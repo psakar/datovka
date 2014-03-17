@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>CZ.NIC</author>
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>851</width>
+    <height>611</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>QDatovka - Free interface for Datové schránky</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedKingdom"/>
+  </property>
+  <property name="animated">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="CentralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="50,200">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetNoConstraint</enum>
+    </property>
+    <item>
+     <widget class="QTableWidget" name="AccountList">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>Accounts</string>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="textAlignment">
+        <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="VerticalBox">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetNoConstraint</enum>
+      </property>
+      <item>
+       <widget class="QTableWidget" name="ReceivedMessageList">
+        <property name="columnCount">
+         <number>6</number>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Title</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Sender</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Delivered</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Accepted</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Read locally</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="SentMessageList">
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Title</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Recipient</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Status</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Delivered</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Accepted</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="HorizontalBox">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetNoConstraint</enum>
+        </property>
+        <item>
+         <widget class="QListView" name="InfoView"/>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetNoConstraint</enum>
+          </property>
+          <item>
+           <widget class="QDialogButtonBox" name="buttonBox">
+            <property name="standardButtons">
+             <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <column>
+             <property name="text">
+              <string>File name</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Size</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>851</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionSync_all_accounts"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_account"/>
+    <addaction name="actionModify_account"/>
+    <addaction name="actionDelete_account"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_database_directory"/>
+    <addaction name="separator"/>
+    <addaction name="actionProxy_settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuDatabox">
+    <property name="title">
+     <string>Databox</string>
+    </property>
+    <addaction name="actionGet_messages"/>
+    <addaction name="actionSent_message"/>
+    <addaction name="actionMark_all_as_read"/>
+    <addaction name="separator"/>
+    <addaction name="actionChange_password"/>
+    <addaction name="separator"/>
+    <addaction name="actionAccount_properties"/>
+    <addaction name="separator"/>
+    <addaction name="actionMove_account_up"/>
+    <addaction name="actionMove_account_down"/>
+    <addaction name="separator"/>
+    <addaction name="actionChange_data_directory"/>
+   </widget>
+   <widget class="QMenu" name="menuMessage">
+    <property name="title">
+     <string>Message</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionFind_databox"/>
+    <addaction name="actionAuthenticate_message_file"/>
+    <addaction name="actionView_message_from_ZPO_file"/>
+    <addaction name="actionExport_corespondence_overview"/>
+   </widget>
+   <widget class="QMenu" name="menuHepl">
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout_Datovka"/>
+    <addaction name="actionHepl"/>
+    <addaction name="actionUpdate"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuDatabox"/>
+   <addaction name="menuMessage"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHepl"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionSync_all_accounts">
+   <property name="text">
+    <string>Sync all accounts</string>
+   </property>
+  </action>
+  <action name="actionAdd_account">
+   <property name="text">
+    <string>Add account</string>
+   </property>
+  </action>
+  <action name="actionModify_account">
+   <property name="text">
+    <string>Modify account</string>
+   </property>
+  </action>
+  <action name="actionDelete_account">
+   <property name="text">
+    <string>Remove account</string>
+   </property>
+  </action>
+  <action name="actionProxy_settings">
+   <property name="text">
+    <string>Proxy settings</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionImport_database_directory">
+   <property name="text">
+    <string>Import database directory</string>
+   </property>
+  </action>
+  <action name="actionGet_messages">
+   <property name="text">
+    <string>Get messages</string>
+   </property>
+  </action>
+  <action name="actionSent_message">
+   <property name="text">
+    <string>Create message</string>
+   </property>
+  </action>
+  <action name="actionMark_all_as_read">
+   <property name="text">
+    <string>Mark all as read</string>
+   </property>
+  </action>
+  <action name="actionChange_password">
+   <property name="text">
+    <string>Change password</string>
+   </property>
+  </action>
+  <action name="actionAccount_properties">
+   <property name="text">
+    <string>Account properties</string>
+   </property>
+  </action>
+  <action name="actionMove_account_up">
+   <property name="text">
+    <string>Move account up</string>
+   </property>
+  </action>
+  <action name="actionMove_account_down">
+   <property name="text">
+    <string>Move account down</string>
+   </property>
+  </action>
+  <action name="actionChange_data_directory">
+   <property name="text">
+    <string>Change data directory</string>
+   </property>
+  </action>
+  <action name="actionAbout_Datovka">
+   <property name="text">
+    <string>About Datovka</string>
+   </property>
+  </action>
+  <action name="actionHepl">
+   <property name="text">
+    <string>Help index</string>
+   </property>
+  </action>
+  <action name="actionUpdate">
+   <property name="text">
+    <string>Update</string>
+   </property>
+  </action>
+  <action name="actionFind_databox">
+   <property name="text">
+    <string>Find Data Box</string>
+   </property>
+  </action>
+  <action name="actionAuthenticate_message_file">
+   <property name="text">
+    <string>Authenticate message file</string>
+   </property>
+  </action>
+  <action name="actionView_message_from_ZPO_file">
+   <property name="text">
+    <string>View message from ZFO file</string>
+   </property>
+  </action>
+  <action name="actionExport_corespondence_overview">
+   <property name="text">
+    <string>Export correspondence overview</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
