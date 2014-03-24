@@ -18,6 +18,8 @@ public:
 private slots:
     void on_actionPreferences_triggered();
 
+    void on_actionProxy_settings_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

@@ -14,10 +14,13 @@ TEMPLATE = app
 
 SOURCES += src/main.cpp\
         src/datovka.cpp \
-    src/preferences.cpp
+    src/preferences.cpp \
+    src/proxysets.cpp
 
 HEADERS  += src/datovka.h \
-    src/preferences.h
+    src/preferences.h \
+    src/proxysets.h
 
 FORMS    += ui/datovka.ui \
-    ui/preferences.ui
+    ui/preferences.ui \
+    ui/proxysets.ui
