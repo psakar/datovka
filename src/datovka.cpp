@@ -1,5 +1,6 @@
 #include "datovka.h"
 #include "ui_datovka.h"
+#include "preferences.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -11,4 +12,10 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    QDialog *Preferences = new PreferencesDialog(this);
+    Preferences->show();
 }

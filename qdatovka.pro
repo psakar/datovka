@@ -13,9 +13,11 @@ TEMPLATE = app
 
 
 SOURCES += src/main.cpp\
-        src/datovka.cpp
+        src/datovka.cpp \
+    src/preferences.cpp
 
-HEADERS  += src/datovka.h
+HEADERS  += src/datovka.h \
+    src/preferences.h
 
 FORMS    += ui/datovka.ui \
     ui/preferences.ui
