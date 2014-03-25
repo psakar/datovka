@@ -17,7 +17,8 @@ public:
 
 private slots:
     void on_actionPreferences_triggered();
-
+    void ShowOnlyInfo();
+    bool AddAccountToTree();
     void on_actionProxy_settings_triggered();
 
 private:

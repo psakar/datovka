@@ -66,7 +66,7 @@
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
        <attribute name="headerVisible">
-        <bool>true</bool>
+        <bool>false</bool>
        </attribute>
        <attribute name="headerDefaultSectionSize">
         <number>100</number>
@@ -191,17 +191,23 @@
            <enum>Qt::Vertical</enum>
           </property>
           <widget class="QTableWidget" name="ReceivedMessageList">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="minimumSize">
             <size>
              <width>0</width>
              <height>0</height>
             </size>
            </property>
+           <property name="showGrid">
+            <bool>true</bool>
+           </property>
            <property name="columnCount">
             <number>6</number>
            </property>
            <attribute name="horizontalHeaderVisible">
-            <bool>true</bool>
+            <bool>false</bool>
            </attribute>
            <attribute name="horizontalHeaderCascadingSectionResizes">
             <bool>false</bool>
@@ -411,7 +417,7 @@
                    </widget>
                   </item>
                   <item>
-                   <spacer name="horizontalSpacer">
+                   <spacer name="H4spacer">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
@@ -445,7 +451,7 @@
      <x>0</x>
      <y>0</y>
      <width>829</width>
-     <height>20</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
