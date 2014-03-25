@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/16x16/datovka-account-sync.png</file>
+        <file>icons/16x16/datovka-all-accounts-sync.png</file>
+        <file>icons/16x16/datovka-error.png</file>
+        <file>icons/16x16/datovka-message-download.png</file>
+        <file>icons/16x16/datovka-message-reply.png</file>
+        <file>icons/16x16/datovka-message-verify.png</file>
+        <file>icons/16x16/datovka-message.png</file>
+        <file>icons/16x16/datovka-ok.png</file>
+        <file>icons/16x16/datovka-stock-keyring.png</file>
+        <file>icons/16x16/datovka.png</file>
+        <file>icons/24x24/datovka-account-sync.png</file>
+        <file>icons/24x24/datovka-all-accounts-sync.png</file>
+        <file>icons/24x24/datovka-error.png</file>
+        <file>icons/24x24/datovka-message-download.png</file>
+        <file>icons/24x24/datovka-message-reply.png</file>
+        <file>icons/24x24/datovka-message-verify.png</file>
+        <file>icons/24x24/datovka-message.png</file>
+        <file>icons/24x24/datovka-ok.png</file>
+        <file>icons/24x24/datovka-stock-keyring.png</file>
+        <file>icons/24x24/datovka.png</file>
+    </qresource>
+</RCC>

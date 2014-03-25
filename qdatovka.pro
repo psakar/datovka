@@ -24,3 +24,6 @@ HEADERS  += src/datovka.h \
 FORMS    += ui/datovka.ui \
     ui/preferences.ui \
     ui/proxysets.ui
+
+RESOURCES += \
+    res/resources.qrc
