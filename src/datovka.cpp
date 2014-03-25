@@ -20,8 +20,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionPreferences_triggered()
 {
     QDialog *Preferences = new PreferencesDialog(this);
-    this->AddAccountToTree();
-    this->AddAccountToTree();
+    this->AddAccountToTree("Testovací účet 1");
+    this->AddAccountToTree("Testovací účet 2");
     Preferences->show();
 }
 
@@ -31,23 +31,32 @@ void MainWindow::on_actionProxy_settings_triggered()
     Proxy->show();
 }
 
-
-bool MainWindow::AddAccountToTree(){
-
-    QString name = "AHOJ";
+/**
+ * @brief MainWindow::AddAccountToTree add account into TreeWidget
+ * @return true if success
+ */
+bool MainWindow::AddAccountToTree(QString AccountName){
 
     QTreeWidget *treeWidget = ui->AccountList;
     QTreeWidgetItem* topLevel = new QTreeWidgetItem();
-    topLevel->setText(0,name);
-    topLevel->icon(0);
+    topLevel->setText(0,AccountName);
+    QFont font;
+    font.setBold(true);
+    topLevel->setFont(0,font);
+    topLevel->setIcon(0,QIcon(":/icons/3party/letter_16.png"));
 
     QTreeWidgetItem * item = new QTreeWidgetItem();
     item->setText(0,"Recent Recieved");
+    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
     item->setText(0,"Recent Sent");
+    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
     topLevel->addChild(item);
+
+
+
 
     treeWidget->addTopLevelItem(topLevel);
 

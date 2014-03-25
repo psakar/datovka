@@ -66,7 +66,7 @@
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
        <attribute name="headerVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="headerDefaultSectionSize">
         <number>100</number>
@@ -82,106 +82,6 @@
          <string>Accounts</string>
         </property>
        </column>
-       <item>
-        <property name="text">
-         <string>Default account</string>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="icon">
-         <iconset resource="../res/resources.qrc">
-          <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>Recent received</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../res/resources.qrc">
-           <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Recent sent</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../res/resources.qrc">
-           <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-         <item>
-          <property name="text">
-           <string>Received</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Sent</string>
-          </property>
-         </item>
-        </item>
-        <item>
-         <property name="text">
-          <string notr="true"/>
-         </property>
-         <property name="toolTip">
-          <string notr="true"/>
-         </property>
-         <property name="statusTip">
-          <string notr="true"/>
-         </property>
-         <property name="whatsThis">
-          <string notr="true"/>
-         </property>
-         <property name="font">
-          <font>
-           <kerning>false</kerning>
-          </font>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Test account</string>
-        </property>
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="icon">
-         <iconset resource="../res/resources.qrc">
-          <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>Recent received</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../res/resources.qrc">
-           <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Recent sent</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../res/resources.qrc">
-           <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
-         </property>
-        </item>
-       </item>
       </widget>
       <widget class="QWidget" name="horizontalLayoutWidget">
        <layout class="QHBoxLayout" name="HBoxLayout1">
@@ -207,7 +107,7 @@
             <number>6</number>
            </property>
            <attribute name="horizontalHeaderVisible">
-            <bool>false</bool>
+            <bool>true</bool>
            </attribute>
            <attribute name="horizontalHeaderCascadingSectionResizes">
             <bool>false</bool>
@@ -451,7 +351,7 @@
      <x>0</x>
      <y>0</y>
      <width>829</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
