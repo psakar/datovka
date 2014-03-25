@@ -20,5 +20,47 @@
         <file>icons/24x24/datovka-ok.png</file>
         <file>icons/24x24/datovka-stock-keyring.png</file>
         <file>icons/24x24/datovka.png</file>
+        <file>icons/3party/address_16.png</file>
+        <file>icons/3party/block_16.png</file>
+        <file>icons/3party/bookmark_16.png</file>
+        <file>icons/3party/briefcase_16.png</file>
+        <file>icons/3party/bubble_16.png</file>
+        <file>icons/3party/buy_16.png</file>
+        <file>icons/3party/calendar_16.png</file>
+        <file>icons/3party/clipboard_16.png</file>
+        <file>icons/3party/clock_16.png</file>
+        <file>icons/3party/delete_16.png</file>
+        <file>icons/3party/diagram_16.png</file>
+        <file>icons/3party/document_16.png</file>
+        <file>icons/3party/down_16.png</file>
+        <file>icons/3party/flag_16.png</file>
+        <file>icons/3party/folder_16.png</file>
+        <file>icons/3party/gear_16.png</file>
+        <file>icons/3party/globe_16.png</file>
+        <file>icons/3party/heart_16.png</file>
+        <file>icons/3party/help_16.png</file>
+        <file>icons/3party/home_16.png</file>
+        <file>icons/3party/info_16.png</file>
+        <file>icons/3party/key_16.png</file>
+        <file>icons/3party/label_16.png</file>
+        <file>icons/3party/left_16.png</file>
+        <file>icons/3party/letter_16.png</file>
+        <file>icons/3party/monitor_16.png</file>
+        <file>icons/3party/pencil_16.png</file>
+        <file>icons/3party/plus_16.png</file>
+        <file>icons/3party/present_16.png</file>
+        <file>icons/3party/print_16.png</file>
+        <file>icons/3party/right_16.png</file>
+        <file>icons/3party/save_16.png</file>
+        <file>icons/3party/search_16.png</file>
+        <file>icons/3party/shield_16.png</file>
+        <file>icons/3party/statistics_16.png</file>
+        <file>icons/3party/stop_16.png</file>
+        <file>icons/3party/tick_16.png</file>
+        <file>icons/3party/trash_16.png</file>
+        <file>icons/3party/up_16.png</file>
+        <file>icons/3party/user_16.png</file>
+        <file>icons/3party/wallet_16.png</file>
+        <file>icons/3party/warning_16.png</file>
     </qresource>
 </RCC>
