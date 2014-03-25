@@ -83,14 +83,26 @@
         <property name="text">
          <string>Default account</string>
         </property>
+        <property name="icon">
+         <iconset resource="../res/resources.qrc">
+          <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
+        </property>
         <item>
          <property name="text">
           <string>Recent received</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../res/resources.qrc">
+           <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Recent sent</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../res/resources.qrc">
+           <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
          </property>
         </item>
        </item>
@@ -271,12 +283,26 @@
                     <property name="text">
                      <string>Save file</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../res/resources.qrc">
+                      <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextUnderIcon</enum>
+                    </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QToolButton" name="SaveAllButton">
                     <property name="text">
                      <string>Save all</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../res/resources.qrc">
+                      <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextUnderIcon</enum>
                     </property>
                    </widget>
                   </item>
@@ -285,12 +311,26 @@
                     <property name="text">
                      <string>Open with</string>
                     </property>
+                    <property name="icon">
+                     <iconset resource="../res/resources.qrc">
+                      <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextUnderIcon</enum>
+                    </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QToolButton" name="DeleteFileButton">
                     <property name="text">
                      <string>Remove</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="../res/resources.qrc">
+                      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextUnderIcon</enum>
                     </property>
                    </widget>
                   </item>
@@ -489,76 +529,136 @@
    </property>
   </action>
   <action name="actionGet_messages">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
+   </property>
    <property name="text">
     <string>Get messages</string>
    </property>
   </action>
   <action name="actionSent_message">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
+   </property>
    <property name="text">
     <string>Create message</string>
    </property>
   </action>
   <action name="actionMark_all_as_read">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-ok.png</normaloff>:/icons/16x16/datovka-ok.png</iconset>
+   </property>
    <property name="text">
     <string>Mark all as read</string>
    </property>
   </action>
   <action name="actionChange_password">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
+   </property>
    <property name="text">
     <string>Change password</string>
    </property>
   </action>
   <action name="actionAccount_properties">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
+   </property>
    <property name="text">
     <string>Account properties</string>
    </property>
   </action>
   <action name="actionMove_account_up">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+   </property>
    <property name="text">
     <string>Move account up</string>
    </property>
   </action>
   <action name="actionMove_account_down">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/down_16.png</normaloff>:/icons/3party/down_16.png</iconset>
+   </property>
    <property name="text">
     <string>Move account down</string>
    </property>
   </action>
   <action name="actionChange_data_directory">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+   </property>
    <property name="text">
     <string>Change data directory</string>
    </property>
   </action>
   <action name="actionAbout_Datovka">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/home_16.png</normaloff>:/icons/3party/home_16.png</iconset>
+   </property>
    <property name="text">
     <string>About Datovka</string>
    </property>
   </action>
   <action name="actionHepl">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/help_16.png</normaloff>:/icons/3party/help_16.png</iconset>
+   </property>
    <property name="text">
     <string>Help index</string>
    </property>
   </action>
   <action name="actionUpdate">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
+   </property>
    <property name="text">
     <string>Update</string>
    </property>
   </action>
   <action name="actionFind_databox">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+   </property>
    <property name="text">
     <string>Find Data Box</string>
    </property>
   </action>
   <action name="actionAuthenticate_message_file">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/key_16.png</normaloff>:/icons/3party/key_16.png</iconset>
+   </property>
    <property name="text">
     <string>Authenticate message file</string>
    </property>
   </action>
   <action name="actionView_message_from_ZPO_file">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
+   </property>
    <property name="text">
     <string>View message from ZFO file</string>
    </property>
   </action>
   <action name="actionExport_corespondence_overview">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+   </property>
    <property name="text">
     <string>Export correspondence overview</string>
    </property>
