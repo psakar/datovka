@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->AddAccountToTree("Testovací účet 1");
+    this->AddAccountToTree("Testovací účet 2");
     this->ShowOnlyInfo();
 
 }
@@ -20,8 +22,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionPreferences_triggered()
 {
     QDialog *Preferences = new PreferencesDialog(this);
-    this->AddAccountToTree("Testovací účet 1");
-    this->AddAccountToTree("Testovací účet 2");
     Preferences->show();
 }
 
@@ -55,8 +55,20 @@ bool MainWindow::AddAccountToTree(QString AccountName){
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
     topLevel->addChild(item);
 
+    item = new QTreeWidgetItem();
+    item->setText(0,"All");
+    //item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
+    topLevel->addChild(item);
 
+    item = new QTreeWidgetItem();
+    item->setText(0,"Recieved");
+    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
+    topLevel->child(2)->addChild(item);
 
+    item = new QTreeWidgetItem();
+    item->setText(0,"Sent");
+    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
+    topLevel->child(2)->addChild(item);
 
     treeWidget->addTopLevelItem(topLevel);
 
@@ -64,15 +76,32 @@ bool MainWindow::AddAccountToTree(QString AccountName){
 }
 
 
-
+/**
+ * @brief MainWindow::ShowOnlyInfo
+ */
 void MainWindow::ShowOnlyInfo(){
 
-    connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->ReceivedMessageList,SLOT(hide()));
+   //int c;
+
+    for( int i = 0; i < ui->AccountList->topLevelItemCount(); ++i )
+    {
+       QTreeWidgetItem *item = ui->AccountList->topLevelItem( i );
+       this->AddAccountToTree("xxx");
+       // Do something with item ...
+    }
+
+
+   //c = ui->AccountList->topLevelItemCount();
+
+    //connect(ui->AccountList, SIGNAL(itemClicked(ui->AccountList->topLevelItem(0)->takeChild(0),0)),ui->ReceivedMessageList,SLOT(hide()));
+//    connect(ui->AccountList, SIGNAL(itemClicked(item,0)),ui->SentMessageList,SLOT(hide()));
+
+/*
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AttachFileList,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SaveAllButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SaveFileButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->OpenFileButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->DeleteFileButton,SLOT(hide()));
-
+*/
 }
