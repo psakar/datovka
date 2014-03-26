@@ -22,6 +22,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionPreferences_triggered()
 {
     QDialog *Preferences = new PreferencesDialog(this);
+    this->AddMessageIntoTable();
     Preferences->show();
 }
 
@@ -76,32 +77,42 @@ bool MainWindow::AddAccountToTree(QString AccountName){
 }
 
 
+bool MainWindow::AddMessageIntoTable(){
+
+   //int c;
+    QTableWidget *TableWidget = ui->ReceivedMessageList;
+    int newRow = TableWidget->rowCount();
+    TableWidget->insertRow(newRow);
+    QTableWidgetItem *item = new QTableWidgetItem;
+    item->setText("xxx1");
+    TableWidget->setItem(newRow,0, item);
+    item = new QTableWidgetItem;
+    item->setText("xxx2");
+    TableWidget->setItem(newRow,1, item);
+    item = new QTableWidgetItem;
+    item->setText("xxx3");
+    TableWidget->setItem(newRow,2, item);
+    item = new QTableWidgetItem;
+    item->setText("xxx4");
+    TableWidget->setItem(newRow,3, item);
+    item = new QTableWidgetItem;
+    item->setText("xxx5");
+    TableWidget->setItem(newRow,4, item);
+    return true;
+}
+
+
+
+
 /**
  * @brief MainWindow::ShowOnlyInfo
  */
 void MainWindow::ShowOnlyInfo(){
 
-   //int c;
-
-    for( int i = 0; i < ui->AccountList->topLevelItemCount(); ++i )
-    {
-       QTreeWidgetItem *item = ui->AccountList->topLevelItem( i );
-       this->AddAccountToTree("xxx");
-       // Do something with item ...
-    }
-
-
-   //c = ui->AccountList->topLevelItemCount();
-
-    //connect(ui->AccountList, SIGNAL(itemClicked(ui->AccountList->topLevelItem(0)->takeChild(0),0)),ui->ReceivedMessageList,SLOT(hide()));
-//    connect(ui->AccountList, SIGNAL(itemClicked(item,0)),ui->SentMessageList,SLOT(hide()));
-
-/*
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AttachFileList,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SaveAllButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SaveFileButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->OpenFileButton,SLOT(hide()));
     connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->DeleteFileButton,SLOT(hide()));
-*/
 }

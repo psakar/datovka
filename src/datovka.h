@@ -19,6 +19,7 @@ private slots:
     void on_actionPreferences_triggered();
     void ShowOnlyInfo();
     bool AddAccountToTree(QString AccountName);
+    bool AddMessageIntoTable();
     void on_actionProxy_settings_triggered();
 
 private:
