@@ -1,7 +1,7 @@
 #include "datovka.h"
+#include "dlg_preferences.h"
+#include "dlg_proxysets.h"
 #include "ui_datovka.h"
-#include "preferences.h"
-#include "proxysets.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),

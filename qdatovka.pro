@@ -13,17 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += src/main.cpp\
-        src/datovka.cpp \
-    src/preferences.cpp \
-    src/proxysets.cpp
+    src/datovka.cpp \
+    src/dlg_preferences.cpp \
+    src/dlg_proxysets.cpp
 
-HEADERS  += src/datovka.h \
-    src/preferences.h \
-    src/proxysets.h
+HEADERS += src/datovka.h \
+    src/dlg_preferences.h \
+    src/dlg_proxysets.h
 
-FORMS    += ui/datovka.ui \
-    ui/preferences.ui \
-    ui/proxysets.ui
+FORMS += ui/datovka.ui \
+    ui/dlg_preferences.ui \
+    ui/dlg_proxysets.ui
 
 RESOURCES += \
     res/resources.qrc

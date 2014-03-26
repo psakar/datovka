@@ -1,5 +1,7 @@
-#include "datovka.h"
 #include <QApplication>
+
+#include "datovka.h"
+
 
 int main(int argc, char *argv[])
 {

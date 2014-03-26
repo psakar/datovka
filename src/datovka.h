@@ -1,5 +1,5 @@
-#ifndef DATOVKA_H
-#define DATOVKA_H
+#ifndef _DATOVKA_H_
+#define _DATOVKA_H_
 
 #include <QMainWindow>
 
@@ -28,4 +28,4 @@ private:
     Ui::MainWindow *ui;
 };
 
-#endif // DATOVKA_H
+#endif /* _DATOVKA_H_ */
