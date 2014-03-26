@@ -267,7 +267,7 @@
            </property>
           </column>
          </widget>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QToolButton" name="SaveFileButton">
@@ -451,6 +451,8 @@
    <addaction name="actionAccount_properties"/>
    <addaction name="actionChange_password"/>
    <addaction name="actionPreferences"/>
+   <addaction name="separator"/>
+   <addaction name="actionTest"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSync_all_accounts">
@@ -739,6 +741,21 @@
    </property>
    <property name="shortcut">
     <string>Alt+V</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="icon">
+    <iconset resource="../res/resources.qrc">
+     <normaloff>:/icons/3party/heart_16.png</normaloff>:/icons/3party/heart_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Test</string>
+   </property>
+   <property name="toolTip">
+    <string>Test Button</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+T</string>
    </property>
   </action>
  </widget>

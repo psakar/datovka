@@ -22,6 +22,8 @@ private slots:
     bool AddMessageIntoTable();
     void on_actionProxy_settings_triggered();
 
+    void on_actionTest_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

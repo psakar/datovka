@@ -22,7 +22,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionPreferences_triggered()
 {
     QDialog *Preferences = new PreferencesDialog(this);
-    this->AddMessageIntoTable();
     Preferences->show();
 }
 
@@ -76,10 +75,12 @@ bool MainWindow::AddAccountToTree(QString AccountName){
     return true;
 }
 
-
+/**
+ * @brief MainWindow::AddMessageIntoTable
+ * @return true
+ */
 bool MainWindow::AddMessageIntoTable(){
 
-   //int c;
     QTableWidget *TableWidget = ui->ReceivedMessageList;
     int newRow = TableWidget->rowCount();
     TableWidget->insertRow(newRow);
@@ -110,4 +111,9 @@ bool MainWindow::AddMessageIntoTable(){
 void MainWindow::ShowOnlyInfo(){
    connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
    connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
+}
+
+void MainWindow::on_actionTest_triggered()
+{
+        this->AddMessageIntoTable();
 }
