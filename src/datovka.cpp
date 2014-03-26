@@ -11,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->AddAccountToTree("Testovací účet 1");
     this->AddAccountToTree("Testovací účet 2");
     this->ShowOnlyInfo();
-
 }
 
 MainWindow::~MainWindow()
@@ -42,9 +41,9 @@ bool MainWindow::AddAccountToTree(QString AccountName){
     topLevel->setText(0,AccountName);
     QFont font;
     font.setBold(true);
+    font.setItalic(true);
     topLevel->setFont(0,font);
     topLevel->setIcon(0,QIcon(":/icons/3party/letter_16.png"));
-
     QTreeWidgetItem * item = new QTreeWidgetItem();
     item->setText(0,"Recent Recieved");
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
@@ -76,34 +75,74 @@ bool MainWindow::AddAccountToTree(QString AccountName){
 }
 
 /**
- * @brief MainWindow::AddMessageIntoTable
- * @return true
+ * @brief MainWindow::AddMessageIntoRecieved
+ * @param Id
+ * @param Title
+ * @param Sender
+ * @param Delivered
+ * @param Accepted
+ * @return
  */
-bool MainWindow::AddMessageIntoTable(){
+bool MainWindow::AddMessageIntoRecieved(QString Id, QString Title,
+    QString Sender, QString Delivered, QString Accepted){
 
     QTableWidget *TableWidget = ui->ReceivedMessageList;
     int newRow = TableWidget->rowCount();
     TableWidget->insertRow(newRow);
     QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText("xxx1");
+    item->setText(Id);
     TableWidget->setItem(newRow,0, item);
     item = new QTableWidgetItem;
-    item->setText("xxx2");
+    item->setText(Title);
     TableWidget->setItem(newRow,1, item);
     item = new QTableWidgetItem;
-    item->setText("xxx3");
+    item->setText(Sender);
     TableWidget->setItem(newRow,2, item);
     item = new QTableWidgetItem;
-    item->setText("xxx4");
+    item->setText(Delivered);
     TableWidget->setItem(newRow,3, item);
     item = new QTableWidgetItem;
-    item->setText("xxx5");
+    item->setText(Accepted);
     TableWidget->setItem(newRow,4, item);
     return true;
 }
 
+/**
+ * @brief MainWindow::AddMessageIntoSent
+ * @param Id
+ * @param Title
+ * @param Recipient
+ * @param Status
+ * @param Delivered
+ * @param Accepted
+ * @return
+ */
+bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
+    QString Recipient, QString Status, QString Delivered, QString Accepted) {
 
-
+    QTableWidget *TableWidget = ui->SentMessageList;
+    int newRow = TableWidget->rowCount();
+    TableWidget->insertRow(newRow);
+    QTableWidgetItem *item = new QTableWidgetItem;
+    item->setText(Id);
+    TableWidget->setItem(newRow,0, item);
+    item = new QTableWidgetItem;
+    item->setText(Title);
+    TableWidget->setItem(newRow,1, item);
+    item = new QTableWidgetItem;
+    item->setText(Recipient);
+    TableWidget->setItem(newRow,2, item);
+    item = new QTableWidgetItem;
+    item->setText(Status);
+    TableWidget->setItem(newRow,3, item);
+    item = new QTableWidgetItem;
+    item->setText(Delivered);
+    TableWidget->setItem(newRow,4, item);
+    item = new QTableWidgetItem;
+    item->setText(Accepted);
+    TableWidget->setItem(newRow,5, item);
+    return true;
+}
 
 /**
  * @brief MainWindow::ShowOnlyInfo
@@ -115,5 +154,5 @@ void MainWindow::ShowOnlyInfo(){
 
 void MainWindow::on_actionTest_triggered()
 {
-        this->AddMessageIntoTable();
+        this->AddMessageIntoRecieved("12365","Dodavka svetelnych mecu","Orion","12.12.12 12:12","YES");
 }

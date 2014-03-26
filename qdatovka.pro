@@ -27,3 +27,5 @@ FORMS += ui/datovka.ui \
 
 RESOURCES += \
     res/resources.qrc
+
+OTHER_FILES +=
