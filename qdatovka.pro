@@ -28,4 +28,7 @@ FORMS += ui/datovka.ui \
 RESOURCES += \
     res/resources.qrc
 
+TRANSLATIONS += locale/datovka_en.ts \
+    locale/datovka_cz.ts
+
 OTHER_FILES +=

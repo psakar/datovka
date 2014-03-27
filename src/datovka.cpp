@@ -45,27 +45,27 @@ bool MainWindow::AddAccountToTree(QString AccountName){
     topLevel->setFont(0,font);
     topLevel->setIcon(0,QIcon(":/icons/3party/letter_16.png"));
     QTreeWidgetItem * item = new QTreeWidgetItem();
-    item->setText(0,"Recent Recieved");
+    item->setText(0,tr("Recent Recieved"));
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
-    item->setText(0,"Recent Sent");
+    item->setText(0,tr("Recent Sent"));
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
-    item->setText(0,"All");
+    item->setText(0,tr("All"));
     //item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
-    item->setText(0,"Recieved");
+    item->setText(0,tr("Recieved"));
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
     topLevel->child(2)->addChild(item);
 
     item = new QTreeWidgetItem();
-    item->setText(0,"Sent");
+    item->setText(0,tr("Sent"));
     item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
     topLevel->child(2)->addChild(item);
 
