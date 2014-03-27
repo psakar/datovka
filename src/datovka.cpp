@@ -43,30 +43,29 @@ bool MainWindow::AddAccountToTree(QString AccountName){
     font.setBold(true);
     font.setItalic(true);
     topLevel->setFont(0,font);
-    topLevel->setIcon(0,QIcon(":/icons/3party/letter_16.png"));
+    topLevel->setIcon(0,QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
     QTreeWidgetItem * item = new QTreeWidgetItem();
     item->setText(0,tr("Recent Recieved"));
-    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
+    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
     topLevel->addChild(item);
-
     item = new QTreeWidgetItem();
     item->setText(0,tr("Recent Sent"));
-    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
+    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
     item->setText(0,tr("All"));
-    //item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
+    //item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
     topLevel->addChild(item);
 
     item = new QTreeWidgetItem();
     item->setText(0,tr("Recieved"));
-    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-download.png"));
+    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
     topLevel->child(2)->addChild(item);
 
     item = new QTreeWidgetItem();
     item->setText(0,tr("Sent"));
-    item->setIcon(0,QIcon(":/icons/16x16/datovka-message-reply.png"));
+    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
     topLevel->child(2)->addChild(item);
 
     treeWidget->addTopLevelItem(topLevel);

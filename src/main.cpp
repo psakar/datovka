@@ -6,15 +6,22 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
 
     QString locale = QLocale::system().name();
-    QTranslator translator;
-    translator.load(QString("datovka_") + locale);
-    a.installTranslator(&translator);
+    qDebug() << locale;
+    QTranslator *translator = new QTranslator;
+    translator->load(QString("datovka_") + locale, "/home/martin/Git/qdatovka/locale/");
+    app.installTranslator(translator);
+/*
+#if defined(Q_OS_UNIX)
+#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_MAC)
+#endif
+*/
+    MainWindow mainwin;
+    mainwin.show();
 
-    MainWindow w;
-    w.show();
-
-    return a.exec();
+    return app.exec();
 }

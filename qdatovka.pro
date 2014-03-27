@@ -29,6 +29,6 @@ RESOURCES += \
     res/resources.qrc
 
 TRANSLATIONS += locale/datovka_en.ts \
-    locale/datovka_cz.ts
+    locale/datovka_cs.ts
 
 OTHER_FILES +=

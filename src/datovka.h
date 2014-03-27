@@ -1,9 +1,9 @@
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
-#define ICON_16x16_PATH "/icons/16x16/"
-#define ICON_24x24_PATH "/icons/24x24/"
-#define ICON_3PARTY_PATH "/icons/3party/"
+#define ICON_16x16_PATH ":/icons/16x16/"
+#define ICON_24x24_PATH ":/icons/24x24/"
+#define ICON_3PARTY_PATH ":/icons/3party/"
 
 #include <QMainWindow>
 
@@ -28,7 +28,6 @@ private slots:
     bool AddMessageIntoSent(QString Id, QString Title,
     QString Recipient, QString Status, QString Delivered, QString Accepted);
     void on_actionProxy_settings_triggered();
-
     void on_actionTest_triggered();
 
 private:

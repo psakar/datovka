@@ -1,126 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="cs_CZ">
 <context>
     <name>MainWindow</name>
     <message>
         <location filename="../ui/datovka.ui" line="24"/>
         <source>QDatovka - Free interface for Datové schránky</source>
-        <translation type="unfinished"></translation>
+        <translation>QDatovka - Svobodné rozhraní pro Datové schránky</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="82"/>
         <source>Accounts</source>
-        <translation type="unfinished"></translation>
+        <translation>Účty</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="141"/>
         <location filename="../ui/datovka.ui" line="197"/>
         <source>ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="146"/>
         <location filename="../ui/datovka.ui" line="202"/>
         <source>Title</source>
-        <translation type="unfinished"></translation>
+        <translation>Předmět</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="151"/>
         <source>Sender</source>
-        <translation type="unfinished"></translation>
+        <translation>Odesílatel</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="156"/>
         <location filename="../ui/datovka.ui" line="217"/>
         <source>Delivered</source>
-        <translation type="unfinished"></translation>
+        <translation>Přijato</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="161"/>
         <location filename="../ui/datovka.ui" line="222"/>
         <source>Accepted</source>
-        <translation type="unfinished"></translation>
+        <translation>Potvrzeno</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="166"/>
         <source>Read locally</source>
-        <translation type="unfinished"></translation>
+        <translation>Přečteno lokálně</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="207"/>
         <source>Recipient</source>
-        <translation type="unfinished"></translation>
+        <translation>Příjemce</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="212"/>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Stav</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="256"/>
         <source>File name</source>
-        <translation type="unfinished"></translation>
+        <translation>Název souboru</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="261"/>
         <source>Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Velikost</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="266"/>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Datum</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="275"/>
         <source>Save file</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložit soubor</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="289"/>
         <source>Save all</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložit vše</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="303"/>
         <source>Open with</source>
-        <translation type="unfinished"></translation>
+        <translation>Otevřít</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="317"/>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstranit</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="362"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Soubor</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="380"/>
         <source>Databox</source>
-        <translation type="unfinished"></translation>
+        <translation>Databox</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="397"/>
         <source>Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Zpráva</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="402"/>
         <source>Tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Nástroje</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="414"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Nápověda</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="434"/>
         <source>toolBar</source>
-        <translation type="unfinished"></translation>
+        <translation>Panel nástrojů</translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="464"/>
