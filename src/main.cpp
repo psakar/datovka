@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
 
 
     QString locale = QLocale::system().name();
-    qDebug() << locale;
     QTranslator *translator = new QTranslator;
     translator->load(QString("datovka_") + locale, "/home/martin/Git/qdatovka/locale/");
     app.installTranslator(translator);

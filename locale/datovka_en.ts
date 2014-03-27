@@ -9,345 +9,271 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="82"/>
-        <source>Accounts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="141"/>
-        <location filename="../ui/datovka.ui" line="197"/>
-        <source>ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="146"/>
-        <location filename="../ui/datovka.ui" line="202"/>
-        <source>Title</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="151"/>
-        <source>Sender</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="156"/>
-        <location filename="../ui/datovka.ui" line="217"/>
-        <source>Delivered</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="161"/>
-        <location filename="../ui/datovka.ui" line="222"/>
-        <source>Accepted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="166"/>
-        <source>Read locally</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="207"/>
-        <source>Recipient</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="212"/>
-        <source>Status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="256"/>
-        <source>File name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="261"/>
-        <source>Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="266"/>
-        <source>Date</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/datovka.ui" line="275"/>
+        <location filename="../ui/datovka.ui" line="165"/>
         <source>Save file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="289"/>
+        <location filename="../ui/datovka.ui" line="179"/>
         <source>Save all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="303"/>
+        <location filename="../ui/datovka.ui" line="193"/>
         <source>Open with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="317"/>
+        <location filename="../ui/datovka.ui" line="207"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="362"/>
+        <location filename="../ui/datovka.ui" line="252"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="380"/>
+        <location filename="../ui/datovka.ui" line="270"/>
         <source>Databox</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="397"/>
+        <location filename="../ui/datovka.ui" line="287"/>
         <source>Message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="402"/>
+        <location filename="../ui/datovka.ui" line="292"/>
         <source>Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="414"/>
+        <location filename="../ui/datovka.ui" line="304"/>
         <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="434"/>
+        <location filename="../ui/datovka.ui" line="324"/>
         <source>toolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="464"/>
+        <location filename="../ui/datovka.ui" line="354"/>
         <source>Sync all accounts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="473"/>
+        <location filename="../ui/datovka.ui" line="363"/>
         <source>Add account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="482"/>
+        <location filename="../ui/datovka.ui" line="372"/>
         <source>Modify account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="491"/>
+        <location filename="../ui/datovka.ui" line="381"/>
         <source>Remove account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="500"/>
+        <location filename="../ui/datovka.ui" line="390"/>
         <source>Proxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="509"/>
+        <location filename="../ui/datovka.ui" line="399"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="518"/>
+        <location filename="../ui/datovka.ui" line="408"/>
         <source>Quit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="527"/>
+        <location filename="../ui/datovka.ui" line="417"/>
         <source>Import database directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="536"/>
+        <location filename="../ui/datovka.ui" line="426"/>
         <source>Get messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="545"/>
-        <location filename="../ui/datovka.ui" line="707"/>
+        <location filename="../ui/datovka.ui" line="435"/>
+        <location filename="../ui/datovka.ui" line="597"/>
         <source>Create message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="554"/>
+        <location filename="../ui/datovka.ui" line="444"/>
         <source>Mark all as read</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="563"/>
+        <location filename="../ui/datovka.ui" line="453"/>
         <source>Change password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="572"/>
+        <location filename="../ui/datovka.ui" line="462"/>
         <source>Account properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="581"/>
+        <location filename="../ui/datovka.ui" line="471"/>
         <source>Move account up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="590"/>
+        <location filename="../ui/datovka.ui" line="480"/>
         <source>Move account down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="599"/>
+        <location filename="../ui/datovka.ui" line="489"/>
         <source>Change data directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="608"/>
+        <location filename="../ui/datovka.ui" line="498"/>
         <source>About Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="611"/>
+        <location filename="../ui/datovka.ui" line="501"/>
         <source>About Datovka application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="620"/>
+        <location filename="../ui/datovka.ui" line="510"/>
         <source>Help index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="629"/>
+        <location filename="../ui/datovka.ui" line="519"/>
         <source>Datovka update </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="632"/>
+        <location filename="../ui/datovka.ui" line="522"/>
         <source>Update Datovka application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="641"/>
+        <location filename="../ui/datovka.ui" line="531"/>
         <source>Find Data Box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="650"/>
+        <location filename="../ui/datovka.ui" line="540"/>
         <source>Authenticate message file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="659"/>
+        <location filename="../ui/datovka.ui" line="549"/>
         <source>View message from ZFO file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="668"/>
+        <location filename="../ui/datovka.ui" line="558"/>
         <source>Export correspondence overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="677"/>
+        <location filename="../ui/datovka.ui" line="567"/>
         <source>Recieved all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="680"/>
+        <location filename="../ui/datovka.ui" line="570"/>
         <source>Recieved messages from all accounts at once</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="683"/>
+        <location filename="../ui/datovka.ui" line="573"/>
         <source>Alt+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="692"/>
+        <location filename="../ui/datovka.ui" line="582"/>
         <source>Download messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="695"/>
+        <location filename="../ui/datovka.ui" line="585"/>
         <source>Download messages from the box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="698"/>
+        <location filename="../ui/datovka.ui" line="588"/>
         <source>Alt+D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="710"/>
+        <location filename="../ui/datovka.ui" line="600"/>
         <source>Create and sent a new message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="713"/>
+        <location filename="../ui/datovka.ui" line="603"/>
         <source>Alt+M</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="722"/>
-        <location filename="../ui/datovka.ui" line="725"/>
+        <location filename="../ui/datovka.ui" line="612"/>
+        <location filename="../ui/datovka.ui" line="615"/>
         <source>Reply to the sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="728"/>
+        <location filename="../ui/datovka.ui" line="618"/>
         <source>Alt+R</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="737"/>
-        <location filename="../ui/datovka.ui" line="740"/>
+        <location filename="../ui/datovka.ui" line="627"/>
+        <location filename="../ui/datovka.ui" line="630"/>
         <source>Verify a message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="743"/>
+        <location filename="../ui/datovka.ui" line="633"/>
         <source>Alt+V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="752"/>
+        <location filename="../ui/datovka.ui" line="642"/>
         <source>Test</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="755"/>
+        <location filename="../ui/datovka.ui" line="645"/>
         <source>Test Button</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/datovka.ui" line="758"/>
+        <location filename="../ui/datovka.ui" line="648"/>
         <source>Alt+T</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/datovka.cpp" line="48"/>
+        <location filename="../src/datovka.cpp" line="44"/>
+        <source>Accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/datovka.cpp" line="54"/>
         <source>Recent Recieved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/datovka.cpp" line="53"/>
+        <location filename="../src/datovka.cpp" line="57"/>
         <source>Recent Sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/datovka.cpp" line="58"/>
-        <source>All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/datovka.cpp" line="63"/>
-        <source>Recieved</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/datovka.cpp" line="68"/>
-        <source>Sent</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

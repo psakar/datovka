@@ -8,9 +8,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->AddAccountToTree("Testovací účet 1");
-    this->AddAccountToTree("Testovací účet 2");
+
+    QStandardItem *treerootnode = this->InitAccountListTree(tr("Accounts"));
+    QStandardItemModel *tablemodel = this->InitRecievedMessageListTable();
+    for(int i=0; i<3; i++) {
+        this->AddMessageIntoRecieved(tablemodel, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15");
+    }
+    this->AddAccountToTree(treerootnode, "Testovací účet 1");
+    this->AddAccountToTree(treerootnode, "Testovací účet 2");
     this->ShowOnlyInfo();
+
 }
 
 MainWindow::~MainWindow()
@@ -31,45 +38,85 @@ void MainWindow::on_actionProxy_settings_triggered()
 }
 
 /**
+ * @brief MainWindow::InitAccountListTree
+ * @param HeaderTitle
+ * @return
+ */
+QStandardItem* MainWindow::InitAccountListTree(QString HeaderTitle) {
+
+    QTreeView *AccountTreeView = ui->AccountList;
+    QStandardItemModel *standardModel = new QStandardItemModel() ;
+    // add header
+    standardModel->setHorizontalHeaderItem(0, new QStandardItem(HeaderTitle));
+    QStandardItem *rootNode = standardModel->invisibleRootItem();
+    //register the model
+    AccountTreeView->setModel(standardModel);
+    return rootNode;
+}
+
+/**
+ * @brief MainWindow::InitRecievedMessageListTable
+ * @return
+ */
+QStandardItemModel* MainWindow::InitRecievedMessageListTable() {
+
+    QTableView *RecievedMessageTableView = ui->ReceivedMessageList;
+    QStandardItemModel *standardModel = new QStandardItemModel(0,6,this) ;
+    // add header
+    for (short i=0; i<6; i++) {
+        standardModel->setHorizontalHeaderItem(i, new QStandardItem(QString("Header")));
+    }
+    QStandardItem *rootNode = standardModel->invisibleRootItem();
+    //register the model
+    RecievedMessageTableView->setModel(standardModel);
+    return standardModel;
+}
+
+/**
  * @brief MainWindow::AddAccountToTree add account into TreeWidget
  * @return true if success
  */
-bool MainWindow::AddAccountToTree(QString AccountName){
+bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
 
-    QTreeWidget *treeWidget = ui->AccountList;
-    QTreeWidgetItem* topLevel = new QTreeWidgetItem();
-    topLevel->setText(0,AccountName);
+    //defining a couple of items
+    QStandardItem *Account = new QStandardItem(AccountName);
     QFont font;
     font.setBold(true);
-    font.setItalic(true);
-    topLevel->setFont(0,font);
-    topLevel->setIcon(0,QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
-    QTreeWidgetItem * item = new QTreeWidgetItem();
-    item->setText(0,tr("Recent Recieved"));
-    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
-    topLevel->addChild(item);
-    item = new QTreeWidgetItem();
-    item->setText(0,tr("Recent Sent"));
-    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
-    topLevel->addChild(item);
+    //font.setItalic(true);
+    Account->setFont(font);
+    Account->setIcon(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
 
-    item = new QTreeWidgetItem();
-    item->setText(0,tr("All"));
-    //item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
-    topLevel->addChild(item);
+    QStandardItem *RecentRecieved = new QStandardItem(tr("Recent Recieved"));
+    RecentRecieved->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
 
-    item = new QTreeWidgetItem();
-    item->setText(0,tr("Recieved"));
-    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
-    topLevel->child(2)->addChild(item);
+    QStandardItem *RecentSent = new QStandardItem(tr("Recent Sent"));
+    RecentSent->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
 
-    item = new QTreeWidgetItem();
-    item->setText(0,tr("Sent"));
-    item->setIcon(0,QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
-    topLevel->child(2)->addChild(item);
+    QStandardItem *All = new QStandardItem(tr("All"));
 
-    treeWidget->addTopLevelItem(topLevel);
+    QStandardItem *AllRecieved = new QStandardItem(tr("Recent Recieved"));
+    AllRecieved->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
 
+    QStandardItem *AllSent = new QStandardItem(tr("Recent Sent"));
+    AllSent->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
+
+    //building up the hierarchy
+    rootNode->appendRow(Account);
+    Account->appendRow(RecentRecieved);
+    Account->appendRow(RecentSent);
+    Account->appendRow(All);
+    All->appendRow(AllRecieved);
+    All->appendRow(AllSent);
+
+    QTreeView *AccountTreeView = ui->AccountList;
+    AccountTreeView->expandAll();
+
+/*
+     //selection changes shall trigger a slot
+     QItemSelectionModel *selectionModel= AccountTreeView->selectionModel();
+     connect(selectionModel, SIGNAL(selectionChanged (const QItemSelection &, const QItemSelection &)),
+             this, SLOT(selectionChangedSlot(const QItemSelection &, const QItemSelection &)));
+*/
     return true;
 }
 
@@ -82,27 +129,19 @@ bool MainWindow::AddAccountToTree(QString AccountName){
  * @param Accepted
  * @return
  */
-bool MainWindow::AddMessageIntoRecieved(QString Id, QString Title,
+bool MainWindow::AddMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
     QString Sender, QString Delivered, QString Accepted){
 
-    QTableWidget *TableWidget = ui->ReceivedMessageList;
-    int newRow = TableWidget->rowCount();
-    TableWidget->insertRow(newRow);
-    QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText(Id);
-    TableWidget->setItem(newRow,0, item);
-    item = new QTableWidgetItem;
-    item->setText(Title);
-    TableWidget->setItem(newRow,1, item);
-    item = new QTableWidgetItem;
-    item->setText(Sender);
-    TableWidget->setItem(newRow,2, item);
-    item = new QTableWidgetItem;
-    item->setText(Delivered);
-    TableWidget->setItem(newRow,3, item);
-    item = new QTableWidgetItem;
-    item->setText(Accepted);
-    TableWidget->setItem(newRow,4, item);
+    QStandardItem *item = new QStandardItem(Id);
+    model->setItem(row,0, item);
+    item = new QStandardItem(Title);
+    model->setItem(row,1, item);
+    item = new QStandardItem(Sender);
+    model->setItem(row,2, item);
+    item = new QStandardItem(Delivered);
+    model->setItem(row,3, item);
+    item = new QStandardItem(Accepted);
+    model->setItem(row,4, item);
     return true;
 }
 
@@ -118,7 +157,7 @@ bool MainWindow::AddMessageIntoRecieved(QString Id, QString Title,
  */
 bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
     QString Recipient, QString Status, QString Delivered, QString Accepted) {
-
+/*
     QTableWidget *TableWidget = ui->SentMessageList;
     int newRow = TableWidget->rowCount();
     TableWidget->insertRow(newRow);
@@ -140,6 +179,8 @@ bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
     item = new QTableWidgetItem;
     item->setText(Accepted);
     TableWidget->setItem(newRow,5, item);
+
+    */
     return true;
 }
 
@@ -147,11 +188,11 @@ bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
  * @brief MainWindow::ShowOnlyInfo
  */
 void MainWindow::ShowOnlyInfo(){
-   connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
-   connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
+   //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
+   //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
 }
 
 void MainWindow::on_actionTest_triggered()
 {
-        this->AddMessageIntoRecieved("12365","Dodavka svetelnych mecu","Orion","12.12.12 12:12","YES");
+        //this->AddMessageIntoRecieved("12365","Dodavka svetelnych mecu","Orion","12.12.12 12:12","YES");
 }
