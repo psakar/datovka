@@ -19,7 +19,8 @@ SOURCES += src/main.cpp\
 
 HEADERS += src/datovka.h \
     src/dlg_preferences.h \
-    src/dlg_proxysets.h
+    src/dlg_proxysets.h \
+    src/common.h
 
 FORMS += ui/datovka.ui \
     ui/dlg_preferences.ui \

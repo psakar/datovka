@@ -14,6 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     for(int i=0; i<3; i++) {
         this->AddMessageIntoRecieved(tablemodel, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15");
     }
+    QStandardItemModel *tablemodel2 = this->InitSentMessageListTable();
+    for(int i=0; i<3; i++) {
+        this->AddMessageIntoSent(tablemodel2, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15", "Ok");
+    }
+
     this->AddAccountToTree(treerootnode, "Testovací účet 1");
     this->AddAccountToTree(treerootnode, "Testovací účet 2");
     this->ShowOnlyInfo();
@@ -51,6 +56,10 @@ QStandardItem* MainWindow::InitAccountListTree(QString HeaderTitle) {
     QStandardItem *rootNode = standardModel->invisibleRootItem();
     //register the model
     AccountTreeView->setModel(standardModel);
+
+    connect(AccountTreeView, SIGNAL(clicked(QModelIndex)),
+         this, SLOT(TreeItemClicked(QModelIndex)));
+
     return rootNode;
 }
 
@@ -62,15 +71,37 @@ QStandardItemModel* MainWindow::InitRecievedMessageListTable() {
 
     QTableView *RecievedMessageTableView = ui->ReceivedMessageList;
     QStandardItemModel *standardModel = new QStandardItemModel(0,6,this) ;
+
     // add header
-    for (short i=0; i<6; i++) {
-        standardModel->setHorizontalHeaderItem(i, new QStandardItem(QString("Header")));
-    }
-    QStandardItem *rootNode = standardModel->invisibleRootItem();
+    standardModel->setHorizontalHeaderItem(0, new QStandardItem(QString(tr("Id"))));
+    standardModel->setHorizontalHeaderItem(1, new QStandardItem(QString(tr("Message Subject"))));
+    standardModel->setHorizontalHeaderItem(2, new QStandardItem(QString(tr("Sender"))));
+    standardModel->setHorizontalHeaderItem(3, new QStandardItem(QString(tr("Recieved"))));
+    standardModel->setHorizontalHeaderItem(4, new QStandardItem(QString(tr("Accepted"))));
+    standardModel->setHorizontalHeaderItem(5, new QStandardItem(QString(tr("Locally read"))));
+
     //register the model
     RecievedMessageTableView->setModel(standardModel);
     return standardModel;
 }
+
+
+QStandardItemModel* MainWindow::InitSentMessageListTable() {
+
+    QTableView *SentMessageTableView = ui->SentMessageList;
+    QStandardItemModel *standardModel = new QStandardItemModel(0,6,this) ;
+    // add header
+    standardModel->setHorizontalHeaderItem(0, new QStandardItem(QString(tr("Id"))));
+    standardModel->setHorizontalHeaderItem(1, new QStandardItem(QString(tr("Message Subject"))));
+    standardModel->setHorizontalHeaderItem(2, new QStandardItem(QString(tr("Recipient"))));
+    standardModel->setHorizontalHeaderItem(3, new QStandardItem(QString(tr("Recieved"))));
+    standardModel->setHorizontalHeaderItem(4, new QStandardItem(QString(tr("Accepted"))));
+    standardModel->setHorizontalHeaderItem(5, new QStandardItem(QString(tr("Status"))));
+    //register the model
+    SentMessageTableView->setModel(standardModel);
+    return standardModel;
+}
+
 
 /**
  * @brief MainWindow::AddAccountToTree add account into TreeWidget
@@ -79,6 +110,7 @@ QStandardItemModel* MainWindow::InitRecievedMessageListTable() {
 bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
 
     //defining a couple of items
+    QTreeView *AccountTreeView = ui->AccountList;
     QStandardItem *Account = new QStandardItem(AccountName);
     QFont font;
     font.setBold(true);
@@ -102,15 +134,14 @@ bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
 
     //building up the hierarchy
     rootNode->appendRow(Account);
+
     Account->appendRow(RecentRecieved);
     Account->appendRow(RecentSent);
     Account->appendRow(All);
     All->appendRow(AllRecieved);
     All->appendRow(AllSent);
 
-    QTreeView *AccountTreeView = ui->AccountList;
     AccountTreeView->expandAll();
-
 /*
      //selection changes shall trigger a slot
      QItemSelectionModel *selectionModel= AccountTreeView->selectionModel();
@@ -119,6 +150,34 @@ bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
 */
     return true;
 }
+
+
+ void MainWindow::TreeItemClicked(const QModelIndex &index)
+ {
+
+    qDebug() << index.model();
+    qDebug() << index.row()  << " - " << index.column()  << " - "<< index.parent().row();
+
+    QTableView *xxx = ui->SentMessageList;
+    if (index.parent().row() == -1) {
+        xxx->hide();
+    }
+    if (index.parent().row() == 0) {
+        xxx->show();
+    }
+
+
+
+
+     //QStandardItemModel *mod = index.model() ;
+
+     //QStandardItem *item = mod->itemFromIndex(index);
+
+     //qDebug() << item;
+
+     // Do stuff with the item ...
+ }
+
 
 /**
  * @brief MainWindow::AddMessageIntoRecieved
@@ -155,32 +214,21 @@ bool MainWindow::AddMessageIntoRecieved(QStandardItemModel* model,int row, QStri
  * @param Accepted
  * @return
  */
-bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
+bool MainWindow::AddMessageIntoSent(QStandardItemModel* model, int row, QString Id, QString Title,
     QString Recipient, QString Status, QString Delivered, QString Accepted) {
-/*
-    QTableWidget *TableWidget = ui->SentMessageList;
-    int newRow = TableWidget->rowCount();
-    TableWidget->insertRow(newRow);
-    QTableWidgetItem *item = new QTableWidgetItem;
-    item->setText(Id);
-    TableWidget->setItem(newRow,0, item);
-    item = new QTableWidgetItem;
-    item->setText(Title);
-    TableWidget->setItem(newRow,1, item);
-    item = new QTableWidgetItem;
-    item->setText(Recipient);
-    TableWidget->setItem(newRow,2, item);
-    item = new QTableWidgetItem;
-    item->setText(Status);
-    TableWidget->setItem(newRow,3, item);
-    item = new QTableWidgetItem;
-    item->setText(Delivered);
-    TableWidget->setItem(newRow,4, item);
-    item = new QTableWidgetItem;
-    item->setText(Accepted);
-    TableWidget->setItem(newRow,5, item);
 
-    */
+    QStandardItem *item = new QStandardItem(Id);
+    model->setItem(row,0, item);
+    item = new QStandardItem(Title);
+    model->setItem(row,1, item);
+    item = new QStandardItem(Recipient);
+    model->setItem(row,2, item);
+    item = new QStandardItem(Status);
+    model->setItem(row,3, item);
+    item = new QStandardItem(Delivered);
+    model->setItem(row,4, item);
+    item = new QStandardItem(Accepted);
+    model->setItem(row,5, item);
     return true;
 }
 
@@ -190,9 +238,4 @@ bool MainWindow::AddMessageIntoSent(QString Id, QString Title,
 void MainWindow::ShowOnlyInfo(){
    //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
    //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
-}
-
-void MainWindow::on_actionTest_triggered()
-{
-        //this->AddMessageIntoRecieved("12365","Dodavka svetelnych mecu","Orion","12.12.12 12:12","YES");
 }
