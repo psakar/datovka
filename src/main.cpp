@@ -3,6 +3,7 @@
 
 #include "datovka.h"
 
+#define LOCALE_PATH "locale"
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
 
     QString locale = QLocale::system().name();
     QTranslator *translator = new QTranslator;
-    translator->load(QString("datovka_") + locale, "/home/martin/Git/qdatovka/locale/");
+    translator->load(QString("datovka_") + locale, LOCALE_PATH);
     app.installTranslator(translator);
 /*
 #if defined(Q_OS_UNIX)
