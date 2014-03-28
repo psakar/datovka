@@ -150,8 +150,12 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <widget class="QListView" name="ViewMessageInfo"/>
-        <widget class="QSplitter" name="splitter_1">
+        <widget class="QTextEdit" name="MessageTextInfo">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QSplitter" name="splitter">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -175,7 +179,7 @@
            <bool>false</bool>
           </attribute>
          </widget>
-         <widget class="QWidget" name="layoutWidget">
+         <widget class="QWidget" name="">
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QToolButton" name="SaveFileButton">
@@ -234,24 +238,29 @@
             </widget>
            </item>
            <item>
-            <spacer name="H4spacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+            <widget class="QToolButton" name="DeleteAll">
+             <property name="text">
+              <string>Remove All</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
+             <property name="icon">
+              <iconset resource="../res/resources.qrc">
+               <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
              </property>
-            </spacer>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextUnderIcon</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
         </widget>
        </widget>
       </widget>
-      <widget class="QTextEdit" name="AccountTextInfo"/>
+      <widget class="QTextEdit" name="AccountTextInfo">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
