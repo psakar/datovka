@@ -16,7 +16,7 @@ public:
 	AccountModel(void);
 
 private:
-	bool addAccount(QString accountName);
+	bool addAccount(const QString &accountName);
 };
 
 

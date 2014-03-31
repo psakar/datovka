@@ -19,13 +19,15 @@ SOURCES += src/main.cpp\
     src/gui/datovka.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
-    src/models/accounts_model.cpp
+    src/models/accounts_model.cpp \
+    src/models/messages_remote_models.cpp
 
 HEADERS += src/gui/datovka.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/common.h \
-    src/models/accounts_model.h
+    src/models/accounts_model.h \
+    src/models/messages_remote_models.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_preferences.ui \

@@ -12,16 +12,17 @@ AccountModel::AccountModel(void)
 	/* Add header. */
 	this->setHorizontalHeaderItem(0, new QStandardItem(tr("Accounts")));
 
-	this->addAccount("Testovací účet 1");
-	this->addAccount("Testovací účet 2");
+	/* Load content. */
+	addAccount("Testovací účet 1");
+	addAccount("Testovací účet 2");
 }
 
 
 /* ========================================================================= */
-bool AccountModel::addAccount(QString accountName)
+bool AccountModel::addAccount(const QString &accountName)
 /* ========================================================================= */
 {
-	//defining a couple of items
+	/* Defining a couple of items. */
 	QStandardItem *account = new QStandardItem(accountName);
 	QFont font;
 	QStandardItem *recentRecieved =
