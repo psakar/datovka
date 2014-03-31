@@ -5,12 +5,7 @@
 
 
 #include <QMainWindow>
-#include <QTreeView>
-#include <QTableView>
 #include <QStandardItemModel>
-#include <QAbstractItemModel>
-#include <QItemSelectionModel>
-#include <QDebug>
 
 #include "src/common.h"
 #include "src/models/accounts_model.h"
@@ -37,7 +32,7 @@ private slots:
     bool AddMessageIntoSent(QStandardItemModel* model,int row, QString Id, QString Title,
     QString Recipient, QString Status, QString Delivered, QString Accepted);
     void on_actionProxy_settings_triggered();
-    void TreeItemClicked(const QModelIndex &index);
+    void treeItemClicked(const QModelIndex &index);
     void SetAccountInfotext(int Account, QString html);
 
 private:

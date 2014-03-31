@@ -1,5 +1,8 @@
 
 
+#include <QDebug>
+#include <QTableView>
+
 #include "datovka.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
@@ -25,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->AccountList->setModel(&accountModel);
 	ui->AccountList->expandAll();
 	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
-	    this, SLOT(TreeItemClicked(QModelIndex)));
+	    this, SLOT(treeItemClicked(QModelIndex)));
 
 	this->ShowOnlyInfo();
 }
@@ -88,38 +91,43 @@ QStandardItemModel* MainWindow::InitSentMessageListTable() {
 }
 
 
-void MainWindow::TreeItemClicked(const QModelIndex &index)
+/* ========================================================================= */
+void MainWindow::treeItemClicked(const QModelIndex &index)
+/* ========================================================================= */
 {
+	QTableView *sentMessageList = ui->SentMessageList;
+	QTableView *receivedMessageList = ui->ReceivedMessageList;
+	QTextEdit *accountTextInfo = ui->AccountTextInfo;
+	QSplitter *splitter_2 = ui->splitter_2;
+	QStandardItem *item = accountModel.itemFromIndex(index);
 
-   qDebug() << index.model();
-   qDebug() << index.row()  << " - " << index.column()  << " - "<< index.parent().row();
+	qDebug() << index.model() << item->text();
+	qDebug() << index.row()  << " - " << index.column()
+	    << " - "<< index.parent().row();
 
-   QTableView *SentMessageList = ui->SentMessageList;
-   QTableView *ReceivedMessageList = ui->ReceivedMessageList;
-   QTextEdit *AccountTextInfo = ui->AccountTextInfo;
-   QSplitter *splitter_2 = ui->splitter_2;
+	/* Depending on which item was clicked show/hide elements. */
 
-   if (index.parent().row() == -1) {
-       SentMessageList->hide();
-       ReceivedMessageList->hide();
-       AccountTextInfo->show();
-       splitter_2->hide();
-   } else if (index.row() == 0) {
-       SentMessageList->hide();
-       ReceivedMessageList->show();
-       AccountTextInfo->hide();
-       splitter_2->show();
-   } else if (index.row() == 1) {
-       SentMessageList->show();
-       ReceivedMessageList->hide();
-       AccountTextInfo->hide();
-       splitter_2->show();
-   } else {
-       SentMessageList->hide();
-       ReceivedMessageList->hide();
-       AccountTextInfo->show();
-       splitter_2->hide();
-   }
+	if (index.parent().row() == -1) {
+		sentMessageList->hide();
+		receivedMessageList->hide();
+		accountTextInfo->show();
+		splitter_2->hide();
+	} else if (index.row() == 0) {
+		sentMessageList->hide();
+		receivedMessageList->show();
+		accountTextInfo->hide();
+		splitter_2->show();
+	} else if (index.row() == 1) {
+		sentMessageList->show();
+		receivedMessageList->hide();
+		accountTextInfo->hide();
+		splitter_2->show();
+	} else {
+		sentMessageList->hide();
+		receivedMessageList->hide();
+		accountTextInfo->show();
+		splitter_2->hide();
+	}
 }
 
 
