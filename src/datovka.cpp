@@ -158,24 +158,32 @@ bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
     qDebug() << index.model();
     qDebug() << index.row()  << " - " << index.column()  << " - "<< index.parent().row();
 
-    QTableView *xxx = ui->SentMessageList;
+    QTableView *SentMessageList = ui->SentMessageList;
+    QTableView *ReceivedMessageList = ui->ReceivedMessageList;
+    QTextEdit *AccountTextInfo = ui->AccountTextInfo;
+    QSplitter *splitter_2 = ui->splitter_2;
+
     if (index.parent().row() == -1) {
-        xxx->hide();
+        SentMessageList->hide();
+        ReceivedMessageList->hide();
+        AccountTextInfo->show();
+        splitter_2->hide();
+    } else if (index.row() == 0) {
+        SentMessageList->hide();
+        ReceivedMessageList->show();
+        AccountTextInfo->hide();
+        splitter_2->show();
+    } else if (index.row() == 1) {
+        SentMessageList->show();
+        ReceivedMessageList->hide();
+        AccountTextInfo->hide();
+        splitter_2->show();
+    } else {
+        SentMessageList->hide();
+        ReceivedMessageList->hide();
+        AccountTextInfo->show();
+        splitter_2->hide();
     }
-    if (index.parent().row() == 0) {
-        xxx->show();
-    }
-
-
-
-
-     //QStandardItemModel *mod = index.model() ;
-
-     //QStandardItem *item = mod->itemFromIndex(index);
-
-     //qDebug() << item;
-
-     // Do stuff with the item ...
  }
 
 

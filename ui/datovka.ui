@@ -167,7 +167,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QSplitter" name="splitter">
+        <widget class="QSplitter" name="splitter_1">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
