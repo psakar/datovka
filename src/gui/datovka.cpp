@@ -16,21 +16,20 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-    QStandardItemModel *tablemodel = this->InitRecievedMessageListTable();
-    for(int i=0; i<3; i++) {
-        this->AddMessageIntoRecieved(tablemodel, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15");
-    }
-    QStandardItemModel *tablemodel2 = this->InitSentMessageListTable();
-    for(int i=0; i<3; i++) {
-        this->AddMessageIntoSent(tablemodel2, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15", "Ok");
-    }
+	QStandardItemModel *tablemodel = this->initRecievedMessageListTable();
+	for(int i=0; i<3; i++) {
+		this->addMessageIntoRecieved(tablemodel, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15");
+	}
+
+	QStandardItemModel *tablemodel2 = this->initSentMessageListTable();
+	for(int i=0; i<3; i++) {
+		this->addMessageIntoSent(tablemodel2, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15", "Ok");
+	}
 
 	ui->AccountList->setModel(&accountModel);
 	ui->AccountList->expandAll();
 	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(treeItemClicked(QModelIndex)));
-
-	this->ShowOnlyInfo();
 }
 
 MainWindow::~MainWindow()
@@ -55,7 +54,7 @@ void MainWindow::on_actionProxy_settings_triggered()
  * @brief MainWindow::InitRecievedMessageListTable
  * @return
  */
-QStandardItemModel* MainWindow::InitRecievedMessageListTable() {
+QStandardItemModel* MainWindow::initRecievedMessageListTable() {
 
     QTableView *RecievedMessageTableView = ui->ReceivedMessageList;
     QStandardItemModel *standardModel = new QStandardItemModel(0,6,this) ;
@@ -74,7 +73,7 @@ QStandardItemModel* MainWindow::InitRecievedMessageListTable() {
 }
 
 
-QStandardItemModel* MainWindow::InitSentMessageListTable() {
+QStandardItemModel* MainWindow::initSentMessageListTable() {
 
     QTableView *SentMessageTableView = ui->SentMessageList;
     QStandardItemModel *standardModel = new QStandardItemModel(0,6,this) ;
@@ -112,6 +111,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		receivedMessageList->hide();
 		accountTextInfo->show();
 		splitter_2->hide();
+		QString html = createAccountInfo(item->text());
+		setAccountInfo(html);
 	} else if (index.row() == 0) {
 		sentMessageList->hide();
 		receivedMessageList->show();
@@ -127,6 +128,9 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		receivedMessageList->hide();
 		accountTextInfo->show();
 		splitter_2->hide();
+		QString html = createAccountInfo(tr("All messages"));
+		setAccountInfo(html);
+
 	}
 }
 
@@ -140,7 +144,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
  * @param Accepted
  * @return
  */
-bool MainWindow::AddMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
+bool MainWindow::addMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
     QString Sender, QString Delivered, QString Accepted){
 
     QStandardItem *item = new QStandardItem(Id);
@@ -166,7 +170,7 @@ bool MainWindow::AddMessageIntoRecieved(QStandardItemModel* model,int row, QStri
  * @param Accepted
  * @return
  */
-bool MainWindow::AddMessageIntoSent(QStandardItemModel* model, int row, QString Id, QString Title,
+bool MainWindow::addMessageIntoSent(QStandardItemModel* model, int row, QString Id, QString Title,
     QString Recipient, QString Status, QString Delivered, QString Accepted) {
 
     QStandardItem *item = new QStandardItem(Id);
@@ -184,21 +188,17 @@ bool MainWindow::AddMessageIntoSent(QStandardItemModel* model, int row, QString 
     return true;
 }
 
-/**
- * @brief MainWindow::ShowOnlyInfo
- */
-void MainWindow::ShowOnlyInfo(){
-   //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
-   //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
+QString MainWindow::createAccountInfo(QString accountName) {
+
+	QString html=QString("<h3>") + accountName + QString("</h3>");
+	return html;
 }
 
 
-void MainWindow::SetAccountInfotext(int Account, QString html){
+void MainWindow::setAccountInfo(QString html) {
 
-    QString text="<html><body>DFgsdghdhsfghf</body></html>";
-    QTextEdit *AccountTextInfo = ui->AccountTextInfo;
-    AccountTextInfo->setHtml(text);
-
+	QTextEdit *AccountTextInfo = ui->AccountTextInfo;
+	AccountTextInfo->setHtml(html);
 }
 
 

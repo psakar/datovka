@@ -23,17 +23,17 @@ public:
     ~MainWindow();
 
 private slots:
-    QStandardItemModel * InitRecievedMessageListTable();
-    QStandardItemModel * InitSentMessageListTable();
-    void on_actionPreferences_triggered();
-    void ShowOnlyInfo();
-    bool AddMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
-    QString Sender, QString Delivered, QString Accepted);
-    bool AddMessageIntoSent(QStandardItemModel* model,int row, QString Id, QString Title,
-    QString Recipient, QString Status, QString Delivered, QString Accepted);
-    void on_actionProxy_settings_triggered();
-    void treeItemClicked(const QModelIndex &index);
-    void SetAccountInfotext(int Account, QString html);
+	QStandardItemModel * initRecievedMessageListTable();
+	QStandardItemModel * initSentMessageListTable();
+	void on_actionPreferences_triggered();
+	bool addMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
+	QString Sender, QString Delivered, QString Accepted);
+	bool addMessageIntoSent(QStandardItemModel* model,int row, QString Id, QString Title,
+	QString Recipient, QString Status, QString Delivered, QString Accepted);
+	void on_actionProxy_settings_triggered();
+	void treeItemClicked(const QModelIndex &index);
+	QString createAccountInfo(QString accountName);
+	void setAccountInfo(QString html);
 
 private:
 	AccountModel accountModel;
