@@ -1,7 +1,9 @@
+
+
 #include <QApplication>
 #include <QtWidgets>
 
-#include "datovka.h"
+#include "gui/datovka.h"
 
 #define LOCALE_PATH "locale"
 

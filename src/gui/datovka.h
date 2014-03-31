@@ -14,9 +14,8 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+	Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -37,7 +36,7 @@ private slots:
     void TreeItemClicked(const QModelIndex &index);
 
 private:
-    Ui::MainWindow *ui;
+	Ui::MainWindow *ui;
 };
 
 #endif /* _DATOVKA_H_ */

@@ -11,20 +11,24 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = qdatovka
 TEMPLATE = app
 
+QMAKE_CXXFLAGS = \
+	-Isrc \
+	-g -O0 -std=c++11 \
+	-Wall -Wextra -pedantic
 
 SOURCES += src/main.cpp\
-    src/datovka.cpp \
-    src/dlg_preferences.cpp \
-    src/dlg_proxysets.cpp
+    src/gui/datovka.cpp \
+    src/gui/dlg_preferences.cpp \
+    src/gui/dlg_proxysets.cpp
 
-HEADERS += src/datovka.h \
-    src/dlg_preferences.h \
-    src/dlg_proxysets.h \
+HEADERS += src/gui/datovka.h \
+    src/gui/dlg_preferences.h \
+    src/gui/dlg_proxysets.h \
     src/common.h
 
-FORMS += ui/datovka.ui \
-    ui/dlg_preferences.ui \
-    ui/dlg_proxysets.ui
+FORMS += src/gui/ui/datovka.ui \
+    src/gui/ui/dlg_preferences.ui \
+    src/gui/ui/dlg_proxysets.ui
 
 RESOURCES += \
     res/resources.qrc
