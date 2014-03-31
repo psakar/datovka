@@ -1,7 +1,9 @@
+
+
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
-#include "src/common.h"
+
 #include <QMainWindow>
 #include <QTreeView>
 #include <QTableView>
@@ -10,8 +12,12 @@
 #include <QItemSelectionModel>
 #include <QDebug>
 
+#include "src/common.h"
+#include "src/models/accounts_model.h"
+
+
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow {
@@ -22,12 +28,10 @@ public:
     ~MainWindow();
 
 private slots:
-    QStandardItem* InitAccountListTree(QString HeaderTitle);
-    QStandardItemModel* InitRecievedMessageListTable();
-    QStandardItemModel* InitSentMessageListTable();
+    QStandardItemModel * InitRecievedMessageListTable();
+    QStandardItemModel * InitSentMessageListTable();
     void on_actionPreferences_triggered();
     void ShowOnlyInfo();
-    bool AddAccountToTree(QStandardItem* rootNode, QString AccountName);
     bool AddMessageIntoRecieved(QStandardItemModel* model,int row, QString Id, QString Title,
     QString Sender, QString Delivered, QString Accepted);
     bool AddMessageIntoSent(QStandardItemModel* model,int row, QString Id, QString Title,
@@ -37,6 +41,7 @@ private slots:
     void SetAccountInfotext(int Account, QString html);
 
 private:
+	AccountModel accountModel;
 	Ui::MainWindow *ui;
 };
 

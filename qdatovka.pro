@@ -12,19 +12,20 @@ TARGET = qdatovka
 TEMPLATE = app
 
 QMAKE_CXXFLAGS = \
-	-Isrc \
 	-g -O0 -std=c++11 \
 	-Wall -Wextra -pedantic
 
 SOURCES += src/main.cpp\
     src/gui/datovka.cpp \
     src/gui/dlg_preferences.cpp \
-    src/gui/dlg_proxysets.cpp
+    src/gui/dlg_proxysets.cpp \
+    src/models/accounts_model.cpp
 
 HEADERS += src/gui/datovka.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
-    src/common.h
+    src/common.h \
+    src/models/accounts_model.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_preferences.ui \

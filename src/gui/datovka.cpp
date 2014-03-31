@@ -1,15 +1,18 @@
+
+
 #include "datovka.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
 #include "ui_datovka.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    accountModel(),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 
-    QStandardItem *treerootnode = this->InitAccountListTree(tr("Accounts"));
     QStandardItemModel *tablemodel = this->InitRecievedMessageListTable();
     for(int i=0; i<3; i++) {
         this->AddMessageIntoRecieved(tablemodel, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15");
@@ -19,10 +22,12 @@ MainWindow::MainWindow(QWidget *parent) :
         this->AddMessageIntoSent(tablemodel2, i, "12365","Dodávka světelných mečů","Orion","12.3.2014 12:12","12.3.2014 12:15", "Ok");
     }
 
-    this->AddAccountToTree(treerootnode, "Testovací účet 1");
-    this->AddAccountToTree(treerootnode, "Testovací účet 2");
-    this->ShowOnlyInfo();
+	ui->AccountList->setModel(&accountModel);
+	ui->AccountList->expandAll();
+	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
+	    this, SLOT(TreeItemClicked(QModelIndex)));
 
+	this->ShowOnlyInfo();
 }
 
 MainWindow::~MainWindow()
@@ -42,26 +47,6 @@ void MainWindow::on_actionProxy_settings_triggered()
     Proxy->show();
 }
 
-/**
- * @brief MainWindow::InitAccountListTree
- * @param HeaderTitle
- * @return
- */
-QStandardItem* MainWindow::InitAccountListTree(QString HeaderTitle) {
-
-    QTreeView *AccountTreeView = ui->AccountList;
-    QStandardItemModel *standardModel = new QStandardItemModel() ;
-    // add header
-    standardModel->setHorizontalHeaderItem(0, new QStandardItem(HeaderTitle));
-    QStandardItem *rootNode = standardModel->invisibleRootItem();
-    //register the model
-    AccountTreeView->setModel(standardModel);
-
-    connect(AccountTreeView, SIGNAL(clicked(QModelIndex)),
-         this, SLOT(TreeItemClicked(QModelIndex)));
-
-    return rootNode;
-}
 
 /**
  * @brief MainWindow::InitRecievedMessageListTable
@@ -103,88 +88,39 @@ QStandardItemModel* MainWindow::InitSentMessageListTable() {
 }
 
 
-/**
- * @brief MainWindow::AddAccountToTree add account into TreeWidget
- * @return true if success
- */
-bool MainWindow::AddAccountToTree(QStandardItem* rootNode, QString AccountName){
+void MainWindow::TreeItemClicked(const QModelIndex &index)
+{
 
-    //defining a couple of items
-    QTreeView *AccountTreeView = ui->AccountList;
-    QStandardItem *Account = new QStandardItem(AccountName);
-    QFont font;
-    font.setBold(true);
-    //font.setItalic(true);
-    Account->setFont(font);
-    Account->setIcon(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
+   qDebug() << index.model();
+   qDebug() << index.row()  << " - " << index.column()  << " - "<< index.parent().row();
 
-    QStandardItem *RecentRecieved = new QStandardItem(tr("Recent Recieved"));
-    RecentRecieved->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
+   QTableView *SentMessageList = ui->SentMessageList;
+   QTableView *ReceivedMessageList = ui->ReceivedMessageList;
+   QTextEdit *AccountTextInfo = ui->AccountTextInfo;
+   QSplitter *splitter_2 = ui->splitter_2;
 
-    QStandardItem *RecentSent = new QStandardItem(tr("Recent Sent"));
-    RecentSent->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
-
-    QStandardItem *All = new QStandardItem(tr("All"));
-
-    QStandardItem *AllRecieved = new QStandardItem(tr("Recent Recieved"));
-    AllRecieved->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
-
-    QStandardItem *AllSent = new QStandardItem(tr("Recent Sent"));
-    AllSent->setIcon(QIcon(ICON_16x16_PATH + QString("datovka-message-reply.png")));
-
-    //building up the hierarchy
-    rootNode->appendRow(Account);
-
-    Account->appendRow(RecentRecieved);
-    Account->appendRow(RecentSent);
-    Account->appendRow(All);
-    All->appendRow(AllRecieved);
-    All->appendRow(AllSent);
-
-    AccountTreeView->expandAll();
-/*
-     //selection changes shall trigger a slot
-     QItemSelectionModel *selectionModel= AccountTreeView->selectionModel();
-     connect(selectionModel, SIGNAL(selectionChanged (const QItemSelection &, const QItemSelection &)),
-             this, SLOT(selectionChangedSlot(const QItemSelection &, const QItemSelection &)));
-*/
-    return true;
+   if (index.parent().row() == -1) {
+       SentMessageList->hide();
+       ReceivedMessageList->hide();
+       AccountTextInfo->show();
+       splitter_2->hide();
+   } else if (index.row() == 0) {
+       SentMessageList->hide();
+       ReceivedMessageList->show();
+       AccountTextInfo->hide();
+       splitter_2->show();
+   } else if (index.row() == 1) {
+       SentMessageList->show();
+       ReceivedMessageList->hide();
+       AccountTextInfo->hide();
+       splitter_2->show();
+   } else {
+       SentMessageList->hide();
+       ReceivedMessageList->hide();
+       AccountTextInfo->show();
+       splitter_2->hide();
+   }
 }
-
-
- void MainWindow::TreeItemClicked(const QModelIndex &index)
- {
-
-    qDebug() << index.model();
-    qDebug() << index.row()  << " - " << index.column()  << " - "<< index.parent().row();
-
-    QTableView *SentMessageList = ui->SentMessageList;
-    QTableView *ReceivedMessageList = ui->ReceivedMessageList;
-    QTextEdit *AccountTextInfo = ui->AccountTextInfo;
-    QSplitter *splitter_2 = ui->splitter_2;
-
-    if (index.parent().row() == -1) {
-        SentMessageList->hide();
-        ReceivedMessageList->hide();
-        AccountTextInfo->show();
-        splitter_2->hide();
-    } else if (index.row() == 0) {
-        SentMessageList->hide();
-        ReceivedMessageList->show();
-        AccountTextInfo->hide();
-        splitter_2->show();
-    } else if (index.row() == 1) {
-        SentMessageList->show();
-        ReceivedMessageList->hide();
-        AccountTextInfo->hide();
-        splitter_2->show();
-    } else {
-        SentMessageList->hide();
-        ReceivedMessageList->hide();
-        AccountTextInfo->show();
-        splitter_2->hide();
-    }
- }
 
 
 /**

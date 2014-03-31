@@ -24,7 +24,7 @@
    <string>QDatovka - Free interface for Datové schránky</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../res/resources.qrc">
+   <iconset resource="../../../res/resources.qrc">
     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
   </property>
   <property name="layoutDirection">
@@ -199,7 +199,7 @@
               <string>Save file</string>
              </property>
              <property name="icon">
-              <iconset resource="../res/resources.qrc">
+              <iconset resource="../../../res/resources.qrc">
                <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
              </property>
              <property name="toolButtonStyle">
@@ -213,7 +213,7 @@
               <string>Save all</string>
              </property>
              <property name="icon">
-              <iconset resource="../res/resources.qrc">
+              <iconset resource="../../../res/resources.qrc">
                <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
              </property>
              <property name="toolButtonStyle">
@@ -227,7 +227,7 @@
               <string>Open with</string>
              </property>
              <property name="icon">
-              <iconset resource="../res/resources.qrc">
+              <iconset resource="../../../res/resources.qrc">
                <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
              </property>
              <property name="toolButtonStyle">
@@ -241,7 +241,7 @@
               <string>Remove</string>
              </property>
              <property name="icon">
-              <iconset resource="../res/resources.qrc">
+              <iconset resource="../../../res/resources.qrc">
                <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
              </property>
              <property name="toolButtonStyle">
@@ -255,7 +255,7 @@
               <string>Remove All</string>
              </property>
              <property name="icon">
-              <iconset resource="../res/resources.qrc">
+              <iconset resource="../../../res/resources.qrc">
                <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
              </property>
              <property name="toolButtonStyle">
@@ -296,7 +296,7 @@
      <x>0</x>
      <y>0</y>
      <width>829</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -398,7 +398,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSync_all_accounts">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-all-accounts-sync.png</normaloff>:/icons/16x16/datovka-all-accounts-sync.png</iconset>
    </property>
    <property name="text">
@@ -407,7 +407,7 @@
   </action>
   <action name="actionAdd_account">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/plus_16.png</normaloff>:/icons/3party/plus_16.png</iconset>
    </property>
    <property name="text">
@@ -416,7 +416,7 @@
   </action>
   <action name="actionModify_account">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
    </property>
    <property name="text">
@@ -425,7 +425,7 @@
   </action>
   <action name="actionDelete_account">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
    </property>
    <property name="text">
@@ -434,7 +434,7 @@
   </action>
   <action name="actionProxy_settings">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/globe_16.png</normaloff>:/icons/3party/globe_16.png</iconset>
    </property>
    <property name="text">
@@ -443,7 +443,7 @@
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +452,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
    </property>
    <property name="text">
@@ -461,7 +461,7 @@
   </action>
   <action name="actionImport_database_directory">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/address_16.png</normaloff>:/icons/3party/address_16.png</iconset>
    </property>
    <property name="text">
@@ -470,7 +470,7 @@
   </action>
   <action name="actionGet_messages">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
    </property>
    <property name="text">
@@ -479,7 +479,7 @@
   </action>
   <action name="actionSent_message">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-message.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
    </property>
    <property name="text">
@@ -488,7 +488,7 @@
   </action>
   <action name="actionMark_all_as_read">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-ok.png</normaloff>:/icons/16x16/datovka-ok.png</iconset>
    </property>
    <property name="text">
@@ -497,7 +497,7 @@
   </action>
   <action name="actionChange_password">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
    </property>
    <property name="text">
@@ -506,7 +506,7 @@
   </action>
   <action name="actionAccount_properties">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
    </property>
    <property name="text">
@@ -515,7 +515,7 @@
   </action>
   <action name="actionMove_account_up">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
    </property>
    <property name="text">
@@ -524,7 +524,7 @@
   </action>
   <action name="actionMove_account_down">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/down_16.png</normaloff>:/icons/3party/down_16.png</iconset>
    </property>
    <property name="text">
@@ -533,7 +533,7 @@
   </action>
   <action name="actionChange_data_directory">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
    </property>
    <property name="text">
@@ -542,7 +542,7 @@
   </action>
   <action name="actionAbout_Datovka">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/home_16.png</normaloff>:/icons/3party/home_16.png</iconset>
    </property>
    <property name="text">
@@ -554,7 +554,7 @@
   </action>
   <action name="actionHepl">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/help_16.png</normaloff>:/icons/3party/help_16.png</iconset>
    </property>
    <property name="text">
@@ -563,7 +563,7 @@
   </action>
   <action name="actionUpdate">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/present_16.png</normaloff>:/icons/3party/present_16.png</iconset>
    </property>
    <property name="text">
@@ -575,7 +575,7 @@
   </action>
   <action name="actionFind_databox">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
    </property>
    <property name="text">
@@ -584,7 +584,7 @@
   </action>
   <action name="actionAuthenticate_message_file">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/key_16.png</normaloff>:/icons/3party/key_16.png</iconset>
    </property>
    <property name="text">
@@ -593,7 +593,7 @@
   </action>
   <action name="actionView_message_from_ZPO_file">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
    </property>
    <property name="text">
@@ -602,7 +602,7 @@
   </action>
   <action name="actionExport_corespondence_overview">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
    </property>
    <property name="text">
@@ -611,7 +611,7 @@
   </action>
   <action name="actionRecieved_all">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-all-accounts-sync.png</normaloff>:/icons/24x24/datovka-all-accounts-sync.png</iconset>
    </property>
    <property name="text">
@@ -626,7 +626,7 @@
   </action>
   <action name="actionDownload_messages">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-account-sync.png</normaloff>:/icons/24x24/datovka-account-sync.png</iconset>
    </property>
    <property name="text">
@@ -641,7 +641,7 @@
   </action>
   <action name="actionCreate_message">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-message.png</normaloff>:/icons/24x24/datovka-message.png</iconset>
    </property>
    <property name="text">
@@ -656,7 +656,7 @@
   </action>
   <action name="actionReply_to_the_sender">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-message-reply.png</normaloff>:/icons/24x24/datovka-message-reply.png</iconset>
    </property>
    <property name="text">
@@ -671,7 +671,7 @@
   </action>
   <action name="actionVerify_a_message">
    <property name="icon">
-    <iconset resource="../res/resources.qrc">
+    <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-message-verify.png</normaloff>:/icons/24x24/datovka-message-verify.png</iconset>
    </property>
    <property name="text">
@@ -686,7 +686,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../res/resources.qrc"/>
+  <include location="../../../res/resources.qrc"/>
  </resources>
  <connections>
   <connection>
