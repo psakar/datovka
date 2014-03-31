@@ -1,7 +1,7 @@
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
-#include "common.h"
+#include "src/common.h"
 #include <QMainWindow>
 #include <QTreeView>
 #include <QTableView>
@@ -34,6 +34,7 @@ private slots:
     QString Recipient, QString Status, QString Delivered, QString Accepted);
     void on_actionProxy_settings_triggered();
     void TreeItemClicked(const QModelIndex &index);
+    void SetAccountInfotext(int Account, QString html);
 
 private:
 	Ui::MainWindow *ui;

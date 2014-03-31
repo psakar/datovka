@@ -247,3 +247,14 @@ void MainWindow::ShowOnlyInfo(){
    //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->SentMessageList,SLOT(hide()));
    //connect(ui->AccountList, SIGNAL(itemClicked(QTreeWidgetItem*,int)),ui->AccountTextInfo,SLOT(hide()));
 }
+
+
+void MainWindow::SetAccountInfotext(int Account, QString html){
+
+    QString text="<html><body>DFgsdghdhsfghf</body></html>";
+    QTextEdit *AccountTextInfo = ui->AccountTextInfo;
+    AccountTextInfo->setHtml(text);
+
+}
+
+
