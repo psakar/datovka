@@ -32,6 +32,8 @@ private slots:
 	void setAccountInfoToWidget(QString html);
 	QString addItemOfAccountInfo(QString title, QString data);
 
+    void on_actionCreate_message_triggered();
+
 private:
 	void ensureConfPresence(void);
 	void loadSettings(void);

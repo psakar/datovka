@@ -9,6 +9,7 @@
 #include "datovka.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
+#include "dlg_sent_message.h"
 #include "ui_datovka.h"
 
 
@@ -55,7 +56,6 @@ void MainWindow::on_actionProxy_settings_triggered()
 	QDialog *Proxy = new ProxyDialog(this);
 	Proxy->show();
 }
-
 
 /* ========================================================================= */
 void MainWindow::treeItemClicked(const QModelIndex &index)
@@ -192,4 +192,10 @@ void MainWindow::loadSettings(void)
 void MainWindow::saveSettings(void)
 /* ========================================================================= */
 {
+}
+
+void MainWindow::on_actionCreate_message_triggered()
+{
+    QDialog *newMessageDialog = new dlg_sent_message(this);
+    newMessageDialog->show();
 }

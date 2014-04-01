@@ -20,18 +20,21 @@ SOURCES += src/main.cpp\
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
     src/models/accounts_model.cpp \
-    src/models/messages_remote_models.cpp
+    src/models/messages_remote_models.cpp \
+    src/gui/dlg_sent_message.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/models/accounts_model.h \
-    src/models/messages_remote_models.h
+    src/models/messages_remote_models.h \
+    src/gui/dlg_sent_message.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_preferences.ui \
-    src/gui/ui/dlg_proxysets.ui
+    src/gui/ui/dlg_proxysets.ui \
+    src/gui/ui/dlg_sent_message.ui
 
 RESOURCES += \
     res/resources.qrc
