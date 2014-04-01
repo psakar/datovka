@@ -1,12 +1,19 @@
 
 
 #include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QSettings>
 #include <QTableView>
 
 #include "datovka.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
 #include "ui_datovka.h"
+
+
+#define CONF_SUBDIR ".dsgui"
+#define CONF_FILE "dsgui.conf"
 
 
 /* ========================================================================= */
@@ -20,17 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	/* Accounts. */
-	ui->AccountList->setModel(&accountModel);
-	ui->AccountList->expandAll();
-	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
-	    this, SLOT(treeItemClicked(QModelIndex)));
+	m_confDirName = QDir::homePath() + "/" + CONF_SUBDIR;
+	m_confFileName = m_confDirName + "/" + CONF_FILE;
 
-	/* Received messages. */
-	ui->ReceivedMessageList->setModel(&receivedModel);
+	qDebug() << m_confDirName << m_confFileName;
 
-	/* Sent messages. */
-	ui->SentMessageList->setModel(&sentModel);
+	ensureConfPresence();
+	loadSettings();
 }
 
 
@@ -145,4 +148,48 @@ void MainWindow::setAccountInfoToWidget(QString html)
 {
 	QTextEdit *AccountTextInfo = ui->AccountTextInfo;
 	AccountTextInfo->setHtml(html);
+}
+
+
+/* ========================================================================= */
+void MainWindow::ensureConfPresence(void)
+/* ========================================================================= */
+{
+	if (!QDir(m_confDirName).exists()) {
+		QDir(QDir::homePath()).mkdir(CONF_SUBDIR);
+	}
+	if (!QFile(m_confFileName).exists()) {
+		QFile file(m_confFileName);
+		file.open(QIODevice::ReadWrite);
+		file.close();
+	}
+}
+
+
+/* ========================================================================= */
+void MainWindow::loadSettings(void)
+/* ========================================================================= */
+{
+	QSettings settings(m_confFileName, QSettings::IniFormat);
+
+	qDebug() << settings.allKeys();
+
+	/* Accounts. */
+	ui->AccountList->setModel(&accountModel);
+	ui->AccountList->expandAll();
+	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
+	    this, SLOT(treeItemClicked(QModelIndex)));
+
+	/* Received messages. */
+	ui->ReceivedMessageList->setModel(&receivedModel);
+
+	/* Sent messages. */
+	ui->SentMessageList->setModel(&sentModel);
+}
+
+
+/* ========================================================================= */
+void MainWindow::saveSettings(void)
+/* ========================================================================= */
+{
 }

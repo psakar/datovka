@@ -33,6 +33,13 @@ private slots:
 	QString addItemOfAccountInfo(QString title, QString data);
 
 private:
+	void ensureConfPresence(void);
+	void loadSettings(void);
+	void saveSettings(void);
+
+	QString m_confDirName;
+	QString m_confFileName;
+
 	AccountModel accountModel;
 	ReceivedMessagesRemoteModel receivedModel;
 	SentMessagesRemoteModel sentModel;

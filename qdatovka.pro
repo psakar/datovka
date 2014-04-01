@@ -22,10 +22,10 @@ SOURCES += src/main.cpp\
     src/models/accounts_model.cpp \
     src/models/messages_remote_models.cpp
 
-HEADERS += src/gui/datovka.h \
+HEADERS += src/common.h \
+    src/gui/datovka.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
-    src/common.h \
     src/models/accounts_model.h \
     src/models/messages_remote_models.h
 
