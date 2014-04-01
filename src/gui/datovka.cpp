@@ -17,11 +17,15 @@
 #define CONF_FILE "dsgui.conf"
 
 
+#define accountInfoLine(title, value) \
+	"<div><strong>" + (title) + ": </strong>" + (value) + "</div>"
+
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
-    accountModel(),
+    m_accountModel(this),
     receivedModel(this),
     sentModel(this),
     ui(new Ui::MainWindow)
@@ -38,10 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-MainWindow::~MainWindow()
+/* ========================================================================= */
+MainWindow::~MainWindow(void)
+/* ========================================================================= */
 {
 	delete ui;
 }
+
 
 /* ========================================================================= */
 void MainWindow::on_actionPreferences_triggered()
@@ -68,7 +75,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	QTableView *receivedMessageList = ui->ReceivedMessageList;
 	QTextEdit *accountTextInfo = ui->AccountTextInfo;
 	QSplitter *splitter_2 = ui->splitter_2;
-	QStandardItem *item = accountModel.itemFromIndex(index);
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
 
 	qDebug() << index.model() << item->text();
 	qDebug() << index.parent().row()  << " - " << index.row();
@@ -76,11 +83,12 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	/* Depending on which item was clicked show/hide elements. */
 
 	if (index.parent().row() == -1) {
+		/* Clicked account. */
 		sentMessageList->hide();
 		receivedMessageList->hide();
 		accountTextInfo->show();
 		splitter_2->hide();
-		html = createAccountInfo(item->text());
+		html = createAccountInfo(*item);
 		setAccountInfoToWidget(html);
 	} else if (index.row() == 0) {
 		sentMessageList->hide();
@@ -99,67 +107,68 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		splitter_2->hide();
 		html = createAccountInfoAllField(tr("All messages"));
 		setAccountInfoToWidget(html);
-		//accountModel.addYearItemToAccount(index, "2014");
+		//m_accountModel.addYearItemToAccount(index, "2014");
 	}
 }
 
 
 /* ========================================================================= */
-QString MainWindow::addItemOfAccountInfo(QString title, QString data)
+QString MainWindow::createAccountInfo(const QStandardItem &item)
 /* ========================================================================= */
 {
-	QString item;
-	item = QString("<div><strong>") + QString(title) +
-	       QString("</strong>") + data + QString("</div>");
-	return item;
-}
+	const AccountModel::SettingsMap &itemSettings = item.data().toMap();
+	QString html = QString("<h3>") + item.text() + QString("</h3>");
 
-/* ========================================================================= */
-QString MainWindow::createAccountInfo(QString accountName)
-/* ========================================================================= */
-{
-	QString html = QString("<h3>") + accountName + QString("</h3>");
+	html.append(accountInfoLine(tr("Account name"),
+	    itemSettings[NAME].toString()));
+	html.append("<br>");
+	html.append(accountInfoLine(tr("User name"),
+	    itemSettings[USER].toString()));
 
-	html += addItemOfAccountInfo(tr("Account name: "),accountName);
-	html += addItemOfAccountInfo(tr("Username: "),accountName);
-	html += addItemOfAccountInfo(tr("Databox ID: "),accountName);
-	html += addItemOfAccountInfo(tr("Type of Databox: "),accountName);
-	html += addItemOfAccountInfo(tr("IČ: "),accountName);
-	html += addItemOfAccountInfo(tr("Company name: "),accountName);
-	html += addItemOfAccountInfo(tr("Address: "),accountName);
-	html += addItemOfAccountInfo(tr("City: "),accountName);
-	html += addItemOfAccountInfo(tr("State: "),accountName);
-	html += addItemOfAccountInfo(tr("Nationatily: "),accountName);
-	html += addItemOfAccountInfo(tr("Efective OVM: "),accountName);
-	html += addItemOfAccountInfo(tr("Open addressing: "),accountName);
-	html += addItemOfAccountInfo(tr("Password expiration date: "),accountName);
+	QString unknown = "unknown";
+
+	html.append(accountInfoLine(tr("Databox ID"), unknown));
+	html.append(accountInfoLine(tr("Type of Databox"), unknown));
+	html.append(accountInfoLine(tr("IČ"), unknown));
+	html.append(accountInfoLine(tr("Company name"), unknown));
+	html.append(accountInfoLine(tr("Address"), unknown));
+	html.append(accountInfoLine(tr("City"), unknown));
+	html.append(accountInfoLine(tr("State"), unknown));
+	html.append(accountInfoLine(tr("Nationality"), unknown));
+	html.append(accountInfoLine(tr("Effective OVM"), unknown));
+	html.append(accountInfoLine(tr("Open addressing"), unknown));
+	html.append("<br>");
+	html.append(accountInfoLine(tr("Password expiration date"), unknown));
 
 	return html;
 }
 
 /* ========================================================================= */
-QString MainWindow::createAccountInfoAllField(QString accountName)
+QString MainWindow::createAccountInfoAllField(const QString &accountName)
 /* ========================================================================= */
 {
 	QString html = QString("<h3>") + accountName + QString("</h3>");
-	html += addItemOfAccountInfo(tr("Received messages: "),accountName);
-	/* TODO - add count of recevied messages */
-	html += addItemOfAccountInfo(tr("Sent messages: "),accountName);
+
+	html.append(accountInfoLine(tr("Received messages"), accountName));
+	/* TODO - add count of received messages */
+	html.append(accountInfoLine(tr("Sent messages"), accountName));
 	/* TODO - add count of sent messages */
 	return html;
 }
 
 
 /* ========================================================================= */
-void MainWindow::setAccountInfoToWidget(QString html)
+void MainWindow::setAccountInfoToWidget(const QString &html)
 /* ========================================================================= */
 {
-	QTextEdit *AccountTextInfo = ui->AccountTextInfo;
-	AccountTextInfo->setHtml(html);
+	ui->AccountTextInfo->setHtml(html);
 }
 
 
 /* ========================================================================= */
+/*
+ * Create configuration file if not present.
+ */
 void MainWindow::ensureConfPresence(void)
 /* ========================================================================= */
 {
@@ -175,15 +184,21 @@ void MainWindow::ensureConfPresence(void)
 
 
 /* ========================================================================= */
+/*
+ * Load and apply setting from configuration file.
+ */
 void MainWindow::loadSettings(void)
 /* ========================================================================= */
 {
 	QSettings settings(m_confFileName, QSettings::IniFormat);
 
-	qDebug() << settings.allKeys();
+//	qDebug() << "All: " << settings.allKeys();
+//	qDebug() << "Groups: " << settings.childGroups();
+//	qDebug() << "Keys:" << settings.childKeys();
 
 	/* Accounts. */
-	ui->AccountList->setModel(&accountModel);
+	m_accountModel.loadFromSettings(settings);
+	ui->AccountList->setModel(&m_accountModel);
 	ui->AccountList->expandAll();
 	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(treeItemClicked(QModelIndex)));
@@ -197,10 +212,15 @@ void MainWindow::loadSettings(void)
 
 
 /* ========================================================================= */
+/*!
+ * @brief Store current setting to configuration file.
+ */
 void MainWindow::saveSettings(void)
 /* ========================================================================= */
 {
+	/* TODO */
 }
+
 
 /* ========================================================================= */
 void MainWindow::on_actionCreate_message_triggered()

@@ -21,30 +21,45 @@ class MainWindow : public QMainWindow {
 
 public:
 	explicit MainWindow(QWidget *parent = 0);
-	~MainWindow();
+	~MainWindow(void);
 
 private slots:
 	void on_actionPreferences_triggered();
 	void on_actionProxy_settings_triggered();
 	void treeItemClicked(const QModelIndex &index);
-	QString createAccountInfo(QString accountName);
-	QString createAccountInfoAllField(QString accountName);
-	void setAccountInfoToWidget(QString html);
-	QString addItemOfAccountInfo(QString title, QString data);
 
     void on_actionCreate_message_triggered();
 
     void on_actionSent_message_triggered();
 
 private:
+	/*!
+	 * @brief Create configuration file if not present.
+	 */
 	void ensureConfPresence(void);
+
+	/*!
+	 * @brief Load and apply setting from configuration file.
+	 */
 	void loadSettings(void);
+
+	/*!
+	 * @brief Store current setting to configuration file.
+	 */
 	void saveSettings(void);
 
+	/*
+	 * @brief Generate account info HTML message.
+	 */
+	QString createAccountInfo(const QStandardItem &item);
+	QString createAccountInfoAllField(const QString &accountName);
+	void setAccountInfoToWidget(const QString &html);
+
+	/* Configuration file related. */
 	QString m_confDirName;
 	QString m_confFileName;
 
-	AccountModel accountModel;
+	AccountModel m_accountModel;
 	ReceivedMessagesRemoteModel receivedModel;
 	SentMessagesRemoteModel sentModel;
 	Ui::MainWindow *ui;
