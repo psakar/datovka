@@ -14,6 +14,13 @@ static
 QString fromBase64(const QString &base64);
 
 
+/*!
+ * @brief Converts string into base64.
+ */
+static
+QString toBase64(const QString &plain);
+
+
 /* ========================================================================= */
 /*
  * Empty account model constructor.
@@ -39,7 +46,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 /* ========================================================================= */
 {
 	QStringList groups = settings.childGroups();
-	QRegExp credRe("credentials.*");
+	QRegExp credRe(CREDENTIALS".*");
 	SettingsMap itemSettings;
 
 	/* Clear present rows. */
@@ -73,6 +80,44 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			addAccount(itemSettings[NAME].toString(),
 			    itemSettings);
 		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Store data to settings structure.
+ */
+void AccountModel::saveToSettings(QSettings &settings) const
+/* ========================================================================= */
+{
+	QString groupName;
+
+	for (int i = 0; i < this->rowCount(); ++i) {
+		const SettingsMap &itemSettings =
+		    this->item(i)->data().toMap();
+
+		groupName = CREDENTIALS;
+		if (i > 0) {
+			groupName.append(QString::number(i + 1));
+		}
+//		qDebug() << this->item(i)->text() << groupName;
+		settings.beginGroup(groupName);
+
+		settings.setValue(NAME, itemSettings.value(NAME));
+		settings.setValue(USER, itemSettings.value(USER));
+		settings.setValue(LOGIN, itemSettings.value(LOGIN));
+		if (!itemSettings.value(PWD).isNull() &&
+		    itemSettings.value(PWD).isValid() &&
+		    !itemSettings.value(PWD).toString().isEmpty()) {
+			settings.setValue(PWD,
+			    toBase64(itemSettings.value(PWD).toString()));
+		}
+		settings.setValue(TEST, itemSettings.value(TEST));
+		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
+		settings.setValue(SYNC, itemSettings.value(SYNC));
+
+		settings.endGroup();
 	}
 }
 
@@ -151,4 +196,16 @@ QString fromBase64(const QString &base64)
 /* ========================================================================= */
 {
 	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
+}
+
+
+/* ========================================================================= */
+/*!
+ * @brief Converts string into base64.
+ */
+static
+QString toBase64(const QString &plain)
+/* ========================================================================= */
+{
+	return QString::fromUtf8(plain.toUtf8().toBase64());
 }

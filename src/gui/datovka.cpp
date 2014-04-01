@@ -46,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow(void)
 /* ========================================================================= */
 {
+	/* Save settings on exit. */
+	saveSettings();
+
 	delete ui;
 }
 
@@ -218,7 +221,18 @@ void MainWindow::loadSettings(void)
 void MainWindow::saveSettings(void)
 /* ========================================================================= */
 {
+	/*
+	 * TODO -- Target file name differs from source for testing purposes.
+	 */
+	QSettings settings(m_confFileName + "x", QSettings::IniFormat);
+
+	settings.clear();
+
+	/* Accounts. */
+	m_accountModel.saveToSettings(settings);
 	/* TODO */
+
+	settings.sync();
 }
 
 
