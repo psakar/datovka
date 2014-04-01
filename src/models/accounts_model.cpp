@@ -2,7 +2,7 @@
 
 #include "accounts_model.h"
 #include "src/common.h"
-
+#include <QDebug>
 
 /* ========================================================================= */
 AccountModel::AccountModel(void)
@@ -29,8 +29,8 @@ bool AccountModel::addAccount(const QString &accountName)
 	    new QStandardItem(tr("Recent Recieved"));
 	QStandardItem *recentSent = new QStandardItem(tr("Recent Sent"));
 	QStandardItem *all = new QStandardItem(tr("All"));
-	QStandardItem *allRecieved = new QStandardItem(tr("Recent Recieved"));
-	QStandardItem *allSent = new QStandardItem(tr("Recent Sent"));
+	QStandardItem *allRecieved = new QStandardItem(tr("Recieved"));
+	QStandardItem *allSent = new QStandardItem(tr("Sent"));
 
 	font.setBold(true);
 //	font.setItalic(true);
@@ -54,6 +54,19 @@ bool AccountModel::addAccount(const QString &accountName)
 	all->appendRow(allSent);
 
 	invisibleRootItem()->appendRow(account);
+
+	return true;
+}
+
+/* TODO */
+bool AccountModel::addYearItemToAccount(const QModelIndex &index, const QString &year)
+{
+	qDebug() << index.parent().row() << " - " << index.row();
+
+	QStandardItem *yearitem = new QStandardItem(year);
+	yearitem->setIcon(QIcon(
+	    ICON_16x16_PATH + QString("datovka-message-download.png")));
+	AccountModel::item(index.parent().row(),0)->appendRow(yearitem);
 
 	return true;
 }

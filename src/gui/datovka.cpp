@@ -42,15 +42,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    QDialog *Preferences = new PreferencesDialog(this);
-    Preferences->show();
+	QDialog *Preferences = new PreferencesDialog(this);
+	Preferences->show();
 }
 
 
 void MainWindow::on_actionProxy_settings_triggered()
 {
-    QDialog *Proxy = new ProxyDialog(this);
-    Proxy->show();
+	QDialog *Proxy = new ProxyDialog(this);
+	Proxy->show();
 }
 
 
@@ -58,6 +58,7 @@ void MainWindow::on_actionProxy_settings_triggered()
 void MainWindow::treeItemClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
+	QString html;
 	QTableView *sentMessageList = ui->SentMessageList;
 	QTableView *receivedMessageList = ui->ReceivedMessageList;
 	QTextEdit *accountTextInfo = ui->AccountTextInfo;
@@ -65,8 +66,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	QStandardItem *item = accountModel.itemFromIndex(index);
 
 	qDebug() << index.model() << item->text();
-	qDebug() << index.row()  << " - " << index.column()
-	    << " - "<< index.parent().row();
+	qDebug() << index.parent().row()  << " - " << index.row();
 
 	/* Depending on which item was clicked show/hide elements. */
 
@@ -75,8 +75,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		receivedMessageList->hide();
 		accountTextInfo->show();
 		splitter_2->hide();
-		QString html = createAccountInfo(item->text());
-		setAccountInfo(html);
+		html = createAccountInfo(item->text());
+		setAccountInfoToWidget(html);
 	} else if (index.row() == 0) {
 		sentMessageList->hide();
 		receivedMessageList->show();
@@ -92,20 +92,56 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		receivedMessageList->hide();
 		accountTextInfo->show();
 		splitter_2->hide();
-		QString html = createAccountInfo(tr("All messages"));
-		setAccountInfo(html);
+		html = createAccountInfoAllField(tr("All messages"));
+		setAccountInfoToWidget(html);
+		//accountModel.addYearItemToAccount(index, "2014");
 	}
 }
 
 
+
+QString MainWindow::addItemOfAccountInfo(QString title, QString data)
+{
+	QString item;
+	item = QString("<div><strong>") + QString(title) +
+	       QString("</strong>") + data + QString("</div>");
+	return item;
+}
+
 QString MainWindow::createAccountInfo(QString accountName)
 {
-	QString html=QString("<h3>") + accountName + QString("</h3>");
+	QString html = QString("<h3>") + accountName + QString("</h3>");
+
+	html += addItemOfAccountInfo(tr("Account name: "),accountName);
+	html += addItemOfAccountInfo(tr("Username: "),accountName);
+	html += addItemOfAccountInfo(tr("Databox ID: "),accountName);
+	html += addItemOfAccountInfo(tr("Type of Databox: "),accountName);
+	html += addItemOfAccountInfo(tr("IČ: "),accountName);
+	html += addItemOfAccountInfo(tr("Company name: "),accountName);
+	html += addItemOfAccountInfo(tr("Address: "),accountName);
+	html += addItemOfAccountInfo(tr("City: "),accountName);
+	html += addItemOfAccountInfo(tr("State: "),accountName);
+	html += addItemOfAccountInfo(tr("Nationatily: "),accountName);
+	html += addItemOfAccountInfo(tr("Efective OVM: "),accountName);
+	html += addItemOfAccountInfo(tr("Open addressing: "),accountName);
+	html += addItemOfAccountInfo(tr("Password expiration date: "),accountName);
+
+	return html;
+}
+
+QString MainWindow::createAccountInfoAllField(QString accountName)
+{
+	QString html = QString("<h3>") + accountName + QString("</h3>");
+	html += addItemOfAccountInfo(tr("Received messages: "),accountName);
+	/* TODO - add count of recevied messages */
+	html += addItemOfAccountInfo(tr("Sent messages: "),accountName);
+	/* TODO - add count of sent messages */
 	return html;
 }
 
 
-void MainWindow::setAccountInfo(QString html)
+
+void MainWindow::setAccountInfoToWidget(QString html)
 {
 	QTextEdit *AccountTextInfo = ui->AccountTextInfo;
 	AccountTextInfo->setHtml(html);

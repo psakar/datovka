@@ -14,9 +14,10 @@ class AccountModel: public QStandardItemModel {
 
 public:
 	AccountModel(void);
-
-private:
 	bool addAccount(const QString &accountName);
+	bool addYearItemToAccount(const QModelIndex &parent, const QString &year);
+private:
+
 };
 
 

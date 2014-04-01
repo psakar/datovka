@@ -28,7 +28,9 @@ private slots:
 	void on_actionProxy_settings_triggered();
 	void treeItemClicked(const QModelIndex &index);
 	QString createAccountInfo(QString accountName);
-	void setAccountInfo(QString html);
+	QString createAccountInfoAllField(QString accountName);
+	void setAccountInfoToWidget(QString html);
+	QString addItemOfAccountInfo(QString title, QString data);
 
 private:
 	AccountModel accountModel;
