@@ -43,15 +43,17 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-
+/* ========================================================================= */
 void MainWindow::on_actionPreferences_triggered()
+/* ========================================================================= */
 {
 	QDialog *Preferences = new PreferencesDialog(this);
 	Preferences->show();
 }
 
-
+/* ========================================================================= */
 void MainWindow::on_actionProxy_settings_triggered()
+/* ========================================================================= */
 {
 	QDialog *Proxy = new ProxyDialog(this);
 	Proxy->show();
@@ -102,8 +104,9 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 }
 
 
-
+/* ========================================================================= */
 QString MainWindow::addItemOfAccountInfo(QString title, QString data)
+/* ========================================================================= */
 {
 	QString item;
 	item = QString("<div><strong>") + QString(title) +
@@ -111,7 +114,9 @@ QString MainWindow::addItemOfAccountInfo(QString title, QString data)
 	return item;
 }
 
+/* ========================================================================= */
 QString MainWindow::createAccountInfo(QString accountName)
+/* ========================================================================= */
 {
 	QString html = QString("<h3>") + accountName + QString("</h3>");
 
@@ -132,7 +137,9 @@ QString MainWindow::createAccountInfo(QString accountName)
 	return html;
 }
 
+/* ========================================================================= */
 QString MainWindow::createAccountInfoAllField(QString accountName)
+/* ========================================================================= */
 {
 	QString html = QString("<h3>") + accountName + QString("</h3>");
 	html += addItemOfAccountInfo(tr("Received messages: "),accountName);
@@ -143,8 +150,9 @@ QString MainWindow::createAccountInfoAllField(QString accountName)
 }
 
 
-
+/* ========================================================================= */
 void MainWindow::setAccountInfoToWidget(QString html)
+/* ========================================================================= */
 {
 	QTextEdit *AccountTextInfo = ui->AccountTextInfo;
 	AccountTextInfo->setHtml(html);
@@ -194,14 +202,17 @@ void MainWindow::saveSettings(void)
 {
 }
 
+/* ========================================================================= */
 void MainWindow::on_actionCreate_message_triggered()
+/* ========================================================================= */
 {
-    QDialog *newMessageDialog = new dlg_sent_message(this);
-    newMessageDialog->show();
+	on_actionSent_message_triggered();
 }
 
+/* ========================================================================= */
 void MainWindow::on_actionSent_message_triggered()
+/* ========================================================================= */
 {
-    QDialog *newMessageDialog = new dlg_sent_message(this);
-    newMessageDialog->show();
+	QDialog *newMessageDialog = new dlg_sent_message(this);
+	newMessageDialog->show();
 }

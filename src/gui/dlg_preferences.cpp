@@ -3,7 +3,7 @@
 
 PreferencesDialog::PreferencesDialog( QWidget * parent) : QDialog(parent) {
 
-    setupUi(this);
+	setupUi(this);
 
-    // perform additional setup here ...
+	// perform additional setup here ...
 }
