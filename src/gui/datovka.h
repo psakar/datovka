@@ -34,6 +34,8 @@ private slots:
 
     void on_actionCreate_message_triggered();
 
+    void on_actionSent_message_triggered();
+
 private:
 	void ensureConfPresence(void);
 	void loadSettings(void);

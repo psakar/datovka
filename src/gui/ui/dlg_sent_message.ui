@@ -12,12 +12,16 @@
   </property>
   <property name="font">
    <font>
-    <weight>75</weight>
-    <bold>true</bold>
+    <weight>50</weight>
+    <bold>false</bold>
    </font>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Create and sent message</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../../res/resources.qrc">
+    <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

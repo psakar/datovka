@@ -199,3 +199,9 @@ void MainWindow::on_actionCreate_message_triggered()
     QDialog *newMessageDialog = new dlg_sent_message(this);
     newMessageDialog->show();
 }
+
+void MainWindow::on_actionSent_message_triggered()
+{
+    QDialog *newMessageDialog = new dlg_sent_message(this);
+    newMessageDialog->show();
+}

@@ -4,5 +4,10 @@
 dlg_sent_message::dlg_sent_message(QWidget *parent) :
     QDialog(parent)
 {
-    setupUi(this);
+	setupUi(this);
+}
+
+void dlg_sent_message::on_CancelButton_clicked()
+{
+	this->close();
 }

@@ -9,7 +9,7 @@ class PreferencesDialog : public QDialog, public Ui::Preferences {
     Q_OBJECT
 
 public:
-    PreferencesDialog( QWidget * parent = 0);
+	PreferencesDialog( QWidget * parent = 0);
 };
 
 #endif /* _DLG_PREFERENCES_H_ */
