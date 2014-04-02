@@ -32,6 +32,8 @@ private slots:
 
     void on_actionSent_message_triggered();
 
+    void on_actionAdd_account_triggered();
+
 private:
 	/*!
 	 * @brief Get configuration directory name.

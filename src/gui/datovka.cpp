@@ -10,6 +10,7 @@
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
 #include "dlg_sent_message.h"
+#include "dlg_create_account.h"
 #include "ui_datovka.h"
 
 
@@ -178,13 +179,10 @@ QString MainWindow::confDir(void)
 {
 	QDir homeDir(QDir::homePath());
 
-	qDebug() << "01" << homeDir.path();
 	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(CONF_SUBDIR)) {
 		/* Set windows directory. */
 		homeDir.cd(WIN_PREFIX);
-		qDebug() << "02" << homeDir.path();
 	}
-	qDebug() << "03" << homeDir.path();
 
 	return homeDir.path() + "/" + CONF_SUBDIR;
 }
@@ -271,4 +269,10 @@ void MainWindow::on_actionSent_message_triggered()
 {
 	QDialog *newMessageDialog = new dlg_sent_message(this);
 	newMessageDialog->show();
+}
+
+void MainWindow::on_actionAdd_account_triggered()
+{
+	QDialog *newAccountDialog = new CreateNewAccountDialog(this);
+	newAccountDialog->show();
 }
