@@ -34,11 +34,20 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
+	/* Account list. */
+	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
+	    this, SLOT(treeItemClicked(QModelIndex)));
+	ui->AccountList->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->AccountList,
+	    SIGNAL(customContextMenuRequested(QPoint)),
+	    this, SLOT(treeItemRightClicked(QPoint)));
+
 	m_confDirName = confDir();
 	m_confFileName = m_confDirName + "/" + CONF_FILE;
 
 	qDebug() << m_confDirName << m_confFileName;
 
+	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
 }
@@ -63,6 +72,7 @@ void MainWindow::on_actionPreferences_triggered()
 	Preferences->show();
 }
 
+
 /* ========================================================================= */
 void MainWindow::on_actionProxy_settings_triggered()
 /* ========================================================================= */
@@ -70,6 +80,7 @@ void MainWindow::on_actionProxy_settings_triggered()
 	QDialog *Proxy = new ProxyDialog(this);
 	Proxy->show();
 }
+
 
 /* ========================================================================= */
 void MainWindow::treeItemClicked(const QModelIndex &index)
@@ -118,11 +129,36 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 
 
 /* ========================================================================= */
+void MainWindow::treeItemRightClicked(const QPoint &point)
+/* ========================================================================= */
+{
+	QStandardItem *item = m_accountModel.itemFromIndex(ui->AccountList->indexAt(point));
+
+	if (0 != item) {
+		QMenu *menu = new QMenu;
+		menu->addAction(QString("Import"), menu, SLOT(slotImport()));
+		menu->addAction(QString("Export"), menu, SLOT(slotExport()));
+		menu->exec(QCursor::pos());
+	}
+}
+
+
+/* ========================================================================= */
 QString MainWindow::createAccountInfo(const QStandardItem &item)
 /* ========================================================================= */
 {
-	const AccountModel::SettingsMap &itemSettings = item.data().toMap();
-	QString html = QString("<h3>") + item.text() + QString("</h3>");
+	const AccountModel::SettingsMap &itemSettings =
+	    item.data(ROLE_SETINGS).toMap();
+
+	QString html;
+
+	html.append("<h3>");
+	if (itemSettings[TEST].toBool()) {
+		html.append(tr("Test account"));
+	} else {
+		html.append(tr("Standard account"));
+	}
+	html.append("</h3>");
 
 	html.append(accountInfoLine(tr("Account name"),
 	    itemSettings[NAME].toString()));
@@ -222,9 +258,7 @@ void MainWindow::loadSettings(void)
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->AccountList->setModel(&m_accountModel);
-	ui->AccountList->expandAll();
-	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
-	    this, SLOT(treeItemClicked(QModelIndex)));
+//	ui->AccountList->expandAll();
 
 	/* Received messages. */
 	ui->ReceivedMessageList->setModel(&receivedModel);
@@ -254,6 +288,22 @@ void MainWindow::saveSettings(void)
 
 	settings.sync();
 }
+
+
+/* ========================================================================= */
+/*!
+ * @brief Open/create message database related to item.
+ */
+void MainWindow::openMessageDb(const QStandardItem &item)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap &settings =
+	    item.data(ROLE_SETINGS).toMap();
+
+	QString dbFile = settings[USER].toString();
+	Q_ASSERT(!dbFile.isEmpty());
+}
+
 
 
 /* ========================================================================= */

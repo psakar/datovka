@@ -72,6 +72,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.insert(REMEMBER,
 			    settings.value(groups.at(i) + "/" + REMEMBER,
 			        "").toBool());
+			itemSettings.insert(DB_DIR,
+			    settings.value(groups.at(i) + "/" + DB_DIR, ""));
 			itemSettings.insert(SYNC,
 			    settings.value(groups.at(i) + "/" + SYNC,
 			        "").toBool());
@@ -95,7 +97,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 
 	for (int i = 0; i < this->rowCount(); ++i) {
 		const SettingsMap &itemSettings =
-		    this->item(i)->data().toMap();
+		    this->item(i)->data(ROLE_SETINGS).toMap();
 
 		groupName = CREDENTIALS;
 		if (i > 0) {
@@ -115,6 +117,11 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		}
 		settings.setValue(TEST, itemSettings.value(TEST));
 		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
+		if (!itemSettings.value(DB_DIR).isNull() &&
+		    itemSettings.value(DB_DIR).isValid() &&
+		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
+			settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
+		}
 		settings.setValue(SYNC, itemSettings.value(SYNC));
 
 		settings.endGroup();
@@ -140,7 +147,7 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	QStandardItem *allRecieved = new QStandardItem(tr("Recieved"));
 	QStandardItem *allSent = new QStandardItem(tr("Sent"));
 
-	account->setData(data);
+	account->setData(data, ROLE_SETINGS);
 
 	font.setBold(true);
 //	font.setItalic(true);

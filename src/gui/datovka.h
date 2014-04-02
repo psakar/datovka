@@ -27,6 +27,7 @@ private slots:
 	void on_actionPreferences_triggered();
 	void on_actionProxy_settings_triggered();
 	void treeItemClicked(const QModelIndex &index);
+	void treeItemRightClicked(const QPoint &point);
 
     void on_actionCreate_message_triggered();
 
@@ -56,6 +57,16 @@ private:
 	 */
 	void saveSettings(void);
 
+	/*!
+	 * @brief Open/create message database related to item.
+	 */
+	void openMessageDb(const QStandardItem &item);
+
+	/*!
+	 * @brief Close message database related to item.
+	 */
+	void closeMessageDb(const QStandardItem &item);
+
 	/*
 	 * @brief Generate account info HTML message.
 	 */
@@ -67,6 +78,7 @@ private:
 	QString m_confDirName;
 	QString m_confFileName;
 
+	/* Account tree view data model. */
 	AccountModel m_accountModel;
 	ReceivedMessagesRemoteModel receivedModel;
 	SentMessagesRemoteModel sentModel;

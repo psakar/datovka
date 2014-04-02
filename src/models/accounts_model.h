@@ -15,7 +15,12 @@
 #define PWD "password"
 #define TEST "test_account"
 #define REMEMBER "remember_password"
+#define DB_DIR "database_dir"
 #define SYNC "sync_with_all"
+
+
+#define ROLE_SETINGS (Qt::UserRole + 1)
+#define ROLE_DB (Qt::UserRole + 2)
 
 
 /*!
