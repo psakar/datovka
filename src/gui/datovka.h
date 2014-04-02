@@ -34,6 +34,12 @@ private slots:
 
 private:
 	/*!
+	 * @brief Get configuration directory name.
+	 */
+	static
+	QString confDir(void);
+
+	/*!
 	 * @brief Create configuration file if not present.
 	 */
 	void ensureConfPresence(void);

@@ -13,6 +13,7 @@
 #include "ui_datovka.h"
 
 
+#define WIN_PREFIX "AppData/Roaming"
 #define CONF_SUBDIR ".dsgui"
 #define CONF_FILE "dsgui.conf"
 
@@ -32,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	m_confDirName = QDir::homePath() + "/" + CONF_SUBDIR;
+	m_confDirName = confDir();
 	m_confFileName = m_confDirName + "/" + CONF_FILE;
 
 	qDebug() << m_confDirName << m_confFileName;
@@ -170,13 +171,34 @@ void MainWindow::setAccountInfoToWidget(const QString &html)
 
 /* ========================================================================= */
 /*
+ * Get configuration directory name.
+ */
+QString MainWindow::confDir(void)
+/* ========================================================================= */
+{
+	QDir homeDir(QDir::homePath());
+
+	qDebug() << "01" << homeDir.path();
+	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(CONF_SUBDIR)) {
+		/* Set windows directory. */
+		homeDir.cd(WIN_PREFIX);
+		qDebug() << "02" << homeDir.path();
+	}
+	qDebug() << "03" << homeDir.path();
+
+	return homeDir.path() + "/" + CONF_SUBDIR;
+}
+
+
+/* ========================================================================= */
+/*
  * Create configuration file if not present.
  */
 void MainWindow::ensureConfPresence(void)
 /* ========================================================================= */
 {
 	if (!QDir(m_confDirName).exists()) {
-		QDir(QDir::homePath()).mkdir(CONF_SUBDIR);
+		QDir(m_confDirName).mkpath(".");
 	}
 	if (!QFile(m_confFileName).exists()) {
 		QFile file(m_confFileName);
