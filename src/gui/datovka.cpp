@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QSettings>
 #include <QTableView>
+#include <QStackedWidget>
 
 #include "datovka.h"
 #include "dlg_preferences.h"
@@ -35,10 +36,10 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	/* Account list. */
-	connect(ui->AccountList, SIGNAL(clicked(QModelIndex)),
+	connect(ui->accountList, SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(treeItemClicked(QModelIndex)));
-	ui->AccountList->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->AccountList,
+	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->accountList,
 	    SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(treeItemRightClicked(QPoint)));
 
@@ -87,10 +88,6 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
 	QString html;
-	QTableView *sentMessageList = ui->SentMessageList;
-	QTableView *receivedMessageList = ui->ReceivedMessageList;
-	QTextEdit *accountTextInfo = ui->AccountTextInfo;
-	QSplitter *splitter_2 = ui->splitter_2;
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 
 	qDebug() << index.model() << item->text();
@@ -99,28 +96,15 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	/* Depending on which item was clicked show/hide elements. */
 
 	if (index.parent().row() == -1) {
-		/* Clicked account. */
-		sentMessageList->hide();
-		receivedMessageList->hide();
-		accountTextInfo->show();
-		splitter_2->hide();
+		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfo(*item);
 		setAccountInfoToWidget(html);
 	} else if (index.row() == 0) {
-		sentMessageList->hide();
-		receivedMessageList->show();
-		accountTextInfo->hide();
-		splitter_2->show();
+		ui->messageStackedWidget->setCurrentIndex(1);
 	} else if (index.row() == 1) {
-		sentMessageList->show();
-		receivedMessageList->hide();
-		accountTextInfo->hide();
-		splitter_2->show();
+		ui->messageStackedWidget->setCurrentIndex(1);
 	} else {
-		sentMessageList->hide();
-		receivedMessageList->hide();
-		accountTextInfo->show();
-		splitter_2->hide();
+		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfoAllField(tr("All messages"));
 		setAccountInfoToWidget(html);
 		//m_accountModel.addYearItemToAccount(index, "2014");
@@ -132,7 +116,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 void MainWindow::treeItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
-	QStandardItem *item = m_accountModel.itemFromIndex(ui->AccountList->indexAt(point));
+	QStandardItem *item = m_accountModel.itemFromIndex(ui->accountList->indexAt(point));
 
 	if (0 != item) {
 		QMenu *menu = new QMenu;
@@ -202,7 +186,7 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName)
 void MainWindow::setAccountInfoToWidget(const QString &html)
 /* ========================================================================= */
 {
-	ui->AccountTextInfo->setHtml(html);
+	ui->accountTextInfo->setHtml(html);
 }
 
 
@@ -257,14 +241,14 @@ void MainWindow::loadSettings(void)
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
-	ui->AccountList->setModel(&m_accountModel);
+	ui->accountList->setModel(&m_accountModel);
 //	ui->AccountList->expandAll();
 
 	/* Received messages. */
-	ui->ReceivedMessageList->setModel(&receivedModel);
+	ui->messageList->setModel(&receivedModel);
 
 	/* Sent messages. */
-	ui->SentMessageList->setModel(&sentModel);
+	ui->messageList->setModel(&sentModel);
 }
 
 
