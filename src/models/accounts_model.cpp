@@ -175,8 +175,55 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	return true;
 }
 
+
+/* ========================================================================= */
+/*!
+ * @brief Returns pointer to related top-most item.
+ */
+const QStandardItem * AccountModel::itemTop(const QStandardItem *item)
+/* ========================================================================= */
+{
+	if (0 == item) {
+		return 0;
+	}
+
+	while (0 != item->parent()) {
+		item = item->parent();
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
+/*!
+ * @brief Get user name of the account.
+ */
+QString AccountModel::userName(const QStandardItem &item)
+/* ========================================================================= */
+{
+	QString user;
+	const QStandardItem *parent;
+
+	parent = &item;
+	while (parent->parent() != 0) {
+		parent = parent->parent();
+	}
+
+	Q_ASSERT(parent != 0);
+
+	user = parent->data(ROLE_SETINGS).toMap()[USER].toString();
+
+	Q_ASSERT(!user.isEmpty());
+
+	return user;
+}
+
+
+
 /* TODO */
-bool AccountModel::addYearItemToAccount(const QModelIndex &index, const QString &year)
+bool AccountModel::addYearItemToAccount(const QModelIndex &index,
+    const QString &year)
 {
 	qDebug() << index.parent().row() << " - " << index.row();
 

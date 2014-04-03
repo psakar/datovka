@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,8 +21,8 @@ SOURCES += src/main.cpp\
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_sent_message.cpp \
+    src/io/message_db.cpp \
     src/models/accounts_model.cpp \
-    src/models/messages_remote_models.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
@@ -30,8 +30,8 @@ HEADERS += src/common.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_sent_message.h \
+    src/io/message_db.h \
     src/models/accounts_model.h \
-    src/models/messages_remote_models.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_create_account.ui \

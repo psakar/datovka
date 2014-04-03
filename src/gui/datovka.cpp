@@ -29,8 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
     m_accountModel(this),
-    receivedModel(this),
-    sentModel(this),
+    m_messageDbs(),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -88,25 +87,50 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
 	QString html;
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	MessageDb *db;
 
+	Q_ASSERT(0 != itemTop);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_SETINGS).toMap();
+
+	const QString &userName = itemSettings[USER].toString();
+	QString dbDir = itemSettings[DB_DIR].toString();
+
+	Q_ASSERT(!userName.isEmpty());
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = m_confDirName;
+	}
+
+	qDebug() << "Selected user account" << userName << dbDir;
 	qDebug() << index.model() << item->text();
 	qDebug() << index.parent().row()  << " - " << index.row();
 
-	/* Depending on which item was clicked show/hide elements. */
+	db = m_messageDbs.accessMessageDb(userName, dbDir);
+	Q_ASSERT(0 != db);
 
+	/* Depending on which item was clicked show/hide elements. */
 	if (index.parent().row() == -1) {
+		/* Clicked account. */
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfo(*item);
-		setAccountInfoToWidget(html);
+		ui->accountTextInfo->setHtml(html);
 	} else if (index.row() == 0) {
+		/* Received messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
+		ui->messageList->setModel(db->receivedModel());
 	} else if (index.row() == 1) {
+		/* Sent messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
+		ui->messageList->setModel(db->sentModel());
 	} else {
+		/* Messages total. */
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfoAllField(tr("All messages"));
-		setAccountInfoToWidget(html);
+		ui->accountTextInfo->setHtml(html);
 		//m_accountModel.addYearItemToAccount(index, "2014");
 	}
 }
@@ -116,14 +140,23 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 void MainWindow::treeItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
-	QStandardItem *item = m_accountModel.itemFromIndex(ui->accountList->indexAt(point));
+	QModelIndex index = ui->accountList->indexAt(point);
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QMenu *menu = new QMenu;
 
 	if (0 != item) {
-		QMenu *menu = new QMenu;
-		menu->addAction(QString("Import"), menu, SLOT(slotImport()));
-		menu->addAction(QString("Export"), menu, SLOT(slotExport()));
-		menu->exec(QCursor::pos());
+		treeItemClicked(index);
+
+		menu->addAction(QString(tr("Option 1")),
+		    this, SLOT(slotOption1()));
+		menu->addAction(QString(tr("Option 2")),
+		    this, SLOT(slotOption2()));
+	} else {
+		menu->addAction(QString(tr("Add new")),
+		    this, SLOT(slotAddNew()));
 	}
+
+	menu->exec(QCursor::pos());
 }
 
 
@@ -183,14 +216,6 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName)
 
 
 /* ========================================================================= */
-void MainWindow::setAccountInfoToWidget(const QString &html)
-/* ========================================================================= */
-{
-	ui->accountTextInfo->setHtml(html);
-}
-
-
-/* ========================================================================= */
 /*
  * Get configuration directory name.
  */
@@ -245,10 +270,8 @@ void MainWindow::loadSettings(void)
 //	ui->AccountList->expandAll();
 
 	/* Received messages. */
-	ui->messageList->setModel(&receivedModel);
 
 	/* Sent messages. */
-	ui->messageList->setModel(&sentModel);
 }
 
 
@@ -272,22 +295,6 @@ void MainWindow::saveSettings(void)
 
 	settings.sync();
 }
-
-
-/* ========================================================================= */
-/*!
- * @brief Open/create message database related to item.
- */
-void MainWindow::openMessageDb(const QStandardItem &item)
-/* ========================================================================= */
-{
-	const AccountModel::SettingsMap &settings =
-	    item.data(ROLE_SETINGS).toMap();
-
-	QString dbFile = settings[USER].toString();
-	Q_ASSERT(!dbFile.isEmpty());
-}
-
 
 
 /* ========================================================================= */

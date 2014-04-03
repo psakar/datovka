@@ -51,7 +51,20 @@ public:
 	 */
 	bool addAccount(const QString &name,
 	    const QVariant &data = QVariant());
-	bool addYearItemToAccount(const QModelIndex &parent, const QString &year);
+
+	/*!
+	 * @brief Returns pointer to related top-most item.
+	 */
+	static
+	const QStandardItem * itemTop(const QStandardItem *item);
+
+	/*!
+	 * @brief Get user name of the account.
+	 */
+	QString userName(const QStandardItem &item);
+
+	bool addYearItemToAccount(const QModelIndex &parent,
+	    const QString &year);
 private:
 
 };

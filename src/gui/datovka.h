@@ -8,8 +8,8 @@
 #include <QStandardItemModel>
 
 #include "src/common.h"
+#include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
-#include "src/models/messages_remote_models.h"
 
 
 namespace Ui {
@@ -26,7 +26,15 @@ public:
 private slots:
 	void on_actionPreferences_triggered();
 	void on_actionProxy_settings_triggered();
+
+	/*!
+	 * @brief Redraws widgets according to selected item.
+	 */
 	void treeItemClicked(const QModelIndex &index);
+
+	/*!
+	 * @brief Generates menu to selected item. (And redraw widgets.)
+	 */
 	void treeItemRightClicked(const QPoint &point);
 
     void on_actionCreate_message_triggered();
@@ -57,22 +65,11 @@ private:
 	 */
 	void saveSettings(void);
 
-	/*!
-	 * @brief Open/create message database related to item.
-	 */
-	void openMessageDb(const QStandardItem &item);
-
-	/*!
-	 * @brief Close message database related to item.
-	 */
-	void closeMessageDb(const QStandardItem &item);
-
 	/*
 	 * @brief Generate account info HTML message.
 	 */
 	QString createAccountInfo(const QStandardItem &item);
 	QString createAccountInfoAllField(const QString &accountName);
-	void setAccountInfoToWidget(const QString &html);
 
 	/* Configuration file related. */
 	QString m_confDirName;
@@ -80,8 +77,10 @@ private:
 
 	/* Account tree view data model. */
 	AccountModel m_accountModel;
-	ReceivedMessagesRemoteModel receivedModel;
-	SentMessagesRemoteModel sentModel;
+
+	/* Map of databases. */
+	dbContainer m_messageDbs;
+
 	Ui::MainWindow *ui;
 };
 
