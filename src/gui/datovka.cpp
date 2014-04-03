@@ -122,6 +122,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		/* Received messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->receivedModel());
+//		ui->messageList->horizontalHeader()->moveSection(5,3);
 	} else if (index.row() == 1) {
 		/* Sent messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);

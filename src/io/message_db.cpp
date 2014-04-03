@@ -6,6 +6,28 @@
 #include "message_db.h"
 
 
+static
+QVector<QString> receivedHeaderVector = {
+	QObject::tr("Id"),
+	QObject::tr("Message Subject"),
+	QObject::tr("Sender"),
+	QObject::tr("Received"),
+	QObject::tr("Accepted"),
+	QObject::tr("Locally read")
+};
+
+
+static
+QVector<QString> sentHeaderVector = {
+	QObject::tr("Id"),
+	QObject::tr("Message Subject"),
+	QObject::tr("Recipient"),
+	QObject::tr("Received"),
+	QObject::tr("Accepted"),
+	QObject::tr("Status")
+};
+
+
 /* ========================================================================= */
 ReceivedMesagesDbModel::ReceivedMesagesDbModel(QSqlDatabase &db,
     QObject *parent)
@@ -14,18 +36,10 @@ ReceivedMesagesDbModel::ReceivedMesagesDbModel(QSqlDatabase &db,
     m_dbRef(db)
 {
 	/* Add header. */
-	this->setHorizontalHeaderItem(0,
-	    new QStandardItem(QString(tr("Id"))));
-	this->setHorizontalHeaderItem(1,
-	    new QStandardItem(QString(tr("Message Subject"))));
-	this->setHorizontalHeaderItem(2,
-	    new QStandardItem(QString(tr("Sender"))));
-	this->setHorizontalHeaderItem(3,
-	    new QStandardItem(QString(tr("Received"))));
-	this->setHorizontalHeaderItem(4,
-	    new QStandardItem(QString(tr("Accepted"))));
-	this->setHorizontalHeaderItem(5,
-	    new QStandardItem(QString(tr("Locally read"))));
+	for (int i = 0; i < receivedHeaderVector.size(); ++i) {
+		this->setHorizontalHeaderItem(i,
+		    new QStandardItem(receivedHeaderVector[i]));
+	}
 
 	/* Load content. */
 	fillContent();
@@ -74,18 +88,10 @@ SentMesagesDbModel::SentMesagesDbModel(QSqlDatabase &db, QObject *parent)
     m_dbRef(db)
 {
 	/* Add header. */
-	this->setHorizontalHeaderItem(0,
-	    new QStandardItem(QString(tr("Id"))));
-	this->setHorizontalHeaderItem(1,
-	    new QStandardItem(QString(tr("Message Subject"))));
-	this->setHorizontalHeaderItem(2,
-	    new QStandardItem(QString(tr("Recipient"))));
-	this->setHorizontalHeaderItem(3,
-	    new QStandardItem(QString(tr("Received"))));
-	this->setHorizontalHeaderItem(4,
-	    new QStandardItem(QString(tr("Accepted"))));
-	this->setHorizontalHeaderItem(5,
-	    new QStandardItem(QString(tr("Status"))));
+	for (int i = 0; i < sentHeaderVector.size(); ++i) {
+		this->setHorizontalHeaderItem(i,
+		    new QStandardItem(sentHeaderVector[i]));
+	}
 
 	/* Load content. */
 	fillContent();
@@ -221,7 +227,7 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 	qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
-	qDebug() << "opening" << db->openDb(locDir + key + "___1.db");
+	qDebug() << "opening" << db->openDb(locDir + "/" + key + "___1.db");
 
 	this->insert(key, db);
 	return db;
