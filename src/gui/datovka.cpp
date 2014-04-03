@@ -19,6 +19,12 @@
 #define CONF_SUBDIR ".dsgui"
 #define CONF_FILE "dsgui.conf"
 
+#define WIN_POSITION_HEADER "window_position"
+#define WIN_POSITION_X "x"
+#define WIN_POSITION_Y "y"
+#define WIN_POSITION_W "w"
+#define WIN_POSITION_H "h"
+
 
 #define accountInfoLine(title, value) \
 	"<div><strong>" + (title) + ": </strong>" + (value) + "</div>"
@@ -50,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
+
 }
 
 
@@ -265,10 +272,36 @@ void MainWindow::loadSettings(void)
 //	qDebug() << "Groups: " << settings.childGroups();
 //	qDebug() << "Keys:" << settings.childKeys();
 
+	// set mainwindows position and size
+	int x = settings.value("window_position/x",0).toInt();
+	int y = settings.value("window_position/y",0).toInt();
+	int w = settings.value("window_position/w",800).toInt();
+	int h = settings.value("window_position/h",600).toInt();
+	this->setGeometry(x+2,y+22,w,h);
+
+	// set mainspliter - hSplitterAccount
+	QList<int> sizes = ui->hSplitterAccount->sizes();
+	int tmp = settings.value("panes/hpaned1",0).toInt();
+	sizes[0] = tmp;
+	sizes[1] = w-sizes[0];;
+	ui->hSplitterAccount->setSizes(sizes);
+
+	// set messagelistspliter - vSplitterMessage
+	sizes = ui->vSplitterMessage->sizes();
+	sizes[0] = settings.value("panes/message_pane",0).toInt();
+	sizes[1] = h-50-sizes[0];
+	ui->vSplitterMessage->setSizes(sizes);
+
+	// set message/mesageinfospliter - hSplitterMessageInfo
+	sizes = ui->hSplitterMessageInfo->sizes();
+	sizes[0] = settings.value("panes/message_display_pane",0).toInt();
+	sizes[1] = w-tmp-sizes[0];
+	ui->hSplitterMessageInfo->setSizes(sizes);
+
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
-//	ui->AccountList->expandAll();
+	ui->accountList->expandAll();
 
 	/* Received messages. */
 
