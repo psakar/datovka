@@ -11,7 +11,6 @@
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
-
 namespace Ui {
 	class MainWindow;
 }
@@ -37,11 +36,11 @@ private slots:
 	 */
 	void treeItemRightClicked(const QPoint &point);
 
-    void on_actionCreate_message_triggered();
+	void on_actionCreate_message_triggered();
 
-    void on_actionSent_message_triggered();
+	void on_actionSent_message_triggered();
 
-    void on_actionAdd_account_triggered();
+	void on_actionAdd_account_triggered();
 
 private:
 	/*!
@@ -59,6 +58,10 @@ private:
 	 * @brief Load and apply setting from configuration file.
 	 */
 	void loadSettings(void);
+
+	void getPreferencesFromSettings(const QSettings &settings);
+
+	void getProxyFromSettings(const QSettings &settings);
 
 	/*!
 	 * @brief Store current setting to configuration file.

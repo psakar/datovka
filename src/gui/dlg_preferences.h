@@ -2,7 +2,7 @@
 #define _DLG_PREFERENCES_H_
 
 #include <QDialog>
-
+#include "src/common.h"
 #include "ui_dlg_preferences.h"
 
 class PreferencesDialog : public QDialog, public Ui::Preferences {
@@ -10,6 +10,10 @@ class PreferencesDialog : public QDialog, public Ui::Preferences {
 
 public:
 	PreferencesDialog( QWidget * parent = 0);
+
+private:
+	void setPreference(void);
+
 };
 
 #endif /* _DLG_PREFERENCES_H_ */
