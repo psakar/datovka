@@ -69,6 +69,14 @@ public:
 	QStandardItemModel * sentModel(void);
 
 protected:
+	/*!
+	 * @brief Adds _dmType column.
+	 *
+	 * @note This code may be needed to update database between different
+	 * versions.
+	 */
+	bool addDmtypeColumn(void);
+
 	/* TODO -- Move db. */
 	/* TODO -- Copy db. */
 	/* TODO -- Delete db. */

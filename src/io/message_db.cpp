@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QSqlError>
+#include <QSqlQuery>
 
 #include "message_db.h"
 
@@ -186,6 +188,32 @@ QStandardItemModel * MessageDb::sentModel(void)
 	/* TODO */
 
 	return &m_sentModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Adds _dmType column.
+ */
+bool  MessageDb::addDmtypeColumn(void)
+/* ========================================================================= */
+{
+	if (false == m_db.isOpen()) {
+		return false;
+	}
+
+	/*
+	 * Create _dmType column if it does not exist.
+	 */
+	QSqlQuery query(m_db);
+	query.prepare("SELECT _dmType FROM messages LIMIT 1");
+	if (false == query.exec()) {
+		query.clear();
+		query.prepare("ALTER TABLE messages ADD COLUMN _dmType TEXT");
+		query.exec();
+	}
+
+	return true;
 }
 
 
