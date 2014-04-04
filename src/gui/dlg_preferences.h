@@ -11,9 +11,15 @@ class PreferencesDialog : public QDialog, public Ui::Preferences {
 public:
 	PreferencesDialog( QWidget * parent = 0);
 
-private:
-	void setPreference(void);
+private slots:
 
+	void setActiveCheckBox(int);
+
+private:
+	void initPreferencesInDialog(void);
+	void saveChangesInDialog(void);
+	int getLangugeIndex(QString language);
+	QString getIndexFromLanguge(int index);
 };
 
 #endif /* _DLG_PREFERENCES_H_ */

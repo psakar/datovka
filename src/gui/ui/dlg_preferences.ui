@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="PrefWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -95,6 +95,9 @@
           </item>
           <item>
            <widget class="QCheckBox" name="send_stats_with_version_checks">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Send version info alongside the request</string>
             </property>
@@ -104,6 +107,9 @@
            </widget>
           </item>
          </layout>
+         <zorder>check_new_versions</zorder>
+         <zorder>send_stats_with_version_checks</zorder>
+         <zorder>send_stats_with_version_checks</zorder>
         </widget>
        </item>
        <item>
@@ -143,7 +149,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="checkBox_5">
+           <widget class="QCheckBox" name="store_additional_data_on_disk">
             <property name="text">
              <string>Allow storage of additional data</string>
             </property>
@@ -153,7 +159,7 @@
            </widget>
           </item>
           <item>
-           <spacer name="store_additional_data_on_disk">
+           <spacer name="hspacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -371,8 +377,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -387,8 +393,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>224</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
