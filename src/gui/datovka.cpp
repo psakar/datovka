@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
+	setDefaultMainWindow(VERSION);
 
 }
 
@@ -258,27 +259,47 @@ void MainWindow::ensureConfPresence(void)
 	}
 }
 
+/* ========================================================================= */
+/*
+ * Set default window with info about Datovka
+ */
+void MainWindow::setDefaultMainWindow(QString version)
+/* ========================================================================= */
+{
+	ui->messageStackedWidget->setCurrentIndex(0);
+	QString html = QString("<br><center>");
+	html += QString("<h2>") + tr("QDatovka - Free interface for Datové schránky") + QString("</h2>");
+	html += accountInfoLine(tr("Version"), version);
+	html += QString("<br><img src=") + ICON_128x128_PATH + QString("datovka.png />");
+	html += QString("<h3>") + tr("Powered by") + QString("</h3>");
+	html += QString("<br><img src=") + ICON_128x128_PATH + QString("cznic.png />");
+	html += QString("</center>");
+	ui->accountTextInfo->setHtml(html);
+}
 
 /* ========================================================================= */
 /*
- * Load and apply setting from configuration file.
+ * Set mainwindows position and size from settings
  */
-void MainWindow::loadSettings(void)
+void MainWindow::setMainWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
-	QSettings settings(m_confFileName, QSettings::IniFormat);
-
-//	qDebug() << "All: " << settings.allKeys();
-//	qDebug() << "Groups: " << settings.childGroups();
-//	qDebug() << "Keys:" << settings.childKeys();
-
 	// set mainwindows position and size
 	int x = settings.value("window_position/x",0).toInt();
 	int y = settings.value("window_position/y",0).toInt();
 	int w = settings.value("window_position/w",800).toInt();
 	int h = settings.value("window_position/h",600).toInt();
 	this->setGeometry(x+2,y+22,w,h);
+	setSpllitersWidth(settings, w, h);
+}
 
+/* ========================================================================= */
+/*
+ * Set splliters position from settings
+ */
+void MainWindow::setSpllitersWidth(const QSettings &settings, int w, int h)
+/* ========================================================================= */
+{
 	// set mainspliter - hSplitterAccount
 	QList<int> sizes = ui->hSplitterAccount->sizes();
 	int tmp = settings.value("panes/hpaned1",0).toInt();
@@ -297,6 +318,22 @@ void MainWindow::loadSettings(void)
 	sizes[0] = settings.value("panes/message_display_pane",0).toInt();
 	sizes[1] = w-tmp-sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
+}
+
+/* ========================================================================= */
+/*
+ * Load and apply setting from configuration file.
+ */
+void MainWindow::loadSettings(void)
+/* ========================================================================= */
+{
+	QSettings settings(m_confFileName, QSettings::IniFormat);
+
+//	qDebug() << "All: " << settings.allKeys();
+//	qDebug() << "Groups: " << settings.childGroups();
+//	qDebug() << "Keys:" << settings.childKeys();
+
+	setMainWindowGeometry(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);

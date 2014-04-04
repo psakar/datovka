@@ -62,5 +62,7 @@
         <file>icons/3party/user_16.png</file>
         <file>icons/3party/wallet_16.png</file>
         <file>icons/3party/warning_16.png</file>
+        <file>icons/128x128/datovka.png</file>
+        <file>icons/128x128/cznic.png</file>
     </qresource>
 </RCC>

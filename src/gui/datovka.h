@@ -65,6 +65,12 @@ private:
 	 */
 	void saveSettings(void);
 
+	void setMainWindowGeometry(const QSettings &settings);
+
+	void setSpllitersWidth(const QSettings &settings, int w, int h);
+
+	void setDefaultMainWindow(QString version);
+
 	/*
 	 * @brief Generate account info HTML message.
 	 */
