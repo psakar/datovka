@@ -151,8 +151,6 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QMenu *menu = new QMenu;
 
-	qDebug() << index << " " << item;
-
 	if (0 != item) {
 		treeItemClicked(index);
 

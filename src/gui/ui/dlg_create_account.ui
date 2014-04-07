@@ -31,7 +31,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="InfoLabel">
+    <widget class="QLabel" name="infoLabel">
      <property name="text">
       <string>Please enter credentials for your Data Box.</string>
      </property>
@@ -46,14 +46,14 @@
       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="AccountLabel">
+      <widget class="QLabel" name="accountLabel">
        <property name="text">
         <string>Custom account name:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="AccountLineEdit"/>
+      <widget class="QLineEdit" name="accountLineEdit"/>
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="Line" name="Line_0">
@@ -63,14 +63,14 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="UsernameLabel">
+      <widget class="QLabel" name="usernameLabel">
        <property name="text">
         <string>Username:</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="UsernameLineEdit"/>
+      <widget class="QLineEdit" name="usernameLineEdit"/>
      </item>
      <item row="3" column="0">
       <spacer name="horizontalSpacer">
@@ -86,21 +86,21 @@
       </spacer>
      </item>
      <item row="3" column="1">
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="testAccountCheckBox">
        <property name="text">
         <string>This is a test account</string>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="LoginmethodLabel">
+      <widget class="QLabel" name="loginmethodLabel">
        <property name="text">
         <string>Login method:</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="LoginmethodComboBox"/>
+      <widget class="QComboBox" name="loginmethodComboBox"/>
      </item>
      <item row="5" column="0" colspan="2">
       <widget class="Line" name="line_1">
@@ -110,14 +110,18 @@
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="PasswordLabel">
+      <widget class="QLabel" name="passwordLabel">
        <property name="text">
         <string>Password:</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QLineEdit" name="PasswordLineEdit"/>
+      <widget class="QLineEdit" name="passwordLineEdit">
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
      </item>
      <item row="8" column="0">
       <spacer name="horizontalSpacer_2">
@@ -133,14 +137,14 @@
       </spacer>
      </item>
      <item row="8" column="1">
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="rememberPswcheckBox">
        <property name="text">
         <string>Remember password</string>
        </property>
       </widget>
      </item>
      <item row="9" column="0">
-      <widget class="QLabel" name="CertificateLabel">
+      <widget class="QLabel" name="certificateLabel">
        <property name="text">
         <string>Certificate file:</string>
        </property>
@@ -156,7 +160,7 @@
      <item row="9" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QPushButton" name="AddCertificateButton">
+        <widget class="QPushButton" name="addCertificateButton">
          <property name="text">
           <string>Add</string>
          </property>
@@ -184,7 +188,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox_3">
+    <widget class="QCheckBox" name="synchroCheckBox">
      <property name="text">
       <string>Synchronize account when &quot;Synchronize all&quot; is activated</string>
      </property>
@@ -194,7 +198,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="accountButtonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -210,7 +214,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>accountButtonBox</sender>
    <signal>accepted()</signal>
    <receiver>CreateNewAccountDialog</receiver>
    <slot>accept()</slot>
@@ -226,7 +230,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>accountButtonBox</sender>
    <signal>rejected()</signal>
    <receiver>CreateNewAccountDialog</receiver>
    <slot>reject()</slot>
