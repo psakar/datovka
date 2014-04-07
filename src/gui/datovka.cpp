@@ -336,9 +336,9 @@ void MainWindow::getProxyFromSettings(const QSettings &settings)
 /* ========================================================================= */
 {
 	globProxSet.https_proxy = settings.value("connection/https_proxy",
-	    -1).toInt();
+	    "-1").toString();
 	globProxSet.http_proxy = settings.value("connection/http_proxy",
-	    -1).toInt();
+	    "-1").toString();
 }
 
 

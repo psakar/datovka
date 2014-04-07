@@ -6,7 +6,6 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
-
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"

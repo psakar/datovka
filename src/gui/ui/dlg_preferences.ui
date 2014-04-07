@@ -107,9 +107,6 @@
            </widget>
           </item>
          </layout>
-         <zorder>check_new_versions</zorder>
-         <zorder>send_stats_with_version_checks</zorder>
-         <zorder>send_stats_with_version_checks</zorder>
         </widget>
        </item>
        <item>
@@ -355,7 +352,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="prefButtonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -371,7 +368,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>prefButtonBox</sender>
    <signal>accepted()</signal>
    <receiver>Preferences</receiver>
    <slot>accept()</slot>
@@ -387,7 +384,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>prefButtonBox</sender>
    <signal>rejected()</signal>
    <receiver>Preferences</receiver>
    <slot>reject()</slot>

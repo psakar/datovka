@@ -34,8 +34,8 @@ class ProxySettings {
 
 
 public:
-	int https_proxy;
-	int http_proxy;
+	QString https_proxy;
+	QString http_proxy;
 };
 
 

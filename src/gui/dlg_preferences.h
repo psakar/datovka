@@ -14,10 +14,10 @@ public:
 private slots:
 
 	void setActiveCheckBox(int);
+	void saveChanges(void);
 
 private:
-	void initPreferencesInDialog(void);
-	void saveChangesInDialog(void);
+	void initPrefDialog(void);
 	int getLangugeIndex(QString language);
 	QString getIndexFromLanguge(int index);
 };
