@@ -73,8 +73,8 @@ MainWindow::~MainWindow(void)
 void MainWindow::on_actionPreferences_triggered()
 /* ========================================================================= */
 {
-	QDialog *Preferences = new PreferencesDialog(this);
-	Preferences->show();
+	QDialog *preferences = new PreferencesDialog(this);
+	preferences->show();
 }
 
 
@@ -294,39 +294,6 @@ void MainWindow::setMainWindowGeometry(const QSettings &settings)
 	setSpllitersWidth(settings, w, h);
 }
 
-/* ========================================================================= */
-/*
- * Set mainwindows position and size from settings
- */
-void MainWindow::getPreferencesFromSettings(const QSettings &settings)
-/* ========================================================================= */
-{
-	globPref.store_messages_on_disk =
-	    settings.value("preferences/store_messages_on_disk",true).toBool();
-	globPref.date_format =
-	    settings.value("preferences/date_format",1).toInt();
-	globPref.default_download_signed =
-	    settings.value("preferences/default_download_signed",true).toBool();
-	globPref.check_crl =
-	    settings.value("preferences/check_crl",true).toBool();
-	globPref.language =
-	    settings.value("preferences/language","system").toString();
-	globPref.check_new_versions =
-	    settings.value("preferences/check_new_versions",true).toBool();
-	globPref.store_additional_data_on_disk =
-	    settings.value("preferences/store_additional_data_on_disk",
-	    true).toBool();
-	globPref.send_stats_with_version_checks =
-	     settings.value("preferences/send_stats_with_version_checks",
-	     true).toBool();
-	globPref.certificate_validation_date =
-	    settings.value("preferences/certificate_validation_date",1).toInt();
-	globPref.after_start_select =
-	    settings.value("preferences/after_start_select",1).toInt();
-	globPref.auto_download_whole_messages =
-	    settings.value("preferences/auto_download_whole_messages",
-	    false).toBool();
-}
 
 /* ========================================================================= */
 /*
@@ -384,7 +351,7 @@ void MainWindow::loadSettings(void)
 //	qDebug() << "Keys:" << settings.childKeys();
 
 	setMainWindowGeometry(settings);
-	getPreferencesFromSettings(settings);
+	globPref.loadFromSettings(settings);
 	getProxyFromSettings(settings);
 
 	/* Accounts. */

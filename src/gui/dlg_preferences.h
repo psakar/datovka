@@ -5,7 +5,7 @@
 #include "src/common.h"
 #include "ui_dlg_preferences.h"
 
-class PreferencesDialog : public QDialog, public Ui::Preferences {
+class PreferencesDialog : public QDialog, public Ui::dlgPreferences {
     Q_OBJECT
 
 public:

@@ -77,28 +77,32 @@ void PreferencesDialog::setActiveCheckBox(int state)
 
 void PreferencesDialog::saveChanges(void)
 {
-	globPref.auto_download_whole_messages = this->auto_download_whole_messages->isChecked();
-	globPref.send_stats_with_version_checks = this->send_stats_with_version_checks->isChecked();
-	globPref.check_new_versions = this->check_new_versions->isChecked();
-	globPref.store_messages_on_disk = this->store_messages_on_disk->isChecked();
-	globPref.store_additional_data_on_disk = this->store_additional_data_on_disk->isChecked();
+	globPref.auto_download_whole_messages =
+	    this->auto_download_whole_messages->isChecked();
+	// Not used in this dialog.
+	//globPref.default_download_signed;
+	globPref.store_messages_on_disk =
+	    this->store_messages_on_disk->isChecked();
+	globPref.store_additional_data_on_disk =
+	    this->store_additional_data_on_disk->isChecked();
+	globPref.certificate_validation_date =
+	    this->certificate_validation_date_1->isChecked() ?
+	        GlobPreferences::DOWNLOAD_DATE :
+	        GlobPreferences::CURRENT_DATE;
 	globPref.check_crl = this->check_crl->isChecked();
-	globPref.language = getIndexFromLanguge(this->language->currentIndex());
-
-	// not used in this dialog
-	//globPref.default_download_signed = this->default_download_signed->isChecked();
-
+	globPref.check_new_versions = this->check_new_versions->isChecked();
+	globPref.send_stats_with_version_checks =
+	    this->send_stats_with_version_checks->isChecked();
+	// Not used in this dialog.
+	//date_format;
+	globPref.language =
+	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {
-		globPref.after_start_select = 1;
+		globPref.after_start_select = GlobPreferences::SELECT_NEWEST;
 	} else if (this->after_start_select_2->isChecked()) {
-		globPref.after_start_select = 2;
+		globPref.after_start_select =
+		    GlobPreferences::SELECT_LAST_VISITED;
 	} else {
-		globPref.after_start_select = 3;
-	}
-
-	if (this->certificate_validation_date_1->isChecked()) {
-		globPref.certificate_validation_date = 1;
-	} else {
-		globPref.certificate_validation_date = 2;
+		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
 	}
 }

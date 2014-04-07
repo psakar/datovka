@@ -142,7 +142,8 @@ MessageDb::MessageDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
     m_receivedModel(m_db, this),
-    m_sentModel(m_db, this)
+    m_sentModel(m_db, this),
+    m_sqlModel()
 {
 	m_db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
 }
@@ -172,12 +173,21 @@ bool MessageDb::openDb(const QString &fileName)
 
 
 /* ========================================================================= */
-QStandardItemModel * MessageDb::receivedModel(void)
+QAbstractTableModel * MessageDb::receivedModel(void)
 /* ========================================================================= */
 {
 	/* TODO */
+	QSqlQuery query(m_db);
+	query.prepare(
+	    "SELECT dmID, dmAnnotation, dmSender, dmDeliveryTime, "
+	    "dmAcceptanceTime from messages");
+	query.exec();
 
-	return &m_receivedModel;
+	m_sqlModel.setQuery(query);
+
+	return &m_sqlModel;
+
+//	return &m_receivedModel;
 }
 
 

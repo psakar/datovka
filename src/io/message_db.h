@@ -6,6 +6,7 @@
 
 #include <QStandardItemModel>
 #include <QSqlDatabase>
+#include <QSqlQueryModel>
 
 
 /*!
@@ -61,7 +62,7 @@ public:
 	/*!
 	 * @brief Return received messages model.
 	 */
-	QStandardItemModel * receivedModel(void);
+	QAbstractTableModel * receivedModel(void);
 
 	/*!
 	 * @brief Return received messages model.
@@ -85,6 +86,7 @@ private:
 	QSqlDatabase m_db; /*!< Message database. */
 	ReceivedMesagesDbModel m_receivedModel;
 	SentMesagesDbModel m_sentModel;
+	QSqlQueryModel m_sqlModel;
 };
 
 

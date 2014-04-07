@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Preferences</class>
- <widget class="QDialog" name="Preferences">
+ <class>dlgPreferences</class>
+ <widget class="QDialog" name="dlgPreferences">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
-    <height>234</height>
+    <width>519</width>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -370,7 +370,7 @@
   <connection>
    <sender>prefButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>dlgPreferences</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -386,7 +386,7 @@
   <connection>
    <sender>prefButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>dlgPreferences</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
