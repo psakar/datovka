@@ -37,6 +37,9 @@ GlobPreferences::~GlobPreferences(void)
 
 
 /* ========================================================================= */
+/*
+ * Load data from supplied settings.
+ */
 void GlobPreferences::loadFromSettings(const QSettings &settings)
 /* ========================================================================= */
 {
@@ -74,11 +77,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		break;
 	}
 
-	check_crl = settings.value(
-	    "preferences/check_crl", dlftlGlobPref.check_crl).toBool();
+	check_crl = settings.value("preferences/check_crl",
+	    dlftlGlobPref.check_crl).toBool();
 
-	check_new_versions = settings.value(
-	    "preferences/check_new_versions",
+	check_new_versions = settings.value("preferences/check_new_versions",
 	    dlftlGlobPref.check_new_versions).toBool();
 
 	send_stats_with_version_checks = settings.value(
@@ -103,8 +105,11 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		break;
 	}
 
-	language = settings.value(
-	    "preferences/language", dlftlGlobPref.language).toString();
+	language = settings.value("preferences/language",
+	    dlftlGlobPref.language).toString();
+	if (language.isEmpty()) {
+		language = dlftlGlobPref.language;
+	}
 
 	value = settings.value("preferences/after_start_select",
 	    dlftlGlobPref.after_start_select).toInt();
@@ -123,4 +128,73 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		Q_ASSERT(0);
 		break;
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Store data to settings structure.
+ */
+void GlobPreferences::saveToSettings(QSettings &settings) const
+/* ========================================================================= */
+{
+	settings.beginGroup("preferences");
+
+	/* Only values differing from defaults are written. */
+
+	if (dlftlGlobPref.auto_download_whole_messages !=
+	    auto_download_whole_messages) {
+		settings.setValue("auto_download_whole_messages",
+		    auto_download_whole_messages);
+	}
+
+	if (dlftlGlobPref.default_download_signed != default_download_signed) {
+		settings.setValue("default_download_signed",
+		    default_download_signed);
+	}
+
+	if (dlftlGlobPref.store_messages_on_disk != store_messages_on_disk) {
+		settings.setValue("store_messages_on_disk",
+		    store_messages_on_disk);
+	}
+
+	if (dlftlGlobPref.store_additional_data_on_disk !=
+	    store_additional_data_on_disk) {
+		settings.setValue("store_additional_data_on_disk",
+		    store_additional_data_on_disk);
+	}
+
+	if (dlftlGlobPref.certificate_validation_date !=
+	    certificate_validation_date) {
+		settings.setValue("certificate_validation_date",
+		    certificate_validation_date);
+	}
+
+	if (dlftlGlobPref.check_crl != check_crl) {
+		settings.setValue("check_crl", check_crl);
+	}
+
+	if (dlftlGlobPref.check_new_versions != check_new_versions) {
+		settings.setValue("check_new_versions", check_new_versions);
+	}
+
+	if (dlftlGlobPref.send_stats_with_version_checks !=
+	    send_stats_with_version_checks) {
+		settings.setValue("send_stats_with_version_checks",
+		    send_stats_with_version_checks);
+	}
+
+	if (dlftlGlobPref.date_format != date_format) {
+		settings.setValue("date_format", date_format);
+	}
+
+	if (dlftlGlobPref.language != language) {
+		settings.setValue("language", language);
+	}
+
+	if (dlftlGlobPref.after_start_select != after_start_select) {
+		settings.setValue("after_start_select", after_start_select);
+	}
+
+	settings.endGroup();
 }

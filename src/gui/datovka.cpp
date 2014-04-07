@@ -367,6 +367,7 @@ void MainWindow::setSpllitersWidth(const QSettings &settings, int w, int h)
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
 
+
 /* ========================================================================= */
 /*
  * Load and apply setting from configuration file.
@@ -381,8 +382,10 @@ void MainWindow::loadSettings(void)
 //	qDebug() << "Keys:" << settings.childKeys();
 
 	setMainWindowGeometry(settings);
-	globPref.loadFromSettings(settings);
 	getProxyFromSettings(settings);
+
+	/* Global preferences from settings. */
+	globPref.loadFromSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -408,6 +411,9 @@ void MainWindow::saveSettings(void)
 	QSettings settings(m_confFileName + "x", QSettings::IniFormat);
 
 	settings.clear();
+
+	/* Global preferences from settings. */
+	globPref.saveToSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.saveToSettings(settings);

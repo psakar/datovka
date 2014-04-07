@@ -52,7 +52,15 @@ public:
 	QString language;
 	SelectType after_start_select;
 
+	/*!
+	 * @brief Load data from supplied settings.
+	 */
 	void loadFromSettings(const QSettings &settings);
+
+	/*!
+	 * @brief Store data to settings structure.
+	 */
+	void saveToSettings(QSettings &settings) const;
 };
 
 
