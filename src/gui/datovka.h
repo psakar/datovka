@@ -76,8 +76,6 @@ private:
 
 	void getPreferencesFromSettings(const QSettings &settings);
 
-	void getProxyFromSettings(const QSettings &settings);
-
 	/*!
 	 * @brief Store current setting to configuration file.
 	 */

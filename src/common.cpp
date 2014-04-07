@@ -4,10 +4,14 @@
 
 
 GlobPreferences globPref;
-ProxySettings globProxSet;
+GlobProxySettings globProxSet;
 
+
+/* Defaults. */
 static const
 GlobPreferences dlftlGlobPref; /* Defaults. */
+static const
+GlobProxySettings dfltGlobProxSet;
 
 
 /* ========================================================================= */
@@ -194,6 +198,63 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.after_start_select != after_start_select) {
 		settings.setValue("after_start_select", after_start_select);
+	}
+
+	settings.endGroup();
+}
+
+
+/* ========================================================================= */
+GlobProxySettings::GlobProxySettings(void)
+/* ========================================================================= */
+    : https_proxy("-1"),
+    http_proxy("-1")
+{
+}
+
+
+/* ========================================================================= */
+GlobProxySettings::~GlobProxySettings(void)
+/* ========================================================================= */
+{
+}
+
+
+/* ========================================================================= */
+/*
+ * Load data from supplied settings.
+ */
+void GlobProxySettings::loadFromSettings(const QSettings &settings)
+/* ========================================================================= */
+{
+	https_proxy = settings.value("connection/https_proxy",
+	    dfltGlobProxSet.https_proxy).toString();
+	http_proxy = settings.value("connection/http_proxy",
+	    dfltGlobProxSet.http_proxy).toString();
+
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Store data to settings structure.
+ */
+void GlobProxySettings::saveToSettings(QSettings &settings) const
+/* ========================================================================= */
+{
+	settings.beginGroup("connection");
+
+	if ("-1" == https_proxy) {
+		settings.setValue("https_proxy", https_proxy);
+	} else {
+		/* TODO */
+	}
+
+	if ("-1" == http_proxy) {
+		settings.setValue("http_proxy", http_proxy);
+	} else {
+		/* TODO */
 	}
 
 	settings.endGroup();

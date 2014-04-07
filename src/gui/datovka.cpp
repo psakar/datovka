@@ -327,21 +327,6 @@ void MainWindow::setMainWindowGeometry(const QSettings &settings)
 
 /* ========================================================================= */
 /*
- * Set mainwindows position and size from settings
- */
-void MainWindow::getProxyFromSettings(const QSettings &settings)
-/* ========================================================================= */
-{
-	globProxSet.https_proxy = settings.value("connection/https_proxy",
-	    "-1").toString();
-	globProxSet.http_proxy = settings.value("connection/http_proxy",
-	    "-1").toString();
-}
-
-
-
-/* ========================================================================= */
-/*
  * Set splliters position from settings
  */
 void MainWindow::setSpllitersWidth(const QSettings &settings, int w, int h)
@@ -382,10 +367,12 @@ void MainWindow::loadSettings(void)
 //	qDebug() << "Keys:" << settings.childKeys();
 
 	setMainWindowGeometry(settings);
-	getProxyFromSettings(settings);
 
-	/* Global preferences from settings. */
+	/* Global preferences. */
 	globPref.loadFromSettings(settings);
+
+	/* Proxy settings. */
+	globProxSet.loadFromSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -412,11 +399,15 @@ void MainWindow::saveSettings(void)
 
 	settings.clear();
 
-	/* Global preferences from settings. */
+	/* Global preferences. */
 	globPref.saveToSettings(settings);
+
+	/* Proxy settings. */
+	globProxSet.saveToSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.saveToSettings(settings);
+
 	/* TODO */
 
 	settings.sync();

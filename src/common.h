@@ -36,6 +36,7 @@ public:
 		SELECT_NOTHING = 3
 	} SelectType;
 
+
 	GlobPreferences(void);
 	~GlobPreferences(void);
 
@@ -64,17 +65,31 @@ public:
 };
 
 
-class ProxySettings {
+class GlobProxySettings {
 
 public:
+	GlobProxySettings(void);
+	~GlobProxySettings(void);
+
 	QString https_proxy;
 	QString http_proxy;
+	/* TODO -- Additional settings according to ProxyManager on Datovka. */
+
+	/*!
+	 * @brief Load data from supplied settings.
+	 */
+	void loadFromSettings(const QSettings &settings);
+
+	/*!
+	 * @brief Store data to settings structure.
+	 */
+	void saveToSettings(QSettings &settings) const;
 };
 
 
 /* Global preferences structure. */
 extern GlobPreferences globPref;
-extern ProxySettings globProxSet;
+extern GlobProxySettings globProxSet;
 
 
 #endif /* _COMMON_H_ */
