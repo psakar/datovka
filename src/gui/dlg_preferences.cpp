@@ -18,7 +18,7 @@ void PreferencesDialog::initPrefDialog(void)
 	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
 	connect(this->check_new_versions, SIGNAL(stateChanged(int)), this, SLOT(setActiveCheckBox(int)));
-	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChangesInDialog(void)));
+	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
 	//not used in this dialog
 	//this->default_download_signed->setChecked(globPref.default_download_signed);
 
