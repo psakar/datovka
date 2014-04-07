@@ -485,7 +485,7 @@
   <action name="actionGet_messages">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
+     <normaloff>:/icons/16x16/datovka-account-sync.png</normaloff>:/icons/16x16/datovka-account-sync.png</iconset>
    </property>
    <property name="text">
     <string>Get messages</string>

@@ -41,6 +41,22 @@ private slots:
 
 	void on_actionAdd_account_triggered();
 
+	void on_actionDelete_account_triggered();
+
+	void on_actionChange_password_triggered();
+
+	void on_actionAccount_properties_triggered();
+
+	void on_actionMove_account_up_triggered();
+
+	void on_actionMove_account_down_triggered();
+
+	void on_actionChange_data_directory_triggered();
+
+	void on_actionMark_all_as_read_triggered();
+
+	void on_actionGet_messages_triggered();
+
 private:
 	/*!
 	 * @brief Get configuration directory name.

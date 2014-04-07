@@ -157,30 +157,35 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 
 		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
 		    QString(tr("Get messages")),
-		    this, SLOT(slotOption1()));
+		    this, SLOT(on_actionGet_messages_triggered()));
 		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
 		    QString(tr("Create message")),
 		    this, SLOT(on_actionCreate_message_triggered()));
-		menu->addAction(QString(tr("Mark all as read")),
-		    this, SLOT(slotOption1()));
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("tick_16.png")),
+		    QString(tr("Mark all as read")),
+		    this, SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
 		    QString(tr("Change password")),
-		    this, SLOT(slotOption1()));
+		    this, SLOT(on_actionChange_password_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
 		    QString(tr("Account properties")),
-		    this, SLOT(slotOption1()));
+		    this, SLOT(on_actionAccount_properties_triggered()));
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
+		    QString(tr("Remove Account")),
+		    this, SLOT(on_actionDelete_account_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
 		    QString(tr("Move account up")),
-		    this, SLOT(slotOption1()));
+		    this, SLOT(on_actionMove_account_up_triggered()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
 		    QString(tr("Move account down")),
-		    this, SLOT(slotOption1()));
+		    this, SLOT(on_actionMove_account_down_triggered()));
 		menu->addSeparator();
-		menu->addAction(QString(tr("Change data directory")),
-		    this, SLOT(slotOption1()));
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("folder_16.png")),
+		    QString(tr("Change data directory")),
+		    this, SLOT(on_actionChange_data_directory_triggered()));
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
 		    QString(tr("Add new account")),
@@ -431,4 +436,44 @@ void MainWindow::on_actionAdd_account_triggered()
 {
 	QDialog *newAccountDialog = new CreateNewAccountDialog(this);
 	newAccountDialog->show();
+}
+
+void MainWindow::on_actionDelete_account_triggered()
+{
+
+}
+
+void MainWindow::on_actionChange_password_triggered()
+{
+
+}
+
+void MainWindow::on_actionAccount_properties_triggered()
+{
+
+}
+
+void MainWindow::on_actionMove_account_up_triggered()
+{
+
+}
+
+void MainWindow::on_actionMove_account_down_triggered()
+{
+
+}
+
+void MainWindow::on_actionChange_data_directory_triggered()
+{
+
+}
+
+void MainWindow::on_actionMark_all_as_read_triggered()
+{
+
+}
+
+void MainWindow::on_actionGet_messages_triggered()
+{
+
 }
