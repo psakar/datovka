@@ -65,18 +65,18 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			    settings.value(groups.at(i) + "/" + LOGIN, ""));
 			itemSettings.insert(PWD, fromBase64(
 			    settings.value(groups.at(i) + "/" + PWD,
-			        "").toString()));
+				"").toString()));
 			itemSettings.insert(TEST,
 			    settings.value(groups.at(i) + "/" + TEST,
-			        "").toBool());
+				"").toBool());
 			itemSettings.insert(REMEMBER,
 			    settings.value(groups.at(i) + "/" + REMEMBER,
-			        "").toBool());
+				"").toBool());
 			itemSettings.insert(DB_DIR,
 			    settings.value(groups.at(i) + "/" + DB_DIR, ""));
 			itemSettings.insert(SYNC,
 			    settings.value(groups.at(i) + "/" + SYNC,
-			        "").toBool());
+				"").toBool());
 
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
@@ -138,14 +138,19 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 {
 	/* Defining a couple of items. */
 	QStandardItem *account = new QStandardItem(name);
-
+	account->setFlags(account->flags() & ~Qt::ItemIsEditable);
 	QFont font;
 	QStandardItem *recentRecieved =
 	    new QStandardItem(tr("Recent Recieved"));
+	recentRecieved->setFlags(recentRecieved->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *recentSent = new QStandardItem(tr("Recent Sent"));
+	recentSent->setFlags(recentSent->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *all = new QStandardItem(tr("All"));
+	all->setFlags(all->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *allRecieved = new QStandardItem(tr("Recieved"));
+	allRecieved->setFlags(allRecieved->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *allSent = new QStandardItem(tr("Sent"));
+	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
 	account->setData(data, ROLE_SETINGS);
 

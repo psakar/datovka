@@ -150,16 +150,41 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QMenu *menu = new QMenu;
 
+	qDebug() << index << " " << item;
+
 	if (0 != item) {
 		treeItemClicked(index);
 
-		menu->addAction(QString(tr("Option 1")),
+		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
+		    QString(tr("Get messages")),
 		    this, SLOT(slotOption1()));
-		menu->addAction(QString(tr("Option 2")),
-		    this, SLOT(slotOption2()));
+		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
+		    QString(tr("Create message")),
+		    this, SLOT(on_actionCreate_message_triggered()));
+		menu->addAction(QString(tr("Mark all as read")),
+		    this, SLOT(slotOption1()));
+		menu->addSeparator();
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
+		    QString(tr("Change password")),
+		    this, SLOT(slotOption1()));
+		menu->addSeparator();
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
+		    QString(tr("Account properties")),
+		    this, SLOT(slotOption1()));
+		menu->addSeparator();
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
+		    QString(tr("Move account up")),
+		    this, SLOT(slotOption1()));
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
+		    QString(tr("Move account down")),
+		    this, SLOT(slotOption1()));
+		menu->addSeparator();
+		menu->addAction(QString(tr("Change data directory")),
+		    this, SLOT(slotOption1()));
 	} else {
-		menu->addAction(QString(tr("Add new")),
-		    this, SLOT(slotAddNew()));
+		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
+		    QString(tr("Add new account")),
+		    this, SLOT(on_actionAdd_account_triggered()));
 	}
 
 	menu->exec(QCursor::pos());
