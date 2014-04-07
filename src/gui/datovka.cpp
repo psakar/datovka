@@ -27,6 +27,7 @@
 #define accountInfoLine(title, value) \
 	"<div><strong>" + (title) + ": </strong>" + (value) + "</div>"
 
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -308,49 +309,88 @@ void MainWindow::setDefaultMainWindow(QString version)
 	ui->accountTextInfo->setHtml(html);
 }
 
+
+#define W_OFFS 2
+#define H_OFFS 22
+#define SH_OFFS 50 /* Menu bar + top tool-bar. */
 /* ========================================================================= */
 /*
- * Set mainwindows position and size from settings
+ * Sets geometry from settings.
  */
-void MainWindow::setMainWindowGeometry(const QSettings &settings)
+void MainWindow::loadWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
-	// set mainwindows position and size
-	int x = settings.value("window_position/x",0).toInt();
-	int y = settings.value("window_position/y",0).toInt();
-	int w = settings.value("window_position/w",800).toInt();
-	int h = settings.value("window_position/h",600).toInt();
-	this->setGeometry(x+2,y+22,w,h);
-	setSpllitersWidth(settings, w, h);
-}
+	/* Window geometry. */
 
+	int x = settings.value("window_position/x", 0).toInt() + W_OFFS;
+	int y = settings.value("window_position/y", 0).toInt() + H_OFFS;
+	int w = settings.value("window_position/w", 800).toInt();
+	int h = settings.value("window_position/h", 600).toInt();
+	this->setGeometry(x, y, w, h);
 
-/* ========================================================================= */
-/*
- * Set splliters position from settings
- */
-void MainWindow::setSpllitersWidth(const QSettings &settings, int w, int h)
-/* ========================================================================= */
-{
+	/* Splitter geometry. */
+
 	// set mainspliter - hSplitterAccount
 	QList<int> sizes = ui->hSplitterAccount->sizes();
-	int tmp = settings.value("panes/hpaned1",0).toInt();
+	int tmp = settings.value("panes/hpaned1", 0).toInt();
 	sizes[0] = tmp;
-	sizes[1] = w-sizes[0];;
+	sizes[1] = w - sizes[0];;
 	ui->hSplitterAccount->setSizes(sizes);
 
 	// set messagelistspliter - vSplitterMessage
 	sizes = ui->vSplitterMessage->sizes();
-	sizes[0] = settings.value("panes/message_pane",0).toInt();
-	sizes[1] = h-50-sizes[0];
+	sizes[0] = settings.value("panes/message_pane", 0).toInt();
+	sizes[1] = h - SH_OFFS - sizes[0];
 	ui->vSplitterMessage->setSizes(sizes);
 
 	// set message/mesageinfospliter - hSplitterMessageInfo
 	sizes = ui->hSplitterMessageInfo->sizes();
-	sizes[0] = settings.value("panes/message_display_pane",0).toInt();
-	sizes[1] = w-tmp-sizes[0];
+	sizes[0] = settings.value("panes/message_display_pane", 0).toInt();
+	sizes[1] = w - tmp - sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
+
+
+/* ========================================================================= */
+/*
+ * Store geometry to settings.
+ */
+void MainWindow::saveWindowGeometry(QSettings &settings) const
+/* ========================================================================= */
+{
+	int value;
+
+	/* Window geometry. */
+
+	settings.beginGroup("window_position");
+
+	value = this->geometry().x() - W_OFFS;
+	value = (value < 0) ? 0 : value;
+	settings.setValue("x", value);
+
+	value = this->geometry().y() - H_OFFS;
+	value = (value < 0) ? 0 : value;
+	settings.setValue("y", value);
+
+	settings.setValue("w", this->geometry().width());
+	settings.setValue("h", this->geometry().height());
+
+	settings.endGroup();
+
+	/* Splitter geometry. */
+
+	settings.beginGroup("panes");
+
+	settings.setValue("hpaned1", ui->hSplitterAccount->sizes()[0]);
+	settings.setValue("message_pane", ui->vSplitterMessage->sizes()[0]);
+	settings.setValue("message_display_pane",
+	    ui->hSplitterMessageInfo->sizes()[0]);
+
+	settings.endGroup();
+}
+#undef W_OFFS
+#undef H_OFFS
+#undef SH_OFFS
 
 
 /* ========================================================================= */
@@ -366,7 +406,8 @@ void MainWindow::loadSettings(void)
 //	qDebug() << "Groups: " << settings.childGroups();
 //	qDebug() << "Keys:" << settings.childKeys();
 
-	setMainWindowGeometry(settings);
+	/* Window geometry. */
+	loadWindowGeometry(settings);
 
 	/* Global preferences. */
 	globPref.loadFromSettings(settings);
@@ -398,6 +439,9 @@ void MainWindow::saveSettings(void)
 	QSettings settings(m_confFileName + "x", QSettings::IniFormat);
 
 	settings.clear();
+
+	/* Window geometry. */
+	saveWindowGeometry(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);

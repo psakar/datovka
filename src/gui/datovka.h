@@ -6,13 +6,16 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
+
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
+
 namespace Ui {
 	class MainWindow;
 }
+
 
 class MainWindow : public QMainWindow {
 	Q_OBJECT
@@ -74,16 +77,20 @@ private:
 	 */
 	void loadSettings(void);
 
-	void getPreferencesFromSettings(const QSettings &settings);
-
 	/*!
 	 * @brief Store current setting to configuration file.
 	 */
 	void saveSettings(void);
 
-	void setMainWindowGeometry(const QSettings &settings);
+	/*!
+	 * @brief Sets geometry from settings.
+	 */
+	void loadWindowGeometry(const QSettings &settings);
 
-	void setSpllitersWidth(const QSettings &settings, int w, int h);
+	/*!
+	 * @brief Store geometry to settings.
+	 */
+	void saveWindowGeometry(QSettings &settings) const;
 
 	void setDefaultMainWindow(QString version);
 
@@ -105,5 +112,6 @@ private:
 
 	Ui::MainWindow *ui;
 };
+
 
 #endif /* _DATOVKA_H_ */
