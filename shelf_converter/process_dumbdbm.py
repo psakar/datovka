@@ -21,14 +21,14 @@ def open_shelf(filename, flag='c', protocol=None, writeback=False):
 
 # Commandine arguments.
 if len(sys.argv) != 2:
-    sys.stderr.write("Usage:\n\n%s dsgui_direrctory\n" % (sys.argv[0]))
+    sys.stderr.write("Usage:\n\n%s dsgui_directory\n" % (sys.argv[0]))
     sys.exit(1)
 
 
 # Check file presence.
-shelf_prefix = sys.argv[1] + "messages.shelf"
+shelf_prefix = sys.argv[1] + "/messages.shelf"
 shelf_file = shelf_prefix + ".dat"
-db_file = sys.argv[1] + "messages.shelf.db"
+db_file = sys.argv[1] + "/messages.shelf.db"
 if not os.path.isfile(shelf_file):
     sys.stderr.write("File %s does not exist.\n" % (shelf_file))
     sys.exit(1)
