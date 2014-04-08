@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SentMessageDialog</class>
- <widget class="QDialog" name="SentMessageDialog">
+ <class>sentMessageDialog</class>
+ <widget class="QDialog" name="sentMessageDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,7 +25,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="InfoText">
+    <widget class="QLabel" name="infoText">
      <property name="font">
       <font>
        <weight>50</weight>
@@ -36,7 +36,7 @@
       <enum>Qt::LeftToRight</enum>
      </property>
      <property name="text">
-      <string>Please fill in at least the subject, one recipient and one attachment:</string>
+      <string>Please fill in at least the &lt;b&gt;subject&lt;/b&gt;, &lt;b&gt;one recipient&lt;/b&gt; and &lt;b&gt;one attachment&lt;/b&gt;:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -44,9 +44,16 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_1">
      <item>
-      <widget class="QLabel" name="FromLabel">
+      <widget class="QLabel" name="fromLabel">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -59,7 +66,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="FromUser">
+      <widget class="QLabel" name="fromUser">
        <property name="text">
         <string/>
        </property>
@@ -68,13 +75,13 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="SubjectLabel">
+      <widget class="QLabel" name="subjectLabel">
        <property name="font">
         <font>
-         <weight>50</weight>
-         <bold>false</bold>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
@@ -83,7 +90,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="SubjectText">
+      <widget class="QLineEdit" name="subjectText">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -93,6 +100,168 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="optionalFieldCheckBox">
+     <property name="text">
+      <string>Show optional fields</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="OptionalWidget" native="true">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <property name="horizontalSpacing">
+       <number>2</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Mandate:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <property name="spacing">
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QLineEdit" name="lineEdit"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>/</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_3"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>§</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_2"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>paragraph</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_4"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>letter</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_5"/>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Our reference number:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_6"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Our file mark:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="lineEdit_7"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Your reference number:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="lineEdit_8"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>Your file mark:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lineEdit_9"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Personal delivery:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="checkBox_4">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>To hands:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="lineEdit_10"/>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_2">
@@ -102,13 +271,13 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="RecipientLabel">
+      <widget class="QLabel" name="recipientLabel">
        <property name="font">
         <font>
-         <weight>50</weight>
-         <bold>false</bold>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
@@ -117,7 +286,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="AddRecipient">
+      <widget class="QPushButton" name="addRecipient">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -134,7 +303,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="RemoveRecipient">
+      <widget class="QPushButton" name="removeRecipient">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -142,7 +311,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Removed</string>
+        <string>Remove</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
@@ -151,7 +320,25 @@
       </widget>
      </item>
      <item>
-      <spacer name="RecipienthorizontalSpacer">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Find</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../res/resources.qrc">
+         <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="recipienthorizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -166,10 +353,10 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeView" name="RecipientTree"/>
+    <widget class="QTreeView" name="recipientTree"/>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox_1">
+    <widget class="QCheckBox" name="senderCheckBox_1">
      <property name="font">
       <font>
        <weight>50</weight>
@@ -185,7 +372,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox_2">
+    <widget class="QCheckBox" name="payCheckBox_2">
      <property name="font">
       <font>
        <weight>50</weight>
@@ -198,7 +385,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="checkBox_3">
+    <widget class="QCheckBox" name="useCheckBox_3">
      <property name="font">
       <font>
        <weight>50</weight>
@@ -211,20 +398,20 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
+    <widget class="Line" name="line_0">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QLabel" name="AttachmentLabel">
+      <widget class="QLabel" name="attachmentLabel">
        <property name="font">
         <font>
-         <weight>50</weight>
-         <bold>false</bold>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="text">
@@ -233,7 +420,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="AddAttachment">
+      <widget class="QPushButton" name="addAttachment">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -250,7 +437,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="RemoveAttachment">
+      <widget class="QPushButton" name="removeAttachment">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -258,7 +445,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Removed</string>
+        <string>Remove</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
@@ -274,7 +461,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="OpenAttachment">
+      <widget class="QPushButton" name="openAttachment">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -286,12 +473,12 @@
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
+         <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="AttachhorizontalSpacer_3">
+      <spacer name="attachhorizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -306,10 +493,10 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeView" name="AttachmentTree"/>
+    <widget class="QTreeView" name="attachmentTree"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -324,7 +511,10 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="SendMessageButton">
+      <widget class="QPushButton" name="sendButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <weight>50</weight>
@@ -337,7 +527,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="CancelButton">
+      <widget class="QPushButton" name="cancelButton">
        <property name="font">
         <font>
          <weight>50</weight>

@@ -29,9 +29,15 @@ QString CreateNewAccountDialog::addCertificateFromFile()
 {
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "", tr("Certificate File (*.p12)"));
-	this->addCertificateButton->setText(certFileName);
-	this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
-	    QString("key_16.png")));
+	if (certFileName != NULL) {
+		this->addCertificateButton->setText(certFileName);
+		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
+		QString("key_16.png")));
+	} else {
+		this->addCertificateButton->setText(tr("Add"));
+		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
+		QString("plus_16.png")));
+	}
 
 	return certFileName;
 }

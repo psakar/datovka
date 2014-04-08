@@ -7,8 +7,7 @@
 #include "ui_dlg_create_account.h"
 
 
-class CreateNewAccountDialog : public QDialog, public Ui::CreateNewAccountDialog
-{
+class CreateNewAccountDialog : public QDialog, public Ui::CreateNewAccountDialog {
 	Q_OBJECT
 
 public:
