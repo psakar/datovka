@@ -93,13 +93,20 @@ private:
 	 */
 	void saveWindowGeometry(QSettings &settings) const;
 
-	void setDefaultMainWindow(QString version);
-
-	/*
+	/*!
 	 * @brief Generate account info HTML message.
 	 */
 	QString createAccountInfo(const QStandardItem &item);
+
+	/*!
+	 * @brief Generate overall account information.
+	 */
 	QString createAccountInfoAllField(const QString &accountName);
+
+	/*!
+	 * @brief Generate banner.
+	 */
+	QString createDatovkaBanner(const QString &version);
 
 	/* Configuration file related. */
 	QString m_confDirName;

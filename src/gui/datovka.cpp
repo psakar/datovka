@@ -56,7 +56,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
-	setDefaultMainWindow(VERSION);
+
+	/* Show banner. */
+	ui->messageStackedWidget->setCurrentIndex(0);
+	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
@@ -200,6 +203,9 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 
 
 /* ========================================================================= */
+/*
+ * Generate account info HTML message.
+ */
 QString MainWindow::createAccountInfo(const QStandardItem &item)
 /* ========================================================================= */
 {
@@ -240,16 +246,40 @@ QString MainWindow::createAccountInfo(const QStandardItem &item)
 	return html;
 }
 
+
 /* ========================================================================= */
+/*
+ * Generate overall account information.
+ */
 QString MainWindow::createAccountInfoAllField(const QString &accountName)
 /* ========================================================================= */
 {
-	QString html = QString("<h3>") + accountName + QString("</h3>");
+	QString html = "<h3>" + accountName + "</h3>";
 
 	html.append(accountInfoLine(tr("Received messages"), accountName));
 	/* TODO - add count of received messages */
 	html.append(accountInfoLine(tr("Sent messages"), accountName));
 	/* TODO - add count of sent messages */
+	return html;
+}
+
+
+/* ========================================================================= */
+/*
+ * Generate banner.
+ */
+QString MainWindow::createDatovkaBanner(const QString &version)
+/* ========================================================================= */
+{
+	QString html = "<br><center>";
+	html += "<h2>" +
+	    tr("QDatovka - Free interface for Datové schránky") + "</h2>";
+	html += accountInfoLine(tr("Version"), version);
+	html += QString("<br><img src=") + ICON_128x128_PATH +
+	    "datovka.png />";
+	html += "<h3>" + tr("Powered by") + "</h3>";
+	html += QString("<br><img src=") + ICON_128x128_PATH + "cznic.png />";
+	html += "</center>";
 	return html;
 }
 
@@ -287,28 +317,6 @@ void MainWindow::ensureConfPresence(void)
 		file.open(QIODevice::ReadWrite);
 		file.close();
 	}
-}
-
-/* ========================================================================= */
-/*
- * Set default window with info about Datovka
- */
-void MainWindow::setDefaultMainWindow(QString version)
-/* ========================================================================= */
-{
-	ui->messageStackedWidget->setCurrentIndex(0);
-	QString html = QString("<br><center>");
-	html += QString("<h2>") +
-	    tr("QDatovka - Free interface for Datové schránky") +
-	    QString("</h2>");
-	html += accountInfoLine(tr("Version"), version);
-	html += QString("<br><img src=") +
-	    ICON_128x128_PATH + QString("datovka.png />");
-	html += QString("<h3>") + tr("Powered by") + QString("</h3>");
-	html += QString("<br><img src=") +
-	    ICON_128x128_PATH + QString("cznic.png />");
-	html += QString("</center>");
-	ui->accountTextInfo->setHtml(html);
 }
 
 
