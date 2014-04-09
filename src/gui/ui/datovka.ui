@@ -320,7 +320,6 @@
     <addaction name="actionSync_all_accounts"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_account"/>
-    <addaction name="actionModify_account"/>
     <addaction name="actionDelete_account"/>
     <addaction name="separator"/>
     <addaction name="actionImport_database_directory"/>
@@ -426,15 +425,6 @@
    </property>
    <property name="text">
     <string>Add account</string>
-   </property>
-  </action>
-  <action name="actionModify_account">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Modify account</string>
    </property>
   </action>
   <action name="actionDelete_account">

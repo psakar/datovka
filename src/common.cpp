@@ -5,7 +5,7 @@
 
 GlobPreferences globPref;
 GlobProxySettings globProxSet;
-
+QMap<QString, QVariant> *currentAccountMap;
 
 /* Defaults. */
 static const

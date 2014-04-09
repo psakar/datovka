@@ -1,15 +1,20 @@
+#include "src/models/accounts_model.h"
 #include "dlg_create_account.h"
 #include "ui_dlg_create_account.h"
 
-CreateNewAccountDialog::CreateNewAccountDialog(QWidget *parent) :
-	QDialog(parent)
+CreateNewAccountDialog::CreateNewAccountDialog(QWidget *parent,
+    QTreeView *accountList, QString action)
+    : QDialog(parent),
+    m_accountList(accountList)
 {
 	setupUi(this);
-	initAccountDialog();
+	initAccountDialog(accountList, action);
 }
 
-void CreateNewAccountDialog::initAccountDialog(void)
+void CreateNewAccountDialog::initAccountDialog(QTreeView *accountList, QString action)
 {
+	Q_ASSERT(0 != accountList);
+
 	this->loginmethodComboBox->addItem(QString(tr("Password")));
 	this->loginmethodComboBox->addItem(QString(tr("Certificate")));
 	this->loginmethodComboBox->addItem(QString(tr("Certificate + Password")));
@@ -23,7 +28,49 @@ void CreateNewAccountDialog::initAccountDialog(void)
 	    SLOT(addCertificateFromFile()));
 	connect(this->accountButtonBox, SIGNAL(accepted()), this,
 	    SLOT(saveAccount(void)));
+
+	if (action == "Edit") {
+		setCurrentAccountData(accountList);
+	}
 }
+
+void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
+{
+	int itemindex;
+
+	AccountModel *model = dynamic_cast<AccountModel*>(accountList->model());
+	QModelIndex index = accountList->currentIndex();
+	const QStandardItem *item = model->itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_SETINGS).toMap();
+
+	this->setWindowTitle(tr("Update account") + " " + itemTop->text());
+	this->accountLineEdit->setText(itemTop->text());
+	this->usernameLineEdit->setText(itemSettings[USER].toString());
+	//this->usernameLineEdit->setEnabled(false);
+
+	QString login_method = itemSettings[LOGIN].toString();
+	if (login_method == "username") {
+		itemindex = USER_NAME;
+	} else if(login_method == "certificate") {
+		itemindex = CERTIFICATE;
+	} else if(login_method == "user_certificate") {
+		itemindex = USER_CERTIFICATE;
+	} else if(login_method == "hotp") {
+		itemindex = HOTP;
+	} else {
+		itemindex = TOTP;
+	}
+	this->loginmethodComboBox->setCurrentIndex(itemindex);
+	setActiveButton(itemindex);
+
+	this->passwordLineEdit->setText(itemSettings[PWD].toString());
+	this->testAccountCheckBox->setChecked(itemSettings[TEST].toBool());
+	this->rememberPswcheckBox->setChecked(itemSettings[REMEMBER].toBool());
+	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
+}
+
 
 QString CreateNewAccountDialog::addCertificateFromFile()
 {
@@ -44,13 +91,13 @@ QString CreateNewAccountDialog::addCertificateFromFile()
 
 void CreateNewAccountDialog::setActiveButton(int itemindex)
 {
-	if (itemindex == 1) {
+	if (itemindex == CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		this->rememberPswcheckBox->setEnabled(false);
-	} else if (itemindex == 2) {
+	} else if (itemindex == USER_CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(true);
@@ -67,6 +114,23 @@ void CreateNewAccountDialog::setActiveButton(int itemindex)
 
 void CreateNewAccountDialog::saveAccount(void)
 {
+	AccountModel *model = dynamic_cast<AccountModel*>(m_accountList->model());
+	QModelIndex index = m_accountList->currentIndex();
+	QStandardItem *item = model->itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+	AccountModel::SettingsMap itemSettings =
+	    itemTop->data(ROLE_SETINGS).toMap();
+
+	model->itemFromIndex(index)->setText(this->accountLineEdit->text());
+	itemSettings[NAME]= this->accountLineEdit->text();
+	itemSettings[USER]= this->usernameLineEdit->text();
+	itemSettings[PWD]= this->passwordLineEdit->text();
+
+	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
+	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
+	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
+
+	itemTop->setData(itemSettings);
 	qDebug() << "saveAccount";
 }
 

@@ -201,6 +201,22 @@ const QStandardItem * AccountModel::itemTop(const QStandardItem *item)
 
 
 /* ========================================================================= */
+QStandardItem * AccountModel::itemTop(QStandardItem *item)
+/* ========================================================================= */
+{
+	if (0 == item) {
+		return 0;
+	}
+
+	while (0 != item->parent()) {
+		item = item->parent();
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
 /*!
  * @brief Get user name of the account.
  */

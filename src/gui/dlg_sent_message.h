@@ -17,6 +17,7 @@ private slots:
 
 private:
 	void initNewMessageDialog(void);
+	void sendMessage(void);
 
 };
 

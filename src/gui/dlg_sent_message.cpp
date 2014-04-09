@@ -25,3 +25,8 @@ void dlg_sent_message::showOptionalForm(int state)
 	this->OptionalWidget->setHidden(Qt::Unchecked == state);
 }
 
+
+void dlg_sent_message::sendMessage(void) {
+
+
+}

@@ -14,6 +14,13 @@
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.1"
 
+typedef enum {
+	USER_NAME = 0,
+	CERTIFICATE = 1,
+	USER_CERTIFICATE = 2,
+	HOTP = 3,
+	TOTP = 4
+} LoginMethodsIndex;
 
 class GlobPreferences {
 
@@ -90,6 +97,6 @@ public:
 /* Global preferences structure. */
 extern GlobPreferences globPref;
 extern GlobProxySettings globProxSet;
-
+extern QMap<QString, QVariant> *currentAccountMap;
 
 #endif /* _COMMON_H_ */

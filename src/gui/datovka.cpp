@@ -82,7 +82,7 @@ void MainWindow::on_actionPreferences_triggered()
 /* ========================================================================= */
 {
 	QDialog *preferences = new PreferencesDialog(this);
-	preferences->show();
+	preferences->exec();
 }
 
 
@@ -91,7 +91,7 @@ void MainWindow::on_actionProxy_settings_triggered()
 /* ========================================================================= */
 {
 	QDialog *Proxy = new ProxyDialog(this);
-	Proxy->show();
+	Proxy->exec();
 }
 
 
@@ -120,7 +120,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 
 	qDebug() << "Selected user account" << userName << dbDir;
 	qDebug() << index.model() << item->text();
-	qDebug() << index.parent().row()  << " - " << index.row();
+	//qDebug() << index.parent().row()  << " - " << index.row();
+	qDebug() << "\n";
 
 	db = m_messageDbs.accessMessageDb(userName, dbDir);
 	Q_ASSERT(0 != db);
@@ -457,7 +458,6 @@ void MainWindow::loadSettings(void)
 
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
-
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
@@ -518,8 +518,9 @@ void MainWindow::on_actionSent_message_triggered()
 
 void MainWindow::on_actionAdd_account_triggered()
 {
-	QDialog *newAccountDialog = new CreateNewAccountDialog(this);
-	newAccountDialog->show();
+
+	QDialog *newAccountDialog = new CreateNewAccountDialog(this, ui->accountList, "New");
+	newAccountDialog->exec();
 }
 
 void MainWindow::on_actionDelete_account_triggered()
@@ -534,6 +535,8 @@ void MainWindow::on_actionChange_password_triggered()
 
 void MainWindow::on_actionAccount_properties_triggered()
 {
+	QDialog *newAccountDialog = new CreateNewAccountDialog(this, ui->accountList, "Edit");
+	newAccountDialog->exec();
 
 }
 

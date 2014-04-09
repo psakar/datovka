@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QFileDialog>
+#include <QTreeView>
 #include "src/common.h"
 #include "ui_dlg_create_account.h"
 
@@ -11,7 +12,7 @@ class CreateNewAccountDialog : public QDialog, public Ui::CreateNewAccountDialog
 	Q_OBJECT
 
 public:
-	CreateNewAccountDialog(QWidget *parent = 0);
+	CreateNewAccountDialog(QWidget *parent = 0, QTreeView *accountList = 0, QString action = "Add");
 
 private slots:
 
@@ -20,7 +21,10 @@ private slots:
 	void saveAccount(void);
 
 private:
-	void initAccountDialog(void);
+	void initAccountDialog(QTreeView *accountList, QString action);
+	void setCurrentAccountData(QTreeView *accountList);
+
+	QTreeView *m_accountList;
 };
 
 #endif // DLG_CREATENEWACCOUNTDIALOG_H

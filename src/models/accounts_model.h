@@ -57,6 +57,8 @@ public:
 	 */
 	static
 	const QStandardItem * itemTop(const QStandardItem *item);
+	static
+	QStandardItem * itemTop(QStandardItem *item);
 
 	/*!
 	 * @brief Get user name of the account.
