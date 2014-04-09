@@ -9,7 +9,7 @@
 
 
 static
-QVector<QString> receivedHeaderVector = {
+const QVector<QString> receivedHeaderVector = {
 	QObject::tr("Id"),
 	QObject::tr("Message Subject"),
 	QObject::tr("Sender"),
@@ -20,7 +20,7 @@ QVector<QString> receivedHeaderVector = {
 
 
 static
-QVector<QString> sentHeaderVector = {
+const QVector<QString> sentHeaderVector = {
 	QObject::tr("Id"),
 	QObject::tr("Message Subject"),
 	QObject::tr("Recipient"),

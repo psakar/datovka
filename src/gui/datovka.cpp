@@ -233,46 +233,36 @@ QString MainWindow::createAccountInfo(const QStandardItem &item)
 	accountEntry = m_accountDb.accountEntry(
 	    itemSettings[USER].toString() + "___True");
 
-	if (!accountEntry.dbID.isEmpty()) {
-		html.append(accountInfoLine(tr("Databox ID"),
-		    accountEntry.dbID));
+	/* Print non-empty entries. */
+	for (int i = 0; i < AccountEntry::entryNames.size(); ++i) {
+		const QString &key = AccountEntry::entryNames[i].first;
+		if (accountEntry.hasValue(key) &&
+		    !AccountEntry::entryNameMap[key].isEmpty()) {
+			switch (AccountEntry::entryNames[i].second) {
+			case AccountEntry::STRING:
+				html.append(accountInfoLine(
+				    AccountEntry::entryNameMap[key],
+				    accountEntry.value(key).toString()));
+				break;
+			case AccountEntry::INTEGER:
+				html.append(accountInfoLine(
+				    AccountEntry::entryNameMap[key],
+				    QString::number(
+				        accountEntry.value(key).toInt())));
+				break;
+			case AccountEntry::BOOL:
+				html.append(accountInfoLine(
+				    AccountEntry::entryNameMap[key],
+				    accountEntry.value(key).toBool() ?
+				        tr("Yes") : tr("No")));
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+		}
 	}
-	if (!accountEntry.dbType.isEmpty()) {
-		html.append(accountInfoLine(tr("Type of Databox"),
-		    accountEntry.dbType));
-	}
-	if (0 != accountEntry.ic) {
-		html.append(accountInfoLine(tr("IČ"),
-		    QString::number(accountEntry.ic)));
-	}
-	if (!accountEntry.firmName.isEmpty()) {
-		html.append(accountInfoLine(tr("Firm name"),
-		    accountEntry.firmName));
-	}
-	if (!accountEntry.adCity.isEmpty()) {
-		html.append(accountInfoLine(tr("City of residence"),
-		    accountEntry.adCity));
-	}
-	if (!accountEntry.adStreet.isEmpty()) {
-		html.append(accountInfoLine(tr("Street of residence"),
-		    accountEntry.adStreet));
-	}
-	if (!accountEntry.adNumberInMunicipality.isEmpty()) {
-		html.append(accountInfoLine(tr("Number in municipality"),
-		    accountEntry.adNumberInMunicipality));
-	}
-	if (!accountEntry.adZipCode.isEmpty()) {
-		html.append(accountInfoLine(tr("Zip code"),
-		    accountEntry.adZipCode));
-	}
-	if (!accountEntry.nationality.isEmpty()) {
-		html.append(accountInfoLine(tr("Nationality"),
-		    accountEntry.nationality));
-	}
-	html.append(accountInfoLine(tr("Effective OVM"),
-	    accountEntry.dbEffectiveOVM ? tr("Yes") : tr("No")));
-	html.append(accountInfoLine(tr("Open addressing"),
-	    accountEntry.dbOpenAddressing ? tr("Yes") : tr("No")));
+
 	html.append("<br>");
 	html.append(accountInfoLine(tr("Password expiration date"),
 	    tr("unknown or without expiration")));

@@ -3,37 +3,56 @@
 #ifndef _ACCOUNT_DB_H_
 #define _ACCOUNT_DB_H_
 
-
+#include <QPair>
 #include <QObject>
 #include <QSqlDatabase>
 
 
-class AccountEntry {
+/*!
+ * @brief Account information.
+ */
+class AccountEntry : private QMap<QString, QVariant> {
+
 public:
-	QString dbID;
-	QString dbType;
-	int ic;
-	QString pnFirstName;
-	QString pnMiddleName;
-	QString pnLastName;
-	QString pnLastNameAtBirth;
-	QString firmName;
-	QString biDate;
-	QString biCity;
-	QString biCounty;
-	QString biState;
-	QString adCity;
-	QString adStreet;
-	QString adNumberInStreet;
-	QString adNumberInMunicipality;
-	QString adZipCode;
-	QString adState;
-	QString nationality;
-	QString identifier;
-	QString registryCode;
-	int dbState;
-	bool dbEffectiveOVM;
-	bool dbOpenAddressing;
+	typedef enum {
+		STRING = 1,
+		INTEGER,
+		BOOL
+	} m_dbEntryType;
+
+	AccountEntry(void);
+	~AccountEntry(void);
+
+	/*!
+	 * @brief Set value.
+	 */
+	bool setValue(const QString &key, const QVariant &value);
+
+	/*!
+	 * @brief Check whether value is stored.
+	 */
+	bool hasValue(const QString &key) const;
+
+	/*!
+	 * @brief Return stored value.
+	 */
+	const QVariant value(const QString &key,
+	    const QVariant &defaultValue = QVariant()) const;
+
+	/*!
+	 * List of know entries and their types.
+	 */
+	static
+	const QVector< QPair<QString, m_dbEntryType> > entryNames;
+
+	/*!
+	 * Mapping between entry identifiers an their description.
+	 */
+	static
+	const QMap<QString, QString> entryNameMap;
+
+private:
+	typedef QMap<QString, QVariant> m_parentType;
 };
 
 
