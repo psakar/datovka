@@ -8,6 +8,7 @@
 #include <QStandardItemModel>
 
 #include "src/common.h"
+#include "src/io/account_db.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
@@ -106,6 +107,9 @@ private:
 
 	/* Account tree view data model. */
 	AccountModel m_accountModel;
+
+	/* Accout database. */
+	AccountDb m_accountDb;
 
 	/* Map of databases. */
 	dbContainer m_messageDbs;

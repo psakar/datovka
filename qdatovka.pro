@@ -15,12 +15,20 @@ QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
 	-Wall -Wextra -pedantic
 
+#INCLUDEPATH = \
+#	$$LIBISDS_PREFIX/include
+#LIBPATH = \
+#	$$LIBISDS_PREFIX/lib
+#LIBS = \
+#	-lisds
+
 SOURCES += src/main.cpp\
     src/gui/datovka.cpp \
     src/gui/dlg_create_account.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_sent_message.cpp \
+    src/io/account_db.cpp \
     src/io/message_db.cpp \
     src/models/accounts_model.cpp \
     src/common.cpp
@@ -31,6 +39,7 @@ HEADERS += src/common.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_sent_message.h \
+    src/io/account_db.h \
     src/io/message_db.h \
     src/models/accounts_model.h \
 

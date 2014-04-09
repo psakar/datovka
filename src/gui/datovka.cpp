@@ -16,6 +16,7 @@
 #define WIN_PREFIX "AppData/Roaming"
 #define CONF_SUBDIR ".dsgui"
 #define CONF_FILE "dsgui.conf"
+#define ACCOUNT_DB_FILE "messages.shelf.db"
 
 #define WIN_POSITION_HEADER "window_position"
 #define WIN_POSITION_X "x"
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
     m_accountModel(this),
+    m_accountDb("accountDb"),
     m_messageDbs(),
     ui(new Ui::MainWindow)
 {
@@ -56,6 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
 	loadSettings();
 	setDefaultMainWindow(VERSION);
 
+	/* Open accounts database. */
+	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
 }
 
 
