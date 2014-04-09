@@ -31,118 +31,9 @@ const QVector<QString> sentHeaderVector = {
 
 
 /* ========================================================================= */
-ReceivedMesagesDbModel::ReceivedMesagesDbModel(QSqlDatabase &db,
-    QObject *parent)
-/* ========================================================================= */
-    : QStandardItemModel(0, 6, parent),
-    m_dbRef(db)
-{
-	/* Add header. */
-	for (int i = 0; i < receivedHeaderVector.size(); ++i) {
-		this->setHorizontalHeaderItem(i,
-		    new QStandardItem(receivedHeaderVector[i]));
-	}
-
-	/* Load content. */
-	fillContent();
-}
-
-
-/* ========================================================================= */
-bool ReceivedMesagesDbModel::addMessage(int row, const QString &id,
-    const QString &title, const QString &sender, const QString &delivered,
-    const QString &accepted)
-/* ========================================================================= */
-{
-	QStandardItem *item;
-
-	item = new QStandardItem(id);
-	this->setItem(row, 0, item);
-	item = new QStandardItem(title);
-	this->setItem(row, 1, item);
-	item = new QStandardItem(sender);
-	this->setItem(row, 2, item);
-	item = new QStandardItem(delivered);
-	this->setItem(row, 3, item);
-	item = new QStandardItem(accepted);
-	this->setItem(row, 4, item);
-
-	return true;
-}
-
-
-/* ========================================================================= */
-void ReceivedMesagesDbModel::fillContent(void)
-/* ========================================================================= */
-{
-	for(int i=0; i<3; i++) {
-		this->addMessage(i, "12365",
-		    "Dodávka světelných mečů", "Orion", "12.3.2014 12:12",
-		    "12.3.2014 12:15");
-	}
-}
-
-
-/* ========================================================================= */
-SentMesagesDbModel::SentMesagesDbModel(QSqlDatabase &db, QObject *parent)
-/* ========================================================================= */
-    : QStandardItemModel(0, 6, parent),
-    m_dbRef(db)
-{
-	/* Add header. */
-	for (int i = 0; i < sentHeaderVector.size(); ++i) {
-		this->setHorizontalHeaderItem(i,
-		    new QStandardItem(sentHeaderVector[i]));
-	}
-
-	/* Load content. */
-	fillContent();
-}
-
-
-/* ========================================================================= */
-bool SentMesagesDbModel::addMessage(int row, const QString &id,
-    const QString &title, const QString &recipient, const QString &status,
-    const QString &delivered, const QString &accepted)
-/* ========================================================================= */
-{
-	QStandardItem *item;
-
-	item = new QStandardItem(id);
-	this->setItem(row,0, item);
-	item = new QStandardItem(title);
-	this->setItem(row,1, item);
-	item = new QStandardItem(recipient);
-	this->setItem(row,2, item);
-	item = new QStandardItem(status);
-	this->setItem(row,3, item);
-	item = new QStandardItem(delivered);
-	this->setItem(row,4, item);
-	item = new QStandardItem(accepted);
-	this->setItem(row,5, item);
-
-	return true;
-}
-
-
-/* ========================================================================= */
-void SentMesagesDbModel::fillContent(void)
-/* ========================================================================= */
-{
-	for(int i=0; i<3; i++) {
-		this->addMessage(i, "12365",
-		    "Dodávka světelných mečů", "Orion", "12.3.2014 12:12",
-		    "12.3.2014 12:15", "Ok");
-	}
-}
-
-
-/* ========================================================================= */
 MessageDb::MessageDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
-    m_receivedModel(m_db, this),
-    m_sentModel(m_db, this),
     m_sqlModel()
 {
 	m_db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
@@ -173,31 +64,43 @@ bool MessageDb::openDb(const QString &fileName)
 
 
 /* ========================================================================= */
-QAbstractTableModel * MessageDb::receivedModel(void)
+QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 /* ========================================================================= */
 {
 	/* TODO */
 	QSqlQuery query(m_db);
-	query.prepare(
+	QString queryStr =
 	    "SELECT dmID, dmAnnotation, dmSender, dmDeliveryTime, "
-	    "dmAcceptanceTime from messages");
+	    "dmAcceptanceTime FROM messages WHERE dbIDRecipient = '" +
+	    recipDbId + "'";
+	qDebug() << queryStr;
+	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
 
 	return &m_sqlModel;
-
-//	return &m_receivedModel;
 }
 
 
 /* ========================================================================= */
-QStandardItemModel * MessageDb::sentModel(void)
+QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 /* ========================================================================= */
 {
 	/* TODO */
+	QSqlQuery query(m_db);
+	QString queryStr =
+	    "SELECT dmID, dmAnnotation, dmRecipient, dmMessageStatus, "
+	    "dmDeliveryTime, dmAcceptanceTime "
+	    "FROM messages WHERE dbIDSender = '" +
+	    sendDbId + "'";
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
 
-	return &m_sentModel;
+	m_sqlModel.setQuery(query);
+
+	return &m_sqlModel;
 }
 
 

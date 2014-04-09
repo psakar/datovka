@@ -158,7 +158,7 @@ bool AccountDb::openDb(const QString &fileName)
 
 
 /* ========================================================================= */
-AccountEntry AccountDb::accountEntry(const QString &key)
+AccountEntry AccountDb::accountEntry(const QString &key) const
 /* ========================================================================= */
 {
 	AccountEntry entry;
@@ -168,33 +168,52 @@ AccountEntry AccountDb::accountEntry(const QString &key)
 	}
 
 	QSqlQuery query(m_db);
-	query.prepare("SELECT _dmType FROM messages LIMIT 1");
-	if (false == query.exec()) {
-		QString queryStr = "SELECT ";
-		for (int i = 0; i < (AccountEntry::entryNames.size() - 1);
-		     ++i) {
-			queryStr += AccountEntry::entryNames[i].first + ", ";
-		}
-		queryStr += AccountEntry::entryNames.last().first + " ";
-		queryStr += "FROM account_info WHERE key = '" + key + "'";
-//		qDebug() << queryStr;
-		if (query.prepare(queryStr) && query.exec() &&
-		    query.isActive() && query.first()) {
-//			qDebug() << "SQL Ok.";
-			QSqlRecord rec = query.record();
-			for (int i = 0; i < AccountEntry::entryNames.size();
-			     ++i) {
-				QVariant value = query.value(rec.indexOf(
-				    AccountEntry::entryNames[i].first));
-				if (!value.isNull() && value.isValid()) {
-					entry.setValue(
-					    AccountEntry::entryNames[i].first,
-					    value);
-				}
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (AccountEntry::entryNames.size() - 1); ++i) {
+		queryStr += AccountEntry::entryNames[i].first + ", ";
+	}
+	queryStr += AccountEntry::entryNames.last().first + " ";
+	queryStr += "FROM account_info WHERE key = '" + key + "'";
+//	qDebug() << queryStr;
+	if (query.prepare(queryStr) && query.exec() && query.isActive() &&
+	    query.first()) {
+//		qDebug() << "SQL Ok.";
+		QSqlRecord rec = query.record();
+		for (int i = 0; i < AccountEntry::entryNames.size(); ++i) {
+			QVariant value = query.value(rec.indexOf(
+			    AccountEntry::entryNames[i].first));
+			if (!value.isNull() && value.isValid()) {
+				entry.setValue(
+				    AccountEntry::entryNames[i].first,
+				    value);
 			}
 		}
-		query.finish();
 	}
+	query.finish();
 
 	return entry;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return data box identifier.
+ */
+const QString AccountDb::dbId(const QString &key,
+    const QString defaultValue) const
+/* ========================================================================= */
+{
+	if (false == m_db.isOpen()) {
+		return defaultValue;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT dbID FROM account_info WHERE key = '" +
+	    key + "'";
+	if (query.prepare(queryStr) && query.exec() && query.isActive() &&
+	    query.first()) {
+		return query.value(0).toString();
+	} else {
+		return defaultValue;
+	}
 }

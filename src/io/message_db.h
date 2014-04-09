@@ -4,45 +4,8 @@
 #define _MESSAGE_DB_H_
 
 
-#include <QStandardItemModel>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
-
-
-/*!
- * @brief Provides a model for received messages.
- */
-class ReceivedMesagesDbModel : public QStandardItemModel {
-
-public:
-	ReceivedMesagesDbModel(QSqlDatabase &db, QObject *parent = 0);
-
-private:
-	bool addMessage(int row, const QString &id, const QString &title,
-	    const QString &sender, const QString &delivered,
-	    const QString &accepted);
-	void fillContent(void);
-
-	QSqlDatabase &m_dbRef; /*!< Reference to database. */
-};
-
-
-/*
- * @brief On-line accessible messages.
- */
-class SentMesagesDbModel : public QStandardItemModel {
-
-public:
-	SentMesagesDbModel(QSqlDatabase &db, QObject *parent = 0);
-
-private:
-	bool addMessage(int row, const QString &id, const QString &title,
-	    const QString &recipient, const QString &status,
-	    const QString &delivered, const QString &accepted);
-	void fillContent(void);
-
-	QSqlDatabase &m_dbRef; /*!< Reference to database. */
-};
 
 
 /*!
@@ -62,12 +25,12 @@ public:
 	/*!
 	 * @brief Return received messages model.
 	 */
-	QAbstractTableModel * receivedModel(void);
+	QAbstractTableModel * receivedModel(const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages model.
 	 */
-	QStandardItemModel * sentModel(void);
+	QAbstractTableModel * sentModel(const QString &sendDbId);
 
 protected:
 	/*!
@@ -84,8 +47,6 @@ protected:
 
 private:
 	QSqlDatabase m_db; /*!< Message database. */
-	ReceivedMesagesDbModel m_receivedModel;
-	SentMesagesDbModel m_sentModel;
 	QSqlQueryModel m_sqlModel;
 };
 

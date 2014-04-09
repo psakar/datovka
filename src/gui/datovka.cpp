@@ -126,6 +126,10 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	db = m_messageDbs.accessMessageDb(userName, dbDir);
 	Q_ASSERT(0 != db);
 
+	QString dbId = m_accountDb.dbId(userName + "___True");
+	qDebug() << "Selected data box ID" << dbId;
+	Q_ASSERT(!dbId.isEmpty());
+
 	/* Depending on which item was clicked show/hide elements. */
 	if (index.parent().row() == -1) {
 		/* Clicked account. */
@@ -135,12 +139,12 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	} else if (index.row() == 0) {
 		/* Received messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->receivedModel());
+		ui->messageList->setModel(db->receivedModel(dbId));
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 	} else if (index.row() == 1) {
 		/* Sent messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->sentModel());
+		ui->messageList->setModel(db->sentModel(dbId));
 	} else {
 		/* Messages total. */
 		ui->messageStackedWidget->setCurrentIndex(0);

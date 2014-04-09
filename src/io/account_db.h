@@ -75,7 +75,13 @@ public:
 	 *
 	 * @note Key is in format 'login___True'
 	 */
-	AccountEntry accountEntry(const QString &key);
+	AccountEntry accountEntry(const QString &key) const;
+
+	/*!
+	 * @brief Return data box identifier.
+	 */
+	const QString dbId(const QString &key,
+	    const QString defaultValue = QString()) const;
 
 private:
 	QSqlDatabase m_db; /*!< Account database. */
