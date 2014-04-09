@@ -228,20 +228,53 @@ QString MainWindow::createAccountInfo(const QStandardItem &item)
 	html.append(accountInfoLine(tr("User name"),
 	    itemSettings[USER].toString()));
 
-	QString unknown = "unknown";
+	AccountEntry accountEntry;
+	accountEntry = m_accountDb.accountEntry(
+	    itemSettings[USER].toString() + "___True");
 
-	html.append(accountInfoLine(tr("Databox ID"), unknown));
-	html.append(accountInfoLine(tr("Type of Databox"), unknown));
-	html.append(accountInfoLine(tr("IČ"), unknown));
-	html.append(accountInfoLine(tr("Company name"), unknown));
-	html.append(accountInfoLine(tr("Address"), unknown));
-	html.append(accountInfoLine(tr("City"), unknown));
-	html.append(accountInfoLine(tr("State"), unknown));
-	html.append(accountInfoLine(tr("Nationality"), unknown));
-	html.append(accountInfoLine(tr("Effective OVM"), unknown));
-	html.append(accountInfoLine(tr("Open addressing"), unknown));
+	if (!accountEntry.dbID.isEmpty()) {
+		html.append(accountInfoLine(tr("Databox ID"),
+		    accountEntry.dbID));
+	}
+	if (!accountEntry.dbType.isEmpty()) {
+		html.append(accountInfoLine(tr("Type of Databox"),
+		    accountEntry.dbType));
+	}
+	if (0 != accountEntry.ic) {
+		html.append(accountInfoLine(tr("IČ"),
+		    QString::number(accountEntry.ic)));
+	}
+	if (!accountEntry.firmName.isEmpty()) {
+		html.append(accountInfoLine(tr("Firm name"),
+		    accountEntry.firmName));
+	}
+	if (!accountEntry.adCity.isEmpty()) {
+		html.append(accountInfoLine(tr("City of residence"),
+		    accountEntry.adCity));
+	}
+	if (!accountEntry.adStreet.isEmpty()) {
+		html.append(accountInfoLine(tr("Street of residence"),
+		    accountEntry.adStreet));
+	}
+	if (!accountEntry.adNumberInMunicipality.isEmpty()) {
+		html.append(accountInfoLine(tr("Number in municipality"),
+		    accountEntry.adNumberInMunicipality));
+	}
+	if (!accountEntry.adZipCode.isEmpty()) {
+		html.append(accountInfoLine(tr("Zip code"),
+		    accountEntry.adZipCode));
+	}
+	if (!accountEntry.nationality.isEmpty()) {
+		html.append(accountInfoLine(tr("Nationality"),
+		    accountEntry.nationality));
+	}
+	html.append(accountInfoLine(tr("Effective OVM"),
+	    accountEntry.dbEffectiveOVM ? tr("Yes") : tr("No")));
+	html.append(accountInfoLine(tr("Open addressing"),
+	    accountEntry.dbOpenAddressing ? tr("Yes") : tr("No")));
 	html.append("<br>");
-	html.append(accountInfoLine(tr("Password expiration date"), unknown));
+	html.append(accountInfoLine(tr("Password expiration date"),
+	    tr("unknown or without expiration")));
 
 	return html;
 }
