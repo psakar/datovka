@@ -17,14 +17,17 @@ public:
 private slots:
 
 	void setActiveButton(int);
-	QString addCertificateFromFile(void);
+	void addCertificateFromFile(void);
 	void saveAccount(void);
+	void checkInputFields();
 
 private:
 	void initAccountDialog(QTreeView *accountList, QString action);
 	void setCurrentAccountData(QTreeView *accountList);
-
 	QTreeView *m_accountList;
+	QString  m_action;
+	int m_loginmethod;
+	QString  m_certPath;
 };
 
 #endif // DLG_CREATENEWACCOUNTDIALOG_H
