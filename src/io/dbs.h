@@ -8,10 +8,10 @@
  * @brief Used datatypes in databases.
  */
 typedef enum {
-	INTEGER = 1,
-	TEXT,
-	BOOLEAN,
-	DATETIME
+	DB_INTEGER = 1,
+	DB_TEXT,
+	DB_BOOLEAN,
+	DB_DATETIME
 } dbEntryType;
 
 

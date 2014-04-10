@@ -243,24 +243,24 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 		if (accountEntry.hasValue(key) &&
 		    !AccountEntry::entryNameMap[key].isEmpty()) {
 			switch (AccountEntry::entryNames[i].second) {
-			case INTEGER:
+			case DB_INTEGER:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    QString::number(
 				        accountEntry.value(key).toInt())));
 				break;
-			case TEXT:
+			case DB_TEXT:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toString()));
 				break;
-			case BOOLEAN:
+			case DB_BOOLEAN:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toBool() ?
 				        tr("Yes") : tr("No")));
 				break;
-			case DATETIME:
+			case DB_DATETIME:
 				/* TODO ? */
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
