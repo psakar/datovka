@@ -40,6 +40,7 @@ HEADERS += src/common.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_sent_message.h \
     src/io/account_db.h \
+    src/io/dbs.h \
     src/io/message_db.h \
     src/models/accounts_model.h \
 

@@ -71,7 +71,7 @@ private:
 	/*!
 	 * @brief Create configuration file if not present.
 	 */
-	void ensureConfPresence(void);
+	void ensureConfPresence(void) const;
 
 	/*!
 	 * @brief Load and apply setting from configuration file.
@@ -81,7 +81,7 @@ private:
 	/*!
 	 * @brief Store current setting to configuration file.
 	 */
-	void saveSettings(void);
+	void saveSettings(void) const;
 
 	/*!
 	 * @brief Sets geometry from settings.
@@ -96,30 +96,28 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &item);
+	QString createAccountInfo(const QStandardItem &item) const;
 
 	/*!
 	 * @brief Generate overall account information.
 	 */
-	QString createAccountInfoAllField(const QString &accountName);
+	QString createAccountInfoAllField(const QString &accountName) const;
 
 	/*!
 	 * @brief Generate banner.
 	 */
-	QString createDatovkaBanner(const QString &version);
+	QString createDatovkaBanner(const QString &version) const;
 
-	/* Configuration file related. */
-	QString m_confDirName;
-	QString m_confFileName;
+	QString m_confDirName; /*!< Configuration directory location. */
+	QString m_confFileName; /*!< Configuration file location. */
 
 	/* Account tree view data model. */
-	AccountModel m_accountModel;
-
-	/* Accout database. */
-	AccountDb m_accountDb;
-
-	/* Map of databases. */
-	dbContainer m_messageDbs;
+	AccountModel m_accountModel; /*!<
+	                              * Account model. Generated from
+	                              * configuration file.
+	                              */
+	AccountDb m_accountDb; /*!< Account information database. */
+	dbContainer m_messageDbs; /*!< Map of message databases. */
 
 	Ui::MainWindow *ui;
 };

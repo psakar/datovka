@@ -66,32 +66,31 @@ const QVariant AccountEntry::value(const QString &key,
 }
 
 
-const QVector< QPair<QString, AccountEntry::m_dbEntryType> >
-    AccountEntry::entryNames = {
-	{"dbID", STRING},
-	{"dbType", STRING},
+const QVector< QPair<QString, dbEntryType> > AccountEntry::entryNames = {
+	{"dbID", TEXT},
+	{"dbType", TEXT},
 	{"ic", INTEGER},
-	{"pnFirstName", STRING},
-	{"pnMiddleName", STRING},
-	{"pnLastName", STRING},
-	{"pnLastNameAtBirth", STRING},
-	{"firmName", STRING},
-	{"biDate", STRING},
-	{"biCity", STRING},
-	{"biCounty", STRING},
-	{"biState", STRING},
-	{"adCity", STRING},
-	{"adStreet", STRING},
-	{"adNumberInStreet", STRING},
-	{"adNumberInMunicipality", STRING},
-	{"adZipCode", STRING},
-	{"adState", STRING},
-	{"nationality", STRING},
-	{"identifier", STRING},
-	{"registryCode", STRING},
+	{"pnFirstName", TEXT},
+	{"pnMiddleName", TEXT},
+	{"pnLastName", TEXT},
+	{"pnLastNameAtBirth", TEXT},
+	{"firmName", TEXT},
+	{"biDate", TEXT},
+	{"biCity", TEXT},
+	{"biCounty", TEXT},
+	{"biState", TEXT},
+	{"adCity", TEXT},
+	{"adStreet", TEXT},
+	{"adNumberInStreet", TEXT},
+	{"adNumberInMunicipality", TEXT},
+	{"adZipCode", TEXT},
+	{"adState", TEXT},
+	{"nationality", TEXT},
+	{"identifier", TEXT},
+	{"registryCode", TEXT},
 	{"dbState", INTEGER},
-	{"dbEffectiveOVM", BOOL},
-	{"dbOpenAddressing", BOOL}
+	{"dbEffectiveOVM", BOOLEAN},
+	{"dbOpenAddressing", BOOLEAN}
 };
 
 

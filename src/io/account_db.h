@@ -8,18 +8,15 @@
 #include <QSqlDatabase>
 
 
+#include "dbs.h"
+
+
 /*!
  * @brief Account information.
  */
 class AccountEntry : private QMap<QString, QVariant> {
 
 public:
-	typedef enum {
-		STRING = 1,
-		INTEGER,
-		BOOL
-	} m_dbEntryType;
-
 	AccountEntry(void);
 	~AccountEntry(void);
 
@@ -43,7 +40,7 @@ public:
 	 * List of know entries and their types.
 	 */
 	static
-	const QVector< QPair<QString, m_dbEntryType> > entryNames;
+	const QVector< QPair<QString, dbEntryType> > entryNames;
 
 	/*!
 	 * Mapping between entry identifiers an their description.

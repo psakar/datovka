@@ -59,8 +59,8 @@ account_info_structure = [
     ("identifier", str, "TEXT", str),
     ("registryCode", str, "TEXT", str),
     ("dbState", int, "INTEGER", int),
-    ("dbEffectiveOVM", bool, "INTEGER", int),
-    ("dbOpenAddressing", bool, "INTEGER", int)
+    ("dbEffectiveOVM", bool, "BOOLEAN", int),
+    ("dbOpenAddressing", bool, "BOOLEAN", int)
 ]
 
 

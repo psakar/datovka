@@ -211,7 +211,7 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 /*
  * Generate account info HTML message.
  */
-QString MainWindow::createAccountInfo(const QStandardItem &item)
+QString MainWindow::createAccountInfo(const QStandardItem &item) const
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
@@ -243,22 +243,28 @@ QString MainWindow::createAccountInfo(const QStandardItem &item)
 		if (accountEntry.hasValue(key) &&
 		    !AccountEntry::entryNameMap[key].isEmpty()) {
 			switch (AccountEntry::entryNames[i].second) {
-			case AccountEntry::STRING:
-				html.append(accountInfoLine(
-				    AccountEntry::entryNameMap[key],
-				    accountEntry.value(key).toString()));
-				break;
-			case AccountEntry::INTEGER:
+			case INTEGER:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    QString::number(
 				        accountEntry.value(key).toInt())));
 				break;
-			case AccountEntry::BOOL:
+			case TEXT:
+				html.append(accountInfoLine(
+				    AccountEntry::entryNameMap[key],
+				    accountEntry.value(key).toString()));
+				break;
+			case BOOLEAN:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toBool() ?
 				        tr("Yes") : tr("No")));
+				break;
+			case DATETIME:
+				/* TODO ? */
+				html.append(accountInfoLine(
+				    AccountEntry::entryNameMap[key],
+				    accountEntry.value(key).toString()));
 				break;
 			default:
 				Q_ASSERT(0);
@@ -279,7 +285,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item)
 /*
  * Generate overall account information.
  */
-QString MainWindow::createAccountInfoAllField(const QString &accountName)
+QString MainWindow::createAccountInfoAllField(const QString &accountName) const
 /* ========================================================================= */
 {
 	QString html = "<h3>" + accountName + "</h3>";
@@ -296,7 +302,7 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName)
 /*
  * Generate banner.
  */
-QString MainWindow::createDatovkaBanner(const QString &version)
+QString MainWindow::createDatovkaBanner(const QString &version) const
 /* ========================================================================= */
 {
 	QString html = "<br><center>";
@@ -334,7 +340,7 @@ QString MainWindow::confDir(void)
 /*
  * Create configuration file if not present.
  */
-void MainWindow::ensureConfPresence(void)
+void MainWindow::ensureConfPresence(void) const
 /* ========================================================================= */
 {
 	if (!QDir(m_confDirName).exists()) {
@@ -467,7 +473,7 @@ void MainWindow::loadSettings(void)
 /*!
  * @brief Store current setting to configuration file.
  */
-void MainWindow::saveSettings(void)
+void MainWindow::saveSettings(void) const
 /* ========================================================================= */
 {
 	/*

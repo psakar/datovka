@@ -8,25 +8,79 @@
 #include "message_db.h"
 
 
-static
-const QVector<QString> receivedHeaderVector = {
-	QObject::tr("Id"),
-	QObject::tr("Message Subject"),
-	QObject::tr("Sender"),
-	QObject::tr("Received"),
-	QObject::tr("Accepted"),
-	QObject::tr("Locally read")
+const QVector< QPair<QString, dbEntryType> > MessageDb::messagesTblKnownAttrs = {
+	{"dmID", INTEGER},
+	{"is_verified", BOOLEAN},
+	{"_origin", TEXT},
+	{"dbIDSender", TEXT},
+	{"dmSender", TEXT},
+	{"dmSenderAddress", TEXT},
+	{"dmSenderType", INTEGER},
+	{"dmRecipient", TEXT},
+	{"dmRecipientAddress", TEXT},
+	{"dmAmbiguousRecipient", TEXT},
+	{"dmSenderOrgUnit", TEXT},
+	{"dmSenderOrgUnitNum", TEXT},
+	{"dbIDRecipient", TEXT},
+	{"dmRecipientOrgUnit", TEXT},
+	{"dmRecipientOrgUnitNum", TEXT},
+	{"dmToHands", TEXT},
+	{"dmAnnotation", TEXT},
+	{"dmRecipientRefNumber", TEXT},
+	{"dmSenderRefNumber", TEXT},
+	{"dmRecipientIdent", TEXT},
+	{"dmSenderIdent", TEXT},
+	{"dmLegalTitleLaw", TEXT},
+	{"dmLegalTitleYear", TEXT},
+	{"dmLegalTitleSect", TEXT},
+	{"dmLegalTitlePar", TEXT},
+	{"dmLegalTitlePoint", TEXT},
+	{"dmPersonalDelivery", BOOLEAN},
+	{"dmAllowSubstDelivery", BOOLEAN},
+	{"dmQTimestamp", TEXT},
+	{"dmDeliveryTime", DATETIME},
+	{"dmAcceptanceTime", DATETIME},
+	{"dmMessageStatus", INTEGER},
+	{"dmAttachmentSize", INTEGER},
+	{"_dmType", TEXT}
 };
 
 
-static
-const QVector<QString> sentHeaderVector = {
-	QObject::tr("Id"),
-	QObject::tr("Message Subject"),
-	QObject::tr("Recipient"),
-	QObject::tr("Received"),
-	QObject::tr("Accepted"),
-	QObject::tr("Status")
+const QMap<QString, QString> MessageDb::messagesTblAttrNames = {
+	{"dmID", QObject::tr("ID")},
+	{"is_verified", ""},
+	{"_origin", ""},
+	{"dbIDSender", ""},
+	{"dmSender", QObject::tr("Sender")},
+	{"dmSenderAddress", ""},
+	{"dmSenderType", ""},
+	{"dmRecipient", QObject::tr("Recipient")},
+	{"dmRecipientAddress", ""},
+	{"dmAmbiguousRecipient", ""},
+	{"dmSenderOrgUnit", ""},
+	{"dmSenderOrgUnitNum", ""},
+	{"dbIDRecipient", ""},
+	{"dmRecipientOrgUnit", ""},
+	{"dmRecipientOrgUnitNum", ""},
+	{"dmToHands", ""},
+	{"dmAnnotation", QObject::tr("Title")},
+	{"dmRecipientRefNumber", ""},
+	{"dmSenderRefNumber", ""},
+	{"dmRecipientIdent", ""},
+	{"dmSenderIdent", ""},
+	{"dmLegalTitleLaw", ""},
+	{"dmLegalTitleYear", ""},
+	{"dmLegalTitleSect", ""},
+	{"dmLegalTitlePar", ""},
+	{"dmLegalTitlePoint", ""},
+	{"dmPersonalDelivery", ""},
+	{"dmAllowSubstDelivery", ""},
+	{"dmQTimestamp", ""},
+	{"dmDeliveryTime", QObject::tr("Delivered")},
+	{"dmAcceptanceTime", QObject::tr("Accepted")},
+	{"dmMessageStatus", QObject::tr("Status")},
+	{"dmAttachmentSize", ""},
+	{"_dmType", ""}
 };
 
 
@@ -67,17 +121,24 @@ bool MessageDb::openDb(const QString &fileName)
 QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 /* ========================================================================= */
 {
-	/* TODO */
+	static QVector<QString> itemIds = {"dmID", "dmAnnotation", "dmSender",
+	    "dmDeliveryTime", "dmAcceptanceTime"};
 	QSqlQuery query(m_db);
-	QString queryStr =
-	    "SELECT dmID, dmAnnotation, dmSender, dmDeliveryTime, "
-	    "dmAcceptanceTime FROM messages WHERE dbIDRecipient = '" +
-	    recipDbId + "'";
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (itemIds.size() - 1); ++i) {
+		queryStr += itemIds[i] + ", ";
+	}
+	queryStr += itemIds.last();
+	queryStr += " FROM messages WHERE dbIDRecipient = '" + recipDbId + "'";
 	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
+	for (int i = 0; i < itemIds.size(); ++i) {
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(itemIds[i]));
+	}
 
 	return &m_sqlModel;
 }
@@ -87,18 +148,26 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 /* ========================================================================= */
 {
-	/* TODO */
+	static QVector<QString> itemIds = {"dmID", "dmAnnotation",
+	    "dmRecipient", "dmMessageStatus", "dmDeliveryTime",
+	    "dmAcceptanceTime"};
 	QSqlQuery query(m_db);
-	QString queryStr =
-	    "SELECT dmID, dmAnnotation, dmRecipient, dmMessageStatus, "
-	    "dmDeliveryTime, dmAcceptanceTime "
-	    "FROM messages WHERE dbIDSender = '" +
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (itemIds.size() - 1); ++i) {
+		queryStr += itemIds[i] + ", ";
+	}
+	queryStr += itemIds.last();
+	queryStr += " FROM messages WHERE dbIDSender = '" +
 	    sendDbId + "'";
 	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
+	for (int i = 0; i < itemIds.size(); ++i) {
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(itemIds[i]));
+	}
 
 	return &m_sqlModel;
 }

@@ -7,6 +7,8 @@
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
 
+#include "dbs.h"
+
 
 /*!
  * @brief Encapsulates message database.
@@ -32,6 +34,18 @@ public:
 	 */
 	QAbstractTableModel * sentModel(const QString &sendDbId);
 
+	/*!
+	 * List of know entries in messages db and their types.
+	 */
+	static
+	const QVector< QPair<QString, dbEntryType> > messagesTblKnownAttrs;
+
+	/*!
+	 * Mapping between entry identifiers an their description.
+	 */
+	static
+	const QMap<QString, QString> messagesTblAttrNames;
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.
@@ -47,7 +61,7 @@ protected:
 
 private:
 	QSqlDatabase m_db; /*!< Message database. */
-	QSqlQueryModel m_sqlModel;
+	QSqlQueryModel m_sqlModel; /*!< Model of diaplayed data. */
 };
 
 
