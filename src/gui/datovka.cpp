@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
+
+	QSettings settings(m_confFileName, QSettings::IniFormat);
+	setDefaultAccount(settings);
 }
 
 
@@ -514,7 +517,7 @@ void MainWindow::loadSettings(void)
 	ui->accountList->setModel(&m_accountModel);
 	ui->accountList->expandAll();
 
-	setDefaultAccount(settings);
+
 
 	/* Received messages. */
 
