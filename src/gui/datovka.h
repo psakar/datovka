@@ -69,6 +69,11 @@ private:
 	QString confDir(void);
 
 	/*!
+	 * @brief Fix "\" on "/" in configuration file.
+	 */
+	void fixBackSlash(const QString fileName);
+
+	/*!
 	 * @brief Create configuration file if not present.
 	 */
 	void ensureConfPresence(void) const;
@@ -113,9 +118,9 @@ private:
 
 	/* Account tree view data model. */
 	AccountModel m_accountModel; /*!<
-	                              * Account model. Generated from
-	                              * configuration file.
-	                              */
+				      * Account model. Generated from
+				      * configuration file.
+				      */
 	AccountDb m_accountDb; /*!< Account information database. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 

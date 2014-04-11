@@ -77,6 +77,13 @@ void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
 	this->testAccountCheckBox->setChecked(itemSettings[TEST].toBool());
 	this->rememberPswcheckBox->setChecked(itemSettings[REMEMBER].toBool());
 	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
+
+	if (itemSettings[P12FILE].toString() != NULL) {
+		this->addCertificateButton->setText(QDir::toNativeSeparators(itemSettings[P12FILE].toString()));
+		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
+		QString("key_16.png")));
+		m_certPath = QDir::toNativeSeparators(itemSettings[P12FILE].toString());
+	}
 }
 
 
@@ -156,13 +163,31 @@ void CreateNewAccountDialog::saveAccount(void)
 	AccountModel::SettingsMap itemSettings =
 	    itemTop->data(ROLE_SETINGS).toMap();
 
-		itemSettings[NAME]= this->accountLineEdit->text();
-		itemSettings[USER]= this->usernameLineEdit->text();
-		itemSettings[PWD]= this->passwordLineEdit->text();
+	itemSettings[NAME]= this->accountLineEdit->text();
+	itemSettings[USER]= this->usernameLineEdit->text();
 
-		itemSettings[TEST]= this->testAccountCheckBox->isChecked();
-		itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
-		itemSettings[SYNC]= this->synchroCheckBox->isChecked();
+	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
+		itemSettings[LOGIN] = "username";
+	} else if(this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
+		itemSettings[LOGIN] = "certificate";
+	} else if(this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
+		itemSettings[LOGIN] = "user_certificate";
+	} else if(this->loginmethodComboBox->currentIndex() == HOTP) {
+		itemSettings[LOGIN] = "hotp";
+	} else {
+		itemSettings[LOGIN] = "totp";
+	}
+
+	itemSettings[PWD]= this->passwordLineEdit->text();
+	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
+	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
+	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
+
+	if (m_certPath.isEmpty()) {
+		itemSettings[P12FILE].setValue(NULL);
+	} else {
+		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
+	}
 
 	if (m_action == "Edit") {
 		model->itemFromIndex(index)->setText(this->accountLineEdit->text());

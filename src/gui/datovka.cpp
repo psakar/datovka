@@ -53,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	qDebug() << m_confDirName << m_confFileName;
 
+	/* Change "\" to "/" */
+
+	fixBackSlash(m_confFileName);
+
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
@@ -63,6 +67,24 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
+}
+
+
+void MainWindow::fixBackSlash(const QString fileName)
+{
+	QString line;
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadWrite|QIODevice::Text)) {
+		QTextStream in(&file);
+		line = in.readAll();
+		line.replace(QString("\\"), QString("/"));
+		file.reset();
+		in << line;
+		file.close();
+	} else {
+		qDebug() << "Error: Cannot open ini file";
+	}
 }
 
 
@@ -128,7 +150,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	qDebug() << "Selected data box ID" << dbId;
-	Q_ASSERT(!dbId.isEmpty());
+//	Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
 	if (index.parent().row() == -1) {
@@ -247,7 +269,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    QString::number(
-				        accountEntry.value(key).toInt())));
+					accountEntry.value(key).toInt())));
 				break;
 			case DB_TEXT:
 				html.append(accountInfoLine(
@@ -258,7 +280,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toBool() ?
-				        tr("Yes") : tr("No")));
+					tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				/* TODO ? */

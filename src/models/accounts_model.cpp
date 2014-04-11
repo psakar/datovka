@@ -2,7 +2,6 @@
 
 #include <QDebug>
 #include <QRegExp>
-
 #include "accounts_model.h"
 #include "src/common.h"
 
@@ -77,7 +76,9 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.insert(SYNC,
 			    settings.value(groups.at(i) + "/" + SYNC,
 				"").toBool());
-
+			itemSettings.insert(P12FILE,
+			    settings.value(groups.at(i) + "/" + P12FILE,
+				"").toString());
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
 			    itemSettings);
@@ -122,6 +123,10 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
 			settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
 		}
+		if (!itemSettings.value(P12FILE).isNull()) {
+			settings.setValue(P12FILE, itemSettings.value(P12FILE));
+		}
+
 		settings.setValue(SYNC, itemSettings.value(SYNC));
 
 		settings.endGroup();
