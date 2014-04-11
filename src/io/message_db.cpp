@@ -5,6 +5,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+
+#include "src/common.h"
 #include "message_db.h"
 
 
@@ -86,6 +88,26 @@ const QMap<QString, QString> MessageDb::messagesTblAttrNames = {
 
 
 /* ========================================================================= */
+/*
+ * Convert viewed data in date/time columns.
+ */
+QVariant dbTableModel::data(const QModelIndex &index, int role) const
+/* ========================================================================= */
+{
+	if ((Qt::DisplayRole == role) &&
+	    (this->headerData(index.column(), Qt::Horizontal,
+	         TYPE_ROLE).toInt() == DB_DATETIME)) {
+		/* Convert date on display. */
+		return dateTimeFromDbFormat(
+		    QSqlQueryModel::data(index, role).toString(),
+		    dateTimeDisplayFormat);
+	} else {
+		return QSqlQueryModel::data(index, role);
+	}
+}
+
+
+/* ========================================================================= */
 MessageDb::MessageDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
@@ -124,6 +146,8 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 {
 	static QVector<QString> itemIds = {"dmID", "dmAnnotation", "dmSender",
 	    "dmDeliveryTime", "dmAcceptanceTime"};
+	static QVector<dbEntryType> itemTypes = {DB_INTEGER, DB_TEXT, DB_TEXT,
+	    DB_DATETIME, DB_DATETIME};
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (itemIds.size() - 1); ++i) {
@@ -131,14 +155,16 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 	}
 	queryStr += itemIds.last();
 	queryStr += " FROM messages WHERE dbIDRecipient = '" + recipDbId + "'";
-	qDebug() << queryStr;
+//	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
 	for (int i = 0; i < itemIds.size(); ++i) {
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(itemIds[i]));
+		    messagesTblAttrNames.value(itemIds[i])); /* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal, itemTypes[i],
+		    TYPE_ROLE); /* Data type. */
 	}
 
 	return &m_sqlModel;
@@ -152,6 +178,9 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 	static QVector<QString> itemIds = {"dmID", "dmAnnotation",
 	    "dmRecipient", "dmMessageStatus", "dmDeliveryTime",
 	    "dmAcceptanceTime"};
+	static QVector<dbEntryType> itemTypes = {DB_INTEGER, DB_TEXT,
+	    DB_TEXT, DB_INTEGER, DB_DATETIME,
+	    DB_DATETIME};
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (itemIds.size() - 1); ++i) {
@@ -160,14 +189,16 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 	queryStr += itemIds.last();
 	queryStr += " FROM messages WHERE dbIDSender = '" +
 	    sendDbId + "'";
-	qDebug() << queryStr;
+//	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
 	for (int i = 0; i < itemIds.size(); ++i) {
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(itemIds[i]));
+		    messagesTblAttrNames.value(itemIds[i])); /* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal, itemTypes[i],
+		    TYPE_ROLE); /* Data type. */
 	}
 
 	return &m_sqlModel;
@@ -229,16 +260,17 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 	/* Already opened. */
 	if (this->find(key) != this->end()) {
-		qDebug() << key << "db found";
+//		qDebug() << key << "db found";
 		return (*this)[key];
 	}
 
-	qDebug() << "creating new" << key;
+//	qDebug() << "creating new" << key;
 	db = new MessageDb(key);
 
-	qDebug() << "searching for file" << key << "in" << locDir;
+//	qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
-	qDebug() << "opening" << db->openDb(locDir + "/" + key + "___1.db");
+//	qDebug() << "opening";
+	db->openDb(locDir + "/" + key + "___1.db");
 
 	this->insert(key, db);
 	return db;

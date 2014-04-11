@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Change "\" to "/" */
 
-	fixBackSlash(m_confFileName);
+	fixBackSlashesInFile(m_confFileName);
 
 	/* Load configuration file. */
 	ensureConfPresence();
@@ -70,7 +70,12 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 
-void MainWindow::fixBackSlash(const QString fileName)
+/* ========================================================================= */
+/*
+ * Changes all occurences of '\' to '/' in given file.
+ */
+void MainWindow::fixBackSlashesInFile(const QString &fileName)
+/* ========================================================================= */
 {
 	QString line;
 	QFile file(fileName);
@@ -283,10 +288,11 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 					tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
-				/* TODO ? */
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
-				    accountEntry.value(key).toString()));
+				    dateTimeFromDbFormat(
+				        accountEntry.value(key).toString(),
+				        dateTimeDisplayFormat)));
 				break;
 			default:
 				Q_ASSERT(0);

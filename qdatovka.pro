@@ -29,6 +29,7 @@ SOURCES += src/main.cpp\
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_sent_message.cpp \
     src/io/account_db.cpp \
+    src/io/dbs.cpp \
     src/io/message_db.cpp \
     src/models/accounts_model.cpp \
     src/common.cpp

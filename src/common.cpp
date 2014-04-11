@@ -259,3 +259,6 @@ void GlobProxySettings::saveToSettings(QSettings &settings) const
 
 	settings.endGroup();
 }
+
+
+QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");

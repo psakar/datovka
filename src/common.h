@@ -99,4 +99,11 @@ extern GlobPreferences globPref;
 extern GlobProxySettings globProxSet;
 extern QMap<QString, QVariant> *currentAccountMap;
 
+
+/*!
+ * @brief Date/time format used in the application.
+ */
+extern
+QString dateTimeDisplayFormat;
+
 #endif /* _COMMON_H_ */

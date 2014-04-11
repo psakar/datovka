@@ -69,9 +69,11 @@ private:
 	QString confDir(void);
 
 	/*!
-	 * @brief Fix "\" on "/" in configuration file.
+	 * @brief Changes all occurences of '\' to '/' in given file.
 	 */
-	void fixBackSlash(const QString fileName);
+	/* TODO -- Move to common? */
+	static
+	void fixBackSlashesInFile(const QString &fileName);
 
 	/*!
 	 * @brief Create configuration file if not present.
@@ -118,9 +120,9 @@ private:
 
 	/* Account tree view data model. */
 	AccountModel m_accountModel; /*!<
-				      * Account model. Generated from
-				      * configuration file.
-				      */
+	                              * Account model. Generated from
+	                              * configuration file.
+	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 

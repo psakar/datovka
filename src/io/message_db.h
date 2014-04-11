@@ -10,6 +10,26 @@
 #include "dbs.h"
 
 
+/* Used to determine the db data type of the column. */
+#define TYPE_ROLE (Qt::UserRole + 1)
+
+
+/*!
+ * @brief Custom model class.
+ *
+ * Used for data conversion on display.
+ *
+ * @note setItemDelegate and a custom ItemDelegate would also be the solution.
+ */
+class dbTableModel : public QSqlQueryModel {
+public:
+	/*!
+	 * @brief Convert viewed data in date/time columns.
+	 */
+	virtual QVariant data(const QModelIndex &index, int role) const;
+};
+
+
 /*!
  * @brief Encapsulates message database.
  */
@@ -17,7 +37,7 @@ class MessageDb : public QObject {
 
 public:
 	MessageDb(const QString &connectionName, QObject *parent = 0);
-	~MessageDb(void);
+	virtual ~MessageDb(void);
 
 	/*!
 	 * @brief Open database file.
@@ -61,7 +81,7 @@ protected:
 
 private:
 	QSqlDatabase m_db; /*!< Message database. */
-	QSqlQueryModel m_sqlModel; /*!< Model of diaplayed data. */
+	dbTableModel m_sqlModel; /*!< Model of diaplayed data. */
 };
 
 
