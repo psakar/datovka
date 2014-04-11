@@ -123,7 +123,6 @@ void CreateNewAccountDialog::checkInputFields()
 		    && !this->usernameLineEdit->text().isEmpty()
 		    && !this->passwordLineEdit->text().isEmpty();
 	}
-
 	this->accountButtonBox->button(QDialogButtonBox::Ok)->
 	    setEnabled(buttonEnabled);
 }

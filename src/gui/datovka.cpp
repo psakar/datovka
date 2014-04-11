@@ -249,6 +249,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 
 	QString html;
 
+	html.append("<div style=\"margin-left: 12px;\">");
 	html.append("<h3>");
 	if (itemSettings[TEST].toBool()) {
 		html.append(tr("Test account"));
@@ -308,6 +309,8 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 	html.append(accountInfoLine(tr("Password expiration date"),
 	    tr("unknown or without expiration")));
 
+	html.append("</div>");
+
 	return html;
 }
 
@@ -319,12 +322,15 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 QString MainWindow::createAccountInfoAllField(const QString &accountName) const
 /* ========================================================================= */
 {
-	QString html = "<h3>" + accountName + "</h3>";
+	QString html = ("<div style=\"margin-left: 12px;\">");
+	html.append ("<h3>" + accountName + "</h3>");
 
 	html.append(accountInfoLine(tr("Received messages"), accountName));
 	/* TODO - add count of received messages */
 	html.append(accountInfoLine(tr("Sent messages"), accountName));
 	/* TODO - add count of sent messages */
+
+	html.append("</div>");
 	return html;
 }
 
