@@ -170,8 +170,10 @@ void CreateNewAccountDialog::saveAccount(void)
 		itemSettings[LOGIN] = "username";
 	} else if(this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
 		itemSettings[LOGIN] = "certificate";
+		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if(this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
 		itemSettings[LOGIN] = "user_certificate";
+		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if(this->loginmethodComboBox->currentIndex() == HOTP) {
 		itemSettings[LOGIN] = "hotp";
 	} else {
@@ -182,12 +184,6 @@ void CreateNewAccountDialog::saveAccount(void)
 	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
-
-	if (m_certPath.isEmpty()) {
-		itemSettings[P12FILE].setValue(NULL);
-	} else {
-		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	}
 
 	if (m_action == "Edit") {
 		model->itemFromIndex(index)->setText(this->accountLineEdit->text());

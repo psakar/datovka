@@ -123,7 +123,9 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
 			settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
 		}
-		if (!itemSettings.value(P12FILE).isNull()) {
+		if (!itemSettings.value(P12FILE).isNull() &&
+		    itemSettings.value(P12FILE).isValid() &&
+		    !itemSettings.value(P12FILE).toString().isEmpty()) {
 			settings.setValue(P12FILE, itemSettings.value(P12FILE));
 		}
 
@@ -244,8 +246,6 @@ QString AccountModel::userName(const QStandardItem &item)
 
 	return user;
 }
-
-
 
 /* TODO */
 bool AccountModel::addYearItemToAccount(const QModelIndex &index,

@@ -291,8 +291,8 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    dateTimeFromDbFormat(
-				        accountEntry.value(key).toString(),
-				        dateTimeDisplayFormat)));
+					accountEntry.value(key).toString(),
+					dateTimeDisplayFormat)));
 				break;
 			default:
 				Q_ASSERT(0);
@@ -425,6 +425,29 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 
 /* ========================================================================= */
 /*
+ * Set default account from settings.
+ */
+void MainWindow::setDefaultAccount(const QSettings &settings)
+/* ========================================================================= */
+{
+	QString username = settings.value("default_account/username", "").toString();
+	if (!username.isEmpty()) {
+		int topitemcount = m_accountModel.rowCount();
+		for (int i = 0; i < topitemcount; i++) {
+			const QStandardItem *item = m_accountModel.item(i,0);
+			QString user = item->data(ROLE_SETINGS).toMap()[USER].toString();
+			if (user == username) {
+				QModelIndex index = m_accountModel.indexFromItem(item);
+				ui->accountList->setCurrentIndex(index.child(0,0));
+				treeItemClicked(index.child(0,0));
+			}
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Store geometry to settings.
  */
 void MainWindow::saveWindowGeometry(QSettings &settings) const
@@ -491,9 +514,31 @@ void MainWindow::loadSettings(void)
 	ui->accountList->setModel(&m_accountModel);
 	ui->accountList->expandAll();
 
+	setDefaultAccount(settings);
+
 	/* Received messages. */
 
 	/* Sent messages. */
+}
+
+/* ========================================================================= */
+/*
+ * Store current account username to settings.
+ */
+void MainWindow::saveAccountIndex(QSettings &settings) const
+/* ========================================================================= */
+{
+	QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+
+	settings.beginGroup("default_account");
+	settings.setValue("username", userName);
+	settings.endGroup();
 }
 
 
@@ -513,6 +558,8 @@ void MainWindow::saveSettings(void) const
 
 	/* Window geometry. */
 	saveWindowGeometry(settings);
+
+	saveAccountIndex(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);

@@ -96,9 +96,19 @@ private:
 	void loadWindowGeometry(const QSettings &settings);
 
 	/*!
+	 * @brief Set default account from settings.
+	 */
+	void setDefaultAccount(const QSettings &settings);
+
+	/*!
 	 * @brief Store geometry to settings.
 	 */
 	void saveWindowGeometry(QSettings &settings) const;
+
+	/*!
+	 * @brief Store current account username to settings.
+	 */
+	void saveAccountIndex(QSettings &settings) const;
 
 	/*!
 	 * @brief Generate account info HTML message.
