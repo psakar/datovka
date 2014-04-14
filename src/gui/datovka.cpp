@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QTableView>
 #include <QStackedWidget>
+#include <QMessageBox>
 
 #include "datovka.h"
 #include "dlg_preferences.h"
@@ -636,14 +637,28 @@ void MainWindow::on_actionDelete_account_triggered()
 /* ========================================================================= */
 {
 	const QModelIndex index = ui->accountList->currentIndex();
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
 	int currentTopRow = itemTop->row();
 
 	if (currentTopRow < 0) {
 		return;
 	}
-	/* TODO */
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+	    tr("Remove account ") + itemTop->text(),
+	    tr("Do you want to remove account") +  " '" + itemTop->text() +"'?",
+	    QMessageBox::Yes|QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		if(itemTop->hasChildren()) {
+			itemTop->removeRows(0, itemTop->rowCount());
+		}
+		ui->accountList->model()->removeRow(currentTopRow);
+		/* TODO - delete database */
+		saveSettings();
+	}
 }
 
 /* ========================================================================= */
