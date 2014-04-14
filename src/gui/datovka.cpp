@@ -713,11 +713,10 @@ void MainWindow::on_actionMove_account_up_triggered()
 	}
 
 	int newRow = currentTopRow-1;
-	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
+	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow);
 	itemModel->insertRow(newRow, list);
 	ui->accountList->expandAll();
-
-	//index = itemModel->indexFromItem(item);
+	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
 }
 
@@ -730,11 +729,10 @@ void MainWindow::on_actionMove_account_down_triggered()
 {
 	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
 	    (ui->accountList->model());
-	const QModelIndex index = ui->accountList->currentIndex();
+	QModelIndex index = ui->accountList->currentIndex();
 	const QStandardItem *item = m_accountModel.itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	int currentTopRow = itemTop->row();
-
 	int topItemCount = m_accountModel.rowCount()-1;
 
 	if (currentTopRow == topItemCount) {
@@ -745,6 +743,7 @@ void MainWindow::on_actionMove_account_down_triggered()
 	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
 	itemModel->insertRow(newRow, list);
 	ui->accountList->expandAll();
+	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
 }
 
