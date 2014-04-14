@@ -32,7 +32,8 @@ SOURCES += src/main.cpp\
     src/io/dbs.cpp \
     src/io/message_db.cpp \
     src/models/accounts_model.cpp \
-    src/common.cpp
+    src/common.cpp \
+    src/gui/dlg_change_pwd.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
@@ -44,12 +45,14 @@ HEADERS += src/common.h \
     src/io/dbs.h \
     src/io/message_db.h \
     src/models/accounts_model.h \
+    src/gui/dlg_change_pwd.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_create_account.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
-    src/gui/ui/dlg_sent_message.ui
+    src/gui/ui/dlg_sent_message.ui \
+    src/gui/ui/dlg_change_pwd.ui
 
 RESOURCES += \
     res/resources.qrc

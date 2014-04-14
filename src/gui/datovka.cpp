@@ -10,6 +10,7 @@
 #include "dlg_proxysets.h"
 #include "dlg_sent_message.h"
 #include "dlg_create_account.h"
+#include "dlg_change_pwd.h"
 #include "ui_datovka.h"
 
 
@@ -439,16 +440,21 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 void MainWindow::setDefaultAccount(const QSettings &settings)
 /* ========================================================================= */
 {
-	QString username = settings.value("default_account/username", "").toString();
+	QString username = settings.value("default_account/username", "")
+	   .toString();
 	if (!username.isEmpty()) {
-		int topitemcount = m_accountModel.rowCount();
-		for (int i = 0; i < topitemcount; i++) {
+		int topItemCount = m_accountModel.rowCount();
+		for (int i = 0; i < topItemCount; i++) {
 			const QStandardItem *item = m_accountModel.item(i,0);
-			QString user = item->data(ROLE_SETINGS).toMap()[USER].toString();
+			QString user = item->data(ROLE_SETINGS).toMap()[USER].
+			    toString();
 			if (user == username) {
-				QModelIndex index = m_accountModel.indexFromItem(item);
-				ui->accountList->setCurrentIndex(index.child(0,0));
+				QModelIndex index = m_accountModel.
+				    indexFromItem(item);
+				ui->accountList->
+				    setCurrentIndex(index.child(0,0));
 				treeItemClicked(index.child(0,0));
+				break;
 			}
 		}
 	}
@@ -600,38 +606,135 @@ void MainWindow::on_actionSent_message_triggered()
 	newMessageDialog->show();
 }
 
+/* ========================================================================= */
+/*
+ * Create account dialog for addition new.
+ */
 void MainWindow::on_actionAdd_account_triggered()
+/* ========================================================================= */
 {
-
-	QDialog *newAccountDialog = new CreateNewAccountDialog(this, ui->accountList, "New");
+	QDialog *newAccountDialog =
+	    new CreateNewAccountDialog(this, ui->accountList, "New");
 	newAccountDialog->exec();
 }
 
+/* ========================================================================= */
+/*
+* Delete account
+ */
 void MainWindow::on_actionDelete_account_triggered()
+/* ========================================================================= */
 {
+	const QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	int currentTopRow = itemTop->row();
 
+	if (currentTopRow < 0) {
+		return;
+	}
+	/* TODO */
 }
 
+/* ========================================================================= */
+/*
+ * Change user password for account.
+ */
 void MainWindow::on_actionChange_password_triggered()
+/* ========================================================================= */
 {
+	const QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	MessageDb *db;
 
+	Q_ASSERT(0 != itemTop);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_SETINGS).toMap();
+
+	const QString &userName = itemSettings[USER].toString();
+	QString dbDir = itemSettings[DB_DIR].toString();
+
+	Q_ASSERT(!userName.isEmpty());
+	if (dbDir.isEmpty()) {
+		dbDir = m_confDirName;
+	}
+
+	db = m_messageDbs.accessMessageDb(userName, dbDir);
+	Q_ASSERT(0 != db);
+
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	QDialog *changePwd = new changePassword(this, ui->accountList, dbId);
+	changePwd->exec();
 }
 
+/* ========================================================================= */
+/*
+ * Create account dialog for updates.
+ */
 void MainWindow::on_actionAccount_properties_triggered()
+/* ========================================================================= */
 {
-	QDialog *newAccountDialog = new CreateNewAccountDialog(this, ui->accountList, "Edit");
+	QDialog *newAccountDialog =
+	    new CreateNewAccountDialog(this, ui->accountList, "Edit");
 	newAccountDialog->exec();
-
 }
 
+
+/* ========================================================================= */
+/*
+ * Move account up (currentRow - 1).
+ */
 void MainWindow::on_actionMove_account_up_triggered()
+/* ========================================================================= */
 {
+	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
+	    (ui->accountList->model());
+	QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	int currentTopRow = itemTop->row();
 
+	if (currentTopRow == 0) {
+		return;
+	}
+
+	int newRow = currentTopRow-1;
+	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
+	itemModel->insertRow(newRow, list);
+	ui->accountList->expandAll();
+
+	//index = itemModel->indexFromItem(item);
+	ui->accountList->setCurrentIndex(index.child(0,0));
 }
 
+/* ========================================================================= */
+/*
+* Move account down (currentRow + 1).
+ */
 void MainWindow::on_actionMove_account_down_triggered()
+/* ========================================================================= */
 {
+	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
+	    (ui->accountList->model());
+	const QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	int currentTopRow = itemTop->row();
 
+	int topItemCount = m_accountModel.rowCount()-1;
+
+	if (currentTopRow == topItemCount) {
+		return;
+	}
+
+	int newRow = currentTopRow+1;
+	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
+	itemModel->insertRow(newRow, list);
+	ui->accountList->expandAll();
+	ui->accountList->setCurrentIndex(index.child(0,0));
 }
 
 void MainWindow::on_actionChange_data_directory_triggered()
