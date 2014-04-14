@@ -78,10 +78,12 @@ void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
 	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
 
 	if (itemSettings[P12FILE].toString() != NULL) {
-		this->addCertificateButton->setText(QDir::toNativeSeparators(itemSettings[P12FILE].toString()));
+		this->addCertificateButton->setText(QDir::
+		    toNativeSeparators(itemSettings[P12FILE].toString()));
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
-		m_certPath = QDir::toNativeSeparators(itemSettings[P12FILE].toString());
+		m_certPath = QDir::toNativeSeparators(itemSettings[P12FILE].
+		   toString());
 	}
 }
 
@@ -154,7 +156,8 @@ void CreateNewAccountDialog::setActiveButton(int itemindex)
 
 void CreateNewAccountDialog::saveAccount(void)
 {
-	AccountModel *model = dynamic_cast<AccountModel*>(m_accountList->model());
+	AccountModel *model = dynamic_cast<AccountModel*>
+	    (m_accountList->model());
 	QModelIndex index = m_accountList->currentIndex();
 	QStandardItem *item = model->itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
@@ -184,11 +187,11 @@ void CreateNewAccountDialog::saveAccount(void)
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 
 	if (m_action == "Edit") {
-		model->itemFromIndex(index)->setText(this->accountLineEdit->text());
+		model->itemFromIndex(index)->
+		    setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
-		qDebug() << "saveAccount: " << this->accountLineEdit->text();
 	} else {
 		model->addAccount(this->accountLineEdit->text(), itemSettings);
-		qDebug() << "createAccount: " << this->accountLineEdit->text();
+		m_accountList->expandAll();
 	}
 }

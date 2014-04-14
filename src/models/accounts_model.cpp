@@ -30,10 +30,6 @@ AccountModel::AccountModel(QObject *parent)
 {
 	/* Set header. */
 	this->setHorizontalHeaderItem(0, new QStandardItem(tr("Accounts")));
-
-//	/* Load content. */
-//	addAccount("Testovací účet 1");
-//	addAccount("Testovací účet 2");
 }
 
 
@@ -183,7 +179,6 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	all->appendRow(allSent);
 
 	invisibleRootItem()->appendRow(account);
-
 	return true;
 }
 

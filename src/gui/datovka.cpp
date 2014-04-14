@@ -162,7 +162,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	qDebug() << "Selected data box ID" << dbId;
-	Q_ASSERT(!dbId.isEmpty());
+	//Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
 	qDebug() << "Clicked row" << index.row();
@@ -190,12 +190,12 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	case AccountModel::nodeReceived:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->receivedModel(dbId));
-//		m_accountModel.addNodeReceivedYear(index, "2014");
+		m_accountModel.addNodeReceivedYear(index, "2014");
 		break;
 	case AccountModel::nodeSent:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->sentModel(dbId));
-//		m_accountModel.addNodeSentYear(index, "2014");
+		m_accountModel.addNodeSentYear(index, "2014");
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO */
@@ -638,7 +638,7 @@ void MainWindow::on_actionCreate_message_triggered()
 void MainWindow::on_actionSent_message_triggered()
 /* ========================================================================= */
 {
-	QDialog *newMessageDialog = new dlg_sent_message(this);
+	QDialog *newMessageDialog = new dlg_sent_message(this, ui->accountList);
 	newMessageDialog->show();
 }
 
