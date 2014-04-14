@@ -138,7 +138,7 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	Q_ASSERT(0 != itemTop);
 
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_SETINGS).toMap();
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 
 	const QString &userName = itemSettings[USER].toString();
 	QString dbDir = itemSettings[DB_DIR].toString();
@@ -154,14 +154,20 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	//qDebug() << index.parent().row()  << " - " << index.row();
 	qDebug() << "\n";
 
-	db = m_messageDbs.accessMessageDb(userName, dbDir);
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 
+	/*
+	 * TODO -- Is '___True' somehow related to the testing state
+	 * of an account?
+	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	qDebug() << "Selected data box ID" << dbId;
 //	Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
+	qDebug() << "Clicked row" << index.row();
 	if (index.parent().row() == -1) {
 		/* Clicked account. */
 		ui->messageStackedWidget->setCurrentIndex(0);
@@ -170,7 +176,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	} else if (index.row() == 0) {
 		/* Received messages. */
 		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->receivedModel(dbId));
+		//ui->messageList->setModel(db->receivedModel(dbId));
+		ui->messageList->setModel(db->receivedWithin90DaysModel(dbId));
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 	} else if (index.row() == 1) {
 		/* Sent messages. */
@@ -246,7 +253,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
-	    item.data(ROLE_SETINGS).toMap();
+	    item.data(ROLE_CONF_SETINGS).toMap();
 
 	QString html;
 
@@ -279,7 +286,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    QString::number(
-					accountEntry.value(key).toInt())));
+				        accountEntry.value(key).toInt())));
 				break;
 			case DB_TEXT:
 				html.append(accountInfoLine(
@@ -290,14 +297,14 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toBool() ?
-					tr("Yes") : tr("No")));
+				        tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				html.append(accountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    dateTimeFromDbFormat(
-					accountEntry.value(key).toString(),
-					dateTimeDisplayFormat)));
+				        accountEntry.value(key).toString(),
+				        dateTimeDisplayFormat)));
 				break;
 			default:
 				Q_ASSERT(0);
@@ -446,8 +453,8 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 		int topItemCount = m_accountModel.rowCount();
 		for (int i = 0; i < topItemCount; i++) {
 			const QStandardItem *item = m_accountModel.item(i,0);
-			QString user = item->data(ROLE_SETINGS).toMap()[USER].
-			    toString();
+			QString user = item->data(
+			    ROLE_CONF_SETINGS).toMap()[USER].toString();
 			if (user == username) {
 				QModelIndex index = m_accountModel.
 				    indexFromItem(item);
@@ -524,9 +531,12 @@ void MainWindow::loadSettings(void)
 
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
+
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
+	/* Scan databases. */
+
 	ui->accountList->expandAll();
 
 
@@ -548,7 +558,7 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_SETINGS).toMap();
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 	const QString &userName = itemSettings[USER].toString();
 
 	settings.beginGroup("default_account");
@@ -651,7 +661,7 @@ void MainWindow::on_actionChange_password_triggered()
 	Q_ASSERT(0 != itemTop);
 
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_SETINGS).toMap();
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 
 	const QString &userName = itemSettings[USER].toString();
 	QString dbDir = itemSettings[DB_DIR].toString();
@@ -661,7 +671,8 @@ void MainWindow::on_actionChange_password_triggered()
 		dbDir = m_confDirName;
 	}
 
-	db = m_messageDbs.accessMessageDb(userName, dbDir);
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 
 	QString dbId = m_accountDb.dbId(userName + "___True");

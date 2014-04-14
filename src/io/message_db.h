@@ -10,10 +10,6 @@
 #include "dbs.h"
 
 
-/* Used to determine the db data type of the column. */
-#define TYPE_ROLE (Qt::UserRole + 1)
-
-
 /*!
  * @brief Custom model class.
  *
@@ -50,7 +46,13 @@ public:
 	QAbstractTableModel * receivedModel(const QString &recipDbId);
 
 	/*!
-	 * @brief Return received messages model.
+	 * @brief Return received messages within past 90 days;
+	 */
+	QAbstractTableModel * receivedWithin90DaysModel(
+	    const QString &recipDbId);
+
+	/*!
+	 * @brief Return sent messages model.
 	 */
 	QAbstractTableModel * sentModel(const QString &sendDbId);
 
@@ -80,8 +82,17 @@ protected:
 	/* TODO -- Delete db. */
 
 private:
+	static
+	const QVector<QString> receivedItemIds;
+	static
+	const QVector<dbEntryType> receivedItemTypes;
+	static
+	const QVector<QString> sentItemIds;
+	static
+	const QVector<dbEntryType> sentItemTypes;
+
 	QSqlDatabase m_db; /*!< Message database. */
-	dbTableModel m_sqlModel; /*!< Model of diaplayed data. */
+	dbTableModel m_sqlModel; /*!< Model of displayed data. */
 };
 
 
@@ -98,7 +109,7 @@ public:
 	 * @brief Access/create+open message database related to item.
 	 */
 	MessageDb * accessMessageDb(const QString &key,
-	    const QString &locDir);
+	    const QString &locDir, bool testing);
 
 	/*!
 	 * @brief Close message database related to item.

@@ -64,21 +64,21 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			    settings.value(groups.at(i) + "/" + LOGIN, ""));
 			itemSettings.insert(PWD, fromBase64(
 			    settings.value(groups.at(i) + "/" + PWD,
-				"").toString()));
+			        "").toString()));
 			itemSettings.insert(TEST,
 			    settings.value(groups.at(i) + "/" + TEST,
-				"").toBool());
+			        "").toBool());
 			itemSettings.insert(REMEMBER,
 			    settings.value(groups.at(i) + "/" + REMEMBER,
-				"").toBool());
+			        "").toBool());
 			itemSettings.insert(DB_DIR,
 			    settings.value(groups.at(i) + "/" + DB_DIR, ""));
 			itemSettings.insert(SYNC,
 			    settings.value(groups.at(i) + "/" + SYNC,
-				"").toBool());
+			        "").toBool());
 			itemSettings.insert(P12FILE,
 			    settings.value(groups.at(i) + "/" + P12FILE,
-				"").toString());
+			        "").toString());
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
 			    itemSettings);
@@ -98,7 +98,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 
 	for (int i = 0; i < this->rowCount(); ++i) {
 		const SettingsMap &itemSettings =
-		    this->item(i)->data(ROLE_SETINGS).toMap();
+		    this->item(i)->data(ROLE_CONF_SETINGS).toMap();
 
 		groupName = CREDENTIALS;
 		if (i > 0) {
@@ -159,7 +159,7 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	QStandardItem *allSent = new QStandardItem(tr("Sent"));
 	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
-	account->setData(data, ROLE_SETINGS);
+	account->setData(data, ROLE_CONF_SETINGS);
 
 	font.setBold(true);
 //	font.setItalic(true);
@@ -189,8 +189,8 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 
 
 /* ========================================================================= */
-/*!
- * @brief Returns pointer to related top-most item.
+/*
+ * Returns pointer to related top-most item.
  */
 const QStandardItem * AccountModel::itemTop(const QStandardItem *item)
 /* ========================================================================= */
@@ -240,7 +240,7 @@ QString AccountModel::userName(const QStandardItem &item)
 
 	Q_ASSERT(parent != 0);
 
-	user = parent->data(ROLE_SETINGS).toMap()[USER].toString();
+	user = parent->data(ROLE_CONF_SETINGS).toMap()[USER].toString();
 
 	Q_ASSERT(!user.isEmpty());
 

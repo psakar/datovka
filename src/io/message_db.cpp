@@ -87,6 +87,19 @@ const QMap<QString, QString> MessageDb::messagesTblAttrNames = {
 };
 
 
+const QVector<QString> MessageDb::receivedItemIds = {"dmID", "dmAnnotation",
+    "dmSender", "dmDeliveryTime", "dmAcceptanceTime"};
+const QVector<dbEntryType> MessageDb::receivedItemTypes = {DB_INTEGER, DB_TEXT,
+    DB_TEXT, DB_DATETIME, DB_DATETIME};
+
+
+const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
+    "dmRecipient", "dmMessageStatus", "dmDeliveryTime",
+    "dmAcceptanceTime"};
+const QVector<dbEntryType> MessageDb::sentItemTypes = {DB_INTEGER, DB_TEXT,
+    DB_TEXT, DB_INTEGER, DB_DATETIME, DB_DATETIME};
+
+
 /* ========================================================================= */
 /*
  * Convert viewed data in date/time columns.
@@ -96,7 +109,7 @@ QVariant dbTableModel::data(const QModelIndex &index, int role) const
 {
 	if ((Qt::DisplayRole == role) &&
 	    (this->headerData(index.column(), Qt::Horizontal,
-	         TYPE_ROLE).toInt() == DB_DATETIME)) {
+	         ROLE_DB_ENTRY_TYPE).toInt() == DB_DATETIME)) {
 		/* Convert date on display. */
 		return dateTimeFromDbFormat(
 		    QSqlQueryModel::data(index, role).toString(),
@@ -141,30 +154,31 @@ bool MessageDb::openDb(const QString &fileName)
 
 
 /* ========================================================================= */
+/*
+ * Return received messages within past 90 days;
+ */
 QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 /* ========================================================================= */
 {
-	static QVector<QString> itemIds = {"dmID", "dmAnnotation", "dmSender",
-	    "dmDeliveryTime", "dmAcceptanceTime"};
-	static QVector<dbEntryType> itemTypes = {DB_INTEGER, DB_TEXT, DB_TEXT,
-	    DB_DATETIME, DB_DATETIME};
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (itemIds.size() - 1); ++i) {
-		queryStr += itemIds[i] + ", ";
+	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += itemIds.last();
+	queryStr += receivedItemIds.last();
 	queryStr += " FROM messages WHERE dbIDRecipient = '" + recipDbId + "'";
 //	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
 	m_sqlModel.setQuery(query);
-	for (int i = 0; i < itemIds.size(); ++i) {
+	for (int i = 0; i < receivedItemIds.size(); ++i) {
+		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(itemIds[i])); /* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal, itemTypes[i],
-		    TYPE_ROLE); /* Data type. */
+		    messagesTblAttrNames.value(receivedItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -172,21 +186,54 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 
 
 /* ========================================================================= */
+/*
+ * Return received messages within past 90 days;
+ */
+QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
+    const QString &recipDbId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+		queryStr += receivedItemIds[i] + ", ";
+	}
+	queryStr += receivedItemIds.last();
+	queryStr += " FROM messages WHERE "
+	    "(dbIDRecipient = '" + recipDbId + "')"
+	    " and "
+	    "(dmDeliveryTime >= date('now','-90 day'))";
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
+
+	m_sqlModel.setQuery(query);
+	for (int i = 0; i < receivedItemIds.size(); ++i) {
+		/* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(receivedItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+	}
+
+	return &m_sqlModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return sent messages model.
+ */
 QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 /* ========================================================================= */
 {
-	static QVector<QString> itemIds = {"dmID", "dmAnnotation",
-	    "dmRecipient", "dmMessageStatus", "dmDeliveryTime",
-	    "dmAcceptanceTime"};
-	static QVector<dbEntryType> itemTypes = {DB_INTEGER, DB_TEXT,
-	    DB_TEXT, DB_INTEGER, DB_DATETIME,
-	    DB_DATETIME};
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (itemIds.size() - 1); ++i) {
-		queryStr += itemIds[i] + ", ";
+	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
+		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += itemIds.last();
+	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE dbIDSender = '" +
 	    sendDbId + "'";
 //	qDebug() << queryStr;
@@ -194,11 +241,13 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 	query.exec();
 
 	m_sqlModel.setQuery(query);
-	for (int i = 0; i < itemIds.size(); ++i) {
+	for (int i = 0; i < sentItemIds.size(); ++i) {
+		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(itemIds[i])); /* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal, itemTypes[i],
-		    TYPE_ROLE); /* Data type. */
+		    messagesTblAttrNames.value(sentItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal, sentItemTypes[i],
+		    ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -253,7 +302,7 @@ dbContainer::~dbContainer(void)
 
 /* ========================================================================= */
 MessageDb * dbContainer::accessMessageDb(const QString &key,
-    const QString &locDir)
+    const QString &locDir, bool testing)
 /* ========================================================================= */
 {
 	MessageDb *db;
@@ -270,7 +319,11 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 //	qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
 //	qDebug() << "opening";
-	db->openDb(locDir + "/" + key + "___1.db");
+	/*
+	 * Test accounts have ___1 in their names, ___0 relates to standard
+	 * accounts.
+	 */
+	db->openDb(locDir + "/" + key + "___" + (testing ? "1" : "0") + ".db");
 
 	this->insert(key, db);
 	return db;

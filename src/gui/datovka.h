@@ -125,12 +125,11 @@ private:
 	 */
 	QString createDatovkaBanner(const QString &version) const;
 
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
-
-	/* Account tree view data model. */
 	AccountModel m_accountModel; /*!<
-	                              * Account model. Generated from
+	                              * Account tree view model. Generated from
 	                              * configuration file.
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */

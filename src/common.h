@@ -8,11 +8,13 @@
 #include <QString>
 #include <QDebug>
 
+
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.1"
+
 
 typedef enum {
 	USER_NAME = 0,
@@ -21,6 +23,21 @@ typedef enum {
 	HOTP = 3,
 	TOTP = 4
 } LoginMethodsIndex;
+
+
+/*
+ * Defined roles accross the application. 
+ */
+#define ROLE_CONF_SETINGS (Qt::UserRole + 1) /*
+                                              * Used to access configuration
+                                              * data.
+                                              */
+//#define ROLE_DB (Qt::UserRole + 2)
+#define ROLE_DB_ENTRY_TYPE (Qt::UserRole + 3) /*
+                                               * Used to determine the db data
+                                               * type of the column.
+                                               */
+
 
 class GlobPreferences {
 
@@ -105,5 +122,6 @@ extern QMap<QString, QVariant> *currentAccountMap;
  */
 extern
 QString dateTimeDisplayFormat;
+
 
 #endif /* _COMMON_H_ */

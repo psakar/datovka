@@ -19,9 +19,6 @@
 #define SYNC "sync_with_all"
 #define P12FILE "p12file"
 
-#define ROLE_SETINGS (Qt::UserRole + 1)
-#define ROLE_DB (Qt::UserRole + 2)
-
 
 /*!
  * @brief Account hierarchy.

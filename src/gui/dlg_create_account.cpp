@@ -50,7 +50,7 @@ void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_SETINGS).toMap();
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 
 	this->setWindowTitle(tr("Update account") + " " + itemTop->text());
 	this->accountLineEdit->setText(itemTop->text());
@@ -159,7 +159,7 @@ void CreateNewAccountDialog::saveAccount(void)
 	QStandardItem *item = model->itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
 	AccountModel::SettingsMap itemSettings =
-	    itemTop->data(ROLE_SETINGS).toMap();
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 
 	itemSettings[NAME]= this->accountLineEdit->text();
 	itemSettings[USER]= this->usernameLineEdit->text();
