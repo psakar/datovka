@@ -52,6 +52,11 @@ public:
 	    const QString &recipDbId);
 
 	/*!
+	 * @brief Return list of years (strings) in database.
+	 */
+	QList<QString> receivedYears(const QString &recipDbId);
+
+	/*!
 	 * @brief Return sent messages model.
 	 */
 	QAbstractTableModel * sentModel(const QString &sendDbId);
@@ -61,6 +66,11 @@ public:
 	 */
 	QAbstractTableModel * sentWithin90DaysModel(
 	    const QString &sendDbId);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 */
+	QList<QString> sentYears(const QString &sendDbId);
 
 	/*!
 	 * List of know entries in messages db and their types.

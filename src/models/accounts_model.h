@@ -117,14 +117,17 @@ public:
 	/*!
 	 * @brief Add received year node into account.
 	 */
-	bool addNodeReceivedYear(const QModelIndex &index,
-	    const QString &year);
+	bool addNodeReceivedYear(QStandardItem *item, const QString &year);
 
 	/*!
 	 * @brief Add sent year node into account.
 	 */
-	bool addNodeSentYear(const QModelIndex &index,
-	    const QString &year);
+	bool addNodeSentYear(QStandardItem *item, const QString &year);
+
+	/*!
+	 * @brief Delete all year-related nodes in model.
+	 */
+	void removeAllYearNodes(void);
 private:
 
 };

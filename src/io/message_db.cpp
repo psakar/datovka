@@ -223,6 +223,36 @@ QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
 
 /* ========================================================================= */
 /*
+ * Return list of years (strings) in database.
+ */
+QList<QString> MessageDb::receivedYears(const QString &recipDbId)
+/* ========================================================================= */
+{
+	QList<QString> yearList;
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
+	    "FROM messages WHERE "
+	    "dbIDRecipient = '" + recipDbId + "'"
+	    " ORDER BY dmDeliveryTime ASC";
+
+//	qDebug() << "Generating received year list" << recipDbId;
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec()) {
+		query.first();
+		while (query.isValid()) {
+//			qDebug() << query.value(0).toString();
+			yearList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+
+	return yearList;
+}
+
+
+/* ========================================================================= */
+/*
  * Return sent messages model.
  */
 QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
@@ -287,6 +317,36 @@ QAbstractTableModel * MessageDb::sentWithin90DaysModel(
 	}
 
 	return &m_sqlModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return list of years (strings) in database.
+ */
+QList<QString> MessageDb::sentYears(const QString &sendDbId)
+/* ========================================================================= */
+{
+	QList<QString> yearList;
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
+	    "FROM messages WHERE "
+	    "dbIDSender = '" + sendDbId + "'"
+	    " ORDER BY dmDeliveryTime ASC";
+
+//	qDebug() << "Generating received year list" << recipDbId;
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec()) {
+		query.first();
+		while (query.isValid()) {
+//			qDebug() << query.value(0).toString();
+			yearList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+
+	return yearList;
 }
 
 

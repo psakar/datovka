@@ -190,12 +190,10 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	case AccountModel::nodeReceived:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->receivedModel(dbId));
-		m_accountModel.addNodeReceivedYear(index, "2014");
 		break;
 	case AccountModel::nodeSent:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->sentModel(dbId));
-		m_accountModel.addNodeSentYear(index, "2014");
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO */
@@ -562,6 +560,7 @@ void MainWindow::loadSettings(void)
 	setDefaultAccount(settings);
 
 	/* Scan databases. */
+	regenerateAccountModelYears();
 
 	/* Received messages. */
 
@@ -587,6 +586,57 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 	settings.beginGroup("default_account");
 	settings.setValue("username", userName);
 	settings.endGroup();
+}
+
+
+/* ========================================================================= */
+/*
+ * Regenerates account model according to the database content.
+ */
+bool MainWindow::regenerateAccountModelYears(void)
+/* ========================================================================= */
+{
+	QStandardItem *itemTop;
+	MessageDb *db;
+	QList<QString> yearList;
+
+	m_accountModel.removeAllYearNodes();
+
+//	qDebug() << "Generating years";
+
+	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
+		itemTop = m_accountModel.item(i, 0);
+		Q_ASSERT(0 != itemTop);
+		const AccountModel::SettingsMap &itemSettings =
+		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		const QString &userName = itemSettings[USER].toString();
+		Q_ASSERT(!userName.isEmpty());
+		QString dbDir = itemSettings[DB_DIR].toString();
+		if (dbDir.isEmpty()) {
+			/* Set default directory name. */
+			dbDir = m_confDirName;
+		}
+		db = m_messageDbs.accessMessageDb(userName, dbDir,
+		    itemSettings[TEST].toBool());
+		Q_ASSERT(0 != db);
+		QString dbId = m_accountDb.dbId(userName + "___True");
+		/* Received. */
+		yearList = db->receivedYears(dbId);
+		for (int j = 0; j < yearList.size(); ++j) {
+//			qDebug() << yearList.value(j);
+			m_accountModel.addNodeReceivedYear(itemTop,
+			    yearList.value(j));
+		}
+		/* Sent. */
+		yearList = db->sentYears(dbId);
+		for (int j = 0; j < yearList.size(); ++j) {
+//			qDebug() << yearList.value(j);
+			m_accountModel.addNodeSentYear(itemTop,
+			    yearList.value(j));
+		}
+	}
+
+	return true;
 }
 
 
@@ -711,6 +761,7 @@ void MainWindow::on_actionChange_password_triggered()
 		dbDir = m_confDirName;
 	}
 
+	/* TODO -- ??? */
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);

@@ -111,6 +111,11 @@ private:
 	void saveAccountIndex(QSettings &settings) const;
 
 	/*!
+	 * @brief Regenerates account model according to the database content.
+	 */
+	bool regenerateAccountModelYears(void);
+
+	/*!
 	 * @brief Generate account info HTML message.
 	 */
 	QString createAccountInfo(const QStandardItem &item) const;

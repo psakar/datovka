@@ -303,11 +303,11 @@ QString AccountModel::userName(const QStandardItem &item)
 /*
  * Add received year node into account.
  */
-bool AccountModel::addNodeReceivedYear(const QModelIndex &index,
+bool AccountModel::addNodeReceivedYear(QStandardItem *item,
     const QString &year)
 /* ========================================================================= */
 {
-	QStandardItem *item = this->itemFromIndex(index);
+	Q_ASSERT(0 != item);
 
 	/* Find account top. */
 	while (0 != item->parent()) {
@@ -349,11 +349,10 @@ bool AccountModel::addNodeReceivedYear(const QModelIndex &index,
 /*
  * Add sent year node into account.
  */
-bool AccountModel::addNodeSentYear(const QModelIndex &index,
-    const QString &year)
+bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year)
 /* ========================================================================= */
 {
-	QStandardItem *item = this->itemFromIndex(index);
+	Q_ASSERT(0 != item);
 
 	/* Find account top. */
 	while (0 != item->parent()) {
@@ -384,10 +383,34 @@ bool AccountModel::addNodeSentYear(const QModelIndex &index,
 	QStandardItem *yearitem = new QStandardItem(year);
 	yearitem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-download.png")));
-	qDebug() << "Adding year" << year;
 	item->appendRow(yearitem);
 
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete all year-related nodes in model.
+ */
+void AccountModel::removeAllYearNodes(void)
+/* ========================================================================= */
+{
+	QStandardItem *itemRoot = this->invisibleRootItem();
+	QStandardItem *item;
+
+	qDebug() << "Deleting all year items.";
+
+	for (int i = 0; i < itemRoot->rowCount(); ++i) {
+		/* Received. */
+		item = itemRoot->child(i, 0)->child(2, 0)->child(0, 0);
+		Q_ASSERT(0 != item);
+		item->removeRows(0, item->rowCount());
+		/* Sent. */
+		item = itemRoot->child(i, 0)->child(2, 0)->child(1, 0);
+		Q_ASSERT(0 != item);
+		item->removeRows(0, item->rowCount());
+	}
 }
 
 
