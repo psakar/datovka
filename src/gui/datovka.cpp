@@ -59,25 +59,22 @@ MainWindow::MainWindow(QWidget *parent)
 
 	fixBackSlashesInFile(m_confFileName);
 
-	/* Load configuration file. */
-	ensureConfPresence();
-	loadSettings();
-
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
 	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
 
+	/* Load configuration file. */
+	ensureConfPresence();
+	loadSettings();
+
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
-
-	QSettings settings(m_confFileName, QSettings::IniFormat);
-	setDefaultAccount(settings);
 }
 
 
 /* ========================================================================= */
 /*
- * Changes all occurences of '\' to '/' in given file.
+ * Changes all occurrences of '\' to '/' in given file.
  */
 void MainWindow::fixBackSlashesInFile(const QString &fileName)
 /* ========================================================================= */
@@ -165,31 +162,49 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	qDebug() << "Selected data box ID" << dbId;
-//	Q_ASSERT(!dbId.isEmpty());
+	Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
 	qDebug() << "Clicked row" << index.row();
-	if (index.parent().row() == -1) {
-		/* Clicked account. */
+	qDebug() << "Clicked type" << AccountModel::nodeType(index);
+	switch (AccountModel::nodeType(index)) {
+	case AccountModel::nodeAccountTop:
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfo(*item);
 		ui->accountTextInfo->setHtml(html);
-	} else if (index.row() == 0) {
-		/* Received messages. */
+		break;
+	case AccountModel::nodeRecentReceived:
 		ui->messageStackedWidget->setCurrentIndex(1);
-		//ui->messageList->setModel(db->receivedModel(dbId));
 		ui->messageList->setModel(db->receivedWithin90DaysModel(dbId));
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
-	} else if (index.row() == 1) {
-		/* Sent messages. */
+		break;
+	case AccountModel::nodeRecentSent:
 		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->sentModel(dbId));
-	} else {
-		/* Messages total. */
+		ui->messageList->setModel(db->sentWithin90DaysModel(dbId));
+		break;
+	case AccountModel::nodeAll:
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfoAllField(tr("All messages"));
 		ui->accountTextInfo->setHtml(html);
-		//m_accountModel.addYearItemToAccount(index, "2014");
+//		m_accountModel.addYearItemToAccount(index, "2014");
+		break;
+	case AccountModel::nodeReceived:
+		ui->messageStackedWidget->setCurrentIndex(1);
+		ui->messageList->setModel(db->receivedModel(dbId));
+		break;
+	case AccountModel::nodeSent:
+		ui->messageStackedWidget->setCurrentIndex(1);
+		ui->messageList->setModel(db->sentModel(dbId));
+		break;
+	case AccountModel::nodeReceivedYear:
+		/* TODO */
+		break;
+	case AccountModel::nodeSentYear:
+		/* TODO */
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
 	}
 }
 
@@ -536,20 +551,26 @@ void MainWindow::loadSettings(void)
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
-	/* Scan databases. */
 
 	ui->accountList->expandAll();
 
+	/* Open accounts database. */
+	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
 
+	/* Select last-used account. */
+	setDefaultAccount(settings);
+
+	/* Scan databases. */
 
 	/* Received messages. */
 
 	/* Sent messages. */
 }
 
+
 /* ========================================================================= */
 /*
- * Store current account username to settings.
+ * Store current account user name to settings.
  */
 void MainWindow::saveAccountIndex(QSettings &settings) const
 /* ========================================================================= */
@@ -595,6 +616,9 @@ void MainWindow::saveSettings(void) const
 
 	/* Accounts. */
 	m_accountModel.saveToSettings(settings);
+
+	/* Store last-used account. */
+	saveAccountIndex(settings);
 
 	/* TODO */
 

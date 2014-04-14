@@ -28,6 +28,49 @@ class AccountModel: public QStandardItemModel {
 public:
 	typedef QMap<QString, QVariant> SettingsMap;
 
+	/*
+	 * |
+	 * +- nodeAccountTop (account X)
+	 * |   |
+	 * |   +- nodeRecentReceived
+	 * |   +- nodeRecentSent
+	 * |   +- nodeAll
+	 * |      |
+	 * |      +- nodeReceived
+	 * |      |  |
+	 * |      |  +- nodeReceivedYear (yyyy)
+	 * |      |  +- nodeReceivedYear (zzzz)
+	 * |      |  .
+	 * |      |  .
+	 * |      |  .
+	 * |      |
+	 * |      +- nodeSent
+	 * |         |
+	 * |         +- nodeSentYear (aaaa)
+	 * |         +- nodeSentYear (bbbb)
+	 * |         .
+	 * |         .
+	 * |         .
+	 * |
+	 * +- nodeAccountTop (account Y)
+	 *    |
+	 *    .
+	 *    .
+	 *    .
+	 */
+	typedef enum {
+		nodeUnknown = 0,
+		nodeAccountTop,
+		nodeRecentReceived,
+		nodeRecentSent,
+		nodeAll,
+		nodeReceived,
+		nodeSent,
+		nodeReceivedYear,
+		nodeSentYear
+	} NodeType;
+
+
 	/*!
 	 * @brief Empty account model constructor.
 	 */
@@ -48,6 +91,12 @@ public:
 	 */
 	bool addAccount(const QString &name,
 	    const QVariant &data = QVariant());
+
+	/*!
+	 * @brief Returns node type.
+	 */
+	static
+	NodeType nodeType(const QModelIndex &index);
 
 	/*!
 	 * @brief Returns pointer to related top-most item.

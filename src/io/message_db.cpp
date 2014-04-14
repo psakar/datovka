@@ -187,7 +187,7 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 
 /* ========================================================================= */
 /*
- * Return received messages within past 90 days;
+ * Return received messages within past 90 days.
  */
 QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
     const QString &recipDbId)
@@ -236,6 +236,42 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE dbIDSender = '" +
 	    sendDbId + "'";
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
+
+	m_sqlModel.setQuery(query);
+	for (int i = 0; i < sentItemIds.size(); ++i) {
+		/* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(sentItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal, sentItemTypes[i],
+		    ROLE_DB_ENTRY_TYPE);
+	}
+
+	return &m_sqlModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return sent messages within past 90 days.
+ */
+QAbstractTableModel * MessageDb::sentWithin90DaysModel(
+    const QString &sendDbId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
+		queryStr += sentItemIds[i] + ", ";
+	}
+	queryStr += sentItemIds.last();
+	queryStr += " FROM messages WHERE "
+	    "(dbIDSender = '" + sendDbId + "')"
+	    " and "
+	    "(dmDeliveryTime >= date('now','-90 day'))";
 //	qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();

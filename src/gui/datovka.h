@@ -69,7 +69,7 @@ private:
 	QString confDir(void);
 
 	/*!
-	 * @brief Changes all occurences of '\' to '/' in given file.
+	 * @brief Changes all occurrences of '\' to '/' in given file.
 	 */
 	/* TODO -- Move to common? */
 	static
@@ -106,7 +106,7 @@ private:
 	void saveWindowGeometry(QSettings &settings) const;
 
 	/*!
-	 * @brief Store current account username to settings.
+	 * @brief Store current account user name to settings.
 	 */
 	void saveAccountIndex(QSettings &settings) const;
 

@@ -46,7 +46,7 @@ public:
 	QAbstractTableModel * receivedModel(const QString &recipDbId);
 
 	/*!
-	 * @brief Return received messages within past 90 days;
+	 * @brief Return received messages within past 90 days.
 	 */
 	QAbstractTableModel * receivedWithin90DaysModel(
 	    const QString &recipDbId);
@@ -55,6 +55,12 @@ public:
 	 * @brief Return sent messages model.
 	 */
 	QAbstractTableModel * sentModel(const QString &sendDbId);
+
+	/*!
+	 * @brief Return sent messages within past 90 days.
+	 */
+	QAbstractTableModel * sentWithin90DaysModel(
+	    const QString &sendDbId);
 
 	/*!
 	 * List of know entries in messages db and their types.

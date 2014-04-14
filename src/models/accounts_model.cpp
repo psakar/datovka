@@ -189,6 +189,60 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 
 
 /* ========================================================================= */
+/*!
+ * @brief Returns node type.
+ */
+AccountModel::NodeType AccountModel::nodeType(const QModelIndex &index)
+/* ========================================================================= */
+{
+	if (-1 == index.parent().row()) {
+		return nodeAccountTop;
+	} else if (-1 == index.parent().parent().row()) {
+		switch (index.row()) {
+		case 0:
+			return nodeRecentReceived;
+			break;
+		case 1:
+			return nodeRecentSent;
+			break;
+		case 2:
+			return nodeAll;
+			break;
+		default:
+			return nodeUnknown;
+			break;
+		}
+	} else if (-1 == index.parent().parent().parent().row()) {
+		switch (index.row()) {
+		case 0:
+			return nodeReceived;
+			break;
+		case 1:
+			return nodeSent;
+			break;
+		default:
+			return nodeUnknown;
+			break;
+		}
+	} else if (-1 == index.parent().parent().parent().parent().row()) {
+		switch (index.parent().row()) {
+		case 0:
+			return nodeReceivedYear;
+			break;
+		case 1:
+			return nodeSentYear;
+			break;
+		default:
+			return nodeUnknown;
+			break;
+		}
+	} else {
+		return nodeUnknown;
+	}
+}
+
+
+/* ========================================================================= */
 /*
  * Returns pointer to related top-most item.
  */
