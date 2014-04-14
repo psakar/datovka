@@ -277,9 +277,10 @@ QStandardItem * AccountModel::itemTop(QStandardItem *item)
 }
 
 
+#if 0
 /* ========================================================================= */
-/*!
- * @brief Get user name of the account.
+/*
+ * Get user name of the account.
  */
 QString AccountModel::userName(const QStandardItem &item)
 /* ========================================================================= */
@@ -300,17 +301,96 @@ QString AccountModel::userName(const QStandardItem &item)
 
 	return user;
 }
+#endif
 
-/* TODO */
-bool AccountModel::addYearItemToAccount(const QModelIndex &index,
+
+/* ========================================================================= */
+/*
+ * Add received year node into account.
+ */
+bool AccountModel::addNodeReceivedYear(const QModelIndex &index,
     const QString &year)
+/* ========================================================================= */
 {
-	qDebug() << index.parent().row() << " - " << index.row();
+	QStandardItem *item = this->itemFromIndex(index);
 
+	/* Find account top. */
+	while (0 != item->parent()) {
+		item = item->parent();
+	}
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Get received node. */
+	item = item->child(2, 0)->child(0, 0);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Check whether year already exists as child element. */
+	for (int i = 0; i < item->rowCount(); ++i) {
+		if (year == item->child(i, 0)->text()) {
+			return false;
+		}
+	}
+
+	/* Add new child item. */
 	QStandardItem *yearitem = new QStandardItem(year);
-	yearitem->setIcon(QIcon(
-	    ICON_16x16_PATH + QString("datovka-message-download.png")));
-	AccountModel::item(index.parent().row(),0)->appendRow(yearitem);
+	yearitem->setIcon(QIcon(ICON_16x16_PATH +
+	    QString("datovka-message-download.png")));
+	qDebug() << "Adding year" << year;
+	item->appendRow(yearitem);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Add sent year node into account.
+ */
+bool AccountModel::addNodeSentYear(const QModelIndex &index,
+    const QString &year)
+/* ========================================================================= */
+{
+	QStandardItem *item = this->itemFromIndex(index);
+
+	/* Find account top. */
+	while (0 != item->parent()) {
+		item = item->parent();
+	}
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Get sent node. */
+	item = item->child(2, 0)->child(1, 0);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Check whether year already exists as child element. */
+	for (int i = 0; i < item->rowCount(); ++i) {
+		if (year == item->child(i, 0)->text()) {
+			return false;
+		}
+	}
+
+	/* Add new child item. */
+	QStandardItem *yearitem = new QStandardItem(year);
+	yearitem->setIcon(QIcon(ICON_16x16_PATH +
+	    QString("datovka-message-download.png")));
+	qDebug() << "Adding year" << year;
+	item->appendRow(yearitem);
 
 	return true;
 }

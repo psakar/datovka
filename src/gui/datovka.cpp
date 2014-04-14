@@ -186,15 +186,16 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfoAllField(tr("All messages"));
 		ui->accountTextInfo->setHtml(html);
-//		m_accountModel.addYearItemToAccount(index, "2014");
 		break;
 	case AccountModel::nodeReceived:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->receivedModel(dbId));
+//		m_accountModel.addNodeReceivedYear(index, "2014");
 		break;
 	case AccountModel::nodeSent:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(db->sentModel(dbId));
+//		m_accountModel.addNodeSentYear(index, "2014");
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO */

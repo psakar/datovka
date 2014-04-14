@@ -106,12 +106,24 @@ public:
 	static
 	QStandardItem * itemTop(QStandardItem *item);
 
+#if 0
 	/*!
 	 * @brief Get user name of the account.
 	 */
+	static
 	QString userName(const QStandardItem &item);
+#endif
 
-	bool addYearItemToAccount(const QModelIndex &parent,
+	/*!
+	 * @brief Add received year node into account.
+	 */
+	bool addNodeReceivedYear(const QModelIndex &index,
+	    const QString &year);
+
+	/*!
+	 * @brief Add sent year node into account.
+	 */
+	bool addNodeSentYear(const QModelIndex &index,
 	    const QString &year);
 private:
 
