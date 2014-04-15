@@ -32,7 +32,8 @@ private slots:
 	/*!
 	 * @brief Redraws widgets according to selected item.
 	 */
-	void treeItemClicked(const QModelIndex &index);
+	void treeItemSelectionChanged(const QModelIndex &current,
+	    const QModelIndex &previous = QModelIndex());
 
 	/*!
 	 * @brief Generates menu to selected item. (And redraw widgets.)

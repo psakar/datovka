@@ -46,11 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	/* Account list. */
-	connect(ui->accountList, SIGNAL(clicked(QModelIndex)),
-	    this, SLOT(treeItemClicked(QModelIndex)));
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->accountList,
-	    SIGNAL(customContextMenuRequested(QPoint)),
+	connect(ui->accountList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(treeItemRightClicked(QPoint)));
 
 	m_confDirName = confDir();
@@ -69,6 +66,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
+	/* Account list must already be set in order to connect this signal. */
+	connect(ui->accountList->selectionModel(),
+	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+	    SLOT(treeItemSelectionChanged(QModelIndex, QModelIndex)));
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
@@ -128,11 +129,17 @@ void MainWindow::on_actionProxy_settings_triggered()
 
 
 /* ========================================================================= */
-void MainWindow::treeItemClicked(const QModelIndex &index)
+/*
+ * Redraws widgets according to selected item.
+ */
+void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
+    const QModelIndex &previous)
 /* ========================================================================= */
 {
+	(void) previous;
+
 	QString html;
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *item = m_accountModel.itemFromIndex(current);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	MessageDb *db;
 
@@ -151,8 +158,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	}
 
 	qDebug() << "Selected user account" << userName << dbDir;
-	qDebug() << index.model() << item->text();
-	//qDebug() << index.parent().row()  << " - " << index.row();
+	qDebug() << current.model() << item->text();
+	//qDebug() << current.parent().row()  << " - " << current.row();
 	qDebug() << "\n";
 
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
@@ -168,9 +175,9 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	//Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
-//	qDebug() << "Clicked row" << index.row();
-//	qDebug() << "Clicked type" << AccountModel::nodeType(index);
-	switch (AccountModel::nodeType(index)) {
+//	qDebug() << "Clicked row" << current.row();
+//	qDebug() << "Clicked type" << AccountModel::nodeType(current);
+	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfo(*item);
@@ -228,7 +235,7 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (0 != item) {
-		treeItemClicked(index);
+		treeItemSelectionChanged(index);
 
 		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
 		    QString(tr("Get messages")),
@@ -509,7 +516,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				    indexFromItem(item);
 				ui->accountList->
 				    setCurrentIndex(index.child(0,0));
-				treeItemClicked(index.child(0,0));
+				treeItemSelectionChanged(index.child(0,0));
 				break;
 			}
 		}
