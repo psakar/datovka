@@ -4,9 +4,12 @@
 #include "ui_dlg_sent_message.h"
 
 
-dlg_sent_message::dlg_sent_message(QWidget *parent, QTreeView *accountList) :
+dlg_sent_message::dlg_sent_message(QWidget *parent, QTreeView *accountList,
+    QTableView *messageList, QString action) :
     QDialog(parent),
-    m_accountList(accountList)
+    m_accountList(accountList),
+    m_messageList(messageList),
+    m_action(action)
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -20,7 +23,16 @@ void dlg_sent_message::on_cancelButton_clicked()
 void dlg_sent_message::initNewMessageDialog(void)
 {
 
-	AccountModel *model = dynamic_cast<AccountModel*>(m_accountList->model());
+	this->recipientTableWidget->setColumnWidth(0,50);
+	this->recipientTableWidget->setColumnWidth(1,130);
+	this->recipientTableWidget->setColumnWidth(2,130);
+
+	this->attachmentTableWidget->setColumnWidth(0,150);
+	this->attachmentTableWidget->setColumnWidth(1,40);
+	this->attachmentTableWidget->setColumnWidth(2,120);
+
+	AccountModel *model = dynamic_cast<AccountModel*>
+	   (m_accountList->model());
 	QModelIndex index = m_accountList->currentIndex();
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
@@ -36,6 +48,11 @@ void dlg_sent_message::initNewMessageDialog(void)
 
 	connect(this->addRecipient, SIGNAL(clicked()), this,
 	    SLOT(addRecipientData()));
+	connect(this->removeRecipient, SIGNAL(clicked()), this,
+	    SLOT(deleteRecipientData()));
+	connect(this->findRecipient, SIGNAL(clicked()), this,
+	    SLOT(findRecipientData()));
+
 	connect(this->addAttachment, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
 	connect(this->removeAttachment, SIGNAL(clicked()), this,
@@ -43,23 +60,24 @@ void dlg_sent_message::initNewMessageDialog(void)
 	connect(this->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openAttachmentFile()));
 
+	connect(this->recipientTableWidget,
+	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
+	    SLOT(recItemSelect(QTableWidgetItem *)));
+
 	connect(this->attachmentTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(AttItemSelect(QTableWidgetItem *)));
+	    SLOT(attItemSelect(QTableWidgetItem *)));
 
 	this->attachmentTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-}
-
-void dlg_sent_message::addRecipientData(void)
-{
-	/* TODO */
+	if (m_action == "Replay") {
+		this->subjectText->setText("TODO");
+	}
 }
 
 void dlg_sent_message::addAttachmentFile(void)
 {
-
 	QString attachFileName = QFileDialog::getOpenFileName(this,
 	    tr("Add file"), "", tr("All files (*.*)"));
 
@@ -91,14 +109,18 @@ void dlg_sent_message::addAttachmentFile(void)
 	}
 }
 
-void dlg_sent_message::AttItemSelect(QTableWidgetItem *item)
+void dlg_sent_message::attItemSelect(QTableWidgetItem *item)
 {
+	this->removeRecipient->setEnabled(true);
+}
 
-	qDebug() << item->text();
+
+void dlg_sent_message::recItemSelect(QTableWidgetItem *item)
+{
 	this->removeAttachment->setEnabled(true);
 	this->openAttachment->setEnabled(true);
-
 }
+
 
 void dlg_sent_message::showOptionalForm(int state)
 {
@@ -106,15 +128,37 @@ void dlg_sent_message::showOptionalForm(int state)
 }
 
 
+void dlg_sent_message::addRecipientData(void)
+{
+
+	/* TODO */
+}
+
+
+
 void dlg_sent_message::deleteAttachmentFile()
 {
 	int row = this->attachmentTableWidget->currentRow();
-	qDebug() << row;
 	if (row >= 0) {
 		this->attachmentTableWidget->removeRow(row);
 		this->removeAttachment->setEnabled(false);
 		this->openAttachment->setEnabled(false);
 	}
+}
+
+
+void dlg_sent_message::deleteRecipientData()
+{
+	int row = this->recipientTableWidget->currentRow();
+	if (row >= 0) {
+		this->recipientTableWidget->removeRow(row);
+		this->removeRecipient->setEnabled(false);
+	}
+}
+
+void dlg_sent_message::findRecipientData(void)
+{
+	/* TODO */
 }
 
 

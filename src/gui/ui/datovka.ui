@@ -659,6 +659,9 @@
    </property>
   </action>
   <action name="actionReply_to_the_sender">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-message-reply.png</normaloff>:/icons/24x24/datovka-message-reply.png</iconset>
@@ -674,6 +677,9 @@
    </property>
   </action>
   <action name="actionVerify_a_message">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-message-verify.png</normaloff>:/icons/24x24/datovka-message-verify.png</iconset>

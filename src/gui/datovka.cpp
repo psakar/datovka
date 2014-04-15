@@ -739,7 +739,8 @@ void MainWindow::on_actionCreate_message_triggered()
 void MainWindow::on_actionSent_message_triggered()
 /* ========================================================================= */
 {
-	QDialog *newMessageDialog = new dlg_sent_message(this, ui->accountList);
+	QDialog *newMessageDialog = new dlg_sent_message(this,
+	   ui->accountList, ui->messageList, "New");
 	newMessageDialog->show();
 }
 
@@ -902,4 +903,11 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 void MainWindow::on_actionGet_messages_triggered()
 {
 
+}
+
+void MainWindow::on_actionReply_to_the_sender_triggered()
+{
+    	QDialog *newMessageDialog = new dlg_sent_message(this,
+	   ui->accountList, ui->messageList, "Replay");
+	newMessageDialog->show();
 }

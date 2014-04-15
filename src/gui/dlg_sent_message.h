@@ -11,7 +11,9 @@ class dlg_sent_message : public QDialog, public Ui::sentMessageDialog {
     Q_OBJECT
 
 public:
-	explicit dlg_sent_message(QWidget *parent = 0, QTreeView *accountList = 0);
+	explicit dlg_sent_message(QWidget *parent = 0,
+	    QTreeView *accountList = 0, QTableView *messageList = 0,
+	    QString action = "Add");
 
 private slots:
 	void on_cancelButton_clicked();
@@ -20,12 +22,17 @@ private slots:
 	void deleteAttachmentFile(void);
 	void openAttachmentFile(void);
 	void addRecipientData(void);
-	void AttItemSelect(QTableWidgetItem *item);
+	void deleteRecipientData(void);
+	void findRecipientData(void);
+	void recItemSelect(QTableWidgetItem *item);
+	void attItemSelect(QTableWidgetItem *item);
 
 private:
 	void initNewMessageDialog(void);
 	void sendMessage(void);
 	QTreeView *m_accountList;
+	QTableView *m_messageList;
+	QString m_action;
 };
 
 #endif // DLG_SENT_MESSAGE_H

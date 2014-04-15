@@ -62,6 +62,8 @@ private slots:
 
 	void on_actionGet_messages_triggered();
 
+	void on_actionReply_to_the_sender_triggered();
+
 private:
 	/*!
 	 * @brief Get configuration directory name.
