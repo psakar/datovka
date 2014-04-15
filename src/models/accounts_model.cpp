@@ -382,7 +382,7 @@ bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year)
 	/* Add new child item. */
 	QStandardItem *yearitem = new QStandardItem(year);
 	yearitem->setIcon(QIcon(ICON_16x16_PATH +
-	    QString("datovka-message-download.png")));
+	    QString("datovka-message-reply.png")));
 	item->appendRow(yearitem);
 
 	return true;

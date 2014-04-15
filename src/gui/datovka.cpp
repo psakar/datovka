@@ -139,6 +139,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	(void) previous;
 
 	QString html;
+	QAbstractTableModel *model;
 	const QStandardItem *item = m_accountModel.itemFromIndex(current);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	MessageDb *db;
@@ -174,50 +175,59 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	qDebug() << "Selected data box ID" << dbId;
 	//Q_ASSERT(!dbId.isEmpty());
 
-	/* Depending on which item was clicked show/hide elements. */
 //	qDebug() << "Clicked row" << current.row();
 //	qDebug() << "Clicked type" << AccountModel::nodeType(current);
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
-		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfo(*item);
-		ui->accountTextInfo->setHtml(html);
 		break;
 	case AccountModel::nodeRecentReceived:
-		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->receivedWithin90DaysModel(dbId));
+		model = db->receivedWithin90DaysModel(dbId);
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
-		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->sentWithin90DaysModel(dbId));
+		model = db->sentWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
-		ui->messageStackedWidget->setCurrentIndex(0);
 		html = createAccountInfoAllField(tr("All messages"),
 		    db->receivedYearlyCounts(dbId),
 		    db->sentYearlyCounts(dbId));
-		ui->accountTextInfo->setHtml(html);
 		break;
 	case AccountModel::nodeReceived:
-		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->receivedModel(dbId));
+		model = db->receivedModel(dbId);
 		break;
 	case AccountModel::nodeSent:
-		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(db->sentModel(dbId));
+		model = db->sentModel(dbId);
 		break;
 	case AccountModel::nodeReceivedYear:
-		ui->messageStackedWidget->setCurrentIndex(1);
 		/* TODO -- Parameter check. */
-		ui->messageList->setModel(db->receivedInYearModel(dbId,
-		    item->text()));
+		model = db->receivedInYearModel(dbId, item->text());
 		break;
 	case AccountModel::nodeSentYear:
-		ui->messageStackedWidget->setCurrentIndex(1);
 		/* TODO -- Parameter check. */
-		ui->messageList->setModel(db->sentInYearModel(dbId,
-		    item->text()));
+		model = db->sentInYearModel(dbId, item->text());
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	/* Depending on which item was clicked show/hide elements. */
+	switch (AccountModel::nodeType(current)) {
+	case AccountModel::nodeAccountTop:
+	case AccountModel::nodeAll:
+		ui->messageStackedWidget->setCurrentIndex(0);
+		ui->accountTextInfo->setHtml(html);
+		break;
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeReceivedYear:
+	case AccountModel::nodeSentYear:
+		ui->messageStackedWidget->setCurrentIndex(1);
+		ui->messageList->setModel(model);
 		break;
 	default:
 		Q_ASSERT(0);
