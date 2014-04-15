@@ -378,6 +378,7 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 	html.append(strongAccountInfoLine(tr("Sent messages"), ""));
 	html.append("<div style=\"margin-left: 12px;\">");
 	if (0 == sentCounts.size()) {
+		html.append(tr("none"));
 	} else {
 		for (int i = 0; i < sentCounts.size(); ++i) {
 			html.append(accountInfoLine(sentCounts[i].first,
