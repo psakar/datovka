@@ -123,7 +123,9 @@ private:
 	/*!
 	 * @brief Generate overall account information.
 	 */
-	QString createAccountInfoAllField(const QString &accountName) const;
+	QString createAccountInfoAllField(const QString &accountName,
+	    const QList< QPair<QString, int> > &receivedCounts,
+	    const QList< QPair<QString, int> > &sent) const;
 
 	/*!
 	 * @brief Generate banner.

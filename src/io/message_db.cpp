@@ -261,7 +261,7 @@ QAbstractTableModel * MessageDb::receivedInYearModel(const QString &recipDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::receivedYears(const QString &recipDbId)
+QList<QString> MessageDb::receivedYears(const QString &recipDbId) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
@@ -284,6 +284,37 @@ QList<QString> MessageDb::receivedYears(const QString &recipDbId)
 	}
 
 	return yearList;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return list of years and number of messages in database.
+ */
+QList< QPair<QString, int> > MessageDb::receivedYearlyCounts(
+    const QString &recipDbId) const
+/* ========================================================================= */
+{
+	QList< QPair<QString, int> > yearlyCounts;
+	QList<QString> yearList = receivedYears(recipDbId);
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	for (int i = 0; i < yearList.size(); ++i) {
+		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
+		    "(dbIDRecipient = '" + recipDbId + "')"
+		    " and "
+		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
+//		qDebug() << queryStr;
+		query.prepare(queryStr);
+		if (query.exec() && query.isActive()) {
+			query.first();
+			yearlyCounts.append(QPair<QString, int>(yearList[i],
+			    query.value(0).toInt()));
+		}
+	}
+
+	return yearlyCounts;
 }
 
 
@@ -396,7 +427,7 @@ QAbstractTableModel * MessageDb::sentInYearModel(const QString &sendDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::sentYears(const QString &sendDbId)
+QList<QString> MessageDb::sentYears(const QString &sendDbId) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
@@ -419,6 +450,37 @@ QList<QString> MessageDb::sentYears(const QString &sendDbId)
 	}
 
 	return yearList;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return list of years and number of messages in database.
+ */
+QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
+    const QString &sendDbId) const
+/* ========================================================================= */
+{
+	QList< QPair<QString, int> > yearlyCounts;
+	QList<QString> yearList = sentYears(sendDbId);
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	for (int i = 0; i < yearList.size(); ++i) {
+		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
+		    "(dbIDSender = '" + sendDbId + "')"
+		    " and "
+		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
+//		qDebug() << queryStr;
+		query.prepare(queryStr);
+		if (query.exec() && query.isActive()) {
+			query.first();
+			yearlyCounts.append(QPair<QString, int>(yearList[i],
+			    query.value(0).toInt()));
+		}
+	}
+
+	return yearlyCounts;
 }
 
 

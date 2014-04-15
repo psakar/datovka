@@ -27,8 +27,11 @@
 #define WIN_POSITION_H "h"
 
 
+#define strongAccountInfoLine(title, value) \
+	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
+	"</div>")
 #define accountInfoLine(title, value) \
-	"<div><strong>" + (title) + ": </strong>" + (value) + "</div>"
+	(QString("<div>") + (title) + ": " + (value) + "</div>")
 
 
 /* ========================================================================= */
@@ -184,7 +187,9 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		break;
 	case AccountModel::nodeAll:
 		ui->messageStackedWidget->setCurrentIndex(0);
-		html = createAccountInfoAllField(tr("All messages"));
+		html = createAccountInfoAllField(tr("All messages"),
+		    db->receivedYearlyCounts(dbId),
+		    db->sentYearlyCounts(dbId));
 		ui->accountTextInfo->setHtml(html);
 		break;
 	case AccountModel::nodeReceived:
@@ -287,10 +292,10 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 	}
 	html.append("</h3>");
 
-	html.append(accountInfoLine(tr("Account name"),
+	html.append(strongAccountInfoLine(tr("Account name"),
 	    itemSettings[NAME].toString()));
 	html.append("<br>");
-	html.append(accountInfoLine(tr("User name"),
+	html.append(strongAccountInfoLine(tr("User name"),
 	    itemSettings[USER].toString()));
 
 	AccountEntry accountEntry;
@@ -304,24 +309,24 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 		    !AccountEntry::entryNameMap[key].isEmpty()) {
 			switch (AccountEntry::entryNames[i].second) {
 			case DB_INTEGER:
-				html.append(accountInfoLine(
+				html.append(strongAccountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    QString::number(
 				        accountEntry.value(key).toInt())));
 				break;
 			case DB_TEXT:
-				html.append(accountInfoLine(
+				html.append(strongAccountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toString()));
 				break;
 			case DB_BOOLEAN:
-				html.append(accountInfoLine(
+				html.append(strongAccountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    accountEntry.value(key).toBool() ?
 				        tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
-				html.append(accountInfoLine(
+				html.append(strongAccountInfoLine(
 				    AccountEntry::entryNameMap[key],
 				    dateTimeFromDbFormat(
 				        accountEntry.value(key).toString(),
@@ -335,7 +340,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 	}
 
 	html.append("<br>");
-	html.append(accountInfoLine(tr("Password expiration date"),
+	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    tr("unknown or without expiration")));
 
 	html.append("</div>");
@@ -348,16 +353,38 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 /*
  * Generate overall account information.
  */
-QString MainWindow::createAccountInfoAllField(const QString &accountName) const
+QString MainWindow::createAccountInfoAllField(const QString &accountName,
+    const QList< QPair<QString, int> > &receivedCounts,
+    const QList< QPair<QString, int> > &sentCounts) const
 /* ========================================================================= */
 {
 	QString html = ("<div style=\"margin-left: 12px;\">");
 	html.append ("<h3>" + accountName + "</h3>");
 
-	html.append(accountInfoLine(tr("Received messages"), accountName));
-	/* TODO - add count of received messages */
-	html.append(accountInfoLine(tr("Sent messages"), accountName));
-	/* TODO - add count of sent messages */
+	html.append(strongAccountInfoLine(tr("Received messages"), ""));
+	html.append("<div style=\"margin-left: 12px;\">");
+	if (0 == receivedCounts.size()) {
+		html.append(tr("none"));
+	} else {
+		for (int i = 0; i < receivedCounts.size(); ++i) {
+			html.append(accountInfoLine(receivedCounts[i].first,
+			    QString::number(receivedCounts[i].second)));
+		}
+	}
+	html.append("</div>");
+
+	html.append("<br/>");
+
+	html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+	html.append("<div style=\"margin-left: 12px;\">");
+	if (0 == sentCounts.size()) {
+	} else {
+		for (int i = 0; i < sentCounts.size(); ++i) {
+			html.append(accountInfoLine(sentCounts[i].first,
+			    QString::number(sentCounts[i].second)));
+		}
+	}
+	html.append("</div>");
 
 	html.append("</div>");
 	return html;
@@ -374,7 +401,7 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 	QString html = "<br><center>";
 	html += "<h2>" +
 	    tr("QDatovka - Free interface for Datové schránky") + "</h2>";
-	html += accountInfoLine(tr("Version"), version);
+	html += strongAccountInfoLine(tr("Version"), version);
 	html += QString("<br><img src=") + ICON_128x128_PATH +
 	    "datovka.png />";
 	html += "<h3>" + tr("Powered by") + "</h3>";

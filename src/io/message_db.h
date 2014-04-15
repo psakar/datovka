@@ -58,9 +58,15 @@ public:
 	    const QString &year);
 
 	/*!
-	 * @brief Return list of years (strings) in database.
+	 * @brief Return list of yearly counts in database.
 	 */
-	QList<QString> receivedYears(const QString &recipDbId);
+	QList<QString> receivedYears(const QString &recipDbId) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 */
+	QList< QPair<QString, int> > receivedYearlyCounts(
+	    const QString &recipDbId) const;
 
 	/*!
 	 * @brief Return sent messages model.
@@ -82,7 +88,13 @@ public:
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 */
-	QList<QString> sentYears(const QString &sendDbId);
+	QList<QString> sentYears(const QString &sendDbId) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 */
+	QList< QPair<QString, int> > sentYearlyCounts(
+	    const QString &sendDbId) const;
 
 	/*!
 	 * List of know entries in messages db and their types.

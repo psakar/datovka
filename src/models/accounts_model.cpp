@@ -338,7 +338,7 @@ bool AccountModel::addNodeReceivedYear(QStandardItem *item,
 	QStandardItem *yearitem = new QStandardItem(year);
 	yearitem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-download.png")));
-	qDebug() << "Adding year" << year;
+//	qDebug() << "Adding year" << year;
 	item->appendRow(yearitem);
 
 	return true;
@@ -399,7 +399,7 @@ void AccountModel::removeAllYearNodes(void)
 	QStandardItem *itemRoot = this->invisibleRootItem();
 	QStandardItem *item;
 
-	qDebug() << "Deleting all year items.";
+//	qDebug() << "Deleting all year items.";
 
 	for (int i = 0; i < itemRoot->rowCount(); ++i) {
 		/* Received. */
