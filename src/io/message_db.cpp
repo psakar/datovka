@@ -223,6 +223,42 @@ QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
 
 /* ========================================================================= */
 /*
+ * Return received messages within given year.
+ */
+QAbstractTableModel * MessageDb::receivedInYearModel(const QString &recipDbId,
+    const QString &year)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+		queryStr += receivedItemIds[i] + ", ";
+	}
+	queryStr += receivedItemIds.last();
+	queryStr += " FROM messages WHERE "
+	    "(dbIDRecipient = '" + recipDbId + "')"
+	    " and "
+	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
+
+	m_sqlModel.setQuery(query);
+	for (int i = 0; i < receivedItemIds.size(); ++i) {
+		/* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(receivedItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+	}
+
+	return &m_sqlModel;
+}
+
+
+/* ========================================================================= */
+/*
  * Return list of years (strings) in database.
  */
 QList<QString> MessageDb::receivedYears(const QString &recipDbId)
@@ -314,6 +350,42 @@ QAbstractTableModel * MessageDb::sentWithin90DaysModel(
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal, sentItemTypes[i],
 		    ROLE_DB_ENTRY_TYPE);
+	}
+
+	return &m_sqlModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return sent messages within given year.
+ */
+QAbstractTableModel * MessageDb::sentInYearModel(const QString &sendDbId,
+    const QString &year)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+		queryStr += receivedItemIds[i] + ", ";
+	}
+	queryStr += receivedItemIds.last();
+	queryStr += " FROM messages WHERE "
+	    "(dbIDSender = '" + sendDbId + "')"
+	    " and "
+	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
+
+	m_sqlModel.setQuery(query);
+	for (int i = 0; i < receivedItemIds.size(); ++i) {
+		/* Description. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    messagesTblAttrNames.value(receivedItemIds[i]));
+		/* Data type. */
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;

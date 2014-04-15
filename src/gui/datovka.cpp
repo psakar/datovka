@@ -165,8 +165,8 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 	//Q_ASSERT(!dbId.isEmpty());
 
 	/* Depending on which item was clicked show/hide elements. */
-	qDebug() << "Clicked row" << index.row();
-	qDebug() << "Clicked type" << AccountModel::nodeType(index);
+//	qDebug() << "Clicked row" << index.row();
+//	qDebug() << "Clicked type" << AccountModel::nodeType(index);
 	switch (AccountModel::nodeType(index)) {
 	case AccountModel::nodeAccountTop:
 		ui->messageStackedWidget->setCurrentIndex(0);
@@ -196,10 +196,16 @@ void MainWindow::treeItemClicked(const QModelIndex &index)
 		ui->messageList->setModel(db->sentModel(dbId));
 		break;
 	case AccountModel::nodeReceivedYear:
-		/* TODO */
+		ui->messageStackedWidget->setCurrentIndex(1);
+		/* TODO -- Parameter check. */
+		ui->messageList->setModel(db->receivedInYearModel(dbId,
+		    item->text()));
 		break;
 	case AccountModel::nodeSentYear:
-		/* TODO */
+		ui->messageStackedWidget->setCurrentIndex(1);
+		/* TODO -- Parameter check. */
+		ui->messageList->setModel(db->sentInYearModel(dbId,
+		    item->text()));
 		break;
 	default:
 		Q_ASSERT(0);
