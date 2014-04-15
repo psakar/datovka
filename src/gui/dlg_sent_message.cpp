@@ -1,3 +1,4 @@
+#include <QMimeDatabase>
 #include "src/models/accounts_model.h"
 #include "dlg_sent_message.h"
 #include "ui_dlg_sent_message.h"
@@ -16,7 +17,8 @@ void dlg_sent_message::on_cancelButton_clicked()
 	this->close();
 }
 
-void dlg_sent_message::initNewMessageDialog(void) {
+void dlg_sent_message::initNewMessageDialog(void)
+{
 
 	AccountModel *model = dynamic_cast<AccountModel*>(m_accountList->model());
 	QModelIndex index = m_accountList->currentIndex();
@@ -36,27 +38,67 @@ void dlg_sent_message::initNewMessageDialog(void) {
 	    SLOT(addRecipientData()));
 	connect(this->addAttachment, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
+	connect(this->removeAttachment, SIGNAL(clicked()), this,
+	    SLOT(deleteAttachmentFile()));
+	connect(this->openAttachment, SIGNAL(clicked()), this,
+	    SLOT(openAttachmentFile()));
 
-	//this->recipientTableView->setHorizontalHeader(0, new QStandardItem(tr("Accounts")));
+	connect(this->attachmentTableWidget,
+	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
+	    SLOT(AttItemSelect(QTableWidgetItem *)));
 
+	this->attachmentTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 }
 
-void dlg_sent_message::addRecipientData(void) {
-
+void dlg_sent_message::addRecipientData(void)
+{
+	/* TODO */
 }
 
-void dlg_sent_message::addAttachmentFile(void) {
+void dlg_sent_message::addAttachmentFile(void)
+{
 
 	QString attachFileName = QFileDialog::getOpenFileName(this,
 	    tr("Add file"), "", tr("All files (*.*)"));
-	if (attachFileName != NULL) {
 
-	} else {
+	if (!attachFileName.isNull()) {
 
+		int size = 0;
+		QString filename = "";
+		QFile attFile(attachFileName);
+		size = attFile.size();
+		QFileInfo fileInfo(attFile.fileName());
+		filename = fileInfo.fileName();
+		QMimeDatabase db;
+		QMimeType type = db.mimeTypeForFile(attachFileName);
+
+		int row = this->attachmentTableWidget->rowCount();
+		this->attachmentTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(filename);
+		this->attachmentTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText("");
+		this->attachmentTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText(type.name());
+		this->attachmentTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+		item->setText(QString::number(size));
+		this->attachmentTableWidget->setItem(row,3,item);
 	}
 }
 
+void dlg_sent_message::AttItemSelect(QTableWidgetItem *item)
+{
+
+	qDebug() << item->text();
+	this->removeAttachment->setEnabled(true);
+	this->openAttachment->setEnabled(true);
+
+}
 
 void dlg_sent_message::showOptionalForm(int state)
 {
@@ -64,7 +106,25 @@ void dlg_sent_message::showOptionalForm(int state)
 }
 
 
-void dlg_sent_message::sendMessage(void) {
+void dlg_sent_message::deleteAttachmentFile()
+{
+	int row = this->attachmentTableWidget->currentRow();
+	qDebug() << row;
+	if (row >= 0) {
+		this->attachmentTableWidget->removeRow(row);
+		this->removeAttachment->setEnabled(false);
+		this->openAttachment->setEnabled(false);
+	}
+}
 
 
+void dlg_sent_message::openAttachmentFile(void)
+{
+	/* TODO */
+}
+
+
+void dlg_sent_message::sendMessage(void)
+{
+	/* TODO */
 }

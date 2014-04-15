@@ -17,7 +17,10 @@ private slots:
 	void on_cancelButton_clicked();
 	void showOptionalForm(int);
 	void addAttachmentFile(void);
+	void deleteAttachmentFile(void);
+	void openAttachmentFile(void);
 	void addRecipientData(void);
+	void AttItemSelect(QTableWidgetItem *item);
 
 private:
 	void initNewMessageDialog(void);
