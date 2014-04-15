@@ -1,10 +1,13 @@
+
+
 #include <QMimeDatabase>
+
+#include "dlg_send_message.h"
 #include "src/models/accounts_model.h"
-#include "dlg_sent_message.h"
-#include "ui_dlg_sent_message.h"
+#include "ui_dlg_send_message.h"
 
 
-dlg_sent_message::dlg_sent_message(QWidget *parent, QTreeView *accountList,
+DlgSentMessage::DlgSentMessage(QWidget *parent, QTreeView *accountList,
     QTableView *messageList, QString action) :
     QDialog(parent),
     m_accountList(accountList),
@@ -15,12 +18,12 @@ dlg_sent_message::dlg_sent_message(QWidget *parent, QTreeView *accountList,
 	initNewMessageDialog();
 }
 
-void dlg_sent_message::on_cancelButton_clicked()
+void DlgSentMessage::on_cancelButton_clicked(void)
 {
 	this->close();
 }
 
-void dlg_sent_message::initNewMessageDialog(void)
+void DlgSentMessage::initNewMessageDialog(void)
 {
 	QModelIndex index;
 	const QStandardItem *item;
@@ -91,7 +94,7 @@ void dlg_sent_message::initNewMessageDialog(void)
 	}
 }
 
-void dlg_sent_message::addAttachmentFile(void)
+void DlgSentMessage::addAttachmentFile(void)
 {
 	QString attachFileName = QFileDialog::getOpenFileName(this,
 	    tr("Add file"), "", tr("All files (*.*)"));
@@ -124,34 +127,32 @@ void dlg_sent_message::addAttachmentFile(void)
 	}
 }
 
-void dlg_sent_message::attItemSelect(QTableWidgetItem *item)
+void DlgSentMessage::attItemSelect(QTableWidgetItem *item)
 {
 	this->removeRecipient->setEnabled(true);
 }
 
 
-void dlg_sent_message::recItemSelect(QTableWidgetItem *item)
+void DlgSentMessage::recItemSelect(QTableWidgetItem *item)
 {
 	this->removeAttachment->setEnabled(true);
 	this->openAttachment->setEnabled(true);
 }
 
 
-void dlg_sent_message::showOptionalForm(int state)
+void DlgSentMessage::showOptionalForm(int state)
 {
 	this->OptionalWidget->setHidden(Qt::Unchecked == state);
 }
 
 
-void dlg_sent_message::addRecipientData(void)
+void DlgSentMessage::addRecipientData(void)
 {
-
 	/* TODO */
 }
 
 
-
-void dlg_sent_message::deleteAttachmentFile()
+void DlgSentMessage::deleteAttachmentFile()
 {
 	int row = this->attachmentTableWidget->currentRow();
 	if (row >= 0) {
@@ -162,7 +163,7 @@ void dlg_sent_message::deleteAttachmentFile()
 }
 
 
-void dlg_sent_message::deleteRecipientData()
+void DlgSentMessage::deleteRecipientData()
 {
 	int row = this->recipientTableWidget->currentRow();
 	if (row >= 0) {
@@ -171,19 +172,19 @@ void dlg_sent_message::deleteRecipientData()
 	}
 }
 
-void dlg_sent_message::findRecipientData(void)
+void DlgSentMessage::findRecipientData(void)
 {
 	/* TODO */
 }
 
 
-void dlg_sent_message::openAttachmentFile(void)
+void DlgSentMessage::openAttachmentFile(void)
 {
 	/* TODO */
 }
 
 
-void dlg_sent_message::sendMessage(void)
+void DlgSentMessage::sendMessage(void)
 {
 	/* TODO */
 }

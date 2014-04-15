@@ -1,17 +1,17 @@
 
 #include <QDir>
 #include <QFile>
-#include <QSettings>
-#include <QTableView>
-#include <QStackedWidget>
 #include <QMessageBox>
+#include <QSettings>
+#include <QStackedWidget>
+#include <QTableView>
 
 #include "datovka.h"
+#include "dlg_change_pwd.h"
+#include "dlg_create_account.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
-#include "dlg_sent_message.h"
-#include "dlg_create_account.h"
-#include "dlg_change_pwd.h"
+#include "dlg_send_message.h"
 #include "ui_datovka.h"
 
 
@@ -49,6 +49,11 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->accountList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(treeItemRightClicked(QPoint)));
+
+	/* Message list. */
+	ui->messageList->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
+	    this, SLOT(tableItemRightClicked(QPoint)));
 
 	m_confDirName = confDir();
 	m_confFileName = m_confDirName + "/" + CONF_FILE;
@@ -228,6 +233,9 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(model);
+		connect(ui->messageList->selectionModel(),
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
 		break;
 	default:
 		Q_ASSERT(0);
@@ -241,47 +249,95 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->indexAt(point);
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QMenu *menu = new QMenu;
 
-	if (0 != item) {
-		treeItemSelectionChanged(index);
+	if (index.isValid()) {
+//		treeItemSelectionChanged(index);
 
 		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
-		    QString(tr("Get messages")),
+		    tr("Get messages"),
 		    this, SLOT(on_actionGet_messages_triggered()));
 		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
-		    QString(tr("Create message")),
+		    tr("Create message"),
 		    this, SLOT(on_actionCreate_message_triggered()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("tick_16.png")),
-		    QString(tr("Mark all as read")),
+		    tr("Mark all as read"),
 		    this, SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
-		    QString(tr("Change password")),
+		    tr("Change password"),
 		    this, SLOT(on_actionChange_password_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
-		    QString(tr("Account properties")),
+		    tr("Account properties"),
 		    this, SLOT(on_actionAccount_properties_triggered()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
-		    QString(tr("Remove Account")),
+		    tr("Remove Account"),
 		    this, SLOT(on_actionDelete_account_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
-		    QString(tr("Move account up")),
+		    tr("Move account up"),
 		    this, SLOT(on_actionMove_account_up_triggered()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
-		    QString(tr("Move account down")),
+		    tr("Move account down"),
 		    this, SLOT(on_actionMove_account_down_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("folder_16.png")),
-		    QString(tr("Change data directory")),
+		    tr("Change data directory"),
 		    this, SLOT(on_actionChange_data_directory_triggered()));
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
-		    QString(tr("Add new account")),
+		    tr("Add new account"),
 		    this, SLOT(on_actionAdd_account_triggered()));
+	}
+
+	menu->exec(QCursor::pos());
+}
+
+
+/* ========================================================================= */
+/*
+ * Sets content of widgets according to selected message.
+ */
+void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
+    const QModelIndex &previous)
+/* ========================================================================= */
+{
+	(void) previous;
+	QModelIndex index = current;
+	const QAbstractItemModel *model = index.model();
+	Q_ASSERT(0 != model);
+	index = model->index(index.row(), 0); /* First column. */
+
+	/* TODO */
+
+	qDebug() << "Selected message"
+	    << model->itemData(index).first().toString();
+}
+
+
+/* ========================================================================= */
+/*
+ * Generates menu to selected item. (And redraw widgets.)
+ */
+void MainWindow::tableItemRightClicked(const QPoint &point)
+/* ========================================================================= */
+{
+	QModelIndex index = ui->messageList->indexAt(point);
+	QMenu *menu = new QMenu;
+
+	if (index.isValid()) {
+//		tableItemSelectionChanged(index);
+
+		/* TODO */
+		menu->addAction(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message-download.png")),
+		    tr("Download message signed"));
+		menu->addAction(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message-reply.png")), tr("Reply"));
+		menu->addSeparator();
+	} else {
+		/* Nothing. */
 	}
 
 	menu->exec(QCursor::pos());
@@ -739,8 +795,13 @@ void MainWindow::on_actionCreate_message_triggered()
 void MainWindow::on_actionSent_message_triggered()
 /* ========================================================================= */
 {
-	QDialog *newMessageDialog = new dlg_sent_message(this,
-	   ui->accountList, ui->messageList, "New");
+	/*
+	 * TODO -- This method copies on_actionReply_to_the_sender_triggered().
+	 * Delete one of them.
+	 */
+
+	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
+	    ui->messageList, "New");
 	newMessageDialog->show();
 }
 
@@ -775,8 +836,9 @@ void MainWindow::on_actionDelete_account_triggered()
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this,
 	    tr("Remove account ") + itemTop->text(),
-	    tr("Do you want to remove account") +  " '" + itemTop->text() +"'?",
-	    QMessageBox::Yes|QMessageBox::No);
+	    tr("Do you want to remove account") +  " '" + itemTop->text() +
+	    "'?",
+	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
 		if(itemTop->hasChildren()) {
@@ -907,7 +969,12 @@ void MainWindow::on_actionGet_messages_triggered()
 
 void MainWindow::on_actionReply_to_the_sender_triggered()
 {
-    	QDialog *newMessageDialog = new dlg_sent_message(this,
-	   ui->accountList, ui->messageList, "Replay");
+	/*
+	 * TODO -- This method copies on_actionSent_message_triggered().
+	 * Delete one of them.
+	 */
+
+	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
+	    ui->messageList, "Replay");
 	newMessageDialog->show();
 }

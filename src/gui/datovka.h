@@ -40,6 +40,17 @@ private slots:
 	 */
 	void treeItemRightClicked(const QPoint &point);
 
+	/*!
+	 * @brief Sets content of widgets according to selected message.
+	 */
+	void tableItemSelectionChanged(const QModelIndex &current,
+	    const QModelIndex &previous = QModelIndex());
+
+	/*!
+	 * @brief Generates menu to selected item. (And redraw widgets.)
+	 */
+	void tableItemRightClicked(const QPoint &point);
+
 	void on_actionCreate_message_triggered();
 
 	void on_actionSent_message_triggered();

@@ -1,22 +1,27 @@
-#ifndef DLG_SENT_MESSAGE_H
-#define DLG_SENT_MESSAGE_H
+
+
+#ifndef _DLG_SEND_MESSAGE_H_
+#define _DLG_SEND_MESSAGE_H_
+
 
 #include <QDialog>
 #include <QFileDialog>
 #include <QTreeView>
-#include "src/common.h"
-#include "ui_dlg_sent_message.h"
 
-class dlg_sent_message : public QDialog, public Ui::sentMessageDialog {
+#include "src/common.h"
+#include "ui_dlg_send_message.h"
+
+
+class DlgSentMessage : public QDialog, public Ui::sentMessageDialog {
     Q_OBJECT
 
 public:
-	explicit dlg_sent_message(QWidget *parent = 0,
+	explicit DlgSentMessage(QWidget *parent = 0,
 	    QTreeView *accountList = 0, QTableView *messageList = 0,
 	    QString action = "Add");
 
 private slots:
-	void on_cancelButton_clicked();
+	void on_cancelButton_clicked(void);
 	void showOptionalForm(int);
 	void addAttachmentFile(void);
 	void deleteAttachmentFile(void);
@@ -35,4 +40,5 @@ private:
 	QString m_action;
 };
 
-#endif // DLG_SENT_MESSAGE_H
+
+#endif /* _DLG_SEND_MESSAGE_H_ */

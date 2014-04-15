@@ -22,37 +22,37 @@ QMAKE_CXXFLAGS = \
 #LIBS = \
 #	-lisds
 
-SOURCES += src/main.cpp\
+SOURCES += src/common.cpp \
     src/gui/datovka.cpp \
+    src/gui/dlg_change_pwd.cpp \
     src/gui/dlg_create_account.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
-    src/gui/dlg_sent_message.cpp \
+    src/gui/dlg_send_message.cpp \
     src/io/account_db.cpp \
     src/io/dbs.cpp \
     src/io/message_db.cpp \
-    src/models/accounts_model.cpp \
-    src/common.cpp \
-    src/gui/dlg_change_pwd.cpp
+    src/main.cpp \
+    src/models/accounts_model.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
+    src/gui/dlg_change_pwd.h \
     src/gui/dlg_create_account.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
-    src/gui/dlg_sent_message.h \
+    src/gui/dlg_send_message.h \
     src/io/account_db.h \
     src/io/dbs.h \
     src/io/message_db.h \
-    src/models/accounts_model.h \
-    src/gui/dlg_change_pwd.h
+    src/models/accounts_model.h
 
 FORMS += src/gui/ui/datovka.ui \
+    src/gui/ui/dlg_change_pwd.ui \
     src/gui/ui/dlg_create_account.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
-    src/gui/ui/dlg_sent_message.ui \
-    src/gui/ui/dlg_change_pwd.ui
+    src/gui/ui/dlg_send_message.ui
 
 RESOURCES += \
     res/resources.qrc
