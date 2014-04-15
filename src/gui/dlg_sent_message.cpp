@@ -22,6 +22,8 @@ void dlg_sent_message::on_cancelButton_clicked()
 
 void dlg_sent_message::initNewMessageDialog(void)
 {
+	QModelIndex index;
+	const QStandardItem *item;
 
 	this->recipientTableWidget->setColumnWidth(0,50);
 	this->recipientTableWidget->setColumnWidth(1,130);
@@ -31,16 +33,29 @@ void dlg_sent_message::initNewMessageDialog(void)
 	this->attachmentTableWidget->setColumnWidth(1,40);
 	this->attachmentTableWidget->setColumnWidth(2,120);
 
-	AccountModel *model = dynamic_cast<AccountModel*>
-	   (m_accountList->model());
-	QModelIndex index = m_accountList->currentIndex();
-	const QStandardItem *item = model->itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	AccountModel *accountModel = dynamic_cast<AccountModel *>(
+	    m_accountList->model());
+	index = m_accountList->currentIndex();
+	Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
 
-	this->fromUser->setText("<strong>"+ itemTop->text() + "</strong>"
-	    + " (" + itemSettings[USER].toString() + ")");
+	item = accountModel->itemFromIndex(index);
+	Q_ASSERT(0 != item);
+	const QStandardItem *accountItemTop = AccountModel::itemTop(item);
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+
+	this->fromUser->setText("<strong>" + accountItemTop->text() +
+	    "</strong>" + " (" + itemSettings[USER].toString() + ")");
+
+	index = m_messageList->currentIndex();
+	Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
+
+	QAbstractItemModel *messageModel = m_messageList->model();
+	index = messageModel->index(index.row(), 0); /* First column. */
+	const QMap<int, QVariant> messageItemData =
+	    messageModel->itemData(index);
+	/* TODO -- A more robust mapping to message id. */
+	qDebug() << "ID " << messageItemData.first().toString();
 
 	this->OptionalWidget->setHidden(true);
 	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
