@@ -39,6 +39,13 @@ typedef enum {
                                                */
 
 
+#define strongAccountInfoLine(title, value) \
+	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
+	"</div>")
+#define accountInfoLine(title, value) \
+	(QString("<div>") + (title) + ": " + (value) + "</div>")
+
+
 class GlobPreferences {
 
 public:

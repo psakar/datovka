@@ -12,6 +12,7 @@
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
 #include "dlg_send_message.h"
+#include "src/common.h"
 #include "ui_datovka.h"
 
 
@@ -25,13 +26,6 @@
 #define WIN_POSITION_Y "y"
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
-
-
-#define strongAccountInfoLine(title, value) \
-	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
-	"</div>")
-#define accountInfoLine(title, value) \
-	(QString("<div>") + (title) + ": " + (value) + "</div>")
 
 
 /* ========================================================================= */
@@ -141,36 +135,32 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
-	(void) previous;
+	(void) previous; /* Unused. */
 
 	QString html;
 	QAbstractTableModel *tableModel;
+
 	const QStandardItem *item = m_accountModel.itemFromIndex(current);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	MessageDb *db;
-
 	Q_ASSERT(0 != itemTop);
-
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-
 	const QString &userName = itemSettings[USER].toString();
 	QString dbDir = itemSettings[DB_DIR].toString();
+	MessageDb *db;
 
 	Q_ASSERT(!userName.isEmpty());
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
 		dbDir = m_confDirName;
 	}
-
-	qDebug() << "Selected user account" << userName << dbDir;
-	qDebug() << current.model() << item->text();
-	//qDebug() << current.parent().row()  << " - " << current.row();
-	qDebug() << "\n";
-
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
+
+//	qDebug() << "Selected user account" << userName << dbDir;
+//	qDebug() << current.model() << item->text();
+//	qDebug() << "\n";
 
 	/*
 	 * TODO -- Is '___True' somehow related to the testing state
@@ -325,16 +315,37 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
-	(void) previous;
-	QModelIndex index = current;
-	const QAbstractItemModel *model = index.model();
-	Q_ASSERT(0 != model);
-	index = model->index(index.row(), 0); /* First column. */
+	(void) previous; /* Unused. */
+
+	const QAbstractItemModel *tableModel = current.model();
+	Q_ASSERT(0 != tableModel);
+	QModelIndex index = tableModel->index(
+	    current.row(), 0); /* First column. */
+
+	const QStandardItem *item = m_accountModel.itemFromIndex(
+	    ui->accountList->selectionModel()->currentIndex());
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	Q_ASSERT(0 != itemTop);
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+	QString dbDir = itemSettings[DB_DIR].toString();
+	MessageDb *db;
+
+	Q_ASSERT(!userName.isEmpty());
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = m_confDirName;
+	}
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+
+	ui->messageInfo->setHtml(
+	    db->messageDescriptionHtml(
+	        tableModel->itemData(index).first().toInt()));
 
 	/* TODO */
-
-	ui->messageInfo->setHtml("<h3>Selected message</h3>" +
-	    model->itemData(index).first().toString());
 }
 
 

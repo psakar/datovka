@@ -486,6 +486,23 @@ QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
 
 /* ========================================================================= */
 /*
+ * Return message HTML formatted description.
+ */
+QString MessageDb::messageDescriptionHtml(int dmId) const
+/* ========================================================================= */
+{
+	QString html;
+
+	html += "<h3>Selected message</h3>" + QString::number(dmId);
+
+	/* TODO */
+
+	return html;
+}
+
+
+/* ========================================================================= */
+/*
  * Adds _dmType column.
  */
 bool  MessageDb::addDmtypeColumn(void)

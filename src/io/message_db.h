@@ -97,6 +97,11 @@ public:
 	    const QString &sendDbId) const;
 
 	/*!
+	 * @brief Return message HTML formatted description.
+	 */
+	QString messageDescriptionHtml(int dmId) const;
+
+	/*!
 	 * List of know entries in messages db and their types.
 	 */
 	static
