@@ -144,7 +144,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	(void) previous;
 
 	QString html;
-	QAbstractTableModel *model;
+	QAbstractTableModel *tableModel;
 	const QStandardItem *item = m_accountModel.itemFromIndex(current);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	MessageDb *db;
@@ -188,11 +188,11 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		html = createAccountInfo(*item);
 		break;
 	case AccountModel::nodeRecentReceived:
-		model = db->receivedWithin90DaysModel(dbId);
+		tableModel = db->receivedWithin90DaysModel(dbId);
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
-		model = db->sentWithin90DaysModel(dbId);
+		tableModel = db->sentWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
 		html = createAccountInfoAllField(tr("All messages"),
@@ -200,18 +200,18 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		    db->sentYearlyCounts(dbId));
 		break;
 	case AccountModel::nodeReceived:
-		model = db->receivedModel(dbId);
+		tableModel = db->receivedModel(dbId);
 		break;
 	case AccountModel::nodeSent:
-		model = db->sentModel(dbId);
+		tableModel = db->sentModel(dbId);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
-		model = db->receivedInYearModel(dbId, item->text());
+		tableModel = db->receivedInYearModel(dbId, item->text());
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
-		model = db->sentInYearModel(dbId, item->text());
+		tableModel = db->sentInYearModel(dbId, item->text());
 		break;
 	default:
 		Q_ASSERT(0);
@@ -230,6 +230,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	}
 
 	/* Depending on which item was clicked show/hide elements. */
+	QAbstractItemModel *itemModel;
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 	case AccountModel::nodeAll:
@@ -243,11 +244,20 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeReceivedYear:
 	case AccountModel::nodeSentYear:
 		ui->messageStackedWidget->setCurrentIndex(1);
-		ui->messageList->setModel(model);
+		ui->messageList->setModel(tableModel);
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
+		/* Clear message info. */
+		ui->messageInfo->clear();
+		/* Select last message in list if there are some messages. */
+		itemModel = ui->messageList->model();
+		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
+			QModelIndex lastIndex =
+			    itemModel->index(itemModel->rowCount() - 1, 0);
+			ui->messageList->setCurrentIndex(lastIndex);
+		}
 		break;
 	default:
 		Q_ASSERT(0);
@@ -323,8 +333,8 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 
 	/* TODO */
 
-	qDebug() << "Selected message"
-	    << model->itemData(index).first().toString();
+	ui->messageInfo->setHtml("<h3>Selected message</h3>" +
+	    model->itemData(index).first().toString());
 }
 
 
