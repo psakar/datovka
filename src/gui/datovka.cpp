@@ -218,6 +218,17 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		break;
 	}
 
+	/*
+	 * Disconnect slot from model as we want to prevent a signal to be
+	 * handled multiple times.
+	 */
+	if (0 != ui->messageList->selectionModel()) {
+		/* New model hasn't been set yet. */
+		ui->messageList->selectionModel()->disconnect(
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
+	}
+
 	/* Depending on which item was clicked show/hide elements. */
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
@@ -233,6 +244,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(model);
+		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
