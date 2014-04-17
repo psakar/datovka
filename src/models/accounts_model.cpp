@@ -339,6 +339,7 @@ bool AccountModel::addNodeReceivedYear(QStandardItem *item,
 	yearitem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-download.png")));
 //	qDebug() << "Adding year" << year;
+	yearitem->setFlags(yearitem->flags() & ~Qt::ItemIsEditable);
 	item->appendRow(yearitem);
 
 	return true;
@@ -383,6 +384,7 @@ bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year)
 	QStandardItem *yearitem = new QStandardItem(year);
 	yearitem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-reply.png")));
+	yearitem->setFlags(yearitem->flags() & ~Qt::ItemIsEditable);
 	item->appendRow(yearitem);
 
 	return true;
