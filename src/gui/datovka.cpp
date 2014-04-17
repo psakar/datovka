@@ -1008,7 +1008,36 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	 * Delete one of them.
 	 */
 
+	const QAbstractItemModel *tableModel = ui->messageList->model();
+	Q_ASSERT(0 != tableModel);
+	QModelIndex index = tableModel->index(
+	    ui->messageList->currentIndex().row(), 0); /* First column. */
+	/* TODO -- Replimenent this conftruction. */
+
+	const QStandardItem *item = m_accountModel.itemFromIndex(
+	    ui->accountList->selectionModel()->currentIndex());
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	Q_ASSERT(0 != itemTop);
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+	QString dbDir = itemSettings[DB_DIR].toString();
+	MessageDb *db;
+
+	Q_ASSERT(!userName.isEmpty());
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = m_confDirName;
+	}
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+
+	db->replyDataTo(tableModel->itemData(index).first().toInt());
+
+	/* TODO */
+
 	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
-	    ui->messageList, "Replay");
+	    ui->messageList, "Reply");
 	newMessageDialog->show();
 }

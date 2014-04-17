@@ -486,6 +486,35 @@ QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
 
 /* ========================================================================= */
 /*
+ * Generate information for reply dialog.
+ */
+QVector<QString> MessageDb::replyDataTo(int dmId) const
+/* ========================================================================= */
+{
+	QVector<QString> reply(4);
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	qDebug() << queryStr;
+//	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		reply[0] = query.value(0).toString();
+		reply[1] = query.value(1).toString();
+		reply[2] = query.value(2).toString();
+		reply[3] = query.value(3).toString();
+	}
+
+	return reply;
+}
+
+
+/* ========================================================================= */
+/*
  * Return message HTML formatted description.
  */
 QString MessageDb::messageDescriptionHtml(int dmId) const

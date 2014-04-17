@@ -97,6 +97,13 @@ public:
 	    const QString &sendDbId) const;
 
 	/*!
+	 * @brief Generate information for reply dialog.
+	 *
+	 * @note title, senderId, sender, senderAddress
+	 */
+	QVector<QString> replyDataTo(int dmId) const;
+
+	/*!
 	 * @brief Return message HTML formatted description.
 	 */
 	QString messageDescriptionHtml(int dmId) const;
