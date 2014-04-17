@@ -365,14 +365,15 @@ void MainWindow::tableItemRightClicked(const QPoint &point)
 		/* TODO */
 		menu->addAction(QIcon(ICON_16x16_PATH +
 		    QString("datovka-message-download.png")),
-		    tr("Download message signed"));
+		    tr("Download message signed"),
+		    this, SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-reply.png")), tr("Reply"));
+		    QString("datovka-message-reply.png")), tr("Reply"),
+		    this, SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 	} else {
 		/* Nothing. */
 	}
-
 	menu->exec(QCursor::pos());
 }
 

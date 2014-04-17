@@ -660,7 +660,7 @@
   </action>
   <action name="actionReply_to_the_sender">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
