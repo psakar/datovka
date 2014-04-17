@@ -11,8 +11,12 @@ class dlg_ds_search_dialog : public QDialog, public Ui::dlg_ds_search_dialog {
 public:
 	dlg_ds_search_dialog(QWidget *parent = 0);
 
-private:
+private slots:
+	void checkInputFields();
 
+
+private:
+	void initSearchWindow(void);
 };
 
 #endif // DLG_DS_SEARCH_H

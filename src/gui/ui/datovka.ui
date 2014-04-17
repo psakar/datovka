@@ -351,6 +351,23 @@
     <property name="title">
      <string>Message</string>
     </property>
+    <addaction name="actionDownload_message_signed"/>
+    <addaction name="actionReply"/>
+    <addaction name="separator"/>
+    <addaction name="actionSignature_detail"/>
+    <addaction name="actionAuthenticate_message"/>
+    <addaction name="actionDelete_message"/>
+    <addaction name="separator"/>
+    <addaction name="actionExport_as_ZFO"/>
+    <addaction name="actionOpen_message_externally"/>
+    <addaction name="actionOpen_delivery_info_externally"/>
+    <addaction name="actionExport_delivery_info_as_ZFO"/>
+    <addaction name="actionExport_delivery_info_as_PDF"/>
+    <addaction name="actionExport_message_envelope_as_PDF"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_attachment"/>
+    <addaction name="actionSave_attachment"/>
+    <addaction name="actionDelete_attachment"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -692,6 +709,108 @@
    </property>
    <property name="shortcut">
     <string>Alt+V</string>
+   </property>
+  </action>
+  <action name="actionDownload_message_signed">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
+   </property>
+   <property name="text">
+    <string>Download message signed</string>
+   </property>
+  </action>
+  <action name="actionReply">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reply</string>
+   </property>
+  </action>
+  <action name="actionSignature_detail">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Signature detail</string>
+   </property>
+  </action>
+  <action name="actionAuthenticate_message">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka-message-verify.png</normaloff>:/icons/16x16/datovka-message-verify.png</iconset>
+   </property>
+   <property name="text">
+    <string>Authenticate message</string>
+   </property>
+  </action>
+  <action name="actionDelete_message">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete message</string>
+   </property>
+  </action>
+  <action name="actionExport_as_ZFO">
+   <property name="text">
+    <string>Export as ZFO</string>
+   </property>
+  </action>
+  <action name="actionOpen_message_externally">
+   <property name="text">
+    <string>Open message externally</string>
+   </property>
+  </action>
+  <action name="actionOpen_delivery_info_externally">
+   <property name="text">
+    <string>Open delivery info externally</string>
+   </property>
+  </action>
+  <action name="actionExport_delivery_info_as_ZFO">
+   <property name="text">
+    <string>Export delivery info as ZFO</string>
+   </property>
+  </action>
+  <action name="actionExport_delivery_info_as_PDF">
+   <property name="text">
+    <string>Export delivery info as PDF</string>
+   </property>
+  </action>
+  <action name="actionExport_message_envelope_as_PDF">
+   <property name="text">
+    <string>Export message envelope as PDF</string>
+   </property>
+  </action>
+  <action name="actionOpen_attachment">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open attachment</string>
+   </property>
+  </action>
+  <action name="actionSave_attachment">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save attachment</string>
+   </property>
+  </action>
+  <action name="actionDelete_attachment">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete attachment</string>
    </property>
   </action>
  </widget>

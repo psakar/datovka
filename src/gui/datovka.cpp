@@ -378,7 +378,8 @@ void MainWindow::tableItemRightClicked(const QPoint &point)
 		    this, SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-verify.png")), tr("Verified messages"),
+		    QString("datovka-message-verify.png")),
+		    tr("Verified messages"),
 		    this, SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 	} else {
