@@ -1,18 +1,22 @@
-
-
 #include <QMimeDatabase>
-
 #include "dlg_send_message.h"
+#include "dlg_ds_search.h"
 #include "src/models/accounts_model.h"
 #include "ui_dlg_send_message.h"
 
 
 DlgSentMessage::DlgSentMessage(QWidget *parent, QTreeView *accountList,
-    QTableView *messageList, QString action) :
+    QTableView *messageList, const QString &action, const QString &reSubject,
+	    const QString &senderId, const QString &sender,
+	    const QString &senderAddress) :
     QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
-    m_action(action)
+    m_action(action),
+    reSubject(reSubject),
+    senderId(senderId),
+    sender(sender),
+    senderAddress(senderAddress)
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -29,8 +33,8 @@ void DlgSentMessage::initNewMessageDialog(void)
 	const QStandardItem *item;
 
 	this->recipientTableWidget->setColumnWidth(0,50);
-	this->recipientTableWidget->setColumnWidth(1,130);
-	this->recipientTableWidget->setColumnWidth(2,130);
+	this->recipientTableWidget->setColumnWidth(1,140);
+	this->recipientTableWidget->setColumnWidth(2,150);
 
 	this->attachmentTableWidget->setColumnWidth(0,150);
 	this->attachmentTableWidget->setColumnWidth(1,40);
@@ -51,14 +55,38 @@ void DlgSentMessage::initNewMessageDialog(void)
 	    "</strong>" + " (" + itemSettings[USER].toString() + ")");
 
 	index = m_messageList->currentIndex();
-	Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
-
+	//Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
+/*
 	QAbstractItemModel *messageModel = m_messageList->model();
-	index = messageModel->index(index.row(), 0); /* First column. */
+	index = messageModel->index(index.row(), 0);
 	const QMap<int, QVariant> messageItemData =
 	    messageModel->itemData(index);
-	/* TODO -- A more robust mapping to message id. */
+
 	qDebug() << "ID " << messageItemData.first().toString();
+*/
+	connect(this->recipientTableWidget->model(),
+	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
+	    SLOT(tableItemInsRem()));
+	connect(this->recipientTableWidget->model(),
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
+	    SLOT(tableItemInsRem()));
+
+	if (m_action == "Reply") {
+		this->subjectText->setText("Re: " + reSubject);
+
+		int row = this->recipientTableWidget->rowCount();
+		this->recipientTableWidget->insertRow(row);
+
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(senderId);
+		this->recipientTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText(sender);
+		this->recipientTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText(senderAddress);
+		this->recipientTableWidget->setItem(row,2,item);
+	}
 
 	this->OptionalWidget->setHidden(true);
 	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
@@ -80,18 +108,28 @@ void DlgSentMessage::initNewMessageDialog(void)
 
 	connect(this->recipientTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(recItemSelect(QTableWidgetItem *)));
+	    SLOT(recItemSelect()));
 
 	connect(this->attachmentTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(attItemSelect(QTableWidgetItem *)));
+	    SLOT(attItemSelect()));
 
+	connect(this->subjectText, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
+	    SLOT(tableItemInsRem()));
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
+	    SLOT(tableItemInsRem()));
+
+	this->recipientTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 	this->attachmentTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	if (m_action == "Replay") {
-		this->subjectText->setText("TODO");
-	}
+
 }
 
 void DlgSentMessage::addAttachmentFile(void)
@@ -127,18 +165,24 @@ void DlgSentMessage::addAttachmentFile(void)
 	}
 }
 
-void DlgSentMessage::attItemSelect(QTableWidgetItem *item)
+void DlgSentMessage::attItemSelect()
+{
+
+	this->removeAttachment->setEnabled(true);
+	this->openAttachment->setEnabled(true);
+}
+
+
+void DlgSentMessage::recItemSelect()
 {
 	this->removeRecipient->setEnabled(true);
 }
 
 
-void DlgSentMessage::recItemSelect(QTableWidgetItem *item)
+void DlgSentMessage::tableItemInsRem()
 {
-	this->removeAttachment->setEnabled(true);
-	this->openAttachment->setEnabled(true);
+	checkInputFields();
 }
-
 
 void DlgSentMessage::showOptionalForm(int state)
 {
@@ -148,7 +192,8 @@ void DlgSentMessage::showOptionalForm(int state)
 
 void DlgSentMessage::addRecipientData(void)
 {
-	/* TODO */
+	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this);
+	dlg_ds_search->show();
 }
 
 
@@ -160,6 +205,15 @@ void DlgSentMessage::deleteAttachmentFile()
 		this->removeAttachment->setEnabled(false);
 		this->openAttachment->setEnabled(false);
 	}
+}
+
+
+void DlgSentMessage::checkInputFields()
+{
+	bool buttonEnabled = !this->subjectText->text().isEmpty()
+		    && (this->recipientTableWidget->rowCount() > 0)
+		    && (this->attachmentTableWidget->rowCount() > 0);
+	this->sendButton->setEnabled(buttonEnabled);
 }
 
 

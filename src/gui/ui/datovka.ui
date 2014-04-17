@@ -652,7 +652,7 @@
     <string>Create message</string>
    </property>
    <property name="toolTip">
-    <string>Create and sent a new message</string>
+    <string>Create and send a new message</string>
    </property>
    <property name="shortcut">
     <string>Alt+M</string>

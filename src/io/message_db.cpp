@@ -499,8 +499,8 @@ QVector<QString> MessageDb::replyDataTo(int dmId) const
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress"
 	    " FROM messages WHERE "
 	    "dmID = " + QString::number(dmId);
-	qDebug() << queryStr;
-//	query.prepare(queryStr);
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		reply[0] = query.value(0).toString();
@@ -508,6 +508,7 @@ QVector<QString> MessageDb::replyDataTo(int dmId) const
 		reply[2] = query.value(2).toString();
 		reply[3] = query.value(3).toString();
 	}
+//	qDebug() << reply[0] << reply[1] << reply[2] << reply[3];
 
 	return reply;
 }

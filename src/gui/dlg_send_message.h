@@ -18,7 +18,10 @@ class DlgSentMessage : public QDialog, public Ui::sentMessageDialog {
 public:
 	explicit DlgSentMessage(QWidget *parent = 0,
 	    QTreeView *accountList = 0, QTableView *messageList = 0,
-	    QString action = "Add");
+	    const QString &action = "New", const QString &reSubject = QString(),
+	    const QString &senderId = QString(),
+	    const QString &sender = QString(),
+	    const QString &senderAddress = QString());
 
 private slots:
 	void on_cancelButton_clicked(void);
@@ -29,8 +32,10 @@ private slots:
 	void addRecipientData(void);
 	void deleteRecipientData(void);
 	void findRecipientData(void);
-	void recItemSelect(QTableWidgetItem *item);
-	void attItemSelect(QTableWidgetItem *item);
+	void recItemSelect();
+	void attItemSelect();
+	void checkInputFields();
+	void tableItemInsRem();
 
 private:
 	void initNewMessageDialog(void);
@@ -38,6 +43,11 @@ private:
 	QTreeView *m_accountList;
 	QTableView *m_messageList;
 	QString m_action;
+	QString reSubject;
+	QString senderId;
+	QString sender;
+	QString senderAddress;
+
 };
 
 

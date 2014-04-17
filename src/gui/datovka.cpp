@@ -247,7 +247,13 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 			QModelIndex lastIndex =
 			    itemModel->index(itemModel->rowCount() - 1, 0);
 			ui->messageList->setCurrentIndex(lastIndex);
+			ui->actionReply_to_the_sender->setEnabled(true);
+			ui->actionVerify_a_message->setEnabled(true);
+		} else {
+			ui->actionReply_to_the_sender->setEnabled(false);
+			ui->actionVerify_a_message->setEnabled(false);
 		}
+
 		break;
 	default:
 		Q_ASSERT(0);
@@ -371,8 +377,15 @@ void MainWindow::tableItemRightClicked(const QPoint &point)
 		    QString("datovka-message-reply.png")), tr("Reply"),
 		    this, SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
+		menu->addAction(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message-verify.png")), tr("Verified messages"),
+		    this, SLOT(on_actionReply_to_the_sender_triggered()));
+		menu->addSeparator();
 	} else {
-		/* Nothing. */
+		menu->addAction(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message.png")),
+		    tr("Create a new message"),
+		    this, SLOT(on_actionSent_message_triggered()));
 	}
 	menu->exec(QCursor::pos());
 }
@@ -1033,11 +1046,13 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 
-	db->replyDataTo(tableModel->itemData(index).first().toInt());
+	QVector<QString> replyTo = db->replyDataTo(
+	    tableModel->itemData(index).first().toInt());
 
 	/* TODO */
 
 	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
-	    ui->messageList, "Reply");
+	    ui->messageList, "Reply", replyTo[0], replyTo[1], replyTo[2],
+	    replyTo[3]);
 	newMessageDialog->show();
 }
