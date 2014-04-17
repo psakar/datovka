@@ -262,3 +262,38 @@ void GlobProxySettings::saveToSettings(QSettings &settings) const
 
 
 QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
+
+
+/* ========================================================================= */
+/*
+ * Translates message type to text.
+ */
+const QString dmTypeToText(const QString &dmType)
+/* ========================================================================= */
+{
+	if (dmType.size() != 0) {
+		return QString();
+	}
+
+	switch (dmType[0].toLatin1()) {
+	case 'K':
+		return QObject::tr("Postal data message");
+		break;
+	case 'I':
+		return QObject::tr("Initializing postal data message");
+		break;
+	case 'O':
+		return QObject::tr("Reply postal data message");
+		break;
+	case 'X':
+		return QObject::tr(
+		    "Initializing postal data message - expired");
+		break;
+	case 'Y':
+		return QObject::tr("Initializing postal data message - used");
+		break;
+	default:
+		return QString();
+		break;
+	}
+}

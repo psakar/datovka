@@ -43,57 +43,57 @@ public:
 	/*!
 	 * @brief Return received messages model.
 	 */
-	QAbstractTableModel * receivedModel(const QString &recipDbId);
+	QAbstractTableModel * msgsRcvdModel(const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
 	 */
-	QAbstractTableModel * receivedWithin90DaysModel(
+	QAbstractTableModel * msgsRcvdWithin90DaysModel(
 	    const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within given year.
 	 */
-	QAbstractTableModel * receivedInYearModel(const QString &recipDbId,
+	QAbstractTableModel * msgsRcvdInYearModel(const QString &recipDbId,
 	    const QString &year);
 
 	/*!
 	 * @brief Return list of yearly counts in database.
 	 */
-	QList<QString> receivedYears(const QString &recipDbId) const;
+	QList<QString> msgsRcvdYears(const QString &recipDbId) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 */
-	QList< QPair<QString, int> > receivedYearlyCounts(
+	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
 	    const QString &recipDbId) const;
 
 	/*!
 	 * @brief Return sent messages model.
 	 */
-	QAbstractTableModel * sentModel(const QString &sendDbId);
+	QAbstractTableModel * msgsSntModel(const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
 	 */
-	QAbstractTableModel * sentWithin90DaysModel(
+	QAbstractTableModel * msgsSntWithin90DaysModel(
 	    const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within given year.
 	 */
-	QAbstractTableModel * sentInYearModel(const QString &sendDbId,
+	QAbstractTableModel * msgsSntInYearModel(const QString &sendDbId,
 	    const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 */
-	QList<QString> sentYears(const QString &sendDbId) const;
+	QList<QString> msgsSntYears(const QString &sendDbId) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 */
-	QList< QPair<QString, int> > sentYearlyCounts(
+	QList< QPair<QString, int> > msgsSntYearlyCounts(
 	    const QString &sendDbId) const;
 
 	/*!
@@ -101,24 +101,17 @@ public:
 	 *
 	 * @note title, senderId, sender, senderAddress
 	 */
-	QVector<QString> replyDataTo(int dmId) const;
+	QVector<QString> msgsReplyDataTo(int dmId) const;
+
+	/*!
+	 * @brief Read data from supplementary message data table.
+	 */
+	QVector<QString> smsgdQuery(int msgId) const;
 
 	/*!
 	 * @brief Return message HTML formatted description.
 	 */
-	QString messageDescriptionHtml(int dmId) const;
-
-	/*!
-	 * List of know entries in messages db and their types.
-	 */
-	static
-	const QVector< QPair<QString, dbEntryType> > messagesTblKnownAttrs;
-
-	/*!
-	 * Mapping between entry identifiers an their description.
-	 */
-	static
-	const QMap<QString, QString> messagesTblAttrNames;
+	QString descriptionHtml(int dmId, bool showId = false) const;
 
 protected:
 	/*!

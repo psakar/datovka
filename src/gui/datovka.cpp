@@ -178,30 +178,30 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		html = createAccountInfo(*item);
 		break;
 	case AccountModel::nodeRecentReceived:
-		tableModel = db->receivedWithin90DaysModel(dbId);
+		tableModel = db->msgsRcvdWithin90DaysModel(dbId);
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
-		tableModel = db->sentWithin90DaysModel(dbId);
+		tableModel = db->msgsSntWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
 		html = createAccountInfoAllField(tr("All messages"),
-		    db->receivedYearlyCounts(dbId),
-		    db->sentYearlyCounts(dbId));
+		    db->msgsRcvdYearlyCounts(dbId),
+		    db->msgsSntYearlyCounts(dbId));
 		break;
 	case AccountModel::nodeReceived:
-		tableModel = db->receivedModel(dbId);
+		tableModel = db->msgsRcvdModel(dbId);
 		break;
 	case AccountModel::nodeSent:
-		tableModel = db->sentModel(dbId);
+		tableModel = db->msgsSntModel(dbId);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
-		tableModel = db->receivedInYearModel(dbId, item->text());
+		tableModel = db->msgsRcvdInYearModel(dbId, item->text());
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
-		tableModel = db->sentInYearModel(dbId, item->text());
+		tableModel = db->msgsSntInYearModel(dbId, item->text());
 		break;
 	default:
 		Q_ASSERT(0);
@@ -348,8 +348,7 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 	Q_ASSERT(0 != db);
 
 	ui->messageInfo->setHtml(
-	    db->messageDescriptionHtml(
-	        tableModel->itemData(index).first().toInt()));
+	    db->descriptionHtml(tableModel->itemData(index).first().toInt()));
 
 	/* TODO */
 }
@@ -371,16 +370,16 @@ void MainWindow::tableItemRightClicked(const QPoint &point)
 		/* TODO */
 		menu->addAction(QIcon(ICON_16x16_PATH +
 		    QString("datovka-message-download.png")),
-		    tr("Download message signed"),
-		    this, SLOT(on_actionMark_all_as_read_triggered()));
+		    tr("Download message signed"), this,
+		    SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-reply.png")), tr("Reply"),
-		    this, SLOT(on_actionReply_to_the_sender_triggered()));
+		    QString("datovka-message-reply.png")), tr("Reply"), this,
+		    SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_16x16_PATH +
 		    QString("datovka-message-verify.png")),
-		    tr("Verified messages"),
-		    this, SLOT(on_actionReply_to_the_sender_triggered()));
+		    tr("Verified messages"), this,
+		    SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 	} else {
 		menu->addAction(QIcon(ICON_16x16_PATH +
@@ -776,14 +775,14 @@ bool MainWindow::regenerateAccountModelYears(void)
 		Q_ASSERT(0 != db);
 		QString dbId = m_accountDb.dbId(userName + "___True");
 		/* Received. */
-		yearList = db->receivedYears(dbId);
+		yearList = db->msgsRcvdYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
 //			qDebug() << yearList.value(j);
 			m_accountModel.addNodeReceivedYear(itemTop,
 			    yearList.value(j));
 		}
 		/* Sent. */
-		yearList = db->sentYears(dbId);
+		yearList = db->msgsSntYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
 //			qDebug() << yearList.value(j);
 			m_accountModel.addNodeSentYear(itemTop,
@@ -1026,7 +1025,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	Q_ASSERT(0 != tableModel);
 	QModelIndex index = tableModel->index(
 	    ui->messageList->currentIndex().row(), 0); /* First column. */
-	/* TODO -- Replimenent this conftruction. */
+	/* TODO -- Reimplement this construction. */
 
 	const QStandardItem *item = m_accountModel.itemFromIndex(
 	    ui->accountList->selectionModel()->currentIndex());
@@ -1047,7 +1046,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 
-	QVector<QString> replyTo = db->replyDataTo(
+	QVector<QString> replyTo = db->msgsReplyDataTo(
 	    tableModel->itemData(index).first().toInt());
 
 	/* TODO */

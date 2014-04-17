@@ -131,4 +131,10 @@ extern
 QString dateTimeDisplayFormat;
 
 
+/*!
+ * @brief Translates message type to text.
+ */
+const QString dmTypeToText(const QString &dmType);
+
+
 #endif /* _COMMON_H_ */

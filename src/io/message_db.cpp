@@ -10,94 +10,13 @@
 #include "message_db.h"
 
 
-const QVector< QPair<QString, dbEntryType> >
-    MessageDb::messagesTblKnownAttrs = {
-	{"dmID", DB_INTEGER},
-	{"is_verified", DB_BOOLEAN},
-	{"_origin", DB_TEXT},
-	{"dbIDSender", DB_TEXT},
-	{"dmSender", DB_TEXT},
-	{"dmSenderAddress", DB_TEXT},
-	{"dmSenderType", DB_INTEGER},
-	{"dmRecipient", DB_TEXT},
-	{"dmRecipientAddress", DB_TEXT},
-	{"dmAmbiguousRecipient", DB_TEXT},
-	{"dmSenderOrgUnit", DB_TEXT},
-	{"dmSenderOrgUnitNum", DB_TEXT},
-	{"dbIDRecipient", DB_TEXT},
-	{"dmRecipientOrgUnit", DB_TEXT},
-	{"dmRecipientOrgUnitNum", DB_TEXT},
-	{"dmToHands", DB_TEXT},
-	{"dmAnnotation", DB_TEXT},
-	{"dmRecipientRefNumber", DB_TEXT},
-	{"dmSenderRefNumber", DB_TEXT},
-	{"dmRecipientIdent", DB_TEXT},
-	{"dmSenderIdent", DB_TEXT},
-	{"dmLegalTitleLaw", DB_TEXT},
-	{"dmLegalTitleYear", DB_TEXT},
-	{"dmLegalTitleSect", DB_TEXT},
-	{"dmLegalTitlePar", DB_TEXT},
-	{"dmLegalTitlePoint", DB_TEXT},
-	{"dmPersonalDelivery", DB_BOOLEAN},
-	{"dmAllowSubstDelivery", DB_BOOLEAN},
-	{"dmQTimestamp", DB_TEXT},
-	{"dmDeliveryTime", DB_DATETIME},
-	{"dmAcceptanceTime", DB_DATETIME},
-	{"dmMessageStatus", DB_INTEGER},
-	{"dmAttachmentSize", DB_INTEGER},
-	{"_dmType", DB_TEXT}
-};
-
-
-const QMap<QString, QString> MessageDb::messagesTblAttrNames = {
-	{"dmID", QObject::tr("ID")},
-	{"is_verified", ""},
-	{"_origin", ""},
-	{"dbIDSender", ""},
-	{"dmSender", QObject::tr("Sender")},
-	{"dmSenderAddress", ""},
-	{"dmSenderType", ""},
-	{"dmRecipient", QObject::tr("Recipient")},
-	{"dmRecipientAddress", ""},
-	{"dmAmbiguousRecipient", ""},
-	{"dmSenderOrgUnit", ""},
-	{"dmSenderOrgUnitNum", ""},
-	{"dbIDRecipient", ""},
-	{"dmRecipientOrgUnit", ""},
-	{"dmRecipientOrgUnitNum", ""},
-	{"dmToHands", ""},
-	{"dmAnnotation", QObject::tr("Title")},
-	{"dmRecipientRefNumber", ""},
-	{"dmSenderRefNumber", ""},
-	{"dmRecipientIdent", ""},
-	{"dmSenderIdent", ""},
-	{"dmLegalTitleLaw", ""},
-	{"dmLegalTitleYear", ""},
-	{"dmLegalTitleSect", ""},
-	{"dmLegalTitlePar", ""},
-	{"dmLegalTitlePoint", ""},
-	{"dmPersonalDelivery", ""},
-	{"dmAllowSubstDelivery", ""},
-	{"dmQTimestamp", ""},
-	{"dmDeliveryTime", QObject::tr("Delivered")},
-	{"dmAcceptanceTime", QObject::tr("Accepted")},
-	{"dmMessageStatus", QObject::tr("Status")},
-	{"dmAttachmentSize", ""},
-	{"_dmType", ""}
-};
-
-
 const QVector<QString> MessageDb::receivedItemIds = {"dmID", "dmAnnotation",
     "dmSender", "dmDeliveryTime", "dmAcceptanceTime"};
-const QVector<dbEntryType> MessageDb::receivedItemTypes = {DB_INTEGER, DB_TEXT,
-    DB_TEXT, DB_DATETIME, DB_DATETIME};
 
 
 const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
     "dmRecipient", "dmMessageStatus", "dmDeliveryTime",
     "dmAcceptanceTime"};
-const QVector<dbEntryType> MessageDb::sentItemTypes = {DB_INTEGER, DB_TEXT,
-    DB_TEXT, DB_INTEGER, DB_DATETIME, DB_DATETIME};
 
 
 /* ========================================================================= */
@@ -157,7 +76,7 @@ bool MessageDb::openDb(const QString &fileName)
 /*
  * Return received messages within past 90 days;
  */
-QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
+QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -175,10 +94,11 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(receivedItemIds[i]));
+		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -189,7 +109,7 @@ QAbstractTableModel * MessageDb::receivedModel(const QString &recipDbId)
 /*
  * Return received messages within past 90 days.
  */
-QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
+QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
     const QString &recipDbId)
 /* ========================================================================= */
 {
@@ -211,10 +131,11 @@ QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(receivedItemIds[i]));
+		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -225,7 +146,7 @@ QAbstractTableModel * MessageDb::receivedWithin90DaysModel(
 /*
  * Return received messages within given year.
  */
-QAbstractTableModel * MessageDb::receivedInYearModel(const QString &recipDbId,
+QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
     const QString &year)
 /* ========================================================================= */
 {
@@ -247,10 +168,11 @@ QAbstractTableModel * MessageDb::receivedInYearModel(const QString &recipDbId,
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(receivedItemIds[i]));
+		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -261,7 +183,7 @@ QAbstractTableModel * MessageDb::receivedInYearModel(const QString &recipDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::receivedYears(const QString &recipDbId) const
+QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
@@ -291,12 +213,12 @@ QList<QString> MessageDb::receivedYears(const QString &recipDbId) const
 /*
  * Return list of years and number of messages in database.
  */
-QList< QPair<QString, int> > MessageDb::receivedYearlyCounts(
+QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
     const QString &recipDbId) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = receivedYears(recipDbId);
+	QList<QString> yearList = msgsRcvdYears(recipDbId);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -322,7 +244,7 @@ QList< QPair<QString, int> > MessageDb::receivedYearlyCounts(
 /*
  * Return sent messages model.
  */
-QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
+QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -341,9 +263,10 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(sentItemIds[i]));
+		    msgsTbl::attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal, sentItemTypes[i],
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    msgsTbl::attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -355,7 +278,7 @@ QAbstractTableModel * MessageDb::sentModel(const QString &sendDbId)
 /*
  * Return sent messages within past 90 days.
  */
-QAbstractTableModel * MessageDb::sentWithin90DaysModel(
+QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
     const QString &sendDbId)
 /* ========================================================================= */
 {
@@ -377,9 +300,10 @@ QAbstractTableModel * MessageDb::sentWithin90DaysModel(
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(sentItemIds[i]));
+		    msgsTbl::attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal, sentItemTypes[i],
+		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		    msgsTbl::attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -391,7 +315,7 @@ QAbstractTableModel * MessageDb::sentWithin90DaysModel(
 /*
  * Return sent messages within given year.
  */
-QAbstractTableModel * MessageDb::sentInYearModel(const QString &sendDbId,
+QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
     const QString &year)
 /* ========================================================================= */
 {
@@ -413,10 +337,11 @@ QAbstractTableModel * MessageDb::sentInYearModel(const QString &sendDbId,
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    messagesTblAttrNames.value(receivedItemIds[i]));
+		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    receivedItemTypes[i], ROLE_DB_ENTRY_TYPE);
+		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    ROLE_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlModel;
@@ -427,7 +352,7 @@ QAbstractTableModel * MessageDb::sentInYearModel(const QString &sendDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::sentYears(const QString &sendDbId) const
+QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
@@ -457,12 +382,12 @@ QList<QString> MessageDb::sentYears(const QString &sendDbId) const
 /*
  * Return list of years and number of messages in database.
  */
-QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
+QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
     const QString &sendDbId) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = sentYears(sendDbId);
+	QList<QString> yearList = msgsSntYears(sendDbId);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -475,8 +400,10 @@ QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
 		query.prepare(queryStr);
 		if (query.exec() && query.isActive()) {
 			query.first();
-			yearlyCounts.append(QPair<QString, int>(yearList[i],
-			    query.value(0).toInt()));
+			if (query.isValid()) {
+				yearlyCounts.append(QPair<QString, int>(
+				    yearList[i], query.value(0).toInt()));
+			}
 		}
 	}
 
@@ -488,7 +415,7 @@ QList< QPair<QString, int> > MessageDb::sentYearlyCounts(
 /*
  * Generate information for reply dialog.
  */
-QVector<QString> MessageDb::replyDataTo(int dmId) const
+QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 /* ========================================================================= */
 {
 	QVector<QString> reply(4);
@@ -503,12 +430,41 @@ QVector<QString> MessageDb::replyDataTo(int dmId) const
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
-		reply[0] = query.value(0).toString();
-		reply[1] = query.value(1).toString();
-		reply[2] = query.value(2).toString();
-		reply[3] = query.value(3).toString();
+		if (query.isValid()) {
+			reply[0] = query.value(0).toString();
+			reply[1] = query.value(1).toString();
+			reply[2] = query.value(2).toString();
+			reply[3] = query.value(3).toString();
+		}
 	}
-//	qDebug() << reply[0] << reply[1] << reply[2] << reply[3];
+
+	return reply;
+}
+
+
+/* ========================================================================= */
+/*
+ * Read data from supplementary message data table.
+ */
+QVector<QString> MessageDb::smsgdQuery(int msgId) const
+/* ========================================================================= */
+{
+	QVector<QString> reply;
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT ";
+	    "message_id, message_type, read_locally, download_date, "
+	    "custom_data"
+	    " FROM supplementary_message_data WHERE "
+	    "message_id = "  + QString::number(msgId);
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			/* TODO */
+		}
+	}
 
 	return reply;
 }
@@ -518,13 +474,43 @@ QVector<QString> MessageDb::replyDataTo(int dmId) const
 /*
  * Return message HTML formatted description.
  */
-QString MessageDb::messageDescriptionHtml(int dmId) const
+QString MessageDb::descriptionHtml(int dmId, bool showId) const
 /* ========================================================================= */
 {
 	QString html;
+	QSqlQuery query(m_db);
+	QString queryStr;
 
-	html += "<h3>Selected message</h3>" + QString::number(dmId);
+	html += "<h3>" + tr("Identification") + "</h3>";
+	if (showId) {
+		html += strongAccountInfoLine(tr("ID"), QString::number(dmId));
+	}
 
+	queryStr = "SELECT "
+	    "dmAnnotation, _dmType"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		html += strongAccountInfoLine(tr("Subject"),
+		    query.value(0).toString());
+		if (!query.value(1).toString().isEmpty() &&
+		    (!dmTypeToText(query.value(1).toString()).isEmpty())) {
+			html += strongAccountInfoLine(tr("Message type"),
+			    dmTypeToText(query.value(1).toString()));
+		}
+
+		html += "<br/>";
+
+		/* Information about message author. */
+		/* Custom data. */
+
+	}
+
+	html += QString::number(dmId);
+	qDebug() << html;
 	/* TODO */
 
 	return html;
