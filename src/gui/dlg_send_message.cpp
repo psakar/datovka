@@ -195,6 +195,7 @@ void DlgSentMessage::addRecipientData(void)
 {
 	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this);
 	dlg_ds_search->show();
+
 }
 
 
@@ -229,7 +230,7 @@ void DlgSentMessage::deleteRecipientData(void)
 
 void DlgSentMessage::findRecipientData(void)
 {
-	QDialog *dlg_cont = new dlg_contacts(this);
+	QDialog *dlg_cont = new dlg_contacts(this, this->recipientTableWidget);
 	dlg_cont->show();
 }
 
