@@ -12,7 +12,7 @@ public:
 	dlg_ds_search_dialog(QWidget *parent = 0);
 
 private slots:
-	void checkInputFields();
+	void checkInputFields(void);
 
 
 private:

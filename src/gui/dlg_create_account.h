@@ -19,7 +19,7 @@ private slots:
 	void setActiveButton(int);
 	void addCertificateFromFile(void);
 	void saveAccount(void);
-	void checkInputFields();
+	void checkInputFields(void);
 
 private:
 	void initAccountDialog(QTreeView *accountList, QString action);

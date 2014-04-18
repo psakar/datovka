@@ -166,7 +166,7 @@ void DlgSentMessage::addAttachmentFile(void)
 	}
 }
 
-void DlgSentMessage::attItemSelect()
+void DlgSentMessage::attItemSelect(void)
 {
 
 	this->removeAttachment->setEnabled(true);
@@ -174,13 +174,13 @@ void DlgSentMessage::attItemSelect()
 }
 
 
-void DlgSentMessage::recItemSelect()
+void DlgSentMessage::recItemSelect(void)
 {
 	this->removeRecipient->setEnabled(true);
 }
 
 
-void DlgSentMessage::tableItemInsRem()
+void DlgSentMessage::tableItemInsRem(void)
 {
 	checkInputFields();
 }
@@ -198,7 +198,7 @@ void DlgSentMessage::addRecipientData(void)
 }
 
 
-void DlgSentMessage::deleteAttachmentFile()
+void DlgSentMessage::deleteAttachmentFile(void)
 {
 	int row = this->attachmentTableWidget->currentRow();
 	if (row >= 0) {
@@ -209,7 +209,7 @@ void DlgSentMessage::deleteAttachmentFile()
 }
 
 
-void DlgSentMessage::checkInputFields()
+void DlgSentMessage::checkInputFields(void)
 {
 	bool buttonEnabled = !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
@@ -218,7 +218,7 @@ void DlgSentMessage::checkInputFields()
 }
 
 
-void DlgSentMessage::deleteRecipientData()
+void DlgSentMessage::deleteRecipientData(void)
 {
 	int row = this->recipientTableWidget->currentRow();
 	if (row >= 0) {

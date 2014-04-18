@@ -32,10 +32,10 @@ private slots:
 	void addRecipientData(void);
 	void deleteRecipientData(void);
 	void findRecipientData(void);
-	void recItemSelect();
-	void attItemSelect();
-	void checkInputFields();
-	void tableItemInsRem();
+	void recItemSelect(void);
+	void attItemSelect(void);
+	void checkInputFields(void);
+	void tableItemInsRem(void);
 
 private:
 	void initNewMessageDialog(void);

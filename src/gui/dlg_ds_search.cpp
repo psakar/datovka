@@ -7,12 +7,16 @@ dlg_ds_search_dialog::dlg_ds_search_dialog(QWidget *parent) : QDialog(parent)
 }
 
 
-void dlg_ds_search_dialog::initSearchWindow()
+void dlg_ds_search_dialog::initSearchWindow(void)
 {
 	this->dataBoxTypeCBox->addItem(QString(tr("OMV - Orgán věřejné moci")));
 	this->dataBoxTypeCBox->addItem(QString(tr("PO - Právnická osoba")));
 	this->dataBoxTypeCBox->addItem(QString(tr("PFO - Podnikající fyzická osoba")));
 	this->dataBoxTypeCBox->addItem(QString(tr("FO - Fyzická osoba")));
+
+	this->resultsTableWidget->setColumnWidth(0,20);
+	this->resultsTableWidget->setColumnWidth(1,60);
+	this->resultsTableWidget->setColumnWidth(2,150);
 
 	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -26,9 +30,12 @@ void dlg_ds_search_dialog::initSearchWindow()
 	    this, SLOT(checkInputFields()));
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	this->resultsTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
 }
 
-void dlg_ds_search_dialog::checkInputFields()
+void dlg_ds_search_dialog::checkInputFields(void)
 {
 	if (this->dataBoxTypeCBox->currentIndex() == 3) {
 		this->iCLineEdit->setEnabled(false);

@@ -12,8 +12,10 @@ class dlg_contacts : public QDialog, public Ui::dlg_contacts
 public:
 	dlg_contacts(QWidget *parent = 0);
 
-private:
-
+private slots:
+	void findContact(QString);
+	void clearContactText(void);
+	void fillContactFromMessage(void);
 };
 
 #endif // DLG_CONTACTS_H

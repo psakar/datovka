@@ -88,7 +88,7 @@ void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
 }
 
 
-void CreateNewAccountDialog::addCertificateFromFile()
+void CreateNewAccountDialog::addCertificateFromFile(void)
 {
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "", tr("Certificate File (*.p12)"));
@@ -107,7 +107,7 @@ void CreateNewAccountDialog::addCertificateFromFile()
 	}
 }
 
-void CreateNewAccountDialog::checkInputFields()
+void CreateNewAccountDialog::checkInputFields(void)
 {
 	bool buttonEnabled;
 	if (m_loginmethod == CERTIFICATE) {
