@@ -1,6 +1,7 @@
 #include <QMimeDatabase>
 #include "dlg_send_message.h"
 #include "dlg_ds_search.h"
+#include "dlg_contacts.h"
 #include "src/models/accounts_model.h"
 #include "ui_dlg_send_message.h"
 
@@ -228,7 +229,8 @@ void DlgSentMessage::deleteRecipientData()
 
 void DlgSentMessage::findRecipientData(void)
 {
-	/* TODO */
+	QDialog *dlg_cont = new dlg_contacts(this);
+	dlg_cont->show();
 }
 
 

@@ -135,12 +135,12 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Id</string>
+       <string/>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Nový sloupec</string>
+       <string>ID</string>
       </property>
      </column>
      <column>
