@@ -1,6 +1,6 @@
 #include "dlg_contacts.h"
 
-dlg_contacts::dlg_contacts(QWidget *parent, QTableWidget *recipientTableWidget) :
+dlg_contacts::dlg_contacts(QWidget *parent, QTableWidget *recipientTableWidget):
     QDialog(parent),
     m_recipientTableWidget(recipientTableWidget)
 {
@@ -11,41 +11,54 @@ dlg_contacts::dlg_contacts(QWidget *parent, QTableWidget *recipientTableWidget) 
 	this->contactTableWidget->setColumnWidth(2,150);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	this->clearPushButton->setEnabled(false);
 
-	fillContactFromMessage();
+	fillContactsFromMessageDb();
 
 	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(findContact(QString)));
-	connect(this->contactTableWidget, SIGNAL(itemClicked(QTableWidgetItem*)),
-	    this, SLOT(doClick(QTableWidgetItem*)));
+	    this, SLOT(filterContact(QString)));
+	connect(this->contactTableWidget,
+	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
+	    SLOT(doClick()));
 	connect(this->clearPushButton, SIGNAL(clicked()), this,
 	    SLOT(clearContactText()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(insertDsItems(void)));
+	    SLOT(insertDsItems()));
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
 }
 
 
-void dlg_contacts::findContact(QString text)
+void dlg_contacts::filterContact(QString text)
 {
-	qDebug() << text;
-	if (this->filterLineEdit->text().length() > 2) {
-
-
+	this->clearPushButton->setEnabled(true);
+	if (!text.isEmpty()) {
+		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
+			contactTableWidget->hideRow(i);
+		}
+		QList<QTableWidgetItem *> items =
+		    contactTableWidget->findItems(text, Qt::MatchContains);
+		for (int i = 0; i < items.count(); i++) {
+				contactTableWidget->showRow(items.at(i)->row());
+		}
+	} else {
+		this->clearPushButton->setEnabled(false);
+		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
+			contactTableWidget->showRow(i);
+		}
 	}
 }
 
 void dlg_contacts::clearContactText(void)
 {
 	this->filterLineEdit->clear();
+	this->clearPushButton->setEnabled(false);
 }
 
-void dlg_contacts::fillContactFromMessage()
+void dlg_contacts::fillContactsFromMessageDb()
 {
-	/* TODO - from DB */
+	/* TODO - select contacts from DB */
 
 	for (int i = 0; i < 5; i++) {
 
@@ -70,7 +83,8 @@ void dlg_contacts::fillContactFromMessage()
 	}
 }
 
-void dlg_contacts::doClick(QTableWidgetItem* item){
+void dlg_contacts::doClick(void)
+{
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
@@ -81,24 +95,24 @@ void dlg_contacts::doClick(QTableWidgetItem* item){
 	}
 }
 
-void dlg_contacts::insertDsItems(void){
-
-	qDebug() << "insertDsItems";
+void dlg_contacts::insertDsItems(void)
+{
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {
 			int row = m_recipientTableWidget->rowCount();
 			m_recipientTableWidget->insertRow(row);
 			QTableWidgetItem *item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->item(i,1)->text());
+			item->setText(this->contactTableWidget->
+			    item(i,1)->text());
 			this->m_recipientTableWidget->setItem(row,0,item);
 			item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->item(i,2)->text());
+			item->setText(this->contactTableWidget->
+			    item(i,2)->text());
 			this->m_recipientTableWidget->setItem(row,1,item);
 			item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->item(i,3)->text());
+			item->setText(this->contactTableWidget->\
+			    item(i,3)->text());
 			this->m_recipientTableWidget->setItem(row,2,item);
 		}
 	}
 }
-
-

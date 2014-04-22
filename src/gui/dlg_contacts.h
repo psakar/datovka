@@ -14,10 +14,10 @@ public:
 	dlg_contacts(QWidget *parent = 0, QTableWidget *recipientTableWidget = 0);
 
 private slots:
-	void findContact(QString);
+	void filterContact(QString);
 	void clearContactText(void);
-	void fillContactFromMessage(void);
-	void doClick(QTableWidgetItem*);
+	void fillContactsFromMessageDb(void);
+	void doClick(void);
 	void insertDsItems(void);
 private:
 	QTableWidget *m_recipientTableWidget;
