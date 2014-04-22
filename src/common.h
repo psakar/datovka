@@ -143,4 +143,10 @@ const QString dmTypeToText(const QString &dmType);
 const QString authorTypeToText(const QString &authorType);
 
 
+/*!
+ * @brief Returns message status description.
+ */
+const QString msgStatusToText(int status);
+
+
 #endif /* _COMMON_H_ */

@@ -325,3 +325,87 @@ const QString authorTypeToText(const QString &authorType)
 		return QString();
 	}
 }
+
+
+/* ========================================================================= */
+/*
+ * Returns message status description.
+ */
+const QString msgStatusToText(int status)
+/* ========================================================================= */
+{
+	switch (status) {
+	case 1:
+		/* Zprava byla podana (vznikla v ISDS). */
+		return QObject::tr("Message bas submitted "
+		    "(originates at ISDS )");
+		break;
+	case 2:
+		/*
+		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
+		 */
+		return QObject::tr("Data message and papers signed with "
+		    "time-stamp.");
+		break;
+	case 3:
+		/*
+		 * Zprava neprosla AV kontrolou; nakazena pisemnost je smazana;
+		 * konecny stav zpravy pred smazanim.
+		 */
+		return QObject::tr("Message did not pass through AV check; "
+		    "infected paper deleted; final status before deletion");
+		break;
+	case 4:
+		/* Zprava dodana do ISDS (zapsan cas dodani). */
+		return QObject::tr("Message handed into ISDS "
+		    "(delivery time recorded)");
+		break;
+	case 5:
+		/*
+		 * Uplynulo 10 dnu od dodani verejne zpravy, ktera dosud nebyla
+		 * dorucena prihlasenim (predpoklad dorucení fikci u neOVM DS);
+		 * u komercni zpravy nemuze tento stav nastat.
+		 */
+		return QObject::tr("10 days have passed since the delivery of "
+		    "the public message which has not been accepted by "
+		    "logging-in (assumption of delivery by fiction in nonOVM "
+		    "DS); this state cannot occur for commertial messages.");
+		break;
+	case 6:
+		/*
+		 * Osoba opravnena cist tuto zpravu se prihlasila - dodana
+		 * zprava byla dorucena.",
+		 */
+		return QObject::tr("A person authorised to read this message "
+		    "has logged-in -- delivered message has been accepted.");
+		break;
+	case 7:
+		/* Zprava byla prectena (na portale nebo akci ESS). */
+		return QObject::tr("Message has been read (on the portal or "
+		    "by ESS action)");
+		break;
+	case 8:
+		/*
+		 * Zprava byla oznacena jako nedorucitelna, protoze DS adresata
+		 * byla zpetne znepristupnena.
+		 */
+		return QObject::tr("Message marked as undeliverable because "
+		    "the target DS has been made inaccessible.");
+		break;
+	case 9:
+		/*
+		 * Obsah zpravy byl smazan, obalka zpravy vcetne hashu
+		 * presunuta do archivu.
+		 */
+		return QObject::tr("Message content deleted, envelope "
+		    "including hashes has been moved into archive.");
+		break;
+	case 10:
+		/* Zprava je v Datovem trezoru. */
+		return QObject::tr("Message resides in data vault.");
+		break;
+	default:
+		return QString();
+		break;
+	}
+}

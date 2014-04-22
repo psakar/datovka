@@ -136,11 +136,11 @@ private:
 	static
 	const QVector<QString> receivedItemIds;
 	static
-	const QVector<dbEntryType> receivedItemTypes;
-	static
 	const QVector<QString> sentItemIds;
 	static
-	const QVector<dbEntryType> sentItemTypes;
+	const QVector<QString> msgAttribs2;
+	static
+	const QVector<QString> msgStatus;
 
 	QSqlDatabase m_db; /*!< Message database. */
 	dbTableModel m_sqlModel; /*!< Model of displayed data. */

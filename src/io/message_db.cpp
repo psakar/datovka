@@ -21,6 +21,16 @@ const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
     "dmAcceptanceTime"};
 
 
+const QVector<QString> MessageDb::msgAttribs2 = {"dmSenderIdent",
+    "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
+    "dmToHands", "dmLegalTitleLaw", "dmLegalTitleYear", "dmLegalTitleSect",
+    "dmLegalTitlePar", "dmLegalTitlePoint"};
+
+
+const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
+    "dmAcceptanceTime", "dmMessageStatus"};
+
+
 /* ========================================================================= */
 /*
  * Convert viewed data in date/time columns.
@@ -518,7 +528,8 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 	}
 
 	queryStr = "SELECT "
-	    "dmAnnotation, _dmType, dmSender, dmSenderAddress"
+	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
+	    "dmRecipient, dmRecipientAddress"
 	    " FROM messages WHERE "
 	    "dmID = " + QString::number(dmId);
 	qDebug() << queryStr;
@@ -555,7 +566,62 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 			}
 		}
 
+		html += "<br/>";
+
+		html += strongAccountInfoLine(tr("To"),
+		    query.value(4).toString());
+		html += strongAccountInfoLine(tr("Recipient Address"),
+		    query.value(5).toString());
 	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (msgAttribs2.size() - 1); ++i) {
+		queryStr += msgAttribs2[i] + ", ";
+	}
+	queryStr += msgAttribs2.last();
+	queryStr += " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		for (int i = 0; i < msgAttribs2.size(); ++i) {
+			if (!query.value(i).toString().isEmpty()) {
+				html += strongAccountInfoLine(
+				    MsgsTbl::attrProps[msgAttribs2[i]].desc,
+				    query.value(i).toString());
+			}
+		}
+	}
+
+	html += "<h3>" + tr("Status") + "</h3>";
+	/* Status. */
+	queryStr = "SELECT ";
+	for (int i = 0; i < (msgStatus.size() - 1); ++i) {
+		queryStr += msgStatus[i] + ", ";
+	}
+	queryStr += msgStatus.last();
+	queryStr += " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		html += strongAccountInfoLine(
+		    MsgsTbl::attrProps[msgStatus[0]].desc,
+		    dateTimeFromDbFormat(query.value(0).toString(),
+		        dateTimeDisplayFormat));
+		html += strongAccountInfoLine(
+		    MsgsTbl::attrProps[msgStatus[1]].desc,
+		    dateTimeFromDbFormat(query.value(1).toString(),
+		        dateTimeDisplayFormat));
+		html += strongAccountInfoLine(
+		    MsgsTbl::attrProps[msgStatus[2]].desc,
+		    QString::number(query.value(2).toInt()) + " -- " +
+		    msgStatusToText(query.value(2).toInt()));
+	}
+	/* Events. */
+	/* TODO */
 
 //	html += QString::number(dmId);
 	qDebug() << html;
