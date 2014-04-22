@@ -61,7 +61,7 @@ void dlg_contacts::clearContactText(void)
 void dlg_contacts::fillContactsFromMessageDb()
 {
 	QList<QVector<QString>> contactList;
-	contactList = m_messdb->selectContactsFromMessageDb();
+	contactList = m_messdb->uniqueContacts();
 
 	for (int i = 0; i < contactList.count(); i++) {
 

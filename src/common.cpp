@@ -271,7 +271,7 @@ QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
 const QString dmTypeToText(const QString &dmType)
 /* ========================================================================= */
 {
-	if (dmType.size() != 0) {
+	if (dmType.size() != 1) {
 		return QString();
 	}
 
@@ -295,5 +295,33 @@ const QString dmTypeToText(const QString &dmType)
 	default:
 		return QString();
 		break;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Translatest author type to text.
+ */
+const QString authorTypeToText(const QString &authorType)
+/* ========================================================================= */
+{
+	if ("PRIMARY_USER" == authorType) {
+		/* Opravnena osoba nebo likvidator. */
+		return QObject::tr("Primary user");
+	} else if ("ENTRUSTED_USER" == authorType) {
+		/* Poverena osoba. */
+		return QObject::tr("Entrusted user");
+	} else if ("ADMINISTRATOR" == authorType) {
+		/* Systemove DZ. */
+		return QObject::tr("Administrator");
+	} else if ( "OFFICIAL" == authorType) {
+		/* Systemove DZ. */
+		return QObject::tr("Official");
+	} else if ("VIRTUAL" == authorType) {
+		/* Spisovka. */
+		return QObject::tr("Virtual");
+	} else {
+		return QString();
 	}
 }

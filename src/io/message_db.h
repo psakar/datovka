@@ -4,6 +4,7 @@
 #define _MESSAGE_DB_H_
 
 
+#include <QJsonDocument>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
 
@@ -63,11 +64,6 @@ public:
 	QList<QString> msgsRcvdYears(const QString &recipDbId) const;
 
 	/*!
-	 * @brief Return contacts from message db.
-	 */
-	QList<QVector<QString>> selectContactsFromMessageDb(void);
-
-	/*!
 	 * @brief Return list of years and number of messages in database.
 	 */
 	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
@@ -109,9 +105,14 @@ public:
 	QVector<QString> msgsReplyDataTo(int dmId) const;
 
 	/*!
+	 * @brief Return contacts from message db.
+	 */
+	QList< QVector<QString> > uniqueContacts(void);
+
+	/*!
 	 * @brief Read data from supplementary message data table.
 	 */
-	QVector<QString> smsgdQuery(int msgId) const;
+	QJsonDocument smsgdCustomData(int msgId) const;
 
 	/*!
 	 * @brief Return message HTML formatted description.

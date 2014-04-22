@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QJsonObject>
+#include <QJsonValue>
 #include <QSqlError>
 #include <QSqlQuery>
 
@@ -380,33 +382,6 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 
 /* ========================================================================= */
 /*
- * @Return contact list from message db.
- */
-QList<QVector<QString>> MessageDb::selectContactsFromMessageDb(void)
-/* ========================================================================= */
-{
-	QList<QVector<QString>> list_contacts;
-	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT "
-	   "dbIDSender, dmSender, dmSenderAddress"
-	   " FROM messages";
-	query.prepare(queryStr);
-	if (query.exec()) {
-		query.first();
-		while (query.isValid()) {
-			QVector<QString> contact;
-			contact.append(query.value(0).toString());
-			contact.append(query.value(1).toString());
-			contact.append(query.value(2).toString());
-			list_contacts.append(contact);
-			query.next();
-		}
-	}
-	return list_contacts;
-}
-
-/* ========================================================================= */
-/*
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
@@ -471,29 +446,58 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 
 /* ========================================================================= */
 /*
- * Read data from supplementary message data table.
+ * Return contact list from message db.
  */
-QVector<QString> MessageDb::smsgdQuery(int msgId) const
+QList< QVector<QString> > MessageDb::uniqueContacts(void)
 /* ========================================================================= */
 {
-	QVector<QString> reply;
+	QList<QVector<QString>> list_contacts;
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT DISTINCT "
+	   "dbIDSender, dmSender, dmSenderAddress"
+	   " FROM messages";
+	query.prepare(queryStr);
+	if (query.exec()) {
+		query.first();
+		while (query.isValid()) {
+			QVector<QString> contact;
+			contact.append(query.value(0).toString());
+			contact.append(query.value(1).toString());
+			contact.append(query.value(2).toString());
+			list_contacts.append(contact);
+			query.next();
+		}
+	}
+	return list_contacts;
+}
+
+
+/* ========================================================================= */
+/*
+ * Read data from supplementary message data table.
+ */
+QJsonDocument MessageDb::smsgdCustomData(int msgId) const
+/* ========================================================================= */
+{
+	QJsonDocument jsonDoc;
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	queryStr = "SELECT ";
-	    "message_id, message_type, read_locally, download_date, "
+	queryStr = "SELECT "
 	    "custom_data"
 	    " FROM supplementary_message_data WHERE "
 	    "message_id = "  + QString::number(msgId);
+//	qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			/* TODO */
+			jsonDoc = QJsonDocument::fromJson(
+			    query.value(0).toByteArray());
 		}
 	}
 
-	return reply;
+	return jsonDoc;
 }
 
 
@@ -514,7 +518,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 	}
 
 	queryStr = "SELECT "
-	    "dmAnnotation, _dmType"
+	    "dmAnnotation, _dmType, dmSender, dmSenderAddress"
 	    " FROM messages WHERE "
 	    "dmID = " + QString::number(dmId);
 	qDebug() << queryStr;
@@ -532,11 +536,28 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 		html += "<br/>";
 
 		/* Information about message author. */
+		html += strongAccountInfoLine("From",
+		    query.value(2).toString());
+		html += strongAccountInfoLine("Sender Address",
+		    query.value(3).toString());
 		/* Custom data. */
+		QJsonDocument customData = smsgdCustomData(dmId);
+		if (!customData.isEmpty() && customData.isObject()) {
+			QJsonValue value =
+			    customData.object().value("message_author");
+			if (value.isObject()) {
+				html += strongAccountInfoLine(
+				    tr("Message author"),
+				    value.toObject().value(
+				        "authorName").toString() + ", " +
+				    authorTypeToText(value.toObject().value(
+				        "userType").toString()));
+			}
+		}
 
 	}
 
-	html += QString::number(dmId);
+//	html += QString::number(dmId);
 	qDebug() << html;
 	/* TODO */
 

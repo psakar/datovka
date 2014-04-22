@@ -1,7 +1,6 @@
 
 
 #include <QDateTime>
-#include <QString>
 
 #include "dbs.h"
 

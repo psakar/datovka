@@ -59,6 +59,15 @@ private:
  */
 class SmsgdTbl {
 public:
+	class Entry {
+	public:
+		int message_id;
+		int message_type;
+		bool read_locally;
+		QString download_date;
+		QString custom_data;
+	};
+
 	/*! Table name. */
 	static
 	const QString tabName;

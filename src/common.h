@@ -137,4 +137,10 @@ QString dateTimeDisplayFormat;
 const QString dmTypeToText(const QString &dmType);
 
 
+/*!
+ * @brief Translatest author type to text.
+ */
+const QString authorTypeToText(const QString &authorType);
+
+
 #endif /* _COMMON_H_ */
