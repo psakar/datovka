@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QTableWidget>
 #include "ui_dlg_contacts.h"
+#include "src/io/message_db.h"
 #include "src/common.h"
 
 class dlg_contacts : public QDialog, public Ui::dlg_contacts
@@ -11,7 +12,8 @@ class dlg_contacts : public QDialog, public Ui::dlg_contacts
 	Q_OBJECT
 
 public:
-	dlg_contacts(QWidget *parent = 0, QTableWidget *recipientTableWidget = 0);
+	dlg_contacts(QWidget *parent = 0,
+	    QTableWidget *recipientTableWidget = 0, MessageDb *db = 0);
 
 private slots:
 	void filterContact(QString);
@@ -21,6 +23,7 @@ private slots:
 	void insertDsItems(void);
 private:
 	QTableWidget *m_recipientTableWidget;
+	MessageDb *m_messdb;
 };
 
 #endif // DLG_CONTACTS_H

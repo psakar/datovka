@@ -231,7 +231,8 @@ void DlgSentMessage::deleteRecipientData(void)
 
 void DlgSentMessage::findRecipientData(void)
 {
-	QDialog *dlg_cont = new dlg_contacts(this, this->recipientTableWidget);
+	QDialog *dlg_cont = new dlg_contacts(this,
+	    this->recipientTableWidget, &m_messDb);
 	dlg_cont->show();
 }
 

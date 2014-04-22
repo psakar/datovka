@@ -380,24 +380,29 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 
 /* ========================================================================= */
 /*
- * @brief Return messages from db.
+ * @Return contact list from message db.
  */
-QList<QString> MessageDb::SelectAllMessage()
+QList<QVector<QString>> MessageDb::selectContactsFromMessageDb(void)
 /* ========================================================================= */
 {
-	QList<QString> items;
+	QList<QVector<QString>> list_contacts;
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT * FROM messages";
+	QString queryStr = "SELECT DISTINCT "
+	   "dbIDSender, dmSender, dmSenderAddress"
+	   " FROM messages";
 	query.prepare(queryStr);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-//			qDebug() << query.value(0).toString();
-			items.append(query.value(0).toString());
+			QVector<QString> contact;
+			contact.append(query.value(0).toString());
+			contact.append(query.value(1).toString());
+			contact.append(query.value(2).toString());
+			list_contacts.append(contact);
 			query.next();
 		}
 	}
-	return items;
+	return list_contacts;
 }
 
 /* ========================================================================= */

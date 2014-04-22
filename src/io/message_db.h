@@ -63,9 +63,9 @@ public:
 	QList<QString> msgsRcvdYears(const QString &recipDbId) const;
 
 	/*!
-	 * @brief Return messages from db.
+	 * @brief Return contacts from message db.
 	 */
-	QList<QString> SelectAllMessage();
+	QList<QVector<QString>> selectContactsFromMessageDb(void);
 
 	/*!
 	 * @brief Return list of years and number of messages in database.

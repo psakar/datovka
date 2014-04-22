@@ -1,9 +1,10 @@
 #include "dlg_contacts.h"
-#include "src/io/message_db.h"
 
-dlg_contacts::dlg_contacts(QWidget *parent, QTableWidget *recipientTableWidget):
-    QDialog(parent),
-    m_recipientTableWidget(recipientTableWidget)
+dlg_contacts::dlg_contacts(QWidget *parent,
+    QTableWidget *recipientTableWidget, MessageDb *db):
+       QDialog(parent),
+       m_recipientTableWidget(recipientTableWidget),
+       m_messdb(db)
 {
 	setupUi(this);
 
@@ -59,20 +60,10 @@ void dlg_contacts::clearContactText(void)
 
 void dlg_contacts::fillContactsFromMessageDb()
 {
-	/* TODO - select contacts from DB */
+	QList<QVector<QString>> contactList;
+	contactList = m_messdb->selectContactsFromMessageDb();
 
-
-
-	//QList<QString> items;
-	//items = MessageDb.xxx();
-
-
-
-	for (int i = 0; i < 5; i++) {
-
-		// only for testing - random data
-		int randomValue = qrand();
-		QString aString=QString::number(randomValue);
+	for (int i = 0; i < contactList.count(); i++) {
 
 		int row = this->contactTableWidget->rowCount();
 		this->contactTableWidget->insertRow(row);
@@ -80,13 +71,13 @@ void dlg_contacts::fillContactsFromMessageDb()
 		item->setCheckState(Qt::Unchecked);
 		this->contactTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(aString);
+		item->setText(contactList[i].takeAt(0));
 		this->contactTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText("Matesnice" + QString::number(i));
+		item->setText(contactList[i].takeAt(0));
 		this->contactTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
-		item->setText("Brno, Janska " + aString + ", CZ");
+		item->setText(contactList[i].takeAt(0));
 		this->contactTableWidget->setItem(row,3,item);
 	}
 }
