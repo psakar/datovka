@@ -94,10 +94,10 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -131,10 +131,10 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -168,10 +168,10 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -263,10 +263,10 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(sentItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(sentItemIds[i]).type,
+		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -300,10 +300,10 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(sentItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(sentItemIds[i]).type,
+		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -337,10 +337,10 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 

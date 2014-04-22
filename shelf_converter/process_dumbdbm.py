@@ -45,7 +45,7 @@ account_info_structure = [
     ("pnLastName", str, "TEXT", str),
     ("pnLastNameAtBirth", str, "TEXT", str),
     ("firmName", str, "TEXT", str),
-    ("biDate", str, "TEXT", str),
+    ("biDate", str, "DATETIME", str),
     ("biCity", str, "TEXT", str),
     ("biCounty", str, "TEXT", str),
     ("biState", str, "TEXT", str),

@@ -34,7 +34,7 @@ public:
 /*!
  * @brief Table 'messages'.
  */
-class msgsTbl {
+class MsgsTbl {
 public:
 	/*! Table name. */
 	static
@@ -50,14 +50,14 @@ public:
 
 private:
 	/* Prohibit all instances. */
-	msgsTbl(void);
+	MsgsTbl(void);
 };
 
 
 /*!
  * @brief Table 'supplementary_message_data'.
  */
-class smsgdTbl {
+class SmsgdTbl {
 public:
 	/*! Table name. */
 	static
@@ -73,7 +73,7 @@ public:
 
 private:
 	/* Prohibit all instances. */
-	smsgdTbl(void);
+	SmsgdTbl(void);
 };
 
 

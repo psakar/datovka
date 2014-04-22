@@ -396,31 +396,31 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 	    itemSettings[USER].toString() + "___True");
 
 	/* Print non-empty entries. */
-	for (int i = 0; i < AccountEntry::entryNames.size(); ++i) {
-		const QString &key = AccountEntry::entryNames[i].first;
+	for (int i = 0; i < AccountEntry::knownAttrs.size(); ++i) {
+		const QString &key = AccountEntry::knownAttrs[i].first;
 		if (accountEntry.hasValue(key) &&
-		    !AccountEntry::entryNameMap[key].isEmpty()) {
-			switch (AccountEntry::entryNames[i].second) {
+		    !AccountEntry::attrProps[key].desc.isEmpty()) {
+			switch (AccountEntry::knownAttrs[i].second) {
 			case DB_INTEGER:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::entryNameMap[key],
+				    AccountEntry::attrProps[key].desc,
 				    QString::number(
 				        accountEntry.value(key).toInt())));
 				break;
 			case DB_TEXT:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::entryNameMap[key],
+				    AccountEntry::attrProps[key].desc,
 				    accountEntry.value(key).toString()));
 				break;
 			case DB_BOOLEAN:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::entryNameMap[key],
+				    AccountEntry::attrProps[key].desc,
 				    accountEntry.value(key).toBool() ?
 				        tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::entryNameMap[key],
+				    AccountEntry::attrProps[key].desc,
 				    dateTimeFromDbFormat(
 				        accountEntry.value(key).toString(),
 				        dateTimeDisplayFormat)));

@@ -32,8 +32,8 @@ bool AccountEntry::setValue(const QString &key, const QVariant &value)
 /* ========================================================================= */
 {
 	/* Don't insert if key is not known. */
-	if (AccountEntry::entryNameMap.find(key) ==
-	    AccountEntry::entryNameMap.end()) {
+	if (AccountEntry::attrProps.find(key) ==
+	    AccountEntry::attrProps.end()) {
 		return false;
 	}
 
@@ -66,7 +66,7 @@ const QVariant AccountEntry::value(const QString &key,
 }
 
 
-const QVector< QPair<QString, dbEntryType> > AccountEntry::entryNames = {
+const QVector< QPair<QString, dbEntryType> > AccountEntry::knownAttrs = {
 	{"dbID", DB_TEXT},
 	{"dbType", DB_TEXT},
 	{"ic", DB_INTEGER},
@@ -75,7 +75,7 @@ const QVector< QPair<QString, dbEntryType> > AccountEntry::entryNames = {
 	{"pnLastName", DB_TEXT},
 	{"pnLastNameAtBirth", DB_TEXT},
 	{"firmName", DB_TEXT},
-	{"biDate", DB_TEXT},
+	{"biDate", DB_DATETIME},
 	{"biCity", DB_TEXT},
 	{"biCounty", DB_TEXT},
 	{"biState", DB_TEXT},
@@ -94,31 +94,31 @@ const QVector< QPair<QString, dbEntryType> > AccountEntry::entryNames = {
 };
 
 
-const QMap<QString, QString> AccountEntry::entryNameMap = {
-	{"dbID", QObject::tr("Data box ID")},
-	{"dbType", QObject::tr("Data box type")},
-	{"ic", QObject::tr("IČ")},
-	{"pnFirstName", QObject::tr("Given name")},
-	{"pnMiddleName", QObject::tr("Middle name")},
-	{"pnLastName", QObject::tr("Surname")},
-	{"pnLastNameAtBirth", QObject::tr("Surname at birth")},
-	{"firmName", QObject::tr("Firm name")},
-	{"biDate", QObject::tr("Date of birth")},
-	{"biCity", QObject::tr("City of birth")},
-	{"biCounty", QObject::tr("County of birth")},
-	{"biState", QObject::tr("State of birth")},
-	{"adCity", QObject::tr("City of residence")},
-	{"adStreet", QObject::tr("Street of residence")},
-	{"adNumberInStreet", QObject::tr("Number in street")},
-	{"adNumberInMunicipality", QObject::tr("Number in municipality")},
-	{"adZipCode", QObject::tr("Zip code")},
-	{"adState", QObject::tr("State of residence")},
-	{"nationality", QObject::tr("Nationality")},
-	{"identifier", ""}, //
-	{"registryCode", ""}, //
-	{"dbState", ""}, //
-	{"dbEffectiveOVM", QObject::tr("Effective OVM")},
-	{"dbOpenAddressing", QObject::tr("Open addressing")}
+const QMap<QString, AttrProp> AccountEntry::attrProps = {
+	{"dbID",                   {DB_TEXT, QObject::tr("Data box ID")}},
+	{"dbType",                 {DB_TEXT, QObject::tr("Data box type")}},
+	{"ic",                     {DB_INTEGER, QObject::tr("IČ")}},
+	{"pnFirstName",            {DB_TEXT, QObject::tr("Given name")}},
+	{"pnMiddleName",           {DB_TEXT, QObject::tr("Middle name")}},
+	{"pnLastName",             {DB_TEXT, QObject::tr("Surname")}},
+	{"pnLastNameAtBirth",      {DB_TEXT, QObject::tr("Surname at birth")}},
+	{"firmName",               {DB_TEXT, QObject::tr("Firm name")}},
+	{"biDate",                 {DB_DATETIME, QObject::tr("Date of birth")}},
+	{"biCity",                 {DB_TEXT, QObject::tr("City of birth")}},
+	{"biCounty",               {DB_TEXT, QObject::tr("County of birth")}},
+	{"biState",                {DB_TEXT, QObject::tr("State of birth")}},
+	{"adCity",                 {DB_TEXT, QObject::tr("City of residence")}},
+	{"adStreet",               {DB_TEXT, QObject::tr("Street of residence")}},
+	{"adNumberInStreet",       {DB_TEXT, QObject::tr("Number in street")}},
+	{"adNumberInMunicipality", {DB_TEXT, QObject::tr("Number in municipality")}},
+	{"adZipCode",              {DB_TEXT, QObject::tr("Zip code")}},
+	{"adState",                {DB_TEXT, QObject::tr("State of residence")}},
+	{"nationality",            {DB_TEXT, QObject::tr("Nationality")}},
+	{"identifier",             {DB_TEXT, ""}}, //
+	{"registryCode",           {DB_TEXT, ""}}, //
+	{"dbState",                {DB_INTEGER, ""}}, //
+	{"dbEffectiveOVM",         {DB_BOOLEAN, QObject::tr("Effective OVM")}},
+	{"dbOpenAddressing",       {DB_BOOLEAN, QObject::tr("Open addressing")}}
 };
 
 
@@ -168,22 +168,22 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (AccountEntry::entryNames.size() - 1); ++i) {
-		queryStr += AccountEntry::entryNames[i].first + ", ";
+	for (int i = 0; i < (AccountEntry::knownAttrs.size() - 1); ++i) {
+		queryStr += AccountEntry::knownAttrs[i].first + ", ";
 	}
-	queryStr += AccountEntry::entryNames.last().first + " ";
+	queryStr += AccountEntry::knownAttrs.last().first + " ";
 	queryStr += "FROM account_info WHERE key = '" + key + "'";
 //	qDebug() << queryStr;
 	if (query.prepare(queryStr) && query.exec() && query.isActive() &&
 	    query.first()) {
 //		qDebug() << "SQL Ok.";
 		QSqlRecord rec = query.record();
-		for (int i = 0; i < AccountEntry::entryNames.size(); ++i) {
+		for (int i = 0; i < AccountEntry::knownAttrs.size(); ++i) {
 			QVariant value = query.value(rec.indexOf(
-			    AccountEntry::entryNames[i].first));
+			    AccountEntry::knownAttrs[i].first));
 			if (!value.isNull() && value.isValid()) {
 				entry.setValue(
-				    AccountEntry::entryNames[i].first,
+				    AccountEntry::knownAttrs[i].first,
 				    value);
 			}
 		}

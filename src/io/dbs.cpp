@@ -6,10 +6,10 @@
 #include "dbs.h"
 
 
-const QString msgsTbl::tabName("messages");
+const QString MsgsTbl::tabName("messages");
 
 
-const QVector< QPair<QString, dbEntryType> > msgsTbl::knownAttrs = {
+const QVector< QPair<QString, dbEntryType> > MsgsTbl::knownAttrs = {
 	{"dmID", DB_INTEGER},
 	{"is_verified", DB_BOOLEAN},
 	{"_origin", DB_TEXT},
@@ -47,7 +47,7 @@ const QVector< QPair<QString, dbEntryType> > msgsTbl::knownAttrs = {
 };
 
 
-const QMap<QString, AttrProp> msgsTbl::attrProps = {
+const QMap<QString, AttrProp> MsgsTbl::attrProps = {
 	{"dmID",                  {DB_INTEGER, QObject::tr("ID")}},
 	{"is_verified",           {DB_BOOLEAN, ""}},
 	{"_origin",               {DB_TEXT, ""}},
@@ -85,10 +85,10 @@ const QMap<QString, AttrProp> msgsTbl::attrProps = {
 };
 
 
-const QString smsgdTbl::tabName("supplementary_message_data");
+const QString SmsgdTbl::tabName("supplementary_message_data");
 
 
-const QVector< QPair<QString, dbEntryType> > smsgdTbl::knownAttrs = {
+const QVector< QPair<QString, dbEntryType> > SmsgdTbl::knownAttrs = {
 	{"message_id", DB_INTEGER},
 	{"message_type", DB_INTEGER},
 	{"read_locally", DB_BOOLEAN},
@@ -97,7 +97,7 @@ const QVector< QPair<QString, dbEntryType> > smsgdTbl::knownAttrs = {
 };
 
 
-const QMap<QString, AttrProp> smsgdTbl::attrProps = {
+const QMap<QString, AttrProp> SmsgdTbl::attrProps = {
 	{"message_id",    {DB_INTEGER, ""}},
 	{"message_type",  {DB_INTEGER, ""}},
 	{"read_locally",  {DB_BOOLEAN, ""}},

@@ -40,13 +40,13 @@ public:
 	 * List of know entries and their types.
 	 */
 	static
-	const QVector< QPair<QString, dbEntryType> > entryNames;
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
 
 	/*!
-	 * Mapping between entry identifiers an their description.
+	 * Attribute properties.
 	 */
 	static
-	const QMap<QString, QString> entryNameMap;
+	const QMap<QString, AttrProp> attrProps;
 
 private:
 	typedef QMap<QString, QVariant> m_parentType;
