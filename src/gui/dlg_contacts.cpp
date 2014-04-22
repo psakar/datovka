@@ -71,13 +71,13 @@ void dlg_contacts::fillContactsFromMessageDb()
 		item->setCheckState(Qt::Unchecked);
 		this->contactTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(contactList[i].takeAt(0));
+		item->setText(contactList[i].at(0));
 		this->contactTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(contactList[i].takeAt(0));
+		item->setText(contactList[i].at(1));
 		this->contactTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
-		item->setText(contactList[i].takeAt(0));
+		item->setText(contactList[i].at(2));
 		this->contactTableWidget->setItem(row,3,item);
 	}
 }
