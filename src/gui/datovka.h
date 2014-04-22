@@ -146,6 +146,15 @@ private:
 	 */
 	QString createDatovkaBanner(const QString &version) const;
 
+	/*!
+	 * @brief Returns user name related to given account item.
+	 */
+	QString accountUserName(const QStandardItem *accountItem = 0) const;
+
+	/*!
+	 * @brief Get message db to selected account item.
+	 */
+	MessageDb * accountMessageDb(const QStandardItem *accountItem = 0);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

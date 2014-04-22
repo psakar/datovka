@@ -140,26 +140,13 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	QString html;
 	QAbstractTableModel *tableModel;
 
-	const QStandardItem *item = m_accountModel.itemFromIndex(current);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	Q_ASSERT(0 != itemTop);
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
-	QString dbDir = itemSettings[DB_DIR].toString();
-	MessageDb *db;
-
-	Q_ASSERT(!userName.isEmpty());
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = m_confDirName;
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(current);
+	QString userName = accountUserName(accountItem);
+	MessageDb *messageDb = accountMessageDb(accountItem);
 
 //	qDebug() << "Selected user account" << userName << dbDir;
-//	qDebug() << current.model() << item->text();
+//	qDebug() << current.model() << accountItem->text();
 //	qDebug() << "\n";
 
 	/*
@@ -175,33 +162,35 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
-		html = createAccountInfo(*item);
+		html = createAccountInfo(*accountItem);
 		break;
 	case AccountModel::nodeRecentReceived:
-		tableModel = db->msgsRcvdWithin90DaysModel(dbId);
+		tableModel = messageDb->msgsRcvdWithin90DaysModel(dbId);
 //		ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
-		tableModel = db->msgsSntWithin90DaysModel(dbId);
+		tableModel = messageDb->msgsSntWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
 		html = createAccountInfoAllField(tr("All messages"),
-		    db->msgsRcvdYearlyCounts(dbId),
-		    db->msgsSntYearlyCounts(dbId));
+		    messageDb->msgsRcvdYearlyCounts(dbId),
+		    messageDb->msgsSntYearlyCounts(dbId));
 		break;
 	case AccountModel::nodeReceived:
-		tableModel = db->msgsRcvdModel(dbId);
+		tableModel = messageDb->msgsRcvdModel(dbId);
 		break;
 	case AccountModel::nodeSent:
-		tableModel = db->msgsSntModel(dbId);
+		tableModel = messageDb->msgsSntModel(dbId);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
-		tableModel = db->msgsRcvdInYearModel(dbId, item->text());
+		tableModel = messageDb->msgsRcvdInYearModel(dbId,
+		    accountItem->text());
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
-		tableModel = db->msgsSntInYearModel(dbId, item->text());
+		tableModel = messageDb->msgsSntInYearModel(dbId,
+		    accountItem->text());
 		break;
 	default:
 		Q_ASSERT(0);
@@ -328,27 +317,11 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 	QModelIndex index = tableModel->index(
 	    current.row(), 0); /* First column. */
 
-	const QStandardItem *item = m_accountModel.itemFromIndex(
-	    ui->accountList->selectionModel()->currentIndex());
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	Q_ASSERT(0 != itemTop);
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
-	QString dbDir = itemSettings[DB_DIR].toString();
-	MessageDb *db;
-
-	Q_ASSERT(!userName.isEmpty());
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = m_confDirName;
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
+	MessageDb *messageDb = accountMessageDb();
 
 	ui->messageInfo->setHtml(
-	    db->descriptionHtml(tableModel->itemData(index).first().toInt()));
+	    messageDb->descriptionHtml(
+	        tableModel->itemData(index).first().toInt()));
 
 	/* TODO */
 }
@@ -529,6 +502,69 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 	html += QString("<br><img src=") + ICON_128x128_PATH + "cznic.png />";
 	html += "</center>";
 	return html;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns user name related to given account item.
+ */
+QString MainWindow::accountUserName(const QStandardItem *accountItem) const
+/* ========================================================================= */
+{
+	const QStandardItem *accountItemTop;
+
+	if (0 == accountItem) {
+		accountItem = m_accountModel.itemFromIndex(
+		    ui->accountList->selectionModel()->currentIndex());
+	}
+
+	accountItemTop = AccountModel::itemTop(accountItem);
+	Q_ASSERT(0 != accountItemTop);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+	QString userName = itemSettings[USER].toString();
+	Q_ASSERT(!userName.isEmpty());
+
+	return userName;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message db to selected account item.
+ */
+MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
+/* ========================================================================= */
+{
+	const QStandardItem *accountItemTop;
+	MessageDb *db;
+
+	if (0 == accountItem) {
+		accountItem = m_accountModel.itemFromIndex(
+		    ui->accountList->selectionModel()->currentIndex());
+	}
+
+	accountItemTop = AccountModel::itemTop(accountItem);
+	Q_ASSERT(0 != accountItemTop);
+
+	/* Get user name and db location. */
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+	Q_ASSERT(!userName.isEmpty());
+
+	QString dbDir = itemSettings[DB_DIR].toString();
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = m_confDirName;
+	}
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+
+	return db;
 }
 
 
@@ -847,33 +883,10 @@ void MainWindow::on_actionSent_message_triggered()
 	 * Delete one of them.
 	 */
 
-	const QAbstractItemModel *tableModel = ui->messageList->model();
-	Q_ASSERT(0 != tableModel);
-	QModelIndex index = tableModel->index(
-	    ui->messageList->currentIndex().row(), 0); /* First column. */
-	/* TODO -- Reimplement this construction. */
+	MessageDb *messageDb = accountMessageDb();
 
-	const QStandardItem *item = m_accountModel.itemFromIndex(
-	    ui->accountList->selectionModel()->currentIndex());
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	Q_ASSERT(0 != itemTop);
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
-	QString dbDir = itemSettings[DB_DIR].toString();
-	MessageDb *db;
-
-	Q_ASSERT(!userName.isEmpty());
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = m_confDirName;
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
-
-	QDialog *newMessageDialog = new DlgSentMessage(*db, this, ui->accountList,
-	    ui->messageList, "New");
+	QDialog *newMessageDialog = new DlgSentMessage(*messageDb, this,
+	    ui->accountList, ui->messageList, "New");
 	newMessageDialog->show();
 }
 
@@ -929,29 +942,7 @@ void MainWindow::on_actionDelete_account_triggered()
 void MainWindow::on_actionChange_password_triggered()
 /* ========================================================================= */
 {
-	const QModelIndex index = ui->accountList->currentIndex();
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	MessageDb *db;
-
-	Q_ASSERT(0 != itemTop);
-
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-
-	const QString &userName = itemSettings[USER].toString();
-	QString dbDir = itemSettings[DB_DIR].toString();
-
-	Q_ASSERT(!userName.isEmpty());
-	if (dbDir.isEmpty()) {
-		dbDir = m_confDirName;
-	}
-
-	/* TODO -- ??? */
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
-
+	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QDialog *changePwd = new changePassword(this, ui->accountList, dbId);
@@ -1052,32 +1043,15 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    ui->messageList->currentIndex().row(), 0); /* First column. */
 	/* TODO -- Reimplement this construction. */
 
-	const QStandardItem *item = m_accountModel.itemFromIndex(
-	    ui->accountList->selectionModel()->currentIndex());
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	Q_ASSERT(0 != itemTop);
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
-	QString dbDir = itemSettings[DB_DIR].toString();
-	MessageDb *db;
+	MessageDb *messageDb = accountMessageDb();
 
-	Q_ASSERT(!userName.isEmpty());
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = m_confDirName;
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
-
-	QVector<QString> replyTo = db->msgsReplyDataTo(
+	QVector<QString> replyTo = messageDb->msgsReplyDataTo(
 	    tableModel->itemData(index).first().toInt());
 
 	/* TODO */
 
-	QDialog *newMessageDialog = new DlgSentMessage(*db, this, ui->accountList,
-	    ui->messageList, "Reply", replyTo[0], replyTo[1], replyTo[2],
-	    replyTo[3]);
+	QDialog *newMessageDialog = new DlgSentMessage(*messageDb, this,
+	    ui->accountList, ui->messageList, "Reply",
+	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
 }
