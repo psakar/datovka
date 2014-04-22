@@ -6,10 +6,11 @@
 #include "ui_dlg_send_message.h"
 #include "src/io/message_db.h"
 
-DlgSentMessage::DlgSentMessage(MessageDb &db, QWidget *parent, QTreeView *accountList,
-    QTableView *messageList, const QString &action, const QString &reSubject,
-	    const QString &senderId, const QString &sender,
-	    const QString &senderAddress) :
+DlgSendMessage::DlgSendMessage(MessageDb &db, QWidget *parent,
+    QTreeView *accountList, QTableView *messageList,
+    const QString &action, const QString &reSubject,
+    const QString &senderId, const QString &sender,
+    const QString &senderAddress) :
     QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
@@ -24,12 +25,12 @@ DlgSentMessage::DlgSentMessage(MessageDb &db, QWidget *parent, QTreeView *accoun
 	initNewMessageDialog();
 }
 
-void DlgSentMessage::on_cancelButton_clicked(void)
+void DlgSendMessage::on_cancelButton_clicked(void)
 {
 	this->close();
 }
 
-void DlgSentMessage::initNewMessageDialog(void)
+void DlgSendMessage::initNewMessageDialog(void)
 {
 	QModelIndex index;
 	const QStandardItem *item;
@@ -134,7 +135,7 @@ void DlgSentMessage::initNewMessageDialog(void)
 
 }
 
-void DlgSentMessage::addAttachmentFile(void)
+void DlgSendMessage::addAttachmentFile(void)
 {
 	QString attachFileName = QFileDialog::getOpenFileName(this,
 	    tr("Add file"), "", tr("All files (*.*)"));
@@ -167,7 +168,7 @@ void DlgSentMessage::addAttachmentFile(void)
 	}
 }
 
-void DlgSentMessage::attItemSelect(void)
+void DlgSendMessage::attItemSelect(void)
 {
 
 	this->removeAttachment->setEnabled(true);
@@ -175,24 +176,24 @@ void DlgSentMessage::attItemSelect(void)
 }
 
 
-void DlgSentMessage::recItemSelect(void)
+void DlgSendMessage::recItemSelect(void)
 {
 	this->removeRecipient->setEnabled(true);
 }
 
 
-void DlgSentMessage::tableItemInsRem(void)
+void DlgSendMessage::tableItemInsRem(void)
 {
 	checkInputFields();
 }
 
-void DlgSentMessage::showOptionalForm(int state)
+void DlgSendMessage::showOptionalForm(int state)
 {
 	this->OptionalWidget->setHidden(Qt::Unchecked == state);
 }
 
 
-void DlgSentMessage::addRecipientData(void)
+void DlgSendMessage::addRecipientData(void)
 {
 	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this);
 	dlg_ds_search->show();
@@ -200,7 +201,7 @@ void DlgSentMessage::addRecipientData(void)
 }
 
 
-void DlgSentMessage::deleteAttachmentFile(void)
+void DlgSendMessage::deleteAttachmentFile(void)
 {
 	int row = this->attachmentTableWidget->currentRow();
 	if (row >= 0) {
@@ -211,7 +212,7 @@ void DlgSentMessage::deleteAttachmentFile(void)
 }
 
 
-void DlgSentMessage::checkInputFields(void)
+void DlgSendMessage::checkInputFields(void)
 {
 	bool buttonEnabled = !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
@@ -220,7 +221,7 @@ void DlgSentMessage::checkInputFields(void)
 }
 
 
-void DlgSentMessage::deleteRecipientData(void)
+void DlgSendMessage::deleteRecipientData(void)
 {
 	int row = this->recipientTableWidget->currentRow();
 	if (row >= 0) {
@@ -229,7 +230,7 @@ void DlgSentMessage::deleteRecipientData(void)
 	}
 }
 
-void DlgSentMessage::findRecipientData(void)
+void DlgSendMessage::findRecipientData(void)
 {
 	QDialog *dlg_cont = new dlg_contacts(this,
 	    this->recipientTableWidget, &m_messDb);
@@ -237,13 +238,13 @@ void DlgSentMessage::findRecipientData(void)
 }
 
 
-void DlgSentMessage::openAttachmentFile(void)
+void DlgSendMessage::openAttachmentFile(void)
 {
 	/* TODO */
 }
 
 
-void DlgSentMessage::sendMessage(void)
+void DlgSendMessage::sendMessage(void)
 {
 	/* TODO */
 }

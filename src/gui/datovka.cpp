@@ -885,7 +885,7 @@ void MainWindow::on_actionSent_message_triggered()
 
 	MessageDb *messageDb = accountMessageDb();
 
-	QDialog *newMessageDialog = new DlgSentMessage(*messageDb, this,
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, this,
 	    ui->accountList, ui->messageList, "New");
 	newMessageDialog->show();
 }
@@ -1050,7 +1050,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 
 	/* TODO */
 
-	QDialog *newMessageDialog = new DlgSentMessage(*messageDb, this,
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, this,
 	    ui->accountList, ui->messageList, "Reply",
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();

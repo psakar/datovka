@@ -13,13 +13,14 @@
 #include "ui_dlg_send_message.h"
 
 
-class DlgSentMessage : public QDialog, public Ui::sentMessageDialog {
+class DlgSendMessage : public QDialog, public Ui::sentMessageDialog {
     Q_OBJECT
 
 public:
-	explicit DlgSentMessage(MessageDb &db, QWidget *parent = 0,
+	explicit DlgSendMessage(MessageDb &db, QWidget *parent = 0,
 	    QTreeView *accountList = 0, QTableView *messageList = 0,
-	    const QString &action = "New", const QString &reSubject = QString(),
+	    const QString &action = "New",
+	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
 	    const QString &sender = QString(),
 	    const QString &senderAddress = QString());
