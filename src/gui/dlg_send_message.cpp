@@ -4,9 +4,9 @@
 #include "dlg_contacts.h"
 #include "src/models/accounts_model.h"
 #include "ui_dlg_send_message.h"
+#include "src/io/message_db.h"
 
-
-DlgSentMessage::DlgSentMessage(QWidget *parent, QTreeView *accountList,
+DlgSentMessage::DlgSentMessage(MessageDb &db, QWidget *parent, QTreeView *accountList,
     QTableView *messageList, const QString &action, const QString &reSubject,
 	    const QString &senderId, const QString &sender,
 	    const QString &senderAddress) :
@@ -17,7 +17,8 @@ DlgSentMessage::DlgSentMessage(QWidget *parent, QTreeView *accountList,
     reSubject(reSubject),
     senderId(senderId),
     sender(sender),
-    senderAddress(senderAddress)
+    senderAddress(senderAddress),
+    m_messDb(db)
 {
 	setupUi(this);
 	initNewMessageDialog();

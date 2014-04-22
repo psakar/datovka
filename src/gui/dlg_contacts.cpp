@@ -1,4 +1,5 @@
 #include "dlg_contacts.h"
+#include "src/io/message_db.h"
 
 dlg_contacts::dlg_contacts(QWidget *parent, QTableWidget *recipientTableWidget):
     QDialog(parent),
@@ -59,6 +60,13 @@ void dlg_contacts::clearContactText(void)
 void dlg_contacts::fillContactsFromMessageDb()
 {
 	/* TODO - select contacts from DB */
+
+
+
+	//QList<QString> items;
+	//items = MessageDb.xxx();
+
+
 
 	for (int i = 0; i < 5; i++) {
 

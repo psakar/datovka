@@ -380,6 +380,28 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 
 /* ========================================================================= */
 /*
+ * @brief Return messages from db.
+ */
+QList<QString> MessageDb::SelectAllMessage()
+/* ========================================================================= */
+{
+	QList<QString> items;
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT * FROM messages";
+	query.prepare(queryStr);
+	if (query.exec()) {
+		query.first();
+		while (query.isValid()) {
+//			qDebug() << query.value(0).toString();
+			items.append(query.value(0).toString());
+			query.next();
+		}
+	}
+	return items;
+}
+
+/* ========================================================================= */
+/*
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(

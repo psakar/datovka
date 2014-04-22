@@ -9,6 +9,7 @@
 #include <QTreeView>
 
 #include "src/common.h"
+#include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
 
 
@@ -16,7 +17,7 @@ class DlgSentMessage : public QDialog, public Ui::sentMessageDialog {
     Q_OBJECT
 
 public:
-	explicit DlgSentMessage(QWidget *parent = 0,
+	explicit DlgSentMessage(MessageDb &db, QWidget *parent = 0,
 	    QTreeView *accountList = 0, QTableView *messageList = 0,
 	    const QString &action = "New", const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
@@ -48,6 +49,7 @@ private:
 	QString sender;
 	QString senderAddress;
 
+	MessageDb &m_messDb;
 };
 
 

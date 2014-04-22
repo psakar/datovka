@@ -847,7 +847,32 @@ void MainWindow::on_actionSent_message_triggered()
 	 * Delete one of them.
 	 */
 
-	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
+	const QAbstractItemModel *tableModel = ui->messageList->model();
+	Q_ASSERT(0 != tableModel);
+	QModelIndex index = tableModel->index(
+	    ui->messageList->currentIndex().row(), 0); /* First column. */
+	/* TODO -- Reimplement this construction. */
+
+	const QStandardItem *item = m_accountModel.itemFromIndex(
+	    ui->accountList->selectionModel()->currentIndex());
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	Q_ASSERT(0 != itemTop);
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+	QString dbDir = itemSettings[DB_DIR].toString();
+	MessageDb *db;
+
+	Q_ASSERT(!userName.isEmpty());
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = m_confDirName;
+	}
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+
+	QDialog *newMessageDialog = new DlgSentMessage(*db, this, ui->accountList,
 	    ui->messageList, "New");
 	newMessageDialog->show();
 }
@@ -1051,7 +1076,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 
 	/* TODO */
 
-	QDialog *newMessageDialog = new DlgSentMessage(this, ui->accountList,
+	QDialog *newMessageDialog = new DlgSentMessage(*db, this, ui->accountList,
 	    ui->messageList, "Reply", replyTo[0], replyTo[1], replyTo[2],
 	    replyTo[3]);
 	newMessageDialog->show();
