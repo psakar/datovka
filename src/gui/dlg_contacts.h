@@ -19,9 +19,11 @@ private slots:
 	void filterContact(QString);
 	void clearContactText(void);
 	void fillContactsFromMessageDb(void);
-	void doClick(void);
+	void enableOkButton(void);
 	void insertDsItems(void);
 private:
+
+	bool isInRecipientTable(QString idDs);
 	QTableWidget *m_recipientTableWidget;
 	MessageDb *m_messdb;
 };

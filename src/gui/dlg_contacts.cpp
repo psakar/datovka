@@ -21,7 +21,7 @@ dlg_contacts::dlg_contacts(QWidget *parent,
 	    this, SLOT(filterContact(QString)));
 	connect(this->contactTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
-	    SLOT(doClick()));
+	    SLOT(enableOkButton()));
 	connect(this->clearPushButton, SIGNAL(clicked()), this,
 	    SLOT(clearContactText()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
@@ -82,7 +82,7 @@ void dlg_contacts::fillContactsFromMessageDb()
 	}
 }
 
-void dlg_contacts::doClick(void)
+void dlg_contacts::enableOkButton(void)
 {
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -94,24 +94,39 @@ void dlg_contacts::doClick(void)
 	}
 }
 
+
+bool dlg_contacts::isInRecipientTable(QString idDs)
+{
+	for (int i = 0; i < this->m_recipientTableWidget->rowCount(); i++) {
+		if (this->m_recipientTableWidget->item(i,0)->text() == idDs)
+		return true;
+	}
+	return false;
+}
+
+
+
 void dlg_contacts::insertDsItems(void)
 {
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {
-			int row = m_recipientTableWidget->rowCount();
-			m_recipientTableWidget->insertRow(row);
-			QTableWidgetItem *item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->
-			    item(i,1)->text());
-			this->m_recipientTableWidget->setItem(row,0,item);
-			item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->
-			    item(i,2)->text());
-			this->m_recipientTableWidget->setItem(row,1,item);
-			item = new QTableWidgetItem;
-			item->setText(this->contactTableWidget->\
-			    item(i,3)->text());
-			this->m_recipientTableWidget->setItem(row,2,item);
+			if (!isInRecipientTable(
+			    this->contactTableWidget->item(i,1)->text())) {
+				int row = m_recipientTableWidget->rowCount();
+				m_recipientTableWidget->insertRow(row);
+				QTableWidgetItem *item = new QTableWidgetItem;
+				item->setText(this->contactTableWidget->
+				    item(i,1)->text());
+				this->m_recipientTableWidget->setItem(row,0,item);
+				item = new QTableWidgetItem;
+				item->setText(this->contactTableWidget->
+				    item(i,2)->text());
+				this->m_recipientTableWidget->setItem(row,1,item);
+				item = new QTableWidgetItem;
+				item->setText(this->contactTableWidget->\
+				    item(i,3)->text());
+				this->m_recipientTableWidget->setItem(row,2,item);
+			}
 		}
 	}
 }
