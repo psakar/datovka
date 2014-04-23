@@ -87,6 +87,52 @@ private:
 
 
 /*!
+ * @brief table 'events'.
+ */
+class EvntsTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	EvntsTbl(void);
+};
+
+
+/*!
+ * @brief Table 'files'.
+ */
+class FlsTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	FlsTbl(void);
+};
+
+
+/*!
  * @brief Converts date from database format into desired format if possible.
  */
 QString dateTimeFromDbFormat(const QString &dateTimeStr, const QString &fmt);

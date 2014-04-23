@@ -44,6 +44,8 @@ typedef enum {
 	"</div>")
 #define accountInfoLine(title, value) \
 	(QString("<div>") + (title) + ": " + (value) + "</div>")
+#define indentDivStart "<div style=\"margin-left: 12px;\">"
+#define divEnd "</div>"
 
 
 class GlobPreferences {

@@ -451,11 +451,11 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
     const QList< QPair<QString, int> > &sentCounts) const
 /* ========================================================================= */
 {
-	QString html = ("<div style=\"margin-left: 12px;\">");
+	QString html = indentDivStart;
 	html.append ("<h3>" + accountName + "</h3>");
 
 	html.append(strongAccountInfoLine(tr("Received messages"), ""));
-	html.append("<div style=\"margin-left: 12px;\">");
+	html.append(indentDivStart);
 	if (0 == receivedCounts.size()) {
 		html.append(tr("none"));
 	} else {
@@ -464,12 +464,12 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 			    QString::number(receivedCounts[i].second)));
 		}
 	}
-	html.append("</div>");
+	html.append(divEnd);
 
 	html.append("<br/>");
 
 	html.append(strongAccountInfoLine(tr("Sent messages"), ""));
-	html.append("<div style=\"margin-left: 12px;\">");
+	html.append(indentDivStart);
 	if (0 == sentCounts.size()) {
 		html.append(tr("none"));
 	} else {
@@ -478,9 +478,9 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 			    QString::number(sentCounts[i].second)));
 		}
 	}
-	html.append("</div>");
+	html.append(divEnd);
 
-	html.append("</div>");
+	html.append(divEnd);
 	return html;
 }
 

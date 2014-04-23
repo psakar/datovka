@@ -522,6 +522,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 	QSqlQuery query(m_db);
 	QString queryStr;
 
+	html += indentDivStart;
 	html += "<h3>" + tr("Identification") + "</h3>";
 	if (showId) {
 		html += strongAccountInfoLine(tr("ID"), QString::number(dmId));
@@ -621,7 +622,63 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 		    msgStatusToText(query.value(2).toInt()));
 	}
 	/* Events. */
+	queryStr = "SELECT "
+	    "dmEventTime, dmEventDescr"
+	    " FROM events WHERE "
+	    "message_id = " + QString::number(dmId) +
+	    " ORDER BY dmEventTime ASC";
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			html += strongAccountInfoLine(tr("Events"), "");
+		}
+		while (query.isValid()) {
+			html += indentDivStart +
+			    strongAccountInfoLine(
+			        dateTimeFromDbFormat(
+			            query.value(0).toString(),
+			            dateTimeDisplayFormat),
+			        query.value(1).toString()) +
+			    divEnd;
+			query.next();
+		} 
+	}
+	/* Attachments. */
+	queryStr = "SELECT COUNT(*) AS nrFiles "
+	    " FROM files WHERE "
+	    "message_id = " + QString::number(dmId);
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid() &&
+	    (query.value(0).toInt() > 0)) {
+		html += strongAccountInfoLine(tr("Attachments"), 
+		    QString::number(query.value(0).toInt()) + " " +
+		    tr("(downloaded and ready)"));
+	} else {
+		queryStr = "SELECT "
+		    "dmAttachmentSize"
+		    " FROM messages WHERE "
+		    "dmID = " + QString::number(dmId);
+		qDebug() << queryStr;
+		query.prepare(queryStr);
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid() &&
+		   (query.value(0).toInt() > 0)) {
+			html += strongAccountInfoLine(tr("Attachments"),
+			    tr("not downloaded yet, ~") +
+			    QString::number(query.value(0).toInt()) +
+			    tr(" KB; use 'Download' to get them."));
+		} else {
+			html += strongAccountInfoLine(tr("Attachments"), 
+			    tr("(not available)"));
+		}
+	}
 	/* TODO */
+
+	html += divEnd;
 
 //	html += QString::number(dmId);
 	qDebug() << html;
