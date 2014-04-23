@@ -27,9 +27,6 @@
    <iconset resource="../../../res/resources.qrc">
     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
   </property>
-  <property name="toolTip">
-   <string>QDatovka - Free interface for Datové schránky</string>
-  </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
   </property>
