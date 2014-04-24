@@ -6,7 +6,7 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
-
+#include <QLineEdit>
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
@@ -76,6 +76,12 @@ private slots:
 	void on_actionReply_to_the_sender_triggered();
 
 	void on_actionFind_databox_triggered();
+
+	void on_actionReply_triggered();
+
+	void on_actionSearchClear_triggered(void);
+
+	void filterMessages(QString text);
 
 private:
 	/*!
@@ -171,6 +177,7 @@ private:
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
+	QLineEdit *m_searchLine;
 
 	Ui::MainWindow *ui;
 };

@@ -36,9 +36,26 @@ MainWindow::MainWindow(QWidget *parent)
     m_accountModel(this),
     m_accountDb("accountDb"),
     m_messageDbs(),
+    m_searchLine(NULL),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+
+	/* Generate messages search filter */
+	QWidget *spacer = new QWidget();
+	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	// toolBar is a pointer to an existing toolbar
+	ui->toolBar->addWidget(spacer);
+	QLabel *searchLabel = new QLabel;
+	searchLabel->setText(tr("Search: "));
+	ui->toolBar->addWidget(searchLabel);
+	m_searchLine = new QLineEdit;
+	connect(m_searchLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(filterMessages(QString)));
+	m_searchLine->setFixedWidth(200);
+	ui->toolBar->addWidget(m_searchLine);
+	ui->toolBar->addAction(QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
+	    "", this, SLOT(on_actionSearchClear_triggered()));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -1107,4 +1124,41 @@ void MainWindow::on_actionFind_databox_triggered()
 	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
 	    NULL, "Blank");
 	dlg_ds_search->show();
+}
+
+void MainWindow::on_actionReply_triggered()
+{
+    on_actionReply_to_the_sender_triggered();
+}
+
+void MainWindow::on_actionSearchClear_triggered(void)
+{
+	m_searchLine->clear();
+}
+
+void MainWindow::filterMessages(QString text)
+{
+	const QAbstractItemModel *tableModel = ui->messageList->model();
+	QModelIndex curr = ui->messageList->currentIndex();
+	int rc = tableModel->rowCount(curr.parent());
+	if (!text.isEmpty()) {
+		m_searchLine->setStyleSheet("QLineEdit{background: rgb(255, 204, 204);}");
+		for (int i = 0; i < rc; i++) {
+			ui->messageList->hideRow(i);
+		}
+		QModelIndexList Items = tableModel->match(tableModel->index(0, 0),
+		    Qt::DisplayRole, QVariant::fromValue(text), -1,
+		    Qt::MatchContains);
+
+		if (!Items.isEmpty()) {
+			for (int i = 0; i < Items.size(); ++i) {
+				ui->messageList->showRow(Items[i].row());
+			}
+		}
+	} else {
+		m_searchLine->setStyleSheet("QLineEdit{background: white;}");
+		for (int i = 0; i < rc; i++) {
+			ui->messageList->showRow(i);
+		}
+	}
 }
