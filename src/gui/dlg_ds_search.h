@@ -38,7 +38,8 @@ class dlg_ds_search_dialog : public QDialog, public Ui::dlg_ds_search_dialog {
 
 public:
 	dlg_ds_search_dialog(QWidget *parent = 0,
-	    QTableWidget *recipientTableWidget = 0);
+	    QTableWidget *recipientTableWidget = 0,
+	    QString action = "Blank");
 
 private slots:
 	void checkInputFields(void);
@@ -52,6 +53,7 @@ private:
 	void initSearchWindow(void);
 	void addContactsToTable(QList<QVector<QString>> contactList);
 	QTableWidget *m_recipientTableWidget;
+	QString m_action;
 };
 
 #endif // DLG_DS_SEARCH_H

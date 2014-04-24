@@ -196,7 +196,7 @@ void DlgSendMessage::showOptionalForm(int state)
 void DlgSendMessage::addRecipientData(void)
 {
 	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
-	    this->recipientTableWidget);
+	    this->recipientTableWidget, "Add");
 	dlg_ds_search->show();
 
 }

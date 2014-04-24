@@ -75,12 +75,19 @@ private slots:
 
 	void on_actionReply_to_the_sender_triggered();
 
+	void on_actionFind_databox_triggered();
+
 private:
 	/*!
 	 * @brief Get configuration directory name.
 	 */
 	static
 	QString confDir(void);
+
+	/*!
+	 * @brief Default settings of mainwindow.
+	 */
+	void defaultUiMainWindowSettings(void) const;
 
 	/*!
 	 * @brief Changes all occurrences of '\' to '/' in given file.

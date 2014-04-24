@@ -14,6 +14,7 @@
 #include "dlg_send_message.h"
 #include "src/common.h"
 #include "ui_datovka.h"
+#include "dlg_ds_search.h"
 
 
 #define WIN_PREFIX "AppData/Roaming"
@@ -238,11 +239,15 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 			ui->messageList->setCurrentIndex(lastIndex);
 			ui->actionReply_to_the_sender->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
+			ui->menuMessage->setEnabled(true);
+			ui->actionAuthenticate_message_file->setEnabled(true);
+			ui->actionExport_corespondence_overview->setEnabled(true);
 		} else {
 			ui->actionReply_to_the_sender->setEnabled(false);
 			ui->actionVerify_a_message->setEnabled(false);
+			ui->menuMessage->setEnabled(false);
+			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
-
 		break;
 	default:
 		Q_ASSERT(0);
@@ -666,12 +671,50 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->accountList->
 				    setCurrentIndex(index.child(0,0));
 				treeItemSelectionChanged(index.child(0,0));
+				ui->menuDatabox->setEnabled(true);
+				ui->actionDelete_account->setEnabled(true);
+				ui->actionSync_all_accounts->setEnabled(true);
+				ui->actionAccount_properties->setEnabled(true);
+				ui->actionChange_password->setEnabled(true);
+				ui->actionCreate_message->setEnabled(true);
+				ui->actionFind_databox->setEnabled(true);
+				ui->actionDownload_messages->setEnabled(true);
+				ui->actionRecieved_all->setEnabled(true);
+
 				break;
 			}
 		}
+	} else {
+		defaultUiMainWindowSettings();
 	}
 }
 
+/* ========================================================================= */
+/*
+ *  Set default settings of mainwindow.
+ */
+void MainWindow::defaultUiMainWindowSettings(void) const
+/* ========================================================================= */
+{
+	// TopMenu
+	ui->menuDatabox->setEnabled(false);
+	ui->menuMessage->setEnabled(false);
+	// ToolBar
+	ui->actionRecieved_all->setEnabled(false);
+	ui->actionDownload_messages->setEnabled(false);
+	ui->actionCreate_message->setEnabled(false);
+	ui->actionReply_to_the_sender->setEnabled(false);
+	ui->actionVerify_a_message->setEnabled(false);
+	ui->actionAccount_properties->setEnabled(false);
+	ui->actionChange_password->setEnabled(false);
+	// Menu: File
+	ui->actionDelete_account->setEnabled(false);
+	ui->actionSync_all_accounts->setEnabled(false);
+	// Menu: Tools
+	ui->actionFind_databox->setEnabled(false);
+	ui->actionAuthenticate_message_file->setEnabled(false);
+	ui->actionExport_corespondence_overview->setEnabled(false);
+}
 
 /* ========================================================================= */
 /*
@@ -1054,4 +1097,11 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    ui->accountList, ui->messageList, "Reply",
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
+}
+
+void MainWindow::on_actionFind_databox_triggered()
+{
+	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
+	    NULL, "Blank");
+	dlg_ds_search->show();
 }

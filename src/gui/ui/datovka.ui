@@ -328,6 +328,9 @@
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuDatabox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Databox</string>
     </property>
@@ -345,6 +348,9 @@
     <addaction name="actionChange_data_directory"/>
    </widget>
    <widget class="QMenu" name="menuMessage">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Message</string>
     </property>

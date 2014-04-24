@@ -1,9 +1,10 @@
 #include "dlg_ds_search.h"
 
 dlg_ds_search_dialog::dlg_ds_search_dialog(QWidget *parent,
-    QTableWidget *recipientTableWidget) :
+    QTableWidget *recipientTableWidget, QString action) :
         QDialog(parent),
-        m_recipientTableWidget(recipientTableWidget)
+        m_recipientTableWidget(recipientTableWidget),
+        m_action(action)
 {
 	setupUi(this);
 	initSearchWindow();
@@ -167,25 +168,29 @@ bool dlg_ds_search_dialog::isInRecipientTable(QString idDs)
 
 void dlg_ds_search_dialog::insertDsItems(void)
 {
-	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-		if (this->resultsTableWidget->item(i,0)->checkState()) {
-			if (!isInRecipientTable(
-			    this->resultsTableWidget->item(i,1)->text())) {
-				int row = m_recipientTableWidget->rowCount();
-				m_recipientTableWidget->insertRow(row);
-				QTableWidgetItem *item = new QTableWidgetItem;
-				item->setText(this->resultsTableWidget->
-				    item(i,1)->text());
-				this->m_recipientTableWidget->setItem(row,0,item);
-				item = new QTableWidgetItem;
-				item->setText(this->resultsTableWidget->
-				    item(i,2)->text());
-				this->m_recipientTableWidget->setItem(row,1,item);
-				item = new QTableWidgetItem;
-				item->setText(this->resultsTableWidget->\
-				    item(i,3)->text());
-				this->m_recipientTableWidget->setItem(row,2,item);
+	if (m_action == "Add") {
+		for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
+			if ((!this->resultsTableWidget->item(
+			          i,0)->checkState()) ||
+			    isInRecipientTable(this->resultsTableWidget->item(
+			        i,1)->text())) {
+				continue;
 			}
+			/* For all checked non-duplicated. */
+			int row = m_recipientTableWidget->rowCount();
+			m_recipientTableWidget->insertRow(row);
+			QTableWidgetItem *item = new QTableWidgetItem;
+			item->setText(this->resultsTableWidget->
+			    item(i,1)->text());
+			this->m_recipientTableWidget->setItem(row,0,item);
+			item = new QTableWidgetItem;
+			item->setText(this->resultsTableWidget->
+			    item(i,2)->text());
+			this->m_recipientTableWidget->setItem(row,1,item);
+			item = new QTableWidgetItem;
+			item->setText(this->resultsTableWidget->\
+			    item(i,3)->text());
+			this->m_recipientTableWidget->setItem(row,2,item);
 		}
 	}
 }
