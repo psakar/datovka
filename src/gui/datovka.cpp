@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
 	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+	ui->accountTextInfo->setReadOnly(true);
 
 	/* Load configuration file. */
 	ensureConfPresence();
@@ -216,6 +217,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeAll:
 		ui->messageStackedWidget->setCurrentIndex(0);
 		ui->accountTextInfo->setHtml(html);
+		ui->accountTextInfo->setReadOnly(true);
 		break;
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeRecentSent:
@@ -327,6 +329,7 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 	ui->messageInfo->setHtml(
 	    messageDb->descriptionHtml(
 	        tableModel->itemData(index).first().toInt()));
+	ui->messageInfo->setReadOnly(true);
 
 	/* TODO */
 }
