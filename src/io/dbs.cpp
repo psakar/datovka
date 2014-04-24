@@ -44,9 +44,9 @@ const QVector< QPair<QString, dbEntryType> > MsgsTbl::knownAttrs = {
 	{"dmAttachmentSize", DB_INTEGER},
 	{"_dmType", DB_TEXT}
 	/*
-	 * PRIMARY KEY ("dmID"), 
-	 * CHECK (is_verified IN (0, 1)), 
-	 * CHECK ("dmPersonalDelivery" IN (0, 1)), 
+	 * PRIMARY KEY ("dmID"),
+	 * CHECK (is_verified IN (0, 1)),
+	 * CHECK ("dmPersonalDelivery" IN (0, 1)),
 	 * CHECK ("dmAllowSubstDelivery" IN (0, 1))
 	*/
 };
@@ -90,55 +90,6 @@ const QMap<QString, AttrProp> MsgsTbl::attrProps = {
 };
 
 
-const QString SmsgdTbl::tabName("supplementary_message_data");
-
-
-const QVector< QPair<QString, dbEntryType> > SmsgdTbl::knownAttrs = {
-	{"message_id", DB_INTEGER}, /* NOT NULL */
-	{"message_type", DB_INTEGER},
-	{"read_locally", DB_BOOLEAN},
-	{"download_date", DB_DATETIME},
-	{"custom_data", DB_TEXT}
-	/*
-	 * PRIMARY KEY (message_id), 
-	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID"), 
-	 * CHECK (read_locally IN (0, 1))
-	 */
-};
-
-
-const QMap<QString, AttrProp> SmsgdTbl::attrProps = {
-	{"message_id",    {DB_INTEGER, ""}},
-	{"message_type",  {DB_INTEGER, ""}},
-	{"read_locally",  {DB_BOOLEAN, ""}},
-	{"download_date", {DB_DATETIME, ""}},
-	{"custom_data",   {DB_TEXT, ""}}
-};
-
-
-const QString EvntsTbl::tabName("events");
-
-
-const QVector< QPair<QString, dbEntryType> > EvntsTbl::knownAttrs = {
-	{"id", DB_INTEGER}, /* NOT NULL */
-	{"message_id", DB_INTEGER},
-	{"dmEventTime", DB_TEXT},
-	{"dmEventDescr", DB_TEXT}
-	/*
-	 * PRIMARY KEY (id), 
-	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
-	 */
-};
-
-
-const QMap<QString, AttrProp> EvntsTbl::attrProps = {
-	{"id",           {DB_INTEGER, ""}},
-	{"message_id",   {DB_INTEGER, ""}},
-	{"dmEventTime",  {DB_TEXT, ""}},
-	{"dmEventDescr", {DB_TEXT, ""}}
-};
-
-
 const QString FlsTbl::tabName("files");
 
 
@@ -153,7 +104,7 @@ const QVector< QPair<QString, dbEntryType> > FlsTbl::knownAttrs = {
 	{"_dmFileMetaType", DB_TEXT},
 	{"dmEncodedContent", DB_TEXT}
 	/*
-	 * PRIMARY KEY (id), 
+	 * PRIMARY KEY (id),
 	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
 	 */
 };
@@ -169,6 +120,156 @@ const QMap<QString, AttrProp> FlsTbl::attrProps = {
 	{"_dmFormat",        {DB_TEXT, ""}},
 	{"_dmFileMetaType",  {DB_TEXT, ""}},
 	{"dmEncodedContent", {DB_TEXT, ""}}
+};
+
+
+const QString HshsTbl::tabName("hashes");
+
+
+const QVector< QPair<QString, dbEntryType> > HshsTbl::knownAttrs = {
+	{"id", DB_INTEGER}, /* NOT NULL */
+	{"message_id", DB_INTEGER},
+	{"value", DB_TEXT},
+	{"_algorithm", DB_TEXT}
+	/*
+	 * PRIMARY KEY (id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
+	 */
+};
+
+
+const QMap<QString, AttrProp> HshsTbl::attrProps = {
+	{"id",         {DB_INTEGER, ""}},
+	{"message_id", {DB_INTEGER, ""}},
+	{"value",      {DB_TEXT, ""}},
+	{"_algorithm", {DB_TEXT, ""}}
+};
+
+
+const QString EvntsTbl::tabName("events");
+
+
+const QVector< QPair<QString, dbEntryType> > EvntsTbl::knownAttrs = {
+	{"id", DB_INTEGER}, /* NOT NULL */
+	{"message_id", DB_INTEGER},
+	{"dmEventTime", DB_TEXT},
+	{"dmEventDescr", DB_TEXT}
+	/*
+	 * PRIMARY KEY (id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
+	 */
+};
+
+
+const QMap<QString, AttrProp> EvntsTbl::attrProps = {
+	{"id",           {DB_INTEGER, ""}},
+	{"message_id",   {DB_INTEGER, ""}},
+	{"dmEventTime",  {DB_TEXT, ""}},
+	{"dmEventDescr", {DB_TEXT, ""}}
+};
+
+
+const QString RwmsgdtTbl::tabName("raw_message_data");
+
+
+const QVector< QPair<QString, dbEntryType> > RwmsgdtTbl::knownAttrs = {
+	{"message_id", DB_INTEGER}, /* NOT NULL */
+	{"message_type", DB_INTEGER},
+	{"data", DB_TEXT}
+	/*
+	 * PRIMARY KEY (message_id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
+	 */
+};
+
+
+const QMap<QString, AttrProp> RwmsgdtTbl::attrProps = {
+	{"message_id",   {DB_INTEGER, ""}},
+	{"message_type", {DB_INTEGER, ""}},
+	{"data",         {DB_TEXT, ""}}
+};
+
+
+const QString RwdlvrinfdtTbl::tabName("raw_delivery_info_data");
+
+
+const QVector< QPair<QString, dbEntryType> > RwdlvrinfdtTbl::knownAttrs = {
+	{"message_id", DB_INTEGER}, /* NOT NULL */
+	{"data", DB_TEXT}
+	/*
+	 * PRIMARY KEY (message_id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
+	 */
+};
+
+
+const QMap<QString, AttrProp> RwdlvrinfdtTbl::attrProps = {
+	{"message_id", {DB_INTEGER, ""}},
+	{"data",       {DB_TEXT, ""}}
+};
+
+
+const QString SmsgdTbl::tabName("supplementary_message_data");
+
+
+const QVector< QPair<QString, dbEntryType> > SmsgdTbl::knownAttrs = {
+	{"message_id", DB_INTEGER}, /* NOT NULL */
+	{"message_type", DB_INTEGER},
+	{"read_locally", DB_BOOLEAN},
+	{"download_date", DB_DATETIME},
+	{"custom_data", DB_TEXT}
+	/*
+	 * PRIMARY KEY (message_id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID"),
+	 * CHECK (read_locally IN (0, 1))
+	 */
+};
+
+
+const QMap<QString, AttrProp> SmsgdTbl::attrProps = {
+	{"message_id",    {DB_INTEGER, ""}},
+	{"message_type",  {DB_INTEGER, ""}},
+	{"read_locally",  {DB_BOOLEAN, ""}},
+	{"download_date", {DB_DATETIME, ""}},
+	{"custom_data",   {DB_TEXT, ""}}
+};
+
+
+const QString CrtdtTbl::tabName("certificate_data");
+
+
+const QVector< QPair<QString, dbEntryType> > CrtdtTbl::knownAttrs = {
+	{"id", DB_INTEGER}, /* NOT NULL */
+	{"der_data", DB_TEXT}
+	/*
+	 * PRIMARY KEY (id),
+	 * UNIQUE (der_data)
+	 */
+};
+
+
+const QMap<QString, AttrProp> CrtdtTbl::attrProps = {
+	{"id",       {DB_INTEGER, ""}},
+	{"der_data", {DB_TEXT, ""}}
+};
+
+
+const QString MsgcrtdtTbl::tabName("message_certificate_data");
+
+
+const QVector< QPair<QString, dbEntryType> > MsgcrtdtTbl::knownAttrs = {
+	{"message_id", DB_INTEGER},
+	{"certificate_id", DB_INTEGER}
+	/*
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID"),
+	 * FOREIGN KEY(certificate_id) REFERENCES certificate_data (id)
+	 */
+};
+
+
+const QMap<QString, AttrProp> MsgcrtdtTbl::attrProps = {
+	{"message_id",     {DB_INTEGER, ""}},
+	{"certificate_id", {DB_INTEGER, ""}}
 };
 
 

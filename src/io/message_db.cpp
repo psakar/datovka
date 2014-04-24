@@ -515,7 +515,7 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 /*
  * Return message HTML formatted description.
  */
-QString MessageDb::descriptionHtml(int dmId, bool showId) const
+QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 /* ========================================================================= */
 {
 	QString html;
@@ -676,6 +676,14 @@ QString MessageDb::descriptionHtml(int dmId, bool showId) const
 			    tr("(not available)"));
 		}
 	}
+	if (warnOld) {
+		/* TODO */
+	}
+
+	html += "<h3>" + tr("Signature") + "</h3>";
+	/* Signature. */
+	
+
 	/* TODO */
 
 	html += divEnd;

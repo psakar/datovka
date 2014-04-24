@@ -117,7 +117,8 @@ public:
 	/*!
 	 * @brief Return message HTML formatted description.
 	 */
-	QString descriptionHtml(int dmId, bool showId = false) const;
+	QString descriptionHtml(int dmId, bool showId = false,
+	    bool warnOld = true) const;
 
 protected:
 	/*!

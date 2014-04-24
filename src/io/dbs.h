@@ -11,7 +11,7 @@
 
 
 /*!
- * @brief Used datatypes in databases.
+ * @brief Used data types in databases.
  */
 typedef enum {
 	DB_INTEGER = 1,
@@ -55,6 +55,121 @@ private:
 
 
 /*!
+ * @brief Table 'files'.
+ */
+class FlsTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	FlsTbl(void);
+};
+
+
+/*!
+ * @brief Table 'hashes'.
+ */
+class HshsTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	HshsTbl(void);
+};
+
+
+/*!
+ * @brief Table 'events'.
+ */
+class EvntsTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	EvntsTbl(void);
+};
+
+
+/*!
+ * @brief Table 'raw_message_data'.
+ */
+class RwmsgdtTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	RwmsgdtTbl(void);
+};
+
+
+/*!
+ * @brief Table 'raw_delivery_info_data'.
+ */
+class RwdlvrinfdtTbl {
+public:
+	/*! Table name. */
+	static
+	const QString tabName;
+
+	/*! Known attributes. */
+	static
+	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+
+	/*! Attribute properties. */
+	static
+	const QMap<QString, AttrProp> attrProps;
+
+private:
+	/* Prohibit all instances. */
+	RwdlvrinfdtTbl(void);
+};
+
+
+/*!
  * @brief Table 'supplementary_message_data'.
  */
 class SmsgdTbl {
@@ -87,9 +202,9 @@ private:
 
 
 /*!
- * @brief table 'events'.
+ * @brief Table 'certificate_data'
  */
-class EvntsTbl {
+class CrtdtTbl {
 public:
 	/*! Table name. */
 	static
@@ -105,14 +220,14 @@ public:
 
 private:
 	/* Prohibit all instances. */
-	EvntsTbl(void);
+	CrtdtTbl(void);
 };
 
 
 /*!
- * @brief Table 'files'.
+ * @brief Table 'message_certificate_data'.
  */
-class FlsTbl {
+class MsgcrtdtTbl {
 public:
 	/*! Table name. */
 	static
@@ -128,7 +243,7 @@ public:
 
 private:
 	/* Prohibit all instances. */
-	FlsTbl(void);
+	MsgcrtdtTbl(void);
 };
 
 
