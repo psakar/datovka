@@ -5,6 +5,7 @@
 
 
 #include <QJsonDocument>
+#include <QSslCertificate>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
 
@@ -110,11 +111,6 @@ public:
 	QList< QVector<QString> > uniqueContacts(void);
 
 	/*!
-	 * @brief Read data from supplementary message data table.
-	 */
-	QJsonDocument smsgdCustomData(int msgId) const;
-
-	/*!
 	 * @brief Return message HTML formatted description.
 	 */
 	QString descriptionHtml(int dmId, bool showId = false,
@@ -145,6 +141,21 @@ private:
 
 	QSqlDatabase m_db; /*!< Message database. */
 	dbTableModel m_sqlModel; /*!< Model of displayed data. */
+
+	/*!
+	 * @brief Returns whether message is verified.
+	 */
+	bool msgsIsVerified(int dmId) const;
+
+	/*!
+	 * @brief Read data from supplementary message data table.
+	 */
+	QJsonDocument smsgdCustomData(int msgId) const;
+
+	/*!
+	 * @brief Returns list of stored certificates.
+	 */
+	QList< QPair<int, QSslCertificate> > certificates(void) const;
 };
 
 

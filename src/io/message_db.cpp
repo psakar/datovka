@@ -484,35 +484,6 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void)
 
 /* ========================================================================= */
 /*
- * Read data from supplementary message data table.
- */
-QJsonDocument MessageDb::smsgdCustomData(int msgId) const
-/* ========================================================================= */
-{
-	QJsonDocument jsonDoc;
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT "
-	    "custom_data"
-	    " FROM supplementary_message_data WHERE "
-	    "message_id = "  + QString::number(msgId);
-//	qDebug() << queryStr;
-	query.prepare(queryStr);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			jsonDoc = QJsonDocument::fromJson(
-			    query.value(0).toByteArray());
-		}
-	}
-
-	return jsonDoc;
-}
-
-
-/* ========================================================================= */
-/*
  * Return message HTML formatted description.
  */
 QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
@@ -682,7 +653,14 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 	html += "<h3>" + tr("Signature") + "</h3>";
 	/* Signature. */
-	
+	if (!msgsIsVerified(dmId)) {
+		/* Verification no attempted. */
+		html += strongAccountInfoLine(tr("Message signature"),
+		    tr("Not present"));
+		/* TODO */
+	} else {
+		/* TODO */
+	}
 
 	/* TODO */
 
@@ -693,6 +671,98 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	/* TODO */
 
 	return html;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns whether message is verified.
+ */
+bool MessageDb::msgsIsVerified(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "is_verified"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toBool();
+	}
+
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Read data from supplementary message data table.
+ */
+QJsonDocument MessageDb::smsgdCustomData(int msgId) const
+/* ========================================================================= */
+{
+	QJsonDocument jsonDoc;
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "custom_data"
+	    " FROM supplementary_message_data WHERE "
+	    "message_id = "  + QString::number(msgId);
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			jsonDoc = QJsonDocument::fromJson(
+			    query.value(0).toByteArray());
+		}
+	}
+
+	return jsonDoc;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns list of stored certificates.
+ */
+QList< QPair<int, QSslCertificate> > MessageDb::certificates(void) const
+/* ========================================================================= */
+{
+	QList< QPair<int, QSslCertificate> > certList;
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "id, der_data"
+	    " FROM certificate_data";
+	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			QList<QSslCertificate> certs =
+			    QSslCertificate::fromData(
+			        QByteArray::fromBase64(
+			            query.value(1).toByteArray()),
+			        QSsl::Der);
+			Q_ASSERT(1 == certs.size());
+
+			certList.append(
+			    QPair<int, QSslCertificate>(
+			        query.value(0).toInt(), certs.first()));
+
+			query.next();
+		}
+	}
+
+	return certList;
 }
 
 

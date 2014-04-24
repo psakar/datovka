@@ -250,6 +250,7 @@ private:
 /*!
  * @brief Converts date from database format into desired format if possible.
  */
-QString dateTimeFromDbFormat(const QString &dateTimeStr, const QString &fmt);
+QString dateTimeFromDbFormat(const QString &dateTimeStr,
+    const QString &tgtFmt);
 
 #endif /* _DBS_H_ */
