@@ -4,9 +4,11 @@
 #define _DATOVKA_H_
 
 
-#include <QMainWindow>
-#include <QStandardItemModel>
 #include <QLineEdit>
+#include <QMainWindow>
+#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
+
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
@@ -81,7 +83,7 @@ private slots:
 
 	void on_actionSearchClear_triggered(void);
 
-	void filterMessages(QString text);
+	void filterMessages(const QString &text);
 
 private:
 	/*!
@@ -177,7 +179,8 @@ private:
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
-	QLineEdit *m_searchLine;
+	QLineEdit *m_searchLine; /*!< Search-line object. */
+	QSortFilterProxyModel m_messageListProxyModel;
 
 	Ui::MainWindow *ui;
 };

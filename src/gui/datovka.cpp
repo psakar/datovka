@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_accountDb("accountDb"),
     m_messageDbs(),
     m_searchLine(NULL),
+    m_messageListProxyModel(this),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -49,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QLabel *searchLabel = new QLabel;
 	searchLabel->setText(tr("Search: "));
 	ui->toolBar->addWidget(searchLabel);
-	m_searchLine = new QLineEdit;
+	m_searchLine = new QLineEdit(this);
 	connect(m_searchLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
@@ -250,11 +251,10 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeReceivedYear:
 	case AccountModel::nodeSentYear:
 		ui->messageStackedWidget->setCurrentIndex(1);
+		Q_ASSERT(0 != tableModel);
 		ui->messageList->setModel(tableModel);
-		/* applt message filter */
-		if (!m_searchLine->text().isEmpty()) {
-			filterMessages(m_searchLine->text());
-		}
+		/* Apply message filter. */
+		filterMessages(m_searchLine->text());
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
@@ -362,16 +362,22 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	const QAbstractItemModel *tableModel = current.model();
-	Q_ASSERT(0 != tableModel);
-	QModelIndex index = tableModel->index(
-	    current.row(), 0); /* First column. */
 
-	MessageDb *messageDb = accountMessageDb();
+	if (0 != tableModel) {
+		QModelIndex index = tableModel->index(
+		    current.row(), 0); /* First column. */
 
-	ui->messageInfo->setHtml(
-	    messageDb->descriptionHtml(
-	        tableModel->itemData(index).first().toInt()));
-	ui->messageInfo->setReadOnly(true);
+		MessageDb *messageDb = accountMessageDb();
+
+		ui->messageInfo->setHtml(
+		    messageDb->descriptionHtml(
+		        tableModel->itemData(index).first().toInt()));
+		ui->messageInfo->setReadOnly(true);
+
+	} else {
+		ui->messageInfo->setHtml("");
+		ui->messageInfo->setReadOnly(true);
+	}
 
 	/* TODO */
 }
@@ -1190,33 +1196,20 @@ void MainWindow::on_actionSearchClear_triggered(void)
 /*
 * Message filter
  */
-void MainWindow::filterMessages(QString text)
+void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
 {
-	const QAbstractItemModel *tableModel = ui->messageList->model();
-	QModelIndex curr = ui->messageList->currentIndex();
-	int rc = tableModel->rowCount(curr.parent());
-	if (!text.isEmpty()) {
-		m_searchLine->setStyleSheet(
-		    "QLineEdit{background: rgb(255, 204, 204);}");
-		for (int i = 0; i < rc; i++) {
-			ui->messageList->hideRow(i);
-		}
-		for (int i =0; i < 5; i++) {
-			QModelIndexList itms = tableModel->match(
-			    tableModel->index(0, i), Qt::DisplayRole,
-			   QVariant::fromValue(text), -1, Qt::MatchContains);
+	QAbstractItemModel *tableModel = ui->messageList->model();
+	Q_ASSERT(0 != tableModel);
 
-			if (!itms.isEmpty()) {
-				for (int i = 0; i < itms.size(); ++i) {
-					ui->messageList->showRow(itms[i].row());
-				}
-			}
-		}
-	} else {
-		m_searchLine->setStyleSheet("QLineEdit{background: white;}");
-		for (int i = 0; i < rc; i++) {
-			ui->messageList->showRow(i);
-		}
+	if (tableModel != &m_messageListProxyModel) {
+		/* Prohibit the proxy model to be the source of itself. */
+		m_messageListProxyModel.setSourceModel(tableModel);
 	}
+	ui->messageList->setModel(&m_messageListProxyModel);
+
+	m_messageListProxyModel.setFilterRegExp(QRegExp(text,
+	    Qt::CaseInsensitive, QRegExp::FixedString));
+	/* Filter according to second column. */
+	m_messageListProxyModel.setFilterKeyColumn(1);
 }
