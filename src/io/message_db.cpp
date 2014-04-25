@@ -42,7 +42,7 @@ QVariant dbTableModel::data(const QModelIndex &index, int role) const
 	    (this->headerData(index.column(), Qt::Horizontal,
 	         ROLE_DB_ENTRY_TYPE).toInt() == DB_DATETIME)) {
 		/* Convert date on display. */
-		return dateTimeFromDbFormat(
+		return dateTimeStrFromDbFormat(
 		    QSqlQueryModel::data(index, role).toString(),
 		    dateTimeDisplayFormat);
 	} else {
@@ -581,11 +581,11 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		query.first();
 		html += strongAccountInfoLine(
 		    MsgsTbl::attrProps[msgStatus[0]].desc,
-		    dateTimeFromDbFormat(query.value(0).toString(),
+		    dateTimeStrFromDbFormat(query.value(0).toString(),
 		        dateTimeDisplayFormat));
 		html += strongAccountInfoLine(
 		    MsgsTbl::attrProps[msgStatus[1]].desc,
-		    dateTimeFromDbFormat(query.value(1).toString(),
+		    dateTimeStrFromDbFormat(query.value(1).toString(),
 		        dateTimeDisplayFormat));
 		html += strongAccountInfoLine(
 		    MsgsTbl::attrProps[msgStatus[2]].desc,
@@ -608,7 +608,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		while (query.isValid()) {
 			html += indentDivStart +
 			    strongAccountInfoLine(
-			        dateTimeFromDbFormat(
+			        dateTimeStrFromDbFormat(
 			            query.value(0).toString(),
 			            dateTimeDisplayFormat),
 			        query.value(1).toString()) +
@@ -653,12 +653,30 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 	html += "<h3>" + tr("Signature") + "</h3>";
 	/* Signature. */
-	if (!msgsIsVerified(dmId)) {
+	if (!msgsVarificationAttempted(dmId)) {
 		/* Verification no attempted. */
 		html += strongAccountInfoLine(tr("Message signature"),
 		    tr("Not present"));
-		/* TODO */
+		/* TODO -- Enable verification button. */
+	} else if (!msgsVerified(dmId)) {
+		html += strongAccountInfoLine(tr("Message signature"),
+		    tr("Invalid")  + " -- " +
+		    tr("Message signature and content do not correspond!"));
 	} else {
+		html += strongAccountInfoLine(tr("Message signature"),
+		    tr("Valid"));
+		/* Check signing certificate. */
+		qDebug() << msgsVerificationDate(dmId);
+		bool verified = msgCertValidAtDate(dmId,
+		    msgsVerificationDate(dmId), !globPref.check_crl);
+		QString verifiedText = verified ? tr("Valid") : tr("Invalid");
+		if (!globPref.check_crl) {
+			verifiedText += " (" +
+			    tr("Certificate revocation check is turned off!") +
+			    ")";
+		}
+		html += strongAccountInfoLine(tr("Signing certificate"),
+		    verifiedText);
 		/* TODO */
 	}
 
@@ -676,13 +694,14 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 /* ========================================================================= */
 /*
- * Returns whether message is verified.
+ * Returns true if verification attempt was performed.
  */
-bool MessageDb::msgsIsVerified(int dmId) const
+bool MessageDb::msgsVarificationAttempted(int dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
+	bool ok;
 
 	queryStr = "SELECT "
 	    "is_verified"
@@ -692,10 +711,72 @@ bool MessageDb::msgsIsVerified(int dmId) const
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
+		/* If no value is set then the conversion will fail. */
+		query.value(0).toInt(&ok);
+		return ok;
+	}
+
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns whether message is verified.
+ */
+bool MessageDb::msgsVerified(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "is_verified"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+//	qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
 	}
 
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns verification date.
+ */
+QDateTime MessageDb::msgsVerificationDate(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	if (GlobPreferences::DOWNLOAD_DATE ==
+	    globPref.certificate_validation_date) {
+
+		queryStr = "SELECT "
+		    "download_date"
+		    " FROM supplementary_message_data WHERE "
+		    "message_id = " + QString::number(dmId);
+		qDebug() << queryStr;
+		query.prepare(queryStr);
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid()) {
+			qDebug() << "dateTime" << query.value(0).toString();
+			QDateTime dateTime =
+			    dateTimeFromDbFormat(query.value(0).toString());
+
+			if (dateTime.isValid()) {
+				return dateTime;
+			}
+		}
+	}
+
+	return QDateTime::currentDateTime();
 }
 
 
@@ -730,39 +811,136 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 
 /* ========================================================================= */
 /*
- * Returns list of stored certificates.
+ * Certificates related to given message.
  */
-QList< QPair<int, QSslCertificate> > MessageDb::certificates(void) const
+QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
 /* ========================================================================= */
 {
-	QList< QPair<int, QSslCertificate> > certList;
+	QList<QSslCertificate> certList;
 	QSqlQuery query(m_db);
 	QString queryStr;
+	QList<int> certIds;
 
 	queryStr = "SELECT "
-	    "id, der_data"
-	    " FROM certificate_data";
+	    "certificate_id"
+	    " FROM message_certificate_data WHERE "
+	    "message_id = " + QString::number(dmId);
 	qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
-		while (query.isValid()) {
-			QList<QSslCertificate> certs =
-			    QSslCertificate::fromData(
-			        QByteArray::fromBase64(
-			            query.value(1).toByteArray()),
-			        QSsl::Der);
-			Q_ASSERT(1 == certs.size());
+		if (query.isValid()) {
+			bool ok;
+			int ret;
+			ret = query.value(0).toInt(&ok);
+			Q_ASSERT(ok);
+			if (ok) {
+				certIds.append(ret);
+			}
+		}
+	}
 
-			certList.append(
-			    QPair<int, QSslCertificate>(
-			        query.value(0).toInt(), certs.first()));
+	if (certIds.size() > 0) {
+		queryStr = "SELECT "
+		    "der_data"
+		    " FROM certificate_data WHERE ";
+		for (int i = 0; i < (certIds.size() - 1); ++i) {
+			queryStr += "(id = " + QString::number(certIds[i]) +
+			    ") or ";
+		}
+		queryStr += "(id = " + QString::number(certIds.last()) + ")";
+		qDebug() << queryStr;
+		query.prepare(queryStr);
+		if (query.exec() && query.isActive()) {
+			query.first();
+			while (query.isValid()) {
+				QList<QSslCertificate> certs =
+				    QSslCertificate::fromData(
+				        QByteArray::fromBase64(
+				            query.value(0).toByteArray()),
+				        QSsl::Der);
+				Q_ASSERT(1 == certs.size());
 
-			query.next();
+				certList.append(certs.first());
+
+				query.next();
+			}
 		}
 	}
 
 	return certList;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check whether message signature was valid at given date.
+ */
+bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
+    bool ignoreMissingCrlCheck) const
+/* ========================================================================= */
+{
+	QList<QSslCertificate> certList = msgCerts(dmId);
+
+	if (certList.size() > 0) {
+		Q_ASSERT(1 == certList.size());
+
+		const QSslCertificate &cert = certList.first();
+
+		bool timeValid = certTimeValidAtTime(cert, dateTime);
+		bool crlValid = ignoreMissingCrlCheck; /* true; */
+		if (globPref.check_crl) {
+			crlValid = certCrlValidAtTime(cert, dateTime);
+		}
+
+		return timeValid && crlValid;
+	}
+
+	return false;
+}
+
+
+/* ========================================================================= */
+bool MessageDb::certTimeValidAtTime(const QSslCertificate &cert,
+    const QDateTime &dateTime)
+/* ========================================================================= */
+{
+	QDateTime start, stop;
+
+	start = cert.effectiveDate();
+	stop = cert.expiryDate();
+
+	return (start <= dateTime) && (dateTime <= stop);
+}
+
+
+/* ========================================================================= */
+/*
+ * Check whether the certificate was not on CRL on given date.
+ */
+bool MessageDb::certCrlValidAtTime(const QSslCertificate &cert,
+    const QDateTime &dateTime)
+/* ========================================================================= */
+{
+	QDateTime revocationDate = certRevocationDate(cert);
+
+	if (!revocationDate.isValid()) {
+		return true;
+	} else {
+		return revocationDate > dateTime;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Get certificate revocation date.
+ */
+QDateTime MessageDb::certRevocationDate(const QSslCertificate &cert)
+/* ========================================================================= */
+{
+	/* TODO */
+	return QDateTime();
 }
 
 

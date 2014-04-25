@@ -209,10 +209,10 @@ const QMap<QString, AttrProp> RwdlvrinfdtTbl::attrProps = {
 };
 
 
-const QString SmsgdTbl::tabName("supplementary_message_data");
+const QString SmsgdtTbl::tabName("supplementary_message_data");
 
 
-const QVector< QPair<QString, dbEntryType> > SmsgdTbl::knownAttrs = {
+const QVector< QPair<QString, dbEntryType> > SmsgdtTbl::knownAttrs = {
 	{"message_id", DB_INTEGER}, /* NOT NULL */
 	{"message_type", DB_INTEGER},
 	{"read_locally", DB_BOOLEAN},
@@ -226,7 +226,7 @@ const QVector< QPair<QString, dbEntryType> > SmsgdTbl::knownAttrs = {
 };
 
 
-const QMap<QString, AttrProp> SmsgdTbl::attrProps = {
+const QMap<QString, AttrProp> SmsgdtTbl::attrProps = {
 	{"message_id",    {DB_INTEGER, ""}},
 	{"message_type",  {DB_INTEGER, ""}},
 	{"read_locally",  {DB_BOOLEAN, ""}},
@@ -289,18 +289,40 @@ const QString dbDateTimeFormat("yyyy-MM-dd HH:mm:ss.zzz");
 /*
  * Converts date from database format into desired format if possible.
  */
-QString dateTimeFromDbFormat(const QString &dateTimeStr, const QString &tgtFmt)
+QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr)
 /* ========================================================================= */
 {
-	QDateTime date = QDateTime::fromString(dateTimeStr, dbDateTimeFormat);
-	if (date.isNull() || !date.isValid()) {
+	QDateTime dateTime = QDateTime::fromString(dateTimeDbStr,
+	    dbDateTimeFormat);
+	if (dateTime.isNull() || !dateTime.isValid()) {
 		/* Try the faulty format. */
-		date = QDateTime::fromString(dateTimeStr,
+		dateTime = QDateTime::fromString(dateTimeDbStr,
 		    dbFaultyDateTimeFormat);
 	}
-	if (date.isValid()) {
-		return date.toString(tgtFmt);
+	if (dateTime.isNull() || !dateTime.isValid()) {
+		/* Try to ignore 3 rightmost characters. */
+		dateTime = QDateTime::fromString(
+		    dateTimeDbStr.left(dateTimeDbStr.size() - 3),
+		    dbDateTimeFormat);
+	}
+
+	return dateTime;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts date from database format into desired format if possible.
+ */
+QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
+    const QString &tgtFmt)
+/* ========================================================================= */
+{
+	QDateTime dateTime = dateTimeFromDbFormat(dateTimeDbStr);
+
+	if (dateTime.isValid()) {
+		return dateTime.toString(tgtFmt);
 	} else {
-		return dateTimeStr;
+		return QString();
 	}
 }

@@ -143,9 +143,19 @@ private:
 	dbTableModel m_sqlModel; /*!< Model of displayed data. */
 
 	/*!
+	 * @brief Returns true if verification attempt was performed.
+	 */
+	bool msgsVarificationAttempted(int dmId) const;
+
+	/*!
 	 * @brief Returns whether message is verified.
 	 */
-	bool msgsIsVerified(int dmId) const;
+	bool msgsVerified(int dmId) const;
+
+	/*!
+	 * @brief Returns verification date.
+	 */
+	QDateTime msgsVerificationDate(int dmId) const;
 
 	/*!
 	 * @brief Read data from supplementary message data table.
@@ -153,9 +163,35 @@ private:
 	QJsonDocument smsgdCustomData(int msgId) const;
 
 	/*!
-	 * @brief Returns list of stored certificates.
+	 * @brief Certificates related to given message.
 	 */
-	QList< QPair<int, QSslCertificate> > certificates(void) const;
+	QList<QSslCertificate> msgCerts(int dmId) const;
+
+	/*!
+	 * @brief Check whether message signature was valid at given date.
+	 */
+	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
+	    bool ignoreMissingCrlCheck = false) const;
+
+	/*!
+	 * @brief Check certificate validity at given time.
+	 */
+	static
+	bool certTimeValidAtTime(const QSslCertificate &cert,
+	    const QDateTime &dateTime);
+
+	/*!
+	 * @brief Check whether the certificate was not on CRL on given date.
+	 */
+	static
+	bool certCrlValidAtTime(const QSslCertificate &cert,
+	    const QDateTime &dateTime);
+
+	/*!
+	 * @brief Get certificate revocation date.
+	 */
+	static
+	QDateTime certRevocationDate(const QSslCertificate &cert);
 };
 
 

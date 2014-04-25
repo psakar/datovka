@@ -172,7 +172,7 @@ private:
 /*!
  * @brief Table 'supplementary_message_data'.
  */
-class SmsgdTbl {
+class SmsgdtTbl {
 public:
 	class Entry {
 	public:
@@ -197,7 +197,7 @@ public:
 
 private:
 	/* Prohibit all instances. */
-	SmsgdTbl(void);
+	SmsgdtTbl(void);
 };
 
 
@@ -250,7 +250,13 @@ private:
 /*!
  * @brief Converts date from database format into desired format if possible.
  */
-QString dateTimeFromDbFormat(const QString &dateTimeStr,
+QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr);
+
+
+/*!
+ * @brief Converts date from database format into desired format if possible.
+ */
+QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt);
 
 #endif /* _DBS_H_ */

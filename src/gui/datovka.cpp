@@ -471,7 +471,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 			case DB_DATETIME:
 				html.append(strongAccountInfoLine(
 				    AccountEntry::attrProps[key].desc,
-				    dateTimeFromDbFormat(
+				    dateTimeStrFromDbFormat(
 				        accountEntry.value(key).toString(),
 				        dateTimeDisplayFormat)));
 				break;
