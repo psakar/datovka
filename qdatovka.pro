@@ -39,6 +39,7 @@ SOURCES += src/common.cpp \
     src/io/account_db.cpp \
     src/io/dbs.cpp \
     src/io/message_db.cpp \
+    src/io/pkcs7.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
     src/gui/dlg_ds_search.cpp \
@@ -54,6 +55,7 @@ HEADERS += src/common.h \
     src/io/account_db.h \
     src/io/dbs.h \
     src/io/message_db.h \
+    src/io/pkcs7.h \
     src/models/accounts_model.h \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_contacts.h

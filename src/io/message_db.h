@@ -172,26 +172,6 @@ private:
 	 */
 	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
-
-	/*!
-	 * @brief Check certificate validity at given time.
-	 */
-	static
-	bool certTimeValidAtTime(const QSslCertificate &cert,
-	    const QDateTime &dateTime);
-
-	/*!
-	 * @brief Check whether the certificate was not on CRL on given date.
-	 */
-	static
-	bool certCrlValidAtTime(const QSslCertificate &cert,
-	    const QDateTime &dateTime);
-
-	/*!
-	 * @brief Get certificate revocation date.
-	 */
-	static
-	QDateTime certRevocationDate(const QSslCertificate &cert);
 };
 
 

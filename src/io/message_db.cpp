@@ -8,8 +8,9 @@
 #include <QSqlQuery>
 
 
-#include "src/common.h"
 #include "message_db.h"
+#include "src/common.h"
+#include "src/io/pkcs7.h"
 
 
 const QVector<QString> MessageDb::receivedItemIds = {"dmID", "dmAnnotation",
@@ -897,50 +898,6 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	}
 
 	return false;
-}
-
-
-/* ========================================================================= */
-bool MessageDb::certTimeValidAtTime(const QSslCertificate &cert,
-    const QDateTime &dateTime)
-/* ========================================================================= */
-{
-	QDateTime start, stop;
-
-	start = cert.effectiveDate();
-	stop = cert.expiryDate();
-
-	return (start <= dateTime) && (dateTime <= stop);
-}
-
-
-/* ========================================================================= */
-/*
- * Check whether the certificate was not on CRL on given date.
- */
-bool MessageDb::certCrlValidAtTime(const QSslCertificate &cert,
-    const QDateTime &dateTime)
-/* ========================================================================= */
-{
-	QDateTime revocationDate = certRevocationDate(cert);
-
-	if (!revocationDate.isValid()) {
-		return true;
-	} else {
-		return revocationDate > dateTime;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Get certificate revocation date.
- */
-QDateTime MessageDb::certRevocationDate(const QSslCertificate &cert)
-/* ========================================================================= */
-{
-	/* TODO */
-	return QDateTime();
 }
 
 
