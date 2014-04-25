@@ -38,6 +38,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
+    m_received_1(200),
+    m_received_2(200),
+    m_sent_1(200),
+    m_sent_2(200),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -93,6 +97,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
+	/* Enable sort of table items */
+	ui->messageList->setSortingEnabled(true);
 }
 
 
@@ -245,11 +251,26 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		ui->accountTextInfo->setReadOnly(true);
 		break;
 	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeReceived:
-	case AccountModel::nodeSent:
 	case AccountModel::nodeReceivedYear:
+		/*  set fixed column width*/
+		ui->messageList->setColumnWidth(0, 60);
+		ui->messageList->setColumnWidth(1, m_received_1);
+		ui->messageList->setColumnWidth(2, m_received_2);
+		ui->messageList->setColumnWidth(3, 120);
+		ui->messageList->setColumnWidth(4, 120);
+		goto setmodel;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
+		/*  set fixed column width*/
+		ui->messageList->setColumnWidth(0, 60);
+		ui->messageList->setColumnWidth(1, m_sent_1);
+		ui->messageList->setColumnWidth(2, m_sent_2);
+		ui->messageList->setColumnWidth(3, 60);
+		ui->messageList->setColumnWidth(4, 120);
+		ui->messageList->setColumnWidth(5, 120);
+setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		Q_ASSERT(0 != tableModel);
 		ui->messageList->setModel(tableModel);
@@ -846,11 +867,48 @@ void MainWindow::loadSettings(void)
 	/* Scan databases. */
 	regenerateAccountModelYears();
 
-	/* Received messages. */
-
-	/* Sent messages. */
+	/* Received Sent messages Column widths */
+	loadSentReceivedMessagesColumnWidth(settings);
 }
 
+
+/* ========================================================================= */
+/*
+ * Load received/sent messages column widths from settings.
+ */
+void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
+/* ========================================================================= */
+{
+	m_received_1 = settings.value("column_widths/received_1", 200).toInt();
+	m_received_2 = settings.value("column_widths/received_2", 200).toInt();
+	m_sent_1 = settings.value("column_widths/sent_1", 200).toInt();
+	m_sent_2 = settings.value("column_widths/sent_2", 200).toInt();
+}
+
+/* ========================================================================= */
+/*
+ * Save received/sent messages column widths to settings.
+ */
+void MainWindow::saveSentReceivedColumnWidth(const QSettings &settings)
+/* ========================================================================= */
+{
+/*
+	QModelIndex index = ui->accountList->currentIndex();
+	const QStandardItem *item = m_accountModel.itemFromIndex(index);
+	const QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+
+	settings.beginGroup("column_widths");
+	settings.setValue("received_1", received_1);
+	settings.setValue("received_2", received_2);
+	settings.setValue("sent_1", sent_1);
+	settings.setValue("sent_2", sent_2);
+	settings.endGroup();
+*/
+}
 
 /* ========================================================================= */
 /*
@@ -956,6 +1014,7 @@ void MainWindow::saveSettings(void) const
 	saveAccountIndex(settings);
 
 	/* TODO */
+	//saveSentReceivedColumnWidth(settings);
 
 	settings.sync();
 }

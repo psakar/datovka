@@ -130,6 +130,16 @@ private:
 	void setDefaultAccount(const QSettings &settings);
 
 	/*!
+	 * @brief Load sent/recivied messages column widths from settings.
+	 */
+	void loadSentReceivedMessagesColumnWidth(const QSettings &settings);
+
+	/*!
+	 * @brief Save sen/recivied messages column widths into settings.
+	 */
+	void saveSentReceivedColumnWidth(const QSettings &settings);
+
+	/*!
 	 * @brief Store geometry to settings.
 	 */
 	void saveWindowGeometry(QSettings &settings) const;
@@ -181,6 +191,11 @@ private:
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
 	QSortFilterProxyModel m_messageListProxyModel;
+
+	int m_received_1;
+	int m_received_2;
+	int m_sent_1;
+	int m_sent_2;
 
 	Ui::MainWindow *ui;
 };
