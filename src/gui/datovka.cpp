@@ -54,7 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
 	ui->toolBar->addWidget(m_searchLine);
-	ui->toolBar->addAction(QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
+	ui->toolBar->addAction(
+	    QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
 	    "", this, SLOT(on_actionSearchClear_triggered()));
 
 	/* Account list. */
@@ -129,6 +130,9 @@ MainWindow::~MainWindow(void)
 
 
 /* ========================================================================= */
+/*
+ * Create and open Preferences dialog
+ */
 void MainWindow::on_actionPreferences_triggered()
 /* ========================================================================= */
 {
@@ -138,6 +142,9 @@ void MainWindow::on_actionPreferences_triggered()
 
 
 /* ========================================================================= */
+/*
+ * Create and open Proxy settings dialog
+ */
 void MainWindow::on_actionProxy_settings_triggered()
 /* ========================================================================= */
 {
@@ -244,6 +251,10 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		ui->messageList->setModel(tableModel);
+		/* applt message filter */
+		if (!m_searchLine->text().isEmpty()) {
+			filterMessages(m_searchLine->text());
+		}
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
@@ -252,6 +263,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		ui->messageInfo->clear();
 		/* Select last message in list if there are some messages. */
 		itemModel = ui->messageList->model();
+		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
 			QModelIndex lastIndex =
 			    itemModel->index(itemModel->rowCount() - 1, 0);
@@ -260,7 +272,8 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->menuMessage->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
-			ui->actionExport_corespondence_overview->setEnabled(true);
+			ui->actionExport_corespondence_overview->
+			    setEnabled(true);
 		} else {
 			ui->actionReply_to_the_sender->setEnabled(false);
 			ui->actionVerify_a_message->setEnabled(false);
@@ -274,8 +287,10 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	}
 }
 
-
 /* ========================================================================= */
+/*
+ * Account context right menu
+ */
 void MainWindow::treeItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
@@ -285,39 +300,49 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 	if (index.isValid()) {
 //		treeItemSelectionChanged(index);
 
-		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
+		menu->addAction(
+		   QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
 		    tr("Get messages"),
 		    this, SLOT(on_actionGet_messages_triggered()));
-		menu->addAction(QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
 		    tr("Create message"),
 		    this, SLOT(on_actionCreate_message_triggered()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("tick_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("tick_16.png")),
 		    tr("Mark all as read"),
 		    this, SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
 		    tr("Change password"),
 		    this, SLOT(on_actionChange_password_triggered()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
 		    tr("Account properties"),
 		    this, SLOT(on_actionAccount_properties_triggered()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
 		    tr("Remove Account"),
 		    this, SLOT(on_actionDelete_account_triggered()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
 		    tr("Move account up"),
 		    this, SLOT(on_actionMove_account_up_triggered()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
 		    tr("Move account down"),
 		    this, SLOT(on_actionMove_account_down_triggered()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("folder_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("folder_16.png")),
 		    tr("Change data directory"),
 		    this, SLOT(on_actionChange_data_directory_triggered()));
 	} else {
-		menu->addAction(QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
 		    tr("Add new account"),
 		    this, SLOT(on_actionAdd_account_triggered()));
 	}
@@ -931,13 +956,20 @@ void MainWindow::saveSettings(void) const
 
 
 /* ========================================================================= */
+/*
+* Create message slot
+ */
 void MainWindow::on_actionCreate_message_triggered()
 /* ========================================================================= */
 {
 	on_actionSent_message_triggered();
 }
 
+
 /* ========================================================================= */
+/*
+* Send message slot
+ */
 void MainWindow::on_actionSent_message_triggered()
 /* ========================================================================= */
 {
@@ -1119,40 +1151,66 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	newMessageDialog->show();
 }
 
+/* ========================================================================= */
+/*
+* Active search databox dialog
+ */
 void MainWindow::on_actionFind_databox_triggered()
+/* ========================================================================= */
 {
 	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
 	    NULL, "Blank");
 	dlg_ds_search->show();
 }
 
+
+/* ========================================================================= */
+/*
+* Reply meesage private slot
+ */
 void MainWindow::on_actionReply_triggered()
+/* ========================================================================= */
 {
-    on_actionReply_to_the_sender_triggered();
+	on_actionReply_to_the_sender_triggered();
 }
 
+
+/* ========================================================================= */
+/*
+* Clear message filter text
+ */
 void MainWindow::on_actionSearchClear_triggered(void)
+/* ========================================================================= */
 {
 	m_searchLine->clear();
 }
 
+
+/* ========================================================================= */
+/*
+* Message filter
+ */
 void MainWindow::filterMessages(QString text)
+/* ========================================================================= */
 {
 	const QAbstractItemModel *tableModel = ui->messageList->model();
 	QModelIndex curr = ui->messageList->currentIndex();
 	int rc = tableModel->rowCount(curr.parent());
 	if (!text.isEmpty()) {
-		m_searchLine->setStyleSheet("QLineEdit{background: rgb(255, 204, 204);}");
+		m_searchLine->setStyleSheet(
+		    "QLineEdit{background: rgb(255, 204, 204);}");
 		for (int i = 0; i < rc; i++) {
 			ui->messageList->hideRow(i);
 		}
-		QModelIndexList Items = tableModel->match(tableModel->index(0, 0),
-		    Qt::DisplayRole, QVariant::fromValue(text), -1,
-		    Qt::MatchContains);
+		for (int i =0; i < 5; i++) {
+			QModelIndexList itms = tableModel->match(
+			    tableModel->index(0, i), Qt::DisplayRole,
+			   QVariant::fromValue(text), -1, Qt::MatchContains);
 
-		if (!Items.isEmpty()) {
-			for (int i = 0; i < Items.size(); ++i) {
-				ui->messageList->showRow(Items[i].row());
+			if (!itms.isEmpty()) {
+				for (int i = 0; i < itms.size(); ++i) {
+					ui->messageList->showRow(itms[i].row());
+				}
 			}
 		}
 	} else {
