@@ -85,6 +85,8 @@ private slots:
 
 	void filterMessages(const QString &text);
 
+	void onTableColumnResized(int index, int oldSize, int newSize);
+
 private:
 	/*!
 	 * @brief Get configuration directory name.
@@ -137,7 +139,17 @@ private:
 	/*!
 	 * @brief Save sen/recivied messages column widths into settings.
 	 */
-	void saveSentReceivedColumnWidth(const QSettings &settings);
+	void saveSentReceivedColumnWidth(QSettings &settings) const;
+
+	/*!
+	 * @brief Set reciveid message column widths.
+	 */
+	void setReciveidColumnWidths(void);
+
+	/*!
+	 * @brief Set sent message column widths.
+	 */
+	void setSentColumnWidths(void);
 
 	/*!
 	 * @brief Store geometry to settings.
