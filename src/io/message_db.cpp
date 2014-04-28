@@ -334,10 +334,10 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
-		queryStr += receivedItemIds[i] + ", ";
+	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
+		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += receivedItemIds.last();
+	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE "
 	    "(dbIDSender = '" + sendDbId + "')"
 	    " and "
@@ -347,13 +347,13 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	query.exec();
 
 	m_sqlModel.setQuery(query);
-	for (int i = 0; i < receivedItemIds.size(); ++i) {
+	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 

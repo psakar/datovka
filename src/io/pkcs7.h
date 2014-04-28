@@ -9,6 +9,17 @@
 
 
 /*!
+ * Certificate storage.
+ */
+class CertStore {
+public:
+	CertStore(void);
+
+	QList<QSslCertificate> caCerts; /*!< List of system CA certificates. */
+};
+
+
+/*!
  * @brief Check certificate validity at given time.
  */
 bool certTimeValidAtTime(const QSslCertificate &cert,
