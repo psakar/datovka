@@ -87,6 +87,8 @@ private slots:
 
 	void onTableColumnResized(int index, int oldSize, int newSize);
 
+	void onTableColumnSort(int column);
+
 private:
 	/*!
 	 * @brief Get configuration directory name.
@@ -208,6 +210,8 @@ private:
 	int m_received_2;
 	int m_sent_1;
 	int m_sent_2;
+	int m_sort_column;
+	QString m_sort_order;
 
 	Ui::MainWindow *ui;
 };
