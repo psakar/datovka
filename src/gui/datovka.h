@@ -139,6 +139,11 @@ private:
 	void loadSentReceivedMessagesColumnWidth(const QSettings &settings);
 
 	/*!
+	 * @brief Load collapse info of account items from settings.
+	 */
+	void loadAccountCollapseInfo(QSettings &settings);
+
+	/*!
 	 * @brief Save sen/recivied messages column widths into settings.
 	 */
 	void saveSentReceivedColumnWidth(QSettings &settings) const;

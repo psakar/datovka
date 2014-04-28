@@ -864,7 +864,7 @@ void MainWindow::loadSettings(void)
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
 
-	ui->accountList->expandAll();
+	//ui->accountList->expandAll();
 
 	/* Open accounts database. */
 	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
@@ -874,6 +874,9 @@ void MainWindow::loadSettings(void)
 
 	/* Scan databases. */
 	regenerateAccountModelYears();
+
+	/* Load collapse info of account items from settings */
+	loadAccountCollapseInfo(settings);
 
 	/* Received Sent messages Column widths */
 	loadSentReceivedMessagesColumnWidth(settings);
@@ -1153,7 +1156,7 @@ void MainWindow::on_actionMove_account_up_triggered()
 	int newRow = currentTopRow-1;
 	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow);
 	itemModel->insertRow(newRow, list);
-	ui->accountList->expandAll();
+	//ui->accountList->expandAll();
 	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
 }
@@ -1180,7 +1183,7 @@ void MainWindow::on_actionMove_account_down_triggered()
 	int newRow = currentTopRow+1;
 	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
 	itemModel->insertRow(newRow, list);
-	ui->accountList->expandAll();
+	//ui->accountList->expandAll();
 	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
 }
@@ -1363,7 +1366,7 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 /*
 * Set actual sort order for current column.
- */
+*/
 void MainWindow::onTableColumnSort(int column)
 /* ========================================================================= */
 {
@@ -1376,5 +1379,45 @@ void MainWindow::onTableColumnSort(int column)
 	    m_sort_order = "SORT_DESCENDING";
 	} else {
 		m_sort_order = "";
+	}
+}
+
+/* ========================================================================= */
+/*
+* Load collapse info of account items from settings
+*/
+void MainWindow::loadAccountCollapseInfo(QSettings &settings)
+/* ========================================================================= */
+{
+	settings.beginGroup("account_tree");
+	QStringList key = settings.childKeys();
+	QModelIndex index;
+	for (int i = 0; i < key.size(); i++) {
+
+		QStringList keyindex = key[i].split("_");
+		/* Expanded toplevel item */
+		if (keyindex.size() == 3) {
+			index = ui->accountList->model()->
+			    index(keyindex[2].toInt(),0);
+			ui->accountList->setExpanded(index,
+			    !settings.value(key[i], true).toBool());
+		}
+		/* Expanded all item */
+		if (keyindex.size() == 4) {
+			index = ui->accountList->model()->
+			    index(keyindex[2].toInt(),0);
+			index = index.child(keyindex[3].toInt(),0);
+			ui->accountList->setExpanded(index,
+			    !settings.value(key[i], true).toBool());
+		}
+		/* Expanded items chilg of all*/
+		if (keyindex.size() == 5) {
+			index = ui->accountList->model()->
+			    index(keyindex[2].toInt(),0);
+			index = index.child(keyindex[3].toInt(),0);
+			index = index.child(keyindex[4].toInt(),0);
+			ui->accountList->setExpanded(index,
+			    !settings.value(key[i], true).toBool());
+		}
 	}
 }
