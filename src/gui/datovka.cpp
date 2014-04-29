@@ -1029,6 +1029,9 @@ void MainWindow::saveSettings(void) const
 	/* TODO */
 	saveSentReceivedColumnWidth(settings);
 
+	/* Store account collapses */
+	saveAccountCollapseInfo(settings);
+
 	settings.sync();
 }
 
@@ -1337,6 +1340,7 @@ void MainWindow::setSentColumnWidths(void)
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 {
+	(void) oldSize;
 	QModelIndex current = ui->accountList->currentIndex();
 
 	switch (AccountModel::nodeType(current)) {
@@ -1420,4 +1424,43 @@ void MainWindow::loadAccountCollapseInfo(QSettings &settings)
 			    !settings.value(key[i], true).toBool());
 		}
 	}
+}
+
+/* ========================================================================= */
+/*
+* Save collapse info of account items from settings
+*/
+void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
+/* ========================================================================= */
+{
+	QString keypref= "acc_collapsed_";
+	settings.beginGroup("account_tree");
+	int row = ui->accountList->model()->rowCount();
+	QModelIndex index;
+	for (int i = 0; i < row; i++) {
+		index = ui->accountList->model()->index(i,0);
+		bool isExpTopLevel = ui->accountList->isExpanded(index);
+		settings.setValue(keypref+QString::number(i), !isExpTopLevel);
+		/* TopLevel item is expanded */
+		if (isExpTopLevel) {
+			index = ui->accountList->model()->index(i,0).child(2,0);
+			bool isExpAll = ui->accountList->isExpanded(index);
+			settings.setValue(keypref+QString::number(i)+
+			    QString("_2"), !isExpAll);
+			/* All item is expanded */
+			if (isExpAll) {
+				index = ui->accountList->model()->
+				    index(i,0).child(2,0).child(0,0);
+				settings.setValue(keypref+QString::number(i)+
+				    QString("_2_0"),
+				    !ui->accountList->isExpanded(index));
+				index = ui->accountList->model()->
+				    index(i,0).child(2,0).child(1,0);
+				settings.setValue(keypref+QString::number(i)+
+				    QString("_2_1"),
+				    !ui->accountList->isExpanded(index));
+			}
+		}
+	}
+	settings.endGroup();
 }
