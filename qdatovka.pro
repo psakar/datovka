@@ -8,6 +8,8 @@ QT += core gui network sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+#LIBISDS_PREFIX = "$$HOME/third_party/built"
+
 TARGET = qdatovka
 TEMPLATE = app
 
@@ -22,12 +24,13 @@ macx {
 	CONFIG +=c++11
 }
 
-#INCLUDEPATH = \
-#	$$LIBISDS_PREFIX/include
+INCLUDEPATH = \
+	src \
+	/usr/include/libxml2
 #LIBPATH = \
 #	$$LIBISDS_PREFIX/lib
-#LIBS = \
-#	-lisds
+LIBS = \
+	-lisds
 
 SOURCES += src/common.cpp \
     src/gui/datovka.cpp \

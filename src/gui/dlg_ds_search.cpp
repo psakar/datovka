@@ -95,13 +95,14 @@ void dlg_ds_search_dialog::checkInputFields(void)
 
 void dlg_ds_search_dialog::searchDataBox(void)
 {
+/*
 	isds_DbOwnerInfo isdsSearch;
 	isdsSearch.dbID = (char*)this->iDLineEdit->text().toStdString().c_str();
 	//isdsSearch.dbType = DBTYPE_OVM;
 	isdsSearch.ic = (char*) this->iCLineEdit->text().toStdString().c_str();
 	isdsSearch.firmName = (char*) this->nameLineEdit->text().toStdString().c_str();
 	isdsSearch.address = (char*) this->pscLineEdit->text().toStdString().c_str();
-
+*/
 	/* TODO - connect ISDS and call search request */
 
 	QList<QVector<QString>> list_contacts;
