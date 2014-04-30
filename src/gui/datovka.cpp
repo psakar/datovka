@@ -9,12 +9,13 @@
 #include "datovka.h"
 #include "dlg_change_pwd.h"
 #include "dlg_create_account.h"
+#include "dlg_ds_search.h"
 #include "dlg_preferences.h"
 #include "dlg_proxysets.h"
 #include "dlg_send_message.h"
 #include "src/common.h"
+#include "src/io/pkcs7.h"
 #include "ui_datovka.h"
-#include "dlg_ds_search.h"
 
 
 #define WIN_PREFIX "AppData/Roaming"
@@ -227,8 +228,8 @@ MainWindow::~MainWindow(void)
 void MainWindow::on_actionPreferences_triggered()
 /* ========================================================================= */
 {
-	QDialog *preferences = new PreferencesDialog(this);
-	preferences->exec();
+	QDialog *prefDlg = new PreferencesDialog(this);
+	prefDlg->exec();
 }
 
 
@@ -239,8 +240,8 @@ void MainWindow::on_actionPreferences_triggered()
 void MainWindow::on_actionProxy_settings_triggered()
 /* ========================================================================= */
 {
-	QDialog *Proxy = new ProxyDialog(this);
-	Proxy->exec();
+	QDialog *proxyDlg = new ProxyDialog(this);
+	proxyDlg->exec();
 }
 
 
@@ -549,31 +550,31 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 	    itemSettings[USER].toString() + "___True");
 
 	/* Print non-empty entries. */
-	for (int i = 0; i < AccountEntry::knownAttrs.size(); ++i) {
-		const QString &key = AccountEntry::knownAttrs[i].first;
+	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
+		const QString &key = accntinfTbl.knownAttrs[i].first;
 		if (accountEntry.hasValue(key) &&
-		    !AccountEntry::attrProps[key].desc.isEmpty()) {
-			switch (AccountEntry::knownAttrs[i].second) {
+		    !accntinfTbl.attrProps[key].desc.isEmpty()) {
+			switch (accntinfTbl.knownAttrs[i].second) {
 			case DB_INTEGER:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::attrProps[key].desc,
+				    accntinfTbl.attrProps[key].desc,
 				    QString::number(
 				        accountEntry.value(key).toInt())));
 				break;
 			case DB_TEXT:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::attrProps[key].desc,
+				    accntinfTbl.attrProps[key].desc,
 				    accountEntry.value(key).toString()));
 				break;
 			case DB_BOOLEAN:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::attrProps[key].desc,
+				    accntinfTbl.attrProps[key].desc,
 				    accountEntry.value(key).toBool() ?
 				        tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				html.append(strongAccountInfoLine(
-				    AccountEntry::attrProps[key].desc,
+				    accntinfTbl.attrProps[key].desc,
 				    dateTimeStrFromDbFormat(
 				        accountEntry.value(key).toString(),
 				        dateTimeDisplayFormat)));

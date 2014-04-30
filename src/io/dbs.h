@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QPair>
 #include <QString>
+#include <QSqlDatabase>
 #include <QVector>
 
 
@@ -32,219 +33,42 @@ public:
 
 
 /*!
- * @brief Table 'messages'.
+ * @brief Table prototype.
  */
-class MsgsTbl {
+class Tbl {
 public:
+	/*
+	 * Constructor.
+	 */
+	Tbl(const QString &name,
+	    const QVector< QPair<QString, dbEntryType> > &attrs,
+	    const QMap<QString, AttrProp> &props);
+
 	/*! Table name. */
-	static
-	const QString tabName;
+	const QString &tabName;
 
 	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
+	const QVector< QPair<QString, dbEntryType> > &knownAttrs;
 
 	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
+	const QMap<QString, AttrProp> &attrProps;
 
-private:
-	/* Prohibit all instances. */
-	MsgsTbl(void);
+	/*!
+	 * @brief Return true if table in database exists.
+	 */
+	bool existsInDb(const QSqlDatabase &db) const;
 };
 
 
-/*!
- * @brief Table 'files'.
- */
-class FlsTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	FlsTbl(void);
-};
-
-
-/*!
- * @brief Table 'hashes'.
- */
-class HshsTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	HshsTbl(void);
-};
-
-
-/*!
- * @brief Table 'events'.
- */
-class EvntsTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	EvntsTbl(void);
-};
-
-
-/*!
- * @brief Table 'raw_message_data'.
- */
-class RwmsgdtTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	RwmsgdtTbl(void);
-};
-
-
-/*!
- * @brief Table 'raw_delivery_info_data'.
- */
-class RwdlvrinfdtTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	RwdlvrinfdtTbl(void);
-};
-
-
-/*!
- * @brief Table 'supplementary_message_data'.
- */
-class SmsgdtTbl {
-public:
-	class Entry {
-	public:
-		int message_id;
-		int message_type;
-		bool read_locally;
-		QString download_date;
-		QString custom_data;
-	};
-
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	SmsgdtTbl(void);
-};
-
-
-/*!
- * @brief Table 'certificate_data'
- */
-class CrtdtTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	CrtdtTbl(void);
-};
-
-
-/*!
- * @brief Table 'message_certificate_data'.
- */
-class MsgcrtdtTbl {
-public:
-	/*! Table name. */
-	static
-	const QString tabName;
-
-	/*! Known attributes. */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*! Attribute properties. */
-	static
-	const QMap<QString, AttrProp> attrProps;
-
-private:
-	/* Prohibit all instances. */
-	MsgcrtdtTbl(void);
-};
+extern const Tbl msgsTbl; /*!< Table 'messages'. */
+extern const Tbl flsTbl; /*!< Table 'files'. */
+extern const Tbl hshsTbl; /*!< Table 'hashes'. */
+extern const Tbl evntsTbl; /*!< Table 'events'. */
+extern const Tbl rwmsgdtTbl; /*!< Table 'raw_message_data'. */
+extern const Tbl rwdlvrinfdtTbl; /*!< Table 'raw_delivery_info_data'. */
+extern const Tbl smsgdtTbl; /*!< Table 'supplementary_message_data'. */
+extern const Tbl crtdtTbl; /*!< Table 'certificate_data'. */
+extern const Tbl msgcrtdtTbl; /*!< Table 'message_certificate_data'. */
 
 
 /*!
@@ -258,5 +82,6 @@ QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr);
  */
 QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt);
+
 
 #endif /* _DBS_H_ */

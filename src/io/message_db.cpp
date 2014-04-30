@@ -106,10 +106,10 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -143,10 +143,10 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -180,10 +180,10 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).desc);
+		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(receivedItemIds[i]).type,
+		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -275,10 +275,10 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
+		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
+		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -312,10 +312,10 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
+		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
+		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -349,10 +349,10 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).desc);
+		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
 		m_sqlModel.setHeaderData(i, Qt::Horizontal,
-		    MsgsTbl::attrProps.value(sentItemIds[i]).type,
+		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
@@ -560,7 +560,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		for (int i = 0; i < msgAttribs2.size(); ++i) {
 			if (!query.value(i).toString().isEmpty()) {
 				html += strongAccountInfoLine(
-				    MsgsTbl::attrProps[msgAttribs2[i]].desc,
+				    msgsTbl.attrProps[msgAttribs2[i]].desc,
 				    query.value(i).toString());
 			}
 		}
@@ -580,15 +580,15 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		html += strongAccountInfoLine(
-		    MsgsTbl::attrProps[msgStatus[0]].desc,
+		    msgsTbl.attrProps[msgStatus[0]].desc,
 		    dateTimeStrFromDbFormat(query.value(0).toString(),
 		        dateTimeDisplayFormat));
 		html += strongAccountInfoLine(
-		    MsgsTbl::attrProps[msgStatus[1]].desc,
+		    msgsTbl.attrProps[msgStatus[1]].desc,
 		    dateTimeStrFromDbFormat(query.value(1).toString(),
 		        dateTimeDisplayFormat));
 		html += strongAccountInfoLine(
-		    MsgsTbl::attrProps[msgStatus[2]].desc,
+		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
 		    msgStatusToText(query.value(2).toInt()));
 	}

@@ -11,6 +11,9 @@
 #include "dbs.h"
 
 
+extern const Tbl accntinfTbl; /*!< Table 'account_info'. */
+
+
 /*!
  * @brief Account information.
  */
@@ -35,18 +38,6 @@ public:
 	 */
 	const QVariant value(const QString &key,
 	    const QVariant &defaultValue = QVariant()) const;
-
-	/*!
-	 * List of know entries and their types.
-	 */
-	static
-	const QVector< QPair<QString, dbEntryType> > knownAttrs;
-
-	/*!
-	 * Attribute properties.
-	 */
-	static
-	const QMap<QString, AttrProp> attrProps;
 
 private:
 	typedef QMap<QString, QVariant> m_parentType;
