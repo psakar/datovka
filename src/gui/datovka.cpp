@@ -89,6 +89,9 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
 	ui->accountTextInfo->setReadOnly(true);
 
+	/* Open accounts database. */
+	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
+
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
@@ -96,9 +99,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->accountList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(treeItemSelectionChanged(QModelIndex, QModelIndex)));
-
-	/* Open accounts database. */
-	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
 
 	/* Enable sort of table items */
 	ui->messageList->setSortingEnabled(true);
@@ -934,9 +934,6 @@ void MainWindow::loadSettings(void)
 	ui->accountList->setModel(&m_accountModel);
 
 	//ui->accountList->expandAll();
-
-	/* Open accounts database. */
-	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
 
 	/* Select last-used account. */
 	setDefaultAccount(settings);
