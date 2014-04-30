@@ -997,16 +997,19 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 /* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->currentIndex();
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
+	if (index.isValid()) {
+		const QStandardItem *item =
+		    m_accountModel.itemFromIndex(index);
+		const QStandardItem *itemTop = AccountModel::itemTop(item);
 
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+		const AccountModel::SettingsMap &itemSettings =
+		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		const QString &userName = itemSettings[USER].toString();
 
-	settings.beginGroup("default_account");
-	settings.setValue("username", userName);
-	settings.endGroup();
+		settings.beginGroup("default_account");
+		settings.setValue("username", userName);
+		settings.endGroup();
+	}
 }
 
 
@@ -1077,8 +1080,6 @@ void MainWindow::saveSettings(void) const
 
 	/* Window geometry. */
 	saveWindowGeometry(settings);
-
-	saveAccountIndex(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);
