@@ -28,7 +28,7 @@ INCLUDEPATH = \
 	src \
 	/usr/include/libxml2
 #LIBPATH = \
-#	$$LIBISDS_PREFIX/lib
+#//	/usr/local/lib
 LIBS = \
 	-lisds
 

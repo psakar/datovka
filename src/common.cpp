@@ -6,6 +6,8 @@
 GlobPreferences globPref;
 GlobProxySettings globProxSet;
 QMap<QString, QVariant> *currentAccountMap;
+QMap<QString, isds_ctx *> isdsSessionMap;
+
 
 /* Defaults. */
 static const

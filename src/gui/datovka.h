@@ -90,6 +90,9 @@ private slots:
 	void onTableColumnSort(int column);
 
 private:
+
+	int createIsdsContext(QString userName);
+
 	/*!
 	 * @brief Get configuration directory name.
 	 */

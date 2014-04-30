@@ -15,6 +15,7 @@
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.1"
+#define TIMEOUT_MS 1000
 
 
 typedef enum {
@@ -126,6 +127,8 @@ extern GlobPreferences globPref;
 extern GlobProxySettings globProxSet;
 extern QMap<QString, QVariant> *currentAccountMap;
 
+/* Global isds contexts for DataBoxes */
+extern QMap<QString, isds_ctx *> isdsSessionMap;
 
 /*!
  * @brief Date/time format used in the application.

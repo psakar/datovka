@@ -28,7 +28,6 @@
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
 
-
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -115,8 +114,61 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
+
+	/* Create isds contexts for accounts */
+	int row = ui->accountList->model()->rowCount();
+	for (int i = 0; i < row; i++) {
+		QStandardItem *accountItem = m_accountModel.item(i,0);
+		const AccountModel::SettingsMap &itemSettings =
+		    accountItem->data(ROLE_CONF_SETINGS).toMap();
+		int ret = createIsdsContext(itemSettings[USER].toString());
+	}
 }
 
+int MainWindow::createIsdsContext(QString userName)
+{
+	/* Create isds context for account */
+	isds_error status;
+	struct isds_ctx *isds_session = NULL;
+
+	status = isds_init();
+	if (IE_SUCCESS != status) {
+		fputs("Unsuccessful ISDS initialisation.\n", stderr);
+		goto fail;
+	}
+
+	/* Logging. */
+	isds_set_logging(ILF_ALL, ILL_ALL);
+
+	isds_session = isds_ctx_create();
+	if (NULL == isds_session) {
+		fputs("Error creating ISDS session.\n", stderr);
+		goto fail;
+	}
+
+	status = isds_set_timeout(isds_session, TIMEOUT_MS);
+	if (IE_SUCCESS != status) {
+		fputs("Error setting time-out.\n", stderr);
+	}
+
+	isdsSessionMap.insert(userName, isds_session);
+
+	return EXIT_SUCCESS;
+
+fail:
+	if (NULL != isds_session) {
+		status = isds_ctx_free(&isds_session);
+		if (IE_SUCCESS != status) {
+			fputs("Error freeing ISDS session.\n", stderr);
+		}
+	}
+	status = isds_cleanup();
+	if (IE_SUCCESS != status) {
+		fputs("Unsuccessful ISDS clean-up.\n", stderr);
+	}
+
+	return EXIT_FAILURE;
+}
 
 /* ========================================================================= */
 /*
@@ -147,6 +199,22 @@ MainWindow::~MainWindow(void)
 {
 	/* Save settings on exit. */
 	saveSettings();
+
+	isds_error status;
+	struct isds_ctx *isds_session = NULL;
+
+	/* Delete isds contexts for accounts */
+	 foreach (isds_session, isdsSessionMap) {
+		status = isds_ctx_free(&isds_session);
+		if (IE_SUCCESS != status) {
+			fputs("Error freeing ISDS session.\n", stderr);
+		}
+
+		status = isds_cleanup();
+		if (IE_SUCCESS != status) {
+			fputs("Unsuccessful ISDS clean-up.\n", stderr);
+		}
+	 }
 
 	delete ui;
 }
