@@ -23,6 +23,12 @@ typedef enum {
 
 
 /*!
+ * @brief Converts db types strings.
+ */
+const QString & dbEntryTypeStr(dbEntryType entryType);
+
+
+/*!
  * @brief Table attribute property.
  */
 class AttrProp {
@@ -42,7 +48,9 @@ public:
 	 */
 	Tbl(const QString &name,
 	    const QVector< QPair<QString, dbEntryType> > &attrs,
-	    const QMap<QString, AttrProp> &props);
+	    const QMap<QString, AttrProp> &props,
+	    const QMap<QString, QString> &colCons = Tbl::emptyColConstraints,
+	    const QString &tblCons = emptyTblConstraint);
 
 	/*! Table name. */
 	const QString &tabName;
@@ -57,6 +65,26 @@ public:
 	 * @brief Return true if table in database exists.
 	 */
 	bool existsInDb(const QSqlDatabase &db) const;
+
+	/*!
+	 * @brief Create empty table in supplied database.
+	 */
+	bool createEmpty(QSqlDatabase &db) const;
+
+private:
+	/*! Column constraints. */
+	const QMap<QString, QString> &colConstraints;
+
+	/*! Table constraint. */
+	const QString &tblConstraint;
+
+	/*! Empty column constraints. */
+	static
+	const QMap<QString, QString> emptyColConstraints;
+
+	/*! Empty table constraint. */
+	static
+	const QString emptyTblConstraint;
 };
 
 

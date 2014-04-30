@@ -39,6 +39,17 @@ namespace AccntinfTbl {
 	{"dbOpenAddressing", DB_BOOLEAN}
 	};
 
+	const QMap<QString, QString> colConstraints = {
+	    {"dbID", "NOT NULL"}
+	};
+
+	const QString tblConstraint = {
+	    ",\n"
+	    "        PRIMARY KEY (dbID),\n"
+	    "        CHECK (dbEffectiveOVM IN (0, 1)),\n"
+	    "        CHECK (dbOpenAddressing IN (0, 1))"
+	};
+
 	const QMap<QString, AttrProp> attrProps = {
 	{"dbID",                   {DB_TEXT, QObject::tr("Data box ID")}},
 	{"dbType",                 {DB_TEXT, QObject::tr("Data box type")}},
@@ -67,7 +78,8 @@ namespace AccntinfTbl {
 	};
 } /* namespace AccntinfTbl */
 const Tbl accntinfTbl(AccntinfTbl::tabName, AccntinfTbl::knownAttrs,
-    AccntinfTbl::attrProps);
+    AccntinfTbl::attrProps, AccntinfTbl::colConstraints,
+    AccntinfTbl::tblConstraint);
 
 
 /* ========================================================================= */
@@ -162,6 +174,7 @@ bool AccountDb::openDb(const QString &fileName)
 		/* Check whether database contains account table. */
 		if (!accntinfTbl.existsInDb(m_db)) {
 			//qDebug() << accntinfTbl.tabName << "does not exist.";
+			return accntinfTbl.createEmpty(m_db);
 		}
 	}
 
