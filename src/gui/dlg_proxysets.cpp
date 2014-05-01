@@ -1,19 +1,26 @@
+
+
 #include "dlg_proxysets.h"
 #include "ui_dlg_proxysets.h"
 
-ProxyDialog::ProxyDialog( QWidget * parent) : QDialog(parent) {
 
+DlgProxysets::DlgProxysets(QWidget *parent)
+    : QDialog(parent)
+{
 	setupUi(this);
 	initProxyDialog();
 }
 
-void ProxyDialog::initProxyDialog(void)
+void DlgProxysets::initProxyDialog(void)
 {
 	QStringList hostport;
 
-	connect(this->manualProxyRadioButton1, SIGNAL(toggled (bool)), this, SLOT(setActiveTextEdit1(bool)));
-	connect(this->manualProxyRadioButton2, SIGNAL(toggled (bool)), this, SLOT(setActiveTextEdit2(bool)));
-	connect(this->proxyButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
+	connect(this->manualProxyRadioButton1, SIGNAL(toggled (bool)),
+	    this, SLOT(setActiveTextEdit1(bool)));
+	connect(this->manualProxyRadioButton2, SIGNAL(toggled (bool)),
+	    this, SLOT(setActiveTextEdit2(bool)));
+	connect(this->proxyButtonBox, SIGNAL(accepted()),
+	    this, SLOT(saveChanges(void)));
 
 	if (globProxSet.http_proxy == "-1") {
 		this->noProxyRadioButton1->setChecked(false);
@@ -60,27 +67,27 @@ void ProxyDialog::initProxyDialog(void)
 	}
 }
 
-void ProxyDialog::setActiveTextEdit1(bool state)
+void DlgProxysets::setActiveTextEdit1(bool state)
 {
 	this->hostnameLineEdit1->setEnabled(state);
 	this->portLineEdit1->setEnabled(state);
 }
 
-void ProxyDialog::setActiveTextEdit2(bool state)
+void DlgProxysets::setActiveTextEdit2(bool state)
 {
 	this->hostnameLineEdit2->setEnabled(state);
 	this->portLineEdit2->setEnabled(state);
 }
 
-void ProxyDialog::saveChanges(void)
+void DlgProxysets::saveChanges(void) const
 {
 	if (this->noProxyRadioButton1->isChecked()) {
 		globProxSet.http_proxy = "None";
 	} else if (this->autoProxyRadioButton1->isChecked()) {
 		globProxSet.http_proxy = "-1";
 	} else {
-		globProxSet.http_proxy = QString(this->hostnameLineEdit1->text())
-		+ QString(":") + QString(this->portLineEdit1->text());
+		globProxSet.http_proxy = this->hostnameLineEdit1->text() +
+		    ":" + this->portLineEdit1->text();
 	}
 
 	if (this->noProxyRadioButton2->isChecked()) {
@@ -88,7 +95,7 @@ void ProxyDialog::saveChanges(void)
 	} else if (this->autoProxyRadioButton2->isChecked()) {
 		globProxSet.https_proxy = "-1";
 	} else {
-		globProxSet.https_proxy = QString(this->hostnameLineEdit2->text())
-		+ QString(":") + QString(this->portLineEdit2->text());
+		globProxSet.https_proxy = this->hostnameLineEdit2->text() +
+		    ":" + this->portLineEdit2->text();
 	}
 }

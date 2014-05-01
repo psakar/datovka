@@ -1,17 +1,24 @@
-#ifndef DLG_DS_SEARCH_H
-#define DLG_DS_SEARCH_H
+#ifndef _DLG_DS_SEARCH_H_
+#define _DLG_DS_SEARCH_H_
+
 
 #include <QDialog>
+
 #include "src/common.h"
 #include "ui_dlg_ds_search.h"
 
-class dlg_ds_search_dialog : public QDialog, public Ui::dlg_ds_search_dialog {
+
+class DlgDsSearch : public QDialog, public Ui::DsSearch {
 	Q_OBJECT
 
 public:
-	dlg_ds_search_dialog(QWidget *parent = 0,
-	    QTableWidget *recipientTableWidget = 0,
-	    QString action = "Blank");
+	enum Action {
+		ACT_BLANK,
+		ACT_ADDNEW
+	};
+
+	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
+	    QWidget *parent = 0);
 
 private slots:
 	void checkInputFields(void);
@@ -19,13 +26,14 @@ private slots:
 	void enableOkButton(void);
 	void searchDataBox(void);
 
-
 private:
-	bool isInRecipientTable(QString idDs);
+	bool isInRecipientTable(const QString &idDs) const;
 	void initSearchWindow(void);
-	void addContactsToTable(QList<QVector<QString>> contactList);
+	void addContactsToTable(const QList< QVector<QString> > &contactList);
+
 	QTableWidget *m_recipientTableWidget;
-	QString m_action;
+	Action m_action;
 };
 
-#endif // DLG_DS_SEARCH_H
+
+#endif /* DLG_DS_SEARCH_H */

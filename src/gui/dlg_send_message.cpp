@@ -1,24 +1,28 @@
-#include <QMimeDatabase>
-#include "dlg_send_message.h"
-#include "dlg_ds_search.h"
-#include "dlg_contacts.h"
-#include "src/models/accounts_model.h"
-#include "ui_dlg_send_message.h"
-#include "src/io/message_db.h"
 
-DlgSendMessage::DlgSendMessage(MessageDb &db, QWidget *parent,
-    QTreeView *accountList, QTableView *messageList,
-    const QString &action, const QString &reSubject,
-    const QString &senderId, const QString &sender,
-    const QString &senderAddress) :
-    QDialog(parent),
+
+#include <QMimeDatabase>
+
+#include "dlg_send_message.h"
+#include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_contacts.h"
+#include "src/models/accounts_model.h"
+#include "src/io/message_db.h"
+#include "ui_dlg_send_message.h"
+
+
+DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
+    QTreeView &accountList, QTableView &messageList,
+    QWidget *parent,
+    const QString &reSubject, const QString &senderId, const QString &sender,
+    const QString &senderAddress)
+    : QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
     m_action(action),
-    reSubject(reSubject),
-    senderId(senderId),
-    sender(sender),
-    senderAddress(senderAddress),
+    m_reSubject(reSubject),
+    m_senderId(senderId),
+    m_sender(sender),
+    m_senderAddress(senderAddress),
     m_messDb(db)
 {
 	setupUi(this);
@@ -44,8 +48,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableWidget->setColumnWidth(2,120);
 
 	AccountModel *accountModel = dynamic_cast<AccountModel *>(
-	    m_accountList->model());
-	index = m_accountList->currentIndex();
+	    m_accountList.model());
+	index = m_accountList.currentIndex();
 	Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
 
 	item = accountModel->itemFromIndex(index);
@@ -57,7 +61,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->fromUser->setText("<strong>" + accountItemTop->text() +
 	    "</strong>" + " (" + itemSettings[USER].toString() + ")");
 
-	index = m_messageList->currentIndex();
+	index = m_messageList.currentIndex();
 	//Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
 /*
 	QAbstractItemModel *messageModel = m_messageList->model();
@@ -74,20 +78,20 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
 	    SLOT(tableItemInsRem()));
 
-	if (m_action == "Reply") {
-		this->subjectText->setText("Re: " + reSubject);
+	if (ACT_REPLY == m_action) {
+		this->subjectText->setText("Re: " + m_reSubject);
 
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
 
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(senderId);
+		item->setText(m_senderId);
 		this->recipientTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(sender);
+		item->setText(m_sender);
 		this->recipientTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(senderAddress);
+		item->setText(m_senderAddress);
 		this->recipientTableWidget->setItem(row,2,item);
 	}
 
@@ -195,9 +199,9 @@ void DlgSendMessage::showOptionalForm(int state)
 
 void DlgSendMessage::addRecipientData(void)
 {
-	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
-	    this->recipientTableWidget, "Add");
-	dlg_ds_search->show();
+	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
+	    this->recipientTableWidget, this);
+	dsSearch->show();
 
 }
 
@@ -233,8 +237,8 @@ void DlgSendMessage::deleteRecipientData(void)
 
 void DlgSendMessage::findRecipientData(void)
 {
-	QDialog *dlg_cont = new dlg_contacts(this,
-	    this->recipientTableWidget, &m_messDb);
+	QDialog *dlg_cont = new DlgContacts(m_messDb,
+	    *(this->recipientTableWidget), this);
 	dlg_cont->show();
 }
 

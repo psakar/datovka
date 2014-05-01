@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ProxyDialog</class>
- <widget class="QDialog" name="ProxyDialog">
+ <class>Proxysets</class>
+ <widget class="QDialog" name="Proxysets">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -211,7 +211,7 @@
   <connection>
    <sender>proxyButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ProxyDialog</receiver>
+   <receiver>Proxysets</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -227,7 +227,7 @@
   <connection>
    <sender>proxyButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ProxyDialog</receiver>
+   <receiver>Proxysets</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

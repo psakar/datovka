@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>sentMessageDialog</class>
- <widget class="QDialog" name="sentMessageDialog">
+ <class>SendMessage</class>
+ <widget class="QDialog" name="SendMessage">
   <property name="geometry">
    <rect>
     <x>0</x>

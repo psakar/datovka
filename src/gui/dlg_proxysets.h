@@ -2,22 +2,25 @@
 #define _DLG_PROXYSETS_H_
 
 #include <QDialog>
+
 #include "src/common.h"
 #include "ui_dlg_proxysets.h"
 
-class ProxyDialog : public QDialog, public Ui::ProxyDialog {
+
+class DlgProxysets : public QDialog, public Ui::Proxysets {
     Q_OBJECT
 
 public:
-	ProxyDialog( QWidget * parent = 0);
+	DlgProxysets(QWidget *parent = 0);
 
 private slots:
-	void saveChanges(void);
-	void setActiveTextEdit1(bool);
-	void setActiveTextEdit2(bool);
+	void saveChanges(void) const;
+	void setActiveTextEdit1(bool state);
+	void setActiveTextEdit2(bool state);
 
 private:
 	void initProxyDialog(void);
 };
+
 
 #endif /* _DLG_PROXYSETS_H_ */

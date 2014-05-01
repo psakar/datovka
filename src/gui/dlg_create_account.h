@@ -1,33 +1,42 @@
-#ifndef DLG_CREATENEWACCOUNTDIALOG_H
-#define DLG_CREATENEWACCOUNTDIALOG_H
+#ifndef _DLG_CREATE_ACCOUNT_H_
+#define _DLG_CREATE_ACCOUNT_H_
+
 
 #include <QDialog>
 #include <QFileDialog>
 #include <QTreeView>
+
 #include "src/common.h"
 #include "ui_dlg_create_account.h"
 
 
-class CreateNewAccountDialog : public QDialog, public Ui::CreateNewAccountDialog {
+class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 	Q_OBJECT
 
 public:
-	CreateNewAccountDialog(QWidget *parent = 0, QTreeView *accountList = 0, QString action = "Add");
+	enum Action {
+		ACT_ADDNEW,
+		ACT_EDIT
+	};
+
+	DlgCreateAccount(QTreeView &accountList, Action action,
+	    QWidget *parent = 0);
 
 private slots:
-
 	void setActiveButton(int);
 	void addCertificateFromFile(void);
 	void saveAccount(void);
 	void checkInputFields(void);
 
 private:
-	void initAccountDialog(QTreeView *accountList, QString action);
-	void setCurrentAccountData(QTreeView *accountList);
-	QTreeView *m_accountList;
-	QString  m_action;
+	void initAccountDialog(void);
+	void setCurrentAccountData(void);
+
+	QTreeView &m_accountList;
+	const Action m_action;
 	int m_loginmethod;
-	QString  m_certPath;
+	QString m_certPath;
 };
 
-#endif // DLG_CREATENEWACCOUNTDIALOG_H
+
+#endif /* _DLG_CREATE_ACCOUNT_H_ */

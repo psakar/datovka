@@ -1,8 +1,10 @@
-#include "src/models/accounts_model.h"
-#include "dlg_create_account.h"
 
-CreateNewAccountDialog::CreateNewAccountDialog(QWidget *parent,
-    QTreeView *accountList, QString action)
+#include "dlg_create_account.h"
+#include "src/models/accounts_model.h"
+
+
+DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, Action action,
+    QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
     m_action(action),
@@ -10,18 +12,19 @@ CreateNewAccountDialog::CreateNewAccountDialog(QWidget *parent,
     m_certPath("")
 {
 	setupUi(this);
-	initAccountDialog(accountList, action);
+	initAccountDialog();
 }
 
-void CreateNewAccountDialog::initAccountDialog(QTreeView *accountList, QString action)
+void DlgCreateAccount::initAccountDialog(void)
 {
-	this->loginmethodComboBox->addItem(QString(tr("Password")));
-	this->loginmethodComboBox->addItem(QString(tr("Certificate")));
-	this->loginmethodComboBox->addItem(QString(tr("Certificate + Password")));
-	this->loginmethodComboBox->addItem(QString(tr("Password + Secure code")));
-	this->loginmethodComboBox->addItem(QString(tr("Password + Secure SMS")));
+	this->loginmethodComboBox->addItem(tr("Password"));
+	this->loginmethodComboBox->addItem(tr("Certificate"));
+	this->loginmethodComboBox->addItem(tr("Certificate + Password"));
+	this->loginmethodComboBox->addItem(tr("Password + Secure code"));
+	this->loginmethodComboBox->addItem(tr("Password + Secure SMS"));
 	this->certificateLabel->setEnabled(false);
-	this->accountButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	this->accountButtonBox->button(
+	    QDialogButtonBox::Ok)->setEnabled(false);
 	this->addCertificateButton->setEnabled(false);
 	connect(this->loginmethodComboBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(setActiveButton(int)));
@@ -36,17 +39,18 @@ void CreateNewAccountDialog::initAccountDialog(QTreeView *accountList, QString a
 	connect(this->passwordLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	if (action == "Edit") {
-		setCurrentAccountData(accountList);
+	if (ACT_EDIT == m_action) {
+		setCurrentAccountData();
 	}
 }
 
-void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
+void DlgCreateAccount::setCurrentAccountData(void)
 {
 	int itemindex;
 
-	AccountModel *model = dynamic_cast<AccountModel*>(accountList->model());
-	QModelIndex index = accountList->currentIndex();
+	AccountModel *model = dynamic_cast<AccountModel *>(
+	    m_accountList.model());
+	QModelIndex index = m_accountList.currentIndex();
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	const AccountModel::SettingsMap &itemSettings =
@@ -88,7 +92,7 @@ void CreateNewAccountDialog::setCurrentAccountData(QTreeView *accountList)
 }
 
 
-void CreateNewAccountDialog::addCertificateFromFile(void)
+void DlgCreateAccount::addCertificateFromFile(void)
 {
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "", tr("Certificate File (*.p12)"));
@@ -107,7 +111,7 @@ void CreateNewAccountDialog::addCertificateFromFile(void)
 	}
 }
 
-void CreateNewAccountDialog::checkInputFields(void)
+void DlgCreateAccount::checkInputFields(void)
 {
 	bool buttonEnabled;
 	if (m_loginmethod == CERTIFICATE) {
@@ -128,7 +132,7 @@ void CreateNewAccountDialog::checkInputFields(void)
 	    setEnabled(buttonEnabled);
 }
 
-void CreateNewAccountDialog::setActiveButton(int itemindex)
+void DlgCreateAccount::setActiveButton(int itemindex)
 {
 	if (itemindex == CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
@@ -154,28 +158,29 @@ void CreateNewAccountDialog::setActiveButton(int itemindex)
 	checkInputFields();
 }
 
-void CreateNewAccountDialog::saveAccount(void)
+void DlgCreateAccount::saveAccount(void)
 {
-	AccountModel *model = dynamic_cast<AccountModel*>
-	    (m_accountList->model());
-	QModelIndex index = m_accountList->currentIndex();
+	AccountModel *model = dynamic_cast<AccountModel*>(
+	    m_accountList.model());
+	QModelIndex index = m_accountList.currentIndex();
 	QStandardItem *item = model->itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
 	AccountModel::SettingsMap itemSettings =
 	    itemTop->data(ROLE_CONF_SETINGS).toMap();
 
-	itemSettings[NAME]= this->accountLineEdit->text();
-	itemSettings[USER]= this->usernameLineEdit->text();
+	itemSettings[NAME] = this->accountLineEdit->text();
+	itemSettings[USER] = this->usernameLineEdit->text();
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
 		itemSettings[LOGIN] = "username";
-	} else if(this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
+	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
 		itemSettings[LOGIN] = "certificate";
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	} else if(this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
+	} else if (this->loginmethodComboBox->currentIndex() ==
+	           USER_CERTIFICATE) {
 		itemSettings[LOGIN] = "user_certificate";
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	} else if(this->loginmethodComboBox->currentIndex() == HOTP) {
+	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
 		itemSettings[LOGIN] = "hotp";
 	} else {
 		itemSettings[LOGIN] = "totp";
@@ -186,12 +191,18 @@ void CreateNewAccountDialog::saveAccount(void)
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 
-	if (m_action == "Edit") {
+	switch (m_action) {
+	case ACT_EDIT:
 		model->itemFromIndex(index)->
 		    setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
-	} else {
+		break;
+	case ACT_ADDNEW:
 		model->addAccount(this->accountLineEdit->text(), itemSettings);
-		m_accountList->expandAll();
+		m_accountList.expandAll();
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
 	}
 }

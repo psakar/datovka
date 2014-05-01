@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CreateNewAccountDialog</class>
- <widget class="QDialog" name="CreateNewAccountDialog">
+ <class>CreateAccount</class>
+ <widget class="QDialog" name="CreateAccount">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -223,7 +223,7 @@
   <connection>
    <sender>accountButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CreateNewAccountDialog</receiver>
+   <receiver>CreateAccount</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -239,7 +239,7 @@
   <connection>
    <sender>accountButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CreateNewAccountDialog</receiver>
+   <receiver>CreateAccount</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -13,13 +13,18 @@
 #include "ui_dlg_send_message.h"
 
 
-class DlgSendMessage : public QDialog, public Ui::sentMessageDialog {
+class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT
 
 public:
-	explicit DlgSendMessage(MessageDb &db, QWidget *parent = 0,
-	    QTreeView *accountList = 0, QTableView *messageList = 0,
-	    const QString &action = "New",
+	enum Action {
+		ACT_NEW,
+		ACT_REPLY
+	};
+
+	DlgSendMessage(MessageDb &db, Action action,
+	    QTreeView &accountList, QTableView &messageList,
+	    QWidget *parent = 0,
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
 	    const QString &sender = QString(),
@@ -42,13 +47,13 @@ private slots:
 private:
 	void initNewMessageDialog(void);
 	void sendMessage(void);
-	QTreeView *m_accountList;
-	QTableView *m_messageList;
-	QString m_action;
-	QString reSubject;
-	QString senderId;
-	QString sender;
-	QString senderAddress;
+	QTreeView &m_accountList;
+	QTableView &m_messageList;
+	const Action m_action;
+	QString m_reSubject;
+	QString m_senderId;
+	QString m_sender;
+	QString m_senderAddress;
 
 	MessageDb &m_messDb;
 };

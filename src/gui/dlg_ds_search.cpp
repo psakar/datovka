@@ -1,23 +1,25 @@
+
+
 #include "dlg_ds_search.h"
 
-dlg_ds_search_dialog::dlg_ds_search_dialog(QWidget *parent,
-    QTableWidget *recipientTableWidget, QString action) :
-        QDialog(parent),
-        m_recipientTableWidget(recipientTableWidget),
-        m_action(action)
+
+DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
+    QWidget *parent)
+    : QDialog(parent),
+    m_recipientTableWidget(recipientTableWidget),
+    m_action(action)
 {
 	setupUi(this);
 	initSearchWindow();
-
 }
 
-void dlg_ds_search_dialog::initSearchWindow(void)
+void DlgDsSearch::initSearchWindow(void)
 {
-	this->dataBoxTypeCBox->addItem(QString(tr("OMV - Orgán věřejné moci")));
-	this->dataBoxTypeCBox->addItem(QString(tr("PO - Právnická osoba")));
-	this->dataBoxTypeCBox->addItem(QString(
-	    tr("PFO - Podnikající fyzická osoba")));
-	this->dataBoxTypeCBox->addItem(QString(tr("FO - Fyzická osoba")));
+	this->dataBoxTypeCBox->addItem(tr("OMV - Orgán věřejné moci"));
+	this->dataBoxTypeCBox->addItem(tr("PO - Právnická osoba"));
+	this->dataBoxTypeCBox->addItem(
+	    tr("PFO - Podnikající fyzická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("FO - Fyzická osoba"));
 
 	this->resultsTableWidget->setColumnWidth(0,20);
 	this->resultsTableWidget->setColumnWidth(1,60);
@@ -47,7 +49,7 @@ void dlg_ds_search_dialog::initSearchWindow(void)
 
 }
 
-void dlg_ds_search_dialog::checkInputFields(void)
+void DlgDsSearch::checkInputFields(void)
 {
 	if (this->dataBoxTypeCBox->currentIndex() == 3) {
 		this->iCLineEdit->setEnabled(false);
@@ -93,7 +95,7 @@ void dlg_ds_search_dialog::checkInputFields(void)
 	}
 }
 
-void dlg_ds_search_dialog::searchDataBox(void)
+void DlgDsSearch::searchDataBox(void)
 {
 /*
 	isds_DbOwnerInfo isdsSearch;
@@ -116,7 +118,7 @@ void dlg_ds_search_dialog::searchDataBox(void)
 }
 
 
-void dlg_ds_search_dialog::enableOkButton(void)
+void DlgDsSearch::enableOkButton(void)
 {
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
@@ -128,8 +130,8 @@ void dlg_ds_search_dialog::enableOkButton(void)
 }
 
 
-void dlg_ds_search_dialog::addContactsToTable(
-    QList<QVector<QString>> contactList)
+void DlgDsSearch::addContactsToTable(
+    const QList< QVector<QString> > &contactList)
 {
 	this->resultsTableWidget->setRowCount(0);
 
@@ -157,19 +159,23 @@ void dlg_ds_search_dialog::addContactsToTable(
 }
 
 
-bool dlg_ds_search_dialog::isInRecipientTable(QString idDs)
+bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
 {
+	Q_ASSERT(0 != m_recipientTableWidget);
+
 	for (int i = 0; i < this->m_recipientTableWidget->rowCount(); i++) {
-		if (this->m_recipientTableWidget->item(i,0)->text() == idDs)
-		return true;
+		if (this->m_recipientTableWidget->item(i,0)->text() == idDs) {
+			return true;
+		}
 	}
 	return false;
 }
 
 
-void dlg_ds_search_dialog::insertDsItems(void)
+void DlgDsSearch::insertDsItems(void)
 {
-	if (m_action == "Add") {
+	if (ACT_ADDNEW == m_action) {
+		Q_ASSERT(0 != m_recipientTableWidget);
 		for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
 			if ((!this->resultsTableWidget->item(
 			          i,0)->checkState()) ||
@@ -195,4 +201,3 @@ void dlg_ds_search_dialog::insertDsItems(void)
 		}
 	}
 }
-

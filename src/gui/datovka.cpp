@@ -229,8 +229,8 @@ MainWindow::~MainWindow(void)
 void MainWindow::on_actionPreferences_triggered()
 /* ========================================================================= */
 {
-	QDialog *prefDlg = new PreferencesDialog(this);
-	prefDlg->exec();
+	QDialog *dlgPrefs = new DlgPreferences(this);
+	dlgPrefs->exec();
 }
 
 
@@ -241,8 +241,8 @@ void MainWindow::on_actionPreferences_triggered()
 void MainWindow::on_actionProxy_settings_triggered()
 /* ========================================================================= */
 {
-	QDialog *proxyDlg = new ProxyDialog(this);
-	proxyDlg->exec();
+	QDialog *dlgProxy = new DlgProxysets(this);
+	dlgProxy->exec();
 }
 
 
@@ -1129,8 +1129,9 @@ void MainWindow::on_actionSent_message_triggered()
 
 	MessageDb *messageDb = accountMessageDb();
 
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, this,
-	    ui->accountList, ui->messageList, "New");
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
+	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
+	    this);
 	newMessageDialog->show();
 }
 
@@ -1141,8 +1142,8 @@ void MainWindow::on_actionSent_message_triggered()
 void MainWindow::on_actionAdd_account_triggered()
 /* ========================================================================= */
 {
-	QDialog *newAccountDialog =
-	    new CreateNewAccountDialog(this, ui->accountList, "New");
+	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
+	    DlgCreateAccount::ACT_ADDNEW, this);
 	newAccountDialog->exec();
 }
 
@@ -1189,7 +1190,7 @@ void MainWindow::on_actionChange_password_triggered()
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
-	QDialog *changePwd = new changePassword(this, ui->accountList, dbId);
+	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList), this);
 	changePwd->exec();
 }
 
@@ -1200,9 +1201,9 @@ void MainWindow::on_actionChange_password_triggered()
 void MainWindow::on_actionAccount_properties_triggered()
 /* ========================================================================= */
 {
-	QDialog *newAccountDialog =
-	    new CreateNewAccountDialog(this, ui->accountList, "Edit");
-	newAccountDialog->exec();
+	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
+	    DlgCreateAccount::ACT_EDIT, this);
+	editAccountDialog->exec();
 }
 
 
@@ -1294,9 +1295,9 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 
 	/* TODO */
 
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, this,
-	    ui->accountList, ui->messageList, "Reply",
-	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
+	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
+	    this, replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
 }
 
@@ -1307,9 +1308,8 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
-	QDialog *dlg_ds_search = new dlg_ds_search_dialog(this,
-	    NULL, "Blank");
-	dlg_ds_search->show();
+	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0, this);
+	dsSearch->show();
 }
 
 

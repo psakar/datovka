@@ -1,25 +1,39 @@
 #ifndef _DLG_PREFERENCES_H_
 #define _DLG_PREFERENCES_H_
 
+
 #include <QDialog>
+
 #include "src/common.h"
 #include "ui_dlg_preferences.h"
 
-class PreferencesDialog : public QDialog, public Ui::dlgPreferences {
+
+class DlgPreferences : public QDialog, public Ui::Preferences {
     Q_OBJECT
 
 public:
-	PreferencesDialog( QWidget * parent = 0);
+	DlgPreferences(QWidget *parent = 0);
 
 private slots:
-
 	void setActiveCheckBox(int);
-	void saveChanges(void);
+	void saveChanges(void) const;
 
 private:
 	void initPrefDialog(void);
-	int getLangugeIndex(QString language);
-	QString getIndexFromLanguge(int index);
+
+	static
+	int getLangugeIndex(const QString &language);
+
+	static
+	const QString & getIndexFromLanguge(int index);
+
+	static
+	const QString langCs;
+	static
+	const QString langEn;
+	static
+	const QString langSystem;
 };
+
 
 #endif /* _DLG_PREFERENCES_H_ */

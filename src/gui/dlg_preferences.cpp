@@ -1,13 +1,17 @@
+
+
 #include "dlg_preferences.h"
 #include "ui_dlg_preferences.h"
 
-PreferencesDialog::PreferencesDialog( QWidget * parent) : QDialog(parent)
+
+DlgPreferences::DlgPreferences(QWidget * parent)
+    : QDialog(parent)
 {
 	setupUi(this);
 	initPrefDialog();
 }
 
-void PreferencesDialog::initPrefDialog(void)
+void DlgPreferences::initPrefDialog(void)
 {
 	this->auto_download_whole_messages->setChecked(globPref.auto_download_whole_messages);
 	this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
@@ -45,11 +49,11 @@ void PreferencesDialog::initPrefDialog(void)
 	}
 }
 
-int PreferencesDialog::getLangugeIndex(QString language)
+int DlgPreferences::getLangugeIndex(const QString &language)
 {
-	if (language == "cs") {
+	if (langCs == language) {
 		return 1;
-	} else if (language == "en") {
+	} else if (langEn == language) {
 		return 2;
 	} else {
 		return 0;
@@ -57,25 +61,34 @@ int PreferencesDialog::getLangugeIndex(QString language)
 }
 
 
-QString PreferencesDialog::getIndexFromLanguge(int index)
+const QString & DlgPreferences::getIndexFromLanguge(int index)
 {
 	switch (index) {
-	case 1: return "cs";
+	case 1:
+		return langCs;
 		break;
-	case 2: return "en";
+	case 2:
+		return langEn;
 		break;
-	default: return "system";
+	default:
+		return langSystem;
 		break;
 	}
 }
 
-void PreferencesDialog::setActiveCheckBox(int state)
+
+const QString DlgPreferences::langCs("cs");
+const QString DlgPreferences::langEn("en");
+const QString DlgPreferences::langSystem("system");
+
+
+void DlgPreferences::setActiveCheckBox(int state)
 {
 	this->send_stats_with_version_checks->setEnabled(Qt::Checked == state);
 }
 
 
-void PreferencesDialog::saveChanges(void)
+void DlgPreferences::saveChanges(void) const
 {
 	globPref.auto_download_whole_messages =
 	    this->auto_download_whole_messages->isChecked();

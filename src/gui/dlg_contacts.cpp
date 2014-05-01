@@ -1,10 +1,12 @@
+
 #include "dlg_contacts.h"
 
-dlg_contacts::dlg_contacts(QWidget *parent,
-    QTableWidget *recipientTableWidget, MessageDb *db):
-       QDialog(parent),
-       m_recipientTableWidget(recipientTableWidget),
-       m_messdb(db)
+
+DlgContacts::DlgContacts(MessageDb &db, QTableWidget &recipientTableWidget,
+    QWidget *parent)
+    : QDialog(parent),
+    m_recipientTableWidget(recipientTableWidget),
+    m_messDb(db)
 {
 	setupUi(this);
 
@@ -32,7 +34,7 @@ dlg_contacts::dlg_contacts(QWidget *parent,
 }
 
 
-void dlg_contacts::filterContact(QString text)
+void DlgContacts::filterContact(const QString &text)
 {
 	this->clearPushButton->setEnabled(true);
 	if (!text.isEmpty()) {
@@ -52,16 +54,16 @@ void dlg_contacts::filterContact(QString text)
 	}
 }
 
-void dlg_contacts::clearContactText(void)
+void DlgContacts::clearContactText(void)
 {
 	this->filterLineEdit->clear();
 	this->clearPushButton->setEnabled(false);
 }
 
-void dlg_contacts::fillContactsFromMessageDb()
+void DlgContacts::fillContactsFromMessageDb()
 {
 	QList<QVector<QString>> contactList;
-	contactList = m_messdb->uniqueContacts();
+	contactList = m_messDb.uniqueContacts();
 
 	for (int i = 0; i < contactList.count(); i++) {
 
@@ -82,7 +84,7 @@ void dlg_contacts::fillContactsFromMessageDb()
 	}
 }
 
-void dlg_contacts::enableOkButton(void)
+void DlgContacts::enableOkButton(void)
 {
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -95,10 +97,10 @@ void dlg_contacts::enableOkButton(void)
 }
 
 
-bool dlg_contacts::isInRecipientTable(QString idDs)
+bool DlgContacts::isInRecipientTable(const QString &idDs) const
 {
-	for (int i = 0; i < this->m_recipientTableWidget->rowCount(); i++) {
-		if (this->m_recipientTableWidget->item(i,0)->text() == idDs)
+	for (int i = 0; i < this->m_recipientTableWidget.rowCount(); i++) {
+		if (this->m_recipientTableWidget.item(i,0)->text() == idDs)
 		return true;
 	}
 	return false;
@@ -106,26 +108,29 @@ bool dlg_contacts::isInRecipientTable(QString idDs)
 
 
 
-void dlg_contacts::insertDsItems(void)
+void DlgContacts::insertDsItems(void)
 {
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {
 			if (!isInRecipientTable(
 			    this->contactTableWidget->item(i,1)->text())) {
-				int row = m_recipientTableWidget->rowCount();
-				m_recipientTableWidget->insertRow(row);
+				int row = m_recipientTableWidget.rowCount();
+				m_recipientTableWidget.insertRow(row);
 				QTableWidgetItem *item = new QTableWidgetItem;
 				item->setText(this->contactTableWidget->
 				    item(i,1)->text());
-				this->m_recipientTableWidget->setItem(row,0,item);
+				this->m_recipientTableWidget.setItem(row, 0,
+				    item);
 				item = new QTableWidgetItem;
 				item->setText(this->contactTableWidget->
 				    item(i,2)->text());
-				this->m_recipientTableWidget->setItem(row,1,item);
+				this->m_recipientTableWidget.setItem(row, 1,
+				    item);
 				item = new QTableWidgetItem;
 				item->setText(this->contactTableWidget->\
 				    item(i,3)->text());
-				this->m_recipientTableWidget->setItem(row,2,item);
+				this->m_recipientTableWidget.setItem(row, 2,
+				    item);
 			}
 		}
 	}

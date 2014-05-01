@@ -1,18 +1,22 @@
+
+
 #include "src/models/accounts_model.h"
 #include "dlg_change_pwd.h"
 
-changePassword::changePassword(QWidget *parent, QTreeView *accountList, QString idBox) :
-    QDialog(parent),
+
+DlgChangePwd::DlgChangePwd(const QString &boxId, QTreeView &accountList,
+    QWidget *parent)
+    : QDialog(parent),
     m_accountList(accountList),
-    m_idBox(idBox)
+    m_boxId(boxId)
 {
 	setupUi(this);
-	initPwdChangeDialog(m_idBox);
+	initPwdChangeDialog();
 }
 
-void changePassword::initPwdChangeDialog(QString idBox)
+void DlgChangePwd::initPwdChangeDialog(void)
 {
-	this->accountLineEdit->setText(idBox);
+	this->accountLineEdit->setText(m_boxId);
 	connect(this->generateButton, SIGNAL(clicked()), this,
 	    SLOT(generatePassword()));
 	connect(this->showHideButton, SIGNAL(clicked()), this,
@@ -28,14 +32,14 @@ void changePassword::initPwdChangeDialog(QString idBox)
 	    SLOT(saveChange(void)));
 }
 
-void changePassword::generatePassword(void)
+void DlgChangePwd::generatePassword(void)
 {
-	QString pwd = getRandomString();
+	QString pwd = generateRandomString();
 	this->newPwdLineEdit->setText(pwd);
 	this->NewPwdLineEdit2->setText(pwd);
 }
 
-QString changePassword::getRandomString(void) const
+QString DlgChangePwd::generateRandomString(void)
 {
 	QString randomString;
 	for(int i=0; i<randomStringLength; ++i) {
@@ -48,17 +52,17 @@ QString changePassword::getRandomString(void) const
 
 
 
-void changePassword::checkInputFields(void)
+void DlgChangePwd::checkInputFields(void)
 {
-	bool buttonEnabled = !this->newPwdLineEdit->text().isEmpty()
-		    && !this->currentPwdLineEdit->text().isEmpty()
-		    && !this->NewPwdLineEdit2->text().isEmpty();
-	this->buttonBox->button(QDialogButtonBox::Ok)->
-	    setEnabled(buttonEnabled);
+	bool buttonEnabled = !this->newPwdLineEdit->text().isEmpty() &&
+	    !this->currentPwdLineEdit->text().isEmpty() &&
+	    !this->NewPwdLineEdit2->text().isEmpty();
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    buttonEnabled);
 }
 
 
-void changePassword::showHidePasswordLine(void)
+void DlgChangePwd::showHidePasswordLine(void)
 {
 	if (this->currentPwdLineEdit->echoMode() == QLineEdit::Password) {
 		this->currentPwdLineEdit->setEchoMode(QLineEdit::Normal);
@@ -73,8 +77,12 @@ void changePassword::showHidePasswordLine(void)
 	}
 }
 
-void changePassword::saveChange(void)
+void DlgChangePwd::saveChange(void)
 {
-
+	/* TODO */
 }
 
+
+const QString DlgChangePwd::possibleCharacters(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+const int DlgChangePwd::randomStringLength = 10;
