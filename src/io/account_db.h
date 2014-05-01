@@ -11,9 +11,6 @@
 #include "dbs.h"
 
 
-extern const Tbl accntinfTbl; /*!< Table 'account_info'. */
-
-
 /*!
  * @brief Account information.
  */

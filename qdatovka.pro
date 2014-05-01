@@ -40,6 +40,7 @@ SOURCES += src/common.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_send_message.cpp \
     src/io/account_db.cpp \
+    src/io/db_tables.cpp \
     src/io/dbs.cpp \
     src/io/message_db.cpp \
     src/io/pkcs7.cpp \
@@ -56,6 +57,7 @@ HEADERS += src/common.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_send_message.h \
     src/io/account_db.h \
+    src/io/db_tables.h \
     src/io/dbs.h \
     src/io/message_db.h \
     src/io/pkcs7.h \

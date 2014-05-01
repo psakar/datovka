@@ -7,13 +7,14 @@
 #include <QTableView>
 
 #include "datovka.h"
-#include "dlg_change_pwd.h"
-#include "dlg_create_account.h"
-#include "dlg_ds_search.h"
-#include "dlg_preferences.h"
-#include "dlg_proxysets.h"
-#include "dlg_send_message.h"
 #include "src/common.h"
+#include "src/gui/dlg_change_pwd.h"
+#include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_preferences.h"
+#include "src/gui/dlg_proxysets.h"
+#include "src/gui/dlg_send_message.h"
+#include "src/io/db_tables.h"
 #include "src/io/pkcs7.h"
 #include "ui_datovka.h"
 

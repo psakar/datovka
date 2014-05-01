@@ -10,6 +10,7 @@
 
 #include "message_db.h"
 #include "src/common.h"
+#include "src/io/db_tables.h"
 #include "src/io/pkcs7.h"
 
 
