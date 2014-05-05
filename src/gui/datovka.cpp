@@ -117,8 +117,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	createIsdsContextForAllDataBoxs();
-	connectToAllDataBoxs();
+	//createIsdsContextForAllDataBoxs();
+	//connectToAllDataBoxs();
 
 }
 
@@ -207,7 +207,7 @@ fail:
 
 bool MainWindow::connectToDataBox(const QModelIndex &index)
 {
-	isds_error status;
+	isds_error status = IE_SUCCESS;
 
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 	const AccountModel::SettingsMap &itemSettings =
@@ -241,6 +241,15 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 	} else if (login_method == "certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
+		QString certPath = itemSettings[P12FILE].toString();
+		//pki_credentials->engine = NULL;
+		//pki_credentials->certificate_format = PKI_FORMAT_DER;
+		// malloc
+		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
+		//pki_credentials->key_format = PKI_FORMAT_DER;
+		//pki_credentials->key = NULL;
+		//pki_credentials->passphrase = NULL;
+
 		QString iDbox = "TODO";
 
 		if (test_account) {
@@ -259,6 +268,14 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 	} else if (login_method == "user_certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
+		QString certPath = itemSettings[P12FILE].toString();
+		//pki_credentials->engine = NULL;
+		//pki_credentials->certificate_format = PKI_FORMAT_DER;
+		// malloc
+		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
+		//pki_credentials->key_format = PKI_FORMAT_DER;
+		//pki_credentials->key = NULL;
+		//pki_credentials->passphrase = NULL;
 
 		if (test_account) {
 			if (password.isNull()) {
@@ -288,8 +305,8 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 			}
 		}
 
-	/* Login method based username and hopt */
-	} else if (login_method == "hotp") {
+	/* Login method based username and opt */
+	} else {
 
 		isds_otp *opt = NULL;
 
