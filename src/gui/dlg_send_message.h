@@ -54,6 +54,7 @@ private:
 	QString m_senderId;
 	QString m_sender;
 	QString m_senderAddress;
+	QString m_userName;
 
 	MessageDb &m_messDb;
 };

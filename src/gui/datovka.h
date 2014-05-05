@@ -26,6 +26,12 @@ class MainWindow : public QMainWindow {
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
+	bool connectToDataBox(const QModelIndex &index);
+	bool isIsdsContext(QString userName);
+	int createIsdsContext(const QModelIndex &index);
+
+	bool createIsdsContextForAllDataBoxs(void);
+	bool connectToAllDataBoxs(void);
 
 private slots:
 	void on_actionPreferences_triggered();
@@ -90,8 +96,6 @@ private slots:
 	void onTableColumnSort(int column);
 
 private:
-
-	int createIsdsContext(QString userName);
 
 	/*!
 	 * @brief Get configuration directory name.

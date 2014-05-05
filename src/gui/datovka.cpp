@@ -117,19 +117,51 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	/* Create isds contexts for accounts */
-	int row = ui->accountList->model()->rowCount();
-	for (int i = 0; i < row; i++) {
-		QStandardItem *accountItem = m_accountModel.item(i,0);
-		const AccountModel::SettingsMap &itemSettings =
-		    accountItem->data(ROLE_CONF_SETINGS).toMap();
-		int ret = createIsdsContext(itemSettings[USER].toString());
-	}
+	createIsdsContextForAllDataBoxs();
+	connectToAllDataBoxs();
+
 }
 
-int MainWindow::createIsdsContext(QString userName)
+
+bool MainWindow::createIsdsContextForAllDataBoxs(void)
 {
-	/* Create isds context for account */
+	int row = ui->accountList->model()->rowCount();
+	for (int i = 0; i < row; i++) {
+		QModelIndex index = m_accountModel.index(i,0);
+		bool ret = createIsdsContext(index);
+	}
+	return true;
+}
+
+
+bool MainWindow::connectToAllDataBoxs(void)
+{
+	int row = ui->accountList->model()->rowCount();
+	for (int i = 0; i < row; i++) {
+		QModelIndex index = m_accountModel.index(i,0);
+		connectToDataBox(index);
+	}
+	return true;
+}
+
+
+
+bool MainWindow::isIsdsContext(QString userName)
+{
+	return (isdsSessionMap.contains(userName));
+}
+
+
+int MainWindow::createIsdsContext(const QModelIndex &index)
+{
+	/* Create isds context for account index */
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItem->data(ROLE_CONF_SETINGS).toMap();
+	QString userName = itemSettings[USER].toString();
+
+	if (isIsdsContext(userName)) return EXIT_SUCCESS;
+
 	isds_error status;
 	struct isds_ctx *isds_session = NULL;
 
@@ -172,6 +204,71 @@ fail:
 	return EXIT_FAILURE;
 }
 
+
+bool MainWindow::connectToDataBox(const QModelIndex &index)
+{
+	isds_error status;
+
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItem->data(ROLE_CONF_SETINGS).toMap();
+
+	QString login_method  = itemSettings[LOGIN].toString();
+	QString username  = itemSettings[USER].toString();
+	bool test_account  = itemSettings[TEST].toBool();
+
+	if (!isIsdsContext(username)) return false;
+
+	/* Login method based on username and password */
+	if (login_method == "username") {
+
+		QString password  = itemSettings[PWD].toString();
+
+		if (isdsSessionMap.contains(username)) {
+		status = isds_login(isdsSessionMap.value(username),
+		    isds_testing_locator,
+		    username.toStdString().c_str(),
+		    password.toStdString().c_str(),
+		    NULL, NULL);
+		}
+
+	/* Login method based on certificate only */
+	} else if (login_method == "certificate") {
+
+		// only certifiacate
+		if (username.isNull()) {
+			status = isds_login(isdsSessionMap.value(username),
+			    isds_testing_locator,
+			    NULL, NULL,
+			    NULL, NULL);
+		}
+
+	/* Login method based on certificate together with username */
+	} else if (login_method == "user_certificate") {
+
+		if (isdsSessionMap.contains(username)) {
+		status = isds_login(isdsSessionMap.value(username),
+		    isds_testing_locator,
+		    username.toStdString().c_str(),
+		    NULL,
+		    NULL, NULL);
+		}
+
+	} else if (login_method == "hotp") {
+
+	} else {
+
+	}
+
+	if (IE_SUCCESS != status) {
+		fputs("Error connecting to ISDS.\n", stderr);
+		return false;
+	}
+	return true;
+}
+
+
+
 /* ========================================================================= */
 /*
  * Changes all occurrences of '\' to '/' in given file.
@@ -207,6 +304,12 @@ MainWindow::~MainWindow(void)
 
 	/* Delete isds contexts for accounts */
 	 foreach (isds_session, isdsSessionMap) {
+
+		status = isds_logout(isds_session);
+		if (IE_SUCCESS != status) {
+			fputs("Error ISDS logout procedure.\n", stderr);
+		}
+
 		status = isds_ctx_free(&isds_session);
 		if (IE_SUCCESS != status) {
 			fputs("Error freeing ISDS session.\n", stderr);
@@ -1308,7 +1411,8 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0, this);
+	QString userName = accountUserName();
+	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0, this, userName);
 	dsSearch->show();
 }
 

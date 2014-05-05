@@ -18,7 +18,7 @@ public:
 	};
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-	    QWidget *parent = 0);
+	    QWidget *parent = 0, QString useName = "");
 
 private slots:
 	void checkInputFields(void);
@@ -33,6 +33,7 @@ private:
 
 	QTableWidget *m_recipientTableWidget;
 	Action m_action;
+	QString m_userName;
 };
 
 

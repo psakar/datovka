@@ -2,12 +2,13 @@
 
 #include "dlg_ds_search.h"
 
-
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    QWidget *parent)
+    QWidget *parent, QString userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
-    m_action(action)
+    m_action(action),
+    m_userName(userName)
+
 {
 	setupUi(this);
 	initSearchWindow();
@@ -95,17 +96,29 @@ void DlgDsSearch::checkInputFields(void)
 	}
 }
 
+
+
+#define PWD1 "Heslo3.14"
+#define PWD2 "Schr8ne4ka4"
 void DlgDsSearch::searchDataBox(void)
 {
-/*
-	isds_DbOwnerInfo isdsSearch;
-	isdsSearch.dbID = (char*)this->iDLineEdit->text().toStdString().c_str();
+
+	//isds_DbOwnerInfo *isdsSearch = NULL;
+	//isdsSearch->dbID = (char*)this->iDLineEdit->text().toStdString().c_str();
 	//isdsSearch.dbType = DBTYPE_OVM;
-	isdsSearch.ic = (char*) this->iCLineEdit->text().toStdString().c_str();
-	isdsSearch.firmName = (char*) this->nameLineEdit->text().toStdString().c_str();
-	isdsSearch.address = (char*) this->pscLineEdit->text().toStdString().c_str();
-*/
+	//isdsSearch->ic = (char*) this->iCLineEdit->text().toStdString().c_str();
+	//isdsSearch->firmName = (char*) this->nameLineEdit->text().toStdString().c_str();
+	//isdsSearch.address = (char*) this->pscLineEdit->text().toStdString().c_str();
+
 	/* TODO - connect ISDS and call search request */
+	//pokus(isdsSearch);
+	isds_error status;
+	status = isds_login(isdsSessionMap.value(m_userName),
+	    isds_testing_locator, m_userName.toStdString().c_str(), PWD1,
+	    NULL, NULL);
+	if (IE_SUCCESS != status) {
+		fputs("Error connecting to ISDS.\n", stderr);
+	}
 
 	QList<QVector<QString>> list_contacts;
 	QVector<QString> contact;
@@ -201,3 +214,30 @@ void DlgDsSearch::insertDsItems(void)
 		}
 	}
 }
+
+
+#define USR1 "js2t8p"
+#define PWD1 "Heslo3.14"
+
+#define USR2 "wh5ef3"
+#define PWD2 "Schr8ne4ka4"
+
+/* Restricted access. */
+#define USR_RES "tjo75m"
+#define PWD_RES "R2D2blabla2"
+
+/* Apple, do not change password. */
+#define USR_APP "84xyv9"
+#define PWD_APP "Apple1234567"
+#define TIMEOUT_MS 1000
+
+/* ========================================================================= */
+/* ========================================================================= */
+//void dlg_ds_search_dialog::pokus(isds_DbOwnerInfo *criteria)
+/* ========================================================================= */
+/* ========================================================================= */
+//{
+
+//}
+
+

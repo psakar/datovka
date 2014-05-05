@@ -23,7 +23,8 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
     m_senderId(senderId),
     m_sender(sender),
     m_senderAddress(senderAddress),
-    m_messDb(db)
+    m_messDb(db),
+    m_userName("")
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -62,6 +63,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    "</strong>" + " (" + itemSettings[USER].toString() + ")");
 
 	index = m_messageList.currentIndex();
+	m_userName = itemSettings[USER].toString();
+
 	//Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
 /*
 	QAbstractItemModel *messageModel = m_messageList->model();
@@ -200,9 +203,8 @@ void DlgSendMessage::showOptionalForm(int state)
 void DlgSendMessage::addRecipientData(void)
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, this);
+	    this->recipientTableWidget, this, m_userName);
 	dsSearch->show();
-
 }
 
 
