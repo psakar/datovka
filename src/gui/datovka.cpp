@@ -215,6 +215,7 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 
 	QString login_method  = itemSettings[LOGIN].toString();
 	QString username  = itemSettings[USER].toString();
+	QString password  = itemSettings[PWD].toString();
 	bool test_account  = itemSettings[TEST].toBool();
 
 	if (!isIsdsContext(username)) return false;
@@ -222,42 +223,93 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 	/* Login method based on username and password */
 	if (login_method == "username") {
 
-		QString password  = itemSettings[PWD].toString();
-
-		if (isdsSessionMap.contains(username)) {
-		status = isds_login(isdsSessionMap.value(username),
-		    isds_testing_locator,
-		    username.toStdString().c_str(),
-		    password.toStdString().c_str(),
-		    NULL, NULL);
+		if (test_account) {
+			status = isds_login(isdsSessionMap.value(username),
+			    isds_testing_locator,
+			    username.toStdString().c_str(),
+			    password.toStdString().c_str(),
+			    NULL, NULL);
+		} else {
+			status = isds_login(isdsSessionMap.value(username),
+			    isds_locator,
+			    username.toStdString().c_str(),
+			    password.toStdString().c_str(),
+			    NULL, NULL);
 		}
 
 	/* Login method based on certificate only */
 	} else if (login_method == "certificate") {
 
-		// only certifiacate
-		if (username.isNull()) {
-			status = isds_login(isdsSessionMap.value(username),
-			    isds_testing_locator,
+		isds_pki_credentials *pki_credentials = NULL;
+		QString iDbox = "TODO";
+
+		if (test_account) {
+			status = isds_login(isdsSessionMap.value(iDbox),
+			    isds_cert_testing_locator,
 			    NULL, NULL,
-			    NULL, NULL);
+			    pki_credentials, NULL);
+		} else {
+			status = isds_login(isdsSessionMap.value(iDbox),
+			    isds_cert_locator,
+			    NULL, NULL,
+			    pki_credentials, NULL);
 		}
 
 	/* Login method based on certificate together with username */
 	} else if (login_method == "user_certificate") {
 
-		if (isdsSessionMap.contains(username)) {
-		status = isds_login(isdsSessionMap.value(username),
-		    isds_testing_locator,
-		    username.toStdString().c_str(),
-		    NULL,
-		    NULL, NULL);
+		isds_pki_credentials *pki_credentials = NULL;
+
+		if (test_account) {
+			if (password.isNull()) {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_cert_testing_locator,
+				    username.toStdString().c_str(), NULL,
+				    pki_credentials, NULL);
+			} else {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_cert_testing_locator,
+				    username.toStdString().c_str(),
+				    password.toStdString().c_str(),
+				    pki_credentials, NULL);
+			}
+		} else {
+			if (password.isNull()) {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_cert_locator,
+				    username.toStdString().c_str(), NULL,
+				    pki_credentials, NULL);
+			} else {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_cert_locator,
+				    username.toStdString().c_str(),
+				    password.toStdString().c_str(),
+				    pki_credentials, NULL);
+			}
 		}
 
+	/* Login method based username and hopt */
 	} else if (login_method == "hotp") {
 
-	} else {
+		isds_otp *opt = NULL;
 
+		if (test_account) {
+			if (isdsSessionMap.contains(username)) {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_otp_testing_locator,
+				    username.toStdString().c_str(),
+				    password.toStdString().c_str(),
+				    NULL, opt);
+			}
+		} else {
+			if (isdsSessionMap.contains(username)) {
+				status = isds_login(isdsSessionMap.value(username),
+				    isds_otp_locator,
+				    username.toStdString().c_str(),
+				    password.toStdString().c_str(),
+				    NULL, opt);
+			}
+		}
 	}
 
 	if (IE_SUCCESS != status) {
