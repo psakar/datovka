@@ -23,8 +23,8 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
     m_senderId(senderId),
     m_sender(sender),
     m_senderAddress(senderAddress),
-    m_messDb(db),
-    m_userName("")
+    m_userName(""),
+    m_messDb(db)
 {
 	setupUi(this);
 	initNewMessageDialog();

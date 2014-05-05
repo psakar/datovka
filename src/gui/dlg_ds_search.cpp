@@ -99,7 +99,7 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
-	isds_DbOwnerInfo *isdsSearch = NULL;
+	//isds_DbOwnerInfo *isdsSearch = NULL;
 	//isdsSearch->dbID = (char*)this->iDLineEdit->text().toStdString().c_str();
 	//isdsSearch.dbType = DBTYPE_OVM;
 	//isdsSearch->ic = (char*) this->iCLineEdit->text().toStdString().c_str();

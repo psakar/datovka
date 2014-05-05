@@ -3,8 +3,7 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-#include <cstdbool>
-#include <isds.h>
+
 #include <QSettings>
 #include <QString>
 #include <QDebug>
@@ -125,10 +124,6 @@ public:
 /* Global preferences structure. */
 extern GlobPreferences globPref;
 extern GlobProxySettings globProxSet;
-extern QMap<QString, QVariant> *currentAccountMap;
-
-/* Global isds contexts for DataBoxes */
-extern QMap<QString, isds_ctx *> isdsSessionMap;
 
 /*!
  * @brief Date/time format used in the application.

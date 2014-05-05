@@ -15,6 +15,7 @@
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/io/db_tables.h"
+#include "src/io/isds_sessions.h"
 #include "src/io/pkcs7.h"
 #include "ui_datovka.h"
 
@@ -117,13 +118,13 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	//createIsdsContextForAllDataBoxs();
-	//connectToAllDataBoxs();
+	createIsdsContextForAllDataBoxes();
+	connectToAllDataBoxes();
 
 }
 
 
-bool MainWindow::createIsdsContextForAllDataBoxs(void)
+bool MainWindow::createIsdsContextForAllDataBoxes(void)
 {
 	int row = ui->accountList->model()->rowCount();
 	for (int i = 0; i < row; i++) {
@@ -134,7 +135,7 @@ bool MainWindow::createIsdsContextForAllDataBoxs(void)
 }
 
 
-bool MainWindow::connectToAllDataBoxs(void)
+bool MainWindow::connectToAllDataBoxes(void)
 {
 	int row = ui->accountList->model()->rowCount();
 	for (int i = 0; i < row; i++) {
@@ -142,13 +143,6 @@ bool MainWindow::connectToAllDataBoxs(void)
 		connectToDataBox(index);
 	}
 	return true;
-}
-
-
-
-bool MainWindow::isIsdsContext(QString userName)
-{
-	return (isdsSessionMap.contains(userName));
 }
 
 
@@ -160,48 +154,15 @@ int MainWindow::createIsdsContext(const QModelIndex &index)
 	    accountItem->data(ROLE_CONF_SETINGS).toMap();
 	QString userName = itemSettings[USER].toString();
 
-	if (isIsdsContext(userName)) return EXIT_SUCCESS;
-
-	isds_error status;
-	struct isds_ctx *isds_session = NULL;
-
-	status = isds_init();
-	if (IE_SUCCESS != status) {
-		fputs("Unsuccessful ISDS initialisation.\n", stderr);
-		goto fail;
+	if (isdsSessions.holdsSession(userName)) {
+		return EXIT_SUCCESS;
 	}
 
-	/* Logging. */
-	isds_set_logging(ILF_ALL, ILL_ALL);
-
-	isds_session = isds_ctx_create();
-	if (NULL == isds_session) {
-		fputs("Error creating ISDS session.\n", stderr);
-		goto fail;
+	if (0 != isdsSessions.createCleanSession(userName)) {
+		return EXIT_SUCCESS;
+	} else {
+		return EXIT_FAILURE;
 	}
-
-	status = isds_set_timeout(isds_session, TIMEOUT_MS);
-	if (IE_SUCCESS != status) {
-		fputs("Error setting time-out.\n", stderr);
-	}
-
-	isdsSessionMap.insert(userName, isds_session);
-
-	return EXIT_SUCCESS;
-
-fail:
-	if (NULL != isds_session) {
-		status = isds_ctx_free(&isds_session);
-		if (IE_SUCCESS != status) {
-			fputs("Error freeing ISDS session.\n", stderr);
-		}
-	}
-	status = isds_cleanup();
-	if (IE_SUCCESS != status) {
-		fputs("Unsuccessful ISDS clean-up.\n", stderr);
-	}
-
-	return EXIT_FAILURE;
 }
 
 
@@ -213,29 +174,24 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItem->data(ROLE_CONF_SETINGS).toMap();
 
-	QString login_method  = itemSettings[LOGIN].toString();
-	QString username  = itemSettings[USER].toString();
+	const QString &login_method  = itemSettings[LOGIN].toString();
+	const QString &userName  = itemSettings[USER].toString();
 	QString password  = itemSettings[PWD].toString();
-	bool test_account  = itemSettings[TEST].toBool();
+	const bool testAccount  = itemSettings[TEST].toBool();
 
-	if (!isIsdsContext(username)) return false;
+	if (!isdsSessions.holdsSession(userName)) {
+		return false;
+	}
 
 	/* Login method based on username and password */
 	if (login_method == "username") {
 
-		if (test_account) {
-			status = isds_login(isdsSessionMap.value(username),
-			    isds_testing_locator,
-			    username.toStdString().c_str(),
-			    password.toStdString().c_str(),
-			    NULL, NULL);
-		} else {
-			status = isds_login(isdsSessionMap.value(username),
-			    isds_locator,
-			    username.toStdString().c_str(),
-			    password.toStdString().c_str(),
-			    NULL, NULL);
+		if (password.isEmpty()) {
+			/* TODO -- Ask for password if password is empty. */
+			password = "xxx";
 		}
+		status = isdsLoginUserName(isdsSessions.session(userName),
+		    userName, password, testAccount);
 
 	/* Login method based on certificate only */
 	} else if (login_method == "certificate") {
@@ -251,18 +207,10 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 		//pki_credentials->passphrase = NULL;
 
 		QString iDbox = "TODO";
+		/* TODO -- The account is not identified with a user name! */
 
-		if (test_account) {
-			status = isds_login(isdsSessionMap.value(iDbox),
-			    isds_cert_testing_locator,
-			    NULL, NULL,
-			    pki_credentials, NULL);
-		} else {
-			status = isds_login(isdsSessionMap.value(iDbox),
-			    isds_cert_locator,
-			    NULL, NULL,
-			    pki_credentials, NULL);
-		}
+		status = isdsLoginCert(isdsSessions.session(iDbox),
+		    pki_credentials, testAccount);
 
 	/* Login method based on certificate together with username */
 	} else if (login_method == "user_certificate") {
@@ -277,60 +225,33 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 		//pki_credentials->key = NULL;
 		//pki_credentials->passphrase = NULL;
 
-		if (test_account) {
-			if (password.isNull()) {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_cert_testing_locator,
-				    username.toStdString().c_str(), NULL,
-				    pki_credentials, NULL);
-			} else {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_cert_testing_locator,
-				    username.toStdString().c_str(),
-				    password.toStdString().c_str(),
-				    pki_credentials, NULL);
-			}
+		if (password.isNull()) {
+			status = isdsLoginUserCert(
+			    isdsSessions.session(userName),
+			    userName /* boxId */,
+			    pki_credentials, testAccount);
 		} else {
-			if (password.isNull()) {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_cert_locator,
-				    username.toStdString().c_str(), NULL,
-				    pki_credentials, NULL);
-			} else {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_cert_locator,
-				    username.toStdString().c_str(),
-				    password.toStdString().c_str(),
-				    pki_credentials, NULL);
-			}
+			status = isdsLoginUserCertPwd(
+			    isdsSessions.session(userName),
+			    userName /* boxId */, password,
+			    pki_credentials, testAccount);
 		}
 
-	/* Login method based username and opt */
+	/* Login method based username and otp */
 	} else {
 
 		isds_otp *opt = NULL;
 
-		if (test_account) {
-			if (isdsSessionMap.contains(username)) {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_otp_testing_locator,
-				    username.toStdString().c_str(),
-				    password.toStdString().c_str(),
-				    NULL, opt);
-			}
-		} else {
-			if (isdsSessionMap.contains(username)) {
-				status = isds_login(isdsSessionMap.value(username),
-				    isds_otp_locator,
-				    username.toStdString().c_str(),
-				    password.toStdString().c_str(),
-				    NULL, opt);
-			}
+		if (isdsSessions.holdsSession(userName)) {
+			status = isdsLoginUserOtp(
+			    isdsSessions.session(userName), userName, password,
+			    opt, testAccount);
 		}
+
 	}
 
 	if (IE_SUCCESS != status) {
-		fputs("Error connecting to ISDS.\n", stderr);
+		qDebug() << "Error connecting to ISDS.";
 		return false;
 	}
 	return true;
@@ -367,28 +288,6 @@ MainWindow::~MainWindow(void)
 {
 	/* Save settings on exit. */
 	saveSettings();
-
-	isds_error status;
-	struct isds_ctx *isds_session = NULL;
-
-	/* Delete isds contexts for accounts */
-	 foreach (isds_session, isdsSessionMap) {
-
-		status = isds_logout(isds_session);
-		if (IE_SUCCESS != status) {
-			fputs("Error ISDS logout procedure.\n", stderr);
-		}
-
-		status = isds_ctx_free(&isds_session);
-		if (IE_SUCCESS != status) {
-			fputs("Error freeing ISDS session.\n", stderr);
-		}
-
-		status = isds_cleanup();
-		if (IE_SUCCESS != status) {
-			fputs("Unsuccessful ISDS clean-up.\n", stderr);
-		}
-	 }
 
 	delete ui;
 }

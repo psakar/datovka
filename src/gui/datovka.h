@@ -27,11 +27,10 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
 	bool connectToDataBox(const QModelIndex &index);
-	bool isIsdsContext(QString userName);
 	int createIsdsContext(const QModelIndex &index);
 
-	bool createIsdsContextForAllDataBoxs(void);
-	bool connectToAllDataBoxs(void);
+	bool createIsdsContextForAllDataBoxes(void);
+	bool connectToAllDataBoxes(void);
 
 private slots:
 	void on_actionPreferences_triggered();
@@ -104,7 +103,7 @@ private:
 	QString confDir(void);
 
 	/*!
-	 * @brief Default settings of mainwindow.
+	 * @brief Default settings of main window.
 	 */
 	void defaultUiMainWindowSettings(void) const;
 
@@ -141,7 +140,7 @@ private:
 	void setDefaultAccount(const QSettings &settings);
 
 	/*!
-	 * @brief Load sent/recivied messages column widths from settings.
+	 * @brief Load sent/received messages column widths from settings.
 	 */
 	void loadSentReceivedMessagesColumnWidth(const QSettings &settings);
 
@@ -156,12 +155,12 @@ private:
 	void saveAccountCollapseInfo(QSettings &settings) const;
 
 	/*!
-	 * @brief Save sen/recivied messages column widths into settings.
+	 * @brief Save sent/received messages column widths into settings.
 	 */
 	void saveSentReceivedColumnWidth(QSettings &settings) const;
 
 	/*!
-	 * @brief Set reciveid message column widths.
+	 * @brief Set received message column widths.
 	 */
 	void setReciveidColumnWidths(void);
 
@@ -221,7 +220,10 @@ private:
 	AccountDb m_accountDb; /*!< Account information database. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
-	QSortFilterProxyModel m_messageListProxyModel;
+	QSortFilterProxyModel m_messageListProxyModel; /*!<
+	                                                * Used for message
+	                                                * sorting.
+	                                                */
 
 	int m_received_1;
 	int m_received_2;

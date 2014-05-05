@@ -44,6 +44,7 @@ SOURCES += src/common.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
+    src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
     src/io/pkcs7.cpp \
     src/main.cpp \
@@ -61,6 +62,7 @@ HEADERS += src/common.h \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
+    src/io/isds_sessions.h \
     src/io/message_db.h \
     src/io/pkcs7.h \
     src/models/accounts_model.h
