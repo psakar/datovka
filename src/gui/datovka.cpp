@@ -335,9 +335,9 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	QString userName = accountUserName(accountItem);
 	MessageDb *messageDb = accountMessageDb(accountItem);
 
-//	qDebug() << "Selected user account" << userName << dbDir;
-//	qDebug() << current.model() << accountItem->text();
-//	qDebug() << "\n";
+	//qDebug() << "Selected user account" << userName << dbDir;
+	//qDebug() << current.model() << accountItem->text();
+	//qDebug() << "\n";
 
 	/*
 	 * TODO -- Is '___True' somehow related to the testing state
@@ -347,8 +347,8 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	qDebug() << "Selected data box ID" << dbId;
 	//Q_ASSERT(!dbId.isEmpty());
 
-//	qDebug() << "Clicked row" << current.row();
-//	qDebug() << "Clicked type" << AccountModel::nodeType(current);
+	//qDebug() << "Clicked row" << current.row();
+	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
@@ -356,7 +356,7 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeRecentReceived:
 		tableModel = messageDb->msgsRcvdWithin90DaysModel(dbId);
-//		ui->messageList->horizontalHeader()->moveSection(5,3);
+		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
 		tableModel = messageDb->msgsSntWithin90DaysModel(dbId);
@@ -468,7 +468,7 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-//		treeItemSelectionChanged(index);
+		//treeItemSelectionChanged(index);
 
 		menu->addAction(
 		   QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
@@ -564,7 +564,7 @@ void MainWindow::tableItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-//		tableItemSelectionChanged(index);
+		//tableItemSelectionChanged(index);
 
 		/* TODO */
 		menu->addAction(QIcon(ICON_16x16_PATH +
@@ -988,9 +988,9 @@ void MainWindow::loadSettings(void)
 {
 	QSettings settings(m_confFileName, QSettings::IniFormat);
 
-//	qDebug() << "All: " << settings.allKeys();
-//	qDebug() << "Groups: " << settings.childGroups();
-//	qDebug() << "Keys:" << settings.childKeys();
+	//qDebug() << "All: " << settings.allKeys();
+	//qDebug() << "Groups: " << settings.childGroups();
+	//qDebug() << "Keys:" << settings.childKeys();
 
 	/* Window geometry. */
 	loadWindowGeometry(settings);
@@ -1098,7 +1098,7 @@ bool MainWindow::regenerateAccountModelYears(void)
 
 	m_accountModel.removeAllYearNodes();
 
-//	qDebug() << "Generating years";
+	//qDebug() << "Generating years";
 
 	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
 		itemTop = m_accountModel.item(i, 0);
@@ -1119,14 +1119,14 @@ bool MainWindow::regenerateAccountModelYears(void)
 		/* Received. */
 		yearList = db->msgsRcvdYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
-//			qDebug() << yearList.value(j);
+			//qDebug() << yearList.value(j);
 			m_accountModel.addNodeReceivedYear(itemTop,
 			    yearList.value(j));
 		}
 		/* Sent. */
 		yearList = db->msgsSntYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
-//			qDebug() << yearList.value(j);
+			//qDebug() << yearList.value(j);
 			m_accountModel.addNodeSentYear(itemTop,
 			    yearList.value(j));
 		}

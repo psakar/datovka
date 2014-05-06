@@ -324,7 +324,7 @@ isds_Address * isds_Address_add(const QString &adCity,
 
 /* ========================================================================= */
 /*
- * Add items into DbOwnerInfo structure.
+ * Create DbOwnerInfo structure and Search DataBoxes.
  */
 isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
     const QString &dbID,
@@ -336,7 +336,6 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
     bool dbEffectiveOVM, bool dbOpenAddressing)
 /* ========================================================================= */
 {
-
 	struct isds_DbOwnerInfo *tmp = NULL;
 
 	tmp =(struct isds_DbOwnerInfo *)
@@ -373,9 +372,6 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
 	tmp->dbState = &dbState;
 
 	isds_error status;
-
-	qDebug() << "----------------------------------------------------";
-
 	status = isds_FindDataBox(isdsSessions.session(userName), tmp, result);
 
 	qDebug() << status << isds_strerror(status);

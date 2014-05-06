@@ -108,7 +108,7 @@ isds_Address * isds_Address_add(const QString &adCity,
     const QString &biState);
 
 /*!
- * @brief Add info into DbOwnerInfo.
+ * @brief Create DbOwnerInfo structure and Search DataBoxes.
  */
 isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
     const QString &dbID,

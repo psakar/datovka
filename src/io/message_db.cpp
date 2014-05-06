@@ -99,7 +99,7 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	}
 	queryStr += receivedItemIds.last();
 	queryStr += " FROM messages WHERE dbIDRecipient = '" + recipDbId + "'";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -136,7 +136,7 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 	    "(dbIDRecipient = '" + recipDbId + "')"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -173,7 +173,7 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	    "(dbIDRecipient = '" + recipDbId + "')"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -206,13 +206,13 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId) const
 	    "dbIDRecipient = '" + recipDbId + "'"
 	    " ORDER BY dmDeliveryTime ASC";
 
-//	// qDebug() << "Generating received year list" << recipDbId;
-//	// qDebug() << queryStr;
+	// qDebug() << "Generating received year list" << recipDbId;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-//			// qDebug() << query.value(0).toString();
+			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
@@ -240,7 +240,7 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    "(dbIDRecipient = '" + recipDbId + "')"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
-//		// qDebug() << queryStr;
+		// qDebug() << queryStr;
 		query.prepare(queryStr);
 		if (query.exec() && query.isActive()) {
 			query.first();
@@ -268,7 +268,7 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE dbIDSender = '" +
 	    sendDbId + "'";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -305,7 +305,7 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 	    "(dbIDSender = '" + sendDbId + "')"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -342,7 +342,7 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	    "(dbIDSender = '" + sendDbId + "')"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	query.exec();
 
@@ -375,13 +375,13 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 	    "dbIDSender = '" + sendDbId + "'"
 	    " ORDER BY dmDeliveryTime ASC";
 
-//	// qDebug() << "Generating received year list" << recipDbId;
-//	// qDebug() << queryStr;
+	// qDebug() << "Generating received year list" << recipDbId;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-//			// qDebug() << query.value(0).toString();
+			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
@@ -409,7 +409,7 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 		    "(dbIDSender = '" + sendDbId + "')"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
-//		// qDebug() << queryStr;
+		// qDebug() << queryStr;
 		query.prepare(queryStr);
 		if (query.exec() && query.isActive()) {
 			query.first();
@@ -439,7 +439,7 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress"
 	    " FROM messages WHERE "
 	    "dmID = " + QString::number(dmId);
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
@@ -685,7 +685,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 	html += divEnd;
 
-//	html += QString::number(dmId);
+	//html += QString::number(dmId);
 	// qDebug() << html;
 	/* TODO */
 
@@ -735,7 +735,7 @@ bool MessageDb::msgsVerified(int dmId) const
 	    "is_verified"
 	    " FROM messages WHERE "
 	    "dmID = " + QString::number(dmId);
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -796,7 +796,7 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 	    "custom_data"
 	    " FROM supplementary_message_data WHERE "
 	    "message_id = "  + QString::number(msgId);
-//	// qDebug() << queryStr;
+	// qDebug() << queryStr;
 	query.prepare(queryStr);
 	if (query.exec() && query.isActive()) {
 		query.first();
@@ -956,16 +956,16 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 	/* Already opened. */
 	if (this->find(key) != this->end()) {
-//		// qDebug() << key << "db found";
+		// qDebug() << key << "db found";
 		return (*this)[key];
 	}
 
-//	// qDebug() << "creating new" << key;
+	// qDebug() << "creating new" << key;
 	db = new MessageDb(key);
 
-//	// qDebug() << "searching for file" << key << "in" << locDir;
+	// qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
-//	// qDebug() << "opening";
+	// qDebug() << "opening";
 	/*
 	 * Test accounts have ___1 in their names, ___0 relates to standard
 	 * accounts.

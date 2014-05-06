@@ -1,5 +1,5 @@
 
-
+#include <QMessageBox>
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 
@@ -100,11 +100,14 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
-	/* TODO - apply FindDataBox function from libisds */
+	this->resultsTableWidget->setRowCount(0);
+	this->resultsTableWidget->setEnabled(false);
+
 	struct isds_DbOwnerInfo *criteria = NULL;
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_BirthInfo *birthInfo = NULL;
+	QList<QVector<QString>> list_contacts;
 
 	isds_DbType dbType;
 	int index = this->dataBoxTypeCBox->currentIndex();
@@ -123,21 +126,47 @@ void DlgDsSearch::searchDataBox(void)
 	    this->nameLineEdit->text(), this->nameLineEdit->text(),
 	    this->nameLineEdit->text());
 	address = isds_Address_add("", "", "","" , this->pscLineEdit->text(), "");
-	birthInfo = NULL;
+
 	struct isds_list *boxes = NULL;
 
 	criteria = isds_DbOwnerInfo_search(&boxes, m_userName, this->iDLineEdit->text(), dbType,
 	   this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
 	   birthInfo, address, "", "", "", "", "", 1, false, false);
 
-	QList<QVector<QString>> list_contacts;
-	QVector<QString> contact;
-	contact.append("xxxx");
-	contact.append(this->nameLineEdit->text());
-	contact.append("uiopp");
-	contact.append("62122");
-	list_contacts.append(contact);
-	addContactsToTable(list_contacts);
+	struct isds_list *box;
+	box = boxes;
+
+	if (0 == box) {
+		QMessageBox::information(this, tr("Search result"),
+		tr("Sorry, item(s) not found..."), QMessageBox::Ok);
+	} else {
+		while (0 != box) {
+			this->resultsTableWidget->setEnabled(true);
+			isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+			Q_ASSERT(0 != item);
+			qDebug() << item->dbID;
+			QVector<QString> contact;
+			contact.append(item->dbID);
+			contact.append(item->firmName);
+			contact.append(QString(item->address->adStreet) +
+			    " " + QString(item->address->adNumberInStreet));
+			contact.append(QString(item->address->adZipCode));
+			list_contacts.append(contact);
+			addContactsToTable(list_contacts);
+
+			box = box->next;
+		}
+	}
+
+
+	isds_PersonName_free(&personName);
+	isds_Address_free(&address);
+	isds_BirthInfo_free(&birthInfo);
+
+	isds_list_free(&boxes);
+
+	/* TODO - free criteria struct */
+	//isds_DbOwnerInfo_free(&criteria);
 }
 
 
