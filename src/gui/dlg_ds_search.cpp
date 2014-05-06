@@ -63,7 +63,7 @@ void DlgDsSearch::checkInputFields(void)
 		this->nameLineEdit->setEnabled(false);
 		this->pscLineEdit->setEnabled(false);
 
-		if (this->iDLineEdit->text().length() == 6) {
+		if (this->iDLineEdit->text().length() == 7) {
 			this->searchPushButton->setEnabled(true);
 		}
 		else {
@@ -100,7 +100,40 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
-	/* TODO - apply FindDataBox funrtion from libisds */
+	/* TODO - apply FindDataBox function from libisds */
+	struct isds_DbOwnerInfo *criteria = NULL;
+	struct isds_PersonName *personName = NULL;
+	struct isds_Address *address = NULL;
+	struct isds_BirthInfo *birthInfo = NULL;
+
+	struct tm * timeinfo;
+	time_t rawtime;
+
+	/* get current timeinfo and modify it to the user's choice */
+	time ( &rawtime );
+	timeinfo = localtime ( &rawtime );
+	timeinfo->tm_year = 1;
+	timeinfo->tm_mon = 5;
+	timeinfo->tm_mday = 1;
+
+	personName = isds_PersonName_add(this->nameLineEdit->text(),
+	    this->nameLineEdit->text(), this->nameLineEdit->text(),
+	    this->nameLineEdit->text());
+	address = isds_Address_add("", "", "","" , this->pscLineEdit->text(), "");
+	birthInfo = isds_BirthInfo_add(timeinfo, "", "", "");
+	birthInfo = NULL;
+	struct isds_list *boxes = NULL;
+
+	criteria = isds_DbOwnerInfo_search(&boxes, m_userName, this->iDLineEdit->text(), DBTYPE_FO,
+	   this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
+	   birthInfo, address, "", "", "", "", "", 1, false, false);
+
+	qDebug() << criteria->dbType;
+	qDebug() << criteria->personName->pnFirstName;
+	qDebug() << criteria->birthInfo;
+
+
+
 	QList<QVector<QString>> list_contacts;
 	QVector<QString> contact;
 	contact.append("xxxx");
@@ -109,6 +142,11 @@ void DlgDsSearch::searchDataBox(void)
 	contact.append("62122");
 	list_contacts.append(contact);
 	addContactsToTable(list_contacts);
+
+	//isds_PersonName_free(&personName);
+	//isds_BirthInfo_free(&birthInfo);
+	//isds_Address_free(&address);
+	//isds_DbOwnerInfo_free(&criteria);
 }
 
 

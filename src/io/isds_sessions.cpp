@@ -222,3 +222,163 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	    userName.toStdString().c_str(), pwd.toStdString().c_str(), NULL,
 	    opt);
 }
+
+
+/* ========================================================================= */
+/*
+ * Add items into isds_PersonName structure.
+ */
+isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
+    const QString &pnMiddleName, const QString &pnLastName,
+    const QString &pnLastNameAtBirth)
+/* ========================================================================= */
+{
+	struct isds_PersonName *tmp = NULL;
+
+	tmp =(struct isds_PersonName *)
+	    malloc(sizeof(struct isds_PersonName));
+
+	if (tmp == NULL) {
+		free(tmp);
+		return NULL;
+	}
+
+	tmp->pnFirstName = !pnFirstName.isEmpty() ?
+	    strdup(pnFirstName.toStdString().c_str()) : NULL;
+	tmp->pnMiddleName = !pnMiddleName.isEmpty() ?
+	    strdup(pnMiddleName.toStdString().c_str()) : NULL;
+	tmp->pnLastName = !pnLastName.isEmpty() ?
+	    strdup(pnLastName.toStdString().c_str()) : NULL;
+	tmp->pnLastNameAtBirth = !pnLastNameAtBirth.isEmpty() ?
+	    strdup(pnLastNameAtBirth.toStdString().c_str()) : NULL;
+
+	return tmp;
+}
+
+/* ========================================================================= */
+/*
+ * Add items into isds_BirthInfo structure.
+ */
+ isds_BirthInfo * isds_BirthInfo_add(struct tm *biDate,
+    const QString &biCity, const QString &biCountry,
+    const QString &biState)
+/* ========================================================================= */
+{
+	struct isds_BirthInfo *tmp = NULL;
+
+	tmp =(struct isds_BirthInfo *)
+	    malloc(sizeof(struct isds_BirthInfo));
+
+	if (tmp == NULL) {
+		free(tmp);
+		return NULL;
+	}
+
+	tmp->biDate = biDate;
+	tmp->biCity = !biCity.isEmpty() ?
+	    strdup(biCity.toStdString().c_str()) : NULL;
+	tmp->biCounty = !biCountry.isEmpty() ?
+	    strdup(biCountry.toStdString().c_str()) : NULL;
+	tmp->biState = !biState.isEmpty() ?
+	    strdup(biState.toStdString().c_str()) : NULL;
+
+	return tmp;
+}
+
+
+/* ========================================================================= */
+/*
+ * Add items into isds_Address structure.
+ */
+isds_Address * isds_Address_add(const QString &adCity,
+    const QString &adStreet, const QString &adNumberInStreet,
+    const QString &adNumberInMunicipality, const QString &adZipCode,
+    const QString &adState)
+/* ========================================================================= */
+{
+	struct isds_Address *tmp = NULL;
+
+	tmp =(struct isds_Address *)
+	    malloc(sizeof(struct isds_Address));
+
+	if (tmp == NULL) {
+		free(tmp);
+		return NULL;
+	}
+
+	tmp->adCity = !adCity.isEmpty() ?
+	    strdup(adCity.toStdString().c_str()) : NULL;
+	tmp->adStreet = !adStreet.isEmpty() ?
+	    strdup(adStreet.toStdString().c_str()) : NULL;
+	tmp->adNumberInStreet = !adNumberInStreet.isEmpty() ?
+	    strdup(adNumberInStreet.toStdString().c_str()) : NULL;
+	tmp->adNumberInMunicipality = !adNumberInMunicipality.isEmpty() ?
+	    strdup(adNumberInMunicipality.toStdString().c_str()) : NULL;
+	tmp->adZipCode = !adZipCode.isEmpty() ?
+	    strdup(adZipCode.toStdString().c_str()) : NULL;
+	tmp->adState = !adState.isEmpty() ?
+	    strdup(adState.toStdString().c_str()) : NULL;
+
+	return tmp;
+}
+
+/* ========================================================================= */
+/*
+ * Add items into DbOwnerInfo structure.
+ */
+isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
+    const QString &dbID,
+    isds_DbType dbType, const QString &ic,
+    struct isds_PersonName *personName, const QString &firmName,
+    struct isds_BirthInfo *birthInfo, struct isds_Address *address,
+    const QString &nationality, const QString &email, const QString telNumber,
+    const QString &identifier, const QString &registryCode, long int dbState,
+    bool dbEffectiveOVM, bool dbOpenAddressing)
+/* ========================================================================= */
+{
+
+	struct isds_DbOwnerInfo *tmp = NULL;
+
+	tmp =(struct isds_DbOwnerInfo *)
+	    malloc(sizeof(struct isds_DbOwnerInfo));
+
+	if (tmp == NULL) {
+		free(tmp);
+		return NULL;
+	}
+
+	tmp->dbID = !dbID.isEmpty() ?
+	    strdup(dbID.toStdString().c_str()) : NULL;
+	tmp->ic = !ic.isEmpty() ?
+	    strdup(ic.toStdString().c_str()) : NULL;
+	tmp->firmName = !firmName.isEmpty() ?
+	    strdup(firmName.toStdString().c_str()) : NULL;
+	tmp->nationality = !nationality.isEmpty() ?
+	    strdup(nationality.toStdString().c_str()) : NULL;
+	tmp->email = !email.isEmpty() ?
+	    strdup(email.toStdString().c_str()) : NULL;
+	tmp->telNumber = !telNumber.isEmpty() ?
+	    strdup(telNumber.toStdString().c_str()) : NULL;
+	tmp->identifier = !identifier.isEmpty() ?
+	    strdup(identifier.toStdString().c_str()) : NULL;
+	tmp->registryCode = !registryCode.isEmpty() ?
+	    strdup(registryCode.toStdString().c_str()) : NULL;
+
+	tmp->dbType = &dbType;
+	tmp->dbEffectiveOVM = &dbEffectiveOVM;
+	tmp->dbOpenAddressing = &dbOpenAddressing;
+	tmp->personName = personName;
+	tmp->address = address;
+	tmp->birthInfo = birthInfo;
+	tmp->dbState = &dbState;
+
+	isds_error status;
+
+	qDebug() << "----------------------------------------------------";
+
+	status = isds_FindDataBox(isdsSessions.session(userName), tmp, result);
+
+	qDebug() << status << isds_strerror(status);
+
+	return tmp;
+}

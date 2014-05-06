@@ -118,8 +118,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	//createIsdsContextForAllDataBoxes();
-	//connectToAllDataBoxes();
+	createIsdsContextForAllDataBoxes();
+	connectToAllDataBoxes();
 
 }
 
