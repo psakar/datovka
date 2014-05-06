@@ -1,6 +1,7 @@
 
 
 #include "dlg_ds_search.h"
+#include "src/io/isds_sessions.h"
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
     QWidget *parent, QString userName)
@@ -99,13 +100,7 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
-	//isds_DbOwnerInfo *isdsSearch = NULL;
-	//isdsSearch->dbID = (char*)this->iDLineEdit->text().toStdString().c_str();
-	//isdsSearch.dbType = DBTYPE_OVM;
-	//isdsSearch->ic = (char*) this->iCLineEdit->text().toStdString().c_str();
-	//isdsSearch->firmName = (char*) this->nameLineEdit->text().toStdString().c_str();
-	//isdsSearch.address = (char*) this->pscLineEdit->text().toStdString().c_str();
-
+	/* TODO - apply FindDataBox funrtion from libisds */
 	QList<QVector<QString>> list_contacts;
 	QVector<QString> contact;
 	contact.append("xxxx");
