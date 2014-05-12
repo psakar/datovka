@@ -156,6 +156,7 @@ void DlgDsSearch::searchDataBox(void)
 
 			box = box->next;
 		}
+		this->resultsTableWidget->resizeColumnsToContents();
 	}
 
 

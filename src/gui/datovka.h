@@ -94,6 +94,8 @@ private slots:
 
 	void onTableColumnSort(int column);
 
+	void on_actionDownload_messages_triggered();
+
 private:
 
 	/*!

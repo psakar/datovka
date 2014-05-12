@@ -1604,3 +1604,38 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 	}
 	settings.endGroup();
 }
+
+void MainWindow::on_actionDownload_messages_triggered()
+{
+	isds_error status;
+/*
+	QString message_id = "1786066";
+	struct isds_message *message = NULL;
+
+	status = isds_get_received_envelope(isdsSessions.session(accountUserName()),
+	    message_id.toStdString().c_str(), &message);
+
+	qDebug() << status << isds_strerror(status);
+*/
+
+	struct isds_list *messageList = NULL;
+
+	status = isds_get_list_of_received_messages(isdsSessions.session(accountUserName()),
+	    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+
+	qDebug() << status << isds_strerror(status);
+
+	struct isds_list *box;
+	box = messageList;
+
+	while (0 != box) {
+
+		isds_message *item = (isds_message *) box->data;
+		qDebug() << item->envelope->dmID;
+		qDebug() << item->envelope->dmAnnotation;
+		qDebug() << item->envelope->dmSender;
+		qDebug() << item->envelope->dmDeliveryTime->tv_sec;
+
+		box = box->next;
+	}
+}

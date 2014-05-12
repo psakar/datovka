@@ -82,6 +82,7 @@ void DlgContacts::fillContactsFromMessageDb()
 		item->setText(contactList[i].at(2));
 		this->contactTableWidget->setItem(row,3,item);
 	}
+	this->contactTableWidget->resizeColumnsToContents();
 }
 
 void DlgContacts::enableOkButton(void)

@@ -11,6 +11,8 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
+#include "src/io/isds_sessions.h"
+
 
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
@@ -43,10 +45,10 @@ private slots:
 	void attItemSelect(void);
 	void checkInputFields(void);
 	void tableItemInsRem(void);
+	void sendMessage(void);
 
 private:
 	void initNewMessageDialog(void);
-	void sendMessage(void);
 
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
@@ -56,7 +58,6 @@ private:
 	QString m_sender;
 	QString m_senderAddress;
 	QString m_userName;
-
 	MessageDb &m_messDb;
 };
 
