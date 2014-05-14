@@ -106,6 +106,11 @@ public:
 	QVector<QString> msgsReplyDataTo(int dmId) const;
 
 	/*!
+	 * @brief Returns true if verification attempt was performed.
+	 */
+	bool msgsVerificationAttempted(int dmId) const;
+
+	/*!
 	 * @brief Return contacts from message db.
 	 */
 	QList< QVector<QString> > uniqueContacts(void);
@@ -143,11 +148,6 @@ private:
 	dbTableModel m_sqlModel; /*!< Model of displayed data. */
 
 	/*!
-	 * @brief Returns true if verification attempt was performed.
-	 */
-	bool msgsVarificationAttempted(int dmId) const;
-
-	/*!
 	 * @brief Returns whether message is verified.
 	 */
 	bool msgsVerified(int dmId) const;
@@ -156,6 +156,14 @@ private:
 	 * @brief Returns verification date.
 	 */
 	QDateTime msgsVerificationDate(int dmId) const;
+
+	/*!
+	 * @brief Returns time-stamp validity.
+	 *
+	 * @return Return time-stamp validity check, tst is invalid if none
+	 *     found.
+	 */
+	bool msgsCheckTimestamp(int dmId, QDateTime &tst) const;
 
 	/*!
 	 * @brief Read data from supplementary message data table.

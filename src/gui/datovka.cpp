@@ -533,16 +533,27 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 
 	const QAbstractItemModel *tableModel = current.model();
 
+	/* Disable message related buttons. */
+	ui->downloadComplete->setEnabled(false);
+	ui->saveAttachment->setEnabled(false);
+	ui->openAttachment->setEnabled(false);
+	ui->verifySignature->setEnabled(false);
+	ui->signatureDetails->setEnabled(false);
+
 	if (0 != tableModel) {
 		QModelIndex index = tableModel->index(
 		    current.row(), 0); /* First column. */
 
 		MessageDb *messageDb = accountMessageDb();
+		int msgId = tableModel->itemData(index).first().toInt();
 
-		ui->messageInfo->setHtml(
-		    messageDb->descriptionHtml(
-		        tableModel->itemData(index).first().toInt()));
+		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
 		ui->messageInfo->setReadOnly(true);
+
+		/* Enable buttons according to databse content. */
+		ui->verifySignature->setEnabled(
+		    !messageDb->msgsVerificationAttempted(msgId));
+		ui->signatureDetails->setEnabled(true);
 
 	} else {
 		ui->messageInfo->setHtml("");

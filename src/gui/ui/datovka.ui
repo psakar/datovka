@@ -289,7 +289,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="signatueDetails">
+                 <widget class="QToolButton" name="signatureDetails">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -377,7 +377,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

@@ -457,6 +457,34 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 
 /* ========================================================================= */
 /*
+ * Returns true if verification attempt was performed.
+ */
+bool MessageDb::msgsVerificationAttempted(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	bool ok;
+
+	queryStr = "SELECT "
+	    "is_verified"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	// qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		/* If no value is set then the conversion will fail. */
+		query.value(0).toInt(&ok);
+		return ok;
+	}
+
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Return contact list from message db.
  */
 QList< QVector<QString> > MessageDb::uniqueContacts(void)
@@ -654,7 +682,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 	html += "<h3>" + tr("Signature") + "</h3>";
 	/* Signature. */
-	if (!msgsVarificationAttempted(dmId)) {
+	if (!msgsVerificationAttempted(dmId)) {
 		/* Verification no attempted. */
 		html += strongAccountInfoLine(tr("Message signature"),
 		    tr("Not present"));
@@ -681,6 +709,19 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		/* TODO */
 	}
 
+	/* Time-stamp. */
+	QDateTime tst;
+	bool valid = msgsCheckTimestamp(dmId, tst);
+	QString timeStampStr;
+	if (!tst.isValid()) {
+		timeStampStr = tr("Not present");
+	} else {
+		timeStampStr = valid ? tr("Valid") : tr("Invalid");
+		/* TODO -- Print time-stamp. */
+	}
+	html += strongAccountInfoLine(tr("Time-stamp"),
+	    "TODO");
+
 	/* TODO */
 
 	html += divEnd;
@@ -690,34 +731,6 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	/* TODO */
 
 	return html;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns true if verification attempt was performed.
- */
-bool MessageDb::msgsVarificationAttempted(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	bool ok;
-
-	queryStr = "SELECT "
-	    "is_verified"
-	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		/* If no value is set then the conversion will fail. */
-		query.value(0).toInt(&ok);
-		return ok;
-	}
-
-	return false;
 }
 
 
@@ -763,7 +776,7 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 		    "download_date"
 		    " FROM supplementary_message_data WHERE "
 		    "message_id = " + QString::number(dmId);
-		// qDebug() << queryStr;
+		//qDebug() << queryStr;
 		query.prepare(queryStr);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
@@ -778,6 +791,47 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 	}
 
 	return QDateTime::currentDateTime();
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns time-stamp validity.
+ */
+bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &tst) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QList<QSslCertificate> certs;
+
+	tst = QDateTime();
+
+	queryStr = "SELECT "
+	    "dmQTimestamp"
+	    " FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	//qDebug() << queryStr;
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		//qDebug() << "timestamp" << query.value(0).toString();
+		QByteArray byteArray = query.value(0).toByteArray();
+		if (byteArray.isEmpty()) {
+			return false;
+		}
+
+		//qDebug() << QByteArray::fromBase64(byteArray);
+		/*
+		 * TODO -- Time from base64 encoded timestamp.
+		 * RFC3161 (ASN.1 encoded).
+		 * ISDS provozni rad, appendix 2 -- Manipulace s datovymi
+		 * zpravami.
+		 */
+
+	}
+
+	return false;
 }
 
 

@@ -12,6 +12,10 @@
 
 /* TODO -- Check whether session is active. */
 
+/* Global ISDS context container instance. */
+class GlobIsdsSessions;
+extern GlobIsdsSessions isdsSessions;
+
 
 /*!
  * @brief Holds the ISDS context structures.
@@ -42,10 +46,6 @@ public:
 private:
 	QMap<QString, struct isds_ctx *> m_sessions;
 };
-
-
-/* Global ISDS context container instance. */
-extern GlobIsdsSessions isdsSessions;
 
 
 /*!
@@ -118,7 +118,6 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
     const QString &nationality, const QString &email, const QString telNumber,
     const QString &identifier, const QString &registryCode, long int dbState,
     bool dbEffectiveOVM, bool dbOpenAddressing);
-
 
 
 #endif /* _ISDS_SESSIONS_H_ */

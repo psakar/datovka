@@ -6,6 +6,9 @@
 #include "src/common.h"
 
 
+GlobIsdsSessions isdsSessions;
+
+
 /* ========================================================================= */
 GlobIsdsSessions::GlobIsdsSessions(void)
 /* ========================================================================= */
@@ -118,9 +121,6 @@ struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
 
 	return m_sessions.value(userName);
 }
-
-
-GlobIsdsSessions isdsSessions;
 
 
 /* ========================================================================= */
