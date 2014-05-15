@@ -12,7 +12,7 @@
 #include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
-
+#include "datovka.h"
 
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
@@ -26,6 +26,7 @@ public:
 
 	DlgSendMessage(MessageDb &db, Action action,
 	    QTreeView &accountList, QTableView &messageList,
+	    AccountStructInfo accountinfo,
 	    QWidget *parent = 0,
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
@@ -53,12 +54,15 @@ private:
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
 	const Action m_action;
+	AccountStructInfo m_accountinfo;
 	QString m_reSubject;
 	QString m_senderId;
 	QString m_sender;
 	QString m_senderAddress;
 	QString m_userName;
 	MessageDb &m_messDb;
+
+
 };
 
 

@@ -18,6 +18,7 @@ public:
 	};
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
+	    AccountStructInfo accountinfo,
 	    QWidget *parent = 0, QString useName = "");
 
 private slots:
@@ -34,6 +35,7 @@ private:
 	QTableWidget *m_recipientTableWidget;
 	Action m_action;
 	QString m_userName;
+	AccountStructInfo m_accountinfo;
 };
 
 

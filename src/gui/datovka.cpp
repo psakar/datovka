@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_accountDb("accountDb"),
     m_messageDbs(),
     m_searchLine(NULL),
+    m_statusProgressBar(NULL),
     m_messageListProxyModel(this),
     m_received_1(200),
     m_received_2(200),
@@ -66,6 +67,25 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->toolBar->addAction(
 	    QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
 	    "", this, SLOT(on_actionSearchClear_triggered()));
+
+	/* Create status bar label */
+	QLabel* statusLabel = new QLabel(this);
+	statusLabel->setText(tr("Status:"));
+	statusLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	ui->statusBar->addWidget(statusLabel,1);
+
+	/* Create progress bar object and set default value */
+	m_statusProgressBar = new QProgressBar(this);
+	m_statusProgressBar->setAlignment(Qt::AlignRight);
+	m_statusProgressBar->setMinimumWidth(100);
+	m_statusProgressBar->setMaximumWidth(200);
+	m_statusProgressBar->setTextVisible(true);
+	m_statusProgressBar->setRange(0,100);
+	m_statusProgressBar->setValue(0);
+	setDefaultProgressStatus();
+	ui->statusBar->addWidget(m_statusProgressBar,1);
+
+
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -118,13 +138,27 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	createIsdsContextForAllDataBoxes();
-	connectToAllDataBoxes();
-
+	//createIsdsContextForAllDataBoxes();
+	//connectToAllDataBoxes();
 }
 
 
+/* ========================================================================= */
+/*
+ * Set default status of progress bar
+ */
+void MainWindow::setDefaultProgressStatus(void)
+/* ========================================================================= */
+{
+	m_statusProgressBar->setFormat(tr("Idle"));
+}
+
+/* ========================================================================= */
+/*
+ * Create isds context for all accounts
+ */
 bool MainWindow::createIsdsContextForAllDataBoxes(void)
+/* ========================================================================= */
 {
 	int row = ui->accountList->model()->rowCount();
 	for (int i = 0; i < row; i++) {
@@ -135,7 +169,12 @@ bool MainWindow::createIsdsContextForAllDataBoxes(void)
 }
 
 
+/* ========================================================================= */
+/*
+ * Connect to all databoxes
+ */
 bool MainWindow::connectToAllDataBoxes(void)
+/* ========================================================================= */
 {
 	int row = ui->accountList->model()->rowCount();
 	for (int i = 0; i < row; i++) {
@@ -146,7 +185,12 @@ bool MainWindow::connectToAllDataBoxes(void)
 }
 
 
+/* ========================================================================= */
+/*
+ * Create isds context for databox given by account index
+ */
 int MainWindow::createIsdsContext(const QModelIndex &index)
+/* ========================================================================= */
 {
 	/* Create isds context for account index */
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
@@ -166,10 +210,18 @@ int MainWindow::createIsdsContext(const QModelIndex &index)
 }
 
 
+/* ========================================================================= */
+/*
+ * Connect to databox specified by account index
+ */
 bool MainWindow::connectToDataBox(const QModelIndex &index)
+/* ========================================================================= */
 {
 	isds_error status = IE_SUCCESS;
 
+	qDebug() << index;
+
+	m_statusProgressBar->setFormat(tr("Connecting to account"));
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItem->data(ROLE_CONF_SETINGS).toMap();
@@ -250,13 +302,14 @@ bool MainWindow::connectToDataBox(const QModelIndex &index)
 
 	}
 
+	setDefaultProgressStatus();
+
 	if (IE_SUCCESS != status) {
 		qDebug() << "Error connecting to ISDS.";
 		return false;
 	}
 	return true;
 }
-
 
 
 /* ========================================================================= */
@@ -1043,12 +1096,14 @@ void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
 	m_received_2 = settings.value("column_widths/received_2", 200).toInt();
 	m_sent_1 = settings.value("column_widths/sent_1", 200).toInt();
 	m_sent_2 = settings.value("column_widths/sent_2", 200).toInt();
-	m_sort_column =	settings.value("message_ordering/sort_column", 0).toInt();
+	m_sort_column =	settings.value("message_ordering/sort_column", 0)
+	    .toInt();
 	/* Sort column saturation from old datovka */
 	if (m_sort_column > 5) {
 		m_sort_column = 1;
 	}
-	m_sort_order = settings.value("message_ordering/sort_order", "").toString();
+	m_sort_order = settings.value("message_ordering/sort_order", "")
+	    .toString();
 }
 
 /* ========================================================================= */
@@ -1199,6 +1254,45 @@ void MainWindow::on_actionCreate_message_triggered()
 
 /* ========================================================================= */
 /*
+* Get account info from
+ */
+AccountStructInfo MainWindow::getAccountInfos(QModelIndex index)
+/* ========================================================================= */
+{
+	AccountStructInfo accountinfo;
+
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItem->data(ROLE_CONF_SETINGS).toMap();
+	qDebug() << itemSettings[USER].toString();
+
+	accountinfo.login_method = itemSettings[LOGIN].toString();
+	accountinfo.userName = itemSettings[USER].toString();
+	accountinfo.password = itemSettings[PWD].toString();
+	accountinfo.testAccount  = itemSettings[TEST].toBool();
+	accountinfo.certPath = itemSettings[P12FILE].toString();
+
+	return accountinfo;
+}
+
+
+
+/* ========================================================================= */
+/*
+* Get top level index from current index
+ */
+QModelIndex MainWindow::topLevelFromIndex(QModelIndex index)
+/* ========================================================================= */
+{
+	while (index.parent().isValid()) {
+		index = index.parent();
+	}
+	return index;
+}
+
+
+/* ========================================================================= */
+/*
 * Send message slot
  */
 void MainWindow::on_actionSent_message_triggered()
@@ -1208,12 +1302,17 @@ void MainWindow::on_actionSent_message_triggered()
 	 * TODO -- This method copies on_actionReply_to_the_sender_triggered().
 	 * Delete one of them.
 	 */
+	QModelIndex index = ui->accountList->currentIndex();
+	index = topLevelFromIndex(index);
+
+	AccountStructInfo accountinfo;
+	accountinfo = getAccountInfos(index);
 
 	MessageDb *messageDb = accountMessageDb();
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
-	    this);
+	    accountinfo, this);
 	newMessageDialog->show();
 }
 
@@ -1376,10 +1475,15 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    tableModel->itemData(index).first().toInt());
 
 	/* TODO */
+	index = ui->accountList->currentIndex();
+	index = topLevelFromIndex(index);
+
+	AccountStructInfo accountinfo;
+	accountinfo = getAccountInfos(index);
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    this, replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
+	    accountinfo, this, replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
 }
 
@@ -1390,8 +1494,16 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
+
+	QModelIndex index = ui->accountList->currentIndex();
+	index = topLevelFromIndex(index);
+
+	AccountStructInfo accountinfo;
+	accountinfo = getAccountInfos(index);
+
 	QString userName = accountUserName();
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0, this, userName);
+	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
+	    accountinfo, this, userName);
 	dsSearch->show();
 }
 
@@ -1619,19 +1731,11 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 void MainWindow::on_actionDownload_messages_triggered()
 {
 	isds_error status;
-/*
-	QString message_id = "1786066";
-	struct isds_message *message = NULL;
-
-	status = isds_get_received_envelope(isdsSessions.session(accountUserName()),
-	    message_id.toStdString().c_str(), &message);
-
-	qDebug() << status << isds_strerror(status);
-*/
 
 	struct isds_list *messageList = NULL;
 
-	status = isds_get_list_of_received_messages(isdsSessions.session(accountUserName()),
+	status = isds_get_list_of_received_messages(isdsSessions.
+	    session(accountUserName()),
 	    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
 
 	qDebug() << status << isds_strerror(status);
@@ -1639,14 +1743,24 @@ void MainWindow::on_actionDownload_messages_triggered()
 	struct isds_list *box;
 	box = messageList;
 
-	while (0 != box) {
+	int row = ui->messageList->model()->rowCount();
+	for (int i = 0; i < row; i++) {
+		QModelIndex index = ui->messageList->model()->index(i,0);
+	}
 
+
+	int cnt = 0;
+
+	while (0 != box) {
+		cnt++;
 		isds_message *item = (isds_message *) box->data;
+		qDebug() << cnt << ") ----------";
 		qDebug() << item->envelope->dmID;
 		qDebug() << item->envelope->dmAnnotation;
 		qDebug() << item->envelope->dmSender;
-		qDebug() << item->envelope->dmDeliveryTime->tv_sec;
-
+//		qDebug() << item->envelope->dmDeliveryTime->tv_sec;
+//		qDebug() << item->envelope->dmAcceptanceTime->tv_sec;
 		box = box->next;
 	}
+
 }

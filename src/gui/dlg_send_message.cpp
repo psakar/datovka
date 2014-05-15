@@ -7,10 +7,11 @@
 #include "src/models/accounts_model.h"
 #include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
+#include "src/io/isds_sessions.h"
 
 
 DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
-    QTreeView &accountList, QTableView &messageList,
+    QTreeView &accountList, QTableView &messageList, AccountStructInfo accountinfo,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
     const QString &senderAddress)
@@ -18,6 +19,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
     m_accountList(accountList),
     m_messageList(messageList),
     m_action(action),
+    m_accountinfo(accountinfo),
     m_reSubject(reSubject),
     m_senderId(senderId),
     m_sender(sender),
@@ -230,7 +232,7 @@ void DlgSendMessage::addRecipientData(void)
 /* ========================================================================= */
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, this, m_userName);
+	    this->recipientTableWidget, m_accountinfo, this, m_userName);
 	dsSearch->show();
 }
 
@@ -325,13 +327,15 @@ void isds_message_copy_free_void(void **message_copy)
 
 /* ========================================================================= */
 /*
- * Sent message/multiple message
+ * Send message/multiple message
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 
 {
-	/* TODO - test if you are still connecting into ISDS */
+	if (!isdsSessions.isConnectToIsds(m_accountinfo.userName)) {
+		isdsSessions.connectToIsds(m_accountinfo);
+	}
 
 	isds_error status;
 

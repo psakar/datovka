@@ -9,6 +9,7 @@
 #include <QMap>
 #include <QString>
 
+#include "src/common.h"
 
 /* TODO -- Check whether session is active. */
 
@@ -42,6 +43,11 @@ public:
 	 * @brief Returns associated session.
 	 */
 	struct isds_ctx * session(const QString &userName) const;
+
+
+	void connectToIsds(AccountStructInfo accountInfo);
+
+	bool isConnectToIsds(const QString userName);
 
 private:
 	QMap<QString, struct isds_ctx *> m_sessions;
@@ -119,5 +125,14 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
     const QString &identifier, const QString &registryCode, long int dbState,
     bool dbEffectiveOVM, bool dbOpenAddressing);
 
+
+/*!
+ * @brief Create DbUserInfo structure.
+ */
+isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
+    isds_UserType userType, long int userPrivils,
+    struct isds_PersonName *personName, struct isds_Address *address,
+    const QString &ic, const QString &firmName, const QString &caStreet,
+    const QString &caCity, const QString &caZipCode, const QString &caState);
 
 #endif /* _ISDS_SESSIONS_H_ */

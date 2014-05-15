@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #include "isds_sessions.h"
-#include "src/common.h"
+
 
 
 GlobIsdsSessions isdsSessions;
@@ -69,6 +69,121 @@ bool GlobIsdsSessions::holdsSession(const QString &userName) const
 {
 	return 0 != m_sessions.value(userName, 0);
 }
+
+
+/* ========================================================================= */
+/*
+ * Is connect to databox given by account index
+ */
+bool GlobIsdsSessions::isConnectToIsds(QString userName)
+/* ========================================================================= */
+{
+	isds_error status;
+
+	if (!isdsSessions.holdsSession(userName)) {
+		return false;
+	}
+
+	status = isds_ping(isdsSessions.session(userName));
+	if (IE_SUCCESS == status) {
+		return true;
+	}
+	return false;
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Is connect to databox
+ */
+void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
+/* ========================================================================= */
+{
+	isds_error status = IE_SUCCESS;
+
+	qDebug() << accountInfo.login_method;
+
+	if (!isdsSessions.holdsSession(accountInfo.userName)) {
+		createCleanSession(accountInfo.userName);
+	}
+
+	/* Login method based on username and password */
+	if (accountInfo.login_method == "username") {
+
+		if (accountInfo.password.isEmpty()) {
+			/* TODO -- Ask for password if password is empty. */
+			accountInfo.password = "xxx";
+		}
+		status = isdsLoginUserName(
+		    isdsSessions.session(accountInfo.userName),
+		    accountInfo.userName, accountInfo.password,
+		    accountInfo.testAccount);
+
+	/* Login method based on certificate only */
+	} else if (accountInfo.login_method == "certificate") {
+
+		isds_pki_credentials *pki_credentials = NULL;
+		//pki_credentials->engine = NULL;
+		//pki_credentials->certificate_format = PKI_FORMAT_DER;
+		// malloc
+		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
+		//pki_credentials->key_format = PKI_FORMAT_DER;
+		//pki_credentials->key = NULL;
+		//pki_credentials->passphrase = NULL;
+
+		QString iDbox = "TODO";
+		/* TODO -- The account is not identified with a user name! */
+
+		status = isdsLoginCert(isdsSessions.session(iDbox),
+		    pki_credentials, accountInfo.testAccount);
+
+	/* Login method based on certificate together with username */
+	} else if (accountInfo.login_method == "user_certificate") {
+
+		isds_pki_credentials *pki_credentials = NULL;
+		//pki_credentials->engine = NULL;
+		//pki_credentials->certificate_format = PKI_FORMAT_DER;
+		// malloc
+		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
+		//pki_credentials->key_format = PKI_FORMAT_DER;
+		//pki_credentials->key = NULL;
+		//pki_credentials->passphrase = NULL;
+
+		if (accountInfo.password.isNull()) {
+			status = isdsLoginUserCert(
+			    isdsSessions.session(accountInfo.userName),
+			    accountInfo.userName /* boxId */,
+			    pki_credentials, accountInfo.testAccount);
+		} else {
+			status = isdsLoginUserCertPwd(
+			    isdsSessions.session(accountInfo.userName),
+			    accountInfo.userName, accountInfo.password,
+			    pki_credentials, accountInfo.testAccount);
+		}
+
+	/* Login method based username and otp */
+	} else {
+
+		isds_otp *opt = NULL;
+
+		if (isdsSessions.holdsSession(accountInfo.userName)) {
+			status = isdsLoginUserOtp(
+			    isdsSessions.session(accountInfo.userName),
+			    accountInfo.userName, accountInfo.password,
+			    opt, accountInfo.testAccount);
+		}
+
+	}
+
+	if (IE_SUCCESS != status) {
+		qDebug() << "Error connecting to ISDS.";
+		return;
+	}
+	return;
+}
+
+
 
 
 /* ========================================================================= */
@@ -346,6 +461,8 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
 		return NULL;
 	}
 
+	memset(tmp, 0, sizeof(struct isds_DbOwnerInfo));
+
 	tmp->dbID = !dbID.isEmpty() ?
 	    strdup(dbID.toStdString().c_str()) : NULL;
 	tmp->ic = !ic.isEmpty() ?
@@ -378,3 +495,51 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
 
 	return tmp;
 }
+
+/* ========================================================================= */
+/*
+ * Create DbUserInfo structure and Search DataBoxes.
+ */
+isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
+    isds_UserType userType, long int userPrivils,
+    struct isds_PersonName *personName, struct isds_Address *address,
+    const QString &ic, const QString &firmName, const QString &caStreet,
+    const QString &caCity, const QString &caZipCode, const QString &caState)
+/* ========================================================================= */
+{
+	struct isds_DbUserInfo  *tmp = NULL;
+
+	tmp =(struct isds_DbUserInfo  *)
+	    malloc(sizeof(struct isds_DbUserInfo));
+
+	if (tmp == NULL) {
+		free(tmp);
+		return NULL;
+	}
+
+	memset(tmp, 0, sizeof(struct isds_DbUserInfo));
+
+	tmp->userID = !userID.isEmpty() ?
+	    strdup(userID.toStdString().c_str()) : NULL;
+	tmp->ic = !ic.isEmpty() ?
+	    strdup(ic.toStdString().c_str()) : NULL;
+	tmp->firmName = !firmName.isEmpty() ?
+	    strdup(firmName.toStdString().c_str()) : NULL;
+	tmp->caStreet = !caStreet.isEmpty() ?
+	    strdup(caStreet.toStdString().c_str()) : NULL;
+	tmp->caCity = !caCity.isEmpty() ?
+	    strdup(caCity.toStdString().c_str()) : NULL;
+	tmp->caZipCode = !caZipCode.isEmpty() ?
+	    strdup(caZipCode.toStdString().c_str()) : NULL;
+	tmp->caState = !caState.isEmpty() ?
+	    strdup(caState.toStdString().c_str()) : NULL;
+
+	tmp->userType = &userType;
+	tmp->personName = personName;
+	tmp->address = address;
+	tmp->userPrivils = &userPrivils;
+
+	return tmp;
+}
+
+
