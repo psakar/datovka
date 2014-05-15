@@ -77,11 +77,20 @@ MessageDb::~MessageDb(void)
 bool MessageDb::openDb(const QString &fileName)
 /* ========================================================================= */
 {
+	bool ret;
+
 	m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
 
 	m_db.setDatabaseName(fileName);
 
-	return m_db.open();
+	ret = m_db.open();
+
+	if (ret) {
+		/* Ensure database contains all tables. */
+		createEmptyMissingTables();
+	}
+
+	return ret;
 }
 
 
@@ -731,6 +740,54 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	/* TODO */
 
 	return html;
+}
+
+
+/* ========================================================================= */
+/*
+ * Create empty tables if tables do not already exist.
+ */
+void MessageDb::createEmptyMissingTables(void)
+/* ========================================================================= */
+{
+	bool ret;
+
+	if (!msgsTbl.existsInDb(this->m_db)) {
+		ret = msgsTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!flsTbl.existsInDb(this->m_db)) {
+		ret = flsTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!hshsTbl.existsInDb(this->m_db)) {
+		ret = hshsTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!evntsTbl.existsInDb(this->m_db)) {
+		ret = evntsTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!rwmsgdtTbl.existsInDb(this->m_db)) {
+		ret = rwmsgdtTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!rwdlvrinfdtTbl.existsInDb(this->m_db)) {
+		ret = rwdlvrinfdtTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!smsgdtTbl.existsInDb(this->m_db)) {
+		ret = smsgdtTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!crtdtTbl.existsInDb(this->m_db)) {
+		ret = crtdtTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+	if (!msgcrtdtTbl.existsInDb(this->m_db)) {
+		ret = msgcrtdtTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
 }
 
 

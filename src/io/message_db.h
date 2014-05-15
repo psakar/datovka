@@ -148,6 +148,11 @@ private:
 	dbTableModel m_sqlModel; /*!< Model of displayed data. */
 
 	/*!
+	 * @brief Create empty tables if tables do not already exist.
+	 */
+	void createEmptyMissingTables(void);
+
+	/*!
 	 * @brief Returns whether message is verified.
 	 */
 	bool msgsVerified(int dmId) const;
