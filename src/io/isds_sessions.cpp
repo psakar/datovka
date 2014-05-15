@@ -1,6 +1,8 @@
 
 
 #include <QDebug>
+#include <QInputDialog>
+#include <QObject>
 
 #include "isds_sessions.h"
 
@@ -102,8 +104,6 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 {
 	isds_error status = IE_SUCCESS;
 
-	qDebug() << accountInfo.login_method;
-
 	if (!isdsSessions.holdsSession(accountInfo.userName)) {
 		createCleanSession(accountInfo.userName);
 	}
@@ -112,8 +112,18 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 	if (accountInfo.login_method == "username") {
 
 		if (accountInfo.password.isEmpty()) {
-			/* TODO -- Ask for password if password is empty. */
-			accountInfo.password = "xxx";
+			bool ok;
+			QString text = "";
+			while (text.isEmpty()) {
+				text = QInputDialog::getText(0,
+				    QObject::tr("Enter password"),
+				    QObject::tr("Enter password for account ") +
+				    accountInfo.userName,
+				    QLineEdit::Password, "", &ok);
+				if (ok && !text.isEmpty()) {
+					accountInfo.password = text;
+				}
+			}
 		}
 		status = isdsLoginUserName(
 		    isdsSessions.session(accountInfo.userName),
@@ -156,6 +166,22 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 			    accountInfo.userName /* boxId */,
 			    pki_credentials, accountInfo.testAccount);
 		} else {
+
+
+			if (accountInfo.password.isEmpty()) {
+				bool ok;
+				QString text = "";
+				while (text.isEmpty()) {
+					text = QInputDialog::getText(0,
+					    QObject::tr("Enter certificate password"),
+					    QObject::tr("Enter certificate password for account ") +
+					    accountInfo.userName,
+					    QLineEdit::Password, "", &ok);
+					if (ok && !text.isEmpty()) {
+						accountInfo.password = text;
+					}
+				}
+			}
 			status = isdsLoginUserCertPwd(
 			    isdsSessions.session(accountInfo.userName),
 			    accountInfo.userName, accountInfo.password,
@@ -164,7 +190,20 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 
 	/* Login method based username and otp */
 	} else {
-
+		if (accountInfo.password.isEmpty()) {
+			bool ok;
+			QString text = "";
+			while (text.isEmpty()) {
+				text = QInputDialog::getText(0,
+				    QObject::tr("Enter password"),
+				    QObject::tr("Enter password for account ") +
+				    accountInfo.userName,
+				    QLineEdit::Password, "", &ok);
+				if (ok && !text.isEmpty()) {
+					accountInfo.password = text;
+				}
+			}
+		}
 		isds_otp *opt = NULL;
 
 		if (isdsSessions.holdsSession(accountInfo.userName)) {
