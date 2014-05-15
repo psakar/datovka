@@ -106,6 +106,12 @@ public:
 	static
 	QStandardItem * itemTop(QStandardItem *item);
 
+	/*!
+	 * @brief Returns index to related top-most item.
+	 */
+	static
+	QModelIndex indexTop(const QModelIndex &index);
+
 #if 0
 	/*!
 	 * @brief Get user name of the account.

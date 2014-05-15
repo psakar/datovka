@@ -27,11 +27,7 @@ class MainWindow : public QMainWindow {
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
-	bool connectToDataBox(const QModelIndex &index);
-	int createIsdsContext(const QModelIndex &index);
 
-	bool createIsdsContextForAllDataBoxes(void);
-	bool connectToAllDataBoxes(void);
 	void setDefaultProgressStatus(void);
 	AccountStructInfo getAccountInfos(QModelIndex index);
 
@@ -170,11 +166,6 @@ private:
 	 * @brief Set received message column widths.
 	 */
 	void setReciveidColumnWidths(void);
-
- 	/*!
-	 * @brief Get top level index from current index
-	 */
-	QModelIndex topLevelFromIndex(QModelIndex index);
 
 	/*!
 	 * @brief Set sent message column widths.

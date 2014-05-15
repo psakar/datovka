@@ -35,11 +35,11 @@
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
+    m_statusProgressBar(NULL),
     m_accountModel(this),
     m_accountDb("accountDb"),
     m_messageDbs(),
     m_searchLine(NULL),
-    m_statusProgressBar(NULL),
     m_messageListProxyModel(this),
     m_received_1(200),
     m_received_2(200),
@@ -137,9 +137,6 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
-
-	//createIsdsContextForAllDataBoxes();
-	//connectToAllDataBoxes();
 }
 
 
@@ -151,164 +148,6 @@ void MainWindow::setDefaultProgressStatus(void)
 /* ========================================================================= */
 {
 	m_statusProgressBar->setFormat(tr("Idle"));
-}
-
-/* ========================================================================= */
-/*
- * Create isds context for all accounts
- */
-bool MainWindow::createIsdsContextForAllDataBoxes(void)
-/* ========================================================================= */
-{
-	int row = ui->accountList->model()->rowCount();
-	for (int i = 0; i < row; i++) {
-		QModelIndex index = m_accountModel.index(i,0);
-		bool ret = createIsdsContext(index);
-	}
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Connect to all databoxes
- */
-bool MainWindow::connectToAllDataBoxes(void)
-/* ========================================================================= */
-{
-	int row = ui->accountList->model()->rowCount();
-	for (int i = 0; i < row; i++) {
-		QModelIndex index = m_accountModel.index(i,0);
-		connectToDataBox(index);
-	}
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Create isds context for databox given by account index
- */
-int MainWindow::createIsdsContext(const QModelIndex &index)
-/* ========================================================================= */
-{
-	/* Create isds context for account index */
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-	const AccountModel::SettingsMap &itemSettings =
-	    accountItem->data(ROLE_CONF_SETINGS).toMap();
-	QString userName = itemSettings[USER].toString();
-
-	if (isdsSessions.holdsSession(userName)) {
-		return EXIT_SUCCESS;
-	}
-
-	if (0 != isdsSessions.createCleanSession(userName)) {
-		return EXIT_SUCCESS;
-	} else {
-		return EXIT_FAILURE;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Connect to databox specified by account index
- */
-bool MainWindow::connectToDataBox(const QModelIndex &index)
-/* ========================================================================= */
-{
-	isds_error status = IE_SUCCESS;
-
-	qDebug() << index;
-
-	m_statusProgressBar->setFormat(tr("Connecting to account"));
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-	const AccountModel::SettingsMap &itemSettings =
-	    accountItem->data(ROLE_CONF_SETINGS).toMap();
-
-	const QString &login_method  = itemSettings[LOGIN].toString();
-	const QString &userName  = itemSettings[USER].toString();
-	QString password  = itemSettings[PWD].toString();
-	const bool testAccount  = itemSettings[TEST].toBool();
-
-	if (!isdsSessions.holdsSession(userName)) {
-		return false;
-	}
-
-	/* Login method based on username and password */
-	if (login_method == "username") {
-
-		if (password.isEmpty()) {
-			/* TODO -- Ask for password if password is empty. */
-			password = "xxx";
-		}
-		status = isdsLoginUserName(isdsSessions.session(userName),
-		    userName, password, testAccount);
-
-	/* Login method based on certificate only */
-	} else if (login_method == "certificate") {
-
-		isds_pki_credentials *pki_credentials = NULL;
-		QString certPath = itemSettings[P12FILE].toString();
-		//pki_credentials->engine = NULL;
-		//pki_credentials->certificate_format = PKI_FORMAT_DER;
-		// malloc
-		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
-		//pki_credentials->key_format = PKI_FORMAT_DER;
-		//pki_credentials->key = NULL;
-		//pki_credentials->passphrase = NULL;
-
-		QString iDbox = "TODO";
-		/* TODO -- The account is not identified with a user name! */
-
-		status = isdsLoginCert(isdsSessions.session(iDbox),
-		    pki_credentials, testAccount);
-
-	/* Login method based on certificate together with username */
-	} else if (login_method == "user_certificate") {
-
-		isds_pki_credentials *pki_credentials = NULL;
-		QString certPath = itemSettings[P12FILE].toString();
-		//pki_credentials->engine = NULL;
-		//pki_credentials->certificate_format = PKI_FORMAT_DER;
-		// malloc
-		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
-		//pki_credentials->key_format = PKI_FORMAT_DER;
-		//pki_credentials->key = NULL;
-		//pki_credentials->passphrase = NULL;
-
-		if (password.isNull()) {
-			status = isdsLoginUserCert(
-			    isdsSessions.session(userName),
-			    userName /* boxId */,
-			    pki_credentials, testAccount);
-		} else {
-			status = isdsLoginUserCertPwd(
-			    isdsSessions.session(userName),
-			    userName /* boxId */, password,
-			    pki_credentials, testAccount);
-		}
-
-	/* Login method based username and otp */
-	} else {
-
-		isds_otp *opt = NULL;
-
-		if (isdsSessions.holdsSession(userName)) {
-			status = isdsLoginUserOtp(
-			    isdsSessions.session(userName), userName, password,
-			    opt, testAccount);
-		}
-
-	}
-
-	setDefaultProgressStatus();
-
-	if (IE_SUCCESS != status) {
-		qDebug() << "Error connecting to ISDS.";
-		return false;
-	}
-	return true;
 }
 
 
@@ -1276,21 +1115,6 @@ AccountStructInfo MainWindow::getAccountInfos(QModelIndex index)
 }
 
 
-
-/* ========================================================================= */
-/*
-* Get top level index from current index
- */
-QModelIndex MainWindow::topLevelFromIndex(QModelIndex index)
-/* ========================================================================= */
-{
-	while (index.parent().isValid()) {
-		index = index.parent();
-	}
-	return index;
-}
-
-
 /* ========================================================================= */
 /*
 * Send message slot
@@ -1303,7 +1127,7 @@ void MainWindow::on_actionSent_message_triggered()
 	 * Delete one of them.
 	 */
 	QModelIndex index = ui->accountList->currentIndex();
-	index = topLevelFromIndex(index);
+	index = AccountModel::indexTop(index);
 
 	AccountStructInfo accountinfo;
 	accountinfo = getAccountInfos(index);
@@ -1316,6 +1140,7 @@ void MainWindow::on_actionSent_message_triggered()
 	newMessageDialog->show();
 }
 
+
 /* ========================================================================= */
 /*
  * Create account dialog for addition new.
@@ -1327,6 +1152,7 @@ void MainWindow::on_actionAdd_account_triggered()
 	    DlgCreateAccount::ACT_ADDNEW, this);
 	newAccountDialog->exec();
 }
+
 
 /* ========================================================================= */
 /*
@@ -1476,7 +1302,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 
 	/* TODO */
 	index = ui->accountList->currentIndex();
-	index = topLevelFromIndex(index);
+	index = AccountModel::indexTop(index);
 
 	AccountStructInfo accountinfo;
 	accountinfo = getAccountInfos(index);
@@ -1496,7 +1322,7 @@ void MainWindow::on_actionFind_databox_triggered()
 {
 
 	QModelIndex index = ui->accountList->currentIndex();
-	index = topLevelFromIndex(index);
+	index = AccountModel::indexTop(index);
 
 	AccountStructInfo accountinfo;
 	accountinfo = getAccountInfos(index);

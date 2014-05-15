@@ -272,6 +272,27 @@ QStandardItem * AccountModel::itemTop(QStandardItem *item)
 }
 
 
+/* ========================================================================= */
+/*
+ * Returns index to related top-most item.
+ */
+QModelIndex AccountModel::indexTop(const QModelIndex &index)
+/* ========================================================================= */
+{
+	QModelIndex top = index;
+
+	if (!top.isValid()) {
+		return top;
+	}
+
+	while (top.parent().isValid()) {
+		top = top.parent();
+	}
+
+	return top;
+}
+
+
 #if 0
 /* ========================================================================= */
 /*
