@@ -16,7 +16,13 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 	initSearchWindow();
 }
 
+
+/* ========================================================================= */
+/*
+ * Init ISDS search dialog
+ */
 void DlgDsSearch::initSearchWindow(void)
+/* ========================================================================= */
 {
 	this->dataBoxTypeCBox->addItem(tr("OMV - Orgán věřejné moci"));
 	this->dataBoxTypeCBox->addItem(tr("PO - Právnická osoba"));
@@ -52,7 +58,13 @@ void DlgDsSearch::initSearchWindow(void)
 
 }
 
+
+/* ========================================================================= */
+/*
+ *  Checke input fields in the dialog
+ */
 void DlgDsSearch::checkInputFields(void)
+/* ========================================================================= */
 {
 	if (this->dataBoxTypeCBox->currentIndex() == 3) {
 		this->iCLineEdit->setEnabled(false);
@@ -99,12 +111,16 @@ void DlgDsSearch::checkInputFields(void)
 }
 
 
+/* ========================================================================= */
+/*
+ *  Call ISDS and find databoxes via given criteria
+ */
 void DlgDsSearch::searchDataBox(void)
+/* ========================================================================= */
 {
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
 
-	struct isds_DbOwnerInfo *criteria = NULL;
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_BirthInfo *birthInfo = NULL;
@@ -126,7 +142,7 @@ void DlgDsSearch::searchDataBox(void)
 	personName = isds_PersonName_add(this->nameLineEdit->text(),
 	    this->nameLineEdit->text(), this->nameLineEdit->text(),
 	    this->nameLineEdit->text());
-	address = isds_Address_add("", "", "","" , this->pscLineEdit->text(), "");
+	address = isds_Address_add("","","","", this->pscLineEdit->text(), "");
 
 	struct isds_list *boxes = NULL;
 
@@ -135,9 +151,10 @@ void DlgDsSearch::searchDataBox(void)
 	}
 
 
-	criteria = isds_DbOwnerInfo_search(&boxes, m_userName, this->iDLineEdit->text(), dbType,
-	   this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
-	   birthInfo, address, "", "", "", "", "", 1, false, false);
+	isds_DbOwnerInfo_search(&boxes, m_userName,
+	    this->iDLineEdit->text(), dbType,
+	    this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
+	    birthInfo, address, "", "", "", "", "", 1, false, false);
 
 	struct isds_list *box;
 	box = boxes;
@@ -165,19 +182,19 @@ void DlgDsSearch::searchDataBox(void)
 		this->resultsTableWidget->resizeColumnsToContents();
 	}
 
-
 	isds_PersonName_free(&personName);
 	isds_Address_free(&address);
 	isds_BirthInfo_free(&birthInfo);
-
 	isds_list_free(&boxes);
-
-	/* TODO - free criteria struct */
-	//isds_DbOwnerInfo_free(&criteria);
 }
 
 
+/* ========================================================================= */
+/*
+ *  Enable action button
+ */
 void DlgDsSearch::enableOkButton(void)
+/* ========================================================================= */
 {
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
@@ -189,8 +206,13 @@ void DlgDsSearch::enableOkButton(void)
 }
 
 
+/* ========================================================================= */
+/*
+ * At contact list from ISDS into search result table widget
+ */
 void DlgDsSearch::addContactsToTable(
     const QList< QVector<QString> > &contactList)
+/* ========================================================================= */
 {
 	this->resultsTableWidget->setRowCount(0);
 
@@ -218,7 +240,12 @@ void DlgDsSearch::addContactsToTable(
 }
 
 
+/* ========================================================================= */
+/*
+ *  Test if the selected item is not in recipient list
+ */
 bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
+/* ========================================================================= */
 {
 	Q_ASSERT(0 != m_recipientTableWidget);
 
@@ -231,7 +258,12 @@ bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
 }
 
 
+/* ========================================================================= */
+/*
+ *  Insert selected item into recipient list of the sent message dialog
+ */
 void DlgDsSearch::insertDsItems(void)
+/* ========================================================================= */
 {
 	if (ACT_ADDNEW == m_action) {
 		Q_ASSERT(0 != m_recipientTableWidget);

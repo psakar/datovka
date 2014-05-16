@@ -14,12 +14,12 @@ class DlgChangePwd : public QDialog, public Ui::ChangePwd {
 
 public:
 	DlgChangePwd(const QString &boxId, QTreeView &accountList,
-	    QWidget *parent = 0);
+	    AccountStructInfo accountinfo, QWidget *parent = 0);
 
 private slots:
 	void generatePassword(void);
 	void showHidePasswordLine(void);
-	void saveChange(void);
+	void changePassword(void);
 	void checkInputFields(void);
 
 private:
@@ -34,6 +34,7 @@ private:
 	const int randomStringLength;
 
 	QTreeView &m_accountList;
+	AccountStructInfo m_accountinfo;
 	const QString m_boxId;
 };
 

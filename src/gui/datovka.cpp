@@ -1197,7 +1197,14 @@ void MainWindow::on_actionChange_password_triggered()
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
-	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList), this);
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+
+	AccountStructInfo accountinfo;
+	accountinfo = getAccountInfos(index);
+
+	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList),
+	    accountinfo, this);
 	changePwd->exec();
 }
 
@@ -1320,7 +1327,6 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
-
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
@@ -1554,10 +1560,23 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 	settings.endGroup();
 }
 
+
+
+
+
+
 void MainWindow::on_actionDownload_messages_triggered()
 {
-	isds_error status;
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+	AccountStructInfo accountinfo;
+	accountinfo = getAccountInfos(index);
 
+	if (!isdsSessions.isConnectToIsds(accountinfo.userName)) {
+		isdsSessions.connectToIsds(accountinfo);
+	}
+
+	isds_error status;
 	struct isds_list *messageList = NULL;
 
 	status = isds_get_list_of_received_messages(isdsSessions.

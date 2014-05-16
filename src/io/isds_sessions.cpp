@@ -480,8 +480,8 @@ isds_Address * isds_Address_add(const QString &adCity,
 /*
  * Create DbOwnerInfo structure and Search DataBoxes.
  */
-isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
-    const QString &dbID,
+void isds_DbOwnerInfo_search(struct isds_list **result,
+    const QString &userName, const QString &dbID,
     isds_DbType dbType, const QString &ic,
     struct isds_PersonName *personName, const QString &firmName,
     struct isds_BirthInfo *birthInfo, struct isds_Address *address,
@@ -497,7 +497,7 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
 
 	if (tmp == NULL) {
 		free(tmp);
-		return NULL;
+		return;
 	}
 
 	memset(tmp, 0, sizeof(struct isds_DbOwnerInfo));
@@ -531,8 +531,6 @@ isds_DbOwnerInfo * isds_DbOwnerInfo_search(struct isds_list **result, const QStr
 	status = isds_FindDataBox(isdsSessions.session(userName), tmp, result);
 
 	qDebug() << status << isds_strerror(status);
-
-	return tmp;
 }
 
 /* ========================================================================= */
