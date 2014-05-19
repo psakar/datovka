@@ -15,7 +15,13 @@ DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, Action action,
 	initAccountDialog();
 }
 
+
+/* ========================================================================= */
+/*
+ * Init dialog
+ */
 void DlgCreateAccount::initAccountDialog(void)
+/* ========================================================================= */
 {
 	this->loginmethodComboBox->addItem(tr("Password"));
 	this->loginmethodComboBox->addItem(tr("Certificate"));
@@ -39,12 +45,19 @@ void DlgCreateAccount::initAccountDialog(void)
 	connect(this->passwordLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
+	/* if account exists then we set all items */
 	if (ACT_EDIT == m_action) {
 		setCurrentAccountData();
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ * Set current account data from dsgui.conf (exist account edit)
+ */
 void DlgCreateAccount::setCurrentAccountData(void)
+/* ========================================================================= */
 {
 	int itemindex;
 
@@ -92,7 +105,12 @@ void DlgCreateAccount::setCurrentAccountData(void)
 }
 
 
+/* ========================================================================= */
+/*
+ * Open load dialog and set certificate file path
+ */
 void DlgCreateAccount::addCertificateFromFile(void)
+/* ========================================================================= */
 {
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "", tr("Certificate File (*.p12)"));
@@ -111,7 +129,13 @@ void DlgCreateAccount::addCertificateFromFile(void)
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ *  Check content of mandatory items in dialog and activate save button
+ */
 void DlgCreateAccount::checkInputFields(void)
+/* ========================================================================= */
 {
 	bool buttonEnabled;
 	if (m_loginmethod == CERTIFICATE) {
@@ -132,7 +156,13 @@ void DlgCreateAccount::checkInputFields(void)
 	    setEnabled(buttonEnabled);
 }
 
+
+/* ========================================================================= */
+/*
+ * Set active/inactive buttons based on login method
+ */
 void DlgCreateAccount::setActiveButton(int itemindex)
+/* ========================================================================= */
 {
 	if (itemindex == CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
@@ -146,7 +176,6 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLabel->setEnabled(true);
 		this->passwordLineEdit->setEnabled(true);
 		this->rememberPswcheckBox->setEnabled(true);
-
 	} else {
 		this->certificateLabel->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
@@ -158,7 +187,13 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 	checkInputFields();
 }
 
+
+/* ========================================================================= */
+/*
+ *  Create and save a new account into dsgui.conf
+ */
 void DlgCreateAccount::saveAccount(void)
+/* ========================================================================= */
 {
 	AccountModel *model = dynamic_cast<AccountModel*>(
 	    m_accountList.model());
