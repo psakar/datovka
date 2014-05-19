@@ -1561,11 +1561,12 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 }
 
 
-
-
-
-
+/* ========================================================================= */
+/*
+* Download message list from ISDS for current account
+*/
 void MainWindow::on_actionDownload_messages_triggered()
+/* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
@@ -1579,33 +1580,48 @@ void MainWindow::on_actionDownload_messages_triggered()
 	isds_error status;
 	struct isds_list *messageList = NULL;
 
+	/* Download message list from ISDS  for current account */
 	status = isds_get_list_of_received_messages(isdsSessions.
-	    session(accountUserName()),
+	    session(accountinfo.userName),
 	    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
 
 	qDebug() << status << isds_strerror(status);
 
+	if (status != IE_SUCCESS) {
+		isds_list_free(&messageList);
+		return;
+	}
+
 	struct isds_list *box;
 	box = messageList;
 
-	int row = ui->messageList->model()->rowCount();
-	for (int i = 0; i < row; i++) {
-		QModelIndex index = ui->messageList->model()->index(i,0);
-	}
-
-
-	int cnt = 0;
-
+	int messcnt = 0;
+	int newcnt = 0;
 	while (0 != box) {
-		cnt++;
+		messcnt++;
 		isds_message *item = (isds_message *) box->data;
-		qDebug() << cnt << ") ----------";
-		qDebug() << item->envelope->dmID;
-		qDebug() << item->envelope->dmAnnotation;
-		qDebug() << item->envelope->dmSender;
-//		qDebug() << item->envelope->dmDeliveryTime->tv_sec;
-//		qDebug() << item->envelope->dmAcceptanceTime->tv_sec;
+		int dmId = atoi(item->envelope->dmID);
+//		qDebug() << dmId;
+		MessageDb *messageDb = accountMessageDb();
+		if (!messageDb->isInMessageDb(dmId)) {
+			/* TODO - insert into db */
+
+			newcnt++;
+			QModelIndex itemindex = index.child(0,0);
+			QString label = itemindex.data().toString();
+			label = label + " (" + QString::number(newcnt) + ")";
+			QStandardItem *accountitem = m_accountModel.itemFromIndex(itemindex);
+			accountitem->setText(label);
+			QFont font;
+			font.setBold(true);
+			accountitem->setFont(font);
+
+			qDebug() << newcnt << ") ----------";
+			qDebug() << item->envelope->dmID;
+			qDebug() << item->envelope->dmAnnotation;
+			qDebug() << item->envelope->dmSender;
+		}
 		box = box->next;
 	}
-
+	qDebug() << "# messages" << messcnt;
 }

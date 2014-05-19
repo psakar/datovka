@@ -1086,3 +1086,32 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	this->insert(key, db);
 	return db;
 }
+
+
+
+/* ========================================================================= */
+/*
+ * Check if any message (dmID) exists in the table
+ */
+bool MessageDb::isInMessageDb(int dmId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT count(*) FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			Q_ASSERT(query.value(0).toInt() < 2);
+			if (query.value(0).toInt() == 1) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+

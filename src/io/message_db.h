@@ -121,6 +121,11 @@ public:
 	QString descriptionHtml(int dmId, bool showId = false,
 	    bool warnOld = true) const;
 
+	/*!
+	 * @brief Check if any message (dmID) exists in the table.
+	 */
+	bool isInMessageDb(int dmId);
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.
