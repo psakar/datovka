@@ -172,6 +172,15 @@ void DlgChangePwd::changePassword(void)
 		    tr("Password has been changed successfully...") + "\n" +
 		    tr("Reference number: ") + result,
 		    QMessageBox::Ok);
+
+		AccountModel *model = dynamic_cast<AccountModel*>(
+		    m_accountList.model());
+		QModelIndex index = m_accountList.currentIndex();
+		QStandardItem *item = model->itemFromIndex(index);
+		QStandardItem *itemTop = AccountModel::itemTop(item);
+		AccountModel::SettingsMap itemSettings =
+		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		itemSettings[PWD] = this->newPwdLineEdit->text();
 	} else {
 		QMessageBox::warning(this, tr("Password error"),
 		    tr("An error occurred while password was changed")
