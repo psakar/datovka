@@ -158,4 +158,10 @@ const QString authorTypeToText(const QString &authorType);
 const QString msgStatusToText(int status);
 
 
+/*!
+ * @brief Changes all occurrences of '\' to '/' in given file.
+ */
+void fixBackSlashesInFile(const QString &fileName);
+
+
 #endif /* _COMMON_H_ */

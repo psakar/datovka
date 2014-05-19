@@ -32,11 +32,15 @@ const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
     "dmAcceptanceTime", "dmMessageStatus"};
 
 
+const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
+    "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
+
+
 /* ========================================================================= */
 /*
  * Convert viewed data in date/time columns.
  */
-QVariant dbTableModel::data(const QModelIndex &index, int role) const
+QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */
 {
 	if ((Qt::DisplayRole == role) &&
@@ -53,10 +57,32 @@ QVariant dbTableModel::data(const QModelIndex &index, int role) const
 
 
 /* ========================================================================= */
+/*
+ * Compute viewed data in file size column.
+ */
+QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
+/* ========================================================================= */
+{
+	/* TODO -- Add accurate attachment size computation. */
+	if ((Qt::DisplayRole == role) && (4 == index.column())) {
+		/* Compute attachment size from base64 length. */
+		return QSqlQueryModel::data(index, role).toInt() * 3 / 4;
+		/* TODO -- Add fast accurate attachment size computation. */
+		//const QByteArray &b64 = QSqlQueryModel::data(
+		//    index.sibling(index.row(), 2), role).toByteArray();
+		//return QByteArray::fromBase64(b64).size();
+	} else {
+		return QSqlQueryModel::data(index, role);
+	}
+}
+
+
+/* ========================================================================= */
 MessageDb::MessageDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
-    m_sqlModel()
+    m_sqlMsgsModel(),
+    m_sqlFilesModel()
 {
 	m_db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
 }
@@ -112,18 +138,18 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -149,18 +175,18 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -186,18 +212,18 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -281,18 +307,18 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -318,18 +344,18 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -355,18 +381,18 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	query.prepare(queryStr);
 	query.exec();
 
-	m_sqlModel.setQuery(query);
+	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* Description. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).desc);
 		/* Data type. */
-		m_sqlModel.setHeaderData(i, Qt::Horizontal,
+		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
 		    ROLE_DB_ENTRY_TYPE);
 	}
 
-	return &m_sqlModel;
+	return &m_sqlMsgsModel;
 }
 
 
@@ -745,6 +771,72 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 
 /* ========================================================================= */
 /*
+ * Return files related to given message.
+ */
+QAbstractTableModel * MessageDb::flsModel(int msgId)
+/* ========================================================================= */
+{
+	int i;
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT ";
+	for (i = 0; i < (fileItemIds.size() - 1); ++i) {
+		queryStr += fileItemIds[i] + ", ";
+	}
+	queryStr += fileItemIds.last();
+	queryStr += " FROM files WHERE "
+	    "message_id = " + QString::number(msgId);
+	//qDebug() << queryStr;
+	query.prepare(queryStr);
+	query.exec();
+
+	/* First three columns ought to be hidden. */
+
+	m_sqlFilesModel.setQuery(query);
+	for (i = 0; i < fileItemIds.size(); ++i) {
+		/* Description. */
+		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
+		    flsTbl.attrProps.value(fileItemIds[i]).desc);
+		/* Data type. */
+		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
+		    flsTbl.attrProps.value(fileItemIds[i]).type,
+		    ROLE_DB_ENTRY_TYPE);
+	}
+
+	/* Rename last column to file size. */
+	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal, tr("File Size"));
+
+	return &m_sqlFilesModel;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check if any message (dmID) exists in the table
+ */
+bool MessageDb::isInMessageDb(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT count(*) FROM messages WHERE "
+	    "dmID = " + QString::number(dmId);
+	query.prepare(queryStr);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			Q_ASSERT(query.value(0).toInt() < 2);
+			if (query.value(0).toInt() == 1) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Create empty tables if tables do not already exist.
  */
 void MessageDb::createEmptyMissingTables(void)
@@ -1086,32 +1178,3 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	this->insert(key, db);
 	return db;
 }
-
-
-
-/* ========================================================================= */
-/*
- * Check if any message (dmID) exists in the table
- */
-bool MessageDb::isInMessageDb(int dmId)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT count(*) FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	query.prepare(queryStr);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			Q_ASSERT(query.value(0).toInt() < 2);
-			if (query.value(0).toInt() == 1) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-

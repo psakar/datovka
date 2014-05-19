@@ -1,5 +1,7 @@
 
 
+#include <QFile>
+
 #include "common.h"
 
 
@@ -407,5 +409,28 @@ const QString msgStatusToText(int status)
 	default:
 		return QString();
 		break;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Changes all occurrences of '\' to '/' in given file.
+ */
+void fixBackSlashesInFile(const QString &fileName)
+/* ========================================================================= */
+{
+	QString line;
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadWrite|QIODevice::Text)) {
+		QTextStream in(&file);
+		line = in.readAll();
+		line.replace(QString("\\"), QString("/"));
+		file.reset();
+		in << line;
+		file.close();
+	} else {
+		qDebug() << "Error: Cannot open file '" << fileName << "'";
 	}
 }

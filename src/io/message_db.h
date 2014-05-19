@@ -5,6 +5,7 @@
 
 
 #include <QJsonDocument>
+#include <QMap>
 #include <QSslCertificate>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
@@ -13,16 +14,30 @@
 
 
 /*!
- * @brief Custom model class.
+ * @brief Custom message model class.
  *
- * Used for data conversion on display.
+ * Used for data conversion on display. (Use proxy model?)
  *
  * @note setItemDelegate and a custom ItemDelegate would also be the solution.
  */
-class dbTableModel : public QSqlQueryModel {
+class DbMsgsTblModel : public QSqlQueryModel {
 public:
 	/*!
 	 * @brief Convert viewed data in date/time columns.
+	 */
+	virtual QVariant data(const QModelIndex &index, int role) const;
+};
+
+
+/*!
+ * @brief Custom file model class.
+ *
+ * Used for data conversion on display. (Use proxy model?)
+ */
+class DbFlsTblModel : public QSqlQueryModel {
+public:
+	/*!
+	 * @brief Compute viewed data in file size column.
 	 */
 	virtual QVariant data(const QModelIndex &index, int role) const;
 };
@@ -122,9 +137,14 @@ public:
 	    bool warnOld = true) const;
 
 	/*!
+	 * @brief Return files related to given message.
+	 */
+	QAbstractTableModel * flsModel(int msgId);
+
+	/*!
 	 * @brief Check if any message (dmID) exists in the table.
 	 */
-	bool isInMessageDb(int dmId);
+	bool isInMessageDb(int dmId) const;
 
 protected:
 	/*!
@@ -148,9 +168,12 @@ private:
 	const QVector<QString> msgAttribs2;
 	static
 	const QVector<QString> msgStatus;
+	static
+	const QVector<QString> fileItemIds;
 
 	QSqlDatabase m_db; /*!< Message database. */
-	dbTableModel m_sqlModel; /*!< Model of displayed data. */
+	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
+	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
 
 	/*!
 	 * @brief Create empty tables if tables do not already exist.

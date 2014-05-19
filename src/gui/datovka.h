@@ -38,26 +38,28 @@ private slots:
 	void on_actionProxy_settings_triggered();
 
 	/*!
-	 * @brief Redraws widgets according to selected item.
+	 * @brief Redraws widgets according to selected account item.
 	 */
-	void treeItemSelectionChanged(const QModelIndex &current,
+	void accountItemSelectionChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
-	 * @brief Generates menu to selected item. (And redraw widgets.)
+	 * @brief Generates menu to selected account item.
+	 *     (And redraw widgets.)
 	 */
-	void treeItemRightClicked(const QPoint &point);
+	void accountItemRightClicked(const QPoint &point);
 
 	/*!
 	 * @brief Sets content of widgets according to selected message.
 	 */
-	void tableItemSelectionChanged(const QModelIndex &current,
+	void messageItemSelectionChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
-	 * @brief Generates menu to selected item. (And redraw widgets.)
+	 * @brief Generates menu to selected message item.
+	 *      (And redraw widgets.)
 	 */
-	void tableItemRightClicked(const QPoint &point);
+	void messageItemRightClicked(const QPoint &point);
 
 	void on_actionCreate_message_triggered();
 
@@ -109,13 +111,6 @@ private:
 	 * @brief Default settings of main window.
 	 */
 	void defaultUiMainWindowSettings(void) const;
-
-	/*!
-	 * @brief Changes all occurrences of '\' to '/' in given file.
-	 */
-	/* TODO -- Move to common? */
-	static
-	void fixBackSlashesInFile(const QString &fileName);
 
 	/*!
 	 * @brief Create configuration file if not present.

@@ -86,16 +86,15 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
 
-
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->accountList, SIGNAL(customContextMenuRequested(QPoint)),
-	    this, SLOT(treeItemRightClicked(QPoint)));
+	    this, SLOT(accountItemRightClicked(QPoint)));
 
 	/* Message list. */
 	ui->messageList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
-	    this, SLOT(tableItemRightClicked(QPoint)));
+	    this, SLOT(messageItemRightClicked(QPoint)));
 
 	m_confDirName = confDir();
 	m_confFileName = m_confDirName + "/" + CONF_FILE;
@@ -120,7 +119,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Account list must already be set in order to connect this signal. */
 	connect(ui->accountList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(treeItemSelectionChanged(QModelIndex, QModelIndex)));
+	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
 
 	/* Enable sort of table items */
 	ui->messageList->setSortingEnabled(true);
@@ -148,29 +147,6 @@ void MainWindow::setDefaultProgressStatus(void)
 /* ========================================================================= */
 {
 	m_statusProgressBar->setFormat(tr("Idle"));
-}
-
-
-/* ========================================================================= */
-/*
- * Changes all occurrences of '\' to '/' in given file.
- */
-void MainWindow::fixBackSlashesInFile(const QString &fileName)
-/* ========================================================================= */
-{
-	QString line;
-	QFile file(fileName);
-
-	if (file.open(QIODevice::ReadWrite|QIODevice::Text)) {
-		QTextStream in(&file);
-		line = in.readAll();
-		line.replace(QString("\\"), QString("/"));
-		file.reset();
-		in << line;
-		file.close();
-	} else {
-		qDebug() << "Error: Cannot open ini file";
-	}
 }
 
 
@@ -211,16 +187,16 @@ void MainWindow::on_actionProxy_settings_triggered()
 
 /* ========================================================================= */
 /*
- * Redraws widgets according to selected item.
+ * Redraws widgets according to selected account item.
  */
-void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
+void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
 	(void) previous; /* Unused. */
 
 	QString html;
-	QAbstractTableModel *tableModel;
+	QAbstractTableModel *msgTblMdl;
 
 	const QStandardItem *accountItem =
 	    m_accountModel.itemFromIndex(current);
@@ -247,11 +223,11 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		html = createAccountInfo(*accountItem);
 		break;
 	case AccountModel::nodeRecentReceived:
-		tableModel = messageDb->msgsRcvdWithin90DaysModel(dbId);
+		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		break;
 	case AccountModel::nodeRecentSent:
-		tableModel = messageDb->msgsSntWithin90DaysModel(dbId);
+		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
 		html = createAccountInfoAllField(tr("All messages"),
@@ -259,19 +235,19 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		    messageDb->msgsSntYearlyCounts(dbId));
 		break;
 	case AccountModel::nodeReceived:
-		tableModel = messageDb->msgsRcvdModel(dbId);
+		msgTblMdl = messageDb->msgsRcvdModel(dbId);
 		break;
 	case AccountModel::nodeSent:
-		tableModel = messageDb->msgsSntModel(dbId);
+		msgTblMdl = messageDb->msgsSntModel(dbId);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
-		tableModel = messageDb->msgsRcvdInYearModel(dbId,
+		msgTblMdl = messageDb->msgsRcvdInYearModel(dbId,
 		    accountItem->text());
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
-		tableModel = messageDb->msgsSntInYearModel(dbId,
+		msgTblMdl = messageDb->msgsSntInYearModel(dbId,
 		    accountItem->text());
 		break;
 	default:
@@ -287,7 +263,8 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 		/* New model hasn't been set yet. */
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
+		    SLOT(messageItemSelectionChanged(QModelIndex,
+		         QModelIndex)));
 	}
 
 	/* Depending on which item was clicked show/hide elements. */
@@ -302,25 +279,26 @@ void MainWindow::treeItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		/*  set columns width*/
+		/* Set specific column width. */
 		setReciveidColumnWidths();
 		goto setmodel;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		/*  set columns width*/
+		/* Set specific column width. */
 		setSentColumnWidths();
 
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
-		Q_ASSERT(0 != tableModel);
-		ui->messageList->setModel(tableModel);
+		Q_ASSERT(0 != msgTblMdl);
+		ui->messageList->setModel(msgTblMdl);
 		/* Apply message filter. */
 		filterMessages(m_searchLine->text());
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(tableItemSelectionChanged(QModelIndex, QModelIndex)));
+		    SLOT(messageItemSelectionChanged(QModelIndex,
+		        QModelIndex)));
 		/* Clear message info. */
 		ui->messageInfo->clear();
 		/* Select last message in list if there are some messages. */
@@ -351,16 +329,17 @@ setmodel:
 
 /* ========================================================================= */
 /*
- * Account context right menu
+ * Generates menu to selected account item.
+ *     (And redraw widgets.)
  */
-void MainWindow::treeItemRightClicked(const QPoint &point)
+void MainWindow::accountItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-		//treeItemSelectionChanged(index);
+		//accountItemSelectionChanged(index);
 
 		menu->addAction(
 		   QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
@@ -417,28 +396,29 @@ void MainWindow::treeItemRightClicked(const QPoint &point)
 /*
  * Sets content of widgets according to selected message.
  */
-void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
+void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
 	(void) previous; /* Unused. */
 
-	const QAbstractItemModel *tableModel = current.model();
+	const QAbstractItemModel *msgTblMdl = current.model();
 
 	/* Disable message related buttons. */
-	ui->downloadComplete->setEnabled(false);
+	ui->downloadComplete->setEnabled(true);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
 	ui->verifySignature->setEnabled(false);
 	ui->signatureDetails->setEnabled(false);
 
-	if (0 != tableModel) {
-		QModelIndex index = tableModel->index(
+	if (0 != msgTblMdl) {
+		QModelIndex index = msgTblMdl->index(
 		    current.row(), 0); /* First column. */
 
 		MessageDb *messageDb = accountMessageDb();
-		int msgId = tableModel->itemData(index).first().toInt();
+		int msgId = msgTblMdl->itemData(index).first().toInt();
 
+		/* Generate and show message information. */
 		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
 		ui->messageInfo->setReadOnly(true);
 
@@ -446,6 +426,16 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 		ui->verifySignature->setEnabled(
 		    !messageDb->msgsVerificationAttempted(msgId));
 		ui->signatureDetails->setEnabled(true);
+
+		/* Show files related to message message. */
+		QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
+		Q_ASSERT(0 != fileTblMdl);
+		//qDebug() << "Setting files";
+		ui->messageAttachmentList->setModel(fileTblMdl);
+		/* First three columns contain hidden data. */
+		ui->messageAttachmentList->setColumnHidden(0, true);
+		ui->messageAttachmentList->setColumnHidden(1, true);
+		ui->messageAttachmentList->setColumnHidden(2, true);
 
 	} else {
 		ui->messageInfo->setHtml("");
@@ -458,16 +448,17 @@ void MainWindow::tableItemSelectionChanged(const QModelIndex &current,
 
 /* ========================================================================= */
 /*
- * Generates menu to selected item. (And redraw widgets.)
+ * Generates menu to selected message item.
+ *     (And redraw widgets.)
  */
-void MainWindow::tableItemRightClicked(const QPoint &point)
+void MainWindow::messageItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
 	QModelIndex index = ui->messageList->indexAt(point);
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-		//tableItemSelectionChanged(index);
+		//messageItemSelectionChanged(index);
 
 		/* TODO */
 		menu->addAction(QIcon(ICON_16x16_PATH +
@@ -794,7 +785,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				    indexFromItem(item);
 				ui->accountList->
 				    setCurrentIndex(index.child(0,0));
-				treeItemSelectionChanged(index.child(0,0));
+				accountItemSelectionChanged(index.child(0,0));
 				ui->menuDatabox->setEnabled(true);
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);

@@ -346,10 +346,10 @@ namespace FlsTbl {
 	const QMap<QString, AttrProp> attrProps = {
 	{"id",               {DB_INTEGER, ""}},
 	{"message_id",       {DB_INTEGER, ""}},
-	{"_dmFileDescr",     {DB_TEXT, ""}},
+	{"_dmFileDescr",     {DB_TEXT, QObject::tr("File name")}},
 	{"_dmUpFileGuid",    {DB_TEXT, ""}},
 	{"_dmFileGuid",      {DB_TEXT, ""}},
-	{"_dmMimeType",      {DB_TEXT, ""}},
+	{"_dmMimeType",      {DB_TEXT, QObject::tr("Mime type")}},
 	{"_dmFormat",        {DB_TEXT, ""}},
 	{"_dmFileMetaType",  {DB_TEXT, ""}},
 	{"dmEncodedContent", {DB_TEXT, ""}}
