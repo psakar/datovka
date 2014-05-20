@@ -83,6 +83,11 @@ private slots:
 	 */
 	void saveSelectedAttachmentToFile(void);
 
+	/*!
+	 * @brief Open attachment in default application.
+	 */
+	void openAttachment(void);
+
 	void on_actionCreate_message_triggered();
 
 	void on_actionSent_message_triggered();

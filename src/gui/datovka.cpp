@@ -1,10 +1,12 @@
 
+#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
+#include <QTemporaryFile>
 
 #include "datovka.h"
 #include "src/common.h"
@@ -154,7 +156,8 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->downloadComplete
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
 	    SLOT(saveSelectedAttachmentToFile()));
-//	ui->openAttachment
+	connect(ui->openAttachment, SIGNAL(clicked()), this,
+	    SLOT(openAttachment()));
 //	ui->verifySignature
 //	ui->signatureDetails
 }
@@ -555,8 +558,8 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 
 		/* TODO */
 		menu->addAction(QIcon(ICON_3PARTY_PATH +
-		    QString("folder_16.png")),
-		    tr("Open attachment"));
+		    QString("folder_16.png")), tr("Open attachment"), this,
+		    SLOT(openAttachment()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH +
 		    QString("save_16.png")), tr("Save attachment"), this,
 		    SLOT(saveSelectedAttachmentToFile()));
@@ -574,7 +577,9 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
-	qDebug() << "Attachment double clicked.";
+	(void) index;
+	//qDebug() << "Attachment double clicked.";
+	openAttachment();
 }
 
 
@@ -603,6 +608,7 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 		return;
 	}
 	QString fileName = fileNameIndex.data().toString();
+	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Remember directory? */
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"), fileName);
@@ -635,6 +641,74 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	}
 
 	fout.close();
+}
+
+
+/* ========================================================================= */
+/*
+ * Open attachment in default application.
+ */
+void MainWindow::openAttachment(void)
+/* ========================================================================= */
+{
+	QModelIndex selectedIndex =
+	    ui->messageAttachmentList->selectionModel()->currentIndex();
+	    /* selection().indexes() ? */
+
+	//qDebug() << "Open attachment." << selectedIndex;
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return;
+	}
+
+	QModelIndex fileNameIndex =
+	    selectedIndex.sibling(selectedIndex.row(), 3);
+	Q_ASSERT(fileNameIndex.isValid());
+	if(!fileNameIndex.isValid()) {
+		return;
+	}
+	QString fileName = fileNameIndex.data().toString();
+	Q_ASSERT(!fileName.isEmpty());
+	/* TODO -- Add message id into file name? */
+	fileName = "qdatovka_XXXXXX_" + fileName;
+
+	//qDebug() << "Selected file: " << fileName;
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	if (!fout.open()) {
+		return; /* TODO -- Error message. */
+	}
+
+	fout.setAutoRemove(false);
+
+	fileName = fout.fileName();
+
+	/* Get data from base64. */
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	Q_ASSERT(dataIndex.isValid());
+	if (!dataIndex.isValid()) {
+		return;
+	}
+	//qDebug() << "Data index." << dataIndex;
+
+	QByteArray data =
+	    QByteArray::fromBase64(dataIndex.data().toByteArray());
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+		/* TODO -- Error message? */
+	}
+
+	fout.close();
+
+	//qDebug() << "file://" + fileName;
+	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	/* TODO -- Handle openUrl() return value. */
 }
 
 
