@@ -45,7 +45,7 @@ private slots:
 
 	/*!
 	 * @brief Generates menu to selected account item.
-	 *     (And redraw widgets.)
+	 *     (And redraws widgets.)
 	 */
 	void accountItemRightClicked(const QPoint &point);
 
@@ -57,9 +57,26 @@ private slots:
 
 	/*!
 	 * @brief Generates menu to selected message item.
-	 *      (And redraw widgets.)
+	 *     (And redraws widgets.)
 	 */
 	void messageItemRightClicked(const QPoint &point);
+
+	/*!
+	 * @brief Redraws widgets according to selected attachment item.
+	 */
+	void attachmentItemSelectionChanged(const QModelIndex &current,
+	    const QModelIndex &previous = QModelIndex());
+
+	/*!
+	 * @brief Generates menu to selected message item.
+	 *     (And redraws widgets.)
+	 */
+	void attachmentItemRightClicked(const QPoint &point);
+
+	/*!
+	 * @brief Handle attachment double click.
+	 */
+	void attachmentItemDoubleClicked(const QModelIndex &index);
 
 	void on_actionCreate_message_triggered();
 

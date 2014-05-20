@@ -121,18 +121,31 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
 
-	/* Enable sort of table items */
+	/* Enable sorting of message table items. */
 	ui->messageList->setSortingEnabled(true);
 
-	/* set default columns size */
+	/* Set default column size. */
+	/* TODO -- Check whether received of sent messages are shown? */
 	setReciveidColumnWidths();
 
-	/* Is it fires when any collumn was resized */
+	/* Attachment list. */
+	connect(ui->messageAttachmentList->selectionModel(),
+	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+	    SLOT(attachmentItemSelectionChanged(QModelIndex, QModelIndex)));
+	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->messageAttachmentList,
+	    SIGNAL(customContextMenuRequested(QPoint)), this,
+	    SLOT(attachmentItemRightClicked(QPoint)));
+	connect(ui->messageAttachmentList,
+	    SIGNAL(doubleClicked(QModelIndex)), this,
+	    SLOT(attachmentItemDoubleClicked(QModelIndex)));
+
+	/* It fires when any column was resized. */
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionResized(int, int, int)),
 	    this, SLOT(onTableColumnResized(int, int, int)));
 
-	/* Is it fires when any collumn was resized */
+	/* It fires when any column was resized. */
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
@@ -411,6 +424,18 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	ui->verifySignature->setEnabled(false);
 	ui->signatureDetails->setEnabled(false);
 
+	/*
+	 * Disconnect slot from model as we want to prevent a signal to be
+	 * handled multiple times.
+	 */
+	if (0 != ui->messageAttachmentList->selectionModel()) {
+		/* New model hasn't been set yet. */
+		ui->messageAttachmentList->selectionModel()->disconnect(
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		         QModelIndex)));
+	}
+
 	if (0 != msgTblMdl) {
 		QModelIndex index = msgTblMdl->index(
 		    current.row(), 0); /* First column. */
@@ -437,6 +462,11 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageAttachmentList->setColumnHidden(1, true);
 		ui->messageAttachmentList->setColumnHidden(2, true);
 
+		/* Connect new slot. */
+		connect(ui->messageAttachmentList->selectionModel(),
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		        QModelIndex)));
 	} else {
 		ui->messageInfo->setHtml("");
 		ui->messageInfo->setReadOnly(true);
@@ -481,6 +511,61 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    this, SLOT(on_actionSent_message_triggered()));
 	}
 	menu->exec(QCursor::pos());
+}
+
+
+/* ========================================================================= */
+/*
+ * Redraws widgets according to selected attachment item.
+ */
+void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
+    const QModelIndex &previous)
+/* ========================================================================= */
+{
+	(void) previous;
+	//qDebug() << "Attachment selection changed.";
+	if (current.isValid()) {
+		ui->saveAttachment->setEnabled(true);
+		ui->openAttachment->setEnabled(true);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Generates menu to selected message item.
+ *     (And redraws widgets.)
+ */
+void MainWindow::attachmentItemRightClicked(const QPoint &point)
+/* ========================================================================= */
+{
+	QModelIndex index = ui->messageAttachmentList->indexAt(point);
+	QMenu *menu = new QMenu;
+
+	if (index.isValid()) {
+		//attachmentItemSelectionChanged(index);
+
+		/* TODO */
+		menu->addAction(QIcon(ICON_3PARTY_PATH +
+		    QString("folder_16.png")),
+		    tr("Open attachment"));
+		menu->addAction(QIcon(ICON_3PARTY_PATH +
+		    QString("save_16.png")), tr("Save attachment"));
+	} else {
+		/* Do nothing. */
+	}
+	menu->exec(QCursor::pos());
+}
+
+
+/* ========================================================================= */
+/*
+ * Handle attachment double click.
+ */
+void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
+/* ========================================================================= */
+{
+	qDebug() << "Attachment double clicked.";
 }
 
 
