@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QObject>
+#include <QMessageBox>
 
 #include "isds_sessions.h"
 
@@ -97,7 +98,7 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
 
 /* ========================================================================= */
 /*
- * Is connect to databox
+ * Connect to databox
  */
 void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 /* ========================================================================= */
@@ -112,7 +113,7 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 	if (accountInfo.login_method == "username") {
 
 		if (accountInfo.password.isEmpty()) {
-			bool ok;
+			bool ok = false;
 			QString text = "";
 			while (text.isEmpty()) {
 				text = QInputDialog::getText(0,
@@ -120,11 +121,16 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 				    QObject::tr("Enter password for account ") +
 				    accountInfo.userName,
 				    QLineEdit::Password, "", &ok);
-				if (ok && !text.isEmpty()) {
-					accountInfo.password = text;
+				if (ok) {
+					if (!text.isEmpty()) {
+						accountInfo.password = text;
+					}
+				} else {
+					return;
 				}
 			}
 		}
+
 		status = isdsLoginUserName(
 		    isdsSessions.session(accountInfo.userName),
 		    accountInfo.userName, accountInfo.password,
@@ -134,13 +140,22 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 	} else if (accountInfo.login_method == "certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
-		//pki_credentials->engine = NULL;
-		//pki_credentials->certificate_format = PKI_FORMAT_DER;
-		// malloc
-		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
-		//pki_credentials->key_format = PKI_FORMAT_DER;
-		//pki_credentials->key = NULL;
-		//pki_credentials->passphrase = NULL;
+
+		pki_credentials = (struct isds_pki_credentials *)
+		    malloc(sizeof(struct isds_pki_credentials));
+		if (pki_credentials == NULL) {
+			free(pki_credentials);
+			return;
+		}
+		memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
+
+		/* TODO - set correct cert format and certificate/key */
+		pki_credentials->engine = NULL;
+		pki_credentials->certificate_format = PKI_FORMAT_DER;
+		pki_credentials->certificate = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->key_format = PKI_FORMAT_DER;
+		pki_credentials->key = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->passphrase = NULL;
 
 		QString iDbox = "TODO";
 		/* TODO -- The account is not identified with a user name! */
@@ -148,17 +163,28 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 		status = isdsLoginCert(isdsSessions.session(iDbox),
 		    pki_credentials, accountInfo.testAccount);
 
+		isds_pki_credentials_free(&pki_credentials);
+
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.login_method == "user_certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
-		//pki_credentials->engine = NULL;
-		//pki_credentials->certificate_format = PKI_FORMAT_DER;
-		// malloc
-		//pki_credentials->certificate = (char *) certPath.toStdString().c_str();
-		//pki_credentials->key_format = PKI_FORMAT_DER;
-		//pki_credentials->key = NULL;
-		//pki_credentials->passphrase = NULL;
+
+		pki_credentials = (struct isds_pki_credentials *)
+		    malloc(sizeof(struct isds_pki_credentials));
+		if (pki_credentials == NULL) {
+			free(pki_credentials);
+			return;
+		}
+		memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
+
+		/* TODO - set correct cert format and certificate/key */
+		pki_credentials->engine = NULL;
+		pki_credentials->certificate_format = PKI_FORMAT_DER;
+		pki_credentials->certificate = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->key_format = PKI_FORMAT_DER;
+		pki_credentials->key = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->passphrase = NULL;
 
 		if (accountInfo.password.isNull()) {
 			status = isdsLoginUserCert(
@@ -166,8 +192,6 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 			    accountInfo.userName /* boxId */,
 			    pki_credentials, accountInfo.testAccount);
 		} else {
-
-
 			if (accountInfo.password.isEmpty()) {
 				bool ok;
 				QString text = "";
@@ -177,8 +201,13 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 					    QObject::tr("Enter certificate password for account ") +
 					    accountInfo.userName,
 					    QLineEdit::Password, "", &ok);
-					if (ok && !text.isEmpty()) {
-						accountInfo.password = text;
+					if (ok) {
+						if (!text.isEmpty()) {
+							accountInfo.password = text;
+						}
+					} else {
+						isds_pki_credentials_free(&pki_credentials);
+						return;
 					}
 				}
 			}
@@ -186,6 +215,8 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 			    isdsSessions.session(accountInfo.userName),
 			    accountInfo.userName, accountInfo.password,
 			    pki_credentials, accountInfo.testAccount);
+
+			isds_pki_credentials_free(&pki_credentials);
 		}
 
 	/* Login method based username and otp */
@@ -199,8 +230,12 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 				    QObject::tr("Enter password for account ") +
 				    accountInfo.userName,
 				    QLineEdit::Password, "", &ok);
-				if (ok && !text.isEmpty()) {
-					accountInfo.password = text;
+				if (ok) {
+					if (!text.isEmpty()) {
+						accountInfo.password = text;
+					}
+				} else {
+					return;
 				}
 			}
 		}
@@ -215,11 +250,25 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 
 	}
 
-	if (IE_SUCCESS != status) {
-		qDebug() << "Error connecting to ISDS.";
+	if (IE_NOT_LOGGED_IN == status) {
+		QMessageBox::warning(0, QObject::tr("Authentication fails"),
+		    QObject::tr("Authentication fails")
+		    + "\n" + QObject::tr("ErrorType: ") + isds_strerror(status),
+		    QMessageBox::Ok);
+		return;
+	} else if (IE_PARTIAL_SUCCESS == status) {
+		QMessageBox::warning(0, QObject::tr("OTP authentication fails"),
+		    QObject::tr("OTP authentication fails")
+		    + "\n" + QObject::tr("ErrorType: ") + isds_strerror(status),
+		    QMessageBox::Ok);
+		return;
+	} else if (IE_SUCCESS != status) {
+		QMessageBox::warning(0, QObject::tr("Error occurred"),
+		    QObject::tr("An error occurred while connect to ISDS")
+		    + "\n" + QObject::tr("ErrorType: ") + isds_strerror(status),
+		    QMessageBox::Ok);
 		return;
 	}
-	return;
 }
 
 
