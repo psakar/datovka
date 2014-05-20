@@ -18,6 +18,8 @@ static
 const QString dbFaultyDateTimeFormat("yyyy-MM-dd HH:mm:ss.000zzz");
 static
 const QString dbDateTimeFormat("yyyy-MM-dd HH:mm:ss.zzz");
+static
+const QString dbShortDateTimeFormat("yyyy-MM-dd HH:mm:ss");
 
 
 /* ========================================================================= */
@@ -60,4 +62,26 @@ QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
 	} else {
 		return QString();
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts date to format to be stored in database.
+ */
+QString timevalToDbFormat(const struct timeval *tv)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != tv);
+	QDateTime timeStamp;
+
+	timeStamp.setTime_t(tv->tv_sec);
+
+	QString ret = timeStamp.toString(dbShortDateTimeFormat) + ".%1";
+	Q_ASSERT(tv->tv_usec < 1000000);
+	ret = ret.arg(QString::number(tv->tv_usec), 6, '0');
+
+	qDebug() << "timeStamp" << ret;
+
+	return ret;
 }

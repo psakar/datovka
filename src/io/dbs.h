@@ -21,4 +21,10 @@ QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt);
 
 
+/*!
+ * @brief Converts date to format to be stored in database.
+ */
+QString timevalToDbFormat(const struct timeval *tv);
+
+
 #endif /* _DBS_H_ */
