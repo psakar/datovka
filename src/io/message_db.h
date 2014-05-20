@@ -146,6 +146,27 @@ public:
 	 */
 	bool isInMessageDb(int dmId) const;
 
+	/*!
+	 * @brief Insert message envelope into messages table.
+	 */
+	bool insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
+const QString &_origin, const QString &dbIDSender, const QString &dmSender,
+const QString &dmSenderAddress, long int dmSenderType, const QString &dmRecipient,
+const QString &dmRecipientAddress, const QString &dmAmbiguousRecipient,
+const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
+const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
+const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
+const QString &dmAnnotation, const QString &dmRecipientRefNumber,
+const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
+const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
+const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
+const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
+bool dmPersonalDelivery, bool dmAllowSubstDelivery,
+const QString &dmQTimestamp, const QString &dmDeliveryTime,
+const QString &dmAcceptanceTime, int dmMessageStatus, long int dmAttachmentSize,
+const QString &_dmType) const;
+
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.

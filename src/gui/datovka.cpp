@@ -1816,15 +1816,14 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 	int messcnt = 0;
 	int newcnt = 0;
+
+	MessageDb *messageDb = accountMessageDb();
+
 	while (0 != box) {
 		messcnt++;
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
-//		qDebug() << dmId;
-		MessageDb *messageDb = accountMessageDb();
 		if (!messageDb->isInMessageDb(dmId)) {
-			/* TODO - insert into db */
-
 			newcnt++;
 			QModelIndex itemindex = index.child(0,0);
 			QString label = itemindex.data().toString();
@@ -1835,12 +1834,50 @@ void MainWindow::on_actionDownload_messages_triggered()
 			font.setBold(true);
 			accountitem->setFont(font);
 
+			messageDb->insertMessageEnvelopeIntoDb(dmId,
+			    false, NULL,
+			    item->envelope->dbIDSender,
+			    item->envelope->dmSender,
+			    item->envelope->dmSenderAddress,
+			    (long int) item->envelope->dmSenderType,
+			    item->envelope->dmRecipient,
+			    item->envelope->dmRecipientAddress,
+			    // conversion boot to qstring
+			    item->envelope->dmAmbiguousRecipient ? "1" : "0",
+			    item->envelope->dmSenderOrgUnit,
+			    NULL,//item->envelope->dmSenderOrgUnitNum - not use
+			    item->envelope->dbIDRecipient,
+			    item->envelope->dmRecipientOrgUnit,
+			    NULL, //item->envelope->dmRecipientOrgUnitNum
+			    item->envelope->dmToHands,
+			    item->envelope->dmAnnotation,
+			    item->envelope->dmRecipientRefNumber,
+			    item->envelope->dmSenderRefNumber,
+			    item->envelope->dmRecipientIdent,
+			    item->envelope->dmSenderIdent,
+			    QString::number(*item->envelope->dmLegalTitleLaw),
+			    QString::number(*item->envelope->dmLegalTitleYear),
+			    item->envelope->dmLegalTitleSect,
+			    item->envelope->dmLegalTitlePar,
+			    item->envelope->dmLegalTitlePoint,
+			    item->envelope->dmPersonalDelivery,
+			    item->envelope->dmAllowSubstDelivery,
+			    /* TODO - save timestamp from void* */
+			    "", //item->envelope->timestamp,
+
+			    /* TODO - implement timetToDbFormat function
+			              *input time_t
+			              *output QString in foramt (2014-03-03 10:54:11.000547)
+			    */
+			    "", //timetToDbFormat(item->envelope->dmDeliveryTime->tv_sec),
+			    "", //timetToDbFormat(item->envelope->dmAcceptanceTime->tv_sec),
+			    *item->envelope->dmMessageStatus,
+			    *item->envelope->dmAttachmentSize,
+			    item->envelope->dmType);
+
 			qDebug() << newcnt << ") ----------";
-			qDebug() << item->envelope->dmID;
-			qDebug() << item->envelope->dmAnnotation;
-			qDebug() << item->envelope->dmSender;
 		}
 		box = box->next;
 	}
-	qDebug() << "# messages" << messcnt;
+	qDebug() << "# Total messages: " << messcnt;
 }
