@@ -149,6 +149,14 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
+
+	/* Message/attachment related buttons. */
+//	ui->downloadComplete
+	connect(ui->saveAttachment, SIGNAL(clicked()), this,
+	    SLOT(saveSelectedAttachmentToFile()));
+//	ui->openAttachment
+//	ui->verifySignature
+//	ui->signatureDetails
 }
 
 
@@ -417,7 +425,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 	const QAbstractItemModel *msgTblMdl = current.model();
 
-	/* Disable message related buttons. */
+	/* Disable message/attachment related buttons. */
 	ui->downloadComplete->setEnabled(true);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
@@ -550,7 +558,8 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 		    QString("folder_16.png")),
 		    tr("Open attachment"));
 		menu->addAction(QIcon(ICON_3PARTY_PATH +
-		    QString("save_16.png")), tr("Save attachment"));
+		    QString("save_16.png")), tr("Save attachment"), this,
+		    SLOT(saveSelectedAttachmentToFile()));
 	} else {
 		/* Do nothing. */
 	}
@@ -566,6 +575,66 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
 	qDebug() << "Attachment double clicked.";
+}
+
+
+/* ========================================================================= */
+/*
+ * Saves selected attachment to file.
+ */
+void MainWindow::saveSelectedAttachmentToFile(void)
+/* ========================================================================= */
+{
+	QModelIndex selectedIndex =
+	    ui->messageAttachmentList->selectionModel()->currentIndex();
+	    /* selection().indexes() ? */
+
+	//qDebug() << "Save attachment to file." << selectedIndex;
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return;
+	}
+
+	QModelIndex fileNameIndex =
+	    selectedIndex.sibling(selectedIndex.row(), 3);
+	Q_ASSERT(fileNameIndex.isValid());
+	if(!fileNameIndex.isValid()) {
+		return;
+	}
+	QString fileName = fileNameIndex.data().toString();
+	/* TODO -- Remember directory? */
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save attachment"), fileName);
+
+	//qDebug() << "Selected file: " << fileName;
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly)) {
+		return; /* TODO -- Error message. */
+	}
+
+	/* Get data from base64. */
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	Q_ASSERT(dataIndex.isValid());
+	if (!dataIndex.isValid()) {
+		return;
+	}
+	//qDebug() << "Data index." << dataIndex;
+
+	QByteArray data =
+	    QByteArray::fromBase64(dataIndex.data().toByteArray());
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+		/* TODO -- Error message? */
+	}
+
+	fout.close();
 }
 
 
@@ -1418,7 +1487,7 @@ void MainWindow::on_actionFind_databox_triggered()
 
 /* ========================================================================= */
 /*
-* Reply meesage private slot
+* Reply message private slot
  */
 void MainWindow::on_actionReply_triggered()
 /* ========================================================================= */
@@ -1463,7 +1532,7 @@ void MainWindow::filterMessages(const QString &text)
 
 /* ========================================================================= */
 /*
-* Set recivied message column widths and sort order.
+* Set received message column widths and sort order.
  */
 void MainWindow::setReciveidColumnWidths(void)
 /* ========================================================================= */

@@ -78,6 +78,11 @@ private slots:
 	 */
 	void attachmentItemDoubleClicked(const QModelIndex &index);
 
+	/*!
+	 * @brief Saves selected attachment to file.
+	 */
+	void saveSelectedAttachmentToFile(void);
+
 	void on_actionCreate_message_triggered();
 
 	void on_actionSent_message_triggered();
