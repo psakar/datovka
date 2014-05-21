@@ -841,7 +841,7 @@ bool MessageDb::isInMessageDb(int dmId) const
  */
 bool MessageDb::insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
 const QString &_origin, const QString &dbIDSender, const QString &dmSender,
-const QString &dmSenderAddress, long int dmSenderType, const QString &dmRecipient,
+const QString &dmSenderAddress, int dmSenderType, const QString &dmRecipient,
 const QString &dmRecipientAddress, const QString &dmAmbiguousRecipient,
 const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
 const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
@@ -853,33 +853,65 @@ const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
 const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
 bool dmPersonalDelivery, bool dmAllowSubstDelivery,
 const QString &dmQTimestamp, const QString &dmDeliveryTime,
-const QString &dmAcceptanceTime, int dmMessageStatus, long int dmAttachmentSize,
+const QString &dmAcceptanceTime, int dmMessageStatus, int dmAttachmentSize,
 const QString &_dmType) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	queryStr = "INSERT INTO messages VALUES("
-		    + dmId + QString(",") + is_verified + ","
-		    + _origin + ",'" + dbIDSender + "','" + dmSender + "','"
-		    + dmSenderAddress + "','" + dmSenderType + "','"
-		    + dmRecipient + "','" + dmRecipientAddress + "','"
-		    + dmAmbiguousRecipient +  "','" + dmSenderOrgUnit + "','"
-		    + dmSenderOrgUnitNum + "','" + dbIDRecipient + "','"
-		    + dmRecipientOrgUnit + "','" + dmRecipientOrgUnitNum + "','"
-		    + dmToHands + "','" + dmAnnotation + "','"
-		    + dmRecipientRefNumber + "','" + dmSenderRefNumber + "','"
-		    + dmRecipientIdent + "','" + dmSenderIdent + "','"
-		    + dmLegalTitleLaw + "','" + dmLegalTitleYear + "','"
-		    + dmLegalTitleSect + "','" + dmLegalTitlePar + "','"
-		    + dmLegalTitlePoint + "'," + dmPersonalDelivery + ","
-		    + dmAllowSubstDelivery + ",'" + dmQTimestamp + "','"
-		    + dmDeliveryTime + "','" + dmAcceptanceTime + "','"
-		    + dmMessageStatus + "," + dmAttachmentSize + ",'"
-		    + _dmType + "')";
+	QString queryString = "INSERT INTO messages (dmID, is_verified, "
+	    + QString("_origin, dbIDSender, dmSender, dmSenderAddress, ")
+	    + QString("dmSenderType, dmRecipient, dmRecipientAddress, ")
+	    + QString("dmAmbiguousRecipient, dmSenderOrgUnit, ")
+	    + QString("dmSenderOrgUnitNum, dbIDRecipient, dmRecipientOrgUnit, ")
+	    + QString("dmRecipientOrgUnitNum, dmToHands, dmAnnotation, ")
+	    + QString("dmRecipientRefNumber, dmSenderRefNumber, ")
+	    + QString("dmRecipientIdent, dmSenderIdent, dmLegalTitleLaw, ")
+	    + QString("dmLegalTitleYear, dmLegalTitleSect, dmLegalTitlePar, ")
+	    + QString("dmLegalTitlePoint, dmPersonalDelivery, ")
+	    + QString("dmAllowSubstDelivery, dmQTimestamp, dmDeliveryTime, ")
+	    + QString("dmAcceptanceTime, dmMessageStatus, dmAttachmentSize, ")
+	    + QString("_dmType)")
+	    + QString(" VALUES ")
+	    + QString("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,")
+	    + QString("?,?,?,?,?,?,?,?)");
 
-	query.prepare(queryStr);
+	query.prepare(queryString);
+	query.addBindValue(dmId);
+	query.addBindValue(is_verified);
+	query.addBindValue(_origin);
+	query.addBindValue(dbIDSender);
+	query.addBindValue(dmSender);
+	query.addBindValue(dmSenderAddress);
+	query.addBindValue(dmSenderType);
+	query.addBindValue(dmRecipient);
+	query.addBindValue(dmRecipientAddress);
+	query.addBindValue(dmAmbiguousRecipient);
+	query.addBindValue(dmSenderOrgUnit);
+	query.addBindValue(dmSenderOrgUnitNum);
+	query.addBindValue(dbIDRecipient);
+	query.addBindValue(dmRecipientOrgUnit);
+	query.addBindValue(dmRecipientOrgUnitNum);
+	query.addBindValue(dmToHands);
+	query.addBindValue(dmAnnotation);
+	query.addBindValue(dmRecipientRefNumber);
+	query.addBindValue(dmSenderRefNumber);
+	query.addBindValue(dmRecipientIdent);
+	query.addBindValue(dmSenderIdent);
+	query.addBindValue(dmLegalTitleLaw);
+	query.addBindValue(dmLegalTitleYear);
+	query.addBindValue(dmLegalTitleSect);
+	query.addBindValue(dmLegalTitlePar);
+	query.addBindValue(dmLegalTitlePoint);
+	query.addBindValue(dmPersonalDelivery);
+	query.addBindValue(dmAllowSubstDelivery);
+	query.addBindValue(dmQTimestamp);
+	query.addBindValue(dmDeliveryTime);
+	query.addBindValue(dmAcceptanceTime);
+	query.addBindValue(dmMessageStatus);
+	query.addBindValue(dmAttachmentSize);
+	query.addBindValue(_dmType);
+
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (!query.isValid()) {

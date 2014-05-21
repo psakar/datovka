@@ -81,7 +81,7 @@ QString timevalToDbFormat(const struct timeval *tv)
 	Q_ASSERT(tv->tv_usec < 1000000);
 	ret = ret.arg(QString::number(tv->tv_usec), 6, '0');
 
-	qDebug() << "timeStamp" << ret;
+	//qDebug() << "timeStamp" << ret;
 
 	return ret;
 }

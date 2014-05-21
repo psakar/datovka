@@ -462,7 +462,7 @@ void DlgSendMessage::sendMessage(void)
 	    (long int *)this->dmLegalTitleLaw->text().toLong() : NULL;
 	sent_envelope->dmToHands = !this->dmToHands->text().isEmpty() ?
 	    strdup(this->dmToHands->text().toStdString().c_str()) : NULL;
-	sent_envelope->dmType = strdup("V");
+	sent_envelope->dmType = NULL;
 
 	// set bool pointers
 	dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));

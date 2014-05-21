@@ -151,7 +151,7 @@ public:
 	 */
 	bool insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
 const QString &_origin, const QString &dbIDSender, const QString &dmSender,
-const QString &dmSenderAddress, long int dmSenderType, const QString &dmRecipient,
+const QString &dmSenderAddress, int dmSenderType, const QString &dmRecipient,
 const QString &dmRecipientAddress, const QString &dmAmbiguousRecipient,
 const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
 const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
@@ -163,7 +163,7 @@ const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
 const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
 bool dmPersonalDelivery, bool dmAllowSubstDelivery,
 const QString &dmQTimestamp, const QString &dmDeliveryTime,
-const QString &dmAcceptanceTime, int dmMessageStatus, long int dmAttachmentSize,
+const QString &dmAcceptanceTime, int dmMessageStatus, int dmAttachmentSize,
 const QString &_dmType) const;
 
 

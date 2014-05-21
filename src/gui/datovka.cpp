@@ -1813,71 +1813,110 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 	struct isds_list *box;
 	box = messageList;
-
-	int messcnt = 0;
 	int newcnt = 0;
-
 	MessageDb *messageDb = accountMessageDb();
 
 	while (0 != box) {
-		messcnt++;
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
 		if (!messageDb->isInMessageDb(dmId)) {
-			newcnt++;
-			QModelIndex itemindex = index.child(0,0);
-			QString label = itemindex.data().toString();
-			label = label + " (" + QString::number(newcnt) + ")";
-			QStandardItem *accountitem = m_accountModel.itemFromIndex(itemindex);
-			accountitem->setText(label);
-			QFont font;
-			font.setBold(true);
-			accountitem->setFont(font);
+
+			QString dmAmbiguousRecipient;
+			if (0 == item->envelope->dmAmbiguousRecipient) {
+				dmAmbiguousRecipient = "0";
+			} else {
+				dmAmbiguousRecipient = QString::number(
+				    *item->envelope->dmAmbiguousRecipient);
+			}
+
+			QString dmLegalTitleYear;
+			if (0 == item->envelope->dmLegalTitleYear) {
+				dmLegalTitleYear = "";
+			} else {
+				dmLegalTitleYear = QString::number(
+				    *item->envelope->dmLegalTitleYear);
+			}
+
+			QString dmLegalTitleLaw;
+			if (0 == item->envelope->dmLegalTitleLaw) {
+				dmLegalTitleLaw = "";
+			} else {
+				dmLegalTitleLaw = QString::number(
+				    *item->envelope->dmLegalTitleLaw);
+			}
+
+			QString dmSenderOrgUnitNum;
+			if (0 == item->envelope->dmSenderOrgUnitNum) {
+				dmSenderOrgUnitNum = "";
+			} else {
+				dmSenderOrgUnitNum =
+				    *item->envelope->dmSenderOrgUnitNum != 0 ?
+				    QString::number(*item->envelope->
+				    dmSenderOrgUnitNum) : "";
+			}
+
+			QString dmRecipientOrgUnitNum;
+			if (0 == item->envelope->dmRecipientOrgUnitNum) {
+				dmRecipientOrgUnitNum = "";
+			} else {
+				dmRecipientOrgUnitNum =
+				    *item->envelope->dmRecipientOrgUnitNum != 0
+				    ? QString::number(*item->envelope->
+				    dmRecipientOrgUnitNum) : "";
+			}
 
 			messageDb->insertMessageEnvelopeIntoDb(dmId,
-			    false, NULL,
+			    /* TODO - set correctly next two values */
+			    false, "tReturnedMessage",
 			    item->envelope->dbIDSender,
 			    item->envelope->dmSender,
 			    item->envelope->dmSenderAddress,
-			    (long int) item->envelope->dmSenderType,
+			    (int)*item->envelope->dmSenderType,
 			    item->envelope->dmRecipient,
 			    item->envelope->dmRecipientAddress,
-			    // conversion boot to qstring
-			    item->envelope->dmAmbiguousRecipient ? "1" : "0",
+			    dmAmbiguousRecipient,
 			    item->envelope->dmSenderOrgUnit,
-			    NULL,//item->envelope->dmSenderOrgUnitNum - not use
+			    dmSenderOrgUnitNum,
 			    item->envelope->dbIDRecipient,
 			    item->envelope->dmRecipientOrgUnit,
-			    NULL, //item->envelope->dmRecipientOrgUnitNum
+			    dmRecipientOrgUnitNum,
 			    item->envelope->dmToHands,
 			    item->envelope->dmAnnotation,
 			    item->envelope->dmRecipientRefNumber,
 			    item->envelope->dmSenderRefNumber,
 			    item->envelope->dmRecipientIdent,
 			    item->envelope->dmSenderIdent,
-			    QString::number(*item->envelope->dmLegalTitleLaw),
-			    QString::number(*item->envelope->dmLegalTitleYear),
+			    dmLegalTitleLaw,
+			    dmLegalTitleYear,
 			    item->envelope->dmLegalTitleSect,
 			    item->envelope->dmLegalTitlePar,
 			    item->envelope->dmLegalTitlePoint,
 			    item->envelope->dmPersonalDelivery,
 			    item->envelope->dmAllowSubstDelivery,
-			    /* TODO - save timestamp from void* */
-			    "", //item->envelope->timestamp,
-
-			    /* TODO - implement timetToDbFormat function
-			              *input time_t
-			              *output QString in foramt (2014-03-03 10:54:11.000547)
-			    */
-			    "", //timetToDbFormat(item->envelope->dmDeliveryTime->tv_sec),
-			    "", //timetToDbFormat(item->envelope->dmAcceptanceTime->tv_sec),
+			    (char*)item->envelope->timestamp,
+			    timevalToDbFormat(item->envelope->dmDeliveryTime),
+			    timevalToDbFormat(item->envelope->dmAcceptanceTime),
 			    *item->envelope->dmMessageStatus,
-			    *item->envelope->dmAttachmentSize,
+			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType);
 
-			qDebug() << newcnt << ") ----------";
+			newcnt++;
 		}
 		box = box->next;
+
 	}
-	qDebug() << "# Total messages: " << messcnt;
+
+	isds_list_free(&messageList);
+
+	if (newcnt > 0) {
+		QModelIndex itemindex = index.child(0,0);
+		QString label = itemindex.data().toString();
+		label = label + " (" + QString::number(newcnt) + ")";
+		QStandardItem *accountitem =
+		    m_accountModel.itemFromIndex(itemindex);
+		accountitem->setText(label);
+		QFont font;
+		font.setBold(true);
+		accountitem->setFont(font);
+	}
 }
