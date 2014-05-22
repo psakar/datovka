@@ -1,7 +1,13 @@
 
 
+#include <QMap>
 #include <QObject>
+#include <QPair>
+#include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QString>
+#include <QVariant>
+#include <QVector>
 
 #include "db_tables.h"
 
@@ -82,9 +88,12 @@ bool Tbl::existsInDb(const QSqlDatabase &db) const
 	    " FROM sqlite_master WHERE "
 	    "type = 'table'"
 	    " and "
-	    "name = '" + tabName + "'";
+	    "name = :tabName";
 	//qDebug() << queryStr;
-	query.prepare(queryStr);
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":tabName", tabName);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return true;
@@ -128,7 +137,9 @@ bool Tbl::createEmpty(QSqlDatabase &db) const
 	queryStr += tblConstraint;
 	queryStr += "\n)";
 	//qDebug() << queryStr;
-	query.prepare(queryStr);
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
 	if (query.exec()) {
 		return true;
 	}

@@ -2,8 +2,7 @@
 
 #include <QDateTime>
 #include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
+#include <QString>
 
 #include "dbs.h"
 

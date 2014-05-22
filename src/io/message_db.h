@@ -4,13 +4,19 @@
 #define _MESSAGE_DB_H_
 
 
+#include <QAbstractTableModel>
 #include <QJsonDocument>
+#include <QList>
 #include <QMap>
-#include <QSslCertificate>
+#include <QModelIndex>
+#include <QObject>
+#include <QPair>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
-
-#include "dbs.h"
+#include <QSslCertificate>
+#include <QString>
+#include <QVariant>
+#include <QVector>
 
 
 /*!
@@ -150,21 +156,23 @@ public:
 	 * @brief Insert message envelope into messages table.
 	 */
 	bool insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
-const QString &_origin, const QString &dbIDSender, const QString &dmSender,
-const QString &dmSenderAddress, int dmSenderType, const QString &dmRecipient,
-const QString &dmRecipientAddress, const QString &dmAmbiguousRecipient,
-const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-const QString &dmQTimestamp, const QString &dmDeliveryTime,
-const QString &dmAcceptanceTime, int dmMessageStatus, int dmAttachmentSize,
-const QString &_dmType) const;
+	    const QString &_origin, const QString &dbIDSender,
+	    const QString &dmSender, const QString &dmSenderAddress,
+	    int dmSenderType, const QString &dmRecipient,
+	    const QString &dmRecipientAddress,
+	    const QString &dmAmbiguousRecipient,
+	    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
+	    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
+	    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
+	    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
+	    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
+	    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
+	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
+	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
+	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
+	    const QString &dmQTimestamp, const QString &dmDeliveryTime,
+	    const QString &dmAcceptanceTime, int dmMessageStatus,
+	    int dmAttachmentSize, const QString &_dmType);
 
 
 protected:

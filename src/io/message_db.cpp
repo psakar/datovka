@@ -1,16 +1,28 @@
 
 
+#include <QAbstractTableModel>
 #include <QDebug>
 #include <QDir>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
-#include <QSqlError>
+#include <QList>
+#include <QMap>
+#include <QModelIndex>
+#include <QObject>
+#include <QPair>
+#include <QSqlDatabase>
 #include <QSqlQuery>
-
+#include <QSqlQueryModel>
+#include <QSslCertificate>
+#include <QString>
+#include <QVariant>
+#include <QVector>
 
 #include "message_db.h"
 #include "src/common.h"
 #include "src/io/db_tables.h"
+#include "src/io/dbs.h"
 #include "src/io/pkcs7.h"
 
 
@@ -133,10 +145,13 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += receivedItemIds.last();
-	queryStr += " FROM messages WHERE dbIDRecipient = '" + recipDbId + "'";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	queryStr += " FROM messages WHERE dbIDRecipient = :recipDbId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -168,12 +183,15 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 	}
 	queryStr += receivedItemIds.last();
 	queryStr += " FROM messages WHERE "
-	    "(dbIDRecipient = '" + recipDbId + "')"
+	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -205,12 +223,16 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	}
 	queryStr += receivedItemIds.last();
 	queryStr += " FROM messages WHERE "
-	    "(dbIDRecipient = '" + recipDbId + "')"
+	    "(dbIDRecipient = :recipDbId)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	    "(strftime('%Y', dmDeliveryTime) = :year)";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":year", year);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -238,12 +260,14 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId) const
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
-	    "dbIDRecipient = '" + recipDbId + "'"
+	    "dbIDRecipient = :recipDbId"
 	    " ORDER BY dmDeliveryTime ASC";
-
-	// qDebug() << "Generating received year list" << recipDbId;
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	//qDebug() << "Generating received year list" << recipDbId;
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -274,9 +298,12 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
 		    "(dbIDRecipient = '" + recipDbId + "')"
 		    " and "
-		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
-		// qDebug() << queryStr;
-		query.prepare(queryStr);
+		    "(strftime('%Y', dmDeliveryTime) = :year)";
+		//qDebug() << queryStr;
+		if (!query.prepare(queryStr)) {
+			/* TODO -- Handle error. */
+		}
+		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive()) {
 			query.first();
 			yearlyCounts.append(QPair<QString, int>(yearList[i],
@@ -301,11 +328,13 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 		queryStr += sentItemIds[i] + ", ";
 	}
 	queryStr += sentItemIds.last();
-	queryStr += " FROM messages WHERE dbIDSender = '" +
-	    sendDbId + "'";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	queryStr += " FROM messages WHERE dbIDSender = :sendDbId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -337,12 +366,15 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 	}
 	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE "
-	    "(dbIDSender = '" + sendDbId + "')"
+	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -374,12 +406,15 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	}
 	queryStr += sentItemIds.last();
 	queryStr += " FROM messages WHERE "
-	    "(dbIDSender = '" + sendDbId + "')"
+	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
+	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -407,12 +442,14 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
-	    "dbIDSender = '" + sendDbId + "'"
+	    "dbIDSender = :sendDbId"
 	    " ORDER BY dmDeliveryTime ASC";
-
-	// qDebug() << "Generating received year list" << recipDbId;
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	//qDebug() << "Generating received year list" << recipDbId;
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -443,9 +480,12 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
 		    "(dbIDSender = '" + sendDbId + "')"
 		    " and "
-		    "(strftime('%Y', dmDeliveryTime) = '" + yearList[i] + "')";
-		// qDebug() << queryStr;
-		query.prepare(queryStr);
+		    "(strftime('%Y', dmDeliveryTime) = :year)";
+		//qDebug() << queryStr;
+		if (!query.prepare(queryStr)) {
+			/* TODO -- Handle error. */
+		}
+		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive()) {
 			query.first();
 			if (query.isValid()) {
@@ -473,9 +513,12 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 	queryStr = "SELECT "
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress"
 	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -504,9 +547,12 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	queryStr = "SELECT "
 	    "is_verified"
 	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
@@ -530,7 +576,9 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void)
 	QString queryStr = "SELECT DISTINCT "
 	   "dbIDSender, dmSender, dmSenderAddress"
 	   " FROM messages";
-	query.prepare(queryStr);
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -567,9 +615,12 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
 	    "dmRecipient, dmRecipientAddress"
 	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		html += strongAccountInfoLine(tr("Subject"),
@@ -616,9 +667,12 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	}
 	queryStr += msgAttribs2.last();
 	queryStr += " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		for (int i = 0; i < msgAttribs2.size(); ++i) {
@@ -638,9 +692,12 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	}
 	queryStr += msgStatus.last();
 	queryStr += " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		html += strongAccountInfoLine(
@@ -660,10 +717,13 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	queryStr = "SELECT "
 	    "dmEventTime, dmEventDescr"
 	    " FROM events WHERE "
-	    "message_id = " + QString::number(dmId) +
+	    "message_id = :dmId"
 	    " ORDER BY dmEventTime ASC";
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -683,9 +743,12 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 	/* Attachments. */
 	queryStr = "SELECT COUNT(*) AS nrFiles "
 	    " FROM files WHERE "
-	    "message_id = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "message_id = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid() &&
 	    (query.value(0).toInt() > 0)) {
@@ -696,9 +759,12 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		queryStr = "SELECT "
 		    "dmAttachmentSize"
 		    " FROM messages WHERE "
-		    "dmID = " + QString::number(dmId);
-		// qDebug() << queryStr;
-		query.prepare(queryStr);
+		    "dmID = :dmId";
+		//qDebug() << queryStr;
+		if (!query.prepare(queryStr)) {
+			/* TODO -- Handle error. */
+		}
+		query.bindValue(":dmId", dmId);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid() &&
 		   (query.value(0).toInt() > 0)) {
@@ -784,10 +850,13 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 	}
 	queryStr += fileItemIds.last();
 	queryStr += " FROM files WHERE "
-	    "message_id = " + QString::number(msgId);
+	    "message_id = :msgId";
 	//qDebug() << queryStr;
-	query.prepare(queryStr);
-	query.exec();
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":msgId", msgId);
+	query.exec(); /* TODO -- Handle error. */
 
 	/* First three columns ought to be hidden. */
 
@@ -820,8 +889,11 @@ bool MessageDb::isInMessageDb(int dmId) const
 	QString queryStr;
 
 	queryStr = "SELECT count(*) FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -840,77 +912,90 @@ bool MessageDb::isInMessageDb(int dmId) const
  * Insert message envelope into messages table
  */
 bool MessageDb::insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
-const QString &_origin, const QString &dbIDSender, const QString &dmSender,
-const QString &dmSenderAddress, int dmSenderType, const QString &dmRecipient,
-const QString &dmRecipientAddress, const QString &dmAmbiguousRecipient,
-const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-const QString &dmQTimestamp, const QString &dmDeliveryTime,
-const QString &dmAcceptanceTime, int dmMessageStatus, int dmAttachmentSize,
-const QString &_dmType) const
+    const QString &_origin, const QString &dbIDSender,
+    const QString &dmSender, const QString &dmSenderAddress,
+    int dmSenderType, const QString &dmRecipient,
+    const QString &dmRecipientAddress,
+    const QString &dmAmbiguousRecipient,
+    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
+    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
+    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
+    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
+    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
+    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
+    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
+    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
+    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
+    const QString &dmQTimestamp, const QString &dmDeliveryTime,
+    const QString &dmAcceptanceTime, int dmMessageStatus,
+    int dmAttachmentSize, const QString &_dmType)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
-	QString queryString = "INSERT INTO messages (dmID, is_verified, "
-	    + QString("_origin, dbIDSender, dmSender, dmSenderAddress, ")
-	    + QString("dmSenderType, dmRecipient, dmRecipientAddress, ")
-	    + QString("dmAmbiguousRecipient, dmSenderOrgUnit, ")
-	    + QString("dmSenderOrgUnitNum, dbIDRecipient, dmRecipientOrgUnit, ")
-	    + QString("dmRecipientOrgUnitNum, dmToHands, dmAnnotation, ")
-	    + QString("dmRecipientRefNumber, dmSenderRefNumber, ")
-	    + QString("dmRecipientIdent, dmSenderIdent, dmLegalTitleLaw, ")
-	    + QString("dmLegalTitleYear, dmLegalTitleSect, dmLegalTitlePar, ")
-	    + QString("dmLegalTitlePoint, dmPersonalDelivery, ")
-	    + QString("dmAllowSubstDelivery, dmQTimestamp, dmDeliveryTime, ")
-	    + QString("dmAcceptanceTime, dmMessageStatus, dmAttachmentSize, ")
-	    + QString("_dmType)")
-	    + QString(" VALUES ")
-	    + QString("(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,")
-	    + QString("?,?,?,?,?,?,?,?)");
+	QString queryStr = "INSERT INTO messages ("
+	    "dmID, is_verified, _origin, dbIDSender, dmSender, "
+	    "dmSenderAddress, dmSenderType, dmRecipient, "
+	    "dmRecipientAddress, dmAmbiguousRecipient, dmSenderOrgUnit, "
+	    "dmSenderOrgUnitNum, dbIDRecipient, dmRecipientOrgUnit, "
+	    "dmRecipientOrgUnitNum, dmToHands, dmAnnotation, "
+	    "dmRecipientRefNumber, dmSenderRefNumber, dmRecipientIdent, "
+	    "dmSenderIdent, dmLegalTitleLaw, dmLegalTitleYear, "
+	    "dmLegalTitleSect, dmLegalTitlePar, dmLegalTitlePoint, "
+	    "dmPersonalDelivery, dmAllowSubstDelivery, dmQTimestamp, "
+	    "dmDeliveryTime, dmAcceptanceTime, dmMessageStatus, "
+	    "dmAttachmentSize, _dmType"
+	    ") VALUES ("
+	    ":dmId, :is_verified, :_origin, :dbIDSender, :dmSender, "
+	    ":dmSenderAddress, :dmSenderType, :dmRecipient, "
+	    ":dmRecipientAddress, :dmAmbiguousRecipient, :dmSenderOrgUnit, "
+	    ":dmSenderOrgUnitNum, :dbIDRecipient, :dmRecipientOrgUnit, "
+	    ":dmRecipientOrgUnitNum, :dmToHands, :dmAnnotation, "
+	    ":dmRecipientRefNumber, :dmSenderRefNumber, :dmRecipientIdent, "
+	    ":dmSenderIdent, :dmLegalTitleLaw, :dmLegalTitleYear, "
+	    ":dmLegalTitleSect, :dmLegalTitlePar, :dmLegalTitlePoint,"
+	    ":dmPersonalDelivery, dmAllowSubstDelivery, :dmQTimestamp, "
+	    ":dmDeliveryTime, :dmAcceptanceTime, :dmMessageStatus, "
+	    ":dmAttachmentSize, :_dmType"
+	    ")";
 
-	query.prepare(queryString);
-	query.addBindValue(dmId);
-	query.addBindValue(is_verified);
-	query.addBindValue(_origin);
-	query.addBindValue(dbIDSender);
-	query.addBindValue(dmSender);
-	query.addBindValue(dmSenderAddress);
-	query.addBindValue(dmSenderType);
-	query.addBindValue(dmRecipient);
-	query.addBindValue(dmRecipientAddress);
-	query.addBindValue(dmAmbiguousRecipient);
-	query.addBindValue(dmSenderOrgUnit);
-	query.addBindValue(dmSenderOrgUnitNum);
-	query.addBindValue(dbIDRecipient);
-	query.addBindValue(dmRecipientOrgUnit);
-	query.addBindValue(dmRecipientOrgUnitNum);
-	query.addBindValue(dmToHands);
-	query.addBindValue(dmAnnotation);
-	query.addBindValue(dmRecipientRefNumber);
-	query.addBindValue(dmSenderRefNumber);
-	query.addBindValue(dmRecipientIdent);
-	query.addBindValue(dmSenderIdent);
-	query.addBindValue(dmLegalTitleLaw);
-	query.addBindValue(dmLegalTitleYear);
-	query.addBindValue(dmLegalTitleSect);
-	query.addBindValue(dmLegalTitlePar);
-	query.addBindValue(dmLegalTitlePoint);
-	query.addBindValue(dmPersonalDelivery);
-	query.addBindValue(dmAllowSubstDelivery);
-	query.addBindValue(dmQTimestamp);
-	query.addBindValue(dmDeliveryTime);
-	query.addBindValue(dmAcceptanceTime);
-	query.addBindValue(dmMessageStatus);
-	query.addBindValue(dmAttachmentSize);
-	query.addBindValue(_dmType);
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":is_verified", is_verified);
+	query.bindValue(":_origin", _origin);
+	query.bindValue(":dbIDSender", dbIDSender);
+	query.bindValue(":dmSender", dmSender);
+	query.bindValue(":dmSenderAddress", dmSenderAddress);
+	query.bindValue(":dmSenderType", dmSenderType);
+	query.bindValue(":dmRecipient", dmRecipient);
+	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
+	query.bindValue(":dmAmbiguousRecipient", dmAmbiguousRecipient);
+	query.bindValue(":dmSenderOrgUnit", dmSenderOrgUnit);
+	query.bindValue(":dmSenderOrgUnitNum", dmSenderOrgUnitNum);
+	query.bindValue(":dbIDRecipient", dbIDRecipient);
+	query.bindValue(":dmRecipientOrgUnit", dmRecipientOrgUnit);
+	query.bindValue(":dmRecipientOrgUnitNum", dmRecipientOrgUnitNum);
+	query.bindValue(":dmToHands", dmToHands);
+	query.bindValue(":dmAnnotation", dmAnnotation);
+	query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
+	query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
+	query.bindValue(":dmRecipientIdent", dmRecipientIdent);
+	query.bindValue(":dmSenderIdent", dmSenderIdent);
+	query.bindValue(":dmLegalTitleLaw", dmLegalTitleLaw);
+	query.bindValue(":dmLegalTitleYear", dmLegalTitleYear);
+	query.bindValue(":dmLegalTitleSect", dmLegalTitleSect);
+	query.bindValue(":dmLegalTitlePar", dmLegalTitlePar);
+	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
+	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
+	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
+	query.bindValue(":dmQTimestamp", dmQTimestamp);
+	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
+	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
+	query.bindValue(":dmMessageStatus", dmMessageStatus);
+	query.bindValue(":dmAttachmentSize", dmAttachmentSize);
+	query.bindValue(":_dmType", _dmType);
 
 	if (query.exec() && query.isActive()) {
 		query.first();
@@ -983,9 +1068,12 @@ bool MessageDb::msgsVerified(int dmId) const
 	queryStr = "SELECT "
 	    "is_verified"
 	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
@@ -1011,9 +1099,12 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 		queryStr = "SELECT "
 		    "download_date"
 		    " FROM supplementary_message_data WHERE "
-		    "message_id = " + QString::number(dmId);
+		    "message_id = :dmId";
 		//qDebug() << queryStr;
-		query.prepare(queryStr);
+		if (!query.prepare(queryStr)) {
+			/* TODO -- Handle error. */
+		}
+		query.bindValue(":dmId", dmId);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
 			// qDebug() << "dateTime" << query.value(0).toString();
@@ -1046,9 +1137,12 @@ bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &tst) const
 	queryStr = "SELECT "
 	    "dmQTimestamp"
 	    " FROM messages WHERE "
-	    "dmID = " + QString::number(dmId);
+	    "dmID = :dmId";
 	//qDebug() << queryStr;
-	query.prepare(queryStr);
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		//qDebug() << "timestamp" << query.value(0).toString();
@@ -1085,9 +1179,12 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 	queryStr = "SELECT "
 	    "custom_data"
 	    " FROM supplementary_message_data WHERE "
-	    "message_id = "  + QString::number(msgId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "message_id = :msgId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":msgId", msgId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -1115,9 +1212,12 @@ QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
 	queryStr = "SELECT "
 	    "certificate_id"
 	    " FROM message_certificate_data WHERE "
-	    "message_id = " + QString::number(dmId);
-	// qDebug() << queryStr;
-	query.prepare(queryStr);
+	    "message_id = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -1136,12 +1236,16 @@ QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
 		    "der_data"
 		    " FROM certificate_data WHERE ";
 		for (int i = 0; i < (certIds.size() - 1); ++i) {
-			queryStr += "(id = " + QString::number(certIds[i]) +
-			    ") or ";
+			queryStr += "(id = ?) or ";
 		}
-		queryStr += "(id = " + QString::number(certIds.last()) + ")";
-		// qDebug() << queryStr;
-		query.prepare(queryStr);
+		queryStr += "(id = ?)";
+		//qDebug() << queryStr;
+		if (!query.prepare(queryStr)) {
+			/* TODO -- Handle error. */
+		}
+		for (int i = 0; i < certIds.size(); ++i) {
+			query.addBindValue(certIds[i]);
+		}
 		if (query.exec() && query.isActive()) {
 			query.first();
 			while (query.isValid()) {

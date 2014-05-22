@@ -2,9 +2,13 @@
 
 #include <QDebug>
 #include <QDir>
-#include <QSqlError>
+#include <QMap>
+#include <QObject>
+#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QString>
+#include <QVariant>
 
 #include "account_db.h"
 #include "src/io/db_tables.h"
@@ -126,11 +130,14 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 		queryStr += accntinfTbl.knownAttrs[i].first + ", ";
 	}
 	queryStr += accntinfTbl.knownAttrs.last().first + " ";
-	queryStr += "FROM account_info WHERE key = '" + key + "'";
-//	qDebug() << queryStr;
-	if (query.prepare(queryStr) && query.exec() && query.isActive() &&
-	    query.first()) {
-//		qDebug() << "SQL Ok.";
+	queryStr += "FROM account_info WHERE key = :key";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		return entry;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive() && query.first()) {
+		//qDebug() << "SQL Ok.";
 		QSqlRecord rec = query.record();
 		for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
 			QVariant value = query.value(rec.indexOf(
@@ -161,10 +168,13 @@ const QString AccountDb::dbId(const QString &key,
 	}
 
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT dbID FROM account_info WHERE key = '" +
-	    key + "'";
-	if (query.prepare(queryStr) && query.exec() && query.isActive() &&
-	    query.first()) {
+	QString queryStr = "SELECT dbID FROM account_info WHERE key = :key";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		return defaultValue;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive() && query.first()) {
 		return query.value(0).toString();
 	} else {
 		return defaultValue;

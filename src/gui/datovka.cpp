@@ -17,6 +17,7 @@
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/io/db_tables.h"
+#include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/pkcs7.h"
 #include "ui_datovka.h"
@@ -236,8 +237,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	 * of an account?
 	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
-	qDebug() << "Selected data box ID" << dbId;
-	//Q_ASSERT(!dbId.isEmpty());
+	//qDebug() << "Selected data box ID" << dbId;
+	Q_ASSERT(!dbId.isEmpty());
 
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);

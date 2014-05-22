@@ -6,8 +6,8 @@
 
 #include <QMap>
 #include <QPair>
-#include <QString>
 #include <QSqlDatabase>
+#include <QString>
 #include <QVector>
 
 
@@ -21,10 +21,12 @@ enum EntryType{
 	DB_DATETIME
 };
 
+
 /*!
  * @brief Converts db types strings.
  */
 const QString & entryTypeStr(EntryType entryType);
+
 
 /*!
  * @brief Table attribute property.

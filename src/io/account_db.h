@@ -3,12 +3,12 @@
 #ifndef _ACCOUNT_DB_H_
 #define _ACCOUNT_DB_H_
 
-#include <QPair>
+
+#include <QMap>
 #include <QObject>
 #include <QSqlDatabase>
-
-
-#include "dbs.h"
+#include <QString>
+#include <QVariant>
 
 
 /*!
