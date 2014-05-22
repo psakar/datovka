@@ -1782,13 +1782,12 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 
 /* ========================================================================= */
 /*
-* Download message list from ISDS for current account
+* Download message list from ISDS for current account index
 */
-void MainWindow::on_actionDownload_messages_triggered()
+bool MainWindow::downloadMessageList(QModelIndex index)
 /* ========================================================================= */
 {
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
+
 	AccountStructInfo accountinfo;
 	accountinfo = getAccountInfos(index);
 
@@ -1808,15 +1807,17 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 	if (status != IE_SUCCESS) {
 		isds_list_free(&messageList);
-		return;
+		return false;
 	}
 
 	struct isds_list *box;
 	box = messageList;
 	int newcnt = 0;
+	int allcnt = 0;
 	MessageDb *messageDb = accountMessageDb();
 
 	while (0 != box) {
+		allcnt++;
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
 		if (!messageDb->isInMessageDb(dmId)) {
@@ -1906,6 +1907,9 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 	}
 
+	qDebug() << "#messages:" << allcnt;
+	qDebug() << "#new:" << newcnt;
+
 	isds_list_free(&messageList);
 
 	if (newcnt > 0) {
@@ -1919,4 +1923,45 @@ void MainWindow::on_actionDownload_messages_triggered()
 		font.setBold(true);
 		accountitem->setFont(font);
 	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Download message list from ISDS for current account
+*/
+void MainWindow::on_actionDownload_messages_triggered()
+/* ========================================================================= */
+{
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+	downloadMessageList(index);
+}
+
+
+/* ========================================================================= */
+/*
+* Download message list from ISDS for all accounts
+*/
+void MainWindow::on_actionSync_all_accounts_triggered()
+/* ========================================================================= */
+{
+	int count = ui->accountList->model()->rowCount();
+	qDebug() << count;
+	for (int i = 0; i < count; i++) {
+		QModelIndex index = m_accountModel.index(i,0);
+		downloadMessageList(index);
+	}
+}
+
+/* ========================================================================= */
+/*
+* Download message list from ISDS for all accounts (click from toolbar)
+*/
+void MainWindow::on_actionRecieved_all_triggered()
+/* ========================================================================= */
+{
+	on_actionSync_all_accounts_triggered();
 }

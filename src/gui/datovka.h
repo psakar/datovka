@@ -126,6 +126,10 @@ private slots:
 
 	void on_actionDownload_messages_triggered();
 
+	void on_actionSync_all_accounts_triggered();
+
+	void on_actionRecieved_all_triggered();
+
 private:
 
 	/*!
@@ -235,6 +239,12 @@ private:
 	 * @brief Get message db to selected account item.
 	 */
 	MessageDb * accountMessageDb(const QStandardItem *accountItem = 0);
+
+	/*!
+	 * @brief Download message list for specific account.
+	 */
+	bool downloadMessageList(QModelIndex index);
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
