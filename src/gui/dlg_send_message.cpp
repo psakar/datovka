@@ -11,7 +11,8 @@
 
 
 DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
-    QTreeView &accountList, QTableView &messageList, AccountStructInfo accountinfo,
+    QTreeView &accountList, QTableView &messageList,
+    const AccountModel::SettingsMap &accountInfo,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
     const QString &senderAddress)
@@ -19,7 +20,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
     m_accountList(accountList),
     m_messageList(messageList),
     m_action(action),
-    m_accountinfo(accountinfo),
+    m_accountInfo(accountInfo),
     m_reSubject(reSubject),
     m_senderId(senderId),
     m_sender(sender),
@@ -29,6 +30,8 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
 {
 	setupUi(this);
 	initNewMessageDialog();
+
+	qDebug() << m_accountInfo;
 }
 
 /* ========================================================================= */
@@ -232,7 +235,7 @@ void DlgSendMessage::addRecipientData(void)
 /* ========================================================================= */
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, m_accountinfo, this, m_userName);
+	    this->recipientTableWidget, m_accountInfo, this, m_userName);
 	dsSearch->show();
 }
 
@@ -331,10 +334,11 @@ void isds_message_copy_free_void(void **message_copy)
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
-
 {
-	if (!isdsSessions.isConnectToIsds(m_accountinfo.userName)) {
-		isdsSessions.connectToIsds(m_accountinfo);
+	qDebug() << "XXX" << m_accountInfo;
+
+	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		isdsSessions.connectToIsds(m_accountInfo);
 	}
 
 	isds_error status;

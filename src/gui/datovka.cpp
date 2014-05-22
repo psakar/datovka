@@ -154,11 +154,12 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(onTableColumnSort(int)));
 
 	/* Message/attachment related buttons. */
-//	ui->downloadComplete
+	connect(ui->downloadComplete, SIGNAL(clicked()), this,
+	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
 	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
-	    SLOT(openAttachment()));
+	    SLOT(openSelectedAttachment()));
 //	ui->verifySignature
 //	ui->signatureDetails
 }
@@ -560,7 +561,7 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 		/* TODO */
 		menu->addAction(QIcon(ICON_3PARTY_PATH +
 		    QString("folder_16.png")), tr("Open attachment"), this,
-		    SLOT(openAttachment()));
+		    SLOT(openSelectedAttachment()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH +
 		    QString("save_16.png")), tr("Save attachment"), this,
 		    SLOT(saveSelectedAttachmentToFile()));
@@ -580,7 +581,7 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 {
 	(void) index;
 	//qDebug() << "Attachment double clicked.";
-	openAttachment();
+	openSelectedAttachment();
 }
 
 
@@ -649,7 +650,7 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 /*
  * Open attachment in default application.
  */
-void MainWindow::openAttachment(void)
+void MainWindow::openSelectedAttachment(void)
 /* ========================================================================= */
 {
 	QModelIndex selectedIndex =
@@ -710,6 +711,22 @@ void MainWindow::openAttachment(void)
 	//qDebug() << "file://" + fileName;
 	QDesktopServices::openUrl(QUrl("file://" + fileName));
 	/* TODO -- Handle openUrl() return value. */
+}
+
+
+/* ========================================================================= */
+/*
+ * Downloads the attachments for the selected message.
+ */
+void MainWindow::downloadSelectedMessageAttachments(void)
+/* ========================================================================= */
+{
+	QModelIndex selectedIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+	    /* selection().indexes() ? */
+
+	downloadAttachments(selectedIndex); /* TODO -- Check return value. */
+	/* TODO -- Reload content of attachment list. */
 }
 
 
@@ -1313,30 +1330,6 @@ void MainWindow::on_actionCreate_message_triggered()
 
 /* ========================================================================= */
 /*
-* Get account info from
- */
-AccountStructInfo MainWindow::getAccountInfos(QModelIndex index)
-/* ========================================================================= */
-{
-	AccountStructInfo accountinfo;
-
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-	const AccountModel::SettingsMap &itemSettings =
-	    accountItem->data(ROLE_CONF_SETINGS).toMap();
-	qDebug() << itemSettings[USER].toString();
-
-	accountinfo.login_method = itemSettings[LOGIN].toString();
-	accountinfo.userName = itemSettings[USER].toString();
-	accountinfo.password = itemSettings[PWD].toString();
-	accountinfo.testAccount  = itemSettings[TEST].toBool();
-	accountinfo.certPath = itemSettings[P12FILE].toString();
-
-	return accountinfo;
-}
-
-
-/* ========================================================================= */
-/*
 * Send message slot
  */
 void MainWindow::on_actionSent_message_triggered()
@@ -1349,14 +1342,11 @@ void MainWindow::on_actionSent_message_triggered()
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	AccountStructInfo accountinfo;
-	accountinfo = getAccountInfos(index);
-
 	MessageDb *messageDb = accountMessageDb();
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
-	    accountinfo, this);
+	    index.data(ROLE_CONF_SETINGS).toMap(), this);
 	newMessageDialog->show();
 }
 
@@ -1420,11 +1410,8 @@ void MainWindow::on_actionChange_password_triggered()
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	AccountStructInfo accountinfo;
-	accountinfo = getAccountInfos(index);
-
 	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList),
-	    accountinfo, this);
+	    index.data(ROLE_CONF_SETINGS).toMap(), this);
 	changePwd->exec();
 }
 
@@ -1531,13 +1518,12 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	AccountStructInfo accountinfo;
-	accountinfo = getAccountInfos(index);
-
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    accountinfo, this, replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
+	    index.data(ROLE_CONF_SETINGS).toMap(), this,
+	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
+	qDebug() << "Dialog shown";
 }
 
 /* ========================================================================= */
@@ -1550,12 +1536,9 @@ void MainWindow::on_actionFind_databox_triggered()
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	AccountStructInfo accountinfo;
-	accountinfo = getAccountInfos(index);
-
 	QString userName = accountUserName();
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    accountinfo, this, userName);
+	    index.data(ROLE_CONF_SETINGS).toMap(), this, userName);
 	dsSearch->show();
 }
 
@@ -1785,15 +1768,18 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 /*
 * Download message list from ISDS for current account index
 */
-bool MainWindow::downloadMessageList(QModelIndex index)
+bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
+	Q_ASSERT(acntTopIdx.isValid());
+	if (!acntTopIdx.isValid()) {
+		return false;
+	}
+	const AccountModel::SettingsMap &accountInfo =
+	    acntTopIdx.data(ROLE_CONF_SETINGS).toMap();
 
-	AccountStructInfo accountinfo;
-	accountinfo = getAccountInfos(index);
-
-	if (!isdsSessions.isConnectToIsds(accountinfo.userName)) {
-		isdsSessions.connectToIsds(accountinfo);
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
 	}
 
 	isds_error status;
@@ -1801,7 +1787,7 @@ bool MainWindow::downloadMessageList(QModelIndex index)
 
 	/* Download message list from ISDS  for current account */
 	status = isds_get_list_of_received_messages(isdsSessions.
-	    session(accountinfo.userName),
+	    session(accountInfo.userName()),
 	    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
 
 	qDebug() << status << isds_strerror(status);
@@ -1867,7 +1853,7 @@ bool MainWindow::downloadMessageList(QModelIndex index)
 				    dmRecipientOrgUnitNum) : "";
 			}
 
-			messageDb->insertMessageEnvelopeIntoDb(dmId,
+			messageDb->msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
 			    false, "tReturnedMessage",
 			    item->envelope->dbIDSender,
@@ -1914,7 +1900,7 @@ bool MainWindow::downloadMessageList(QModelIndex index)
 	isds_list_free(&messageList);
 
 	if (newcnt > 0) {
-		QModelIndex itemindex = index.child(0,0);
+		QModelIndex itemindex = acntTopIdx.child(0,0);
 		QString label = itemindex.data().toString();
 		label = label + " (" + QString::number(newcnt) + ")";
 		QStandardItem *accountitem =
@@ -1930,6 +1916,29 @@ bool MainWindow::downloadMessageList(QModelIndex index)
 
 
 /* ========================================================================= */
+/*!
+ * @brief Download attachments for specific message.
+ */
+bool MainWindow::downloadAttachments(const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	/* First column. */
+	int dmId = msgIdx.sibling(msgIdx.row(), 0).data().toInt();
+
+	qDebug() << "Downloading attachments for message" << dmId;
+
+	/* TODO */
+
+	return true;
+}
+
+
+/* ========================================================================= */
 /*
 * Download message list from ISDS for current account
 */
@@ -1938,7 +1947,7 @@ void MainWindow::on_actionDownload_messages_triggered()
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
-	downloadMessageList(index);
+	downloadMessageList(index); /* TODO -- Check return value. */
 }
 
 
@@ -1950,12 +1959,14 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 /* ========================================================================= */
 {
 	int count = ui->accountList->model()->rowCount();
-	qDebug() << count;
+	//qDebug() << count;
 	for (int i = 0; i < count; i++) {
-		QModelIndex index = m_accountModel.index(i,0);
-		downloadMessageList(index);
+		qDebug() << "Downloading messages for account" << i;
+		QModelIndex index = m_accountModel.index(i, 0);
+		downloadMessageList(index); /* TODO -- Check return value. */
 	}
 }
+
 
 /* ========================================================================= */
 /*

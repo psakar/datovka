@@ -10,6 +10,8 @@
 #include <QString>
 
 #include "src/common.h"
+#include "src/models/accounts_model.h"
+
 
 /* TODO -- Check whether session is active. */
 
@@ -45,7 +47,7 @@ public:
 	struct isds_ctx * session(const QString &userName) const;
 
 
-	void connectToIsds(AccountStructInfo accountInfo);
+	void connectToIsds(const AccountModel::SettingsMap &accountInfo);
 
 	bool isConnectToIsds(const QString userName);
 

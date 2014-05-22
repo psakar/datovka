@@ -26,7 +26,7 @@ public:
 
 	DlgSendMessage(MessageDb &db, Action action,
 	    QTreeView &accountList, QTableView &messageList,
-	    AccountStructInfo accountinfo,
+	    const AccountModel::SettingsMap &accountInfo,
 	    QWidget *parent = 0,
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
@@ -54,7 +54,7 @@ private:
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
 	const Action m_action;
-	AccountStructInfo m_accountinfo;
+	AccountModel::SettingsMap m_accountInfo;
 	QString m_reSubject;
 	QString m_senderId;
 	QString m_sender;

@@ -1,15 +1,16 @@
 
 #include <QMessageBox>
 
-#include "src/models/accounts_model.h"
 #include "dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
+#include "src/models/accounts_model.h"
+
 
 DlgChangePwd::DlgChangePwd(const QString &boxId, QTreeView &accountList,
-    AccountStructInfo accountinfo, QWidget *parent)
+    const AccountModel::SettingsMap &accountInfo, QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
-    m_accountinfo(accountinfo),
+    m_accountInfo(accountInfo),
     m_boxId(boxId)
 {
 	setupUi(this);
@@ -39,8 +40,8 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(changePassword(void)));
 
-	if (m_accountinfo.login_method == "hotp" ||
-	    m_accountinfo.login_method == "topt") {
+	if (m_accountInfo.loginMethod() == "hotp" ||
+	    m_accountInfo.loginMethod() == "topt") {
 		this->secCodeLineEdit->setEnabled(true);
 		this->label_7->setEnabled(true);
 	} else {
@@ -125,21 +126,21 @@ void DlgChangePwd::showHidePasswordLine(void)
 void DlgChangePwd::changePassword(void)
 /* ========================================================================= */
 {
-	if (!isdsSessions.isConnectToIsds(m_accountinfo.userName)) {
-		isdsSessions.connectToIsds(m_accountinfo);
+	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		isdsSessions.connectToIsds(m_accountInfo);
 	}
 
 	isds_error status;
 	char * refnumber = NULL;
 
-	if (m_accountinfo.login_method == "hotp" ||
-	    m_accountinfo.login_method == "topt") {
+	if (m_accountInfo.loginMethod() == "hotp" ||
+	    m_accountInfo.loginMethod() == "topt") {
 
 		struct isds_otp *otp = NULL;
 		otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 		memset(otp, 0, sizeof(struct isds_otp));
 
-		if (m_accountinfo.login_method == "hotp") {
+		if (m_accountInfo.loginMethod() == "hotp") {
 			otp->method = OTP_HMAC;
 		} else {
 			otp->method = OTP_TIME;
@@ -150,7 +151,7 @@ void DlgChangePwd::changePassword(void)
 		    : NULL;
 
 		status = isds_change_password(
-		    isdsSessions.session(m_accountinfo.userName),
+		    isdsSessions.session(m_accountInfo.userName()),
 		    this->currentPwdLineEdit->text().toStdString().c_str(),
 		    this->newPwdLineEdit->text().toStdString().c_str(),
 		    otp, &refnumber);
@@ -159,7 +160,7 @@ void DlgChangePwd::changePassword(void)
 		free(otp);
 	} else {
 		status = isds_change_password(
-		    isdsSessions.session(m_accountinfo.userName),
+		    isdsSessions.session(m_accountInfo.userName()),
 		    this->currentPwdLineEdit->text().toStdString().c_str(),
 		    this->newPwdLineEdit->text().toStdString().c_str(),
 		    NULL, &refnumber);

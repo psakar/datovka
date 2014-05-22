@@ -155,7 +155,7 @@ public:
 	/*!
 	 * @brief Insert message envelope into messages table.
 	 */
-	bool insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
+	bool msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,

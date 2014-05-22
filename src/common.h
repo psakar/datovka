@@ -48,14 +48,6 @@ typedef enum {
 #define indentDivStart "<div style=\"margin-left: 12px;\">"
 #define divEnd "</div>"
 
-class AccountStructInfo {
-public:
-	QString login_method;
-	QString userName;
-	QString password;
-	bool testAccount;
-	QString certPath;
-};
 
 class GlobPreferences {
 

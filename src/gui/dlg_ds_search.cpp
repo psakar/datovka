@@ -4,13 +4,13 @@
 #include "src/io/isds_sessions.h"
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    AccountStructInfo accountinfo,
+    const AccountModel::SettingsMap &accountInfo,
     QWidget *parent, QString userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
     m_action(action),
     m_userName(userName),
-    m_accountinfo(accountinfo)
+    m_accountInfo(accountInfo)
 {
 	setupUi(this);
 	initSearchWindow();
@@ -146,8 +146,8 @@ void DlgDsSearch::searchDataBox(void)
 
 	struct isds_list *boxes = NULL;
 
-	if (!isdsSessions.isConnectToIsds(m_accountinfo.userName)) {
-		isdsSessions.connectToIsds(m_accountinfo);
+	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		isdsSessions.connectToIsds(m_accountInfo);
 	}
 
 

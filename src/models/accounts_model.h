@@ -4,8 +4,11 @@
 #define _ACCOUNTS_MODEL_H_
 
 
+#include <QMap>
 #include <QSettings>
 #include <QStandardItemModel>
+#include <QString>
+#include <QVariant>
 
 
 #define CREDENTIALS "credentials"
@@ -26,7 +29,18 @@
 class AccountModel: public QStandardItemModel {
 
 public:
-	typedef QMap<QString, QVariant> SettingsMap;
+	class SettingsMap : public QMap<QString, QVariant> {
+	public:
+		SettingsMap(void);
+		SettingsMap(const QMap<QString, QVariant> &map);
+
+		QString loginMethod(void) const;
+		QString userName(void) const;
+		QString password(void) const;
+		void setPassword(const QString &pwd);
+		bool testAccount(void) const;
+		QString certPath(void) const;
+	};
 
 	/*
 	 * |

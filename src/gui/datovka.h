@@ -29,9 +29,8 @@ public:
 	~MainWindow(void);
 
 	void setDefaultProgressStatus(void);
-	AccountStructInfo getAccountInfos(QModelIndex index);
 
-	QProgressBar *m_statusProgressBar; /*!< Progressbar object. */
+	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 
 private slots:
 	void on_actionPreferences_triggered();
@@ -86,7 +85,12 @@ private slots:
 	/*!
 	 * @brief Open attachment in default application.
 	 */
-	void openAttachment(void);
+	void openSelectedAttachment(void);
+
+	/*!
+	 * @brief Downloads the attachments for the selected message.
+	 */
+	void downloadSelectedMessageAttachments(void);
 
 	void on_actionCreate_message_triggered();
 
@@ -243,8 +247,12 @@ private:
 	/*!
 	 * @brief Download message list for specific account.
 	 */
-	bool downloadMessageList(QModelIndex index);
+	bool downloadMessageList(const QModelIndex &acntTopIdx);
 
+	/*!
+	 * @brief Download attachments for specific message.
+	 */
+	bool downloadAttachments(const QModelIndex &msgIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

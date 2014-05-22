@@ -6,6 +6,7 @@
 #include <QTreeView>
 
 #include "src/common.h"
+#include "src/models/accounts_model.h"
 #include "ui_dlg_change_pwd.h"
 
 
@@ -14,7 +15,7 @@ class DlgChangePwd : public QDialog, public Ui::ChangePwd {
 
 public:
 	DlgChangePwd(const QString &boxId, QTreeView &accountList,
-	    AccountStructInfo accountinfo, QWidget *parent = 0);
+	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
 
 private slots:
 	void generatePassword(void);
@@ -34,7 +35,7 @@ private:
 	const int randomStringLength;
 
 	QTreeView &m_accountList;
-	AccountStructInfo m_accountinfo;
+	AccountModel::SettingsMap m_accountInfo;
 	const QString m_boxId;
 };
 

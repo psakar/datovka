@@ -8,7 +8,6 @@
 #include "isds_sessions.h"
 
 
-
 GlobIsdsSessions isdsSessions;
 
 
@@ -100,30 +99,33 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
 /*
  * Connect to databox
  */
-void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
+void GlobIsdsSessions::connectToIsds(
+    const AccountModel::SettingsMap &accountInfo)
 /* ========================================================================= */
 {
 	isds_error status = IE_SUCCESS;
 
-	if (!isdsSessions.holdsSession(accountInfo.userName)) {
-		createCleanSession(accountInfo.userName);
+	QString password = accountInfo.password();
+
+	if (!isdsSessions.holdsSession(accountInfo.userName())) {
+		createCleanSession(accountInfo.userName());
 	}
 
 	/* Login method based on username and password */
-	if (accountInfo.login_method == "username") {
+	if (accountInfo.loginMethod() == "username") {
 
-		if (accountInfo.password.isEmpty()) {
+		if (password.isEmpty()) {
 			bool ok = false;
 			QString text = "";
 			while (text.isEmpty()) {
 				text = QInputDialog::getText(0,
 				    QObject::tr("Enter password"),
 				    QObject::tr("Enter password for account ") +
-				    accountInfo.userName,
+				    accountInfo.userName(),
 				    QLineEdit::Password, "", &ok);
 				if (ok) {
 					if (!text.isEmpty()) {
-						accountInfo.password = text;
+						password = text;
 					}
 				} else {
 					return;
@@ -132,12 +134,12 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 		}
 
 		status = isdsLoginUserName(
-		    isdsSessions.session(accountInfo.userName),
-		    accountInfo.userName, accountInfo.password,
-		    accountInfo.testAccount);
+		    isdsSessions.session(accountInfo.userName()),
+		    accountInfo.userName(), password,
+		    accountInfo.testAccount());
 
 	/* Login method based on certificate only */
-	} else if (accountInfo.login_method == "certificate") {
+	} else if (accountInfo.loginMethod() == "certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
 
@@ -152,21 +154,21 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 		/* TODO - set correct cert format and certificate/key */
 		pki_credentials->engine = NULL;
 		pki_credentials->certificate_format = PKI_FORMAT_DER;
-		pki_credentials->certificate = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->certificate = strdup(accountInfo.certPath().toStdString().c_str());
 		pki_credentials->key_format = PKI_FORMAT_DER;
-		pki_credentials->key = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->key = strdup(accountInfo.certPath().toStdString().c_str());
 		pki_credentials->passphrase = NULL;
 
 		QString iDbox = "TODO";
 		/* TODO -- The account is not identified with a user name! */
 
 		status = isdsLoginCert(isdsSessions.session(iDbox),
-		    pki_credentials, accountInfo.testAccount);
+		    pki_credentials, accountInfo.testAccount());
 
 		isds_pki_credentials_free(&pki_credentials);
 
 	/* Login method based on certificate together with username */
-	} else if (accountInfo.login_method == "user_certificate") {
+	} else if (accountInfo.loginMethod() == "user_certificate") {
 
 		isds_pki_credentials *pki_credentials = NULL;
 
@@ -181,29 +183,29 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 		/* TODO - set correct cert format and certificate/key */
 		pki_credentials->engine = NULL;
 		pki_credentials->certificate_format = PKI_FORMAT_DER;
-		pki_credentials->certificate = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->certificate = strdup(accountInfo.certPath().toStdString().c_str());
 		pki_credentials->key_format = PKI_FORMAT_DER;
-		pki_credentials->key = strdup(accountInfo.certPath.toStdString().c_str());
+		pki_credentials->key = strdup(accountInfo.certPath().toStdString().c_str());
 		pki_credentials->passphrase = NULL;
 
-		if (accountInfo.password.isNull()) {
+		if (password.isNull()) {
 			status = isdsLoginUserCert(
-			    isdsSessions.session(accountInfo.userName),
-			    accountInfo.userName /* boxId */,
-			    pki_credentials, accountInfo.testAccount);
+			    isdsSessions.session(accountInfo.userName()),
+			    accountInfo.userName() /* boxId */,
+			    pki_credentials, accountInfo.testAccount());
 		} else {
-			if (accountInfo.password.isEmpty()) {
+			if (password.isEmpty()) {
 				bool ok;
 				QString text = "";
 				while (text.isEmpty()) {
 					text = QInputDialog::getText(0,
 					    QObject::tr("Enter certificate password"),
 					    QObject::tr("Enter certificate password for account ") +
-					    accountInfo.userName,
+					    accountInfo.userName(),
 					    QLineEdit::Password, "", &ok);
 					if (ok) {
 						if (!text.isEmpty()) {
-							accountInfo.password = text;
+							password = text;
 						}
 					} else {
 						isds_pki_credentials_free(&pki_credentials);
@@ -212,27 +214,27 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 				}
 			}
 			status = isdsLoginUserCertPwd(
-			    isdsSessions.session(accountInfo.userName),
-			    accountInfo.userName, accountInfo.password,
-			    pki_credentials, accountInfo.testAccount);
+			    isdsSessions.session(accountInfo.userName()),
+			    accountInfo.userName(), password,
+			    pki_credentials, accountInfo.testAccount());
 
 			isds_pki_credentials_free(&pki_credentials);
 		}
 
 	/* Login method based username and otp */
 	} else {
-		if (accountInfo.password.isEmpty()) {
+		if (password.isEmpty()) {
 			bool ok;
 			QString text = "";
 			while (text.isEmpty()) {
 				text = QInputDialog::getText(0,
 				    QObject::tr("Enter password"),
 				    QObject::tr("Enter password for account ") +
-				    accountInfo.userName,
+				    accountInfo.userName(),
 				    QLineEdit::Password, "", &ok);
 				if (ok) {
 					if (!text.isEmpty()) {
-						accountInfo.password = text;
+						password = text;
 					}
 				} else {
 					return;
@@ -241,11 +243,11 @@ void GlobIsdsSessions::connectToIsds(AccountStructInfo accountInfo)
 		}
 		isds_otp *opt = NULL;
 
-		if (isdsSessions.holdsSession(accountInfo.userName)) {
+		if (isdsSessions.holdsSession(accountInfo.userName())) {
 			status = isdsLoginUserOtp(
-			    isdsSessions.session(accountInfo.userName),
-			    accountInfo.userName, accountInfo.password,
-			    opt, accountInfo.testAccount);
+			    isdsSessions.session(accountInfo.userName()),
+			    accountInfo.userName(), password,
+			    opt, accountInfo.testAccount());
 		}
 
 	}

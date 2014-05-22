@@ -911,7 +911,7 @@ bool MessageDb::isInMessageDb(int dmId) const
 /*
  * Insert message envelope into messages table
  */
-bool MessageDb::insertMessageEnvelopeIntoDb(int dmId, bool is_verified,
+bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
     const QString &_origin, const QString &dbIDSender,
     const QString &dmSender, const QString &dmSenderAddress,
     int dmSenderType, const QString &dmRecipient,

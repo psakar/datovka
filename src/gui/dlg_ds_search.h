@@ -5,6 +5,7 @@
 #include <QDialog>
 
 #include "src/common.h"
+#include "src/models/accounts_model.h"
 #include "ui_dlg_ds_search.h"
 
 
@@ -18,7 +19,7 @@ public:
 	};
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-	    AccountStructInfo accountinfo,
+	    const AccountModel::SettingsMap &accountInfo,
 	    QWidget *parent = 0, QString useName = "");
 
 private slots:
@@ -35,7 +36,7 @@ private:
 	QTableWidget *m_recipientTableWidget;
 	Action m_action;
 	QString m_userName;
-	AccountStructInfo m_accountinfo;
+	AccountModel::SettingsMap m_accountInfo;
 };
 
 
