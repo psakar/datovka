@@ -84,3 +84,14 @@ QString timevalToDbFormat(const struct timeval *tv)
 
 	return ret;
 }
+
+
+/* ========================================================================= */
+/*
+ * Converts date to format to be stored in database.
+ */
+QString qDateTimeToDbFormat(const QDateTime &dateTime)
+/* ========================================================================= */
+{
+	QString ret = dateTime.toString(dbDateTimeFormat) + "000";
+}

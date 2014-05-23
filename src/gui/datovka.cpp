@@ -1775,7 +1775,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 	if (!acntTopIdx.isValid()) {
 		return false;
 	}
-	const AccountModel::SettingsMap &accountInfo =
+	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_CONF_SETINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
