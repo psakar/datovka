@@ -94,4 +94,6 @@ QString qDateTimeToDbFormat(const QDateTime &dateTime)
 /* ========================================================================= */
 {
 	QString ret = dateTime.toString(dbDateTimeFormat) + "000";
+
+	return ret;
 }
