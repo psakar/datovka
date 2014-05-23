@@ -906,6 +906,47 @@ bool MessageDb::isInMessageDb(int dmId) const
 	return false;
 }
 
+/* ========================================================================= */
+/*
+ * Insert message files into file table
+ */
+bool MessageDb::msgsInsertMessageFiles(int dmId,
+    const QString &dmFileDescr, const QString &dmUpFileGuid,
+    const QString &dmFileGuid, const QString &dmMimeType,
+    const QString &dmFormat, const QString &dmFileMetaType,
+    const QString &dmEncodedContent)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "INSERT INTO files ("
+	    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent"
+	    ") VALUES ("
+	    ":message_id, :_dmFileDescr, :_dmUpFileGuid, :_dmFileGuid, "
+	    ":_dmMimeType, :_dmFormat, :_dmFileMetaType, :dmEncodedContent"
+	    ")";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":_dmFileDescr", dmFileDescr);
+	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
+	query.bindValue(":_dmFileGuid", dmFileGuid);
+	query.bindValue(":_dmMimeType", dmMimeType);
+	query.bindValue(":_dmFormat", dmFormat);
+	query.bindValue(":_dmFileMetaType", dmFileMetaType);
+	query.bindValue(":dmEncodedContent", dmEncodedContent);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 /* ========================================================================= */
 /*
@@ -997,11 +1038,9 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	query.bindValue(":dmAttachmentSize", dmAttachmentSize);
 	query.bindValue(":_dmType", _dmType);
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (!query.isValid()) {
-			return false;
-		}
+	if (!query.exec()) {
+		qDebug() << "error 1";
+		return false;
 	}
 
 	queryStr = "INSERT INTO supplementary_message_data ("
@@ -1022,15 +1061,122 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	query.bindValue(":download_date", dmDownloadTime);
 	query.bindValue(":custom_data", "TODO");
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (!query.isValid()) {
-			return false;
-		}
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "error 2";
+		return false;
 	}
-	return true;
 }
 
+
+/* ========================================================================= */
+/*
+ * Update exist message envelope/supplementary data in db
+ */
+bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
+    const QString &_origin, const QString &dbIDSender,
+    const QString &dmSender, const QString &dmSenderAddress,
+    int dmSenderType, const QString &dmRecipient,
+    const QString &dmRecipientAddress,
+    const QString &dmAmbiguousRecipient,
+    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
+    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
+    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
+    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
+    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
+    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
+    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
+    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
+    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
+    const QString &dmQTimestamp, const QString &dmDeliveryTime,
+    const QString &dmAcceptanceTime, int dmMessageStatus,
+    int dmAttachmentSize, const QString &_dmType)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "UPDATE messages SET "
+	    "is_verified = :is_verified, _origin = :_origin, dbIDSender = :dbIDSender, dmSender = :dmSender, "
+	    "dmSenderAddress = :dmSenderAddress, dmSenderType = :dmSenderType, dmRecipient = :dmRecipient, "
+	    "dmRecipientAddress = :dmRecipientAddress, dmAmbiguousRecipient = :dmAmbiguousRecipient, dmSenderOrgUnit = :dmSenderOrgUnit, "
+	    "dmSenderOrgUnitNum = :dmSenderOrgUnitNum, dbIDRecipient = :dbIDRecipient, dmRecipientOrgUnit = :dmRecipientOrgUnit, "
+	    "dmRecipientOrgUnitNum = :dmRecipientOrgUnitNum, dmToHands = :dmToHands, dmAnnotation = :dmAnnotation, "
+	    "dmRecipientRefNumber = :dmRecipientRefNumber, dmSenderRefNumber = :dmSenderRefNumber, dmRecipientIdent = :dmRecipientIdent, "
+	    "dmSenderIdent = :dmSenderIdent, dmLegalTitleLaw = :dmLegalTitleLaw, dmLegalTitleYear = :dmLegalTitleYear, "
+	    "dmLegalTitleSect = :dmLegalTitleSect, dmLegalTitlePar = :dmLegalTitlePar, dmLegalTitlePoint = :dmLegalTitlePoint, "
+	    "dmPersonalDelivery = :dmPersonalDelivery, dmAllowSubstDelivery = :dmAllowSubstDelivery, dmQTimestamp = :dmQTimestamp, "
+	    "dmDeliveryTime = :dmDeliveryTime, dmAcceptanceTime = :dmAcceptanceTime, dmMessageStatus = :dmMessageStatus, "
+	    "dmAttachmentSize = :dmAttachmentSize, _dmType = :_dmType WHERE dmID = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":is_verified", is_verified);
+	query.bindValue(":_origin", _origin);
+	query.bindValue(":dbIDSender", dbIDSender);
+	query.bindValue(":dmSender", dmSender);
+	query.bindValue(":dmSenderAddress", dmSenderAddress);
+	query.bindValue(":dmSenderType", dmSenderType);
+	query.bindValue(":dmRecipient", dmRecipient);
+	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
+	query.bindValue(":dmAmbiguousRecipient", dmAmbiguousRecipient);
+	query.bindValue(":dmSenderOrgUnit", dmSenderOrgUnit);
+	query.bindValue(":dmSenderOrgUnitNum", dmSenderOrgUnitNum);
+	query.bindValue(":dbIDRecipient", dbIDRecipient);
+	query.bindValue(":dmRecipientOrgUnit", dmRecipientOrgUnit);
+	query.bindValue(":dmRecipientOrgUnitNum", dmRecipientOrgUnitNum);
+	query.bindValue(":dmToHands", dmToHands);
+	query.bindValue(":dmAnnotation", dmAnnotation);
+	query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
+	query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
+	query.bindValue(":dmRecipientIdent", dmRecipientIdent);
+	query.bindValue(":dmSenderIdent", dmSenderIdent);
+	query.bindValue(":dmLegalTitleLaw", dmLegalTitleLaw);
+	query.bindValue(":dmLegalTitleYear", dmLegalTitleYear);
+	query.bindValue(":dmLegalTitleSect", dmLegalTitleSect);
+	query.bindValue(":dmLegalTitlePar", dmLegalTitlePar);
+	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
+	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
+	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
+	query.bindValue(":dmQTimestamp", dmQTimestamp);
+	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
+	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
+	query.bindValue(":dmMessageStatus", dmMessageStatus);
+	query.bindValue(":dmAttachmentSize", dmAttachmentSize);
+	query.bindValue(":_dmType", _dmType);
+
+	if (!query.exec()) {
+		qDebug() << "error";
+		return false;
+	}
+
+	queryStr = "UPDATE supplementary_message_data SET "
+	    "message_type = :message_type, read_locally = :read_locally, "
+	    "download_date =:download_date, custom_data = :custom_data "
+	    "WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+
+	}
+
+	QDateTime current = QDateTime::currentDateTime();
+	QString dmDownloadTime = qDateTimeToDbFormat(current);
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":message_type", 1); // 1 received / 2 sent
+	query.bindValue(":read_locally", true);
+	query.bindValue(":download_date", dmDownloadTime);
+	query.bindValue(":custom_data", "TODO");
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "error";
+		return false;
+	}
+}
 
 /* ========================================================================= */
 /*

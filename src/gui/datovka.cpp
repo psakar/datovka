@@ -1896,9 +1896,6 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 			    *item->envelope->dmMessageStatus,
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType);
-
-
-
 			newcnt++;
 //			accountItemSelectionChanged(index.child(0,0)); //reload message list
 		}
@@ -1964,8 +1961,123 @@ bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
 		return false;
 	}
 
-	qDebug() << (char*)message->envelope->timestamp;
-	qDebug() << "dfgdfg";
+
+	MessageDb *messageDb = accountMessageDb();
+	int dmID = atoi(message->envelope->dmID);
+
+	/* TODO - update message envelope items */
+	QString timestamp = QByteArray((char *)message->envelope->timestamp,
+	    message->envelope->timestamp_length).toBase64();
+
+			QString dmAmbiguousRecipient;
+			if (0 == message->envelope->dmAmbiguousRecipient) {
+				dmAmbiguousRecipient = "0";
+			} else {
+				dmAmbiguousRecipient = QString::number(
+				    *message->envelope->dmAmbiguousRecipient);
+			}
+
+			QString dmLegalTitleYear;
+			if (0 == message->envelope->dmLegalTitleYear) {
+				dmLegalTitleYear = "";
+			} else {
+				dmLegalTitleYear = QString::number(
+				    *message->envelope->dmLegalTitleYear);
+			}
+
+			QString dmLegalTitleLaw;
+			if (0 == message->envelope->dmLegalTitleLaw) {
+				dmLegalTitleLaw = "";
+			} else {
+				dmLegalTitleLaw = QString::number(
+				    *message->envelope->dmLegalTitleLaw);
+			}
+
+			QString dmSenderOrgUnitNum;
+			if (0 == message->envelope->dmSenderOrgUnitNum) {
+				dmSenderOrgUnitNum = "";
+			} else {
+				dmSenderOrgUnitNum =
+				    *message->envelope->dmSenderOrgUnitNum != 0 ?
+				    QString::number(*message->envelope->
+				    dmSenderOrgUnitNum) : "";
+			}
+
+			QString dmRecipientOrgUnitNum;
+			if (0 == message->envelope->dmRecipientOrgUnitNum) {
+				dmRecipientOrgUnitNum = "";
+			} else {
+				dmRecipientOrgUnitNum =
+				    *message->envelope->dmRecipientOrgUnitNum != 0
+				    ? QString::number(*message->envelope->
+				    dmRecipientOrgUnitNum) : "";
+			}
+
+			messageDb->msgsUpdateMessageEnvelope(dmID,
+			    /* TODO - set correctly next two values */
+			    true, "tReturnedMessage",
+			    message->envelope->dbIDSender,
+			    message->envelope->dmSender,
+			    message->envelope->dmSenderAddress,
+			    (int)*message->envelope->dmSenderType,
+			    message->envelope->dmRecipient,
+			    message->envelope->dmRecipientAddress,
+			    dmAmbiguousRecipient,
+			    message->envelope->dmSenderOrgUnit,
+			    dmSenderOrgUnitNum,
+			    message->envelope->dbIDRecipient,
+			    message->envelope->dmRecipientOrgUnit,
+			    dmRecipientOrgUnitNum,
+			    message->envelope->dmToHands,
+			    message->envelope->dmAnnotation,
+			    message->envelope->dmRecipientRefNumber,
+			    message->envelope->dmSenderRefNumber,
+			    message->envelope->dmRecipientIdent,
+			    message->envelope->dmSenderIdent,
+			    dmLegalTitleLaw,
+			    dmLegalTitleYear,
+			    message->envelope->dmLegalTitleSect,
+			    message->envelope->dmLegalTitlePar,
+			    message->envelope->dmLegalTitlePoint,
+			    message->envelope->dmPersonalDelivery,
+			    message->envelope->dmAllowSubstDelivery,
+			    timestamp,
+			    timevalToDbFormat(message->envelope->dmDeliveryTime),
+			    timevalToDbFormat(message->envelope->dmAcceptanceTime),
+			    *message->envelope->dmMessageStatus,
+			    (int)*message->envelope->dmAttachmentSize,
+			    message->envelope->dmType);
+
+
+	struct isds_list *file;
+	file = message->documents;
+
+	while (0 != file) {
+		isds_document *item = (isds_document *) file->data;
+
+		QString dmEncodedContent = QByteArray((char *)item->data,
+		    item->data_length).toBase64();
+
+		QString dmFileMetaType;
+		if (item->dmFileMetaType == FILEMETATYPE_MAIN) {
+			dmFileMetaType = "main";
+		} else if (item->dmFileMetaType == FILEMETATYPE_ENCLOSURE) {
+			dmFileMetaType = "encl";
+		} else if (item->dmFileMetaType == FILEMETATYPE_SIGNATURE) {
+			dmFileMetaType = "sign";
+		} else if (item->dmFileMetaType == FILEMETATYPE_META) {
+			dmFileMetaType = "meta";
+		} else {
+			dmFileMetaType = "";
+		}
+		/* insert new file to db */
+		messageDb->msgsInsertMessageFiles(dmID,
+		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
+		   item->dmMimeType, item->dmFormat, dmFileMetaType,
+		   dmEncodedContent);
+
+		file = file->next;
+	}
 	return true;
 }
 
