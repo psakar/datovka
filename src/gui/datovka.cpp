@@ -224,6 +224,11 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	QString html;
 	QAbstractTableModel *msgTblMdl;
 
+	Q_ASSERT(current.isValid());
+	if (!current.isValid()) {
+		return;
+	}
+
 	const QStandardItem *accountItem =
 	    m_accountModel.itemFromIndex(current);
 	QString userName = accountUserName(accountItem);
@@ -368,48 +373,39 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		//accountItemSelectionChanged(index);
 
 		menu->addAction(
-		   QIcon(ICON_16x16_PATH + QString("datovka-account-sync.png")),
+		    QIcon(ICON_16x16_PATH "datovka-account-sync.png"),
 		    tr("Get messages"),
 		    this, SLOT(on_actionGet_messages_triggered()));
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH + QString("datovka-message.png")),
+		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create message"),
 		    this, SLOT(on_actionCreate_message_triggered()));
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("tick_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "tick_16.png"),
 		    tr("Mark all as read"),
 		    this, SLOT(on_actionMark_all_as_read_triggered()));
 		menu->addSeparator();
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("user_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
 		    tr("Change password"),
 		    this, SLOT(on_actionChange_password_triggered()));
 		menu->addSeparator();
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("letter_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "letter_16.png"),
 		    tr("Account properties"),
 		    this, SLOT(on_actionAccount_properties_triggered()));
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Remove Account"),
 		    this, SLOT(on_actionDelete_account_triggered()));
 		menu->addSeparator();
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("up_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "up_16.png"),
 		    tr("Move account up"),
 		    this, SLOT(on_actionMove_account_up_triggered()));
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("down_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "down_16.png"),
 		    tr("Move account down"),
 		    this, SLOT(on_actionMove_account_down_triggered()));
 		menu->addSeparator();
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("folder_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
 		    tr("Change data directory"),
 		    this, SLOT(on_actionChange_data_directory_triggered()));
 	} else {
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH + QString("plus_16.png")),
+		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
 		    this, SLOT(on_actionAdd_account_triggered()));
 	}
@@ -427,6 +423,11 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 /* ========================================================================= */
 {
 	(void) previous; /* Unused. */
+
+	Q_ASSERT(current.isValid());
+	if (!current.isValid()) {
+		return;
+	}
 
 	const QAbstractItemModel *msgTblMdl = current.model();
 
@@ -504,22 +505,22 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		//messageItemSelectionChanged(index);
 
 		/* TODO */
-		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-download.png")),
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 		    tr("Download message signed"), this,
 		    SLOT(on_actionMark_all_as_read_triggered()));
-		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-reply.png")), tr("Reply"), this,
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
+		    tr("Reply"), this,
 		    SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message-verify.png")),
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
 		    tr("Verified messages"), this,
 		    SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addSeparator();
 	} else {
-		menu->addAction(QIcon(ICON_16x16_PATH +
-		    QString("datovka-message.png")),
+		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create a new message"),
 		    this, SLOT(on_actionSent_message_triggered()));
 	}
@@ -536,11 +537,15 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
 /* ========================================================================= */
 {
 	(void) previous;
-	//qDebug() << "Attachment selection changed.";
-	if (current.isValid()) {
-		ui->saveAttachment->setEnabled(true);
-		ui->openAttachment->setEnabled(true);
+
+	Q_ASSERT(current.isValid());
+	if (!current.isValid()) {
+		return;
 	}
+
+	//qDebug() << "Attachment selection changed.";
+	ui->saveAttachment->setEnabled(true);
+	ui->openAttachment->setEnabled(true);
 }
 
 
@@ -559,11 +564,11 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 		//attachmentItemSelectionChanged(index);
 
 		/* TODO */
-		menu->addAction(QIcon(ICON_3PARTY_PATH +
-		    QString("folder_16.png")), tr("Open attachment"), this,
+		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
+		    tr("Open attachment"), this,
 		    SLOT(openSelectedAttachment()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH +
-		    QString("save_16.png")), tr("Save attachment"), this,
+		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
+		    tr("Save attachment"), this,
 		    SLOT(saveSelectedAttachmentToFile()));
 	} else {
 		/* Do nothing. */
