@@ -723,9 +723,11 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 {
 	QModelIndex selectedIndex =
 	    ui->messageList->selectionModel()->currentIndex();
+	QModelIndex accountIndex = ui->accountList->currentIndex();
+	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
-	downloadAttachments(selectedIndex); /* TODO -- Check return value. */
+	downloadAttachments(accountIndex, selectedIndex); /* TODO -- Check return value. */
 	/* TODO -- Reload content of attachment list. */
 }
 
@@ -1493,7 +1495,9 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 
 void MainWindow::on_actionGet_messages_triggered()
 {
-
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+	downloadMessageList(index);
 }
 
 void MainWindow::on_actionReply_to_the_sender_triggered()
@@ -1888,7 +1892,10 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType);
 
+
+
 			newcnt++;
+//			accountItemSelectionChanged(index.child(0,0)); //reload message list
 		}
 		box = box->next;
 
@@ -1919,7 +1926,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 /*!
  * @brief Download attachments for specific message.
  */
-bool MainWindow::downloadAttachments(const QModelIndex &msgIdx)
+bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
@@ -1928,12 +1936,31 @@ bool MainWindow::downloadAttachments(const QModelIndex &msgIdx)
 	}
 
 	/* First column. */
-	int dmId = msgIdx.sibling(msgIdx.row(), 0).data().toInt();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	qDebug() << "Downloading attachments for message" << dmId;
 
-	/* TODO */
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
 
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	// message and envleople structures
+	struct isds_message *message = NULL;
+
+	isds_error status;
+	status = isds_get_received_message(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
+
+	if (IE_SUCCESS != status) {
+		isds_message_free(&message);
+		return false;
+	}
+
+	qDebug() << (char*)message->envelope->timestamp;
+	qDebug() << "dfgdfg";
 	return true;
 }
 

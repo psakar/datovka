@@ -252,7 +252,8 @@ private:
 	/*!
 	 * @brief Download attachments for specific message.
 	 */
-	bool downloadAttachments(const QModelIndex &msgIdx);
+	bool downloadAttachments(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

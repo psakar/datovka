@@ -1003,6 +1003,31 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 			return false;
 		}
 	}
+
+	queryStr = "INSERT INTO supplementary_message_data ("
+	    "message_id, message_type, read_locally, download_date, custom_data"
+	    ") VALUES (:dmId, :message_type, :read_locally, :download_date,"
+	    ":custom_data)";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	QDateTime current = QDateTime::currentDateTime();
+	QString dmDownloadTime = qDateTimeToDbFormat(current);
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":message_type", 1); // 1 received / 2 sent
+	query.bindValue(":read_locally", false);
+	query.bindValue(":download_date", dmDownloadTime);
+	query.bindValue(":custom_data", "TODO");
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (!query.isValid()) {
+			return false;
+		}
+	}
 	return true;
 }
 
