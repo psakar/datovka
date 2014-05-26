@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QPair>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
 #include <QSslCertificate>
@@ -995,7 +996,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	    ":dmRecipientRefNumber, :dmSenderRefNumber, :dmRecipientIdent, "
 	    ":dmSenderIdent, :dmLegalTitleLaw, :dmLegalTitleYear, "
 	    ":dmLegalTitleSect, :dmLegalTitlePar, :dmLegalTitlePoint,"
-	    ":dmPersonalDelivery, dmAllowSubstDelivery, :dmQTimestamp, "
+	    ":dmPersonalDelivery, :dmAllowSubstDelivery, :dmQTimestamp, "
 	    ":dmDeliveryTime, :dmAcceptanceTime, :dmMessageStatus, "
 	    ":dmAttachmentSize, :_dmType"
 	    ")";
@@ -1039,7 +1040,8 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		qDebug() << "error 1";
+		qDebug() << "Insert messages error:"
+		    << query.lastError();
 		return false;
 	}
 
@@ -1064,7 +1066,8 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	if (query.exec()) {
 		return true;
 	} else {
-		qDebug() << "error 2";
+		qDebug() << "Insert supplementary_message_data error:"
+		    << query.lastError();
 		return false;
 	}
 }
@@ -1097,17 +1100,36 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	QSqlQuery query(m_db);
 
 	QString queryStr = "UPDATE messages SET "
-	    "is_verified = :is_verified, _origin = :_origin, dbIDSender = :dbIDSender, dmSender = :dmSender, "
-	    "dmSenderAddress = :dmSenderAddress, dmSenderType = :dmSenderType, dmRecipient = :dmRecipient, "
-	    "dmRecipientAddress = :dmRecipientAddress, dmAmbiguousRecipient = :dmAmbiguousRecipient, dmSenderOrgUnit = :dmSenderOrgUnit, "
-	    "dmSenderOrgUnitNum = :dmSenderOrgUnitNum, dbIDRecipient = :dbIDRecipient, dmRecipientOrgUnit = :dmRecipientOrgUnit, "
-	    "dmRecipientOrgUnitNum = :dmRecipientOrgUnitNum, dmToHands = :dmToHands, dmAnnotation = :dmAnnotation, "
-	    "dmRecipientRefNumber = :dmRecipientRefNumber, dmSenderRefNumber = :dmSenderRefNumber, dmRecipientIdent = :dmRecipientIdent, "
-	    "dmSenderIdent = :dmSenderIdent, dmLegalTitleLaw = :dmLegalTitleLaw, dmLegalTitleYear = :dmLegalTitleYear, "
-	    "dmLegalTitleSect = :dmLegalTitleSect, dmLegalTitlePar = :dmLegalTitlePar, dmLegalTitlePoint = :dmLegalTitlePoint, "
-	    "dmPersonalDelivery = :dmPersonalDelivery, dmAllowSubstDelivery = :dmAllowSubstDelivery, dmQTimestamp = :dmQTimestamp, "
-	    "dmDeliveryTime = :dmDeliveryTime, dmAcceptanceTime = :dmAcceptanceTime, dmMessageStatus = :dmMessageStatus, "
-	    "dmAttachmentSize = :dmAttachmentSize, _dmType = :_dmType WHERE dmID = :dmId";
+	    "is_verified = :is_verified, _origin = :_origin, "
+	    "dbIDSender = :dbIDSender, dmSender = :dmSender, "
+	    "dmSenderAddress = :dmSenderAddress, "
+	    "dmSenderType = :dmSenderType, "
+	    "dmRecipient = :dmRecipient, "
+	    "dmRecipientAddress = :dmRecipientAddress, "
+	    "dmAmbiguousRecipient = :dmAmbiguousRecipient, "
+	    "dmSenderOrgUnit = :dmSenderOrgUnit, "
+	    "dmSenderOrgUnitNum = :dmSenderOrgUnitNum, "
+	    "dbIDRecipient = :dbIDRecipient, "
+	    "dmRecipientOrgUnit = :dmRecipientOrgUnit, "
+	    "dmRecipientOrgUnitNum = :dmRecipientOrgUnitNum, "
+	    "dmToHands = :dmToHands, dmAnnotation = :dmAnnotation, "
+	    "dmRecipientRefNumber = :dmRecipientRefNumber, "
+	    "dmSenderRefNumber = :dmSenderRefNumber, "
+	    "dmRecipientIdent = :dmRecipientIdent, "
+	    "dmSenderIdent = :dmSenderIdent, "
+	    "dmLegalTitleLaw = :dmLegalTitleLaw, "
+	    "dmLegalTitleYear = :dmLegalTitleYear, "
+	    "dmLegalTitleSect = :dmLegalTitleSect, "
+	    "dmLegalTitlePar = :dmLegalTitlePar, "
+	    "dmLegalTitlePoint = :dmLegalTitlePoint, "
+	    "dmPersonalDelivery = :dmPersonalDelivery, "
+	    "dmAllowSubstDelivery = :dmAllowSubstDelivery, "
+	    "dmQTimestamp = :dmQTimestamp, "
+	    "dmDeliveryTime = :dmDeliveryTime, "
+	    "dmAcceptanceTime = :dmAcceptanceTime, "
+	    "dmMessageStatus = :dmMessageStatus, "
+	    "dmAttachmentSize = :dmAttachmentSize, "
+	    "_dmType = :_dmType WHERE dmID = :dmId";
 
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
@@ -1148,7 +1170,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		qDebug() << "error";
+		qDebug() << "Update messages error:" << query.lastError();
 		return false;
 	}
 
@@ -1173,7 +1195,8 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	if (query.exec()) {
 		return true;
 	} else {
-		qDebug() << "error";
+		qDebug() << "Update supplementary_message_data error:"
+		    << query.lastError();
 		return false;
 	}
 }
