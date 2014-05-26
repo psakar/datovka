@@ -245,9 +245,10 @@ private:
 	MessageDb * accountMessageDb(const QStandardItem *accountItem = 0);
 
 	/*!
-	 * @brief Download message list for specific account.
+	 * @brief Download sent/received message list for specific account.
 	 */
-	bool downloadMessageList(const QModelIndex &acntTopIdx);
+	bool downloadMessageList(const QModelIndex &acntTopIdx,
+	    const QString messageType);
 
 	/*!
 	 * @brief Download attachments for specific message.

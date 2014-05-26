@@ -172,7 +172,8 @@ public:
 	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
 	    const QString &dmQTimestamp, const QString &dmDeliveryTime,
 	    const QString &dmAcceptanceTime, int dmMessageStatus,
-	    int dmAttachmentSize, const QString &_dmType);
+	    int dmAttachmentSize, const QString &_dmType,
+	    const QString messtype);
 
 	/*!
 	 * @brief Update message envelope into messages table.
@@ -194,7 +195,8 @@ public:
 	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
 	    const QString &dmQTimestamp, const QString &dmDeliveryTime,
 	    const QString &dmAcceptanceTime, int dmMessageStatus,
-	    int dmAttachmentSize, const QString &_dmType);
+	    int dmAttachmentSize, const QString &_dmType,
+	    const QString messtype);
 
 	/*!
 	 * @brief Insert message files into files table.

@@ -1355,6 +1355,7 @@ void MainWindow::on_actionSent_message_triggered()
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_CONF_SETINGS).toMap(), this);
 	newMessageDialog->show();
+	downloadMessageList(index, "sent");
 }
 
 
@@ -1502,7 +1503,8 @@ void MainWindow::on_actionGet_messages_triggered()
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
-	downloadMessageList(index);
+	downloadMessageList(index,"sent");
+	downloadMessageList(index,"received");
 }
 
 void MainWindow::on_actionReply_to_the_sender_triggered()
@@ -1532,7 +1534,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    index.data(ROLE_CONF_SETINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	newMessageDialog->show();
-	qDebug() << "Dialog shown";
+	downloadMessageList(index, "sent");
 }
 
 /* ========================================================================= */
@@ -1775,9 +1777,10 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 
 /* ========================================================================= */
 /*
-* Download message list from ISDS for current account index
+* Download sent/received message list from ISDS for current account index
 */
-bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
+bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
+    const QString messageType)
 /* ========================================================================= */
 {
 	Q_ASSERT(acntTopIdx.isValid());
@@ -1794,10 +1797,16 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 	isds_error status;
 	struct isds_list *messageList = NULL;
 
-	/* Download message list from ISDS  for current account */
-	status = isds_get_list_of_received_messages(isdsSessions.
-	    session(accountInfo.userName()),
-	    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+	/* Download sent/received message list from ISDS for current account */
+	if (messageType == "sent") {
+		status = isds_get_list_of_sent_messages(isdsSessions.
+		    session(accountInfo.userName()),
+		    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+	} else if (messageType == "received") {
+		status = isds_get_list_of_received_messages(isdsSessions.
+		    session(accountInfo.userName()),
+		    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+	}
 
 	qDebug() << status << isds_strerror(status);
 
@@ -1895,21 +1904,23 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 			    timevalToDbFormat(item->envelope->dmAcceptanceTime),
 			    *item->envelope->dmMessageStatus,
 			    (int)*item->envelope->dmAttachmentSize,
-			    item->envelope->dmType);
+			    item->envelope->dmType,
+			    messageType);
 			newcnt++;
-//			accountItemSelectionChanged(index.child(0,0)); //reload message list
 		}
 		box = box->next;
 
 	}
 
-	qDebug() << "#messages:" << allcnt;
-	qDebug() << "#new:" << newcnt;
-
 	isds_list_free(&messageList);
 
 	if (newcnt > 0) {
-		QModelIndex itemindex = acntTopIdx.child(0,0);
+		QModelIndex itemindex;
+		if (messageType == "received") {
+			itemindex = acntTopIdx.child(0,0);
+		} else {
+			itemindex = acntTopIdx.child(1,0);
+		}
 		QString label = itemindex.data().toString();
 		label = label + " (" + QString::number(newcnt) + ")";
 		QStandardItem *accountitem =
@@ -1918,6 +1929,14 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx)
 		QFont font;
 		font.setBold(true);
 		accountitem->setFont(font);
+	}
+
+	if (messageType == "received") {
+		qDebug() << "#Received total:" << allcnt;
+		qDebug() << "#Received new:" << newcnt;
+	} else {
+		qDebug() << "#Sent total:" << allcnt;
+		qDebug() << "#Sent new:" << newcnt;
 	}
 
 	return true;
@@ -2046,7 +2065,8 @@ bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
 			    timevalToDbFormat(message->envelope->dmAcceptanceTime),
 			    *message->envelope->dmMessageStatus,
 			    (int)*message->envelope->dmAttachmentSize,
-			    message->envelope->dmType);
+			    message->envelope->dmType,
+			    "received");
 
 
 	struct isds_list *file;
@@ -2091,7 +2111,8 @@ void MainWindow::on_actionDownload_messages_triggered()
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
-	downloadMessageList(index); /* TODO -- Check return value. */
+	downloadMessageList(index,"received");
+	downloadMessageList(index,"sent");
 }
 
 
@@ -2107,7 +2128,9 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 	for (int i = 0; i < count; i++) {
 		qDebug() << "Downloading messages for account" << i;
 		QModelIndex index = m_accountModel.index(i, 0);
-		downloadMessageList(index); /* TODO -- Check return value. */
+			downloadMessageList(index,"sent");
+			 /* TODO -- Check return value. */
+			 downloadMessageList(index,"received");
 	}
 }
 

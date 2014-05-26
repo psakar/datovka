@@ -8,6 +8,7 @@
 #include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/dbs.h"
 
 
 DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
@@ -335,8 +336,6 @@ void isds_message_copy_free_void(void **message_copy)
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
-	qDebug() << "XXX" << m_accountInfo;
-
 	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		isdsSessions.connectToIsds(m_accountInfo);
 	}
@@ -488,9 +487,6 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->envelope = sent_envelope;
 	sent_message->documents = documents;
 
-	/* TODO - save message to sent db */
-
-
 //************
 /* Temporary alert for testing mode */
 QMessageBox::StandardButton reply;
@@ -502,12 +498,29 @@ reply = QMessageBox::question(this,
 if (reply == QMessageBox::Yes) {
 //*********
 
-		// only one recipient was chossen
+	// only one recipient was chossen
 	if (this->recipientTableWidget->rowCount() == 1) {
 		status = isds_send_message(isdsSessions.session(m_userName),
 		    sent_message);
+
+		if (status == IE_SUCCESS) {
+			QMessageBox::information(this,
+			    tr("Message was sent"),
+			    tr("Message was sent into ISDS successfully."),
+			    QMessageBox::Ok);
+		} else {
+			QMessageBox::warning(this, tr("Error occurred"),
+			    tr("An error occurred while message was sent")
+			    + "\n" + tr("ErrorType: ") + isds_strerror(status),
+			    QMessageBox::Ok);
+		}
+
+		isds_message_free(&sent_message);
+		this->close();
+
+
+	// message for multiple recipients
 	} else {
-		// message for multiple recipients
 		struct isds_list *copies = NULL;
 		struct isds_list *last = NULL;
 
@@ -547,21 +560,24 @@ if (reply == QMessageBox::Yes) {
 		}
 		status = isds_send_message_to_multiple_recipients(
 		    isdsSessions.session(m_userName), sent_message, copies);
+
+
+		if (status == IE_SUCCESS) {
+			QMessageBox::information(this,
+			    tr("Messages were sent"),
+			    tr("Messages were sent into ISDS successfully."),
+			    QMessageBox::Ok);
+		} else {
+			QMessageBox::warning(this, tr("Error occurred"),
+			    tr("An error occurred while messages were sent")
+			    + "\n" + tr("ErrorType: ") + isds_strerror(status),
+			    QMessageBox::Ok);
+		}
+
+		isds_message_free(&sent_message);
+		this->close();
 	}
 
-	isds_message_free(&sent_message);
-	this->close();
-
-	/* TODO - better send info create */
-	if (status == IE_SUCCESS) {
-		QMessageBox::information(this, tr("Message was sent"),
-		    tr("Message was sent successfully..."), QMessageBox::Ok);
-	} else {
-		QMessageBox::warning(this, tr("Error occurred"),
-		    tr("An error occurred while message was sent")
-		    + "\n" + tr("ErrorType: ") + isds_strerror(status),
-		    QMessageBox::Ok);
-	}
 //***************
 } else {
 	this->close();

@@ -970,9 +970,10 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
     bool dmPersonalDelivery, bool dmAllowSubstDelivery,
     const QString &dmQTimestamp, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType)
+    int dmAttachmentSize, const QString &_dmType, const QString messtype)
 /* ========================================================================= */
 {
+
 	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT INTO messages ("
@@ -1058,7 +1059,11 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	QString dmDownloadTime = qDateTimeToDbFormat(current);
 
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":message_type", 1); // 1 received / 2 sent
+	if (messtype == "received") {
+		query.bindValue(":message_type", 1);
+	} else {
+		query.bindValue(":message_type", 2);
+	}
 	query.bindValue(":read_locally", false);
 	query.bindValue(":download_date", dmDownloadTime);
 	query.bindValue(":custom_data", "TODO");
@@ -1094,7 +1099,8 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
     bool dmPersonalDelivery, bool dmAllowSubstDelivery,
     const QString &dmQTimestamp, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType)
+    int dmAttachmentSize, const QString &_dmType,
+    const QString messtype)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1187,7 +1193,11 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	QString dmDownloadTime = qDateTimeToDbFormat(current);
 
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":message_type", 1); // 1 received / 2 sent
+	if (messtype == "received") {
+		query.bindValue(":message_type", 1);
+	} else {
+		query.bindValue(":message_type", 2);
+	}
 	query.bindValue(":read_locally", true);
 	query.bindValue(":download_date", dmDownloadTime);
 	query.bindValue(":custom_data", "TODO");

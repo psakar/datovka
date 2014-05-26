@@ -50,7 +50,6 @@ private slots:
 
 private:
 	void initNewMessageDialog(void);
-
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
 	const Action m_action;
