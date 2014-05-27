@@ -23,11 +23,6 @@
 #include "ui_datovka.h"
 
 
-#define WIN_PREFIX "AppData/Roaming"
-#define CONF_SUBDIR ".dsgui"
-#define CONF_FILE "dsgui.conf"
-#define ACCOUNT_DB_FILE "messages.shelf.db"
-
 #define WIN_POSITION_HEADER "window_position"
 #define WIN_POSITION_X "x"
 #define WIN_POSITION_Y "y"
@@ -99,22 +94,21 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(messageItemRightClicked(QPoint)));
 
-	m_confDirName = confDir();
-	m_confFileName = m_confDirName + "/" + CONF_FILE;
-
-	qDebug() << m_confDirName << m_confFileName;
+	qDebug() << "Load " << globPref.loadConfPath();
+	qDebug() << "Save" << globPref.saveConfPath();
 
 	/* Change "\" to "/" */
 
-	fixBackSlashesInFile(m_confFileName);
+	fixBackSlashesInFile(globPref.loadConfPath());
 
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
-	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+	ui->accountTextInfo->setHtml(createDatovkaBanner(
+	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 
 	/* Open accounts database. */
-	m_accountDb.openDb(m_confDirName + "/" + ACCOUNT_DB_FILE);
+	m_accountDb.openDb(globPref.accountDbPath());
 
 	/* Load configuration file. */
 	ensureConfPresence();
@@ -935,7 +929,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	QString dbDir = itemSettings[DB_DIR].toString();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = m_confDirName;
+		dbDir = GlobPreferences::confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
@@ -947,34 +941,16 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 
 /* ========================================================================= */
 /*
- * Get configuration directory name.
- */
-QString MainWindow::confDir(void)
-/* ========================================================================= */
-{
-	QDir homeDir(QDir::homePath());
-
-	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(CONF_SUBDIR)) {
-		/* Set windows directory. */
-		homeDir.cd(WIN_PREFIX);
-	}
-
-	return homeDir.path() + "/" + CONF_SUBDIR;
-}
-
-
-/* ========================================================================= */
-/*
  * Create configuration file if not present.
  */
 void MainWindow::ensureConfPresence(void) const
 /* ========================================================================= */
 {
-	if (!QDir(m_confDirName).exists()) {
-		QDir(m_confDirName).mkpath(".");
+	if (!QDir(GlobPreferences::confDir()).exists()) {
+		QDir(GlobPreferences::confDir()).mkpath(".");
 	}
-	if (!QFile(m_confFileName).exists()) {
-		QFile file(m_confFileName);
+	if (!QFile(globPref.loadConfPath()).exists()) {
+		QFile file(globPref.loadConfPath());
 		file.open(QIODevice::ReadWrite);
 		file.close();
 	}
@@ -1137,7 +1113,7 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 void MainWindow::loadSettings(void)
 /* ========================================================================= */
 {
-	QSettings settings(m_confFileName, QSettings::IniFormat);
+	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
 
 	//qDebug() << "All: " << settings.allKeys();
 	//qDebug() << "Groups: " << settings.childGroups();
@@ -1183,14 +1159,14 @@ void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
 	m_received_2 = settings.value("column_widths/received_2", 200).toInt();
 	m_sent_1 = settings.value("column_widths/sent_1", 200).toInt();
 	m_sent_2 = settings.value("column_widths/sent_2", 200).toInt();
-	m_sort_column =	settings.value("message_ordering/sort_column", 0)
-	    .toInt();
+	m_sort_column = settings.value("message_ordering/sort_column",
+	    0).toInt();
 	/* Sort column saturation from old datovka */
 	if (m_sort_column > 5) {
 		m_sort_column = 1;
 	}
-	m_sort_order = settings.value("message_ordering/sort_order", "")
-	    .toString();
+	m_sort_order = settings.value("message_ordering/sort_order",
+	    "").toString();
 }
 
 /* ========================================================================= */
@@ -1263,7 +1239,7 @@ bool MainWindow::regenerateAccountModelYears(void)
 		QString dbDir = itemSettings[DB_DIR].toString();
 		if (dbDir.isEmpty()) {
 			/* Set default directory name. */
-			dbDir = m_confDirName;
+			dbDir = GlobPreferences::confDir();
 		}
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
 		    itemSettings[TEST].toBool());
@@ -1299,7 +1275,7 @@ void MainWindow::saveSettings(void) const
 	/*
 	 * TODO -- Target file name differs from source for testing purposes.
 	 */
-	QSettings settings(m_confFileName + "x", QSettings::IniFormat);
+	QSettings settings(globPref.saveConfPath(), QSettings::IniFormat);
 
 	settings.clear();
 

@@ -135,13 +135,6 @@ private slots:
 	void on_actionRecieved_all_triggered();
 
 private:
-
-	/*!
-	 * @brief Get configuration directory name.
-	 */
-	static
-	QString confDir(void);
-
 	/*!
 	 * @brief Default settings of main window.
 	 */
@@ -256,8 +249,6 @@ private:
 	bool downloadAttachments(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
 
-	QString m_confDirName; /*!< Configuration directory location. */
-	QString m_confFileName; /*!< Configuration file location. */
 	AccountModel m_accountModel; /*!<
 	                              * Account tree view model. Generated from
 	                              * configuration file.

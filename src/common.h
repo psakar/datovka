@@ -74,6 +74,9 @@ public:
 	GlobPreferences(void);
 	~GlobPreferences(void);
 
+	QString loadFromConf; /*!< Configuration file to load from. */
+	QString saveToConf; /*!< Configuration file to save to. */
+	const QString accountDbFile; /*!< Account db file. */
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
@@ -96,6 +99,39 @@ public:
 	 * @brief Store data to settings structure.
 	 */
 	void saveToSettings(QSettings &settings) const;
+
+	/*!
+	 * @brief Return path to configuration directory.
+	 */
+	static
+	QString confDir(void);
+
+	/*!
+	 * @brief Returns whole configuration file path.
+	 */
+	inline
+	QString loadConfPath(void)
+	{
+		return confDir() + "/" + loadFromConf;
+	}
+
+	/*!
+	 * @brief Returns whole configuration file path.
+	 */
+	inline
+	QString saveConfPath(void)
+	{
+		return confDir() + "/" + saveToConf;
+	}
+
+	/*!
+	 * @brief Returns whole account db path.
+	 */
+	inline
+	QString accountDbPath(void)
+	{
+		return confDir() + "/" + accountDbFile;
+	}
 };
 
 

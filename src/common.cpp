@@ -1,8 +1,15 @@
 
 
+#include <QDir>
 #include <QFile>
 
 #include "common.h"
+
+
+#define WIN_PREFIX "AppData/Roaming"
+#define CONF_SUBDIR ".dsgui"
+#define CONF_FILE "dsgui.conf"
+#define ACCOUNT_DB_FILE "messages.shelf.db"
 
 
 GlobPreferences globPref;
@@ -19,7 +26,10 @@ GlobProxySettings dfltGlobProxSet;
 /* ========================================================================= */
 GlobPreferences::GlobPreferences(void)
 /* ========================================================================= */
-    : auto_download_whole_messages(false),
+    : loadFromConf(CONF_FILE),
+    saveToConf(CONF_FILE),
+    accountDbFile(ACCOUNT_DB_FILE),
+    auto_download_whole_messages(false),
     default_download_signed(true),
     //store_passwords_on_disk(false),
     store_messages_on_disk(true),
@@ -203,6 +213,24 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	}
 
 	settings.endGroup();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return path to configuraton directory.
+ */
+QString GlobPreferences::confDir(void)
+/* ========================================================================= */
+{
+	QDir homeDir(QDir::homePath());
+
+	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(CONF_SUBDIR)) {
+		/* Set windows directory. */
+		homeDir.cd(WIN_PREFIX);
+	}
+
+	return homeDir.path() + "/" CONF_SUBDIR;
 }
 
 
