@@ -132,9 +132,13 @@ MainWindow::MainWindow(QWidget *parent)
 	setReciveidColumnWidths();
 
 	/* Attachment list. */
-	connect(ui->messageAttachmentList->selectionModel(),
-	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(attachmentItemSelectionChanged(QModelIndex, QModelIndex)));
+	if (0 != ui->messageAttachmentList->selectionModel()) {
+		/* Selection model may not be set. */
+		connect(ui->messageAttachmentList->selectionModel(),
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		        QModelIndex)));
+	}
 	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageAttachmentList,
 	    SIGNAL(customContextMenuRequested(QPoint)), this,
