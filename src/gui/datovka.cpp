@@ -67,9 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
 	ui->toolBar->addWidget(m_searchLine);
-	ui->toolBar->addAction(
-	    QIcon(ICON_3PARTY_PATH + QString("delete_16.png")),
-	    "", this, SLOT(on_actionSearchClear_triggered()));
+	ui->toolBar->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
+	    tr("Clear search field"), this,
+	    SLOT(on_actionSearchClear_triggered()));
 
 	/* Create status bar label */
 	QLabel* statusLabel = new QLabel(this);
