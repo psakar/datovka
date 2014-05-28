@@ -48,9 +48,11 @@ int main(int argc, char *argv[])
 		Q_ASSERT(0);
 	}
 	/* Boolean options. */
+#ifdef DEBUG
 	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
 	    "Enable debugging information.");
 	parser.addOption(debugOpt);
+#endif /* DEBUG */
 	/* Process command-line arguments. */
 	parser.process(app);
 
@@ -60,10 +62,16 @@ int main(int argc, char *argv[])
 	if (parser.isSet(SAVE_CONF_OPT)) {
 		globPref.saveToConf = parser.value(SAVE_CONF_OPT);
 	}
+#ifdef DEBUG
 	if (parser.isSet(debugOpt)) {
 		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 		    LOG_UPTO(LOG_DEBUG));
 	}
+#endif /* DEBUG */
+
+	qint64 start, stop, diff;
+	start = QDateTime::currentMSecsSinceEpoch();
+	logInfo("Starting at %lld.%03d .\n", start / 1000, (int) start % 1000);
 /*
 #if defined(Q_OS_UNIX)
 #elif defined(Q_OS_WIN)
@@ -75,5 +83,12 @@ int main(int argc, char *argv[])
 
 	int ret;
 	ret = app.exec();
+
+	stop = QDateTime::currentMSecsSinceEpoch();
+	diff = stop - start;
+	logInfo("Stopping at %lld.%03d; ran for %lld.%03d seconds.\n",
+	    stop / 1000, (int) stop % 1000,
+	    diff / 1000, (int) diff % 1000);
+
 	return ret;
 }

@@ -79,6 +79,13 @@ public:
 	~GlobLog(void);
 
 	/*!
+	 * @brief Get debug verbosity.
+	 *
+	 * @return Debug verbosity.
+	 */
+	int debugVerbosity(void);
+
+	/*!
 	 * @brief Set debug verbosity.
 	 *
 	 * @param[in] verb Verbosity to be set.
@@ -216,6 +223,118 @@ private:
 
 
 extern GlobLog globLog; /*!< Global log facility. */
+
+
+/*!
+ * @brief A macro which logs a function name followed with given debugging
+ * information. The data are logged only when the global verbosity variable
+ * exceeds the given threshold.
+ *
+ * @param[in] verbThresh Verbosity threshold.
+ * @param[in] format     Format of the messages, follows printf syntax.
+ * @param[in] ...        Variadic arguments.
+ *
+ * @note This macro works only if the DEBUG macro is defined. If no DEBUG macro
+ * is defined then it won't generate any code.
+ */
+#if DEBUG
+#define logDebug(verbThresh, format, ...) \
+	if (globLog.debugVerbosity() > verbThresh) { \
+		globLog.log(LOGSRC_DEF, LOG_DEBUG, "%s %s() %d: " format, \
+		    __FILE__, __func__, __LINE__, __VA_ARGS__); \
+	}
+#else /* !DEBUG */
+#define logDebug(verbThresh, format, ...) \
+	(void) 0
+#endif /* DEBUG */
+
+
+/*!
+ * @brief Logs the debugging information even if the threshold was not set.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugLv0(format, ...) \
+	logDebug(-1, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 0.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugLv1(format, ...) \
+	logDebug(0, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 1.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugLv2(format, ...) \
+	logDebug(1, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 2.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugLv3(format, ...) \
+	logDebug(2, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs information message.
+ *
+ * @param[in] format Format of the message.
+ * @param[in] ...    Varidic arguments.
+ */
+#define logInfo(format, ...) \
+	do { \
+		globLog.log(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
+	} while (0)
+
+
+/*!
+ * @brief Logs warning message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logWarning(format, ...) \
+	do { \
+		globLog.log(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
+	} while (0)
+
+
+/*!
+ * @brief Logs error message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logError(format, ...) \
+	do { \
+		globLog.log(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+	} while (0)
+
+
+/*!
+ * @brief Logs multi-line error message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logErrorMl(format, ...) \
+	do { \
+		globLog.logMl(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+	} while (0)
 
 
 #endif /* _LOG_H_ */

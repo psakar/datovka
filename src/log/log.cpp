@@ -100,6 +100,25 @@ GlobLog::~GlobLog(void)
 
 /* ========================================================================= */
 /*
+ * Get debug verbosity.
+ */
+int GlobLog::debugVerbosity(void)
+/* ========================================================================= */
+{
+	int ret;
+
+	m_mutex.lock();
+
+	ret = m_debugVerbosity;
+
+	m_mutex.unlock();
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
  * Set debug verbosity.
  */
 void GlobLog::setDebugVerbosity(int verb)

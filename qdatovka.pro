@@ -10,6 +10,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 #LIBISDS_PREFIX = "$$HOME/third_party/built"
 
+DEFINES += \
+	DEBUG=1
+
 TARGET = qdatovka
 TEMPLATE = app
 
