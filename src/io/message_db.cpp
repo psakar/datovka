@@ -995,7 +995,7 @@ bool MessageDb::msgsInsertMessageEvent(int dmId, const QString &dmEventTime,
 
 	QString queryStr;
 	queryStr = "INSERT INTO events (message_id, dmEventTime, dmEventDescr)"
-	" VALUES (:dmId, :dmEventTime, :dmEventTime)";
+	" VALUES (:dmId, :dmEventTime, :dmEventDescr)";
 
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
