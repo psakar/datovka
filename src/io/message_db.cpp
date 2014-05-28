@@ -951,6 +951,71 @@ bool MessageDb::msgsInsertMessageFiles(int dmId,
 
 /* ========================================================================= */
 /*
+ * Insert message hash into hashes table
+ */
+bool MessageDb::msgsInsertMessageHash(int dmId, const QString &value,
+    const QString &algorithm)
+/* ========================================================================= */
+{
+
+	QSqlQuery query(m_db);
+
+	QString queryStr;
+	queryStr = "INSERT INTO hashes (message_id, value, _algorithm)"
+	" VALUES (:dmId, :value, :algorithm)";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":value", value);
+	query.bindValue(":algorithm", algorithm);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "Insert hashes error:"
+		    << query.lastError();
+		return false;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert message event into events table
+ */
+bool MessageDb::msgsInsertMessageEvent(int dmId, const QString &dmEventTime,
+    const QString &dmEventDescr)
+/* ========================================================================= */
+{
+
+	QSqlQuery query(m_db);
+
+	QString queryStr;
+	queryStr = "INSERT INTO events (message_id, dmEventTime, dmEventDescr)"
+	" VALUES (:dmId, :dmEventTime, :dmEventTime)";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmEventTime", dmEventTime);
+	query.bindValue(":dmEventDescr", dmEventDescr);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "Insert hashes error:"
+		    << query.lastError();
+		return false;
+	}
+}
+
+/* ========================================================================= */
+/*
  * Insert message envelope into messages table
  */
 bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,

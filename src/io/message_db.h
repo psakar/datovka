@@ -207,6 +207,17 @@ public:
 	    const QString &dmFormat, const QString &dmFileMetaType,
 	    const QString &dmEncodedContent);
 
+	/*!
+	 * @brief Insert message hash into hashes table.
+	 */
+	bool msgsInsertMessageHash(int dmId, const QString &value,
+	    const QString &algorithm);
+
+	/*!
+	 * @brief Insert message event into events table.
+	 */
+	bool msgsInsertMessageEvent(int dmId, const QString &dmEventTime,
+	    const QString &dmEventDescr);
 
 protected:
 	/*!

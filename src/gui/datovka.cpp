@@ -730,7 +730,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
-	downloadAttachments(accountIndex, selectedIndex); /* TODO -- Check return value. */
+	downloadMessage(accountIndex, selectedIndex); /* TODO -- Check return value. */
 	/* TODO -- Reload content of attachment list. */
 }
 
@@ -1882,7 +1882,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			    (char*)item->envelope->timestamp,
 			    timevalToDbFormat(item->envelope->dmDeliveryTime),
 			    timevalToDbFormat(item->envelope->dmAcceptanceTime),
-			    *item->envelope->dmMessageStatus,
+			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType,
 			    messageType);
@@ -1927,7 +1927,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 /*!
  * @brief Download attachments for specific message.
  */
-bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
+bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -1960,11 +1960,9 @@ bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
 		return false;
 	}
 
-
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
 
-	/* TODO - update message envelope items */
 	QString timestamp = QByteArray((char *)message->envelope->timestamp,
 	    message->envelope->timestamp_length).toBase64();
 
@@ -2043,10 +2041,14 @@ bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
 			    timestamp,
 			    timevalToDbFormat(message->envelope->dmDeliveryTime),
 			    timevalToDbFormat(message->envelope->dmAcceptanceTime),
-			    *message->envelope->dmMessageStatus,
+			    convertHexToDecIndex(*message->envelope->dmMessageStatus),
 			    (int)*message->envelope->dmAttachmentSize,
 			    message->envelope->dmType,
 			    "received");
+
+			messageDb->msgsInsertMessageHash(dmID,
+			   (char *)message->envelope->hash->value,
+			   convertHashAlg(message->envelope->hash->algorithm));
 
 
 	struct isds_list *file;
@@ -2058,26 +2060,21 @@ bool MainWindow::downloadAttachments(const QModelIndex &acntIdx,
 		QString dmEncodedContent = QByteArray((char *)item->data,
 		    item->data_length).toBase64();
 
-		QString dmFileMetaType;
-		if (item->dmFileMetaType == FILEMETATYPE_MAIN) {
-			dmFileMetaType = "main";
-		} else if (item->dmFileMetaType == FILEMETATYPE_ENCLOSURE) {
-			dmFileMetaType = "encl";
-		} else if (item->dmFileMetaType == FILEMETATYPE_SIGNATURE) {
-			dmFileMetaType = "sign";
-		} else if (item->dmFileMetaType == FILEMETATYPE_META) {
-			dmFileMetaType = "meta";
-		} else {
-			dmFileMetaType = "";
-		}
 		/* insert new file to db */
 		messageDb->msgsInsertMessageFiles(dmID,
 		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
-		   item->dmMimeType, item->dmFormat, dmFileMetaType,
+		   item->dmMimeType, item->dmFormat,
+		   convertAttachmentType(item->dmFileMetaType),
 		   dmEncodedContent);
 
 		file = file->next;
 	}
+
+	getDeliveryInfo(acntIdx, msgIdx);
+
+	isds_list_free(&message->documents);
+	isds_message_free(&message);
+
 	return true;
 }
 
@@ -2124,3 +2121,122 @@ void MainWindow::on_actionRecieved_all_triggered()
 {
 	on_actionSync_all_accounts_triggered();
 }
+
+
+/* ========================================================================= */
+/*
+* Set message as read localli in ISDS.
+*/
+bool MainWindow::setMessageAsLocallyRead(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	status = isds_mark_message_read(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str());
+
+	if (IE_SUCCESS != status) {
+		return false;
+	}
+	return true;
+}
+
+/* ========================================================================= */
+/*
+* Download message delivery info and get list of events message
+*/
+bool MainWindow::getDeliveryInfo(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	// message and envleople structures
+	struct isds_message *message = NULL;
+	isds_error status;
+
+	status = isds_get_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
+
+	if (IE_SUCCESS != status) {
+		isds_message_free(&message);
+		return false;
+	}
+
+
+	MessageDb *messageDb = accountMessageDb();
+	int dmID = atoi(message->envelope->dmID);
+
+	struct isds_list *event;
+	event = message->envelope->events;
+
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb->msgsInsertMessageEvent(dmID,
+		    timevalToDbFormat(item->time), item->description);
+		event = event->next;
+	}
+
+	isds_list_free(&message->envelope->events);
+	isds_message_free(&message);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Get list of sent message state changes
+*/
+bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	struct isds_list *stateList = NULL;
+	isds_error status;
+
+	status = isds_get_list_of_sent_message_state_changes(
+	    isdsSessions.session(accountInfo.userName()),NULL,NULL, &stateList);
+
+	if (IE_SUCCESS != status) {
+		isds_list_free(&stateList);
+		return false;
+	}
+
+	/* TODO - update state of messages */
+	return true;
+}
+

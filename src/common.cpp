@@ -2,9 +2,8 @@
 
 #include <QDir>
 #include <QFile>
-
 #include "common.h"
-
+#include "src/io/isds_sessions.h"
 
 #define WIN_PREFIX "AppData/Roaming"
 #define CONF_SUBDIR ".dsgui"
@@ -462,3 +461,60 @@ void fixBackSlashesInFile(const QString &fileName)
 		qDebug() << "Error: Cannot open file '" << fileName << "'";
 	}
 }
+
+/* ========================================================================= */
+/*
+ * Convert hex to dec number
+ */
+int convertHexToDecIndex(int value)
+/* ========================================================================= */
+{
+	if (value == MESSAGESTATE_SENT) return 1;
+	else if (value == MESSAGESTATE_STAMPED) return 2;
+	else if (value == MESSAGESTATE_INFECTED) return 3;
+	else if (value == MESSAGESTATE_DELIVERED) return 4;
+	else if (value == MESSAGESTATE_SUBSTITUTED) return 5;
+	else if (value == MESSAGESTATE_RECEIVED) return 6;
+	else if (value == MESSAGESTATE_READ) return 7;
+	else if (value == MESSAGESTATE_UNDELIVERABLE) return 8;
+	else if (value == MESSAGESTATE_REMOVED) return 9;
+	else if (value == MESSAGESTATE_IN_SAFE) return 10;
+	else return 0;
+
+
+
+}
+
+
+/* ========================================================================= */
+/*
+ * Convert hash algotirhm to string
+ */
+QString convertHashAlg(int value)
+/* ========================================================================= */
+{
+	if (value == HASH_ALGORITHM_MD5) return "MD5";
+	else if (value == HASH_ALGORITHM_SHA_1) return "SHA-1";
+	else if (value == HASH_ALGORITHM_SHA_224) return "SHA-224";
+	else if (value == HASH_ALGORITHM_SHA_256) return "SHA-256";
+	else if (value == HASH_ALGORITHM_SHA_384) return "SHA-384";
+	else if (value == HASH_ALGORITHM_SHA_512) return "SHA-512";
+	else return "";
+}
+
+
+/* ========================================================================= */
+/*
+ * Convert type of attachment files
+ */
+QString convertAttachmentType(int value)
+/* ========================================================================= */
+{
+	if (value == FILEMETATYPE_MAIN) return "main";
+	else if (value == FILEMETATYPE_ENCLOSURE) return "encl";
+	else if (value == FILEMETATYPE_SIGNATURE) return "sign";
+	else if (value == FILEMETATYPE_META) return "meta";
+	else return "";
+}
+
+

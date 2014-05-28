@@ -191,5 +191,19 @@ const QString msgStatusToText(int status);
  */
 void fixBackSlashesInFile(const QString &fileName);
 
+/*!
+ * @brief Return dec index from hex.
+ */
+int convertHexToDecIndex(int value);
+
+/*!
+ * @brief Return hash algotirhm as string
+ */
+QString convertHashAlg(int value);
+
+/*!
+ * @brief Return attachment type as string
+ */
+QString convertAttachmentType(int value);
 
 #endif /* _COMMON_H_ */

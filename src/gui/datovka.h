@@ -246,8 +246,28 @@ private:
 	/*!
 	 * @brief Download attachments for specific message.
 	 */
-	bool downloadAttachments(const QModelIndex &acntIdx,
+	bool downloadMessage(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
+
+	/*!
+	 * @brief Set message as read localli in ISDS.
+	 */
+	bool setMessageAsLocallyRead(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
+
+	/*!
+	 * @brief Download message delivery info and get list of events message
+	 */
+	bool getDeliveryInfo(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
+
+	/*!
+	 * @brief Get list of sent message state changes
+	 */
+	bool getListSentMessageStateChanges(const QModelIndex &acntIdx);
+
+	QString m_confDirName; /*!< Configuration directory location. */
+	QString m_confFileName; /*!< Configuration file location. */
 
 	AccountModel m_accountModel; /*!<
 	                              * Account tree view model. Generated from
