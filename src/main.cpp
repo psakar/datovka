@@ -4,13 +4,15 @@
 #include <QCommandLineParser>
 #include <QtWidgets>
 
-#include "common.h"
-#include "gui/datovka.h"
+#include "src/common.h"
+#include "src/gui/datovka.h"
+#include "src/log/log.h"
 
 #define LOCALE_PATH "locale"
 
 #define LOAD_CONF_OPT "load-conf"
 #define SAVE_CONF_OPT "save-conf"
+
 
 /* ========================================================================= */
 /* ========================================================================= */
@@ -18,10 +20,13 @@ int main(int argc, char *argv[])
 /* ========================================================================= */
 /* ========================================================================= */
 {
-	QApplication app(argc, argv);
 	/* TODO -- Make the following assignments configurable. */
 	QCoreApplication::setApplicationName("qdatovka");
 	QCoreApplication::setApplicationVersion(VERSION);
+
+	qInstallMessageHandler(globalLogOutput);
+
+	QApplication app(argc, argv);
 
 	QTranslator translator;
 	translator.load("datovka_" + QLocale::system().name(), LOCALE_PATH);
@@ -42,6 +47,10 @@ int main(int argc, char *argv[])
 	        QObject::tr("conf")))) {
 		Q_ASSERT(0);
 	}
+	/* Boolean options. */
+	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
+	    "Enable debugging information.");
+	parser.addOption(debugOpt);
 	/* Process command-line arguments. */
 	parser.process(app);
 
@@ -50,6 +59,10 @@ int main(int argc, char *argv[])
 	}
 	if (parser.isSet(SAVE_CONF_OPT)) {
 		globPref.saveToConf = parser.value(SAVE_CONF_OPT);
+	}
+	if (parser.isSet(debugOpt)) {
+		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+		    LOG_UPTO(LOG_DEBUG));
 	}
 /*
 #if defined(Q_OS_UNIX)

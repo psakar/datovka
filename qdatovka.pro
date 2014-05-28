@@ -47,6 +47,7 @@ SOURCES += src/common.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
     src/io/pkcs7.cpp \
+    src/log/log.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp
 
@@ -65,6 +66,7 @@ HEADERS += src/common.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
     src/io/pkcs7.h \
+    src/log/log.h \
     src/models/accounts_model.h
 
 FORMS += src/gui/ui/datovka.ui \

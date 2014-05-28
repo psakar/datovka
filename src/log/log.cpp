@@ -1,0 +1,435 @@
+
+
+#include <cstdarg>
+#include <cstddef> /* NULL */
+#include <cstdio>
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QHostInfo>
+#include <QMutex>
+#include <QProcess>
+#include <QString>
+#include <QtGlobal>
+
+#include "log.h"
+
+
+#define LOG_TIME_FMT "MMM dd hh:mm:ss"
+
+
+GlobLog globLog;
+
+
+/* ========================================================================= */
+/*!
+ * @brief Message output function.
+ */
+void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
+    const QString &msg)
+/* ========================================================================= */
+{
+	QByteArray localMsg = msg.toLocal8Bit();
+	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
+	const char *prefix = GlobLog::msgTypeCstr(type);
+	uint8_t level = GlobLog::levelFromType(type);
+
+	switch (type) {
+	case QtDebugMsg:
+	case QtWarningMsg:
+	case QtCriticalMsg:
+		globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
+		    localMsg.constData(), context.file, context.line,
+		    context.function);
+		break;
+	case QtFatalMsg:
+		globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
+		    localMsg.constData(), context.file, context.line,
+		    context.function);
+		abort();
+		break;
+	}
+}
+
+
+/*!
+ * @brief A convenience macro for getting levels for a given facility
+ * and source.
+ */
+#define facilityLevels(facility, source) \
+	facDescVect[(facility)].levels[(source)]
+
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
+GlobLog::GlobLog(void)
+/* ========================================================================= */
+    : m_mutex(),
+    m_hostName(QHostInfo::localHostName()),
+    m_debugVerbosity(0)
+{
+	usedSources = 1;
+	openedFiles = 0;
+	for (int i = 0; i < MAX_LOG_FILES; ++i) {
+		for (int j = 0; j < MAX_SOURCES; ++j) {
+			facDescVect[i].levels[j] = 0;
+		}
+		facDescVect[i].fout = NULL;
+	}
+
+	/* TODO -- Initialise syslog. */
+}
+
+
+/* ========================================================================= */
+/*
+ * Destructor.
+ */
+GlobLog::~GlobLog(void)
+/* ========================================================================= */
+{
+	/* TODO -- De-initialise syslog. */
+
+	for (int i = 0; i < openedFiles; ++i) {
+		Q_ASSERT(NULL != facDescVect[i + LF_FILE].fout);
+		fflush(facDescVect[i + LF_FILE].fout);
+		fclose(facDescVect[i + LF_FILE].fout);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Set debug verbosity.
+ */
+void GlobLog::setDebugVerbosity(int verb)
+/* ========================================================================= */
+{
+	m_mutex.lock();
+
+	m_debugVerbosity = verb;
+
+	m_mutex.unlock();
+}
+
+
+/* ========================================================================= */
+/*
+ * Opens a log file as a logging facility.
+ */
+int GlobLog::openFile(const QString &fName, LogMode mode)
+/* ========================================================================= */
+{
+	FILE *of;
+	const char *openMode;
+
+	m_mutex.lock();
+
+	if ((openedFiles + LF_FILE) > MAX_LOG_FILES) {
+		/* Maximal number of facilities reached. */
+		goto fail;
+	}
+
+	switch (mode) {
+	case LM_WRONLY:
+		openMode = "w";
+		break;
+	case LM_APPEND:
+		openMode = "a";
+		break;
+	default:
+		Q_ASSERT(0);
+		goto fail;
+		break;
+	}
+
+	of = fopen(fName.toStdString().c_str(), openMode);
+	if (of == NULL) {
+		goto fail;
+	}
+
+	++openedFiles;
+
+	for (int i; i < MAX_SOURCES; ++i) {
+		facDescVect[LF_FILE + openedFiles - 1].levels[i] = 0;
+	}
+	facDescVect[LF_FILE + openedFiles - 1].fout = of;
+
+	m_mutex.unlock();
+
+	return 0;
+fail:
+	m_mutex.unlock();
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns the log levels for the given facility and source.
+ */
+uint8_t GlobLog::logLevels(int facility, int source)
+/* ========================================================================= */
+{
+	uint8_t ret;
+
+	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
+	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
+
+	m_mutex.lock();
+
+	ret = facilityLevels(facility, source);
+
+	m_mutex.unlock();
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Sets the log levels for the selected facility and source.
+ */
+void GlobLog::setLogLevels(int facility, int source, uint8_t levels)
+/* ========================================================================= */
+{
+	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
+	Q_ASSERT((source >= -1) && (source < MAX_SOURCES));
+
+	m_mutex.lock();
+
+	if (source != LOGSRC_ANY) {
+		facilityLevels(facility, source) = levels;
+	} else {
+		for (int i = 0; i < MAX_SOURCES; ++i) {
+			facilityLevels(facility, i) = levels;
+		}
+	}
+
+	m_mutex.unlock();
+}
+
+
+/* ========================================================================= */
+/*
+ * Add log levels to the selected facility and source.
+ */
+void GlobLog::addLogLevels(int facility, int source, uint8_t levels)
+/* ========================================================================= */
+{
+	int i;
+
+	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
+	Q_ASSERT((source >= -1) && (source < MAX_SOURCES));
+
+	m_mutex.lock();
+
+	if (source != LOGSRC_ANY) {
+		facilityLevels(facility, source) |= levels;
+	} else {
+		for (i = 0; i < MAX_SOURCES; ++i) {
+			facilityLevels(facility, i) |= levels;
+		}
+	}
+
+	m_mutex.unlock();
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns the id of a new unique source that can be used.
+ */
+int GlobLog::acquireUniqueLogSource(void)
+/* ========================================================================= */
+{
+	int ret;
+
+	m_mutex.lock();
+
+	if (usedSources < MAX_SOURCES) {
+		ret = usedSources;
+		++usedSources;
+	} else {
+		ret = -1;
+	}
+
+	m_mutex.unlock();
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Log message.
+ */
+int GlobLog::log(int source, uint8_t level, const char *fmt, ...)
+/* ========================================================================= */
+{
+	const char *prefix;
+	va_list argp;
+
+	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
+	Q_ASSERT(level < 8);
+
+	prefix = urgencyPrefix(level);
+	if (prefix == NULL) {
+		return -1;
+	}
+
+	va_start(argp, fmt);
+
+	m_mutex.lock();
+
+	logPrefixVlog(source, level, prefix, fmt, argp);
+
+	m_mutex.unlock();
+
+	va_end(argp);
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns a string containing log urgency prefix.
+ */
+const char * GlobLog::urgencyPrefix(uint8_t level)
+/* ========================================================================= */
+{
+	const char *prefix;
+
+	switch (level) {
+	case LOG_EMERG :   prefix = "emergency: "; break;
+	case LOG_ALERT :   prefix = "alert: ";     break;
+	case LOG_CRIT :    prefix = "critical: ";  break;
+	case LOG_ERR :     prefix = "error: ";     break;
+	case LOG_WARNING : prefix = "warning: ";   break;
+	case LOG_NOTICE :  prefix = "notice: ";    break;
+	case LOG_INFO :    prefix = "info: ";      break;
+	case LOG_DEBUG :   prefix = "debug: ";     break;
+	default :          prefix = NULL;
+	}
+
+	return prefix;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts message type to printable string.
+ */
+const char * GlobLog::msgTypeCstr(QtMsgType type)
+/* ========================================================================= */
+{
+	switch (type) {
+	case QtDebugMsg:
+		return urgencyPrefix(LOG_DEBUG);
+		break;
+	case QtWarningMsg:
+		return urgencyPrefix(LOG_WARNING);
+		break;
+	case QtCriticalMsg:
+		return urgencyPrefix(LOG_CRIT);
+		break;
+	case QtFatalMsg:
+		return urgencyPrefix(LOG_EMERG); /* System is unusable. */
+	default:
+		Q_ASSERT(0);
+		return NULL;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * converts message type to urgency level.
+ */
+uint8_t GlobLog::levelFromType(QtMsgType type)
+/* ========================================================================= */
+{
+	switch (type) {
+	case QtDebugMsg:
+		return LOG_DEBUG;
+		break;
+	case QtWarningMsg:
+		return LOG_WARNING;
+		break;
+	case QtCriticalMsg:
+		return LOG_CRIT;
+		break;
+	case QtFatalMsg:
+		return LOG_EMERG; /* System is unusable. */
+	default:
+		Q_ASSERT(0);
+		return -1;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Log message.
+ */
+void GlobLog::logPrefixVlog(int source, uint8_t level,
+    const char *prefix, const char *format, va_list ap)
+/* ========================================================================= */
+{
+	uint8_t logMask;
+	int i;
+	FILE *of;
+	va_list aq;
+	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
+	QString msgPrefix = "";
+	QString msgFormatted = "";
+	QString msg;
+	/*!
+	 * @todo Handle case in which no additional memory can be
+	 * allocated.
+	 */
+
+	msgPrefix = dateTime + " " + globLog.m_hostName + " " +
+	    QCoreApplication::applicationName() + "[" +
+	    QString::number(QCoreApplication::applicationPid()) + "]: ";
+
+	if (NULL != prefix) {
+		msgPrefix += prefix;
+	}
+
+	va_copy(aq, ap);
+	msgFormatted.vsprintf(format, aq);
+	va_end(aq);
+
+	msg = msgPrefix + msgFormatted;
+
+	/* Convert lo log mask. */
+	logMask = LOG_MASK(level);
+
+	/* Syslog. */
+	if (facilityLevels(LF_SYSLOG, source) & logMask) {
+		/* TODO -- Write to syslog. */
+//		syslog(level, "%s", msg.toStdString().c_str());
+	}
+
+	/* Log files. */
+	for (i = LF_STDOUT; i < (LF_FILE + openedFiles); ++i) {
+		if (facilityLevels(i, source) & logMask) {
+			switch (i) {
+			case LF_STDOUT:
+				of = stdout;
+				break;
+			case LF_STDERR:
+				of = stderr;
+				break;
+			default:
+				of = facDescVect[i].fout;
+			}
+
+			Q_ASSERT(of != NULL);
+			fputs(msg.toStdString().c_str(), of);
+		}
+	}
+}
