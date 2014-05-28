@@ -142,6 +142,19 @@ public:
 	 */
 	int log(int source, uint8_t level, const char *fmt, ...);
 
+	/*!
+	 * @brief Log multi-line message.
+	 *
+	 * Every new line is merged with the same prefix.
+	 *
+	 * @param[in] source Source identifier.
+	 * @param[in] level  Message urgency level.
+	 * @param[in] fmt    Format of the log message -- follows printf(3)
+	 *     format.
+	 * @return -1 if error, 0 else.
+	 */
+	int logMl(int source, uint8_t level, const char *fmt, ...);
+
 	friend void globalLogOutput(QtMsgType type,
 	    const QMessageLogContext &context, const QString &msg);
 
@@ -164,12 +177,6 @@ private:
 	const char * urgencyPrefix(uint8_t level);
 
 	/*!
-	 * @brief Converts message type to printable string.
-	 */
-	static
-	const char * msgTypeCstr(QtMsgType type);
-
-	/*!
 	 * @brief converts message type to urgency level.
 	 *
 	 * @param[in] type Message type.
@@ -190,6 +197,20 @@ private:
 	 * @return -1 if error, 0 else.
 	 */
 	void logPrefixVlog(int source, uint8_t level,
+	    const char *prefix, const char *format, va_list ap);
+
+	/*!
+	 * @brief Log multi-line message.
+	 *
+	 * @param[in]     source Source identifier.
+	 * @param[in]     level  Message urgency level.
+	 * @param[in]     prefix Message prefix.
+	 * @param[in]     format Content of the log message -- in printf(3)
+	 *     format.
+	 * @param[in,out] ap     Variable argument list.
+	 * @return -1 if error, 0 else.
+	 */
+	void logPrefixVlogMl(int source, uint8_t level,
 	    const char *prefix, const char *format, va_list ap);
 };
 

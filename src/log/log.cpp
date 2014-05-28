@@ -30,7 +30,6 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 {
 	QByteArray localMsg = msg.toLocal8Bit();
 	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
-	const char *prefix = GlobLog::msgTypeCstr(type);
 	uint8_t level = GlobLog::levelFromType(type);
 
 	switch (type) {
@@ -295,6 +294,38 @@ int GlobLog::log(int source, uint8_t level, const char *fmt, ...)
 
 /* ========================================================================= */
 /*
+ * Log multi-line message.
+ */
+int GlobLog::logMl(int source, uint8_t level, const char *fmt, ...)
+/* ========================================================================= */
+{
+	const char *prefix;
+	va_list argp;
+
+	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
+	Q_ASSERT(level < 8);
+
+	prefix = urgencyPrefix(level);
+	if (prefix == NULL) {
+		return -1;
+	}
+
+	va_start(argp, fmt);
+
+	m_mutex.lock();
+
+	logPrefixVlogMl(source, level, prefix, fmt, argp);
+
+	m_mutex.unlock();
+
+	va_end(argp);
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
  * Returns a string containing log urgency prefix.
  */
 const char * GlobLog::urgencyPrefix(uint8_t level)
@@ -315,32 +346,6 @@ const char * GlobLog::urgencyPrefix(uint8_t level)
 	}
 
 	return prefix;
-}
-
-
-/* ========================================================================= */
-/*
- * Converts message type to printable string.
- */
-const char * GlobLog::msgTypeCstr(QtMsgType type)
-/* ========================================================================= */
-{
-	switch (type) {
-	case QtDebugMsg:
-		return urgencyPrefix(LOG_DEBUG);
-		break;
-	case QtWarningMsg:
-		return urgencyPrefix(LOG_WARNING);
-		break;
-	case QtCriticalMsg:
-		return urgencyPrefix(LOG_CRIT);
-		break;
-	case QtFatalMsg:
-		return urgencyPrefix(LOG_EMERG); /* System is unusable. */
-	default:
-		Q_ASSERT(0);
-		return NULL;
-	}
 }
 
 
@@ -430,6 +435,75 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 
 			Q_ASSERT(of != NULL);
 			fputs(msg.toStdString().c_str(), of);
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Log multi-line message.
+ */
+void GlobLog::logPrefixVlogMl(int source, uint8_t level,
+    const char *prefix, const char *format, va_list ap)
+/* ========================================================================= */
+{
+	uint8_t logMask;
+	int i;
+	FILE *of;
+	va_list aq;
+	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
+	QString msgPrefix = "";
+	QString msgFormatted = "";
+	QStringList msgLines;
+	QString msg;
+
+	msgPrefix = dateTime + " " + globLog.m_hostName + " " +
+	    QCoreApplication::applicationName() + "[" +
+	    QString::number(QCoreApplication::applicationPid()) + "]: ";
+
+	if (NULL != prefix) {
+		msgPrefix += prefix;
+	}
+
+	/* Convert lo log mask. */
+	logMask = LOG_MASK(level);
+
+	va_copy(aq, ap);
+	msgFormatted.vsprintf(format, aq);
+	va_end(aq);
+
+	msgLines = msgFormatted.split(QRegExp("(\r\n|\r|\n)"),
+	    QString::SkipEmptyParts);
+
+	for (QList<QString>::iterator it = msgLines.begin();
+	     it != msgLines.end(); ++it) {
+		msg = msgPrefix + *it;
+
+		/* Syslog. */
+		if (facilityLevels(LF_SYSLOG, source) & logMask) {
+			/* TODO -- Write to syslog. */
+//			syslog(level, "%s", msg.toStdString().c_str());
+		}
+
+		/* Log files. */
+		for (i = LF_STDOUT; i < (LF_FILE + openedFiles); ++i) {
+			if (facilityLevels(i, source) & logMask) {
+				switch (i) {
+				case LF_STDOUT:
+					of = stdout;
+					break;
+				case LF_STDERR:
+					of = stderr;
+					break;
+				default:
+					of = facDescVect[i].fout;
+				}
+
+				Q_ASSERT(of != NULL);
+				fputs(msg.toStdString().c_str(), of);
+				fputc('\n', of);
+			}
 		}
 	}
 }
