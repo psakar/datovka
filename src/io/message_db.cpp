@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QDir>
+#include <QIcon>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -57,14 +58,46 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */
 {
-	if ((Qt::DisplayRole == role) &&
-	    (this->headerData(index.column(), Qt::Horizontal,
-	         ROLE_DB_ENTRY_TYPE).toInt() == DB_DATETIME)) {
-		/* Convert date on display. */
-		return dateTimeStrFromDbFormat(
-		    QSqlQueryModel::data(index, role).toString(),
-		    dateTimeDisplayFormat);
-	} else {
+	switch (role) {
+	case Qt::DisplayRole:
+		if (this->headerData(index.column(), Qt::Horizontal,
+		         ROLE_DB_ENTRY_TYPE).toInt() == DB_DATETIME) {
+			/* Convert date on display. */
+			return dateTimeStrFromDbFormat(
+			    QSqlQueryModel::data(index, role).toString(),
+			    dateTimeDisplayFormat);
+		}
+		if ((5 == index.column()) &&
+		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
+		         ROLE_DB_ENTRY_TYPE).toInt())) {
+			/* Hide text for 'read locally'. */
+			/*
+			 * TODO -- Store data in separate role in order to hide
+			 * it.
+			 */
+//			return QVariant();
+		}
+
+		return QSqlQueryModel::data(index, role);
+		break;
+
+	case Qt::DecorationRole:
+		if ((5 == index.column()) &&
+		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
+		         ROLE_DB_ENTRY_TYPE).toInt())) {
+			/* Show icon for 'read locally'. */
+			qDebug() << index.data();
+			if (index.data().toInt()) {
+				return QIcon(ICON_3PARTY_PATH "tick_16.png");
+			} else {
+				return QIcon(ICON_3PARTY_PATH "delete_16.png");
+			}
+		}
+
+		return QSqlQueryModel::data(index, role);
+		break;
+
+	default:
 		return QSqlQueryModel::data(index, role);
 	}
 }

@@ -22,7 +22,7 @@
 /*!
  * @brief Custom message model class.
  *
- * Used for data conversion on display. (Use proxy model?)
+ * Used for data conversion on display. (Use QIdentityProxyModel?)
  *
  * @note setItemDelegate and a custom ItemDelegate would also be the solution.
  */
@@ -38,7 +38,7 @@ public:
 /*!
  * @brief Custom file model class.
  *
- * Used for data conversion on display. (Use proxy model?)
+ * Used for data conversion on display. (Use QIdentityProxyModel?)
  */
 class DbFlsTblModel : public QSqlQueryModel {
 public:
