@@ -71,11 +71,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
 		         ROLE_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'read locally'. */
-			/*
-			 * TODO -- Store data in separate role in order to hide
-			 * it.
-			 */
-//			return QVariant();
+			return QVariant();
 		}
 
 		return QSqlQueryModel::data(index, role);
@@ -86,8 +82,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
 		         ROLE_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
-			qDebug() << index.data();
-			if (index.data().toInt()) {
+			if (QSqlQueryModel::data(index).toInt()) {
 				return QIcon(ICON_3PARTY_PATH "tick_16.png");
 			} else {
 				return QIcon(ICON_3PARTY_PATH "delete_16.png");
