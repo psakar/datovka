@@ -27,8 +27,9 @@
 #include "src/io/pkcs7.h"
 
 
+/* Joinned tables messages and supplementary_message_data. */
 const QVector<QString> MessageDb::receivedItemIds = {"dmID", "dmAnnotation",
-    "dmSender", "dmDeliveryTime", "dmAcceptanceTime"};
+    "dmSender", "dmDeliveryTime", "dmAcceptanceTime", "read_locally"};
 
 
 const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
@@ -135,7 +136,7 @@ bool MessageDb::openDb(const QString &fileName)
 
 /* ========================================================================= */
 /*
- * Return received messages within past 90 days;
+ * Return received messages model.
  */
 QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /* ========================================================================= */
@@ -146,7 +147,9 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += receivedItemIds.last();
-	queryStr += " FROM messages WHERE dbIDRecipient = :recipDbId";
+	queryStr += " FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE (dbIDRecipient = :recipDbId) ";
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
@@ -156,13 +159,29 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* Description. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-		/* Data type. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		/* TODO -- Handle the joined tables in a better way. */
+		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
+		    msgsTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
+		    smsgdtTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(
+			    receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else {
+			Q_ASSERT(0);
+		}
 	}
 
 	return &m_sqlMsgsModel;
@@ -183,7 +202,9 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += receivedItemIds.last();
-	queryStr += " FROM messages WHERE "
+	queryStr += " FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
@@ -196,13 +217,29 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* Description. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-		/* Data type. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		/* TODO -- Handle the joined tables in a better way. */
+		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
+		    msgsTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
+		    smsgdtTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(
+			    receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else {
+			Q_ASSERT(0);
+		}
 	}
 
 	return &m_sqlMsgsModel;
@@ -223,7 +260,9 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += receivedItemIds.last();
-	queryStr += " FROM messages WHERE "
+	queryStr += " FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
@@ -237,13 +276,29 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* Description. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-		/* Data type. */
-		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-		    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		/* TODO -- Handle the joined tables in a better way. */
+		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
+		    msgsTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
+		    smsgdtTbl.attrProps.end()) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(
+			    receivedItemIds[i]).desc);
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
+			    ROLE_DB_ENTRY_TYPE);
+		} else {
+			Q_ASSERT(0);
+		}
 	}
 
 	return &m_sqlMsgsModel;

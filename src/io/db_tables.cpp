@@ -536,7 +536,7 @@ namespace SmsgdtTbl {
 	const QMap<QString, AttrProp> attrProps = {
 	{"message_id",    {DB_INTEGER, ""}},
 	{"message_type",  {DB_INTEGER, ""}},
-	{"read_locally",  {DB_BOOLEAN, ""}},
+	{"read_locally",  {DB_BOOLEAN, "Read locally"}},
 	{"download_date", {DB_DATETIME, ""}},
 	{"custom_data",   {DB_TEXT, ""}}
 	};
