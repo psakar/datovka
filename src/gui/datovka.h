@@ -213,7 +213,8 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &item) const;
+	QString createAccountInfo(const QStandardItem &item,
+	const QString expir) const;
 
 	/*!
 	 * @brief Generate overall account information.
@@ -265,6 +266,11 @@ private:
 	 * @brief Get list of sent message state changes
 	 */
 	bool getListSentMessageStateChanges(const QModelIndex &acntIdx);
+
+	/*!
+	 * @brief Get password expiration info for account index
+	 */
+	QString getPasswordInfo(const QModelIndex &acntIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

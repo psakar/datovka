@@ -247,9 +247,12 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
+	QString expir;
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
-		html = createAccountInfo(*accountItem);
+		expir = getPasswordInfo(current);
+		html = createAccountInfo(*accountItem, expir);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
@@ -739,7 +742,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 /*
  * Generate account info HTML message.
  */
-QString MainWindow::createAccountInfo(const QStandardItem &item) const
+QString MainWindow::createAccountInfo(const QStandardItem &item,
+    const QString expir) const
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
@@ -805,7 +809,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &item) const
 
 	html.append("<br>");
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
-	    tr("unknown or without expiration")));
+	    expir));
 
 	html.append("</div>");
 
@@ -2238,5 +2242,40 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 
 	/* TODO - update state of messages */
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Get password expiration info for account index
+*/
+QString MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
+/* ========================================================================= */
+{
+	isds_error status;
+	struct timeval *expiration = NULL;
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (accountInfo.loginMethod() != "username" &&
+	    accountInfo.loginMethod() != "user_certificate") {
+		return tr("unknown or without expiration");
+	}
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	status = isds_get_password_expiration(
+	    isdsSessions.session(accountInfo.userName()), &expiration);
+
+	if (IE_SUCCESS == status) {
+		if (0 != expiration) {
+			QString expir = timevalToDbFormat(expiration);
+			return expir;
+		}
+	}
+	return tr("unknown or without expiration");
 }
 
