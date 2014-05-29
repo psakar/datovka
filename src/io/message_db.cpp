@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QDir>
+#include <QFont>
 #include <QIcon>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -58,6 +59,7 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */
 {
+#define READLOC_COL 5
 	switch (role) {
 	case Qt::DisplayRole:
 		if (this->headerData(index.column(), Qt::Horizontal,
@@ -67,7 +69,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    QSqlQueryModel::data(index, role).toString(),
 			    dateTimeDisplayFormat);
 		}
-		if ((5 == index.column()) &&
+		if ((READLOC_COL == index.column()) &&
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
 		         ROLE_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'read locally'. */
@@ -78,7 +80,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::DecorationRole:
-		if ((5 == index.column()) &&
+		if ((READLOC_COL == index.column()) &&
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
 		         ROLE_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
@@ -92,9 +94,25 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QSqlQueryModel::data(index, role);
 		break;
 
+	case Qt::FontRole:
+		if ((DB_BOOLEAN == headerData(READLOC_COL, Qt::Horizontal,
+		         ROLE_DB_ENTRY_TYPE).toInt()) &&
+		    (!QSqlQueryModel::data(index.sibling(index.row(),
+		         READLOC_COL)).toBool())) {
+			/* Unread messages are shown bold. */
+			QFont boldFont;
+			boldFont.setBold(true);
+			return boldFont;
+		}
+
+		return QSqlQueryModel::data(index, role);
+		break;
+
 	default:
 		return QSqlQueryModel::data(index, role);
+		break;
 	}
+#undef READLOC_COL
 }
 
 
