@@ -732,7 +732,11 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
+	m_statusProgressBar->setFormat(tr("downloadMessage"));
+	m_statusProgressBar->repaint();
 	downloadMessage(accountIndex, selectedIndex); /* TODO -- Check return value. */
+	setDefaultProgressStatus();
+
 	/* TODO -- Reload content of attachment list. */
 }
 
@@ -1486,10 +1490,20 @@ void MainWindow::on_actionGet_messages_triggered()
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
+
+	m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
+	m_statusProgressBar->repaint();
 	downloadMessageList(index,"sent");
+	m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
+	m_statusProgressBar->repaint();
 	downloadMessageList(index,"received");
+	m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+	m_statusProgressBar->repaint();
 	getListSentMessageStateChanges(index);
+	m_statusProgressBar->setFormat(tr("getPasswordInfo"));
+	m_statusProgressBar->repaint();
 	getPasswordInfo(index);
+	setDefaultProgressStatus();
 
 }
 
@@ -2103,6 +2117,9 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	? qDebug() << "Delivery info of message was processed..."
 	: qDebug() << "ERROR: Delivery info of message not found!";
 
+	getMessageAuthor(acntIdx, msgIdx);
+
+
 	/*  Mark this message as downloaded in ISDS */
 	(markMessageAsDownloaded(acntIdx, msgIdx))
 	? qDebug() << "Message was marked as downloaded..."
@@ -2383,3 +2400,51 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
 	}
 	return false;
 }
+
+
+/* ========================================================================= */
+/*
+* Get additional info about author (sender)
+*/
+bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	isds_sender_type *sender_type = NULL;
+	char * raw_sender_type = NULL;
+	char * sender_name = NULL;
+
+	status = isds_get_message_sender(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(),
+	    &sender_type, &raw_sender_type, &sender_name);
+
+	if (IE_SUCCESS != status) {
+		return false;
+	}
+
+	MessageDb *messageDb = accountMessageDb();
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	(messageDb->addMessageAuthorInfo(dmID,
+	    convertSenderTypeToString((int)*sender_type), sender_name))
+	? qDebug() << "Author info of message was added..."
+	: qDebug() << "ERROR: Author info of message wrong!";
+
+	return true;
+}
+

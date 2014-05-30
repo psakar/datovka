@@ -206,4 +206,9 @@ QString convertHashAlg(int value);
  */
 QString convertAttachmentType(int value);
 
+/*!
+ * @brief Convert type of author to string
+ */
+QString convertSenderTypeToString(int value);
+
 #endif /* _COMMON_H_ */

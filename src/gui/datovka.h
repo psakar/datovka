@@ -277,6 +277,12 @@ private:
 	 */
 	bool getPasswordInfo(const QModelIndex &acntIdx);
 
+	/*!
+	 * @brief Get additional info about author (sender)
+	 */
+	bool getMessageAuthor(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

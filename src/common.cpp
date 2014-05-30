@@ -517,4 +517,19 @@ QString convertAttachmentType(int value)
 	else return "";
 }
 
-
+/* ========================================================================= */
+/*
+ * Convert type of author to string
+ */
+QString convertSenderTypeToString(int value)
+/* ========================================================================= */
+{
+	if (value == SENDERTYPE_PRIMARY) return "PRIMARY_USER";
+	else if (value == SENDERTYPE_ENTRUSTED) return "ENTRUSTED_USER";
+	else if (value == SENDERTYPE_ADMINISTRATOR) return "ADMINISTRATOR";
+	else if (value == SENDERTYPE_OFFICIAL) return "OFFICIAL";
+	else if (value == SENDERTYPE_VIRTUAL) return "VIRTUAL";
+	else if (value == SENDERTYPE_OFFICIAL_CERT) return "OFFICIAL_CERT";
+	else if (value == SENDERTYPE_LIQUIDATOR) return "LIQUIDATOR";
+	else return "";
+}

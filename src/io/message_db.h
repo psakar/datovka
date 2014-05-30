@@ -219,6 +219,12 @@ public:
 	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
 	    const QString &dmEventDescr);
 
+ 	/*!
+	 * @brief Insert additional info about author (sender) into db.
+	 */
+	bool addMessageAuthorInfo(int dmID, const QString &sender_type,
+	    const QString &sender_name);
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.

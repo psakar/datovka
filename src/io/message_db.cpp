@@ -1008,6 +1008,49 @@ bool MessageDb::isInMessageDb(int dmId) const
 	return false;
 }
 
+
+/* ========================================================================= */
+/*
+ * Insert additional info about author (sender) into db
+ */
+bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
+    const QString &sender_name)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QVariantMap map;
+	/* TODO - update on the old datovka format */
+	//{"message_author": {"userType": "PRIMARY_USER", "authorName": null}}
+	map.insert("userType", sender_type);
+	map.insert("authorName", sender_name);
+	QJsonObject object = QJsonObject::fromVariantMap(map);
+
+	QJsonDocument document;
+	document.setObject(object);
+
+	QString  json = document.toJson(QJsonDocument::Compact);
+
+	QString queryStr = "UPDATE supplementary_message_data SET "
+	    "custom_data = :custom_data WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Update supplementary_message_data error:"
+		    << query.lastError();
+	}
+
+	query.bindValue(":dmId", dmID);
+	query.bindValue(":custom_data", json);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "Update supplementary_message_data error:"
+		    << query.lastError();
+		return false;
+	}
+}
+
 /* ========================================================================= */
 /*
  * Insert/update message file into file table
@@ -1345,7 +1388,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	}
 	query.bindValue(":read_locally", false);
 	query.bindValue(":download_date", dmDownloadTime);
-	query.bindValue(":custom_data", "TODO");
+	query.bindValue(":custom_data", "null");
 
 	if (query.exec()) {
 		return true;
@@ -1461,15 +1504,12 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 
 	queryStr = "UPDATE supplementary_message_data SET "
 	    "message_type = :message_type, read_locally = :read_locally, "
-	    "download_date =:download_date, custom_data = :custom_data "
+	    "custom_data = :custom_data "
 	    "WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
 
 	}
-
-	QDateTime current = QDateTime::currentDateTime();
-	QString dmDownloadTime = qDateTimeToDbFormat(current);
 
 	query.bindValue(":dmId", dmId);
 	if (messtype == "received") {
@@ -1478,8 +1518,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 		query.bindValue(":message_type", 2);
 	}
 	query.bindValue(":read_locally", true);
-	query.bindValue(":download_date", dmDownloadTime);
-	query.bindValue(":custom_data", "TODO");
+	query.bindValue(":custom_data", "null");
 
 	if (query.exec()) {
 		return true;
