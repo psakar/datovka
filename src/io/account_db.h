@@ -68,6 +68,17 @@ public:
 	const QString dbId(const QString &key,
 	    const QString defaultValue = QString()) const;
 
+	/*!
+	 * @brief Return pwd expiration info from db.
+	 */
+	const QString getPwdExpirFromDb(const QString &key) const;
+
+ 	/*!
+	 * @brief Set pwd expiration to password_expiration_date table
+	 */
+	bool setPwdExpirIntoDb(const QString &key, QString &date)
+	    const;
+
 private:
 	QSqlDatabase m_db; /*!< Account database. */
 };

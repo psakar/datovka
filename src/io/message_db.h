@@ -199,24 +199,24 @@ public:
 	    const QString messtype);
 
 	/*!
-	 * @brief Insert message files into files table.
+	 * @brief Insert/update message files into files table.
 	 */
-	bool msgsInsertMessageFiles(int dmId,
+	bool msgsInsertUpdateMessageFile(int dmId,
 	    const QString &dmFileDescr, const QString &dmUpFileGuid,
 	    const QString &dmFileGuid, const QString &dmMimeType,
 	    const QString &dmFormat, const QString &dmFileMetaType,
 	    const QString &dmEncodedContent);
 
 	/*!
-	 * @brief Insert message hash into hashes table.
+	 * @brief Insert/update message hash into hashes table.
 	 */
-	bool msgsInsertMessageHash(int dmId, const QString &value,
+	bool msgsInsertUpdateMessageHash(int dmId, const QString &value,
 	    const QString &algorithm);
 
 	/*!
-	 * @brief Insert message event into events table.
+	 * @brief Insert/update message event into events table.
 	 */
-	bool msgsInsertMessageEvent(int dmId, const QString &dmEventTime,
+	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
 	    const QString &dmEventDescr);
 
 protected:

@@ -180,3 +180,91 @@ const QString AccountDb::dbId(const QString &key,
 		return defaultValue;
 	}
 }
+
+
+/* ========================================================================= */
+/*
+ * Get pwd expiration info from password_expiration_date table
+ */
+const QString AccountDb::getPwdExpirFromDb(const QString &key) const
+/* ========================================================================= */
+{
+	QString ret = tr("unknown or without expiration");
+
+	if (false == m_db.isOpen()) {
+		return ret;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr =
+	    "SELECT expDate FROM password_expiration_date WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		return ret;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive() && query.first()) {
+		if (query.value(0).toString().isEmpty()) {
+			return ret;
+		} else {
+			return query.value(0).toString();
+		}
+	} else {
+		return ret;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Set pwd expiration to password_expiration_date table
+ */
+bool AccountDb::setPwdExpirIntoDb(const QString &key, QString &date)
+    const
+/* ========================================================================= */
+{
+	if (false == m_db.isOpen()) {
+		return false;
+	}
+
+	bool update = true;
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT count(*) FROM password_expiration_date WHERE "
+	    "key = :key";
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":key", key);
+
+	if (!query.exec()) {
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() == 0) {
+				update = false;
+			}
+		}
+	}
+
+	if (update) {
+		queryStr = "UPDATE password_expiration_date SET "
+		"expDate = :expDate WHERE key = :key";
+	} else {
+		queryStr = "INSERT INTO password_expiration_date ("
+		    "key, expDate) VALUES (:key, :expDate)";
+	}
+
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":key", key);
+	query.bindValue(":expDate", date);
+	if (!query.exec()) {
+		return false;
+	}
+	return true;
+}
+
+

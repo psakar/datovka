@@ -251,8 +251,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
-		expir = getPasswordInfo(current);
-		html = createAccountInfo(*accountItem, expir);
+		html = createAccountInfo(*accountItem);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
@@ -742,8 +741,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 /*
  * Generate account info HTML message.
  */
-QString MainWindow::createAccountInfo(const QStandardItem &item,
-    const QString expir) const
+QString MainWindow::createAccountInfo(const QStandardItem &item) const
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
@@ -808,8 +806,9 @@ QString MainWindow::createAccountInfo(const QStandardItem &item,
 	}
 
 	html.append("<br>");
+	QString key = itemSettings[USER].toString() + "___True";
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
-	    expir));
+	    m_accountDb.getPwdExpirFromDb(key)));
 
 	html.append("</div>");
 
@@ -1489,6 +1488,9 @@ void MainWindow::on_actionGet_messages_triggered()
 	index = AccountModel::indexTop(index);
 	downloadMessageList(index,"sent");
 	downloadMessageList(index,"received");
+	getListSentMessageStateChanges(index);
+	getPasswordInfo(index);
+
 }
 
 void MainWindow::on_actionReply_to_the_sender_triggered()
@@ -1785,16 +1787,22 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (messageType == "sent") {
 		status = isds_get_list_of_sent_messages(isdsSessions.
 		    session(accountInfo.userName()),
-		    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+		    NULL, NULL, NULL,
+		    //MESSAGESTATE_SENT |  MESSAGESTATE_STAMPED |
+		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
+		    MESSAGESTATE_ANY,
+		    0, NULL, &messageList);
 	} else if (messageType == "received") {
 		status = isds_get_list_of_received_messages(isdsSessions.
 		    session(accountInfo.userName()),
-		    NULL, NULL, NULL, MESSAGESTATE_ANY, 0, NULL, &messageList);
+		    NULL, NULL, NULL,
+		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
+		    MESSAGESTATE_ANY,
+		    0, NULL, &messageList);
 	}
 
-	qDebug() << status << isds_strerror(status);
-
 	if (status != IE_SUCCESS) {
+		qDebug() << status << isds_strerror(status);
 		isds_list_free(&messageList);
 		return false;
 	}
@@ -1855,7 +1863,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 				    dmRecipientOrgUnitNum) : "";
 			}
 
-			messageDb->msgsInsertMessageEnvelope(dmId,
+			/* insert message envelope in db */
+			(messageDb->msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
 			    false, "tReturnedMessage",
 			    item->envelope->dbIDSender,
@@ -1889,7 +1898,12 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType,
-			    messageType);
+			    messageType))
+			? qDebug() << "Message envelope" << dmId <<
+			    "was inserted into db..."
+			: qDebug() << "ERROR: Message envelope " << dmId <<
+			    "insert!";
+
 			newcnt++;
 		}
 		box = box->next;
@@ -1999,8 +2013,8 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 				dmSenderOrgUnitNum = "";
 			} else {
 				dmSenderOrgUnitNum =
-				    *message->envelope->dmSenderOrgUnitNum != 0 ?
-				    QString::number(*message->envelope->
+				    *message->envelope->dmSenderOrgUnitNum != 0
+				    ? QString::number(*message->envelope->
 				    dmSenderOrgUnitNum) : "";
 			}
 
@@ -2009,12 +2023,13 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 				dmRecipientOrgUnitNum = "";
 			} else {
 				dmRecipientOrgUnitNum =
-				    *message->envelope->dmRecipientOrgUnitNum != 0
+				  *message->envelope->dmRecipientOrgUnitNum != 0
 				    ? QString::number(*message->envelope->
 				    dmRecipientOrgUnitNum) : "";
 			}
 
-			messageDb->msgsUpdateMessageEnvelope(dmID,
+			/* update message envelope in db */
+			(messageDb->msgsUpdateMessageEnvelope(dmID,
 			    /* TODO - set correctly next two values */
 			    true, "tReturnedMessage",
 			    message->envelope->dbIDSender,
@@ -2048,36 +2063,55 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 			    convertHexToDecIndex(*message->envelope->dmMessageStatus),
 			    (int)*message->envelope->dmAttachmentSize,
 			    message->envelope->dmType,
-			    "received");
+			    "received"))
+			    ? qDebug() << "Message envelope was updated..."
+			    : qDebug() << "ERROR: Message envelope update!";
 
-			messageDb->msgsInsertMessageHash(dmID,
-			   (char *)message->envelope->hash->value,
-			   convertHashAlg(message->envelope->hash->algorithm));
+			/* insert/update hash into db */
+			(messageDb->msgsInsertUpdateMessageHash(dmID,
+			    (char *)message->envelope->hash->value,
+			    convertHashAlg(message->envelope->hash->algorithm)))
+			? qDebug() << "Message hash was stored into db..."
+			: qDebug() << "ERROR: Message hash insert!";
 
 
 	struct isds_list *file;
 	file = message->documents;
 
+	/* insert/update files */
 	while (0 != file) {
 		isds_document *item = (isds_document *) file->data;
 
 		QString dmEncodedContent = QByteArray((char *)item->data,
 		    item->data_length).toBase64();
 
-		/* insert new file to db */
-		messageDb->msgsInsertMessageFiles(dmID,
+		/* insert/update file to db */
+		(messageDb->msgsInsertUpdateMessageFile(dmID,
 		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
 		   item->dmMimeType, item->dmFormat,
 		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContent);
-
+		   dmEncodedContent))
+		? qDebug() << "Message file" << item->dmFileDescr <<
+		    "was stored into db..."
+		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
+		    "insert!";
 		file = file->next;
 	}
 
-	getDeliveryInfo(acntIdx, msgIdx);
+	/* Download and save delivery info and message events */
+	(getReceivedsDeliveryInfo(acntIdx, msgIdx))
+	? qDebug() << "Delivery info of message was processed..."
+	: qDebug() << "ERROR: Delivery info of message not found!";
+
+	/*  Mark this message as downloaded in ISDS */
+	(markMessageAsDownloaded(acntIdx, msgIdx))
+	? qDebug() << "Message was marked as downloaded..."
+	: qDebug() << "ERROR: Message was not marked as downloaded!";
 
 	isds_list_free(&message->documents);
 	isds_message_free(&message);
+
+	qDebug() << "downloadMessage(): Done!";
 
 	return true;
 }
@@ -2090,10 +2124,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 void MainWindow::on_actionDownload_messages_triggered()
 /* ========================================================================= */
 {
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
-	downloadMessageList(index,"received");
-	downloadMessageList(index,"sent");
+	on_actionGet_messages_triggered();
 }
 
 
@@ -2129,9 +2160,9 @@ void MainWindow::on_actionRecieved_all_triggered()
 
 /* ========================================================================= */
 /*
-* Set message as read localli in ISDS.
+* Set message as downloaded from ISDS.
 */
-bool MainWindow::setMessageAsLocallyRead(const QModelIndex &acntIdx,
+bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2163,7 +2194,7 @@ bool MainWindow::setMessageAsLocallyRead(const QModelIndex &acntIdx,
 /*
 * Download message delivery info and get list of events message
 */
-bool MainWindow::getDeliveryInfo(const QModelIndex &acntIdx,
+bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2172,7 +2203,7 @@ bool MainWindow::getDeliveryInfo(const QModelIndex &acntIdx,
 		return false;
 	}
 
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
@@ -2203,7 +2234,55 @@ bool MainWindow::getDeliveryInfo(const QModelIndex &acntIdx,
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
-		messageDb->msgsInsertMessageEvent(dmID,
+		messageDb->msgsInsertUpdateMessageEvent(dmID,
+		    timevalToDbFormat(item->time), item->description);
+		event = event->next;
+	}
+
+	isds_list_free(&message->envelope->events);
+	isds_message_free(&message);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Download sent message delivery info and get list of events message
+*/
+bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
+    int msgIdx)
+/* ========================================================================= */
+{
+	QString dmId = QString::number(msgIdx);
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	// message and envleople structures
+	struct isds_message *message = NULL;
+	isds_error status;
+
+	status = isds_get_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
+
+	if (IE_SUCCESS != status) {
+		isds_message_free(&message);
+		return false;
+	}
+
+	MessageDb *messageDb = accountMessageDb();
+	int dmID = atoi(message->envelope->dmID);
+
+	struct isds_list *event;
+	event = message->envelope->events;
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time), item->description);
 		event = event->next;
 	}
@@ -2240,6 +2319,24 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 		return false;
 	}
 
+	struct isds_list *stateListFirst = NULL;
+	stateListFirst = stateList;
+
+	while (0 != stateList) {
+		isds_message_status_change *item =
+		    (isds_message_status_change *) stateList->data;
+		int dmId = atoi(item->dmID);
+		qDebug() << item->dmID;
+		qDebug() << timevalToDbFormat(item->time);
+		qDebug() << convertHexToDecIndex(*item->dmMessageStatus);
+		getSentDeliveryInfo(acntIdx, dmId);
+		stateList = stateList->next;
+	}
+
+	isds_list_free(&stateListFirst);
+
+
+
 	/* TODO - update state of messages */
 	return true;
 }
@@ -2249,33 +2346,40 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 /*
 * Get password expiration info for account index
 */
-QString MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
+bool MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
 /* ========================================================================= */
 {
 	isds_error status;
 	struct timeval *expiration = NULL;
+	QString expirDate;
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
 
+	QString key = accountInfo.userName() + "___True";
+
 	if (accountInfo.loginMethod() != "username" &&
 	    accountInfo.loginMethod() != "user_certificate") {
-		return tr("unknown or without expiration");
-	}
+		expirDate = "";
+		m_accountDb.setPwdExpirIntoDb(key, expirDate);
+		return true;
+	} else {
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
-	}
-
-	status = isds_get_password_expiration(
-	    isdsSessions.session(accountInfo.userName()), &expiration);
-
-	if (IE_SUCCESS == status) {
-		if (0 != expiration) {
-			QString expir = timevalToDbFormat(expiration);
-			return expir;
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			isdsSessions.connectToIsds(accountInfo);
 		}
-	}
-	return tr("unknown or without expiration");
-}
 
+		status = isds_get_password_expiration(
+		    isdsSessions.session(accountInfo.userName()), &expiration);
+
+		if (IE_SUCCESS == status) {
+			if (0 != expiration) {
+				expirDate = timevalToDbFormat(expiration);
+				m_accountDb.setPwdExpirIntoDb(key, expirDate);
+				return true;
+			}
+		}
+		return true;
+	}
+	return false;
+}

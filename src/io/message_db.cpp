@@ -1010,9 +1010,9 @@ bool MessageDb::isInMessageDb(int dmId) const
 
 /* ========================================================================= */
 /*
- * Insert message files into file table
+ * Insert/update message file into file table
  */
-bool MessageDb::msgsInsertMessageFiles(int dmId,
+bool MessageDb::msgsInsertUpdateMessageFile(int dmId,
     const QString &dmFileDescr, const QString &dmUpFileGuid,
     const QString &dmFileGuid, const QString &dmMimeType,
     const QString &dmFormat, const QString &dmFileMetaType,
@@ -1020,19 +1020,57 @@ bool MessageDb::msgsInsertMessageFiles(int dmId,
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
+	int dbId;
 
-	QString queryStr = "INSERT INTO files ("
-	    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
-	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent"
-	    ") VALUES ("
-	    ":message_id, :_dmFileDescr, :_dmUpFileGuid, :_dmFileGuid, "
-	    ":_dmMimeType, :_dmFormat, :_dmFileMetaType, :dmEncodedContent"
-	    ")";
+	QString queryStr = "SELECT id FROM files WHERE "
+	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr "
+	    "AND _dmMimeType = :dmMimeType";
 
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		qDebug() << "Error: msgsInsertUpdateMessageFile"
+		    << query.lastError();
+		return false;
 	}
 
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":dmFileDescr", dmFileDescr);
+	query.bindValue(":dmMimeType", dmMimeType);
+
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageFile"
+		    << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = 0;
+		}
+	}
+
+	if (dbId != 0) {
+		queryStr = "UPDATE files SET "
+		" _dmFileDescr = :_dmFileDescr, _dmUpFileGuid = :_dmUpFileGuid,"
+		" _dmFileGuid = :_dmFileGuid, _dmMimeType = :_dmMimeType, "
+		"_dmFormat = :_dmFormat, _dmFileMetaType = :_dmFileMetaType, "
+		"dmEncodedContent = :dmEncodedContent "
+		"WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO files ("
+		    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+		    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent"
+		    ") VALUES ("
+		    ":message_id, :_dmFileDescr, :_dmUpFileGuid, :_dmFileGuid,"
+		    " :_dmMimeType, :_dmFormat, :_dmFileMetaType, "
+		    ":dmEncodedContent)";
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageFile"
+		    << query.lastError();
+		return false;
+	}
 	query.bindValue(":message_id", dmId);
 	query.bindValue(":_dmFileDescr", dmFileDescr);
 	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
@@ -1041,10 +1079,15 @@ bool MessageDb::msgsInsertMessageFiles(int dmId,
 	query.bindValue(":_dmFormat", dmFormat);
 	query.bindValue(":_dmFileMetaType", dmFileMetaType);
 	query.bindValue(":dmEncodedContent", dmEncodedContent);
+	if (dbId != 0) {
+	    query.bindValue(":dbId", dbId);
+	}
 
 	if (query.exec()) {
 		return true;
 	} else {
+		qDebug() << "Error: msgsInsertUpdateMessageFile"
+		    << query.lastError();
 		return false;
 	}
 }
@@ -1054,29 +1097,65 @@ bool MessageDb::msgsInsertMessageFiles(int dmId,
 /*
  * Insert message hash into hashes table
  */
-bool MessageDb::msgsInsertMessageHash(int dmId, const QString &value,
+bool MessageDb::msgsInsertUpdateMessageHash(int dmId, const QString &value,
     const QString &algorithm)
 /* ========================================================================= */
 {
 
 	QSqlQuery query(m_db);
+	int dbId;
 
-	QString queryStr;
-	queryStr = "INSERT INTO hashes (message_id, value, _algorithm)"
-	" VALUES (:dmId, :value, :algorithm)";
+	QString queryStr = "SELECT id FROM hashes WHERE "
+	    "message_id = :message_id";
 
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		qDebug() << "Error: msgsInsertUpdateMessageHash"
+		    << query.lastError();
+		return false;
 	}
 
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":algorithm", algorithm);
+
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageHash"
+		    << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = 0;
+		}
+	}
+
+	if (dbId != 0) {
+		queryStr = "UPDATE hashes SET "
+		"value = :value, _algorithm = :algorithm "
+		"WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO hashes (message_id, value, _algorithm)"
+		" VALUES (:dmId, :value, :algorithm)";
+
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageHash"
+		    << query.lastError();
+		return false;
+	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":value", value);
 	query.bindValue(":algorithm", algorithm);
+	if (dbId != 0) {
+	    query.bindValue(":dbId", dbId);
+	}
 
 	if (query.exec()) {
 		return true;
 	} else {
-		qDebug() << "Insert hashes error:"
+		qDebug() << "Error: msgsInsertUpdateMessageHash"
 		    << query.lastError();
 		return false;
 	}
@@ -1085,31 +1164,65 @@ bool MessageDb::msgsInsertMessageHash(int dmId, const QString &value,
 
 /* ========================================================================= */
 /*
- * Insert message event into events table
+ * Insert/update message event into events table
  */
-bool MessageDb::msgsInsertMessageEvent(int dmId, const QString &dmEventTime,
+bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
     const QString &dmEventDescr)
 /* ========================================================================= */
 {
-
 	QSqlQuery query(m_db);
+	int dbId;
 
-	QString queryStr;
-	queryStr = "INSERT INTO events (message_id, dmEventTime, dmEventDescr)"
-	" VALUES (:dmId, :dmEventTime, :dmEventDescr)";
+	QString queryStr = "SELECT id FROM events WHERE "
+	    "message_id = :message_id AND dmEventTime = :dmEventTime";
 
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		qDebug() << "Error: msgsInsertUpdateMessageEvent"
+		    << query.lastError();
+		return false;
 	}
 
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":dmEventTime", dmEventTime);
+
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageEvent"
+		    << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = 0;
+		}
+	}
+
+	if (dbId != 0) {
+		queryStr = "UPDATE events SET "
+		"dmEventTime = :dmEventTime, dmEventDescr = :dmEventDescr "
+		"WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO events (message_id, dmEventTime, "
+		    "dmEventDescr) VALUES (:dmId, :dmEventTime, :dmEventDescr)";
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageEvent"
+		    << query.lastError();
+		return false;
+	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmEventTime", dmEventTime);
 	query.bindValue(":dmEventDescr", dmEventDescr);
+	if (dbId != 0) {
+	    query.bindValue(":dbId", dbId);
+	}
 
 	if (query.exec()) {
 		return true;
 	} else {
-		qDebug() << "Insert hashes error:"
+		qDebug() << "Error: msgsInsertUpdateMessageEvent"
 		    << query.lastError();
 		return false;
 	}

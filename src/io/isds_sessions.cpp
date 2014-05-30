@@ -27,7 +27,7 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 	}
 
 	/* Logging. */
-	isds_set_logging(ILF_ALL, ILL_ALL);
+	//isds_set_logging(ILF_ALL, ILL_ALL);
 }
 
 

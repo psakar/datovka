@@ -213,8 +213,7 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &item,
-	const QString expir) const;
+	QString createAccountInfo(const QStandardItem &item) const;
 
 	/*!
 	 * @brief Generate overall account information.
@@ -251,16 +250,22 @@ private:
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Set message as read localli in ISDS.
+	 * @brief Set message as downloaded from ISDS.
 	 */
-	bool setMessageAsLocallyRead(const QModelIndex &acntIdx,
+	bool markMessageAsDownloaded(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Download message delivery info and get list of events message
+	 * @brief Download received message delivery info and events
 	 */
-	bool getDeliveryInfo(const QModelIndex &acntIdx,
+	bool getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
+
+	/*!
+	 * @brief Download sent message delivery info and events
+	 */
+	bool getSentDeliveryInfo(const QModelIndex &acntIdx,
+	    int msgIdx);
 
 	/*!
 	 * @brief Get list of sent message state changes
@@ -270,7 +275,7 @@ private:
 	/*!
 	 * @brief Get password expiration info for account index
 	 */
-	QString getPasswordInfo(const QModelIndex &acntIdx);
+	bool getPasswordInfo(const QModelIndex &acntIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
