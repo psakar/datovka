@@ -1011,6 +1011,36 @@ bool MessageDb::isInMessageDb(int dmId) const
 
 /* ========================================================================= */
 /*
+ * Get message hash info from table
+ */
+QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QList<QString> retitem;
+	QString queryStr;
+
+	queryStr = "SELECT value,_algorithm FROM hashes WHERE "
+	    "message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Select hashes errro:" << query.lastError();
+	}
+
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			retitem.append(query.value(0).toString());
+			retitem.append(query.value(1).toString());
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Insert additional info about author (sender) into db
  */
 bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
@@ -1019,16 +1049,13 @@ bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
 {
 	QSqlQuery query(m_db);
 
-	QVariantMap map;
-	/* TODO - update on the old datovka format */
-	//{"message_author": {"userType": "PRIMARY_USER", "authorName": null}}
-	map.insert("userType", sender_type);
-	map.insert("authorName", sender_name);
+	QVariantMap map, map2;
+	map2.insert("userType", sender_type);
+	map2.insert("authorName", sender_name);
+	map.insert("message_author", map2);
 	QJsonObject object = QJsonObject::fromVariantMap(map);
-
 	QJsonDocument document;
 	document.setObject(object);
-
 	QString  json = document.toJson(QJsonDocument::Compact);
 
 	QString queryStr = "UPDATE supplementary_message_data SET "
@@ -1037,6 +1064,7 @@ bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
 	if (!query.prepare(queryStr)) {
 		qDebug() << "Update supplementary_message_data error:"
 		    << query.lastError();
+		return false;
 	}
 
 	query.bindValue(":dmId", dmID);

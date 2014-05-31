@@ -283,6 +283,12 @@ private:
 	bool getMessageAuthor(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
 
+	/*!
+	 * @brief Verify message = comparison hash with hash stored in ISDS.
+	 */
+	bool verifyMessage(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

@@ -201,6 +201,11 @@ int convertHexToDecIndex(int value);
  */
 QString convertHashAlg(int value);
 
+ /*!
+ * @brief Return hash algotirhm as int
+ */
+int convertHashAlg2(QString value);
+
 /*!
  * @brief Return attachment type as string
  */

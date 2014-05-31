@@ -2355,6 +2355,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 
 	if (IE_SUCCESS != status) {
 		isds_list_free(&stateList);
+		qDebug() << status << isds_strerror(status);
 		return false;
 	}
 
@@ -2450,6 +2451,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
 	    &sender_type, &raw_sender_type, &sender_name);
 
 	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
 		return false;
 	}
 
@@ -2463,4 +2465,73 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
 
 	return true;
 }
+
+
+/* ========================================================================= */
+/*
+* Verify message = comparison message hash with hash stored in ISDS.
+*/
+bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	struct isds_hash *hashIsds = NULL;
+
+	status = isds_download_message_hash(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &hashIsds);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+	struct isds_hash *hashLocal = NULL;
+	hashLocal = (struct isds_hash *)
+	    malloc(sizeof(struct isds_hash));
+
+	if (hashLocal == NULL) {
+		free(hashLocal);
+		return false;
+	}
+	memset(hashLocal, 0, sizeof(struct isds_hash));
+	MessageDb *messageDb = accountMessageDb();
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QList<QString> hashLocaldata;
+	hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
+
+	hashLocal->value = (void*)hashLocaldata[0].toStdString().c_str();
+	hashLocal->length = (size_t)hashLocaldata[0].size();
+	hashLocal->algorithm =
+	    (isds_hash_algorithm)convertHashAlg2(hashLocaldata[1]);
+
+	status = isds_hash_cmp(hashIsds, hashLocal);
+
+	isds_hash_free(&hashLocal);
+	isds_hash_free(&hashIsds);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+	return true;
+}
+
+
+
 

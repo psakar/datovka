@@ -225,6 +225,12 @@ public:
 	bool addMessageAuthorInfo(int dmID, const QString &sender_type,
 	    const QString &sender_name);
 
+ 	/*!
+	 * @brief Retrun hash of message froms db.
+	 */
+	QList<QString> msgsGetHashFromDb(int dmId) const;
+
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.

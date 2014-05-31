@@ -480,9 +480,6 @@ int convertHexToDecIndex(int value)
 	else if (value == MESSAGESTATE_REMOVED) return 9;
 	else if (value == MESSAGESTATE_IN_SAFE) return 10;
 	else return 0;
-
-
-
 }
 
 
@@ -501,6 +498,24 @@ QString convertHashAlg(int value)
 	else if (value == HASH_ALGORITHM_SHA_512) return "SHA-512";
 	else return "";
 }
+
+
+/* ========================================================================= */
+/*
+ * Convert hash algotirhm to int
+ */
+int convertHashAlg2(QString value)
+/* ========================================================================= */
+{
+	if (value == "MD5") return HASH_ALGORITHM_MD5;
+	else if (value == "SHA_1") return HASH_ALGORITHM_SHA_1;
+	else if (value == "SHA_224") return HASH_ALGORITHM_SHA_224;
+	else if (value == "SHA_256") return HASH_ALGORITHM_SHA_256;
+	else if (value == "SHA_384") return HASH_ALGORITHM_SHA_384;
+	else if (value == "SHA_512") return HASH_ALGORITHM_SHA_512;
+	else return 0;
+}
+
 
 
 /* ========================================================================= */
