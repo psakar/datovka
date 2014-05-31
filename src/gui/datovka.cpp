@@ -734,7 +734,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	m_statusProgressBar->setFormat(tr("downloadMessage"));
 	m_statusProgressBar->repaint();
-	downloadMessage(accountIndex, selectedIndex); /* TODO -- Check return value. */
+	downloadMessage(accountIndex, selectedIndex, false); /* TODO -- Check return value. */
 	setDefaultProgressStatus();
 
 	/* TODO -- Reload content of attachment list. */
@@ -1960,7 +1960,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
  * @brief Download attachments for specific message.
  */
 bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
-    const QModelIndex &msgIdx)
+    const QModelIndex &msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
@@ -1971,7 +1971,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	/* First column. */
 	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
-	qDebug() << "Downloading attachments for message" << dmId;
+	qDebug() << "Downloading complete message" << dmId;
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
@@ -1980,17 +1980,29 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 		isdsSessions.connectToIsds(accountInfo);
 	}
 
-	// message and envleople structures
+	// files and envleople structures
 	struct isds_message *message = NULL;
 
 	isds_error status;
+
+	(signedMsg) ?
+	status = isds_get_signed_received_message(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
+	:
 	status = isds_get_received_message(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
 
 	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
 		isds_message_free(&message);
 		return false;
 	}
+
+	/* TODO - if signedMsg == true then decode signed message (raw ) */
+	//qDebug() << (int)message->raw_length;
+	//QString raw = QByteArray((char*)message->raw, message->raw_length).toBase64();
+	//qDebug() << raw;
+	//qDebug() << (char*)message->raw;
 
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
@@ -2113,7 +2125,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	}
 
 	/* Download and save delivery info and message events */
-	(getReceivedsDeliveryInfo(acntIdx, msgIdx))
+	(getReceivedsDeliveryInfo(acntIdx, msgIdx, false))
 	? qDebug() << "Delivery info of message was processed..."
 	: qDebug() << "ERROR: Delivery info of message not found!";
 
@@ -2212,7 +2224,7 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntIdx,
 * Download message delivery info and get list of events message
 */
 bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
-    const QModelIndex &msgIdx)
+    const QModelIndex &msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
@@ -2233,21 +2245,25 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 	struct isds_message *message = NULL;
 	isds_error status;
 
-	status = isds_get_delivery_info(isdsSessions.session(
+	(signedMsg)
+	? status = isds_get_signed_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
+	: status = isds_get_delivery_info(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
 
 	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
 		isds_message_free(&message);
 		return false;
 	}
 
+	/* TODO - if signedMsg == true then decode signed message (raw ) */
 
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
 
 	struct isds_list *event;
 	event = message->envelope->events;
-
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
@@ -2268,7 +2284,7 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 * Download sent message delivery info and get list of events message
 */
 bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
-    int msgIdx)
+    int msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
 	QString dmId = QString::number(msgIdx);
@@ -2283,13 +2299,19 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
 	struct isds_message *message = NULL;
 	isds_error status;
 
-	status = isds_get_delivery_info(isdsSessions.session(
+	(signedMsg)
+	? status = isds_get_signed_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
+	: status = isds_get_delivery_info(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
 
 	if (IE_SUCCESS != status) {
 		isds_message_free(&message);
+		qDebug() << status << isds_strerror(status);
 		return false;
 	}
+
+	/* TODO - if signedMsg == true then decode signed message (raw ) */
 
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
@@ -2343,18 +2365,12 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateList->data;
 		int dmId = atoi(item->dmID);
-		qDebug() << item->dmID;
-		qDebug() << timevalToDbFormat(item->time);
-		qDebug() << convertHexToDecIndex(*item->dmMessageStatus);
-		getSentDeliveryInfo(acntIdx, dmId);
+		getSentDeliveryInfo(acntIdx, dmId, false);
 		stateList = stateList->next;
 	}
 
 	isds_list_free(&stateListFirst);
 
-
-
-	/* TODO - update state of messages */
 	return true;
 }
 

@@ -247,7 +247,7 @@ private:
 	 * @brief Download attachments for specific message.
 	 */
 	bool downloadMessage(const QModelIndex &acntIdx,
-	    const QModelIndex &msgIdx);
+	    const QModelIndex &msgIdx, bool signedMsg);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.
@@ -259,13 +259,13 @@ private:
 	 * @brief Download received message delivery info and events
 	 */
 	bool getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
-	    const QModelIndex &msgIdx);
+	    const QModelIndex &msgIdx, bool signedMsg);
 
 	/*!
 	 * @brief Download sent message delivery info and events
 	 */
 	bool getSentDeliveryInfo(const QModelIndex &acntIdx,
-	    int msgIdx);
+	    int msgIdx, bool signedMsg);
 
 	/*!
 	 * @brief Get list of sent message state changes
