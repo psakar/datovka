@@ -1,4 +1,5 @@
-﻿#include <QMessageBox>
+﻿#include <QDesktopServices>
+#include <QMessageBox>
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
@@ -31,8 +32,6 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
 {
 	setupUi(this);
 	initNewMessageDialog();
-
-	qDebug() << m_accountInfo;
 }
 
 /* ========================================================================= */
@@ -298,13 +297,34 @@ void DlgSendMessage::findRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Free document list
+* Open attachment in default application.
  */
 void DlgSendMessage::openAttachmentFile(void)
 /* ========================================================================= */
 {
-	/* TODO */
+
+	QModelIndex selectedIndex = this->attachmentTableWidget->currentIndex();
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return;
+	}
+
+	QModelIndex fileNameIndex =
+	    selectedIndex.sibling(selectedIndex.row(), 4);
+	Q_ASSERT(fileNameIndex.isValid());
+	if(!fileNameIndex.isValid()) {
+		return;
+	}
+	QString fileName = fileNameIndex.data().toString();
+	Q_ASSERT(!fileName.isEmpty());
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+	QDesktopServices::openUrl(QUrl("file://" + fileName));
 }
+
 
 /* ========================================================================= */
 /*

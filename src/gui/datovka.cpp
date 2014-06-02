@@ -1341,7 +1341,7 @@ void MainWindow::on_actionSent_message_triggered()
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_CONF_SETINGS).toMap(), this);
-	newMessageDialog->show();
+	newMessageDialog->exec();
 	downloadMessageList(index, "sent");
 }
 
@@ -1533,7 +1533,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_CONF_SETINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
-	newMessageDialog->show();
+	newMessageDialog->exec();
 	downloadMessageList(index, "sent");
 }
 
