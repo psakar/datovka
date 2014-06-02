@@ -142,6 +142,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
 }
 
 /* ========================================================================= */

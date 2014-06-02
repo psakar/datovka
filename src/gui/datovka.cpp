@@ -1341,8 +1341,9 @@ void MainWindow::on_actionSent_message_triggered()
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_CONF_SETINGS).toMap(), this);
-	newMessageDialog->exec();
-	downloadMessageList(index, "sent");
+	if (newMessageDialog->exec() == QDialog::Accepted) {
+		downloadMessageList(index, "sent");
+	}
 }
 
 
@@ -1533,8 +1534,9 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_CONF_SETINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
-	newMessageDialog->exec();
-	downloadMessageList(index, "sent");
+	if (newMessageDialog->exec() == QDialog::Accepted) {
+		downloadMessageList(index, "sent");
+	}
 }
 
 /* ========================================================================= */
@@ -1985,7 +1987,9 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 
 	isds_error status;
 
-	(signedMsg) ?
+	//(signedMsg) ?
+	true ?
+
 	status = isds_get_signed_received_message(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
 	:
@@ -1999,10 +2003,12 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	}
 
 	/* TODO - if signedMsg == true then decode signed message (raw ) */
-	//qDebug() << (int)message->raw_length;
-	//QString raw = QByteArray((char*)message->raw, message->raw_length).toBase64();
-	//qDebug() << raw;
+	qDebug() << (int)message->raw_length;
+	QString raw = QByteArray((char*)message->raw, message->raw_length).toBase64();
+	qDebug() << raw;
 	//qDebug() << (char*)message->raw;
+
+	return true;
 
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
