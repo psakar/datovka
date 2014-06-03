@@ -244,10 +244,10 @@ private:
 	    const QString messageType);
 
 	/*!
-	 * @brief Download attachments for specific message.
+	 * @brief Download attachments, envelope and raw for specific message.
 	 */
 	bool downloadMessage(const QModelIndex &acntIdx,
-	    const QModelIndex &msgIdx, bool signedMsg);
+	    const QModelIndex &msgIdx, bool signedMsg, bool sentMessage);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.

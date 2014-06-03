@@ -219,6 +219,17 @@ public:
 	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
 	    const QString &dmEventDescr);
 
+	/*!
+	 * @brief Insert/update raw message data into raw_message_data table.
+	 */
+	bool msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
+	    int message_type);
+
+	/*!
+	 * @brief Insert/update raw delivery info into raw_delivery_info_data.
+	 */
+	bool msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw);
+
  	/*!
 	 * @brief Insert additional info about author (sender) into db.
 	 */

@@ -1011,7 +1011,7 @@ bool MessageDb::isInMessageDb(int dmId) const
 
 /* ========================================================================= */
 /*
- * Get message hash info from table
+ * Get message hash from db
  */
 QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
 /* ========================================================================= */
@@ -1034,8 +1034,12 @@ QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
 		if (query.isValid()) {
 			retitem.append(query.value(0).toString());
 			retitem.append(query.value(1).toString());
+			return retitem;
 		}
 	}
+	retitem.append("");
+	retitem.append("");
+	return retitem;
 }
 
 
@@ -1186,7 +1190,6 @@ bool MessageDb::msgsInsertUpdateMessageHash(int dmId, const QString &value,
 	}
 
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":algorithm", algorithm);
 
 	if (!query.exec()) {
 		qDebug() << "Error: msgsInsertUpdateMessageHash"
@@ -1227,6 +1230,140 @@ bool MessageDb::msgsInsertUpdateMessageHash(int dmId, const QString &value,
 		return true;
 	} else {
 		qDebug() << "Error: msgsInsertUpdateMessageHash"
+		    << query.lastError();
+		return false;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert raw message data into raw_message_data table
+ */
+bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
+	int message_type)
+/* ========================================================================= */
+{
+
+	QSqlQuery query(m_db);
+	int dbId;
+
+	QString queryStr = "SELECT message_id FROM raw_message_data WHERE "
+	    "message_id = :message_id";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageRaw"
+		    << query.lastError();
+		return false;
+	}
+
+	query.bindValue(":message_id", dmId);
+
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageRaw"
+		    << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = 0;
+		}
+	}
+
+	if (dbId != 0) {
+		queryStr = "UPDATE raw_message_data SET "
+		"data = :data, message_type = :message_type "
+		"WHERE message_id = :dbId";
+	} else {
+		queryStr = "INSERT INTO raw_message_data "
+		"(message_id, message_type, data) "
+		"VALUES (:dmId, :data, :message_type)";
+
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageRaw"
+		    << query.lastError();
+		return false;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":data", raw);
+	query.bindValue(":message_type", message_type);
+	if (dbId != 0) {
+	    query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "Error: msgsInsertUpdateMessageRaw"
+		    << query.lastError();
+		return false;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert raw delivery info into raw_delivery_info_data table
+ */
+bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
+/* ========================================================================= */
+{
+
+	QSqlQuery query(m_db);
+	int dbId;
+
+	QString queryStr = "SELECT message_id FROM raw_delivery_info_data WHERE"
+	    " message_id = :message_id";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
+		    << query.lastError();
+		return false;
+	}
+
+	query.bindValue(":message_id", dmId);
+
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
+		    << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = 0;
+		}
+	}
+
+	if (dbId != 0) {
+		queryStr = "UPDATE raw_delivery_info_data SET "
+		"data = :data WHERE message_id = :dbId";
+	} else {
+		queryStr = "INSERT INTO raw_delivery_info_data "
+		"(message_id, data) VALUES (:dmId, :data)";
+
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
+		    << query.lastError();
+		return false;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":data", raw);
+	if (dbId != 0) {
+	    query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
 		    << query.lastError();
 		return false;
 	}
