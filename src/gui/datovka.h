@@ -284,6 +284,12 @@ private:
 	    const QModelIndex &msgIdx);
 
 	/*!
+	 * @brief Delete message from long term storage in ISDS.
+	 */
+	bool eraseMessage(const QModelIndex &acntIdx,
+	    const QModelIndex &msgIdx);
+
+	/*!
 	 * @brief Verify message = comparison hash with hash stored in ISDS.
 	 */
 	bool verifyMessage(const QModelIndex &acntIdx,

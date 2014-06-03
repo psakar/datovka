@@ -2557,3 +2557,45 @@ bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
 	}
 	return true;
 }
+
+
+/* ========================================================================= */
+/*
+* Delete message from long term storage in ISDS.
+*/
+bool MainWindow::eraseMessage(const QModelIndex &acntIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return false;
+	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	/* TODO - set true if message is received or false if is sent */
+	bool incoming = true;
+
+	status = isds_delete_message_from_storage(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(),
+	    (incoming) ? true :false);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+	qDebug() << "Message" << dmId << "was deleted from ISDS";
+
+	/* TODO - delete message data from db (all tables) */
+
+	return true;
+}
