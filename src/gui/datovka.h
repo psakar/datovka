@@ -141,6 +141,11 @@ private:
 	void defaultUiMainWindowSettings(void) const;
 
 	/*!
+	 * @brief Set message action/button to visible.
+	 */
+	void setMessageActionVisibility(bool action) const;
+
+	/*!
 	 * @brief Create configuration file if not present.
 	 */
 	void ensureConfPresence(void) const;

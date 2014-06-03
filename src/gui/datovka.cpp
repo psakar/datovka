@@ -247,10 +247,9 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
-	QString expir;
-
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
+		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
 		break;
 	case AccountModel::nodeRecentReceived:
@@ -261,9 +260,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
 		break;
 	case AccountModel::nodeAll:
+		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
 		    messageDb->msgsRcvdYearlyCounts(dbId),
-		    messageDb->msgsSntYearlyCounts(dbId));
+		    messageDb->msgsSntYearlyCounts(dbId));				
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
@@ -1075,6 +1075,19 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionExport_corespondence_overview->setEnabled(false);
 }
 
+
+/* ========================================================================= */
+/*
+ *  Set default settings of mainwindow.
+ */
+void MainWindow::setMessageActionVisibility(bool action) const
+/* ========================================================================= */
+{
+	ui->menuMessage->setEnabled(action);
+	ui->actionReply_to_the_sender->setEnabled(action);
+	ui->actionVerify_a_message->setEnabled(action);
+}
+
 /* ========================================================================= */
 /*
  * Store geometry to settings.
@@ -1800,7 +1813,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		isdsSessions.connectToIsds(accountInfo);
 	}
 
-	isds_error status;
+	isds_error status = IE_ERROR;
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */

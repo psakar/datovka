@@ -169,7 +169,7 @@ int GlobLog::openFile(const QString &fName, LogMode mode)
 
 	++openedFiles;
 
-	for (int i; i < MAX_SOURCES; ++i) {
+	for (int i = 0; i < MAX_SOURCES; ++i) {
 		facDescVect[LF_FILE + openedFiles - 1].levels[i] = 0;
 	}
 	facDescVect[LF_FILE + openedFiles - 1].fout = of;
