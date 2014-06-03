@@ -2113,12 +2113,12 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	    : qDebug() << "ERROR: Message envelope update!";
 
 	/* insert/update hash into db */
+	QString hashValue = QByteArray((char*)message->envelope->hash->value,
+		    message->envelope->hash->length).toBase64();
 	(messageDb->msgsInsertUpdateMessageHash(dmID,
-	    (char *)message->envelope->hash->value,
-	    convertHashAlg(message->envelope->hash->algorithm)))
+	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
 	? qDebug() << "Message hash was stored into db..."
 	: qDebug() << "ERROR: Message hash insert!";
-
 
 	/* Insert/update all attachment files */
 	struct isds_list *file;
@@ -2540,6 +2540,13 @@ bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
 
 	QList<QString> hashLocaldata;
 	hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
+
+	/* TODO - check if hash info is in db */
+	if (hashLocaldata[0].isEmpty()) {
+		isds_hash_free(&hashLocal);
+		isds_hash_free(&hashIsds);
+		return false;
+	}
 
 	hashLocal->value = (void*)hashLocaldata[0].toStdString().c_str();
 	hashLocal->length = (size_t)hashLocaldata[0].size();
