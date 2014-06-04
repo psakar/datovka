@@ -107,19 +107,21 @@ MainWindow::MainWindow(QWidget *parent)
 	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 
-	/* Load configuration file. */
+	/* Confioguration directory and file must exist. */
 	ensureConfPresence();
-	loadSettings();
-	/* Account list must already be set in order to connect this signal. */
-	connect(ui->accountList->selectionModel(),
-	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
 
 	/* Open accounts database. */
 	if (!m_accountDb.openDb(globPref.accountDbPath())) {
 		qWarning() << "Error opening account db"
 		    << globPref.accountDbPath();
 	}
+
+	/* Load configuration file. */
+	loadSettings();
+	/* Account list must already be set in order to connect this signal. */
+	connect(ui->accountList->selectionModel(),
+	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
 
 	/* Enable sorting of message table items. */
 	ui->messageList->setSortingEnabled(true);

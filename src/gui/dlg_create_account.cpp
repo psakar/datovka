@@ -252,7 +252,8 @@ void DlgCreateAccount::saveAccount(void)
 		QString username = this->usernameLineEdit->text() + "___True";
 
 		QString bithDAte = "";
-		if (0 != db_owner_info->birthInfo->biDate) {
+		if ((NULL != db_owner_info->birthInfo) &&
+		    (NULL != db_owner_info->birthInfo->biDate)) {
 			struct tm *birthDate = db_owner_info->birthInfo->biDate;
 			bithDAte = QString::number(birthDate->tm_year) + "-" +
 			QString::number(birthDate->tm_mon) + "-" +
