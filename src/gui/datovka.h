@@ -300,6 +300,16 @@ private:
 	bool verifyMessage(const QModelIndex &acntIdx,
 	    const QModelIndex &msgIdx);
 
+	/*!
+	 * @brief Get data about logged in user and his box.
+	 */
+	bool getOwnerInfoFromLogin(const QModelIndex &acntIdx);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	bool getUserInfoFromLogin(const QModelIndex &acntIdx);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

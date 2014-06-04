@@ -157,6 +157,7 @@ namespace AccntinfTbl {
 	const QString tabName("account_info");
 
 	const QVector< QPair<QString, EntryType> > knownAttrs = {
+	{"key", DB_TEXT},
 	{"dbID", DB_TEXT},
 	{"dbType", DB_TEXT},
 	{"ic", DB_INTEGER},
@@ -189,12 +190,13 @@ namespace AccntinfTbl {
 
 	const QString tblConstraint = {
 	    ",\n"
-	    "        PRIMARY KEY (dbID),\n"
+	    "        PRIMARY KEY (key),\n"
 	    "        CHECK (dbEffectiveOVM IN (0, 1)),\n"
 	    "        CHECK (dbOpenAddressing IN (0, 1))"
 	};
 
 	const QMap<QString, AttrProp> attrProps = {
+	{"key",                    {DB_TEXT, QObject::tr("")}},
 	{"dbID",                   {DB_TEXT, QObject::tr("Data box ID")}},
 	{"dbType",                 {DB_TEXT, QObject::tr("Data box type")}},
 	{"ic",                     {DB_INTEGER, QObject::tr("IČ")}},

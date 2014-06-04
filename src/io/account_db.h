@@ -79,6 +79,20 @@ public:
 	bool setPwdExpirIntoDb(const QString &key, QString &date)
 	    const;
 
+	/*!
+	 * @brief Insert account info into db
+	 */
+	bool insertAccountIntoDb(const QString &key, const QString &dbID,
+	    const QString &dbType, int ic, const QString &pnFirstName,
+	    const QString &pnMiddleName, const QString &pnLastName,
+	    const QString &pnLastNameAtBirth, const QString &firmName,
+	    const QString &biDate, const QString &biCity, const QString &biCounty,
+	    const QString &biState, const QString &adCity, const QString &adStreet,
+	    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
+	    const QString &adZipCode,const QString &adState,const QString &nationality,
+	    const QString &identifier, const QString &registryCode,
+	    int dbState, int dbEffectiveOVM, int dbOpenAddressing) const;
+
 private:
 	QSqlDatabase m_db; /*!< Account database. */
 };

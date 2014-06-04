@@ -167,8 +167,6 @@ bool MessageDb::openDb(const QString &fileName)
 
 	m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
 
-	m_db.setDatabaseName(fileName);
-
 	ret = m_db.open();
 
 	if (ret) {

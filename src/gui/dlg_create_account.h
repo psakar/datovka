@@ -8,7 +8,8 @@
 
 #include "src/common.h"
 #include "ui_dlg_create_account.h"
-
+#include "src/io/isds_sessions.h"
+#include "src/io/account_db.h"
 
 class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 	Q_OBJECT
@@ -19,8 +20,8 @@ public:
 		ACT_EDIT
 	};
 
-	DlgCreateAccount(QTreeView &accountList, Action action,
-	    QWidget *parent = 0);
+	DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
+	    Action action, QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -33,6 +34,7 @@ private:
 	void setCurrentAccountData(void);
 
 	QTreeView &m_accountList;
+	AccountDb &m_accountDb;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;

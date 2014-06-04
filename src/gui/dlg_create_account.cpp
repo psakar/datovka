@@ -2,11 +2,12 @@
 #include "dlg_create_account.h"
 #include "src/models/accounts_model.h"
 
-
-DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, Action action,
+DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
+Action action,
     QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
+    m_accountDb(m_accountDb),
     m_action(action),
     m_loginmethod(0),
     m_certPath("")
@@ -210,11 +211,111 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0 != itemTop);
 		itemSettings = itemTop->data(ROLE_CONF_SETINGS).toMap();
 	} else {
-		/*
-		 * TODO -- Connect temporarily to ISDS and get user information
-		 *     (data box ID).
-		 *      -- Exit with no action of fail.
-		 */
+		isds_error status;
+		struct isds_ctx *isds_session = NULL;
+		this->usernameLineEdit->text();
+
+		isds_session = isds_ctx_create();
+		if (NULL == isds_session) {
+			qDebug() << "Error creating ISDS session.";
+			isds_ctx_free(&isds_session);
+			return;
+		}
+
+		status = isds_set_timeout(isds_session, TIMEOUT_MS);
+		if (IE_SUCCESS != status) {
+			qDebug() << "Error setting time-out.";
+			isds_ctx_free(&isds_session);
+			return;
+		}
+
+		status = isdsLoginUserName(isds_session,
+		    this->usernameLineEdit->text(),
+		    this->passwordLineEdit->text(),
+		    this->testAccountCheckBox->isChecked());
+		if (IE_SUCCESS != status) {
+			qDebug() << "Error isdsLoginUserName.";
+			qDebug() << status << isds_strerror(status);
+			return;
+		}
+
+		struct isds_DbOwnerInfo *db_owner_info = NULL;
+		status = isds_GetOwnerInfoFromLogin(isds_session,
+		    &db_owner_info);
+
+		if (IE_SUCCESS != status) {
+			qDebug() << "Error isds_GetOwnerInfoFromLogin.";
+			qDebug() << status << isds_strerror(status);
+			return;
+		}
+
+		QString username = this->usernameLineEdit->text() + "___True";
+
+		QString bithDAte = "";
+		if (0 != db_owner_info->birthInfo->biDate) {
+			struct tm *birthDate = db_owner_info->birthInfo->biDate;
+			bithDAte = QString::number(birthDate->tm_year) + "-" +
+			QString::number(birthDate->tm_mon) + "-" +
+			QString::number(birthDate->tm_mday);
+		}
+
+		m_accountDb.insertAccountIntoDb(
+		    username,
+		    db_owner_info->dbID,
+		    convertDbTypeToString(*db_owner_info->dbType),
+		    atoi(db_owner_info->ic),
+		    db_owner_info->personName ?
+		        db_owner_info->personName->pnFirstName : NULL,
+		    db_owner_info->personName ?
+		        db_owner_info->personName->pnMiddleName : NULL,
+		    db_owner_info->personName ?
+		        db_owner_info->personName->pnLastName : NULL,
+		    db_owner_info->personName ?
+		        db_owner_info->personName->pnLastNameAtBirth : NULL,
+		    db_owner_info->firmName,
+		    bithDAte,
+		    db_owner_info->birthInfo ?
+		        db_owner_info->birthInfo->biCity : NULL,
+		    db_owner_info->birthInfo ?
+		        db_owner_info->birthInfo->biCounty : NULL,
+		    db_owner_info->birthInfo ?
+		        db_owner_info->birthInfo->biState : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adCity : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adStreet : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adNumberInStreet : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adNumberInMunicipality : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adZipCode : NULL,
+		    db_owner_info->address ?
+		        db_owner_info->address->adState : NULL,
+		    db_owner_info->nationality,
+		    db_owner_info->identifier,
+		    db_owner_info->registryCode,
+		    (int)*db_owner_info->dbState,
+		    (int)*db_owner_info->dbEffectiveOVM,
+		    (int)*db_owner_info->dbOpenAddressing);
+
+		status = isds_logout(isds_session);
+		if (IE_SUCCESS != status) {
+			qDebug() << "Error in ISDS logout procedure.";
+			qDebug() << status << isds_strerror(status);
+		}
+
+		status = isds_ctx_free(&isds_session);
+		if (IE_SUCCESS != status) {
+			qDebug() << "Error freeing ISDS session.";
+			qDebug() << status << isds_strerror(status);
+		}
+
+		status = isds_cleanup();
+		if (IE_SUCCESS != status) {
+			qDebug() << "Unsuccessful ISDS clean-up.";
+			qDebug() << status << isds_strerror(status);
+		}
 	}
 
 	itemSettings[NAME] = this->accountLineEdit->text();

@@ -548,3 +548,27 @@ QString convertSenderTypeToString(int value)
 	else if (value == SENDERTYPE_LIQUIDATOR) return "LIQUIDATOR";
 	else return "";
 }
+
+
+/* ========================================================================= */
+/*
+ * Convert type of databox to string
+ */
+QString convertDbTypeToString(int value)
+/* ========================================================================= */
+{
+	if (value == DBTYPE_SYSTEM) return "SYSTEM";
+	else if (value == DBTYPE_OVM) return "OVM";
+	else if (value == DBTYPE_OVM_NOTAR) return "OVM_NOTAR";
+	else if (value == DBTYPE_OVM_EXEKUT) return "OVM_EXEKUT";
+	else if (value == DBTYPE_OVM_REQ) return "OVM_REQ";
+	else if (value == DBTYPE_PO) return "PO";
+	else if (value == DBTYPE_PO_ZAK) return "PO_ZAK";
+	else if (value == DBTYPE_PO_REQ) return "PO_REQ";
+	else if (value == DBTYPE_PFO) return "PFO";
+	else if (value == DBTYPE_PFO_ADVOK) return "PFO_ADVOK";
+	else if (value == DBTYPE_PFO_DANPOR) return "PFO_DANPOR";
+	else if (value == DBTYPE_PFO_INSSPR) return "PFO_INSSPR";
+	else if (value == DBTYPE_FO) return "FO";
+	else return "";
+}

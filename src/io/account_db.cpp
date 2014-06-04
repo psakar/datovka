@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QObject>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QString>
@@ -268,3 +269,79 @@ bool AccountDb::setPwdExpirIntoDb(const QString &key, QString &date)
 }
 
 
+/* ========================================================================= */
+/*
+ * Insert account into db
+ */
+bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
+    const QString &dbType, int ic, const QString &pnFirstName,
+    const QString &pnMiddleName, const QString &pnLastName,
+    const QString &pnLastNameAtBirth, const QString &firmName,
+    const QString &biDate, const QString &biCity, const QString &biCounty,
+    const QString &biState, const QString &adCity, const QString &adStreet,
+    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
+    const QString &adZipCode,const QString &adState,const QString &nationality,
+    const QString &identifier, const QString &registryCode,
+    int dbState, int dbEffectiveOVM, int dbOpenAddressing) const
+/* ========================================================================= */
+{
+	if (!m_db.isOpen()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT INTO account_info ("
+	    "key, dbID, dbType, ic, pnFirstName, pnMiddleName, "
+	    "pnLastName, pnLastNameAtBirth, firmName, biDate, biCity, "
+	    "biCounty, biState, adCity, adStreet, adNumberInStreet, "
+	    "adNumberInMunicipality, adZipCode, adState, nationality, "
+	     "identifier, registryCode, dbState, dbEffectiveOVM, "
+	     "dbOpenAddressing) VALUES ("
+	    ":key, :dbID, :dbType, :ic, :pnFirstName, :pnMiddleName, "
+	    ":pnLastName, :pnLastNameAtBirth, :firmName, :biDate, :biCity, "
+	    ":biCounty, :biState, :adCity, :adStreet, :adNumberInStreet, "
+	    ":adNumberInMunicipality, :adZipCode, :adState, :nationality, "
+	    ":identifier, :registryCode, :dbState, :dbEffectiveOVM, "
+	    ":dbOpenAddressing"
+	    ")";
+
+	if (!query.prepare(queryStr)) {
+		qWarning() << query.lastError();
+		return false;
+	}
+
+	query.bindValue(":key", key);
+	query.bindValue(":dbID", dbID);
+	query.bindValue(":dbType", dbType);
+	query.bindValue(":ic", ic);
+	query.bindValue(":pnFirstName", pnFirstName);
+	query.bindValue(":pnMiddleName", pnMiddleName);
+	query.bindValue(":pnLastName", pnLastName);
+	query.bindValue(":pnLastNameAtBirth", pnLastNameAtBirth);
+	query.bindValue(":firmName", firmName);
+	query.bindValue(":biDate", biDate);
+	query.bindValue(":biCity", biCity);
+	query.bindValue(":biCounty", biCounty);
+	query.bindValue(":biState", biState);
+	query.bindValue(":adCity", adCity);
+	query.bindValue(":adStreet", adStreet);
+	query.bindValue(":adNumberInStreet", adNumberInStreet);
+	query.bindValue(":adNumberInMunicipality", adNumberInMunicipality);
+	query.bindValue(":adZipCode", adZipCode);
+	query.bindValue(":adState", adState);
+	query.bindValue(":nationality", nationality);
+	query.bindValue(":identifier", identifier);
+	query.bindValue(":registryCode", registryCode);
+	query.bindValue(":dbState", dbState);
+	query.bindValue(":dbEffectiveOVM", dbEffectiveOVM);
+	query.bindValue(":dbOpenAddressing", dbOpenAddressing);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		qWarning() << query.lastError();
+		return false;
+	}
+}

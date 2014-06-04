@@ -107,9 +107,6 @@ MainWindow::MainWindow(QWidget *parent)
 	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 
-	/* Open accounts database. */
-	m_accountDb.openDb(globPref.accountDbPath());
-
 	/* Load configuration file. */
 	ensureConfPresence();
 	loadSettings();
@@ -117,6 +114,12 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->accountList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
+
+	/* Open accounts database. */
+	if (!m_accountDb.openDb(globPref.accountDbPath())) {
+		qWarning() << "Error opening account db"
+		    << globPref.accountDbPath();
+	}
 
 	/* Enable sorting of message table items. */
 	ui->messageList->setSortingEnabled(true);
@@ -1372,7 +1375,7 @@ void MainWindow::on_actionAdd_account_triggered()
 /* ========================================================================= */
 {
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	    DlgCreateAccount::ACT_ADDNEW, this);
+	   m_accountDb, DlgCreateAccount::ACT_ADDNEW, this);
 	newAccountDialog->exec();
 }
 
@@ -1436,7 +1439,7 @@ void MainWindow::on_actionAccount_properties_triggered()
 /* ========================================================================= */
 {
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	    DlgCreateAccount::ACT_EDIT, this);
+	   m_accountDb, DlgCreateAccount::ACT_EDIT, this);
 	editAccountDialog->exec();
 }
 
@@ -2617,5 +2620,60 @@ bool MainWindow::eraseMessage(const QModelIndex &acntIdx,
 
 	/* TODO - delete message data from db (all tables) */
 
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Get data about logged in user and his box.
+*/
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	struct isds_DbOwnerInfo *db_owner_info = NULL;
+	isds_error status;
+	status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
+	    accountInfo.userName()), &db_owner_info);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Get data about logged in user.
+*/
+bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntIdx)
+/* ========================================================================= */
+{
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+	struct isds_DbUserInfo *db_user_info = NULL;
+	isds_error status;
+
+	status = isds_GetUserInfoFromLogin(isdsSessions.session(
+	    accountInfo.userName()), &db_user_info);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
 	return true;
 }

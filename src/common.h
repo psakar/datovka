@@ -216,4 +216,9 @@ QString convertAttachmentType(int value);
  */
 QString convertSenderTypeToString(int value);
 
+/*!
+ * @brief Convert type of databox to string
+ */
+QString convertDbTypeToString(int value);
+
 #endif /* _COMMON_H_ */
