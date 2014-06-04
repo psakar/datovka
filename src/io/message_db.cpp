@@ -54,7 +54,7 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
 
 /* ========================================================================= */
 /*
- * Convert viewed data in date/time columns.
+ * Used for data conversion on display.
  */
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */

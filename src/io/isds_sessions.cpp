@@ -22,7 +22,7 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 	status = isds_init();
 	Q_ASSERT(IE_SUCCESS == status);
 	if (IE_SUCCESS != status) {
-		qDebug() << "Unsuccessful ISDS initialisation.";
+		qWarning() << "Unsuccessful ISDS initialisation.";
 		/* TODO -- What to do on failure? */
 	}
 
@@ -44,7 +44,7 @@ GlobIsdsSessions::~GlobIsdsSessions(void)
 
 		status = isds_logout(isdsSession);
 		if (IE_SUCCESS != status) {
-			qDebug() << "Error ISDS logout procedure.";
+			qWarning() << "Error in ISDS logout procedure.";
 		}
 
 		status = isds_ctx_free(&isdsSession);

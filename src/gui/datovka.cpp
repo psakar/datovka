@@ -263,7 +263,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
 		    messageDb->msgsRcvdYearlyCounts(dbId),
-		    messageDb->msgsSntYearlyCounts(dbId));				
+		    messageDb->msgsSntYearlyCounts(dbId));
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);

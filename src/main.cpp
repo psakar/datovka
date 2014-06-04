@@ -20,6 +20,10 @@ int main(int argc, char *argv[])
 /* ========================================================================= */
 /* ========================================================================= */
 {
+	/* Log warnings. */
+	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+	    LOG_UPTO(LOG_WARNING));
+
 	/* TODO -- Make the following assignments configurable. */
 	QCoreApplication::setApplicationName("qdatovka");
 	QCoreApplication::setApplicationVersion(VERSION);

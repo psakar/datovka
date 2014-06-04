@@ -198,10 +198,24 @@ void DlgCreateAccount::saveAccount(void)
 	AccountModel *model = dynamic_cast<AccountModel*>(
 	    m_accountList.model());
 	QModelIndex index = m_accountList.currentIndex();
-	QStandardItem *item = model->itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-	AccountModel::SettingsMap itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	QStandardItem *item;
+	QStandardItem *itemTop;
+	AccountModel::SettingsMap itemSettings;
+	if (ACT_EDIT == m_action) {
+		/* Model must be present. */
+		Q_ASSERT(index.isValid());
+		item = model->itemFromIndex(index);
+		Q_ASSERT(0 != item);
+		itemTop = AccountModel::itemTop(item);
+		Q_ASSERT(0 != itemTop);
+		itemSettings = itemTop->data(ROLE_CONF_SETINGS).toMap();
+	} else {
+		/*
+		 * TODO -- Connect temporarily to ISDS and get user information
+		 *     (data box ID).
+		 *      -- Exit with no action of fail.
+		 */
+	}
 
 	itemSettings[NAME] = this->accountLineEdit->text();
 	itemSettings[USER] = this->usernameLineEdit->text();
@@ -231,10 +245,12 @@ void DlgCreateAccount::saveAccount(void)
 		model->itemFromIndex(index)->
 		    setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
+		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
 		model->addAccount(this->accountLineEdit->text(), itemSettings);
 		m_accountList.expandAll();
+		/* TODO -- Save/update related account DB entry. */
 		break;
 	default:
 		Q_ASSERT(0);
