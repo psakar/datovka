@@ -429,13 +429,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 {
 	(void) previous; /* Unused. */
 
-	Q_ASSERT(current.isValid());
-	if (!current.isValid()) {
-		return;
-	}
-
-	const QAbstractItemModel *msgTblMdl = current.model();
-
 	/* Disable message/attachment related buttons. */
 	ui->downloadComplete->setEnabled(true);
 	ui->saveAttachment->setEnabled(false);
@@ -454,6 +447,19 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
 		         QModelIndex)));
 	}
+
+	/* Disable model for attachment list. */
+	ui->messageAttachmentList->setModel(0);
+
+	if (!current.isValid()) {
+		/* End if invalid item is selected. */
+		return;
+	}
+
+	const QAbstractItemModel *msgTblMdl = current.model();
+
+	/* Disable message/attachment related buttons. */
+	ui->downloadComplete->setEnabled(true);
 
 	if (0 != msgTblMdl) {
 		QModelIndex index = msgTblMdl->index(
@@ -1608,7 +1614,9 @@ void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
 {
 	QAbstractItemModel *tableModel = ui->messageList->model();
-	Q_ASSERT(0 != tableModel);
+	if (0 == tableModel) {
+		return;
+	}
 
 	if (tableModel != &m_messageListProxyModel) {
 		/* Prohibit the proxy model to be the source of itself. */
