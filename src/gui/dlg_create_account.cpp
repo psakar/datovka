@@ -1,4 +1,6 @@
 
+#include <QMessageBox>
+
 #include "dlg_create_account.h"
 #include "src/io/dbs.h"
 #include "src/models/accounts_model.h"
@@ -214,12 +216,17 @@ void DlgCreateAccount::saveAccount(void)
 	} else {
 		isds_error status;
 		struct isds_ctx *isds_session = NULL;
-		this->usernameLineEdit->text();
+		QMessageBox msgBox;
+		QString messageBoxTitle = tr("Account error");
 
 		isds_session = isds_ctx_create();
 		if (NULL == isds_session) {
 			qDebug() << "Error creating ISDS session.";
 			isds_ctx_free(&isds_session);
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into ISDS."));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.exec();
 			return;
 		}
 
@@ -227,6 +234,10 @@ void DlgCreateAccount::saveAccount(void)
 		if (IE_SUCCESS != status) {
 			qDebug() << "Error setting time-out.";
 			isds_ctx_free(&isds_session);
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into ISDS."));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.exec();
 			return;
 		}
 
@@ -237,6 +248,12 @@ void DlgCreateAccount::saveAccount(void)
 		if (IE_SUCCESS != status) {
 			qDebug() << "Error isdsLoginUserName.";
 			qDebug() << status << isds_strerror(status);
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into databox."));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setInformativeText(
+			    tr("Bad username or password for this account."));
+			msgBox.exec();
 			return;
 		}
 
@@ -297,7 +314,11 @@ void DlgCreateAccount::saveAccount(void)
 		    db_owner_info->registryCode,
 		    (int)*db_owner_info->dbState,
 		    (int)*db_owner_info->dbEffectiveOVM,
-		    (int)*db_owner_info->dbOpenAddressing);
+		    (int)*db_owner_info->dbOpenAddressing)
+		? qDebug() << "Account info of" << username <<
+		    "was inserted into db..."
+		: qDebug() << "ERROR: Account info of " << username <<
+		    "insert!";
 
 		status = isds_logout(isds_session);
 		if (IE_SUCCESS != status) {
@@ -358,6 +379,3 @@ void DlgCreateAccount::saveAccount(void)
 		break;
 	}
 }
-
-// js2t8p
-// Heslo3.14
