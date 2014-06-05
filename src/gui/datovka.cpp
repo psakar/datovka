@@ -247,6 +247,14 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	//qDebug() << "Selected data box ID" << dbId;
+	if (dbId.isEmpty()) {
+		/* Get user information. */
+		qWarning() << "Missing user entry of" << userName
+		    << "in account db.";
+		getOwnerInfoFromLogin(AccountModel::indexTop(current));
+		/* TODO -- What to do wjen no ISDS connection is present? */
+		dbId = m_accountDb.dbId(userName + "___True");
+	}
 	Q_ASSERT(!dbId.isEmpty());
 
 	//qDebug() << "Clicked row" << current.row();
