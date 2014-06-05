@@ -995,20 +995,20 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 
 	// set mainspliter - hSplitterAccount
 	QList<int> sizes = ui->hSplitterAccount->sizes();
-	int tmp = settings.value("panes/hpaned1", 0).toInt();
+	int tmp = settings.value("panes/hpaned1", 200).toInt();
 	sizes[0] = tmp;
 	sizes[1] = w - sizes[0];;
 	ui->hSplitterAccount->setSizes(sizes);
 
 	// set messagelistspliter - vSplitterMessage
 	sizes = ui->vSplitterMessage->sizes();
-	sizes[0] = settings.value("panes/message_pane", 0).toInt();
+	sizes[0] = settings.value("panes/message_pane", 235).toInt();
 	sizes[1] = h - SH_OFFS - sizes[0];
 	ui->vSplitterMessage->setSizes(sizes);
 
 	// set message/mesageinfospliter - hSplitterMessageInfo
 	sizes = ui->hSplitterMessageInfo->sizes();
-	sizes[0] = settings.value("panes/message_display_pane", 0).toInt();
+	sizes[0] = settings.value("panes/message_display_pane", 258).toInt();
 	sizes[1] = w - tmp - sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
@@ -2649,6 +2649,56 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
 		qDebug() << status << isds_strerror(status);
 		return false;
 	}
+
+	QString username = accountInfo.userName() + "___True";
+	QString bithDAte = "";
+	if (0 != db_owner_info->birthInfo->biDate) {
+		struct tm *birthDate = db_owner_info->birthInfo->biDate;
+		bithDAte = QString::number(birthDate->tm_year) + "-" +
+		QString::number(birthDate->tm_mon) + "-" +
+		QString::number(birthDate->tm_mday);
+	}
+
+	m_accountDb.insertAccountIntoDb(
+	    username,
+	    db_owner_info->dbID,
+	    convertDbTypeToString(*db_owner_info->dbType),
+	    atoi(db_owner_info->ic),
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnFirstName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnMiddleName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnLastName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnLastNameAtBirth : NULL,
+	    db_owner_info->firmName,
+	    bithDAte,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biCity : NULL,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biCounty : NULL,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biState : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adCity : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adStreet : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adNumberInStreet : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adNumberInMunicipality : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adZipCode : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adState : NULL,
+	    db_owner_info->nationality,
+	    db_owner_info->identifier,
+	    db_owner_info->registryCode,
+	    (int)*db_owner_info->dbState,
+	    (int)*db_owner_info->dbEffectiveOVM,
+	    (int)*db_owner_info->dbOpenAddressing);
+
 	return true;
 }
 
@@ -2677,5 +2727,8 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntIdx)
 		qDebug() << status << isds_strerror(status);
 		return false;
 	}
+
+	/* TODO - insert data into db */
+
 	return true;
 }
