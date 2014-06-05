@@ -1,5 +1,6 @@
 
 
+#include <time.h>
 #include <QDateTime>
 #include <QDebug>
 #include <QString>
@@ -71,7 +72,7 @@ QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
 QString timevalToDbFormat(const struct timeval *tv)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != tv);
+	Q_ASSERT(NULL != tv);
 	QDateTime timeStamp;
 
 	timeStamp.setTime_t(tv->tv_sec);
@@ -81,6 +82,29 @@ QString timevalToDbFormat(const struct timeval *tv)
 	ret = ret.arg(QString::number(tv->tv_usec), 6, '0');
 
 	//qDebug() << "timeStamp" << ret;
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts date format to be stored in database.
+ */
+QString tmToDbFormat(const struct tm *t)
+/* ========================================================================= */
+{
+	Q_ASSERT(NULL != t);
+
+	QString ret = "%1-%2-%3 %4:%5:%6.%7";
+
+	ret = ret.arg(QString::number(t->tm_year + 1900))
+	    .arg(QString::number(t->tm_mon, 2, '0'))
+	    .arg(QString::number(t->tm_mday, 2, '0'))
+	    .arg(QString::number(t->tm_hour), 2, '0')
+	    .arg(QString::number(t->tm_min), 2, '0')
+	    .arg(QString::number(t->tm_sec), 2, '0')
+	    .arg(QString::number(0), 3, '0');
 
 	return ret;
 }

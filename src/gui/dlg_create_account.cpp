@@ -1,5 +1,6 @@
 
 #include "dlg_create_account.h"
+#include "src/io/dbs.h"
 #include "src/models/accounts_model.h"
 
 DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
@@ -251,13 +252,11 @@ void DlgCreateAccount::saveAccount(void)
 
 		QString username = this->usernameLineEdit->text() + "___True";
 
-		QString bithDAte = "";
+		QString birthDate;
 		if ((NULL != db_owner_info->birthInfo) &&
 		    (NULL != db_owner_info->birthInfo->biDate)) {
-			struct tm *birthDate = db_owner_info->birthInfo->biDate;
-			bithDAte = QString::number(birthDate->tm_year) + "-" +
-			QString::number(birthDate->tm_mon) + "-" +
-			QString::number(birthDate->tm_mday);
+			birthDate = tmToDbFormat(
+			    db_owner_info->birthInfo->biDate);
 		}
 
 		m_accountDb.insertAccountIntoDb(
@@ -274,7 +273,7 @@ void DlgCreateAccount::saveAccount(void)
 		    db_owner_info->personName ?
 		        db_owner_info->personName->pnLastNameAtBirth : NULL,
 		    db_owner_info->firmName,
-		    bithDAte,
+		    birthDate,
 		    db_owner_info->birthInfo ?
 		        db_owner_info->birthInfo->biCity : NULL,
 		    db_owner_info->birthInfo ?

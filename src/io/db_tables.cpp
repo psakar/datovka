@@ -157,8 +157,8 @@ namespace AccntinfTbl {
 	const QString tabName("account_info");
 
 	const QVector< QPair<QString, EntryType> > knownAttrs = {
-	{"key", DB_TEXT},
-	{"dbID", DB_TEXT},
+	{"key", DB_TEXT}, /* NOT NULL */
+	{"dbID", DB_TEXT}, /* NOT NULL */
 	{"dbType", DB_TEXT},
 	{"ic", DB_INTEGER},
 	{"pnFirstName", DB_TEXT},
@@ -185,6 +185,7 @@ namespace AccntinfTbl {
 	};
 
 	const QMap<QString, QString> colConstraints = {
+	    {"key", "NOT NULL"},
 	    {"dbID", "NOT NULL"}
 	};
 

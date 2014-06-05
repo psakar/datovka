@@ -2683,12 +2683,10 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
 	}
 
 	QString username = accountInfo.userName() + "___True";
-	QString bithDAte = "";
-	if (0 != db_owner_info->birthInfo->biDate) {
-		struct tm *birthDate = db_owner_info->birthInfo->biDate;
-		bithDAte = QString::number(birthDate->tm_year) + "-" +
-		QString::number(birthDate->tm_mon) + "-" +
-		QString::number(birthDate->tm_mday);
+	QString birthDate;
+	if ((NULL != db_owner_info->birthInfo) &&
+	    (NULL != db_owner_info->birthInfo->biDate)) {
+		birthDate = tmToDbFormat(db_owner_info->birthInfo->biDate);
 	}
 
 	m_accountDb.insertAccountIntoDb(
@@ -2705,7 +2703,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
 	    db_owner_info->personName ?
 	        db_owner_info->personName->pnLastNameAtBirth : NULL,
 	    db_owner_info->firmName,
-	    bithDAte,
+	    birthDate,
 	    db_owner_info->birthInfo ?
 	        db_owner_info->birthInfo->biCity : NULL,
 	    db_owner_info->birthInfo ?

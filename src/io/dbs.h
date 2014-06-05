@@ -28,6 +28,12 @@ QString timevalToDbFormat(const struct timeval *tv);
 
 
 /*!
+ * @brief Converts date format to be stored in database.
+ */
+QString tmToDbFormat(const struct tm *t);
+
+
+/*!
  * @brief Converts date to format to be stored in database.
  */
 QString qDateTimeToDbFormat(const QDateTime &dateTime);
