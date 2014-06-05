@@ -146,6 +146,11 @@ private:
 	void setMessageActionVisibility(bool action) const;
 
 	/*!
+	 * @brief Active/Inactive account menu and buttons in the mainwindow.
+	 */
+	void activeAccountMenuAndButtons(bool action) const;
+
+	/*!
 	 * @brief Create configuration file if not present.
 	 */
 	void ensureConfPresence(void) const;

@@ -1099,6 +1099,26 @@ void MainWindow::setMessageActionVisibility(bool action) const
 	ui->actionVerify_a_message->setEnabled(action);
 }
 
+
+/* ========================================================================= */
+/*
+ *  Active/Inactive account menu and buttons in the mainwindow.
+ */
+void MainWindow::activeAccountMenuAndButtons(bool action) const
+/* ========================================================================= */
+{
+	ui->menuDatabox->setEnabled(action);
+	ui->actionRecieved_all->setEnabled(action);
+	ui->actionCreate_message->setEnabled(action);
+	ui->actionAccount_properties->setEnabled(action);
+	ui->actionDownload_messages->setEnabled(action);
+	ui->actionChange_password->setEnabled(action);
+	ui->actionSync_all_accounts->setEnabled(action);
+	ui->actionDelete_account->setEnabled(action);
+	ui->actionFind_databox->setEnabled(action);
+}
+
+
 /* ========================================================================= */
 /*
  * Store geometry to settings.
@@ -1384,7 +1404,11 @@ void MainWindow::on_actionAdd_account_triggered()
 {
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, DlgCreateAccount::ACT_ADDNEW, this);
-	newAccountDialog->exec();
+	if (QDialog::Accepted == newAccountDialog->exec()) {
+		if (ui->accountList->model()->rowCount() > 0) {
+			activeAccountMenuAndButtons(true);
+		}
+	}
 }
 
 
