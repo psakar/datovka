@@ -68,7 +68,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	Q_ASSERT(0 != item);
 	const QStandardItem *accountItemTop = AccountModel::itemTop(item);
 	const AccountModel::SettingsMap &itemSettings =
-	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	this->fromUser->setText("<strong>" + accountItemTop->text() +
 	    "</strong>" + " (" + itemSettings[USER].toString() + ")");

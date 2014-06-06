@@ -22,16 +22,27 @@ public:
 
 	/*!
 	 * @brief Set value.
+	 *
+	 * @param[in] key   Key string.
+	 * @param[in] value Value to be stored.
 	 */
 	bool setValue(const QString &key, const QVariant &value);
 
 	/*!
 	 * @brief Check whether value is stored.
+	 *
+	 * @param[in] key Key string.
+	 * @return True if key found, False else.
 	 */
 	bool hasValue(const QString &key) const;
 
 	/*!
 	 * @brief Return stored value.
+	 *
+	 * @param[in] key          Key string.
+	 * @param[in] defaultValue Value to be returned if key not found.
+	 * @return Found value associated to key or defaultValue if such entry
+	 *     found.
 	 */
 	const QVariant value(const QString &key,
 	    const QVariant &defaultValue = QVariant()) const;
@@ -58,7 +69,7 @@ public:
 	/*!
 	 * @brief Return account entry.
 	 *
-	 * @note Key is in format 'login___True'
+	 * @note Key is in format 'login___True'.
 	 */
 	AccountEntry accountEntry(const QString &key) const;
 

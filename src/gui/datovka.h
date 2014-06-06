@@ -223,7 +223,7 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &item) const;
+	QString createAccountInfo(const QStandardItem &topItem) const;
 
 	/*!
 	 * @brief Generate overall account information.
@@ -256,64 +256,64 @@ private:
 	/*!
 	 * @brief Download attachments, envelope and raw for specific message.
 	 */
-	bool downloadMessage(const QModelIndex &acntIdx,
+	bool downloadMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx, bool signedMsg, bool sentMessage);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.
 	 */
-	bool markMessageAsDownloaded(const QModelIndex &acntIdx,
+	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
 	 * @brief Download received message delivery info and events
 	 */
-	bool getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
+	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx, bool signedMsg);
 
 	/*!
 	 * @brief Download sent message delivery info and events
 	 */
-	bool getSentDeliveryInfo(const QModelIndex &acntIdx,
+	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	    int msgIdx, bool signedMsg);
 
 	/*!
 	 * @brief Get list of sent message state changes
 	 */
-	bool getListSentMessageStateChanges(const QModelIndex &acntIdx);
+	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx);
 
 	/*!
 	 * @brief Get password expiration info for account index
 	 */
-	bool getPasswordInfo(const QModelIndex &acntIdx);
+	bool getPasswordInfo(const QModelIndex &acntTopIdx);
 
 	/*!
 	 * @brief Get additional info about author (sender)
 	 */
-	bool getMessageAuthor(const QModelIndex &acntIdx,
+	bool getMessageAuthor(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
-	bool eraseMessage(const QModelIndex &acntIdx,
+	bool eraseMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Verify message = comparison hash with hash stored in ISDS.
+	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	bool verifyMessage(const QModelIndex &acntIdx,
+	bool verifyMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntIdx);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	/*!
 	 * @brief Get data about logged in user.
 	 */
-	bool getUserInfoFromLogin(const QModelIndex &acntIdx);
+	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

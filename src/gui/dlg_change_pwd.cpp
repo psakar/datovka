@@ -180,7 +180,7 @@ void DlgChangePwd::changePassword(void)
 		QStandardItem *item = model->itemFromIndex(index);
 		QStandardItem *itemTop = AccountModel::itemTop(item);
 		AccountModel::SettingsMap itemSettings =
-		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		itemSettings[PWD] = this->newPwdLineEdit->text();
 	} else {
 		QMessageBox::warning(this, tr("Password error"),

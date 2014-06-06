@@ -98,6 +98,48 @@ AccountModel::AccountModel(QObject *parent)
 
 /* ========================================================================= */
 /*
+ * Compute viewed data.
+ */
+QVariant AccountModel::data(const QModelIndex &index, int role) const
+/* ========================================================================= */
+{
+	QVariant storedData;
+	switch (role) {
+	case Qt::DisplayRole:
+		storedData = QStandardItemModel::data(index,
+		    ROLE_ACNT_UNREAD_MSGS);
+		if (storedData.isValid()) {
+			QString retStr = QStandardItemModel::data(index,
+			    role).toString() + " (" +
+			    QString::number(storedData.toInt()) + ")";
+			return retStr;
+		}
+
+		return QStandardItemModel::data(index, role);
+		break;
+
+	case Qt::FontRole:
+		/* TODO -- Draw bold top level. */
+		storedData = QStandardItemModel::data(index,
+		    ROLE_ACNT_UNREAD_MSGS);
+		if (storedData.isValid()) {
+			QFont retFont;
+			retFont.setBold(true);
+			return retFont;
+		}
+
+		return QStandardItemModel::data(index, role);
+		break;
+
+	default:
+		return QStandardItemModel::data(index, role);
+		break;
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Load data from supplied settings.
  */
 void AccountModel::loadFromSettings(const QSettings &settings)
@@ -157,7 +199,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 
 	for (int i = 0; i < this->rowCount(); ++i) {
 		const SettingsMap &itemSettings =
-		    this->item(i)->data(ROLE_CONF_SETINGS).toMap();
+		    this->item(i)->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 		groupName = CREDENTIALS;
 		if (i > 0) {
@@ -218,7 +260,7 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	QStandardItem *allSent = new QStandardItem(tr("Sent"));
 	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
-	account->setData(data, ROLE_CONF_SETINGS);
+	account->setData(data, ROLE_ACNT_CONF_SETTINGS);
 
 	font.setBold(true);
 //	font.setItalic(true);
@@ -356,47 +398,16 @@ QModelIndex AccountModel::indexTop(const QModelIndex &index)
 }
 
 
-#if 0
-/* ========================================================================= */
-/*
- * Get user name of the account.
- */
-QString AccountModel::userName(const QStandardItem &item)
-/* ========================================================================= */
-{
-	QString user;
-	const QStandardItem *parent;
-
-	parent = &item;
-	while (parent->parent() != 0) {
-		parent = parent->parent();
-	}
-
-	Q_ASSERT(parent != 0);
-
-	user = parent->data(ROLE_CONF_SETINGS).toMap()[USER].toString();
-
-	Q_ASSERT(!user.isEmpty());
-
-	return user;
-}
-#endif
-
-
 /* ========================================================================= */
 /*
  * Add received year node into account.
  */
 bool AccountModel::addNodeReceivedYear(QStandardItem *item,
-    const QString &year)
+    const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != item);
-
 	/* Find account top. */
-	while (0 != item->parent()) {
-		item = item->parent();
-	}
+	item = itemTop(item);
 
 	Q_ASSERT(0 != item);
 	if (0 == item) {
@@ -419,12 +430,14 @@ bool AccountModel::addNodeReceivedYear(QStandardItem *item,
 	}
 
 	/* Add new child item. */
-	QStandardItem *yearitem = new QStandardItem(year);
-	yearitem->setIcon(QIcon(ICON_16x16_PATH +
+	QStandardItem *yearItem = new QStandardItem(year);
+	yearItem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-download.png")));
-//	qDebug() << "Adding year" << year;
-	yearitem->setFlags(yearitem->flags() & ~Qt::ItemIsEditable);
-	item->appendRow(yearitem);
+	yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
+	if (0 < unreadMsgs) {
+		yearItem->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
+	}
+	item->appendRow(yearItem);
 
 	return true;
 }
@@ -434,15 +447,12 @@ bool AccountModel::addNodeReceivedYear(QStandardItem *item,
 /*
  * Add sent year node into account.
  */
-bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year)
+bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year,
+    unsigned unreadMsgs)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != item);
-
 	/* Find account top. */
-	while (0 != item->parent()) {
-		item = item->parent();
-	}
+	item = itemTop(item);
 
 	Q_ASSERT(0 != item);
 	if (0 == item) {
@@ -465,11 +475,14 @@ bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year)
 	}
 
 	/* Add new child item. */
-	QStandardItem *yearitem = new QStandardItem(year);
-	yearitem->setIcon(QIcon(ICON_16x16_PATH +
+	QStandardItem *yearItem = new QStandardItem(year);
+	yearItem->setIcon(QIcon(ICON_16x16_PATH +
 	    QString("datovka-message-reply.png")));
-	yearitem->setFlags(yearitem->flags() & ~Qt::ItemIsEditable);
-	item->appendRow(yearitem);
+	yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
+	if (0 < unreadMsgs) {
+		yearItem->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
+	}
+	item->appendRow(yearItem);
 
 	return true;
 }

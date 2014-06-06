@@ -91,6 +91,13 @@ public:
 	AccountModel(QObject *parent = 0);
 
 	/*!
+	 * @brief Compute viewed data.
+	 */
+	virtual
+	QVariant data(const QModelIndex &index,
+	    int role = Qt::DisplayRole) const;
+
+	/*!
 	 * @brief Load data from supplied settings.
 	 */
 	void loadFromSettings(const QSettings &settings);
@@ -126,23 +133,19 @@ public:
 	static
 	QModelIndex indexTop(const QModelIndex &index);
 
-#if 0
-	/*!
-	 * @brief Get user name of the account.
-	 */
-	static
-	QString userName(const QStandardItem &item);
-#endif
-
 	/*!
 	 * @brief Add received year node into account.
+	 *
+	 * @param[in] 
 	 */
-	bool addNodeReceivedYear(QStandardItem *item, const QString &year);
+	bool addNodeReceivedYear(QStandardItem *item, const QString &year,
+	    unsigned unreadMsgs = 0);
 
 	/*!
 	 * @brief Add sent year node into account.
 	 */
-	bool addNodeSentYear(QStandardItem *item, const QString &year);
+	bool addNodeSentYear(QStandardItem *item, const QString &year,
+	    unsigned unreadMsgs = 0);
 
 	/*!
 	 * @brief Delete all year-related nodes in model.

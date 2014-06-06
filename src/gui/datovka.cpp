@@ -252,7 +252,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		qWarning() << "Missing user entry of" << userName
 		    << "in account db.";
 		getOwnerInfoFromLogin(AccountModel::indexTop(current));
-		/* TODO -- What to do wjen no ISDS connection is present? */
+		/* TODO -- What to do when no ISDS connection is present? */
 		dbId = m_accountDb.dbId(userName + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
@@ -768,11 +768,11 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 /*
  * Generate account info HTML message.
  */
-QString MainWindow::createAccountInfo(const QStandardItem &item) const
+QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
-	    item.data(ROLE_CONF_SETINGS).toMap();
+	    topItem.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	QString html;
 
@@ -924,7 +924,7 @@ QString MainWindow::accountUserName(const QStandardItem *accountItem) const
 	Q_ASSERT(0 != accountItemTop);
 
 	const AccountModel::SettingsMap &itemSettings =
-	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	QString userName = itemSettings[USER].toString();
 	Q_ASSERT(!userName.isEmpty());
 
@@ -952,7 +952,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 
 	/* Get user name and db location. */
 	const AccountModel::SettingsMap &itemSettings =
-	    accountItemTop->data(ROLE_CONF_SETINGS).toMap();
+	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	const QString &userName = itemSettings[USER].toString();
 	Q_ASSERT(!userName.isEmpty());
 
@@ -1042,7 +1042,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 		for (int i = 0; i < topItemCount; i++) {
 			const QStandardItem *item = m_accountModel.item(i,0);
 			QString user = item->data(
-			    ROLE_CONF_SETINGS).toMap()[USER].toString();
+			    ROLE_ACNT_CONF_SETTINGS).toMap()[USER].toString();
 			if (user == username) {
 				QModelIndex index = m_accountModel.
 				    indexFromItem(item);
@@ -1267,7 +1267,7 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 		const QStandardItem *itemTop = AccountModel::itemTop(item);
 
 		const AccountModel::SettingsMap &itemSettings =
-		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		const QString &userName = itemSettings[USER].toString();
 
 		settings.beginGroup("default_account");
@@ -1296,7 +1296,7 @@ bool MainWindow::regenerateAccountModelYears(void)
 		itemTop = m_accountModel.item(i, 0);
 		Q_ASSERT(0 != itemTop);
 		const AccountModel::SettingsMap &itemSettings =
-		    itemTop->data(ROLE_CONF_SETINGS).toMap();
+		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		const QString &userName = itemSettings[USER].toString();
 		Q_ASSERT(!userName.isEmpty());
 		QString dbDir = itemSettings[DB_DIR].toString();
@@ -1396,7 +1396,7 @@ void MainWindow::on_actionSent_message_triggered()
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_CONF_SETINGS).toMap(), this);
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		downloadMessageList(index, "sent");
 	}
@@ -1464,10 +1464,11 @@ void MainWindow::on_actionChange_password_triggered()
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QModelIndex index = ui->accountList->currentIndex();
+	Q_ASSERT(index.isValid());
 	index = AccountModel::indexTop(index);
 
 	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList),
-	    index.data(ROLE_CONF_SETINGS).toMap(), this);
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	changePwd->exec();
 }
 
@@ -1588,11 +1589,12 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 
 	/* TODO */
 	index = ui->accountList->currentIndex();
+	Q_ASSERT(index.isValid());
 	index = AccountModel::indexTop(index);
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_CONF_SETINGS).toMap(), this,
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		downloadMessageList(index, "sent");
@@ -1607,11 +1609,12 @@ void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->currentIndex();
+	Q_ASSERT(index.isValid());
 	index = AccountModel::indexTop(index);
 
 	QString userName = accountUserName();
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    index.data(ROLE_CONF_SETINGS).toMap(), this, userName);
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this, userName);
 	dsSearch->show();
 }
 
@@ -1852,7 +1855,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		return false;
 	}
 	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2034,7 +2037,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 /*!
  * @brief Download attachments, envelope and raw for specific message.
  */
-bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
+bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx, bool signedMsg, bool sentMessage)
 /* ========================================================================= */
 {
@@ -2049,7 +2052,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	qDebug() << "Downloading complete message" << dmId;
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2193,7 +2196,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 
 	/* insert/update hash into db */
 	QString hashValue = QByteArray((char*)message->envelope->hash->value,
-		    message->envelope->hash->length).toBase64();
+	    message->envelope->hash->length).toBase64();
 	(messageDb->msgsInsertUpdateMessageHash(dmID,
 	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
 	? qDebug() << "Message hash was stored into db..."
@@ -2222,15 +2225,15 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	}
 
 	/* Download and save delivery info and message events */
-	(getReceivedsDeliveryInfo(acntIdx, msgIdx, false))
+	(getReceivedsDeliveryInfo(acntTopIdx, msgIdx, false))
 	? qDebug() << "Delivery info of message was processed..."
 	: qDebug() << "ERROR: Delivery info of message not found!";
 
-	getMessageAuthor(acntIdx, msgIdx);
+	getMessageAuthor(acntTopIdx, msgIdx);
 
 
 	/*  Mark this message as downloaded in ISDS */
-	(markMessageAsDownloaded(acntIdx, msgIdx))
+	(markMessageAsDownloaded(acntTopIdx, msgIdx))
 	? qDebug() << "Message was marked as downloaded..."
 	: qDebug() << "ERROR: Message was not marked as downloaded!";
 
@@ -2288,7 +2291,7 @@ void MainWindow::on_actionRecieved_all_triggered()
 /*
 * Set message as downloaded from ISDS.
 */
-bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntIdx,
+bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2300,7 +2303,7 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntIdx,
 	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2320,7 +2323,7 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntIdx,
 /*
 * Download message delivery info, raw and get list of events message
 */
-bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
+bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
@@ -2332,7 +2335,7 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2389,13 +2392,13 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 /*
 * Download sent message delivery info and get list of events message
 */
-bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
+bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
     int msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
 	QString dmId = QString::number(msgIdx);
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2445,11 +2448,11 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
 /*
 * Get list of sent message state changes
 */
-bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
+bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2474,7 +2477,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateList->data;
 		int dmId = atoi(item->dmID);
-		getSentDeliveryInfo(acntIdx, dmId, false);
+		getSentDeliveryInfo(acntTopIdx, dmId, false);
 		stateList = stateList->next;
 	}
 
@@ -2488,7 +2491,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntIdx)
 /*
 * Get password expiration info for account index
 */
-bool MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
+bool MainWindow::getPasswordInfo(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -2496,7 +2499,7 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
 	QString expirDate;
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	QString key = accountInfo.userName() + "___True";
 
@@ -2531,7 +2534,7 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntIdx)
 /*
 * Get additional info about author (sender)
 */
-bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
+bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2543,7 +2546,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2577,9 +2580,9 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntIdx,
 
 /* ========================================================================= */
 /*
-* Verify message = comparison message hash with hash stored in ISDS.
-*/
-bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
+ * Verify message. Compare hash with hash stored in ISDS.
+ */
+bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2591,7 +2594,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2653,7 +2656,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntIdx,
 /*
 * Delete message from long term storage in ISDS.
 */
-bool MainWindow::eraseMessage(const QModelIndex &acntIdx,
+bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -2665,7 +2668,7 @@ bool MainWindow::eraseMessage(const QModelIndex &acntIdx,
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2693,13 +2696,13 @@ bool MainWindow::eraseMessage(const QModelIndex &acntIdx,
 
 /* ========================================================================= */
 /*
-* Get data about logged in user and his box.
-*/
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
+ * Get data about logged in user and his box.
+ */
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
@@ -2770,12 +2773,11 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntIdx)
 /*
 * Get data about logged in user.
 */
-bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntIdx)
+bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-
 	const AccountModel::SettingsMap accountInfo =
-	    acntIdx.data(ROLE_CONF_SETINGS).toMap();
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);

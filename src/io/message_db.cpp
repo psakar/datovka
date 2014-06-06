@@ -63,7 +63,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	switch (role) {
 	case Qt::DisplayRole:
 		if (this->headerData(index.column(), Qt::Horizontal,
-		         ROLE_DB_ENTRY_TYPE).toInt() == DB_DATETIME) {
+		         ROLE_MSGS_DB_ENTRY_TYPE).toInt() == DB_DATETIME) {
 			/* Convert date on display. */
 			return dateTimeStrFromDbFormat(
 			    QSqlQueryModel::data(index, role).toString(),
@@ -71,7 +71,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		}
 		if ((READLOC_COL == index.column()) &&
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_DB_ENTRY_TYPE).toInt())) {
+		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'read locally'. */
 			return QVariant();
 		}
@@ -82,7 +82,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 		if ((READLOC_COL == index.column()) &&
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_DB_ENTRY_TYPE).toInt())) {
+		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
 			if (QSqlQueryModel::data(index).toInt()) {
 				return QIcon(ICON_3PARTY_PATH "tick_16.png");
@@ -96,7 +96,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case Qt::FontRole:
 		if ((DB_BOOLEAN == headerData(READLOC_COL, Qt::Horizontal,
-		         ROLE_DB_ENTRY_TYPE).toInt()) &&
+		         ROLE_MSGS_DB_ENTRY_TYPE).toInt()) &&
 		    (!QSqlQueryModel::data(index.sibling(index.row(),
 		         READLOC_COL)).toBool())) {
 			/* Unread messages are shown bold. */
@@ -212,7 +212,7 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
 		    smsgdtTbl.attrProps.end()) {
 			/* Description. */
@@ -222,7 +222,7 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -270,7 +270,7 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
 		    smsgdtTbl.attrProps.end()) {
 			/* Description. */
@@ -280,7 +280,7 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -329,7 +329,7 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
 		    smsgdtTbl.attrProps.end()) {
 			/* Description. */
@@ -339,7 +339,7 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_DB_ENTRY_TYPE);
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -444,7 +444,7 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 		/* Data type. */
 		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		    ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlMsgsModel;
@@ -484,7 +484,7 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 		/* Data type. */
 		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		    ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlMsgsModel;
@@ -524,7 +524,7 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 		/* Data type. */
 		m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 		    msgsTbl.attrProps.value(sentItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		    ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	return &m_sqlMsgsModel;
@@ -968,7 +968,7 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 		/* Data type. */
 		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
 		    flsTbl.attrProps.value(fileItemIds[i]).type,
-		    ROLE_DB_ENTRY_TYPE);
+		    ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	/* Rename last column to file size. */
@@ -987,9 +987,12 @@ bool MessageDb::isInMessageDb(int dmId) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
+	bool inMessages = false;
+	bool inSupplementary = false;
 
 	queryStr = "SELECT count(*) FROM messages WHERE "
 	    "dmID = :dmId";
+	qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
@@ -998,12 +1001,32 @@ bool MessageDb::isInMessageDb(int dmId) const
 		query.first();
 		if (query.isValid()) {
 			Q_ASSERT(query.value(0).toInt() < 2);
-			if (query.value(0).toInt() == 1) {
-				return true;
-			}
+			inMessages = (1 == query.value(0).toInt());
 		}
 	}
-	return false;
+
+	/*
+	 * Entry in supplementary_message_data must exist if exists in
+	 * messages.
+	 */
+	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
+	    "message_id = :dmId";
+	qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			Q_ASSERT(query.value(0).toInt() < 2);
+			inSupplementary = (1 == query.value(0).toInt());
+		}
+	}
+
+	Q_ASSERT(inMessages == inSupplementary);
+
+	return inMessages && inSupplementary;
 }
 
 

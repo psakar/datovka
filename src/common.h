@@ -29,15 +29,18 @@ typedef enum {
 /*
  * Defined roles accross the application. 
  */
-#define ROLE_CONF_SETINGS (Qt::UserRole + 1) /*
-                                              * Used to access configuration
-                                              * data.
-                                              */
-//#define ROLE_DB (Qt::UserRole + 2)
-#define ROLE_DB_ENTRY_TYPE (Qt::UserRole + 3) /*
-                                               * Used to determine the db data
-                                               * type of the column.
-                                               */
+#define ROLE_ACNT_CONF_SETTINGS (Qt::UserRole + 1) /*
+                                                    * Used to access
+                                                    * configuration data.
+                                                    */
+#define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 2) /*
+                                                  * Used to store number of
+                                                  * unread messages.
+                                                  */
+#define ROLE_MSGS_DB_ENTRY_TYPE (Qt::UserRole + 3) /*
+                                                    * Used to determine the db
+                                                    * data type of the column.
+                                                    */
 
 
 #define strongAccountInfoLine(title, value) \

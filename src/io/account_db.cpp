@@ -97,16 +97,18 @@ bool AccountDb::openDb(const QString &fileName)
 /* ========================================================================= */
 {
 	bool ret;
-	//qDebug() << "Opening account db" << fileName;
 
 	m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+
+	/* TODO -- generate warning when no database is present. */
 
 	ret = m_db.open();
 
 	if (ret) {
 		/* Check whether database contains account table. */
 		if (!accntinfTbl.existsInDb(m_db)) {
-			//qDebug() << accntinfTbl.tabName << "does not exist.";
+			qWarning() << accntinfTbl.tabName
+			    << "does not exist. Creating.";
 			return accntinfTbl.createEmpty(m_db);
 		}
 	}
@@ -121,7 +123,7 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 {
 	AccountEntry entry;
 
-	if (false == m_db.isOpen()) {
+	if (!m_db.isOpen()) {
 		return entry;
 	}
 
@@ -164,13 +166,13 @@ const QString AccountDb::dbId(const QString &key,
     const QString defaultValue) const
 /* ========================================================================= */
 {
-	if (false == m_db.isOpen()) {
+	if (!m_db.isOpen()) {
 		return defaultValue;
 	}
 
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dbID FROM account_info WHERE key = :key";
-	//qDebug() << queryStr;
+	qDebug() << queryStr << key;
 	if (!query.prepare(queryStr)) {
 		return defaultValue;
 	}
@@ -192,7 +194,7 @@ const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 {
 	QString ret = tr("unknown or without expiration");
 
-	if (false == m_db.isOpen()) {
+	if (!m_db.isOpen()) {
 		return ret;
 	}
 
@@ -223,7 +225,7 @@ bool AccountDb::setPwdExpirIntoDb(const QString &key, QString &date)
     const
 /* ========================================================================= */
 {
-	if (false == m_db.isOpen()) {
+	if (!m_db.isOpen()) {
 		return false;
 	}
 

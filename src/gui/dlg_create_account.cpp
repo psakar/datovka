@@ -71,7 +71,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_CONF_SETINGS).toMap();
+	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	this->setWindowTitle(tr("Update account") + " " + itemTop->text());
 	this->accountLineEdit->setText(itemTop->text());
@@ -212,7 +212,7 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0 != item);
 		itemTop = AccountModel::itemTop(item);
 		Q_ASSERT(0 != itemTop);
-		itemSettings = itemTop->data(ROLE_CONF_SETINGS).toMap();
+		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	} else {
 		isds_error status;
 		struct isds_ctx *isds_session = NULL;
