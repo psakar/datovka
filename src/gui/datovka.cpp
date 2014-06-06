@@ -1941,8 +1941,16 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 				    dmRecipientOrgUnitNum) : "";
 			}
 
-			Q_ASSERT(item->envelope->dmDeliveryTime);
-			Q_ASSERT(item->envelope->dmAcceptanceTime);
+			QString dmDeliveryTime = "";
+			if (0 != item->envelope->dmDeliveryTime) {
+				dmDeliveryTime = timevalToDbFormat(
+				    item->envelope->dmDeliveryTime);
+			}
+			QString dmAcceptanceTime = "";
+			if (0 != item->envelope->dmAcceptanceTime) {
+				dmAcceptanceTime = timevalToDbFormat(
+				    item->envelope->dmAcceptanceTime);
+			}
 
 			/* insert message envelope in db */
 			(messageDb->msgsInsertMessageEnvelope(dmId,
@@ -1974,8 +1982,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			    item->envelope->dmPersonalDelivery,
 			    item->envelope->dmAllowSubstDelivery,
 			    (char*)item->envelope->timestamp,
-			    timevalToDbFormat(item->envelope->dmDeliveryTime),
-			    timevalToDbFormat(item->envelope->dmAcceptanceTime),
+			    dmDeliveryTime,
+			    dmAcceptanceTime,
 			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType,
@@ -2133,6 +2141,16 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 		    ? QString::number(*message->envelope->
 		    dmRecipientOrgUnitNum) : "";
 	}
+	QString dmDeliveryTime = "";
+	if (0 != message->envelope->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    message->envelope->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != message->envelope->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    message->envelope->dmAcceptanceTime);
+	}
 
 	/* update message envelope in db */
 	(messageDb->msgsUpdateMessageEnvelope(dmID,
@@ -2164,8 +2182,8 @@ bool MainWindow::downloadMessage(const QModelIndex &acntIdx,
 	    message->envelope->dmPersonalDelivery,
 	    message->envelope->dmAllowSubstDelivery,
 	    timestamp,
-	    timevalToDbFormat(message->envelope->dmDeliveryTime),
-	    timevalToDbFormat(message->envelope->dmAcceptanceTime),
+	    dmDeliveryTime,
+	    dmAcceptanceTime,
 	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
 	    (int)*message->envelope->dmAttachmentSize,
 	    message->envelope->dmType,
