@@ -217,7 +217,7 @@ public:
 	 * @brief Insert/update message event into events table.
 	 */
 	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
-	    const QString &dmEventDescr);
+	    const QString &dmEventType, const QString &dmEventDescr);
 
 	/*!
 	 * @brief Insert/update raw message data into raw_message_data table.

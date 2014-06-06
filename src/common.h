@@ -221,4 +221,9 @@ QString convertSenderTypeToString(int value);
  */
 QString convertDbTypeToString(int value);
 
+/*!
+ * @brief Convert event type to string
+ */
+QString convertEventTypeToString(int value);
+
 #endif /* _COMMON_H_ */

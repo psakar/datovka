@@ -572,3 +572,24 @@ QString convertDbTypeToString(int value)
 	else if (value == DBTYPE_FO) return "FO";
 	else return "";
 }
+
+
+/* ========================================================================= */
+/*
+ * Convert event type to string
+ */
+QString convertEventTypeToString(int value)
+/* ========================================================================= */
+{
+	if (value == EVENT_ACCEPTED_BY_RECIPIENT) return "EV4: ";
+	else if (value == EVENT_ACCEPTED_BY_FICTION) return "EV2: ";
+	else if (value == EVENT_UNDELIVERABLE) return "EV3: ";
+	else if (value == EVENT_COMMERCIAL_ACCEPTED) return "EV1: ";
+	else if (value == EVENT_ENTERED_SYSTEM) return "EV0: ";
+	else if (value == EVENT_DELIVERED) return "EV5: ";
+	else if (value == EVENT_PRIMARY_LOGIN) return "EV11: ";
+	else if (value == EVENT_ENTRUSTED_LOGIN) return "EV12: ";
+	else if (value == EVENT_SYSCERT_LOGIN) return "EV13: ";
+	else if (value == EVENT_UKNOWN) return "";
+	else return "";
+}

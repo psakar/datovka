@@ -241,19 +241,44 @@ void DlgCreateAccount::saveAccount(void)
 			return;
 		}
 
-		status = isdsLoginUserName(isds_session,
-		    this->usernameLineEdit->text(),
-		    this->passwordLineEdit->text(),
-		    this->testAccountCheckBox->isChecked());
-		if (IE_SUCCESS != status) {
-			qDebug() << "Error isdsLoginUserName.";
-			qDebug() << status << isds_strerror(status);
-			msgBox.setWindowTitle(messageBoxTitle);
-			msgBox.setText(tr("Error to connect into databox."));
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.setInformativeText(
-			    tr("Bad username or password for this account."));
-			msgBox.exec();
+		if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
+			status = isdsLoginUserName(isds_session,
+			    this->usernameLineEdit->text(),
+			    this->passwordLineEdit->text(),
+			    this->testAccountCheckBox->isChecked());
+			if (IE_SUCCESS != status) {
+				qDebug() << "Error isdsLoginUserName.";
+				qDebug() << status << isds_strerror(status);
+				msgBox.setWindowTitle(messageBoxTitle);
+				msgBox.setText(tr("Error to connect into databox."));
+				msgBox.setIcon(QMessageBox::Warning);
+				msgBox.setInformativeText(
+				    tr("Bad username or password for this account."));
+				msgBox.setInformativeText(
+				    tr("Account will not created."));
+				msgBox.exec();
+				return;
+			}
+		} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
+			status = isdsLoginUserCert(isds_session,
+			    this->usernameLineEdit->text(),
+			    /* TODO - set certificate structure */
+			    NULL, //pki_credentials,
+			    this->testAccountCheckBox->isChecked());
+			if (IE_SUCCESS != status) {
+				qDebug() << "Error isdsLoginUserCert.";
+				qDebug() << status << isds_strerror(status);
+				msgBox.setWindowTitle(messageBoxTitle);
+				msgBox.setText(tr("Error to connect into databox."));
+				msgBox.setIcon(QMessageBox::Warning);
+				msgBox.setInformativeText(
+				    tr("Bad username or certificate for this account."));
+				msgBox.setInformativeText(
+				    tr("Account will not created."));
+				msgBox.exec();
+				return;
+			}
+		} else {
 			return;
 		}
 

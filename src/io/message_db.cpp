@@ -1373,7 +1373,7 @@ bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
  * Insert/update message event into events table
  */
 bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
-    const QString &dmEventDescr)
+    const QString &dmEventType, const QString &dmEventDescr)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1404,6 +1404,8 @@ bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTim
 		}
 	}
 
+	QString dmEventDescrType = dmEventType + dmEventDescr;
+
 	if (dbId != 0) {
 		queryStr = "UPDATE events SET "
 		"dmEventTime = :dmEventTime, dmEventDescr = :dmEventDescr "
@@ -1420,7 +1422,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTim
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmEventTime", dmEventTime);
-	query.bindValue(":dmEventDescr", dmEventDescr);
+	query.bindValue(":dmEventDescr", dmEventDescrType);
 	if (dbId != 0) {
 	    query.bindValue(":dbId", dbId);
 	}

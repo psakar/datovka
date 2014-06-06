@@ -1941,6 +1941,9 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 				    dmRecipientOrgUnitNum) : "";
 			}
 
+			Q_ASSERT(item->envelope->dmDeliveryTime);
+			Q_ASSERT(item->envelope->dmAcceptanceTime);
+
 			/* insert message envelope in db */
 			(messageDb->msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
@@ -2351,7 +2354,9 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntIdx,
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
-		    timevalToDbFormat(item->time), item->description);
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
 		event = event->next;
 	}
 
@@ -2405,7 +2410,9 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntIdx,
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
-		    timevalToDbFormat(item->time), item->description);
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
 		event = event->next;
 	}
 
