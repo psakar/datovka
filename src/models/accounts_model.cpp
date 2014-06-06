@@ -119,7 +119,12 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		/* TODO -- Draw bold top level. */
+		if (nodeAccountTop == nodeType(index)) {
+			QFont retFont;
+			retFont.setBold(true);
+			return retFont;
+		}
+
 		storedData = QStandardItemModel::data(index,
 		    ROLE_ACNT_UNREAD_MSGS);
 		if (storedData.isValid()) {
@@ -247,7 +252,6 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	/* Defining a couple of items. */
 	QStandardItem *account = new QStandardItem(name);
 	account->setFlags(account->flags() & ~Qt::ItemIsEditable);
-	QFont font;
 	QStandardItem *recentRecieved =
 	    new QStandardItem(tr("Recent Recieved"));
 	recentRecieved->setFlags(recentRecieved->flags() & ~Qt::ItemIsEditable);
@@ -262,9 +266,7 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 
 	account->setData(data, ROLE_ACNT_CONF_SETTINGS);
 
-	font.setBold(true);
-//	font.setItalic(true);
-	account->setFont(font);
+	/* Account node is drawn bold in the data() method. */
 	account->setIcon(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
 
 	recentRecieved->setIcon(
