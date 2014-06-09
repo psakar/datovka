@@ -176,6 +176,7 @@ void MainWindow::setDefaultProgressStatus(void)
 /* ========================================================================= */
 {
 	m_statusProgressBar->setFormat(tr("Idle"));
+	m_statusProgressBar->setValue(0);
 }
 
 
@@ -1546,6 +1547,18 @@ void MainWindow::on_actionChange_data_directory_triggered()
 void MainWindow::on_actionMark_all_as_read_triggered()
 {
 
+	qDebug() << "on_actionMark_all_as_read_triggered";
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+
+/*
+	for (int i = 0; i < ; i++) {
+
+		(markMessageAsDownloaded(index, msgIdx))
+		? qDebug() << "Message was marked as downloaded..."
+		: qDebug() << "ERROR: Message was not marked as downloaded!";
+	}
+*/
 }
 
 void MainWindow::on_actionGet_messages_triggered()
@@ -1858,7 +1871,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	isds_error status = IE_ERROR;
@@ -2046,6 +2059,8 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
+	m_statusProgressBar->setValue(10);
+
 	/* First column. */
 	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
@@ -2055,8 +2070,9 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
+	m_statusProgressBar->setValue(20);
 
 	// message structures - all members
 	struct isds_message *message = NULL;
@@ -2089,6 +2105,8 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 		isds_message_free(&message);
 		return false;
 	}
+
+	m_statusProgressBar->setValue(50);
 
 	MessageDb *messageDb = accountMessageDb();
 	int dmID = atoi(message->envelope->dmID);
@@ -2194,6 +2212,8 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
+	m_statusProgressBar->setValue(60);
+
 	/* insert/update hash into db */
 	QString hashValue = QByteArray((char*)message->envelope->hash->value,
 	    message->envelope->hash->length).toBase64();
@@ -2202,6 +2222,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	? qDebug() << "Message hash was stored into db..."
 	: qDebug() << "ERROR: Message hash insert!";
 
+	m_statusProgressBar->setValue(70);
 	/* Insert/update all attachment files */
 	struct isds_list *file;
 	file = message->documents;
@@ -2224,14 +2245,16 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 		file = file->next;
 	}
 
+	m_statusProgressBar->setValue(80);
 	/* Download and save delivery info and message events */
 	(getReceivedsDeliveryInfo(acntTopIdx, msgIdx, false))
 	? qDebug() << "Delivery info of message was processed..."
 	: qDebug() << "ERROR: Delivery info of message not found!";
 
+	m_statusProgressBar->setValue(90);
 	getMessageAuthor(acntTopIdx, msgIdx);
 
-
+	m_statusProgressBar->setValue(100);
 	/*  Mark this message as downloaded in ISDS */
 	(markMessageAsDownloaded(acntTopIdx, msgIdx))
 	? qDebug() << "Message was marked as downloaded..."
@@ -2306,7 +2329,7 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	isds_error status;
@@ -2338,7 +2361,7 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	// message and envleople structures
@@ -2401,7 +2424,7 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	// message and envleople structures
@@ -2455,7 +2478,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	struct isds_list *stateList = NULL;
@@ -2511,7 +2534,7 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntTopIdx)
 	} else {
 
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			isdsSessions.connectToIsds(accountInfo);
+			isdsSessions.connectToIsds(accountInfo, this);
 		}
 
 		status = isds_get_password_expiration(
@@ -2549,7 +2572,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	isds_error status;
@@ -2597,7 +2620,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	isds_error status;
@@ -2671,7 +2694,7 @@ bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	isds_error status;
@@ -2705,7 +2728,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
@@ -2780,7 +2803,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 	struct isds_DbUserInfo *db_user_info = NULL;
 	isds_error status;
@@ -2797,3 +2820,29 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	return true;
 }
+
+
+/* ========================================================================= */
+/*
+* CALLBACK
+*/
+int MainWindow::progressCallback(double upload_total, double upload_current,
+        double download_total, double download_current, void *data)
+/* ========================================================================= */
+{
+	QProgressBar *progressBar = (QProgressBar *) data;
+	if (0 == progressBar) {
+		return 0; /* DOn't draw anything. */
+	}
+
+	qDebug() << upload_total << upload_current <<
+	    download_total << download_current;
+
+
+
+	return 0;
+}
+
+
+
+

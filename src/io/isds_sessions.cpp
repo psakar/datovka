@@ -6,6 +6,7 @@
 #include <QMessageBox>
 
 #include "isds_sessions.h"
+#include "src/gui/datovka.h"
 
 
 GlobIsdsSessions isdsSessions;
@@ -100,7 +101,7 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
  * Connect to databox
  */
 void GlobIsdsSessions::connectToIsds(
-    const AccountModel::SettingsMap &accountInfo)
+    const AccountModel::SettingsMap &accountInfo, MainWindow *mw)
 /* ========================================================================= */
 {
 	isds_error status = IE_SUCCESS;
@@ -108,7 +109,7 @@ void GlobIsdsSessions::connectToIsds(
 	QString password = accountInfo.password();
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		createCleanSession(accountInfo.userName());
+		createCleanSession(accountInfo.userName(), mw);
 	}
 
 	/* Login method based on username and password */
@@ -280,7 +281,8 @@ void GlobIsdsSessions::connectToIsds(
 /*
  * Creates new session.
  */
-struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
+struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
+    MainWindow *mw)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -302,6 +304,11 @@ struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
 	}
 
 	m_sessions.insert(userName, isds_session);
+
+	/* Progress callback. */
+	/* TODO -- What to do in multiple simultaneous downloads? */
+	isds_set_progress_callback(isds_session, MainWindow::progressCallback,
+	    (0 != mw) ? mw->m_statusProgressBar : 0);
 
 	return isds_session;
 fail:

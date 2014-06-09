@@ -10,6 +10,7 @@
 #include <QString>
 
 #include "src/common.h"
+#include "src/gui/datovka.h"
 #include "src/models/accounts_model.h"
 
 
@@ -35,23 +36,25 @@ public:
 	bool holdsSession(const QString &userName) const;
 
 	/*!
-	 * @brief Creates new session.
-	 *
-	 * @return Pointer to new session or NULL on failure.
-	 */
-	struct isds_ctx * createCleanSession(const QString &userName);
-
-	/*!
 	 * @brief Returns associated session.
 	 */
 	struct isds_ctx * session(const QString &userName) const;
 
 
-	void connectToIsds(const AccountModel::SettingsMap &accountInfo);
+	void connectToIsds(const AccountModel::SettingsMap &accountInfo,
+	    MainWindow *mw = 0);
 
 	bool isConnectToIsds(const QString userName);
 
 private:
+	/*!
+	 * @brief Creates new session.
+	 *
+	 * @return Pointer to new session or NULL on failure.
+	 */
+	struct isds_ctx * createCleanSession(const QString &userName,
+	    MainWindow *mw = 0);
+
 	QMap<QString, struct isds_ctx *> m_sessions;
 };
 

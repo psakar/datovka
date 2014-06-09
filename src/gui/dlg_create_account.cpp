@@ -260,10 +260,28 @@ void DlgCreateAccount::saveAccount(void)
 				return;
 			}
 		} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
+
+			isds_pki_credentials *pki_credentials = NULL;
+
+			pki_credentials = (struct isds_pki_credentials *)
+			    malloc(sizeof(struct isds_pki_credentials));
+			if (pki_credentials == NULL) {
+				free(pki_credentials);
+				return;
+			}
+			memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
+
+			/* TODO - set correct cert format and certificate/key */
+			pki_credentials->engine = NULL;
+			pki_credentials->certificate_format = PKI_FORMAT_DER;
+			pki_credentials->certificate = strdup(QDir::fromNativeSeparators(m_certPath).toStdString().c_str());
+			pki_credentials->key_format = PKI_FORMAT_DER;
+			pki_credentials->key = strdup(QDir::fromNativeSeparators(m_certPath).toStdString().c_str());
+			pki_credentials->passphrase = NULL;
+
 			status = isdsLoginUserCert(isds_session,
 			    this->usernameLineEdit->text(),
-			    /* TODO - set certificate structure */
-			    NULL, //pki_credentials,
+			    pki_credentials,
 			    this->testAccountCheckBox->isChecked());
 			if (IE_SUCCESS != status) {
 				qDebug() << "Error isdsLoginUserCert.";

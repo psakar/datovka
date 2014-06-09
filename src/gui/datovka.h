@@ -31,6 +31,9 @@ public:
 	void setDefaultProgressStatus(void);
 
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
+	static
+	int progressCallback(double upload_total, double upload_current,
+        double download_total, double download_current, void *data);
 
 private slots:
 	void on_actionPreferences_triggered();
