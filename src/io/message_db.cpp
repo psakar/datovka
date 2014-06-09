@@ -2100,6 +2100,72 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 		return false;
 	}
 
+	/* Select certificate_id from message_certificate_data table */
+	int certificate_id = 0;
+	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+	 	return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			certificate_id = query.value(0).toInt();
+		}
+	}
+	/* Delete certificate reference from message_certificate_data table */
+	queryStr = "DELETE FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Select certificate id from message_certificate_data table */
+	bool deleteCert = true;
+	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
+	    "certificate_id = :certificate_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":certificate_id", certificate_id);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() > 0) {
+				deleteCert = false;
+			}
+		}
+	}
+
+	/* Delete certificate data from certificate_data table if no messages */
+	if (deleteCert) {
+		queryStr = "DELETE FROM certificate_data WHERE "
+		    "id = :certificate_id";
+		if (!query.prepare(queryStr)) {
+			qDebug() << "Error: msgsDeleteMessageData"
+			    << query.lastError();
+			return false;
+		}
+		query.bindValue(":certificate_id", certificate_id);
+		if (!query.exec()) {
+			qDebug() << "Error: msgsDeleteMessageData"
+			    << query.lastError();
+			return false;
+		}
+	}
+
 	/* Delete message from messages table */
 	queryStr = "DELETE FROM messages WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
