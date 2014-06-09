@@ -265,35 +265,43 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
+		ui->actionDelete_message->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
+		ui->actionDelete_message->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentSent:
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
+		ui->actionDelete_message->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
 		    messageDb->msgsRcvdYearlyCounts(dbId),
 		    messageDb->msgsSntYearlyCounts(dbId));
+		ui->actionDelete_message->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
+		ui->actionDelete_message->setEnabled(true);
 		break;
 	case AccountModel::nodeSent:
 		msgTblMdl = messageDb->msgsSntModel(dbId);
+		ui->actionDelete_message->setEnabled(true);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsRcvdInYearModel(dbId,
 		    accountItem->text());
+		ui->actionDelete_message->setEnabled(true);
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsSntInYearModel(dbId,
 		    accountItem->text());
+		ui->actionDelete_message->setEnabled(true);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -533,6 +541,11 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
 		    tr("Reply"), this,
 		    SLOT(on_actionReply_to_the_sender_triggered()));
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
+		    tr("Delete message"), this,
+		    SLOT(on_actionDelete_message_triggered()))->
+		    setEnabled(ui->actionDelete_message->isEnabled());
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
@@ -2917,4 +2930,28 @@ int MainWindow::progressCallback(double upload_total, double upload_current,
 	//qDebug() << upload_total << upload_current <<
 	//    download_total << download_current;
 	return 0;
+}
+
+
+/* ========================================================================= */
+/*
+* Delete message slot
+*/
+void MainWindow::on_actionDelete_message_triggered()
+/* ========================================================================= */
+{
+	QModelIndex acntTopIdx = ui->accountList->selectionModel()->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+	    tr("Delete message ") + dmId,
+	    tr("Do you want to delete message") +  " '" + dmId +
+	    "'?",
+	    QMessageBox::Yes | QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		eraseMessage(acntTopIdx, msgIdx);
+	}
 }

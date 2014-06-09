@@ -137,6 +137,8 @@ private slots:
 
 	void on_actionRecieved_all_triggered();
 
+	void on_actionDelete_message_triggered();
+
 private:
 	/*!
 	 * @brief Default settings of main window.
