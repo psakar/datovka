@@ -396,13 +396,14 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 
 	for (int i = 0; i < yearList.size(); ++i) {
 		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
-		    "(dbIDRecipient = '" + recipDbId + "')"
+		    "(dbIDRecipient = :recipDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		//qDebug() << queryStr;
+		qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
 			/* TODO -- Handle error. */
 		}
+		query.bindValue(":recipDbId", recipDbId);
 		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive()) {
 			query.first();
@@ -412,6 +413,75 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 	}
 
 	return yearlyCounts;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return number of unread messages received within past 90
+ *     days.
+ */
+int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT COUNT(*) AS nrUnread "
+	    "FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
+	    "(dbIDRecipient = :recipDbId)"
+	    " and "
+	    "(dmDeliveryTime >= date('now','-90 day'))"
+	    " and "
+	    "(read_locally = 0)";
+	//qDebug() << queryStr << recipDbId;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toInt();
+	}
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return number of unread received messages in year.
+ */
+int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
+    const QString &year) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT COUNT(*) AS nrUnread "
+	    "FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
+	    "(dbIDRecipient = :recipDbId)"
+	    " and "
+	    "(strftime('%Y', dmDeliveryTime) = :year)"
+	    " and "
+	    "(read_locally = 0)";
+	//qDebug() << queryStr << recipDbId << year;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":year", year);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toInt();
+	}
+
+	return 0;
 }
 
 
@@ -508,12 +578,13 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	queryStr += " FROM messages WHERE "
 	    "(dbIDSender = :sendDbId)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = '" + year + "')";
+	    "(strftime('%Y', dmDeliveryTime) = :year)";
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
 	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":year", year);
 	query.exec(); /* TODO -- Handle error. */
 
 	m_sqlMsgsModel.setQuery(query);
@@ -578,13 +649,14 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 
 	for (int i = 0; i < yearList.size(); ++i) {
 		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
-		    "(dbIDSender = '" + sendDbId + "')"
+		    "(dbIDSender = :sendDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
 		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
 			/* TODO -- Handle error. */
 		}
+		query.bindValue(":sendDbId", sendDbId);
 		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive()) {
 			query.first();
@@ -596,6 +668,75 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 	}
 
 	return yearlyCounts;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return number of unread messages sent within past 90
+ *     days.
+ */
+int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT COUNT(*) AS nrUnread "
+	    "FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
+	    "(dbIDSender = :sendDbId)"
+	    " and "
+	    "(dmDeliveryTime >= date('now','-90 day'))"
+	    " and "
+	    "(read_locally = 0)";
+	//qDebug() << queryStr << sendDbId;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toInt();
+	}
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return number of unread sent messages in year.
+ */
+int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
+    const QString &year) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT COUNT(*) AS nrUnread "
+	    "FROM messages LEFT JOIN supplementary_message_data "
+	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "WHERE "
+	    "(dbIDSender = :sendDbId)"
+	    " and "
+	    "(strftime('%Y', dmDeliveryTime) = :year)"
+	    " and "
+	    "(read_locally = 0)";
+	//qDebug() << queryStr << sendDbId << year;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":year", year);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toInt();
+	}
+
+	return 0;
 }
 
 

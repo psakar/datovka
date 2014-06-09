@@ -1288,6 +1288,7 @@ bool MainWindow::regenerateAccountModelYears(void)
 	QStandardItem *itemTop;
 	MessageDb *db;
 	QList<QString> yearList;
+	int unreadMsgs;
 
 	m_accountModel.removeAllYearNodes();
 
@@ -1310,18 +1311,26 @@ bool MainWindow::regenerateAccountModelYears(void)
 		Q_ASSERT(0 != db);
 		QString dbId = m_accountDb.dbId(userName + "___True");
 		/* Received. */
+		unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
+		m_accountModel.updateRecentReceivedUnread(itemTop, unreadMsgs);
 		yearList = db->msgsRcvdYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
-			m_accountModel.addNodeReceivedYear(itemTop,
+			unreadMsgs = db->msgsRcvdUnreadInYear(dbId,
 			    yearList.value(j));
+			m_accountModel.addNodeReceivedYear(itemTop,
+			    yearList.value(j), unreadMsgs);
 		}
 		/* Sent. */
+		unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
+		m_accountModel.updateRecentSentUnread(itemTop, unreadMsgs);
 		yearList = db->msgsSntYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
-			m_accountModel.addNodeSentYear(itemTop,
+			unreadMsgs = db->msgsSntUnreadInYear(dbId,
 			    yearList.value(j));
+			m_accountModel.addNodeSentYear(itemTop,
+			    yearList.value(j), unreadMsgs);
 		}
 	}
 
@@ -1912,8 +1921,6 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	int newcnt = 0;
 	int allcnt = 0;
 
-
-
 	const QStandardItem *accountItem =
 	    m_accountModel.itemFromIndex(acntTopIdx);
 	MessageDb *messageDb = accountMessageDb(accountItem);
@@ -2049,23 +2056,6 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	m_statusProgressBar->setValue(100);
 
 	isds_list_free(&messageList);
-
-	if (newcnt > 0) {
-		QModelIndex itemindex;
-		if (messageType == "received") {
-			itemindex = acntTopIdx.child(0,0);
-		} else {
-			itemindex = acntTopIdx.child(1,0);
-		}
-		QString label = itemindex.data().toString();
-		label = label + " (" + QString::number(newcnt) + ")";
-		QStandardItem *accountitem =
-		    m_accountModel.itemFromIndex(itemindex);
-		accountitem->setText(label);
-		QFont font;
-		font.setBold(true);
-		accountitem->setFont(font);
-	}
 
 	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;

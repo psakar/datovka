@@ -402,6 +402,38 @@ QModelIndex AccountModel::indexTop(const QModelIndex &index)
 
 /* ========================================================================= */
 /*
+ * Set number of unread messages in recent received.
+ */
+bool AccountModel::updateRecentReceivedUnread(QStandardItem *item,
+    unsigned unreadMsgs)
+/* ========================================================================= */
+{
+	/* Find account top. */
+	item = itemTop(item);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Get recently received node. */
+	item = item->child(0, 0);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	if (0 < unreadMsgs) {
+		item->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
+	} else {
+		item->setData(QVariant(), ROLE_ACNT_UNREAD_MSGS);
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Add received year node into account.
  */
 bool AccountModel::addNodeReceivedYear(QStandardItem *item,
@@ -442,6 +474,38 @@ bool AccountModel::addNodeReceivedYear(QStandardItem *item,
 	item->appendRow(yearItem);
 
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set number of unread messages in recent sent.
+ */
+bool AccountModel::updateRecentSentUnread(QStandardItem *item,
+    unsigned unreadMsgs)
+/* ========================================================================= */
+{
+	/* Find account top. */
+	item = itemTop(item);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	/* Get recently sent node. */
+	item = item->child(1, 0);
+
+	Q_ASSERT(0 != item);
+	if (0 == item) {
+		return false;
+	}
+
+	if (0 < unreadMsgs) {
+		item->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
+	} else {
+		item->setData(QVariant(), ROLE_ACNT_UNREAD_MSGS);
+	}
 }
 
 

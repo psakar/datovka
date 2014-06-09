@@ -92,6 +92,18 @@ public:
 	    const QString &recipDbId) const;
 
 	/*!
+	 * @brief Return number of unread messages received within past 90
+	 *     days.
+	 */
+	int msgsRcvdUnreadWithin90Days(const QString &recipDbId) const;
+
+	/*!
+	 * @brief Return number of unread received messages in year.
+	 */
+	int msgsRcvdUnreadInYear(const QString &recipDbId,
+	    const QString &year) const;
+
+	/*!
 	 * @brief Return sent messages model.
 	 */
 	QAbstractTableModel * msgsSntModel(const QString &sendDbId);
@@ -118,6 +130,18 @@ public:
 	 */
 	QList< QPair<QString, int> > msgsSntYearlyCounts(
 	    const QString &sendDbId) const;
+
+	/*!
+	 * @brief Return number of unread messages sent within past 90
+	 *     days.
+	 */
+	int msgsSntUnreadWithin90Days(const QString &sendDbId) const;
+
+	/*!
+	 * @brief Return number of unread sent messages in year.
+	 */
+	int msgsSntUnreadInYear(const QString &sendDbId,
+	    const QString &year) const;
 
 	/*!
 	 * @brief Generate information for reply dialog.

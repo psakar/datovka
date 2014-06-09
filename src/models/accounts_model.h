@@ -134,15 +134,43 @@ public:
 	QModelIndex indexTop(const QModelIndex &index);
 
 	/*!
+	 * @brief Set number of unread messages in recent received.
+	 *
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateRecentReceivedUnread(QStandardItem *item,
+	    unsigned unreadMsgs = 0);
+
+	/*!
 	 * @brief Add received year node into account.
 	 *
-	 * @param[in] 
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
 	 */
 	bool addNodeReceivedYear(QStandardItem *item, const QString &year,
 	    unsigned unreadMsgs = 0);
 
 	/*!
+	 * @brief Set number of unread messages in recent sent.
+	 *
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateRecentSentUnread(QStandardItem *item,
+	    unsigned unreadMsgs = 0);
+
+	/*!
 	 * @brief Add sent year node into account.
+	 *
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
 	 */
 	bool addNodeSentYear(QStandardItem *item, const QString &year,
 	    unsigned unreadMsgs = 0);
