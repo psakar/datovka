@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
 	qint64 start, stop, diff;
 	start = QDateTime::currentMSecsSinceEpoch();
-	logInfo("Starting at %lld.%03d .\n", start / 1000, (int) start % 1000);
+	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 /*
 #if defined(Q_OS_UNIX)
 #elif defined(Q_OS_WIN)
@@ -90,9 +90,8 @@ int main(int argc, char *argv[])
 
 	stop = QDateTime::currentMSecsSinceEpoch();
 	diff = stop - start;
-	logInfo("Stopping at %lld.%03d; ran for %lld.%03d seconds.\n",
-	    stop / 1000, (int) stop % 1000,
-	    diff / 1000, (int) diff % 1000);
+	logInfo("Stopping at %lld.%03lld; ran for %lld.%03lld seconds.\n",
+	    stop / 1000, stop % 1000, diff / 1000, diff % 1000);
 
 	return ret;
 }
