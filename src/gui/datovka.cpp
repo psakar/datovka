@@ -1870,9 +1870,13 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	m_statusProgressBar->setValue(10);
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo, this);
 	}
+
+	m_statusProgressBar->setValue(20);
 
 	isds_error status = IE_ERROR;
 	struct isds_list *messageList = NULL;
@@ -1901,6 +1905,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
+	m_statusProgressBar->setValue(30);
+
 	struct isds_list *box;
 	box = messageList;
 	int newcnt = 0;
@@ -1909,6 +1915,25 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	while (0 != box) {
 		allcnt++;
+		box = box->next;
+	}
+
+	box = messageList;
+
+	int delta = 0;
+	int diff = 0;
+
+	if (allcnt == 0) {
+		m_statusProgressBar->setValue(60);
+	} else {
+		delta = ceil(70 / allcnt);
+	}
+
+	while (0 != box) {
+
+		diff = diff + delta;
+		m_statusProgressBar->setValue(30+diff);
+
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
 		if (!messageDb->isInMessageDb(dmId)) {
@@ -2014,6 +2039,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		box = box->next;
 
 	}
+
+	m_statusProgressBar->setValue(100);
 
 	isds_list_free(&messageList);
 
@@ -2834,15 +2861,7 @@ int MainWindow::progressCallback(double upload_total, double upload_current,
 	if (0 == progressBar) {
 		return 0; /* DOn't draw anything. */
 	}
-
-	qDebug() << upload_total << upload_current <<
-	    download_total << download_current;
-
-
-
+	//qDebug() << upload_total << upload_current <<
+	//    download_total << download_current;
 	return 0;
 }
-
-
-
-
