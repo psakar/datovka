@@ -474,7 +474,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		QModelIndex index = msgTblMdl->index(
 		    current.row(), 0); /* First column. */
 
-		MessageDb *messageDb = accountMessageDb();
+		MessageDb *messageDb = accountMessageDb(0);
 		int msgId = msgTblMdl->itemData(index).first().toInt();
 
 		/* Generate and show message information. */
@@ -1393,7 +1393,7 @@ void MainWindow::on_actionSent_message_triggered()
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
@@ -1595,7 +1595,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	    ui->messageList->currentIndex().row(), 0); /* First column. */
 	/* TODO -- Reimplement this construction. */
 
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 
 	QVector<QString> replyTo = messageDb->msgsReplyDataTo(
 	    tableModel->itemData(index).first().toInt());
@@ -1911,7 +1911,12 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	box = messageList;
 	int newcnt = 0;
 	int allcnt = 0;
-	MessageDb *messageDb = accountMessageDb();
+
+
+
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(acntTopIdx);
+	MessageDb *messageDb = accountMessageDb(accountItem);
 
 	while (0 != box) {
 		allcnt++;
@@ -1936,6 +1941,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
+
 		if (!messageDb->isInMessageDb(dmId)) {
 
 			QString dmAmbiguousRecipient;
@@ -2135,7 +2141,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 
 	m_statusProgressBar->setValue(50);
 
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(message->envelope->dmID);
 
 	/* get signed raw data from message */
@@ -2315,13 +2321,22 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 /* ========================================================================= */
 {
 	int count = ui->accountList->model()->rowCount();
-	//qDebug() << count;
 	for (int i = 0; i < count; i++) {
 		qDebug() << "Downloading messages for account" << i;
 		QModelIndex index = m_accountModel.index(i, 0);
-			downloadMessageList(index,"sent");
-			 /* TODO -- Check return value. */
-			 downloadMessageList(index,"received");
+		m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
+		m_statusProgressBar->repaint();
+		downloadMessageList(index,"sent");
+		m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
+		m_statusProgressBar->repaint();
+		downloadMessageList(index,"received");
+		m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+		m_statusProgressBar->repaint();
+		getListSentMessageStateChanges(index);
+		m_statusProgressBar->setFormat(tr("getPasswordInfo"));
+		m_statusProgressBar->repaint();
+		getPasswordInfo(index);
+		setDefaultProgressStatus();
 	}
 }
 
@@ -2407,7 +2422,7 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(message->envelope->dmID);
 
 	/* get signed raw data from message */
@@ -2472,7 +2487,10 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 
 	/* TODO - if signedMsg == true then decode signed message (raw ) */
 
-	MessageDb *messageDb = accountMessageDb();
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(acntTopIdx);
+	MessageDb *messageDb = accountMessageDb(accountItem);
+
 	int dmID = atoi(message->envelope->dmID);
 
 	struct isds_list *event;
@@ -2504,9 +2522,13 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	m_statusProgressBar->setValue(10);
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo, this);
 	}
+
+	m_statusProgressBar->setValue(20);
 
 	struct isds_list *stateList = NULL;
 	isds_error status;
@@ -2520,16 +2542,40 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 		return false;
 	}
 
+	m_statusProgressBar->setValue(30);
+
 	struct isds_list *stateListFirst = NULL;
 	stateListFirst = stateList;
+
+	int allcnt = 0;
+
+	while (0 != stateList) {
+		allcnt++;
+		stateList = stateList->next;
+	}
+
+	stateList = stateListFirst;
+
+	int delta = 0;
+	int diff = 0;
+
+	if (allcnt == 0) {
+		m_statusProgressBar->setValue(60);
+	} else {
+		delta = ceil(70 / allcnt);
+	}
 
 	while (0 != stateList) {
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateList->data;
+		diff = diff + delta;
+		m_statusProgressBar->setValue(30+diff);
 		int dmId = atoi(item->dmID);
 		getSentDeliveryInfo(acntTopIdx, dmId, false);
 		stateList = stateList->next;
 	}
+
+	m_statusProgressBar->setValue(100);
 
 	isds_list_free(&stateListFirst);
 
@@ -2616,7 +2662,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	(messageDb->addMessageAuthorInfo(dmID,
@@ -2671,7 +2717,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 	}
 
 	memset(hashLocal, 0, sizeof(struct isds_hash));
-	MessageDb *messageDb = accountMessageDb();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QList<QString> hashLocaldata;

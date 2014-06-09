@@ -172,7 +172,7 @@ const QString AccountDb::dbId(const QString &key,
 
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dbID FROM account_info WHERE key = :key";
-	qDebug() << queryStr << key;
+	//qDebug() << queryStr << key;
 	if (!query.prepare(queryStr)) {
 		return defaultValue;
 	}

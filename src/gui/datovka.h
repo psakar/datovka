@@ -242,13 +242,18 @@ private:
 
 	/*!
 	 * @brief Returns user name related to given account item.
+	 * TODO - If accountItem is 0 then currently selected account is
+	 *     processed.
 	 */
 	QString accountUserName(const QStandardItem *accountItem = 0) const;
 
 	/*!
 	 * @brief Get message db to selected account item.
+	 *
+	 * @note If accountItem is 0 then currently selected account is
+	 *     processed.
 	 */
-	MessageDb * accountMessageDb(const QStandardItem *accountItem = 0);
+	MessageDb * accountMessageDb(const QStandardItem *accountItem);
 
 	/*!
 	 * @brief Download sent/received message list for specific account.
