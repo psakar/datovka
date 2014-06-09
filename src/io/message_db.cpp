@@ -1877,6 +1877,106 @@ bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &tst) const
 
 /* ========================================================================= */
 /*
+ * Delete message records from db
+ */
+bool MessageDb::msgsDeleteMessageData(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	/* Delete hash from hashes table */
+	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete file(s) from files table */
+	queryStr = "DELETE FROM files WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete event(s) from events table */
+	queryStr = "DELETE FROM events WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete raw message data from raw_message_data table */
+	queryStr= "DELETE FROM raw_message_data WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete raw info data from raw_delivery_info_data table */
+	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete supplementary from supplementary_message_data table */
+	queryStr = "DELETE FROM supplementary_message_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete message from messages table */
+	queryStr = "DELETE FROM messages WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
  * Read data from supplementary message data table.
  */
 QJsonDocument MessageDb::smsgdCustomData(int msgId) const

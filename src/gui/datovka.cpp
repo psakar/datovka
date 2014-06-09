@@ -2771,20 +2771,37 @@ bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	}
 
 	isds_error status;
-	/* TODO - set true if message is received or false if is sent */
 	bool incoming = true;
 
-	status = isds_delete_message_from_storage(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str(),
-	    (incoming) ? true :false);
+	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
+	switch (AccountModel::nodeType(index)) {
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeReceivedYear:
+		incoming = false;
+		break;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeSentYear:
+		incoming = true;
+		break;
+	default:
+		break;
+	}
 
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
+	status = isds_delete_message_from_storage(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), incoming);
+
+	if (IE_SUCCESS == status) {
+		MessageDb *messageDb = accountMessageDb(0);
+		int dmID = atoi(dmId.toStdString().c_str());
+		messageDb->msgsDeleteMessageData(dmID)
+		? qDebug() << "Message" << dmId<< "was deleted from ISDS and db"
+		: qDebug() << "Message " << dmId << "deleted error from db";
+	} else {
+		qDebug() << "Error: " << status << isds_strerror(status);
 		return false;
 	}
-	qDebug() << "Message" << dmId << "was deleted from ISDS";
-
-	/* TODO - delete message data from db (all tables) */
 
 	return true;
 }

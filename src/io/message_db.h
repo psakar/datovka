@@ -230,17 +230,21 @@ public:
 	 */
 	bool msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw);
 
- 	/*!
+	/*!
 	 * @brief Insert additional info about author (sender) into db.
 	 */
 	bool addMessageAuthorInfo(int dmID, const QString &sender_type,
 	    const QString &sender_name);
 
- 	/*!
+	/*!
 	 * @brief Retrun hash of message froms db.
 	 */
 	QList<QString> msgsGetHashFromDb(int dmId) const;
 
+	/*!
+	 * @brief Delete all message records from db.
+	 */
+	bool msgsDeleteMessageData(int dmId) const;
 
 protected:
 	/*!
