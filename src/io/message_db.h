@@ -156,6 +156,23 @@ public:
 	bool msgsVerificationAttempted(int dmId) const;
 
 	/*!
+	 * @brief Was message locally read.
+	 * 
+	 * @param[in] dmId Message id.
+	 * @retunrn False if not read or on failure.
+	 */
+	bool smsgdtLocallyRead(int dmId) const;
+
+	/*!
+	 * @brief Set message status to locally read.
+	 *
+	 * @param[in] dmId Message id.
+	 * @param[in] read New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetLocallyRead(int dmId, bool read = true);
+
+	/*!
 	 * @brief Return contacts from message db.
 	 */
 	QList< QVector<QString> > uniqueContacts(void);

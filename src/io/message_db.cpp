@@ -807,6 +807,56 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 
 /* ========================================================================= */
 /*
+ * Was message locally read.
+ */
+bool MessageDb::smsgdtLocallyRead(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT read_locally FROM supplementary_message_data "
+	    "WHERE "
+	    "message_id = :dmId";
+	qDebug() << queryStr << dmId;
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec()) {
+		query.first();
+		return query.value(0).toBool();
+	}
+
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set message status to locally read.
+ */
+bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "UPDATE supplementary_message_data "
+	    "SET read_locally = :read WHERE "
+	    "message_id = :dmId";
+	qDebug() << queryStr << dmId;
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":read", read);
+	query.bindValue(":dmId", dmId);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
  * Return contact list from message db.
  */
 QList< QVector<QString> > MessageDb::uniqueContacts(void)

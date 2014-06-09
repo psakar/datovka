@@ -483,7 +483,29 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		    current.row(), 0); /* First column. */
 
 		MessageDb *messageDb = accountMessageDb(0);
+		Q_ASSERT(0 != messageDb);
 		int msgId = msgTblMdl->itemData(index).first().toInt();
+
+		/* Mark message locally read. */
+		if (!messageDb->smsgdtLocallyRead(msgId)) {
+			messageDb->smsgdtSetLocallyRead(msgId);
+			/*
+			 * TODO -- Reload/update account model only for
+			 * affected account (without database reload).
+			 */
+			regenerateAccountModelYears();
+			/*
+			 * TODO -- Mark message as read without reloading
+			 * the whole model.
+			 */
+			int oldRow = ui->messageList->selectionModel()->
+			    currentIndex().row();
+			accountItemSelectionChanged(
+			    ui->accountList->selectionModel()->currentIndex());
+			QModelIndex newIndex =
+			    ui->messageList->model()->index(oldRow, 0);
+			ui->messageList->setCurrentIndex(newIndex);
+		}
 
 		/* Generate and show message information. */
 		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
