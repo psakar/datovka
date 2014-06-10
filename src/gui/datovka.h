@@ -306,8 +306,7 @@ private:
 	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
-	bool eraseMessage(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx);
+	bool eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.

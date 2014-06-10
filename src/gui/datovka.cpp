@@ -2778,16 +2778,9 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 * Delete message from long term storage in ISDS.
 */
 bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
-    const QModelIndex &msgIdx)
+    QString dmId)
 /* ========================================================================= */
 {
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
-		return false;
-	}
-
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
@@ -2962,9 +2955,10 @@ int MainWindow::progressCallback(double upload_total, double upload_current,
 void MainWindow::on_actionDelete_message_triggered()
 /* ========================================================================= */
 {
-	QModelIndex acntTopIdx = ui->accountList->selectionModel()->currentIndex();
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this,
@@ -2974,6 +2968,6 @@ void MainWindow::on_actionDelete_message_triggered()
 	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		eraseMessage(acntTopIdx, msgIdx);
+		eraseMessage(acntTopIdx, dmId);
 	}
 }
