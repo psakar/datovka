@@ -176,6 +176,11 @@ public:
 	    unsigned unreadMsgs = 0);
 
 	/*!
+	 * @brief Delete year-related nodes in model for given account.
+	 */
+	void removeYearNodes(const QModelIndex &topIndex);
+
+	/*!
 	 * @brief Delete all year-related nodes in model.
 	 */
 	void removeAllYearNodes(void);

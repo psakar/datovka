@@ -556,6 +556,35 @@ bool AccountModel::addNodeSentYear(QStandardItem *item, const QString &year,
 
 /* ========================================================================= */
 /*
+ * Delete year-related nodes in model for given account.
+ */
+void AccountModel::removeYearNodes(const QModelIndex &topIndex)
+/* ========================================================================= */
+{
+	QStandardItem *topItem;
+	QStandardItem *item;
+
+	Q_ASSERT(topIndex.isValid());
+	if (!topIndex.isValid()) {
+		return;
+	}
+	Q_ASSERT(topIndex == indexTop(topIndex));
+
+	topItem = this->itemFromIndex(topIndex);
+	Q_ASSERT(0 != topItem);
+	/* Received. */
+	item = topItem->child(2, 0)->child(0, 0);
+	Q_ASSERT(0 != item);
+	item->removeRows(0, item->rowCount());
+	/* Sent. */
+	item = topItem->child(2, 0)->child(1, 0);
+	Q_ASSERT(0 != item);
+	item->removeRows(0, item->rowCount());
+}
+
+
+/* ========================================================================= */
+/*
  * Delete all year-related nodes in model.
  */
 void AccountModel::removeAllYearNodes(void)
