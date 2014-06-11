@@ -104,6 +104,11 @@ public:
 	    const QString &identifier, const QString &registryCode,
 	    int dbState, int dbEffectiveOVM, int dbOpenAddressing) const;
 
+	/*!
+	 * @brief delete account info from db
+	 */
+	bool deleteAccountInfo(QString key) const;
+
 private:
 	QSqlDatabase m_db; /*!< Account database. */
 };

@@ -347,3 +347,42 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 		return false;
 	}
 }
+
+
+/* ========================================================================= */
+/*
+ * Delete account records from db
+ */
+bool AccountDb::deleteAccountInfo(QString key) const
+/* ========================================================================= */
+{
+	if (!m_db.isOpen()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM account_info WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: deleteAccountInfo" << query.lastError();
+		return false;
+	}
+	query.bindValue(":key", key);
+	if (!query.exec()) {
+		qDebug() << "Error: deleteAccountInfo" << query.lastError();
+		return false;
+	}
+
+	queryStr = "DELETE FROM password_expiration_date WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: deleteAccountInfo" << query.lastError();
+		return false;
+	}
+	query.bindValue(":key", key);
+	if (!query.exec()) {
+		qDebug() << "Error: deleteAccountInfo" << query.lastError();
+		return false;
+	}
+
+	return true;
+}

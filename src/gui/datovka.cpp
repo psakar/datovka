@@ -1548,11 +1548,17 @@ void MainWindow::on_actionDelete_account_triggered()
 	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		if(itemTop->hasChildren()) {
+
+		QString userName = accountUserName() + "___True";
+
+		if (itemTop->hasChildren()) {
 			itemTop->removeRows(0, itemTop->rowCount());
 		}
+		m_accountDb.deleteAccountInfo(userName);
+
 		ui->accountList->model()->removeRow(currentTopRow);
-		/* TODO - delete database */
+
+		/* TODO - delete message db on disk */
 		saveSettings();
 	}
 }
@@ -2151,6 +2157,8 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	isds_list_free(&messageList);
 
+	regenerateAccountModelYears(acntTopIdx);
+
 	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;
 		qDebug() << "#Received new:" << newcnt;
@@ -2662,6 +2670,8 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 	m_statusProgressBar->setValue(100);
 
 	isds_list_free(&stateListFirst);
+
+	regenerateAccountModelYears(acntTopIdx);
 
 	return true;
 }
