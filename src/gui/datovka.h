@@ -341,6 +341,7 @@ private:
 	                              * configuration file.
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
+	DbMsgsTblModel *m_messageModel; /*!< Currently displayed model. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
 	QSortFilterProxyModel m_messageListProxyModel; /*!<

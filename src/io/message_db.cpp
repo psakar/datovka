@@ -54,6 +54,18 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
 
 /* ========================================================================= */
 /*
+ * Constructor.
+ */
+DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
+/* ========================================================================= */
+    : QSqlQueryModel(parent),
+    m_overridden()
+{
+}
+
+
+/* ========================================================================= */
+/*
  * Used for data conversion on display.
  */
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
@@ -84,7 +96,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
 		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
-			if (QSqlQueryModel::data(index).toInt()) {
+			int dmId = QSqlQueryModel::data(
+			    index.sibling(index.row(), 0),
+			    Qt::DisplayRole).toInt();
+			if ((m_overridden.value(dmId, false)) ||
+			    QSqlQueryModel::data(index).toBool()) {
 				return QIcon(ICON_3PARTY_PATH "tick_16.png");
 			} else {
 				return QIcon(ICON_3PARTY_PATH "delete_16.png");
@@ -95,14 +111,20 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if ((DB_BOOLEAN == headerData(READLOC_COL, Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt()) &&
-		    (!QSqlQueryModel::data(index.sibling(index.row(),
-		         READLOC_COL)).toBool())) {
-			/* Unread messages are shown bold. */
-			QFont boldFont;
-			boldFont.setBold(true);
-			return boldFont;
+		if (DB_BOOLEAN == headerData(READLOC_COL, Qt::Horizontal,
+		         ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
+			/* In read messages. */
+			int dmId = QSqlQueryModel::data(
+			    index.sibling(index.row(), 0),
+			    Qt::DisplayRole).toInt();
+			if ((!QSqlQueryModel::data(index.sibling(index.row(),
+			         READLOC_COL)).toBool()) &&
+			    (!m_overridden.value(dmId, false))) {
+				/* Unread messages are shown bold. */
+				QFont boldFont;
+				boldFont.setBold(true);
+				return boldFont;
+			}
 		}
 
 		return QSqlQueryModel::data(index, role);
@@ -113,6 +135,19 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 	}
 #undef READLOC_COL
+}
+
+
+/* ========================================================================= */
+/*
+ * Override message as being read.
+ */
+bool DbMsgsTblModel::overideRead(int dmId, bool forceRead)
+/* ========================================================================= */
+{
+	m_overridden[dmId] = forceRead;
+
+	return true;
 }
 
 
@@ -182,7 +217,7 @@ bool MessageDb::openDb(const QString &fileName)
 /*
  * Return received messages model.
  */
-QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
+DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -236,7 +271,7 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /*
  * Return received messages within past 90 days.
  */
-QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
+DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
     const QString &recipDbId)
 /* ========================================================================= */
 {
@@ -294,7 +329,7 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(
 /*
  * Return received messages within given year.
  */
-QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
+DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
     const QString &year)
 /* ========================================================================= */
 {
@@ -489,7 +524,7 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 /*
  * Return sent messages model.
  */
-QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
+DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -525,7 +560,7 @@ QAbstractTableModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /*
  * Return sent messages within past 90 days.
  */
-QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
+DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
     const QString &sendDbId)
 /* ========================================================================= */
 {
@@ -565,7 +600,7 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 /*
  * Return sent messages within given year.
  */
-QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
+DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
     const QString &year)
 /* ========================================================================= */
 {

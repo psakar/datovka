@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_statusProgressBar(NULL),
     m_accountModel(this),
     m_accountDb("accountDb"),
+    m_messageModel(NULL),
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
@@ -226,7 +227,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	QString html;
-	QAbstractTableModel *msgTblMdl;
+	DbMsgsTblModel *msgTblMdl;
 
 	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
@@ -344,7 +345,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		Q_ASSERT(0 != msgTblMdl);
-		ui->messageList->setModel(msgTblMdl);
+		m_messageModel = msgTblMdl;
+		ui->messageList->setModel(m_messageModel);
 		/* Apply message filter. */
 		filterMessages(m_searchLine->text());
 		/* Connect new slot. */
@@ -496,23 +498,22 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			regenerateAccountModelYears(ui->accountList->
 			    selectionModel()->currentIndex());
 			/*
-			 * TODO -- Mark message as read without reloading
+			 * Mark message as read without reloading
 			 * the whole model.
 			 */
-			int oldRow = ui->messageList->selectionModel()->
-			    currentIndex().row();
-			accountItemSelectionChanged(
-			    ui->accountList->selectionModel()->currentIndex());
-			QModelIndex newIndex =
-			    ui->messageList->model()->index(oldRow, 0);
-			ui->messageList->setCurrentIndex(newIndex);
+			Q_ASSERT(0 != m_messageModel);
+			QModelIndex modelIndex =
+			    ui->messageList->selectionModel()->currentIndex();
+			m_messageModel->overideRead(
+			    current.sibling(modelIndex.row(),
+			        0).data().toInt(), true);
 		}
 
 		/* Generate and show message information. */
 		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
 		ui->messageInfo->setReadOnly(true);
 
-		/* Enable buttons according to databse content. */
+		/* Enable buttons according to database content. */
 		ui->verifySignature->setEnabled(
 		    !messageDb->msgsVerificationAttempted(msgId));
 		ui->signatureDetails->setEnabled(true);
@@ -1770,12 +1771,12 @@ void MainWindow::on_actionSearchClear_triggered(void)
 void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
 {
-	QAbstractItemModel *tableModel = ui->messageList->model();
+	QAbstractItemModel *tableModel = m_messageModel;
 	if (0 == tableModel) {
 		return;
 	}
 
-	if (tableModel != &m_messageListProxyModel) {
+	if (tableModel != &m_messageListProxyModel) { /* TODO -- UNNECESSARY */
 		/* Prohibit the proxy model to be the source of itself. */
 		m_messageListProxyModel.setSourceModel(tableModel);
 	}

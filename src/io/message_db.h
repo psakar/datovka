@@ -29,9 +29,28 @@
 class DbMsgsTblModel : public QSqlQueryModel {
 public:
 	/*!
+	 * @brief Constructor.
+	 */
+	DbMsgsTblModel(QObject *parent = 0);
+
+	/*!
 	 * @brief Convert viewed data in date/time columns.
 	 */
 	virtual QVariant data(const QModelIndex &index, int role) const;
+
+	/*!
+	 * @brief Override message as being read.
+	 *
+	 * @param[in] dmId      Message id.
+	 * @param[in] forceRead Set whether to force read state.
+	 */
+	virtual bool overideRead(int dmId, bool forceRead = true);
+	/*
+	 * The view's proxy model cannot be accessed, so the message must be
+	 * addressed via its id rather than using the index.
+	 */
+private:
+	QMap<int, bool> m_overridden; /*!< Holds overriding information. */
 };
 
 
@@ -66,18 +85,18 @@ public:
 	/*!
 	 * @brief Return received messages model.
 	 */
-	QAbstractTableModel * msgsRcvdModel(const QString &recipDbId);
+	DbMsgsTblModel * msgsRcvdModel(const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
 	 */
-	QAbstractTableModel * msgsRcvdWithin90DaysModel(
+	DbMsgsTblModel * msgsRcvdWithin90DaysModel(
 	    const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within given year.
 	 */
-	QAbstractTableModel * msgsRcvdInYearModel(const QString &recipDbId,
+	DbMsgsTblModel * msgsRcvdInYearModel(const QString &recipDbId,
 	    const QString &year);
 
 	/*!
@@ -106,18 +125,18 @@ public:
 	/*!
 	 * @brief Return sent messages model.
 	 */
-	QAbstractTableModel * msgsSntModel(const QString &sendDbId);
+	DbMsgsTblModel * msgsSntModel(const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
 	 */
-	QAbstractTableModel * msgsSntWithin90DaysModel(
+	DbMsgsTblModel * msgsSntWithin90DaysModel(
 	    const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within given year.
 	 */
-	QAbstractTableModel * msgsSntInYearModel(const QString &sendDbId,
+	DbMsgsTblModel * msgsSntInYearModel(const QString &sendDbId,
 	    const QString &year);
 
 	/*!
