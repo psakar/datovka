@@ -3037,6 +3037,8 @@ void MainWindow::on_actionDelete_message_triggered()
 	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		eraseMessage(acntTopIdx, dmId);
+		if (!eraseMessage(acntTopIdx, dmId)) {
+			qDebug() << "The message" << dmId << "was deleted";
+		}
 	}
 }

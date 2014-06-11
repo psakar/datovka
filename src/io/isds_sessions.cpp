@@ -119,11 +119,12 @@ void GlobIsdsSessions::connectToIsds(
 			bool ok = false;
 			QString text = "";
 			while (text.isEmpty()) {
-				text = QInputDialog::getText(0,
+				text = QInputDialog::getText(mw,
 				    QObject::tr("Enter password"),
 				    QObject::tr("Enter password for account ") +
 				    accountInfo.userName(),
-				    QLineEdit::Password, "", &ok);
+				    QLineEdit::Password, "", &ok,
+				    Qt::WindowStaysOnTopHint|Qt::Widget);
 				if (ok) {
 					if (!text.isEmpty()) {
 						password = text;
@@ -199,11 +200,12 @@ void GlobIsdsSessions::connectToIsds(
 				bool ok;
 				QString text = "";
 				while (text.isEmpty()) {
-					text = QInputDialog::getText(0,
+					text = QInputDialog::getText(mw,
 					    QObject::tr("Enter certificate password"),
 					    QObject::tr("Enter certificate password for account ") +
 					    accountInfo.userName(),
-					    QLineEdit::Password, "", &ok);
+					    QLineEdit::Password, "", &ok,
+					    Qt::WindowStaysOnTopHint);
 					if (ok) {
 						if (!text.isEmpty()) {
 							password = text;
@@ -228,11 +230,12 @@ void GlobIsdsSessions::connectToIsds(
 			bool ok;
 			QString text = "";
 			while (text.isEmpty()) {
-				text = QInputDialog::getText(0,
+				text = QInputDialog::getText(mw,
 				    QObject::tr("Enter password"),
 				    QObject::tr("Enter password for account ") +
 				    accountInfo.userName(),
-				    QLineEdit::Password, "", &ok);
+				    QLineEdit::Password, "", &ok,
+				    Qt::WindowStaysOnTopHint);
 				if (ok) {
 					if (!text.isEmpty()) {
 						password = text;
