@@ -789,12 +789,29 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
+	bool incoming = false;
+
+	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
+	switch (AccountModel::nodeType(index)) {
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeReceivedYear:
+		incoming = false;
+		break;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeSentYear:
+		incoming = true;
+		break;
+	default:
+		break;
+	}
+
 	m_statusProgressBar->setFormat(tr("downloadMessage"));
 	m_statusProgressBar->repaint();
 
-	/* TODO - set last bool parametr true, if current message is sent */
 	/* TODO -- Check return value. */
-	downloadMessage(accountIndex, selectedIndex, false, false);
+	downloadMessage(accountIndex, selectedIndex, true, incoming);
 
 	setDefaultProgressStatus();
 
@@ -1353,7 +1370,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	m_accountModel.updateRecentReceivedUnread(topItem, unreadMsgs);
 	yearList = db->msgsRcvdYears(dbId);
 	for (int j = 0; j < yearList.size(); ++j) {
-		qDebug() << "Received" << yearList.value(j);
+		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = db->msgsRcvdUnreadInYear(dbId, yearList.value(j));
 		m_accountModel.addNodeReceivedYear(topItem, yearList.value(j),
 		    unreadMsgs);
@@ -1363,7 +1380,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	m_accountModel.updateRecentSentUnread(topItem, unreadMsgs);
 	yearList = db->msgsSntYears(dbId);
 	for (int j = 0; j < yearList.size(); ++j) {
-		qDebug() << "Sent" << yearList.value(j);
+		//qDebug() << "Sent" << yearList.value(j);
 		unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
 		m_accountModel.addNodeSentYear(topItem, yearList.value(j),
 		    unreadMsgs);
@@ -2146,12 +2163,6 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			    "was inserted into db..."
 			: qDebug() << "ERROR: Message envelope " << dmId <<
 			    "insert!";
-
-			if (messageType == "sent") {
-
-
-			}
-
 			newcnt++;
 		}
 		box = box->next;
@@ -2307,7 +2318,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	/* update message envelope in db */
 	(messageDb->msgsUpdateMessageEnvelope(dmID,
 	    /* TODO - set correctly next two values */
-	    true, "tReturnedMessage",
+	    false, "tReturnedMessage",
 	    message->envelope->dbIDSender,
 	    message->envelope->dmSender,
 	    message->envelope->dmSenderAddress,
@@ -2377,19 +2388,30 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	}
 
 	m_statusProgressBar->setValue(80);
-	/* Download and save delivery info and message events */
-	(getReceivedsDeliveryInfo(acntTopIdx, msgIdx, false))
-	? qDebug() << "Delivery info of message was processed..."
-	: qDebug() << "ERROR: Delivery info of message not found!";
 
-	m_statusProgressBar->setValue(90);
-	getMessageAuthor(acntTopIdx, msgIdx);
+	if (sentMessage) {
+		/* Download and save delivery info and message events */
+		(getSentDeliveryInfo(acntTopIdx, dmID, true))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+		m_statusProgressBar->setValue(90);
+		getMessageAuthor(acntTopIdx, msgIdx);
+	} else {
+		/* Download and save delivery info and message events */
+		(getReceivedsDeliveryInfo(acntTopIdx, msgIdx, signedMsg))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+
+		m_statusProgressBar->setValue(90);
+		getMessageAuthor(acntTopIdx, msgIdx);
+
+		/*  Mark this message as downloaded in ISDS */
+		(markMessageAsDownloaded(acntTopIdx, msgIdx))
+		? qDebug() << "Message was marked as downloaded..."
+		: qDebug() << "ERROR: Message was not marked as downloaded!";
+	}
 
 	m_statusProgressBar->setValue(100);
-	/*  Mark this message as downloaded in ISDS */
-	(markMessageAsDownloaded(acntTopIdx, msgIdx))
-	? qDebug() << "Message was marked as downloaded..."
-	: qDebug() << "ERROR: Message was not marked as downloaded!";
 
 	isds_list_free(&message->documents);
 	isds_message_free(&message);
