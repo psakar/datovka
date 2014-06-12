@@ -1516,7 +1516,10 @@ void MainWindow::on_actionSent_message_triggered()
 
 	MessageDb *messageDb = accountMessageDb(0);
 
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
+	QString userName = accountUserName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
@@ -1762,7 +1765,11 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	Q_ASSERT(index.isValid());
 	index = AccountModel::indexTop(index);
 
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb,
+
+	QString userName = accountUserName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);

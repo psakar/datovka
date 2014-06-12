@@ -2,11 +2,13 @@
 #include "dlg_contacts.h"
 
 
-DlgContacts::DlgContacts(MessageDb &db, QTableWidget &recipientTableWidget,
+DlgContacts::DlgContacts(MessageDb &db, QString &dbId,
+     QTableWidget &recipientTableWidget,
     QWidget *parent)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
-    m_messDb(db)
+    m_messDb(db),
+    m_dbId(dbId)
 {
 	setupUi(this);
 
@@ -66,21 +68,22 @@ void DlgContacts::fillContactsFromMessageDb()
 	contactList = m_messDb.uniqueContacts();
 
 	for (int i = 0; i < contactList.count(); i++) {
-
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(0));
-		this->contactTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(1));
-		this->contactTableWidget->setItem(row,2,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(2));
-		this->contactTableWidget->setItem(row,3,item);
+		if (m_dbId != contactList[i].at(0)) {
+			int row = this->contactTableWidget->rowCount();
+			this->contactTableWidget->insertRow(row);
+			QTableWidgetItem *item = new QTableWidgetItem;
+			item->setCheckState(Qt::Unchecked);
+			this->contactTableWidget->setItem(row,0,item);
+			item = new QTableWidgetItem;
+			item->setText(contactList[i].at(0));
+			this->contactTableWidget->setItem(row,1,item);
+			item = new QTableWidgetItem;
+			item->setText(contactList[i].at(1));
+			this->contactTableWidget->setItem(row,2,item);
+			item = new QTableWidgetItem;
+			item->setText(contactList[i].at(2));
+			this->contactTableWidget->setItem(row,3,item);
+		};
 	}
 	this->contactTableWidget->resizeColumnsToContents();
 }

@@ -24,7 +24,7 @@ public:
 		ACT_REPLY
 	};
 
-	DlgSendMessage(MessageDb &db, Action action,
+	DlgSendMessage(MessageDb &db, QString &dbId, Action action,
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QWidget *parent = 0,
@@ -52,6 +52,7 @@ private:
 	void initNewMessageDialog(void);
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
+	QString m_dbId;
 	const Action m_action;
 	AccountModel::SettingsMap m_accountInfo;
 	QString m_reSubject;

@@ -12,7 +12,7 @@
 #include "src/io/dbs.h"
 
 
-DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
+DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     QTreeView &accountList, QTableView &messageList,
     const AccountModel::SettingsMap &accountInfo,
     QWidget *parent,
@@ -21,6 +21,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, Action action,
     : QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
+    m_dbId(dbId),
     m_action(action),
     m_accountInfo(accountInfo),
     m_reSubject(reSubject),
@@ -285,12 +286,12 @@ void DlgSendMessage::deleteRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Free document list
+ * Find recipent in contact list
  */
 void DlgSendMessage::findRecipientData(void)
 /* ========================================================================= */
 {
-	QDialog *dlg_cont = new DlgContacts(m_messDb,
+	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
 	    *(this->recipientTableWidget), this);
 	dlg_cont->show();
 }

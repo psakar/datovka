@@ -15,7 +15,8 @@ class DlgContacts : public QDialog, public Ui::Contacts
 	Q_OBJECT
 
 public:
-	DlgContacts(MessageDb &db, QTableWidget &recipientTableWidget,
+	DlgContacts(MessageDb &db, QString &dbId,
+	    QTableWidget &recipientTableWidget,
 	    QWidget *parent = 0);
 
 private slots:
@@ -30,6 +31,7 @@ private:
 
 	QTableWidget &m_recipientTableWidget;
 	MessageDb &m_messDb;
+	QString m_dbId;
 };
 
 
