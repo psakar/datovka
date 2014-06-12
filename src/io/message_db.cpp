@@ -853,7 +853,7 @@ bool MessageDb::smsgdtLocallyRead(int dmId) const
 	queryStr = "SELECT read_locally FROM supplementary_message_data "
 	    "WHERE "
 	    "message_id = :dmId";
-	qDebug() << queryStr << dmId;
+	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
 		return false;
 	}
@@ -1218,7 +1218,7 @@ bool MessageDb::isInMessageDb(int dmId) const
 
 	queryStr = "SELECT count(*) FROM messages WHERE "
 	    "dmID = :dmId";
-	qDebug() << queryStr;
+	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
@@ -1237,7 +1237,7 @@ bool MessageDb::isInMessageDb(int dmId) const
 	 */
 	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
 	    "message_id = :dmId";
-	qDebug() << queryStr;
+	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
