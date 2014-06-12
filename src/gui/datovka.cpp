@@ -2173,7 +2173,13 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	isds_list_free(&messageList);
 
+	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
+	/*
+	 * Force repaint.
+	 * TODO -- A better solution?
+	 */
+	ui->accountList->repaint();
 	accountItemSelectionChanged(ui->accountList->currentIndex());
 
 	if (messageType == "received") {
