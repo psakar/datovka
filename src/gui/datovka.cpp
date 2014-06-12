@@ -1666,18 +1666,31 @@ void MainWindow::on_actionMove_account_down_triggered()
 	ui->accountList->setCurrentIndex(index.child(0,0));
 }
 
-void MainWindow::on_actionChange_data_directory_triggered()
-{
 
+/* ========================================================================= */
+/*
+* Download sent/received message list for current (selected) account
+ */
+void MainWindow::on_actionChange_data_directory_triggered()
+/* ========================================================================= */
+{
+	qDebug() << "on_actionChange_data_directory_triggered";
+	/* TODO */
 }
 
-void MainWindow::on_actionMark_all_as_read_triggered()
-{
 
+/* ========================================================================= */
+/*
+* Download sent/received message list for current (selected) account
+ */
+void MainWindow::on_actionMark_all_as_read_triggered()
+/* ========================================================================= */
+{
 	qDebug() << "on_actionMark_all_as_read_triggered";
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
+	/* TODO */
 /*
 	for (int i = 0; i < ; i++) {
 
@@ -1688,27 +1701,44 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 */
 }
 
+
+/* ========================================================================= */
+/*
+* Download sent/received message list for current (selected) account
+ */
 void MainWindow::on_actionGet_messages_triggered()
+/* ========================================================================= */
 {
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	qDebug() << "Downloading message list for account"
+	    << itemTop->text();
+
 	m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
 	m_statusProgressBar->repaint();
 	downloadMessageList(index,"received");
 	m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
 	m_statusProgressBar->repaint();
 	downloadMessageList(index,"sent");
-	//m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
-	//m_statusProgressBar->repaint();
-	//getListSentMessageStateChanges(index);
+	m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+	m_statusProgressBar->repaint();
+	getListSentMessageStateChanges(index);
 	m_statusProgressBar->setFormat(tr("getPasswordInfo"));
 	m_statusProgressBar->repaint();
 	getPasswordInfo(index);
 	setDefaultProgressStatus();
-
 }
 
+
+/* ========================================================================= */
+/*
+* Create reply dialog and sent reply message from current (selected) account
+ */
 void MainWindow::on_actionReply_to_the_sender_triggered()
+/* ========================================================================= */
 {
 	/*
 	 * TODO -- This method copies on_actionSent_message_triggered().
@@ -1760,7 +1790,7 @@ void MainWindow::on_actionFind_databox_triggered()
 
 /* ========================================================================= */
 /*
-* Reply message private slot
+* Create reply dialog and sent reply message from current (selected) account
  */
 void MainWindow::on_actionReply_triggered()
 /* ========================================================================= */
@@ -2451,23 +2481,26 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 		QModelIndex index = m_accountModel.index(i, 0);
 		QStandardItem *item = m_accountModel.itemFromIndex(index);
 		QStandardItem *itemTop = AccountModel::itemTop(item);
-
-		qDebug() <<"Downloading messages for account"<< itemTop->text();
-
+		qDebug() << "-----------------------------------------------";
+		qDebug() << "Downloading message list for account"
+		    << itemTop->text();
+		qDebug() << "-----------------------------------------------";
 		m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
 		m_statusProgressBar->repaint();
 		downloadMessageList(index,"received");
 		m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
 		m_statusProgressBar->repaint();
 		downloadMessageList(index,"sent");
-		//m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
-		//m_statusProgressBar->repaint();
-		//getListSentMessageStateChanges(index);
+		m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+		m_statusProgressBar->repaint();
+		getListSentMessageStateChanges(index);
 		m_statusProgressBar->setFormat(tr("getPasswordInfo"));
 		m_statusProgressBar->repaint();
 		getPasswordInfo(index);
 		setDefaultProgressStatus();
 	}
+	qDebug() << "-----------------------------------------------";
+	qDebug() << "All DONE!";
 }
 
 
@@ -2684,12 +2717,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 		stateList = stateList->next;
 	}
 
-	qDebug() << allcnt;
-
-
-
-	stateList = stateListFirst;
-
+	stateListFirst = stateList;
 	int delta = 0;
 	int diff = 0;
 
@@ -2699,23 +2727,23 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 		delta = ceil(70 / allcnt);
 	}
 
-	while (0 != stateList) {
+	while (0 != stateListFirst) {
 		isds_message_status_change *item =
-		    (isds_message_status_change *) stateList->data;
+		    (isds_message_status_change *) stateListFirst->data;
 		diff = diff + delta;
 		m_statusProgressBar->setValue(30+diff);
 		int dmId = atoi(item->dmID);
 		/* Download and save delivery info and message events */
-		(getSentDeliveryInfo(acntTopIdx, dmId, false))
+		(getSentDeliveryInfo(acntTopIdx, dmId, true))
 		? qDebug() << "Delivery info of message was processed..."
 		: qDebug() << "ERROR: Delivery info of message not found!";
 
-		stateList = stateList->next;
+		stateListFirst = stateListFirst->next;
 	}
 
 	m_statusProgressBar->setValue(100);
 
-	isds_list_free(&stateListFirst);
+	isds_list_free(&stateList);
 
 	regenerateAccountModelYears(acntTopIdx);
 
