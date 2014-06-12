@@ -79,6 +79,20 @@ public:
 	~GlobLog(void);
 
 	/*!
+	 * @brief Get log verbosity.
+	 *
+	 * @return Log verbosity.
+	 */
+	int logVerbosity(void);
+
+	/*!
+	 * @brief Set log verbosity.
+	 *
+	 * @param[in] verb Verbosity level.
+	 */
+	void setLogVerbosity(int verb);
+
+	/*!
 	 * @brief Get debug verbosity.
 	 *
 	 * @return Debug verbosity.
@@ -175,7 +189,8 @@ private:
 	QMutex m_mutex; /*!< @brief Mutual exclusion. */
 	const QString m_hostName; /*!< @brief Host name. */
 
-	int m_debugVerbosity; /*!< Level verbosity of debugging output. */
+	int m_logVerbosity; /*!< Amount of information in single message. */
+	int m_debugVerbosity; /*!< Verbosity of debugging output. */
 
 	/*!
 	 * @brief Converts log level to urgency prefix.

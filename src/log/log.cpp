@@ -36,14 +36,24 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 	case QtDebugMsg:
 	case QtWarningMsg:
 	case QtCriticalMsg:
-		globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
-		    localMsg.constData(), context.file, context.line,
-		    context.function);
+		if (globLog.logVerbosity() > 0) {
+			globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
+			    localMsg.constData(), context.file, context.line,
+			    context.function);
+		} else {
+			globLog.log(LOGSRC_DEF, level, "%s\n",
+			    localMsg.constData());
+		}
 		break;
 	case QtFatalMsg:
-		globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
-		    localMsg.constData(), context.file, context.line,
-		    context.function);
+		if (globLog.logVerbosity() > 0) {
+			globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
+			    localMsg.constData(), context.file, context.line,
+			    context.function);
+		} else {
+			globLog.log(LOGSRC_DEF, level, "%s\n",
+			    localMsg.constData());
+		}
 		abort();
 		break;
 	}
@@ -66,6 +76,7 @@ GlobLog::GlobLog(void)
 /* ========================================================================= */
     : m_mutex(),
     m_hostName(QHostInfo::localHostName()),
+    m_logVerbosity(0),
     m_debugVerbosity(0)
 {
 	usedSources = 1;
@@ -95,6 +106,46 @@ GlobLog::~GlobLog(void)
 		fflush(facDescVect[i + LF_FILE].fout);
 		fclose(facDescVect[i + LF_FILE].fout);
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Get log verbosity.
+ */
+int GlobLog::logVerbosity(void)
+/* ========================================================================= */
+{
+	int ret;
+
+	m_mutex.lock();
+
+	ret = m_logVerbosity;
+
+	m_mutex.unlock();
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set log verbosity.
+ */
+void GlobLog::setLogVerbosity(int verb)
+/* ========================================================================= */
+{
+	m_mutex.lock();
+
+	if (verb < 0) {
+		verb = 0;
+	} else if (verb > 2) {
+		verb = 2;
+	}
+
+	m_logVerbosity = verb;
+
+	m_mutex.unlock();
 }
 
 
@@ -415,9 +466,12 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 	 * allocated.
 	 */
 
-	msgPrefix = dateTime + " " + globLog.m_hostName + " " +
-	    QCoreApplication::applicationName() + "[" +
-	    QString::number(QCoreApplication::applicationPid()) + "]: ";
+	if (m_logVerbosity > 1) {
+		msgPrefix = dateTime + " " + globLog.m_hostName + " " +
+		    QCoreApplication::applicationName() + "[" +
+		    QString::number(QCoreApplication::applicationPid()) +
+		    "]: ";
+	}
 
 	if (NULL != prefix) {
 		msgPrefix += prefix;

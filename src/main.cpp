@@ -51,6 +51,11 @@ int main(int argc, char *argv[])
 	        QObject::tr("conf")))) {
 		Q_ASSERT(0);
 	}
+	QCommandLineOption logVerb(QStringList() << "L" << "log-verbosity",
+	    QObject::tr("Set verbosity of logged messages to <level>. Default is ") +
+	    QString::number(globLog.logVerbosity()) + ".",
+	    QObject::tr("level"));
+	parser.addOption(logVerb);
 	/* Boolean options. */
 #ifdef DEBUG
 	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
@@ -72,6 +77,16 @@ int main(int argc, char *argv[])
 		    LOG_UPTO(LOG_DEBUG));
 	}
 #endif /* DEBUG */
+	if (parser.isSet(logVerb)) {
+		bool ok;
+		qDebug() << parser.value(logVerb);
+		int value = parser.value(logVerb).toInt(&ok, 10);
+		if (!ok) {
+			logError("%s\n", "Invalid log-verbosity parameter.");
+			exit(1);
+		}
+		globLog.setLogVerbosity(value);
+	}
 
 	qint64 start, stop, diff;
 	start = QDateTime::currentMSecsSinceEpoch();
