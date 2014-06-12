@@ -1522,6 +1522,7 @@ void MainWindow::on_actionSent_message_triggered()
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		downloadMessageList(index, "sent");
 	}
+	setDefaultProgressStatus();
 }
 
 
@@ -1768,6 +1769,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		downloadMessageList(index, "sent");
 	}
+	setDefaultProgressStatus();
 }
 
 /* ========================================================================= */
