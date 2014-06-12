@@ -1,9 +1,11 @@
 
 
+#include <QDebug>
 #include <QMap>
 #include <QObject>
 #include <QPair>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QString>
 #include <QVariant>
@@ -137,14 +139,12 @@ bool Tbl::createEmpty(QSqlDatabase &db) const
 	queryStr += tblConstraint;
 	queryStr += "\n)";
 	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
+	if (!query.prepare(queryStr) || !query.exec()) {
+		qWarning() << query.lastError();
 		return false;
 	}
-	if (query.exec()) {
-		return true;
-	}
 
-	return false;
+	return true;
 }
 
 
@@ -197,7 +197,7 @@ namespace AccntinfTbl {
 	};
 
 	const QMap<QString, AttrProp> attrProps = {
-	{"key",                    {DB_TEXT, QObject::tr("")}},
+	{"key",                    {DB_TEXT, ""}},
 	{"dbID",                   {DB_TEXT, QObject::tr("Data box ID")}},
 	{"dbType",                 {DB_TEXT, QObject::tr("Data box type")}},
 	{"ic",                     {DB_INTEGER, QObject::tr("IČ")}},
@@ -227,6 +227,33 @@ namespace AccntinfTbl {
 const Tbl accntinfTbl(AccntinfTbl::tabName, AccntinfTbl::knownAttrs,
     AccntinfTbl::attrProps, AccntinfTbl::colConstraints,
     AccntinfTbl::tblConstraint);
+
+
+namespace PwdexpdtTbl {
+	const QString tabName("password_expiration_date");
+
+	const QVector< QPair<QString, EntryType> > knownAttrs = {
+	{"key", DB_TEXT}, /* NOT NULL */
+	{"expDate", DB_TEXT}
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"key", "NOT NULL"}
+	};
+
+	const QString tblConstraint = {
+	    ",\n"
+	    "        PRIMARY KEY (key)"
+	};
+
+	const QMap<QString, AttrProp> attrProps = {
+	{"key",     {DB_TEXT, ""}},
+	{"expDate", {DB_TEXT, ""}}
+	};
+} /* namespace PwdexpdtTbl */
+const Tbl pwdexpdtTbl(PwdexpdtTbl::tabName, PwdexpdtTbl::knownAttrs,
+    PwdexpdtTbl::attrProps, PwdexpdtTbl::colConstraints,
+    PwdexpdtTbl::tblConstraint);
 
 
 namespace MsgsTbl {

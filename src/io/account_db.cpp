@@ -111,6 +111,12 @@ bool AccountDb::openDb(const QString &fileName)
 			    << "does not exist. Creating.";
 			return accntinfTbl.createEmpty(m_db);
 		}
+		/* Check whether db contains password expiration table. */
+		if (!pwdexpdtTbl.existsInDb(m_db)) {
+			qWarning() << pwdexpdtTbl.tabName
+			    << "does not exist. Creating.";
+			return pwdexpdtTbl.createEmpty(m_db);
+		}
 	}
 
 	return ret;
