@@ -83,6 +83,11 @@ public:
 	bool openDb(const QString &fileName);
 
 	/*!
+	 * @brief Get file name.
+	 */
+	QString fileName(void) const;
+
+	/*!
 	 * @brief Return received messages model.
 	 */
 	DbMsgsTblModel * msgsRcvdModel(const QString &recipDbId);
@@ -392,6 +397,14 @@ public:
 	    const QString &locDir, bool testing);
 
 	/*!
+	 * @brief Delete message db file.
+	 *
+	 * @return True on success.
+	 */
+	bool deleteMessageDb(MessageDb * deleted);
+
+#if 0
+	/*!
 	 * @brief Close message database related to item.
 	 */
 	void closeMessageDb(const QString &key);
@@ -400,6 +413,7 @@ public:
 	 * @brief Delete message db.
 	 */
 	void deleteMessageDb(const QString &key);
+#endif
 };
 
 

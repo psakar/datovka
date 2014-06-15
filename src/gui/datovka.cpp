@@ -1615,16 +1615,26 @@ void MainWindow::on_actionDelete_account_triggered()
 
 	if (reply == QMessageBox::Yes) {
 
-		QString userName = accountUserName() + "___True";
+		QString userName = accountUserName();
+		const AccountModel::SettingsMap &itemSettings =
+		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		QString dbDir = itemSettings[DB_DIR].toString();
 
 		if (itemTop->hasChildren()) {
 			itemTop->removeRows(0, itemTop->rowCount());
 		}
-		m_accountDb.deleteAccountInfo(userName);
+		m_accountDb.deleteAccountInfo(userName + "___True");
 
 		ui->accountList->model()->removeRow(currentTopRow);
 
-		/* TODO - delete message db on disk */
+		/* Delete message db from disk. */
+		MessageDb *db;
+		db = m_messageDbs.accessMessageDb(userName, dbDir,
+		    itemSettings[TEST].toBool());
+		Q_ASSERT(0 != db);
+		m_messageDbs.deleteMessageDb(db);
+
+		/* Save changed configuration. */
 		saveSettings();
 	}
 }

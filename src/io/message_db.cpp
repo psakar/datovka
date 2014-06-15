@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QFont>
 #include <QIcon>
 #include <QJsonDocument>
@@ -210,6 +211,17 @@ bool MessageDb::openDb(const QString &fileName)
 	}
 
 	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get file name.
+ */
+QString MessageDb::fileName(void) const
+/* ========================================================================= */
+{
+	return m_db.databaseName();
 }
 
 
@@ -2470,4 +2482,48 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 	this->insert(key, db);
 	return db;
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete message db.
+ */
+bool dbContainer::deleteMessageDb(MessageDb * deleted)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != deleted);
+	if (0 == deleted) {
+		return false;
+	}
+
+	/* Find entry. */
+	QMap<QString, MessageDb *>::iterator it = this->begin();
+	while ((it != this->end()) && (it.value() != deleted)) {
+		++it;
+	}
+	/* Must exist. */
+	Q_ASSERT(this->end() != it);
+	if (this->end() == it) {
+		return false;
+	}
+
+	/* Remove from container. */
+	this->erase(it);
+
+	/* Get file name. */
+	QString fileName = deleted->fileName();
+
+	/* Close database. */
+	delete deleted;
+
+	/* Delete file. */
+	qDebug() << "Deleting database file" << fileName;
+
+	if (!QFile::remove(fileName)) {
+		qWarning() << "Failed deleting database file" << fileName;
+		return false;
+	}
+
+	return true;
 }
