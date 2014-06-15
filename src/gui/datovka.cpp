@@ -229,8 +229,15 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	QString html;
 	DbMsgsTblModel *msgTblMdl;
 
-	Q_ASSERT(current.isValid());
+//	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
+		/* May occur on deleting last account. */
+		ui->messageList->selectionModel()->disconnect(
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(messageItemSelectionChanged(QModelIndex,
+		         QModelIndex)));
+
+		ui->messageList->setModel(0);
 		return;
 	}
 
