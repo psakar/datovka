@@ -783,9 +783,11 @@ void MainWindow::openSelectedAttachment(void)
 void MainWindow::downloadSelectedMessageAttachments(void)
 /* ========================================================================= */
 {
-	QModelIndex selectedIndex =
+	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
+	Q_ASSERT(messageIndex.isValid());
 	QModelIndex accountIndex = ui->accountList->currentIndex();
+	Q_ASSERT(accountIndex.isValid());
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
@@ -811,11 +813,46 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	m_statusProgressBar->repaint();
 
 	/* TODO -- Check return value. */
-	downloadMessage(accountIndex, selectedIndex, true, incoming);
+	downloadMessage(accountIndex, messageIndex, true, incoming);
 
 	setDefaultProgressStatus();
 
-	/* TODO -- Reload content of attachment list. */
+	/*
+	 * TODO -- Create a separate function for reloading attachment
+	 * contents. Similar code is used for handling message selection
+	 * changes.
+	 */
+
+	/* Disconnect model from slot if model already set. */
+	if (0 != ui->messageAttachmentList->selectionModel()) {
+		/* New model hasn't been set yet. */
+		ui->messageAttachmentList->selectionModel()->disconnect(
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		         QModelIndex)));
+	}
+
+	int msgId = messageIndex.sibling(messageIndex.row(), 0).data().toInt();
+	//qDebug() << "message index" << msgId;
+
+	/* Show files related to message message. */
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
+	Q_ASSERT(0 != fileTblMdl);
+	//qDebug() << "Setting files";
+	ui->messageAttachmentList->setModel(fileTblMdl);
+	/* First three columns contain hidden data. */
+	ui->messageAttachmentList->setColumnHidden(0, true);
+	ui->messageAttachmentList->setColumnHidden(1, true);
+	ui->messageAttachmentList->setColumnHidden(2, true);
+
+	/* Connect new slot. */
+	connect(ui->messageAttachmentList->selectionModel(),
+	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+	    SLOT(attachmentItemSelectionChanged(QModelIndex,
+	        QModelIndex)));
 }
 
 
