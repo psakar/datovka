@@ -139,6 +139,8 @@ private slots:
 
 	void on_actionDelete_message_triggered();
 
+	void on_actionDownload_message_signed_triggered();
+
 private:
 	/*!
 	 * @brief Default settings of main window.
@@ -276,7 +278,7 @@ private:
 	 * @brief Download attachments, envelope and raw for specific message.
 	 */
 	bool downloadMessage(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx, bool signedMsg, bool sentMessage);
+	    const QModelIndex &msgIdx, bool signedMsg, bool incoming);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.

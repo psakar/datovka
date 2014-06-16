@@ -2126,48 +2126,48 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	/* Delete hash from hashes table */
 	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
 	/* Delete file(s) from files table */
 	queryStr = "DELETE FROM files WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
 	/* Delete event(s) from events table */
 	queryStr = "DELETE FROM events WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
 	/* Delete raw message data from raw_message_data table */
 	queryStr= "DELETE FROM raw_message_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
@@ -2175,12 +2175,12 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
@@ -2188,12 +2188,12 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	queryStr = "DELETE FROM supplementary_message_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
@@ -2202,12 +2202,12 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
 	 	return false;
 	} else {
 		query.first();
@@ -2219,12 +2219,12 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	queryStr = "DELETE FROM message_certificate_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 
@@ -2233,7 +2233,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
 	    "certificate_id = :certificate_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error9: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":certificate_id", certificate_id);
@@ -2251,27 +2251,27 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 		queryStr = "DELETE FROM certificate_data WHERE "
 		    "id = :certificate_id";
 		if (!query.prepare(queryStr)) {
-			qDebug() << "Error: msgsDeleteMessageData"
+			qDebug() << "Error9: msgsDeleteMessageData"
 			    << query.lastError();
 			return false;
 		}
 		query.bindValue(":certificate_id", certificate_id);
 		if (!query.exec()) {
-			qDebug() << "Error: msgsDeleteMessageData"
+			qDebug() << "Error9: msgsDeleteMessageData"
 			    << query.lastError();
 			return false;
 		}
 	}
 
 	/* Delete message from messages table */
-	queryStr = "DELETE FROM messages WHERE message_id = :message_id";
+	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		qDebug() << "Error: msgsDeleteMessageData" << query.lastError();
+		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 

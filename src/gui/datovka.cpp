@@ -567,7 +567,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 		    tr("Download message signed"), this,
-		    SLOT(on_actionMark_all_as_read_triggered()));
+		    SLOT(downloadSelectedMessageAttachments()));
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
 		    tr("Reply"), this,
@@ -798,19 +798,19 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
-	bool incoming = false;
+	bool incoming = true;
 
 	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
 	switch (AccountModel::nodeType(index)) {
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		incoming = false;
+		incoming = true;
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		incoming = true;
+		incoming = false;
 		break;
 	default:
 		break;
@@ -2292,7 +2292,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
  * @brief Download attachments, envelope and raw for specific message.
  */
 bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
-    const QModelIndex &msgIdx, bool signedMsg, bool sentMessage)
+    const QModelIndex &msgIdx, bool signedMsg, bool incoming)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
@@ -2323,13 +2323,13 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	/* download signed message? */
 	if (signedMsg) {
 		/* sent or received message? */
-		if  (sentMessage) {
-			status = isds_get_signed_sent_message(
+		if  (incoming) {
+			status = isds_get_signed_received_message(
 			    isdsSessions.session(accountInfo.userName()),
 			    dmId.toStdString().c_str(),
 			    &message);
 		} else {
-			status = isds_get_signed_received_message(
+			status = isds_get_signed_sent_message(
 			    isdsSessions.session(accountInfo.userName()),
 			    dmId.toStdString().c_str(),
 			    &message);
@@ -2449,7 +2449,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
 	    (int)*message->envelope->dmAttachmentSize,
 	    message->envelope->dmType,
-	    (sentMessage) ? "sent" : "received"))
+	    (incoming) ? "received" : "sent"))
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
@@ -2488,14 +2488,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 
 	m_statusProgressBar->setValue(80);
 
-	if (sentMessage) {
-		/* Download and save delivery info and message events */
-		(getSentDeliveryInfo(acntTopIdx, dmID, true))
-		? qDebug() << "Delivery info of message was processed..."
-		: qDebug() << "ERROR: Delivery info of message not found!";
-		m_statusProgressBar->setValue(90);
-		getMessageAuthor(acntTopIdx, msgIdx);
-	} else {
+	if (incoming) {
 		/* Download and save delivery info and message events */
 		(getReceivedsDeliveryInfo(acntTopIdx, msgIdx, signedMsg))
 		? qDebug() << "Delivery info of message was processed..."
@@ -2508,6 +2501,13 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 		(markMessageAsDownloaded(acntTopIdx, msgIdx))
 		? qDebug() << "Message was marked as downloaded..."
 		: qDebug() << "ERROR: Message was not marked as downloaded!";
+	} else {
+		/* Download and save delivery info and message events */
+		(getSentDeliveryInfo(acntTopIdx, dmID, true))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+		m_statusProgressBar->setValue(90);
+		getMessageAuthor(acntTopIdx, msgIdx);
 	}
 
 	m_statusProgressBar->setValue(100);
@@ -3002,12 +3002,12 @@ bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		incoming = false;
+		incoming = true;
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		incoming = true;
+		incoming = false;
 		break;
 	default:
 		break;
@@ -3178,4 +3178,15 @@ void MainWindow::on_actionDelete_message_triggered()
 			qDebug() << "The message" << dmId << "was deleted";
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+* Download selected message attachments
+*/
+void MainWindow::on_actionDownload_message_signed_triggered()
+/* ========================================================================= */
+{
+	downloadSelectedMessageAttachments();
 }
