@@ -141,6 +141,14 @@ private slots:
 
 	void on_actionDownload_message_signed_triggered();
 
+	void on_actionAbout_Datovka_triggered();
+
+	void on_actionImport_database_directory_triggered();
+
+	void on_actionOpen_attachment_triggered();
+
+	void on_actionSave_attachment_triggered();
+
 private:
 	/*!
 	 * @brief Default settings of main window.

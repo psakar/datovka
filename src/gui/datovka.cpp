@@ -461,7 +461,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	ui->openAttachment->setEnabled(false);
 	ui->verifySignature->setEnabled(false);
 	ui->signatureDetails->setEnabled(false);
-
+	ui->actionSave_attachment->setEnabled(false);
+	ui->actionOpen_attachment->setEnabled(false);
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
 	 * handled multiple times.
@@ -610,6 +611,8 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
 	//qDebug() << "Attachment selection changed.";
 	ui->saveAttachment->setEnabled(true);
 	ui->openAttachment->setEnabled(true);
+	ui->actionSave_attachment->setEnabled(true);
+	ui->actionOpen_attachment->setEnabled(true);
 }
 
 
@@ -1727,13 +1730,14 @@ void MainWindow::on_actionMove_account_down_triggered()
 
 /* ========================================================================= */
 /*
-* Download sent/received message list for current (selected) account
+* Change data directory
  */
 void MainWindow::on_actionChange_data_directory_triggered()
 /* ========================================================================= */
 {
+	/* TODO - Change data directory */
 	qDebug() << "on_actionChange_data_directory_triggered";
-	/* TODO */
+
 }
 
 
@@ -3189,4 +3193,50 @@ void MainWindow::on_actionDownload_message_signed_triggered()
 /* ========================================================================= */
 {
 	downloadSelectedMessageAttachments();
+}
+
+
+/* ========================================================================= */
+/*
+* Download selected message attachments
+*/
+void MainWindow::on_actionAbout_Datovka_triggered()
+/* ========================================================================= */
+{
+	/* TODO - create about dilaog */
+	qDebug() << "on_actionAbout_Datovka_triggered";
+}
+
+
+/* ========================================================================= */
+/*
+* Import database directory
+*/
+void MainWindow::on_actionImport_database_directory_triggered()
+/* ========================================================================= */
+{
+	/* TODO - Import database directory */
+	qDebug() << "on_actionImport_database_directory_triggered";
+}
+
+
+/* ========================================================================= */
+/*
+* Open attachment in associate program
+*/
+void MainWindow::on_actionOpen_attachment_triggered()
+/* ========================================================================= */
+{
+	openSelectedAttachment();
+}
+
+
+/* ========================================================================= */
+/*
+* Save attachment to file
+*/
+void MainWindow::on_actionSave_attachment_triggered()
+/* ========================================================================= */
+{
+	saveSelectedAttachmentToFile();
 }
