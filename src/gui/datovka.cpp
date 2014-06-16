@@ -849,6 +849,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	/* Generate and show message information. */
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
+	ui->messageInfo->setReadOnly(true);
+
 	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
 	Q_ASSERT(0 != fileTblMdl);
 	//qDebug() << "Setting files";
