@@ -95,33 +95,33 @@ private slots:
 	 */
 	void downloadSelectedMessageAttachments(void);
 
-	void on_actionCreate_message_triggered();
+	void on_actionCreate_message_triggered(void);
 
-	void on_actionSent_message_triggered();
+	void on_actionSent_message_triggered(void);
 
-	void on_actionAdd_account_triggered();
+	void on_actionAdd_account_triggered(void);
 
-	void on_actionDelete_account_triggered();
+	void on_actionDelete_account_triggered(void);
 
-	void on_actionChange_password_triggered();
+	void on_actionChange_password_triggered(void);
 
-	void on_actionAccount_properties_triggered();
+	void on_actionAccount_properties_triggered(void);
 
-	void on_actionMove_account_up_triggered();
+	void on_actionMove_account_up_triggered(void);
 
-	void on_actionMove_account_down_triggered();
+	void on_actionMove_account_down_triggered(void);
 
-	void on_actionChange_data_directory_triggered();
+	void on_actionChange_data_directory_triggered(void);
 
-	void on_actionMark_all_as_read_triggered();
+	void on_actionMark_all_as_read_triggered(void);
 
-	void on_actionGet_messages_triggered();
+	void on_actionGet_messages_triggered(void);
 
-	void on_actionReply_to_the_sender_triggered();
+	void on_actionReply_to_the_sender_triggered(void);
 
-	void on_actionFind_databox_triggered();
+	void on_actionFind_databox_triggered(void);
 
-	void on_actionReply_triggered();
+	void on_actionReply_triggered(void);
 
 	void on_actionSearchClear_triggered(void);
 
@@ -131,23 +131,29 @@ private slots:
 
 	void onTableColumnSort(int column);
 
-	void on_actionDownload_messages_triggered();
+	void on_actionDownload_messages_triggered(void);
 
-	void on_actionSync_all_accounts_triggered();
+	void on_actionSync_all_accounts_triggered(void);
 
-	void on_actionRecieved_all_triggered();
+	void on_actionRecieved_all_triggered(void);
 
-	void on_actionDelete_message_triggered();
+	void on_actionDelete_message_triggered(void);
 
-	void on_actionDownload_message_signed_triggered();
+	void on_actionDownload_message_signed_triggered(void);
 
-	void on_actionAbout_Datovka_triggered();
+	void on_actionAbout_Datovka_triggered(void);
 
-	void on_actionImport_database_directory_triggered();
+	void on_actionImport_database_directory_triggered(void);
 
-	void on_actionOpen_attachment_triggered();
+	void on_actionOpen_attachment_triggered(void);
 
-	void on_actionSave_attachment_triggered();
+	void on_actionSave_attachment_triggered(void);
+
+	void on_actionAuthenticate_message_file_triggered(void);
+
+	void on_actionAuthenticate_message_triggered(void);
+
+	void on_actionVerify_a_message_triggered();
 
 private:
 	/*!
@@ -342,6 +348,18 @@ private:
 	 * @brief Get data about logged in user.
 	 */
 	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx);
+
+	/*!
+	 * @brief Authenticate message form db.
+	 */
+	bool authenticateMessageFromDb(const QModelIndex &acntTopIdx,
+	    const QModelIndex &msgIdx);
+
+	/*!
+	 * @brief Authenticate message form file.
+	 */
+	bool authenticateMessageFromZFO(void);
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

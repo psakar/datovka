@@ -2973,15 +2973,17 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	hashLocal->value = (void*)hashLocaldata[0].toStdString().c_str();
-	hashLocal->length = (size_t)hashLocaldata[0].size();
+	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata[0].toUtf8());
+	hashLocal->length = (size_t)rawHash.size();
 	hashLocal->algorithm =
 	    (isds_hash_algorithm)convertHashAlg2(hashLocaldata[1]);
+	hashLocal->value = malloc(hashLocal->length);
+	memcpy(hashLocal->value, rawHash.data(), hashLocal->length);
 
 	status = isds_hash_cmp(hashIsds, hashLocal);
 
-	isds_hash_free(&hashLocal);
 	isds_hash_free(&hashIsds);
+	isds_hash_free(&hashLocal);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -3247,4 +3249,151 @@ void MainWindow::on_actionSave_attachment_triggered()
 /* ========================================================================= */
 {
 	saveSelectedAttachmentToFile();
+}
+
+
+/* ========================================================================= */
+/*
+* Authenticate message form db
+*/
+bool MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
+    const QModelIndex &msgIdx)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo, this);
+	}
+	struct isds_message *message = NULL;
+	isds_error status;
+	size_t length;
+
+	status = isds_authenticate_message(isdsSessions.session(
+	    accountInfo.userName()), message, length);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Authenticate message form ZFO file
+*/
+bool MainWindow::authenticateMessageFromZFO(void)
+/* ========================================================================= */
+{
+	qDebug() << "authenticateMessageFromZFO";
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QString attachFileName = QFileDialog::getOpenFileName(this,
+	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
+
+	if (attachFileName.isNull()) {
+		return false;
+	}
+
+	size_t length;
+	isds_error status;
+	QByteArray bytes;
+	QFile file(attachFileName);
+
+	if (file.exists()) {
+
+		if (!file.open(QIODevice::ReadOnly)) {
+			qDebug() << "Couldn't open the file" << attachFileName;
+			return false;
+		}
+
+		bytes = file.readAll();
+		length = bytes.size();
+	}
+
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo, this);
+	}
+
+	status = isds_authenticate_message(isdsSessions.session(
+	    accountInfo.userName()), bytes.data(), length);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Authenticate message slot
+*/
+void MainWindow::on_actionAuthenticate_message_file_triggered(void)
+/* ========================================================================= */
+{
+	authenticateMessageFromZFO() ?
+	    QMessageBox::information(this, tr("Message is authentic"),
+	    tr("ISDS confirms that the message is valid."),
+	    QMessageBox::Ok)
+	: QMessageBox::warning(this,
+	    tr("Authenticate message error"),
+	    tr("The message is not valid or connection to ISDS failed!"),
+	    QMessageBox::Ok);
+}
+
+
+/* ========================================================================= */
+/*
+* Authenticate message slot
+*/
+void MainWindow::on_actionAuthenticate_message_triggered(void)
+/* ========================================================================= */
+{
+	on_actionVerify_a_message_triggered();
+/*
+	authenticateMessageFromZFO() ?
+	    QMessageBox::information(this, tr("Message is authentic"),
+	    tr("ISDS confirms that the message is valid."),
+	    QMessageBox::Ok)
+	: QMessageBox::warning(this,
+	    tr("Authenticate message error"),
+	    tr("The message is not valid or connection to ISDS failed!"),
+	    QMessageBox::Ok);
+*/
+}
+
+
+/* ========================================================================= */
+/*
+* Verify message slot
+*/
+void MainWindow::on_actionVerify_a_message_triggered(void)
+/* ========================================================================= */
+{
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	/* TODO */
+	verifyMessage(acntTopIdx, msgIdx) ?
+	    QMessageBox::information(this, tr("Message is valid"),
+	    tr("Message hash corresponds to ISDS message hash."),
+	    QMessageBox::Ok)
+	: QMessageBox::warning(this,
+	    tr("Authenticate message error"),
+	    tr("The message hash is not valid or connection to ISDS failed!"),
+	    QMessageBox::Ok);
 }
