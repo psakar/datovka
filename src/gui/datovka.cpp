@@ -84,22 +84,22 @@ MainWindow::MainWindow(QWidget *parent)
 	setDefaultProgressStatus();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
-
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->accountList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(accountItemRightClicked(QPoint)));
+	ui->accountList->setSelectionMode(QAbstractItemView::SingleSelection);
 
 	/* Message list. */
 	ui->messageList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(messageItemRightClicked(QPoint)));
+	ui->messageList->setSelectionMode(QAbstractItemView::SingleSelection);
 
 	qDebug() << "Load " << globPref.loadConfPath();
 	qDebug() << "Save" << globPref.saveConfPath();
 
 	/* Change "\" to "/" */
-
 	fixBackSlashesInFile(globPref.loadConfPath());
 
 	/* Show banner. */
@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setSortingEnabled(true);
 
 	/* Set default column size. */
-	/* TODO -- Check whether received of sent messages are shown? */
+	/* TODO -- Check whether received or sent messages are shown? */
 	setReciveidColumnWidths();
 
 	/* Attachment list. */
