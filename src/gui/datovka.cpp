@@ -237,7 +237,11 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
 		         QModelIndex)));
 
+		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
+		ui->accountTextInfo->setHtml(createDatovkaBanner(
+		    QCoreApplication::applicationVersion()));
+		ui->accountTextInfo->setReadOnly(true);
 		return;
 	}
 
