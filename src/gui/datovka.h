@@ -153,7 +153,11 @@ private slots:
 
 	void on_actionAuthenticate_message_triggered(void);
 
-	void on_actionVerify_a_message_triggered();
+	void on_actionVerify_a_message_triggered(void);
+
+	void on_actionView_message_from_ZPO_file_triggered(void);
+
+	void on_actionHepl_triggered(void);
 
 private:
 	/*!

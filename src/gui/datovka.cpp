@@ -10,6 +10,7 @@
 
 #include "datovka.h"
 #include "src/common.h"
+#include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_ds_search.h"
@@ -334,6 +335,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 
 	/* Depending on which item was clicked show/hide elements. */
 	QAbstractItemModel *itemModel;
+	bool received = true;
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 	case AccountModel::nodeAll:
@@ -346,12 +349,14 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeReceivedYear:
 		/* Set specific column width. */
 		setReciveidColumnWidths();
+		received = true;
 		goto setmodel;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
 		/* Set specific column width. */
 		setSentColumnWidths();
+		received = false;
 
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
@@ -391,6 +396,8 @@ setmodel:
 		Q_ASSERT(0);
 		break;
 	}
+	/* Set specific column width. */
+	received ? setReciveidColumnWidths() : setSentColumnWidths();
 }
 
 /* ========================================================================= */
@@ -1168,11 +1175,11 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionFind_databox->setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
 				ui->actionRecieved_all->setEnabled(true);
-
 				break;
 			}
 		}
 	} else {
+
 		defaultUiMainWindowSettings();
 	}
 }
@@ -3213,8 +3220,8 @@ void MainWindow::on_actionDownload_message_signed_triggered()
 void MainWindow::on_actionAbout_Datovka_triggered()
 /* ========================================================================= */
 {
-	/* TODO - create about dilaog */
-	qDebug() << "on_actionAbout_Datovka_triggered";
+	QDialog *abDialog = new aboutDialog(this);
+	abDialog->exec();
 }
 
 
@@ -3396,4 +3403,51 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 	    tr("Authenticate message error"),
 	    tr("The message hash is not valid or connection to ISDS failed!"),
 	    QMessageBox::Ok);
+}
+
+
+/* ========================================================================= */
+/*
+* View message content of ZFO file slot
+*/
+void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << "on_actionView_message_from_ZPO_file_triggered";
+
+	QString attachFileName = QFileDialog::getOpenFileName(this,
+	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
+
+	if (attachFileName.isNull()) {
+		return;
+	}
+
+	size_t length;
+	QByteArray bytes;
+	QFile file(attachFileName);
+
+	if (file.exists()) {
+
+		if (!file.open(QIODevice::ReadOnly)) {
+			qDebug() << "Couldn't open the file" << attachFileName;
+			return;
+		}
+
+		bytes = file.readAll();
+		length = bytes.size();
+	}
+
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+* Show help from html file
+*/
+void MainWindow::on_actionHepl_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << "on_actionHepl_triggered";
+	/* TODO - load help content from html file to browser */
 }
