@@ -1603,6 +1603,7 @@ void MainWindow::on_actionAdd_account_triggered()
 	if (QDialog::Accepted == newAccountDialog->exec()) {
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
+			saveSettings();
 		}
 	}
 }
