@@ -1438,16 +1438,14 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 		    unreadMsgs);
 	}
 	/* Sent. */
-	unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
-	m_accountModel.updateRecentSentUnread(topItem, unreadMsgs);
+	//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
+	m_accountModel.updateRecentSentUnread(topItem, 0);
 	yearList = db->msgsSntYears(dbId);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
-		unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
-		m_accountModel.addNodeSentYear(topItem, yearList.value(j),
-		    unreadMsgs);
+		//unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
+		m_accountModel.addNodeSentYear(topItem, yearList.value(j), 0);
 	}
-
 	return true;
 }
 
@@ -1496,15 +1494,15 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 			    yearList.value(j), unreadMsgs);
 		}
 		/* Sent. */
-		unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
-		m_accountModel.updateRecentSentUnread(itemTop, unreadMsgs);
+		//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
+		m_accountModel.updateRecentSentUnread(itemTop, 0);
 		yearList = db->msgsSntYears(dbId);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
-			unreadMsgs = db->msgsSntUnreadInYear(dbId,
-			    yearList.value(j));
+			//unreadMsgs = db->msgsSntUnreadInYear(dbId,
+			//    yearList.value(j));
 			m_accountModel.addNodeSentYear(itemTop,
-			    yearList.value(j), unreadMsgs);
+			    yearList.value(j), 0);
 		}
 	}
 
