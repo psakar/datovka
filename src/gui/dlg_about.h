@@ -11,6 +11,13 @@ class aboutDialog : public QDialog, public Ui::aboutDialog
 
 public:
 	aboutDialog(QWidget *parent = 0);
+
+private:
+	void initAboutDialog(void);
+private slots:
+	void showLicence(void);
+	void showCredits(void);
+	void closeDialog(void);
 };
 
 #endif // DLG_ABOUT_H

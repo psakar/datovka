@@ -15,7 +15,8 @@
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.1"
 #define TIMEOUT_MS 1000
-
+#define LICENCE_PATH "COPYING";
+#define CREDITS_PATH "AUTHORS";
 
 typedef enum {
 	USER_NAME = 0,
