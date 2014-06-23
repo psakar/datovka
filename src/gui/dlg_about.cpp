@@ -41,23 +41,22 @@ void aboutDialog::showLicence(void)
 /* ========================================================================= */
 {
 	QString filename = LICENCE_PATH;
+	QString content = "";
 	QFile file(filename);
+
 	if(!file.exists()) {
 		qDebug() << "Licence file " << filename << "not found";
 	}
 
-	QString line;
+	QTextStream textStream(&file);
 	this->textEdit->clear();
 	this->textEdit->setReadOnly(true);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		QTextStream stream(&file);
-		while (!stream.atEnd()){
-			line = stream.readLine();
-			this->textEdit->setText(this->textEdit->toPlainText()
-			    + line +"\n");
-		}
+		content = textStream.readAll();
 	}
+
 	file.close();
+	this->textEdit->setPlainText(content);
 }
 
 
@@ -68,23 +67,23 @@ void aboutDialog::showLicence(void)
 void aboutDialog::showCredits(void)
 /* ========================================================================= */
 {
-	QString filename = CREDITS_PATH ;
+	QString filename = CREDITS_PATH;
+	QString content = "";
 	QFile file(filename);
+
 	if(!file.exists()){
 		qDebug() << "Credits file " << filename << "not found";
 	}
 
-	QString line;
+	QTextStream textStream(&file);
 	this->textEdit->clear();
+	this->textEdit->setReadOnly(true);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		QTextStream stream(&file);
-		while (!stream.atEnd()){
-			line = stream.readLine();
-			this->textEdit->setText(this->textEdit->toPlainText()
-			    + line +"\n");
-		}
+		content = textStream.readAll();
 	}
+
 	file.close();
+	this->textEdit->setPlainText(content);
 }
 
 
