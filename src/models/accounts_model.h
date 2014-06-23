@@ -134,68 +134,39 @@ public:
 	QModelIndex indexTop(const QModelIndex &index);
 
 	/*!
-	 * @brief Set number of unread messages in recent received.
+	 * @brief Set number of unread messages in recent model nodes.
 	 *
 	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] nodeType   May be nodeRecentReceived or nodeRecentSent.
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool updateRecentReceivedUnread(QStandardItem *item,
+	bool updateRecentUnread(QStandardItem *item, NodeType nodeType,
 	    unsigned unreadMsgs = 0);
 
 	/*!
-	 * @brief Add received year node into account.
+	 * @brief Add year node into account.
 	 *
 	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
 	 * @param[in] year       Year string.
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool addReceivedYear(QStandardItem *item, const QString &year,
-	    unsigned unreadMsgs = 0);
+	bool addYear(QStandardItem *item, NodeType nodeType,
+	    const QString &year, unsigned unreadMsgs = 0);
 
 	/*!
-	 * @brief Update existing received year node in account.
+	 * @brief Update existing year node in account.
 	 *
 	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
 	 * @param[in] year       Year string.
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool updateReceivedYear(QStandardItem *item, const QString &year,
-	    unsigned unreadMsgs = 0);
-
-	/*!
-	 * @brief Set number of unread messages in recent sent.
-	 *
-	 * @param[in] item       Some item identifying the processed account.
-	 * @param[in] unreadMsgs Number of unread messages.
-	 * @return True on success.
-	 */
-	bool updateRecentSentUnread(QStandardItem *item,
-	    unsigned unreadMsgs = 0);
-
-	/*!
-	 * @brief Add sent year node into account.
-	 *
-	 * @param[in] item       Some item identifying the processed account.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
-	 * @return True on success.
-	 */
-	bool addSentYear(QStandardItem *item, const QString &year,
-	    unsigned unreadMsgs = 0);
-
-	/*!
-	 * @brief Update existing sent year node in account.
-	 *
-	 * @param[in] item       Some item identifying the processed account.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
-	 * @return True on success.
-	 */
-	bool updateSentYear(QStandardItem *item, const QString &year,
-	    unsigned unreadMsgs = 0);
+	bool updateYear(QStandardItem *item, NodeType nodeType,
+	    const QString &year, unsigned unreadMsgs = 0);
 
 	/*!
 	 * @brief Delete year-related nodes in model for given account.

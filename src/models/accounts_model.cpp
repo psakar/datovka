@@ -402,9 +402,9 @@ QModelIndex AccountModel::indexTop(const QModelIndex &index)
 
 /* ========================================================================= */
 /*
- * Set number of unread messages in recent received.
+ * Set number of unread messages in recent model nodes.
  */
-bool AccountModel::updateRecentReceivedUnread(QStandardItem *item,
+bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
     unsigned unreadMsgs)
 /* ========================================================================= */
 {
@@ -416,8 +416,16 @@ bool AccountModel::updateRecentReceivedUnread(QStandardItem *item,
 		return false;
 	}
 
-	/* Get recently received node. */
-	item = item->child(0, 0);
+	if (nodeRecentReceived == nodeType) {
+		/* Get recently received node. */
+		item = item->child(0, 0);
+	} else if (nodeRecentSent == nodeType) {
+		/* Get recently sent node. */
+		item = item->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	Q_ASSERT(0 != item);
 	if (0 == item) {
@@ -436,10 +444,10 @@ bool AccountModel::updateRecentReceivedUnread(QStandardItem *item,
 
 /* ========================================================================= */
 /*
- * Add received year node into account.
+ * Add year node into account.
  */
-bool AccountModel::addReceivedYear(QStandardItem *item, const QString &year,
-    unsigned unreadMsgs)
+bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
+    const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
 	/* Find account top. */
@@ -450,129 +458,16 @@ bool AccountModel::addReceivedYear(QStandardItem *item, const QString &year,
 		return false;
 	}
 
-	/* Get received node. */
-	item = item->child(2, 0)->child(0, 0);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
-		return false;
-	}
-
-	/* Check whether year already exists as child element. */
-	for (int i = 0; i < item->rowCount(); ++i) {
-		if (year == item->child(i, 0)->text()) {
-			return false;
-		}
-	}
-
-	/* Add new child item. */
-	QStandardItem *yearItem = new QStandardItem(year);
-	yearItem->setIcon(QIcon(ICON_16x16_PATH +
-	    QString("datovka-message-download.png")));
-	yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
-	if (0 < unreadMsgs) {
-		yearItem->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
-	}
-	item->appendRow(yearItem);
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Update existing received year node in account.
- */
-bool AccountModel::updateReceivedYear(QStandardItem *item, const QString &year,
-    unsigned unreadMsgs)
-/* ========================================================================= */
-{
-	/* Find account top. */
-	item = itemTop(item);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
-		return false;
-	}
-
-	/* Get received node. */
-	item = item->child(2, 0)->child(0, 0);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
-		return false;
-	}
-
-	/* Check whether year already exists as child element. */
-	for (int i = 0; i < item->rowCount(); ++i) {
-		if (year == item->child(i, 0)->text()) {
-			if (0 < unreadMsgs) {
-				item->child(i, 0)->setData(unreadMsgs,
-				    ROLE_ACNT_UNREAD_MSGS);
-			} else {
-				item->child(i, 0)->setData(QVariant(),
-				    ROLE_ACNT_UNREAD_MSGS);
-			}
-			return true;
-		}
-	}
-
-	return false; /* Element not found. */
-}
-
-
-/* ========================================================================= */
-/*
- * Set number of unread messages in recent sent.
- */
-bool AccountModel::updateRecentSentUnread(QStandardItem *item,
-    unsigned unreadMsgs)
-/* ========================================================================= */
-{
-	/* Find account top. */
-	item = itemTop(item);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
-		return false;
-	}
-
-	/* Get recently sent node. */
-	item = item->child(1, 0);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
-		return false;
-	}
-
-	if (0 < unreadMsgs) {
-		item->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
 	} else {
-		item->setData(QVariant(), ROLE_ACNT_UNREAD_MSGS);
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Add sent year node into account.
- */
-bool AccountModel::addSentYear(QStandardItem *item, const QString &year,
-    unsigned unreadMsgs)
-/* ========================================================================= */
-{
-	/* Find account top. */
-	item = itemTop(item);
-
-	Q_ASSERT(0 != item);
-	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
-
-	/* Get sent node. */
-	item = item->child(2, 0)->child(1, 0);
 
 	Q_ASSERT(0 != item);
 	if (0 == item) {
@@ -586,10 +481,15 @@ bool AccountModel::addSentYear(QStandardItem *item, const QString &year,
 		}
 	}
 
-	/* Add new child item. */
+	/* Add new child item and set proper icon. */
 	QStandardItem *yearItem = new QStandardItem(year);
-	yearItem->setIcon(QIcon(ICON_16x16_PATH +
-	    QString("datovka-message-reply.png")));
+	if (nodeReceivedYear == nodeType) {
+		yearItem->setIcon(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message-download.png")));
+	} else {
+		yearItem->setIcon(QIcon(ICON_16x16_PATH +
+		    QString("datovka-message-reply.png")));
+	}
 	yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
 	if (0 < unreadMsgs) {
 		yearItem->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
@@ -602,10 +502,10 @@ bool AccountModel::addSentYear(QStandardItem *item, const QString &year,
 
 /* ========================================================================= */
 /*
- * Update existing sent year node in account.
+ * Update existing year node in account.
  */
-bool AccountModel::updateSentYear(QStandardItem *item, const QString &year,
-    unsigned unreadMsgs)
+bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
+    const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
 	/* Find account top. */
@@ -616,8 +516,16 @@ bool AccountModel::updateSentYear(QStandardItem *item, const QString &year,
 		return false;
 	}
 
-	/* Get sent node. */
-	item = item->child(2, 0)->child(1, 0);
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	Q_ASSERT(0 != item);
 	if (0 == item) {
