@@ -1,4 +1,5 @@
 
+#include <cmath> /* ceil(3) */
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
@@ -3321,7 +3322,7 @@ bool MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
 	}
 	struct isds_message *message = NULL;
 	isds_error status;
-	size_t length;
+	size_t length = 0;
 
 	status = isds_authenticate_message(isdsSessions.session(
 	    accountInfo.userName()), message, length);
