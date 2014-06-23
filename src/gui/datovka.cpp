@@ -514,7 +514,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			 * Reload/update account model only for
 			 * affected account.
 			 */
-			regenerateAccountModelYears(ui->accountList->
+			updateExistingAccountModelUnread(ui->accountList->
 			    selectionModel()->currentIndex());
 			/*
 			 * Mark message as read without reloading
@@ -523,6 +523,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			Q_ASSERT(0 != m_messageModel);
 			QModelIndex modelIndex =
 			    ui->messageList->selectionModel()->currentIndex();
+			Q_ASSERT(modelIndex.isValid());
 			m_messageModel->overideRead(
 			    current.sibling(modelIndex.row(),
 			        0).data().toInt(), true);
@@ -1396,6 +1397,66 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 
 /* ========================================================================= */
 /*
+ * Update numbers of unread messages in account model.
+ */
+bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
+/* ========================================================================= */
+{
+	/*
+	 * Several nodes may be updated at once, because som messages may be
+	 * referred from multiple nodes.
+	 */
+
+	QStandardItem *topItem;
+	MessageDb *db;
+	QList<QString> yearList;
+	int unreadMsgs;
+
+	Q_ASSERT(index.isValid());
+	index = AccountModel::indexTop(index);
+
+	/* Get database id. */
+	topItem = m_accountModel.itemFromIndex(index);
+	Q_ASSERT(0 != topItem);
+	const AccountModel::SettingsMap &itemSettings =
+	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString &userName = itemSettings[USER].toString();
+	Q_ASSERT(!userName.isEmpty());
+	QString dbDir = itemSettings[DB_DIR].toString();
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = GlobPreferences::confDir();
+	}
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	/* Received. */
+	unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
+	m_accountModel.updateRecentReceivedUnread(topItem, unreadMsgs);
+	yearList = db->msgsRcvdYears(dbId);
+	for (int j = 0; j < yearList.size(); ++j) {
+		//qDebug() << "Received" << yearList.value(j);
+		unreadMsgs = db->msgsRcvdUnreadInYear(dbId, yearList.value(j));
+		m_accountModel.updateReceivedYear(topItem, yearList.value(j),
+		    unreadMsgs);
+	}
+	/* Sent. */
+	//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
+	m_accountModel.updateRecentSentUnread(topItem, 0);
+	yearList = db->msgsSntYears(dbId);
+	for (int j = 0; j < yearList.size(); ++j) {
+		//qDebug() << "Sent" << yearList.value(j);
+		//unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
+		m_accountModel.updateSentYear(topItem, yearList.value(j), 0);
+	}
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
  * Partially regenerates account model according to the database
  *     content.
  */
@@ -1412,6 +1473,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 
 	m_accountModel.removeYearNodes(index);
 
+	/* Get database id. */
 	topItem = m_accountModel.itemFromIndex(index);
 	Q_ASSERT(0 != topItem);
 	const AccountModel::SettingsMap &itemSettings =
@@ -1427,6 +1489,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	/* Received. */
 	unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
 	m_accountModel.updateRecentReceivedUnread(topItem, unreadMsgs);
@@ -1434,7 +1497,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = db->msgsRcvdUnreadInYear(dbId, yearList.value(j));
-		m_accountModel.addNodeReceivedYear(topItem, yearList.value(j),
+		m_accountModel.addReceivedYear(topItem, yearList.value(j),
 		    unreadMsgs);
 	}
 	/* Sent. */
@@ -1444,7 +1507,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
 		//unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
-		m_accountModel.addNodeSentYear(topItem, yearList.value(j), 0);
+		m_accountModel.addSentYear(topItem, yearList.value(j), 0);
 	}
 	return true;
 }
@@ -1467,6 +1530,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 	//qDebug() << "Generating years";
 
 	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
+		/* Get database ID. */
 		itemTop = m_accountModel.item(i, 0);
 		Q_ASSERT(0 != itemTop);
 		const AccountModel::SettingsMap &itemSettings =
@@ -1482,6 +1546,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		    itemSettings[TEST].toBool());
 		Q_ASSERT(0 != db);
 		QString dbId = m_accountDb.dbId(userName + "___True");
+
 		/* Received. */
 		unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
 		m_accountModel.updateRecentReceivedUnread(itemTop, unreadMsgs);
@@ -1490,7 +1555,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 			//qDebug() << yearList.value(j);
 			unreadMsgs = db->msgsRcvdUnreadInYear(dbId,
 			    yearList.value(j));
-			m_accountModel.addNodeReceivedYear(itemTop,
+			m_accountModel.addReceivedYear(itemTop,
 			    yearList.value(j), unreadMsgs);
 		}
 		/* Sent. */
@@ -1501,7 +1566,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 			//qDebug() << yearList.value(j);
 			//unreadMsgs = db->msgsSntUnreadInYear(dbId,
 			//    yearList.value(j));
-			m_accountModel.addNodeSentYear(itemTop,
+			m_accountModel.addSentYear(itemTop,
 			    yearList.value(j), 0);
 		}
 	}

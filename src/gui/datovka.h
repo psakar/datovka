@@ -241,16 +241,34 @@ private:
 	void saveAccountIndex(QSettings &settings) const;
 
 	/*!
+	 * @brief Update numbers of unread messages in account model.
+	 *
+	 * param[in] index Index identifying account.
+	 * @return True on success.
+	 *
+	 * @note Does not add/remove any nodes, just updates the counts.
+	 */
+	bool updateExistingAccountModelUnread(QModelIndex index);
+
+	/*!
 	 * @brief Partially regenerates account model according to the database
 	 *     content.
 	 *
-	 * @param[in] index Index identifying acount.
+	 * @param[in] index Index identifying account.
 	 * @return True on success.
+	 *
+	 * @note This function adds/removes nodes and does not set the
+	 *     currentIndex back to its original position.
 	 */
 	bool regenerateAccountModelYears(QModelIndex index);
 
 	/*!
 	 * @brief Regenerates account model according to the database content.
+	 *
+	 * @return True on success.
+	 *
+	 * @note This function add/removes nodes and does not set the
+	 *     currentIndex back to its original position.
 	 */
 	bool regenerateAllAccountModelYears(void);
 
