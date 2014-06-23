@@ -3158,24 +3158,6 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 
 /* ========================================================================= */
 /*
-* CALLBACK
-*/
-int MainWindow::progressCallback(double upload_total, double upload_current,
-        double download_total, double download_current, void *data)
-/* ========================================================================= */
-{
-	QProgressBar *progressBar = (QProgressBar *) data;
-	if (0 == progressBar) {
-		return 0; /* DOn't draw anything. */
-	}
-	//qDebug() << upload_total << upload_current <<
-	//    download_total << download_current;
-	return 0;
-}
-
-
-/* ========================================================================= */
-/*
 * Delete message slot
 */
 void MainWindow::on_actionDelete_message_triggered()

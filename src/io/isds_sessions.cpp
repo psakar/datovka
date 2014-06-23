@@ -288,6 +288,8 @@ struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
     MainWindow *mw)
 /* ========================================================================= */
 {
+	(void) mw;
+
 	isds_error status;
 	struct isds_ctx *isds_session = NULL;
 
@@ -307,11 +309,6 @@ struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
 	}
 
 	m_sessions.insert(userName, isds_session);
-
-	/* Progress callback. */
-	/* TODO -- What to do in multiple simultaneous downloads? */
-	isds_set_progress_callback(isds_session, MainWindow::progressCallback,
-	    (0 != mw) ? mw->m_statusProgressBar : 0);
 
 	return isds_session;
 fail:
