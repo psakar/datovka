@@ -151,7 +151,18 @@ public:
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool addNodeReceivedYear(QStandardItem *item, const QString &year,
+	bool addReceivedYear(QStandardItem *item, const QString &year,
+	    unsigned unreadMsgs = 0);
+
+	/*!
+	 * @brief Update existing received year node in account.
+	 *
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateReceivedYear(QStandardItem *item, const QString &year,
 	    unsigned unreadMsgs = 0);
 
 	/*!
@@ -172,7 +183,18 @@ public:
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool addNodeSentYear(QStandardItem *item, const QString &year,
+	bool addSentYear(QStandardItem *item, const QString &year,
+	    unsigned unreadMsgs = 0);
+
+	/*!
+	 * @brief Update existing sent year node in account.
+	 *
+	 * @param[in] item       Some item identifying the processed account.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateSentYear(QStandardItem *item, const QString &year,
 	    unsigned unreadMsgs = 0);
 
 	/*!
