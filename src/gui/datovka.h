@@ -377,7 +377,7 @@ private:
 	/*!
 	 * @brief Authenticate message form file.
 	 */
-	bool authenticateMessageFromZFO(void);
+	bool authenticateMessageFromZfoFile(void);
 
 
 	QString m_confDirName; /*!< Configuration directory location. */

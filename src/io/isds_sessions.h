@@ -140,4 +140,15 @@ isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
     const QString &ic, const QString &firmName, const QString &caStreet,
     const QString &caCity, const QString &caZipCode, const QString &caState);
 
+
+/*!
+ * @brief Create a isds message from zfo file.
+ *
+ * @param[in] isdsSession Pointer to session context.
+ * @param[in] fName       File name.
+ * @return Pointer to message structure, NULL on error.
+ */
+struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
+    const QString &fName);
+
 #endif /* _ISDS_SESSIONS_H_ */

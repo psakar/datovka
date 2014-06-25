@@ -1,6 +1,7 @@
 
 
 #include <QDebug>
+#include <QFile>
 #include <QInputDialog>
 #include <QObject>
 #include <QMessageBox>
@@ -638,3 +639,51 @@ isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
 }
 
 
+/* ========================================================================= */
+/*
+ * Create a isds message from zfo file.
+ */
+struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
+    const QString &fileName)
+/* ========================================================================= */
+{
+	isds_error status;
+	isds_raw_type raw_type;
+	struct isds_message *message = NULL;
+
+	Q_ASSERT(NULL != isdsSession);
+
+	QFile file(fileName);
+	QByteArray content;
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		qWarning() << "Cannot open file" << fileName;
+		goto fail;
+	}
+
+	content = file.readAll();
+	file.close();
+
+	status = isds_guess_raw_type(isdsSession, &raw_type, content.data(),
+	    content.size());
+	if (IE_SUCCESS != status) {
+		qWarning() << "Cannot guess content type of file" << fileName;
+		goto fail;
+	}
+
+	status = isds_load_message(isdsSession, raw_type, content.data(),
+	    content.size(), &message, BUFFER_COPY);
+	if (IE_SUCCESS != status) {
+		qWarning() << "Error while loading message from file"
+		    << fileName;
+		goto fail;
+	}
+
+	return message;
+
+fail:
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+	return NULL;
+}

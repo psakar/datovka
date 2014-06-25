@@ -18,6 +18,7 @@
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
+#include "src/gui/dlg_view_zfo.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -3351,10 +3352,10 @@ bool MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
 /*
 * Authenticate message form ZFO file
 */
-bool MainWindow::authenticateMessageFromZFO(void)
+bool MainWindow::authenticateMessageFromZfoFile(void)
 /* ========================================================================= */
 {
-	qDebug() << "authenticateMessageFromZFO";
+	qDebug() << __func__;
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
@@ -3375,7 +3376,6 @@ bool MainWindow::authenticateMessageFromZFO(void)
 	QFile file(attachFileName);
 
 	if (file.exists()) {
-
 		if (!file.open(QIODevice::ReadOnly)) {
 			qDebug() << "Couldn't open the file" << attachFileName;
 			return false;
@@ -3409,7 +3409,7 @@ bool MainWindow::authenticateMessageFromZFO(void)
 void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 /* ========================================================================= */
 {
-	authenticateMessageFromZFO() ?
+	authenticateMessageFromZfoFile() ?
 	    QMessageBox::information(this, tr("Message is authentic"),
 	    tr("ISDS confirms that the message is valid."),
 	    QMessageBox::Ok)
@@ -3429,7 +3429,7 @@ void MainWindow::on_actionAuthenticate_message_triggered(void)
 {
 	on_actionVerify_a_message_triggered();
 /*
-	authenticateMessageFromZFO() ?
+	authenticateMessageFromZfoFile() ?
 	    QMessageBox::information(this, tr("Message is authentic"),
 	    tr("ISDS confirms that the message is valid."),
 	    QMessageBox::Ok)
@@ -3471,31 +3471,43 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << "on_actionView_message_from_ZPO_file_triggered";
+	struct isds_message *message = NULL;
 
-	QString attachFileName = QFileDialog::getOpenFileName(this,
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	qDebug() << __func__;
+
+	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
-	if (attachFileName.isNull()) {
+	if (fileName.isEmpty()) {
 		return;
 	}
 
-	size_t length;
-	QByteArray bytes;
-	QFile file(attachFileName);
-
-	if (file.exists()) {
-
-		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << attachFileName;
-			return;
-		}
-
-		bytes = file.readAll();
-		length = bytes.size();
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo, this);
 	}
 
-	/* TODO */
+	message = loadZfoFile(isdsSessions.session(accountInfo.userName()),
+	    fileName);
+	if (NULL == message) {
+		qDebug() << "Cannot parse file" << fileName;
+		QMessageBox::warning(this,
+		    tr("Content parsing error"),
+		    tr("Cannot parse the content of ") + fileName + ".",
+		    QMessageBox::Ok);
+		return;
+	}
+
+	/* Generate dialog showing message content. */
+	QDialog *viewDialog = new DlgViewZfo(message, this);
+	viewDialog->exec();
+
+	isds_message_free(&message);
 }
 
 
