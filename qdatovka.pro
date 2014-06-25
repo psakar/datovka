@@ -53,7 +53,8 @@ SOURCES += src/common.cpp \
     src/log/log.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
-    src/gui/dlg_about.cpp
+    src/gui/dlg_about.cpp \
+    src/gui/dlg_view_zfo.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
@@ -72,7 +73,8 @@ HEADERS += src/common.h \
     src/io/pkcs7.h \
     src/log/log.h \
     src/models/accounts_model.h \
-    src/gui/dlg_about.h
+    src/gui/dlg_about.h \
+    src/gui/dlg_view_zfo.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \
@@ -82,7 +84,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \
-    src/gui/ui/dlg_about.ui
+    src/gui/ui/dlg_about.ui \
+    src/gui/ui/dlg_view_zfo.ui
 
 RESOURCES += \
     res/resources.qrc
