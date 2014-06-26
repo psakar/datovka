@@ -423,7 +423,9 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0 != itemTop);
 		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	} else {
-		connectToIsds();
+		if (IE_SUCCESS != connectToIsds()) {
+			return;
+		}
 	}
 
 	itemSettings[NAME] = this->accountLineEdit->text();
