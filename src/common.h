@@ -9,6 +9,8 @@
 #include <QDebug>
 
 
+#define TMP_ATTACHMENT_PREFIX "qdatovka_attachment_"
+
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"

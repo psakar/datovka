@@ -4,9 +4,12 @@
 #include <QDesktopServices>
 #include <QDialog>
 #include <QDir>
+#include <QFileDialog>
+#include <QMenu>
 #include <QTemporaryFile>
 #include <QUrl>
 
+#include "src/common.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 
@@ -212,9 +215,31 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, QWidget *parent)
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	QModelIndex index = attachmentTable->indexAt(point);
+	QMenu *menu = new QMenu;
 
-	/* TODO */
+	/* Detects selection of multiple attachments. */
+	QModelIndexList indexes = selectedAttachmentIndexes();
+
+	if (index.isValid()) {
+		//attachmentItemSelectionChanged(index);
+
+		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
+		    tr("Open attachment"), this,
+		    SLOT(openSelectedAttachment()))->
+		        setEnabled(indexes.size() == 1);
+		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
+		    tr("Save attachment"), this,
+		    SLOT(saveSelectedAttachmentToFile()))->
+		        setEnabled(indexes.size() == 1);
+		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
+		    tr("Save attachments"), this,
+		    SLOT(saveSelectedAttachmentsIntoDirectory()))->
+		        setEnabled(indexes.size() > 1);
+	} else {
+		/* Do nothing. */
+	}
+	menu->exec(QCursor::pos());
 }
 
 
@@ -240,7 +265,37 @@ void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
 void DlgViewZfo::saveSelectedAttachmentToFile(void)
 /* ========================================================================= */
 {
-	/* TODO */
+	QModelIndex selectedIndex = selectedAttachmentIndex();
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return;
+	}
+
+	QString fileName = selectedIndex.data().toString();
+	Q_ASSERT(!fileName.isEmpty());
+	/* TODO -- Remember directory? */
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save attachment"), fileName);
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly)) {
+		return; /* TODO -- Error message. */
+	}
+
+	QByteArray data =
+	    m_attachmentModel.attachmentData(selectedIndex.row());
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+		/* TODO -- Error message? */
+	}
+
+	fout.close();
 }
 
 
@@ -262,22 +317,17 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 void DlgViewZfo::openSelectedAttachment(void)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != attachmentTable->selectionModel());
-
-	QModelIndex selectedIndex =
-	    attachmentTable->selectionModel()->currentIndex();
+	QModelIndex selectedIndex = selectedAttachmentIndex();
 
 	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
 		return;
 	}
 
-	selectedIndex = selectedIndex.sibling(selectedIndex.row(), FNAME_COL);
-
 	QString fileName = selectedIndex.data().toString();
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Add message id into file name? */
-	fileName = "qdatovka_attachment_" + fileName;
+	fileName = TMP_ATTACHMENT_PREFIX + fileName;
 
 	//qDebug() << "Selected file: " << fileName;
 
@@ -294,7 +344,8 @@ void DlgViewZfo::openSelectedAttachment(void)
 	/* Get whole path. */
 	fileName = fout.fileName();
 
-	QByteArray data = m_attachmentModel.attachmentData(selectedIndex.row());
+	QByteArray data =
+	    m_attachmentModel.attachmentData(selectedIndex.row());
 
 	int written = fout.write(data);
 	if (written != data.size()) {
@@ -372,4 +423,38 @@ QString DlgViewZfo::descriptionHtml(int attachmentCount)
 	html += strongAccountInfoLine(tr("Time-stamp"), "TODO");
 
 	return html;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns selected attachment index.
+ */
+QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != attachmentTable->selectionModel());
+
+	QModelIndex selectedIndex =
+	    attachmentTable->selectionModel()->currentIndex();
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return QModelIndex();
+	}
+
+	return selectedIndex.sibling(selectedIndex.row(), FNAME_COL);
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns all selected indexes.
+ */
+QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != attachmentTable->selectionModel());
+
+	return attachmentTable->selectionModel()->selectedRows(0);
 }

@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 
-	/* Confioguration directory and file must exist. */
+	/* Configuration directory and file must exist. */
 	ensureConfPresence();
 
 	/* Open accounts database. */
@@ -763,7 +763,7 @@ void MainWindow::openSelectedAttachment(void)
 	QString fileName = fileNameIndex.data().toString();
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Add message id into file name? */
-	fileName = "qdatovka_attachment_" + fileName;
+	fileName = TMP_ATTACHMENT_PREFIX + fileName;
 
 	//qDebug() << "Selected file: " << fileName;
 

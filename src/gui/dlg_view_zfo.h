@@ -124,6 +124,16 @@ private slots:
 
 private:
 	/*!
+	 * @brief Returns selected attachment index.
+	 */
+	QModelIndex selectedAttachmentIndex(void) const;
+
+	/*!
+	 * @brief Returns all selected indexes.
+	 */
+	QModelIndexList selectedAttachmentIndexes(void) const;
+
+	/*!
 	 * @brief Generate description from supplied message.
 	 *
 	 * @param[in] attachmentCount Number of attached files.
