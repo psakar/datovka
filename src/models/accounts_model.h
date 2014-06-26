@@ -33,7 +33,7 @@ public:
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
-
+		QString accountName(void) const;
 		QString loginMethod(void) const;
 		QString userName(void) const;
 		QString password(void) const;

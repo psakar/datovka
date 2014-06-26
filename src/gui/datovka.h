@@ -304,13 +304,13 @@ private:
 	/*!
 	 * @brief Download sent/received message list for specific account.
 	 */
-	bool downloadMessageList(const QModelIndex &acntTopIdx,
+	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
 	    const QString messageType);
 
 	/*!
 	 * @brief Download attachments, envelope and raw for specific message.
 	 */
-	bool downloadMessage(const QModelIndex &acntTopIdx,
+	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx, bool signedMsg, bool incoming);
 
 	/*!
@@ -350,12 +350,12 @@ private:
 	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
-	bool eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
+	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	bool verifyMessage(const QModelIndex &acntTopIdx,
+	qdatovka_error verifyMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
@@ -371,14 +371,13 @@ private:
 	/*!
 	 * @brief Authenticate message form db.
 	 */
-	bool authenticateMessageFromDb(const QModelIndex &acntTopIdx,
+	qdatovka_error authenticateMessageFromDb(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!
 	 * @brief Authenticate message form file.
 	 */
-	bool authenticateMessageFromZfoFile(void);
-
+	qdatovka_error authenticateMessageFromZFO(void);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

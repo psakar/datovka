@@ -192,6 +192,215 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 }
 
 
+
+/* ========================================================================= */
+/*
+ * Connect to ISDS and test of account existence
+ */
+isds_error DlgCreateAccount::connectToIsds(void)
+/* ========================================================================= */
+{
+	isds_error status;
+	struct isds_ctx *isds_session = NULL;
+	QMessageBox msgBox;
+	QString messageBoxTitle = "";
+
+	isds_session = isds_ctx_create();
+	if (NULL == isds_session) {
+		qDebug() << "Error creating ISDS session.";
+		isds_ctx_free(&isds_session);
+		msgBox.setWindowTitle(messageBoxTitle);
+		msgBox.setText(tr("Error to connect into ISDS."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return IE_INVALID_CONTEXT;
+	}
+
+	status = isds_set_timeout(isds_session, TIMEOUT_MS);
+	if (IE_SUCCESS != status) {
+		qDebug() << "Error setting time-out.";
+		isds_ctx_free(&isds_session);
+		msgBox.setWindowTitle(messageBoxTitle);
+		msgBox.setText(tr("Error to connect into ISDS."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.exec();
+		return IE_INVALID_CONTEXT;
+	}
+
+	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
+
+		status = isdsLoginUserName(isds_session,
+		    this->usernameLineEdit->text(),
+		    this->passwordLineEdit->text(),
+		    this->testAccountCheckBox->isChecked(), 0,
+		    this->accountLineEdit->text());
+		if (IE_SUCCESS != status) {
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into databox!"));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setInformativeText(
+			    tr("Bad username or password for this account.\n") +
+			    tr("ISDS ErrorType: ") + isds_strerror(status) +
+			    "\n\n" +
+			    tr("Account ") + this->accountLineEdit->text() +
+			    tr(" will not created..."));
+			msgBox.exec();
+			return IE_ERROR;
+		}
+
+	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
+
+		status = isdsLoginSystemCert(isds_session,
+		    m_certPath, this->testAccountCheckBox->isChecked());
+
+		if (IE_SUCCESS != status) {
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into databox!"));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setInformativeText(
+			    tr("Bad certificate for this account.\n") +
+			    tr("ISDS ErrorType: ") + isds_strerror(status) +
+			    "\n\n" +
+			    tr("Account ") + this->accountLineEdit->text() +
+			    tr(" will not created..."));
+			msgBox.exec();
+			return IE_ERROR;
+		}
+
+	} else if (this->loginmethodComboBox->currentIndex()
+		                                        == USER_CERTIFICATE) {
+
+		if (this->passwordLineEdit->text().isEmpty()) {
+			status = isdsLoginUserCert(isds_session,
+			    //	username means ID of databox
+			    this->usernameLineEdit->text(),
+			    m_certPath, this->testAccountCheckBox->isChecked());
+		} else {
+			status = isdsLoginUserCertPwd(isds_session,
+			    this->usernameLineEdit->text(),
+			    this->passwordLineEdit->text(),
+			    m_certPath, this->testAccountCheckBox->isChecked(),
+			    0, this->accountLineEdit->text());
+		}
+
+		if (IE_SUCCESS != status) {
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into databox!"));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setInformativeText(
+			    tr("Bad certificate or password for this account.\n") +
+			    tr("ISDS ErrorType: ") + isds_strerror(status) +
+			    "\n\n" +
+			    tr("Account ") + this->accountLineEdit->text() +
+			    tr(" will not created..."));
+			msgBox.exec();
+			return IE_ERROR;
+		}
+	} else {
+		status = isdsLoginUserOtp(isds_session,
+		    this->usernameLineEdit->text(),
+		    this->passwordLineEdit->text(),
+		    this->testAccountCheckBox->isChecked(),
+		    0, this->accountLineEdit->text());
+
+		if (IE_SUCCESS != status) {
+			msgBox.setWindowTitle(messageBoxTitle);
+			msgBox.setText(tr("Error to connect into databox!"));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setInformativeText(
+			    tr("Bad login data or OTP code for this account.\n") +
+			    tr("ISDS ErrorType: ") + isds_strerror(status) +
+			    "\n\n" +
+			    tr("Account ") + this->accountLineEdit->text() +
+			    tr(" will not created..."));
+			msgBox.exec();
+			return IE_ERROR;
+		}
+	}
+
+	struct isds_DbOwnerInfo *db_owner_info = NULL;
+	status = isds_GetOwnerInfoFromLogin(isds_session,
+	    &db_owner_info);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << "Error isds_GetOwnerInfoFromLogin.";
+		qDebug() << status << isds_strerror(status);
+		return IE_ERROR;
+	}
+
+	QString username = this->usernameLineEdit->text() + "___True";
+
+	QString birthDate;
+	if ((NULL != db_owner_info->birthInfo) &&
+	    (NULL != db_owner_info->birthInfo->biDate)) {
+		birthDate = tmToDbFormat(
+		    db_owner_info->birthInfo->biDate);
+	}
+
+	m_accountDb.insertAccountIntoDb(
+	    username,
+	    db_owner_info->dbID,
+	    convertDbTypeToString(*db_owner_info->dbType),
+	    atoi(db_owner_info->ic),
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnFirstName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnMiddleName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnLastName : NULL,
+	    db_owner_info->personName ?
+	        db_owner_info->personName->pnLastNameAtBirth : NULL,
+	    db_owner_info->firmName,
+	    birthDate,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biCity : NULL,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biCounty : NULL,
+	    db_owner_info->birthInfo ?
+	        db_owner_info->birthInfo->biState : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adCity : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adStreet : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adNumberInStreet : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adNumberInMunicipality : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adZipCode : NULL,
+	    db_owner_info->address ?
+	        db_owner_info->address->adState : NULL,
+	    db_owner_info->nationality,
+	    db_owner_info->identifier,
+	    db_owner_info->registryCode,
+	    (int)*db_owner_info->dbState,
+	    (int)*db_owner_info->dbEffectiveOVM,
+	    (int)*db_owner_info->dbOpenAddressing)
+	? qDebug() << "Account info of" << username << "was inserted into db..."
+	: qDebug() << "ERROR: Account info of" << username << "insert!";
+
+	status = isds_logout(isds_session);
+	if (IE_SUCCESS != status) {
+		qDebug() << "Error in ISDS logout procedure.";
+		qDebug() << status << isds_strerror(status);
+	}
+
+	status = isds_ctx_free(&isds_session);
+	if (IE_SUCCESS != status) {
+		qDebug() << "Error freeing ISDS session.";
+		qDebug() << status << isds_strerror(status);
+	}
+
+	status = isds_cleanup();
+	if (IE_SUCCESS != status) {
+		qDebug() << "Unsuccessful ISDS clean-up.";
+		qDebug() << status << isds_strerror(status);
+	}
+
+	return IE_SUCCESS;
+}
+
+
 /* ========================================================================= */
 /*
  *  Create and save a new account into dsgui.conf
@@ -214,172 +423,7 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0 != itemTop);
 		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	} else {
-		isds_error status;
-		struct isds_ctx *isds_session = NULL;
-		QMessageBox msgBox;
-		QString messageBoxTitle = tr("Account error");
-
-		isds_session = isds_ctx_create();
-		if (NULL == isds_session) {
-			qDebug() << "Error creating ISDS session.";
-			isds_ctx_free(&isds_session);
-			msgBox.setWindowTitle(messageBoxTitle);
-			msgBox.setText(tr("Error to connect into ISDS."));
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.exec();
-			return;
-		}
-
-		status = isds_set_timeout(isds_session, TIMEOUT_MS);
-		if (IE_SUCCESS != status) {
-			qDebug() << "Error setting time-out.";
-			isds_ctx_free(&isds_session);
-			msgBox.setWindowTitle(messageBoxTitle);
-			msgBox.setText(tr("Error to connect into ISDS."));
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.exec();
-			return;
-		}
-
-		if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-			status = isdsLoginUserName(isds_session,
-			    this->usernameLineEdit->text(),
-			    this->passwordLineEdit->text(),
-			    this->testAccountCheckBox->isChecked());
-			if (IE_SUCCESS != status) {
-				qDebug() << "Error isdsLoginUserName.";
-				qDebug() << status << isds_strerror(status);
-				msgBox.setWindowTitle(messageBoxTitle);
-				msgBox.setText(tr("Error to connect into databox."));
-				msgBox.setIcon(QMessageBox::Warning);
-				msgBox.setInformativeText(
-				    tr("Bad username or password for this account."));
-				msgBox.setInformativeText(
-				    tr("Account will not created."));
-				msgBox.exec();
-				return;
-			}
-		} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
-
-			isds_pki_credentials *pki_credentials = NULL;
-
-			pki_credentials = (struct isds_pki_credentials *)
-			    malloc(sizeof(struct isds_pki_credentials));
-			if (pki_credentials == NULL) {
-				free(pki_credentials);
-				return;
-			}
-			memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
-
-			/* TODO - set correct cert format and certificate/key */
-			pki_credentials->engine = NULL;
-			pki_credentials->certificate_format = PKI_FORMAT_DER;
-			pki_credentials->certificate = strdup(QDir::fromNativeSeparators(m_certPath).toStdString().c_str());
-			pki_credentials->key_format = PKI_FORMAT_DER;
-			pki_credentials->key = strdup(QDir::fromNativeSeparators(m_certPath).toStdString().c_str());
-			pki_credentials->passphrase = NULL;
-
-			status = isdsLoginUserCert(isds_session,
-			    this->usernameLineEdit->text(),
-			    pki_credentials,
-			    this->testAccountCheckBox->isChecked());
-			if (IE_SUCCESS != status) {
-				qDebug() << "Error isdsLoginUserCert.";
-				qDebug() << status << isds_strerror(status);
-				msgBox.setWindowTitle(messageBoxTitle);
-				msgBox.setText(tr("Error to connect into databox."));
-				msgBox.setIcon(QMessageBox::Warning);
-				msgBox.setInformativeText(
-				    tr("Bad username or certificate for this account."));
-				msgBox.setInformativeText(
-				    tr("Account will not created."));
-				msgBox.exec();
-				return;
-			}
-		} else {
-			return;
-		}
-
-		struct isds_DbOwnerInfo *db_owner_info = NULL;
-		status = isds_GetOwnerInfoFromLogin(isds_session,
-		    &db_owner_info);
-
-		if (IE_SUCCESS != status) {
-			qDebug() << "Error isds_GetOwnerInfoFromLogin.";
-			qDebug() << status << isds_strerror(status);
-			return;
-		}
-
-		QString username = this->usernameLineEdit->text() + "___True";
-
-		QString birthDate;
-		if ((NULL != db_owner_info->birthInfo) &&
-		    (NULL != db_owner_info->birthInfo->biDate)) {
-			birthDate = tmToDbFormat(
-			    db_owner_info->birthInfo->biDate);
-		}
-
-		m_accountDb.insertAccountIntoDb(
-		    username,
-		    db_owner_info->dbID,
-		    convertDbTypeToString(*db_owner_info->dbType),
-		    atoi(db_owner_info->ic),
-		    db_owner_info->personName ?
-		        db_owner_info->personName->pnFirstName : NULL,
-		    db_owner_info->personName ?
-		        db_owner_info->personName->pnMiddleName : NULL,
-		    db_owner_info->personName ?
-		        db_owner_info->personName->pnLastName : NULL,
-		    db_owner_info->personName ?
-		        db_owner_info->personName->pnLastNameAtBirth : NULL,
-		    db_owner_info->firmName,
-		    birthDate,
-		    db_owner_info->birthInfo ?
-		        db_owner_info->birthInfo->biCity : NULL,
-		    db_owner_info->birthInfo ?
-		        db_owner_info->birthInfo->biCounty : NULL,
-		    db_owner_info->birthInfo ?
-		        db_owner_info->birthInfo->biState : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adCity : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adStreet : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adNumberInStreet : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adNumberInMunicipality : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adZipCode : NULL,
-		    db_owner_info->address ?
-		        db_owner_info->address->adState : NULL,
-		    db_owner_info->nationality,
-		    db_owner_info->identifier,
-		    db_owner_info->registryCode,
-		    (int)*db_owner_info->dbState,
-		    (int)*db_owner_info->dbEffectiveOVM,
-		    (int)*db_owner_info->dbOpenAddressing)
-		? qDebug() << "Account info of" << username <<
-		    "was inserted into db..."
-		: qDebug() << "ERROR: Account info of " << username <<
-		    "insert!";
-
-		status = isds_logout(isds_session);
-		if (IE_SUCCESS != status) {
-			qDebug() << "Error in ISDS logout procedure.";
-			qDebug() << status << isds_strerror(status);
-		}
-
-		status = isds_ctx_free(&isds_session);
-		if (IE_SUCCESS != status) {
-			qDebug() << "Error freeing ISDS session.";
-			qDebug() << status << isds_strerror(status);
-		}
-
-		status = isds_cleanup();
-		if (IE_SUCCESS != status) {
-			qDebug() << "Unsuccessful ISDS clean-up.";
-			qDebug() << status << isds_strerror(status);
-		}
+		connectToIsds();
 	}
 
 	itemSettings[NAME] = this->accountLineEdit->text();

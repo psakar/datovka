@@ -179,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setDefaultProgressStatus(void)
 /* ========================================================================= */
 {
-	m_statusProgressBar->setFormat(tr("Idle"));
+	m_statusProgressBar->setFormat("Idle");
 	m_statusProgressBar->setValue(0);
 }
 
@@ -833,7 +833,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		break;
 	}
 
-	m_statusProgressBar->setFormat(tr("downloadMessage"));
+	m_statusProgressBar->setFormat("downloadMessage");
 	m_statusProgressBar->repaint();
 
 	/* TODO -- Check return value. */
@@ -1868,22 +1868,28 @@ void MainWindow::on_actionGet_messages_triggered()
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
 
-	qDebug() << "Downloading message list for account"
-	    << itemTop->text();
+	qDebug() << "------------------------------------------------";
+	qDebug() << "Downloading message list for account" << itemTop->text();
+	qDebug() << "------------------------------------------------";
 
-	m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
+	m_statusProgressBar->setFormat("GetListOfReceivedMessages");
 	m_statusProgressBar->repaint();
-	downloadMessageList(index,"received");
-	m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
+	if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
+		setDefaultProgressStatus();
+		qDebug() << "An error occurred!";
+		return;
+	}
+	m_statusProgressBar->setFormat("GetListOfSentMessages");
 	m_statusProgressBar->repaint();
 	downloadMessageList(index,"sent");
-	m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+	m_statusProgressBar->setFormat("GetMessageStateChanges");
 	m_statusProgressBar->repaint();
 	getListSentMessageStateChanges(index);
-	m_statusProgressBar->setFormat(tr("getPasswordInfo"));
+	m_statusProgressBar->setFormat("getPasswordInfo");
 	m_statusProgressBar->repaint();
 	getPasswordInfo(index);
 	setDefaultProgressStatus();
+	qDebug() << "ALL DONE!";
 }
 
 
@@ -2174,13 +2180,13 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 /*
 * Download sent/received message list from ISDS for current account index
 */
-bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
     const QString messageType)
 /* ========================================================================= */
 {
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
-		return false;
+		return Q_GLOBAL_ERROR;
 	}
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -2188,7 +2194,10 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	m_statusProgressBar->setValue(10);
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		}
 	}
 
 	m_statusProgressBar->setValue(20);
@@ -2217,7 +2226,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (status != IE_SUCCESS) {
 		qDebug() << status << isds_strerror(status);
 		isds_list_free(&messageList);
-		return false;
+		return Q_ISDS_ERROR;
 	}
 
 	m_statusProgressBar->setValue(30);
@@ -2379,7 +2388,7 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		qDebug() << "#Sent new:" << newcnt;
 	}
 
-	return true;
+	return Q_SUCCESS;
 }
 
 
@@ -2387,13 +2396,13 @@ bool MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 /*!
  * @brief Download attachments, envelope and raw for specific message.
  */
-bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx, bool signedMsg, bool incoming)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
-		return false;
+		return Q_GLOBAL_ERROR;
 	}
 
 	m_statusProgressBar->setValue(10);
@@ -2407,8 +2416,13 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		}
 	}
+
+
 	m_statusProgressBar->setValue(20);
 
 	// message structures - all members
@@ -2440,7 +2454,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
 		isds_message_free(&message);
-		return false;
+		return Q_ISDS_ERROR;
 	}
 
 	m_statusProgressBar->setValue(50);
@@ -2613,7 +2627,7 @@ bool MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 
 	qDebug() << "downloadMessage(): Done!";
 
-	return true;
+	return Q_SUCCESS;
 }
 
 
@@ -2635,6 +2649,7 @@ void MainWindow::on_actionDownload_messages_triggered()
 void MainWindow::on_actionSync_all_accounts_triggered()
 /* ========================================================================= */
 {
+	bool success = true;
 	int count = ui->accountList->model()->rowCount();
 	for (int i = 0; i < count; i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
@@ -2644,22 +2659,26 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 		qDebug() << "Downloading message list for account"
 		    << itemTop->text();
 		qDebug() << "-----------------------------------------------";
-		m_statusProgressBar->setFormat(tr("GetListOfReceivedMessages"));
+		m_statusProgressBar->setFormat("GetListOfReceivedMessages");
 		m_statusProgressBar->repaint();
-		downloadMessageList(index,"received");
-		m_statusProgressBar->setFormat(tr("GetListOfSentMessages"));
+		if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
+			setDefaultProgressStatus();
+			success = false;
+			continue;
+		}
+		m_statusProgressBar->setFormat("GetListOfSentMessages");
 		m_statusProgressBar->repaint();
 		downloadMessageList(index,"sent");
-		m_statusProgressBar->setFormat(tr("GetMessageStateChanges"));
+		m_statusProgressBar->setFormat("GetMessageStateChanges");
 		m_statusProgressBar->repaint();
 		getListSentMessageStateChanges(index);
-		m_statusProgressBar->setFormat(tr("getPasswordInfo"));
+		m_statusProgressBar->setFormat("getPasswordInfo");
 		m_statusProgressBar->repaint();
 		getPasswordInfo(index);
 		setDefaultProgressStatus();
 	}
 	qDebug() << "-----------------------------------------------";
-	qDebug() << "All DONE!";
+	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
 }
 
 
@@ -3005,13 +3024,13 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
 /*
  * Verify message. Compare hash with hash stored in ISDS.
  */
-bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
-		return false;
+		return Q_GLOBAL_ERROR;
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -3031,7 +3050,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		return false;
+		return Q_ISDS_ERROR;
 	}
 
 	struct isds_hash *hashLocal = NULL;
@@ -3040,7 +3059,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 
 	if (hashLocal == NULL) {
 		free(hashLocal);
-		return false;
+		return Q_GLOBAL_ERROR;
 	}
 
 	memset(hashLocal, 0, sizeof(struct isds_hash));
@@ -3054,7 +3073,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 	if (hashLocaldata[0].isEmpty()) {
 		isds_hash_free(&hashLocal);
 		isds_hash_free(&hashIsds);
-		return false;
+		return Q_SQL_ERROR;
 	}
 
 	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata[0].toUtf8());
@@ -3069,11 +3088,16 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 	isds_hash_free(&hashIsds);
 	isds_hash_free(&hashLocal);
 
+	if (IE_NOTEQUAL == status) {
+		return Q_NOTEQUAL;
+	}
+
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		return false;
+		return Q_ISDS_ERROR;
 	}
-	return true;
+
+	return Q_SUCCESS;
 }
 
 
@@ -3081,7 +3105,7 @@ bool MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 /*
 * Delete message from long term storage in ISDS.
 */
-bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
     QString dmId)
 /* ========================================================================= */
 {
@@ -3089,7 +3113,10 @@ bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		};
 	}
 
 	isds_error status;
@@ -3117,15 +3144,21 @@ bool MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	if (IE_SUCCESS == status) {
 		MessageDb *messageDb = accountMessageDb(0);
 		int dmID = atoi(dmId.toStdString().c_str());
-		messageDb->msgsDeleteMessageData(dmID)
-		? qDebug() << "Message" << dmId<< "was deleted from ISDS and db"
-		: qDebug() << "Message " << dmId << "deleted error from db";
-	} else {
+		if (messageDb->msgsDeleteMessageData(dmID)) {
+			qDebug() << "Message" << dmID << "was deleted from ISDS and db";
+			return Q_SUCCESS;
+		} else {
+			qDebug() << "Message" << dmID << "was deleted from ISDS and db";
+			return Q_SQL_ERROR;
+		}
+	} else if (IE_INVAL == status) {
 		qDebug() << "Error: " << status << isds_strerror(status);
-		return false;
+		return Q_ISDS_ERROR;
+	} else {
+		return Q_ISDS_ERROR;
 	}
 
-	return true;
+	return Q_SUCCESS;
 }
 
 
@@ -3254,8 +3287,7 @@ void MainWindow::on_actionDelete_message_triggered()
 	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		if (!eraseMessage(acntTopIdx, dmId)) {
-			qDebug() << "The message" << dmId << "was deleted";
+		if (Q_CONNECT_ERROR == eraseMessage(acntTopIdx, dmId)) {
 		}
 	}
 }
@@ -3322,29 +3354,44 @@ void MainWindow::on_actionSave_attachment_triggered()
 /*
 * Authenticate message form db
 */
-bool MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		};
 	}
-	struct isds_message *message = NULL;
+
+	size_t length;
 	isds_error status;
-	size_t length = 0;
+	QByteArray bytes;
+
+
+	length = bytes.size();
+
+	/* TODO - get message raw from db */
 
 	status = isds_authenticate_message(isdsSessions.session(
-	    accountInfo.userName()), message, length);
+	    accountInfo.userName()), bytes.data(), length);
+
+	if (IE_NOTEQUAL == status) {
+		return Q_NOTEQUAL;
+	}
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		return false;
+		return Q_ISDS_ERROR;
 	}
 
-	return true;
+	return Q_SUCCESS;
 }
 
 
@@ -3352,7 +3399,7 @@ bool MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
 /*
 * Authenticate message form ZFO file
 */
-bool MainWindow::authenticateMessageFromZfoFile(void)
+qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 /* ========================================================================= */
 {
 	qDebug() << __func__;
@@ -3367,7 +3414,7 @@ bool MainWindow::authenticateMessageFromZfoFile(void)
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
 	if (attachFileName.isNull()) {
-		return false;
+		return Q_CANCEL;
 	}
 
 	size_t length;
@@ -3378,27 +3425,33 @@ bool MainWindow::authenticateMessageFromZfoFile(void)
 	if (file.exists()) {
 		if (!file.open(QIODevice::ReadOnly)) {
 			qDebug() << "Couldn't open the file" << attachFileName;
-			return false;
+			return Q_FILE_ERROR;
 		}
 
 		bytes = file.readAll();
 		length = bytes.size();
 	}
 
-
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		};
 	}
 
 	status = isds_authenticate_message(isdsSessions.session(
 	    accountInfo.userName()), bytes.data(), length);
 
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return false;
+	if (IE_NOTEQUAL == status) {
+		return Q_NOTEQUAL;
 	}
 
-	return true;
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return Q_ISDS_ERROR;
+	}
+
+	return Q_SUCCESS;
 }
 
 
@@ -3409,14 +3462,26 @@ bool MainWindow::authenticateMessageFromZfoFile(void)
 void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 /* ========================================================================= */
 {
-	authenticateMessageFromZfoFile() ?
-	    QMessageBox::information(this, tr("Message is authentic"),
-	    tr("ISDS confirms that the message is valid."),
-	    QMessageBox::Ok)
-	: QMessageBox::warning(this,
-	    tr("Authenticate message error"),
-	    tr("The message is not valid or connection to ISDS failed!"),
-	    QMessageBox::Ok);
+	switch (authenticateMessageFromZFO()) {
+	case Q_SUCCESS:
+		QMessageBox::information(this, tr("Message is authentic"),
+		    tr("ISDS confirms that the message is valid."),
+		    QMessageBox::Ok);
+		break;
+	case Q_NOTEQUAL:
+		QMessageBox::warning(this, tr("Message is not authentic"),
+		    tr("ISDS confirms that the message is invalid."),
+		    QMessageBox::Ok);
+		break;
+	case Q_ISDS_ERROR:
+		QMessageBox::warning(this, tr("Error authentication of message"),
+		    tr("Authentication of message have been stopped"
+		        "because the connection to ISDS failed!"),
+		    QMessageBox::Ok);
+		break;
+	default:
+		break;
+	}
 }
 
 
@@ -3428,16 +3493,6 @@ void MainWindow::on_actionAuthenticate_message_triggered(void)
 /* ========================================================================= */
 {
 	on_actionVerify_a_message_triggered();
-/*
-	authenticateMessageFromZfoFile() ?
-	    QMessageBox::information(this, tr("Message is authentic"),
-	    tr("ISDS confirms that the message is valid."),
-	    QMessageBox::Ok)
-	: QMessageBox::warning(this,
-	    tr("Authenticate message error"),
-	    tr("The message is not valid or connection to ISDS failed!"),
-	    QMessageBox::Ok);
-*/
 }
 
 
@@ -3452,15 +3507,25 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
-	/* TODO */
-	verifyMessage(acntTopIdx, msgIdx) ?
-	    QMessageBox::information(this, tr("Message is valid"),
-	    tr("Message hash corresponds to ISDS message hash."),
-	    QMessageBox::Ok)
-	: QMessageBox::warning(this,
-	    tr("Authenticate message error"),
-	    tr("The message hash is not valid or connection to ISDS failed!"),
-	    QMessageBox::Ok);
+	switch (verifyMessage(acntTopIdx, msgIdx)) {
+	case Q_SUCCESS:
+		QMessageBox::information(this, tr("Message is valid"),
+		    tr("Hash of message corresponds to ISDS message hash."),
+		    QMessageBox::Ok);
+		break;
+	case Q_NOTEQUAL:
+		QMessageBox::warning(this, tr("Message is not authentic"),
+		    tr("ISDS confirms that the message hash is invalid."),
+		    QMessageBox::Ok);
+		break;
+	case Q_ISDS_ERROR:
+		QMessageBox::warning(this, tr("Authenticate message error"),
+		    tr("The message hash is not valid or connection to ISDS failed!"),
+		    QMessageBox::Ok);
+		break;
+	default:
+		break;
+	}
 }
 
 

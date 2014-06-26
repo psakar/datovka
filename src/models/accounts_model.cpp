@@ -37,6 +37,14 @@ AccountModel::SettingsMap::SettingsMap(const QMap<QString, QVariant> &map)
 
 
 /* ========================================================================= */
+QString AccountModel::SettingsMap::accountName(void) const
+/* ========================================================================= */
+{
+	return (*this)[NAME].toString();
+}
+
+
+/* ========================================================================= */
 QString AccountModel::SettingsMap::loginMethod(void) const
 /* ========================================================================= */
 {

@@ -41,7 +41,7 @@ public:
 	struct isds_ctx * session(const QString &userName) const;
 
 
-	void connectToIsds(const AccountModel::SettingsMap &accountInfo,
+	bool connectToIsds(const AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw = 0);
 
 	bool isConnectToIsds(const QString userName);
@@ -63,38 +63,39 @@ private:
  * @brief Log in using user name and password.
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession);
+    const QString &userName, const QString &pwd, bool testingSession,
+    MainWindow *mw, const QString &accountName);
 
 
 /*!
- * @brief Log in using certificate.
+ * @brief Log in using system certificate.
  */
-isds_error isdsLoginCert(struct isds_ctx *isdsSession,
-    isds_pki_credentials *pkiCredentials, bool testingSession);
+isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
+    const QString &certPath, bool testingSession);
 
 
 /*!
- * @brief Log in using certificate.
+ * @brief Log in using user certificate without password.
+ * NOTE: It need ID of Databox instead username
  */
 isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
-    const QString &boxId, isds_pki_credentials *pkiCredentials,
-    bool testingSession);
+    const QString &idBox, const QString &certPath, bool testingSession);
 
 
 /*!
- * @brief Log in using certificate.
+ * @brief Log in using user certificate with password.
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
-    const QString &boxId, const QString &pwd,
-    isds_pki_credentials *pkiCredentials, bool testingSession);
+    const QString &userName, const QString &pwd, const QString &certPath,
+    bool testingSession, MainWindow *mw, const QString &accountName);
 
 
 /*!
- * @brief Log in using opt.
+ * @brief Log in using username, pwd and OTP.
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, isds_otp *opt,
-    bool testingSession);
+    const QString &userName, const QString &pwd, bool testingSession,
+    MainWindow *mw, const QString &accountName);
 
 /*!
  * @brief Add items into isds_PersonName structure.

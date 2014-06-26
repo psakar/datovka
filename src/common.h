@@ -26,6 +26,21 @@ typedef enum {
 	TOTP = 4
 } LoginMethodsIndex;
 
+/* retrun values of qDatovka functions */
+typedef enum {
+	Q_SUCCESS = 0,   // all operations success
+	Q_CANCEL,	 // operation was canceled or file dialog was canceled
+	Q_GLOBAL_ERROR,  // any qdatovka error
+	Q_CONNECT_ERROR, // ISDS login error
+	Q_NETWORK_ERROR, // error
+	Q_ISDS_ERROR,
+	Q_SQL_ERROR,
+	Q_FILE_ERROR,
+	Q_DIALOG_ERROR,
+	Q_NOTEQUAL
+} qdatovka_error;
+
+
 
 /*
  * Defined roles accross the application. 

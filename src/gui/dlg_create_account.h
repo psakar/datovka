@@ -32,6 +32,7 @@ private slots:
 private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);
+	isds_error connectToIsds(void);
 
 	QTreeView &m_accountList;
 	AccountDb &m_accountDb;
