@@ -3540,13 +3540,9 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
 /* ========================================================================= */
 {
+	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
-
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QDialog *viewDialog;
 
 	qDebug() << __func__;
 
@@ -3554,29 +3550,41 @@ void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
 	if (fileName.isEmpty()) {
-		return;
+		goto fail;
 	}
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+	dummy_session = isds_ctx_create();
+	if (NULL == dummy_session) {
+		qDebug() << "Cannot create dummy ISDS session.";
+		
 	}
 
-	message = loadZfoFile(isdsSessions.session(accountInfo.userName()),
-	    fileName);
+	message = loadZfoFile(dummy_session, fileName);
 	if (NULL == message) {
 		qDebug() << "Cannot parse file" << fileName;
 		QMessageBox::warning(this,
 		    tr("Content parsing error"),
 		    tr("Cannot parse the content of ") + fileName + ".",
 		    QMessageBox::Ok);
-		return;
+		goto fail;
 	}
 
 	/* Generate dialog showing message content. */
-	QDialog *viewDialog = new DlgViewZfo(message, this);
+	viewDialog = new DlgViewZfo(message, this);
 	viewDialog->exec();
 
 	isds_message_free(&message);
+	isds_ctx_free(&dummy_session);
+
+	return;
+
+fail:
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+	if (NULL != dummy_session) {
+		isds_ctx_free(&dummy_session);
+	}
 }
 
 
