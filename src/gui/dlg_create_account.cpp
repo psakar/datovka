@@ -203,7 +203,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 	isds_error status;
 	struct isds_ctx *isds_session = NULL;
 	QMessageBox msgBox;
-	QString messageBoxTitle = "";
+	QString messageBoxTitle = tr("QDatovka - Create account error!");
 
 	isds_session = isds_ctx_create();
 	if (NULL == isds_session) {

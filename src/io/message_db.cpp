@@ -2281,6 +2281,32 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 
 /* ========================================================================= */
 /*
+ * Get raw message data from raw_message_data table.
+ */
+QString MessageDb::msgsGetMessageRaw(int dmId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT data FROM raw_message_data WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toString();
+	}
+	return "";
+}
+
+
+/* ========================================================================= */
+/*
  * Read data from supplementary message data table.
  */
 QJsonDocument MessageDb::smsgdCustomData(int msgId) const

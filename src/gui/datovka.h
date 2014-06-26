@@ -156,6 +156,8 @@ private slots:
 
 	void on_actionHepl_triggered(void);
 
+	void on_actionExport_as_ZFO_triggered();
+
 private:
 	/*!
 	 * @brief Default settings of main window.

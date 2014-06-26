@@ -585,13 +585,17 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(downloadSelectedMessageAttachments()));
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
-		    tr("Reply"), this,
+		    tr("Reply on message"), this,
 		    SLOT(on_actionReply_to_the_sender_triggered()));
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Delete message"), this,
 		    SLOT(on_actionDelete_message_triggered()))->
 		    setEnabled(ui->actionDelete_message->isEnabled());
+		menu->addAction(
+		    tr("Export message to ZFO"), this,
+		    SLOT(on_actionExport_as_ZFO_triggered()))->
+		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
@@ -3585,4 +3589,68 @@ void MainWindow::on_actionHepl_triggered(void)
 {
 	qDebug() << "on_actionHepl_triggered";
 	/* TODO - load help content from html file to browser */
+}
+
+
+/* ========================================================================= */
+/*
+* Export message into ZFO file on local disk
+*/
+void MainWindow::on_actionExport_as_ZFO_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		  tr("You must download message firstly before its export..."));
+		msgBox.exec();
+		return;
+	}
+
+	QString fileName = "DDZ_" + dmId + ".zfo";
+	Q_ASSERT(!fileName.isEmpty());
+	/* TODO -- Remember directory? */
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save message as ZFO file"), fileName);
+
+	qDebug() << "Selected file: " << fileName;
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly)) {
+		return; /* TODO -- Error message. */
+	}
+
+
+	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray data = QByteArray::fromBase64(rawutf8);
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+
+	}
+
+	fout.close();
 }
