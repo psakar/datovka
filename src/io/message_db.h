@@ -296,6 +296,11 @@ public:
 	QString msgsGetMessageRaw(int dmId);
 
 	/*!
+	 * @brief get deliveri info raw from raw_delivery_info_data table.
+	 */
+	QString msgsGetDeliveryInfoRaw(int dmId);
+
+	/*!
 	 * @brief Insert/update raw delivery info into raw_delivery_info_data.
 	 */
 	bool msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw);

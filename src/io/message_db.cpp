@@ -2307,6 +2307,33 @@ QString MessageDb::msgsGetMessageRaw(int dmId)
 
 /* ========================================================================= */
 /*
+ * Get raw delivery info from raw_delivery_info_data table.
+ */
+QString MessageDb::msgsGetDeliveryInfoRaw(int dmId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		return query.value(0).toString();
+	}
+	return "";
+}
+
+
+
+/* ========================================================================= */
+/*
  * Read data from supplementary message data table.
  */
 QJsonDocument MessageDb::smsgdCustomData(int msgId) const

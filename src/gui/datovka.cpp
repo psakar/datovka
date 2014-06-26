@@ -3594,7 +3594,7 @@ void MainWindow::on_actionHepl_triggered(void)
 
 /* ========================================================================= */
 /*
-* Export message into ZFO file on local disk
+* Export message into as ZFO file on local disk
 */
 void MainWindow::on_actionExport_as_ZFO_triggered(void)
 /* ========================================================================= */
@@ -3632,7 +3632,67 @@ void MainWindow::on_actionExport_as_ZFO_triggered(void)
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save message as ZFO file"), fileName);
 
-	qDebug() << "Selected file: " << fileName;
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly)) {
+		return; /* TODO -- Error message. */
+	}
+
+
+	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray data = QByteArray::fromBase64(rawutf8);
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+
+	}
+
+	fout.close();
+}
+
+
+/* ========================================================================= */
+/*
+* Export message delivery info as ZFO file on local disk
+*/
+void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setText(tr("Can not export the delivery info ") + dmId);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		  tr("You must download message firstly before export..."));
+		msgBox.exec();
+		return;
+	}
+
+	QString fileName = "DDZ_" + dmId + "_info.zfo";
+	Q_ASSERT(!fileName.isEmpty());
+	/* TODO -- Remember directory? */
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save delivery info as ZFO file"), fileName);
 
 	if (fileName.isEmpty()) {
 		return;

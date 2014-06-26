@@ -158,6 +158,8 @@ private slots:
 
 	void on_actionExport_as_ZFO_triggered();
 
+	void on_actionExport_delivery_info_as_ZFO_triggered();
+
 private:
 	/*!
 	 * @brief Default settings of main window.
