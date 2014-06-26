@@ -1,13 +1,19 @@
 
 
 #include <QAbstractTableModel>
+#include <QDesktopServices>
 #include <QDialog>
+#include <QDir>
+#include <QTemporaryFile>
+#include <QUrl>
 
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 
 
 #define COL_NUM 2
+#define FNAME_COL 0
+#define FSIZE_COL 1
 
 
 const QVector<QString> AttachmentModel::m_headerLabels = {
@@ -76,10 +82,10 @@ QVariant AttachmentModel::data(const QModelIndex &index, int role) const
 		Q_ASSERT(row < m_docs.size());
 		Q_ASSERT(col < COL_NUM);
 
-		if (0 == col) {
+		if (FNAME_COL == col) {
 			/* File name. */
 			return QString(m_docs[row]->dmFileDescr);
-		} else if (1 == col) {
+		} else if (FSIZE_COL == col) {
 			/* File size. */
 			return QString::number(m_docs[row]->data_length);
 		}
@@ -122,8 +128,6 @@ bool AttachmentModel::setModelData(const isds_message *message)
 {
 	const struct isds_list *docListItem;
 
-	m_docs.clear();
-
 	Q_ASSERT(NULL != message);
 	if (NULL == message) {
 		return false;
@@ -135,13 +139,35 @@ bool AttachmentModel::setModelData(const isds_message *message)
 		return false;
 	}
 
+	this->beginResetModel();
+
+	m_docs.clear();
+
 	while (NULL != docListItem) {
 		Q_ASSERT(NULL != docListItem->data);
 		m_docs.append((struct isds_document *) docListItem->data);
 		docListItem = docListItem->next;
 	}
 
+	this->endResetModel();
+
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get attachment content.
+ */
+QByteArray AttachmentModel::attachmentData(int indexRow) const
+/* ========================================================================= */
+{
+	Q_ASSERT(m_docs.size() > 0);
+
+	QByteArray data((char *) m_docs[indexRow]->data,
+	    (int) m_docs[indexRow]->data_length);
+
+	return data;
 }
 
 
@@ -164,11 +190,122 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, QWidget *parent)
 	m_attachmentModel.setModelData(isdsMsg);
 
 	envelopeTextEdit->setHtml(
-	    descriptionHtml(m_attachmentModel.m_docs.size()));
+	    descriptionHtml(m_attachmentModel.rowCount()));
 	envelopeTextEdit->setReadOnly(true);
 
+	/* Attachment list. */
 	attachmentTable->setModel(&m_attachmentModel);
 	attachmentTable->resizeColumnToContents(0);
+
+	attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
+	    this, SLOT(attachmentItemRightClicked(QPoint)));
+	connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
+}
+
+
+/* ========================================================================= */
+/*
+ * Generates menu to selected message item.
+ */
+void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Handle attachment double click.
+ */
+void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
+/* ========================================================================= */
+{
+	(void) index;
+
+	//qDebug() << "Attachment double clicked.";
+
+	openSelectedAttachment();
+}
+
+
+/* ========================================================================= */
+/*
+ * Saves selected attachment to file.
+ */
+void DlgViewZfo::saveSelectedAttachmentToFile(void)
+/* ========================================================================= */
+{
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Saves selected attachments to directory.
+ */
+void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
+/* ========================================================================= */
+{
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Open attachment in default application.
+ */
+void DlgViewZfo::openSelectedAttachment(void)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != attachmentTable->selectionModel());
+
+	QModelIndex selectedIndex =
+	    attachmentTable->selectionModel()->currentIndex();
+
+	Q_ASSERT(selectedIndex.isValid());
+	if (!selectedIndex.isValid()) {
+		return;
+	}
+
+	selectedIndex = selectedIndex.sibling(selectedIndex.row(), FNAME_COL);
+
+	QString fileName = selectedIndex.data().toString();
+	Q_ASSERT(!fileName.isEmpty());
+	/* TODO -- Add message id into file name? */
+	fileName = "qdatovka_attachment_" + fileName;
+
+	//qDebug() << "Selected file: " << fileName;
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	if (!fout.open()) {
+		return; /* TODO -- Error message. */
+	}
+	fout.setAutoRemove(false);
+
+	/* Get whole path. */
+	fileName = fout.fileName();
+
+	QByteArray data = m_attachmentModel.attachmentData(selectedIndex.row());
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+		/* TODO -- Error message? */
+	}
+
+	fout.close();
+
+	//qDebug() << "file://" + fileName;
+	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	/* TODO -- Handle openUrl() return value. */
 }
 
 

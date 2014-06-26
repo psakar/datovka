@@ -763,7 +763,7 @@ void MainWindow::openSelectedAttachment(void)
 	QString fileName = fileNameIndex.data().toString();
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Add message id into file name? */
-	fileName = "qdatovka_XXXXXX_" + fileName;
+	fileName = "qdatovka_attachment_" + fileName;
 
 	//qDebug() << "Selected file: " << fileName;
 
@@ -775,9 +775,9 @@ void MainWindow::openSelectedAttachment(void)
 	if (!fout.open()) {
 		return; /* TODO -- Error message. */
 	}
-
 	fout.setAutoRemove(false);
 
+	/* Get whole path. */
 	fileName = fout.fileName();
 
 	/* Get data from base64. */

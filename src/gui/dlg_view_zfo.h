@@ -17,7 +17,6 @@
 class AttachmentModel : public QAbstractTableModel {
 	Q_OBJECT /* Not supported for nested classes. */
 
-	friend class DlgViewZfo;
 public:
 	/*!
 	 * @brief Constructor.
@@ -56,7 +55,6 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation,
 	    int role) const;
 
-private:
 	/*!
 	 * @brief Set attachment model according to message content.
 	 *
@@ -65,6 +63,12 @@ private:
 	 */
 	bool setModelData(const isds_message *message);
 
+	/*!
+	 * @brief Get attachment content.
+	 */
+	QByteArray attachmentData(int indexRow) const;
+
+private:
 	static
 	const QVector<QString> m_headerLabels; /*!< Header labels. */
 
@@ -91,6 +95,32 @@ public:
 	 * -- Attachment viewing.
 	 * -- Callback for opening attachments.
 	 */
+
+private slots:
+	/*!
+	 * @brief Generates menu to selected message item.
+	 */
+	void attachmentItemRightClicked(const QPoint &point);
+
+	/*!
+	 * @brief Handle attachment double click.
+	 */
+	void attachmentItemDoubleClicked(const QModelIndex &index);
+
+	/*!
+	 * @brief Saves selected attachment to file.
+	 */
+	void saveSelectedAttachmentToFile(void);
+
+	/*!
+	 * @brief Saves selected attachments to directory.
+	 */
+	void saveSelectedAttachmentsIntoDirectory(void);
+
+	/*!
+	 * @brief Open attachment in default application.
+	 */
+	void openSelectedAttachment(void);
 
 private:
 	/*!
