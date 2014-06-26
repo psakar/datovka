@@ -419,7 +419,7 @@
    </widget>
    <widget class="QMenu" name="menuMessage">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Message</string>
@@ -427,25 +427,27 @@
     <addaction name="actionDownload_message_signed"/>
     <addaction name="actionReply"/>
     <addaction name="separator"/>
-    <addaction name="actionSignature_detail"/>
     <addaction name="actionAuthenticate_message"/>
-    <addaction name="actionDelete_message"/>
+    <addaction name="actionSignature_detail"/>
     <addaction name="separator"/>
     <addaction name="actionExport_as_ZFO"/>
-    <addaction name="actionOpen_message_externally"/>
-    <addaction name="actionOpen_delivery_info_externally"/>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
+    <addaction name="actionOpen_message_externally"/>
+    <addaction name="actionOpen_delivery_info_externally"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_message"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
     </property>
     <addaction name="actionFind_databox"/>
+    <addaction name="separator"/>
     <addaction name="actionAuthenticate_message_file"/>
     <addaction name="actionView_message_from_ZPO_file"/>
     <addaction name="actionExport_corespondence_overview"/>
@@ -459,7 +461,6 @@
     </property>
     <addaction name="actionAbout_Datovka"/>
     <addaction name="actionHepl"/>
-    <addaction name="actionUpdate"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDatabox"/>
@@ -801,7 +802,7 @@
      <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
    </property>
    <property name="text">
-    <string>Reply</string>
+    <string>Reply on message</string>
    </property>
   </action>
   <action name="actionSignature_detail">
@@ -833,7 +834,7 @@
   </action>
   <action name="actionExport_as_ZFO">
    <property name="text">
-    <string>Export as ZFO</string>
+    <string>Export message as ZFO</string>
    </property>
   </action>
   <action name="actionOpen_message_externally">
