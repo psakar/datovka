@@ -1582,11 +1582,14 @@ bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
 {
 	QSqlQuery query(m_db);
 
-	QVariantMap map, map2;
-	map2.insert("userType", sender_type);
-	map2.insert("authorName", sender_name);
-	map.insert("message_author", map2);
-	QJsonObject object = QJsonObject::fromVariantMap(map);
+	QJsonObject authorObject;
+	authorObject.insert("userType", sender_type.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : sender_type);
+	authorObject.insert("authorName", sender_name.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : sender_name);
+	QJsonObject object;
+	object.insert("message_author", authorObject);
+
 	QJsonDocument document;
 	document.setObject(object);
 	QString  json = document.toJson(QJsonDocument::Compact);
