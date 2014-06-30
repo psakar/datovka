@@ -606,15 +606,27 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    tr("Export delivery info to ZFO"), this,
 		    SLOT(on_actionExport_delivery_info_as_ZFO_triggered()))->
-		    setEnabled(ui->actionExport_delivery_info_as_ZFO->isEnabled());
+		    setEnabled(ui->actionExport_delivery_info_as_ZFO->
+		    isEnabled());
 		menu->addAction(
 		    tr("Export message envelope as PDF"), this,
 		    SLOT(on_actionExport_message_envelope_as_PDF_triggered()))->
-		    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
+		    setEnabled(ui->actionExport_message_envelope_as_PDF->
+		    isEnabled());
 		menu->addAction(
 		    tr("Export delivery info as PDF"), this,
 		    SLOT(on_actionExport_delivery_info_as_PDF_triggered()))->
-		    setEnabled(ui->actionExport_delivery_info_as_PDF->isEnabled());
+		    setEnabled(ui->actionExport_delivery_info_as_PDF->
+		    isEnabled());
+		menu->addAction(
+		    tr("Open message externally"), this,
+		    SLOT(on_actionOpen_message_externally_triggered()))->
+		    setEnabled(ui->actionOpen_message_externally->isEnabled());
+		menu->addAction(
+		    tr("Open delivery info externally"), this,
+		    SLOT(on_actionOpen_delivery_info_externally_triggered()))->
+		    setEnabled(ui->actionOpen_delivery_info_externally->
+		    isEnabled());
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
@@ -3563,8 +3575,6 @@ void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
 	struct isds_message *message = NULL;
 	QDialog *viewDialog;
 
-	qDebug() << __func__;
-
 	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
@@ -3626,8 +3636,6 @@ void MainWindow::on_actionHepl_triggered(void)
 void MainWindow::on_actionExport_as_ZFO_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
-
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
@@ -3686,8 +3694,6 @@ void MainWindow::on_actionExport_as_ZFO_triggered(void)
 void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
-
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
@@ -3746,10 +3752,7 @@ void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
-
 	QString fileName;
-
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
@@ -3790,10 +3793,7 @@ void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
-
 	QString fileName;
-
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
@@ -3835,7 +3835,56 @@ void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 void MainWindow::on_actionOpen_message_externally_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		  tr("You must download message firstly before its export..."));
+		msgBox.exec();
+		return;
+	}
+
+	QString fileName = TMP_ATTACHMENT_PREFIX "DDZ_" + dmId + ".zfo";
+	Q_ASSERT(!fileName.isEmpty());
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	if (!fout.open()) {
+		return; /* TODO -- Error message. */
+	}
+	fout.setAutoRemove(false);
+
+	/* Get whole path. */
+	fileName = fout.fileName();
+
+	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray data = QByteArray::fromBase64(rawutf8);
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+
+	}
+
+	fout.close();
+
+	QDesktopServices::openUrl(QUrl("file://" + fileName));
 }
 
 
@@ -3846,7 +3895,56 @@ void MainWindow::on_actionOpen_message_externally_triggered(void)
 void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		  tr("You must download message firstly before its export..."));
+		msgBox.exec();
+		return;
+	}
+
+	QString fileName = TMP_ATTACHMENT_PREFIX "DDZ_" + dmId + "_info.zfo";
+	Q_ASSERT(!fileName.isEmpty());
+
+	if (fileName.isEmpty()) {
+		return;
+	}
+
+	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	if (!fout.open()) {
+		return; /* TODO -- Error message. */
+	}
+	fout.setAutoRemove(false);
+
+	/* Get whole path. */
+	fileName = fout.fileName();
+
+	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray data = QByteArray::fromBase64(rawutf8);
+
+	int written = fout.write(data);
+	if (written != data.size()) {
+
+	}
+
+	fout.close();
+
+	QDesktopServices::openUrl(QUrl("file://" + fileName));
 }
 
 
