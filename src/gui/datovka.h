@@ -168,6 +168,8 @@ private slots:
 
 	void on_actionOpen_delivery_info_externally_triggered(void);
 
+	void on_actionSignature_detail_triggered(void);
+
 private:
 	/*!
 	 * @brief Default settings of main window.

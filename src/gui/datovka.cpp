@@ -587,23 +587,40 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(downloadSelectedMessageAttachments()));
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
-		    tr("Reply on message"), this,
+		    tr("Reply on the message"), this,
 		    SLOT(on_actionReply_to_the_sender_triggered()));
+		menu->addSeparator();
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
+		    tr("Authenticate messages"), this,
+		    SLOT(on_actionVerify_a_message_triggered()));
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "label_16.png"),
+		    tr("Signature detail"), this,
+		    SLOT(on_actionSignature_detail_triggered()));
+		menu->addSeparator();
+		menu->addAction(
+		    tr("Export complete message to ZFO"), this,
+		    SLOT(on_actionExport_as_ZFO_triggered()))->
+		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
+		menu->addAction(
+		    tr("Export delivery info to ZFO"), this,
+		    SLOT(on_actionExport_delivery_info_as_ZFO_triggered()))->
+		    setEnabled(ui->actionExport_delivery_info_as_ZFO->isEnabled());
+		menu->addAction(
+		    tr("Export message envelope as PDF"), this,
+		    SLOT(on_actionExport_message_envelope_as_PDF_triggered()))->
+		    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
+		menu->addAction(
+		    tr("Export delivery info as PDF"), this,
+		    SLOT(on_actionExport_delivery_info_as_PDF_triggered()))->
+		    setEnabled(ui->actionExport_delivery_info_as_PDF->isEnabled());
+		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Delete message"), this,
 		    SLOT(on_actionDelete_message_triggered()))->
 		    setEnabled(ui->actionDelete_message->isEnabled());
-		menu->addAction(
-		    tr("Export message to ZFO"), this,
-		    SLOT(on_actionExport_as_ZFO_triggered()))->
-		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
-		menu->addSeparator();
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
-		    tr("Verified messages"), this,
-		    SLOT(on_actionReply_to_the_sender_triggered()));
-		menu->addSeparator();
 	} else {
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create a new message"),
@@ -2330,7 +2347,7 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			/* insert message envelope in db */
 			(messageDb->msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
-			    false, "tReturnedMessage",
+			    false, "tRecord",
 			    item->envelope->dbIDSender,
 			    item->envelope->dmSender,
 			    item->envelope->dmSenderAddress,
@@ -3827,6 +3844,17 @@ void MainWindow::on_actionOpen_message_externally_triggered(void)
 * Open message delivery info externaly
 */
 void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+}
+
+
+/* ========================================================================= */
+/*
+* Show signature details
+*/
+void MainWindow::on_actionSignature_detail_triggered(void)
 /* ========================================================================= */
 {
 	qDebug() << __func__;
