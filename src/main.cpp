@@ -10,6 +10,7 @@
 
 #define LOCALE_PATH "locale"
 
+#define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
 #define SAVE_CONF_OPT "save-conf"
 
@@ -41,6 +42,12 @@ int main(int argc, char *argv[])
 	parser.addHelpOption();
 	parser.addVersionOption();
 	/* Options with values. */
+	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
+	        QObject::tr(
+	            "Use <conf-subdir> subdirectory for configuration."),
+	        QObject::tr("conf-subdir")))) {
+		Q_ASSERT(0);
+	}
 	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
 	        QObject::tr("On start load <conf> file."),
 	        QObject::tr("conf")))) {
@@ -65,6 +72,9 @@ int main(int argc, char *argv[])
 	/* Process command-line arguments. */
 	parser.process(app);
 
+	if (parser.isSet(CONF_SUBDIR_OPT)) {
+		globPref.confSubdir = parser.value(CONF_SUBDIR_OPT);
+	}
 	if (parser.isSet(LOAD_CONF_OPT)) {
 		globPref.loadFromConf = parser.value(LOAD_CONF_OPT);
 	}

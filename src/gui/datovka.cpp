@@ -1085,7 +1085,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	QString dbDir = itemSettings[DB_DIR].toString();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = GlobPreferences::confDir();
+		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
@@ -1102,8 +1102,8 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 void MainWindow::ensureConfPresence(void) const
 /* ========================================================================= */
 {
-	if (!QDir(GlobPreferences::confDir()).exists()) {
-		QDir(GlobPreferences::confDir()).mkpath(".");
+	if (!QDir(globPref.confDir()).exists()) {
+		QDir(globPref.confDir()).mkpath(".");
 	}
 	if (!QFile(globPref.loadConfPath()).exists()) {
 		QFile file(globPref.loadConfPath());
@@ -1433,7 +1433,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	QString dbDir = itemSettings[DB_DIR].toString();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = GlobPreferences::confDir();
+		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
@@ -1495,7 +1495,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	QString dbDir = itemSettings[DB_DIR].toString();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = GlobPreferences::confDir();
+		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
 	    itemSettings[TEST].toBool());
@@ -1555,7 +1555,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		QString dbDir = itemSettings[DB_DIR].toString();
 		if (dbDir.isEmpty()) {
 			/* Set default directory name. */
-			dbDir = GlobPreferences::confDir();
+			dbDir = globPref.confDir();
 		}
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
 		    itemSettings[TEST].toBool());

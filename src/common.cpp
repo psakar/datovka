@@ -6,8 +6,10 @@
 #include "src/io/isds_sessions.h"
 
 #define WIN_PREFIX "AppData/Roaming"
-#define CONF_SUBDIR ".dsgui"
-#define CONF_FILE "dsgui.conf"
+/*!< Default configuration folder location. */
+#define DFLT_CONF_SUBDIR ".dsgui"
+/*!< Default configuration file name. */
+#define DFLT_CONF_FILE "dsgui.conf"
 #define ACCOUNT_DB_FILE "messages.shelf.db"
 
 
@@ -25,8 +27,9 @@ GlobProxySettings dfltGlobProxSet;
 /* ========================================================================= */
 GlobPreferences::GlobPreferences(void)
 /* ========================================================================= */
-    : loadFromConf(CONF_FILE),
-    saveToConf(CONF_FILE),
+    : confSubdir(DFLT_CONF_SUBDIR),
+    loadFromConf(DFLT_CONF_FILE),
+    saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     auto_download_whole_messages(false),
     default_download_signed(true),
@@ -217,19 +220,19 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 /* ========================================================================= */
 /*
- * Return path to configuraton directory.
+ * Return path to configuration directory.
  */
-QString GlobPreferences::confDir(void)
+QString GlobPreferences::confDir(void) const
 /* ========================================================================= */
 {
 	QDir homeDir(QDir::homePath());
 
-	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(CONF_SUBDIR)) {
+	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(confSubdir)) {
 		/* Set windows directory. */
 		homeDir.cd(WIN_PREFIX);
 	}
 
-	return homeDir.path() + "/" CONF_SUBDIR;
+	return homeDir.path() + "/" + confSubdir;
 }
 
 
@@ -330,7 +333,7 @@ const QString dmTypeToText(const QString &dmType)
 
 /* ========================================================================= */
 /*
- * Translatest author type to text.
+ * Translates author type to text.
  */
 const QString authorTypeToText(const QString &authorType)
 /* ========================================================================= */
@@ -485,7 +488,7 @@ int convertHexToDecIndex(int value)
 
 /* ========================================================================= */
 /*
- * Convert hash algotirhm to string
+ * Convert hash algorithm to string
  */
 QString convertHashAlg(int value)
 /* ========================================================================= */
@@ -502,7 +505,7 @@ QString convertHashAlg(int value)
 
 /* ========================================================================= */
 /*
- * Convert hash algotirhm to int
+ * Convert hash algorithm to int
  */
 int convertHashAlg2(QString value)
 /* ========================================================================= */

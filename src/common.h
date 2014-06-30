@@ -114,6 +114,7 @@ public:
 	GlobPreferences(void);
 	~GlobPreferences(void);
 
+	QString confSubdir; /*!< Configuration directory. */
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
@@ -143,14 +144,13 @@ public:
 	/*!
 	 * @brief Return path to configuration directory.
 	 */
-	static
-	QString confDir(void);
+	QString confDir(void) const;
 
 	/*!
 	 * @brief Returns whole configuration file path.
 	 */
 	inline
-	QString loadConfPath(void)
+	QString loadConfPath(void) const
 	{
 		return confDir() + "/" + loadFromConf;
 	}
@@ -159,7 +159,7 @@ public:
 	 * @brief Returns whole configuration file path.
 	 */
 	inline
-	QString saveConfPath(void)
+	QString saveConfPath(void) const
 	{
 		return confDir() + "/" + saveToConf;
 	}
@@ -168,7 +168,7 @@ public:
 	 * @brief Returns whole account db path.
 	 */
 	inline
-	QString accountDbPath(void)
+	QString accountDbPath(void) const
 	{
 		return confDir() + "/" + accountDbFile;
 	}
@@ -215,7 +215,7 @@ const QString dmTypeToText(const QString &dmType);
 
 
 /*!
- * @brief Translatest author type to text.
+ * @brief Translates author type to text.
  */
 const QString authorTypeToText(const QString &authorType);
 
@@ -237,12 +237,12 @@ void fixBackSlashesInFile(const QString &fileName);
 int convertHexToDecIndex(int value);
 
 /*!
- * @brief Return hash algotirhm as string
+ * @brief Return hash algorithm as string
  */
 QString convertHashAlg(int value);
 
  /*!
- * @brief Return hash algotirhm as int
+ * @brief Return hash algorithm as int
  */
 int convertHashAlg2(QString value);
 
