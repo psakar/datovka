@@ -156,9 +156,17 @@ private slots:
 
 	void on_actionHepl_triggered(void);
 
-	void on_actionExport_as_ZFO_triggered();
+	void on_actionExport_as_ZFO_triggered(void);
 
-	void on_actionExport_delivery_info_as_ZFO_triggered();
+	void on_actionExport_delivery_info_as_ZFO_triggered(void);
+
+	void on_actionExport_delivery_info_as_PDF_triggered(void);
+
+	void on_actionExport_message_envelope_as_PDF_triggered(void);
+
+	void on_actionOpen_message_externally_triggered(void);
+
+	void on_actionOpen_delivery_info_externally_triggered(void);
 
 private:
 	/*!

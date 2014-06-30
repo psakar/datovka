@@ -69,6 +69,25 @@ typedef enum {
 #define indentDivStart "<div style=\"margin-left: 12px;\">"
 #define divEnd "</div>"
 
+#define strongMessagePdf(title) \
+	(QString("<strong>") + (title) + QString("</strong>"))
+
+#define messageTableSectionPdf(title) \
+	(QString("<table width=\"100%\" style=\"background-color: #FFFF00; padding: 40px 20px 40px 20px; font-size: 18px;\"><tr><td>") + \
+	title + QString("</td></tr></table>"))
+
+#define messageTableInfoStartPdf() \
+	(QString("<table style=\"margin-left: 10px; margin-top: 10px; margin-bottom: 30px; font-size: 16px;\">"))
+
+#define messageTableInfoPdf(title, value) \
+	(QString("<tr><td>") + title + QString(": ") + \
+	QString("</td><td>") + value + QString("</td></tr>"))
+
+#define messageTableInfoEndPdf() (QString("</table>"))
+
+
+
+
 
 class GlobPreferences {
 

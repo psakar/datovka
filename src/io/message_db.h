@@ -208,6 +208,16 @@ public:
 	    bool warnOld = true) const;
 
 	/*!
+	 * @brief Return message envelope HTML to PDF.
+	 */
+	QString envelopeInfoHtmlToPdf(int dmId) const;
+
+	/*!
+	 * @brief Return message delivery info HTML to PDF.
+	 */
+	QString deliveryInfoHtmlToPdf(int dmId) const;
+
+	/*!
 	 * @brief Return files related to given message.
 	 */
 	QAbstractTableModel * flsModel(int msgId);

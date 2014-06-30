@@ -4,12 +4,14 @@
 #include <QDir>
 #include <QFile>
 #include <QMessageBox>
+#include <QPrinter>
+//#include <QPrinterInfo>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
 #include <QTemporaryFile>
-
 #include "datovka.h"
+
 #include "src/common.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
@@ -3609,10 +3611,8 @@ void MainWindow::on_actionExport_as_ZFO_triggered(void)
 {
 	qDebug() << __func__;
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -3671,10 +3671,8 @@ void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 {
 	qDebug() << __func__;
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -3721,4 +3719,115 @@ void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 	}
 
 	fout.close();
+}
+
+
+/* ========================================================================= */
+/*
+* Export message delivery info as PDF file on local disk
+*/
+void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+
+	QString fileName;
+
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	fileName = "DD_" + dmId + ".pdf";
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save delivery info as PDF file"), fileName);
+
+	MessageDb *messageDb = accountMessageDb(0);
+
+	QTextDocument doc;
+	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
+
+	/* TODO - Slow printer initialization */
+
+	QDialog pdf_dialog(this);
+	pdf_dialog.setModal(false);
+	pdf_dialog.setWindowTitle(tr("PDF printing"));
+	pdf_dialog.show();
+
+	QPrinter printer;
+	printer.setOutputFileName(fileName);
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	doc.print(&printer);
+	pdf_dialog.close();
+}
+
+
+/* ========================================================================= */
+/*
+* Export message envelope as PDF file on local disk
+*/
+void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+
+	QString fileName;
+
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	fileName = "OZ_" + dmId + ".pdf";
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save message envelope as PDF file"), fileName);
+
+	MessageDb *messageDb = accountMessageDb(0);
+
+	QTextDocument doc;
+	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID));
+
+	/* TODO - Slow printer initialization */
+
+	QDialog pdf_dialog(this);
+	pdf_dialog.setModal(false);
+	pdf_dialog.setWindowTitle(tr("PDF printing"));
+	pdf_dialog.show();
+
+	QPrinter printer;
+	printer.setOutputFileName(fileName);
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	doc.print(&printer);
+	pdf_dialog.close();
+
+}
+
+
+/* ========================================================================= */
+/*
+* Open message externaly
+*/
+void MainWindow::on_actionOpen_message_externally_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
+}
+
+
+/* ========================================================================= */
+/*
+* Open message delivery info externaly
+*/
+void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
+/* ========================================================================= */
+{
+	qDebug() << __func__;
 }
