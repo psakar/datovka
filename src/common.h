@@ -31,7 +31,7 @@ typedef enum {
 /* retrun values of qDatovka functions */
 typedef enum {
 	Q_SUCCESS = 0,   // all operations success
-	Q_CANCEL,	 // operation was canceled or file dialog was canceled
+	Q_CANCEL,	 // operation cancelled or file dialog cancelled
 	Q_GLOBAL_ERROR,  // any qdatovka error
 	Q_CONNECT_ERROR, // ISDS login error
 	Q_NETWORK_ERROR, // error

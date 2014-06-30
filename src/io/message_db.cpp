@@ -1811,7 +1811,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
 	} else {
 		queryStr = "INSERT INTO raw_message_data "
 		"(message_id, message_type, data) "
-		"VALUES (:dmId, :data, :message_type)";
+		"VALUES (:dmId, :message_type, :data)";
 
 	}
 
