@@ -31,18 +31,18 @@ macx {
 INCLUDEPATH = \
 	src \
 	/usr/include/libxml2
-#LIBPATH = \
-#//	/usr/local/lib
+
 LIBS = \
 	-lisds
 
 win32 {
 	INCLUDEPATH = \
 		src \
-		/usr/include/libxml2
+		mingw32built/include/libxml2 \
+		mingw32built/include/
 
 	LIBS = \
-		-lisds
+		e:/Git/qdatovka/mingw32built/bin/libisds-5.dll
 }
 
 SOURCES += src/common.cpp \
