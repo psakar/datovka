@@ -36,6 +36,15 @@ INCLUDEPATH = \
 LIBS = \
 	-lisds
 
+win32 {
+	INCLUDEPATH = \
+		src \
+		/usr/include/libxml2
+
+	LIBS = \
+		-lisds
+}
+
 SOURCES += src/common.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_change_pwd.cpp \
