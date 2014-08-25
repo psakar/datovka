@@ -24,11 +24,11 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 void DlgDsSearch::initSearchWindow(void)
 /* ========================================================================= */
 {
-	this->dataBoxTypeCBox->addItem(tr("OMV - Orgán věřejné moci"));
-	this->dataBoxTypeCBox->addItem(tr("PO - Právnická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("OVM – Orgán veřejné moci"));
+	this->dataBoxTypeCBox->addItem(tr("PO – Právnická osoba"));
 	this->dataBoxTypeCBox->addItem(
 	    tr("PFO - Podnikající fyzická osoba"));
-	this->dataBoxTypeCBox->addItem(tr("FO - Fyzická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("FO – Fyzická osoba"));
 
 	this->resultsTableWidget->setColumnWidth(0,20);
 	this->resultsTableWidget->setColumnWidth(1,60);
