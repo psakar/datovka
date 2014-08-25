@@ -341,7 +341,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 	    username,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
-	    (db_owner_info->ic != NULL)?0:atoi(db_owner_info->ic),
+	    (db_owner_info->ic != NULL) ? atoi(db_owner_info->ic) : 0,
 	    db_owner_info->personName ?
 	        db_owner_info->personName->pnFirstName : NULL,
 	    db_owner_info->personName ?
