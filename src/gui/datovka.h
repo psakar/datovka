@@ -132,7 +132,7 @@ private slots:
 
 	void on_actionSync_all_accounts_triggered(void);
 
-	void on_actionRecieved_all_triggered(void);
+	void on_actionReceived_all_triggered(void);
 
 	void on_actionDelete_message_triggered(void);
 

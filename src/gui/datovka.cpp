@@ -1212,7 +1212,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
-				ui->actionRecieved_all->setEnabled(true);
+				ui->actionReceived_all->setEnabled(true);
 				break;
 			}
 		}
@@ -1233,7 +1233,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->menuDatabox->setEnabled(false);
 	ui->menuMessage->setEnabled(false);
 	// ToolBar
-	ui->actionRecieved_all->setEnabled(false);
+	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionCreate_message->setEnabled(false);
 	ui->actionReply_to_the_sender->setEnabled(false);
@@ -1271,7 +1271,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 /* ========================================================================= */
 {
 	ui->menuDatabox->setEnabled(action);
-	ui->actionRecieved_all->setEnabled(action);
+	ui->actionReceived_all->setEnabled(action);
 	ui->actionCreate_message->setEnabled(action);
 	ui->actionAccount_properties->setEnabled(action);
 	ui->actionDownload_messages->setEnabled(action);
@@ -2721,7 +2721,7 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 /*
 * Download message list from ISDS for all accounts (click from toolbar)
 */
-void MainWindow::on_actionRecieved_all_triggered()
+void MainWindow::on_actionReceived_all_triggered()
 /* ========================================================================= */
 {
 	on_actionSync_all_accounts_triggered();

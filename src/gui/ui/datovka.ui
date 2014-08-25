@@ -484,7 +484,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRecieved_all"/>
+   <addaction name="actionReceived_all"/>
    <addaction name="separator"/>
    <addaction name="actionDownload_messages"/>
    <addaction name="actionCreate_message"/>
@@ -706,16 +706,16 @@
     <string>Export correspondence overview</string>
    </property>
   </action>
-  <action name="actionRecieved_all">
+  <action name="actionReceived_all">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/24x24/datovka-all-accounts-sync.png</normaloff>:/icons/24x24/datovka-all-accounts-sync.png</iconset>
    </property>
    <property name="text">
-    <string>Recieved all</string>
+    <string>Received all</string>
    </property>
    <property name="toolTip">
-    <string>Recieved messages from all accounts at once</string>
+    <string>Received messages from all accounts at once</string>
    </property>
    <property name="shortcut">
     <string>Alt+A</string>

@@ -260,15 +260,15 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	/* Defining a couple of items. */
 	QStandardItem *account = new QStandardItem(name);
 	account->setFlags(account->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *recentRecieved =
-	    new QStandardItem(tr("Recent Recieved"));
-	recentRecieved->setFlags(recentRecieved->flags() & ~Qt::ItemIsEditable);
+	QStandardItem *recentReceived =
+	    new QStandardItem(tr("Recent Received"));
+	recentReceived->setFlags(recentReceived->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *recentSent = new QStandardItem(tr("Recent Sent"));
 	recentSent->setFlags(recentSent->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *all = new QStandardItem(tr("All"));
 	all->setFlags(all->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *allRecieved = new QStandardItem(tr("Recieved"));
-	allRecieved->setFlags(allRecieved->flags() & ~Qt::ItemIsEditable);
+	QStandardItem *allReceived = new QStandardItem(tr("Received"));
+	allReceived->setFlags(allReceived->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *allSent = new QStandardItem(tr("Sent"));
 	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
@@ -277,20 +277,20 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	/* Account node is drawn bold in the data() method. */
 	account->setIcon(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
 
-	recentRecieved->setIcon(
+	recentReceived->setIcon(
 	    QIcon(ICON_16x16_PATH + QString("datovka-message-download.png")));
 	recentSent->setIcon(QIcon(
 	    ICON_16x16_PATH + QString("datovka-message-reply.png")));
-	allRecieved->setIcon(QIcon(
+	allReceived->setIcon(QIcon(
 	    ICON_16x16_PATH + QString("datovka-message-download.png")));
 	allSent->setIcon(QIcon(
 	    ICON_16x16_PATH + QString("datovka-message-reply.png")));
 
 	/* Building up the hierarchy. */
-	account->appendRow(recentRecieved);
+	account->appendRow(recentReceived);
 	account->appendRow(recentSent);
 	account->appendRow(all);
-	all->appendRow(allRecieved);
+	all->appendRow(allReceived);
 	all->appendRow(allSent);
 
 	invisibleRootItem()->appendRow(account);

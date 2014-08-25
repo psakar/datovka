@@ -186,12 +186,12 @@
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="567"/>
-        <source>Recieved all</source>
+        <source>Received all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/datovka.ui" line="570"/>
-        <source>Recieved messages from all accounts at once</source>
+        <source>Received messages from all accounts at once</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -268,7 +268,7 @@
     </message>
     <message>
         <location filename="../src/datovka.cpp" line="54"/>
-        <source>Recent Recieved</source>
+        <source>Recent Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
