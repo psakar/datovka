@@ -27,7 +27,7 @@ void DlgDsSearch::initSearchWindow(void)
 	this->dataBoxTypeCBox->addItem(tr("OVM – Orgán veřejné moci"));
 	this->dataBoxTypeCBox->addItem(tr("PO – Právnická osoba"));
 	this->dataBoxTypeCBox->addItem(
-	    tr("PFO - Podnikající fyzická osoba"));
+	    tr("PFO – Podnikající fyzická osoba"));
 	this->dataBoxTypeCBox->addItem(tr("FO – Fyzická osoba"));
 
 	this->resultsTableWidget->setColumnWidth(0,20);
