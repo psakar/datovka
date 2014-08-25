@@ -1,4 +1,4 @@
-
+#include <cstddef>
 #include <QMessageBox>
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
