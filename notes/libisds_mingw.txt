@@ -1,0 +1,166 @@
+This file gives a description how to compile libisds for Windows using MinGW.
+
+//=============================================================================
+# This sequence does not work.
+
+expat-2.1.0		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+w32pth-2.0.4		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+libgpg-error-1.10	./configure --host=i586-mingw32msvc --target=mingw --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+libksba-1.3.0		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+nettle-2.5		./configure --host=i586-mingw32msvc --disable-shared --prefix=${HOME}/tmp/mingw32built
+libassuan-2.0.3		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built
+
+libgcrypt-1.5.0		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+gnutls-3.1.6		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built
+gnupg-1.4.13		./configure --host=i586-mingw32msvc --prefix=${HOME}/tmp/mingw32built
+gpgme-1.3.2		./configure --host=i586-mingw32msvc --enable-shared=no --prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built --with-libassuan-prefix=${HOME}/tmp/mingw32built
+curl-7.28.1		./configure --host=i586-mingw32msvc --enable-shared=no --enable-ipv6 --with-winssl --without-axtls --prefix=${HOME}/tmp/mingw32built
+libxml2-2.7.8		./configure --host=i586-mingw32msvc --enable-shared=no --without-threads --prefix=${HOME}/tmp/mingw32built
+libisds-0.7		./configure --host=i586-mingw32msvc --disable-fatalwarnings --prefix=${HOME}/tmp/mingw32built --with-libgcrypt-prefix=${HOME}/tmp/mingw32built --with-libiconv-prefix=${HOME}/tmp/mingw32built --with-libcurl=${HOME}/tmp/mingw32built --with-xml-prefix=${HOME}/tmp/mingw32built  --with-gpgme-prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS="-L${HOME}/tmp/mingw32built/lib -lgnutls"
+//=============================================================================
+
+
+//=============================================================================
+# This procedure should according to the author work with libisds-0.7.
+# Simline tests don't work because they need fork().
+
+# The reuslting program is statically linked with following parameters:
+
+CPPFLAGS += -DCURL_STATICLIB -DLIBXML_STATIC -I/usr/local/include \
+	-I/usr/local/include/libxml2
+LDFLAGS = -L/usr/local/lib -lisds -lxml2 -lz -lintl -liconv -lws2_32 \
+	-lcurl -lwldap32 -lws2_32 -lz -lexpat -lws2_32 -lgcrypt \
+	-lgpgme -lassuan -lws2_32 -lgpg-error
+
+
+expat-2.1.0		./configure --build=i686-pc-mingw32 --enable-shared=no
+w32pth-2.0.4		./configure --build=i686-pc-mingw32 --enable-shared=no
+libgpg-error-1.10	./configure --build=i686-pc-mingw32 --target=mingw --enable-shared=no
+libksba-1.3.0		./configure --build=i686-pc-mingw32 --enable-shared=no
+nettle-2.5		./configure --build=i686-pc-mingw32 --disable-shared
+libassuan-2.0.3		./configure --build=i686-pc-mingw32 --enable-shared=no
+libgcrypt-1.5.0		./configure --build=i686-pc-mingw32 --enable-shared=no
+gnutls-3.1.6		./configure --build=i686-pc-mingw32 --enable-shared=no
+gnupg-1.4.13		./configure --build=i686-pc-mingw32 
+gpgme-1.3.2		./configure --build=i686-pc-mingw32 --enable-shared=no
+curl-7.28.1		./configure --build=i686-pc-mingw32 --enable-shared=no --enable-ipv6 --with-winssl --without-axtls
+libxml2-2.7.8		./configure --build=i686-pc-mingw32 --enable-shared=no --without-threads
+libisds-0.7		./configure --build=i686-pc-mingw32 --disable-fatalwarnings CPPFLAGS=-I/usr/local/include LDFLAGS="-L/usr/local/lib -lgnutls"
+//============================================================================
+
+
+
+ftp://ftp.g10code.com/g10code/w32pth/
+
+//=============================================================================
+//=============================================================================
+
+# This sequence describes the build procedure to compile libsisds-0.9 with
+# mostly up to date libraries.
+# Some libraries require manual intervention in order to compile them.
+
+# TODO -- After installing on windows, libisds complains about missing CMS
+# support in libgpgme. The problem is solved by installing Gpg4win.
+
+# libopts must be obtained from autogen package. In requires a configure.ac
+# file to be supplied.
+
+export PATH=${HOME}/tmp/mingw32built/bin:$PATH
+
+expat-2.1.0		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+w32pth-2.0.5		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+	# remove the commentary at the beginning of libw32pth.def
+			make && make install
+libgpg-error-1.12	./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+libksba-1.3.0		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built
+	# remove the commentary at the beginning of src/libksba.def
+			make && make install
+gmp-6.0.0		./configure --disable-static --enable-shared --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+nettle-2.7.1		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-include-path=${HOME}/tmp/mingw32built/include --with-lib-path=${HOME}/tmp/mingw32built/lib
+			make && make install
+	# must be compiled with gmp support
+	# gnutls requires nettle<=2.7
+libassuan-2.1.2		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built
+			make && make install
+libgcrypt-1.6.1		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-gpg-error-prefix=${HOME}/tmp/mingw32built
+			make && make install
+pcre-8.35		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+#gnutls-3.2.0		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-libnettle-prefix=${HOME}/tmp/mingw32built 
+#	# requires libnettle with gmp
+#	# modify src/libopts/m4/libopts.m4 (see http://lists.gnupg.org/pipermail/gnutls-devel/2013-May/006254.html)
+#	# configure must then be regenerated
+gnutls-3.2.16		./configure --enable-threads=win32 --disable-guile --disable-nls --disable-libdane --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-libnettle-prefix=${HOME}/tmp/mingw32built --with-libregex=${HOME}/tmp/mingw32built --with-regex-header=pcreposix.h --with-libregex-libs=-lpcreposix NETTLE_CFLAGS=-I${HOME}/tmp/mingw32built/include NETTLE_LIBS=-L${HOME}/tmp/mingw32built/lib HOGWEED_CFLAGS=-I${HOME}/tmp/mingw32built/include HOGWEED_LIBS=-L${HOME}/tmp/mingw32built/lib CFLAGS=-I${HOME}/tmp/mingw32built/include CXXFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+			make NETTLE_CFLAGS=-I${HOME}/tmp/mingw32built/include NETTLE_LIBS="-L${HOME}/tmp/mingw32built/lib -lnettle" HOGWEED_CFLAGS=-I${HOME}/tmp/mingw32built/include HOGWEED_LIBS="-L${HOME}/tmp/mingw32built/lib -lhogweed" CPPFLAGS=-I${HOME}/tmp/mingw32built/include
+	# requires libnettle with gmp
+	# inet_aton() is not defined on windows
+	# see https://gitorious.org/gnutls/gnutls/commit/410970f8777f2fe7a421e94999e542d023f35229
+	# requires automake-1.14
+	# install autoopts/options.h into ${HOME}/tmp/mingw32built/include
+	# disable danetool in src/Makefile.am
+	# requires libopt from autogen
+#gnupg-1.4.18		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+#			make && make install
+gnupg-2.0.26		./configure --enable-gpgsm --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+gpgme-1.5.1		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --disable-w32-glib --disable-w32-qt
+			make && make install
+gpgme-1.4.4		
+			make && make install
+curl-7.37.1		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --enable-ipv6 --with-winssl --without-axtls
+			make && make install
+libisds-0.9		cat configure.ac | sed -e 's/AC_FUNC_MALLOC//g' > nomalloc_configure.ac
+			mv nomalloc_configure.ac configure.ac
+			libtoolize -c --install
+			autoreconf
+			./configure --disable-fatalwarnings --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+			ln -s ${HOME}/tmp/mingw32built/lib/libiconv.la /usr/lib/libiconv.la
+			make
+			cd src
+			../libtool  --tag=CC   --mode=link i686-pc-mingw32-gcc -no-undefined -I/home/karel/tmp/mingw32built/include -I/home/karel/tmp/mingw32built/include -g -O2 -std=c99 -Wall -version-info 8:0:3 -L/home/karel/tmp/mingw32built/lib -lxml2 -lz -liconv -L/home/karel/tmp/mingw32built/lib -lcurl -lwldap32 -lz -lws2_32 -L/home/karel/tmp/mingw32built/lib -lgcrypt -lgpg-error -L/home/karel/tmp/mingw32built/lib -lgpgme -lassuan -lws2_32 -lgpg-error -lexpat -L/home/karel/tmp/mingw32built/lib -lintl -L/home/karel/tmp/mingw32built/lib -liconv -R/home/karel/tmp/mingw32built/lib -R=/lib -L/home/karel/tmp/mingw32built/lib -o libisds.la -rpath /home/karel/tmp/mingw32built/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-crypto.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-soap.lo libisds_la-win32.lo
+			cd ..
+			make install
+			rm /usr/lib/libiconv.la
+
+libxml2-2.9.1		./configure --without-python --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+---
+zlib-1.2.8		make -f win32/Makefile.gcc PREFIX=i686-pc-mingw32- BINARY_PATH=${HOME}/tmp/mingw32built/bin INCLUDE_PATH=${HOME}/tmp/mingw32built/include LIBRARY_PATH=${HOME}/tmp/mingw32built/lib install
+expat-2.1.0		(above)
+libtool-2.4.2		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built
+			make && make install
+libiconv-1.14		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-libxml2-prefix=${HOME}/tmp/mingw32built
+			make && make install
+gettext-0.19.2		./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built --with-libxml2-prefix=${HOME}/tmp/mingw32built --with-libiconv-prefix=${HOME}/tmp/mingw32built --with-sysroot=${HOME}/tmp/mingw32built
+			ln -s ${HOME}/tmp/mingw32built/lib/libiconv.la /usr/lib/libiconv.la
+			make && make install
+			rm /usr/lib/libiconv.la
+guile-1.8.8		./configure --disable-error-on-warning --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+			cp ${HOME}/tmp/mingw32built/bin/libtool ./libtool
+			cp ${HOME}/tmp/mingw32built/bin/libtool guile-readline/libtool
+			make CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+#autogen-5.18.3		./configure --disable-fatalwarnings --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+#	# see http://lists.gnu.org/archive/html/bug-gnu-utils/2013-04/msg00015.html
+#	# modify libopts.m4 (see http://lists.gnupg.org/pipermail/gnutls-devel/2013-May/006254.html)
+	# extract libopts from autogen
+
+libopts-40.1.15		#autoscan
+			#mv configure.scan configure.ac
+			#autoheader
+			#libtoolize -c --install
+			#aclocal -I m4
+			#automake --add-missing --copy
+			#aclocal
+			#autoconf
+			#autoreconf
+			#automake --add-missing
+			cp ../libopt_configure.ac configure.ac
+			autoreconf
+			./configure --host=i686-pc-mingw32 --prefix=${HOME}/tmp/mingw32built CPPFLAGS=-I${HOME}/tmp/mingw32built/include LDFLAGS=-L${HOME}/tmp/mingw32built/lib
+			make && make install
+
+//=============================================================================
+//=============================================================================

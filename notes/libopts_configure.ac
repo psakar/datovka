@@ -1,0 +1,113 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.69])
+AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_CONFIG_SRCDIR([alias.c])
+AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE([1.10 foreign -Wall])
+
+# Checks for programs.
+AM_PROG_AR
+AC_PROG_CC
+AC_PROG_LIBTOOL
+
+LT_INIT([])
+
+AM_CONDITIONAL([INSTALL_LIBOPTS], true)
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_CHECK_HEADERS([ \
+	dirent.h \
+	stdbool.h \
+	fcntl.h \
+	inttypes.h \
+	libintl.h \
+	limits.h \
+	locale.h \
+	memory.h \
+	netinet/in.h \
+	stdarg.h \
+	stdint.h \
+	stdlib.h \
+	string.h \
+	sys/param.h \
+	sys/socket.h \
+	sys/systeminfo.h \
+	unistd.h \
+	utime.h \
+	varargs.h \
+])
+
+AC_PROG_SED
+  [while :
+  do
+      POSIX_SHELL=`which bash`
+      test -x "$POSIX_SHELL" && break
+      POSIX_SHELL=`which dash`
+      test -x "$POSIX_SHELL" && break
+      POSIX_SHELL=/usr/xpg4/bin/sh
+      test -x "$POSIX_SHELL" && break
+      POSIX_SHELL=`/bin/sh -c '
+          exec 2>/dev/null
+          if ! true ; then exit 1 ; fi
+          echo /bin/sh'`
+      test -x "$POSIX_SHELL" && break
+      ]AC_MSG_ERROR([cannot locate a working POSIX shell])[
+  done]
+  AC_DEFINE_UNQUOTED([POSIX_SHELL], ["${POSIX_SHELL}"],
+           [define to a working POSIX compliant shell])
+  AC_SUBST([POSIX_SHELL])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+
+AC_CHECK_TYPES(wchar_t)
+AC_CHECK_TYPES(wint_t, [], [], [
+  AC_INCLUDES_DEFAULT
+  #if HAVE_RUNETYPE_H
+  # include <runetype.h>
+  #endif
+  #if HAVE_WCHAR_H
+  # include <wchar.h>
+  #endif
+])
+AC_CHECK_TYPES([int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t,
+intptr_t, uintptr_t, uint_t, pid_t, size_t])
+AC_CHECK_SIZEOF(char*, 8)
+AC_CHECK_SIZEOF(int,   4)
+AC_CHECK_SIZEOF(long,  8)
+AC_CHECK_SIZEOF(short, 2)
+
+# Checks for library functions.
+#AM_GNU_GETTEXT
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_MMAP
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([ \
+	atexit \
+	dup2 \
+	memmove \
+	memset \
+	munmap \
+	putenv \
+	realpath \
+	regcomp \
+	strchr \
+	strdup \
+	strerror \
+	strpbrk \
+	strrchr \
+	strstr \
+	strtol \
+	strtoul \
+	vprintf \
+])
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
