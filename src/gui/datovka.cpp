@@ -1332,6 +1332,7 @@ void MainWindow::loadSettings(void)
 /* ========================================================================= */
 {
 	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
+	settings.setIniCodec("UTF-8");
 
 	//qDebug() << "All: " << settings.allKeys();
 	//qDebug() << "Groups: " << settings.childGroups();
@@ -1634,6 +1635,7 @@ void MainWindow::saveSettings(void) const
 	 * TODO -- Target file name differs from source for testing purposes.
 	 */
 	QSettings settings(globPref.saveConfPath(), QSettings::IniFormat);
+	settings.setIniCodec("UTF-8");
 
 	settings.clear();
 
