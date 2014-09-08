@@ -453,8 +453,7 @@ void DlgCreateAccount::saveAccount(void)
 
 	switch (m_action) {
 	case ACT_EDIT:
-		model->itemFromIndex(index)->
-		    setText(this->accountLineEdit->text());
+		itemTop->setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
 		/* TODO -- Save/update related account DB entry? */
 		break;
