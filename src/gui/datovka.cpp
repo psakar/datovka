@@ -2686,6 +2686,26 @@ void MainWindow::on_actionDownload_messages_triggered()
 void MainWindow::on_actionSync_all_accounts_triggered()
 /* ========================================================================= */
 {
+	thread = new QThread();
+	QString text = "received";
+	QModelIndex index = m_accountModel.index(0, 0);
+	MessageDb *messageDb = accountMessageDb(0);
+
+
+	//qDebug() << index;
+	//qDebug() << messageDb;
+
+	worker = new Worker(*messageDb, index, text);
+	worker->moveToThread(thread);
+
+	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
+	connect(thread, SIGNAL(started()), worker, SLOT(downloadMessageList()));
+	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
+
+	//worker->abort();
+	//thread->wait(); // If the thread is not running, this will immediately return.
+	worker->requestWork();
+/*
 	bool success = true;
 	int count = ui->accountList->model()->rowCount();
 	for (int i = 0; i < count; i++) {
@@ -2716,6 +2736,7 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 	}
 	qDebug() << "-----------------------------------------------";
 	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
+*/
 }
 
 

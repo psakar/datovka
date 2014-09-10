@@ -9,12 +9,13 @@
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QProgressBar>
+#include <QThread>
 
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
-
+#include "thread/worker.h"
 
 namespace Ui {
 	class MainWindow;
@@ -171,6 +172,14 @@ private slots:
 	void on_actionSignature_detail_triggered(void);
 
 private:
+
+    QThread *thread;
+    /**
+     * @brief Object which contains methods that should be runned in another thread
+     */
+    Worker *worker;
+
+
 	/*!
 	 * @brief Default settings of main window.
 	 */

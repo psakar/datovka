@@ -13,28 +13,32 @@ class Worker : public QObject {
     Q_OBJECT
 
 public:
-	explicit Worker(QObject *parent = 0);
+	explicit Worker(MessageDb &db, const QModelIndex &acntTopIdx, QString &text, QObject *parent = 0);
 
 	/*!
 	* @brief Requests the process to start
 	*/
-	void requestWorkInThread(void);
+	void requestWork(void);
 
 	/*!
 	* @brief Requests the process to abort
 	*/
-	void abortWork(void);
+	void abort(void);
 
 private:
 	bool _abort;
 	bool _working;
 	QMutex mutex;
+	MessageDb &m_db;
+	const QModelIndex m_acntTopIdx; /* Copy. */
+	QString m_text;
+
 
 signals:
 	/*!
 	 * @brief This signal is emitted when the Worker request to Work
 	*/
-	void workRequestedInThread(void);
+	void workRequested(void);
 
 	/*!
 	* @brief This signal is emitted when counted value is changed (every sec)
@@ -44,10 +48,10 @@ signals:
 	/*!
 	* @brief This signal is emitted when process is finished (either by counting 60 sec or being aborted)
 	*/
-	void finishedWork(void);
+	void finished(void);
 
 public slots:
-
+	void downloadMessageList(void);
 	void doWork(void);
 };
 
