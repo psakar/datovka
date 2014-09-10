@@ -107,6 +107,8 @@ int main(int argc, char *argv[])
 #elif defined(Q_OS_MAC)
 #endif
 */
+	qDebug() << "GUI main thread: " << QThread::currentThreadId();
+
 	MainWindow mainwin;
 	mainwin.show();
 

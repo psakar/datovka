@@ -64,7 +64,8 @@ SOURCES += src/common.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
     src/gui/dlg_about.cpp \
-    src/gui/dlg_view_zfo.cpp
+    src/gui/dlg_view_zfo.cpp \
+    src/thread/worker.cpp
 
 HEADERS += src/common.h \
     src/gui/datovka.h \
@@ -84,7 +85,8 @@ HEADERS += src/common.h \
     src/log/log.h \
     src/models/accounts_model.h \
     src/gui/dlg_about.h \
-    src/gui/dlg_view_zfo.h
+    src/gui/dlg_view_zfo.h \
+    src/thread/worker.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \
