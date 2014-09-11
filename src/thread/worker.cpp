@@ -83,6 +83,7 @@ void Worker::doWork()
 		if (abort) {
 			qDebug()<< "Aborting worker process in Thread " <<
 			    thread()->currentThreadId();
+			emit valueChanged("Idle", 0);
 			break;
 		}
 
@@ -105,18 +106,21 @@ void Worker::doWork()
 		qDebug() << "-----------------------------------------------";
 
 		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(index,"received", *messageDb)) {
+		    downloadMessageList(index,"received", *messageDb,
+		    "GetListOfReceivedMessages")) {
 			success = false;
 			continue;
 		}
 
 		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(index,"sent", *messageDb)) {
+		    downloadMessageList(index,"sent", *messageDb,
+		    "GetListOfSentMessages")) {
 			success = false;
 			continue;
 		}
 
-		if (!getListSentMessageStateChanges(index, *messageDb)) {
+		if (!getListSentMessageStateChanges(index, *messageDb,
+		    "GetMessageStateChanges")) {
 			success = false;
 			continue;
 		}
@@ -124,8 +128,9 @@ void Worker::doWork()
 		if (!getPasswordInfo(index)) {
 			success = false;
 		}
-
 	}
+
+	emit valueChanged("Idle", 0);
 
 	qDebug() << "-----------------------------------------------";
 	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
@@ -147,13 +152,15 @@ void Worker::doWork()
 * Download sent/received message list from ISDS for current account index
 */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
-    const QString messageType, MessageDb &messageDb)
+    const QString messageType, MessageDb &messageDb, QString label)
 /* ========================================================================= */
 {
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
 		return Q_GLOBAL_ERROR;
 	}
+
+	emit valueChanged(label, 0);
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -164,6 +171,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			return Q_CONNECT_ERROR;
 		}
 	}
+
+	emit valueChanged(label, 10);
 
 	isds_error status = IE_ERROR;
 	struct isds_list *messageList = NULL;
@@ -186,6 +195,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		    0, NULL, &messageList);
 	}
 
+	emit valueChanged(label, 20);
+
 	if (status != IE_SUCCESS) {
 		qDebug() << status << isds_strerror(status);
 		isds_list_free(&messageList);
@@ -196,6 +207,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	box = messageList;
 	int newcnt = 0;
 	int allcnt = 0;
+	int delta = 0;
+	int diff = 0;
 
 	while (0 != box) {
 		allcnt++;
@@ -204,7 +217,16 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	box = messageList;
 
+	if (allcnt == 0) {
+		emit valueChanged(label, 50);
+	} else {
+		delta = ceil(80 / allcnt);
+	}
+
 	while (0 != box) {
+
+		diff = diff + delta;
+		emit valueChanged(label, 20+diff);
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
@@ -314,6 +336,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	isds_list_free(&messageList);
 
+	emit valueChanged(label, 100);
+
 	/* Redraw views' content. */
 //	regenerateAccountModelYears(acntTopIdx);
 	/*
@@ -339,15 +363,19 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 * Get list of sent message state changes
 */
 bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-    MessageDb &messageDb)
+    MessageDb &messageDb, QString label)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	emit valueChanged(label, 0);
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
 	}
+
+	emit valueChanged(label, 10);
 
 	struct isds_list *stateList = NULL;
 	isds_error status;
@@ -361,6 +389,8 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
+	emit valueChanged(label, 20);
+
 	struct isds_list *stateListFirst = NULL;
 	stateListFirst = stateList;
 
@@ -373,10 +403,23 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 
 	stateListFirst = stateList;
 
+	emit valueChanged(label, 30);
+
+	int delta = 0;
+	int diff = 0;
+
+	if (allcnt == 0) {
+		emit valueChanged(label, 60);
+	} else {
+		delta = ceil(70 / allcnt);
+	}
+
 	while (0 != stateListFirst) {
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateListFirst->data;
 		int dmId = atoi(item->dmID);
+		diff = diff + delta;
+		emit valueChanged(label, 30+diff);
 		/* Download and save delivery info and message events */
 		(getSentDeliveryInfo(acntTopIdx, dmId, true, messageDb))
 		? qDebug() << "Delivery info of message was processed..."
@@ -387,6 +430,7 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 
 	isds_list_free(&stateList);
 
+	emit valueChanged(label, 100);
 //	regenerateAccountModelYears(acntTopIdx);
 
 	return true;

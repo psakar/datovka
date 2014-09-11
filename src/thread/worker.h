@@ -42,13 +42,13 @@ private:
 	* account index
 	*/
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString messageType, MessageDb &messageDb);
+	    const QString messageType, MessageDb &messageDb, QString label);
 
 	/*!
 	* @brief Get list of sent message state changes
 	*/
 	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-	    MessageDb &messageDb);
+	    MessageDb &messageDb, QString label);
 
 	/*!
 	* @brief Get password expiration info for account index
@@ -71,7 +71,7 @@ signals:
 	/*!
 	* @brief This signal is emitted when counted value is changed
 	*/
-	void valueChanged(const QString &value);
+	void valueChanged(QString label, int value);
 
 	/*!
 	* @brief This signal is emitted when process is finished

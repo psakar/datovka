@@ -176,6 +176,11 @@ private slots:
 	 */
 	void deleteThread(void);
 
+	/*!
+	 * @brief Set ProgressBar value and Status bar text.
+	 */
+	void setProgressBarFromWorker(QString label, int value);
+
 
 private:
 

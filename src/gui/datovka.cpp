@@ -2697,9 +2697,17 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 
 
-
-
-
+/* ========================================================================= */
+/*
+* Set ProgressBar value and Status bar text.
+*/
+void MainWindow::setProgressBarFromWorker(QString label, int value)
+/* ========================================================================= */
+{
+	m_statusProgressBar->setFormat(label);
+	m_statusProgressBar->setValue(value);
+	m_statusProgressBar->repaint();
+}
 
 
 /* ========================================================================= */
@@ -2747,6 +2755,8 @@ void MainWindow::on_actionSync_all_accounts_triggered(void)
 	worker = new Worker(m_accountDb, m_accountModel, accountCount, messageDbList);
 	worker->moveToThread(thread);
 
+	connect(worker, SIGNAL(valueChanged(QString, int)),
+	    this, SLOT(setProgressBarFromWorker(QString, int)));
 	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
 	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
 	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
