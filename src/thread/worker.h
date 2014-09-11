@@ -9,11 +9,13 @@
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
+
 class Worker : public QObject {
     Q_OBJECT
 
 public:
-	explicit Worker(MessageDb &db, const QModelIndex &acntTopIdx, QString &text, QObject *parent = 0);
+
+	explicit Worker(AccountDb &accountDb, AccountModel &accountModel, int count, QList<MessageDb*> messageDbList, QObject *parent = 0);
 
 	/*!
 	* @brief Requests the process to start
@@ -29,10 +31,21 @@ private:
 	bool _abort;
 	bool _working;
 	QMutex mutex;
-	MessageDb &m_db;
-	const QModelIndex m_acntTopIdx; /* Copy. */
-	QString m_text;
+	AccountDb &m_accountDb;
+	AccountModel &m_accountModel;
+	int m_count;
+	QList<MessageDb*> m_messageDbList;
 
+	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
+	    const QString messageType, MessageDb &messageDb);
+
+	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
+	MessageDb &messageDb);
+
+	bool getPasswordInfo(const QModelIndex &acntTopIdx);
+
+	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
+	    int msgIdx, bool signedMsg, MessageDb &messageDb);
 
 signals:
 	/*!
@@ -51,7 +64,7 @@ signals:
 	void finished(void);
 
 public slots:
-	void downloadMessageList(void);
+
 	void doWork(void);
 };
 

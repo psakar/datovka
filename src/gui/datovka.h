@@ -171,14 +171,16 @@ private slots:
 
 	void on_actionSignature_detail_triggered(void);
 
+	/*!
+	 * @brief Delete worker and thread objects, enable sync buttons.
+	 */
+	void deleteThread(void);
+
+
 private:
 
-    QThread *thread;
-    /**
-     * @brief Object which contains methods that should be runned in another thread
-     */
-    Worker *worker;
-
+	QThread *thread;
+	Worker *worker;
 
 	/*!
 	 * @brief Default settings of main window.

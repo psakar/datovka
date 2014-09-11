@@ -9,21 +9,25 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/pkcs7.h"
+#include "src/gui/datovka.h"
 
 
 
-
-Worker::Worker(MessageDb &db, const QModelIndex &acntTopIdx, QString &text, QObject *parent) :
+Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count, QList<MessageDb*> messageDbList, QObject *parent) :
 
 	QObject(parent),
-	m_db(db),
-	m_acntTopIdx(acntTopIdx),
-	m_text(text)
+	m_accountDb(accountDb),
+	m_accountModel(accountModel),
+	m_count(count),
+	m_messageDbList(messageDbList)
 {
 	_working =false;
 	_abort = false;
-	qDebug() << m_acntTopIdx;
-	qDebug() << &m_db;
+
+//	qDebug() << "worker" << m_messageDbList.count();
+//	qDebug() << "worker" << m_messageDbList.first();
+//	qDebug() << m_accountDb;
+//	qDebug() << m_accountModel;
 }
 
 void Worker::requestWork() {
@@ -55,36 +59,43 @@ void Worker::doWork()
 	qDebug() << "Starting worker process in Thread "
 	   << thread()->currentThreadId();
 
+	bool success = true;
+	MessageDb *messageDb;
 
-	for (int i = 0; i < 20; i ++) {
-
-		// Checks if the process should be aborted
-		mutex.lock();
-		bool abort = _abort;
-		mutex.unlock();
-
-		if (abort) {
-			qDebug()<<"Aborting worker process in Thread "<<thread()->currentThreadId();
-			break;
+	for (int i = 0; i < m_count; i++) {
+		messageDb = m_messageDbList.at(i);
+		QModelIndex index = m_accountModel.index(i, 0);
+		QStandardItem *item = m_accountModel.itemFromIndex(index);
+		QStandardItem *itemTop = AccountModel::itemTop(item);
+		qDebug() << "-----------------------------------------------";
+		qDebug() << "Downloading message list for account"
+		    << itemTop->text();
+		qDebug() << "-----------------------------------------------";
+		//m_statusProgressBar->setFormat("GetListOfReceivedMessages");
+		//m_statusProgressBar->repaint();
+		if (Q_CONNECT_ERROR == downloadMessageList(index,"received", *messageDb)) {
+			//setDefaultProgressStatus();
+			success = false;
+			continue;
 		}
-
-		// This will stupidly wait 1 sec doing nothing...
-		QEventLoop loop;
-		QTimer::singleShot(500, &loop, SLOT(quit()));
-		loop.exec();
-
-		qDebug() << "--" << i << "-" << m_text
-			<< thread()->currentThreadId() ;
-
-		// Once we're done waiting, value is updated
-		//emit valueChanged(QString::number(i));
+		//m_statusProgressBar->setFormat("GetListOfSentMessages");
+		//m_statusProgressBar->repaint();
+		downloadMessageList(index,"sent", *messageDb);
+		//m_statusProgressBar->setFormat("GetMessageStateChanges");
+		//m_statusProgressBar->repaint();
+		getListSentMessageStateChanges(index, *messageDb);
+		//m_statusProgressBar->setFormat("getPasswordInfo");
+		//m_statusProgressBar->repaint();
+		getPasswordInfo(index);
+		//setDefaultProgressStatus();
 	}
+	qDebug() << "-----------------------------------------------";
+	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
 
 	// Set _working to false, meaning the process can't be aborted anymore.
-
-    mutex.lock();
-    _working = false;
-    mutex.unlock();
+	mutex.lock();
+	_working = false;
+	mutex.unlock();
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
@@ -98,18 +109,22 @@ void Worker::doWork()
 /*
 * Download sent/received message list from ISDS for current account index
 */
-void Worker::downloadMessageList()
+qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
+    const QString messageType, MessageDb &messageDb)
 /* ========================================================================= */
 {
-	qDebug() << "Starting worker process in Thread "
-	   << thread()->currentThreadId();
+	Q_ASSERT(acntTopIdx.isValid());
+	if (!acntTopIdx.isValid()) {
+		return Q_GLOBAL_ERROR;
+	}
 
 	const AccountModel::SettingsMap accountInfo =
-	    m_acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	qDebug() << "1 ";
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!isdsSessions.connectToIsds(accountInfo)) {
 			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
 		}
 	}
 
@@ -117,7 +132,7 @@ void Worker::downloadMessageList()
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */
-	if (m_text == "sent") {
+	if (messageType == "sent") {
 		status = isds_get_list_of_sent_messages(isdsSessions.
 		    session(accountInfo.userName()),
 		    NULL, NULL, NULL,
@@ -125,7 +140,7 @@ void Worker::downloadMessageList()
 		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
 		    MESSAGESTATE_ANY,
 		    0, NULL, &messageList);
-	} else if (m_text == "received") {
+	} else if (messageType == "received") {
 		status = isds_get_list_of_received_messages(isdsSessions.
 		    session(accountInfo.userName()),
 		    NULL, NULL, NULL,
@@ -137,14 +152,13 @@ void Worker::downloadMessageList()
 	if (status != IE_SUCCESS) {
 		qDebug() << status << isds_strerror(status);
 		isds_list_free(&messageList);
+		return Q_ISDS_ERROR;
 	}
 
 	struct isds_list *box;
 	box = messageList;
 	int newcnt = 0;
 	int allcnt = 0;
-
-	MessageDb *messageDb = &this->m_db;
 
 	while (0 != box) {
 		allcnt++;
@@ -166,7 +180,7 @@ void Worker::downloadMessageList()
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
 
-		if (!messageDb->isInMessageDb(dmId)) {
+		if (!messageDb.isInMessageDb(dmId)) {
 
 			QString dmAmbiguousRecipient;
 			if (0 == item->envelope->dmAmbiguousRecipient) {
@@ -224,7 +238,7 @@ void Worker::downloadMessageList()
 			}
 
 			/* insert message envelope in db */
-			(messageDb->msgsInsertMessageEnvelope(dmId,
+			(messageDb.msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
 			    false, "tRecord",
 			    item->envelope->dbIDSender,
@@ -258,7 +272,7 @@ void Worker::downloadMessageList()
 			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType,
-			    m_text))
+			    messageType))
 			? qDebug() << "Message envelope" << dmId <<
 			    "was inserted into db..."
 			: qDebug() << "ERROR: Message envelope " << dmId <<
@@ -280,12 +294,192 @@ void Worker::downloadMessageList()
 //	ui->accountList->repaint();
 //	accountItemSelectionChanged(ui->accountList->currentIndex());
 
-	if (m_text == "received") {
+	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;
 		qDebug() << "#Received new:" << newcnt;
 	} else {
 		qDebug() << "#Sent total:" << allcnt;
 		qDebug() << "#Sent new:" << newcnt;
 	}
+	return Q_SUCCESS;
 }
+
+
+/* ========================================================================= */
+/*
+* Get list of sent message state changes
+*/
+bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, MessageDb &messageDb)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+//	m_statusProgressBar->setValue(10);
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+//	m_statusProgressBar->setValue(20);
+
+	struct isds_list *stateList = NULL;
+	isds_error status;
+
+	status = isds_get_list_of_sent_message_state_changes(
+	    isdsSessions.session(accountInfo.userName()),NULL,NULL, &stateList);
+
+	if (IE_SUCCESS != status) {
+		isds_list_free(&stateList);
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+//	m_statusProgressBar->setValue(30);
+
+	struct isds_list *stateListFirst = NULL;
+	stateListFirst = stateList;
+
+	int allcnt = 0;
+
+	while (0 != stateList) {
+		allcnt++;
+		stateList = stateList->next;
+	}
+
+	stateListFirst = stateList;
+	int delta = 0;
+	int diff = 0;
+
+	if (allcnt == 0) {
+//		m_statusProgressBar->setValue(60);
+	} else {
+		delta = ceil(70 / allcnt);
+	}
+
+	while (0 != stateListFirst) {
+		isds_message_status_change *item =
+		    (isds_message_status_change *) stateListFirst->data;
+		diff = diff + delta;
+//		m_statusProgressBar->setValue(30+diff);
+		int dmId = atoi(item->dmID);
+		/* Download and save delivery info and message events */
+		(getSentDeliveryInfo(acntTopIdx, dmId, true, messageDb))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+
+		stateListFirst = stateListFirst->next;
+	}
+
+//	m_statusProgressBar->setValue(100);
+
+	isds_list_free(&stateList);
+
+//	regenerateAccountModelYears(acntTopIdx);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Download sent message delivery info and get list of events message
+*/
+bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
+    int msgIdx, bool signedMsg, MessageDb &messageDb)
+/* ========================================================================= */
+{
+	QString dmId = QString::number(msgIdx);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	// message and envleople structures
+	struct isds_message *message = NULL;
+	isds_error status;
+
+	(signedMsg)
+	? status = isds_get_signed_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
+	: status = isds_get_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
+
+	if (IE_SUCCESS != status) {
+		isds_message_free(&message);
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+	/* TODO - if signedMsg == true then decode signed message (raw ) */
+
+
+
+	int dmID = atoi(message->envelope->dmID);
+
+	struct isds_list *event;
+	event = message->envelope->events;
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb.msgsInsertUpdateMessageEvent(dmID,
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
+		event = event->next;
+	}
+
+	isds_list_free(&message->envelope->events);
+	isds_message_free(&message);
+
+	return true;
+}
+
+
+
+
+/* ========================================================================= */
+/*
+* Get password expiration info for account index
+*/
+bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
+/* ========================================================================= */
+{
+	isds_error status;
+	struct timeval *expiration = NULL;
+	QString expirDate;
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QString key = accountInfo.userName() + "___True";
+
+	if (accountInfo.loginMethod() != "username" &&
+	    accountInfo.loginMethod() != "user_certificate") {
+		expirDate = "";
+		m_accountDb.setPwdExpirIntoDb(key, expirDate);
+		return true;
+	} else {
+
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			isdsSessions.connectToIsds(accountInfo);
+		}
+
+		status = isds_get_password_expiration(
+		    isdsSessions.session(accountInfo.userName()), &expiration);
+
+		if (IE_SUCCESS == status) {
+			if (0 != expiration) {
+				expirDate = timevalToDbFormat(expiration);
+				m_accountDb.setPwdExpirIntoDb(key, expirDate);
+				return true;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 

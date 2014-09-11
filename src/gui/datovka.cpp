@@ -2679,31 +2679,76 @@ void MainWindow::on_actionDownload_messages_triggered()
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========================================================================= */
+/*
+* Delete worker and thread objects, enable sync buttons.
+*/
+void MainWindow::deleteThread(void)
+/* ========================================================================= */
+{
+	ui->actionSync_all_accounts->setEnabled(true);
+	ui->actionReceived_all->setEnabled(true);
+	ui->actionDownload_messages->setEnabled(true);
+	ui->actionGet_messages->setEnabled(true);
+
+	delete worker;
+	delete thread;
+}
+
+
 /* ========================================================================= */
 /*
 * Download message list from ISDS for all accounts
 */
-void MainWindow::on_actionSync_all_accounts_triggered()
+void MainWindow::on_actionSync_all_accounts_triggered(void)
 /* ========================================================================= */
 {
+	int accountCount = ui->accountList->model()->rowCount();
+	QList<MessageDb*> messageDbList;
+	messageDbList.clear();
+
+	for (int i = 0; i < accountCount; i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		const QStandardItem *accountItem =
+		    m_accountModel.itemFromIndex(index);
+		MessageDb *messageDb = accountMessageDb(accountItem);
+		messageDbList.append(messageDb);
+	}
+
+	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionReceived_all->setEnabled(false);
+	ui->actionDownload_messages->setEnabled(false);
+	ui->actionGet_messages->setEnabled(false);
+
 	thread = new QThread();
-	QString text = "received";
-	QModelIndex index = m_accountModel.index(0, 0);
-	MessageDb *messageDb = accountMessageDb(0);
-
-
-	//qDebug() << index;
-	//qDebug() << messageDb;
-
-	worker = new Worker(*messageDb, index, text);
+	worker = new Worker(m_accountDb, m_accountModel, accountCount, messageDbList);
 	worker->moveToThread(thread);
 
 	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
-	connect(thread, SIGNAL(started()), worker, SLOT(downloadMessageList()));
+	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
 	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
+	connect(worker, SIGNAL(finished()), this, SLOT(deleteThread()));
 
-	//worker->abort();
-	//thread->wait(); // If the thread is not running, this will immediately return.
+	worker->abort();
 	worker->requestWork();
 /*
 	bool success = true;
@@ -2738,6 +2783,31 @@ void MainWindow::on_actionSync_all_accounts_triggered()
 	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
 */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ========================================================================= */
