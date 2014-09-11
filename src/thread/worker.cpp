@@ -1,5 +1,3 @@
-#include <QTimer>
-#include <QEventLoop>
 #include <QThread>
 #include <QDebug>
 
@@ -11,9 +9,8 @@
 #include "src/io/pkcs7.h"
 #include "src/gui/datovka.h"
 
-
-
-Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count, QList<MessageDb*> messageDbList, QObject *parent) :
+Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
+	    QList<MessageDb*> messageDbList, QObject *parent) :
 
 	QObject(parent),
 	m_accountDb(accountDb),
@@ -23,11 +20,6 @@ Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count, QLis
 {
 	_working =false;
 	_abort = false;
-
-//	qDebug() << "worker" << m_messageDbList.count();
-//	qDebug() << "worker" << m_messageDbList.first();
-//	qDebug() << m_accountDb;
-//	qDebug() << m_accountModel;
 }
 
 void Worker::requestWork() {
@@ -54,7 +46,13 @@ void Worker::abort() {
 	mutex.unlock();
 }
 
+
+/* ========================================================================= */
+/*
+* Start background downloading of messages
+*/
 void Worker::doWork()
+/* ========================================================================= */
 {
 	qDebug() << "Starting worker process in Thread "
 	   << thread()->currentThreadId();
@@ -63,32 +61,48 @@ void Worker::doWork()
 	MessageDb *messageDb;
 
 	for (int i = 0; i < m_count; i++) {
-		messageDb = m_messageDbList.at(i);
+
 		QModelIndex index = m_accountModel.index(i, 0);
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+		// if the account is not included to sync all, skip it.
+		if (!accountInfo[SYNC].toBool()) {
+			continue;
+		}
+
 		QStandardItem *item = m_accountModel.itemFromIndex(index);
 		QStandardItem *itemTop = AccountModel::itemTop(item);
+		messageDb = m_messageDbList.at(i);
+
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading message list for account"
 		    << itemTop->text();
 		qDebug() << "-----------------------------------------------";
-		//m_statusProgressBar->setFormat("GetListOfReceivedMessages");
-		//m_statusProgressBar->repaint();
-		if (Q_CONNECT_ERROR == downloadMessageList(index,"received", *messageDb)) {
-			//setDefaultProgressStatus();
+
+		if (Q_CONNECT_ERROR ==
+		    downloadMessageList(index,"received", *messageDb)) {
 			success = false;
 			continue;
 		}
-		//m_statusProgressBar->setFormat("GetListOfSentMessages");
-		//m_statusProgressBar->repaint();
-		downloadMessageList(index,"sent", *messageDb);
-		//m_statusProgressBar->setFormat("GetMessageStateChanges");
-		//m_statusProgressBar->repaint();
-		getListSentMessageStateChanges(index, *messageDb);
-		//m_statusProgressBar->setFormat("getPasswordInfo");
-		//m_statusProgressBar->repaint();
-		getPasswordInfo(index);
-		//setDefaultProgressStatus();
+
+		if (Q_CONNECT_ERROR ==
+		    downloadMessageList(index,"sent", *messageDb)) {
+			success = false;
+			continue;
+		}
+
+		if (!getListSentMessageStateChanges(index, *messageDb)) {
+			success = false;
+			continue;
+		}
+
+		if (!getPasswordInfo(index)) {
+			success = false;
+		}
+
 	}
+
 	qDebug() << "-----------------------------------------------";
 	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
 
@@ -100,7 +114,6 @@ void Worker::doWork()
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
 
-	//Once 60 sec passed, the finished signal is sent
 	emit finished();
 }
 
@@ -315,13 +328,9 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, Messa
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-//	m_statusProgressBar->setValue(10);
-
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		isdsSessions.connectToIsds(accountInfo);
 	}
-
-//	m_statusProgressBar->setValue(20);
 
 	struct isds_list *stateList = NULL;
 	isds_error status;
@@ -334,8 +343,6 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, Messa
 		qDebug() << status << isds_strerror(status);
 		return false;
 	}
-
-//	m_statusProgressBar->setValue(30);
 
 	struct isds_list *stateListFirst = NULL;
 	stateListFirst = stateList;

@@ -181,6 +181,7 @@ private:
 
 	QThread *thread;
 	Worker *worker;
+	QTimer *timer;
 
 	/*!
 	 * @brief Default settings of main window.

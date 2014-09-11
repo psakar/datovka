@@ -1,4 +1,3 @@
-
 #include <cmath> /* ceil(3) */
 #include <QDesktopServices>
 #include <QDir>
@@ -10,8 +9,9 @@
 #include <QStackedWidget>
 #include <QTableView>
 #include <QTemporaryFile>
-#include "datovka.h"
+#include <QTimer>
 
+#include "datovka.h"
 #include "src/common.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
@@ -171,6 +171,10 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(openSelectedAttachment()));
 //	ui->verifySignature
 //	ui->signatureDetails
+
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(on_actionSync_all_accounts_triggered()));
+	timer->start(TIMER_TIMEOUT);
 }
 
 

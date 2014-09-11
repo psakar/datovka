@@ -14,8 +14,8 @@ class Worker : public QObject {
     Q_OBJECT
 
 public:
-
-	explicit Worker(AccountDb &accountDb, AccountModel &accountModel, int count, QList<MessageDb*> messageDbList, QObject *parent = 0);
+	explicit Worker(AccountDb &accountDb, AccountModel &accountModel,
+	   int count, QList<MessageDb*> messageDbList, QObject *parent = 0);
 
 	/*!
 	* @brief Requests the process to start
@@ -40,7 +40,7 @@ private:
 	    const QString messageType, MessageDb &messageDb);
 
 	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-	MessageDb &messageDb);
+	    MessageDb &messageDb);
 
 	bool getPasswordInfo(const QModelIndex &acntTopIdx);
 
@@ -54,12 +54,12 @@ signals:
 	void workRequested(void);
 
 	/*!
-	* @brief This signal is emitted when counted value is changed (every sec)
+	* @brief This signal is emitted when counted value is changed
 	*/
 	void valueChanged(const QString &value);
 
 	/*!
-	* @brief This signal is emitted when process is finished (either by counting 60 sec or being aborted)
+	* @brief This signal is emitted when process is finished
 	*/
 	void finished(void);
 
