@@ -9,6 +9,7 @@
 #include "src/io/pkcs7.h"
 #include "src/gui/datovka.h"
 
+
 Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
 	    QList<MessageDb*> messageDbList, QObject *parent) :
 
@@ -22,7 +23,13 @@ Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
 	_abort = false;
 }
 
+
+/* ========================================================================= */
+/*
+* Tread executing prepare
+*/
 void Worker::requestWork() {
+/* ========================================================================= */
 
 	mutex.lock();
 	_working = true;
@@ -34,7 +41,14 @@ void Worker::requestWork() {
 	emit workRequested();
 }
 
-void Worker::abort() {
+
+/* ========================================================================= */
+/*
+* Abort tread executing
+*/
+void Worker::abort()
+/* ========================================================================= */
+{
 
 	mutex.lock();
 	if (_working) {
@@ -61,6 +75,16 @@ void Worker::doWork()
 	MessageDb *messageDb;
 
 	for (int i = 0; i < m_count; i++) {
+
+		mutex.lock();
+		bool abort = _abort;
+		mutex.unlock();
+
+		if (abort) {
+			qDebug()<< "Aborting worker process in Thread " <<
+			    thread()->currentThreadId();
+			break;
+		}
 
 		QModelIndex index = m_accountModel.index(i, 0);
 		const AccountModel::SettingsMap accountInfo =
@@ -180,15 +204,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	box = messageList;
 
-	int delta = 0;
-	if (allcnt == 0) {
-
-	} else {
-		delta = ceil(70 / allcnt);
-	}
-
 	while (0 != box) {
-
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
@@ -322,7 +338,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 /*
 * Get list of sent message state changes
 */
-bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, MessageDb &messageDb)
+bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
+    MessageDb &messageDb)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
@@ -355,20 +372,10 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, Messa
 	}
 
 	stateListFirst = stateList;
-	int delta = 0;
-	int diff = 0;
-
-	if (allcnt == 0) {
-//		m_statusProgressBar->setValue(60);
-	} else {
-		delta = ceil(70 / allcnt);
-	}
 
 	while (0 != stateListFirst) {
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateListFirst->data;
-		diff = diff + delta;
-//		m_statusProgressBar->setValue(30+diff);
 		int dmId = atoi(item->dmID);
 		/* Download and save delivery info and message events */
 		(getSentDeliveryInfo(acntTopIdx, dmId, true, messageDb))
@@ -377,8 +384,6 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx, Messa
 
 		stateListFirst = stateListFirst->next;
 	}
-
-//	m_statusProgressBar->setValue(100);
 
 	isds_list_free(&stateList);
 
@@ -421,8 +426,6 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	}
 
 	/* TODO - if signedMsg == true then decode signed message (raw ) */
-
-
 
 	int dmID = atoi(message->envelope->dmID);
 
@@ -488,5 +491,3 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 	}
 	return false;
 }
-
-

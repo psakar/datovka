@@ -30,20 +30,35 @@ public:
 private:
 	bool _abort;
 	bool _working;
+
 	QMutex mutex;
 	AccountDb &m_accountDb;
 	AccountModel &m_accountModel;
 	int m_count;
 	QList<MessageDb*> m_messageDbList;
 
+	/*!
+	* @brief Download sent/received message list from ISDS for current
+	* account index
+	*/
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
 	    const QString messageType, MessageDb &messageDb);
 
+	/*!
+	* @brief Get list of sent message state changes
+	*/
 	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 	    MessageDb &messageDb);
 
+	/*!
+	* @brief Get password expiration info for account index
+	*/
 	bool getPasswordInfo(const QModelIndex &acntTopIdx);
 
+	/*!
+	* @brief Download sent message delivery info and get list of events
+	* message
+	*/
 	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	    int msgIdx, bool signedMsg, MessageDb &messageDb);
 
@@ -64,7 +79,9 @@ signals:
 	void finished(void);
 
 public slots:
-
+	/*!
+	* @brief Run Message downloading in thread
+	*/
 	void doWork(void);
 };
 
