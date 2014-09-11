@@ -79,6 +79,9 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	    "preferences/store_additional_data_on_disk",
 	    dlftlGlobPref.store_additional_data_on_disk).toBool();
 
+	timer_value = settings.value(
+	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
+
 	value = settings.value("preferences/certificate_validation_date",
 	    dlftlGlobPref.certificate_validation_date).toInt();
 	switch (value) {
@@ -212,6 +215,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.after_start_select != after_start_select) {
 		settings.setValue("after_start_select", after_start_select);
+	}
+
+	if (dlftlGlobPref.timer_value != timer_value) {
+		settings.setValue("timer_value", timer_value);
 	}
 
 	settings.endGroup();
