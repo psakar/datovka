@@ -172,9 +172,27 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->verifySignature
 //	ui->signatureDetails
 
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(on_actionSync_all_accounts_triggered()));
-	timer->start(TIMER_TIMEOUT);
+	// initialization of Timer
+	if (globPref.auto_download_whole_messages) {
+
+		timer = new QTimer(this);
+		connect(timer, SIGNAL(timeout()), this,
+		    SLOT(on_actionSync_all_accounts_triggered()));
+
+		if (globPref.timer_value > 4) {
+			int timeout = globPref.timer_value * 60000;
+			timer->start(timeout);
+			qDebug() << "Timer set on" << globPref.timer_value <<
+			    "minutes";
+		} else {
+			qDebug() << "Timer set on" <<
+			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
+			timer->start(TIMER_DEFAULT_TIMEOUT_MS);
+		}
+
+		QTimer::singleShot(START_DOWNLOAD_MS, this,
+		    SLOT(on_actionSync_all_accounts_triggered()));
+	}
 }
 
 

@@ -14,6 +14,7 @@ DlgPreferences::DlgPreferences(QWidget * parent)
 void DlgPreferences::initPrefDialog(void)
 {
 	this->auto_download_whole_messages->setChecked(globPref.auto_download_whole_messages);
+	this->timerSpinBox->setValue(globPref.timer_value);
 	this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
 	this->check_new_versions->setChecked(globPref.check_new_versions);
 	this->store_messages_on_disk->setChecked(globPref.store_messages_on_disk);
@@ -21,7 +22,13 @@ void DlgPreferences::initPrefDialog(void)
 	this->check_crl->setChecked(globPref.check_crl);
 	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
+	this->timerLabelPre->setEnabled(this->auto_download_whole_messages->isChecked());
+	this->timerLabelPost->setEnabled(this->auto_download_whole_messages->isChecked());
+	this->timerSpinBox->setEnabled(this->auto_download_whole_messages->isChecked());
+
 	connect(this->check_new_versions, SIGNAL(stateChanged(int)), this, SLOT(setActiveCheckBox(int)));
+	connect(this->auto_download_whole_messages, SIGNAL(stateChanged(int)), this, SLOT(setActiveTimerSetup(int)));
+
 	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
 	//not used in this dialog
 	//this->default_download_signed->setChecked(globPref.default_download_signed);
@@ -76,10 +83,17 @@ const QString & DlgPreferences::getIndexFromLanguge(int index)
 	}
 }
 
-
 const QString DlgPreferences::langCs("cs");
 const QString DlgPreferences::langEn("en");
 const QString DlgPreferences::langSystem("system");
+
+
+void DlgPreferences::setActiveTimerSetup(int state)
+{
+	this->timerLabelPre->setEnabled(Qt::Checked == state);
+	this->timerLabelPost->setEnabled(Qt::Checked == state);
+	this->timerSpinBox->setEnabled(Qt::Checked == state);
+}
 
 
 void DlgPreferences::setActiveCheckBox(int state)
@@ -106,6 +120,7 @@ void DlgPreferences::saveChanges(void) const
 	globPref.check_new_versions = this->check_new_versions->isChecked();
 	globPref.send_stats_with_version_checks =
 	    this->send_stats_with_version_checks->isChecked();
+	globPref.timer_value = this->timerSpinBox->value();
 	// Not used in this dialog.
 	//date_format;
 	globPref.language =

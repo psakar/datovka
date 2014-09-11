@@ -19,7 +19,8 @@
 #define TIMEOUT_MS 1000
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
-#define TIMER_TIMEOUT 600000
+#define START_DOWNLOAD_MS 5000 // 5 sec first download after datovka start
+#define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 
 typedef enum {
 	USER_NAME = 0,
@@ -128,6 +129,7 @@ public:
 	bool check_crl;
 	bool check_new_versions;
 	bool send_stats_with_version_checks;
+	int timer_value;
 	DateFmt date_format;
 	QString language;
 	SelectType after_start_select;

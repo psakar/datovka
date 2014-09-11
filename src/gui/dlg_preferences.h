@@ -15,6 +15,7 @@ public:
 	DlgPreferences(QWidget *parent = 0);
 
 private slots:
+	void setActiveTimerSetup(int);
 	void setActiveCheckBox(int);
 	void saveChanges(void) const;
 
