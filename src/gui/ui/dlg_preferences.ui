@@ -79,7 +79,7 @@
             <item>
              <widget class="QLabel" name="timerLabelPre">
               <property name="text">
-               <string>    Check new messages every</string>
+               <string> Check new messages every</string>
               </property>
              </widget>
             </item>
@@ -121,7 +121,7 @@
           <item>
            <widget class="QCheckBox" name="auto_download_whole_messages">
             <property name="text">
-             <string>Automatically download whole messages</string>
+             <string>Automatically download whole messages (may be slow)</string>
             </property>
            </widget>
           </item>

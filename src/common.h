@@ -19,7 +19,7 @@
 #define TIMEOUT_MS 1000
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
-#define START_DOWNLOAD_MS 5000 // 5 sec first download after datovka start
+#define RUN_FIRST_ACTION_MS 2000 // 2 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 
 typedef enum {

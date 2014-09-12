@@ -186,6 +186,8 @@ private slots:
 	 */
 	void refreshAccountListFromWorker(const QModelIndex acntTopIdx);
 
+	void setWindowsAfterInit(void);
+
 private:
 
 	QThread *thread;

@@ -191,9 +191,23 @@ MainWindow::MainWindow(QWidget *parent)
 			qDebug() << "Timer set on" <<
 			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
 		}
+	}
 
-		QTimer::singleShot(START_DOWNLOAD_MS, this,
-		    SLOT(on_actionSync_all_accounts_triggered()));
+	QTimer::singleShot(RUN_FIRST_ACTION_MS, this,
+	    SLOT(setWindowsAfterInit()));
+}
+
+/* ========================================================================= */
+/*
+ * Do actions after MainWindow initialization
+ */
+void MainWindow::setWindowsAfterInit(void)
+/* ========================================================================= */
+{
+	if (ui->accountList->model()->rowCount() <= 0) {
+		on_actionAdd_account_triggered();
+	} else {
+		on_actionSync_all_accounts_triggered();
 	}
 }
 
@@ -217,6 +231,7 @@ MainWindow::~MainWindow(void)
 	/* Save settings on exit. */
 	saveSettings();
 
+	delete timer;
 	delete ui;
 }
 
@@ -1205,20 +1220,20 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 
 	// set mainspliter - hSplitterAccount
 	QList<int> sizes = ui->hSplitterAccount->sizes();
-	int tmp = settings.value("panes/hpaned1", 200).toInt();
+	int tmp = settings.value("panes/hpaned1", 226).toInt();
 	sizes[0] = tmp;
 	sizes[1] = w - sizes[0];;
 	ui->hSplitterAccount->setSizes(sizes);
 
 	// set messagelistspliter - vSplitterMessage
 	sizes = ui->vSplitterMessage->sizes();
-	sizes[0] = settings.value("panes/message_pane", 235).toInt();
+	sizes[0] = settings.value("panes/message_pane", 265).toInt();
 	sizes[1] = h - SH_OFFS - sizes[0];
 	ui->vSplitterMessage->setSizes(sizes);
 
 	// set message/mesageinfospliter - hSplitterMessageInfo
 	sizes = ui->hSplitterMessageInfo->sizes();
-	sizes[0] = settings.value("panes/message_display_pane", 258).toInt();
+	sizes[0] = settings.value("panes/message_display_pane", 505).toInt();
 	sizes[1] = w - tmp - sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
@@ -2759,10 +2774,14 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 void MainWindow::deleteThread(void)
 /* ========================================================================= */
 {
-	ui->actionSync_all_accounts->setEnabled(true);
-	ui->actionReceived_all->setEnabled(true);
-	ui->actionDownload_messages->setEnabled(true);
-	ui->actionGet_messages->setEnabled(true);
+
+	int accountCount = ui->accountList->model()->rowCount();
+	if (accountCount > 0) {
+		ui->actionSync_all_accounts->setEnabled(true);
+		ui->actionReceived_all->setEnabled(true);
+		ui->actionDownload_messages->setEnabled(true);
+		ui->actionGet_messages->setEnabled(true);
+	}
 
 	delete worker;
 	delete thread;
