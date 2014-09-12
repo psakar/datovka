@@ -62,6 +62,31 @@ private:
 	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	    int msgIdx, bool signedMsg, MessageDb &messageDb);
 
+	/*!
+	* @brief Download attachments, envelope and raw for message.
+	*/
+	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
+	    const QString dmId, bool signedMsg, MessageDb &messageDb,
+	    const QString messageType);
+
+	/*!
+	* @brief Download delivery info for message.
+	*/
+	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
+	    const QString dmId, bool signedMsg, MessageDb &messageDb);
+
+	/*!
+	* @brief Get additional info about author (sender)
+	*/
+	bool getMessageAuthor(const QModelIndex &acntTopIdx,
+	    const QString dmId, MessageDb &messageDb);
+
+	/*!
+	* @brief Set message as downloaded from ISDS.
+	*/
+	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
+	    const QString dmId);
+
 signals:
 	/*!
 	 * @brief This signal is emitted when the Worker request to Work
@@ -73,6 +98,7 @@ signals:
 	*/
 	void valueChanged(QString label, int value);
 
+	void refreshAccountList(const QModelIndex);
 	/*!
 	* @brief This signal is emitted when process is finished
 	*/

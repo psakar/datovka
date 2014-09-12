@@ -129,6 +129,7 @@ public:
 	bool check_crl;
 	bool check_new_versions;
 	bool send_stats_with_version_checks;
+	bool download_on_background;
 	int timer_value;
 	DateFmt date_format;
 	QString language;

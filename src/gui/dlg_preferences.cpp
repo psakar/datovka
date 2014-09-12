@@ -14,6 +14,7 @@ DlgPreferences::DlgPreferences(QWidget * parent)
 void DlgPreferences::initPrefDialog(void)
 {
 	this->auto_download_whole_messages->setChecked(globPref.auto_download_whole_messages);
+	this->download_on_background->setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
 	this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
 	this->check_new_versions->setChecked(globPref.check_new_versions);
@@ -22,12 +23,14 @@ void DlgPreferences::initPrefDialog(void)
 	this->check_crl->setChecked(globPref.check_crl);
 	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
-	this->timerLabelPre->setEnabled(this->auto_download_whole_messages->isChecked());
-	this->timerLabelPost->setEnabled(this->auto_download_whole_messages->isChecked());
-	this->timerSpinBox->setEnabled(this->auto_download_whole_messages->isChecked());
+	this->timerLabelPre->setEnabled(this->download_on_background->isChecked());
+	this->timerLabelPost->setEnabled(this->download_on_background->isChecked());
+	this->timerSpinBox->setEnabled(this->download_on_background->isChecked());
 
-	connect(this->check_new_versions, SIGNAL(stateChanged(int)), this, SLOT(setActiveCheckBox(int)));
-	connect(this->auto_download_whole_messages, SIGNAL(stateChanged(int)), this, SLOT(setActiveTimerSetup(int)));
+	connect(this->check_new_versions, SIGNAL(stateChanged(int)),
+	    this, SLOT(setActiveCheckBox(int)));
+	connect(this->download_on_background, SIGNAL(stateChanged(int)),
+	    this, SLOT(setActiveTimerSetup(int)));
 
 	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
 	//not used in this dialog
@@ -106,6 +109,8 @@ void DlgPreferences::saveChanges(void) const
 {
 	globPref.auto_download_whole_messages =
 	    this->auto_download_whole_messages->isChecked();
+	globPref.download_on_background =
+	    this->download_on_background->isChecked();
 	// Not used in this dialog.
 	//globPref.default_download_signed;
 	globPref.store_messages_on_disk =

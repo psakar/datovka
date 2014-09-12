@@ -111,6 +111,7 @@ void Worker::doWork()
 			success = false;
 			continue;
 		}
+		emit refreshAccountList(index);
 
 		if (Q_CONNECT_ERROR ==
 		    downloadMessageList(index,"sent", *messageDb,
@@ -119,11 +120,15 @@ void Worker::doWork()
 			continue;
 		}
 
+		emit refreshAccountList(index);
+
 		if (!getListSentMessageStateChanges(index, *messageDb,
 		    "GetMessageStateChanges")) {
 			success = false;
 			continue;
 		}
+
+		emit refreshAccountList(index);
 
 		if (!getPasswordInfo(index)) {
 			success = false;
@@ -328,6 +333,12 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			    "was inserted into db..."
 			: qDebug() << "ERROR: Message envelope " << dmId <<
 			    "insert!";
+
+			if (globPref.auto_download_whole_messages) {
+				downloadMessage(acntTopIdx, item->envelope->dmID,
+				    true, messageDb, messageType);
+			}
+
 			newcnt++;
 		}
 		box = box->next;
@@ -337,15 +348,6 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	isds_list_free(&messageList);
 
 	emit valueChanged(label, 100);
-
-	/* Redraw views' content. */
-//	regenerateAccountModelYears(acntTopIdx);
-	/*
-	 * Force repaint.
-	 * TODO -- A better solution?
-	 */
-//	ui->accountList->repaint();
-//	accountItemSelectionChanged(ui->accountList->currentIndex());
 
 	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;
@@ -492,8 +494,6 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 }
 
 
-
-
 /* ========================================================================= */
 /*
 * Get password expiration info for account index
@@ -534,4 +534,349 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 		return true;
 	}
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Download attachments, envelope and raw for message.
+ */
+qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
+    const QString dmId, bool signedMsg, MessageDb &messageDb,
+    const QString messageType)
+/* ========================================================================= */
+{
+	qDebug() << "Downloading complete message" << dmId;
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!isdsSessions.connectToIsds(accountInfo)) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		}
+	}
+
+	// message structures - all members
+	struct isds_message *message = NULL;
+	isds_error status;
+
+	/* download signed message? */
+	if (signedMsg) {
+		/* sent or received message? */
+		if  (messageType == "received") {
+			status = isds_get_signed_received_message(
+			    isdsSessions.session(accountInfo.userName()),
+			    dmId.toStdString().c_str(),
+			    &message);
+		} else {
+			status = isds_get_signed_sent_message(
+			    isdsSessions.session(accountInfo.userName()),
+			    dmId.toStdString().c_str(),
+			    &message);
+		}
+	} else {
+		status = isds_get_received_message(isdsSessions.session(
+		    accountInfo.userName()),
+		    dmId.toStdString().c_str(),
+		    &message);
+	}
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		isds_message_free(&message);
+		return Q_ISDS_ERROR;
+	}
+
+	int dmID = atoi(message->envelope->dmID);
+
+	/* get signed raw data from message */
+	if (signedMsg) {
+		QString raw = QByteArray((char*)message->raw,
+		    message->raw_length).toBase64();
+
+		(messageDb.msgsInsertUpdateMessageRaw(dmID, raw, 0))
+		? qDebug() << "Message raw data were updated..."
+		: qDebug() << "ERROR: Message raw data update!";
+	}
+
+	QString timestamp = QByteArray((char *)message->envelope->timestamp,
+	    message->envelope->timestamp_length).toBase64();
+	QString dmAmbiguousRecipient;
+	if (0 == message->envelope->dmAmbiguousRecipient) {
+		dmAmbiguousRecipient = "0";
+	} else {
+		dmAmbiguousRecipient = QString::number(
+		    *message->envelope->dmAmbiguousRecipient);
+	}
+	QString dmLegalTitleYear;
+	if (0 == message->envelope->dmLegalTitleYear) {
+		dmLegalTitleYear = "";
+	} else {
+		dmLegalTitleYear = QString::number(
+		    *message->envelope->dmLegalTitleYear);
+	}
+	QString dmLegalTitleLaw;
+	if (0 == message->envelope->dmLegalTitleLaw) {
+		dmLegalTitleLaw = "";
+	} else {
+		dmLegalTitleLaw = QString::number(
+		    *message->envelope->dmLegalTitleLaw);
+	}
+	QString dmSenderOrgUnitNum;
+	if (0 == message->envelope->dmSenderOrgUnitNum) {
+		dmSenderOrgUnitNum = "";
+	} else {
+		dmSenderOrgUnitNum =
+		    *message->envelope->dmSenderOrgUnitNum != 0
+		    ? QString::number(*message->envelope->
+		    dmSenderOrgUnitNum) : "";
+	}
+	QString dmRecipientOrgUnitNum;
+	if (0 == message->envelope->dmRecipientOrgUnitNum) {
+		dmRecipientOrgUnitNum = "";
+	} else {
+		dmRecipientOrgUnitNum =
+		  *message->envelope->dmRecipientOrgUnitNum != 0
+		    ? QString::number(*message->envelope->
+		    dmRecipientOrgUnitNum) : "";
+	}
+	QString dmDeliveryTime = "";
+	if (0 != message->envelope->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    message->envelope->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != message->envelope->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    message->envelope->dmAcceptanceTime);
+	}
+
+	/* update message envelope in db */
+	(messageDb.msgsUpdateMessageEnvelope(dmID,
+	    /* TODO - set correctly next two values */
+	    false, "tReturnedMessage",
+	    message->envelope->dbIDSender,
+	    message->envelope->dmSender,
+	    message->envelope->dmSenderAddress,
+	    (int)*message->envelope->dmSenderType,
+	    message->envelope->dmRecipient,
+	    message->envelope->dmRecipientAddress,
+	    dmAmbiguousRecipient,
+	    message->envelope->dmSenderOrgUnit,
+	    dmSenderOrgUnitNum,
+	    message->envelope->dbIDRecipient,
+	    message->envelope->dmRecipientOrgUnit,
+	    dmRecipientOrgUnitNum,
+	    message->envelope->dmToHands,
+	    message->envelope->dmAnnotation,
+	    message->envelope->dmRecipientRefNumber,
+	    message->envelope->dmSenderRefNumber,
+	    message->envelope->dmRecipientIdent,
+	    message->envelope->dmSenderIdent,
+	    dmLegalTitleLaw,
+	    dmLegalTitleYear,
+	    message->envelope->dmLegalTitleSect,
+	    message->envelope->dmLegalTitlePar,
+	    message->envelope->dmLegalTitlePoint,
+	    message->envelope->dmPersonalDelivery,
+	    message->envelope->dmAllowSubstDelivery,
+	    timestamp,
+	    dmDeliveryTime,
+	    dmAcceptanceTime,
+	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
+	    (int)*message->envelope->dmAttachmentSize,
+	    message->envelope->dmType,
+	    messageType))
+	    ? qDebug() << "Message envelope was updated..."
+	    : qDebug() << "ERROR: Message envelope update!";
+
+	/* insert/update hash into db */
+	QString hashValue = QByteArray((char*)message->envelope->hash->value,
+	    message->envelope->hash->length).toBase64();
+	(messageDb.msgsInsertUpdateMessageHash(dmID,
+	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
+	? qDebug() << "Message hash was stored into db..."
+	: qDebug() << "ERROR: Message hash insert!";
+
+	/* Insert/update all attachment files */
+	struct isds_list *file;
+	file = message->documents;
+	while (0 != file) {
+		isds_document *item = (isds_document *) file->data;
+
+		QString dmEncodedContent = QByteArray((char *)item->data,
+		    item->data_length).toBase64();
+
+		/* Insert/update file to db */
+		(messageDb.msgsInsertUpdateMessageFile(dmID,
+		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
+		   item->dmMimeType, item->dmFormat,
+		   convertAttachmentType(item->dmFileMetaType),
+		   dmEncodedContent))
+		? qDebug() << "Message file" << item->dmFileDescr <<
+		    "was stored into db..."
+		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
+		    "insert!";
+		file = file->next;
+	}
+
+	if (messageType == "received") {
+		/* Download and save delivery info and message events */
+		(getReceivedsDeliveryInfo(acntTopIdx, message->envelope->dmID,
+		    signedMsg, messageDb))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+
+		getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
+
+		/*  Mark this message as downloaded in ISDS */
+		(markMessageAsDownloaded(acntTopIdx, message->envelope->dmID))
+		? qDebug() << "Message was marked as downloaded..."
+		: qDebug() << "ERROR: Message was not marked as downloaded!";
+	} else {
+		/* Download and save delivery info and message events */
+		(getSentDeliveryInfo(acntTopIdx, dmID, true, messageDb))
+		? qDebug() << "Delivery info of message was processed..."
+		: qDebug() << "ERROR: Delivery info of message not found!";
+
+		getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
+	}
+
+	isds_list_free(&message->documents);
+	isds_message_free(&message);
+
+	qDebug() << "downloadMessage(): Done!";
+
+	return Q_SUCCESS;
+}
+
+
+/* ========================================================================= */
+/*
+* Download message delivery info, raw and get list of events message
+*/
+bool Worker::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
+    const QString dmId, bool signedMsg, MessageDb &messageDb)
+/* ========================================================================= */
+{
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	// message and envleople structures
+	struct isds_message *message = NULL;
+	isds_error status;
+
+	(signedMsg)
+	? status = isds_get_signed_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message)
+	: status = isds_get_delivery_info(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(), &message);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		isds_message_free(&message);
+		return false;
+	}
+
+	int dmID = atoi(message->envelope->dmID);
+
+	/* get signed raw data from message */
+	if (signedMsg) {
+		QString raw = QByteArray((char*)message->raw,
+		    message->raw_length).toBase64();
+		(messageDb.msgsInsertUpdateDeliveryRaw(dmID, raw))
+		? qDebug() << "Message raw delivery info was updated..."
+		: qDebug() << "ERROR: Message raw delivery info update!";
+	}
+
+	struct isds_list *event;
+	event = message->envelope->events;
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb.msgsInsertUpdateMessageEvent(dmID,
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
+		event = event->next;
+	}
+
+	isds_list_free(&message->envelope->events);
+	isds_message_free(&message);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Get additional info about author (sender)
+*/
+bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
+    const QString dmId, MessageDb &messageDb)
+/* ========================================================================= */
+{
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	isds_sender_type *sender_type = NULL;
+	char * raw_sender_type = NULL;
+	char * sender_name = NULL;
+
+	status = isds_get_message_sender(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str(),
+	    &sender_type, &raw_sender_type, &sender_name);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_strerror(status);
+		return false;
+	}
+
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	(messageDb.addMessageAuthorInfo(dmID,
+	    convertSenderTypeToString((int)*sender_type), sender_name))
+	? qDebug() << "Author info of message was added..."
+	: qDebug() << "ERROR: Author info of message wrong!";
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+* Set message as downloaded from ISDS.
+*/
+bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
+    const QString dmId)
+/* ========================================================================= */
+{
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		isdsSessions.connectToIsds(accountInfo);
+	}
+
+	isds_error status;
+	status = isds_mark_message_read(isdsSessions.session(
+	    accountInfo.userName()), dmId.toStdString().c_str());
+
+	if (IE_SUCCESS != status) {
+		return false;
+	}
+	return true;
 }

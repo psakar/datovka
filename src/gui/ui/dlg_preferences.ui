@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>519</width>
-    <height>293</height>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,7 +58,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Message downloading</string>
+          <string>Messages downloading</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -68,9 +68,9 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QCheckBox" name="auto_download_whole_messages">
+           <widget class="QCheckBox" name="download_on_background">
             <property name="text">
-             <string>Automatically download whole messages</string>
+             <string>Automatically download new messages on background</string>
             </property>
            </widget>
           </item>
@@ -79,7 +79,7 @@
             <item>
              <widget class="QLabel" name="timerLabelPre">
               <property name="text">
-               <string>Automatically download new messages every</string>
+               <string>    Check new messages every</string>
               </property>
              </widget>
             </item>
@@ -117,6 +117,13 @@
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="auto_download_whole_messages">
+            <property name="text">
+             <string>Automatically download whole messages</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

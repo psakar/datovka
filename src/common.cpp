@@ -32,7 +32,9 @@ GlobPreferences::GlobPreferences(void)
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     auto_download_whole_messages(false),
+    download_on_background(true),
     default_download_signed(true),
+    timer_value(10),
     //store_passwords_on_disk(false),
     store_messages_on_disk(true),
     store_additional_data_on_disk(true),
@@ -78,6 +80,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	store_additional_data_on_disk = settings.value(
 	    "preferences/store_additional_data_on_disk",
 	    dlftlGlobPref.store_additional_data_on_disk).toBool();
+
+	download_on_background = settings.value(
+	    "preferences/download_on_background",
+	    dlftlGlobPref.download_on_background).toBool();
 
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
@@ -219,6 +225,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.timer_value != timer_value) {
 		settings.setValue("timer_value", timer_value);
+	}
+
+	if (dlftlGlobPref.download_on_background != download_on_background) {
+		settings.setValue("download_on_background", download_on_background);
 	}
 
 	settings.endGroup();

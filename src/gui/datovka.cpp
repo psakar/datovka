@@ -172,22 +172,24 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->verifySignature
 //	ui->signatureDetails
 
-	// initialization of Timer
-	if (globPref.auto_download_whole_messages) {
 
-		timer = new QTimer(this);
-		connect(timer, SIGNAL(timeout()), this,
-		    SLOT(on_actionSync_all_accounts_triggered()));
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this,
+	    SLOT(on_actionSync_all_accounts_triggered()));
+
+	// initialization of Timer
+	if (globPref.download_on_background) {
 
 		if (globPref.timer_value > 4) {
-			int timeout = globPref.timer_value * 60000;
+			timeout = globPref.timer_value * 60000;
 			timer->start(timeout);
 			qDebug() << "Timer set on" << globPref.timer_value <<
 			    "minutes";
 		} else {
+			timeout = TIMER_DEFAULT_TIMEOUT_MS;
+			timer->start(timeout);
 			qDebug() << "Timer set on" <<
 			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
-			timer->start(TIMER_DEFAULT_TIMEOUT_MS);
 		}
 
 		QTimer::singleShot(START_DOWNLOAD_MS, this,
@@ -228,6 +230,23 @@ void MainWindow::on_actionPreferences_triggered()
 {
 	QDialog *dlgPrefs = new DlgPreferences(this);
 	dlgPrefs->exec();
+
+	// set actuall timer value from settings if is enable
+	if (globPref.download_on_background) {
+		if (globPref.timer_value > 4) {
+			timeout = globPref.timer_value * 60000;
+			timer->start(timeout);
+			qDebug() << "Timer set on" << globPref.timer_value <<
+			    "minutes";
+		} else {
+			timeout = TIMER_DEFAULT_TIMEOUT_MS;
+			timer->start(timeout);
+			qDebug() << "Timer set on" <<
+			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
+		}
+	} else {
+		timer->stop();
+	}
 }
 
 
@@ -2702,17 +2721,22 @@ void MainWindow::on_actionDownload_messages_triggered()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+/* ========================================================================= */
+/*
+* Refresh AccountList
+*/
+void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
+/* ========================================================================= */
+{
+		/* Redraw views' content. */
+	regenerateAccountModelYears(acntTopIdx);
+	/*
+	 * Force repaint.
+	 * TODO -- A better solution?
+	 */
+	ui->accountList->repaint();
+	accountItemSelectionChanged(ui->accountList->currentIndex());
+}
 
 
 /* ========================================================================= */
@@ -2730,7 +2754,7 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 
 /* ========================================================================= */
 /*
-* Delete worker and thread objects, enable sync buttons.
+* Delete worker and thread objects, enable sync buttons and set timer
 */
 void MainWindow::deleteThread(void)
 /* ========================================================================= */
@@ -2742,6 +2766,10 @@ void MainWindow::deleteThread(void)
 
 	delete worker;
 	delete thread;
+
+	if (globPref.download_on_background) {
+		timer->start(timeout);
+	}
 }
 
 
@@ -2752,6 +2780,10 @@ void MainWindow::deleteThread(void)
 void MainWindow::on_actionSync_all_accounts_triggered(void)
 /* ========================================================================= */
 {
+	if (globPref.download_on_background) {
+		timer->stop();
+	}
+
 	int accountCount = ui->accountList->model()->rowCount();
 	QList<MessageDb*> messageDbList;
 	messageDbList.clear();
@@ -2775,6 +2807,8 @@ void MainWindow::on_actionSync_all_accounts_triggered(void)
 
 	connect(worker, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	connect(worker, SIGNAL(refreshAccountList(const QModelIndex)),
+	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
 	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
 	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
 	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
@@ -2782,64 +2816,7 @@ void MainWindow::on_actionSync_all_accounts_triggered(void)
 
 	worker->abort();
 	worker->requestWork();
-/*
-	bool success = true;
-	int count = ui->accountList->model()->rowCount();
-	for (int i = 0; i < count; i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-		QStandardItem *item = m_accountModel.itemFromIndex(index);
-		QStandardItem *itemTop = AccountModel::itemTop(item);
-		qDebug() << "-----------------------------------------------";
-		qDebug() << "Downloading message list for account"
-		    << itemTop->text();
-		qDebug() << "-----------------------------------------------";
-		m_statusProgressBar->setFormat("GetListOfReceivedMessages");
-		m_statusProgressBar->repaint();
-		if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
-			setDefaultProgressStatus();
-			success = false;
-			continue;
-		}
-		m_statusProgressBar->setFormat("GetListOfSentMessages");
-		m_statusProgressBar->repaint();
-		downloadMessageList(index,"sent");
-		m_statusProgressBar->setFormat("GetMessageStateChanges");
-		m_statusProgressBar->repaint();
-		getListSentMessageStateChanges(index);
-		m_statusProgressBar->setFormat("getPasswordInfo");
-		m_statusProgressBar->repaint();
-		getPasswordInfo(index);
-		setDefaultProgressStatus();
-	}
-	qDebug() << "-----------------------------------------------";
-	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
-*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* ========================================================================= */

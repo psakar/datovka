@@ -181,13 +181,17 @@ private slots:
 	 */
 	void setProgressBarFromWorker(QString label, int value);
 
+	/*!
+	 * @brief Refresh AccountList.
+	 */
+	void refreshAccountListFromWorker(const QModelIndex acntTopIdx);
 
 private:
 
 	QThread *thread;
 	Worker *worker;
 	QTimer *timer;
-
+	int timeout;
 	/*!
 	 * @brief Default settings of main window.
 	 */
