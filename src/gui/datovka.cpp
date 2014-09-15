@@ -1952,9 +1952,9 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 
 	QModelIndex curindex = ui->accountList->currentIndex();
 	//curindex = AccountModel::indexTop(curindex);
-	const QAbstractItemModel *msgTblMdl = curindex.model();
-
+	
 	MessageDb *messageDb = accountMessageDb(0);
+	const QAbstractItemModel *msgTblMdl = ui->messageList->model();
 	Q_ASSERT(0 != messageDb);
 
 	int count = msgTblMdl->rowCount();
