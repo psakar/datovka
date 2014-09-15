@@ -207,7 +207,9 @@ void MainWindow::setWindowsAfterInit(void)
 	if (ui->accountList->model()->rowCount() <= 0) {
 		on_actionAdd_account_triggered();
 	} else {
-		on_actionSync_all_accounts_triggered();
+		if (globPref.download_on_background) {
+			on_actionSync_all_accounts_triggered();
+		}
 	}
 }
 
@@ -1941,25 +1943,31 @@ void MainWindow::on_actionChange_data_directory_triggered()
 
 /* ========================================================================= */
 /*
-* Download sent/received message list for current (selected) account
+* Mark all messages as localy read
  */
 void MainWindow::on_actionMark_all_as_read_triggered()
 /* ========================================================================= */
 {
 	qDebug() << __func__;
 
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
+	QModelIndex curindex = ui->accountList->currentIndex();
+	//curindex = AccountModel::indexTop(curindex);
+	const QAbstractItemModel *msgTblMdl = curindex.model();
 
-	/* TODO */
-/*
-	for (int i = 0; i < ; i++) {
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 
-		(markMessageAsDownloaded(index, msgIdx))
-		? qDebug() << "Message was marked as downloaded..."
-		: qDebug() << "ERROR: Message was not marked as downloaded!";
+	int count = msgTblMdl->rowCount();
+
+	if (0 != msgTblMdl) {
+		for (int i = 0; i < count; i++) {
+			QModelIndex index = msgTblMdl->index(i, 0);
+			int msgId = msgTblMdl->itemData(index).first().toInt();
+
+			qDebug() << msgId;
+			//messageDb->smsgdtSetLocallyRead(msgId);
+		}
 	}
-*/
 }
 
 
