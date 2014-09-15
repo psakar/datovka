@@ -16,6 +16,7 @@
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -4219,4 +4220,14 @@ void MainWindow::on_actionSignature_detail_triggered(void)
 /* ========================================================================= */
 {
 	debug_func_call();
+
+	QDialog *signature_detail = new dlg_signature_detail(this);
+	signature_detail->exec();
+
+}
+
+void MainWindow::on_signatureDetails_clicked(void)
+{
+	debug_func_call();
+	on_actionSignature_detail_triggered();
 }

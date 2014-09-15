@@ -188,6 +188,8 @@ private slots:
 
 	void setWindowsAfterInit(void);
 
+	void on_signatureDetails_clicked(void);
+
 private:
 
 	QThread *thread;
