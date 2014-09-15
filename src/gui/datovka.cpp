@@ -1950,8 +1950,7 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 {
 	qDebug() << __func__;
 
-	QModelIndex curindex = ui->accountList->currentIndex();
-	//curindex = AccountModel::indexTop(curindex);
+	QModelIndex acnindex = ui->accountList->currentIndex();
 	
 	MessageDb *messageDb = accountMessageDb(0);
 	const QAbstractItemModel *msgTblMdl = ui->messageList->model();
@@ -1963,11 +1962,12 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 		for (int i = 0; i < count; i++) {
 			QModelIndex index = msgTblMdl->index(i, 0);
 			int msgId = msgTblMdl->itemData(index).first().toInt();
-
-			qDebug() << msgId;
-			//messageDb->smsgdtSetLocallyRead(msgId);
+			messageDb->smsgdtSetLocallyRead(msgId);
 		}
 	}
+
+	//regenerateAllAccountModelYears();
+	regenerateAccountModelYears(acnindex);
 }
 
 
