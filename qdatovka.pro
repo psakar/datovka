@@ -97,7 +97,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \
     src/gui/ui/dlg_about.ui \
-    src/gui/ui/dlg_view_zfo.ui
+    src/gui/ui/dlg_view_zfo.ui \
+    src/gui/ui/dlg_signature_detail.ui
 
 RESOURCES += \
     res/resources.qrc
