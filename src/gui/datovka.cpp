@@ -21,6 +21,7 @@
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
+#include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -1729,7 +1730,7 @@ void MainWindow::saveSettings(void) const
 void MainWindow::on_actionCreate_message_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	on_actionSent_message_triggered();
 }
@@ -1742,7 +1743,7 @@ void MainWindow::on_actionCreate_message_triggered()
 void MainWindow::on_actionSent_message_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	/*
 	 * TODO -- This method copies on_actionReply_to_the_sender_triggered().
@@ -1773,7 +1774,7 @@ void MainWindow::on_actionSent_message_triggered()
 void MainWindow::on_actionAdd_account_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, DlgCreateAccount::ACT_ADDNEW, this);
@@ -1793,7 +1794,7 @@ void MainWindow::on_actionAdd_account_triggered()
 void MainWindow::on_actionDelete_account_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
@@ -1844,7 +1845,7 @@ void MainWindow::on_actionDelete_account_triggered()
 void MainWindow::on_actionChange_password_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
@@ -1865,7 +1866,7 @@ void MainWindow::on_actionChange_password_triggered()
 void MainWindow::on_actionAccount_properties_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, DlgCreateAccount::ACT_EDIT, this);
@@ -1934,7 +1935,7 @@ void MainWindow::on_actionMove_account_down_triggered()
 void MainWindow::on_actionChange_data_directory_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	/* TODO - Change data directory */
 
@@ -1948,7 +1949,7 @@ void MainWindow::on_actionChange_data_directory_triggered()
 void MainWindow::on_actionMark_all_as_read_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex acnindex = ui->accountList->currentIndex();
 	
@@ -1978,7 +1979,7 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 void MainWindow::on_actionGet_messages_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
@@ -2017,7 +2018,7 @@ void MainWindow::on_actionGet_messages_triggered()
 void MainWindow::on_actionReply_to_the_sender_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	/*
 	 * TODO -- This method copies on_actionSent_message_triggered().
@@ -2061,7 +2062,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 void MainWindow::on_actionFind_databox_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex index = ui->accountList->currentIndex();
 	Q_ASSERT(index.isValid());
@@ -2081,7 +2082,7 @@ void MainWindow::on_actionFind_databox_triggered()
 void MainWindow::on_actionReply_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	on_actionReply_to_the_sender_triggered();
 }
@@ -2094,7 +2095,7 @@ void MainWindow::on_actionReply_triggered()
 void MainWindow::on_actionSearchClear_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	m_searchLine->clear();
 }
@@ -2153,7 +2154,7 @@ void MainWindow::setReciveidColumnWidths(void)
 void MainWindow::setSentColumnWidths(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
@@ -2177,7 +2178,7 @@ void MainWindow::setSentColumnWidths(void)
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	(void) oldSize;
 	QModelIndex current = ui->accountList->currentIndex();
@@ -2213,7 +2214,7 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 void MainWindow::onTableColumnSort(int column)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	m_sort_column = column;
 	if (ui->messageList->horizontalHeader()->sortIndicatorOrder()
@@ -2234,7 +2235,7 @@ void MainWindow::onTableColumnSort(int column)
 void MainWindow::loadAccountCollapseInfo(QSettings &settings)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	settings.beginGroup("account_tree");
 	QStringList key = settings.childKeys();
@@ -2276,7 +2277,7 @@ void MainWindow::loadAccountCollapseInfo(QSettings &settings)
 void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString keypref= "acc_collapsed_";
 	settings.beginGroup("account_tree");
@@ -2319,7 +2320,7 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
     const QString messageType)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
@@ -2490,7 +2491,8 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 			    (char*)item->envelope->timestamp,
 			    dmDeliveryTime,
 			    dmAcceptanceTime,
-			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
+			    convertHexToDecIndex(
+			        *item->envelope->dmMessageStatus),
 			    (int)*item->envelope->dmAttachmentSize,
 			    item->envelope->dmType,
 			    messageType))
@@ -2537,7 +2539,7 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx, bool signedMsg, bool incoming)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -2777,7 +2779,7 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 void MainWindow::on_actionDownload_messages_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	on_actionGet_messages_triggered();
 }
@@ -2847,7 +2849,7 @@ void MainWindow::deleteThread(void)
 void MainWindow::on_actionSync_all_accounts_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	if (globPref.download_on_background) {
 		timer->stop();
@@ -2895,7 +2897,7 @@ void MainWindow::on_actionSync_all_accounts_triggered(void)
 void MainWindow::on_actionReceived_all_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	on_actionSync_all_accounts_triggered();
 }
@@ -2909,7 +2911,7 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -2943,7 +2945,7 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -3014,7 +3016,7 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
     int msgIdx, bool signedMsg)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString dmId = QString::number(msgIdx);
 	const AccountModel::SettingsMap accountInfo =
@@ -3074,7 +3076,7 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3152,7 +3154,7 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 bool MainWindow::getPasswordInfo(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	isds_error status;
 	struct timeval *expiration = NULL;
@@ -3198,7 +3200,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -3248,7 +3250,7 @@ qdatovka_error MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -3331,7 +3333,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
     QString dmId)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3393,7 +3395,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3470,7 +3472,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3502,7 +3504,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 void MainWindow::on_actionDelete_message_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -3530,7 +3532,7 @@ void MainWindow::on_actionDelete_message_triggered()
 void MainWindow::on_actionDownload_message_signed_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	downloadSelectedMessageAttachments();
 }
@@ -3543,7 +3545,7 @@ void MainWindow::on_actionDownload_message_signed_triggered()
 void MainWindow::on_actionAbout_Datovka_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QDialog *abDialog = new aboutDialog(this);
 	abDialog->exec();
@@ -3557,7 +3559,7 @@ void MainWindow::on_actionAbout_Datovka_triggered()
 void MainWindow::on_actionImport_database_directory_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	/* TODO - Import database directory */
 }
@@ -3570,7 +3572,7 @@ void MainWindow::on_actionImport_database_directory_triggered()
 void MainWindow::on_actionOpen_attachment_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	openSelectedAttachment();
 }
@@ -3583,7 +3585,7 @@ void MainWindow::on_actionOpen_attachment_triggered()
 void MainWindow::on_actionSave_attachment_triggered()
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	saveSelectedAttachmentToFile();
 }
@@ -3597,7 +3599,7 @@ qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopI
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3643,7 +3645,7 @@ qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopI
 qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
@@ -3703,7 +3705,7 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	switch (authenticateMessageFromZFO()) {
 	case Q_SUCCESS:
@@ -3749,7 +3751,7 @@ void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 void MainWindow::on_actionAuthenticate_message_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	on_actionVerify_a_message_triggered();
 }
@@ -3762,7 +3764,7 @@ void MainWindow::on_actionAuthenticate_message_triggered(void)
 void MainWindow::on_actionVerify_a_message_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -3810,7 +3812,7 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
@@ -3865,7 +3867,7 @@ fail:
 void MainWindow::on_actionHepl_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 	/* TODO - load help content from html file to browser */
 }
 
@@ -3877,7 +3879,7 @@ void MainWindow::on_actionHepl_triggered(void)
 void MainWindow::on_actionExport_as_ZFO_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -3937,7 +3939,7 @@ void MainWindow::on_actionExport_as_ZFO_triggered(void)
 void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -3997,7 +3999,7 @@ void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString fileName;
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -4044,7 +4046,7 @@ void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString fileName;
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -4092,7 +4094,7 @@ void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 void MainWindow::on_actionOpen_message_externally_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4154,7 +4156,7 @@ void MainWindow::on_actionOpen_message_externally_triggered(void)
 void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4216,5 +4218,5 @@ void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
 void MainWindow::on_actionSignature_detail_triggered(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 }

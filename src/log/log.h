@@ -16,6 +16,17 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 
 
 /*!
+ * @brief Generates location debug information.
+ */
+#ifdef DEBUG
+#  define debug_func_call() do {qDebug(">> %s() '%s'", __func__, __FILE__);} while(0)
+#else
+   /* Forces the semicolon after the macro. */
+#  define debug_func_call() do {} while(0)
+#endif
+
+
+/*!
  * @brief Maximal number of simultaneously opened files.
  */
 #define MAX_LOG_FILES 64
