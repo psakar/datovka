@@ -3709,12 +3709,26 @@ void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-		QMessageBox::warning(this, tr("Error authentication of message"),
-		    tr("Authentication of message have been stopped "
-		        "because the connection to ISDS failed!"),
+		QMessageBox::critical(this, tr("Message authentication error"),
+		    tr("Authentication of message has been stopped because the connection to ISDS failed!\nCheck your internet connection."),
 		    QMessageBox::Ok);
 		break;
+	case Q_CONNECT_ERROR:
+		QMessageBox::critical(this, tr("Message authentication error"),
+		    tr("Authentication of message has been stopped because the connection to ISDS failed!\nCheck your internet connection."),
+		    QMessageBox::Ok);
+		break;
+	case Q_FILE_ERROR:
+		QMessageBox::critical(this, tr("Message authentication error"),
+		    tr("Authentication of message has been stopped because the message file has wrong format!"),
+		    QMessageBox::Ok);
+		break;
+	case Q_CANCEL:
+		break;
 	default:
+		QMessageBox::critical(this, tr("Message authentication error"),
+		    tr("An undefined error occurred!\nTry again."),
+		    QMessageBox::Ok);
 		break;
 	}
 }
@@ -3749,20 +3763,33 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 	switch (verifyMessage(acntTopIdx, msgIdx)) {
 	case Q_SUCCESS:
 		QMessageBox::information(this, tr("Message is valid"),
-		    tr("Hash of message corresponds to ISDS message hash."),
+		    tr("Hash of message corresponds to ISDS message hash.\nMessage is valid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
 		QMessageBox::warning(this, tr("Message is not authentic"),
-		    tr("ISDS confirms that the message hash is invalid."),
+		    tr("ISDS confirms that the message hash is invalid!\nMessage is invalid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
 		QMessageBox::warning(this, tr("Authenticate message error"),
-		    tr("The message hash is not valid or connection to ISDS failed!"),
+		    tr("The message hash cannot be verified because the connection to ISDS failed!\nCheck your internet connection."),
+		    QMessageBox::Ok);
+		break;
+	case Q_SQL_ERROR:
+		QMessageBox::warning(this, tr("Authenticate message warning"),
+		    tr("The message hash is not in local database.\nPlease download complete message form ISDS and try again."),
+		    QMessageBox::Ok);
+		break;
+	case Q_GLOBAL_ERROR:
+		QMessageBox::critical(this, tr("Authenticate message error"),
+		    tr("The message hash cannot be verified because an internal error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
 	default:
+		QMessageBox::critical(this, tr("Authenticate message error"),
+		    tr("An undefined error occurred!\nTry again."),
+		    QMessageBox::Ok);
 		break;
 	}
 }
@@ -3978,6 +4005,10 @@ void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save delivery info as PDF file"), fileName);
 
+	if (fileName.isEmpty()) {
+		return;
+	}
+
 	MessageDb *messageDb = accountMessageDb(0);
 
 	QTextDocument doc;
@@ -4020,6 +4051,10 @@ void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 	fileName = "OZ_" + dmId + ".pdf";
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save message envelope as PDF file"), fileName);
+
+	if (fileName.isEmpty()) {
+		return;
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 
