@@ -17,6 +17,7 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_signature_detail.h"
+#include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -1938,7 +1939,8 @@ void MainWindow::on_actionChange_data_directory_triggered()
 {
 	debug_func_call();
 
-	/* TODO - Change data directory */
+	QDialog *change_directory = new dlg_change_directory(this);
+	change_directory->exec();
 
 }
 
