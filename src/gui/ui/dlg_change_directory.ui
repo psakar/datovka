@@ -133,7 +133,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="StartDataRadioButton">
+       <widget class="QRadioButton" name="startDataRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>

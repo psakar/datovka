@@ -77,6 +77,14 @@ void AccountModel::SettingsMap::setPassword(const QString &pwd)
 
 
 /* ========================================================================= */
+void AccountModel::SettingsMap::setDirectory(const QString &path)
+/* ========================================================================= */
+{
+	(*this)[DB_DIR] = path;
+}
+
+
+/* ========================================================================= */
 bool AccountModel::SettingsMap::testAccount(void) const
 /* ========================================================================= */
 {

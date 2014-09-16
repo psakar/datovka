@@ -186,9 +186,20 @@ private slots:
 	 */
 	void refreshAccountListFromWorker(const QModelIndex acntTopIdx);
 
+	/*!
+	 * @brief Set and run any actions after mainwindow has been created.
+	 */
 	void setWindowsAfterInit(void);
 
+	/*!
+	 * @brief Open dialog with signature detail.
+	 */
 	void on_signatureDetails_clicked(void);
+
+	/*!
+	 * @brief Recevied and store new account database path
+	 */
+	void ReceivedNewDataPath(QString newPath);
 
 private:
 
@@ -196,6 +207,7 @@ private:
 	Worker *worker;
 	QTimer *timer;
 	int timeout;
+
 	/*!
 	 * @brief Default settings of main window.
 	 */

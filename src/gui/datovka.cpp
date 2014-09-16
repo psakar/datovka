@@ -1952,11 +1952,34 @@ void MainWindow::on_actionChange_data_directory_triggered()
 		dbDir = globPref.confDir();
 	}
 
-	qDebug() << dbDir;
-
 	QDialog *change_directory = new dlg_change_directory(dbDir, this);
-	change_directory->exec();
 
+	connect(change_directory, SIGNAL(sentNewPath(QString)),
+	    this, SLOT(ReceivedNewDataPath(QString)));
+
+	change_directory->exec();
+}
+
+
+/* ========================================================================= */
+/*
+* Change data directory path in settings
+ */
+void MainWindow::ReceivedNewDataPath(QString newPath)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	const QModelIndex index = ui->accountList->currentIndex();
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	/* TODO - save new path to settings */
+	//itemSettings.setDirectory(newPath);
+	//saveSettings();
 }
 
 

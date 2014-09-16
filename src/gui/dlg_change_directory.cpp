@@ -68,12 +68,20 @@ void dlg_change_directory::onDirectoryChange(void)
 
 /* ========================================================================= */
 /*
- * Set new data directory from action
+ * Set new data directory and save path
  */
 void dlg_change_directory::setNewDataDirectory(void)
 /* ========================================================================= */
 {
-	/* TODO - Move/copy current account data and save to pref */
-
 	qDebug() << __func__;
+
+	if (this->moveDataRadioButton->isChecked()) {
+		/* TODO - Move current database into new directory */
+	} else if (this->startDataRadioButton->isChecked()) {
+		/* TODO - Copy current database into new directory */
+	} else {
+		/* TODO - Create new database into new directory */
+	}
+
+	emit sentNewPath(this->newPath->text());
 }

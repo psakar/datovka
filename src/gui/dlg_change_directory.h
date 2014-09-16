@@ -16,6 +16,9 @@ private slots:
 	void onDirectoryChange(void);
 	void setNewDataDirectory(void);
 
+signals:
+	void sentNewPath(QString);
+
 private:
 	QString m_dirPath;
 	void initDialog(void);

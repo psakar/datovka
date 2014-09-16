@@ -32,9 +32,7 @@ GlobPreferences::GlobPreferences(void)
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     auto_download_whole_messages(false),
-    download_on_background(true),
     default_download_signed(true),
-    timer_value(10),
     //store_passwords_on_disk(false),
     store_messages_on_disk(true),
     store_additional_data_on_disk(true),
@@ -42,6 +40,8 @@ GlobPreferences::GlobPreferences(void)
     check_crl(true),
     check_new_versions(true),
     send_stats_with_version_checks(true),
+    download_on_background(true),
+    timer_value(10),
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
     after_start_select(SELECT_NEWEST)
