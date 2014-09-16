@@ -508,6 +508,12 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 
 			Q_ASSERT(of != NULL);
 			fputs(msg.toStdString().c_str(), of);
+			/*
+			 * Windows buffers stderr, explicit flush is needed.
+			 */
+			if (stderr == of) {
+				fflush(of);
+			}
 		}
 	}
 }
@@ -576,6 +582,13 @@ void GlobLog::logPrefixVlogMl(int source, uint8_t level,
 				Q_ASSERT(of != NULL);
 				fputs(msg.toStdString().c_str(), of);
 				fputc('\n', of);
+				/*
+				 * Windows buffers stderr, explicit flush is
+				 * needed.
+				 */
+				if (stderr == of) {
+					fflush(of);
+				}
 			}
 		}
 	}
