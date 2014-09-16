@@ -1939,7 +1939,22 @@ void MainWindow::on_actionChange_data_directory_triggered()
 {
 	debug_func_call();
 
-	QDialog *change_directory = new dlg_change_directory(this);
+	const QModelIndex index = ui->accountList->currentIndex();
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QString dbDir = itemSettings[DB_DIR].toString();
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = globPref.confDir();
+	}
+
+	qDebug() << dbDir;
+
+	QDialog *change_directory = new dlg_change_directory(dbDir, this);
 	change_directory->exec();
 
 }

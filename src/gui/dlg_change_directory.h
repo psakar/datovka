@@ -10,7 +10,15 @@ class dlg_change_directory : public QDialog, public Ui::dlg_change_directory {
     Q_OBJECT
 
 public:
-	dlg_change_directory(QWidget *parent = 0);
+	dlg_change_directory(QString dirPath, QWidget *parent = 0);
+
+private slots:
+	void onDirectoryChange(void);
+	void setNewDataDirectory(void);
+
+private:
+	QString m_dirPath;
+	void initDialog(void);
 };
 
 
