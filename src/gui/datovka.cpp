@@ -1446,7 +1446,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(accountItemMarkAllRead()));
 	/* Message. */
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
-	    SLOT(actionDelete_message()));
+	    SLOT(messageItemDeleteMessage()));
 	/* Tools. */
 	/* Help. */
 }
