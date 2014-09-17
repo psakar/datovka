@@ -181,6 +181,9 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->verifySignature
 //	ui->signatureDetails
 
+	/* Connect non-automatic menu actions. */
+	connectTopMenuBarSlots();
+	connectTopToolBarSlots();
 
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this,
@@ -1422,9 +1425,53 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 	}
 }
 
+
 /* ========================================================================= */
 /*
- *  Set default settings of mainwindow.
+ * Connects top menu-bar buttons to appropriate actions.
+ */
+void MainWindow::connectTopMenuBarSlots(void)
+/* ========================================================================= */
+{
+	/*
+	 * Actions that cannot be automatically connected
+	 * via QMetaObject::connectSlotsByName because of mismatching names.
+	 */
+
+	/* File. */
+	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
+	    SLOT(synchroniseAllAccounts()));
+	/* Databox. */
+	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
+	    SLOT(accountItemMarkAllRead()));
+	/* Message. */
+	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
+	    SLOT(actionDelete_message()));
+	/* Tools. */
+	/* Help. */
+}
+
+
+/* ========================================================================= */
+/*
+ * Connect top tool-bar buttons to appropriate actions.
+ */
+void MainWindow::connectTopToolBarSlots(void)
+/* ========================================================================= */
+{
+	/*
+	 * Actions that cannot be automatically connected
+	 * via QMetaObject::connectSlotsByName because of mismatching names.
+	 */
+
+	connect(ui->actionReceived_all, SIGNAL(triggered()), this,
+	    SLOT(synchroniseAllAccounts()));
+}
+
+
+/* ========================================================================= */
+/*
+ *  Set default settings of main window.
  */
 void MainWindow::defaultUiMainWindowSettings(void) const
 /* ========================================================================= */

@@ -217,6 +217,16 @@ private:
 	int timeout;
 
 	/*!
+	 * @brief Connects top menu-bar buttons to appropriate actions.
+	 */
+	void connectTopMenuBarSlots(void);
+
+	/*!
+	 * @brief Connect top tool-bar buttons to appropriate actions.
+	 */
+	void connectTopToolBarSlots(void);
+
+	/*!
 	 * @brief Default settings of main window.
 	 */
 	void defaultUiMainWindowSettings(void) const;
