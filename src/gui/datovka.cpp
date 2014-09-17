@@ -494,7 +494,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    this, SLOT(on_actionCreate_message_triggered()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "tick_16.png"),
 		    tr("Mark all as read"),
-		    this, SLOT(on_actionMark_all_as_read_triggered()));
+		    this, SLOT(accountItemMarkAllRead()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
 		    tr("Change password"),
@@ -983,6 +983,52 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(attachmentItemSelectionChanged(QModelIndex,
 	        QModelIndex)));
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages as localy read
+ */
+void MainWindow::accountItemMarkAllRead(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	/* Save current index. */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+	const QAbstractItemModel *msgTblMdl = ui->messageList->model();
+	Q_ASSERT(0 != msgTblMdl);
+
+	int count = msgTblMdl->rowCount();
+
+	if (0 != msgTblMdl) {
+		for (int i = 0; i < count; i++) {
+			QModelIndex index = msgTblMdl->index(i, 0);
+			int msgId = msgTblMdl->itemData(index).first().toInt();
+			messageDb->smsgdtSetLocallyRead(msgId);
+		}
+	}
+
+	/* Regenerate acount tree. */
+	regenerateAllAccountModelYears();
+
+	/* Restore selection. */
+	if (selectedAcntIndex.isValid()) {
+		QItemSelectionModel *selectionModel =
+		    ui->accountList->selectionModel();
+		selectionModel->select(selectedAcntIndex,
+		    QItemSelectionModel::ClearAndSelect);
+		accountItemSelectionChanged(selectedAcntIndex);
+		/*
+		 * TODO -- When using on year account item then the first
+		 * switching on a parent item (Received) does not redraw the
+		 * message list.
+		 */
+	}
 }
 
 
@@ -1990,37 +2036,6 @@ void MainWindow::ReceivedNewDataPath(QString newPath)
 	/* TODO - save new path to settings */
 	//itemSettings.setDirectory(newPath);
 	//saveSettings();
-}
-
-
-/* ========================================================================= */
-/*
-* Mark all messages as localy read
- */
-void MainWindow::on_actionMark_all_as_read_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	QModelIndex acnindex = ui->accountList->currentIndex();
-	
-	MessageDb *messageDb = accountMessageDb(0);
-	const QAbstractItemModel *msgTblMdl = ui->messageList->model();
-	Q_ASSERT(0 != messageDb);
-
-	int count = msgTblMdl->rowCount();
-
-	if (0 != msgTblMdl) {
-		for (int i = 0; i < count; i++) {
-			QModelIndex index = msgTblMdl->index(i, 0);
-			int msgId = msgTblMdl->itemData(index).first().toInt();
-			messageDb->smsgdtSetLocallyRead(msgId);
-		}
-	}
-
-	/* TODO - regenerate messageList */
-
-	regenerateAllAccountModelYears();
 }
 
 

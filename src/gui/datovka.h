@@ -94,6 +94,11 @@ private slots:
 	 */
 	void downloadSelectedMessageAttachments(void);
 
+	/*!
+	 * @brief Mark all messages as read in selected account item.
+	 */
+	void accountItemMarkAllRead(void);
+
 	void on_actionCreate_message_triggered(void);
 
 	void on_actionSent_message_triggered(void);
@@ -111,8 +116,6 @@ private slots:
 	void on_actionMove_account_down_triggered(void);
 
 	void on_actionChange_data_directory_triggered(void);
-
-	void on_actionMark_all_as_read_triggered(void);
 
 	void on_actionGet_messages_triggered(void);
 
