@@ -104,6 +104,11 @@ private slots:
 	 */
 	void messageItemDeleteMessage(void);
 
+	/*!
+	 * @brief Downloads new messages from server for all accounts.
+	 */
+	void synchroniseAllAccounts(void);
+
 	void on_actionCreate_message_triggered(void);
 
 	void on_actionSent_message_triggered(void);
@@ -139,10 +144,6 @@ private slots:
 	void onTableColumnSort(int column);
 
 	void on_actionDownload_messages_triggered(void);
-
-	void on_actionSync_all_accounts_triggered(void);
-
-	void on_actionReceived_all_triggered(void);
 
 	void on_actionDownload_message_signed_triggered(void);
 

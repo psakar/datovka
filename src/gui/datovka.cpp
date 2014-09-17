@@ -184,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this,
-	    SLOT(on_actionSync_all_accounts_triggered()));
+	    SLOT(synchroniseAllAccounts()));
 
 	// initialization of Timer
 	if (globPref.download_on_background) {
@@ -217,7 +217,7 @@ void MainWindow::setWindowsAfterInit(void)
 		on_actionAdd_account_triggered();
 	} else {
 		if (globPref.download_on_background) {
-			on_actionSync_all_accounts_triggered();
+			synchroniseAllAccounts();
 		}
 	}
 }
@@ -1068,6 +1068,54 @@ void MainWindow::messageItemDeleteMessage(void)
 			break;
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Downloads new messages from server for all accounts.
+ */
+void MainWindow::synchroniseAllAccounts(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	if (globPref.download_on_background) {
+		timer->stop();
+	}
+
+	int accountCount = ui->accountList->model()->rowCount();
+	QList<MessageDb*> messageDbList;
+	messageDbList.clear();
+
+	for (int i = 0; i < accountCount; i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		const QStandardItem *accountItem =
+		    m_accountModel.itemFromIndex(index);
+		MessageDb *messageDb = accountMessageDb(accountItem);
+		messageDbList.append(messageDb);
+	}
+
+	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionReceived_all->setEnabled(false);
+	ui->actionDownload_messages->setEnabled(false);
+	ui->actionGet_messages->setEnabled(false);
+
+	thread = new QThread();
+	worker = new Worker(m_accountDb, m_accountModel, accountCount, messageDbList);
+	worker->moveToThread(thread);
+
+	connect(worker, SIGNAL(valueChanged(QString, int)),
+	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	connect(worker, SIGNAL(refreshAccountList(const QModelIndex)),
+	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
+	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
+	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
+	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
+	connect(worker, SIGNAL(finished()), this, SLOT(deleteThread()));
+
+	worker->abort();
+	worker->requestWork();
 }
 
 
@@ -2945,67 +2993,6 @@ void MainWindow::deleteThread(void)
 	if (globPref.download_on_background) {
 		timer->start(timeout);
 	}
-}
-
-
-/* ========================================================================= */
-/*
-* Download message list from ISDS for all accounts
-*/
-void MainWindow::on_actionSync_all_accounts_triggered(void)
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	if (globPref.download_on_background) {
-		timer->stop();
-	}
-
-	int accountCount = ui->accountList->model()->rowCount();
-	QList<MessageDb*> messageDbList;
-	messageDbList.clear();
-
-	for (int i = 0; i < accountCount; i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-		const QStandardItem *accountItem =
-		    m_accountModel.itemFromIndex(index);
-		MessageDb *messageDb = accountMessageDb(accountItem);
-		messageDbList.append(messageDb);
-	}
-
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionReceived_all->setEnabled(false);
-	ui->actionDownload_messages->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
-
-	thread = new QThread();
-	worker = new Worker(m_accountDb, m_accountModel, accountCount, messageDbList);
-	worker->moveToThread(thread);
-
-	connect(worker, SIGNAL(valueChanged(QString, int)),
-	    this, SLOT(setProgressBarFromWorker(QString, int)));
-	connect(worker, SIGNAL(refreshAccountList(const QModelIndex)),
-	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
-	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
-	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
-	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
-	connect(worker, SIGNAL(finished()), this, SLOT(deleteThread()));
-
-	worker->abort();
-	worker->requestWork();
-}
-
-
-/* ========================================================================= */
-/*
-* Download message list from ISDS for all accounts (click from toolbar)
-*/
-void MainWindow::on_actionReceived_all_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	on_actionSync_all_accounts_triggered();
 }
 
 
