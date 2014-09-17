@@ -63,16 +63,22 @@ MainWindow::MainWindow(QWidget *parent)
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	// toolBar is a pointer to an existing toolbar
 	ui->toolBar->addWidget(spacer);
+
 	QLabel *searchLabel = new QLabel;
 	searchLabel->setText(tr("Search: "));
 	ui->toolBar->addWidget(searchLabel);
+
 	m_searchLine = new QLineEdit(this);
 	connect(m_searchLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
 	ui->toolBar->addWidget(m_searchLine);
-	ui->toolBar->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
-	    tr("Clear search field"), this,
+
+	m_pushButton = new QPushButton(this);
+	m_pushButton->setIcon(QIcon(ICON_3PARTY_PATH "delete_16.png"));
+	m_pushButton->setToolTip(tr("Clear search field"));
+	ui->toolBar->addWidget(m_pushButton);
+	connect(m_pushButton, SIGNAL(clicked()), this,
 	    SLOT(on_actionSearchClear_triggered()));
 
 	/* Create status bar label */
@@ -1838,6 +1844,10 @@ void MainWindow::on_actionDelete_account_triggered()
 		/* Save changed configuration. */
 		saveSettings();
 	}
+
+	if (ui->accountList->model()->rowCount() < 1) {
+		defaultUiMainWindowSettings();
+	}
 }
 
 /* ========================================================================= */
@@ -2008,8 +2018,9 @@ void MainWindow::on_actionMark_all_as_read_triggered()
 		}
 	}
 
-	//regenerateAllAccountModelYears();
-	regenerateAccountModelYears(acnindex);
+	/* TODO - regenerate messageList */
+
+	regenerateAllAccountModelYears();
 }
 
 

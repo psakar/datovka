@@ -10,6 +10,7 @@
 #include <QStandardItemModel>
 #include <QProgressBar>
 #include <QThread>
+#include <QPushButton>
 
 #include "src/common.h"
 #include "src/io/account_db.h"
@@ -441,6 +442,7 @@ private:
 	DbMsgsTblModel *m_messageModel; /*!< Currently displayed model. */
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
+	QPushButton *m_pushButton;
 	QSortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting.
