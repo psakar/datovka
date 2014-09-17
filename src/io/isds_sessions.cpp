@@ -4,7 +4,6 @@
 #include <QFile>
 #include <QInputDialog>
 #include <QObject>
-#include <QMessageBox>
 
 #include "isds_sessions.h"
 #include "src/gui/datovka.h"
@@ -100,7 +99,7 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
 /*
  * Connect to databox
  */
-bool GlobIsdsSessions::connectToIsds(
+isds_error GlobIsdsSessions::connectToIsds(
     const AccountModel::SettingsMap &accountInfo, MainWindow *mw)
 /* ========================================================================= */
 {
@@ -150,32 +149,7 @@ bool GlobIsdsSessions::connectToIsds(
 		    accountInfo.testAccount(), mw, accountInfo.accountName());
 	}
 
-	if (IE_NOT_LOGGED_IN == status) {
-		QMessageBox::warning(0, QObject::tr("Authentication fails"),
-		    QObject::tr("Authentication fails for account ")
-		    + accountInfo.accountName()
-		    + "\n" + QObject::tr("ErrorType: ") + isds_strerror(status),
-		    QMessageBox::Ok);
-		return false;
-	} else if (IE_PARTIAL_SUCCESS == status) {
-		QMessageBox::warning(0, QObject::tr("OTP authentication fails"),
-		    QObject::tr("OTP authentication fails for account ")
-		    + accountInfo.accountName()
-		    + "\n" + QObject::tr("ErrorType: ")
-		    + isds_strerror(status),
-		    QMessageBox::Ok);
-		return false;
-	} else if (IE_SUCCESS != status) {
-		QMessageBox::warning(0, QObject::tr("Error occurred"),
-		    QObject::tr("An error occurred while connect to ISDS for account ")
-		    + accountInfo.accountName()
-		    + "\n" + QObject::tr("ErrorType: ")
-		    + isds_strerror(status),
-		    QMessageBox::Ok);
-		return false;
-	}
-
-	return true;
+	return status;
 }
 
 

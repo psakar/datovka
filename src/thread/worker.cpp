@@ -1,25 +1,23 @@
 #include <QThread>
 #include <QDebug>
+#include <QMessageBox>
 
 #include "worker.h"
 #include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
-#include "src/io/isds_sessions.h"
 #include "src/io/pkcs7.h"
 #include "src/gui/datovka.h"
-
+#include "src/io/isds_sessions.h"
 
 Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
-	    QList<MessageDb*> messageDbList, QObject *parent) :
-
-	QObject(parent),
+	    QList<MessageDb*> messageDbList, QObject *parent = 0) :
 	m_accountDb(accountDb),
 	m_accountModel(accountModel),
 	m_count(count),
 	m_messageDbList(messageDbList)
 {
-	_working =false;
+	_working = false;
 	_abort = false;
 }
 
@@ -34,7 +32,7 @@ void Worker::requestWork() {
 	mutex.lock();
 	_working = true;
 	_abort = false;
-	qDebug() << "Request worker start in Thread " <<
+	qDebug() << "Request worker start from Thread " <<
 	    thread()->currentThreadId();
 	mutex.unlock();
 
@@ -154,6 +152,26 @@ void Worker::doWork()
 
 /* ========================================================================= */
 /*
+* Check if connection to ISDS fails.
+*/
+bool Worker::checkConnectionError(int status, QString accountName)
+/* ========================================================================= */
+{
+	switch (status) {
+	case IE_SUCCESS:
+		return false;
+		break;
+	default:
+		emit showConnectionErrorMessageBox(status, accountName);
+		return true;
+		break;
+	}
+}
+
+
+
+/* ========================================================================= */
+/*
 * Download sent/received message list from ISDS for current account index
 */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
@@ -170,8 +188,12 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status = IE_ERROR;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
 		}
@@ -179,7 +201,6 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	emit valueChanged(label, 10);
 
-	isds_error status = IE_ERROR;
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */
@@ -372,15 +393,20 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	emit valueChanged(label, 0);
+	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	emit valueChanged(label, 10);
 
 	struct isds_list *stateList = NULL;
-	isds_error status;
 
 	status = isds_get_list_of_sent_message_state_changes(
 	    isdsSessions.session(accountInfo.userName()),NULL,NULL, &stateList);
@@ -451,13 +477,19 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status = IE_ERROR;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	// message and envleople structures
 	struct isds_message *message = NULL;
-	isds_error status;
 
 	(signedMsg)
 	? status = isds_get_signed_delivery_info(isdsSessions.session(
@@ -518,7 +550,12 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 	} else {
 
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			isdsSessions.connectToIsds(accountInfo);
+			status = isdsSessions.connectToIsds(accountInfo);
+			if (checkConnectionError(status,
+			    accountInfo.accountName())) {
+				qDebug() << "Error connection to ISDS";
+				return false;
+			}
 		}
 
 		status = isds_get_password_expiration(
@@ -551,8 +588,12 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
 		}
@@ -560,7 +601,6 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	// message structures - all members
 	struct isds_message *message = NULL;
-	isds_error status;
 
 	/* download signed message? */
 	if (signedMsg) {
@@ -765,13 +805,18 @@ bool Worker::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	// message and envleople structures
 	struct isds_message *message = NULL;
-	isds_error status;
 
 	(signedMsg)
 	? status = isds_get_signed_delivery_info(isdsSessions.session(
@@ -826,11 +871,16 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
-	isds_error status;
 	isds_sender_type *sender_type = NULL;
 	char * raw_sender_type = NULL;
 	char * sender_name = NULL;
@@ -867,11 +917,16 @@ bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
-	isds_error status;
 	status = isds_mark_message_read(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str());
 

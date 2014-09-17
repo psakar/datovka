@@ -41,7 +41,7 @@ public:
 	struct isds_ctx * session(const QString &userName) const;
 
 
-	bool connectToIsds(const AccountModel::SettingsMap &accountInfo,
+	isds_error connectToIsds(const AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw = 0);
 
 	bool isConnectToIsds(const QString userName);

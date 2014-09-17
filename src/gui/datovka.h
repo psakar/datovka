@@ -6,6 +6,7 @@
 
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QMutex>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QProgressBar>
@@ -32,6 +33,9 @@ public:
 
 	void setDefaultProgressStatus(void);
 
+
+	bool workerRun;
+	QMutex workerMutex;
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 
 private slots:
@@ -208,6 +212,8 @@ private slots:
 	 * @brief Recevied and store new account database path
 	 */
 	void ReceivedNewDataPath(QString newPath);
+
+	void showConnectionErrorMessageBox(int status, QString accountName);
 
 private:
 

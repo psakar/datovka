@@ -9,13 +9,12 @@
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
-
 class Worker : public QObject {
     Q_OBJECT
 
 public:
 	explicit Worker(AccountDb &accountDb, AccountModel &accountModel,
-	   int count, QList<MessageDb*> messageDbList, QObject *parent = 0);
+	   int count, QList<MessageDb*> messageDbList, QObject *parent);
 
 	/*!
 	* @brief Requests the process to start
@@ -87,12 +86,14 @@ private:
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    const QString dmId);
 
+	bool checkConnectionError(int status, QString accountName);
+
 signals:
 	/*!
 	 * @brief This signal is emitted when the Worker request to Work
 	*/
 	void workRequested(void);
-
+	void showConnectionErrorMessageBox(int, QString);
 	/*!
 	* @brief This signal is emitted when counted value is changed
 	*/

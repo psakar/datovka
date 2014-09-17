@@ -58,6 +58,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
+	workerMutex.lock();
+	workerRun = false;
+	workerMutex.unlock();
+
 	/* Generate messages search filter */
 	QWidget *spacer = new QWidget();
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -208,6 +212,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QTimer::singleShot(RUN_FIRST_ACTION_MS, this,
 	    SLOT(setWindowsAfterInit()));
 }
+
 
 /* ========================================================================= */
 /*
@@ -1083,6 +1088,14 @@ void MainWindow::synchroniseAllAccounts(void)
 {
 	debug_func_call();
 
+	workerMutex.lock();
+	if (workerRun) {
+		workerMutex.unlock();
+		return;
+	}
+	workerRun = true;
+	workerMutex.unlock();
+
 	if (globPref.download_on_background) {
 		timer->stop();
 	}
@@ -1105,7 +1118,8 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionGet_messages->setEnabled(false);
 
 	thread = new QThread();
-	worker = new Worker(m_accountDb, m_accountModel, accountCount, messageDbList);
+	worker = new Worker(m_accountDb, m_accountModel, accountCount,
+	    messageDbList, 0);
 	worker->moveToThread(thread);
 
 	connect(worker, SIGNAL(valueChanged(QString, int)),
@@ -1115,7 +1129,9 @@ void MainWindow::synchroniseAllAccounts(void)
 	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
 	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
 	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
-	connect(worker, SIGNAL(finished()), this, SLOT(deleteThread()));
+	connect(thread, SIGNAL(finished()), this, SLOT(deleteThread()));
+	connect(worker, SIGNAL(showConnectionErrorMessageBox(int, QString)),
+	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
 
 	worker->abort();
 	worker->requestWork();
@@ -2758,7 +2774,7 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+		if (!isdsSessions.connectToIsds(accountInfo)) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
 		}
@@ -3025,7 +3041,6 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 void MainWindow::deleteThread(void)
 /* ========================================================================= */
 {
-
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
 		ui->actionSync_all_accounts->setEnabled(true);
@@ -3037,9 +3052,15 @@ void MainWindow::deleteThread(void)
 	delete worker;
 	delete thread;
 
+	workerMutex.lock();
+	workerRun = false;
+	workerMutex.unlock();
+
 	if (globPref.download_on_background) {
 		timer->start(timeout);
 	}
+
+	qDebug() << "Delete Worker and Thread objects";
 }
 
 
@@ -4343,4 +4364,41 @@ void MainWindow::on_signatureDetails_clicked(void)
 {
 	debug_func_call();
 	on_actionSignature_detail_triggered();
+}
+
+
+
+
+/* ========================================================================= */
+/*
+* This is call if connection to ISDS fails. Message info for user.
+*/
+void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
+/* ========================================================================= */
+{
+	if (IE_NOT_LOGGED_IN == status) {
+		QMessageBox::warning(this,
+		    QObject::tr("Authentication fails"),
+		    QObject::tr("Authentication fails for account ")
+		    + accountName
+		    + "\n" + QObject::tr("ErrorType: "),
+		    // + isds_strerror(status),
+		    QMessageBox::Ok);
+	} else if (IE_PARTIAL_SUCCESS == status) {
+		QMessageBox::warning(this,
+		    QObject::tr("OTP authentication fails"),
+		    QObject::tr("OTP authentication fails for account ")
+		    + accountName
+		    + "\n" + QObject::tr("ErrorType: "),
+		    //+ isds_strerror(status),
+		    QMessageBox::Ok);
+	} else if (IE_SUCCESS != status) {
+		QMessageBox::warning(this,
+		    QObject::tr("Error occurred"),
+		    QObject::tr("An error occurred while connect to ISDS for account ")
+		    + accountName
+		    + "\n" + QObject::tr("ErrorType: "),
+		    //+ isds_strerror(status),
+		    QMessageBox::Ok);
+	}
 }
