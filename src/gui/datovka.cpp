@@ -698,7 +698,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Delete message"), this,
-		    SLOT(on_actionDelete_message_triggered()))->
+		    SLOT(messageItemDeleteMessage()))->
 		    setEnabled(ui->actionDelete_message->isEnabled());
 	} else {
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
@@ -988,7 +988,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 /* ========================================================================= */
 /*
- * Mark all messages as localy read
+ * Mark all messages as read in selected account item.
  */
 void MainWindow::accountItemMarkAllRead(void)
 /* ========================================================================= */
@@ -1028,6 +1028,45 @@ void MainWindow::accountItemMarkAllRead(void)
 		 * switching on a parent item (Received) does not redraw the
 		 * message list.
 		 */
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Deletes selected message from message list.
+ */
+void MainWindow::messageItemDeleteMessage(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+	    tr("Delete message ") + dmId,
+	    tr("Do you want to delete message") +  " '" + dmId +
+	    "'?",
+	    QMessageBox::Yes | QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		switch (eraseMessage(acntTopIdx, dmId)) {
+		case Q_SUCCESS:
+			/*
+			 *  Hide deleted message in view. The view/model will
+			 *  be regenerated according to the updated content
+			 *  of the DB when the account selection has been
+			 *  changed.
+			 */
+			ui->messageList->hideRow(msgIdx.row());
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -3438,10 +3477,12 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		MessageDb *messageDb = accountMessageDb(0);
 		int dmID = atoi(dmId.toStdString().c_str());
 		if (messageDb->msgsDeleteMessageData(dmID)) {
-			qDebug() << "Message" << dmID << "was deleted from ISDS and db";
+			qDebug() << "Message" << dmID <<
+			    "was deleted from ISDS and db";
 			return Q_SUCCESS;
 		} else {
-			qDebug() << "Message" << dmID << "was deleted from ISDS and db";
+			qDebug() << "Message" << dmID <<
+			    "was deleted from ISDS and db";
 			return Q_SQL_ERROR;
 		}
 	} else if (IE_INVAL == status) {
@@ -3561,34 +3602,6 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	/* TODO - insert data into db */
 
 	return true;
-}
-
-
-/* ========================================================================= */
-/*
-* Delete message slot
-*/
-void MainWindow::on_actionDelete_message_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this,
-	    tr("Delete message ") + dmId,
-	    tr("Do you want to delete message") +  " '" + dmId +
-	    "'?",
-	    QMessageBox::Yes | QMessageBox::No);
-
-	if (reply == QMessageBox::Yes) {
-		if (Q_CONNECT_ERROR == eraseMessage(acntTopIdx, dmId)) {
-		}
-	}
 }
 
 

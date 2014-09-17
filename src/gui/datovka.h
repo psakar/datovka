@@ -99,6 +99,11 @@ private slots:
 	 */
 	void accountItemMarkAllRead(void);
 
+	/*!
+	 * @brief Deletes selected message from message list.
+	 */
+	void messageItemDeleteMessage(void);
+
 	void on_actionCreate_message_triggered(void);
 
 	void on_actionSent_message_triggered(void);
@@ -138,8 +143,6 @@ private slots:
 	void on_actionSync_all_accounts_triggered(void);
 
 	void on_actionReceived_all_triggered(void);
-
-	void on_actionDelete_message_triggered(void);
 
 	void on_actionDownload_message_signed_triggered(void);
 
