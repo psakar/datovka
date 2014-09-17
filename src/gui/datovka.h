@@ -209,11 +209,19 @@ private slots:
 	void on_signatureDetails_clicked(void);
 
 	/*!
-	 * @brief Recevied and store new account database path
+	 * @brief Recevied and store new account database path.
 	 */
 	void ReceivedNewDataPath(QString newPath);
 
+	/*!
+	 * @brief Show message info for user if connection to ISDS fails.
+	 */
 	void showConnectionErrorMessageBox(int status, QString accountName);
+
+	/*!
+	 * @brief Check if connection to ISDS fails.
+	 */
+	bool checkConnectionError(int status, QString accountName);
 
 private:
 

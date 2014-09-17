@@ -2548,16 +2548,20 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	m_statusProgressBar->setValue(10);
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
 		}
 	}
 
+
 	m_statusProgressBar->setValue(20);
 
-	isds_error status = IE_ERROR;
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */
@@ -2773,8 +2777,12 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
 		}
@@ -2785,8 +2793,6 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 
 	// message structures - all members
 	struct isds_message *message = NULL;
-
-	isds_error status;
 
 	/* download signed message? */
 	if (signedMsg) {
@@ -3084,11 +3090,17 @@ bool MainWindow::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
-	isds_error status;
 	status = isds_mark_message_read(isdsSessions.session(
 	    accountInfo.userName()), dmId.toStdString().c_str());
 
@@ -3118,13 +3130,19 @@ bool MainWindow::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	// message and envleople structures
 	struct isds_message *message = NULL;
-	isds_error status;
 
 	(signedMsg)
 	? status = isds_get_signed_delivery_info(isdsSessions.session(
@@ -3183,13 +3201,19 @@ bool MainWindow::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	// message and envleople structures
 	struct isds_message *message = NULL;
-	isds_error status;
 
 	(signedMsg)
 	? status = isds_get_signed_delivery_info(isdsSessions.session(
@@ -3244,14 +3268,20 @@ bool MainWindow::getListSentMessageStateChanges(const QModelIndex &acntTopIdx)
 
 	m_statusProgressBar->setValue(10);
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	m_statusProgressBar->setValue(20);
 
 	struct isds_list *stateList = NULL;
-	isds_error status;
 
 	status = isds_get_list_of_sent_message_state_changes(
 	    isdsSessions.session(accountInfo.userName()),NULL,NULL, &stateList);
@@ -3317,7 +3347,6 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntTopIdx)
 {
 	debug_func_call();
 
-	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
 
@@ -3333,8 +3362,15 @@ bool MainWindow::getPasswordInfo(const QModelIndex &acntTopIdx)
 		return true;
 	} else {
 
+	isds_error status;
+
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			isdsSessions.connectToIsds(accountInfo, this);
+			status = isdsSessions.connectToIsds(accountInfo);
+			if (checkConnectionError(status,
+			    accountInfo.accountName())) {
+				qDebug() << "Error connection to ISDS";
+				return false;
+			}
 		}
 
 		status = isds_get_password_expiration(
@@ -3373,11 +3409,17 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
-	isds_error status;
 	isds_sender_type *sender_type = NULL;
 	char * raw_sender_type = NULL;
 	char * sender_name = NULL;
@@ -3423,11 +3465,17 @@ qdatovka_error MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return Q_CONNECT_ERROR;
+		}
 	}
 
-	isds_error status;
 	struct isds_hash *hashIsds = NULL;
 
 	status = isds_download_message_hash(isdsSessions.session(
@@ -3499,14 +3547,17 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
-		};
+		}
 	}
 
-	isds_error status;
 	bool incoming = true;
 
 	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
@@ -3563,12 +3614,19 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
 	}
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
-	isds_error status;
+
 	status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
 	    accountInfo.userName()), &db_owner_info);
 
@@ -3640,11 +3698,19 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		isdsSessions.connectToIsds(accountInfo, this);
-	}
-	struct isds_DbUserInfo *db_user_info = NULL;
 	isds_error status;
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		status = isdsSessions.connectToIsds(accountInfo, this);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
+			qDebug() << "Error connection to ISDS";
+			return false;
+		}
+	}
+
+	struct isds_DbUserInfo *db_user_info = NULL;
+
 
 	status = isds_GetUserInfoFromLogin(isdsSessions.session(
 	    accountInfo.userName()), &db_user_info);
@@ -3741,15 +3807,18 @@ qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopI
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
+	isds_error status;
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
-		};
+		}
 	}
 
 	size_t length;
-	isds_error status;
 	QByteArray bytes;
 
 
@@ -3811,10 +3880,12 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	}
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!isdsSessions.connectToIsds(accountInfo, this)) {
+		status = isdsSessions.connectToIsds(accountInfo);
+		if (checkConnectionError(status,
+		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
 			return Q_CONNECT_ERROR;
-		};
+		}
 	}
 
 	status = isds_authenticate_message(isdsSessions.session(
@@ -4371,34 +4442,59 @@ void MainWindow::on_signatureDetails_clicked(void)
 
 /* ========================================================================= */
 /*
-* This is call if connection to ISDS fails. Message info for user.
+* This is call if connection to ISDS fails. Message info for user is generated.
 */
 void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 /* ========================================================================= */
 {
 	if (IE_NOT_LOGGED_IN == status) {
-		QMessageBox::warning(this,
-		    QObject::tr("Authentication fails"),
+
+		QMessageBox::critical(this, accountName + ": " +
+		    QObject::tr("client authentication error"),
 		    QObject::tr("Authentication fails for account ")
 		    + accountName
-		    + "\n" + QObject::tr("ErrorType: "),
-		    // + isds_strerror(status),
+		    + ".\n\n" + QObject::tr("ErrorType: ")
+		    + QObject::tr("Authentication fails."),
 		    QMessageBox::Ok);
+
 	} else if (IE_PARTIAL_SUCCESS == status) {
-		QMessageBox::warning(this,
-		    QObject::tr("OTP authentication fails"),
+
+		QMessageBox::critical(this, accountName + ": " +
+		    QObject::tr("OTP authentication error"),
 		    QObject::tr("OTP authentication fails for account ")
 		    + accountName
-		    + "\n" + QObject::tr("ErrorType: "),
-		    //+ isds_strerror(status),
+		    + ".\n\n" + QObject::tr("ErrorType: ")
+		    + QObject::tr("OTP authentication fails."),
 		    QMessageBox::Ok);
+
 	} else if (IE_SUCCESS != status) {
-		QMessageBox::warning(this,
-		    QObject::tr("Error occurred"),
+
+		QMessageBox::critical(this, accountName + ": " +
+		    QObject::tr("connection error"),
 		    QObject::tr("An error occurred while connect to ISDS for account ")
 		    + accountName
-		    + "\n" + QObject::tr("ErrorType: "),
-		    //+ isds_strerror(status),
+		    + ".\n\n" + QObject::tr("ErrorType: ")
+		    + QObject::tr("Error of connection to ISDS server."),
 		    QMessageBox::Ok);
 	}
 }
+
+
+/* ========================================================================= */
+/*
+* Check if connection to ISDS fails.
+*/
+bool MainWindow::checkConnectionError(int status, QString accountName)
+/* ========================================================================= */
+{
+	switch (status) {
+	case IE_SUCCESS:
+		return false;
+		break;
+	default:
+		showConnectionErrorMessageBox(status, accountName);
+		return true;
+		break;
+	}
+}
+
