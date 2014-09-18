@@ -232,7 +232,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 		status = isdsLoginUserName(isds_session,
 		    this->usernameLineEdit->text(),
 		    this->passwordLineEdit->text(),
-		    this->testAccountCheckBox->isChecked(), 0,
+		    this->testAccountCheckBox->isChecked(),
 		    this->accountLineEdit->text());
 		if (IE_SUCCESS != status) {
 			msgBox.setWindowTitle(messageBoxTitle);
@@ -280,7 +280,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 			    this->usernameLineEdit->text(),
 			    this->passwordLineEdit->text(),
 			    m_certPath, this->testAccountCheckBox->isChecked(),
-			    0, this->accountLineEdit->text());
+			    this->accountLineEdit->text());
 		}
 
 		if (IE_SUCCESS != status) {
@@ -301,7 +301,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 		    this->usernameLineEdit->text(),
 		    this->passwordLineEdit->text(),
 		    this->testAccountCheckBox->isChecked(),
-		    0, this->accountLineEdit->text());
+		    this->accountLineEdit->text());
 
 		if (IE_SUCCESS != status) {
 			msgBox.setWindowTitle(messageBoxTitle);

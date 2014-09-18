@@ -1,12 +1,10 @@
-
-
 #include <QDebug>
 #include <QFile>
 #include <QInputDialog>
 #include <QObject>
 
 #include "isds_sessions.h"
-#include "src/gui/datovka.h"
+
 
 
 GlobIsdsSessions isdsSessions;
@@ -100,13 +98,13 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
  * Connect to databox
  */
 isds_error GlobIsdsSessions::connectToIsds(
-    const AccountModel::SettingsMap &accountInfo, MainWindow *mw)
+    const AccountModel::SettingsMap &accountInfo)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		createCleanSession(accountInfo.userName(), mw);
+		createCleanSession(accountInfo.userName());
 	}
 
 	/* Login method based on username and password */
@@ -114,7 +112,7 @@ isds_error GlobIsdsSessions::connectToIsds(
 		status = isdsLoginUserName(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), accountInfo.password(),
-		    accountInfo.testAccount(), mw, accountInfo.accountName());
+		    accountInfo.testAccount(), accountInfo.accountName());
 
 	/* Login method based on system certificate only */
 	} else if (accountInfo.loginMethod() == "certificate") {
@@ -138,7 +136,7 @@ isds_error GlobIsdsSessions::connectToIsds(
 			    accountInfo.password(),
 			    accountInfo.certPath(),
 			    accountInfo.testAccount(),
-			    mw, accountInfo.accountName());
+			    accountInfo.accountName());
 		}
 
 	/* Login method based username, password and OTP */
@@ -146,7 +144,7 @@ isds_error GlobIsdsSessions::connectToIsds(
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), accountInfo.password(),
-		    accountInfo.testAccount(), mw, accountInfo.accountName());
+		    accountInfo.testAccount(), accountInfo.accountName());
 	}
 
 	qDebug() << status << isds_strerror(status);
@@ -159,12 +157,9 @@ isds_error GlobIsdsSessions::connectToIsds(
 /*
  * Creates new session.
  */
-struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
-    MainWindow *mw)
+struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
 /* ========================================================================= */
 {
-	(void) mw;
-
 	isds_error status;
 	struct isds_ctx *isds_session = NULL;
 
@@ -216,7 +211,7 @@ struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    MainWindow *mw, const QString &accountName)
+    const QString &accountName)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -227,7 +222,7 @@ isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
 		bool ok = false;
 		QString text = "";
 		while (text.isEmpty()) {
-			text = QInputDialog::getText(mw,
+			text = QInputDialog::getText(0,
 			    QObject::tr("Enter password"),
 			    QObject::tr("Enter password for account ")
 			    + accountName + " (" + userName + ")",
@@ -353,7 +348,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession, MainWindow *mw, const QString &accountName)
+    bool testingSession, const QString &accountName)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -392,7 +387,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 		bool ok;
 		QString text = "";
 		while (text.isEmpty()) {
-			text = QInputDialog::getText(mw,
+			text = QInputDialog::getText(0,
 			    QObject::tr("Enter certificate password"),
 			  QObject::tr("Enter certificate password for account ")
 			    + accountName + " (" + userName + ")",
@@ -426,7 +421,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    MainWindow *mw, const QString &accountName)
+    const QString &accountName)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -443,7 +438,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 		bool ok;
 		QString text = "";
 		while (text.isEmpty()) {
-			text = QInputDialog::getText(mw,
+			text = QInputDialog::getText(0,
 			    QObject::tr("Enter password"),
 			    QObject::tr("Enter password for account ") +
 			    accountName + " (" + userName + ")",

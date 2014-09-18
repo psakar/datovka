@@ -10,7 +10,6 @@
 #include <QString>
 
 #include "src/common.h"
-#include "src/gui/datovka.h"
 #include "src/models/accounts_model.h"
 
 
@@ -41,8 +40,7 @@ public:
 	struct isds_ctx * session(const QString &userName) const;
 
 
-	isds_error connectToIsds(const AccountModel::SettingsMap &accountInfo,
-	    MainWindow *mw = 0);
+	isds_error connectToIsds(const AccountModel::SettingsMap &accountInfo);
 
 	bool isConnectToIsds(const QString userName);
 
@@ -52,8 +50,7 @@ private:
 	 *
 	 * @return Pointer to new session or NULL on failure.
 	 */
-	struct isds_ctx * createCleanSession(const QString &userName,
-	    MainWindow *mw = 0);
+	struct isds_ctx * createCleanSession(const QString &userName);
 
 	QMap<QString, struct isds_ctx *> m_sessions;
 };
@@ -64,7 +61,7 @@ private:
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    MainWindow *mw, const QString &accountName);
+    const QString &accountName);
 
 
 /*!
@@ -87,7 +84,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession, MainWindow *mw, const QString &accountName);
+    bool testingSession, const QString &accountName);
 
 
 /*!
@@ -95,7 +92,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    MainWindow *mw, const QString &accountName);
+    const QString &accountName);
 
 /*!
  * @brief Add items into isds_PersonName structure.

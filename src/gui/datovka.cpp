@@ -3713,7 +3713,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		status = isdsSessions.connectToIsds(accountInfo, this);
+		status = isdsSessions.connectToIsds(accountInfo);
 		if (checkConnectionError(status,
 		    accountInfo.accountName())) {
 			qDebug() << "Error connection to ISDS";
