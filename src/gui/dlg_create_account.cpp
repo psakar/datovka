@@ -446,9 +446,12 @@ void DlgCreateAccount::saveAccount(void)
 		itemSettings[LOGIN] = "totp";
 	}
 
-	itemSettings[PWD]= this->passwordLineEdit->text();
-	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
+
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
+	if (this->rememberPswcheckBox->isChecked()) {
+		itemSettings[PWD]= this->passwordLineEdit->text();
+	}
+	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 
 	switch (m_action) {
