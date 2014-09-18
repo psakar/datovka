@@ -20,8 +20,6 @@ Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	m_count(count),
 	m_messageDbList(messageDbList)
 {
-	_working = false;
-	_abort = false;
 }
 
 
@@ -34,33 +32,10 @@ void Worker::requestWork() {
 
 	downloadMessagesMutex.lock();
 
-	mutex.lock();
-	_working = true;
-	_abort = false;
 	qDebug() << "Request worker start from Thread " <<
 	    thread()->currentThreadId();
-	mutex.unlock();
 
 	emit workRequested();
-}
-
-
-/* ========================================================================= */
-/*
-* Abort tread executing
-*/
-void Worker::abort()
-/* ========================================================================= */
-{
-
-	mutex.lock();
-	if (_working) {
-		_abort = true;
-		qDebug() << "Request worker aborting in Thread " <<
-		    thread()->currentThreadId();
-	}
-
-	mutex.unlock();
 }
 
 
@@ -78,17 +53,6 @@ void Worker::syncAllAccounts()
 	MessageDb *messageDb;
 
 	for (int i = 0; i < m_count; i++) {
-
-		mutex.lock();
-		bool abort = _abort;
-		mutex.unlock();
-
-		if (abort) {
-			qDebug()<< "Aborting worker process in Thread " <<
-			    thread()->currentThreadId();
-			emit valueChanged("Idle", 0);
-			break;
-		}
 
 		QModelIndex index = m_accountModel.index(i, 0);
 		const AccountModel::SettingsMap accountInfo =
@@ -142,11 +106,6 @@ void Worker::syncAllAccounts()
 
 	qDebug() << "-----------------------------------------------";
 	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
-
-	// Set _working to false, meaning the process can't be aborted anymore.
-	mutex.lock();
-	_working = false;
-	mutex.unlock();
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();

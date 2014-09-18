@@ -22,16 +22,9 @@ public:
 	*/
 	void requestWork(void);
 
-	/*!
-	* @brief Requests the process to abort
-	*/
-	void abort(void);
 
 private:
-	bool _abort;
-	bool _working;
 
-	QMutex mutex;
 	QModelIndex m_acntTopIdx;
 	QString m_dmId;
 	AccountDb &m_accountDb;

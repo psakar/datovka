@@ -1130,7 +1130,6 @@ void MainWindow::synchroniseAllAccounts(void)
 	connect(workerSyncAll, SIGNAL(showConnectionErrorMessageBox(int, QString)),
 	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
 
-	workerSyncAll->abort();
 	workerSyncAll->requestWork();
 }
 
@@ -1178,7 +1177,6 @@ void MainWindow::synchroniseSelectedAccount(void)
 	connect(workerSyncOne, SIGNAL(showConnectionErrorMessageBox(int, QString)),
 	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
 
-	workerSyncOne->abort();
 	workerSyncOne->requestWork();
 }
 
