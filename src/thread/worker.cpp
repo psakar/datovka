@@ -10,8 +10,11 @@
 #include "src/gui/datovka.h"
 #include "src/io/isds_sessions.h"
 
-Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
+Worker::Worker(QModelIndex acntTopIdx, QString dmId,
+	    AccountDb &accountDb, AccountModel &accountModel, int count,
 	    QList<MessageDb*> messageDbList, QObject *parent = 0) :
+	m_acntTopIdx(acntTopIdx),
+	m_dmId(dmId),
 	m_accountDb(accountDb),
 	m_accountModel(accountModel),
 	m_count(count),
@@ -63,9 +66,9 @@ void Worker::abort()
 
 /* ========================================================================= */
 /*
-* Start background downloading of messages
+* Start background sync of all accounts
 */
-void Worker::doWork()
+void Worker::syncAllAccounts()
 /* ========================================================================= */
 {
 	qDebug() << "Starting worker process in Thread "
@@ -147,6 +150,107 @@ void Worker::doWork()
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
+
+	downloadMessagesMutex.unlock();
+
+	emit finished();
+}
+
+
+/* ========================================================================= */
+/*
+* Download MessageList for account
+*/
+void Worker::syncOneAccount(void)
+/* ========================================================================= */
+{
+	qDebug() << "Starting worker process in Thread "
+	    << thread()->currentThreadId();
+
+	/* test account index valid */
+	if (!m_acntTopIdx.isValid()) {
+		qDebug() << "Invalid Account index! Downloading is canceled.";
+		downloadMessagesMutex.unlock();
+		emit finished();
+	}
+
+
+	bool success = true;
+	MessageDb *messageDb;
+
+	const AccountModel::SettingsMap accountInfo =
+	    m_acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QStandardItem *item = m_accountModel.itemFromIndex(m_acntTopIdx);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+	messageDb = m_messageDbList.at(0);
+
+	qDebug() << "-----------------------------------------------";
+	qDebug() << "Downloading message list for account" << itemTop->text();
+	qDebug() << "-----------------------------------------------";
+
+	if (Q_CONNECT_ERROR ==
+	    downloadMessageList(m_acntTopIdx,"received", *messageDb,
+	    "GetListOfReceivedMessages")) {
+		success = false;
+	}
+
+	emit refreshAccountList(m_acntTopIdx);
+
+	if (Q_CONNECT_ERROR ==
+	    downloadMessageList(m_acntTopIdx,"sent", *messageDb,
+	    "GetListOfSentMessages")) {
+		success = false;
+	}
+
+	emit refreshAccountList(m_acntTopIdx);
+
+	if (!getListSentMessageStateChanges(m_acntTopIdx, *messageDb,
+	    "GetMessageStateChanges")) {
+		success = false;
+	}
+
+	emit refreshAccountList(m_acntTopIdx);
+
+	if (!getPasswordInfo(m_acntTopIdx)) {
+		success = false;
+	}
+
+	emit valueChanged("Idle", 0);
+
+	qDebug() << "-----------------------------------------------";
+	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
+
+	qDebug() << "Worker process finished in Thread " <<
+	    thread()->currentThreadId();
+
+	downloadMessagesMutex.unlock();
+
+	emit finished();
+}
+
+
+/* ========================================================================= */
+/*
+* Download complete message / will be used in future
+*/
+void Worker::downloadCompleteMessage(void)
+/* ========================================================================= */
+{
+	qDebug() << "Starting worker process in Thread "
+	    << thread()->currentThreadId();
+
+	/* test message ID valid */
+	if (m_dmId.isNull() || m_dmId.isEmpty()) {
+		qDebug() << "Invalid message ID! Downloading is canceled.";
+		downloadMessagesMutex.unlock();
+		emit finished();
+	}
+
+	MessageDb *messageDb;
+	messageDb = m_messageDbList.at(0);
+
+	downloadMessage(m_acntTopIdx, m_dmId, true, *messageDb, "sent");
 
 	downloadMessagesMutex.unlock();
 

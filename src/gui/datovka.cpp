@@ -1111,18 +1111,22 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionGet_messages->setEnabled(false);
 
 	threadSyncAll = new QThread();
-	workerSyncAll = new Worker(m_accountDb, m_accountModel, accountCount,
-	    messageDbList, 0);
+	workerSyncAll = new Worker(QModelIndex(), QString(),
+	    m_accountDb, m_accountModel, accountCount, messageDbList, 0);
 	workerSyncAll->moveToThread(threadSyncAll);
 
 	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
 	connect(workerSyncAll, SIGNAL(refreshAccountList(const QModelIndex)),
 	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
-	connect(workerSyncAll, SIGNAL(workRequested()), threadSyncAll, SLOT(start()));
-	connect(threadSyncAll, SIGNAL(started()), workerSyncAll, SLOT(doWork()));
-	connect(workerSyncAll, SIGNAL(finished()), threadSyncAll, SLOT(quit()), Qt::DirectConnection);
-	connect(threadSyncAll, SIGNAL(finished()), this, SLOT(deleteThread()));
+	connect(workerSyncAll, SIGNAL(workRequested()),
+	    threadSyncAll, SLOT(start()));
+	connect(threadSyncAll, SIGNAL(started()),
+	    workerSyncAll, SLOT(syncAllAccounts()));
+	connect(workerSyncAll, SIGNAL(finished()), threadSyncAll,
+	    SLOT(quit()), Qt::DirectConnection);
+	connect(threadSyncAll, SIGNAL(finished()), this,
+	    SLOT(deleteThreadSyncAll()));
 	connect(workerSyncAll, SIGNAL(showConnectionErrorMessageBox(int, QString)),
 	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
 
@@ -1144,33 +1148,38 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
+	QList<MessageDb*> messageDbList;
+	messageDbList.clear();
+
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+	MessageDb *messageDb = accountMessageDb(accountItem);
+	messageDbList.append(messageDb);
 
-	qDebug() << "------------------------------------------------";
-	qDebug() << "Downloading message list for account" << itemTop->text();
-	qDebug() << "------------------------------------------------";
 
-	m_statusProgressBar->setFormat("GetListOfReceivedMessages");
-	m_statusProgressBar->repaint();
-	if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
-		setDefaultProgressStatus();
-		qDebug() << "An error occurred!";
-		return;
-	}
-	m_statusProgressBar->setFormat("GetListOfSentMessages");
-	m_statusProgressBar->repaint();
-	downloadMessageList(index,"sent");
-	m_statusProgressBar->setFormat("GetMessageStateChanges");
-	m_statusProgressBar->repaint();
-	getListSentMessageStateChanges(index);
-	m_statusProgressBar->setFormat("getPasswordInfo");
-	m_statusProgressBar->repaint();
-	getPasswordInfo(index);
-	setDefaultProgressStatus();
-	qDebug() << "ALL DONE!";
+	threadSyncOne = new QThread();
+	workerSyncOne = new Worker(index, QString(), m_accountDb, m_accountModel, 0,
+	    messageDbList, 0);
+	workerSyncOne->moveToThread(threadSyncOne);
+
+	connect(workerSyncOne, SIGNAL(valueChanged(QString, int)),
+	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	connect(workerSyncOne, SIGNAL(refreshAccountList(const QModelIndex)),
+	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
+	connect(workerSyncOne, SIGNAL(workRequested()),
+	    threadSyncOne, SLOT(start()));
+	connect(threadSyncOne, SIGNAL(started()),
+	    workerSyncOne, SLOT(syncOneAccount()));
+	connect(workerSyncOne, SIGNAL(finished()),
+	    threadSyncOne, SLOT(quit()), Qt::DirectConnection);
+	connect(threadSyncOne, SIGNAL(finished()),
+	    this, SLOT(deleteThreadSyncOne()));
+	connect(workerSyncOne, SIGNAL(showConnectionErrorMessageBox(int, QString)),
+	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
+
+	workerSyncOne->abort();
+	workerSyncOne->requestWork();
 }
 
 
@@ -3029,9 +3038,9 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 
 /* ========================================================================= */
 /*
-* Delete worker and thread objects, enable sync buttons and set timer
+* Delete worker and thread objects, enable buttons and set timer
 */
-void MainWindow::deleteThread(void)
+void MainWindow::deleteThreadSyncAll(void)
 /* ========================================================================= */
 {
 	int accountCount = ui->accountList->model()->rowCount();
@@ -3048,6 +3057,28 @@ void MainWindow::deleteThread(void)
 	if (globPref.download_on_background) {
 		timer->start(timeout);
 	}
+
+	qDebug() << "Delete Worker and Thread objects";
+}
+
+
+/* ========================================================================= */
+/*
+* Delete worker and thread objects, enable buttons
+*/
+void MainWindow::deleteThreadSyncOne(void)
+/* ========================================================================= */
+{
+	int accountCount = ui->accountList->model()->rowCount();
+	if (accountCount > 0) {
+		ui->actionSync_all_accounts->setEnabled(true);
+		ui->actionReceived_all->setEnabled(true);
+		ui->actionDownload_messages->setEnabled(true);
+		ui->actionGet_messages->setEnabled(true);
+	}
+
+	delete workerSyncOne;
+	delete threadSyncOne;
 
 	qDebug() << "Delete Worker and Thread objects";
 }

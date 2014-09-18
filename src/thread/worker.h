@@ -13,8 +13,9 @@ class Worker : public QObject {
     Q_OBJECT
 
 public:
-	explicit Worker(AccountDb &accountDb, AccountModel &accountModel,
-	   int count, QList<MessageDb*> messageDbList, QObject *parent);
+	explicit Worker(QModelIndex acntTopIdx, QString dmId,
+	    AccountDb &accountDb, AccountModel &accountModel,
+	    int count, QList<MessageDb*> messageDbList, QObject *parent);
 
 	/*!
 	* @brief Requests the process to start
@@ -31,6 +32,8 @@ private:
 	bool _working;
 
 	QMutex mutex;
+	QModelIndex m_acntTopIdx;
+	QString m_dmId;
 	AccountDb &m_accountDb;
 	AccountModel &m_accountModel;
 	int m_count;
@@ -109,7 +112,9 @@ public slots:
 	/*!
 	* @brief Run Message downloading in thread
 	*/
-	void doWork(void);
+	void syncAllAccounts(void);
+	void syncOneAccount(void);
+	void downloadCompleteMessage(void);
 };
 
 #endif // WORKER_H

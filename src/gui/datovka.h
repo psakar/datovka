@@ -183,7 +183,12 @@ private slots:
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.
 	 */
-	void deleteThread(void);
+	void deleteThreadSyncAll(void);
+
+	/*!
+	 * @brief Delete worker and thread objects, enable sync buttons.
+	 */
+	void deleteThreadSyncOne(void);
 
 	/*!
 	 * @brief Set ProgressBar value and Status bar text.
@@ -222,8 +227,8 @@ private slots:
 
 private:
 
-	QThread *threadSyncAll;
-	Worker *workerSyncAll;
+	QThread *threadSyncAll, *threadSyncOne;
+	Worker *workerSyncAll, *workerSyncOne;
 	QTimer *timer;
 	int timeout;
 
