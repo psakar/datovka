@@ -149,6 +149,8 @@ isds_error GlobIsdsSessions::connectToIsds(
 		    accountInfo.testAccount(), mw, accountInfo.accountName());
 	}
 
+	qDebug() << status << isds_strerror(status);
+
 	return status;
 }
 
