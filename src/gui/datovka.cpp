@@ -58,10 +58,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	workerMutex.lock();
-	workerRun = false;
-	workerMutex.unlock();
-
 	/* Generate messages search filter */
 	QWidget *spacer = new QWidget();
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -1088,14 +1084,6 @@ void MainWindow::synchroniseAllAccounts(void)
 {
 	debug_func_call();
 
-	workerMutex.lock();
-	if (workerRun) {
-		workerMutex.unlock();
-		return;
-	}
-	workerRun = true;
-	workerMutex.unlock();
-
 	if (globPref.download_on_background) {
 		timer->stop();
 	}
@@ -1117,24 +1105,24 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 
-	thread = new QThread();
-	worker = new Worker(m_accountDb, m_accountModel, accountCount,
+	threadSyncAll = new QThread();
+	workerSyncAll = new Worker(m_accountDb, m_accountModel, accountCount,
 	    messageDbList, 0);
-	worker->moveToThread(thread);
+	workerSyncAll->moveToThread(threadSyncAll);
 
-	connect(worker, SIGNAL(valueChanged(QString, int)),
+	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
-	connect(worker, SIGNAL(refreshAccountList(const QModelIndex)),
+	connect(workerSyncAll, SIGNAL(refreshAccountList(const QModelIndex)),
 	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
-	connect(worker, SIGNAL(workRequested()), thread, SLOT(start()));
-	connect(thread, SIGNAL(started()), worker, SLOT(doWork()));
-	connect(worker, SIGNAL(finished()), thread, SLOT(quit()), Qt::DirectConnection);
-	connect(thread, SIGNAL(finished()), this, SLOT(deleteThread()));
-	connect(worker, SIGNAL(showConnectionErrorMessageBox(int, QString)),
+	connect(workerSyncAll, SIGNAL(workRequested()), threadSyncAll, SLOT(start()));
+	connect(threadSyncAll, SIGNAL(started()), workerSyncAll, SLOT(doWork()));
+	connect(workerSyncAll, SIGNAL(finished()), threadSyncAll, SLOT(quit()), Qt::DirectConnection);
+	connect(threadSyncAll, SIGNAL(finished()), this, SLOT(deleteThread()));
+	connect(workerSyncAll, SIGNAL(showConnectionErrorMessageBox(int, QString)),
 	    this, SLOT(showConnectionErrorMessageBox(int, QString)));
 
-	worker->abort();
-	worker->requestWork();
+	workerSyncAll->abort();
+	workerSyncAll->requestWork();
 }
 
 
@@ -3055,12 +3043,8 @@ void MainWindow::deleteThread(void)
 		ui->actionGet_messages->setEnabled(true);
 	}
 
-	delete worker;
-	delete thread;
-
-	workerMutex.lock();
-	workerRun = false;
-	workerMutex.unlock();
+	delete workerSyncAll;
+	delete threadSyncAll;
 
 	if (globPref.download_on_background) {
 		timer->start(timeout);

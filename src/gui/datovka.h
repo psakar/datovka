@@ -6,7 +6,6 @@
 
 #include <QLineEdit>
 #include <QMainWindow>
-#include <QMutex>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QProgressBar>
@@ -33,9 +32,6 @@ public:
 
 	void setDefaultProgressStatus(void);
 
-
-	bool workerRun;
-	QMutex workerMutex;
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 
 private slots:
@@ -225,8 +221,8 @@ private slots:
 
 private:
 
-	QThread *thread;
-	Worker *worker;
+	QThread *threadSyncAll;
+	Worker *workerSyncAll;
 	QTimer *timer;
 	int timeout;
 

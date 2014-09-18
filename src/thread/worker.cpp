@@ -29,6 +29,8 @@ Worker::Worker(AccountDb &accountDb, AccountModel &accountModel, int count,
 void Worker::requestWork() {
 /* ========================================================================= */
 
+	downloadMessagesMutex.lock();
+
 	mutex.lock();
 	_working = true;
 	_abort = false;
@@ -145,6 +147,8 @@ void Worker::doWork()
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
+
+	downloadMessagesMutex.unlock();
 
 	emit finished();
 }
