@@ -492,7 +492,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-account-sync.png"),
 		    tr("Get messages"),
-		    this, SLOT(on_actionGet_messages_triggered()));
+		    this, SLOT(synchroniseSelectedAccount()));
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create message"),
 		    this, SLOT(on_actionCreate_message_triggered()));
@@ -1084,6 +1084,11 @@ void MainWindow::synchroniseAllAccounts(void)
 {
 	debug_func_call();
 
+	/*
+	 * TODO -- The actual work (function) which the worker performs should
+	 * be defined somewhere outside of the worker object.
+	 */
+
 	if (globPref.download_on_background) {
 		timer->stop();
 	}
@@ -1123,6 +1128,49 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	workerSyncAll->abort();
 	workerSyncAll->requestWork();
+}
+
+
+/* ========================================================================= */
+/*
+* Download sent/received message list for current (selected) account
+ */
+void MainWindow::synchroniseSelectedAccount(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	/*
+	 * TODO -- Save/restore the position of selected account and message.
+	 */
+
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+
+	qDebug() << "------------------------------------------------";
+	qDebug() << "Downloading message list for account" << itemTop->text();
+	qDebug() << "------------------------------------------------";
+
+	m_statusProgressBar->setFormat("GetListOfReceivedMessages");
+	m_statusProgressBar->repaint();
+	if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
+		setDefaultProgressStatus();
+		qDebug() << "An error occurred!";
+		return;
+	}
+	m_statusProgressBar->setFormat("GetListOfSentMessages");
+	m_statusProgressBar->repaint();
+	downloadMessageList(index,"sent");
+	m_statusProgressBar->setFormat("GetMessageStateChanges");
+	m_statusProgressBar->repaint();
+	getListSentMessageStateChanges(index);
+	m_statusProgressBar->setFormat("getPasswordInfo");
+	m_statusProgressBar->repaint();
+	getPasswordInfo(index);
+	setDefaultProgressStatus();
+	qDebug() << "ALL DONE!";
 }
 
 
@@ -1446,6 +1494,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
 	    SLOT(synchroniseAllAccounts()));
 	/* Databox. */
+	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
+	    SLOT(synchroniseSelectedAccount()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));
 	/* Message. */
@@ -1470,6 +1520,8 @@ void MainWindow::connectTopToolBarSlots(void)
 
 	connect(ui->actionReceived_all, SIGNAL(triggered()), this,
 	    SLOT(synchroniseAllAccounts()));
+	connect(ui->actionDownload_messages, SIGNAL(triggered()), this,
+	    SLOT(synchroniseSelectedAccount()));
 }
 
 
@@ -2174,45 +2226,6 @@ void MainWindow::ReceivedNewDataPath(QString newPath)
 	/* TODO - save new path to settings */
 	//itemSettings.setDirectory(newPath);
 	//saveSettings();
-}
-
-
-/* ========================================================================= */
-/*
-* Download sent/received message list for current (selected) account
- */
-void MainWindow::on_actionGet_messages_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-
-	qDebug() << "------------------------------------------------";
-	qDebug() << "Downloading message list for account" << itemTop->text();
-	qDebug() << "------------------------------------------------";
-
-	m_statusProgressBar->setFormat("GetListOfReceivedMessages");
-	m_statusProgressBar->repaint();
-	if (Q_CONNECT_ERROR == downloadMessageList(index,"received")) {
-		setDefaultProgressStatus();
-		qDebug() << "An error occurred!";
-		return;
-	}
-	m_statusProgressBar->setFormat("GetListOfSentMessages");
-	m_statusProgressBar->repaint();
-	downloadMessageList(index,"sent");
-	m_statusProgressBar->setFormat("GetMessageStateChanges");
-	m_statusProgressBar->repaint();
-	getListSentMessageStateChanges(index);
-	m_statusProgressBar->setFormat("getPasswordInfo");
-	m_statusProgressBar->repaint();
-	getPasswordInfo(index);
-	setDefaultProgressStatus();
-	qDebug() << "ALL DONE!";
 }
 
 
@@ -2981,20 +2994,6 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 
 	return Q_SUCCESS;
 }
-
-
-/* ========================================================================= */
-/*
-* Download message list from ISDS for current account
-*/
-void MainWindow::on_actionDownload_messages_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	on_actionGet_messages_triggered();
-}
-
 
 
 /* ========================================================================= */

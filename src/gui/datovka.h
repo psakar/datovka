@@ -109,6 +109,11 @@ private slots:
 	 */
 	void synchroniseAllAccounts(void);
 
+	/*!
+	 * @brief Downloads new messages from server for selected account.
+	 */
+	void synchroniseSelectedAccount(void);
+
 	void on_actionCreate_message_triggered(void);
 
 	void on_actionSent_message_triggered(void);
@@ -127,8 +132,6 @@ private slots:
 
 	void on_actionChange_data_directory_triggered(void);
 
-	void on_actionGet_messages_triggered(void);
-
 	void on_actionReply_to_the_sender_triggered(void);
 
 	void on_actionFind_databox_triggered(void);
@@ -142,8 +145,6 @@ private slots:
 	void onTableColumnResized(int index, int oldSize, int newSize);
 
 	void onTableColumnSort(int column);
-
-	void on_actionDownload_messages_triggered(void);
 
 	void on_actionDownload_message_signed_triggered(void);
 
