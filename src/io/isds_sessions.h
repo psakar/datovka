@@ -39,12 +39,11 @@ public:
 	 */
 	struct isds_ctx * session(const QString &userName) const;
 
-
-	isds_error connectToIsds(const AccountModel::SettingsMap &accountInfo);
-
+	/*!
+	 * @brief Ping of ISDS. Test if connection is active.
+	 */
 	bool isConnectToIsds(const QString userName);
 
-private:
 	/*!
 	 * @brief Creates new session.
 	 *
@@ -52,6 +51,8 @@ private:
 	 */
 	struct isds_ctx * createCleanSession(const QString &userName);
 
+
+private:
 	QMap<QString, struct isds_ctx *> m_sessions;
 };
 

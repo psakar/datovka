@@ -146,11 +146,6 @@ void DlgDsSearch::searchDataBox(void)
 
 	struct isds_list *boxes = NULL;
 
-	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
-		isdsSessions.connectToIsds(m_accountInfo);
-	}
-
-
 	isds_DbOwnerInfo_search(&boxes, m_userName,
 	    this->iDLineEdit->text(), dbType,
 	    this->iCLineEdit->text(), personName, this->nameLineEdit->text(),

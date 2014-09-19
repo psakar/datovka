@@ -215,16 +215,6 @@ private slots:
 	 */
 	void ReceivedNewDataPath(QString newPath);
 
-	/*!
-	 * @brief Show message info for user if connection to ISDS fails.
-	 */
-	void showConnectionErrorMessageBox(int status, QString accountName);
-
-	/*!
-	 * @brief Check if connection to ISDS fails.
-	 */
-	bool checkConnectionError(int status, QString accountName);
-
 private:
 
 	QThread *threadSyncAll, *threadSyncOne;
@@ -463,6 +453,27 @@ private:
 	 * @brief Authenticate message form file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
+
+
+
+	/*!
+	 * @brief Show message info for user if connection to ISDS fails.
+	 */
+	void showConnectionErrorMessageBox(int status, QString accountName);
+
+	/*!
+	 * @brief Check if connection to ISDS fails.
+	 */
+	bool checkConnectionError(int status, QString accountName);
+
+	/*!
+	 * @brief Show password input boxs
+	 */
+	QString showPasswordInputBox(const QModelIndex acntTopIdx);
+
+	bool connectToIsds(const QModelIndex acntTopIdx);
+
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

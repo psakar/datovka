@@ -69,7 +69,7 @@ QString AccountModel::SettingsMap::password(void) const
 
 
 /* ========================================================================= */
-void AccountModel::SettingsMap::setPassword(const QString &pwd)
+void AccountModel::SettingsMap::setPassword(QString &pwd)
 /* ========================================================================= */
 {
 	(*this)[PWD] = pwd;

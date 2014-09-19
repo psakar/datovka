@@ -126,10 +126,6 @@ void DlgChangePwd::showHidePasswordLine(void)
 void DlgChangePwd::changePassword(void)
 /* ========================================================================= */
 {
-	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
-		isdsSessions.connectToIsds(m_accountInfo);
-	}
-
 	isds_error status;
 	char * refnumber = NULL;
 

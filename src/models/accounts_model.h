@@ -37,7 +37,7 @@ public:
 		QString loginMethod(void) const;
 		QString userName(void) const;
 		QString password(void) const;
-		void setPassword(const QString &pwd);
+		void setPassword(QString &pwd);
 		void setDirectory(const QString &path);
 		bool testAccount(void) const;
 		QString certPath(void) const;

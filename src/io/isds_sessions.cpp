@@ -95,66 +95,6 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
 
 /* ========================================================================= */
 /*
- * Connect to databox
- */
-isds_error GlobIsdsSessions::connectToIsds(
-    const AccountModel::SettingsMap &accountInfo)
-/* ========================================================================= */
-{
-	isds_error status = IE_ERROR;
-
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		createCleanSession(accountInfo.userName());
-	}
-
-	/* Login method based on username and password */
-	if (accountInfo.loginMethod() == "username") {
-		status = isdsLoginUserName(
-		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), accountInfo.password(),
-		    accountInfo.testAccount(), accountInfo.accountName());
-
-	/* Login method based on system certificate only */
-	} else if (accountInfo.loginMethod() == "certificate") {
-		status = isdsLoginSystemCert(
-		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.certPath(), accountInfo.testAccount());
-
-	/* Login method based on certificate together with username */
-	} else if (accountInfo.loginMethod() == "user_certificate") {
-		if (accountInfo.password().isNull()) {
-			/* in this method the "userName" is Id of databox */
-			status = isdsLoginUserCert(
-			    isdsSessions.session(accountInfo.userName()),
-			    accountInfo.userName(), //means id of databox
-			    accountInfo.certPath(),
-			    accountInfo.testAccount());
-		} else {
-			status = isdsLoginUserCertPwd(
-			    isdsSessions.session(accountInfo.userName()),
-			    accountInfo.userName(),
-			    accountInfo.password(),
-			    accountInfo.certPath(),
-			    accountInfo.testAccount(),
-			    accountInfo.accountName());
-		}
-
-	/* Login method based username, password and OTP */
-	} else {
-		status = isdsLoginUserOtp(
-		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), accountInfo.password(),
-		    accountInfo.testAccount(), accountInfo.accountName());
-	}
-
-	qDebug() << status << isds_strerror(status);
-
-	return status;
-}
-
-
-/* ========================================================================= */
-/*
  * Creates new session.
  */
 struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
@@ -216,34 +156,12 @@ isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
 {
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!userName.isEmpty());
-	QString password = pwd;
-
-	if (password.isEmpty()) {
-		bool ok = false;
-		QString text = "";
-		while (text.isEmpty()) {
-			text = QInputDialog::getText(0,
-			    QObject::tr("Enter password"),
-			    QObject::tr("Enter password for account ")
-			    + accountName + " (" + userName + ")",
-			    QLineEdit::Password, "", &ok,
-			    Qt::WindowStaysOnTopHint|Qt::Widget);
-			if (ok) {
-				if (!text.isEmpty()) {
-					password = text;
-				}
-			} else {
-				return IE_ERROR;
-			}
-		}
-	}
-
-	Q_ASSERT(!password.isEmpty());
+	Q_ASSERT(!pwd.isEmpty());
 
 	return isds_login(isdsSession,
 	    testingSession ? isds_testing_locator : isds_locator,
 	    userName.toStdString().c_str(),
-	    password.toStdString().c_str(),
+	    pwd.toStdString().c_str(),
 	    NULL, NULL);
 }
 

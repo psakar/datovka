@@ -82,20 +82,19 @@ private:
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    const QString dmId);
 
-	bool checkConnectionError(int status, QString accountName);
-
 signals:
 	/*!
 	 * @brief This signal is emitted when the Worker request to Work
 	*/
 	void workRequested(void);
-	void showConnectionErrorMessageBox(int, QString);
+
 	/*!
 	* @brief This signal is emitted when counted value is changed
 	*/
 	void valueChanged(QString label, int value);
 
 	void refreshAccountList(const QModelIndex);
+
 	/*!
 	* @brief This signal is emitted when process is finished
 	*/

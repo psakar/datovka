@@ -359,7 +359,8 @@ void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
 	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
-		isdsSessions.connectToIsds(m_accountInfo);
+		/* TODO */
+		//isdsSessions.connectToIsds(m_accountInfo);
 	}
 
 	isds_error status;

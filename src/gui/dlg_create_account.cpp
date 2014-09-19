@@ -450,6 +450,8 @@ void DlgCreateAccount::saveAccount(void)
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
 	if (this->rememberPswcheckBox->isChecked()) {
 		itemSettings[PWD]= this->passwordLineEdit->text();
+	} else {
+		itemSettings[PWD] = "";
 	}
 	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
