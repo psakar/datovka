@@ -15,7 +15,8 @@ class Worker : public QObject {
 public:
 	explicit Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel,
-	    int count, QList<MessageDb*> messageDbList, QObject *parent);
+	    int count, QList<MessageDb*> messageDbList,
+	    QList<bool> downloadThisAccounts, QObject *parent);
 
 	/*!
 	* @brief Requests the process to start
@@ -31,6 +32,7 @@ private:
 	AccountModel &m_accountModel;
 	int m_count;
 	QList<MessageDb*> m_messageDbList;
+	QList<bool> m_downloadThisAccounts;
 
 	/*!
 	* @brief Download sent/received message list from ISDS for current

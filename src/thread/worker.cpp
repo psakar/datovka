@@ -11,13 +11,15 @@
 
 Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel, int count,
-	    QList<MessageDb*> messageDbList, QObject *parent = 0) :
+	    QList<MessageDb*> messageDbList,
+	    QList<bool> downloadThisAccounts, QObject *parent = 0) :
 	m_acntTopIdx(acntTopIdx),
 	m_dmId(dmId),
 	m_accountDb(accountDb),
 	m_accountModel(accountModel),
 	m_count(count),
-	m_messageDbList(messageDbList)
+	m_messageDbList(messageDbList),
+	m_downloadThisAccounts(downloadThisAccounts)
 {
 }
 
@@ -52,6 +54,10 @@ void Worker::syncAllAccounts()
 	MessageDb *messageDb;
 
 	for (int i = 0; i < m_count; i++) {
+
+		if (!m_downloadThisAccounts.at(i)) {
+			continue;
+		}
 
 		QModelIndex index = m_accountModel.index(i, 0);
 		const AccountModel::SettingsMap accountInfo =

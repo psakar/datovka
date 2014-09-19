@@ -1096,23 +1096,30 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	int accountCount = ui->accountList->model()->rowCount();
 	QList<MessageDb*> messageDbList;
+	QList<bool> downloadThisAccounts;
 	messageDbList.clear();
+	downloadThisAccounts.clear();
+	bool isConnectActive = true;
 
 	for (int i = 0; i < accountCount; i++) {
+
 		QModelIndex index = m_accountModel.index(i, 0);
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+		isConnectActive = true;
+
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			isConnectActive = connectToIsds(index);
+		}
+
+		downloadThisAccounts.append(isConnectActive);
+
 		const QStandardItem *accountItem =
 		    m_accountModel.itemFromIndex(index);
 		MessageDb *messageDb = accountMessageDb(accountItem);
 		messageDbList.append(messageDb);
 
-		const AccountModel::SettingsMap accountInfo =
-		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			if (!connectToIsds(index)) {
-				return;
-			}
-		}
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -1122,7 +1129,8 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	threadSyncAll = new QThread();
 	workerSyncAll = new Worker(QModelIndex(), QString(),
-	    m_accountDb, m_accountModel, accountCount, messageDbList, 0);
+	    m_accountDb, m_accountModel, accountCount, messageDbList,
+	    downloadThisAccounts, 0);
 	workerSyncAll->moveToThread(threadSyncAll);
 
 	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
@@ -1155,8 +1163,12 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	QList<MessageDb*> messageDbList;
+	QList<MessageDb*> messageDbList;	
+	QList<bool> downloadThisAccount;
+
 	messageDbList.clear();
+	downloadThisAccount.clear();
+	downloadThisAccount.append(true);
 
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
@@ -1174,8 +1186,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 	}
 
 	threadSyncOne = new QThread();
-	workerSyncOne = new Worker(index, QString(), m_accountDb, m_accountModel, 0,
-	    messageDbList, 0);
+	workerSyncOne = new Worker(index, QString(), m_accountDb,
+	    m_accountModel, 0, messageDbList, downloadThisAccount, 0);
 	workerSyncOne->moveToThread(threadSyncOne);
 
 	connect(workerSyncOne, SIGNAL(valueChanged(QString, int)),
@@ -3768,6 +3780,13 @@ void MainWindow::on_actionImport_database_directory_triggered()
 {
 	debug_func_call();
 
+	QString importDir = QFileDialog::getExistingDirectory(this,
+	    tr("Import database directory"), NULL, QFileDialog::ShowDirsOnly |
+	    QFileDialog::DontResolveSymlinks);
+
+	qDebug() << importDir;
+
+
 	/* TODO - Import database directory */
 }
 
@@ -4431,13 +4450,17 @@ void MainWindow::on_actionSignature_detail_triggered(void)
 
 }
 
+
+/* ========================================================================= */
+/*
+* Show signature details
+*/
 void MainWindow::on_signatureDetails_clicked(void)
+/* ========================================================================= */
 {
 	debug_func_call();
 	on_actionSignature_detail_triggered();
 }
-
-
 
 
 /* ========================================================================= */
@@ -4489,21 +4512,22 @@ bool MainWindow::checkConnectionError(int status, QString accountName)
 {
 	switch (status) {
 	case IE_SUCCESS:
-		return false;
+		return true;
 		break;
 	default:
+		qDebug() << "Account" << accountName << ":"
+		    << isds_strerror((isds_error)status) << status;
+
 		showConnectionErrorMessageBox(status, accountName);
-		return true;
+		return false;
 		break;
 	}
 }
 
 
-
-
 /* ========================================================================= */
 /*
-* Slot: If not account password remember show input dialog
+* If not account password remember show input dialog
 */
 QString MainWindow::showPasswordInputBox(const QModelIndex acntTopIdx)
 /* ========================================================================= */
@@ -4535,7 +4559,6 @@ QString MainWindow::showPasswordInputBox(const QModelIndex acntTopIdx)
 	}
 	return password;
 }
-
 
 
 /* ========================================================================= */
@@ -4611,15 +4634,5 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 		    accountInfo.testAccount(), accountInfo.accountName());
 	}
 
-	qDebug() << status << isds_strerror(status);
-
-	if (checkConnectionError(status, accountInfo.accountName())) {
-		qDebug() << "Error connection to ISDS";
-	}
-
-
-	return true;
+	return checkConnectionError(status, accountInfo.accountName());
 }
-
-
-
