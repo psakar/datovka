@@ -662,7 +662,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
 		    tr("Reply on the message"), this,
-		    SLOT(on_actionReply_to_the_sender_triggered()));
+		    SLOT(createAndSendMessageReply()));
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
@@ -1165,7 +1165,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	QList<MessageDb*> messageDbList;	
+	QList<MessageDb*> messageDbList;
 	QList<bool> downloadThisAccount;
 
 	messageDbList.clear();
@@ -1536,6 +1536,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));
 	/* Message. */
+	connect(ui->actionReply, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
 	/* Tools. */
@@ -1561,6 +1563,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(synchroniseSelectedAccount()));
 	connect(ui->actionCreate_message, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessage()));
+	connect(ui->actionReply_to_the_sender, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessageReply()));
 }
 
 
@@ -2016,7 +2020,7 @@ void MainWindow::createAndSendMessage(void)
 	debug_func_call();
 
 	/*
-	 * TODO -- This method copies on_actionReply_to_the_sender_triggered().
+	 * TODO -- This method copies createAndSendMessageReply().
 	 * Delete one of them.
 	 */
 	QModelIndex index = ui->accountList->currentIndex();
@@ -2266,9 +2270,9 @@ void MainWindow::ReceivedNewDataPath(QString newPath)
 
 /* ========================================================================= */
 /*
-* Create reply dialog and sent reply message from current (selected) account
+ * Creates and sends a message reply for selected account.
  */
-void MainWindow::on_actionReply_to_the_sender_triggered()
+void MainWindow::createAndSendMessageReply(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2334,19 +2338,6 @@ void MainWindow::on_actionFind_databox_triggered()
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this, userName);
 	dsSearch->show();
-}
-
-
-/* ========================================================================= */
-/*
-* Create reply dialog and sent reply message from current (selected) account
- */
-void MainWindow::on_actionReply_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	on_actionReply_to_the_sender_triggered();
 }
 
 

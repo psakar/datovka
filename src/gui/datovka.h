@@ -119,6 +119,11 @@ private slots:
 	 */
 	void createAndSendMessage(void);
 
+	/*!
+	 * @brief Creates and sends a message reply for selected account.
+	 */
+	void createAndSendMessageReply(void);
+
 	void on_actionAdd_account_triggered(void);
 
 	void on_actionDelete_account_triggered(void);
@@ -133,11 +138,7 @@ private slots:
 
 	void on_actionChange_data_directory_triggered(void);
 
-	void on_actionReply_to_the_sender_triggered(void);
-
 	void on_actionFind_databox_triggered(void);
-
-	void on_actionReply_triggered(void);
 
 	void on_actionSearchClear_triggered(void);
 
