@@ -836,7 +836,7 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	    "is_verified"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
+	// qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
@@ -844,7 +844,8 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
-		query.value(0).toInt(&ok);
+		ok = query.value(0).toBool();
+		// qDebug() << query.value(0) << ok;
 		return ok;
 	}
 
