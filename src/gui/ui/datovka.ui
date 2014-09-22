@@ -494,7 +494,7 @@
    <addaction name="actionVerify_a_message"/>
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
-   <addaction name="actionChange_password"/>
+   <addaction name="actionChange_pwd"/>
    <addaction name="actionPreferences"/>
    <addaction name="separator"/>
   </widget>
@@ -593,6 +593,15 @@
    </property>
   </action>
   <action name="actionChange_password">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Change password</string>
+   </property>
+  </action>
+  <action name="actionChange_pwd">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>

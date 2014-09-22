@@ -508,7 +508,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
 		    tr("Change password"),
-		    this, SLOT(on_actionChange_password_triggered()));
+		    this, SLOT(changeAccountPassword()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "letter_16.png"),
 		    tr("Account properties"),
@@ -1501,7 +1501,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);
 				ui->actionAccount_props->setEnabled(true);
-				ui->actionChange_password->setEnabled(true);
+				ui->actionChange_pwd->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
@@ -1538,6 +1538,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));
+	connect(ui->actionChange_password, SIGNAL(triggered()), this,
+	    SLOT(changeAccountPassword()));
 	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
 	/* Message. */
@@ -1576,6 +1578,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(verifyMessage()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
+	connect(ui->actionChange_pwd, SIGNAL(triggered()), this,
+	    SLOT(changeAccountPassword()));
 }
 
 
@@ -1596,7 +1600,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionReply_to_the_sender->setEnabled(false);
 	ui->actionVerify_a_message->setEnabled(false);
 	ui->actionAccount_props->setEnabled(false);
-	ui->actionChange_password->setEnabled(false);
+	ui->actionChange_pwd->setEnabled(false);
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -2127,11 +2131,12 @@ void MainWindow::on_actionDelete_account_triggered()
 	}
 }
 
+
 /* ========================================================================= */
 /*
- * Change user password for account.
+ * Shows change password dialog.
  */
-void MainWindow::on_actionChange_password_triggered()
+void MainWindow::changeAccountPassword(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2156,6 +2161,7 @@ void MainWindow::on_actionChange_password_triggered()
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	changePwd->exec();
 }
+
 
 /* ========================================================================= */
 /*

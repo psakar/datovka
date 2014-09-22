@@ -134,11 +134,14 @@ private slots:
 	 */
 	void manageAccountProperties(void);
 
+	/*!
+	 * @brief Shows change password dialog.
+	 */
+	void changeAccountPassword(void);
+
 	void on_actionAdd_account_triggered(void);
 
 	void on_actionDelete_account_triggered(void);
-
-	void on_actionChange_password_triggered(void);
 
 	void on_actionMove_account_up_triggered(void);
 
