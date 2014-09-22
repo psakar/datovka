@@ -341,8 +341,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		/* Get user information. */
 		qWarning() << "Missing user entry of" << userName
 		    << "in account db.";
-		getOwnerInfoFromLogin(AccountModel::indexTop(current));
+		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current))) {
 		/* TODO -- What to do when no ISDS connection is present? */
+			return;
+		}
 		dbId = m_accountDb.dbId(userName + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
@@ -3784,10 +3786,86 @@ void MainWindow::on_actionImport_database_directory_triggered()
 	    tr("Import database directory"), NULL, QFileDialog::ShowDirsOnly |
 	    QFileDialog::DontResolveSymlinks);
 
-	qDebug() << importDir;
+	if (importDir.isEmpty() || importDir.isNull()) {
+		return;
+	}
 
+	qDebug() << "Database path:" << importDir;
 
-	/* TODO - Import database directory */
+	QStringList nameFilter("*.db");
+	QDir directory(importDir);
+	QStringList dbFiles = directory.entryList(nameFilter);
+
+	if (dbFiles.isEmpty()) {
+		qDebug() << "No *.db files in the path" << importDir;
+		return;
+	}
+
+	QStringList fileNameParts;
+	// List of test accounts
+	QList<QString> testAccounts;
+	// list of legal/legitimate accounts
+	QList<QString> legalAccounts;
+	QString accountName;
+
+	for (int i = 0; i < dbFiles.size(); ++i) {
+		if (dbFiles.at(i).contains("___")) {
+			fileNameParts = dbFiles.at(i).split("___");
+			accountName = fileNameParts[0];
+			fileNameParts = fileNameParts[1].split(".");
+			if (fileNameParts[0] == "1") {
+				testAccounts.append(accountName);
+			} else {
+				legalAccounts.append(accountName);
+			}
+		}
+	}
+
+	if (testAccounts.empty() && legalAccounts.empty()) {
+		qDebug() << "No valid account database file(s) in the path" << importDir;
+		return;
+	}
+
+	AccountModel::SettingsMap itemSettings;
+
+	int totalAccounts = 0;
+	for (int i = 0; i < legalAccounts.size(); ++i) {
+		accountName = legalAccounts.at(i);
+		qDebug() << "Found legal account:" << accountName;
+		itemSettings[NAME] = accountName;
+		itemSettings[USER] = accountName;
+		itemSettings[LOGIN] = "username";
+		itemSettings[PWD] = "";
+		itemSettings[REMEMBER] = true;
+		itemSettings[TEST] = false;
+		itemSettings[SYNC] = true;
+		itemSettings[DB_DIR] = importDir;
+		m_accountModel.addAccount(accountName, itemSettings);
+		totalAccounts++;
+	}
+
+	for (int i = 0; i < testAccounts.size(); ++i) {
+		accountName = testAccounts.at(i);
+		qDebug() << "Found test account:" << accountName;
+		itemSettings[NAME] = accountName;
+		itemSettings[USER] = accountName;
+		itemSettings[LOGIN] = "username";
+		itemSettings[PWD] = "";
+		itemSettings[REMEMBER] = true;
+		itemSettings[TEST] = true;
+		itemSettings[SYNC] = true;
+		itemSettings[DB_DIR] = importDir;
+		m_accountModel.addAccount(accountName, itemSettings);
+		totalAccounts++;
+	}
+
+	qDebug() << totalAccounts << "database was/were imported from path"
+	    << importDir;
+
+	saveSettings();
+	activeAccountMenuAndButtons(true);
+
+	ui->accountList->expandAll();
 }
 
 
