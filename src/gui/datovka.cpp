@@ -512,7 +512,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "letter_16.png"),
 		    tr("Account properties"),
-		    this, SLOT(on_actionAccount_properties_triggered()));
+		    this, SLOT(manageAccountProperties()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Remove Account"),
 		    this, SLOT(on_actionDelete_account_triggered()));
@@ -1500,7 +1500,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->menuDatabox->setEnabled(true);
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);
-				ui->actionAccount_properties->setEnabled(true);
+				ui->actionAccount_props->setEnabled(true);
 				ui->actionChange_password->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
@@ -1538,6 +1538,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));
+	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
+	    SLOT(manageAccountProperties()));
 	/* Message. */
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
@@ -1572,6 +1574,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
+	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
+	    SLOT(manageAccountProperties()));
 }
 
 
@@ -1591,7 +1595,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionCreate_message->setEnabled(false);
 	ui->actionReply_to_the_sender->setEnabled(false);
 	ui->actionVerify_a_message->setEnabled(false);
-	ui->actionAccount_properties->setEnabled(false);
+	ui->actionAccount_props->setEnabled(false);
 	ui->actionChange_password->setEnabled(false);
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
@@ -2155,9 +2159,9 @@ void MainWindow::on_actionChange_password_triggered()
 
 /* ========================================================================= */
 /*
- * Create account dialog for updates.
+ * Shows account properties dialog.
  */
-void MainWindow::on_actionAccount_properties_triggered()
+void MainWindow::manageAccountProperties(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2169,9 +2173,6 @@ void MainWindow::on_actionAccount_properties_triggered()
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		saveSettings();
 	}
-
-
-
 }
 
 

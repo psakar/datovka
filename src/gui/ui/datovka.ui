@@ -493,7 +493,7 @@
    <addaction name="separator"/>
    <addaction name="actionVerify_a_message"/>
    <addaction name="separator"/>
-   <addaction name="actionAccount_properties"/>
+   <addaction name="actionAccount_props"/>
    <addaction name="actionChange_password"/>
    <addaction name="actionPreferences"/>
    <addaction name="separator"/>
@@ -599,6 +599,15 @@
    </property>
    <property name="text">
     <string>Change password</string>
+   </property>
+  </action>
+  <action name="actionAccount_props">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Account properties</string>
    </property>
   </action>
   <action name="actionAccount_properties">

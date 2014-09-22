@@ -129,13 +129,16 @@ private slots:
 	 */
 	void verifyMessage(void);
 
+	/*!
+	 * @brief Shows account properties dialog.
+	 */
+	void manageAccountProperties(void);
+
 	void on_actionAdd_account_triggered(void);
 
 	void on_actionDelete_account_triggered(void);
 
 	void on_actionChange_password_triggered(void);
-
-	void on_actionAccount_properties_triggered(void);
 
 	void on_actionMove_account_up_triggered(void);
 
