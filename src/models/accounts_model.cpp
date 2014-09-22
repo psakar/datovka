@@ -234,6 +234,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		settings.setValue(LOGIN, itemSettings.value(LOGIN));
 		if (!itemSettings.value(PWD).isNull() &&
 		    itemSettings.value(PWD).isValid() &&
+		    itemSettings.value(REMEMBER).toBool() &&
 		    !itemSettings.value(PWD).toString().isEmpty()) {
 			settings.setValue(PWD,
 			    toBase64(itemSettings.value(PWD).toString()));

@@ -468,12 +468,9 @@ private:
 	bool checkConnectionError(int status, QString accountName);
 
 	/*!
-	 * @brief Show password input boxs
+	 * @brief connect to ISDS databox
 	 */
-	QString showPasswordInputBox(const QModelIndex acntTopIdx);
-
 	bool connectToIsds(const QModelIndex acntTopIdx);
-
 
 
 	QString m_confDirName; /*!< Configuration directory location. */

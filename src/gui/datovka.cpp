@@ -341,6 +341,9 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		/* Get user information. */
 		qWarning() << "Missing user entry of" << userName
 		    << "in account db.";
+
+		/* TODO - paasword dialog is shown before gui is loaded */
+
 		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current))) {
 		/* TODO -- What to do when no ISDS connection is present? */
 			return;
@@ -2055,7 +2058,7 @@ void MainWindow::on_actionAdd_account_triggered()
 	debug_func_call();
 
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	   m_accountDb, DlgCreateAccount::ACT_ADDNEW, this);
+	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
 	if (QDialog::Accepted == newAccountDialog->exec()) {
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
@@ -2160,8 +2163,15 @@ void MainWindow::on_actionAccount_properties_triggered()
 	debug_func_call();
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	   m_accountDb, DlgCreateAccount::ACT_EDIT, this);
-	editAccountDialog->exec();
+	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
+	//editAccountDialog->exec();
+
+	if (QDialog::Accepted == editAccountDialog->exec()) {
+		saveSettings();
+	}
+
+
+
 }
 
 
@@ -4578,42 +4588,6 @@ bool MainWindow::checkConnectionError(int status, QString accountName)
 
 /* ========================================================================= */
 /*
-* If not account password remember show input dialog
-*/
-QString MainWindow::showPasswordInputBox(const QModelIndex acntTopIdx)
-/* ========================================================================= */
-{
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return "";
-	}
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	bool ok = false;
-	QString password = "";
-	while (password.isEmpty()) {
-		password = QInputDialog::getText(this,
-		    accountInfo.accountName() + " - " + tr("enter password"),
-		    tr("Enter password for account ") + accountInfo.accountName()
-		    + " (" + accountInfo.userName() + ")",
-		    QLineEdit::Password, "", &ok,
-		    Qt::WindowStaysOnTopHint|Qt::Widget);
-		if (ok) {
-			if (!password.isEmpty()) {
-				return password;
-			}
-		} else {
-			return "";
-		}
-	}
-	return password;
-}
-
-
-/* ========================================================================= */
-/*
  * Connect to databox
  */
 bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
@@ -4636,21 +4610,32 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == "username") {
-		QString pwd;
-		if (accountInfo.password().isNull() ||
-		    accountInfo.password().isEmpty()) {
-			pwd = showPasswordInputBox(acntTopIdx);
-			if (pwd.isEmpty()) {
+		QString pwd = accountInfo.password();
+		qDebug() << accountInfo.userName();
+		qDebug() << pwd;
+		if (pwd.isNull() ||
+		    pwd.isEmpty()) {
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    *(ui->accountList), m_accountDb, acntTopIdx,
+			    DlgCreateAccount::ACT_PWD, this);
+
+			if (QDialog::Accepted == editAccountDialog->exec()) {
+				saveSettings();
+
+				const AccountModel::SettingsMap accountInfoNew =
+				    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+				pwd = accountInfoNew.password();
+				qDebug() << pwd;
+			} else {
 				return false;
 			}
-		} else {
-			pwd = accountInfo.password();
 		}
 
 		status = isdsLoginUserName(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
 		    accountInfo.testAccount(), accountInfo.accountName());
+
 
 	/* Login method based on system certificate only */
 	} else if (accountInfo.loginMethod() == "certificate") {

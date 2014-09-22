@@ -17,11 +17,12 @@ class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 public:
 	enum Action {
 		ACT_ADDNEW,
-		ACT_EDIT
+		ACT_EDIT,
+		ACT_PWD
 	};
 
 	DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
-	    Action action, QWidget *parent = 0);
+	    QModelIndex acntTopIdx, Action action, QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -36,6 +37,7 @@ private:
 
 	QTreeView &m_accountList;
 	AccountDb &m_accountDb;
+	QModelIndex m_acntTopIdx;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;

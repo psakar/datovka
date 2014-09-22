@@ -6,11 +6,12 @@
 #include "src/models/accounts_model.h"
 
 DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
-Action action,
+QModelIndex acntTopIdx, Action action,
     QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
     m_accountDb(m_accountDb),
+    m_acntTopIdx(acntTopIdx),
     m_action(action),
     m_loginmethod(0),
     m_certPath("")
@@ -50,7 +51,7 @@ void DlgCreateAccount::initAccountDialog(void)
 	    this, SLOT(checkInputFields()));
 
 	/* if account exists then we set all items */
-	if (ACT_EDIT == m_action) {
+	if (ACT_EDIT == m_action || ACT_PWD == m_action) {
 		setCurrentAccountData();
 	}
 }
@@ -64,19 +65,37 @@ void DlgCreateAccount::setCurrentAccountData(void)
 /* ========================================================================= */
 {
 	int itemindex;
+	QModelIndex index;
+	AccountModel *model = dynamic_cast<AccountModel *>(m_accountList.model());
 
-	AccountModel *model = dynamic_cast<AccountModel *>(
-	    m_accountList.model());
-	QModelIndex index = m_accountList.currentIndex();
+	if (ACT_EDIT == m_action) {
+		index = m_accountList.currentIndex();
+	} else  {
+		index = m_acntTopIdx;
+	}
+
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
+
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	this->setWindowTitle(tr("Update account") + " " + itemTop->text());
-	this->accountLineEdit->setText(itemTop->text());
-	this->usernameLineEdit->setText(itemSettings[USER].toString());
-	this->usernameLineEdit->setEnabled(false);
+	if (ACT_EDIT == m_action) {
+		this->setWindowTitle(tr("Update account") + " " + itemTop->text());
+		this->accountLineEdit->setText(itemTop->text());
+		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setEnabled(false);
+
+	} else  {
+		this->setWindowTitle(tr("Enter password for account") + " " + itemTop->text());
+		this->accountLineEdit->setText(itemTop->text());
+		this->accountLineEdit->setEnabled(false);
+		this->infoLabel->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
+		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->testAccountCheckBox->setEnabled(false);
+		this->usernameLineEdit->setEnabled(false);
+	}
 
 	QString login_method = itemSettings[LOGIN].toString();
 	if (login_method == "username") {
@@ -414,7 +433,17 @@ void DlgCreateAccount::saveAccount(void)
 	QStandardItem *item;
 	QStandardItem *itemTop;
 	AccountModel::SettingsMap itemSettings;
+
 	if (ACT_EDIT == m_action) {
+		/* Model must be present. */
+		Q_ASSERT(index.isValid());
+		item = model->itemFromIndex(index);
+		Q_ASSERT(0 != item);
+		itemTop = AccountModel::itemTop(item);
+		Q_ASSERT(0 != itemTop);
+		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	} else if (ACT_PWD == m_action) {
+		index = m_acntTopIdx;
 		/* Model must be present. */
 		Q_ASSERT(index.isValid());
 		item = model->itemFromIndex(index);
@@ -448,16 +477,17 @@ void DlgCreateAccount::saveAccount(void)
 
 
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
-	if (this->rememberPswcheckBox->isChecked()) {
+	//if (this->rememberPswcheckBox->isChecked()) {
 		itemSettings[PWD]= this->passwordLineEdit->text();
-	} else {
-		itemSettings[PWD] = "";
-	}
+	//} else {
+	//	itemSettings[PWD] = "";
+	//}
 	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 
 	switch (m_action) {
 	case ACT_EDIT:
+	case ACT_PWD:
 		itemTop->setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
 		/* TODO -- Save/update related account DB entry? */
