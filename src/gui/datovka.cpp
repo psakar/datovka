@@ -3787,7 +3787,7 @@ void MainWindow::on_actionImport_database_directory_triggered()
 		return;
 	}
 
-	qDebug() << "Database path:" << importDir;
+	qDebug() << "New database files path:" << importDir;
 
 	QStringList nameFilter("*.db");
 	QDir directory(importDir);
@@ -3819,45 +3819,85 @@ void MainWindow::on_actionImport_database_directory_triggered()
 	}
 
 	if (testAccounts.empty() && legalAccounts.empty()) {
-		qDebug() << "No valid account database file(s) in the path" << importDir;
+		qDebug() << "No valid account database file(s) in the path"
+		    << importDir;
 		return;
 	}
 
 	AccountModel::SettingsMap itemSettings;
 
+	QStringList currentAccountList;
+	int accountCount = ui->accountList->model()->rowCount();
+	for (int i = 0; i < accountCount; i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		currentAccountList.append(accountInfo.userName());
+	}
+
 	int totalAccounts = 0;
+
 	for (int i = 0; i < legalAccounts.size(); ++i) {
 		accountName = legalAccounts.at(i);
-		qDebug() << "Found legal account:" << accountName;
-		itemSettings[NAME] = accountName;
-		itemSettings[USER] = accountName;
-		itemSettings[LOGIN] = "username";
-		itemSettings[PWD] = "";
-		itemSettings[REMEMBER] = true;
-		itemSettings[TEST] = false;
-		itemSettings[SYNC] = true;
-		itemSettings[DB_DIR] = importDir;
-		m_accountModel.addAccount(accountName, itemSettings);
-		totalAccounts++;
+		bool isInAccountList = false;
+		for (int j = 0; j < currentAccountList.size(); ++j) {
+			if (currentAccountList.at(j) == accountName) {
+				isInAccountList = true;
+				break;
+			}
+		}
+
+		if (!isInAccountList) {
+			itemSettings[NAME] = accountName;
+			itemSettings[USER] = accountName;
+			itemSettings[LOGIN] = "username";
+			itemSettings[PWD] = "";
+			itemSettings[REMEMBER] = true;
+			itemSettings[TEST] = false;
+			itemSettings[SYNC] = true;
+			itemSettings[DB_DIR] = importDir;
+			m_accountModel.addAccount(accountName, itemSettings);
+			totalAccounts++;
+			qDebug() << "Found legal account:" << accountName <<
+			"...was added";
+		} else {
+			qDebug() << "Found legal account:" << accountName <<
+			    "...already exists";
+		}
 	}
 
 	for (int i = 0; i < testAccounts.size(); ++i) {
+
 		accountName = testAccounts.at(i);
-		qDebug() << "Found test account:" << accountName;
-		itemSettings[NAME] = accountName;
-		itemSettings[USER] = accountName;
-		itemSettings[LOGIN] = "username";
-		itemSettings[PWD] = "";
-		itemSettings[REMEMBER] = true;
-		itemSettings[TEST] = true;
-		itemSettings[SYNC] = true;
-		itemSettings[DB_DIR] = importDir;
-		m_accountModel.addAccount(accountName, itemSettings);
-		totalAccounts++;
+		bool isInAccountList = false;
+		for (int j = 0; j < currentAccountList.size(); ++j) {
+			if (currentAccountList.at(j) == accountName) {
+				isInAccountList = true;
+				break;
+			}
+		}
+
+		if (!isInAccountList) {
+			itemSettings[NAME] = accountName;
+			itemSettings[USER] = accountName;
+			itemSettings[LOGIN] = "username";
+			itemSettings[PWD] = "";
+			itemSettings[REMEMBER] = true;
+			itemSettings[TEST] = true;
+			itemSettings[SYNC] = true;
+			itemSettings[DB_DIR] = importDir;
+			m_accountModel.addAccount(accountName, itemSettings);
+			totalAccounts++;
+			qDebug() << "Found test account:" << accountName <<
+			"...was added";
+		} else {
+			qDebug() << "Found test account:" << accountName <<
+			    "...already exists";
+		}
 	}
 
-	qDebug() << totalAccounts << "database was/were imported from path"
-	    << importDir;
+	qDebug() << totalAccounts <<
+	    "database file(s) was/were imported from path" << importDir;
 
 	saveSettings();
 	activeAccountMenuAndButtons(true);
