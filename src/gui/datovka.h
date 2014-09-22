@@ -124,6 +124,11 @@ private slots:
 	 */
 	void createAndSendMessageReply(void);
 
+	/*!
+	 * @brief Verifies selected message and creates response dialog.
+	 */
+	void verifyMessage(void);
+
 	void on_actionAdd_account_triggered(void);
 
 	void on_actionDelete_account_triggered(void);
@@ -159,10 +164,6 @@ private slots:
 	void on_actionSave_attachment_triggered(void);
 
 	void on_actionAuthenticate_message_file_triggered(void);
-
-	void on_actionAuthenticate_message_triggered(void);
-
-	void on_actionVerify_a_message_triggered(void);
 
 	void on_actionView_message_from_ZPO_file_triggered(void);
 
@@ -432,7 +433,7 @@ private:
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	qdatovka_error verifyMessage(const QModelIndex &acntTopIdx,
+	qdatovka_error verifySelectedMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
 
 	/*!

@@ -667,7 +667,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
 		    tr("Authenticate messages"), this,
-		    SLOT(on_actionVerify_a_message_triggered()));
+		    SLOT(verifyMessage()));
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "label_16.png"),
 		    tr("Signature detail"), this,
@@ -1538,6 +1538,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* Message. */
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
+	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
+	    SLOT(verifyMessage()));
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
 	/* Tools. */
@@ -1565,6 +1567,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionReply_to_the_sender, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
+	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
+	    SLOT(verifyMessage()));
 }
 
 
@@ -3463,7 +3467,7 @@ bool MainWindow::getMessageAuthor(const QModelIndex &acntTopIdx,
 /*
  * Verify message. Compare hash with hash stored in ISDS.
  */
-qdatovka_error MainWindow::verifyMessage(const QModelIndex &acntTopIdx,
+qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
     const QModelIndex &msgIdx)
 /* ========================================================================= */
 {
@@ -4031,22 +4035,9 @@ void MainWindow::on_actionAuthenticate_message_file_triggered(void)
 
 /* ========================================================================= */
 /*
-* Authenticate message slot
-*/
-void MainWindow::on_actionAuthenticate_message_triggered(void)
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	on_actionVerify_a_message_triggered();
-}
-
-
-/* ========================================================================= */
-/*
-* Verify message slot
-*/
-void MainWindow::on_actionVerify_a_message_triggered(void)
+ * Verifies selected message and creates response dialog.
+ */
+void MainWindow::verifyMessage(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4055,7 +4046,7 @@ void MainWindow::on_actionVerify_a_message_triggered(void)
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
-	switch (verifyMessage(acntTopIdx, msgIdx)) {
+	switch (verifySelectedMessage(acntTopIdx, msgIdx)) {
 	case Q_SUCCESS:
 		QMessageBox::information(this, tr("Message is valid"),
 		    tr("Hash of message corresponds to ISDS message hash.\nMessage is valid."),
