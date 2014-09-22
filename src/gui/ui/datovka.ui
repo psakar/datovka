@@ -495,7 +495,7 @@
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
    <addaction name="actionChange_pwd"/>
-   <addaction name="actionPreferences"/>
+   <addaction name="actionPrefs"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -536,6 +536,15 @@
    </property>
   </action>
   <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionPrefs">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>

@@ -35,7 +35,6 @@ public:
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 
 private slots:
-	void on_actionPreferences_triggered();
 	void on_actionProxy_settings_triggered();
 
 	/*!
@@ -138,6 +137,11 @@ private slots:
 	 * @brief Shows change password dialog.
 	 */
 	void changeAccountPassword(void);
+
+	/*!
+	 * @brief Shows the application preferences dialog.
+	 */
+	void applicationPreferences(void);
 
 	void on_actionAdd_account_triggered(void);
 

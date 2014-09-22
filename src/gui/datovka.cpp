@@ -254,11 +254,13 @@ MainWindow::~MainWindow(void)
 
 /* ========================================================================= */
 /*
- * Create and open Preferences dialog
+ * Shows the application preferences dialog.
  */
-void MainWindow::on_actionPreferences_triggered()
+void MainWindow::applicationPreferences(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QDialog *dlgPrefs = new DlgPreferences(this);
 	dlgPrefs->exec();
 
@@ -1523,6 +1525,8 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 void MainWindow::connectTopMenuBarSlots(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	/*
 	 * Actions that cannot be automatically connected
 	 * via QMetaObject::connectSlotsByName because of mismatching names.
@@ -1531,6 +1535,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* File. */
 	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
 	    SLOT(synchroniseAllAccounts()));
+	connect(ui->actionPreferences, SIGNAL(triggered()), this,
+	    SLOT(applicationPreferences()));
 	/* Databox. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
@@ -1561,6 +1567,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 void MainWindow::connectTopToolBarSlots(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	/*
 	 * Actions that cannot be automatically connected
 	 * via QMetaObject::connectSlotsByName because of mismatching names.
@@ -1580,6 +1588,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(manageAccountProperties()));
 	connect(ui->actionChange_pwd, SIGNAL(triggered()), this,
 	    SLOT(changeAccountPassword()));
+	connect(ui->actionPrefs, SIGNAL(triggered()), this,
+	    SLOT(applicationPreferences()));
 }
 
 
