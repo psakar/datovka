@@ -114,9 +114,10 @@ private slots:
 	 */
 	void synchroniseSelectedAccount(void);
 
-	void on_actionCreate_message_triggered(void);
-
-	void on_actionSent_message_triggered(void);
+	/*!
+	 * @brief Creates and sends new message.
+	 */
+	void createAndSendMessage(void);
 
 	void on_actionAdd_account_triggered(void);
 
@@ -453,8 +454,6 @@ private:
 	 * @brief Authenticate message form file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
-
-
 
 	/*!
 	 * @brief Show message info for user if connection to ISDS fails.

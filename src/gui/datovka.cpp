@@ -498,7 +498,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    this, SLOT(synchroniseSelectedAccount()));
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create message"),
-		    this, SLOT(on_actionCreate_message_triggered()));
+		    this, SLOT(createAndSendMessage()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "tick_16.png"),
 		    tr("Mark all as read"),
 		    this, SLOT(accountItemMarkAllRead()));
@@ -710,7 +710,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	} else {
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create a new message"),
-		    this, SLOT(on_actionSent_message_triggered()));
+		    this, SLOT(createAndSendMessage()));
 	}
 	menu->exec(QCursor::pos());
 }
@@ -1531,6 +1531,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* Databox. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
+	connect(ui->actionSent_message, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessage()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));
 	/* Message. */
@@ -1557,6 +1559,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(synchroniseAllAccounts()));
 	connect(ui->actionDownload_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
+	connect(ui->actionCreate_message, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessage()));
 }
 
 
@@ -2004,22 +2008,9 @@ void MainWindow::saveSettings(void) const
 
 /* ========================================================================= */
 /*
-* Create message slot
+ * Creates and sends new message.
  */
-void MainWindow::on_actionCreate_message_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	on_actionSent_message_triggered();
-}
-
-
-/* ========================================================================= */
-/*
-* Send message slot
- */
-void MainWindow::on_actionSent_message_triggered()
+void MainWindow::createAndSendMessage(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2283,7 +2274,7 @@ void MainWindow::on_actionReply_to_the_sender_triggered()
 	debug_func_call();
 
 	/*
-	 * TODO -- This method copies on_actionSent_message_triggered().
+	 * TODO -- This method copies createAndSendMessage().
 	 * Delete one of them.
 	 */
 
