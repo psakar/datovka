@@ -179,8 +179,10 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
-//	ui->verifySignature
-//	ui->signatureDetails
+//	connect(ui->verifySignature, SIGNAL(clicked()), this,
+//	    SLOT(xxxx()));
+	connect(ui->signatureDetails, SIGNAL(clicked()), this,
+	    SLOT(showSignatureDetails()));
 
 	/* Connect non-automatic menu actions. */
 	connectTopMenuBarSlots();
@@ -219,7 +221,7 @@ void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
 	if (ui->accountList->model()->rowCount() <= 0) {
-		on_actionAdd_account_triggered();
+		addNewAccount();
 	} else {
 		if (globPref.download_on_background) {
 			synchroniseAllAccounts();
@@ -285,11 +287,13 @@ void MainWindow::applicationPreferences(void)
 
 /* ========================================================================= */
 /*
- * Create and open Proxy settings dialog
+ * Proxy setting dialog.
  */
-void MainWindow::on_actionProxy_settings_triggered()
+void MainWindow::proxySettings(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QDialog *dlgProxy = new DlgProxysets(this);
 	dlgProxy->exec();
 }
@@ -517,22 +521,22 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    this, SLOT(manageAccountProperties()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
 		    tr("Remove Account"),
-		    this, SLOT(on_actionDelete_account_triggered()));
+		    this, SLOT(deleteSelectedAccount()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "up_16.png"),
 		    tr("Move account up"),
-		    this, SLOT(on_actionMove_account_up_triggered()));
+		    this, SLOT(moveSelectedAccountUp()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "down_16.png"),
 		    tr("Move account down"),
-		    this, SLOT(on_actionMove_account_down_triggered()));
+		    this, SLOT(moveSelectedAccountDown()));
 		menu->addSeparator();
 		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
 		    tr("Change data directory"),
-		    this, SLOT(on_actionChange_data_directory_triggered()));
+		    this, SLOT(changeDataDirectory()));
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
-		    this, SLOT(on_actionAdd_account_triggered()));
+		    this, SLOT(addNewAccount()));
 	}
 
 	menu->exec(QCursor::pos());
@@ -676,11 +680,11 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "label_16.png"),
 		    tr("Signature detail"), this,
-		    SLOT(on_actionSignature_detail_triggered()));
+		    SLOT(showSignatureDetails()));
 		menu->addSeparator();
 		menu->addAction(
 		    tr("Export complete message to ZFO"), this,
-		    SLOT(on_actionExport_as_ZFO_triggered()))->
+		    SLOT(exportSelectedMessageAsZFO()))->
 		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
 		menu->addAction(
 		    tr("Export delivery info to ZFO"), this,
@@ -921,6 +925,8 @@ void MainWindow::openSelectedAttachment(void)
 void MainWindow::downloadSelectedMessageAttachments(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
 	Q_ASSERT(messageIndex.isValid());
@@ -1535,8 +1541,17 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* File. */
 	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
 	    SLOT(synchroniseAllAccounts()));
+	connect(ui->actionAdd_account, SIGNAL(triggered()), this,
+	    SLOT(addNewAccount()));
+	connect(ui->actionDelete_account, SIGNAL(triggered()), this,
+	    SLOT(deleteSelectedAccount()));
+	connect(ui->actionImport_database_directory, SIGNAL(triggered()), this,
+	    SLOT(importDatabaseDirectory()));
+	connect(ui->actionProxy_settings, SIGNAL(triggered()), this,
+	    SLOT(proxySettings()));
 	connect(ui->actionPreferences, SIGNAL(triggered()), this,
 	    SLOT(applicationPreferences()));
+	/* actionQuit -- connected in ui file. */
 	/* Databox. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
@@ -1548,11 +1563,25 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(changeAccountPassword()));
 	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
+	connect(ui->actionMove_account_up, SIGNAL(triggered()), this,
+	    SLOT(moveSelectedAccountUp()));
+	connect(ui->actionMove_account_down, SIGNAL(triggered()), this,
+	    SLOT(moveSelectedAccountDown()));
+	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
+	    SLOT(changeDataDirectory()));
 	/* Message. */
+	connect(ui->actionDownload_message_signed, SIGNAL(triggered()), this,
+	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
+	connect(ui->actionSignature_detail, SIGNAL(triggered()), this,
+	    SLOT(showSignatureDetails()));
+	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
+	    SLOT(exportSelectedMessageAsZFO()));
+
+
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
 	/* Tools. */
@@ -2068,9 +2097,9 @@ void MainWindow::createAndSendMessage(void)
 
 /* ========================================================================= */
 /*
- * Create account dialog for addition new.
+ * Add account action and dialog.
  */
-void MainWindow::on_actionAdd_account_triggered()
+void MainWindow::addNewAccount(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2088,9 +2117,9 @@ void MainWindow::on_actionAdd_account_triggered()
 
 /* ========================================================================= */
 /*
-* Delete account
+ * Deletion confirmation dialog.
  */
-void MainWindow::on_actionDelete_account_triggered()
+void MainWindow::deleteSelectedAccount(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2194,11 +2223,13 @@ void MainWindow::manageAccountProperties(void)
 
 /* ========================================================================= */
 /*
- * Move account up (currentRow - 1).
+ * Move selected account up.
  */
-void MainWindow::on_actionMove_account_up_triggered()
+void MainWindow::moveSelectedAccountUp(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
 	    (ui->accountList->model());
 	QModelIndex index = ui->accountList->currentIndex();
@@ -2220,11 +2251,13 @@ void MainWindow::on_actionMove_account_up_triggered()
 
 /* ========================================================================= */
 /*
-* Move account down (currentRow + 1).
+ * Move selected account down.
  */
-void MainWindow::on_actionMove_account_down_triggered()
+void MainWindow::moveSelectedAccountDown(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
 	    (ui->accountList->model());
 	QModelIndex index = ui->accountList->currentIndex();
@@ -2248,9 +2281,9 @@ void MainWindow::on_actionMove_account_down_triggered()
 
 /* ========================================================================= */
 /*
-* Change data directory
+ * Change data directory dialog.
  */
-void MainWindow::on_actionChange_data_directory_triggered()
+void MainWindow::changeDataDirectory(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -3763,19 +3796,6 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 /*
 * Download selected message attachments
 */
-void MainWindow::on_actionDownload_message_signed_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	downloadSelectedMessageAttachments();
-}
-
-
-/* ========================================================================= */
-/*
-* Download selected message attachments
-*/
 void MainWindow::on_actionAbout_Datovka_triggered()
 /* ========================================================================= */
 {
@@ -3788,9 +3808,9 @@ void MainWindow::on_actionAbout_Datovka_triggered()
 
 /* ========================================================================= */
 /*
-* Import database directory
-*/
-void MainWindow::on_actionImport_database_directory_triggered()
+ * Import database directory dialog.
+ */
+void MainWindow::importDatabaseDirectory(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4217,9 +4237,9 @@ void MainWindow::on_actionHepl_triggered(void)
 
 /* ========================================================================= */
 /*
-* Export message into as ZFO file on local disk
-*/
-void MainWindow::on_actionExport_as_ZFO_triggered(void)
+ * Export message into as ZFO file dialog.
+ */
+void MainWindow::exportSelectedMessageAsZFO(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4556,9 +4576,9 @@ void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
 
 /* ========================================================================= */
 /*
-* Show signature details
-*/
-void MainWindow::on_actionSignature_detail_triggered(void)
+ * View signature details.
+ */
+void MainWindow::showSignatureDetails(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4566,18 +4586,6 @@ void MainWindow::on_actionSignature_detail_triggered(void)
 	QDialog *signature_detail = new dlg_signature_detail(this);
 	signature_detail->exec();
 
-}
-
-
-/* ========================================================================= */
-/*
-* Show signature details
-*/
-void MainWindow::on_signatureDetails_clicked(void)
-/* ========================================================================= */
-{
-	debug_func_call();
-	on_actionSignature_detail_triggered();
 }
 
 

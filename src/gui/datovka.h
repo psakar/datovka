@@ -35,8 +35,6 @@ public:
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 
 private slots:
-	void on_actionProxy_settings_triggered();
-
 	/*!
 	 * @brief Redraws widgets according to selected account item.
 	 */
@@ -143,15 +141,50 @@ private slots:
 	 */
 	void applicationPreferences(void);
 
-	void on_actionAdd_account_triggered(void);
+	/*!
+	 * @brief Add account action and dialog.
+	 */
+	void addNewAccount(void);
 
-	void on_actionDelete_account_triggered(void);
+	/*!
+	 * @brief Deletion confirmation dialog.
+	 */
+	void deleteSelectedAccount(void);
 
-	void on_actionMove_account_up_triggered(void);
+	/*!
+	 * @brief Import database directory dialog.
+	 */
+	void importDatabaseDirectory(void);
 
-	void on_actionMove_account_down_triggered(void);
+	/*!
+	 * @brief Proxy setting dialog.
+	 */
+	void proxySettings(void);
 
-	void on_actionChange_data_directory_triggered(void);
+	/*!
+	 * @brief Move selected account up.
+	 */
+	void moveSelectedAccountUp(void);
+
+	/*!
+	 * @brief Move selected account down.
+	 */
+	void moveSelectedAccountDown(void);
+
+	/*!
+	 * @brief Change data directory dialog.
+	 */
+	void changeDataDirectory(void);
+
+	/*!
+	 * @brief View signature details.
+	 */
+	void showSignatureDetails(void);
+
+	/*!
+	 * @brief Export message into as ZFO file dialog.
+	 */
+	void exportSelectedMessageAsZFO(void);
 
 	void on_actionFind_databox_triggered(void);
 
@@ -163,11 +196,7 @@ private slots:
 
 	void onTableColumnSort(int column);
 
-	void on_actionDownload_message_signed_triggered(void);
-
 	void on_actionAbout_Datovka_triggered(void);
-
-	void on_actionImport_database_directory_triggered(void);
 
 	void on_actionOpen_attachment_triggered(void);
 
@@ -179,8 +208,6 @@ private slots:
 
 	void on_actionHepl_triggered(void);
 
-	void on_actionExport_as_ZFO_triggered(void);
-
 	void on_actionExport_delivery_info_as_ZFO_triggered(void);
 
 	void on_actionExport_delivery_info_as_PDF_triggered(void);
@@ -190,8 +217,6 @@ private slots:
 	void on_actionOpen_message_externally_triggered(void);
 
 	void on_actionOpen_delivery_info_externally_triggered(void);
-
-	void on_actionSignature_detail_triggered(void);
 
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.
@@ -217,11 +242,6 @@ private slots:
 	 * @brief Set and run any actions after mainwindow has been created.
 	 */
 	void setWindowsAfterInit(void);
-
-	/*!
-	 * @brief Open dialog with signature detail.
-	 */
-	void on_signatureDetails_clicked(void);
 
 	/*!
 	 * @brief Recevied and store new account database path.
