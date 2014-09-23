@@ -427,15 +427,15 @@
     <addaction name="actionDownload_message_signed"/>
     <addaction name="actionReply"/>
     <addaction name="separator"/>
-    <addaction name="actionAuthenticate_message"/>
     <addaction name="actionSignature_detail"/>
+    <addaction name="actionAuthenticate_message"/>
     <addaction name="separator"/>
     <addaction name="actionExport_as_ZFO"/>
+    <addaction name="actionOpen_message_externally"/>
+    <addaction name="actionOpen_delivery_info_externally"/>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
-    <addaction name="actionOpen_message_externally"/>
-    <addaction name="actionOpen_delivery_info_externally"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
@@ -829,7 +829,7 @@
      <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
    </property>
    <property name="text">
-    <string>Reply on message</string>
+    <string>Reply to message</string>
    </property>
   </action>
   <action name="actionSignature_detail">
@@ -838,7 +838,7 @@
      <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
    </property>
    <property name="text">
-    <string>Signature detail</string>
+    <string>Signature details</string>
    </property>
   </action>
   <action name="actionAuthenticate_message">

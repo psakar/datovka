@@ -653,46 +653,28 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-		//messageItemSelectionChanged(index);
-
-		/* TODO */
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 		    tr("Download message signed"), this,
 		    SLOT(downloadSelectedMessageAttachments()));
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
-		    tr("Reply on the message"), this,
+		    tr("Reply to message"), this,
 		    SLOT(createAndSendMessageReply()));
 		menu->addSeparator();
 		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
-		    tr("Authenticate messages"), this,
-		    SLOT(verifyMessage()));
-		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "label_16.png"),
-		    tr("Signature detail"), this,
+		    tr("Signature details"), this,
 		    SLOT(showSignatureDetails()));
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
+		    tr("Authenticate message"), this,
+		    SLOT(verifyMessage()));
 		menu->addSeparator();
 		menu->addAction(
-		    tr("Export complete message to ZFO"), this,
+		    tr("Export message as ZFO"), this,
 		    SLOT(exportSelectedMessageAsZFO()))->
 		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
-		menu->addAction(
-		    tr("Export delivery info to ZFO"), this,
-		    SLOT(exportDeliveryInfoAsZFO()))->
-		    setEnabled(ui->actionExport_delivery_info_as_ZFO->
-		    isEnabled());
-		menu->addAction(
-		    tr("Export message envelope as PDF"), this,
-		    SLOT(exportMessageEnvelopeAsPDF()))->
-		    setEnabled(ui->actionExport_message_envelope_as_PDF->
-		    isEnabled());
-		menu->addAction(
-		    tr("Export delivery info as PDF"), this,
-		    SLOT(exportDeliveryInfoAsPDF()))->
-		    setEnabled(ui->actionExport_delivery_info_as_PDF->
-		    isEnabled());
 		menu->addAction(
 		    tr("Open message externally"), this,
 		    SLOT(openSelectedMessageExternally()))->
@@ -701,6 +683,21 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    tr("Open delivery info externally"), this,
 		    SLOT(openDeliveryInfoExternally()))->
 		    setEnabled(ui->actionOpen_delivery_info_externally->
+		    isEnabled());
+		menu->addAction(
+		    tr("Export delivery info as ZFO"), this,
+		    SLOT(exportDeliveryInfoAsZFO()))->
+		    setEnabled(ui->actionExport_delivery_info_as_ZFO->
+		    isEnabled());
+		menu->addAction(
+		    tr("Export delivery info as PDF"), this,
+		    SLOT(exportDeliveryInfoAsPDF()))->
+		    setEnabled(ui->actionExport_delivery_info_as_PDF->
+		    isEnabled());
+		menu->addAction(
+		    tr("Export message envelope as PDF"), this,
+		    SLOT(exportMessageEnvelopeAsPDF()))->
+		    setEnabled(ui->actionExport_message_envelope_as_PDF->
 		    isEnabled());
 		menu->addSeparator();
 		menu->addAction(
@@ -1548,6 +1545,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionPreferences, SIGNAL(triggered()), this,
 	    SLOT(applicationPreferences()));
 	/* actionQuit -- connected in ui file. */
+
 	/* Databox. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
@@ -1565,33 +1563,35 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(moveSelectedAccountDown()));
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
+
 	/* Message. */
 	connect(ui->actionDownload_message_signed, SIGNAL(triggered()), this,
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
-	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
-	    SLOT(verifyMessage()));
 	connect(ui->actionSignature_detail, SIGNAL(triggered()), this,
 	    SLOT(showSignatureDetails()));
+	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
+	    SLOT(verifyMessage()));
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
 	    SLOT(exportSelectedMessageAsZFO()));
+	connect(ui->actionOpen_message_externally, SIGNAL(triggered()), this,
+	    SLOT(openSelectedMessageExternally()));
+	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()), this,
+	    SLOT(openDeliveryInfoExternally()));
 	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()), this,
 	    SLOT(exportDeliveryInfoAsZFO()));
 	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()), this,
 	    SLOT(exportDeliveryInfoAsPDF()));
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
 	    SLOT(exportMessageEnvelopeAsPDF()));
-	connect(ui->actionOpen_message_externally, SIGNAL(triggered()), this,
-	    SLOT(openSelectedMessageExternally()));
-	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()), this,
-	    SLOT(openDeliveryInfoExternally()));
 	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
 	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
 	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
+
 	/* Tools. */
 	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
 	    SLOT(findDatabox()));
@@ -1601,6 +1601,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(viewMessageFromZFO()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
 	    SLOT(exportCorrespondenceOverview()));
+
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
 	    SLOT(aboutApplication()));
