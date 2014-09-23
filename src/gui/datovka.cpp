@@ -2376,7 +2376,7 @@ void MainWindow::changeDataDirectory(void)
  * Receive and store new account database path. Change data
  *     directory path in settings.
  */
-void MainWindow::receiveNewDataPath(QString oldPath, QString newPath,
+void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
     QString action)
 /* ========================================================================= */
 {
@@ -2385,120 +2385,112 @@ void MainWindow::receiveNewDataPath(QString oldPath, QString newPath,
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
-	const AccountModel::SettingsMap &itemSettings =
+
+	/* Copy current settings. */
+	AccountModel::SettingsMap itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	QString fileName, currentFileNamePath, newFileNamePath;
-	QFile file;
+	QString fileName;
 
-	/* 1 = is test account, 0 = is legal aacount */
+	/* 1 = is test account, 0 = is legal account */
 	if (itemSettings[TEST].toBool()) {
 		fileName = itemSettings[USER].toString() + "___1.db";
 	} else {
 		fileName = itemSettings[USER].toString() + "___0.db";
 	}
 
-	/* join path and file name */
-	currentFileNamePath = oldPath + "/" + fileName;
-	newFileNamePath = newPath + "/" + fileName;
+	MessageDb *messageDb = m_messageDbs.accessMessageDb(
+	    itemSettings[USER].toString(), itemSettings[DB_DIR].toString(),
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != messageDb);
 
-	qDebug() << "Found database file: "  << fileName;
-
-	QMessageBox::StandardButton msg;
+	qDebug() << fileName << action;
 
 	/* Move account database into new directory */
-	if (action == "move") {
-		if (file.rename(currentFileNamePath, newFileNamePath)) {
+	if ("move" == action) {
+		if (m_messageDbs.moveMessageDb(messageDb, newDir)) {
 
-			//itemSettings.setDirectory(newPath);
+			itemSettings.setDirectory(newDir);
 			//saveSettings();
 
 			qDebug() << "Move" << fileName << "from"
-			    << oldPath << "to" << newPath << "...done";
+			    << oldDir << "to" << newDir << "...done";
 
-			msg = QMessageBox::information(this,
+			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
 			    tr("Database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was successfully moved to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		} else {
 			qDebug() << "Move" << fileName << "from"
-			    << oldPath << "to" << newPath << "...error";
+			    << oldDir << "to" << newDir << "...error";
 
-			msg = QMessageBox::critical(this,
+			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
 			    tr("Database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was NOT successfully moved to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		}
 
 	/* Copy account database into new directory */
-	} else if (action == "copy") {
-		if (file.copy(currentFileNamePath, newFileNamePath)) {
+	} else if ("copy" == action) {
+		if (m_messageDbs.copyMessageDb(messageDb, newDir)) {
 
-			//itemSettings.setDirectory(newPath);
+			itemSettings.setDirectory(newDir);
 			//saveSettings();
 
 			qDebug() << "Copy" << fileName << "from"
-			    << oldPath << "to" << newPath << "...done";
+			    << oldDir << "to" << newDir << "...done";
 
-			msg = QMessageBox::information(this,
+			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
 			    tr("Database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was successfully copied to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		} else {
 			qDebug() << "Copy" << fileName << "from"
-			    << oldPath << "to" << newPath << "...error";
+			    << oldDir << "to" << newDir << "...error";
 
-			msg = QMessageBox::critical(this,
+			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
 			    tr("Database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was NOT successfully copied to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		}
 
 	/* Create a new account database into new directory */
-	} else if (action == "new") {
+	} else if ("new" == action) {
+		if (m_messageDbs.reopenMessageDb(messageDb, newDir)) {
 
-		/* TODO - create new blank database for current account
-			Variables:
-			@itemSettings[USER].toString() = userName = xxx;
-			@newPath = path where the new database file will
-				   be created.
-			@fileName = xxx___1.db;
-		*/
-		bool isCreated = true;
-
-		if (isCreated) {
-
-			//itemSettings.setDirectory(newPath);
+			itemSettings.setDirectory(newDir);
 			//saveSettings();
 
 			qDebug() << "Create new" << fileName << "in"
-			    << newPath << "...done";
+			    << newDir << "...done";
 
-			msg = QMessageBox::information(this,
+			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
 			    tr("New database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was successfully created to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		} else {
 			qDebug() << "Create new" << fileName << "in"
-			    << newPath << "...error";
+			    << newDir << "...error";
 
-			msg = QMessageBox::critical(this,
+			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
 			    tr("New database file") + "\n\n" + fileName + "\n\n" +
 			    tr("was NOT successfully created to") + "\n\n"
-			    + newPath,
+			    + newDir,
 			    QMessageBox::Ok);
 		}
+	} else {
+		Q_ASSERT(0);
 	}
 }
 

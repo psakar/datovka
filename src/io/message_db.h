@@ -306,7 +306,7 @@ public:
 	QString msgsGetMessageRaw(int dmId);
 
 	/*!
-	 * @brief get deliveri info raw from raw_delivery_info_data table.
+	 * @brief Get delivery info raw from raw_delivery_info_data table.
 	 */
 	QString msgsGetDeliveryInfoRaw(int dmId);
 
@@ -322,7 +322,7 @@ public:
 	    const QString &sender_name);
 
 	/*!
-	 * @brief Retrun hash of message froms db.
+	 * @brief Return hash of message from db.
 	 */
 	QList<QString> msgsGetHashFromDb(int dmId) const;
 
@@ -340,9 +340,29 @@ protected:
 	 */
 	bool addDmtypeColumn(void);
 
-	/* TODO -- Move db. */
-	/* TODO -- Copy db. */
-	/* TODO -- Delete db. */
+	/*!
+	 * @brief Close database file.
+	 */
+	void closeDb(void);
+
+	/*!
+	 * @brief Copy db.
+	 *
+	 * @note The copy is continued to be used. Original is closed.
+	 */
+	bool copyDb(const QString &newFileName);
+
+	/*!
+	 * @brief Move db.
+	 */
+	bool moveDb(const QString &newFileName);
+
+	/*!
+	 * @brief Re-open a different database file.
+	 *
+	 * @note The old database file is left untouched.
+	 */
+	bool reopenDb(const QString &newFileName);
 
 private:
 	static
@@ -398,11 +418,13 @@ private:
 	 */
 	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
+
+	friend class dbContainer;
 };
 
 
 /*!
- * @breif Database container.
+ * @brief Database container.
  */
 class dbContainer : public QMap<QString, MessageDb *> {
 
@@ -413,15 +435,41 @@ public:
 	/*!
 	 * @brief Access/create+open message database related to item.
 	 */
-	MessageDb * accessMessageDb(const QString &key,
-	    const QString &locDir, bool testing);
+	MessageDb * accessMessageDb(const QString &key, const QString &locDir,
+	    bool testing);
+
+	/*!
+	 * @brief Creates a copy of the current database into a given new
+	 *     directory.
+	 *
+	 * @param[in] newLocDir New location directory.
+	 * @return True if database was copied and re-opened.
+	 */
+	bool copyMessageDb(MessageDb *db, const QString &newLocDir);
+
+	/*!
+	 * @brief Move message database into a new directory.
+	 *
+	 * @param[in] newLocDir New location directory.
+	 * @return True if database was moved and re-opened.
+	 */
+	bool moveMessageDb(MessageDb *db, const QString &newLocDir);
+
+	/*!
+	 * @brief Re-open a new database file. The old file is left untouched.
+	 *
+	 * @param[in] newLocDir New location directory.
+	 * @return True if database was re-opened.
+	 */
+	bool reopenMessageDb(MessageDb *db, const QString &newLocDir);
 
 	/*!
 	 * @brief Delete message db file.
 	 *
+	 * @param db Deleted database.
 	 * @return True on success.
 	 */
-	bool deleteMessageDb(MessageDb * deleted);
+	bool deleteMessageDb(MessageDb *db);
 
 #if 0
 	/*!
@@ -434,6 +482,17 @@ public:
 	 */
 	void deleteMessageDb(const QString &key);
 #endif
+private:
+	/*!
+	 * @brief Creates the database name from supplied information.
+	 *
+	 * @param[in] key     ISDS user name.
+	 * @param[in] locDir  Directory where to store the file.
+	 * @param[in] testing Whether it is a testing account.
+	 * @return Path to database file.
+	 */
+	QString constructDbFileName(const QString &key, const QString &locDir,
+	    bool testing);
 };
 
 

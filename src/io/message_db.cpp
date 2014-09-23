@@ -2229,6 +2229,143 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ * Close database file.
+ */
+void MessageDb::closeDb(void)
+/* ========================================================================= */
+{
+	m_db.close();
+}
+
+
+/* ========================================================================= */
+/*
+ * Copy db.
+ */
+bool MessageDb::copyDb(const QString &newFileName)
+/* ========================================================================= */
+{
+	bool copy_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	/* Backup old file name. */
+	QString oldFileName = fileName();
+	qDebug() << oldFileName << "-copy->" << newFileName;
+
+	/* Fail if target equals the source. */
+	/* TODO -- Perform a more reliable check than string comparison. */
+	if (oldFileName == newFileName) {
+		return false;
+	}
+
+	/* Erase target if exists. */
+	QFile::remove(newFileName);
+
+	/* Copy database file. */
+	copy_ret = QFile::copy(oldFileName, newFileName);
+
+	/* Open database. */
+	open_ret = openDb(copy_ret ? newFileName : oldFileName);
+	Q_ASSERT(open_ret);
+	if (!open_ret) {
+		qDebug() << "File" << (copy_ret ? newFileName : oldFileName)
+		    << "could not be opened.";
+		/* TODO -- qFatal() ? */
+	}
+
+	return copy_ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Move db.
+ */
+bool MessageDb::moveDb(const QString &newFileName)
+/* ========================================================================= */
+{
+	bool move_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	/* Backup old file name. */
+	QString oldFileName = fileName();
+	qDebug() << oldFileName << "-move->" << newFileName;
+
+	/* Fail if target equals the source. */
+	/* TODO -- Perform a more reliable check than string comparison. */
+	if (oldFileName == newFileName) {
+		return false;
+	}
+
+	/* Erase target if exists. */
+	QFile::remove(newFileName);
+
+	/* Move database file. */
+	move_ret = QFile::rename(oldFileName, newFileName);
+
+	/* Open database. */
+	open_ret = openDb(move_ret ? newFileName : oldFileName);
+	Q_ASSERT(open_ret);
+	if (!open_ret) {
+		qDebug() << "File" << (move_ret ? newFileName : oldFileName)
+		    << "could not be opened.";
+		/* TODO -- qFatal() ? */
+	}
+
+	return move_ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Re-open a different database file.
+ */
+bool MessageDb::reopenDb(const QString &newFileName)
+/* ========================================================================= */
+{
+	bool reopen_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	/* Backup old file name. */
+	QString oldFileName = fileName();
+	qDebug() << oldFileName << "-reopen->" << newFileName;
+
+	/* Fail if target equals the source. */
+	/* TODO -- Perform a more reliable check than string comparison. */
+	if (oldFileName == newFileName) {
+		return false;
+	}
+
+	/* Erase target if exists. */
+	QFile::remove(newFileName);
+
+	/* Open new database file. */
+	reopen_ret = openDb(newFileName);
+
+	/* Open database. */
+	if (!reopen_ret) {
+		open_ret = openDb(oldFileName);
+		Q_ASSERT(open_ret);
+		if (!open_ret) {
+			qDebug() << "File" << oldFileName
+			    << "could not be opened.";
+			/* TODO -- qFatal() ? */
+		}
+	}
+
+	return reopen_ret;
+}
+
+
 /* ========================================================================= */
 /*
  * Create empty tables if tables do not already exist.
@@ -2740,7 +2877,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 /*
  * Adds _dmType column.
  */
-bool  MessageDb::addDmtypeColumn(void)
+bool MessageDb::addDmtypeColumn(void)
 /* ========================================================================= */
 {
 	if (false == m_db.isOpen()) {
@@ -2783,6 +2920,9 @@ dbContainer::~dbContainer(void)
 
 
 /* ========================================================================= */
+/*
+ * Access/create+open message database related to item.
+ */
 MessageDb * dbContainer::accessMessageDb(const QString &key,
     const QString &locDir, bool testing)
 /* ========================================================================= */
@@ -2805,7 +2945,7 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	 * Test accounts have ___1 in their names, ___0 relates to standard
 	 * accounts.
 	 */
-	db->openDb(locDir + "/" + key + "___" + (testing ? "1" : "0") + ".db");
+	db->openDb(constructDbFileName(key, locDir, testing));
 
 	this->insert(key, db);
 	return db;
@@ -2814,19 +2954,122 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 /* ========================================================================= */
 /*
- * Delete message db.
+ * Creates a copy of the current data base into a given new
+ *     directory.
  */
-bool dbContainer::deleteMessageDb(MessageDb * deleted)
+bool dbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != deleted);
-	if (0 == deleted) {
+	Q_ASSERT(0 != db);
+	if (0 == db) {
 		return false;
 	}
 
 	/* Find entry. */
 	QMap<QString, MessageDb *>::iterator it = this->begin();
-	while ((it != this->end()) && (it.value() != deleted)) {
+	while ((it != this->end()) && (it.value() != db)) {
+		++it;
+	}
+	/* Must exist. */
+	Q_ASSERT(this->end() != it);
+	if (this->end() == it) {
+		return false;
+	}
+
+	/* Get old and new file name. */
+	QString oldFileName = db->fileName();
+	QFileInfo fileInfo(oldFileName);
+	QString newFileName =
+	    newLocDir + QDir::separator() + fileInfo.fileName();
+
+	/* Copy database. */
+	return db->copyDb(newFileName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Move message database into a new directory.
+ */
+bool dbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != db);
+	if (0 == db) {
+		return false;
+	}
+
+	/* Find entry. */
+	QMap<QString, MessageDb *>::iterator it = this->begin();
+	while ((it != this->end()) && (it.value() != db)) {
+		++it;
+	}
+	/* Must exist. */
+	Q_ASSERT(this->end() != it);
+	if (this->end() == it) {
+		return false;
+	}
+
+	/* Get old and new file name. */
+	QString oldFileName = db->fileName();
+	QFileInfo fileInfo(oldFileName);
+	QString newFileName =
+	    newLocDir + QDir::separator() + fileInfo.fileName();
+
+	/* Move database. */
+	return db->moveDb(newFileName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Re-open a new database file. The old file is left untouched.
+ */
+bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != db);
+	if (0 == db) {
+		return false;
+	}
+
+	/* Find entry. */
+	QMap<QString, MessageDb *>::iterator it = this->begin();
+	while ((it != this->end()) && (it.value() != db)) {
+		++it;
+	}
+	/* Must exist. */
+	Q_ASSERT(this->end() != it);
+	if (this->end() == it) {
+		return false;
+	}
+
+	/* Get old and new file name. */
+	QString oldFileName = db->fileName();
+	QFileInfo fileInfo(oldFileName);
+	QString newFileName =
+	    newLocDir + QDir::separator() + fileInfo.fileName();
+
+	/* Move database. */
+	return db->reopenDb(newFileName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete message db.
+ */
+bool dbContainer::deleteMessageDb(MessageDb * db)
+/* ========================================================================= */
+{
+	Q_ASSERT(0 != db);
+	if (0 == db) {
+		return false;
+	}
+
+	/* Find entry. */
+	QMap<QString, MessageDb *>::iterator it = this->begin();
+	while ((it != this->end()) && (it.value() != db)) {
 		++it;
 	}
 	/* Must exist. */
@@ -2839,10 +3082,10 @@ bool dbContainer::deleteMessageDb(MessageDb * deleted)
 	this->erase(it);
 
 	/* Get file name. */
-	QString fileName = deleted->fileName();
+	QString fileName = db->fileName();
 
 	/* Close database. */
-	delete deleted;
+	delete db;
 
 	/* Delete file. */
 	qDebug() << "Deleting database file" << fileName;
@@ -2853,4 +3096,16 @@ bool dbContainer::deleteMessageDb(MessageDb * deleted)
 	}
 
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Creates the database name from supplied information.
+ */
+QString dbContainer::constructDbFileName(const QString &key,
+    const QString &locDir, bool testing)
+/* ========================================================================= */
+{
+	return locDir + "/" + key + "___" + (testing ? "1" : "0") + ".db";
 }
