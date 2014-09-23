@@ -2384,11 +2384,10 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
 
-	/* Copy current settings. */
+	/* Get current settings. */
 	AccountModel::SettingsMap itemSettings =
-	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    m_accountModel.settingsMap(item);
 
 	QString fileName;
 
@@ -2411,7 +2410,8 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.moveMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDirectory(newDir);
-			//saveSettings();
+			m_accountModel.setSettingsMap(item, itemSettings);
+			saveSettings();
 
 			qDebug() << "Move" << fileName << "from"
 			    << oldDir << "to" << newDir << "...done";
@@ -2439,7 +2439,8 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.copyMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDirectory(newDir);
-			//saveSettings();
+			m_accountModel.setSettingsMap(item, itemSettings);
+			saveSettings();
 
 			qDebug() << "Copy" << fileName << "from"
 			    << oldDir << "to" << newDir << "...done";
@@ -2467,7 +2468,8 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.reopenMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDirectory(newDir);
-			//saveSettings();
+			m_accountModel.setSettingsMap(item, itemSettings);
+			saveSettings();
 
 			qDebug() << "Create new" << fileName << "in"
 			    << newDir << "...done";

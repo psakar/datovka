@@ -1,13 +1,17 @@
-#ifndef WORKER_H
-#define WORKER_H
 
-#include <QObject>
+
+#ifndef _WORKER_H_
+#define _WORKER_H_
+
+
 #include <QMutex>
+#include <QObject>
 
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
+
 
 class Worker : public QObject {
     Q_OBJECT
@@ -35,9 +39,9 @@ private:
 	QList<bool> m_downloadThisAccounts;
 
 	/*!
-	* @brief Download sent/received message list from ISDS for current
-	* account index
-	*/
+	 * @brief Download sent/received message list from ISDS for current
+	 *     account index.
+	 */
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
 	    const QString messageType, MessageDb &messageDb, QString label);
 
@@ -111,4 +115,4 @@ public slots:
 	void downloadCompleteMessage(void);
 };
 
-#endif // WORKER_H
+#endif /* _WORKER_H_ */
