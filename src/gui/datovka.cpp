@@ -69,18 +69,19 @@ MainWindow::MainWindow(QWidget *parent)
 	searchLabel->setText(tr("Search: "));
 	ui->toolBar->addWidget(searchLabel);
 
+	/* Message filter field. */
 	m_searchLine = new QLineEdit(this);
 	connect(m_searchLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
 	ui->toolBar->addWidget(m_searchLine);
-
+	/* Clear message filter button. */
 	m_pushButton = new QPushButton(this);
 	m_pushButton->setIcon(QIcon(ICON_3PARTY_PATH "delete_16.png"));
 	m_pushButton->setToolTip(tr("Clear search field"));
 	ui->toolBar->addWidget(m_pushButton);
 	connect(m_pushButton, SIGNAL(clicked()), this,
-	    SLOT(on_actionSearchClear_triggered()));
+	    SLOT(clearFilterField()));
 
 	/* Create status bar label */
 	QLabel* statusLabel = new QLabel(this);
@@ -167,7 +168,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionResized(int, int, int)),
 	    this, SLOT(onTableColumnResized(int, int, int)));
 
-	/* It fires when any column was resized. */
+	/* It fires when any column was clicked. */
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
@@ -215,7 +216,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 /* ========================================================================= */
 /*
- * Do actions after MainWindow initialization
+ * Do actions after main window initialization.
  */
 void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
@@ -470,7 +471,7 @@ setmodel:
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->menuMessage->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
-			ui->actionExport_corespondence_overview->
+			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
 		} else {
 			ui->actionReply_to_the_sender->setEnabled(false);
@@ -657,6 +658,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 void MainWindow::messageItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QModelIndex index = ui->messageList->indexAt(point);
 	QMenu *menu = new QMenu;
 
@@ -688,26 +691,26 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
 		menu->addAction(
 		    tr("Export delivery info to ZFO"), this,
-		    SLOT(on_actionExport_delivery_info_as_ZFO_triggered()))->
+		    SLOT(exportDeliveryInfoAsZFO()))->
 		    setEnabled(ui->actionExport_delivery_info_as_ZFO->
 		    isEnabled());
 		menu->addAction(
 		    tr("Export message envelope as PDF"), this,
-		    SLOT(on_actionExport_message_envelope_as_PDF_triggered()))->
+		    SLOT(exportMessageEnvelopeAsPDF()))->
 		    setEnabled(ui->actionExport_message_envelope_as_PDF->
 		    isEnabled());
 		menu->addAction(
 		    tr("Export delivery info as PDF"), this,
-		    SLOT(on_actionExport_delivery_info_as_PDF_triggered()))->
+		    SLOT(exportDeliveryInfoAsPDF()))->
 		    setEnabled(ui->actionExport_delivery_info_as_PDF->
 		    isEnabled());
 		menu->addAction(
 		    tr("Open message externally"), this,
-		    SLOT(on_actionOpen_message_externally_triggered()))->
+		    SLOT(openSelectedMessageExternally()))->
 		    setEnabled(ui->actionOpen_message_externally->isEnabled());
 		menu->addAction(
 		    tr("Open delivery info externally"), this,
-		    SLOT(on_actionOpen_delivery_info_externally_triggered()))->
+		    SLOT(openDeliveryInfoExternally()))->
 		    setEnabled(ui->actionOpen_delivery_info_externally->
 		    isEnabled());
 		menu->addSeparator();
@@ -796,6 +799,8 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 void MainWindow::saveSelectedAttachmentToFile(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QModelIndex selectedIndex =
 	    ui->messageAttachmentList->selectionModel()->currentIndex();
 	    /* selection().indexes() ? */
@@ -857,6 +862,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 void MainWindow::openSelectedAttachment(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QModelIndex selectedIndex =
 	    ui->messageAttachmentList->selectionModel()->currentIndex();
 	    /* selection().indexes() ? */
@@ -1580,12 +1587,36 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(showSignatureDetails()));
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
 	    SLOT(exportSelectedMessageAsZFO()));
-
-
+	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()), this,
+	    SLOT(exportDeliveryInfoAsZFO()));
+	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()), this,
+	    SLOT(exportDeliveryInfoAsPDF()));
+	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
+	    SLOT(exportMessageEnvelopeAsPDF()));
+	connect(ui->actionOpen_message_externally, SIGNAL(triggered()), this,
+	    SLOT(openSelectedMessageExternally()));
+	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()), this,
+	    SLOT(openDeliveryInfoExternally()));
+	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
+	    SLOT(openSelectedAttachment()));
+	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
+	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
 	/* Tools. */
+	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
+	    SLOT(findDatabox()));
+	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()), this,
+	    SLOT(authenticateMessageFile()));
+	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()), this,
+	    SLOT(viewMessageFromZFO()));
+	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
+	    SLOT(exportCorrespondenceOverview()));
 	/* Help. */
+	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
+	    SLOT(aboutApplication()));
+	connect(ui->actionHelp, SIGNAL(triggered()), this,
+	    SLOT(showHelp()));
 }
 
 
@@ -1646,7 +1677,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
-	ui->actionExport_corespondence_overview->setEnabled(false);
+	ui->actionExport_correspondence_overview->setEnabled(false);
 }
 
 
@@ -2304,7 +2335,7 @@ void MainWindow::changeDataDirectory(void)
 	QDialog *change_directory = new dlg_change_directory(dbDir, this);
 
 	connect(change_directory, SIGNAL(sentNewPath(QString)),
-	    this, SLOT(ReceivedNewDataPath(QString)));
+	    this, SLOT(receiveNewDataPath(QString)));
 
 	change_directory->exec();
 }
@@ -2312,9 +2343,10 @@ void MainWindow::changeDataDirectory(void)
 
 /* ========================================================================= */
 /*
-* Change data directory path in settings
+ * Receive and store new account database path. Change data
+ *     directory path in settings.
  */
-void MainWindow::ReceivedNewDataPath(QString newPath)
+void MainWindow::receiveNewDataPath(QString newPath)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2378,9 +2410,9 @@ void MainWindow::createAndSendMessageReply(void)
 
 /* ========================================================================= */
 /*
-* Active search databox dialog
+ * Search data box dialog.
  */
-void MainWindow::on_actionFind_databox_triggered()
+void MainWindow::findDatabox(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2409,7 +2441,7 @@ void MainWindow::on_actionFind_databox_triggered()
 /*
 * Clear message filter text
  */
-void MainWindow::on_actionSearchClear_triggered(void)
+void MainWindow::clearFilterField(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2425,6 +2457,8 @@ void MainWindow::on_actionSearchClear_triggered(void)
 void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QAbstractItemModel *tableModel = m_messageModel;
 	if (0 == tableModel) {
 		return;
@@ -2490,7 +2524,7 @@ void MainWindow::setSentColumnWidths(void)
 
 /* ========================================================================= */
 /*
-* Set new sent/recivied message column widths.
+ * Set new sent/received message column widths.
  */
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
@@ -2526,8 +2560,8 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 
 /* ========================================================================= */
 /*
-* Set actual sort order for current column.
-*/
+ * Set actual sort order for current column.
+ */
 void MainWindow::onTableColumnSort(int column)
 /* ========================================================================= */
 {
@@ -3794,9 +3828,9 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 
 /* ========================================================================= */
 /*
-* Download selected message attachments
-*/
-void MainWindow::on_actionAbout_Datovka_triggered()
+ * About application dialog.
+ */
+void MainWindow::aboutApplication(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -3944,32 +3978,6 @@ void MainWindow::importDatabaseDirectory(void)
 
 /* ========================================================================= */
 /*
-* Open attachment in associate program
-*/
-void MainWindow::on_actionOpen_attachment_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	openSelectedAttachment();
-}
-
-
-/* ========================================================================= */
-/*
-* Save attachment to file
-*/
-void MainWindow::on_actionSave_attachment_triggered()
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	saveSelectedAttachmentToFile();
-}
-
-
-/* ========================================================================= */
-/*
 * Authenticate message form db
 */
 qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
@@ -4076,9 +4084,9 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 
 /* ========================================================================= */
 /*
-* Authenticate message slot
-*/
-void MainWindow::on_actionAuthenticate_message_file_triggered(void)
+ * Authenticate message file dialog.
+ */
+void MainWindow::authenticateMessageFile(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4170,9 +4178,9 @@ void MainWindow::verifyMessage(void)
 
 /* ========================================================================= */
 /*
-* View message content of ZFO file slot
-*/
-void MainWindow::on_actionView_message_from_ZPO_file_triggered(void)
+ * View message from file dialog.
+ */
+void MainWindow::viewMessageFromZFO(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4225,9 +4233,21 @@ fail:
 
 /* ========================================================================= */
 /*
-* Show help from html file
-*/
-void MainWindow::on_actionHepl_triggered(void)
+ * Export correspondence overview dialog.
+ */
+void MainWindow::exportCorrespondenceOverview(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Show help.
+ */
+void MainWindow::showHelp(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4297,9 +4317,9 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 /* ========================================================================= */
 /*
-* Export message delivery info as ZFO file on local disk
-*/
-void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
+ * Export delivery information as ZFO file dialog.
+ */
+void MainWindow::exportDeliveryInfoAsZFO(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4357,9 +4377,9 @@ void MainWindow::on_actionExport_delivery_info_as_ZFO_triggered(void)
 
 /* ========================================================================= */
 /*
-* Export message delivery info as PDF file on local disk
-*/
-void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
+ * Export delivery information as PDF file dialog.
+ */
+void MainWindow::exportDeliveryInfoAsPDF(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4404,9 +4424,9 @@ void MainWindow::on_actionExport_delivery_info_as_PDF_triggered(void)
 
 /* ========================================================================= */
 /*
-* Export message envelope as PDF file on local disk
-*/
-void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
+ * Export selected message envelope as PDF file dialog.
+ */
+void MainWindow::exportMessageEnvelopeAsPDF(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4452,9 +4472,9 @@ void MainWindow::on_actionExport_message_envelope_as_PDF_triggered(void)
 
 /* ========================================================================= */
 /*
-* Open message externaly
-*/
-void MainWindow::on_actionOpen_message_externally_triggered(void)
+ * Open selected message in external application.
+ */
+void MainWindow::openSelectedMessageExternally(void)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -4514,9 +4534,9 @@ void MainWindow::on_actionOpen_message_externally_triggered(void)
 
 /* ========================================================================= */
 /*
-* Open message delivery info externaly
-*/
-void MainWindow::on_actionOpen_delivery_info_externally_triggered(void)
+ * Open delivery information externally.
+ */
+void MainWindow::openDeliveryInfoExternally(void)
 /* ========================================================================= */
 {
 	debug_func_call();

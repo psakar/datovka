@@ -450,9 +450,9 @@
     <addaction name="separator"/>
     <addaction name="actionAuthenticate_message_file"/>
     <addaction name="actionView_message_from_ZPO_file"/>
-    <addaction name="actionExport_corespondence_overview"/>
+    <addaction name="actionExport_correspondence_overview"/>
    </widget>
-   <widget class="QMenu" name="menuHepl">
+   <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
      <enum>Qt::LeftToRight</enum>
     </property>
@@ -460,13 +460,13 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout_Datovka"/>
-    <addaction name="actionHepl"/>
+    <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDatabox"/>
    <addaction name="menuMessage"/>
    <addaction name="menuTools"/>
-   <addaction name="menuHepl"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="sizePolicy">
@@ -676,7 +676,7 @@
     <string>About Datovka application</string>
    </property>
   </action>
-  <action name="actionHepl">
+  <action name="actionHelp">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/help_16.png</normaloff>:/icons/3party/help_16.png</iconset>
@@ -724,7 +724,7 @@
     <string>View message from ZFO file</string>
    </property>
   </action>
-  <action name="actionExport_corespondence_overview">
+  <action name="actionExport_correspondence_overview">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>

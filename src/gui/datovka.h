@@ -186,37 +186,80 @@ private slots:
 	 */
 	void exportSelectedMessageAsZFO(void);
 
-	void on_actionFind_databox_triggered(void);
+	/*!
+	 * @brief Export delivery information as ZFO file dialog.
+	 */
+	void exportDeliveryInfoAsZFO(void);
 
-	void on_actionSearchClear_triggered(void);
+	/*!
+	 * @brief Export delivery information as PDF file dialog.
+	 */
+	void exportDeliveryInfoAsPDF(void);
 
+	/*!
+	 * @brief Export selected message envelope as PDF file dialog.
+	 */
+	void exportMessageEnvelopeAsPDF(void);
+
+	/*!
+	 * @brief Open selected message in external application.
+	 */
+	void openSelectedMessageExternally(void);
+
+	/*!
+	 * @brief Open delivery information externally.
+	 */
+	void openDeliveryInfoExternally(void);
+
+	/*!
+	 * @brief Search data box dialog.
+	 */
+	void findDatabox(void);
+
+	/*!
+	 * @brief Authenticate message file dialog.
+	 */
+	void authenticateMessageFile(void);
+
+	/*!
+	 * @brief View message from file dialog.
+	 */
+	void viewMessageFromZFO(void);
+
+	/*!
+	 * @brief Export correspondence overview dialog.
+	 */
+	void exportCorrespondenceOverview(void);
+
+	/*!
+	 * @brief About application dialog.
+	 */
+	void aboutApplication(void);
+
+	/*!
+	 * @brief Show help.
+	 */
+	void showHelp(void);
+
+	/*!
+	 * @brief Clear message filter field.
+	 */
+	void clearFilterField(void);
+
+	/*!
+	 * @brief Filter listed messages.
+	 */
 	void filterMessages(const QString &text);
 
+	/*!
+	 * @brief Set new sent/received message column widths.
+	 */
 	void onTableColumnResized(int index, int oldSize, int newSize);
 
+	/*!
+	 * @brief Set actual sort order for current column.
+	 */
 	void onTableColumnSort(int column);
-
-	void on_actionAbout_Datovka_triggered(void);
-
-	void on_actionOpen_attachment_triggered(void);
-
-	void on_actionSave_attachment_triggered(void);
-
-	void on_actionAuthenticate_message_file_triggered(void);
-
-	void on_actionView_message_from_ZPO_file_triggered(void);
-
-	void on_actionHepl_triggered(void);
-
-	void on_actionExport_delivery_info_as_ZFO_triggered(void);
-
-	void on_actionExport_delivery_info_as_PDF_triggered(void);
-
-	void on_actionExport_message_envelope_as_PDF_triggered(void);
-
-	void on_actionOpen_message_externally_triggered(void);
-
-	void on_actionOpen_delivery_info_externally_triggered(void);
 
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.
@@ -239,14 +282,15 @@ private slots:
 	void refreshAccountListFromWorker(const QModelIndex acntTopIdx);
 
 	/*!
-	 * @brief Set and run any actions after mainwindow has been created.
+	 * @brief Set and run any actions after main window has been created.
 	 */
 	void setWindowsAfterInit(void);
 
 	/*!
-	 * @brief Recevied and store new account database path.
+	 * @brief Receive and store new account database path. Change data
+	 *     directory path in settings.
 	 */
-	void ReceivedNewDataPath(QString newPath);
+	void receiveNewDataPath(QString newPath);
 
 private:
 
