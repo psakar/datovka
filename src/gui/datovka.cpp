@@ -2351,8 +2351,8 @@ void MainWindow::changeDataDirectory(void)
 
 	QDialog *change_directory = new dlg_change_directory(dbDir, this);
 
-	connect(change_directory, SIGNAL(sentNewPath(QString)),
-	    this, SLOT(receiveNewDataPath(QString)));
+	connect(change_directory, SIGNAL(sentNewPath(QString, QString, QString)),
+	    this, SLOT(receiveNewDataPath(QString, QString, QString)));
 
 	change_directory->exec();
 }
@@ -2363,7 +2363,8 @@ void MainWindow::changeDataDirectory(void)
  * Receive and store new account database path. Change data
  *     directory path in settings.
  */
-void MainWindow::receiveNewDataPath(QString newPath)
+void MainWindow::receiveNewDataPath(QString oldPath, QString newPath,
+    QString action)
 /* ========================================================================= */
 {
 	debug_func_call();
@@ -2371,13 +2372,121 @@ void MainWindow::receiveNewDataPath(QString newPath)
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
-
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	/* TODO - save new path to settings */
-	//itemSettings.setDirectory(newPath);
-	//saveSettings();
+	QString fileName, currentFileNamePath, newFileNamePath;
+	QFile file;
+
+	/* 1 = is test account, 0 = is legal aacount */
+	if (itemSettings[TEST].toBool()) {
+		fileName = itemSettings[USER].toString() + "___1.db";
+	} else {
+		fileName = itemSettings[USER].toString() + "___0.db";
+	}
+
+	/* join path and file name */
+	currentFileNamePath = oldPath + "/" + fileName;
+	newFileNamePath = newPath + "/" + fileName;
+
+	qDebug() << "Found database file: "  << fileName;
+
+	QMessageBox::StandardButton msg;
+
+	/* Move account database into new directory */
+	if (action == "move") {
+		if (file.rename(currentFileNamePath, newFileNamePath)) {
+
+			//itemSettings.setDirectory(newPath);
+			//saveSettings();
+
+			qDebug() << "Move" << fileName << "from"
+			    << oldPath << "to" << newPath << "...done";
+
+			msg = QMessageBox::information(this,
+			    tr("Change data directory for current account"),
+			    tr("Database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was successfully moved to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		} else {
+			qDebug() << "Move" << fileName << "from"
+			    << oldPath << "to" << newPath << "...error";
+
+			msg = QMessageBox::critical(this,
+			    tr("Change data directory for current account"),
+			    tr("Database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was NOT successfully moved to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		}
+
+	/* Copy account database into new directory */
+	} else if (action == "copy") {
+		if (file.copy(currentFileNamePath, newFileNamePath)) {
+
+			//itemSettings.setDirectory(newPath);
+			//saveSettings();
+
+			qDebug() << "Copy" << fileName << "from"
+			    << oldPath << "to" << newPath << "...done";
+
+			msg = QMessageBox::information(this,
+			    tr("Change data directory for current account"),
+			    tr("Database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was successfully copied to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		} else {
+			qDebug() << "Copy" << fileName << "from"
+			    << oldPath << "to" << newPath << "...error";
+
+			msg = QMessageBox::critical(this,
+			    tr("Change data directory for current account"),
+			    tr("Database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was NOT successfully copied to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		}
+
+	/* Create a new account database into new directory */
+	} else if (action == "new") {
+
+		/* TODO - create new blank database for current account
+			Variables:
+			@itemSettings[USER].toString() = userName = xxx;
+			@newPath = path where the new database file will
+				   be created.
+			@fileName = xxx___1.db;
+		*/
+		bool isCreated = true;
+
+		if (isCreated) {
+
+			//itemSettings.setDirectory(newPath);
+			//saveSettings();
+
+			qDebug() << "Create new" << fileName << "in"
+			    << newPath << "...done";
+
+			msg = QMessageBox::information(this,
+			    tr("Change data directory for current account"),
+			    tr("New database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was successfully created to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		} else {
+			qDebug() << "Create new" << fileName << "in"
+			    << newPath << "...error";
+
+			msg = QMessageBox::critical(this,
+			    tr("Change data directory for current account"),
+			    tr("New database file") + "\n\n" + fileName + "\n\n" +
+			    tr("was NOT successfully created to") + "\n\n"
+			    + newPath,
+			    QMessageBox::Ok);
+		}
+	}
 }
 
 
@@ -4713,21 +4822,16 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == "username") {
 		QString pwd = accountInfo.password();
-		qDebug() << accountInfo.userName();
-		qDebug() << pwd;
 		if (pwd.isNull() ||
 		    pwd.isEmpty()) {
 			QDialog *editAccountDialog = new DlgCreateAccount(
 			    *(ui->accountList), m_accountDb, acntTopIdx,
 			    DlgCreateAccount::ACT_PWD, this);
-
 			if (QDialog::Accepted == editAccountDialog->exec()) {
-				saveSettings();
-
 				const AccountModel::SettingsMap accountInfoNew =
 				    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 				pwd = accountInfoNew.password();
-				qDebug() << pwd;
+				saveSettings();
 			} else {
 				return false;
 			}
@@ -4735,9 +4839,7 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 
 		status = isdsLoginUserName(
 		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), pwd,
-		    accountInfo.testAccount(), accountInfo.accountName());
-
+		    accountInfo.userName(), pwd, accountInfo.testAccount());
 
 	/* Login method based on system certificate only */
 	} else if (accountInfo.loginMethod() == "certificate") {

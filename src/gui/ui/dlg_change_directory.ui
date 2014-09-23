@@ -92,6 +92,22 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="labelWarning">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Cannot used the original directory as destination!</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="font">
       <font>
@@ -120,7 +136,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="copyDataRdioButton">
+       <widget class="QRadioButton" name="copyDataRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -146,22 +162,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="labelWarning">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Cannot used the original directory as destination</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
     </widget>
    </item>
    <item>

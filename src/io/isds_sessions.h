@@ -61,8 +61,7 @@ private:
  * @brief Log in using user name and password.
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession,
-    const QString &accountName);
+    const QString &userName, const QString &pwd, bool testingSession);
 
 
 /*!

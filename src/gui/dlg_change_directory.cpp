@@ -21,6 +21,7 @@ void dlg_change_directory::initDialog(void)
 {
 	this->newPath->setText("");
 	this->currentPath->setText(m_dirPath);
+	this->labelWarning->setStyleSheet("QLabel { color: red }");
 
 	if (this->newPath->text().isEmpty() || this->newPath->text().isNull()) {
 		this->labelWarning->hide();
@@ -75,13 +76,14 @@ void dlg_change_directory::setNewDataDirectory(void)
 {
 	qDebug() << __func__;
 
+	QString action;
 	if (this->moveDataRadioButton->isChecked()) {
-		/* TODO - Move current database into new directory */
-	} else if (this->startDataRadioButton->isChecked()) {
-		/* TODO - Copy current database into new directory */
+		action = "move";
+	} else if (this->copyDataRadioButton->isChecked()) {
+		action = "copy";
 	} else {
-		/* TODO - Create new database into new directory */
+		action = "new";
 	}
 
-	emit sentNewPath(this->newPath->text());
+	emit sentNewPath(m_dirPath, this->newPath->text(), action);
 }

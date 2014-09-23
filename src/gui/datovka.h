@@ -290,7 +290,8 @@ private slots:
 	 * @brief Receive and store new account database path. Change data
 	 *     directory path in settings.
 	 */
-	void receiveNewDataPath(QString newPath);
+	void receiveNewDataPath(QString oldPath, QString newPath,
+	    QString action);
 
 private:
 

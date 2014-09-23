@@ -17,7 +17,7 @@ private slots:
 	void setNewDataDirectory(void);
 
 signals:
-	void sentNewPath(QString);
+	void sentNewPath(QString, QString, QString);
 
 private:
 	QString m_dirPath;

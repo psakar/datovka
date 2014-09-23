@@ -150,8 +150,7 @@ struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
  * Log in using user name and password.
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession,
-    const QString &accountName)
+    const QString &userName, const QString &pwd, bool testingSession)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);

@@ -251,8 +251,7 @@ isds_error DlgCreateAccount::connectToIsds(void)
 		status = isdsLoginUserName(isds_session,
 		    this->usernameLineEdit->text(),
 		    this->passwordLineEdit->text(),
-		    this->testAccountCheckBox->isChecked(),
-		    this->accountLineEdit->text());
+		    this->testAccountCheckBox->isChecked());
 		if (IE_SUCCESS != status) {
 			msgBox.setWindowTitle(messageBoxTitle);
 			msgBox.setText(tr("Error to connect into databox!"));
