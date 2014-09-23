@@ -3,7 +3,7 @@
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
-
+#include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QSortFilterProxyModel>
@@ -33,6 +33,8 @@ public:
 	void setDefaultProgressStatus(void);
 
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
+	QLabel *statusInfoLabel;
+	QLabel *statusOnlineLabel;
 
 private slots:
 	/*!

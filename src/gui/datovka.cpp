@@ -83,6 +83,18 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_pushButton, SIGNAL(clicked()), this,
 	    SLOT(clearFilterField()));
 
+	/* Create status bar info label */
+	statusInfoLabel = new QLabel(this);
+	statusInfoLabel->setText(tr("Ready"));
+	statusInfoLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	ui->statusBar->addWidget(statusInfoLabel,1);
+
+	/* Create status bar online/offline label */
+	statusOnlineLabel = new QLabel(this);
+	statusOnlineLabel->setText(tr("Mode: offline"));
+	statusOnlineLabel->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	ui->statusBar->addWidget(statusOnlineLabel,1);
+
 	/* Create status bar label */
 	QLabel* statusLabel = new QLabel(this);
 	statusLabel->setText(tr("Status:"));
@@ -4785,6 +4797,7 @@ bool MainWindow::checkConnectionError(int status, QString accountName)
 {
 	switch (status) {
 	case IE_SUCCESS:
+		statusOnlineLabel->setText(tr("Mode: online"));
 		return true;
 		break;
 	default:
