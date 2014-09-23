@@ -310,6 +310,11 @@ private:
 	void connectTopToolBarSlots(void);
 
 	/*!
+	 * @brief Connect message-action-bar buttons to appropriate actions.
+	 */
+	void connectMessageActionBarSlots(void);
+
+	/*!
 	 * @brief Default settings of main window.
 	 */
 	void defaultUiMainWindowSettings(void) const;

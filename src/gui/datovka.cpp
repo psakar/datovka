@@ -173,21 +173,10 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(sectionClicked(int)),
 	    this, SLOT(onTableColumnSort(int)));
 
-	/* Message/attachment related buttons. */
-	connect(ui->downloadComplete, SIGNAL(clicked()), this,
-	    SLOT(downloadSelectedMessageAttachments()));
-	connect(ui->saveAttachment, SIGNAL(clicked()), this,
-	    SLOT(saveSelectedAttachmentToFile()));
-	connect(ui->openAttachment, SIGNAL(clicked()), this,
-	    SLOT(openSelectedAttachment()));
-//	connect(ui->verifySignature, SIGNAL(clicked()), this,
-//	    SLOT(xxxx()));
-	connect(ui->signatureDetails, SIGNAL(clicked()), this,
-	    SLOT(showSignatureDetails()));
-
 	/* Connect non-automatic menu actions. */
 	connectTopMenuBarSlots();
 	connectTopToolBarSlots();
+	connectMessageActionBarSlots();
 
 	timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this,
@@ -1650,6 +1639,34 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(changeAccountPassword()));
 	connect(ui->actionPrefs, SIGNAL(triggered()), this,
 	    SLOT(applicationPreferences()));
+}
+
+
+/* ========================================================================= */
+/*
+ * Connect message-action-bar buttons to appropriate actions.
+ */
+void MainWindow::connectMessageActionBarSlots(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	/*
+	 * Actions that cannot be automatically connected
+	 * via QMetaObject::connectSlotsByName because of mismatching names.
+	 */
+
+	/* Message/attachment related buttons. */
+	connect(ui->downloadComplete, SIGNAL(clicked()), this,
+	    SLOT(downloadSelectedMessageAttachments()));
+	connect(ui->saveAttachment, SIGNAL(clicked()), this,
+	    SLOT(saveSelectedAttachmentToFile()));
+	connect(ui->openAttachment, SIGNAL(clicked()), this,
+	    SLOT(openSelectedAttachment()));
+//	connect(ui->verifySignature, SIGNAL(clicked()), this,
+//	    SLOT(xxxx()));
+	connect(ui->signatureDetails, SIGNAL(clicked()), this,
+	    SLOT(showSignatureDetails()));
 }
 
 
