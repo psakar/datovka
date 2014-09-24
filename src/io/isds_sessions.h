@@ -84,7 +84,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession, const QString &accountName);
+    bool testingSession);
 
 
 /*!
@@ -92,7 +92,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &accountName);
+    const QString &otpMethod, const QString &otpCode);
 
 /*!
  * @brief Add items into isds_PersonName structure.

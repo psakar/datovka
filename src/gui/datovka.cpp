@@ -4867,21 +4867,82 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 			    accountInfo.certPath(),
 			    accountInfo.testAccount());
 		} else {
+
+			QString pwd = accountInfo.password();
+			if (pwd.isNull() ||
+			    pwd.isEmpty()) {
+				QDialog *editAccountDialog = new DlgCreateAccount(
+				    *(ui->accountList), m_accountDb, acntTopIdx,
+				    DlgCreateAccount::ACT_PWD, this);
+				if (QDialog::Accepted == editAccountDialog->exec()) {
+					const AccountModel::SettingsMap accountInfoNew =
+				    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+					pwd = accountInfoNew.password();
+					saveSettings();
+				} else {
+					return false;
+				}
+			}
+
 			status = isdsLoginUserCertPwd(
 			    isdsSessions.session(accountInfo.userName()),
 			    accountInfo.userName(),
-			    accountInfo.password(),
+			    pwd,
 			    accountInfo.certPath(),
-			    accountInfo.testAccount(),
-			    accountInfo.accountName());
+			    accountInfo.testAccount());
 		}
 
 	/* Login method based username, password and OTP */
 	} else {
+		QString pwd = accountInfo.password();
+		if (pwd.isNull() ||
+		    pwd.isEmpty()) {
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    *(ui->accountList), m_accountDb, acntTopIdx,
+			    DlgCreateAccount::ACT_PWD, this);
+			if (QDialog::Accepted == editAccountDialog->exec()) {
+				const AccountModel::SettingsMap accountInfoNew =
+				    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+				pwd = accountInfoNew.password();
+				saveSettings();
+			} else {
+				return false;
+			}
+		}
+
+		/* sent OTP request */
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), accountInfo.password(),
-		    accountInfo.testAccount(), accountInfo.accountName());
+		    accountInfo.userName(), pwd,
+		    accountInfo.testAccount(),
+		    accountInfo.loginMethod(),
+		    QString());
+
+		if (!checkConnectionError(status, accountInfo.accountName())) {
+			return false;
+		}
+
+		bool ok;
+		QString code = "";
+		while (code.isEmpty()) {
+			code = QInputDialog::getText(this,
+			    tr("Server connection for ")
+			    + accountInfo.accountName(),
+			    tr("Enter security code for account ")
+			    + accountInfo.accountName()
+			    + " (" + accountInfo.userName() + ")",
+			    QLineEdit::Password, "", &ok,
+			    Qt::WindowStaysOnTopHint);
+			if (!ok) {
+				return false;
+			}
+		}
+
+		/* sent OTP security code */
+		status = isdsLoginUserOtp(
+		    isdsSessions.session(accountInfo.userName()),
+		    accountInfo.userName(), pwd,
+		    accountInfo.testAccount(), accountInfo.loginMethod(), code);
 	}
 
 	return checkConnectionError(status, accountInfo.accountName());

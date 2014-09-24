@@ -265,7 +265,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession, const QString &accountName)
+    bool testingSession)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -299,7 +299,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	pki_credentials->key_format = PKI_FORMAT_DER;
 	pki_credentials->key = strdup(certPath.toStdString().c_str());
 	pki_credentials->passphrase = NULL;
-
+/*
 	if (password.isEmpty()) {
 		bool ok;
 		QString text = "";
@@ -320,7 +320,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 			}
 		}
 	}
-
+*/
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
 	    userName.toStdString().c_str(), password.toStdString().c_str(),
@@ -338,49 +338,53 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &accountName)
+    const QString &otpMethod, const QString &otpCode)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(!pwd.isEmpty());
 	isds_error status = IE_ERROR;
 
 	if (userName.isNull() || userName.isEmpty()) {
 		return status;
 	}
 
-	QString password = pwd;
+	struct isds_otp *otp = NULL;
 
-	if (password.isEmpty()) {
-		bool ok;
-		QString text = "";
-		while (text.isEmpty()) {
-			text = QInputDialog::getText(0,
-			    QObject::tr("Enter password"),
-			    QObject::tr("Enter password for account ") +
-			    accountName + " (" + userName + ")",
-			    QLineEdit::Password, "", &ok,
-			    Qt::WindowStaysOnTopHint);
-			if (ok) {
-				if (!text.isEmpty()) {
-					password = text;
-				}
-			} else {
-				return status;
-			}
-		}
+	otp = (struct isds_otp *)
+	    malloc(sizeof(struct isds_otp));
+
+	if (otp == NULL) {
+		free(otp);
+		return status;
+	}
+	memset(otp, 0, sizeof(struct isds_otp));
+
+	if (otpMethod == "hopt") {
+		otp->method = OTP_HMAC;
+	} else {
+		otp->method = OTP_TIME;
 	}
 
-	isds_otp *opt = NULL;
+	if (otpCode.isNull() || otpCode.isEmpty()) {
+		otp->otp_code = NULL;
+	} else {
+		char *new_str;
+		const char *old_str = otpCode.toStdString().c_str();
+		size_t len = strlen(old_str) + 1;
+		new_str = (char *) malloc(len);
+		memcpy(new_str, old_str, len);
+		otp->otp_code = new_str;
+	}
 
-
-	/* TODO */
 	status = isds_login(isdsSession,
 	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
-	    userName.toStdString().c_str(), password.toStdString().c_str(),
-	    NULL, opt);
+	    userName.toStdString().c_str(), pwd.toStdString().c_str(),
+	    NULL, otp);
 
-	/* TODO - free opt structure */
+	free(otp->otp_code);
+	free(otp);
 
 	return status;
 }
