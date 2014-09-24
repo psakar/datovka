@@ -535,7 +535,7 @@ private:
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Authenticate message form file.
+	 * @brief Authenticate message from ZFO file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
 

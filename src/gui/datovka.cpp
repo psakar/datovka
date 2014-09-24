@@ -312,7 +312,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	QString html;
-	DbMsgsTblModel *msgTblMdl;
+	DbMsgsTblModel *msgTblMdl = 0;
 
 //	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
@@ -501,8 +501,6 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-		//accountItemSelectionChanged(index);
-
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-account-sync.png"),
 		    tr("Get messages"),
@@ -2815,7 +2813,7 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	m_statusProgressBar->setValue(10);
 
-	isds_error status;
+	isds_error status = IE_SUCCESS;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx)) {
@@ -2843,9 +2841,11 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
 		    MESSAGESTATE_ANY,
 		    0, NULL, &messageList);
+	} else {
+		Q_ASSERT(0);
 	}
 
-	if (status != IE_SUCCESS) {
+	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
 		isds_list_free(&messageList);
 		return Q_ISDS_ERROR;
@@ -3261,7 +3261,7 @@ qdatovka_error MainWindow::downloadMessage(const QModelIndex &acntTopIdx,
 void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
 /* ========================================================================= */
 {
-		/* Redraw views' content. */
+	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
 	/*
 	 * Force repaint.
@@ -4158,8 +4158,8 @@ qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopI
 
 /* ========================================================================= */
 /*
-* Authenticate message form ZFO file
-*/
+ * Authenticate message from ZFO file.
+ */
 qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 /* ========================================================================= */
 {
@@ -4191,6 +4191,8 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 
 		bytes = file.readAll();
 		length = bytes.size();
+	} else {
+		return Q_FILE_ERROR;
 	}
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
