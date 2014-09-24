@@ -51,7 +51,7 @@ void DlgCreateAccount::initAccountDialog(void)
 	    this, SLOT(checkInputFields()));
 
 	/* if account exists then we set all items */
-	if (ACT_EDIT == m_action || ACT_PWD == m_action) {
+	if (ACT_ADDNEW != m_action) {
 		setCurrentAccountData();
 	}
 }
@@ -85,9 +85,28 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setText(itemTop->text());
 		this->usernameLineEdit->setText(itemSettings[USER].toString());
 		this->usernameLineEdit->setEnabled(false);
-
-	} else  {
+	} else if (ACT_PWD == m_action)  {
 		this->setWindowTitle(tr("Enter password for account") + " " + itemTop->text());
+		this->accountLineEdit->setText(itemTop->text());
+		this->accountLineEdit->setEnabled(false);
+		this->infoLabel->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
+		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->testAccountCheckBox->setEnabled(false);
+		this->usernameLineEdit->setEnabled(false);
+		this->addCertificateButton->setEnabled(false);
+	} else if (ACT_CERT == m_action)  {
+		this->setWindowTitle(tr("Set certificate for account") + " " + itemTop->text());
+		this->accountLineEdit->setText(itemTop->text());
+		this->accountLineEdit->setEnabled(false);
+		this->infoLabel->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
+		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->testAccountCheckBox->setEnabled(false);
+		this->usernameLineEdit->setEnabled(false);
+		this->passwordLineEdit->setEnabled(false);
+	} else {
+		this->setWindowTitle(tr("Enter password/certificate for account") + " " + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
@@ -249,26 +268,23 @@ void DlgCreateAccount::saveAccount(void)
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
 		itemSettings[LOGIN] = "username";
+		itemSettings[P12FILE] = "";
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
 		itemSettings[LOGIN] = "certificate";
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	} else if (this->loginmethodComboBox->currentIndex() ==
-	           USER_CERTIFICATE) {
+	} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
 		itemSettings[LOGIN] = "user_certificate";
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
 		itemSettings[LOGIN] = "hotp";
+		itemSettings[P12FILE] = "";
 	} else {
 		itemSettings[LOGIN] = "totp";
+		itemSettings[P12FILE] = "";
 	}
 
-
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
-	//if (this->rememberPswcheckBox->isChecked()) {
-		itemSettings[PWD]= this->passwordLineEdit->text();
-	//} else {
-	//	itemSettings[PWD] = "";
-	//}
+	itemSettings[PWD]= this->passwordLineEdit->text();
 	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 

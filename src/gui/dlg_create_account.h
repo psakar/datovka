@@ -18,7 +18,10 @@ public:
 	enum Action {
 		ACT_ADDNEW,
 		ACT_EDIT,
-		ACT_PWD
+		ACT_PWD,
+		ACT_CERT,
+		ACT_CERTPWD,
+		ACT_IDBOX
 	};
 
 	DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,

@@ -554,6 +554,35 @@ private:
 	 */
 	bool connectToIsds(const QModelIndex acntTopIdx);
 
+	/*!
+	 * @brief Login to ISDS server by username and password only.
+	 */
+	bool loginMethodUserNamePwd(const QModelIndex acntTopIdx,
+	   const AccountModel::SettingsMap accountInfo);
+
+	/*!
+	 * @brief Login to ISDS server by username, password and OTP code.
+	 */
+	bool loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
+	    const AccountModel::SettingsMap accountInfo);
+
+	/*!
+	 * @brief Login to ISDS server by certificate only.
+	 */
+	bool loginMethodCertificateOnly(const QModelIndex acntTopIdx,
+	    const AccountModel::SettingsMap accountInfo);
+
+	/*!
+	 * @brief Login to ISDS server by certificate, username and password.
+	 */
+	bool loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
+	    const AccountModel::SettingsMap accountInfo);
+
+	/*!
+	 * @brief Login to ISDS server by certificate and databox ID.
+	 */
+	bool loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
+	    const AccountModel::SettingsMap accountInfo);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

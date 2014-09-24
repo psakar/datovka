@@ -175,6 +175,7 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
 {
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!certPath.isEmpty());
+
 	isds_error status = IE_ERROR;
 
 
@@ -221,6 +222,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!idBox.isEmpty());
 	Q_ASSERT(!certPath.isEmpty());
+
 	isds_error status = IE_ERROR;
 
 	if (certPath.isNull() || certPath.isEmpty()) {
@@ -271,6 +273,8 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(!certPath.isEmpty());
+	Q_ASSERT(!pwd.isEmpty());
+
 	isds_error status = IE_ERROR;
 
 	if (certPath.isNull() || certPath.isEmpty()) {
@@ -299,28 +303,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	pki_credentials->key_format = PKI_FORMAT_DER;
 	pki_credentials->key = strdup(certPath.toStdString().c_str());
 	pki_credentials->passphrase = NULL;
-/*
-	if (password.isEmpty()) {
-		bool ok;
-		QString text = "";
-		while (text.isEmpty()) {
-			text = QInputDialog::getText(0,
-			    QObject::tr("Enter certificate password"),
-			  QObject::tr("Enter certificate password for account ")
-			    + accountName + " (" + userName + ")",
-			    QLineEdit::Password, "", &ok,
-			    Qt::WindowStaysOnTopHint);
-			if (ok) {
-				if (!text.isEmpty()) {
-					password = text;
-				}
-			} else {
-				isds_pki_credentials_free(&pki_credentials);
-				return status;
-			}
-		}
-	}
-*/
+
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
 	    userName.toStdString().c_str(), password.toStdString().c_str(),
@@ -344,6 +327,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	Q_ASSERT(0 != isdsSession);
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(!pwd.isEmpty());
+
 	isds_error status = IE_ERROR;
 
 	if (userName.isNull() || userName.isEmpty()) {
