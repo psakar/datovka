@@ -23,10 +23,17 @@ public:
 	    QList<bool> downloadThisAccounts, QObject *parent);
 
 	/*!
-	* @brief Requests the process to start
-	*/
+	 * @brief Requests the process to start
+	 */
 	void requestWork(void);
 
+	/*!
+	 * @brief Download attachments, envelope and raw for message.
+	 */
+	static
+	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
+	    const QString dmId, bool signedMsg, bool incoming,
+	    MessageDb &messageDb);
 
 private:
 
@@ -60,31 +67,28 @@ private:
 	* @brief Download sent message delivery info and get list of events
 	* message
 	*/
+	static
 	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	    int msgIdx, bool signedMsg, MessageDb &messageDb);
 
 	/*!
-	* @brief Download attachments, envelope and raw for message.
-	*/
-	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QString dmId, bool signedMsg, MessageDb &messageDb,
-	    const QString messageType);
-
-	/*!
-	* @brief Download delivery info for message.
-	*/
+	 * @brief Download delivery info for message.
+	 */
+	static
 	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 	    const QString dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!
-	* @brief Get additional info about author (sender)
-	*/
+	 * @brief Get additional info about author (sender)
+	 */
+	static
 	bool getMessageAuthor(const QModelIndex &acntTopIdx,
 	    const QString dmId, MessageDb &messageDb);
 
 	/*!
-	* @brief Set message as downloaded from ISDS.
-	*/
+	 * @brief Set message as downloaded from ISDS.
+	 */
+	static
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    const QString dmId);
 

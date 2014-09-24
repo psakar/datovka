@@ -468,24 +468,6 @@ private:
 	    const QString messageType);
 
 	/*!
-	 * @brief Download attachments, envelope and raw for specific message.
-	 */
-	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx, bool signedMsg, bool incoming);
-
-	/*!
-	 * @brief Set message as downloaded from ISDS.
-	 */
-	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx);
-
-	/*!
-	 * @brief Download received message delivery info and events
-	 */
-	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx, bool signedMsg);
-
-	/*!
 	 * @brief Download sent message delivery info and events
 	 */
 	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
@@ -500,12 +482,6 @@ private:
 	 * @brief Get password expiration info for account index
 	 */
 	bool getPasswordInfo(const QModelIndex &acntTopIdx);
-
-	/*!
-	 * @brief Get additional info about author (sender)
-	 */
-	bool getMessageAuthor(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx);
 
 	/*!
 	 * @brief Delete message from long term storage in ISDS.

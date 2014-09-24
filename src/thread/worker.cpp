@@ -7,6 +7,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/pkcs7.h"
+#include "src/log/log.h"
 #include "src/gui/datovka.h"
 #include "src/io/isds_sessions.h"
 
@@ -215,7 +216,8 @@ void Worker::downloadCompleteMessage(void)
 	MessageDb *messageDb;
 	messageDb = m_messageDbList.at(0);
 
-	downloadMessage(m_acntTopIdx, m_dmId, true, *messageDb, "sent");
+	/* sent message */
+	downloadMessage(m_acntTopIdx, m_dmId, true, false, *messageDb);
 
 	downloadMessagesMutex.unlock();
 
@@ -401,7 +403,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 			if (globPref.auto_download_whole_messages) {
 				downloadMessage(acntTopIdx, item->envelope->dmID,
-				    true, messageDb, messageType);
+				    true, "received" == messageType, messageDb);
 			}
 
 			newcnt++;
@@ -508,13 +510,15 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
     int msgIdx, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QString dmId = QString::number(msgIdx);
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	isds_error status = IE_ERROR;
 
-	// message and envleople structures
+	// message and envelope structures
 	struct isds_message *message = NULL;
 
 	(signedMsg)
@@ -595,10 +599,11 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
-    const QString dmId, bool signedMsg, MessageDb &messageDb,
-    const QString messageType)
+    const QString dmId, bool signedMsg, bool incoming, MessageDb &messageDb)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	qDebug() << "Downloading complete message" << dmId;
 
 	const AccountModel::SettingsMap accountInfo =
@@ -612,7 +617,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	/* download signed message? */
 	if (signedMsg) {
 		/* sent or received message? */
-		if  (messageType == "received") {
+		if (incoming) {
 			status = isds_get_signed_received_message(
 			    isdsSessions.session(accountInfo.userName()),
 			    dmId.toStdString().c_str(),
@@ -735,7 +740,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
 	    (int)*message->envelope->dmAttachmentSize,
 	    message->envelope->dmType,
-	    messageType))
+	    (incoming) ? "received" : "sent"))
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
@@ -769,7 +774,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		file = file->next;
 	}
 
-	if (messageType == "received") {
+	if (incoming) {
 		/* Download and save delivery info and message events */
 		(getReceivedsDeliveryInfo(acntTopIdx, message->envelope->dmID,
 		    signedMsg, messageDb))
@@ -903,6 +908,7 @@ bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
     const QString dmId)
 /* ========================================================================= */
 {
+	debug_func_call();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
