@@ -468,22 +468,6 @@ private:
 	    const QString messageType);
 
 	/*!
-	 * @brief Download sent message delivery info and events
-	 */
-	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
-	    int msgIdx, bool signedMsg);
-
-	/*!
-	 * @brief Get list of sent message state changes
-	 */
-	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx);
-
-	/*!
-	 * @brief Get password expiration info for account index
-	 */
-	bool getPasswordInfo(const QModelIndex &acntTopIdx);
-
-	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
 	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
