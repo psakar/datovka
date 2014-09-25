@@ -510,17 +510,6 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->envelope = sent_envelope;
 	sent_message->documents = documents;
 
-//************
-/* Temporary alert for testing mode */
-QMessageBox::StandardButton reply;
-reply = QMessageBox::question(this,
-    tr("Sent message to ISDS?"),
-    tr("You are in the test mode of QDatovka now.") + "\n" +
-    tr("Do you want to send message to ISDS?"),
-    QMessageBox::Yes | QMessageBox::No);
-if (reply == QMessageBox::Yes) {
-//*********
-
 	// only one recipient was chossen
 	if (this->recipientTableWidget->rowCount() == 1) {
 		status = isds_send_message(isdsSessions.session(m_userName),
@@ -601,11 +590,6 @@ if (reply == QMessageBox::Yes) {
 		this->close();
 	}
 
-//***************
-} else {
-	this->close();
-}
-//***************
 	return;
 
 fail:
