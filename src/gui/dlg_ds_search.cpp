@@ -159,16 +159,45 @@ void DlgDsSearch::searchDataBox(void)
 		tr("Sorry, item(s) not found..."), QMessageBox::Ok);
 	} else {
 		while (0 != box) {
+
 			this->resultsTableWidget->setEnabled(true);
 			isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
 			Q_ASSERT(0 != item);
 			qDebug() << item->dbID;
 			QVector<QString> contact;
 			contact.append(item->dbID);
-			contact.append(item->firmName);
-			contact.append(QString(item->address->adStreet) +
-			    " " + QString(item->address->adNumberInStreet));
+
+			QString name = item->firmName;
+
+			if (name.isNull() || name.isEmpty()) {
+				name = QString(item->personName->pnFirstName) +
+				    " " + QString(item->personName->pnLastName);
+			}
+
+			QString adNumberInStreet = item->address->adNumberInStreet;
+			QString adNumberInMunicipality =
+			    item->address->adNumberInMunicipality;
+			QString address = QString(item->address->adStreet)
+			    + " " + QString(item->address->adNumberInMunicipality)
+			    + "/"+ QString(item->address->adNumberInStreet)
+			    + ", " + QString(item->address->adCity);
+
+			if (adNumberInStreet.isNull() ||
+			    adNumberInStreet.isEmpty()) {
+				address = QString(item->address->adStreet)
+				    + " " + QString(item->address->adNumberInMunicipality)
+				    + ", " + QString(item->address->adCity);
+			} else if (adNumberInMunicipality.isNull() ||
+			    adNumberInMunicipality.isEmpty()) {
+				address = QString(item->address->adStreet)
+				    + " " + QString(item->address->adNumberInStreet)
+				    + ", " + QString(item->address->adCity);
+			}
+
+			contact.append(name);
+			contact.append(address);
 			contact.append(QString(item->address->adZipCode));
+
 			list_contacts.append(contact);
 			addContactsToTable(list_contacts);
 
