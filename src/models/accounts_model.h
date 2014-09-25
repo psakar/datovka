@@ -111,7 +111,7 @@ public:
 	/*!
 	 * @brief Add account.
 	 */
-	bool addAccount(const QString &name,
+	QModelIndex addAccount(const QString &name,
 	    const QVariant &data = QVariant());
 
 	/*!

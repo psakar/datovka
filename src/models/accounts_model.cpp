@@ -263,7 +263,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 /*
  * Add account.
  */
-bool AccountModel::addAccount(const QString &name, const QVariant &data)
+QModelIndex AccountModel::addAccount(const QString &name, const QVariant &data)
 /* ========================================================================= */
 {
 	/* Defining a couple of items. */
@@ -303,7 +303,7 @@ bool AccountModel::addAccount(const QString &name, const QVariant &data)
 	all->appendRow(allSent);
 
 	invisibleRootItem()->appendRow(account);
-	return true;
+	return account->index();
 }
 
 
