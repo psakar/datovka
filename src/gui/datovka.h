@@ -462,12 +462,6 @@ private:
 	MessageDb * accountMessageDb(const QStandardItem *accountItem);
 
 	/*!
-	 * @brief Download sent/received message list for specific account.
-	 */
-	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString messageType);
-
-	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
 	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);

@@ -6,6 +6,7 @@
 
 #include <QMutex>
 #include <QObject>
+#include <QProgressBar> /* Progress. */
 
 #include "src/common.h"
 #include "src/io/account_db.h"
@@ -17,6 +18,9 @@ class Worker : public QObject {
     Q_OBJECT
 
 public:
+	/*!
+	 * @brief Construtor.
+	 */
 	explicit Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel,
 	    int count, QList<MessageDb*> messageDbList,
@@ -35,6 +39,15 @@ public:
 	    const QString dmId, bool signedMsg, bool incoming,
 	    MessageDb &messageDb);
 
+	/*!
+	 * @brief Download sent/received message list from ISDS for current
+	 *     account index.
+	 */
+	static
+	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
+	    const QString messageType, MessageDb &messageDb, QString label,
+	    QProgressBar *pBar, Worker *worker);
+
 private:
 
 	QModelIndex m_acntTopIdx;
@@ -46,15 +59,8 @@ private:
 	QList<bool> m_downloadThisAccounts;
 
 	/*!
-	 * @brief Download sent/received message list from ISDS for current
-	 *     account index.
+	 * @brief Get list of sent message state changes
 	 */
-	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString messageType, MessageDb &messageDb, QString label);
-
-	/*!
-	* @brief Get list of sent message state changes
-	*/
 	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 	    MessageDb &messageDb, QString label);
 

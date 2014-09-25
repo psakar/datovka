@@ -12,6 +12,10 @@
 #include "src/io/isds_sessions.h"
 
 
+/* ========================================================================= */
+/*!
+ * @brief Construtor.
+ */
 Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel, int count,
 	    QList<MessageDb*> messageDbList,
@@ -23,6 +27,7 @@ Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	m_count(count),
 	m_messageDbList(messageDbList),
 	m_downloadThisAccounts(downloadThisAccounts)
+/* ========================================================================= */
 {
 }
 
@@ -82,7 +87,7 @@ void Worker::syncAllAccounts(void)
 
 		if (Q_CONNECT_ERROR ==
 		    downloadMessageList(index,"received", *messageDb,
-		    "GetListOfReceivedMessages")) {
+		    "GetListOfReceivedMessages", 0, this)) {
 			success = false;
 			continue;
 		}
@@ -90,7 +95,7 @@ void Worker::syncAllAccounts(void)
 
 		if (Q_CONNECT_ERROR ==
 		    downloadMessageList(index,"sent", *messageDb,
-		    "GetListOfSentMessages")) {
+		    "GetListOfSentMessages", 0, this)) {
 			success = false;
 			continue;
 		}
@@ -157,7 +162,7 @@ void Worker::syncOneAccount(void)
 
 	if (Q_CONNECT_ERROR ==
 	    downloadMessageList(m_acntTopIdx,"received", *messageDb,
-	    "GetListOfReceivedMessages")) {
+	    "GetListOfReceivedMessages", 0, this)) {
 		success = false;
 	}
 
@@ -165,7 +170,7 @@ void Worker::syncOneAccount(void)
 
 	if (Q_CONNECT_ERROR ==
 	    downloadMessageList(m_acntTopIdx,"sent", *messageDb,
-	    "GetListOfSentMessages")) {
+	    "GetListOfSentMessages", 0, this)) {
 		success = false;
 	}
 
@@ -230,22 +235,27 @@ void Worker::downloadCompleteMessage(void)
 * Download sent/received message list from ISDS for current account index
 */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
-    const QString messageType, MessageDb &messageDb, QString label)
+    const QString messageType, MessageDb &messageDb, QString label,
+    QProgressBar *pBar, Worker *worker)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
 		return Q_GLOBAL_ERROR;
 	}
 
-	emit valueChanged(label, 0);
+	if (0 != pBar) { pBar->setValue(0); }
+	if (0 != worker) { emit worker->valueChanged(label, 0); }
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	isds_error status = IE_ERROR;
 
-	emit valueChanged(label, 10);
+	if (0 != pBar) { pBar->setValue(10); }
+	if (0 != worker) { emit worker->valueChanged(label, 10); }
 
 	struct isds_list *messageList = NULL;
 
@@ -267,7 +277,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		    0, NULL, &messageList);
 	}
 
-	emit valueChanged(label, 20);
+	if (0 != pBar) { pBar->setValue(20); }
+	if (0 != worker) { emit worker->valueChanged(label, 20); }
 
 	if (status != IE_SUCCESS) {
 		qDebug() << status << isds_strerror(status);
@@ -290,7 +301,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	box = messageList;
 
 	if (allcnt == 0) {
-		emit valueChanged(label, 50);
+		if (0 != pBar) { pBar->setValue(50); }
+		if (0 != worker) { emit worker->valueChanged(label, 50); }
 	} else {
 		delta = ceil(80 / allcnt);
 	}
@@ -298,7 +310,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	while (0 != box) {
 
 		diff = diff + delta;
-		emit valueChanged(label, 20+diff);
+		if (0 != pBar) { pBar->setValue(20+diff); }
+		if (0 != worker) { emit worker->valueChanged(label, 20+diff); }
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
@@ -414,7 +427,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	isds_list_free(&messageList);
 
-	emit valueChanged(label, 100);
+	if (0 != pBar) { pBar->setValue(100); }
+	if (0 != worker) { emit worker->valueChanged(label, 100); }
 
 	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;

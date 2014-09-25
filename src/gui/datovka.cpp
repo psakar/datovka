@@ -2155,6 +2155,7 @@ void MainWindow::createAndSendMessage(void)
 	index = AccountModel::indexTop(index);
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
@@ -2163,7 +2164,16 @@ void MainWindow::createAndSendMessage(void)
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		downloadMessageList(index, "sent");
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			if (!connectToIsds(index)) {
+				/* TODO */
+				//return Q_CONNECT_ERROR;
+			}
+		}
+		Worker::downloadMessageList(index, "sent", *messageDb,
+		    QString(), m_statusProgressBar, NULL);
 	}
 	setDefaultProgressStatus();
 }
@@ -2531,6 +2541,7 @@ void MainWindow::createAndSendMessageReply(void)
 	/* TODO -- Reimplement this construction. */
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 
 	QVector<QString> replyTo = messageDb->msgsReplyDataTo(
 	    tableModel->itemData(index).first().toInt());
@@ -2549,7 +2560,16 @@ void MainWindow::createAndSendMessageReply(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		downloadMessageList(index, "sent");
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			if (!connectToIsds(index)) {
+				/* TODO */
+				//return Q_CONNECT_ERROR;
+			}
+		}
+		Worker::downloadMessageList(index, "sent", *messageDb,
+		    QString(), m_statusProgressBar, NULL);
 	}
 	setDefaultProgressStatus();
 }
@@ -2806,227 +2826,6 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 		}
 	}
 	settings.endGroup();
-}
-
-
-/* ========================================================================= */
-/*
-* Download sent/received message list from ISDS for current account index
-*/
-qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
-    const QString messageType)
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return Q_GLOBAL_ERROR;
-	}
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	m_statusProgressBar->setValue(10);
-
-	isds_error status = IE_SUCCESS;
-
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	m_statusProgressBar->setValue(20);
-
-	struct isds_list *messageList = NULL;
-
-	/* Download sent/received message list from ISDS for current account */
-	if (messageType == "sent") {
-		status = isds_get_list_of_sent_messages(isdsSessions.
-		    session(accountInfo.userName()),
-		    NULL, NULL, NULL,
-		    //MESSAGESTATE_SENT |  MESSAGESTATE_STAMPED |
-		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &messageList);
-	} else if (messageType == "received") {
-		status = isds_get_list_of_received_messages(isdsSessions.
-		    session(accountInfo.userName()),
-		    NULL, NULL, NULL,
-		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &messageList);
-	} else {
-		Q_ASSERT(0);
-	}
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		isds_list_free(&messageList);
-		return Q_ISDS_ERROR;
-	}
-
-	m_statusProgressBar->setValue(30);
-
-	struct isds_list *box;
-	box = messageList;
-	int newcnt = 0;
-	int allcnt = 0;
-
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntTopIdx);
-	MessageDb *messageDb = accountMessageDb(accountItem);
-
-	while (0 != box) {
-		allcnt++;
-		box = box->next;
-	}
-
-	box = messageList;
-
-	int delta = 0;
-	int diff = 0;
-
-	if (allcnt == 0) {
-		m_statusProgressBar->setValue(60);
-	} else {
-		delta = ceil(70 / allcnt);
-	}
-
-	while (0 != box) {
-
-		diff = diff + delta;
-		m_statusProgressBar->setValue(30+diff);
-
-		isds_message *item = (isds_message *) box->data;
-		int dmId = atoi(item->envelope->dmID);
-
-		if (!messageDb->isInMessageDb(dmId)) {
-
-			QString dmAmbiguousRecipient;
-			if (0 == item->envelope->dmAmbiguousRecipient) {
-				dmAmbiguousRecipient = "0";
-			} else {
-				dmAmbiguousRecipient = QString::number(
-				    *item->envelope->dmAmbiguousRecipient);
-			}
-
-			QString dmLegalTitleYear;
-			if (0 == item->envelope->dmLegalTitleYear) {
-				dmLegalTitleYear = "";
-			} else {
-				dmLegalTitleYear = QString::number(
-				    *item->envelope->dmLegalTitleYear);
-			}
-
-			QString dmLegalTitleLaw;
-			if (0 == item->envelope->dmLegalTitleLaw) {
-				dmLegalTitleLaw = "";
-			} else {
-				dmLegalTitleLaw = QString::number(
-				    *item->envelope->dmLegalTitleLaw);
-			}
-
-			QString dmSenderOrgUnitNum;
-			if (0 == item->envelope->dmSenderOrgUnitNum) {
-				dmSenderOrgUnitNum = "";
-			} else {
-				dmSenderOrgUnitNum =
-				    *item->envelope->dmSenderOrgUnitNum != 0 ?
-				    QString::number(*item->envelope->
-				    dmSenderOrgUnitNum) : "";
-			}
-
-			QString dmRecipientOrgUnitNum;
-			if (0 == item->envelope->dmRecipientOrgUnitNum) {
-				dmRecipientOrgUnitNum = "";
-			} else {
-				dmRecipientOrgUnitNum =
-				    *item->envelope->dmRecipientOrgUnitNum != 0
-				    ? QString::number(*item->envelope->
-				    dmRecipientOrgUnitNum) : "";
-			}
-
-			QString dmDeliveryTime = "";
-			if (0 != item->envelope->dmDeliveryTime) {
-				dmDeliveryTime = timevalToDbFormat(
-				    item->envelope->dmDeliveryTime);
-			}
-			QString dmAcceptanceTime = "";
-			if (0 != item->envelope->dmAcceptanceTime) {
-				dmAcceptanceTime = timevalToDbFormat(
-				    item->envelope->dmAcceptanceTime);
-			}
-
-			/* insert message envelope in db */
-			(messageDb->msgsInsertMessageEnvelope(dmId,
-			    /* TODO - set correctly next two values */
-			    false, "tRecord",
-			    item->envelope->dbIDSender,
-			    item->envelope->dmSender,
-			    item->envelope->dmSenderAddress,
-			    (int)*item->envelope->dmSenderType,
-			    item->envelope->dmRecipient,
-			    item->envelope->dmRecipientAddress,
-			    dmAmbiguousRecipient,
-			    item->envelope->dmSenderOrgUnit,
-			    dmSenderOrgUnitNum,
-			    item->envelope->dbIDRecipient,
-			    item->envelope->dmRecipientOrgUnit,
-			    dmRecipientOrgUnitNum,
-			    item->envelope->dmToHands,
-			    item->envelope->dmAnnotation,
-			    item->envelope->dmRecipientRefNumber,
-			    item->envelope->dmSenderRefNumber,
-			    item->envelope->dmRecipientIdent,
-			    item->envelope->dmSenderIdent,
-			    dmLegalTitleLaw,
-			    dmLegalTitleYear,
-			    item->envelope->dmLegalTitleSect,
-			    item->envelope->dmLegalTitlePar,
-			    item->envelope->dmLegalTitlePoint,
-			    item->envelope->dmPersonalDelivery,
-			    item->envelope->dmAllowSubstDelivery,
-			    (char*)item->envelope->timestamp,
-			    dmDeliveryTime,
-			    dmAcceptanceTime,
-			    convertHexToDecIndex(
-			        *item->envelope->dmMessageStatus),
-			    (int)*item->envelope->dmAttachmentSize,
-			    item->envelope->dmType,
-			    messageType))
-			? qDebug() << "Message envelope" << dmId <<
-			    "was inserted into db..."
-			: qDebug() << "ERROR: Message envelope " << dmId <<
-			    "insert!";
-			newcnt++;
-		}
-		box = box->next;
-
-	}
-
-	m_statusProgressBar->setValue(100);
-
-	isds_list_free(&messageList);
-
-	/* Redraw views' content. */
-	regenerateAccountModelYears(acntTopIdx);
-	/*
-	 * Force repaint.
-	 * TODO -- A better solution?
-	 */
-	ui->accountList->repaint();
-	accountItemSelectionChanged(ui->accountList->currentIndex());
-
-	if (messageType == "received") {
-		qDebug() << "#Received total:" << allcnt;
-		qDebug() << "#Received new:" << newcnt;
-	} else {
-		qDebug() << "#Sent total:" << allcnt;
-		qDebug() << "#Sent new:" << newcnt;
-	}
-
-	return Q_SUCCESS;
 }
 
 
