@@ -447,7 +447,7 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    "(dbIDRecipient = :recipDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		qDebug() << queryStr;
+		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
 			/* TODO -- Handle error. */
 		}
@@ -894,7 +894,7 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 	queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read WHERE "
 	    "message_id = :dmId";
-	qDebug() << queryStr << dmId;
+	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
 		return false;
 	}

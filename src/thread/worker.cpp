@@ -31,9 +31,9 @@ Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 /*
 * Tread executing prepare
 */
-void Worker::requestWork() {
+void Worker::requestWork(void)
 /* ========================================================================= */
-
+{
 	downloadMessagesMutex.lock();
 
 	qDebug() << "Request worker start from Thread " <<
@@ -47,7 +47,7 @@ void Worker::requestWork() {
 /*
 * Start background sync of all accounts
 */
-void Worker::syncAllAccounts()
+void Worker::syncAllAccounts(void)
 /* ========================================================================= */
 {
 	qDebug() << "Starting worker process in Thread "

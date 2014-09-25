@@ -95,25 +95,25 @@ private:
 signals:
 	/*!
 	 * @brief This signal is emitted when the Worker request to Work
-	*/
+	 */
 	void workRequested(void);
 
 	/*!
-	* @brief This signal is emitted when counted value is changed
-	*/
+	 * @brief This signal is emitted when counted value is changed
+	 */
 	void valueChanged(QString label, int value);
 
 	void refreshAccountList(const QModelIndex);
 
 	/*!
-	* @brief This signal is emitted when process is finished
-	*/
+	 * @brief This signal is emitted when process is finished
+	 */
 	void finished(void);
 
 public slots:
 	/*!
-	* @brief Run Message downloading in thread
-	*/
+	 * @brief Run Message downloading in thread
+	 */
 	void syncAllAccounts(void);
 	void syncOneAccount(void);
 	void downloadCompleteMessage(void);

@@ -1975,6 +1975,8 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QStandardItem *topItem;
 	MessageDb *db;
 	QList<QString> yearList;
@@ -2035,6 +2037,8 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 bool MainWindow::regenerateAllAccountModelYears(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QStandardItem *itemTop;
 	MessageDb *db;
 	QList<QString> yearList;
@@ -3033,6 +3037,8 @@ qdatovka_error MainWindow::downloadMessageList(const QModelIndex &acntTopIdx,
 void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
 	/*
@@ -3064,6 +3070,8 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 void MainWindow::deleteThreadSyncAll(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
 		ui->actionSync_all_accounts->setEnabled(true);
@@ -3090,6 +3098,8 @@ void MainWindow::deleteThreadSyncAll(void)
 void MainWindow::deleteThreadSyncOne(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
 		ui->actionSync_all_accounts->setEnabled(true);
