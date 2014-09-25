@@ -293,9 +293,6 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
     int dbState, bool dbEffectiveOVM, bool dbOpenAddressing) const
 /* ========================================================================= */
 {
-
-	qDebug() << dbType << ic << biDate << dbState << dbEffectiveOVM << dbOpenAddressing;
-
 	if (!m_db.isOpen()) {
 		return false;
 	}

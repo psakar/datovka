@@ -33,6 +33,9 @@ private slots:
 	void saveAccount(void);
 	void checkInputFields(void);
 
+signals:
+	void getAccountUserDataboxInfo(QModelIndex);
+
 private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);

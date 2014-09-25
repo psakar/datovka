@@ -288,6 +288,8 @@ void DlgCreateAccount::saveAccount(void)
 	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
 	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
 
+	QModelIndex newIndex;
+
 	switch (m_action) {
 	case ACT_EDIT:
 	case ACT_PWD:
@@ -296,8 +298,10 @@ void DlgCreateAccount::saveAccount(void)
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
-		model->addAccount(this->accountLineEdit->text(), itemSettings);
-		m_accountList.expandAll();
+		newIndex = model->addAccount(this->accountLineEdit->text(),
+		    itemSettings);
+		m_accountList.expand(newIndex);
+		emit getAccountUserDataboxInfo(newIndex);
 		/* TODO -- Save/update related account DB entry. */
 		break;
 	default:

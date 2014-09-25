@@ -295,6 +295,11 @@ private slots:
 	void receiveNewDataPath(QString oldDir, QString newDir,
 	    QString action);
 
+	/*!
+	 * @brief Get data about logged in user and his box.
+	 */
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne;
@@ -471,11 +476,6 @@ private:
 	 */
 	qdatovka_error verifySelectedMessage(const QModelIndex &acntTopIdx,
 	    const QModelIndex &msgIdx);
-
-	/*!
-	 * @brief Get data about logged in user and his box.
-	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	/*!
 	 * @brief Get data about logged in user.

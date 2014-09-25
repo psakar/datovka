@@ -1200,6 +1200,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+
 	MessageDb *messageDb = accountMessageDb(accountItem);
 	messageDbList.append(messageDb);
 
@@ -2190,6 +2191,10 @@ void MainWindow::addNewAccount(void)
 
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
+
+	connect(newAccountDialog, SIGNAL(getAccountUserDataboxInfo(QModelIndex)),
+	    this, SLOT(getOwnerInfoFromLogin(const QModelIndex)));
+
 	if (QDialog::Accepted == newAccountDialog->exec()) {
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
