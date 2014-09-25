@@ -309,6 +309,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	(void) previous; /* Unused. */
 
 	QString html;
@@ -1050,10 +1052,8 @@ void MainWindow::accountItemMarkAllRead(void)
 
 	/* Restore selection. */
 	if (selectedAcntIndex.isValid()) {
-		QItemSelectionModel *selectionModel =
-		    ui->accountList->selectionModel();
-		selectionModel->select(selectedAcntIndex,
-		    QItemSelectionModel::ClearAndSelect);
+		ui->accountList->selectionModel()->setCurrentIndex(
+		    selectedAcntIndex, QItemSelectionModel::ClearAndSelect);
 		accountItemSelectionChanged(selectedAcntIndex);
 		/*
 		 * TODO -- When using on year account item then the first
@@ -1506,6 +1506,8 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 void MainWindow::setDefaultAccount(const QSettings &settings)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QString username = settings.value("default_account/username", "")
 	   .toString();
 	if (!username.isEmpty()) {

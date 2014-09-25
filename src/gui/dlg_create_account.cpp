@@ -3,6 +3,7 @@
 
 #include "dlg_create_account.h"
 #include "src/io/dbs.h"
+#include "src/log/log.h"
 #include "src/models/accounts_model.h"
 
 DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
@@ -237,6 +238,8 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 void DlgCreateAccount::saveAccount(void)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	AccountModel *model = dynamic_cast<AccountModel*>(
 	    m_accountList.model());
 	QModelIndex index = m_accountList.currentIndex();
@@ -300,6 +303,11 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_ADDNEW:
 		newIndex = model->addAccount(this->accountLineEdit->text(),
 		    itemSettings);
+		/* Change selection. */
+		qDebug() << "Changing selection" << newIndex;
+		m_accountList.selectionModel()->setCurrentIndex(newIndex,
+		    QItemSelectionModel::ClearAndSelect);
+		/* Expand the tree. */
 		m_accountList.expand(newIndex);
 		emit getAccountUserDataboxInfo(newIndex);
 		/* TODO -- Save/update related account DB entry. */
