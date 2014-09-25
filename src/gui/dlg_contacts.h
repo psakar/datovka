@@ -1,3 +1,5 @@
+
+
 #ifndef _DLG_CONTACTS_H_
 #define _DLG_CONTACTS_H_
 
@@ -15,9 +17,8 @@ class DlgContacts : public QDialog, public Ui::Contacts
 	Q_OBJECT
 
 public:
-	DlgContacts(MessageDb &db, QString &dbId,
-	    QTableWidget &recipientTableWidget,
-	    QWidget *parent = 0);
+	DlgContacts(const MessageDb &db, const QString &dbId,
+	    QTableWidget &recipientTableWidget, QWidget *parent = 0);
 
 private slots:
 	void filterContact(const QString &text);
@@ -30,8 +31,8 @@ private:
 	bool isInRecipientTable(const QString &idDs) const;
 
 	QTableWidget &m_recipientTableWidget;
-	MessageDb &m_messDb;
-	QString m_dbId;
+	const MessageDb &m_messDb;
+	const QString m_dbId;
 };
 
 

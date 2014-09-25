@@ -6,8 +6,9 @@
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 
-DlgCreateAccount::DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
-QModelIndex acntTopIdx, Action action,
+
+DlgCreateAccount::DlgCreateAccount(QTreeView &accountList,
+    AccountDb &m_accountDb, QModelIndex acntTopIdx, Action action,
     QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
@@ -20,6 +21,14 @@ QModelIndex acntTopIdx, Action action,
 	setupUi(this);
 	initAccountDialog();
 }
+
+
+/* Login method descriptors. */
+#define LIM_USERNAME "username"
+#define LIM_CERT "certificate"
+#define LIM_USER_CERT "user_certificate"
+#define LIM_HOTP "hotp"
+#define LIM_TOTP "totp"
 
 
 /* ========================================================================= */
@@ -117,17 +126,19 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->usernameLineEdit->setEnabled(false);
 	}
 
-	QString login_method = itemSettings[LOGIN].toString();
-	if (login_method == "username") {
+	const QString login_method = itemSettings[LOGIN].toString();
+	if (LIM_USERNAME == login_method) {
 		itemindex = USER_NAME;
-	} else if(login_method == "certificate") {
+	} else if (LIM_CERT == login_method) {
 		itemindex = CERTIFICATE;
-	} else if(login_method == "user_certificate") {
+	} else if (LIM_USER_CERT == login_method) {
 		itemindex = USER_CERTIFICATE;
-	} else if(login_method == "hotp") {
+	} else if (LIM_HOTP == login_method) {
 		itemindex = HOTP;
-	} else {
+	} else if (LIM_TOTP == login_method) {
 		itemindex = TOTP;
+	} else {
+		Q_ASSERT(0);
 	}
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
 	setActiveButton(itemindex);
@@ -270,20 +281,22 @@ void DlgCreateAccount::saveAccount(void)
 	itemSettings[USER] = this->usernameLineEdit->text();
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		itemSettings[LOGIN] = "username";
+		itemSettings[LOGIN] = LIM_USERNAME;
 		itemSettings[P12FILE] = "";
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		itemSettings[LOGIN] = "certificate";
+		itemSettings[LOGIN] = LIM_CERT;
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
-		itemSettings[LOGIN] = "user_certificate";
+		itemSettings[LOGIN] = LIM_USER_CERT;
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		itemSettings[LOGIN] = "hotp";
+		itemSettings[LOGIN] = LIM_HOTP;
+		itemSettings[P12FILE] = "";
+	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
+		itemSettings[LOGIN] = LIM_TOTP;
 		itemSettings[P12FILE] = "";
 	} else {
-		itemSettings[LOGIN] = "totp";
-		itemSettings[P12FILE] = "";
+		Q_ASSERT(0);
 	}
 
 	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();

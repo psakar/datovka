@@ -1,3 +1,5 @@
+
+
 #ifndef _DLG_CREATE_ACCOUNT_H_
 #define _DLG_CREATE_ACCOUNT_H_
 
@@ -10,6 +12,7 @@
 #include "ui_dlg_create_account.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/account_db.h"
+
 
 class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 	Q_OBJECT
@@ -24,6 +27,7 @@ public:
 		ACT_IDBOX
 	};
 
+	/* TODO -- What is the purpose of @acntTopIdx ? */
 	DlgCreateAccount(QTreeView &accountList, AccountDb &m_accountDb,
 	    QModelIndex acntTopIdx, Action action, QWidget *parent = 0);
 

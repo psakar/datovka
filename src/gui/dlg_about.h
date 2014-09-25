@@ -1,9 +1,13 @@
-#ifndef DLG_ABOUT_H
-#define DLG_ABOUT_H
+
+
+#ifndef _DLG_ABOUT_H_
+#define _DLG_ABOUT_H_
+
 
 #include <QDialog>
 #include "src/common.h"
 #include "ui_dlg_about.h"
+
 
 class aboutDialog : public QDialog, public Ui::aboutDialog
 {
@@ -20,4 +24,5 @@ private slots:
 	void closeDialog(void);
 };
 
-#endif // DLG_ABOUT_H
+
+#endif /* _DLG_ABOUT_H_ */

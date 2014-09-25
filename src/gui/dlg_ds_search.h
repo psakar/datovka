@@ -1,3 +1,5 @@
+
+
 #ifndef _DLG_DS_SEARCH_H_
 #define _DLG_DS_SEARCH_H_
 
@@ -19,7 +21,6 @@ public:
 	};
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-	    const AccountModel::SettingsMap &accountInfo,
 	    QWidget *parent = 0, QString useName = "");
 
 private slots:
@@ -35,8 +36,7 @@ private:
 
 	QTableWidget *m_recipientTableWidget;
 	Action m_action;
-	QString m_userName;
-	AccountModel::SettingsMap m_accountInfo;
+	const QString m_userName;
 };
 
 

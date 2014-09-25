@@ -2605,7 +2605,7 @@ void MainWindow::findDatabox(void)
 
 	QString userName = accountUserName();
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this, userName);
+	    this, userName);
 	dsSearch->show();
 }
 
@@ -3974,7 +3974,7 @@ void MainWindow::showSignatureDetails(void)
 {
 	debug_func_call();
 
-	QDialog *signature_detail = new dlg_signature_detail(this);
+	QDialog *signature_detail = new DlgSignatureDetail(this);
 	signature_detail->exec();
 
 }

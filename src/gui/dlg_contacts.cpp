@@ -1,10 +1,10 @@
 
+
 #include "dlg_contacts.h"
 
 
-DlgContacts::DlgContacts(MessageDb &db, QString &dbId,
-     QTableWidget &recipientTableWidget,
-    QWidget *parent)
+DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
+    QTableWidget &recipientTableWidget, QWidget *parent)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
     m_messDb(db),

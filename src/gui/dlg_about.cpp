@@ -1,3 +1,5 @@
+
+
 #include <QFile>
 
 #include "dlg_about.h"

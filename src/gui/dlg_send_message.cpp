@@ -237,7 +237,7 @@ void DlgSendMessage::addRecipientData(void)
 /* ========================================================================= */
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, m_accountInfo, this, m_userName);
+	    this->recipientTableWidget, this, m_userName);
 	dsSearch->show();
 }
 
@@ -512,6 +512,7 @@ void DlgSendMessage::sendMessage(void)
 
 	// only one recipient was chossen
 	if (this->recipientTableWidget->rowCount() == 1) {
+		qDebug() << "sending message for user name" << m_userName;
 		status = isds_send_message(isdsSessions.session(m_userName),
 		    sent_message);
 

@@ -199,7 +199,7 @@ public:
 	/*!
 	 * @brief Return contacts from message db.
 	 */
-	QList< QVector<QString> > uniqueContacts(void);
+	QList< QVector<QString> > uniqueContacts(void) const;
 
 	/*!
 	 * @brief Return message HTML formatted description.

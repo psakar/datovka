@@ -1,16 +1,18 @@
+
+
 #include <cstddef>
 #include <QMessageBox>
+
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 
+
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    const AccountModel::SettingsMap &accountInfo,
     QWidget *parent, QString userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
     m_action(action),
-    m_userName(userName),
-    m_accountInfo(accountInfo)
+    m_userName(userName)
 {
 	setupUi(this);
 	initSearchWindow();

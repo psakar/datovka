@@ -1,10 +1,14 @@
-#ifndef DLG_CHANGE_DIRECTORY_H
-#define DLG_CHANGE_DIRECTORY_H
+
+
+#ifndef _DLG_CHANGE_DIRECTORY_H_
+#define _DLG_CHANGE_DIRECTORY_H_
+
 
 #include <QDialog>
 
 #include "src/common.h"
 #include "ui_dlg_change_directory.h"
+
 
 class dlg_change_directory : public QDialog, public Ui::dlg_change_directory {
     Q_OBJECT
@@ -25,4 +29,4 @@ private:
 };
 
 
-#endif // DLG_CHANGE_DIRECTORY_H
+#endif /* _DLG_CHANGE_DIRECTORY_H_ */

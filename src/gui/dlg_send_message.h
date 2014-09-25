@@ -52,7 +52,7 @@ private:
 	void initNewMessageDialog(void);
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
-	QString m_dbId;
+	const QString m_dbId;
 	const Action m_action;
 	AccountModel::SettingsMap m_accountInfo;
 	QString m_reSubject;

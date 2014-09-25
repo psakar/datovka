@@ -908,7 +908,7 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 /*
  * Return contact list from message db.
  */
-QList< QVector<QString> > MessageDb::uniqueContacts(void)
+QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 /* ========================================================================= */
 {
 	QList<QVector<QString>> list_contacts;

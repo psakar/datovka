@@ -1,3 +1,5 @@
+
+
 #ifndef _DLG_CHANGE_PWD_H_
 #define _DLG_CHANGE_PWD_H_
 
@@ -35,7 +37,7 @@ private:
 	const int randomStringLength;
 
 	QTreeView &m_accountList;
-	AccountModel::SettingsMap m_accountInfo;
+	const AccountModel::SettingsMap &m_accountInfo;
 	const QString m_boxId;
 };
 

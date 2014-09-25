@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dlg_signature_detail</class>
+ <class>SignatureDetail</class>
  <widget class="QDialog" name="dlg_signature_detail">
   <property name="geometry">
    <rect>

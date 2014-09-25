@@ -1,16 +1,21 @@
-#ifndef DLG_SIGNATURE_DETAIL_H
-#define DLG_SIGNATURE_DETAIL_H
+
+
+#ifndef _DLG_SIGNATURE_DETAIL_H_
+#define _DLG_SIGNATURE_DETAIL_H_
+
 
 #include <QDialog>
 
 #include "src/common.h"
 #include "ui_dlg_signature_detail.h"
 
-class dlg_signature_detail : public QDialog, public Ui::dlg_signature_detail {
+
+class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
     Q_OBJECT
 
 public:
-	dlg_signature_detail(QWidget *parent = 0);
+	DlgSignatureDetail(QWidget *parent = 0);
 };
 
-#endif // DLG_SIGNATURE_DETAIL_H
+
+#endif /* _DLG_SIGNATURE_DETAIL_H_ */
