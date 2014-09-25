@@ -16,7 +16,7 @@
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.1"
-#define TIMEOUT_MS 1000
+#define TIMEOUT_MS 3000
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
 #define RUN_FIRST_ACTION_MS 2000 // 2 sec run action after datovka start

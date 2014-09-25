@@ -290,9 +290,12 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
     const QString &adNumberInStreet, const QString &adNumberInMunicipality,
     const QString &adZipCode,const QString &adState,const QString &nationality,
     const QString &identifier, const QString &registryCode,
-    int dbState, int dbEffectiveOVM, int dbOpenAddressing) const
+    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing) const
 /* ========================================================================= */
 {
+
+	qDebug() << dbType << ic << biDate << dbState << dbEffectiveOVM << dbOpenAddressing;
+
 	if (!m_db.isOpen()) {
 		return false;
 	}

@@ -109,6 +109,34 @@ QString tmToDbFormat(const struct tm *t)
 	return ret;
 }
 
+/* ========================================================================= */
+/*
+ * Converts date format to be stored in database.
+ */
+QString tmBirthToDbFormat(const struct tm *t)
+/* ========================================================================= */
+{
+	Q_ASSERT(NULL != t);
+
+	QString ret = "%1-%2-%3";
+
+	QString month = QString::number(t->tm_mon+1, 10);
+	if (month.size() == 1) {
+		month = "0" + month;
+	}
+
+	QString mday = QString::number(t->tm_mday, 10);
+	if (mday.size() == 1) {
+		mday = "0" + mday;
+	}
+
+	ret = ret.arg(QString::number(t->tm_year + 1900))
+	    .arg(month)
+	    .arg(mday);
+
+	return ret;
+}
+
 
 /* ========================================================================= */
 /*

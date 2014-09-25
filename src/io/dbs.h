@@ -32,6 +32,11 @@ QString timevalToDbFormat(const struct timeval *tv);
  */
 QString tmToDbFormat(const struct tm *t);
 
+/*!
+ * @brief Converts date format to be stored in database.
+ */
+QString tmBirthToDbFormat(const struct tm *t);
+
 
 /*!
  * @brief Converts date to format to be stored in database.

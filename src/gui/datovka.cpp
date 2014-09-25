@@ -3290,14 +3290,19 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	QString birthDate;
 	if ((NULL != db_owner_info->birthInfo) &&
 	    (NULL != db_owner_info->birthInfo->biDate)) {
-		birthDate = tmToDbFormat(db_owner_info->birthInfo->biDate);
+		birthDate = tmBirthToDbFormat(db_owner_info->birthInfo->biDate);
+	}
+
+	int ic = 0;
+	if (NULL != db_owner_info->ic) {
+		ic = atoi(db_owner_info->ic);
 	}
 
 	m_accountDb.insertAccountIntoDb(
 	    username,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
-	    atoi(db_owner_info->ic),
+	    ic,
 	    db_owner_info->personName ?
 	        db_owner_info->personName->pnFirstName : NULL,
 	    db_owner_info->personName ?
@@ -3330,8 +3335,8 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	    db_owner_info->identifier,
 	    db_owner_info->registryCode,
 	    (int)*db_owner_info->dbState,
-	    (int)*db_owner_info->dbEffectiveOVM,
-	    (int)*db_owner_info->dbOpenAddressing);
+	    *db_owner_info->dbEffectiveOVM,
+	    *db_owner_info->dbOpenAddressing);
 
 	return true;
 }

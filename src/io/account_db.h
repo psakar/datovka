@@ -102,7 +102,7 @@ public:
 	    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
 	    const QString &adZipCode,const QString &adState,const QString &nationality,
 	    const QString &identifier, const QString &registryCode,
-	    int dbState, int dbEffectiveOVM, int dbOpenAddressing) const;
+	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing) const;
 
 	/*!
 	 * @brief delete account info from db
