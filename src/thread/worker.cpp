@@ -572,14 +572,17 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 
 /* ========================================================================= */
 /*
-* Get password expiration info for account index
-*/
+ * Get password expiration info for account index
+ */
 bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
+	bool retval;
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -592,17 +595,21 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 		m_accountDb.setPwdExpirIntoDb(key, expirDate);
 		return true;
 	} else {
+		retval = false;
 		status = isds_get_password_expiration(
 		    isdsSessions.session(accountInfo.userName()), &expiration);
 
 		if (IE_SUCCESS == status) {
-			if (0 != expiration) {
+			if (NULL != expiration) {
 				expirDate = timevalToDbFormat(expiration);
 				m_accountDb.setPwdExpirIntoDb(key, expirDate);
-				return true;
+				retval = true;
 			}
 		}
-		return true;
+		if (NULL != expiration) {
+			free(expiration);
+		}
+		return retval;
 	}
 	return false;
 }
