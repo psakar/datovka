@@ -7,7 +7,25 @@
 QT += core gui network sql
 QT += printsupport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+# Required Qt versions
+REQUIRED_MAJOR = 5
+REQUIRED_MINOR = 2
+
+lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
+	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
+} else {
+	QT += widgets
+}
+
+isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
+	lessThan(QT_MINOR_VERSION, $${REQUIRED_MINOR}) {
+		error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
+	}
+} else {
+	warning(The current Qt version $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION} may not work.)
+}
+
+#lessThan(QT_MAJOR_VERSION)
 
 #LIBISDS_PREFIX = "$$HOME/third_party/built"
 
