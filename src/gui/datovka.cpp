@@ -2163,6 +2163,15 @@ void MainWindow::createAndSendMessage(void)
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(index)) {
+			return;
+		}
+	}
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
@@ -2301,6 +2310,18 @@ void MainWindow::manageAccountProperties(void)
 /* ========================================================================= */
 {
 	debug_func_call();
+
+	QModelIndex index = ui->accountList->currentIndex();
+	Q_ASSERT(index.isValid());
+	index = AccountModel::indexTop(index);
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(index)) {
+			return;
+		}
+	}
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
@@ -2558,9 +2579,17 @@ void MainWindow::createAndSendMessageReply(void)
 	Q_ASSERT(index.isValid());
 	index = AccountModel::indexTop(index);
 
-
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(index)) {
+			return;
+		}
+	}
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
