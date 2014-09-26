@@ -50,12 +50,7 @@ GlobIsdsSessions::~GlobIsdsSessions(void)
 		if (IE_SUCCESS != status) {
 			qDebug() << "Error freeing ISDS session.";
 		}
-
-		status = isds_cleanup();
-		if (IE_SUCCESS != status) {
-			qDebug() << "Unsuccessful ISDS clean-up.";
-		}
-	 }
+	}
 
 	status = isds_cleanup();
 	if (IE_SUCCESS != status) {
