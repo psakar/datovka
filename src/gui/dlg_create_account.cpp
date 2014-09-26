@@ -90,13 +90,17 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (ACT_EDIT == m_action) {
-		this->setWindowTitle(tr("Update account") + " " + itemTop->text());
+	switch (m_action) {
+	case ACT_EDIT:
+		this->setWindowTitle(tr("Update account") + " "
+		    + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
 		this->usernameLineEdit->setText(itemSettings[USER].toString());
 		this->usernameLineEdit->setEnabled(false);
-	} else if (ACT_PWD == m_action)  {
-		this->setWindowTitle(tr("Enter password for account") + " " + itemTop->text());
+		break;
+	case ACT_PWD:
+		this->setWindowTitle(tr("Enter password for account") + " "
+		    + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
@@ -105,8 +109,10 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
-	} else if (ACT_CERT == m_action)  {
-		this->setWindowTitle(tr("Set certificate for account") + " " + itemTop->text());
+		break;
+	case ACT_CERT:
+		this->setWindowTitle(tr("Set certificate for account") + " "
+		    + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
@@ -115,8 +121,10 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
-	} else {
-		this->setWindowTitle(tr("Enter password/certificate for account") + " " + itemTop->text());
+		break;
+	case ACT_CERTPWD:
+		this->setWindowTitle(tr("Enter password/certificate for account")
+		    + " " + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
@@ -124,6 +132,23 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->usernameLineEdit->setText(itemSettings[USER].toString());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
+		break;
+	case ACT_IDBOX:
+		this->setWindowTitle(tr("Enter ID of your databox for account")
+		    + " " + itemTop->text());
+		this->accountLineEdit->setText(itemTop->text());
+		this->accountLineEdit->setEnabled(false);
+		this->infoLabel->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
+		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->testAccountCheckBox->setEnabled(false);
+		this->addCertificateButton->setEnabled(false);
+		this->passwordLineEdit->setEnabled(false);
+		this->usernameLabel->setText(tr("Databox ID:"));
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
 	}
 
 	const QString login_method = itemSettings[LOGIN].toString();
@@ -140,6 +165,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	} else {
 		Q_ASSERT(0);
 	}
+
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
 	setActiveButton(itemindex);
 
@@ -224,18 +250,21 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLabel->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		this->rememberPswcheckBox->setEnabled(false);
+		this->usernameLineEdit->setEnabled(false);
 	} else if (itemindex == USER_CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(true);
 		this->passwordLineEdit->setEnabled(true);
 		this->rememberPswcheckBox->setEnabled(true);
+		this->usernameLineEdit->setEnabled(true);
 	} else {
 		this->certificateLabel->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLabel->setEnabled((true));
 		this->passwordLineEdit->setEnabled((true));
 		this->rememberPswcheckBox->setEnabled(true);
+		this->usernameLineEdit->setEnabled(true);
 	}
 	m_loginmethod = itemindex;
 	checkInputFields();
@@ -244,47 +273,60 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 
 /* ========================================================================= */
 /*
- *  Create and save a new account into dsgui.conf
+ *  Create new or save account into dsgui.conf
  */
 void DlgCreateAccount::saveAccount(void)
 /* ========================================================================= */
 {
 	debug_func_call();
 
+	/* get current account model */
 	AccountModel *model = dynamic_cast<AccountModel*>(
 	    m_accountList.model());
-	QModelIndex index = m_accountList.currentIndex();
-	QStandardItem *item;
+	QModelIndex index;
 	QStandardItem *itemTop;
 	AccountModel::SettingsMap itemSettings;
 
-	if (ACT_EDIT == m_action) {
-		/* Model must be present. */
+	/* set account index, itemTop and map itemSettings for account */
+	switch (m_action) {
+	case ACT_ADDNEW:
+		break;
+	case ACT_EDIT:
+		index = m_accountList.currentIndex();
 		Q_ASSERT(index.isValid());
-		item = model->itemFromIndex(index);
-		Q_ASSERT(0 != item);
-		itemTop = AccountModel::itemTop(item);
+		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
 		Q_ASSERT(0 != itemTop);
 		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	} else if (ACT_PWD == m_action) {
+		break;
+	case ACT_PWD:
+	case ACT_CERT:
+	case ACT_CERTPWD:
+	case ACT_IDBOX:
 		index = m_acntTopIdx;
-		/* Model must be present. */
 		Q_ASSERT(index.isValid());
-		item = model->itemFromIndex(index);
-		Q_ASSERT(0 != item);
-		itemTop = AccountModel::itemTop(item);
+		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
 		Q_ASSERT(0 != itemTop);
 		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
 	}
 
+	/* set account items */
 	itemSettings[NAME] = this->accountLineEdit->text();
 	itemSettings[USER] = this->usernameLineEdit->text();
+	itemSettings[REMEMBER] = this->rememberPswcheckBox->isChecked();
+	itemSettings[PWD] = this->passwordLineEdit->text();
+	itemSettings[TEST] = this->testAccountCheckBox->isChecked();
+	itemSettings[SYNC] = this->synchroCheckBox->isChecked();
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
 		itemSettings[LOGIN] = LIM_USERNAME;
 		itemSettings[P12FILE] = "";
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
 		itemSettings[LOGIN] = LIM_CERT;
+		itemSettings[PWD] = "";
 		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
 	} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
 		itemSettings[LOGIN] = LIM_USER_CERT;
@@ -299,30 +341,27 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0);
 	}
 
-	itemSettings[REMEMBER]= this->rememberPswcheckBox->isChecked();
-	itemSettings[PWD]= this->passwordLineEdit->text();
-	itemSettings[TEST]= this->testAccountCheckBox->isChecked();
-	itemSettings[SYNC]= this->synchroCheckBox->isChecked();
-
-	QModelIndex newIndex;
-
+	/* create new account / save current account */
 	switch (m_action) {
 	case ACT_EDIT:
 	case ACT_PWD:
+	case ACT_CERT:
+	case ACT_CERTPWD:
+	case ACT_IDBOX:
 		itemTop->setText(this->accountLineEdit->text());
 		itemTop->setData(itemSettings);
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
-		newIndex = model->addAccount(this->accountLineEdit->text(),
+		index = model->addAccount(this->accountLineEdit->text(),
 		    itemSettings);
 		/* Change selection. */
-		qDebug() << "Changing selection" << newIndex;
-		m_accountList.selectionModel()->setCurrentIndex(newIndex,
+		qDebug() << "Changing selection" << index;
+		m_accountList.selectionModel()->setCurrentIndex(index,
 		    QItemSelectionModel::ClearAndSelect);
 		/* Expand the tree. */
-		m_accountList.expand(newIndex);
-		emit getAccountUserDataboxInfo(newIndex);
+		m_accountList.expand(index);
+		emit getAccountUserDataboxInfo(index);
 		/* TODO -- Save/update related account DB entry. */
 		break;
 	default:

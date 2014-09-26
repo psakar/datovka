@@ -4224,28 +4224,23 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	}
 
 	QString certPath = accountInfo.certPath();
+	QString idBox;
 
-	if (certPath.isNull() || certPath.isEmpty()) {
-
-		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), m_accountDb, acntTopIdx,
-		    DlgCreateAccount::ACT_CERT, this);
-		if (QDialog::Accepted == editAccountDialog->exec()) {
-			const AccountModel::SettingsMap accountInfoNew =
-			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-			certPath = accountInfoNew.certPath();
-			saveSettings();
-		} else {
-			return false;
-		}
+	QDialog *editAccountDialog = new DlgCreateAccount(
+	    *(ui->accountList), m_accountDb, acntTopIdx,
+	    DlgCreateAccount::ACT_IDBOX, this);
+	if (QDialog::Accepted == editAccountDialog->exec()) {
+		const AccountModel::SettingsMap accountInfoNew =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		certPath = accountInfoNew.certPath();
+		idBox = accountInfoNew.userName();
+		saveSettings();
+	} else {
+		return false;
 	}
 
 	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
-	/* TODO - in this case must be sent dbID
-	 * instead of accountInfo.userName()*/
-	    accountInfo.userName(), // <-|
-	    certPath,
-	    accountInfo.testAccount());
+	    idBox, certPath, accountInfo.testAccount());
 
 	return checkConnectionError(status, accountInfo.accountName());
 }
@@ -4349,14 +4344,19 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == "user_certificate") {
 
+		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo);
+
+		/* TODO - next method is situation when certificate will be used
+		 * and password missing. The username shifts meaning to box ID.
+		 * This is used for hosted services. It is not dokumented and
+		 * we not support this method now.
+
 		if (accountInfo.password().isNull() ||
 		    accountInfo.password().isEmpty()) {
 			return loginMethodCertificateIdBox(acntTopIdx,
 			    accountInfo);
-		} else {
-			return loginMethodCertificateUserPwd(acntTopIdx,
-			    accountInfo);
 		}
+		*/
 
 	/* Login method based username, password and OTP */
 	} else {
