@@ -176,19 +176,26 @@ void DlgSendMessage::pingIsdsServer(void)
 void DlgSendMessage::addAttachmentFile(void)
 /* ========================================================================= */
 {
-	QString attachFileName = QFileDialog::getOpenFileName(this,
-	    tr("Add file"), "", tr("All files (*.*)"));
 
-	if (!attachFileName.isNull()) {
+	QFileDialog dialog(this);
+	dialog.setDirectory(QDir::homePath());
+	dialog.setFileMode(QFileDialog::ExistingFiles);
+	QStringList fileNames;
+
+	if (dialog.exec()) {
+		fileNames = dialog.selectedFiles();
+	}
+
+	for (int i = 0; i < fileNames.count(); ++i) {
 
 		int size = 0;
 		QString filename = "";
-		QFile attFile(attachFileName);
+		QFile attFile(fileNames[i]);
 		size = attFile.size();
 		QFileInfo fileInfo(attFile.fileName());
 		filename = fileInfo.fileName();
 		QMimeDatabase db;
-		QMimeType type = db.mimeTypeForFile(attachFileName);
+		QMimeType type = db.mimeTypeForFile(attFile);
 
 		int row = this->attachmentTableWidget->rowCount();
 		this->attachmentTableWidget->insertRow(row);
@@ -205,7 +212,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		item->setText(QString::number(size));
 		this->attachmentTableWidget->setItem(row,3,item);
 		item = new QTableWidgetItem;
-		item->setText(attachFileName);
+		item->setText(fileNames[i]);
 		this->attachmentTableWidget->setItem(row,4,item);
 	}
 }
