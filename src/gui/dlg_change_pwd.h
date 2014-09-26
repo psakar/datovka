@@ -5,6 +5,7 @@
 
 
 #include <QDialog>
+#include <QTimer>
 #include <QTreeView>
 
 #include "src/common.h"
@@ -24,8 +25,10 @@ private slots:
 	void showHidePasswordLine(void);
 	void changePassword(void);
 	void checkInputFields(void);
+	void pingIsdsServer(void);
 
 private:
+	QTimer *pingTimer;
 	void initPwdChangeDialog(void);
 
 	static

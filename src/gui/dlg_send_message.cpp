@@ -144,7 +144,30 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
+
+	pingTimer = new QTimer(this);
+	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+
+	connect(pingTimer, SIGNAL(timeout()), this,
+	    SLOT(pingIsdsServer()));
 }
+
+
+/* ========================================================================= */
+/*
+ * Ping isds server, test if connection on isds server is active
+ */
+void DlgSendMessage::pingIsdsServer(void)
+/* ========================================================================= */
+
+{
+	if (isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		qDebug() << "Connection to ISDS is alive :)";
+	} else {
+		qDebug() << "Connection to ISDS is dead :(";
+	}
+}
+
 
 /* ========================================================================= */
 /*

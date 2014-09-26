@@ -6,7 +6,9 @@
 
 #include <QDialog>
 #include <QFileDialog>
+#include <QTimer>
 #include <QTreeView>
+
 
 #include "src/common.h"
 #include "src/io/message_db.h"
@@ -47,8 +49,10 @@ private slots:
 	void checkInputFields(void);
 	void tableItemInsRem(void);
 	void sendMessage(void);
+	void pingIsdsServer(void);
 
 private:
+	QTimer *pingTimer;
 	void initNewMessageDialog(void);
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
@@ -61,8 +65,6 @@ private:
 	QString m_senderAddress;
 	QString m_userName;
 	MessageDb &m_messDb;
-
-
 };
 
 

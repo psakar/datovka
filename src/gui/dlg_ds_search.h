@@ -5,6 +5,7 @@
 
 
 #include <QDialog>
+#include <QTimer>
 
 #include "src/common.h"
 #include "src/models/accounts_model.h"
@@ -28,8 +29,10 @@ private slots:
 	void insertDsItems(void);
 	void enableOkButton(void);
 	void searchDataBox(void);
+	void pingIsdsServer(void);
 
 private:
+	QTimer *pingTimer;
 	bool isInRecipientTable(const QString &idDs) const;
 	void initSearchWindow(void);
 	void addContactsToTable(const QList< QVector<QString> > &contactList);

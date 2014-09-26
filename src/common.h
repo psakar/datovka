@@ -19,8 +19,9 @@
 #define TIMEOUT_MS 3000
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
-#define RUN_FIRST_ACTION_MS 2000 // 2 sec run action after datovka start
+#define RUN_FIRST_ACTION_MS 5000 // 5 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
+#define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 
 typedef enum {
 	USER_NAME = 0,

@@ -48,8 +48,29 @@ void DlgChangePwd::initPwdChangeDialog(void)
 		this->secCodeLineEdit->setEnabled(false);
 		this->label_7->setEnabled(false);
 	}
+
+	pingTimer = new QTimer(this);
+	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+
+	connect(pingTimer, SIGNAL(timeout()), this,
+	    SLOT(pingIsdsServer()));
 }
 
+
+/* ========================================================================= */
+/*
+ * Ping isds server, test if connection on isds server is active
+ */
+void DlgChangePwd::pingIsdsServer(void)
+/* ========================================================================= */
+
+{
+	if (isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		qDebug() << "Connection to ISDS is alive :)";
+	} else {
+		qDebug() << "Connection to ISDS is dead :(";
+	}
+}
 
 /* ========================================================================= */
 /*
