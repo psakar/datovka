@@ -1086,6 +1086,16 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	ui->messageAttachmentList->setColumnHidden(1, true);
 	ui->messageAttachmentList->setColumnHidden(2, true);
 
+	if (ui->messageAttachmentList->model()->rowCount() > 0) {
+		ui->saveAttachments->setEnabled(true);
+		ui->actionSave_all_attachments->setEnabled(true);
+	} else {
+		ui->saveAttachments->setEnabled(false);
+		ui->actionSave_all_attachments->setEnabled(false);
+	}
+
+	ui->messageAttachmentList->resizeColumnToContents(3);
+
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
