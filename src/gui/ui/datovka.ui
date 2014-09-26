@@ -206,12 +206,32 @@
                  </widget>
                 </item>
                 <item>
+                 <widget class="QToolButton" name="saveAttachments">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="toolTip">
+                   <string>Save all attachments to files</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="../../../res/resources.qrc">
+                    <normaloff>:/icons/24x24/save-all.png</normaloff>:/icons/24x24/save-all.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>24</width>
+                    <height>24</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QToolButton" name="saveAttachment">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
                   <property name="toolTip">
-                   <string>Save attachment to a file</string>
+                   <string>Save selected attachment to a file</string>
                   </property>
                   <property name="text">
                    <string/>
@@ -437,6 +457,7 @@
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_all_attachments"/>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
     <addaction name="separator"/>
@@ -905,6 +926,15 @@
    </property>
    <property name="text">
     <string>Save attachment</string>
+   </property>
+  </action>
+  <action name="actionSave_all_attachments">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/24x24/save-all.png</normaloff>:/icons/24x24/save-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save all attachments</string>
    </property>
   </action>
  </widget>

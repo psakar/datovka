@@ -626,7 +626,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->verifySignature->setEnabled(
 		    !messageDb->msgsVerificationAttempted(msgId));
 		ui->signatureDetails->setEnabled(true);
-
 		/* Show files related to message message. */
 		QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
 		Q_ASSERT(0 != fileTblMdl);
@@ -637,6 +636,16 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageAttachmentList->setColumnHidden(1, true);
 		ui->messageAttachmentList->setColumnHidden(2, true);
 
+		if (ui->messageAttachmentList->model()->rowCount() > 0) {
+			ui->saveAttachments->setEnabled(true);
+			ui->actionSave_all_attachments->setEnabled(true);
+		} else {
+			ui->saveAttachments->setEnabled(false);
+			ui->actionSave_all_attachments->setEnabled(false);
+		}
+
+		ui->messageAttachmentList->resizeColumnToContents(3);
+
 		/* Connect new slot. */
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
@@ -645,6 +654,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	} else {
 		ui->messageInfo->setHtml("");
 		ui->messageInfo->setReadOnly(true);
+		ui->saveAttachments->setEnabled(false);
 	}
 
 	/* TODO */
@@ -743,6 +753,7 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
 
 	//qDebug() << "Attachment selection changed.";
 	ui->saveAttachment->setEnabled(true);
+	//ui->saveAttachments->setEnabled(true);
 	ui->openAttachment->setEnabled(true);
 	ui->actionSave_attachment->setEnabled(true);
 	ui->actionOpen_attachment->setEnabled(true);
@@ -850,6 +861,69 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	}
 
 	fout.close();
+}
+
+
+/* ========================================================================= */
+/*
+ * Save all attachments to dir.
+ */
+void MainWindow::saveAllAttachmentsToDir(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	int attachments = ui->messageAttachmentList->model()->rowCount();
+
+	QString newdir = QFileDialog::getExistingDirectory(this,
+	    tr("Save attachments"), QDir::homePath(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (newdir.isNull() || newdir.isEmpty()) {
+		return;
+	}
+
+	for (int i = 0; i < attachments; ++i) {
+
+		QModelIndex index = ui->messageAttachmentList->model()->index(i,0);
+
+		Q_ASSERT(index.isValid());
+		if (!index.isValid()) {
+			return;
+		}
+
+		QModelIndex fileNameIndex = index.sibling(index.row(), 3);
+		Q_ASSERT(fileNameIndex.isValid());
+		if(!fileNameIndex.isValid()) {
+			return;
+		}
+
+		QString fileName = fileNameIndex.data().toString();
+		Q_ASSERT(!fileName.isEmpty());
+
+		fileName = newdir + "/" + fileName;
+
+		QFile fout(fileName);
+		if (!fout.open(QIODevice::WriteOnly)) {
+			return;
+		}
+
+		QModelIndex dataIndex = index.sibling(index.row(), 2);
+		Q_ASSERT(dataIndex.isValid());
+		if (!dataIndex.isValid()) {
+			return;
+		}
+
+		QByteArray data =
+		    QByteArray::fromBase64(dataIndex.data().toByteArray());
+
+		int written = fout.write(data);
+		if (written != data.size()) {
+		/* TODO ? */
+		}
+
+		fout.close();
+	}
 }
 
 
@@ -1613,6 +1687,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
 	    SLOT(saveSelectedAttachmentToFile()));
+	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
+	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
 	    SLOT(messageItemDeleteMessage()));
 
@@ -1686,6 +1762,8 @@ void MainWindow::connectMessageActionBarSlots(void)
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
 	    SLOT(saveSelectedAttachmentToFile()));
+	connect(ui->saveAttachments, SIGNAL(clicked()), this,
+	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 //	connect(ui->verifySignature, SIGNAL(clicked()), this,

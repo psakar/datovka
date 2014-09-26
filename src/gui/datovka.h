@@ -84,6 +84,11 @@ private slots:
 	void saveSelectedAttachmentToFile(void);
 
 	/*!
+	 * @brief Save all attachments to dir.
+	 */
+	void saveAllAttachmentsToDir(void);
+
+	/*!
 	 * @brief Open attachment in default application.
 	 */
 	void openSelectedAttachment(void);

@@ -64,5 +64,6 @@
         <file>icons/3party/warning_16.png</file>
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
+        <file>icons/24x24/save-all.png</file>
     </qresource>
 </RCC>
