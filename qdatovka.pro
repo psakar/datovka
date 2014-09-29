@@ -121,7 +121,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/gui/ui/dlg_signature_detail.ui \
-    src/gui/ui/dlg_change_directory.ui
+    src/gui/ui/dlg_change_directory.ui \
+    src/gui/ui/dlg_correspondence_overview.ui
 
 RESOURCES += \
     res/resources.qrc
