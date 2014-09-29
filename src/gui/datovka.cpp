@@ -225,7 +225,7 @@ void MainWindow::setWindowsAfterInit(void)
 	if (ui->accountList->model()->rowCount() <= 0) {
 		addNewAccount();
 	} else {
-		if (globPref.download_on_background) {
+		if (globPref.download_at_start) {
 			synchroniseAllAccounts();
 		}
 	}

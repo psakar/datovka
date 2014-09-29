@@ -19,7 +19,7 @@
 #define TIMEOUT_MS 3000
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
-#define RUN_FIRST_ACTION_MS 5000 // 5 sec run action after datovka start
+#define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 
@@ -133,6 +133,7 @@ public:
 	bool send_stats_with_version_checks;
 	bool download_on_background;
 	int timer_value;
+	bool download_at_start;
 	DateFmt date_format;
 	QString language;
 	SelectType after_start_select;

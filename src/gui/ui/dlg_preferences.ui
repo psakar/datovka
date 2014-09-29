@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>519</width>
-    <height>320</height>
+    <height>347</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -122,6 +122,13 @@
            <widget class="QCheckBox" name="auto_download_whole_messages">
             <property name="text">
              <string>Automatically download whole messages (may be slow)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="download_at_start">
+            <property name="text">
+             <string>Automatically synchronize all accounts after start of application</string>
             </property>
            </widget>
           </item>

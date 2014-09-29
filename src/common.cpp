@@ -42,6 +42,7 @@ GlobPreferences::GlobPreferences(void)
     send_stats_with_version_checks(true),
     download_on_background(true),
     timer_value(10),
+    download_at_start(false),
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
     after_start_select(SELECT_NEWEST)
@@ -84,6 +85,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	download_on_background = settings.value(
 	    "preferences/download_on_background",
 	    dlftlGlobPref.download_on_background).toBool();
+
+	download_at_start = settings.value(
+	    "preferences/download_at_start",
+	    dlftlGlobPref.download_at_start).toBool();
 
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
@@ -229,6 +234,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {
 		settings.setValue("download_on_background", download_on_background);
+	}
+
+	if (dlftlGlobPref.download_at_start != download_at_start) {
+		settings.setValue("download_at_start", download_at_start);
 	}
 
 	settings.endGroup();
