@@ -19,6 +19,7 @@
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
+#include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -3727,7 +3728,9 @@ void MainWindow::exportCorrespondenceOverview(void)
 /* ========================================================================= */
 {
 	debug_func_call();
-	/* TODO */
+
+	QDialog *correspondence_overview = new dlg_correspondence_overview(this);
+	correspondence_overview->exec();
 }
 
 
