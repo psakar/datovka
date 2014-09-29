@@ -2502,7 +2502,7 @@ void MainWindow::changeDataDirectory(void)
 		dbDir = globPref.confDir();
 	}
 
-	QDialog *change_directory = new dlg_change_directory(dbDir, this);
+	QDialog *change_directory = new DlgChangeDirectory(dbDir, this);
 
 	connect(change_directory, SIGNAL(sentNewPath(QString, QString, QString)),
 	    this, SLOT(receiveNewDataPath(QString, QString, QString)));
@@ -3729,7 +3729,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 {
 	debug_func_call();
 
-	QDialog *correspondence_overview = new dlg_correspondence_overview(this);
+	QDialog *correspondence_overview = new DlgCorrespondenceOverview(this);
 	correspondence_overview->exec();
 }
 

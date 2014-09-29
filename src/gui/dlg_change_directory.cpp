@@ -3,8 +3,9 @@
 #include <QFileDialog>
 
 #include "dlg_change_directory.h"
+#include "src/log/log.h"
 
-dlg_change_directory::dlg_change_directory(QString dirPath, QWidget *parent) :
+DlgChangeDirectory::DlgChangeDirectory(QString dirPath, QWidget *parent) :
     QDialog(parent),
     m_dirPath(dirPath)
 {
@@ -16,7 +17,7 @@ dlg_change_directory::dlg_change_directory(QString dirPath, QWidget *parent) :
 /*
  * Init dialog
  */
-void dlg_change_directory::initDialog(void)
+void DlgChangeDirectory::initDialog(void)
 /* ========================================================================= */
 {
 	this->newPath->setText("");
@@ -46,7 +47,7 @@ void dlg_change_directory::initDialog(void)
 /*
  * Choose new data directory
  */
-void dlg_change_directory::onDirectoryChange(void)
+void DlgChangeDirectory::onDirectoryChange(void)
 /* ========================================================================= */
 {
 	QString newdir = QFileDialog::getExistingDirectory(this,
@@ -71,10 +72,10 @@ void dlg_change_directory::onDirectoryChange(void)
 /*
  * Set new data directory and save path
  */
-void dlg_change_directory::setNewDataDirectory(void)
+void DlgChangeDirectory::setNewDataDirectory(void)
 /* ========================================================================= */
 {
-	qDebug() << __func__;
+	debug_func_call();
 
 	QString action;
 	if (this->moveDataRadioButton->isChecked()) {

@@ -1,7 +1,7 @@
 
 #include "dlg_correspondence_overview.h"
 
-dlg_correspondence_overview::dlg_correspondence_overview(QWidget *parent) :
+DlgCorrespondenceOverview::DlgCorrespondenceOverview(QWidget *parent) :
     QDialog(parent)
 {
 	setupUi(this);

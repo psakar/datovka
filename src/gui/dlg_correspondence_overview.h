@@ -7,12 +7,12 @@
 #include "ui_dlg_correspondence_overview.h"
 
 
-class dlg_correspondence_overview : public QDialog,
-    public Ui::dlg_correspondence_overview {
+class DlgCorrespondenceOverview : public QDialog,
+    public Ui::CorrespondenceOverview {
     Q_OBJECT
 
 public:
-	dlg_correspondence_overview(QWidget *parent = 0);
+	DlgCorrespondenceOverview(QWidget *parent = 0);
 
 };
 

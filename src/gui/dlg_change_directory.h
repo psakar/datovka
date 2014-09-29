@@ -10,11 +10,11 @@
 #include "ui_dlg_change_directory.h"
 
 
-class dlg_change_directory : public QDialog, public Ui::dlg_change_directory {
+class DlgChangeDirectory : public QDialog, public Ui::ChangeDirectory {
     Q_OBJECT
 
 public:
-	dlg_change_directory(QString dirPath, QWidget *parent = 0);
+	DlgChangeDirectory(QString dirPath, QWidget *parent = 0);
 
 private slots:
 	void onDirectoryChange(void);

@@ -9,7 +9,7 @@
 #include "ui_dlg_about.h"
 
 
-class aboutDialog : public QDialog, public Ui::aboutDialog
+class aboutDialog : public QDialog, public Ui::AboutDialog
 {
 	Q_OBJECT
 

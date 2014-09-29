@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dlg_change_directory</class>
- <widget class="QDialog" name="dlg_change_directory">
+ <class>ChangeDirectory</class>
+ <widget class="QDialog" name="ChangeDirectory">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -181,7 +181,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>dlg_change_directory</receiver>
+   <receiver>ChangeDirectory</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -197,7 +197,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>dlg_change_directory</receiver>
+   <receiver>ChangeDirectory</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

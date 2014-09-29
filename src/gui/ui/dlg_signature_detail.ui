@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SignatureDetail</class>
- <widget class="QDialog" name="dlg_signature_detail">
+ <widget class="QDialog" name="SignatureDetail">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -245,7 +245,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>dlg_signature_detail</receiver>
+   <receiver>SignatureDetail</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -261,7 +261,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>dlg_signature_detail</receiver>
+   <receiver>SignatureDetail</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
