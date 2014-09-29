@@ -34,8 +34,6 @@ void DlgPreferences::initPrefDialog(void)
 	    this, SLOT(setActiveTimerSetup(int)));
 
 	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
-	//not used in this dialog
-	//this->default_download_signed->setChecked(globPref.default_download_signed);
 
 	if (globPref.after_start_select == 1) {
 		this->after_start_select_1->setChecked(true);
@@ -114,8 +112,6 @@ void DlgPreferences::saveChanges(void) const
 	    this->download_on_background->isChecked();
 	globPref.download_at_start =
 	    this->download_at_start->isChecked();
-	// Not used in this dialog.
-	//globPref.default_download_signed;
 	globPref.store_messages_on_disk =
 	    this->store_messages_on_disk->isChecked();
 	globPref.store_additional_data_on_disk =
@@ -129,8 +125,6 @@ void DlgPreferences::saveChanges(void) const
 	globPref.send_stats_with_version_checks =
 	    this->send_stats_with_version_checks->isChecked();
 	globPref.timer_value = this->timerSpinBox->value();
-	// Not used in this dialog.
-	//date_format;
 	globPref.language =
 	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {
