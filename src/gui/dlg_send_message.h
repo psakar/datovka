@@ -3,18 +3,16 @@
 #ifndef _DLG_SEND_MESSAGE_H_
 #define _DLG_SEND_MESSAGE_H_
 
-
 #include <QDialog>
 #include <QFileDialog>
 #include <QTimer>
 #include <QTreeView>
 
-
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
-#include "datovka.h"
+#include "src/models/accounts_model.h"
 
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {

@@ -331,6 +331,24 @@ public:
 	 */
 	bool msgsDeleteMessageData(int dmId) const;
 
+	/*!
+	 * @brief Return id of messages in database correspond with
+	 * date interval.
+	 */
+	QList<QString> msgsDateInterval(QDate fromDate,
+	    QDate toDate, bool sent) const;
+
+	/*!
+	 * @brief Return some message items for export correspondence to html.
+	 */
+	QList<QString> getMsgForHtmlExport(int dmId) const;
+
+	/*!
+	 * @brief Return some message items for export correspondence to csv.
+	 */
+	QList<QString> getMsgForCsvExport(int dmId) const;
+
+
 protected:
 	/*!
 	 * @brief Adds _dmType column.

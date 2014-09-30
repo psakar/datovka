@@ -31,6 +31,13 @@
      </item>
      <item>
       <widget class="QLabel" name="accountName">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string/>
        </property>
@@ -97,7 +104,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QCalendarWidget" name="calendarWidget"/>
+        <widget class="QCalendarWidget" name="fromCalendarWidget"/>
        </item>
        <item>
         <spacer name="verticalSpacer">
@@ -124,7 +131,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QCalendarWidget" name="calendarWidget_2"/>
+        <widget class="QCalendarWidget" name="toCalendarWidget"/>
        </item>
        <item>
         <spacer name="verticalSpacer_2">
@@ -156,6 +163,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="sentCntLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -179,6 +193,13 @@
        </property>
        <property name="checked">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="receivedCntLabel">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -213,6 +234,9 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>

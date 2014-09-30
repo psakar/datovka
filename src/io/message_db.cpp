@@ -3110,3 +3110,134 @@ QString dbContainer::constructDbFileName(const QString &key,
 {
 	return locDir + "/" + key + "___" + (testing ? "1" : "0") + ".db";
 }
+
+
+/* ========================================================================= */
+/*
+ * Return id of messages in database correspond with date interval.
+ */
+QList<QString> MessageDb::msgsDateInterval(QDate fromDate,
+    QDate toDate, bool sent) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QList<QString> dmIDs;
+
+	if (sent) {
+		queryStr = "SELECT dmID "
+		    "FROM messages AS m LEFT JOIN supplementary_message_data "
+		    "AS s ON (m.dmID = s.message_id) WHERE "
+		    "message_type = 1 AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
+	} else {
+		queryStr = "SELECT dmID "
+		    "FROM messages AS m LEFT JOIN supplementary_message_data "
+		    "AS s ON (m.dmID = s.message_id) WHERE "
+		    "message_type = 2 AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
+	}
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Select error:" << query.lastError();
+	}
+
+	query.bindValue(":fromDate", fromDate);
+	query.bindValue(":toDate", toDate);
+
+	if (query.exec()) {
+		query.first();
+		while (query.isValid()) {
+			dmIDs.append(query.value(0).toString());
+			query.next();
+		}
+	}
+
+
+	return dmIDs;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return some message items for export correspondence to html.
+ */
+QList<QString> MessageDb::getMsgForHtmlExport(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QList<QString> messageItems;
+
+	queryStr = "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
+	    "FROM messages WHERE dmID = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Select error:" << query.lastError();
+	}
+
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			messageItems.append(query.value(0).toString());
+			messageItems.append(query.value(1).toString());
+			messageItems.append(query.value(2).toString());
+			QDateTime dateTime =
+			    dateTimeFromDbFormat(query.value(3).toString());
+			messageItems.append(dateTime.toString("dd.MM.yyyy"));
+			messageItems.append(dateTime.toString("hh:mm:ss"));
+		}
+	}
+
+	return messageItems;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return some message items for export correspondence to csv.
+ */
+QList<QString> MessageDb::getMsgForCsvExport(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QList<QString> messageItems;
+
+	queryStr = "SELECT dmMessageStatus, _dmType, dmDeliveryTime, "
+	    "dmAcceptanceTime, dmAnnotation, dmSender, dmSenderAddress, "
+	    "dmRecipient, dmRecipientAddress, dmSenderOrgUnit, "
+	    "dmSenderOrgUnitNum, dmRecipientOrgUnit, dmRecipientOrgUnitNum "
+	    "FROM messages WHERE dmID = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Select error:" << query.lastError();
+	}
+
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			messageItems.append(query.value(0).toString());
+			messageItems.append(query.value(1).toString());
+			messageItems.append(query.value(2).toString());
+			messageItems.append(query.value(3).toString());
+			messageItems.append(query.value(4).toString());
+			messageItems.append(query.value(5).toString());
+			messageItems.append(query.value(6).toString());
+			messageItems.append(query.value(7).toString());
+			messageItems.append(query.value(8).toString());
+			messageItems.append(query.value(9).toString());
+			messageItems.append(query.value(10).toString());
+			messageItems.append(query.value(11).toString());
+			messageItems.append(query.value(12).toString());
+		}
+	}
+
+	return messageItems;
+}

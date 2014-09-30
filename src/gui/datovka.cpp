@@ -2408,7 +2408,7 @@ void MainWindow::manageAccountProperties(void)
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index)) {
-			return;
+			//return;
 		}
 	}
 
@@ -3729,7 +3729,21 @@ void MainWindow::exportCorrespondenceOverview(void)
 {
 	debug_func_call();
 
-	QDialog *correspondence_overview = new DlgCorrespondenceOverview(this);
+	QModelIndex index = ui->accountList->currentIndex();
+	index = AccountModel::indexTop(index);
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QString userName = accountUserName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
+	    *messageDb, dbId, *(ui->accountList), *(ui->messageList),
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	correspondence_overview->exec();
 }
 
