@@ -1899,9 +1899,8 @@ void MainWindow::loadSettings(void)
 	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
-	//qDebug() << "All: " << settings.allKeys();
-	//qDebug() << "Groups: " << settings.childGroups();
-	//qDebug() << "Keys:" << settings.childKeys();
+	/* Received Sent messages Column widths */
+	loadSentReceivedMessagesColumnWidth(settings);
 
 	/* Window geometry. */
 	loadWindowGeometry(settings);
@@ -1916,8 +1915,6 @@ void MainWindow::loadSettings(void)
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
 
-	//ui->accountList->expandAll();
-
 	/* Select last-used account. */
 	setDefaultAccount(settings);
 
@@ -1926,9 +1923,6 @@ void MainWindow::loadSettings(void)
 
 	/* Load collapse info of account items from settings */
 	loadAccountCollapseInfo(settings);
-
-	/* Received Sent messages Column widths */
-	loadSentReceivedMessagesColumnWidth(settings);
 }
 
 
