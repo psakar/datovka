@@ -4509,6 +4509,10 @@ void MainWindow::setAndShowNotificationDialog(QList<QString> errorDmId,
 	for (int i = 0; i < errorDmId.count(); ++i) {
 		msg += tr("Message") + " " + errorDmId.at(i) + " " +
 		   tr("does not contain data necessary for ZFO export") + ".\n";
+		if (i > 10) {
+			msg += tr("And many more") + "...\n";
+			break;
+		}
 	}
 
 	msg += "\n" + QString::number(successCnt) + " " +
