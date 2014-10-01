@@ -383,6 +383,11 @@ private:
 	void saveAccountCollapseInfo(QSettings &settings) const;
 
 	/*!
+	 * @brief Save application ID and config format
+	 */
+	void saveAppIdConfigFormat(QSettings &settings) const;
+
+	/*!
 	 * @brief Save sent/received messages column widths into settings.
 	 */
 	void saveSentReceivedColumnWidth(QSettings &settings) const;

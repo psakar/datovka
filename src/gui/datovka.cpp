@@ -2208,14 +2208,8 @@ void MainWindow::saveSettings(void) const
 
 	settings.clear();
 
-	/* Window geometry. */
-	saveWindowGeometry(settings);
-
-	/* Global preferences. */
-	globPref.saveToSettings(settings);
-
-	/* Proxy settings. */
-	globProxSet.saveToSettings(settings);
+	/* Store application ID and config format */
+	saveAppIdConfigFormat(settings);
 
 	/* Accounts. */
 	m_accountModel.saveToSettings(settings);
@@ -2226,8 +2220,17 @@ void MainWindow::saveSettings(void) const
 	/* TODO */
 	saveSentReceivedColumnWidth(settings);
 
+	/* Window geometry. */
+	saveWindowGeometry(settings);
+
 	/* Store account collapses */
 	saveAccountCollapseInfo(settings);
+
+	/* Proxy settings. */
+	globProxSet.saveToSettings(settings);
+
+	/* Global preferences. */
+	globPref.saveToSettings(settings);
 
 	settings.sync();
 }
@@ -2953,6 +2956,22 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 			}
 		}
 	}
+	settings.endGroup();
+}
+
+
+/* ========================================================================= */
+/*
+* Store application ID and config format
+*/
+void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	settings.beginGroup("version");
+	settings.setValue("config_format", 1);
+	settings.setValue("app_id", "f2252df807471479fc4ea71682fa3e53");
 	settings.endGroup();
 }
 
