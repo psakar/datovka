@@ -3760,6 +3760,11 @@ void MainWindow::exportCorrespondenceOverview(void)
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
 	    *messageDb, dbId, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
+
+	connect(correspondence_overview,
+	    SIGNAL(showNotificationDialog(QList<QString>, int)), this,
+	    SLOT(setAndShowNotificationDialog(QList<QString>, int)));
+
 	correspondence_overview->exec();
 }
 
@@ -4483,4 +4488,32 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 	} else {
 		return loginMethodUserNamePwdOtp(acntTopIdx, accountInfo);
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * set and show correspondence error dialog
+ */
+void MainWindow::setAndShowNotificationDialog(QList<QString> errorDmId,
+   int successCnt)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	QString msg;
+
+	msg = tr("There were some errors during saving of the overview:") +
+	    "\n\n";
+
+	for (int i = 0; i < errorDmId.count(); ++i) {
+		msg += tr("Message") + " " + errorDmId.at(i) + " " +
+		   tr("does not contain data necessary for ZFO export") + ".\n";
+	}
+
+	msg += "\n" + QString::number(successCnt) + " " +
+	    tr("messages were successfully exported to ZFO") + ".\n";
+
+	QMessageBox::warning(this,
+	    QObject::tr("Correspondence export error"), msg, QMessageBox::Ok);
 }

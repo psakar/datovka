@@ -305,6 +305,12 @@ private slots:
 	 */
 	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
 
+	/*!
+	 * @brief Set and show correspondence error dialog.
+	 */
+	void setAndShowNotificationDialog(QList<QString> errorDmId,
+	   int successCnt);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne;

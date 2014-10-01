@@ -410,24 +410,48 @@ void DlgCorrespondenceOverview::exportData(void)
 		exportMessagesToCsv(importDir);
 	}
 
+	QList<QString> errorDmId;
+	errorDmId.clear();
+	int successCnt = 0;
+
 	if (this->exportZfoCheckBox->isChecked()) {
+
 		/* sent ZFO */
-		for (int i = 0; i < messages.sentdmIDs.count(); ++i) {
-			if (!exportMessageAsZFO(messages.sentdmIDs.at(i),
-			    importDir)) {
-				/* TODO - add dialog describes error */
-				qDebug() << "DDZ" << messages.sentdmIDs.at(i)
-				    << "export error";
+		if (this->sentCheckBox->isChecked()) {
+
+			for (int i = 0; i < messages.sentdmIDs.count(); ++i) {
+				if (!exportMessageAsZFO(messages.sentdmIDs.at(i),
+				    importDir)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DDZ"
+					    << messages.sentdmIDs.at(i)
+					    << "export error";
+					errorDmId.append(messages.sentdmIDs.at(i));
+				} else {
+					successCnt++;
+				}
 			}
 		}
+
 		/* received ZFO */
-		for (int i = 0; i < messages.receivedmIDs.count(); ++i) {
-			if (!exportMessageAsZFO(messages.receivedmIDs.at(i),
-			    importDir)) {
-    				/* TODO - add dialog describes error */
-				qDebug() << "DDZ" << messages.receivedmIDs.at(i)
-				    << "export error";
+		if (this->receivedCheckBox->isChecked()) {
+
+			for (int i = 0; i < messages.receivedmIDs.count(); ++i) {
+				if (!exportMessageAsZFO(messages.receivedmIDs.at(i),
+				    importDir)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DDZ"
+					    << messages.receivedmIDs.at(i)
+					    << "export error";
+					errorDmId.append(messages.receivedmIDs.at(i));
+				} else {
+					successCnt++;
+				}
 			}
 		}
+	}
+
+	if (!errorDmId.isEmpty()) {
+		emit showNotificationDialog(errorDmId, successCnt);
 	}
 }

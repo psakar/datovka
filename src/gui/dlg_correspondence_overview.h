@@ -28,6 +28,9 @@ public:
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
 
+signals:
+	void showNotificationDialog(QList<QString>, int);
+
 private slots:
 	void dateCalendarsChange(QDate date);
 	void exportData(void);

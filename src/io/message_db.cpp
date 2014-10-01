@@ -3128,14 +3128,14 @@ QList<QString> MessageDb::msgsDateInterval(QDate fromDate,
 		queryStr = "SELECT dmID "
 		    "FROM messages AS m LEFT JOIN supplementary_message_data "
 		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 1 AND "
+		    "message_type = 2 AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	} else {
 		queryStr = "SELECT dmID "
 		    "FROM messages AS m LEFT JOIN supplementary_message_data "
 		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 2 AND "
+		    "message_type = 1 AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	}
