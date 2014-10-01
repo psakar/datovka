@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>519</width>
-    <height>347</height>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,6 +54,12 @@
            <height>0</height>
           </size>
          </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
@@ -69,6 +75,12 @@
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <widget class="QCheckBox" name="download_on_background">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Automatically download new messages on background</string>
             </property>
@@ -78,6 +90,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QLabel" name="timerLabelPre">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
               <property name="text">
                <string> Check new messages every</string>
               </property>
@@ -85,6 +103,12 @@
             </item>
             <item>
              <widget class="QSpinBox" name="timerSpinBox">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
               <property name="minimum">
                <number>5</number>
               </property>
@@ -98,6 +122,12 @@
             </item>
             <item>
              <widget class="QLabel" name="timerLabelPost">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
               <property name="text">
                <string>minutes</string>
               </property>
@@ -120,6 +150,12 @@
           </item>
           <item>
            <widget class="QCheckBox" name="auto_download_whole_messages">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Automatically download whole messages (may be slow)</string>
             </property>
@@ -127,8 +163,14 @@
           </item>
           <item>
            <widget class="QCheckBox" name="download_at_start">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
-             <string>Automatically synchronize all accounts after start of application</string>
+             <string>Automatically synchronize all accounts on startup</string>
             </property>
            </widget>
           </item>
@@ -137,12 +179,24 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>New versions</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QCheckBox" name="check_new_versions">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Check for new QDatovka versions on startup</string>
             </property>
@@ -156,11 +210,17 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Send version info alongside the request</string>
             </property>
             <property name="checked">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -188,13 +248,39 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky.
+
+Using the checkboxes below, you can influence which data Datovka stores on the disk.
+
+Note: Password storage can be adjusted on per-account basis in the credentials dialog.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="groupBox_3">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Storage options</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
            <widget class="QCheckBox" name="store_messages_on_disk">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Allow message storage</string>
             </property>
@@ -205,6 +291,12 @@
           </item>
           <item>
            <widget class="QCheckBox" name="store_additional_data_on_disk">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Allow storage of additional data</string>
             </property>
@@ -213,21 +305,21 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="hspacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="hspacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -238,12 +330,24 @@
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QGroupBox" name="groupBox_4">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>When account is opened, select</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
            <widget class="QRadioButton" name="after_start_select_1">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Newest message</string>
             </property>
@@ -254,6 +358,12 @@
           </item>
           <item>
            <widget class="QRadioButton" name="after_start_select_2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Last displayed message</string>
             </property>
@@ -261,26 +371,32 @@
           </item>
           <item>
            <widget class="QRadioButton" name="after_start_select_3">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Nothing</string>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -291,12 +407,24 @@
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QGroupBox" name="groupBox_5">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Signing certificate validity</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <widget class="QRadioButton" name="certificate_validation_date_1">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Check against current date (safer)</string>
             </property>
@@ -307,6 +435,12 @@
           </item>
           <item>
            <widget class="QRadioButton" name="certificate_validation_date_2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Check against the date of download</string>
             </property>
@@ -321,6 +455,12 @@
           </item>
           <item>
            <widget class="QCheckBox" name="check_crl">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
              <string>Check certificate revocation list (CRL)</string>
             </property>
@@ -329,21 +469,21 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="verticalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -354,12 +494,24 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QGroupBox" name="groupBox_6">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="title">
           <string>Application language</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QComboBox" name="language">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <item>
              <property name="text">
               <string>Use system language</string>
@@ -381,7 +533,9 @@
            <widget class="QLabel" name="label">
             <property name="font">
              <font>
+              <weight>50</weight>
               <italic>true</italic>
+              <bold>false</bold>
              </font>
             </property>
             <property name="text">
@@ -389,21 +543,21 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

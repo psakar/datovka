@@ -54,12 +54,24 @@
    </item>
    <item>
     <widget class="QGroupBox" name="httpsGroupBox">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="title">
       <string>HTTPS proxy</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QRadioButton" name="noProxyRadioButton2">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>No proxy</string>
         </property>
@@ -67,6 +79,12 @@
       </item>
       <item>
        <widget class="QRadioButton" name="autoProxyRadioButton2">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Automatic proxy detection</string>
         </property>
@@ -77,6 +95,12 @@
       </item>
       <item>
        <widget class="QRadioButton" name="manualProxyRadioButton2">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Manual proxy setting</string>
         </property>
@@ -86,16 +110,35 @@
        <layout class="QHBoxLayout" name="horizontalLayou_https">
         <item>
          <widget class="QLabel" name="label_21">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
           <property name="text">
            <string>Proxy hostname:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="hostnameLineEdit2"/>
+         <widget class="QLineEdit" name="hostnameLineEdit2">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_22">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
           <property name="text">
            <string>Port:</string>
           </property>
@@ -109,6 +152,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
          </widget>
         </item>
        </layout>
@@ -118,12 +167,24 @@
    </item>
    <item>
     <widget class="QGroupBox" name="httpGroupBox">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="title">
       <string>HTTP proxy</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <widget class="QRadioButton" name="noProxyRadioButton1">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>No proxy</string>
         </property>
@@ -131,6 +192,12 @@
       </item>
       <item>
        <widget class="QRadioButton" name="autoProxyRadioButton1">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Automatic proxy detection</string>
         </property>
@@ -141,6 +208,12 @@
       </item>
       <item>
        <widget class="QRadioButton" name="manualProxyRadioButton1">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
         <property name="text">
          <string>Manual proxy setting</string>
         </property>
@@ -150,16 +223,35 @@
        <layout class="QHBoxLayout" name="horizontalLayout_http">
         <item>
          <widget class="QLabel" name="label_11">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
           <property name="text">
            <string>Proxy hostname:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="hostnameLineEdit1"/>
+         <widget class="QLineEdit" name="hostnameLineEdit1">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_12">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
           <property name="text">
            <string>Port:</string>
           </property>
@@ -185,12 +277,31 @@
             <height>0</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
          </widget>
         </item>
        </layout>
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="proxyButtonBox">
