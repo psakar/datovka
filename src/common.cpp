@@ -515,10 +515,6 @@ void removeQuoteFromAccountPassword(const QString &fileName)
 		QTextStream in(&file);
 		fileContent = in.readAll();
 		file.close();
-		fileContent.replace(QString("\""), QString(""));
-		file.reset();
-		in << fileContent;
-		file.close();
 	} else {
 		qDebug() << "Error: Cannot open file '" << fileName << "'";
 		return;
