@@ -35,6 +35,7 @@ void DlgCorrespondenceOverview::initDialog(void)
 
 	QDate currentDate = QDate().currentDate();
 	this->toCalendarWidget->setMaximumDate(currentDate);
+	this->fromCalendarWidget->setMaximumDate(currentDate);
 
 	this->outputFormatComboBox->addItem("CSV");
 	this->outputFormatComboBox->addItem("HTML");
