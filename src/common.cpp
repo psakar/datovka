@@ -476,20 +476,66 @@ const QString msgStatusToText(int status)
 void fixBackSlashesInFile(const QString &fileName)
 /* ========================================================================= */
 {
-	QString line;
+	QString fileContent;
 	QFile file(fileName);
 
-	if (file.open(QIODevice::ReadWrite|QIODevice::Text)) {
+	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
 		QTextStream in(&file);
-		line = in.readAll();
-		line.replace(QString("\\"), QString("/"));
-		file.reset();
-		in << line;
+		fileContent = in.readAll();
 		file.close();
 	} else {
 		qDebug() << "Error: Cannot open file '" << fileName << "'";
+		return;
+	}
+
+	fileContent.replace(QString("\\"), QString("/"));
+
+	if (file.open(QIODevice::WriteOnly|QIODevice::Text)) {
+		QTextStream in(&file);
+		file.reset();
+		in << fileContent;
+		file.close();
+	} else {
+		qDebug() << "Error: Cannot write file '" << fileName << "'";
 	}
 }
+
+
+/* ========================================================================= */
+/*
+ * Fix account password format = compatability with old datovka.
+ */
+void removeQuoteFromAccountPassword(const QString &fileName)
+/* ========================================================================= */
+{
+	QString fileContent;
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadOnly|QIODevice::Text)) {
+		QTextStream in(&file);
+		fileContent = in.readAll();
+		file.close();
+		fileContent.replace(QString("\""), QString(""));
+		file.reset();
+		in << fileContent;
+		file.close();
+	} else {
+		qDebug() << "Error: Cannot open file '" << fileName << "'";
+		return;
+	}
+
+	fileContent.replace(QString("\""), QString(""));
+
+	if (file.open(QIODevice::WriteOnly|QIODevice::Text)) {
+		QTextStream in(&file);
+		file.reset();
+		in << fileContent;
+		file.close();
+	} else {
+		qDebug() << "Error: Cannot write file '" << fileName << "'";
+	}
+}
+
 
 /* ========================================================================= */
 /*

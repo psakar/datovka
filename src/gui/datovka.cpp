@@ -252,6 +252,9 @@ MainWindow::~MainWindow(void)
 	/* Save settings on exit. */
 	saveSettings();
 
+	/* remove " symbols from passwords in dsgui.conf */
+	removeQuoteFromAccountPassword(globPref.loadConfPath());
+
 	delete timer;
 	delete ui;
 }

@@ -238,6 +238,13 @@ const QString msgStatusToText(int status);
  */
 void fixBackSlashesInFile(const QString &fileName);
 
+
+/*!
+ * @brief Fix account password format = compatability with old datovka.
+ */
+void removeQuoteFromAccountPassword(const QString &fileName);
+
+
 /*!
  * @brief Return dec index from hex.
  */
