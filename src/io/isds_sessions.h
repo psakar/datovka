@@ -3,8 +3,13 @@
 #ifndef _ISDS_SESSIONS_H_
 #define _ISDS_SESSIONS_H_
 
+#ifdef __APPLE__
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
 
-#include <cstdbool>
 #include <isds.h>
 #include <QMap>
 #include <QString>

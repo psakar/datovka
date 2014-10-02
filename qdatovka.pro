@@ -39,19 +39,21 @@ QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
 	-Wall -Wextra -pedantic
 
-macx {
-	# See https://bugreports.qt-project.org/browse/QTBUG-28097
-	# for further details.
-	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
-	CONFIG +=c++11
-}
-
 INCLUDEPATH = \
 	src \
 	/usr/include/libxml2
 
 LIBS = \
 	-lisds
+
+macx {
+	# See https://bugreports.qt-project.org/browse/QTBUG-28097
+	# for further details.
+	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
+	CONFIG +=c++11
+        INCLUDEPATH += /usr/local/include
+	LIBPATH += /usr/local/lib 
+}
 
 win32 {
 	INCLUDEPATH = \

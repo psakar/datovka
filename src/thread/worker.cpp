@@ -1,4 +1,5 @@
 
+#include <cmath> /* ceil(3) */
 #include <QDebug>
 #include <QThread>
 
