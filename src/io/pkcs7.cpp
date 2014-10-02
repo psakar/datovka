@@ -53,5 +53,9 @@ QDateTime certRevocationDate(const QSslCertificate &cert)
 /* ========================================================================= */
 {
 	/* TODO */
+
+	/* unused */
+	(void) cert;
+
 	return QDateTime();
 }

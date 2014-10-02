@@ -29,7 +29,8 @@ Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	m_messageDbList(messageDbList),
 	m_downloadThisAccounts(downloadThisAccounts)
 /* ========================================================================= */
-{
+{	/* unused */
+	(void) parent;
 }
 
 

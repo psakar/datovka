@@ -54,6 +54,9 @@ AttachmentModel::~AttachmentModel(void)
 int AttachmentModel::rowCount(const QModelIndex &parent) const
 /* ========================================================================= */
 {
+	/* unused */
+	(void) parent;
+
 	return m_docs.size();
 }
 
@@ -65,6 +68,9 @@ int AttachmentModel::rowCount(const QModelIndex &parent) const
 int AttachmentModel::columnCount(const QModelIndex &parent) const
 /* ========================================================================= */
 {
+	/* unused */
+	(void) parent;
+
 	return COL_NUM;
 }
 
