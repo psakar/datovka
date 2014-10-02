@@ -21,6 +21,7 @@
 #define DB_DIR "database_dir"
 #define SYNC "sync_with_all"
 #define P12FILE "p12file"
+#define LASTMSG "last_message_id"
 
 
 /*!
@@ -39,8 +40,10 @@ public:
 		QString password(void) const;
 		void setPassword(QString &pwd);
 		void setDirectory(const QString &path);
+		void setLastMsg(const QString &dmId);
 		bool testAccount(void) const;
 		QString certPath(void) const;
+		QString lastMsg(void) const;
 	};
 
 	/*

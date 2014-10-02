@@ -85,6 +85,14 @@ void AccountModel::SettingsMap::setDirectory(const QString &path)
 
 
 /* ========================================================================= */
+void AccountModel::SettingsMap::setLastMsg(const QString &dmId)
+/* ========================================================================= */
+{
+	(*this)[LASTMSG] = dmId;
+}
+
+
+/* ========================================================================= */
 bool AccountModel::SettingsMap::testAccount(void) const
 /* ========================================================================= */
 {
@@ -96,6 +104,14 @@ QString AccountModel::SettingsMap::certPath(void) const
 /* ========================================================================= */
 {
 	return (*this)[P12FILE].toString();
+}
+
+
+/* ========================================================================= */
+QString AccountModel::SettingsMap::lastMsg(void) const
+/* ========================================================================= */
+{
+	return (*this)[LASTMSG].toString();
 }
 
 
@@ -201,9 +217,13 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.insert(P12FILE,
 			    settings.value(groups.at(i) + "/" + P12FILE,
 			        "").toString());
+			itemSettings.insert(LASTMSG,
+			    settings.value(groups.at(i) + "/" + LASTMSG,
+			        "").toString());
+
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
-			    itemSettings);
+			    itemSettings);		    
 		}
 	}
 }
@@ -253,6 +273,12 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		}
 
 		settings.setValue(SYNC, itemSettings.value(SYNC));
+
+		if (!itemSettings.value(LASTMSG).isNull() &&
+		    itemSettings.value(LASTMSG).isValid() &&
+		    !itemSettings.value(LASTMSG).toString().isEmpty()) {
+			settings.setValue(LASTMSG, itemSettings.value(LASTMSG));
+		}
 
 		settings.endGroup();
 	}
