@@ -470,6 +470,8 @@ setmodel:
 		        QModelIndex)));
 		/* Clear message info. */
 		ui->messageInfo->clear();
+		/* Clear attachment list. */
+		messageItemSelectionChanged(QModelIndex());
 		/* Select last message in list if there are some messages. */
 		itemModel = ui->messageList->model();
 		/* enable/disable buttons */
@@ -563,7 +565,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	/* Disable message/attachment related buttons. */
-	ui->downloadComplete->setEnabled(true);
+	ui->downloadComplete->setEnabled(false);
+	ui->saveAttachments->setEnabled(false);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
 	ui->verifySignature->setEnabled(false);
