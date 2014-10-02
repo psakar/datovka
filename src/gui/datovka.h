@@ -379,6 +379,11 @@ private:
 	void loadSentReceivedMessagesColumnWidth(const QSettings &settings);
 
 	/*!
+	 * @brief Load last directory paths from settings.
+	 */
+	void loadLastDirectoryPaths(const QSettings &settings);
+
+	/*!
 	 * @brief Load collapse info of account items from settings.
 	 */
 	void loadAccountCollapseInfo(QSettings &settings);
@@ -577,6 +582,9 @@ private:
 	int m_sent_2;
 	int m_sort_column;
 	QString m_sort_order;
+	QString m_export_correspond_dir;
+	QString m_on_export_zfo_activate;
+	QString m_on_import_database_dir_activate;
 
 	Ui::MainWindow *ui;
 };

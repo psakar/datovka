@@ -26,7 +26,8 @@ public:
 
 	DlgCorrespondenceOverview(MessageDb &db, QString &dbId,
 	    QTreeView &accountList, QTableView &messageList,
-	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
+	    const AccountModel::SettingsMap &accountInfo,
+	    QString &export_correspond_dir, QWidget *parent = 0);
 
 signals:
 	void showNotificationDialog(QList<QString>, int);
@@ -42,6 +43,7 @@ private:
 	QTableView &m_messageList;
 	AccountModel::SettingsMap m_accountInfo;
 	exportMessages messages;
+	QString &m_export_correspond_dir;
 
 	void initDialog(void);
 	void getMsgListFromDates(QDate fromDate, QDate toDate);

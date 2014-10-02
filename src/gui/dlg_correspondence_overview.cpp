@@ -5,13 +5,15 @@
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(
     MessageDb &db, QString &dbId,
     QTreeView &accountList, QTableView &messageList,
-    const AccountModel::SettingsMap &accountInfo, QWidget *parent) :
+    const AccountModel::SettingsMap &accountInfo,
+    QString &export_correspond_dir, QWidget *parent) :
     QDialog(parent),
     m_messDb(db),
     m_dbId(dbId),
     m_accountList(accountList),
     m_messageList(messageList),
-    m_accountInfo(accountInfo)
+    m_accountInfo(accountInfo),
+    m_export_correspond_dir(export_correspond_dir)
 {
 	setupUi(this);
 	initDialog();
@@ -396,11 +398,14 @@ void DlgCorrespondenceOverview::exportData(void)
 {
 	QString importDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select directory to save correspondence"),
-	    NULL, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	    m_export_correspond_dir,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (importDir.isEmpty() || importDir.isNull()) {
 		return;
 	}
+
+	m_export_correspond_dir = importDir;
 
 	qDebug() << "Files are export to:" << importDir;
 

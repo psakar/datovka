@@ -453,9 +453,10 @@
     <addaction name="actionSignature_detail"/>
     <addaction name="actionAuthenticate_message"/>
     <addaction name="separator"/>
-    <addaction name="actionExport_as_ZFO"/>
     <addaction name="actionOpen_message_externally"/>
     <addaction name="actionOpen_delivery_info_externally"/>
+    <addaction name="separator"/>
+    <addaction name="actionExport_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
