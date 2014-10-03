@@ -4219,36 +4219,83 @@ void MainWindow::showSignatureDetails(void)
 void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 /* ========================================================================= */
 {
-	if (IE_NOT_LOGGED_IN == status) {
+	QString msgBoxTitle = "";
+	QString msgBoxContent = "";
 
-		QMessageBox::critical(this, accountName + ": " +
-		    QObject::tr("client authentication error"),
-		    QObject::tr("Authentication fails for account ")
-		    + accountName
-		    + ".\n\n" + QObject::tr("ErrorType: ")
-		    + QObject::tr("Authentication fails."),
-		    QMessageBox::Ok);
+	switch(status) {
+	case IE_NOT_LOGGED_IN:
+		msgBoxTitle = accountName + ": " + tr("Authentication error!");
+		msgBoxContent =
+		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
+		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
+		    tr("Please check your credentials including the test-"
+		        "environment setting.") + "<br>" +
+		    tr("It is possible that your password has expired - "
+		        "in this case, you need to use the official web "
+		        "interface of Datové schránky to change it.");
+		break;
 
-	} else if (IE_PARTIAL_SUCCESS == status) {
+	case IE_PARTIAL_SUCCESS:
+		msgBoxTitle = accountName +
+		    ": " + tr("OTP authentication error!");
+		msgBoxContent =
+		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
+		    "<b>" + tr("Authorization via OTP failed!") + "</b>" + "<br><br>" +
+		    tr("Please check your credentials including the test-"
+		        "environment setting.") + "<br>" +
+		    tr("It is aslo possible that your password has expired - "
+		        "in this case, you need to use the official web "
+		        "interface of Datové schránky to change it.");
+		break;
 
-		QMessageBox::critical(this, accountName + ": " +
-		    QObject::tr("OTP authentication error"),
-		    QObject::tr("OTP authentication fails for account ")
-		    + accountName
-		    + ".\n\n" + QObject::tr("ErrorType: ")
-		    + QObject::tr("OTP authentication fails."),
-		    QMessageBox::Ok);
+	case IE_TIMED_OUT:
+		msgBoxTitle = accountName +
+		    ": " + tr("Connection to ISDS error!");
+		msgBoxContent =
+		    tr("It was not possible to establish a connection "
+		    "within a set time.") + "<br><br>" +
+		    "<b>" + tr("Connection to ISDS timeout!") + "</b>" + "<br><br>" +
+		    tr("This is either caused by an extremely slow and/or "
+		    "unstable connection or by an improper setup.") + "<br>" +
+		    tr("Please check your internet connection and try again.")
+		    + "<br><br>" + tr("It might be necessary to use a proxy to "
+		    "connect to the server. If yes, please set it up in the "
+		    "File/Proxy settings menu.");
+		break;
 
-	} else if (IE_SUCCESS != status) {
+	case IE_INVAL:
+	case IE_ENUM:
+	case IE_NOMEM:
+	case IE_INVALID_CONTEXT:
+	case IE_NOTSUP:
+	case IE_HTTP:
+	case IE_ERROR:
+		msgBoxTitle = accountName +
+		    ": " + tr("QDatovka internal error!");
+		msgBoxContent =
+		    tr("It was not possible to establish a connection "
+		    "to server Datové Schránky.") + "<br><br>" +
+		    "<b>" + tr("QDatovka internal error!") + "</b>" + "<br><br>" +
+		    tr("Please check your internet connection and try again.");
+		break;
 
-		QMessageBox::critical(this, accountName + ": " +
-		    QObject::tr("connection error"),
-		    QObject::tr("An error occurred while connect to ISDS for account ")
-		    + accountName
-		    + ".\n\n" + QObject::tr("ErrorType: ")
-		    + QObject::tr("Error of connection to ISDS server."),
-		    QMessageBox::Ok);
+	default:
+		msgBoxTitle = accountName +
+		    ": " + tr("Connection to ISDS error!");
+		msgBoxContent =
+		    tr("It was not possible a connection between your computer "
+		    "and the server of Datove schranky.") + "<br><br>" +
+		    "<b>" + tr("Connection to ISDS failed!") + "</b>" + "<br><br>" +
+		    tr("This is usually caused by either lack of internet "
+		    "connection or by a firewall on the way.") + "<br>" +
+		    tr("Please check your internet connection and try again.")
+		    + "<br><br>" + tr("It might be necessary to use a proxy to "
+		    "connect to the server. If yes, please set it up in the "
+		    "File/Proxy settings menu.");
+		break;
 	}
+
+	QMessageBox::critical(this, msgBoxTitle, msgBoxContent, QMessageBox::Ok);
 }
 
 
