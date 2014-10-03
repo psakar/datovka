@@ -361,7 +361,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 
 		/* TODO - paasword dialog is shown before gui is loaded */
 
-		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current))) {
+		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current),
+		    false)) {
 		/* TODO -- What to do when no ISDS connection is present? */
 			return;
 		}
@@ -1052,7 +1053,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(accountIndex)) {
+		if (!connectToIsds(accountIndex, true)) {
 			/* TODO */
 			//return Q_CONNECT_ERROR;
 		}
@@ -1231,7 +1232,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		isConnectActive = true;
 
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			isConnectActive = connectToIsds(index);
+			isConnectActive = connectToIsds(index, true);
 		}
 
 		downloadThisAccounts.append(isConnectActive);
@@ -1302,7 +1303,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
+		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
@@ -2266,7 +2267,7 @@ void MainWindow::createAndSendMessage(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
+		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
@@ -2278,7 +2279,7 @@ void MainWindow::createAndSendMessage(void)
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			if (!connectToIsds(index)) {
+			if (!connectToIsds(index, true)) {
 				/* TODO */
 				//return Q_CONNECT_ERROR;
 			}
@@ -2302,8 +2303,9 @@ void MainWindow::addNewAccount(void)
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
 
-	connect(newAccountDialog, SIGNAL(getAccountUserDataboxInfo(QModelIndex)),
-	    this, SLOT(getOwnerInfoFromLogin(const QModelIndex)));
+	connect(newAccountDialog, SIGNAL(getAccountUserDataboxInfo(
+	    QModelIndex, bool)),
+	    this, SLOT(getOwnerInfoFromLogin(const QModelIndex, bool)));
 
 	if (QDialog::Accepted == newAccountDialog->exec()) {
 		if (ui->accountList->model()->rowCount() > 0) {
@@ -2316,7 +2318,7 @@ void MainWindow::addNewAccount(void)
 
 /* ========================================================================= */
 /*
- * Deletion confirmation dialog.
+ * Slot: Delete selected account
  */
 void MainWindow::deleteSelectedAccount(void)
 /* ========================================================================= */
@@ -2372,6 +2374,54 @@ void MainWindow::deleteSelectedAccount(void)
 
 /* ========================================================================= */
 /*
+ * Delete new account if is not possilbe connect to isds
+ */
+bool MainWindow::deleteNewAccount(const QModelIndex acntTopIdx)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	QStandardItem *item = m_accountModel.itemFromIndex(acntTopIdx);
+	QStandardItem *itemTop = AccountModel::itemTop(item);
+	int currentTopRow = itemTop->row();
+
+	if (currentTopRow < 0) {
+		return false;
+	}
+
+	QString userName = accountUserName();
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString dbDir = itemSettings[DB_DIR].toString();
+
+	if (itemTop->hasChildren()) {
+		itemTop->removeRows(0, itemTop->rowCount());
+	}
+
+	m_accountDb.deleteAccountInfo(userName + "___True");
+
+	ui->accountList->model()->removeRow(currentTopRow);
+
+	/* Delete message db from disk. */
+	MessageDb *db;
+	db = m_messageDbs.accessMessageDb(userName, dbDir,
+	    itemSettings[TEST].toBool());
+	Q_ASSERT(0 != db);
+	m_messageDbs.deleteMessageDb(db);
+
+	/* Save changed configuration. */
+	saveSettings();
+
+	if (ui->accountList->model()->rowCount() < 1) {
+		defaultUiMainWindowSettings();
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
  * Shows change password dialog.
  */
 void MainWindow::changeAccountPassword(void)
@@ -2390,7 +2440,7 @@ void MainWindow::changeAccountPassword(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
+		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
@@ -2416,11 +2466,11 @@ void MainWindow::manageAccountProperties(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
-			//return;
-		}
-	}
+//	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+//		if (!connectToIsds(index, true)) {
+//			//return;
+//		}
+//	}
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
@@ -2685,7 +2735,7 @@ void MainWindow::createAndSendMessageReply(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
+		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
@@ -2698,7 +2748,7 @@ void MainWindow::createAndSendMessageReply(void)
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-			if (!connectToIsds(index)) {
+			if (!connectToIsds(index, true)) {
 				/* TODO */
 				//return Q_CONNECT_ERROR;
 			}
@@ -2726,7 +2776,7 @@ void MainWindow::findDatabox(void)
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index)) {
+		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
@@ -2991,8 +3041,6 @@ void MainWindow::saveAccountCollapseInfo(QSettings &settings) const
 void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 /* ========================================================================= */
 {
-	debug_func_call();
-
 	settings.beginGroup("version");
 	settings.setValue("config_format", 1);
 	settings.setValue("app_id", "f2252df807471479fc4ea71682fa3e53");
@@ -3117,7 +3165,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -3196,7 +3244,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -3249,10 +3297,14 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 /*
  * Get data about logged in user and his box.
  */
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add)
 /* ========================================================================= */
 {
 	debug_func_call();
+
+	if (!add) {
+		return false;
+	}
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3260,7 +3312,33 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, false)) {
+
+			QString msgBoxTitle = accountInfo.accountName() +
+			    ": " + tr("Account error");
+			QString msgBoxContent =
+			    tr("It was not possible to get user info and "
+			    "databox info for this account from server.")
+			    +"<br><br><b>" +
+			    tr("Connection to ISDS or user authentication failed!")
+			    + "</b><br><br>" +
+			    tr("Please check your internet connection and "
+			    "try again or it is possible that your password "
+			    "(certificate) has expired - in this case, you "
+			    "need to use the official web interface of Datové "
+			    "schránky to change it.")
+			    + "<br><br><b>" + tr("The account \"") +
+			    accountInfo.accountName() + "\" ("
+			    + accountInfo.userName() + ")"+
+			    tr(" was not created!") + "</b>";
+
+			deleteNewAccount(acntTopIdx);
+
+			QMessageBox::critical(this,
+			    msgBoxTitle,
+			    msgBoxContent,
+			    QMessageBox::Ok);
+
 			return false;
 		}
 	}
@@ -3346,7 +3424,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
 	}
@@ -3538,7 +3616,7 @@ qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopI
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -3607,7 +3685,7 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	}
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx)) {
+		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -4303,7 +4381,8 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 /*
 * Check if connection to ISDS fails.
 */
-bool MainWindow::checkConnectionError(int status, QString accountName)
+bool MainWindow::checkConnectionError(int status, QString accountName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	switch (status) {
@@ -4314,8 +4393,9 @@ bool MainWindow::checkConnectionError(int status, QString accountName)
 	default:
 		qDebug() << "Account" << accountName << ":"
 		    << isds_strerror((isds_error)status) << status;
-
-		showConnectionErrorMessageBox(status, accountName);
+		if (showDialog) {
+			showConnectionErrorMessageBox(status, accountName);
+		}
 		return false;
 		break;
 	}
@@ -4327,7 +4407,7 @@ bool MainWindow::checkConnectionError(int status, QString accountName)
 * Login to ISDS server by username and password only.
 */
 bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo)
+    const AccountModel::SettingsMap accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -4360,7 +4440,8 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	status = isdsLoginUserName(isdsSessions.session(accountInfo.userName()),
 	    accountInfo.userName(), pwd, accountInfo.testAccount());
 
-	return checkConnectionError(status, accountInfo.accountName());
+	return checkConnectionError(status, accountInfo.accountName(),
+	    showDialog);
 }
 
 
@@ -4369,7 +4450,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 * Login to ISDS server by user certificate only.
 */
 bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo)
+    const AccountModel::SettingsMap accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -4402,7 +4483,8 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	    isdsSessions.session(accountInfo.userName()),
 	    certPath, accountInfo.testAccount());
 
-	return checkConnectionError(status, accountInfo.accountName());
+	return checkConnectionError(status, accountInfo.accountName(),
+	    showDialog);
 }
 
 
@@ -4411,7 +4493,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 * Login to ISDS server by user certificate, username and password.
 */
 bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo)
+    const AccountModel::SettingsMap accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -4450,7 +4532,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	    accountInfo.userName(), pwd, certPath, accountInfo.testAccount());
 
 
-	return checkConnectionError(status, accountInfo.accountName());
+	return checkConnectionError(status, accountInfo.accountName(),
+	    showDialog);
 }
 
 
@@ -4459,7 +4542,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 * Login to ISDS server by user certificate and databox ID.
 */
 bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo)
+    const AccountModel::SettingsMap accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -4492,7 +4575,8 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
 	    idBox, certPath, accountInfo.testAccount());
 
-	return checkConnectionError(status, accountInfo.accountName());
+	return checkConnectionError(status, accountInfo.accountName(),
+	    showDialog);
 }
 
 
@@ -4501,7 +4585,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 * Login to ISDS server by username, password and OTP code.
 */
 bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo)
+    const AccountModel::SettingsMap accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -4538,7 +4622,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	    accountInfo.testAccount(),
 	    accountInfo.loginMethod(),
 	    QString());
-	if (!checkConnectionError(status, accountInfo.accountName())) {
+	if (!checkConnectionError(status, accountInfo.accountName(), true)) {
 		return false;
 	}
 	bool ok;
@@ -4563,7 +4647,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	    accountInfo.userName(), pwd,
 	    accountInfo.testAccount(), accountInfo.loginMethod(), code);
 
-	return checkConnectionError(status, accountInfo.accountName());
+	return checkConnectionError(status, accountInfo.accountName(),
+	    showDialog);
 }
 
 
@@ -4571,7 +4656,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 /*
  * Connect to databox
  */
-bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
+bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 /* ========================================================================= */
 {
 
@@ -4585,16 +4670,19 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == "username") {
-		return loginMethodUserNamePwd(acntTopIdx, accountInfo);
+		return loginMethodUserNamePwd(acntTopIdx, accountInfo,
+		    showDialog);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == "certificate") {
-		return loginMethodCertificateOnly(acntTopIdx, accountInfo);
+		return loginMethodCertificateOnly(acntTopIdx, accountInfo,
+		    showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == "user_certificate") {
 
-		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo);
+		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
+		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
 		 * and password missing. The username shifts meaning to box ID.
@@ -4604,13 +4692,14 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx)
 		if (accountInfo.password().isNull() ||
 		    accountInfo.password().isEmpty()) {
 			return loginMethodCertificateIdBox(acntTopIdx,
-			    accountInfo);
+			    accountInfo, showDialog);
 		}
 		*/
 
 	/* Login method based username, password and OTP */
 	} else {
-		return loginMethodUserNamePwdOtp(acntTopIdx, accountInfo);
+		return loginMethodUserNamePwdOtp(acntTopIdx, accountInfo,
+		    showDialog);
 	}
 }
 

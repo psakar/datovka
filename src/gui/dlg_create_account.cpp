@@ -264,7 +264,7 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLabel->setEnabled((true));
 		this->passwordLineEdit->setEnabled((true));
 		this->rememberPswcheckBox->setEnabled(true);
-		this->usernameLineEdit->setEnabled(true);
+		this->usernameLineEdit->setEnabled(false);
 	}
 	m_loginmethod = itemindex;
 	checkInputFields();
@@ -361,7 +361,7 @@ void DlgCreateAccount::saveAccount(void)
 		    QItemSelectionModel::ClearAndSelect);
 		/* Expand the tree. */
 		m_accountList.expand(index);
-		emit getAccountUserDataboxInfo(index);
+		emit getAccountUserDataboxInfo(index, true);
 		/* TODO -- Save/update related account DB entry. */
 		break;
 	default:

@@ -303,7 +303,7 @@ private slots:
 	/*!
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add);
 
 	/*!
 	 * @brief Set and show correspondence error dialog.
@@ -317,6 +317,11 @@ private:
 	Worker *workerSyncAll, *workerSyncOne;
 	QTimer *timer;
 	int timeout;
+
+ 	/*!
+	 * @brief Delete new account if is not possilbe connect to isds.
+	 */
+	bool deleteNewAccount(const QModelIndex acntTopIdx);
 
 	/*!
 	 * @brief Connects top menu-bar buttons to appropriate actions.
@@ -522,42 +527,43 @@ private:
 	/*!
 	 * @brief Check if connection to ISDS fails.
 	 */
-	bool checkConnectionError(int status, QString accountName);
+	bool checkConnectionError(int status, QString accountName,
+	    bool showDialog);
 
 	/*!
 	 * @brief connect to ISDS databox
 	 */
-	bool connectToIsds(const QModelIndex acntTopIdx);
+	bool connectToIsds(const QModelIndex acntTopIdx, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username and password only.
 	 */
 	bool loginMethodUserNamePwd(const QModelIndex acntTopIdx,
-	   const AccountModel::SettingsMap accountInfo);
+	   const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username, password and OTP code.
 	 */
 	bool loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo);
+	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by certificate only.
 	 */
 	bool loginMethodCertificateOnly(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo);
+	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by certificate, username and password.
 	 */
 	bool loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo);
+	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by certificate and databox ID.
 	 */
 	bool loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo);
+	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
