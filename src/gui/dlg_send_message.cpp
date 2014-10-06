@@ -31,6 +31,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_userName(""),
     m_messDb(db)
 {
+	m_attachSize = 0;
 	setupUi(this);
 	initNewMessageDialog();
 }
@@ -41,6 +42,7 @@ void DlgSendMessage::on_cancelButton_clicked(void)
 {
 	this->close();
 }
+
 
 /* ========================================================================= */
 /*
@@ -132,7 +134,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
 	    SLOT(tableItemInsRem()));
@@ -150,6 +152,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	connect(pingTimer, SIGNAL(timeout()), this,
 	    SLOT(pingIsdsServer()));
+
+	this->attachmentWarning->setStyleSheet("QLabel { color: red }");
+	this->attachmentWarning->hide();
 }
 
 
@@ -192,6 +197,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		QString filename = "";
 		QFile attFile(fileNames[i]);
 		size = attFile.size();
+		m_attachSize += size;
 		QFileInfo fileInfo(attFile.fileName());
 		filename = fileInfo.fileName();
 		QMimeDatabase db;
@@ -217,6 +223,7 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 }
 
+
 /* ========================================================================= */
 /*
  * Selection of attachment item
@@ -228,6 +235,7 @@ void DlgSendMessage::attItemSelect(void)
 	this->openAttachment->setEnabled(true);
 }
 
+
 /* ========================================================================= */
 /*
  * Enable/disable optional fields in dialog
@@ -238,15 +246,18 @@ void DlgSendMessage::recItemSelect(void)
 	this->removeRecipient->setEnabled(true);
 }
 
+
 /* ========================================================================= */
 /*
- * Check all intputs when any item was changed
+ * Check all intputs when any item was changed in the tablewidget
  */
 void DlgSendMessage::tableItemInsRem(void)
 /* ========================================================================= */
 {
+	m_attachSize = cmptAttachmentSize();
 	checkInputFields();
 }
+
 
 /* ========================================================================= */
 /*
@@ -271,6 +282,7 @@ void DlgSendMessage::addRecipientData(void)
 	dsSearch->show();
 }
 
+
 /* ========================================================================= */
 /*
  * Delete file (item) from attachment table widget
@@ -286,6 +298,25 @@ void DlgSendMessage::deleteAttachmentFile(void)
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ * Get attachment size when anz item was removed from tablewidget
+ */
+int DlgSendMessage::cmptAttachmentSize(void)
+/* ========================================================================= */
+
+{
+	int attachSize = 0;
+
+	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
+		attachSize += this->attachmentTableWidget->item(i,3)->text().toInt();
+	}
+
+	return attachSize;
+}
+
+
 /* ========================================================================= */
 /*
  * Check non-empty mandatory items in send message dialog
@@ -296,8 +327,17 @@ void DlgSendMessage::checkInputFields(void)
 	bool buttonEnabled = !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
 		    && (this->attachmentTableWidget->rowCount() > 0);
+
+	if (m_attachSize <= MAX_ATTACHMENT_SIZE) {
+		this->attachmentWarning->hide();
+	} else {
+		this->attachmentWarning->show();
+		buttonEnabled = false;
+	}
+
 	this->sendButton->setEnabled(buttonEnabled);
 }
+
 
 /* ========================================================================= */
 /*
@@ -368,6 +408,7 @@ void isds_document_free_void(void **document)
 {
 	isds_document_free((struct isds_document **) document);
 }
+
 
 /* ========================================================================= */
 /*

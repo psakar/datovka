@@ -22,6 +22,8 @@
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
+#define MAX_ATTACHMENT_SIZE 10000000 // 10MB
+
 
 typedef enum {
 	USER_NAME = 0,

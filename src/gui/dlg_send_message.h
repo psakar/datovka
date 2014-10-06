@@ -63,6 +63,9 @@ private:
 	QString m_senderAddress;
 	QString m_userName;
 	MessageDb &m_messDb;
+	int m_attachSize;
+
+	int cmptAttachmentSize(void);
 };
 
 

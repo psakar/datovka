@@ -160,10 +160,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		itemindex = USER_CERTIFICATE;
 	} else if (LIM_HOTP == login_method) {
 		itemindex = HOTP;
-	} else if (LIM_TOTP == login_method) {
-		itemindex = TOTP;
 	} else {
-		Q_ASSERT(0);
+		itemindex = TOTP;
 	}
 
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
@@ -290,6 +288,7 @@ void DlgCreateAccount::saveAccount(void)
 	/* set account index, itemTop and map itemSettings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
+		itemTop = NULL;
 		break;
 	case ACT_EDIT:
 		index = m_accountList.currentIndex();
@@ -309,6 +308,7 @@ void DlgCreateAccount::saveAccount(void)
 		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		break;
 	default:
+		itemTop = NULL;
 		Q_ASSERT(0);
 		break;
 	}
