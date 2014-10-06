@@ -44,6 +44,7 @@ INCLUDEPATH = \
 	/usr/include/libxml2
 
 LIBS = \
+	-lcrypto \
 	-lisds
 
 macx {
@@ -66,6 +67,7 @@ win32 {
 }
 
 SOURCES += src/common.cpp \
+    src/crypto/crypto.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_change_pwd.cpp \
     src/gui/dlg_contacts.cpp \
@@ -91,6 +93,7 @@ SOURCES += src/common.cpp \
     src/gui/dlg_correspondence_overview.cpp
 
 HEADERS += src/common.h \
+    src/crypto/crypto.h \
     src/gui/datovka.h \
     src/gui/dlg_change_pwd.h \
     src/gui/dlg_contacts.h \

@@ -5,6 +5,7 @@
 #include <QtWidgets>
 
 #include "src/common.h"
+#include "src/crypto/crypto.h"
 #include "src/gui/datovka.h"
 #include "src/log/log.h"
 
@@ -101,6 +102,11 @@ int main(int argc, char *argv[])
 	qint64 start, stop, diff;
 	start = QDateTime::currentMSecsSinceEpoch();
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
+
+	if (0 != init_crypto()) {
+		logError("%s\n", "Cannot load cryptographic backend.");
+	}
+
 /*
 #if defined(Q_OS_UNIX)
 #elif defined(Q_OS_WIN)

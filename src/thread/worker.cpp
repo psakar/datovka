@@ -1,10 +1,12 @@
 
+#include <cassert>
 #include <cmath> /* ceil(3) */
 #include <QDebug>
 #include <QThread>
 
 #include "worker.h"
 #include "src/common.h"
+#include "src/crypto/crypto.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/pkcs7.h"
@@ -14,8 +16,8 @@
 
 
 /* ========================================================================= */
-/*!
- * @brief Construtor.
+/*
+ * Constructor.
  */
 Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel, int count,
@@ -29,7 +31,8 @@ Worker::Worker(QModelIndex acntTopIdx, QString dmId,
 	m_messageDbList(messageDbList),
 	m_downloadThisAccounts(downloadThisAccounts)
 /* ========================================================================= */
-{	/* unused */
+{
+	/* unused */
 	(void) parent;
 }
 
@@ -652,6 +655,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 			    &message);
 		}
 	} else {
+		assert(0); /* Only signed messages can be downloaded. */
 		status = isds_get_received_message(isdsSessions.session(
 		    accountInfo.userName()),
 		    dmId.toStdString().c_str(),
@@ -666,7 +670,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	int dmID = atoi(message->envelope->dmID);
 
-	/* get signed raw data from message */
+	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
 		QString raw = QByteArray((char*)message->raw,
 		    message->raw_length).toBase64();
@@ -728,7 +732,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		    message->envelope->dmAcceptanceTime);
 	}
 
-	/* update message envelope in db */
+	/* Update message envelope in db. */
 	(messageDb.msgsUpdateMessageEnvelope(dmID,
 	    /* TODO - set correctly next two values */
 	    false, "tReturnedMessage",
@@ -766,6 +770,11 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	    (incoming) ? "received" : "sent"))
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
+
+	/* Verify message signature. */
+	int ret = verify_raw_message_signature(message->raw,
+	    message->raw_length);
+	qDebug() << "Verification ret" << ret;
 
 	/* insert/update hash into db */
 	QString hashValue = QByteArray((char*)message->envelope->hash->value,
