@@ -71,6 +71,7 @@ private:
 	int m_attachSize;
 
 	int cmptAttachmentSize(void);
+	int showErrorMessageBox(int status);
 };
 
 

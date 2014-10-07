@@ -158,7 +158,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
+	//connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -496,12 +496,7 @@ void isds_message_copy_free_void(void **message_copy)
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
-	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
-		/* TODO */
-		//isdsSessions.connectToIsds(m_accountInfo);
-	}
-
-	isds_error status;
+	isds_error status = IE_ERROR;
 
 	// init bool pointers
 	_Bool *dmPersonalDelivery = NULL;
@@ -523,7 +518,7 @@ void DlgSendMessage::sendMessage(void)
 
 	if (sent_envelope == NULL) {
 		free(sent_envelope);
-		goto fail;
+		goto finish;
 	}
 	memset(sent_envelope, 0, sizeof(struct isds_envelope));
 
@@ -532,7 +527,7 @@ void DlgSendMessage::sendMessage(void)
 
 	if (sent_message == NULL) {
 		free(sent_message);
-		goto fail;
+		goto finish;
 	}
 	memset(sent_message, 0, sizeof(struct isds_message));
 
@@ -545,7 +540,7 @@ void DlgSendMessage::sendMessage(void)
 		Q_ASSERT(0 != document);
 
 		if (document == NULL) {
-			goto fail;
+			goto finish;
 		}
 		memset(document, 0, sizeof(struct isds_document));
 
@@ -591,7 +586,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	// set mandatory fields of envelope
-	sent_envelope->dmID = NULL; // must be NULL;
+	sent_envelope->dmID = NULL;
 	sent_envelope->dmAnnotation =
 	    strdup(this->subjectText->text().toStdString().c_str());
 	sent_envelope->dbIDRecipient =
@@ -667,29 +662,20 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->envelope = sent_envelope;
 	sent_message->documents = documents;
 
-	// only one recipient was chossen
+
+	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+		goto finish;
+	}
+
+
+	/* Sent message to 1 recipient */
 	if (this->recipientTableWidget->rowCount() == 1) {
+
 		qDebug() << "sending message for user name" << m_userName;
 		status = isds_send_message(isdsSessions.session(m_userName),
 		    sent_message);
 
-		if (status == IE_SUCCESS) {
-			QMessageBox::information(this,
-			    tr("Message was sent"),
-			    tr("Message was sent into ISDS successfully."),
-			    QMessageBox::Ok);
-		} else {
-			QMessageBox::warning(this, tr("Error occurred"),
-			    tr("An error occurred while message was sent")
-			    + "\n" + tr("ErrorType: ") + isds_strerror(status),
-			    QMessageBox::Ok);
-		}
-
-		isds_message_free(&sent_message);
-		this->close();
-
-
-	// message for multiple recipients
+	/* Sent message for multiple recipients */
 	} else {
 		struct isds_list *copies = NULL;
 		struct isds_list *last = NULL;
@@ -702,7 +688,7 @@ void DlgSendMessage::sendMessage(void)
 			Q_ASSERT(0 != message_copy);
 
 			if (message_copy == NULL) {
-				goto fail;
+				goto finish;
 			}
 			memset(message_copy,0,sizeof(struct isds_message_copy));
 
@@ -728,30 +714,104 @@ void DlgSendMessage::sendMessage(void)
 				last = newListItem;
 			}
 		}
+
 		status = isds_send_message_to_multiple_recipients(
 		    isdsSessions.session(m_userName), sent_message, copies);
+	}
 
-
-		if (status == IE_SUCCESS) {
-			QMessageBox::information(this,
-			    tr("Messages were sent"),
-			    tr("Messages were sent into ISDS successfully."),
-			    QMessageBox::Ok);
-		} else {
-			QMessageBox::warning(this, tr("Error occurred"),
-			    tr("An error occurred while messages were sent")
-			    + "\n" + tr("ErrorType: ") + isds_strerror(status),
-			    QMessageBox::Ok);
-		}
+finish:
+	if (status == IE_SUCCESS) {
+		QMessageBox::information(this,
+		    tr("Message was sent"),
+		    tr("Messages was sent into ISDS successfully."),
+		    QMessageBox::Ok);
 
 		isds_message_free(&sent_message);
 		this->close();
+		return;
+	} else {
+		if (showErrorMessageBox((int)status) == QMessageBox::Yes) {
+			isds_message_free(&sent_message);
+			this->close();
+			return;
+		};
 	}
 
-	return;
+	isds_message_free(&sent_message);
+}
 
-fail:
-	/* TODO - free all structure */
-	qDebug() << "An error was occurre";
-	this->close();
+
+/* ========================================================================= */
+/*
+* This is call if an error of send message procedure was obtained
+*/
+int DlgSendMessage::showErrorMessageBox(int status)
+/* ========================================================================= */
+{
+	QString msgBoxTitle = "";
+	QString msgBoxContent = "";
+
+	switch(status) {
+	case IE_PARTIAL_SUCCESS:
+		msgBoxTitle = tr("Multiple message error!");
+		msgBoxContent =
+		    tr("It was not possible to send message to all recipients.")
+		    + "<br><br>" +
+		    "<b>" + tr("Send multiple message finished with error!")
+		    + "</b>" + "<br><br>" +
+		    tr("Please check your credentials including the test-"
+		        "environment setting.") + "<br>" +
+		    tr("It is possible that your password has expired - "
+		        "in this case, you need to use the official web "
+		        "interface of Datové schránky to change it.");
+		break;
+
+	case IE_NOT_LOGGED_IN:
+		msgBoxTitle = tr("Send message error!");
+		    tr("It was not possible to send message to ISDS.") + "<br><br>" +
+		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
+		    tr("Please check your credentials including the test-"
+		        "environment setting.") + "<br>" +
+		    tr("It is possible that your password has expired - "
+		        "in this case, you need to use the official web "
+		        "interface of Datové schránky to change it.");
+		break;
+
+	case IE_TIMED_OUT:
+		msgBoxTitle = tr("Send message error!");
+		msgBoxContent =
+		    tr("It was not possible to send message to ISDS.")
+		    + "<br><br>" +
+		    "<b>" + tr("Send message to ISDS timeout!")
+		    + "</b>" + "<br><br>" +
+		    tr("It was not possible to establish a connection "
+		    "within a set time.") + "<br>" +
+		    tr("Please check your internet connection and try again.");
+		break;
+
+	case IE_INVAL:
+	case IE_ENUM:
+	case IE_NOMEM:
+	case IE_INVALID_CONTEXT:
+	case IE_NOTSUP:
+	case IE_HTTP:
+	case IE_ERROR:
+	default:
+		msgBoxTitle = tr("Send message error!");
+		msgBoxContent =
+		    tr("It was not possible to send message to ISDS.")
+		    + "<br><br>" +
+		    "<b>" + tr("Connection to ISDS failed!")
+		    + "</b>" + "<br><br>" +
+		    tr("It was not possible a connection between your computer "
+		    "and the server of Datove schranky.") + " " +
+		    tr("Please check your internet connection and try again.");
+		break;
+	}
+
+	msgBoxContent += "<br><br><b>" +
+	    tr("Do you want to close send message dialog") + "</b>";
+
+	return QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
+		QMessageBox::Yes|QMessageBox::No);
 }
