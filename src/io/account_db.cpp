@@ -392,3 +392,48 @@ bool AccountDb::deleteAccountInfo(QString key) const
 
 	return true;
 }
+
+
+
+/* ========================================================================= */
+/*
+ * Get DbEffectiveOVM from db.
+ */
+QList<QString> AccountDb::getUserDataboxInfo(QString key) const
+/* ========================================================================= */
+{
+	QList<QString> dataList;
+	dataList.clear();
+
+	if (!m_db.isOpen()) {
+		return dataList;
+	}
+
+	QSqlQuery query(m_db);
+
+	QString queryStr =
+	    "SELECT dbType, dbEffectiveOVM, dbOpenAddressing FROM "
+	    "account_info WHERE key = :key";
+
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: getUserDataboxInfo" << query.lastError();
+		return dataList;
+	}
+	query.bindValue(":key", key);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			/* dbType */
+			dataList.append(query.value(0).toString());
+			/* dbEffectiveOVM */
+			dataList.append(query.value(1).toString());
+			/* dbOpenAddressing */
+			dataList.append(query.value(2).toString());
+		}
+	}
+
+	return dataList;
+}
+
+

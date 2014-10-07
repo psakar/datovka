@@ -15,6 +15,7 @@
 DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     QTreeView &accountList, QTableView &messageList,
     const AccountModel::SettingsMap &accountInfo,
+    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
     const QString &senderAddress)
@@ -24,6 +25,9 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_dbId(dbId),
     m_action(action),
     m_accountInfo(accountInfo),
+    m_dbType(dbType),
+    m_dbEffectiveOVM(dbEffectiveOVM),
+    m_dbOpenAddressing(dbOpenAddressing),
     m_reSubject(reSubject),
     m_senderId(senderId),
     m_sender(sender),
@@ -73,8 +77,17 @@ void DlgSendMessage::initNewMessageDialog(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	QString dbOpenAddressing;
+	if (m_dbOpenAddressing) {
+		dbOpenAddressing = tr("PDZ is enabled");
+	} else {
+		dbOpenAddressing = tr("PDZ is disabled");
+	}
+
+
 	this->fromUser->setText("<strong>" + accountItemTop->text() +
-	    "</strong>" + " (" + itemSettings[USER].toString() + ")");
+	    "</strong>" + " (" + itemSettings[USER].toString() + ") - "
+	    + m_dbType + ": " + dbOpenAddressing);
 
 	index = m_messageList.currentIndex();
 	m_userName = itemSettings[USER].toString();
@@ -155,6 +168,26 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	this->attachmentWarning->setStyleSheet("QLabel { color: red }");
 	this->attachmentWarning->hide();
+
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		this->dmAllowSubstDelivery->setEnabled(false);
+		this->dmAllowSubstDelivery->hide();
+	}
+
+	if (m_dbOpenAddressing) {
+		this->payReply->setEnabled(true);
+		this->payReply->show();
+	} else {
+		this->payReply->setEnabled(false);
+		this->payReply->hide();
+	}
+
+	connect(this->payReply, SIGNAL(stateChanged(int)), this,
+	    SLOT(showOptionalFormAndSet(int)));
+
+	/* TODO */
+	this->payRecipient->setEnabled(false);
+	this->payRecipient->hide();
 }
 
 
@@ -272,6 +305,34 @@ void DlgSendMessage::showOptionalForm(int state)
 
 /* ========================================================================= */
 /*
+ * Show/hide optional fields in dialog and set any items
+ */
+void DlgSendMessage::showOptionalFormAndSet(int state)
+/* ========================================================================= */
+{
+	this->OptionalWidget->setHidden(Qt::Unchecked == state);
+
+	checkInputFields();
+
+	if (Qt::Unchecked == state) {
+		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: black }");
+		this->labeldmSenderRefNumber->setText(tr("Your reference number:"));
+		disconnect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
+		this, SLOT(checkInputFields()));
+	} else {
+		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: red }");
+		this->labeldmSenderRefNumber->setText(tr("Enter reference number:"));
+		this->dmSenderRefNumber->setFocus();
+
+		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
+		this, SLOT(checkInputFields()));
+	}
+}
+
+
+
+/* ========================================================================= */
+/*
  * Add recipient from search dialog
  */
 void DlgSendMessage::addRecipientData(void)
@@ -333,6 +394,12 @@ void DlgSendMessage::checkInputFields(void)
 	} else {
 		this->attachmentWarning->show();
 		buttonEnabled = false;
+	}
+
+	if (this->payReply->isChecked()) {
+		if (this->dmSenderRefNumber->text().isEmpty()) {
+			buttonEnabled = false;
+		}
 	}
 
 	this->sendButton->setEnabled(buttonEnabled);
@@ -441,6 +508,7 @@ void DlgSendMessage::sendMessage(void)
 	_Bool *dmOVM = NULL;
 	_Bool *dmPublishOwnID = NULL;
 	_Bool *dmAllowSubstDelivery = NULL;
+	QString dmType;
 
 	// message and envleople structures
 	struct isds_message *sent_message = NULL;
@@ -559,19 +627,37 @@ void DlgSendMessage::sendMessage(void)
 	    (long int *)this->dmLegalTitleLaw->text().toLong() : NULL;
 	sent_envelope->dmToHands = !this->dmToHands->text().isEmpty() ?
 	    strdup(this->dmToHands->text().toStdString().c_str()) : NULL;
-	sent_envelope->dmType = NULL;
 
-	// set bool pointers
+	if (this->payReply->isChecked()) {
+		dmType = "I";
+	}
+
 	dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
 	*dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
 	sent_envelope->dmPersonalDelivery = dmPersonalDelivery;
-	/* TODO - set dmAllowSubstDelivery from dialog */
+
+	/* only OVM can changes */
 	dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
-	*dmAllowSubstDelivery = true;
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		*dmAllowSubstDelivery = true;
+	} else {
+		*dmAllowSubstDelivery = this->dmAllowSubstDelivery->isChecked();
+	}
+
+	/* TODO - set dmType
+	dmType = "O";
+	*/
+
+	if (this->payReply->isChecked()) {
+		dmType = "I";
+	}
+
+	sent_envelope->dmType = !dmType.isNull() ?
+	    strdup(dmType.toStdString().c_str()) : NULL;
+
 	sent_envelope->dmAllowSubstDelivery = dmAllowSubstDelivery;
-	/* TODO - set dmOVM from dialog */
 	dmOVM = (_Bool *) malloc(sizeof(_Bool));
-	*dmOVM = true;
+	*dmOVM = m_dbEffectiveOVM;
 	sent_envelope->dmOVM = dmOVM;
 	dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
 	*dmPublishOwnID = this->dmPublishOwnID->isChecked();

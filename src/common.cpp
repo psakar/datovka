@@ -647,6 +647,28 @@ QString convertDbTypeToString(int value)
 
 /* ========================================================================= */
 /*
+ * Convert type of databox to int
+ */
+int convertDbTypeToInt(QString value)
+/* ========================================================================= */
+{
+	if (value == "OVM") return DBTYPE_OVM;
+	else if (value == "OVM_NOTAR") return DBTYPE_OVM_NOTAR;
+	else if (value == "OVM_EXEKUT") return DBTYPE_OVM_EXEKUT;
+	else if (value == "OVM_REQ") return DBTYPE_OVM_REQ;
+	else if (value == "PO") return DBTYPE_PO;
+	else if (value == "PO_ZAK") return DBTYPE_PO_ZAK;
+	else if (value == "PO_REQ") return DBTYPE_PO_REQ;
+	else if (value == "PFO") return DBTYPE_PFO;
+	else if (value == "PFO_ADVOK") return DBTYPE_PFO_ADVOK;
+	else if (value == "PFO_DANPOR") return DBTYPE_PFO_DANPOR;
+	else if (value == "PFO_INSSPR") return DBTYPE_PFO_INSSPR;
+	else if (value == "FO") return DBTYPE_FO;
+	else return DBTYPE_SYSTEM;
+}
+
+/* ========================================================================= */
+/*
  * Convert event type to string
  */
 QString convertEventTypeToString(int value)

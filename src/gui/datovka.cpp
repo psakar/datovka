@@ -2262,19 +2262,29 @@ void MainWindow::createAndSendMessage(void)
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
+	QList<QString> accountData =
+	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
-	const AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (accountData.isEmpty()) {
+		return;
+	}
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	QString dbType = accountData.at(0);
+	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
+	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+
+	if (!isdsSessions.isConnectToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
+			/* TODO - dialog to inform user about error */
+
 			return;
 		}
 	}
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
+	    dbType, dbEffectiveOVM, dbOpenAddressing, this);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -2731,10 +2741,18 @@ void MainWindow::createAndSendMessageReply(void)
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
-	const AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QList<QString> accountData =
+	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (accountData.isEmpty()) {
+		return;
+	}
+
+	QString dbType = accountData.at(0);
+	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
+	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+
+	if (!isdsSessions.isConnectToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
@@ -2742,7 +2760,8 @@ void MainWindow::createAndSendMessageReply(void)
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this,
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
+	    dbType, dbEffectiveOVM, dbOpenAddressing, this,
 	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		const AccountModel::SettingsMap accountInfo =

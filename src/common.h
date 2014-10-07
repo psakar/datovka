@@ -278,6 +278,11 @@ QString convertSenderTypeToString(int value);
 QString convertDbTypeToString(int value);
 
 /*!
+ * @brief Convert type of databox to int
+ */
+int convertDbTypeToInt(QString value);
+
+/*!
  * @brief Convert event type to string
  */
 QString convertEventTypeToString(int value);

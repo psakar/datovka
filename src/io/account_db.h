@@ -109,6 +109,8 @@ public:
 	 */
 	bool deleteAccountInfo(QString key) const;
 
+	QList<QString> getUserDataboxInfo(QString key) const;
+
 private:
 	QSqlDatabase m_db; /*!< Account database. */
 };

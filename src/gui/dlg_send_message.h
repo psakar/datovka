@@ -27,6 +27,7 @@ public:
 	DlgSendMessage(MessageDb &db, QString &dbId, Action action,
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
+	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QWidget *parent = 0,
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
@@ -36,6 +37,7 @@ public:
 private slots:
 	void on_cancelButton_clicked(void);
 	void showOptionalForm(int);
+	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
 	void deleteAttachmentFile(void);
 	void openAttachmentFile(void);
@@ -57,6 +59,9 @@ private:
 	const QString m_dbId;
 	const Action m_action;
 	AccountModel::SettingsMap m_accountInfo;
+	QString m_dbType;
+	bool m_dbEffectiveOVM;
+	bool m_dbOpenAddressing;
 	QString m_reSubject;
 	QString m_senderId;
 	QString m_sender;
