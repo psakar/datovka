@@ -686,3 +686,29 @@ QString convertEventTypeToString(int value)
 	else if (value == EVENT_UKNOWN) return "";
 	else return "";
 }
+
+
+/* ========================================================================= */
+/*
+ * Convert event type to string
+ */
+QString getdbStateText(int value)
+/* ========================================================================= */
+{
+	if (value == DBSTATE_ACCESSIBLE)
+		return QObject::tr("DS je přístupná, lze do ní dodávat zprávy, "
+		    "na Portále lze vyhledat");
+	else if (value == DBSTATE_TEMP_UNACCESSIBLE)
+		return QObject::tr("DS je dočasně znepřístupněna (na vlastní "
+		"žádost), může být později opět zpřístupněna");
+	else if (value == DBSTATE_NOT_YET_ACCESSIBLE)
+		return QObject::tr("DS je dosud neaktivní, dosud se do ní nikdo"
+		" nepřihlásil z Portálu a nelze ji zpřístupnit pouze na "
+		"základě doručení přístupových údajů");
+	else if (value == DBSTATE_PERM_UNACCESSIBLE)
+		return QObject::tr("DS je trvale znepřístupněna, čeká na smazání"
+		" (může být opět zpřístupněna)");
+	else if (value == DBSTATE_REMOVED)
+		return QObject::tr("DS je smazána (přesto existuje v ISDS)");
+	else return QObject::tr("Došlo k chybě při zjišťování stavu");
+}

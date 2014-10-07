@@ -1368,10 +1368,17 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 		    !accntinfTbl.attrProps[key].desc.isEmpty()) {
 			switch (accntinfTbl.knownAttrs[i].second) {
 			case DB_INTEGER:
-				html.append(strongAccountInfoLine(
-				    accntinfTbl.attrProps[key].desc,
-				    QString::number(
-				        accountEntry.value(key).toInt())));
+				if (key == "dbState") {
+					html.append(strongAccountInfoLine(
+					    accntinfTbl.attrProps[key].desc,
+					    getdbStateText(
+					    accountEntry.value(key).toInt())));
+				} else {
+					html.append(strongAccountInfoLine(
+					    accntinfTbl.attrProps[key].desc,
+					    QString::number(
+					        accountEntry.value(key).toInt())));
+				}
 				break;
 			case DB_TEXT:
 				html.append(strongAccountInfoLine(

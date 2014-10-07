@@ -219,7 +219,7 @@ namespace AccntinfTbl {
 	{"nationality",            {DB_TEXT, QObject::tr("Nationality")}},
 	{"identifier",             {DB_TEXT, ""}}, //
 	{"registryCode",           {DB_TEXT, ""}}, //
-	{"dbState",                {DB_INTEGER, ""}}, //
+	{"dbState",                {DB_INTEGER, QObject::tr("Databox state")}},
 	{"dbEffectiveOVM",         {DB_BOOLEAN, QObject::tr("Effective OVM")}},
 	{"dbOpenAddressing",       {DB_BOOLEAN, QObject::tr("Open addressing")}}
 	};

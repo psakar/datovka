@@ -287,4 +287,9 @@ int convertDbTypeToInt(QString value);
  */
 QString convertEventTypeToString(int value);
 
+/*!
+ * @brief Convert state box to text
+ */
+QString getdbStateText(int value);
+
 #endif /* _COMMON_H_ */
