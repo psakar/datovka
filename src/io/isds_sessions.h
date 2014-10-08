@@ -3,7 +3,7 @@
 #ifndef _ISDS_SESSIONS_H_
 #define _ISDS_SESSIONS_H_
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__clang__)
 #  define __USE_C99_MATH
 #  define _Bool bool
 #else /* !__APPLE__ */
