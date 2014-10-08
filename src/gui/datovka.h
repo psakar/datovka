@@ -318,7 +318,7 @@ private:
 	QTimer *timer;
 	int timeout;
 
- 	/*!
+	/*!
 	 * @brief Delete new account if is not possilbe connect to isds.
 	 */
 	bool deleteNewAccount(const QModelIndex acntTopIdx);

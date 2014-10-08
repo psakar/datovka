@@ -107,7 +107,7 @@ int init_crypto(void)
 	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca_root_pem)) {
 		goto fail;
 	}
-	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca2_sub_pem)) {
+	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca_sub_pem)) {
 		goto fail;
 	}
 	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca2_root_pem)) {
