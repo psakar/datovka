@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 		 * TODO -- the function should fail only when all certificates
 		 * failed to load.
 		 */
-		return EXIT_AILURE;
+		return EXIT_FAILURE;
 	}
 
 	if (!dbContainer::dbDriverSupport()) {
