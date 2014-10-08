@@ -44,7 +44,6 @@ INCLUDEPATH = \
 	/usr/include/libxml2
 
 LIBS = \
-	-lcrypto \
 	-lisds
 
 macx {
@@ -63,7 +62,11 @@ win32 {
 		mingw32built/include/
 
 	LIBS = \
-		e:/Git/qdatovka/mingw32built/bin/libisds-5.dll
+		e:/Git/qdatovka/mingw32built/bin/libisds-5.dll \
+		e:/Git/qdatovka/mingw32built/bin/libeay32.dll
+} else {
+	LIBS += \
+		-lcrypto
 }
 
 SOURCES += src/common.cpp \
