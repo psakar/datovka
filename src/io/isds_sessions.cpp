@@ -1,3 +1,6 @@
+
+#include <cstdlib> /* malloc(3) */
+#include <cstring> /* memset(3) */
 #include <QDebug>
 #include <QFile>
 #include <QInputDialog>
@@ -182,8 +185,7 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
 	pki_credentials = (struct isds_pki_credentials *)
 	    malloc(sizeof(struct isds_pki_credentials));
 	if (pki_credentials == NULL) {
-		free(pki_credentials);
-			return status;
+		return status;
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
@@ -233,8 +235,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
 	pki_credentials = (struct isds_pki_credentials *)
 	    malloc(sizeof(struct isds_pki_credentials));
 	if (pki_credentials == NULL) {
-		free(pki_credentials);
-			return status;
+		return status;
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
@@ -286,8 +287,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	pki_credentials = (struct isds_pki_credentials *)
 	    malloc(sizeof(struct isds_pki_credentials));
 	if (pki_credentials == NULL) {
-		free(pki_credentials);
-			return status;
+		return status;
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
@@ -333,9 +333,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 	otp = (struct isds_otp *)
 	    malloc(sizeof(struct isds_otp));
-
 	if (otp == NULL) {
-		free(otp);
 		return status;
 	}
 	memset(otp, 0, sizeof(struct isds_otp));
@@ -382,11 +380,10 @@ isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
 
 	tmp =(struct isds_PersonName *)
 	    malloc(sizeof(struct isds_PersonName));
-
 	if (tmp == NULL) {
-		free(tmp);
 		return NULL;
 	}
+	memset(tmp, 0, sizeof(struct isds_PersonName));
 
 	tmp->pnFirstName = !pnFirstName.isEmpty() ?
 	    strdup(pnFirstName.toStdString().c_str()) : NULL;
@@ -413,11 +410,10 @@ isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
 
 	tmp =(struct isds_BirthInfo *)
 	    malloc(sizeof(struct isds_BirthInfo));
-
 	if (tmp == NULL) {
-		free(tmp);
 		return NULL;
 	}
+	memset(tmp, 0, sizeof(struct isds_BirthInfo));
 
 	tmp->biDate = biDate;
 	tmp->biCity = !biCity.isEmpty() ?
@@ -445,11 +441,10 @@ isds_Address * isds_Address_add(const QString &adCity,
 
 	tmp =(struct isds_Address *)
 	    malloc(sizeof(struct isds_Address));
-
 	if (tmp == NULL) {
-		free(tmp);
 		return NULL;
 	}
+	memset(tmp, 0, sizeof(struct isds_Address));
 
 	tmp->adCity = !adCity.isEmpty() ?
 	    strdup(adCity.toStdString().c_str()) : NULL;
@@ -485,12 +480,9 @@ void isds_DbOwnerInfo_search(struct isds_list **result,
 
 	tmp =(struct isds_DbOwnerInfo *)
 	    malloc(sizeof(struct isds_DbOwnerInfo));
-
 	if (tmp == NULL) {
-		free(tmp);
 		return;
 	}
-
 	memset(tmp, 0, sizeof(struct isds_DbOwnerInfo));
 
 	tmp->dbID = !dbID.isEmpty() ?
@@ -539,12 +531,9 @@ isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
 
 	tmp =(struct isds_DbUserInfo  *)
 	    malloc(sizeof(struct isds_DbUserInfo));
-
 	if (tmp == NULL) {
-		free(tmp);
 		return NULL;
 	}
-
 	memset(tmp, 0, sizeof(struct isds_DbUserInfo));
 
 	tmp->userID = !userID.isEmpty() ?
