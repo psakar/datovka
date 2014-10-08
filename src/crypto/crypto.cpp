@@ -242,7 +242,7 @@ static
 int X509_store_add_cert_file(X509_STORE *store, const char *fname)
 /* ========================================================================= */
 {
-	FILE *fin;
+	FILE *fin = NULL;
 	X509 *x509 = NULL;
 	unsigned long err;
 
