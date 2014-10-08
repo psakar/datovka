@@ -181,7 +181,8 @@ MessageDb::MessageDb(const QString &connectionName, QObject *parent)
     m_sqlMsgsModel(),
     m_sqlFilesModel()
 {
-	m_db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+	m_db = QSqlDatabase::addDatabase(dbContainer::dbDriverType,
+	    connectionName);
 }
 
 
@@ -3097,6 +3098,22 @@ bool dbContainer::deleteMessageDb(MessageDb * db)
 	}
 
 	return true;
+}
+
+
+const QString dbContainer::dbDriverType("QSQLITE");
+
+
+/* ========================================================================= */
+/*
+ * Check whether required SQL driver is present.
+ */
+bool dbContainer::dbDriverSupport(void)
+/* ========================================================================= */
+{
+	QStringList driversList = QSqlDatabase::drivers();
+
+	return driversList.contains(dbDriverType, Qt::CaseSensitive);
 }
 
 

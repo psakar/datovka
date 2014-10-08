@@ -1,5 +1,6 @@
 
 
+#include <cstdlib>
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QtWidgets>
@@ -7,6 +8,7 @@
 #include "src/common.h"
 #include "src/crypto/crypto.h"
 #include "src/gui/datovka.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 
 #define LOCALE_PATH "locale"
@@ -105,6 +107,19 @@ int main(int argc, char *argv[])
 
 	if (0 != init_crypto()) {
 		logError("%s\n", "Cannot load cryptographic backend.");
+		/* TODO -- throw a dialog notifying the user. */
+		/*
+		 * TODO -- the function should fail only when all certificates
+		 * failed to load.
+		 */
+		return EXIT_AILURE;
+	}
+
+	if (!dbContainer::dbDriverSupport()) {
+		logError("Cannot load database driver '%s'.\n",
+		    dbContainer::dbDriverType.toStdString().c_str());
+		/* TODO -- throw a dialog notifying the user. */
+		return EXIT_FAILURE;
 	}
 
 /*

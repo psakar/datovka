@@ -443,6 +443,9 @@ private:
 
 /*!
  * @brief Database container.
+ *
+ * TODO -- Should there be a single globally accessible instance?
+ *     (Actually no singleton.)
  */
 class dbContainer : public QMap<QString, MessageDb *> {
 
@@ -488,6 +491,20 @@ public:
 	 * @return True on success.
 	 */
 	bool deleteMessageDb(MessageDb *db);
+
+	/*!
+	 * @brief Database driver name.
+	 */
+	static
+	const QString dbDriverType;
+
+	/*!
+	 * @brief Check whether required SQL driver is present.
+	 *
+	 * @return True if database driver is present.
+	 */
+	static
+	bool dbDriverSupport(void);
 
 #if 0
 	/*!
