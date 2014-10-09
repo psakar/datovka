@@ -377,8 +377,8 @@ int cms_verify_signature(CMS_ContentInfo *cms)
 		break;
 	}
 
-	if (!CMS_verify(cms, NULL, NULL, NULL, NULL,
-	        CMS_NO_SIGNER_CERT_VERIFY)) {
+	if (!CMS_verify(cms, NULL, ca_certs, NULL, NULL,
+	        0)) {
 		logWarning("%s\n", "Could not verify CMS.");
 		while (0 != (err = ERR_get_error())) {
 			logError("openssl error: %s\n",
