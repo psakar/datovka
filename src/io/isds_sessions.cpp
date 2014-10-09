@@ -466,7 +466,7 @@ isds_Address * isds_Address_add(const QString &adCity,
 /*
  * Create DbOwnerInfo structure and Search DataBoxes.
  */
-void isds_DbOwnerInfo_search(struct isds_list **result,
+isds_error isds_DbOwnerInfo_search(struct isds_list **result,
     const QString &userName, const QString &dbID,
     isds_DbType dbType, const QString &ic,
     struct isds_PersonName *personName, const QString &firmName,
@@ -481,7 +481,7 @@ void isds_DbOwnerInfo_search(struct isds_list **result,
 	tmp =(struct isds_DbOwnerInfo *)
 	    malloc(sizeof(struct isds_DbOwnerInfo));
 	if (tmp == NULL) {
-		return;
+		return IE_ERROR;
 	}
 	memset(tmp, 0, sizeof(struct isds_DbOwnerInfo));
 
@@ -514,6 +514,7 @@ void isds_DbOwnerInfo_search(struct isds_list **result,
 	status = isds_FindDataBox(isdsSessions.session(userName), tmp, result);
 
 	qDebug() << status << isds_strerror(status);
+	return status;
 }
 
 /* ========================================================================= */

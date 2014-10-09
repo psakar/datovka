@@ -124,7 +124,7 @@ isds_Address * isds_Address_add(const QString &adCity,
 /*!
  * @brief Create DbOwnerInfo structure and Search DataBoxes.
  */
-void isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
+isds_error isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
     const QString &dbID,
     isds_DbType dbType, const QString &ic,
     struct isds_PersonName *personName, const QString &firmName,

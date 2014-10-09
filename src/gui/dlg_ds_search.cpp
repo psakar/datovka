@@ -63,6 +63,8 @@ void DlgDsSearch::initSearchWindow(void)
 
 	connect(pingTimer, SIGNAL(timeout()), this,
 	    SLOT(pingIsdsServer()));
+
+	checkInputFields();
 }
 
 
@@ -88,15 +90,43 @@ void DlgDsSearch::pingIsdsServer(void)
 void DlgDsSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-	if (this->dataBoxTypeCBox->currentIndex() == 3) {
-		this->iCLineEdit->setEnabled(false);
-	} else {
+
+	switch (this->dataBoxTypeCBox->currentIndex()) {
+	/* OVM */
+	case 0:
+	/* PO */
+	case 1:
 		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Subject Name:"));
+		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		break;
+	/* FPO */
+	case 2:
+		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Name:"));
+		this->labelName->setToolTip(tr("Enter PFO last name or "
+		    "firm name."));
+		this->nameLineEdit->setToolTip(tr("Enter PFO last name or "
+		    "firm name."));
+		break;
+	/* FO */
+	case 3:
+		this->iCLineEdit->setEnabled(false);
+		this->labelName->setText(tr("Last Name:"));
+		this->labelName->setToolTip(tr("Enter last name or "
+		    "birth last name of FO."));
+		this->nameLineEdit->setToolTip(tr("Enter last name or "
+		    "birth last name of FO."));
+		break;
+	default:
+		break;
 	}
 
 	if (!this->iDLineEdit->text().isEmpty()) {
 		this->nameLineEdit->setEnabled(false);
 		this->pscLineEdit->setEnabled(false);
+		this->iCLineEdit->setEnabled(false);
 
 		if (this->iDLineEdit->text().length() == 7) {
 			this->searchPushButton->setEnabled(true);
@@ -145,92 +175,133 @@ void DlgDsSearch::searchDataBox(void)
 
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
-	struct isds_BirthInfo *birthInfo = NULL;
+	struct isds_list *boxes = NULL;
 	QList<QVector<QString>> list_contacts;
 
 	isds_DbType dbType;
-	int index = this->dataBoxTypeCBox->currentIndex();
 
-	if (index == 0) {
-		dbType = DBTYPE_OVM;
-	} else if (index == 1) {
-		dbType = DBTYPE_PO;
-	} else if (index == 2) {
-		dbType = DBTYPE_PFO;
-	} else {
+	switch (this->dataBoxTypeCBox->currentIndex()) {
+	case 3:
 		dbType = DBTYPE_FO;
+		break;
+	case 2:
+		dbType = DBTYPE_PFO;
+		break;
+	case 1:
+		dbType = DBTYPE_PO;
+		break;
+	default:
+		dbType = DBTYPE_OVM;
+		break;
 	}
 
-	personName = isds_PersonName_add(this->nameLineEdit->text(),
-	    this->nameLineEdit->text(), this->nameLineEdit->text(),
-	    this->nameLineEdit->text());
+	personName = isds_PersonName_add("", "",
+	    this->nameLineEdit->text(), this->nameLineEdit->text());
 	address = isds_Address_add("","","","", this->pscLineEdit->text(), "");
 
-	struct isds_list *boxes = NULL;
+	isds_error status;
 
-	isds_DbOwnerInfo_search(&boxes, m_userName,
+	status = isds_DbOwnerInfo_search(&boxes, m_userName,
 	    this->iDLineEdit->text(), dbType,
 	    this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
-	    birthInfo, address, "", "", "", "", "", 1, false, false);
+	    NULL, address, "", "", "", "", "", 0, false, false);
+
+	switch (status) {
+	case IE_SUCCESS:
+		break;
+	case IE_NOEXIST:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("Sorry, item(s) not found.<br><br>Try again..."),
+		    QMessageBox::Ok);
+		goto exit;
+		break;
+	case IE_ISDS:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("Ambiguous lookup values.<br><br>Try again..."),
+		    QMessageBox::Ok);
+		goto exit;
+		break;
+	default:
+		QMessageBox::critical(this, tr("Search error"),
+		    tr("It is not possible find databox, because error..."),
+		    QMessageBox::Ok);
+		goto exit;
+		break;
+	}
 
 	struct isds_list *box;
 	box = boxes;
 
-	if (0 == box) {
-		QMessageBox::information(this, tr("Search result"),
-		tr("Sorry, item(s) not found..."), QMessageBox::Ok);
-	} else {
-		while (0 != box) {
+	while (0 != box) {
 
-			this->resultsTableWidget->setEnabled(true);
-			isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
-			Q_ASSERT(0 != item);
-			qDebug() << item->dbID;
-			QVector<QString> contact;
-			contact.append(item->dbID);
+		this->resultsTableWidget->setEnabled(true);
+		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+		Q_ASSERT(0 != item);
+		qDebug() << item->dbID;
+		QVector<QString> contact;
+		contact.append(item->dbID);
 
-			QString name = item->firmName;
+		QString name;
 
-			if (name.isNull() || name.isEmpty()) {
+		if (*item->dbType == DBTYPE_FO) {
+			name = QString(item->personName->pnFirstName) +
+			    " " + QString(item->personName->pnLastName);
+		} else if (*item->dbType == DBTYPE_PFO) {
+			QString firmName = item->firmName;
+			if (firmName.isEmpty() || firmName == " ") {
 				name = QString(item->personName->pnFirstName) +
 				    " " + QString(item->personName->pnLastName);
+			} else {
+				name = item->firmName;
 			}
-
-			QString adNumberInStreet = item->address->adNumberInStreet;
-			QString adNumberInMunicipality =
-			    item->address->adNumberInMunicipality;
-			QString address = QString(item->address->adStreet)
-			    + " " + QString(item->address->adNumberInMunicipality)
-			    + "/"+ QString(item->address->adNumberInStreet)
-			    + ", " + QString(item->address->adCity);
-
-			if (adNumberInStreet.isNull() ||
-			    adNumberInStreet.isEmpty()) {
-				address = QString(item->address->adStreet)
-				    + " " + QString(item->address->adNumberInMunicipality)
-				    + ", " + QString(item->address->adCity);
-			} else if (adNumberInMunicipality.isNull() ||
-			    adNumberInMunicipality.isEmpty()) {
-				address = QString(item->address->adStreet)
-				    + " " + QString(item->address->adNumberInStreet)
-				    + ", " + QString(item->address->adCity);
-			}
-
-			contact.append(name);
-			contact.append(address);
-			contact.append(QString(item->address->adZipCode));
-
-			list_contacts.append(contact);
-			addContactsToTable(list_contacts);
-
-			box = box->next;
+		} else {
+			name = item->firmName;
 		}
-		this->resultsTableWidget->resizeColumnsToContents();
+
+		QString address;
+		QString street = item->address->adStreet;
+		QString adNumberInStreet = item->address->adNumberInStreet;
+		QString adNumberInMunicipality =
+		    item->address->adNumberInMunicipality;
+
+		if (street.isEmpty() || street == " ") {
+			address = item->address->adCity;
+		} else {
+			address = street;
+			if (adNumberInStreet.isEmpty() ||
+			    adNumberInStreet == " ") {
+				address += + " " +
+				    adNumberInMunicipality +
+				    ", " + QString(item->address->adCity);
+			} else if (adNumberInMunicipality.isEmpty() ||
+			    adNumberInMunicipality == " ") {
+				address += + " " +
+				    adNumberInStreet +
+				    ", " + QString(item->address->adCity);
+			} else {
+				address += + " "+
+				    adNumberInMunicipality
+				    + "/" +
+				    adNumberInStreet +
+				", " + QString(item->address->adCity);
+			}
+		}
+
+		contact.append(name);
+		contact.append(address);
+		contact.append(QString(item->address->adZipCode));
+
+		list_contacts.append(contact);
+		addContactsToTable(list_contacts);
+
+		box = box->next;
 	}
 
+	this->resultsTableWidget->resizeColumnsToContents();
+
+exit:
 	isds_PersonName_free(&personName);
 	isds_Address_free(&address);
-	isds_BirthInfo_free(&birthInfo);
 	isds_list_free(&boxes);
 }
 
