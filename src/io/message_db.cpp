@@ -29,6 +29,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/pkcs7.h"
+#include "src/log/log.h"
 
 
 /* Joinned tables messages and supplementary_message_data. */
@@ -832,7 +833,8 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	bool ok;
+
+	debug_func_call();
 
 	queryStr = "SELECT "
 	    "is_verified"
@@ -846,9 +848,9 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
-		ok = query.value(0).toBool();
-		// qDebug() << query.value(0) << ok;
-		return ok;
+		bool ret = ! query.value(0).isNull();
+		qDebug() << "Verification attempted" << ret;
+		return ret;
 	}
 
 	return false;
@@ -1977,7 +1979,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTim
 /*
  * Insert message envelope into messages table
  */
-bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
+bool MessageDb::msgsInsertMessageEnvelope(int dmId,
     const QString &_origin, const QString &dbIDSender,
     const QString &dmSender, const QString &dmSenderAddress,
     int dmSenderType, const QString &dmRecipient,
@@ -2001,7 +2003,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT INTO messages ("
-	    "dmID, is_verified, _origin, dbIDSender, dmSender, "
+	    "dmID, _origin, dbIDSender, dmSender, "
 	    "dmSenderAddress, dmSenderType, dmRecipient, "
 	    "dmRecipientAddress, dmAmbiguousRecipient, dmSenderOrgUnit, "
 	    "dmSenderOrgUnitNum, dbIDRecipient, dmRecipientOrgUnit, "
@@ -2013,7 +2015,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 	    "dmDeliveryTime, dmAcceptanceTime, dmMessageStatus, "
 	    "dmAttachmentSize, _dmType"
 	    ") VALUES ("
-	    ":dmId, :is_verified, :_origin, :dbIDSender, :dmSender, "
+	    ":dmId, :_origin, :dbIDSender, :dmSender, "
 	    ":dmSenderAddress, :dmSenderType, :dmRecipient, "
 	    ":dmRecipientAddress, :dmAmbiguousRecipient, :dmSenderOrgUnit, "
 	    ":dmSenderOrgUnitNum, :dbIDRecipient, :dmRecipientOrgUnit, "
@@ -2030,7 +2032,6 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 		/* TODO -- Handle error. */
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":is_verified", is_verified);
 	query.bindValue(":_origin", _origin);
 	query.bindValue(":dbIDSender", dbIDSender);
 	query.bindValue(":dmSender", dmSender);
@@ -2106,7 +2107,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId, bool is_verified,
 /*
  * Update exist message envelope/supplementary data in db
  */
-bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
+bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
     const QString &_origin, const QString &dbIDSender,
     const QString &dmSender, const QString &dmSenderAddress,
     int dmSenderType, const QString &dmRecipient,
@@ -2130,7 +2131,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 	QSqlQuery query(m_db);
 
 	QString queryStr = "UPDATE messages SET "
-	    "is_verified = :is_verified, _origin = :_origin, "
+	    "_origin = :_origin, "
 	    "dbIDSender = :dbIDSender, dmSender = :dmSender, "
 	    "dmSenderAddress = :dmSenderAddress, "
 	    "dmSenderType = :dmSenderType, "
@@ -2165,7 +2166,6 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId, bool is_verified,
 		/* TODO -- Handle error. */
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":is_verified", is_verified);
 	query.bindValue(":_origin", _origin);
 	query.bindValue(":dbIDSender", dbIDSender);
 	query.bindValue(":dmSender", dmSender);
@@ -2441,6 +2441,31 @@ bool MessageDb::msgsVerified(int dmId) const
 	}
 
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set the verification result.
+ */
+bool MessageDb::msgsSetVerified(int dmId, bool verified)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	debug_func_call();
+
+	queryStr = "UPDATE messages "
+	    "SET is_verified = :verified WHERE "
+	    "dmID = :dmId";
+	qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":verified", verified);
+	query.bindValue(":dmId", dmId);
+	return query.exec();
 }
 
 

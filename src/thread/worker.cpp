@@ -381,7 +381,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			/* insert message envelope in db */
 			(messageDb.msgsInsertMessageEnvelope(dmId,
 			    /* TODO - set correctly next two values */
-			    false, "tRecord",
+			    "tRecord",
 			    item->envelope->dbIDSender,
 			    item->envelope->dmSender,
 			    item->envelope->dmSenderAddress,
@@ -735,7 +735,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	/* Update message envelope in db. */
 	(messageDb.msgsUpdateMessageEnvelope(dmID,
 	    /* TODO - set correctly next two values */
-	    false, "tReturnedMessage",
+	    "tReturnedMessage",
 	    message->envelope->dbIDSender,
 	    message->envelope->dmSender,
 	    message->envelope->dmSenderAddress,
@@ -771,10 +771,23 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
-	/* Verify message signature. */
-	int ret = verify_raw_message_signature(message->raw,
-	    message->raw_length);
-	qDebug() << "Verification ret" << ret;
+	if (signedMsg) {
+		/* Verify message signature. */
+		int ret = verify_raw_message_signature(message->raw,
+		    message->raw_length);
+		qDebug() << "Verification ret" << ret;
+		if (1 == ret) {
+			bool update_ret = messageDb.msgsSetVerified(dmID,
+			    true);
+			/* TODO -- handle return error. */
+		} else if (0 == ret){
+			bool update_ret = messageDb.msgsSetVerified(dmID,
+			    false);
+			/* TODO -- handle return error. */
+		} else {
+			/* TODO -- handle this error. */
+		}
+	}
 
 	/* insert/update hash into db */
 	QString hashValue = QByteArray((char*)message->envelope->hash->value,

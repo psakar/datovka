@@ -230,7 +230,7 @@ public:
 	/*!
 	 * @brief Insert message envelope into messages table.
 	 */
-	bool msgsInsertMessageEnvelope(int dmId, bool is_verified,
+	bool msgsInsertMessageEnvelope(int dmId,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,
@@ -253,7 +253,7 @@ public:
 	/*!
 	 * @brief Update message envelope into messages table.
 	 */
-	bool msgsUpdateMessageEnvelope(int dmId, bool is_verified,
+	bool msgsUpdateMessageEnvelope(int dmId,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,
@@ -348,6 +348,16 @@ public:
 	 */
 	QList<QString> getMsgForCsvExport(int dmId) const;
 
+	/*!
+	 * @brief Set the verification result.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @param[in] verified True is message was successfully verified,
+	 *                     False if verification failed.
+	 * @return True if update was successful.
+	 */
+	bool msgsSetVerified(int dmId, bool verified);
+
 
 protected:
 	/*!
@@ -405,6 +415,9 @@ private:
 
 	/*!
 	 * @brief Returns whether message is verified.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return True if message was verified successfully.
 	 */
 	bool msgsVerified(int dmId) const;
 
