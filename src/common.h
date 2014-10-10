@@ -15,7 +15,7 @@
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
-#define VERSION "0.1"
+#define VERSION "0.1.0"
 #define TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
