@@ -292,4 +292,14 @@ QString convertEventTypeToString(int value);
  */
 QString getdbStateText(int value);
 
+/*!
+ * @brief Converts base64 encoded string into plain text.
+ */
+QString fromBase64(const QString &base64);
+
+/*!
+ * @brief Converts string into base64.
+ */
+QString toBase64(const QString &plain);
+
 #endif /* _COMMON_H_ */

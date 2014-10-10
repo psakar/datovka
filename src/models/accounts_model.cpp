@@ -6,20 +6,6 @@
 #include "src/common.h"
 
 
-/*!
- * @brief Converts base64 encoded string into plain text.
- */
-static
-QString fromBase64(const QString &base64);
-
-
-/*!
- * @brief Converts string into base64.
- */
-static
-QString toBase64(const QString &plain);
-
-
 /* ========================================================================= */
 AccountModel::SettingsMap::SettingsMap(void)
 /* ========================================================================= */
@@ -681,27 +667,3 @@ void AccountModel::removeAllYearNodes(void)
 /* ========================================================================= */
 /* Static function definitions below here. */
 /* ========================================================================= */
-
-
-/* ========================================================================= */
-/*
- * Converts base64 encoded string into plain text.
- */
-static
-QString fromBase64(const QString &base64)
-/* ========================================================================= */
-{
-	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
-}
-
-
-/* ========================================================================= */
-/*!
- * @brief Converts string into base64.
- */
-static
-QString toBase64(const QString &plain)
-/* ========================================================================= */
-{
-	return QString::fromUtf8(plain.toUtf8().toBase64());
-}

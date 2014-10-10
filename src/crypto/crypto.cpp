@@ -1,6 +1,7 @@
 
 
 #include <cassert>
+#include <cstring>
 #include <openssl/bio.h>
 #include <openssl/cms.h>
 #include <openssl/err.h>
@@ -52,9 +53,39 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
 
 /*!
  * @brief Verifies CMS signature.
+ *
+ * @param[in,out] cms CMS message.
+ * @param[in]     crl_check Whether to check CRL if available.
+ * @return  1 if signature valid,
+ *          0 if signature invalid,
+ *         -1 on error.
  */
 static
-int cms_verify_signature(CMS_ContentInfo *cms);
+int cms_verify_signature(CMS_ContentInfo *cms, int crl_check);
+
+
+/*!
+ * @brief Check certificate date.
+ *
+ * @param x509     Certificate to check.
+ * @param utc_time Date to check the certificate against.
+ * @return  1 if check ok,
+ *          0 if check not ok,
+ *         -1 on error.
+ */
+static
+int x509_check_date(const X509 *x509, time_t utc_time);
+
+
+/*!
+ * @brief Converts ASN1_TIME into time_t UTC time.
+ *
+ * @param[in]  asn1_time ASN1 time string.
+ * @param[out] utc_time Output UTC time.
+ * @return 0 on success, -1 on failure.
+ */
+static
+int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time);
 
 
 #define CERT_FILE0 "trusted_certs/all_trusted.pem"
@@ -149,7 +180,7 @@ int verify_raw_message_signature(const void *raw, size_t raw_len)
 		goto fail;
 	}
 
-	ret = cms_verify_signature(cms);
+	ret = cms_verify_signature(cms, 0);
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 
@@ -158,6 +189,72 @@ int verify_raw_message_signature(const void *raw, size_t raw_len)
 fail:
 	if (NULL != cms) {
 		CMS_ContentInfo_free(cms);
+	}
+	ERR_free_strings();
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Verifies whether message signature was valid at given date.
+ */
+int verify_raw_message_signature_date(const void *raw, size_t raw_len,
+    time_t utc_time, int crl_check)
+/* ========================================================================= */
+{
+	int ret;
+	CMS_ContentInfo *cms = NULL;
+	STACK_OF(X509) *signers = NULL;
+	unsigned long err;
+	int num_signers;
+
+	debug_func_call();
+
+	cms = load_cms(raw, raw_len);
+	if (NULL == cms) {
+		logError("%s\n", "Could not load CMS.");
+		goto fail;
+	}
+
+	ret = cms_verify_signature(cms, crl_check);
+
+	if (1 == ret) {
+		/* TODO -- Check certificate. */
+
+		signers = CMS_get0_signers(cms);
+		if (NULL == signers) {
+			logError("%s\n", "Could not get CMS signers.");
+			while (0 != (err = ERR_get_error())) {
+				logError("openssl error: %s\n",
+				    ERR_error_string(err, NULL));
+			}
+			ret = -1;
+			goto fail;
+		}
+
+		num_signers = sk_X509_num(signers);
+		if (1 != num_signers) {
+			logError("Only one CMS signer expected, got %d.\n",
+			    num_signers);
+			ret = -1;
+			goto fail;
+		}
+
+		ret = x509_check_date(sk_X509_value(signers, 0), utc_time);
+	}
+
+	sk_X509_free(signers); signers = NULL;
+	CMS_ContentInfo_free(cms); cms = NULL;
+
+	return ret;
+
+fail:
+	if (NULL != cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	if (NULL != signers) {
+		sk_X509_free(signers);
 	}
 	ERR_free_strings();
 	return -1;
@@ -354,12 +451,13 @@ fail:
  * Verifies CMS signature.
  */
 static
-int cms_verify_signature(CMS_ContentInfo *cms)
+int cms_verify_signature(CMS_ContentInfo *cms, int crl_check)
 /* ========================================================================= */
 {
 	const ASN1_OBJECT *asn1;
 	int nid;
 	unsigned long err;
+	int verify_flags = 0;
 
 	debug_func_call();
 
@@ -377,8 +475,12 @@ int cms_verify_signature(CMS_ContentInfo *cms)
 		break;
 	}
 
+	if (0 == crl_check) {
+		verify_flags |= CMS_NOCRL;
+	}
+
 	if (!CMS_verify(cms, NULL, ca_certs, NULL, NULL,
-	        0)) {
+	        crl_check)) {
 		logWarning("%s\n", "Could not verify CMS.");
 		while (0 != (err = ERR_get_error())) {
 			logError("openssl error: %s\n",
@@ -391,6 +493,166 @@ int cms_verify_signature(CMS_ContentInfo *cms)
 
 fail:
 	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check certificate date.
+ */
+static
+int x509_check_date(const X509 *x509, time_t utc_time)
+/* ========================================================================= */
+{
+	X509_CINF *cinf;
+	X509_VAL *val;
+	ASN1_TIME *notBefore, *notAfter;
+	time_t tNotBef, tNotAft;
+
+	/* ASN1_TIME is an alias for ASN1_STRING. */
+
+	assert(NULL != x509);
+	if (NULL == x509) {
+		goto fail;
+	}
+	cinf = x509->cert_info;
+
+	assert(NULL != cinf);
+	if (NULL == cinf) {
+		goto fail;
+	}
+	val = cinf->validity;
+
+	notBefore = val->notBefore;
+	assert(NULL != notBefore);
+	if (NULL == notBefore) {
+		goto fail;
+	}
+	notAfter = val->notAfter;
+	assert(NULL != notAfter);
+	if (NULL == notAfter) {
+		goto fail;
+	}
+	//fwrite(notBefore->data, 1, notBefore->length, stderr); fputc('\n', stderr);
+	asn1_time_to_utc_time(notBefore, &tNotBef);
+	//fwrite(notAfter->data, 1, notAfter->length, stderr); fputc('\n', stderr);
+	asn1_time_to_utc_time(notAfter, &tNotAft);
+
+	return (tNotBef <= utc_time) && (utc_time <= tNotAft);
+
+fail:
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts ASN1_TIME into time_t UTC time.
+ */
+static
+int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
+/* ========================================================================= */
+{
+	struct tm t;
+	const char *str;
+	unsigned int i = 0;
+	char adjust_op, colon;
+	int adj_hour = 0, adj_min = 0;
+	int adj_secs;
+	time_t ret_time;
+
+	assert(NULL != asn1_time);
+	assert(NULL != utc_time);
+
+	memset(&t, 0, sizeof(t));
+
+	str = (char *) asn1_time->data;
+	assert(NULL != str);
+
+	if (V_ASN1_UTCTIME == asn1_time->type) {
+		/* two digit year */
+		//t.tm_year = (str[i++] - '0') * 10 + (str[i++] - '0');
+		t.tm_year =  (str[i++] - '0') * 10;
+		t.tm_year += (str[i++] - '0');
+		if (t.tm_year < 70) {
+			t.tm_year += 100;
+		}
+	} else if (V_ASN1_GENERALIZEDTIME == asn1_time->type) {
+		/* four digit year */
+		//t.tm_year = (str[i++] - '0') * 1000 +
+		//    (str[++i] - '0') * 100 + (str[++i] - '0') * 10 +
+		//    (str[++i] - '0');
+		t.tm_year =  (str[i++] - '0') * 1000;
+		t.tm_year += (str[i++] - '0') * 100;
+		t.tm_year += (str[i++] - '0') * 10;
+		t.tm_year += (str[i++] - '0');
+		t.tm_year -= 1900;
+	}
+	/* -1 since January is 0 not 1. */
+	//t.tm_mon = ((str[i++] - '0') * 10 + (str[++i] - '0')) - 1;
+	t.tm_mon =  (str[i++] - '0') * 10;
+	t.tm_mon += (str[i++] - '0');
+	t.tm_mon -= 1;
+	//t.tm_mday = (str[i++] - '0') * 10 + (str[++i] - '0');
+	t.tm_mday =  (str[i++] - '0') * 10;
+	t.tm_mday += (str[i++] - '0');
+	//t.tm_hour = (str[i++] - '0') * 10 + (str[++i] - '0');
+	t.tm_hour =  (str[i++] - '0') * 10;
+	t.tm_hour += (str[i++] - '0');
+	//t.tm_min = (str[i++] - '0') * 10 + (str[++i] - '0');
+	t.tm_min =  (str[i++] - '0') * 10;
+	t.tm_min += (str[i++] - '0');
+	//t.tm_sec = (str[i++] - '0') * 10 + (str[++i] - '0');
+	t.tm_sec =  (str[i++] - '0') * 10;
+	t.tm_sec += (str[i++] - '0');
+
+	adjust_op = str[i++];
+	switch (adjust_op) {
+	case 'z':
+	case 'Z':
+		*utc_time = mktime(&t);
+		return 0;
+		break;
+	case '-':
+	case '+':
+		/* Continue. */
+		break;
+	default:
+		assert(0);
+		return -1;
+		break;
+	}
+
+	/* Adjust the time based on time-zone information. */
+
+	assert(('+' == adjust_op) || ('-' == adjust_op));
+	if (('+' != adjust_op) && ('-' != adjust_op)) {
+		return -1;
+	}
+
+	adj_hour =  (str[i++] - '0') * 10;
+	adj_hour += (str[i++] - '0');
+
+	colon = str[i++];
+	assert(':' == colon);
+	if (':' != colon) {
+		return -1;
+	}
+
+	adj_min =  (str[i++] - '0') * 10;
+	adj_min += (str[i++] - '0');
+
+	adj_secs = (adj_hour * 3600) + (adj_min * 60);
+
+	ret_time = mktime(&t);
+
+	if ('+' == adjust_op) {
+		*utc_time = ret_time - adj_secs;
+	} else {
+		*utc_time = ret_time + adj_secs;
+	}
+
+	return 0;
 }
 
 

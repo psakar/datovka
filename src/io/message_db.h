@@ -303,7 +303,7 @@ public:
 	/*!
 	 * @brief get raw message data from raw_message_data table.
 	 */
-	QString msgsGetMessageRaw(int dmId);
+	QString msgsGetMessageRaw(int dmId) const;
 
 	/*!
 	 * @brief Get delivery info raw from raw_delivery_info_data table.

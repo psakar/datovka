@@ -26,6 +26,7 @@
 
 #include "message_db.h"
 #include "src/common.h"
+#include "src/crypto/crypto.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/pkcs7.h"
@@ -1419,7 +1420,8 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 			    ")";
 		}
 		html += strongAccountInfoLine(tr("Signing certificate"),
-		    verifiedText);
+		      "TODO");
+		//    verifiedText);
 		/* TODO */
 	}
 
@@ -2721,9 +2723,11 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 /*
  * Get raw message data from raw_message_data table.
  */
-QString MessageDb::msgsGetMessageRaw(int dmId)
+QString MessageDb::msgsGetMessageRaw(int dmId) const
 /* ========================================================================= */
 {
+	debug_func_call();
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -2739,7 +2743,7 @@ QString MessageDb::msgsGetMessageRaw(int dmId)
 		query.first();
 		return query.value(0).toString();
 	}
-	return "";
+	return QString();
 }
 
 
@@ -2880,6 +2884,12 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
     bool ignoreMissingCrlCheck) const
 /* ========================================================================= */
 {
+#if 0
+	/*
+	 * TODO -- What kind of certificates are stored in the database?
+	 * Are theses certificates used for signing messages?
+	 */
+
 	QList<QSslCertificate> certList = msgCerts(dmId);
 
 	if (certList.size() > 0) {
@@ -2897,6 +2907,21 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	}
 
 	return false;
+#endif
+	debug_func_call();
+
+	QByteArray rawBytes =
+	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
+	Q_ASSERT(rawBytes.size() > 0);
+
+	if (!ignoreMissingCrlCheck) {
+		/* TODO */
+		logWarning("CRL check is not performed for message %d.\n",
+		    dmId);
+	}
+	return 1 == verify_raw_message_signature_date(
+	    rawBytes.data(), rawBytes.size(), 0, 0);
+//	    ignoreMissingCrlCheck ? 0 : 1);
 }
 
 

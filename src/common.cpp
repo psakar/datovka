@@ -712,3 +712,25 @@ QString getdbStateText(int value)
 		return QObject::tr("DS je smazána (přesto existuje v ISDS)");
 	else return QObject::tr("Došlo k chybě při zjišťování stavu");
 }
+
+
+/* ========================================================================= */
+/*
+ * Converts base64 encoded string into plain text.
+ */
+QString fromBase64(const QString &base64)
+/* ========================================================================= */
+{
+	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
+}
+
+
+/* ========================================================================= */
+/*!
+ * @brief Converts string into base64.
+ */
+QString toBase64(const QString &plain)
+/* ========================================================================= */
+{
+	return QString::fromUtf8(plain.toUtf8().toBase64());
+}
