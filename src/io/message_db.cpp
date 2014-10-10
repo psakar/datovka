@@ -21,6 +21,7 @@
 #include <QSqlQueryModel>
 #include <QSslCertificate>
 #include <QString>
+//#include <QTimeZone>
 #include <QVariant>
 #include <QVector>
 
@@ -1420,9 +1421,7 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 			    ")";
 		}
 		html += strongAccountInfoLine(tr("Signing certificate"),
-		      "TODO");
-		//    verifiedText);
-		/* TODO */
+		    verifiedText);
 	}
 
 	/* Time-stamp. */
@@ -2473,7 +2472,7 @@ bool MessageDb::msgsSetVerified(int dmId, bool verified)
 
 /* ========================================================================= */
 /*
- * Returns verification date.
+ * Returns verification date (in localtime).
  */
 QDateTime MessageDb::msgsVerificationDate(int dmId) const
 /* ========================================================================= */
@@ -2878,7 +2877,8 @@ QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
 
 /* ========================================================================= */
 /*
- * Check whether message signature was valid at given date.
+ * Check whether message signature was valid at given date
+ *     (local time).
  */
 bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
     bool ignoreMissingCrlCheck) const
@@ -2919,8 +2919,14 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 		logWarning("CRL check is not performed for message %d.\n",
 		    dmId);
 	}
+	//QDateTime local(QDateTime::currentDateTime());
+	//QTimeZone tZone = QDateTime::currentDateTime().timeZone();
+	//int utcOffset = tZone.offsetFromUtc(dateTime);
+	//qDebug() << "UTC offset" << utcOffset << local << tZone;
+	time_t utcTime = dateTime.toTime_t();
+
 	return 1 == verify_raw_message_signature_date(
-	    rawBytes.data(), rawBytes.size(), 0, 0);
+	    rawBytes.data(), rawBytes.size(), utcTime, 0);
 //	    ignoreMissingCrlCheck ? 0 : 1);
 }
 

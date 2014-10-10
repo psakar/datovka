@@ -422,7 +422,7 @@ private:
 	bool msgsVerified(int dmId) const;
 
 	/*!
-	 * @brief Returns verification date.
+	 * @brief Returns verification date (in local time).
 	 */
 	QDateTime msgsVerificationDate(int dmId) const;
 
@@ -445,7 +445,13 @@ private:
 	QList<QSslCertificate> msgCerts(int dmId) const;
 
 	/*!
-	 * @brief Check whether message signature was valid at given date.
+	 * @brief Check whether message signature was valid at given date
+	 *     (local time).
+	 *
+	 * @param[in] dmId                  Message id.
+	 * @param[in] dateTime              Local time identifier.
+	 * @param[in] ignoreMissingCrlCheck Ignore CRL check if set to true.
+	 * @return True if date check succeeds.
 	 */
 	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
