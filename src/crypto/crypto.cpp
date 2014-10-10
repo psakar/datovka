@@ -5,6 +5,7 @@
 #include <openssl/bio.h>
 #include <openssl/cms.h>
 #include <openssl/err.h>
+#include <openssl/evp.h> /* OpenSSL_add_all_algorithms() */
 #include <openssl/pem.h>
 #include <openssl/ts.h>
 #include <openssl/x509v3.h>
@@ -103,6 +104,8 @@ int init_crypto(void)
 /* ========================================================================= */
 {
 	debug_func_call();
+
+	OpenSSL_add_all_algorithms(); /* Needed for CMS validation. */
 
 	ERR_load_crypto_strings();
 	ERR_load_CMS_strings();
