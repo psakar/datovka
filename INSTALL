@@ -2,10 +2,15 @@ Required libraries
 ------------------
 
 - Qt5
+  - Application requires the Qt sqlite database driver.
 - libisds (http://xpisar.wz.cz/libisds/)
+- OpenSSL
 
 Compilation
 -----------
 
 qmake
 make
+
+The build process requires qmake. We have plan to transition to autotools
+as the code stabilises.

@@ -32,7 +32,7 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 DEFINES += \
 	DEBUG=1
 
-TARGET = qdatovka
+TARGET = datovka
 TEMPLATE = app
 
 QMAKE_CXXFLAGS = \
