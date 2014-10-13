@@ -36,10 +36,6 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
-	QTranslator translator;
-	translator.load("datovka_" + QLocale::system().name(), LOCALE_PATH);
-	app.installTranslator(&translator);
-
 	QCommandLineParser parser;
 	parser.setApplicationDescription(QObject::tr("Data box application"));
 	parser.addHelpOption();
@@ -129,6 +125,22 @@ int main(int argc, char *argv[])
 #endif
 */
 	qDebug() << "GUI main thread: " << QThread::currentThreadId();
+
+	QTranslator translator;
+
+	/* TODO - set language form .dsgui/dsgui.conf */
+	QString language;
+
+	if (language == "cs") {
+		translator.load("datovka_cs", LOCALE_PATH);
+	} else if (language == "en") {
+		translator.load("datovka_en", LOCALE_PATH);
+	} else {
+		// default system
+		translator.load("datovka_" + QLocale::system().name(),
+		    LOCALE_PATH);
+	}
+	app.installTranslator(&translator);
 
 	MainWindow mainwin;
 	mainwin.show();

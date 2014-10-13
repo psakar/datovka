@@ -226,12 +226,38 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
+	if (globPref.check_new_versions) {
+
+		if (globPref.send_stats_with_version_checks) {
+			checkNewDatovkaVersion(QCoreApplication::applicationVersion());
+		} else {
+			checkNewDatovkaVersion(QString());
+		}
+	}
+
 	if (ui->accountList->model()->rowCount() <= 0) {
 		addNewAccount();
 	} else {
 		if (globPref.download_at_start) {
 			synchroniseAllAccounts();
 		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Sent and check a new version of Datovka
+ */
+void MainWindow::checkNewDatovkaVersion(QString version)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	if (version.isNull()) {
+		/* TODO - check new version only */
+	} else {
+		/* TODO - sent current version and check new version */
 	}
 }
 

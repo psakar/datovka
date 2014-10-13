@@ -565,6 +565,11 @@ private:
 	bool loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
+	/*!
+	 * @brief Sent and check a new version of Datovka.
+	 */
+	void checkNewDatovkaVersion(QString version);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 
