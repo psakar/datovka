@@ -1,6 +1,7 @@
 
 
 #include <cassert>
+#include <cctype> /* isdigit(3) */
 #include <cstring>
 #include <openssl/bio.h>
 #include <openssl/cms.h>
@@ -55,14 +56,28 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
 /*!
  * @brief Verifies CMS signature.
  *
- * @param[in,out] cms CMS message.
+ * @param[in,out] cms       CMS message.
+ * @param[in]     ca_store  Certificate against which to check the CMS
+ *                          signature.
  * @param[in]     crl_check Whether to check CRL if available.
  * @return  1 if signature valid,
  *          0 if signature invalid,
  *         -1 on error.
  */
 static
-int cms_verify_signature(CMS_ContentInfo *cms, int crl_check);
+int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
+    int crl_check);
+
+
+/*!
+ * @brief Get RFC 3161 time-stamp value.
+ *
+ * @param[in] cms       Time-stamp CMS.
+ * @param[out] utc_time Parsed time value.
+ * @return 0 on success, -1 on failure.
+ */
+static
+int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time);
 
 
 /*!
@@ -86,7 +101,26 @@ int x509_check_date(const X509 *x509, time_t utc_time);
  * @return 0 on success, -1 on failure.
  */
 static
-int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time);
+int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time);
+
+
+/*!
+ * @brief Portable version of timegm().
+ */
+static
+time_t timegm_utc(struct tm *tm);
+
+
+//#define PRINT_CERTS 1
+
+
+#if defined PRINT_CERTS
+/*!
+ * @brief Prints x509.
+ */
+static
+int x509_printf(X509 *x509, FILE *fout);
+#endif /* PRINT_CERTS */
 
 
 #define CERT_FILE0 "trusted_certs/all_trusted.pem"
@@ -94,7 +128,6 @@ int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time);
 #define CERT_FILE2 "trusted_certs/postsignum_qca_sub.pem"
 #define CERT_FILE3 "trusted_certs/postsignum_qca2_root.pem"
 #define CERT_FILE4 "trusted_certs/postsignum_qca2_sub.pem"
-
 
 /* ========================================================================= */
 /*
@@ -137,7 +170,6 @@ int init_crypto(void)
 		goto fail;
 	}
 #endif
-
 	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca_root_pem)) {
 		goto fail;
 	}
@@ -183,7 +215,7 @@ int verify_raw_message_signature(const void *raw, size_t raw_len)
 		goto fail;
 	}
 
-	ret = cms_verify_signature(cms, 0);
+	ret = cms_verify_signature(cms, ca_certs, 0);
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 
@@ -193,7 +225,6 @@ fail:
 	if (NULL != cms) {
 		CMS_ContentInfo_free(cms);
 	}
-	ERR_free_strings();
 	return -1;
 }
 
@@ -220,11 +251,9 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 		goto fail;
 	}
 
-	ret = cms_verify_signature(cms, crl_check);
+	ret = cms_verify_signature(cms, ca_certs, crl_check);
 
 	if (1 == ret) {
-		/* TODO -- Check certificate. */
-
 		signers = CMS_get0_signers(cms);
 		if (NULL == signers) {
 			logError("%s\n", "Could not get CMS signers.");
@@ -245,9 +274,10 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 		}
 
 		ret = x509_check_date(sk_X509_value(signers, 0), utc_time);
+
+		sk_X509_free(signers); signers = NULL;
 	}
 
-	sk_X509_free(signers); signers = NULL;
 	CMS_ContentInfo_free(cms); cms = NULL;
 
 	return ret;
@@ -259,7 +289,66 @@ fail:
 	if (NULL != signers) {
 		sk_X509_free(signers);
 	}
-	ERR_free_strings();
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Verifies qualified time-stamp signature and parses the time-stamp
+ *     value. Time-stamp format follows RFC 3161.
+ */
+int verify_qualified_timestamp(const void *data, size_t data_len,
+    time_t *utc_time)
+/* ========================================================================= */
+{
+	int ret;
+	CMS_ContentInfo *cms = NULL;
+//	unsigned long err;
+#if defined PRINT_CERTS
+	STACK_OF(X509) *signers = NULL;
+#endif /* PRINT_CERTS */
+
+	debug_func_call();
+
+	cms = load_cms(data, data_len);
+	if (NULL == cms) {
+		logError("%s\n", "Could not load CMS.");
+		goto fail;
+	}
+
+	/*
+	 * The timestamps are provided by the postsignum.cz certification
+	 * authority.
+	 * TODO -- Currently the signing certificate is not checked against
+	 * any other certificate.
+	 */
+	ret = cms_verify_signature(cms, NULL, 0);
+#if defined PRINT_CERTS
+	signers = CMS_get0_signers(cms);
+	x509_printf(sk_X509_value(signers, 0), stderr);
+	sk_X509_free(signers); signers = NULL;
+#endif /* PRINT_CERTS */
+
+	if (-1 != ret) {
+		assert(NULL != utc_time);
+		if (NULL == utc_time) {
+			goto fail;
+		}
+
+		if (-1 == cms_get_timestamp_value(cms, utc_time)) {
+			goto fail;
+		}
+	}
+
+	CMS_ContentInfo_free(cms); cms = NULL;
+
+	return ret;
+
+fail:
+	if (NULL != cms) {
+		CMS_ContentInfo_free(cms);
+	}
 	return -1;
 }
 
@@ -318,6 +407,12 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
 		}
 		goto fail;
 	}
+
+#if defined PRINT_CERTS
+	fprintf(stderr, ">>>\n");
+	x509_printf(x509, stderr);
+	fprintf(stderr, "<<<\n");
+#endif /* PRINT_CERTS */
 
 	X509_free(x509); x509 = NULL;
 
@@ -454,7 +549,8 @@ fail:
  * Verifies CMS signature.
  */
 static
-int cms_verify_signature(CMS_ContentInfo *cms, int crl_check)
+int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
+    int crl_check)
 /* ========================================================================= */
 {
 	const ASN1_OBJECT *asn1;
@@ -478,12 +574,16 @@ int cms_verify_signature(CMS_ContentInfo *cms, int crl_check)
 		break;
 	}
 
+	if (NULL == ca_store) {
+		verify_flags |= CMS_NO_SIGNER_CERT_VERIFY;
+	}
+
 	if (0 == crl_check) {
 		verify_flags |= CMS_NOCRL;
 	}
 
-	if (!CMS_verify(cms, NULL, ca_certs, NULL, NULL,
-	        crl_check)) {
+	if (!CMS_verify(cms, NULL, ca_store, NULL, NULL,
+	        verify_flags)) {
 		logWarning("%s\n", "Could not verify CMS.");
 		while (0 != (err = ERR_get_error())) {
 			logError("openssl error: %s\n",
@@ -495,6 +595,95 @@ int cms_verify_signature(CMS_ContentInfo *cms, int crl_check)
 	return 1;
 
 fail:
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get RFC 3161 time-stamp value.
+ */
+static
+int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time)
+/* ========================================================================= */
+{
+	const ASN1_OBJECT *asn1;
+	int nid;
+	unsigned long err;
+	ASN1_OCTET_STRING **pos;
+	BIO *bio = NULL;
+	TS_TST_INFO *ts_info = NULL;
+	const ASN1_GENERALIZEDTIME *gen_time;
+
+	/* ASN1_GENERALIZEDTIME is an alias for ASN1_STRING. */
+
+	debug_func_call();
+
+	assert(NULL != cms);
+	assert(NULL != utc_time);
+	if (NULL == utc_time) {
+		goto fail;
+	}
+
+	/* Must be signed data. */
+	asn1 = CMS_get0_type(cms);
+	nid = OBJ_obj2nid(asn1);
+	switch (nid) {
+	case NID_pkcs7_signed:
+		break;
+	default:
+		assert(0);
+		goto fail;
+		break;
+	}
+
+	pos = CMS_get0_content((CMS_ContentInfo *) cms);
+	if ((NULL == pos) || (NULL == *pos)) {
+		assert(0);
+		goto fail;
+	}
+
+	bio = BIO_new_mem_buf((*pos)->data, (*pos)->length);
+	if (NULL == bio) {
+		logError("%s\n", "Cannot create memory bio.");
+		while (0 != (err = ERR_get_error())) {
+			logError("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	ts_info = d2i_TS_TST_INFO_bio(bio, NULL);
+	if (NULL == ts_info) {
+		logError("%s\n", "Could not read ts info.");
+		while (0 != (err = ERR_get_error())) {
+			logError("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	gen_time = TS_TST_INFO_get_time(ts_info);
+	if (NULL == gen_time) {
+		goto fail;
+	}
+
+	if (-1 == asn1_time_to_utc_time(gen_time, utc_time)) {
+		goto fail;
+	}
+
+	TS_TST_INFO_free(ts_info); ts_info = NULL;
+
+	return 0;
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	if (NULL != ts_info) {
+		TS_TST_INFO_free(ts_info);
+	}
 	return -1;
 }
 
@@ -536,9 +725,7 @@ int x509_check_date(const X509 *x509, time_t utc_time)
 	if (NULL == notAfter) {
 		goto fail;
 	}
-	//fwrite(notBefore->data, 1, notBefore->length, stderr); fputc('\n', stderr);
 	asn1_time_to_utc_time(notBefore, &tNotBef);
-	//fwrite(notAfter->data, 1, notAfter->length, stderr); fputc('\n', stderr);
 	asn1_time_to_utc_time(notAfter, &tNotAft);
 
 	return (tNotBef <= utc_time) && (utc_time <= tNotAft);
@@ -553,7 +740,7 @@ fail:
  * Converts ASN1_TIME into time_t UTC time.
  */
 static
-int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
+int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
 /* ========================================================================= */
 {
 	struct tm t;
@@ -563,6 +750,9 @@ int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
 	int adj_hour = 0, adj_min = 0;
 	int adj_secs;
 	time_t ret_time;
+
+//	fprintf(stderr, "TIME %s\n",
+//	    ASN1_STRING_data((ASN1_STRING *) asn1_time));
 
 	assert(NULL != asn1_time);
 	assert(NULL != utc_time);
@@ -609,11 +799,20 @@ int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
 	t.tm_sec =  (str[i++] - '0') * 10;
 	t.tm_sec += (str[i++] - '0');
 
+	/* Ignore fractional part of time. */
+	if ('.' == str[i]) {
+		i++;
+		while (isdigit(str[i])) {
+			i++;
+		}
+	}
+
 	adjust_op = str[i++];
 	switch (adjust_op) {
 	case 'z':
 	case 'Z':
-		*utc_time = mktime(&t);
+		*utc_time = timegm_utc(&t);
+//		fprintf(stderr, "UTC %lu\n", *utc_time);
 		return 0;
 		break;
 	case '-':
@@ -647,7 +846,7 @@ int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
 
 	adj_secs = (adj_hour * 3600) + (adj_min * 60);
 
-	ret_time = mktime(&t);
+	ret_time = timegm_utc(&t);
 
 	if ('+' == adjust_op) {
 		*utc_time = ret_time - adj_secs;
@@ -657,6 +856,76 @@ int asn1_time_to_utc_time(ASN1_TIME *asn1_time, time_t *utc_time)
 
 	return 0;
 }
+
+
+/* ========================================================================= */
+/*
+ * Portable version of timegm().
+ */
+static
+time_t timegm_utc(struct tm *tm)
+/* ========================================================================= */
+{
+	/* Code taken from man timegm(3). */
+
+	time_t ret;
+	char *tz;
+
+	tz = getenv("TZ");
+	if (NULL != tz) {
+		tz = strdup(tz);
+	}
+	setenv("TZ", "", 1);
+	tzset();
+	ret = mktime(tm);
+	if (NULL != tz) {
+		setenv("TZ", tz, 1);
+		free(tz);
+	} else {
+		unsetenv("TZ");
+	}
+	tzset();
+
+	return ret;
+}
+
+
+#if defined PRINT_CERTS
+/* ========================================================================= */
+/*
+ * Prints x509.
+ */
+static
+int x509_printf(X509 *x509, FILE *fout)
+/* ========================================================================= */
+{
+	BIO *wbio = NULL;
+	BUF_MEM *buf_mem;
+
+	assert(NULL != x509);
+	assert(NULL != fout);
+
+	wbio = BIO_new(BIO_s_mem());
+	if (NULL == wbio) {
+		goto fail;
+	}
+
+	X509_print(wbio, x509);
+	//i2d_X509_bio(wbio, x509);
+	BIO_get_mem_ptr(wbio, &buf_mem);
+
+	fwrite(buf_mem->data, buf_mem->length, 1, fout);
+
+	BIO_free(wbio); wbio = NULL;
+
+	return 0;
+fail:
+	if (NULL != wbio) {
+		BIO_free(wbio);
+	}
+	return -1;
+}
+#endif /* PRINT_CERTS */
 
 
 const char *postsignum_qca_root_pem =

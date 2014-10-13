@@ -36,4 +36,18 @@ int verify_raw_message_signature(const void *raw, size_t raw_len);
 int verify_raw_message_signature_date(const void *raw, size_t raw_len,
     time_t utc_time, int crl_check);
 
+/*!
+ * @brief Verifies qualified time-stamp signature and parses the time-stamp
+ *     value. Time-stamp format follows RFC 3161.
+ *
+ * @param[in] data      Times-tamp data.
+ * @param[in] data_len  Size of data in buffer.
+ * @param[out] utc_time Value of time-stamp if valid.
+ * @return  1 if signature is valid,
+ *          0 if signature is invalid,
+ *         -1 on other errors.
+ */
+int verify_qualified_timestamp(const void *data, size_t data_len,
+    time_t *utc_time);
+
 #endif /* _CRYPTO_H_ */

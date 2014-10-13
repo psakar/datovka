@@ -429,10 +429,11 @@ private:
 	/*!
 	 * @brief Returns time-stamp validity.
 	 *
+	 * @param[out] qTst Qualified time-stamp value.
 	 * @return Return time-stamp validity check, tst is invalid if none
 	 *     found.
 	 */
-	bool msgsCheckTimestamp(int dmId, QDateTime &tst) const;
+	bool msgsCheckTimestamp(int dmId, QDateTime &qTst) const;
 
 	/*!
 	 * @brief Read data from supplementary message data table.

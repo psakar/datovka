@@ -1432,12 +1432,11 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		timeStampStr = QObject::tr("Not present");
 	} else {
 		timeStampStr = valid ? QObject::tr("Valid") : QObject::tr("Invalid");
-		/* TODO -- Print time-stamp. */
+		timeStampStr +=
+		    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + ")";
 	}
 	html += strongAccountInfoLine(QObject::tr("Time-stamp"),
-	    "TODO");
-
-	/* TODO */
+	    timeStampStr);
 
 	html += divEnd;
 
@@ -2512,14 +2511,14 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 /*
  * Returns time-stamp validity.
  */
-bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &tst) const
+bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
 	QList<QSslCertificate> certs;
 
-	tst = QDateTime();
+	qTst = QDateTime();
 
 	queryStr = "SELECT "
 	    "dmQTimestamp"
@@ -2538,7 +2537,18 @@ bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &tst) const
 			return false;
 		}
 
-		//qDebug() << QByteArray::fromBase64(byteArray);
+		QByteArray tstData = QByteArray::fromBase64(byteArray);
+
+		time_t utc_time = 0;
+		int ret = verify_qualified_timestamp(tstData.data(),
+		    tstData.size(), &utc_time);
+
+		if (-1 != ret) {
+			qTst = QDateTime::fromTime_t(utc_time);
+		}
+
+		return 1 == ret;
+
 		/*
 		 * TODO -- Time from base64 encoded timestamp.
 		 * RFC3161 (ASN.1 encoded).
