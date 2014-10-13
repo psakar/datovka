@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>519</width>
-    <height>310</height>
+    <height>347</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QDatovka - Preferences</string>
+   <string>Datovka - Preferences</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
@@ -198,7 +198,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Check for new QDatovka versions on startup</string>
+             <string>Check for new Datovka versions on startup</string>
             </property>
             <property name="checked">
              <bool>true</bool>

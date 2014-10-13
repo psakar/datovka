@@ -1494,7 +1494,7 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 {
 	QString html = "<br><center>";
 	html += "<h2>" +
-	    tr("QDatovka - Free interface for Datové schránky") + "</h2>";
+	    tr("Datovka - Free interface for Datové schránky") + "</h2>";
 	html += strongAccountInfoLine(tr("Version"), version);
 	html += QString("<br><img src=") + ICON_128x128_PATH +
 	    "datovka.png />";
@@ -3981,7 +3981,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
@@ -4049,7 +4049,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the delivery info ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
@@ -4226,7 +4226,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
@@ -4288,7 +4288,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("QDatovka - Export error!"));
+		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
@@ -4401,11 +4401,11 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 	case IE_HTTP:
 	case IE_ERROR:
 		msgBoxTitle = accountName +
-		    ": " + tr("QDatovka internal error!");
+		    ": " + tr("Datovka internal error!");
 		msgBoxContent =
 		    tr("It was not possible to establish a connection "
 		    "to server Datové Schránky.") + "<br><br>" +
-		    "<b>" + tr("QDatovka internal error!") + "</b>" + "<br><br>" +
+		    "<b>" + tr("Datovka internal error!") + "</b>" + "<br><br>" +
 		    tr("Please check your internet connection and try again.");
 		break;
 

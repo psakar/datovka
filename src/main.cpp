@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	    LOG_UPTO(LOG_WARNING));
 
 	/* TODO -- Make the following assignments configurable. */
-	QCoreApplication::setApplicationName("qdatovka");
+	QCoreApplication::setApplicationName("Datovka");
 	QCoreApplication::setApplicationVersion(VERSION);
 
 	qInstallMessageHandler(globalLogOutput);
