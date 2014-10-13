@@ -110,7 +110,7 @@ AccountModel::AccountModel(QObject *parent)
     : QStandardItemModel(parent)
 {
 	/* Set header. */
-	this->setHorizontalHeaderItem(0, new QStandardItem(tr("Accounts")));
+	this->setHorizontalHeaderItem(0, new QStandardItem(QObject::tr("Accounts")));
 }
 
 
@@ -282,15 +282,15 @@ QModelIndex AccountModel::addAccount(const QString &name, const QVariant &data)
 	QStandardItem *account = new QStandardItem(name);
 	account->setFlags(account->flags() & ~Qt::ItemIsEditable);
 	QStandardItem *recentReceived =
-	    new QStandardItem(tr("Recent Received"));
+	    new QStandardItem(QObject::tr("Recent Received"));
 	recentReceived->setFlags(recentReceived->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *recentSent = new QStandardItem(tr("Recent Sent"));
+	QStandardItem *recentSent = new QStandardItem(QObject::tr("Recent Sent"));
 	recentSent->setFlags(recentSent->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *all = new QStandardItem(tr("All"));
+	QStandardItem *all = new QStandardItem(QObject::tr("All"));
 	all->setFlags(all->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *allReceived = new QStandardItem(tr("Received"));
+	QStandardItem *allReceived = new QStandardItem(QObject::tr("Received"));
 	allReceived->setFlags(allReceived->flags() & ~Qt::ItemIsEditable);
-	QStandardItem *allSent = new QStandardItem(tr("Sent"));
+	QStandardItem *allSent = new QStandardItem(QObject::tr("Sent"));
 	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
 	account->setData(data, ROLE_ACNT_CONF_SETTINGS);

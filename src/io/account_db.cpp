@@ -198,7 +198,7 @@ const QString AccountDb::dbId(const QString &key,
 const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 /* ========================================================================= */
 {
-	QString ret = tr("unknown or without expiration");
+	QString ret = QObject::tr("unknown or without expiration");
 
 	if (!m_db.isOpen()) {
 		return ret;

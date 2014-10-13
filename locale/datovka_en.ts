@@ -46,47 +46,6 @@ based on the libisds library</source>
     </message>
 </context>
 <context>
-    <name>AccountDb</name>
-    <message>
-        <location filename="../src/io/account_db.cpp" line="201"/>
-        <source>unknown or without expiration</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>AccountModel</name>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="113"/>
-        <source>Accounts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="285"/>
-        <source>Recent Received</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="287"/>
-        <source>Recent Sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="289"/>
-        <source>All</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="291"/>
-        <source>Received</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/models/accounts_model.cpp" line="293"/>
-        <source>Sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ChangeDirectory</name>
     <message>
         <location filename="../src/gui/ui/dlg_change_directory.ui" line="14"/>
@@ -1814,305 +1773,6 @@ Try again.</source>
     </message>
 </context>
 <context>
-    <name>MessageDb</name>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="957"/>
-        <source>Advice of Delivery</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="958"/>
-        <location filename="../src/io/message_db.cpp" line="1097"/>
-        <source>Message ID: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="981"/>
-        <location filename="../src/io/message_db.cpp" line="1119"/>
-        <source>Sender</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="985"/>
-        <location filename="../src/io/message_db.cpp" line="993"/>
-        <location filename="../src/io/message_db.cpp" line="1123"/>
-        <location filename="../src/io/message_db.cpp" line="1135"/>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="989"/>
-        <location filename="../src/io/message_db.cpp" line="1131"/>
-        <source>Recipient</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="997"/>
-        <location filename="../src/io/message_db.cpp" line="1142"/>
-        <source>General Information</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="999"/>
-        <location filename="../src/io/message_db.cpp" line="1144"/>
-        <location filename="../src/io/message_db.cpp" line="1241"/>
-        <source>Subject</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1004"/>
-        <location filename="../src/io/message_db.cpp" line="1149"/>
-        <source> paragraph </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1005"/>
-        <location filename="../src/io/message_db.cpp" line="1150"/>
-        <source> letter </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1008"/>
-        <location filename="../src/io/message_db.cpp" line="1153"/>
-        <source>Delegation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1010"/>
-        <location filename="../src/io/message_db.cpp" line="1013"/>
-        <location filename="../src/io/message_db.cpp" line="1016"/>
-        <location filename="../src/io/message_db.cpp" line="1019"/>
-        <location filename="../src/io/message_db.cpp" line="1022"/>
-        <location filename="../src/io/message_db.cpp" line="1155"/>
-        <location filename="../src/io/message_db.cpp" line="1158"/>
-        <location filename="../src/io/message_db.cpp" line="1161"/>
-        <location filename="../src/io/message_db.cpp" line="1164"/>
-        <location filename="../src/io/message_db.cpp" line="1167"/>
-        <source>Not specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1012"/>
-        <location filename="../src/io/message_db.cpp" line="1157"/>
-        <source>Our ref.number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1015"/>
-        <location filename="../src/io/message_db.cpp" line="1160"/>
-        <source>Our doc.id</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1018"/>
-        <location filename="../src/io/message_db.cpp" line="1163"/>
-        <source>Your ref.number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1021"/>
-        <location filename="../src/io/message_db.cpp" line="1166"/>
-        <source>Your doc.id</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1024"/>
-        <location filename="../src/io/message_db.cpp" line="1169"/>
-        <source>To hands</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1026"/>
-        <location filename="../src/io/message_db.cpp" line="1031"/>
-        <location filename="../src/io/message_db.cpp" line="1172"/>
-        <location filename="../src/io/message_db.cpp" line="1177"/>
-        <source>yes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1027"/>
-        <location filename="../src/io/message_db.cpp" line="1030"/>
-        <location filename="../src/io/message_db.cpp" line="1173"/>
-        <location filename="../src/io/message_db.cpp" line="1176"/>
-        <source>no</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1028"/>
-        <location filename="../src/io/message_db.cpp" line="1174"/>
-        <source>Personal Delivery</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1032"/>
-        <location filename="../src/io/message_db.cpp" line="1178"/>
-        <source>Prohibit Delivery by Fiction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1039"/>
-        <source>Delivery/Acceptance Information</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1041"/>
-        <location filename="../src/io/message_db.cpp" line="1136"/>
-        <source>Delivery</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1044"/>
-        <source>Acceptance</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1061"/>
-        <location filename="../src/io/message_db.cpp" line="1345"/>
-        <source>Events</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1068"/>
-        <source>Time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1096"/>
-        <source>Envelope</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1124"/>
-        <source>Databox ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1126"/>
-        <source>Databox Type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1194"/>
-        <location filename="../src/io/message_db.cpp" line="1370"/>
-        <location filename="../src/io/message_db.cpp" line="1386"/>
-        <location filename="../src/io/message_db.cpp" line="1391"/>
-        <source>Attachments</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1224"/>
-        <source>Identification</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1226"/>
-        <source>ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1245"/>
-        <source>Message type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1263"/>
-        <source>Message author</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1273"/>
-        <source>To</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1275"/>
-        <source>Recipient Address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1302"/>
-        <source>Status</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1372"/>
-        <source>(downloaded and ready)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1387"/>
-        <source>not downloaded yet, ~</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1389"/>
-        <source> KB; use &apos;Download&apos; to get them.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1392"/>
-        <source>(not available)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1399"/>
-        <source>Signature</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1403"/>
-        <location filename="../src/io/message_db.cpp" line="1407"/>
-        <location filename="../src/io/message_db.cpp" line="1411"/>
-        <source>Message signature</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1404"/>
-        <location filename="../src/io/message_db.cpp" line="1432"/>
-        <source>Not present</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1408"/>
-        <location filename="../src/io/message_db.cpp" line="1417"/>
-        <location filename="../src/io/message_db.cpp" line="1434"/>
-        <source>Invalid</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1409"/>
-        <source>Message signature and content do not correspond!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1412"/>
-        <location filename="../src/io/message_db.cpp" line="1417"/>
-        <location filename="../src/io/message_db.cpp" line="1434"/>
-        <source>Valid</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1420"/>
-        <source>Certificate revocation check is turned off!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1423"/>
-        <source>Signing certificate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1437"/>
-        <source>Time-stamp</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/io/message_db.cpp" line="1489"/>
-        <source>File Size</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>Preferences</name>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="43"/>
@@ -2592,11 +2252,14 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="318"/>
+        <location filename="../src/io/message_db.cpp" line="1226"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="322"/>
+        <location filename="../src/io/message_db.cpp" line="981"/>
+        <location filename="../src/io/message_db.cpp" line="1119"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2607,6 +2270,8 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="325"/>
+        <location filename="../src/io/message_db.cpp" line="989"/>
+        <location filename="../src/io/message_db.cpp" line="1131"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2617,6 +2282,8 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="333"/>
+        <location filename="../src/io/message_db.cpp" line="1024"/>
+        <location filename="../src/io/message_db.cpp" line="1169"/>
         <source>To hands</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2682,6 +2349,7 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="349"/>
+        <location filename="../src/io/message_db.cpp" line="1302"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2734,6 +2402,319 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
     <message>
         <location filename="../src/main.cpp" line="63"/>
         <source>level</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="113"/>
+        <source>Accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="285"/>
+        <source>Recent Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="287"/>
+        <source>Recent Sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="289"/>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="291"/>
+        <source>Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="293"/>
+        <source>Sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/account_db.cpp" line="201"/>
+        <source>unknown or without expiration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="957"/>
+        <source>Advice of Delivery</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="958"/>
+        <location filename="../src/io/message_db.cpp" line="1097"/>
+        <source>Message ID: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="985"/>
+        <location filename="../src/io/message_db.cpp" line="993"/>
+        <location filename="../src/io/message_db.cpp" line="1123"/>
+        <location filename="../src/io/message_db.cpp" line="1135"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="997"/>
+        <location filename="../src/io/message_db.cpp" line="1142"/>
+        <source>General Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="999"/>
+        <location filename="../src/io/message_db.cpp" line="1144"/>
+        <location filename="../src/io/message_db.cpp" line="1241"/>
+        <source>Subject</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1004"/>
+        <location filename="../src/io/message_db.cpp" line="1149"/>
+        <source> paragraph </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1005"/>
+        <location filename="../src/io/message_db.cpp" line="1150"/>
+        <source> letter </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1008"/>
+        <location filename="../src/io/message_db.cpp" line="1153"/>
+        <source>Delegation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1010"/>
+        <location filename="../src/io/message_db.cpp" line="1013"/>
+        <location filename="../src/io/message_db.cpp" line="1016"/>
+        <location filename="../src/io/message_db.cpp" line="1019"/>
+        <location filename="../src/io/message_db.cpp" line="1022"/>
+        <location filename="../src/io/message_db.cpp" line="1155"/>
+        <location filename="../src/io/message_db.cpp" line="1158"/>
+        <location filename="../src/io/message_db.cpp" line="1161"/>
+        <location filename="../src/io/message_db.cpp" line="1164"/>
+        <location filename="../src/io/message_db.cpp" line="1167"/>
+        <source>Not specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1012"/>
+        <location filename="../src/io/message_db.cpp" line="1157"/>
+        <source>Our ref.number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1015"/>
+        <location filename="../src/io/message_db.cpp" line="1160"/>
+        <source>Our doc.id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1018"/>
+        <location filename="../src/io/message_db.cpp" line="1163"/>
+        <source>Your ref.number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1021"/>
+        <location filename="../src/io/message_db.cpp" line="1166"/>
+        <source>Your doc.id</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1026"/>
+        <location filename="../src/io/message_db.cpp" line="1031"/>
+        <location filename="../src/io/message_db.cpp" line="1172"/>
+        <location filename="../src/io/message_db.cpp" line="1177"/>
+        <source>yes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1027"/>
+        <location filename="../src/io/message_db.cpp" line="1030"/>
+        <location filename="../src/io/message_db.cpp" line="1173"/>
+        <location filename="../src/io/message_db.cpp" line="1176"/>
+        <source>no</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1028"/>
+        <location filename="../src/io/message_db.cpp" line="1174"/>
+        <source>Personal Delivery</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1032"/>
+        <location filename="../src/io/message_db.cpp" line="1178"/>
+        <source>Prohibit Delivery by Fiction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1039"/>
+        <source>Delivery/Acceptance Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1041"/>
+        <location filename="../src/io/message_db.cpp" line="1136"/>
+        <source>Delivery</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1044"/>
+        <source>Acceptance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1061"/>
+        <location filename="../src/io/message_db.cpp" line="1345"/>
+        <source>Events</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1068"/>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1096"/>
+        <source>Envelope</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1124"/>
+        <source>Databox ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1126"/>
+        <source>Databox Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1194"/>
+        <location filename="../src/io/message_db.cpp" line="1370"/>
+        <location filename="../src/io/message_db.cpp" line="1386"/>
+        <location filename="../src/io/message_db.cpp" line="1391"/>
+        <source>Attachments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1224"/>
+        <source>Identification</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1245"/>
+        <source>Message type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1252"/>
+        <source>From</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1254"/>
+        <source>Sender Address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1263"/>
+        <source>Message author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1273"/>
+        <source>To</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1275"/>
+        <source>Recipient Address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1372"/>
+        <source>(downloaded and ready)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1387"/>
+        <source>not downloaded yet, ~</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1389"/>
+        <source> KB; use &apos;Download&apos; to get them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1392"/>
+        <source>(not available)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1399"/>
+        <source>Signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1403"/>
+        <location filename="../src/io/message_db.cpp" line="1407"/>
+        <location filename="../src/io/message_db.cpp" line="1411"/>
+        <source>Message signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1404"/>
+        <location filename="../src/io/message_db.cpp" line="1432"/>
+        <source>Not present</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1408"/>
+        <location filename="../src/io/message_db.cpp" line="1417"/>
+        <location filename="../src/io/message_db.cpp" line="1434"/>
+        <source>Invalid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1409"/>
+        <source>Message signature and content do not correspond!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1412"/>
+        <location filename="../src/io/message_db.cpp" line="1417"/>
+        <location filename="../src/io/message_db.cpp" line="1434"/>
+        <source>Valid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1420"/>
+        <source>Certificate revocation check is turned off!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1423"/>
+        <source>Signing certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1437"/>
+        <source>Time-stamp</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/io/message_db.cpp" line="1489"/>
+        <source>File Size</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

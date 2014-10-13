@@ -140,6 +140,12 @@ int main(int argc, char *argv[])
 		translator.load("datovka_" + QLocale::system().name(),
 		    LOCALE_PATH);
 	}
+
+	/* TODO - set czech locale as default for testing
+	 * It must be removed
+	 */
+	translator.load("datovka_cs", LOCALE_PATH);
+
 	app.installTranslator(&translator);
 
 	MainWindow mainwin;
