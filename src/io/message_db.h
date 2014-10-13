@@ -4,6 +4,7 @@
 #define _MESSAGE_DB_H_
 
 
+#include <QAbstractButton>
 #include <QAbstractTableModel>
 #include <QJsonDocument>
 #include <QList>
@@ -204,8 +205,8 @@ public:
 	/*!
 	 * @brief Return message HTML formatted description.
 	 */
-	QString descriptionHtml(int dmId, bool showId = false,
-	    bool warnOld = true) const;
+	QString descriptionHtml(int dmId, QAbstractButton *verifySignature,
+	    bool showId = false, bool warnOld = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to PDF.

@@ -656,7 +656,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		}
 
 		/* Generate and show message information. */
-		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
+		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
+		    ui->verifySignature));
 		ui->messageInfo->setReadOnly(true);
 
 		/* Enable buttons according to database content. */
@@ -1111,7 +1112,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	/* Show files related to message. */
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
+	    ui->verifySignature));
 	ui->messageInfo->setReadOnly(true);
 
 	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
@@ -1820,8 +1822,9 @@ void MainWindow::connectMessageActionBarSlots(void)
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
-//	connect(ui->verifySignature, SIGNAL(clicked()), this,
-//	    SLOT(xxxx()));
+	/* Downloading attachments also trigers signature verification. */
+	connect(ui->verifySignature, SIGNAL(clicked()), this,
+	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->signatureDetails, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
 }

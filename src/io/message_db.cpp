@@ -1213,7 +1213,8 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId) const
 /*
  * Return message HTML formatted description.
  */
-QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
+QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
+    bool showId, bool warnOld) const
 /* ========================================================================= */
 {
 	QString html;
@@ -1396,13 +1397,21 @@ QString MessageDb::descriptionHtml(int dmId, bool showId, bool warnOld) const
 		/* TODO */
 	}
 
+	/* Disable verify signature button. It is re-enabled when needed. */
+	if (0 != verifySignature) {
+		verifySignature->setEnabled(false);
+	}
+
 	html += "<h3>" + QObject::tr("Signature") + "</h3>";
 	/* Signature. */
 	if (!msgsVerificationAttempted(dmId)) {
 		/* Verification no attempted. */
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Not present"));
-		/* TODO -- Enable verification button. */
+		/* Enable verification button. */
+		if (0 != verifySignature) {
+			verifySignature->setEnabled(true);
+		}
 	} else if (!msgsVerified(dmId)) {
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Invalid")  + " -- " +
