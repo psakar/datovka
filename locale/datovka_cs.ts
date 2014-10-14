@@ -1243,34 +1243,37 @@ Zpráva je neplatná.</translation>
         <location filename="../src/gui/datovka.cpp" line="3836"/>
         <source>The message hash cannot be verified because the connection to ISDS failed!
 Check your internet connection.</source>
-        <translation></translation>
+        <translation>Ověření otisku zpávy nebylo možné, protože selhalo připojení k serveru Datové schránky!
+Zkontrolujte Vaše připojení k internetu.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3840"/>
         <source>Authenticate message warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba autentizace zprávy</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3841"/>
         <source>The message hash is not in local database.
 Please download complete message form ISDS and try again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Otisk zprávy nebyl nalezen v lokální databázi.
+Prosím, shántěte kompletní zprávu ze serveru Datové schránky a zkuste to znova.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3846"/>
         <source>The message hash cannot be verified because an internal error occurred!
 Try again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nebylo možné ověřit otisk zprávy, protože se v aplikaci vysklytla chyba!
+Zkuzte to unova.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3893"/>
         <source>Content parsing error</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba při transormaci</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3894"/>
         <source>Cannot parse the content of </source>
-        <translation type="unfinished"></translation>
+        <translation>Není možné pársovat obsah </translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3987"/>
@@ -1339,13 +1342,13 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4360"/>
         <source>Authentication error!</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba autentizace!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4362"/>
         <location filename="../src/gui/datovka.cpp" line="4375"/>
         <source>It was not possible to connect to your Databox.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nebylo možné se připojit k Vaší datové schránce.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4363"/>
@@ -1366,23 +1369,23 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4373"/>
         <source>OTP authentication error!</source>
-        <translation type="unfinished"></translation>
+        <translation>Selhala OTP autentizace!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4376"/>
         <source>Authorization via OTP failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Selhala OTP autentizace!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4379"/>
         <source>It is aslo possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Také je možné, že vypršela platnost Vašeho hesla - v tomto případě se musíte přihlásit na stránky datové schránky a heslo si změnit.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4386"/>
         <location filename="../src/gui/datovka.cpp" line="4417"/>
         <source>Connection to ISDS error!</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba připojení k serveru Datové schránky!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4388"/>
@@ -1392,12 +1395,12 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4390"/>
         <source>Connection to ISDS timeout!</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba navázování spojení se serverem Datové schránky!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4391"/>
         <source>This is either caused by an extremely slow and/or unstable connection or by an improper setup.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento problém je obvykle způsoben velice pomalým a/nebo nestabilním spojením a nebo jeho nesprávným nastavením.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4393"/>
@@ -1410,12 +1413,12 @@ Try again.</source>
         <location filename="../src/gui/datovka.cpp" line="4394"/>
         <location filename="../src/gui/datovka.cpp" line="4425"/>
         <source>It might be necessary to use a proxy to connect to the server. If yes, please set it up in the File/Proxy settings menu.</source>
-        <translation type="unfinished"></translation>
+        <translation>Je možné, že pro spojení se serverem je třeba použít proxy. Pokud ano, nastavte ji prosím v menu Soubor/Nastavení proxy.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4409"/>
         <source>It was not possible to establish a connection to server Datové Schránky.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nebylo možné navázat spojení se serverem Datové schránky.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4419"/>
@@ -1430,7 +1433,7 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4422"/>
         <source>This is usually caused by either lack of internet connection or by a firewall on the way.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento problém je obvykle způsoben neexistencí internetového připojení nebo přítomností firewallu.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4445"/>
@@ -1440,32 +1443,32 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4687"/>
         <source>Server connection for </source>
-        <translation type="unfinished"></translation>
+        <translation>Připojení pro účet</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4689"/>
         <source>Enter security code for account </source>
-        <translation>Zadejte bezpečnostní kód pro účet</translation>
+        <translation>Zadejte bezpečnostní kód pro účet </translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4774"/>
         <source>There were some errors during saving of the overview:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyskytli se nějaké chyby během exportu korespondence:</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4779"/>
         <source>does not contain data necessary for ZFO export</source>
-        <translation type="unfinished"></translation>
+        <translation>neobsahuje data potřebná k exportu do ZFO souboru</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4781"/>
         <source>And many more</source>
-        <translation type="unfinished"></translation>
+        <translation>A několik dalších</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4787"/>
         <source>messages were successfully exported to ZFO</source>
-        <translation type="unfinished"></translation>
+        <translation>zprávy byly úspěšně exportovány do ZFO</translation>
     </message>
     <message>
         <source>Accounts</source>
