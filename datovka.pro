@@ -56,6 +56,8 @@ macx {
 }
 
 win32 {
+	DEFINES += WIN32=1
+
 	INCLUDEPATH = \
 		src \
 		mingw32built/include/libxml2 \
