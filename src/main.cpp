@@ -118,12 +118,6 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-/*
-#if defined(Q_OS_UNIX)
-#elif defined(Q_OS_WIN)
-#elif defined(Q_OS_MAC)
-#endif
-*/
 	qDebug() << "GUI main thread: " << QThread::currentThreadId();
 
 	QTranslator translator;
