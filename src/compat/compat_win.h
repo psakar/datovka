@@ -6,10 +6,16 @@
 #ifdef WIN32
 
 #ifdef __cplusplus
+#  include <ctime>
+#else
+#  include <time.h>
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
-time_t timegm(struct tm *tm);
+time_t timegm_win(struct tm *tm);
 
 #ifdef __cplusplus
 } /* extern "C" */

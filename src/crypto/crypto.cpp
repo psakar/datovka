@@ -890,7 +890,7 @@ time_t timegm_utc(struct tm *tm)
 
 	return ret;
 #else /* WIN32 */
-	return timegm(tm);
+	return timegm_win(tm);
 #endif /* !WIN32 */
 }
 

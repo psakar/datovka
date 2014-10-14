@@ -32,7 +32,7 @@
  */
 
 #ifdef WIN32
-#include "src/compat/compat_win.c"
+#include "src/compat/compat_win.h"
 
 //#include "platform/platform.h"
 
@@ -43,7 +43,7 @@ int is_leap(unsigned y)
 	return (y % 4) == 0 && ((y % 100) != 0 || (y % 400) == 0);
 }
 
-time_t timegm(struct tm *tm)
+time_t timegm_win(struct tm *tm)
 {
 	static const unsigned ndays[2][12] = {
 		{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
