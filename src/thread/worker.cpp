@@ -15,6 +15,9 @@
 #include "src/io/isds_sessions.h"
 
 
+QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
+
+
 /* ========================================================================= */
 /*
  * Constructor.

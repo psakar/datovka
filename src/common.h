@@ -7,7 +7,6 @@
 #include <QSettings>
 #include <QString>
 #include <QDebug>
-#include <QMutex>
 
 #define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
 
@@ -47,8 +46,6 @@ typedef enum {
 	Q_NOTEQUAL
 } qdatovka_error;
 
-
-extern QMutex downloadMessagesMutex;
 
 /*
  * Defined roles accross the application. 

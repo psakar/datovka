@@ -62,6 +62,16 @@ private slots:
 	void messageItemRightClicked(const QPoint &point);
 
 	/*!
+	 * @brief Saves message selection.
+	 */
+	void messageItemStoreSelection(void);
+
+	/*!
+	 * @brief Restores message selection.
+	 */
+	void messageItemRestoreSelection(void);
+
+	/*!
 	 * @brief Redraws widgets according to selected attachment item.
 	 */
 	void attachmentItemSelectionChanged(const QModelIndex &current,
@@ -586,6 +596,9 @@ private:
 	                                                * Used for message
 	                                                * sorting.
 	                                                */
+
+	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
+	long m_lastStoredMessageId; /*!< Last stored message selection. */
 
 	int m_received_1;
 	int m_received_2;

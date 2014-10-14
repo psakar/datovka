@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
+    m_lastSelectedMessageId(-1),
+    m_lastStoredMessageId(-1),
     m_received_1(200),
     m_received_2(200),
     m_sent_1(200),
@@ -356,6 +358,12 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
 		         QModelIndex)));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutAboutToBeChanged()), this,
+		    SLOT(messageItemStoreSelection()));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutChanged()), this,
+		    SLOT(messageItemRestoreSelection()));
 
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
@@ -456,6 +464,12 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
 		         QModelIndex)));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutAboutToBeChanged()), this,
+		    SLOT(messageItemStoreSelection()));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutChanged()), this,
+		    SLOT(messageItemRestoreSelection()));
 	}
 
 	/* Depending on which item was clicked show/hide elements. */
@@ -495,6 +509,12 @@ setmodel:
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
 		        QModelIndex)));
+		connect(ui->messageList->model(),
+		    SIGNAL(layoutAboutToBeChanged()), this,
+		    SLOT(messageItemStoreSelection()));
+		connect(ui->messageList->model(),
+		    SIGNAL(layoutChanged()), this,
+		    SLOT(messageItemRestoreSelection()));
 		/* Clear message info. */
 		ui->messageInfo->clear();
 		/* Clear attachment list. */
@@ -503,9 +523,7 @@ setmodel:
 		itemModel = ui->messageList->model();
 		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
-			QModelIndex lastIndex =
-			    itemModel->index(itemModel->rowCount() - 1, 0);
-			ui->messageList->setCurrentIndex(lastIndex);
+			messageItemRestoreSelection();
 			ui->actionReply_to_the_sender->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->menuMessage->setEnabled(true);
@@ -616,6 +634,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	ui->messageAttachmentList->setModel(0);
 
 	if (!current.isValid()) {
+		/* Invalid message selected. */
+		m_lastSelectedMessageId = -1;
 		/* End if invalid item is selected. */
 		return;
 	}
@@ -632,6 +652,9 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		MessageDb *messageDb = accountMessageDb(0);
 		Q_ASSERT(0 != messageDb);
 		int msgId = msgTblMdl->itemData(index).first().toInt();
+		/* Remember last selected message. */
+		m_lastSelectedMessageId = msgId;
+		qDebug() << "Last selected" << m_lastSelectedMessageId;
 
 		/* Mark message locally read. */
 		if (!messageDb->smsgdtLocallyRead(msgId)) {
@@ -712,6 +735,11 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	QModelIndex index = ui->messageList->indexAt(point);
 	QMenu *menu = new QMenu;
 
+	/* Remember last selected message. */
+	m_lastSelectedMessageId =
+	    index.model()->itemData(index).first().toInt();
+	qDebug() << "Last selected" << m_lastSelectedMessageId;
+
 	if (index.isValid()) {
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
@@ -771,6 +799,67 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    this, SLOT(createAndSendMessage()));
 	}
 	menu->exec(QCursor::pos());
+}
+
+
+/* ========================================================================= */
+/*
+ * Saves message selection.
+ */
+void MainWindow::messageItemStoreSelection(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	m_lastStoredMessageId = m_lastSelectedMessageId;
+	qDebug() << "Last stored position" << m_lastStoredMessageId;
+}
+
+
+/* ========================================================================= */
+/*
+ * Restores message selection.
+ */
+void MainWindow::messageItemRestoreSelection(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	QModelIndex index;
+
+	const QAbstractItemModel *model = ui->messageList->model();
+	Q_ASSERT(0 != model);
+
+	int rowCount = model->rowCount();
+	int row;
+
+	/* If the ID does not exist the jump to the last element. */
+	if (-1 == m_lastStoredMessageId) {
+		row = rowCount;
+	}
+
+	/* Find and select the message with the ID. */
+	if (-1 != m_lastStoredMessageId) {
+		int row;
+		for (row = 0; row < rowCount; ++row) {
+			/*
+			 * TODO -- Search in a more resource-saving way.
+			 * Eliminate index copying, use smarter search.
+			 */
+			index = model->index(row, 0);
+			if (index.data().toInt() == m_lastStoredMessageId) {
+				break;
+			}
+		}
+	}
+
+	if (row < rowCount) {
+		qDebug() << "Saved position found" << m_lastStoredMessageId;
+		ui->messageList->setCurrentIndex(index);
+	} else {
+		index = model->index(rowCount - 1, 0);
+		ui->messageList->setCurrentIndex(index);
+	}
 }
 
 
@@ -1170,7 +1259,7 @@ void MainWindow::accountItemMarkAllRead(void)
 		}
 	}
 
-	/* Regenerate acount tree. */
+	/* Regenerate account tree. */
 	regenerateAllAccountModelYears();
 
 	/* Restore selection. */

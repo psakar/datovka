@@ -15,7 +15,6 @@
 
 GlobPreferences globPref;
 GlobProxySettings globProxSet;
-QMutex downloadMessagesMutex(QMutex::NonRecursive);
 
 /* Defaults. */
 static const

@@ -209,7 +209,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
-			    itemSettings);		    
+			    itemSettings);
 		}
 	}
 }
