@@ -64,6 +64,10 @@ win32 {
 	LIBS = \
 		e:/Git/qdatovka/mingw32built/bin/libisds-5.dll \
 		e:/Git/qdatovka/mingw32built/bin/libeay32.dll
+
+	SOURCES += src/compat/compat_win.c
+
+	HEADERS += src/compat/compat_win.h
 } else {
 	LIBS += \
 		-lcrypto

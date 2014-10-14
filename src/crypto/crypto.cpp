@@ -11,6 +11,7 @@
 #include <openssl/ts.h>
 #include <openssl/x509v3.h>
 
+#include "src/compat/compat_win.h"
 #include "src/crypto/crypto.h"
 #include "src/log/log.h"
 
@@ -866,6 +867,7 @@ static
 time_t timegm_utc(struct tm *tm)
 /* ========================================================================= */
 {
+#ifndef WIN32
 	/* Code taken from man timegm(3). */
 
 	time_t ret;
@@ -887,6 +889,9 @@ time_t timegm_utc(struct tm *tm)
 	tzset();
 
 	return ret;
+#else /* WIN32 */
+	return timegm(tm);
+#endif /* !WIN32 */
 }
 
 
