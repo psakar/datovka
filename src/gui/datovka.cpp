@@ -1435,8 +1435,13 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 
 	html.append("<br>");
 	QString key = itemSettings[USER].toString() + "___True";
+	QString info = m_accountDb.getPwdExpirFromDb(key);
+	if (info.isEmpty()) {
+		info = tr("unknown or without expiration");
+	}
+
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
-	    m_accountDb.getPwdExpirFromDb(key)));
+	    info));
 
 	html.append("</div>");
 
