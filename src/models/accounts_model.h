@@ -142,7 +142,8 @@ public:
 	 *
 	 * @param[in] item Selected account item.
 	 */
-	SettingsMap settingsMap(QStandardItem *item) const;
+	static
+	SettingsMap settingsMap(QStandardItem *item);
 
 	/*!
 	 * @brief Set settings map to related account.
@@ -151,6 +152,7 @@ public:
 	 * @param[in] map  Settings map to be assigned.
 	 * @retunr True if successful.
 	 */
+	static
 	void setSettingsMap(QStandardItem *item, const SettingsMap &map);
 
 	/*!

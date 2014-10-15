@@ -64,7 +64,12 @@ private slots:
 	/*!
 	 * @brief Saves message selection.
 	 */
-	void messageItemStoreSelection(void);
+	void messageItemStoreSelection(long msgId);
+
+	/*!
+	 * @brief Saves message selection when model changes.
+	 */
+	void messageItemStoreSelectionOnModelChange(void);
 
 	/*!
 	 * @brief Restores message selection.

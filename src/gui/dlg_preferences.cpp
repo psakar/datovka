@@ -35,26 +35,30 @@ void DlgPreferences::initPrefDialog(void)
 
 	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
 
-	if (globPref.after_start_select == 1) {
+	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
 		this->after_start_select_1->setChecked(true);
 		this->after_start_select_2->setChecked(false);
 		this->after_start_select_3->setChecked(false);
-	} else if (globPref.after_start_select == 2) {
+	} else if (GlobPreferences::SELECT_LAST_VISITED == globPref.after_start_select) {
 		this->after_start_select_1->setChecked(false);
 		this->after_start_select_2->setChecked(true);
 		this->after_start_select_3->setChecked(false);
-	} else {
+	} else if (GlobPreferences::SELECT_NOTHING == globPref.after_start_select) {
 		this->after_start_select_1->setChecked(false);
 		this->after_start_select_2->setChecked(false);
 		this->after_start_select_3->setChecked(true);
+	} else {
+		Q_ASSERT(0);
 	}
 
-	if (globPref.certificate_validation_date == 1) {
+	if (GlobPreferences::DOWNLOAD_DATE == globPref.certificate_validation_date) {
 		this->certificate_validation_date_1->setChecked(true);
 		this->certificate_validation_date_2->setChecked(false);
-	} else {
+	} else if (GlobPreferences::CURRENT_DATE == globPref.certificate_validation_date) {
 		this->certificate_validation_date_1->setChecked(false);
 		this->certificate_validation_date_2->setChecked(true);
+	} else {
+		Q_ASSERT(0);
 	}
 }
 

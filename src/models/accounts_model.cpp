@@ -433,7 +433,7 @@ QModelIndex AccountModel::indexTop(const QModelIndex &index)
 /*
  * Return related settings map.
  */
-AccountModel::SettingsMap AccountModel::settingsMap(QStandardItem *item) const
+AccountModel::SettingsMap AccountModel::settingsMap(QStandardItem *item)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != item);
