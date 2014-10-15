@@ -98,8 +98,8 @@ private:
 /*
  * Account database.
  */
-extern const Tbl accntinfTbl; /*!< Table 'account_info'. */
-extern const Tbl pwdexpdtTbl; /*!< Table 'password_expiration_date'. */
+extern Tbl accntinfTbl; /*!< Table 'account_info'. */
+extern Tbl pwdexpdtTbl; /*!< Table 'password_expiration_date'. */
 
 
 /*

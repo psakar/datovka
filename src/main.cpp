@@ -143,6 +143,8 @@ int main(int argc, char *argv[])
 	app.installTranslator(&translator);
 
 	/* Localise description in tables. */
+	accntinfTbl.reloadLocalisedDescription();
+	pwdexpdtTbl.reloadLocalisedDescription();
 	msgsTbl.reloadLocalisedDescription();
 	msgsTbl.reloadLocalisedDescription();
 	flsTbl.reloadLocalisedDescription();

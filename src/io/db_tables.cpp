@@ -246,7 +246,7 @@ namespace AccntinfTbl {
 	{"dbOpenAddressing",       {DB_BOOLEAN, QObject::tr("Open addressing")}}
 	};
 } /* namespace AccntinfTbl */
-const Tbl accntinfTbl(AccntinfTbl::tabName, AccntinfTbl::knownAttrs,
+Tbl accntinfTbl(AccntinfTbl::tabName, AccntinfTbl::knownAttrs,
     AccntinfTbl::attrProps, AccntinfTbl::colConstraints,
     AccntinfTbl::tblConstraint);
 
@@ -273,7 +273,7 @@ namespace PwdexpdtTbl {
 	{"expDate", {DB_TEXT, ""}}
 	};
 } /* namespace PwdexpdtTbl */
-const Tbl pwdexpdtTbl(PwdexpdtTbl::tabName, PwdexpdtTbl::knownAttrs,
+Tbl pwdexpdtTbl(PwdexpdtTbl::tabName, PwdexpdtTbl::knownAttrs,
     PwdexpdtTbl::attrProps, PwdexpdtTbl::colConstraints,
     PwdexpdtTbl::tblConstraint);
 
