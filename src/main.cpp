@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QDir>
 #include <QtWidgets>
 
 #include "src/common.h"
@@ -12,7 +13,7 @@
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 
-#define LOCALE_PATH "locale"
+#define LOCALE_SRC_PATH "locale"
 
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 
 	if (0 != init_crypto()) {
-		logError("%s\n", "Cannot load cryptographic backend.");
+		logError("%s\n", "Cannot load cryptographic back-end.");
 		/* TODO -- throw a dialog notifying the user. */
 		/*
 		 * TODO -- the function should fail only when all certificates
@@ -123,6 +124,8 @@ int main(int argc, char *argv[])
 
 	QTranslator translator;
 
+	qDebug() << "App path : " << app.applicationDirPath();
+
 	/* Load localisation. */
 	{
 		QSettings settings(globPref.loadConfPath(),
@@ -132,14 +135,27 @@ int main(int argc, char *argv[])
 		QString language =
 		    settings.value("preferences/language").toString();
 
+		/* Check for localisation location. */
+		QDir dir;
+		dir.setPath(app.applicationDirPath() + QDir::separator() +
+		    LOCALE_SRC_PATH);
+		if (!dir.exists()) {
+			dir.setPath(LOCALE_INST_DIR);
+			if (!dir.exists()) {
+				dir.setPath("");
+			}
+		}
+
+		qDebug() << "Loading localisation from path" << dir.path();
+
 		if (language == "cs") {
-			translator.load("datovka_cs", LOCALE_PATH);
+			translator.load("datovka_cs", dir.path());
 		} else if (language == "en") {
-			translator.load("datovka_en", LOCALE_PATH);
+			translator.load("datovka_en", dir.path());
 		} else {
 			/* Use system locale. */
 			translator.load("datovka_" + QLocale::system().name(),
-			    LOCALE_PATH);
+			    dir.path());
 		}
 
 		app.installTranslator(&translator);

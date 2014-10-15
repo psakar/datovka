@@ -7,6 +7,9 @@
 QT += core gui network sql
 QT += printsupport
 
+# Generate localisation.
+system(lrelease datovka.pro)
+
 # Required Qt versions
 REQUIRED_MAJOR = 5
 REQUIRED_MINOR = 2
@@ -32,7 +35,29 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 DEFINES += \
 	DEBUG=1
 
-TARGET = datovka
+isEmpty($${PREFIX}) {
+	PREFIX = "/usr/local"
+}
+
+APP_NAME = datovka
+
+application.target = $${APP_NAME}
+application.path = "$${PREFIX}/bin"
+application.files = $${APP_NAME}
+
+LOCALE_INST_DIR = "$${PREFIX}/share/$${APP_NAME}/localisations"
+
+localisation.path = "$${LOCALE_INST_DIR}"
+localisation.files = locale/datovka_cs.qm \
+	locale/datovka_en.qm
+
+DEFINES += LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\""
+
+TEMPLATE = app
+
+INSTALLS += application
+INSTALLS += localisation
+
 TEMPLATE = app
 
 QMAKE_CXXFLAGS = \
