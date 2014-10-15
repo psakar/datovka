@@ -35,7 +35,7 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 DEFINES += \
 	DEBUG=1
 
-isEmpty($${PREFIX}) {
+isEmpty(PREFIX) {
 	PREFIX = "/usr/local"
 }
 
