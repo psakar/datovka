@@ -123,24 +123,27 @@ int main(int argc, char *argv[])
 
 	QTranslator translator;
 
-	/* TODO - set language form .dsgui/dsgui.conf */
-	QString language;
+	/* Load localisation. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
 
-	if (language == "cs") {
-		translator.load("datovka_cs", LOCALE_PATH);
-	} else if (language == "en") {
-		translator.load("datovka_en", LOCALE_PATH);
-	} else {
-		// default system
-		translator.load("datovka_" + QLocale::system().name(),
-		    LOCALE_PATH);
+		QString language =
+		    settings.value("preferences/language").toString();
+
+		if (language == "cs") {
+			translator.load("datovka_cs", LOCALE_PATH);
+		} else if (language == "en") {
+			translator.load("datovka_en", LOCALE_PATH);
+		} else {
+			/* Use system locale. */
+			translator.load("datovka_" + QLocale::system().name(),
+			    LOCALE_PATH);
+		}
+
+		app.installTranslator(&translator);
 	}
-
-	/* TODO - set Czech locale as default for testing
-	 * It must be removed
-	 */
-	translator.load("datovka_cs", LOCALE_PATH);
-	app.installTranslator(&translator);
 
 	/* Localise description in tables. */
 	accntinfTbl.reloadLocalisedDescription();
