@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 		    LOCALE_PATH);
 	}
 
-	/* TODO - set czech locale as default for testing
+	/* TODO - set Czech locale as default for testing
 	 * It must be removed
 	 */
 	translator.load("datovka_cs", LOCALE_PATH);

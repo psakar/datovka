@@ -1272,10 +1272,14 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 			QJsonValue value =
 			    customData.object().value("message_author");
 			if (value.isObject()) {
+				QString authorInfo = value.toObject().value(
+				        "authorName").toString();
+				if (!authorInfo.isEmpty()) {
+					authorInfo += ", ";
+				}
 				html += strongAccountInfoLine(
 				    QObject::tr("Message author"),
-				    value.toObject().value(
-				        "authorName").toString() + ", " +
+				    authorInfo +
 				    authorTypeToText(value.toObject().value(
 				        "userType").toString()));
 			}
@@ -1355,7 +1359,8 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			html += strongAccountInfoLine(QObject::tr("Events"), "");
+			html += strongAccountInfoLine(QObject::tr("Events"),
+			    "");
 		}
 		while (query.isValid()) {
 			html += indentDivStart +
