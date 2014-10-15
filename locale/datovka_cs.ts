@@ -2467,7 +2467,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     </message>
     <message>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="23"/>
-        <location filename="../src/io/db_tables.cpp" line="390"/>
+        <location filename="../src/io/db_tables.cpp" line="412"/>
         <source>File name</source>
         <translation>Název souboru</translation>
     </message>
@@ -2477,271 +2477,271 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
         <translation>Velikost</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="201"/>
+        <location filename="../src/io/db_tables.cpp" line="223"/>
         <source>Data box ID</source>
         <translation>ID schránky</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="202"/>
+        <location filename="../src/io/db_tables.cpp" line="224"/>
         <source>Data box type</source>
         <translation>Typ schránky</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="203"/>
+        <location filename="../src/io/db_tables.cpp" line="225"/>
         <source>IČ</source>
         <translation>IČ</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="204"/>
+        <location filename="../src/io/db_tables.cpp" line="226"/>
         <source>Given name</source>
         <translation>Jméno</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="205"/>
+        <location filename="../src/io/db_tables.cpp" line="227"/>
         <source>Middle name</source>
         <translation>Prostření jméno</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="206"/>
+        <location filename="../src/io/db_tables.cpp" line="228"/>
         <source>Surname</source>
         <translation>Příjmení</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="207"/>
+        <location filename="../src/io/db_tables.cpp" line="229"/>
         <source>Surname at birth</source>
         <translation>Rodné příjmení</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="208"/>
+        <location filename="../src/io/db_tables.cpp" line="230"/>
         <source>Firm name</source>
         <translation>Název firmy</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="209"/>
+        <location filename="../src/io/db_tables.cpp" line="231"/>
         <source>Date of birth</source>
         <translation>Datum narození</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="210"/>
+        <location filename="../src/io/db_tables.cpp" line="232"/>
         <source>City of birth</source>
         <translation>Rodné město</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="211"/>
+        <location filename="../src/io/db_tables.cpp" line="233"/>
         <source>County of birth</source>
         <translation>Rodný kraj</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="212"/>
+        <location filename="../src/io/db_tables.cpp" line="234"/>
         <source>State of birth</source>
         <translation>Rodný stát</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="213"/>
+        <location filename="../src/io/db_tables.cpp" line="235"/>
         <source>City of residence</source>
         <translation>Sídlo - město</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="214"/>
+        <location filename="../src/io/db_tables.cpp" line="236"/>
         <source>Street of residence</source>
         <translation>Sídlo - ulice</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="215"/>
+        <location filename="../src/io/db_tables.cpp" line="237"/>
         <source>Number in street</source>
         <translation>Číslo orientační</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="216"/>
+        <location filename="../src/io/db_tables.cpp" line="238"/>
         <source>Number in municipality</source>
         <translation>Číslo popisné</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="217"/>
+        <location filename="../src/io/db_tables.cpp" line="239"/>
         <source>Zip code</source>
         <translation>PSČ</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="218"/>
+        <location filename="../src/io/db_tables.cpp" line="240"/>
         <source>State of residence</source>
         <translation>Sídlo - stát</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="219"/>
+        <location filename="../src/io/db_tables.cpp" line="241"/>
         <source>Nationality</source>
         <translation>Národnost</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="222"/>
+        <location filename="../src/io/db_tables.cpp" line="244"/>
         <source>Databox state</source>
         <translation>Stav schránky</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="223"/>
+        <location filename="../src/io/db_tables.cpp" line="245"/>
         <source>Effective OVM</source>
         <translation>Efektivní OVM</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="224"/>
+        <location filename="../src/io/db_tables.cpp" line="246"/>
         <source>Open addressing</source>
         <translation>Otevřené adresování</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="318"/>
+        <location filename="../src/io/db_tables.cpp" line="340"/>
         <location filename="../src/io/message_db.cpp" line="1239"/>
         <source>ID</source>
         <translation>ID</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="322"/>
+        <location filename="../src/io/db_tables.cpp" line="344"/>
         <location filename="../src/io/message_db.cpp" line="981"/>
         <location filename="../src/io/message_db.cpp" line="1125"/>
         <source>Sender</source>
         <translation>Odesílatel</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="323"/>
+        <location filename="../src/io/db_tables.cpp" line="345"/>
         <source>Sender address</source>
         <translation>Adresa odesílatele</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="325"/>
+        <location filename="../src/io/db_tables.cpp" line="347"/>
         <location filename="../src/io/message_db.cpp" line="989"/>
         <location filename="../src/io/message_db.cpp" line="1137"/>
         <source>Recipient</source>
         <translation>Příjemce</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="326"/>
+        <location filename="../src/io/db_tables.cpp" line="348"/>
         <source>Recipient address</source>
         <translation>Adresa příjemce</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="333"/>
+        <location filename="../src/io/db_tables.cpp" line="355"/>
         <location filename="../src/io/message_db.cpp" line="1030"/>
         <location filename="../src/io/message_db.cpp" line="1181"/>
         <source>To hands</source>
         <translation>K rukám</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="334"/>
+        <location filename="../src/io/db_tables.cpp" line="356"/>
         <source>Title</source>
         <translation>Předmět</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="335"/>
+        <location filename="../src/io/db_tables.cpp" line="357"/>
         <source>Your reference number</source>
         <translation>Vaše číslo jednací</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="336"/>
+        <location filename="../src/io/db_tables.cpp" line="358"/>
         <source>Our reference number</source>
         <translation>Naše číslo jednací</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="337"/>
+        <location filename="../src/io/db_tables.cpp" line="359"/>
         <source>Your file mark</source>
         <translation>Vaše spisová značka</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="338"/>
+        <location filename="../src/io/db_tables.cpp" line="360"/>
         <source>Our file mark</source>
         <translation>Naše spisová značka</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="339"/>
+        <location filename="../src/io/db_tables.cpp" line="361"/>
         <source>Law</source>
         <translation>Zákon</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="340"/>
+        <location filename="../src/io/db_tables.cpp" line="362"/>
         <source>Year</source>
         <translation>Rok</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="341"/>
+        <location filename="../src/io/db_tables.cpp" line="363"/>
         <source>Selection</source>
         <translation>Sekce</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="342"/>
+        <location filename="../src/io/db_tables.cpp" line="364"/>
         <source>Paragraph</source>
         <translation>Odstavec</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="343"/>
+        <location filename="../src/io/db_tables.cpp" line="365"/>
         <source>Letter</source>
         <translation>Písmeno</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="347"/>
+        <location filename="../src/io/db_tables.cpp" line="369"/>
         <source>Delivered</source>
         <translation>Přijato</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="348"/>
+        <location filename="../src/io/db_tables.cpp" line="370"/>
         <source>Accepted</source>
         <translation>Potvrzeno</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="349"/>
+        <location filename="../src/io/db_tables.cpp" line="371"/>
         <location filename="../src/io/message_db.cpp" line="1315"/>
         <source>Status</source>
         <translation>Stav</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="350"/>
+        <location filename="../src/io/db_tables.cpp" line="372"/>
         <source>Attachment size</source>
         <translation>Velikost příloh</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="393"/>
+        <location filename="../src/io/db_tables.cpp" line="415"/>
         <source>Mime type</source>
         <translation>Typ MIME</translation>
     </message>
     <message>
-        <location filename="../src/io/db_tables.cpp" line="569"/>
+        <location filename="../src/io/db_tables.cpp" line="591"/>
         <source>Read locally</source>
         <translation>Přečteno lokálně</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="40"/>
+        <location filename="../src/main.cpp" line="41"/>
         <source>Data box application</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/main.cpp" line="46"/>
         <source>Use &lt;conf-subdir&gt; subdirectory for configuration.</source>
         <translation>Use &lt;conf-subdir&gt; subdirectory for configuration.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="47"/>
+        <location filename="../src/main.cpp" line="48"/>
         <source>conf-subdir</source>
         <translation>conf-subdir</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="51"/>
+        <location filename="../src/main.cpp" line="52"/>
         <source>On start load &lt;conf&gt; file.</source>
         <translation>On start load &lt;conf&gt; file.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="52"/>
-        <location filename="../src/main.cpp" line="57"/>
+        <location filename="../src/main.cpp" line="53"/>
+        <location filename="../src/main.cpp" line="58"/>
         <source>conf</source>
         <translation>conf</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="56"/>
+        <location filename="../src/main.cpp" line="57"/>
         <source>On stop save &lt;conf&gt; file.</source>
         <translation>On stop save &lt;conf&gt; file.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="61"/>
+        <location filename="../src/main.cpp" line="62"/>
         <source>Set verbosity of logged messages to &lt;level&gt;. Default is </source>
         <translation>Set verbosity of logged messages to &lt;level&gt;. Default is </translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="63"/>
+        <location filename="../src/main.cpp" line="64"/>
         <source>level</source>
         <translation>level</translation>
     </message>
