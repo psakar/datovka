@@ -2413,7 +2413,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/common.cpp" line="441"/>
         <source>Message has been read (on the portal or by ESS action)</source>
-        <translation>Zpráva byla přečtena (na portále nebo ESS)</translation>
+        <translation>Zpráva byla přečtena (na portále nebo akcí ESS)</translation>
     </message>
     <message>
         <location filename="../src/common.cpp" line="449"/>
@@ -2479,12 +2479,12 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/db_tables.cpp" line="223"/>
         <source>Data box ID</source>
-        <translation>ID schránky</translation>
+        <translation>ID datové schránky</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="224"/>
         <source>Data box type</source>
-        <translation>Typ schránky</translation>
+        <translation>Typ datové schránky</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="225"/>
@@ -2676,12 +2676,12 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/db_tables.cpp" line="369"/>
         <source>Delivered</source>
-        <translation>Přijato</translation>
+        <translation>Čas dodání</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="370"/>
         <source>Accepted</source>
-        <translation>Potvrzeno</translation>
+        <translation>Čas doručení</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="371"/>
@@ -2970,7 +2970,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/message_db.cpp" line="1265"/>
         <source>From</source>
-        <translation>Odesílatel</translation>
+        <translation>Od</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1267"/>
@@ -2980,12 +2980,12 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/message_db.cpp" line="1276"/>
         <source>Message author</source>
-        <translation>Autor zprávy</translation>
+        <translation>Odesílající osoba</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1286"/>
         <source>To</source>
-        <translation>Příjemce</translation>
+        <translation>Komu</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1288"/>
