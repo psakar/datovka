@@ -29,7 +29,6 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/io/pkcs7.h"
 #include "ui_datovka.h"
 
 

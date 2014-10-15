@@ -30,7 +30,6 @@
 #include "src/crypto/crypto.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
-#include "src/io/pkcs7.h"
 #include "src/log/log.h"
 
 
@@ -2920,30 +2919,6 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
     bool ignoreMissingCrlCheck) const
 /* ========================================================================= */
 {
-#if 0
-	/*
-	 * TODO -- What kind of certificates are stored in the database?
-	 * Are theses certificates used for signing messages?
-	 */
-
-	QList<QSslCertificate> certList = msgCerts(dmId);
-
-	if (certList.size() > 0) {
-		Q_ASSERT(1 == certList.size());
-
-		const QSslCertificate &cert = certList.first();
-
-		bool timeValid = certTimeValidAtTime(cert, dateTime);
-		bool crlValid = ignoreMissingCrlCheck; /* true; */
-		if (globPref.check_crl) {
-			crlValid = certCrlValidAtTime(cert, dateTime);
-		}
-
-		return timeValid && crlValid;
-	}
-
-	return false;
-#endif
 	debug_func_call();
 
 	QByteArray rawBytes =
