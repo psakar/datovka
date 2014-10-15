@@ -59,6 +59,7 @@ Tbl::Tbl(const QString &name,
     const QString &tblCons)
     : tabName(name),
     knownAttrs(attrs),
+    attrPropsSources(props),
     attrProps(props),
     colConstraints(colCons),
     tblConstraint(tblCons)
@@ -148,6 +149,27 @@ bool Tbl::createEmpty(QSqlDatabase &db) const
 }
 
 
+/* ========================================================================= */
+/*
+ * Reloads the translation according to the selected
+ *     localisation.
+ */
+void Tbl::reloadLocalisedDescription(void)
+/* ========================================================================= */
+{
+	attrProps.clear();
+
+	QMap<QString, AttrProp>::const_iterator it = attrPropsSources.begin();
+
+	class AttrProp prop;
+	for (; it != attrPropsSources.end(); ++it) {
+		prop.type = it.value().type;
+		prop.desc = QObject::tr(it.value().desc.toStdString().c_str());
+		attrProps.insert(it.key(), prop);
+	}
+}
+
+
 const QMap<QString, QString> Tbl::emptyColConstraints;
 
 const QString Tbl::emptyTblConstraint;
@@ -196,7 +218,7 @@ namespace AccntinfTbl {
 	    "        CHECK (dbOpenAddressing IN (0, 1))"
 	};
 
-	const QMap<QString, AttrProp> attrProps = {
+	QMap<QString, AttrProp> attrProps = {
 	{"key",                    {DB_TEXT, ""}},
 	{"dbID",                   {DB_TEXT, QObject::tr("Data box ID")}},
 	{"dbType",                 {DB_TEXT, QObject::tr("Data box type")}},
@@ -351,7 +373,7 @@ namespace MsgsTbl {
 	{"_dmType",               {DB_TEXT, ""}}
 	};
 } /* namespace MsgsTbl */
-const Tbl msgsTbl(MsgsTbl::tabName, MsgsTbl::knownAttrs, MsgsTbl::attrProps,
+Tbl msgsTbl(MsgsTbl::tabName, MsgsTbl::knownAttrs, MsgsTbl::attrProps,
     MsgsTbl::colConstraints, MsgsTbl::tblConstraint);
 
 
@@ -396,7 +418,7 @@ namespace FlsTbl {
 	{"dmEncodedContent", {DB_TEXT, ""}}
 	};
 } /* namespace FlsTbl */
-const Tbl flsTbl(FlsTbl::tabName, FlsTbl::knownAttrs, FlsTbl::attrProps,
+Tbl flsTbl(FlsTbl::tabName, FlsTbl::knownAttrs, FlsTbl::attrProps,
     FlsTbl::colConstraints, FlsTbl::tblConstraint);
 
 
@@ -431,7 +453,7 @@ namespace HshsTbl {
 	{"_algorithm", {DB_TEXT, ""}}
 	};
 } /* namespace HshsTbl */
-const Tbl hshsTbl(HshsTbl::tabName, HshsTbl::knownAttrs, HshsTbl::attrProps,
+Tbl hshsTbl(HshsTbl::tabName, HshsTbl::knownAttrs, HshsTbl::attrProps,
     HshsTbl::colConstraints, HshsTbl::tblConstraint);
 
 
@@ -466,7 +488,7 @@ namespace EvntsTbl {
 	{"dmEventDescr", {DB_TEXT, ""}}
 	};
 } /* namespace EvntsTbl */
-const Tbl evntsTbl(EvntsTbl::tabName, EvntsTbl::knownAttrs,
+Tbl evntsTbl(EvntsTbl::tabName, EvntsTbl::knownAttrs,
     EvntsTbl::attrProps, EvntsTbl::colConstraints, EvntsTbl::tblConstraint);
 
 
@@ -499,7 +521,7 @@ namespace RwmsgdtTbl {
 	{"data",         {DB_TEXT, ""}}
 	};
 } /* namespace RwmsgdtTbl */
-const Tbl rwmsgdtTbl(RwmsgdtTbl::tabName, RwmsgdtTbl::knownAttrs,
+Tbl rwmsgdtTbl(RwmsgdtTbl::tabName, RwmsgdtTbl::knownAttrs,
     RwmsgdtTbl::attrProps, RwmsgdtTbl::colConstraints,
     RwmsgdtTbl::tblConstraint);
 
@@ -531,7 +553,7 @@ namespace RwdlvrinfdtTbl {
 	{"data",       {DB_TEXT, ""}}
 	};
 } /* namespace RwdlvrinfdtTbl */
-const Tbl rwdlvrinfdtTbl(RwdlvrinfdtTbl::tabName, RwdlvrinfdtTbl::knownAttrs,
+Tbl rwdlvrinfdtTbl(RwdlvrinfdtTbl::tabName, RwdlvrinfdtTbl::knownAttrs,
     RwdlvrinfdtTbl::attrProps, RwdlvrinfdtTbl::colConstraints,
     RwdlvrinfdtTbl::tblConstraint);
 
@@ -571,7 +593,7 @@ namespace SmsgdtTbl {
 	{"custom_data",   {DB_TEXT, ""}}
 	};
 } /* namespace SmsgdtTbl */
-const Tbl smsgdtTbl(SmsgdtTbl::tabName, SmsgdtTbl::knownAttrs,
+Tbl smsgdtTbl(SmsgdtTbl::tabName, SmsgdtTbl::knownAttrs,
     SmsgdtTbl::attrProps, SmsgdtTbl::colConstraints, SmsgdtTbl::tblConstraint);
 
 
@@ -602,7 +624,7 @@ namespace CrtdtTbl {
 	{"der_data", {DB_TEXT, ""}}
 	};
 } /* namespace CrtdtTbl */
-const Tbl crtdtTbl(CrtdtTbl::tabName, CrtdtTbl::knownAttrs,
+Tbl crtdtTbl(CrtdtTbl::tabName, CrtdtTbl::knownAttrs,
     CrtdtTbl::attrProps, CrtdtTbl::colConstraints, CrtdtTbl::tblConstraint);
 
 
@@ -631,6 +653,6 @@ namespace MsgcrtdtTbl {
 	{"certificate_id", {DB_INTEGER, ""}}
 	};
 } /* namespace MsgcrtdtTbl */
-const Tbl msgcrtdtTbl(MsgcrtdtTbl::tabName, MsgcrtdtTbl::knownAttrs,
+Tbl msgcrtdtTbl(MsgcrtdtTbl::tabName, MsgcrtdtTbl::knownAttrs,
     MsgcrtdtTbl::attrProps, MsgcrtdtTbl::colConstraints,
     MsgcrtdtTbl::tblConstraint);

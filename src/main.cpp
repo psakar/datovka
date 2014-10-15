@@ -8,6 +8,7 @@
 #include "src/common.h"
 #include "src/crypto/crypto.h"
 #include "src/gui/datovka.h"
+#include "src/io/db_tables.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 
@@ -141,7 +142,17 @@ int main(int argc, char *argv[])
 	translator.load("datovka_cs", LOCALE_PATH);
 	app.installTranslator(&translator);
 
-	qDebug() << QLocale::system().language();
+	/* Localise description in tables. */
+	msgsTbl.reloadLocalisedDescription();
+	msgsTbl.reloadLocalisedDescription();
+	flsTbl.reloadLocalisedDescription();
+	hshsTbl.reloadLocalisedDescription();
+	evntsTbl.reloadLocalisedDescription();
+	rwmsgdtTbl.reloadLocalisedDescription();
+	rwdlvrinfdtTbl.reloadLocalisedDescription();
+	smsgdtTbl.reloadLocalisedDescription();
+	crtdtTbl.reloadLocalisedDescription();
+	msgcrtdtTbl.reloadLocalisedDescription();
 
 	MainWindow mainwin;
 	mainwin.show();

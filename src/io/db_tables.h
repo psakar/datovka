@@ -59,7 +59,8 @@ public:
 	const QVector< QPair<QString, EntryType> > &knownAttrs;
 
 	/*! Attribute properties. */
-	const QMap<QString, AttrProp> &attrProps;
+	const QMap<QString, AttrProp> &attrPropsSources;
+	QMap<QString, AttrProp> attrProps;
 
 	/*!
 	 * @brief Return true if table in database exists.
@@ -70,6 +71,12 @@ public:
 	 * @brief Create empty table in supplied database.
 	 */
 	bool createEmpty(QSqlDatabase &db) const;
+
+	/*!
+	 * @brief Reloads the translation according to the selected
+	 *     localisation.
+	 */
+	void reloadLocalisedDescription(void);
 
 private:
 	/*! Column constraints. */
@@ -98,15 +105,15 @@ extern const Tbl pwdexpdtTbl; /*!< Table 'password_expiration_date'. */
 /*
  * Message database.
  */
-extern const Tbl msgsTbl; /*!< Table 'messages'. */
-extern const Tbl flsTbl; /*!< Table 'files'. */
-extern const Tbl hshsTbl; /*!< Table 'hashes'. */
-extern const Tbl evntsTbl; /*!< Table 'events'. */
-extern const Tbl rwmsgdtTbl; /*!< Table 'raw_message_data'. */
-extern const Tbl rwdlvrinfdtTbl; /*!< Table 'raw_delivery_info_data'. */
-extern const Tbl smsgdtTbl; /*!< Table 'supplementary_message_data'. */
-extern const Tbl crtdtTbl; /*!< Table 'certificate_data'. */
-extern const Tbl msgcrtdtTbl; /*!< Table 'message_certificate_data'. */
+extern Tbl msgsTbl; /*!< Table 'messages'. */
+extern Tbl flsTbl; /*!< Table 'files'. */
+extern Tbl hshsTbl; /*!< Table 'hashes'. */
+extern Tbl evntsTbl; /*!< Table 'events'. */
+extern Tbl rwmsgdtTbl; /*!< Table 'raw_message_data'. */
+extern Tbl rwdlvrinfdtTbl; /*!< Table 'raw_delivery_info_data'. */
+extern Tbl smsgdtTbl; /*!< Table 'supplementary_message_data'. */
+extern Tbl crtdtTbl; /*!< Table 'certificate_data'. */
+extern Tbl msgcrtdtTbl; /*!< Table 'message_certificate_data'. */
 
 
 #endif /* _DB_TABLES_H_ */
