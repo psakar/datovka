@@ -211,7 +211,7 @@ public:
 	/*!
 	 * @brief Return message envelope HTML to PDF.
 	 */
-	QString envelopeInfoHtmlToPdf(int dmId) const;
+	QString envelopeInfoHtmlToPdf(int dmId, QString dbType) const;
 
 	/*!
 	 * @brief Return message delivery info HTML to PDF.

@@ -878,7 +878,7 @@ void MainWindow::messageItemRestoreSelection(void)
 	}
 
 	/* Find and select the message with the ID. */
-	for (row; row < rowCount; ++row) {
+	for (; row < rowCount; ++row) {
 		/*
 		 * TODO -- Search in a more resource-saving way.
 		 * Eliminate index copying, use smarter search.
@@ -4391,9 +4391,16 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	m_on_export_zfo_activate = dirPath.absolutePath();
 
 	MessageDb *messageDb = accountMessageDb(0);
+	QString userName = accountUserName();
+	QList<QString> accountData =
+	    m_accountDb.getUserDataboxInfo(userName + "___True");
+
+	if (accountData.isEmpty()) {
+		return;
+	}
 
 	QTextDocument doc;
-	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID));
+	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID, accountData.at(0)));
 
 	/* TODO - Slow printer initialization */
 
@@ -4407,7 +4414,6 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
 	pdf_dialog.close();
-
 }
 
 

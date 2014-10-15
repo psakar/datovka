@@ -955,7 +955,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 
 	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
 	    strongMessagePdf(QObject::tr("Advice of Delivery")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID: ") + strongMessagePdf(QString::number(dmId)) +
+	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
 	    "</td></tr></table><br/><br/>";
 
 	queryStr = "SELECT "
@@ -999,10 +999,16 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		html += messageTableInfoPdf(QObject::tr("Subject"),
 		    query.value(7).toString());
 
-		tmp = query.value(8).toString() + QString(" / ") +
-		    query.value(9).toString() + QString(" § ") +
-		    query.value(10).toString() + QString(QObject::tr(" paragraph ")) +
-		    query.value(11).toString() + QString(QObject::tr(" letter ")) +
+		query.value(8).toString().isEmpty() ? tmp = "0" :
+		    tmp = query.value(8).toString();
+		tmp += QString(" / ");
+		query.value(9).toString().isEmpty() ? tmp += "0" :
+		    tmp += query.value(9).toString();
+		tmp += QString(" § ") + " " +
+		    query.value(10).toString() + " " +
+		    QString(QObject::tr("paragraph")) + " " +
+		    query.value(11).toString() + " " +
+		    QString(QObject::tr("letter")) + " " +
 		    query.value(12).toString();
 
 		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
@@ -1082,7 +1088,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 /*
  * Return message envelope HTML to PDF
  */
-QString MessageDb::envelopeInfoHtmlToPdf(int dmId) const
+QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 /* ========================================================================= */
 {
 	QString html;
@@ -1094,7 +1100,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId) const
 
 	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
 	    strongMessagePdf(QObject::tr("Envelope")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID: ") + strongMessagePdf(QString::number(dmId)) +
+	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
 	    "</td></tr></table><br/><br/>";
 
 	queryStr = "SELECT "
@@ -1124,7 +1130,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId) const
 		html += messageTableInfoPdf(QObject::tr("Databox ID"),
 		    query.value(2).toString());
 		html += messageTableInfoPdf(QObject::tr("Databox Type"),
-		    query.value(3).toString());
+		    dbType);
 		html += messageTableInfoEndPdf();
 
 		/* Recipient info */
@@ -1144,10 +1150,16 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId) const
 		html += messageTableInfoPdf(QObject::tr("Subject"),
 		    query.value(7).toString());
 
-		tmp = query.value(8).toString() + QString(" / ") +
-		    query.value(9).toString() + QString(" § ") +
-		    query.value(10).toString() + QString(QObject::tr(" paragraph ")) +
-		    query.value(11).toString() + QString(QObject::tr(" letter ")) +
+		query.value(8).toString().isEmpty() ? tmp = "0" :
+		    tmp = query.value(8).toString();
+		tmp += QString(" / ");
+		query.value(9).toString().isEmpty() ? tmp += "0" :
+		    tmp += query.value(9).toString();
+		tmp += QString(" § ") + " " +
+		    query.value(10).toString() + " " +
+		    QString(QObject::tr("paragraph")) + " " +
+		    query.value(11).toString() + " " +
+		    QString(QObject::tr("letter")) + " " +
 		    query.value(12).toString();
 
 		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
