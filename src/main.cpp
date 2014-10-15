@@ -139,8 +139,9 @@ int main(int argc, char *argv[])
 	 * It must be removed
 	 */
 	translator.load("datovka_cs", LOCALE_PATH);
-
 	app.installTranslator(&translator);
+
+	qDebug() << QLocale::system().language();
 
 	MainWindow mainwin;
 	mainwin.show();

@@ -1619,7 +1619,7 @@ Zkuzte to unova.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="326"/>
-        <location filename="../src/gui/ui/datovka.ui" line="866"/>
+        <location filename="../src/gui/ui/datovka.ui" line="869"/>
         <location filename="../src/gui/datovka.cpp" line="753"/>
         <source>Signature details</source>
         <translation>Detail podpisu</translation>
@@ -1664,7 +1664,7 @@ Zkuzte to unova.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="617"/>
-        <location filename="../src/gui/ui/datovka.ui" line="797"/>
+        <location filename="../src/gui/ui/datovka.ui" line="800"/>
         <location filename="../src/gui/datovka.cpp" line="565"/>
         <source>Create message</source>
         <translation>Vytvořit zprávu</translation>
@@ -1718,177 +1718,177 @@ Zkuzte to unova.</translation>
         <translation>O Datovce</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="710"/>
+        <location filename="../src/gui/ui/datovka.ui" line="713"/>
         <source>Help index</source>
         <translation>Nápověda</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="719"/>
+        <location filename="../src/gui/ui/datovka.ui" line="722"/>
         <source>Datovka update </source>
         <translation>Aktualizace</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="722"/>
+        <location filename="../src/gui/ui/datovka.ui" line="725"/>
         <source>Update Datovka application</source>
         <translation>Aktualizovat Datovku</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="731"/>
+        <location filename="../src/gui/ui/datovka.ui" line="734"/>
         <source>Find Data Box</source>
         <translation>Vyhledat datovou schránku</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="740"/>
+        <location filename="../src/gui/ui/datovka.ui" line="743"/>
         <source>Authenticate message file</source>
         <translation>Ověřit zprávu v souboru</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="749"/>
+        <location filename="../src/gui/ui/datovka.ui" line="752"/>
         <source>View message from ZFO file</source>
         <translation>Zobrazit zprávu ze souboru ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="758"/>
+        <location filename="../src/gui/ui/datovka.ui" line="761"/>
         <source>Export correspondence overview</source>
         <translation>Exportovat přehled korespondence</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="767"/>
+        <location filename="../src/gui/ui/datovka.ui" line="770"/>
         <source>Received all</source>
         <translation>Stáhnout vše</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="770"/>
+        <location filename="../src/gui/ui/datovka.ui" line="773"/>
         <source>Received messages from all accounts at once</source>
         <translation>Stáhnout zprávy ze všech účtů najednou</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="773"/>
+        <location filename="../src/gui/ui/datovka.ui" line="776"/>
         <source>Alt+A</source>
         <translation>Alt+A</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="782"/>
+        <location filename="../src/gui/ui/datovka.ui" line="785"/>
         <source>Download messages</source>
         <translation>Stáhnout zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="785"/>
+        <location filename="../src/gui/ui/datovka.ui" line="788"/>
         <source>Download messages from the box</source>
         <translation>Stáhnout zprávy ze schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="788"/>
+        <location filename="../src/gui/ui/datovka.ui" line="791"/>
         <source>Alt+D</source>
         <translation>Alt+D</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="800"/>
+        <location filename="../src/gui/ui/datovka.ui" line="803"/>
         <source>Create and send a new message</source>
         <translation>Vytvoři a poslat novou zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="848"/>
+        <location filename="../src/gui/ui/datovka.ui" line="851"/>
         <location filename="../src/gui/datovka.cpp" line="744"/>
         <source>Download message signed</source>
         <translation>Stáhnout podepsanou zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="857"/>
+        <location filename="../src/gui/ui/datovka.ui" line="860"/>
         <location filename="../src/gui/datovka.cpp" line="748"/>
         <source>Reply to message</source>
         <translation>Odpovědět na zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="875"/>
+        <location filename="../src/gui/ui/datovka.ui" line="878"/>
         <location filename="../src/gui/datovka.cpp" line="757"/>
         <source>Authenticate message</source>
         <translation>Ověřit zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="884"/>
+        <location filename="../src/gui/ui/datovka.ui" line="887"/>
         <location filename="../src/gui/datovka.cpp" line="791"/>
         <source>Delete message</source>
         <translation>Vymazat zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="889"/>
+        <location filename="../src/gui/ui/datovka.ui" line="892"/>
         <location filename="../src/gui/datovka.cpp" line="761"/>
         <source>Export message as ZFO</source>
         <translation>Exportovat zprávu jako ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="894"/>
+        <location filename="../src/gui/ui/datovka.ui" line="897"/>
         <location filename="../src/gui/datovka.cpp" line="765"/>
         <source>Open message externally</source>
         <translation>Otevřít zprávu externí aplikací</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="899"/>
+        <location filename="../src/gui/ui/datovka.ui" line="902"/>
         <location filename="../src/gui/datovka.cpp" line="769"/>
         <source>Open delivery info externally</source>
         <translation>Otevřít doručenku externě</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="904"/>
+        <location filename="../src/gui/ui/datovka.ui" line="907"/>
         <location filename="../src/gui/datovka.cpp" line="774"/>
         <source>Export delivery info as ZFO</source>
         <translation>Exportovat doručenku jako ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="909"/>
+        <location filename="../src/gui/ui/datovka.ui" line="912"/>
         <location filename="../src/gui/datovka.cpp" line="779"/>
         <source>Export delivery info as PDF</source>
         <translation>Exportovat doručenku do PDF</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="914"/>
+        <location filename="../src/gui/ui/datovka.ui" line="917"/>
         <location filename="../src/gui/datovka.cpp" line="784"/>
         <source>Export message envelope as PDF</source>
         <translation>Exportovat obálku zprávy do PDF</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="923"/>
+        <location filename="../src/gui/ui/datovka.ui" line="926"/>
         <location filename="../src/gui/datovka.cpp" line="1017"/>
         <source>Open attachment</source>
         <translation>Otevřít přílohu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="932"/>
+        <location filename="../src/gui/ui/datovka.ui" line="935"/>
         <location filename="../src/gui/datovka.cpp" line="1020"/>
         <location filename="../src/gui/datovka.cpp" line="1072"/>
         <source>Save attachment</source>
         <translation>Uložit soubor jako</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="941"/>
+        <location filename="../src/gui/ui/datovka.ui" line="944"/>
         <source>Save all attachments</source>
         <translation>Uložit vše</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="803"/>
+        <location filename="../src/gui/ui/datovka.ui" line="806"/>
         <source>Alt+M</source>
         <translation>Alt+M</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="815"/>
         <location filename="../src/gui/ui/datovka.ui" line="818"/>
+        <location filename="../src/gui/ui/datovka.ui" line="821"/>
         <source>Reply to the sender</source>
         <translation>Odpovědět odesílateli</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="821"/>
+        <location filename="../src/gui/ui/datovka.ui" line="824"/>
         <source>Alt+R</source>
         <translation>Alt+R</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="833"/>
         <location filename="../src/gui/ui/datovka.ui" line="836"/>
+        <location filename="../src/gui/ui/datovka.ui" line="839"/>
         <source>Verify a message</source>
         <translation>Ověřit zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="839"/>
+        <location filename="../src/gui/ui/datovka.ui" line="842"/>
         <source>Alt+V</source>
         <translation>Alt+V</translation>
     </message>
@@ -3095,12 +3095,12 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="127"/>
         <source>Show optional fields</source>
-        <translation>Zobrazit volitelné položky</translation>
+        <translation>Zobrazit nepovinné položky</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="158"/>
         <source>Mandate:</source>
-        <translation>Zákon:</translation>
+        <translation>Pověření:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="173"/>
@@ -3115,17 +3115,17 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="193"/>
         <source>paragraph</source>
-        <translation>paragraf</translation>
+        <translation>odstavec</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="203"/>
         <source>letter</source>
-        <translation>číslo</translation>
+        <translation>písmeno</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="215"/>
         <source>Our reference number:</source>
-        <translation>Naše referenční číslo:</translation>
+        <translation>Naše číslo jednací:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="225"/>
@@ -3135,7 +3135,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="235"/>
         <source>Your reference number:</source>
-        <translation>Vaše referenční číslo:</translation>
+        <translation>Vaše číslo jednací:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="245"/>
@@ -3145,7 +3145,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="255"/>
         <source>Personal delivery:</source>
-        <translation>Osobní doručení:</translation>
+        <translation>Do vlastních rukou:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="269"/>
@@ -3155,7 +3155,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="297"/>
         <source>Recipients:</source>
-        <translation>Prijemci:</translation>
+        <translation>Přijemci:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="310"/>
@@ -3217,17 +3217,17 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="457"/>
         <source>Include sender identification</source>
-        <translation>Zahrnout do zprávy informace o odesílateli</translation>
+        <translation>Přidat identifikaci odesílatele</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="476"/>
         <source>Pay transfer charges for reply</source>
-        <translation>Zaplatit poplatek za odpověď</translation>
+        <translation>Zaplatit poštovní poplatky za odpověď</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="492"/>
         <source>Use offered payment of transfer charges by recipient</source>
-        <translation></translation>
+        <translation>Nechat poštovní platby na příjemci</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="514"/>
