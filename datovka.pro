@@ -76,8 +76,10 @@ macx {
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
 	CONFIG +=c++11
-        INCLUDEPATH += /usr/local/include
-	LIBPATH += /usr/local/lib 
+	INCLUDEPATH += /usr/local/include \
+		/opt/local/include
+	LIBPATH += /usr/local/lib \
+		/opt/local/lib
 }
 
 win32 {
