@@ -397,7 +397,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -702,6 +702,9 @@
    </property>
   </action>
   <action name="actionHelp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/help_16.png</normaloff>:/icons/3party/help_16.png</iconset>

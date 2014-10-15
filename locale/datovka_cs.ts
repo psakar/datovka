@@ -19,11 +19,17 @@
         <translation>Datovka</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="101"/>
         <source>free graphical interface for &apos;Datové schránky&apos;
 based on the libisds library</source>
-        <translation>svobodné grafické rozhraní pro &quot;Datové schránky&quot;
+        <translation type="obsolete">Svobodné grafické rozhraní pro &quot;Datové schránky&quot;
 Založeno na knihovně libisds</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_about.ui" line="101"/>
+        <source>Free graphical interface for &apos;Datové schránky&apos;.
+Based on the libisds library.</source>
+        <translation>Svobodné grafické rozhraní pro &quot;Datové schránky&quot;.
+Založeno na knihovně libisds.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_about.ui" line="121"/>
@@ -249,12 +255,12 @@ Založeno na knihovně libisds</translation>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="102"/>
         <source>From date:</source>
-        <translation>Od:</translation>
+        <translation>Od data:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="129"/>
         <source>To date:</source>
-        <translation>Do:</translation>
+        <translation>Do data:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="158"/>
@@ -2596,7 +2602,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/db_tables.cpp" line="323"/>
         <source>Sender address</source>
-        <translation>Adresa</translation>
+        <translation>Adresa odesílatele</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="325"/>
@@ -2608,7 +2614,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/db_tables.cpp" line="326"/>
         <source>Recipient address</source>
-        <translation>Adresa</translation>
+        <translation>Adresa příjemce</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="333"/>
@@ -2655,7 +2661,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/db_tables.cpp" line="341"/>
         <source>Selection</source>
-        <translation>Selection</translation>
+        <translation>Sekce</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="342"/>
@@ -2879,7 +2885,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
         <location filename="../src/io/message_db.cpp" line="1184"/>
         <location filename="../src/io/message_db.cpp" line="1189"/>
         <source>yes</source>
-        <translation>Ano</translation>
+        <translation>ano</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1033"/>
@@ -2887,7 +2893,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
         <location filename="../src/io/message_db.cpp" line="1185"/>
         <location filename="../src/io/message_db.cpp" line="1188"/>
         <source>no</source>
-        <translation>Ne</translation>
+        <translation>ne</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1034"/>
@@ -2984,7 +2990,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/io/message_db.cpp" line="1288"/>
         <source>Recipient Address</source>
-        <translation>Adresa</translation>
+        <translation>Adresa příjemce</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1385"/>

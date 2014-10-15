@@ -98,8 +98,8 @@
    <item>
     <widget class="QLabel" name="labelInfo">
      <property name="text">
-      <string>free graphical interface for 'Datové schránky'
-based on the libisds library</string>
+      <string>Free graphical interface for 'Datové schránky'.
+Based on the libisds library.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

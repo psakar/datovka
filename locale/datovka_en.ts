@@ -20,8 +20,8 @@
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_about.ui" line="101"/>
-        <source>free graphical interface for &apos;Datové schránky&apos;
-based on the libisds library</source>
+        <source>Free graphical interface for &apos;Datové schránky&apos;.
+Based on the libisds library.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
