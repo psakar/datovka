@@ -58,6 +58,10 @@ X509_STORE *ca_certs = NULL;
 
 /*!
  * @brief Read certificate from a DER string.
+ *
+ * @param[in,out] store   Certificate storage.
+ * @param[in]     der_str Certificate string.
+ * @return 0 certificate was parsed and was stored, -1 else.
  */
 static
 int X509_store_add_cert_der(X509_STORE *store, const char *der_str);
@@ -65,9 +69,15 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str);
 
 /*!
  * @brief Read certificate file.
+ *
+ * @param[in,out] store      Certificate storage.
+ * @param[in]     fname      Full name of file containing certificates.
+ * @param[out]    num_loaded Number of loaded certificates.
+ * @return 0 if at least one certificate could be loaded, -1 else.
  */
 static
-int X509_store_add_cert_file(X509_STORE *store, const char *fname);
+int X509_store_add_cert_file(X509_STORE *store, const char *fname,
+    int *num_loaded);
 
 
 /*!
@@ -158,7 +168,7 @@ int init_crypto(void)
 {
 	const char **pem_file;
 	const struct pem_str *pem_desc;
-	int loaded_certificates = 0;
+	int loaded_certificates = 0, loaded_at_once;
 #define MAX_PATH_LEN 256
 	size_t crt_dir_path_len, file_name_len;
 	char file_path[MAX_PATH_LEN];
@@ -203,11 +213,12 @@ int init_crypto(void)
 		memcpy(file_path + crt_dir_path_len, *pem_file, file_name_len);
 		file_path[crt_dir_path_len + file_name_len] = '\0';
 
-		if (0 != X509_store_add_cert_file(ca_certs, file_path)) {
+		if (0 != X509_store_add_cert_file(ca_certs, file_path,
+		             &loaded_at_once)) {
 			logWarning("Could not load certificate file '%s'.\n",
 			    file_path);
 		} else {
-			++loaded_certificates;
+			loaded_certificates += loaded_at_once;
 		}
 		++pem_file;
 	}
@@ -478,12 +489,14 @@ fail:
  * Read certificate file.
  */
 static
-int X509_store_add_cert_file(X509_STORE *store, const char *fname)
+int X509_store_add_cert_file(X509_STORE *store, const char *fname,
+    int *num_loaded)
 /* ========================================================================= */
 {
-	FILE *fin = NULL;
+	BIO *bio = NULL;
 	X509 *x509 = NULL;
 	unsigned long err;
+	int read_pems = 0, stored_pems = 0; /* PEM counters. */
 
 	debug_func_call();
 
@@ -498,48 +511,73 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname)
 		goto fail;
 	}
 
-	fin = fopen(fname, "r");
-	if (fin == NULL) {
+	bio = BIO_new_file(fname, "r");
+	if (NULL == bio) {
 		logError("Cannot open certificate file '%s'.\n", fname);
 		goto fail;
 	}
 
-	x509 = PEM_read_X509(fin, NULL, NULL, NULL);
-	if (x509 == NULL) {
-		logError("Cannot parse certificate file '%s'.\n", fname);
-		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
-			    ERR_error_string(err, NULL));
+	for (;;) {
+		x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+		if (NULL == x509) {
+			if (0 == read_pems) {
+				/*
+				 * Print error only if no certificate
+				 * has been read.
+				 */
+				logError("Cannot parse certificate (%d) "
+				    "file '%s'.\n", read_pems, fname);
+				while (0 != (err = ERR_get_error())) {
+					logError("openssl error: %s\n",
+					    ERR_error_string(err, NULL));
+				}
+			}
+			if (0 == stored_pems) {
+				goto fail;
+			} else {
+				break;
+			}
 		}
-		goto fail;
-	}
 
-	fclose(fin); fin = NULL;
-
-	if (X509_STORE_add_cert(store, x509) == 0) {
-		err = ERR_get_error();
-		logError("Cannot store certificate(s) from file '%s'.\n",
-		    fname);
-		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
-			    ERR_error_string(err, NULL));
+		if (X509_STORE_add_cert(store, x509) == 0) {
+			err = ERR_get_error();
+			logError(
+			    "Cannot store certificate (%d) from file '%s'.\n",
+			    read_pems, fname);
+			while (0 != (err = ERR_get_error())) {
+				logError("openssl error: %s\n",
+				    ERR_error_string(err, NULL));
+			}
+		} else {
+			++stored_pems;
 		}
-		goto fail;
-	}
+
+		++read_pems;
 
 #if defined PRINT_CERTS
-	fprintf(stderr, ">>>\n");
-	x509_printf(x509, stderr);
-	fprintf(stderr, "<<<\n");
+		fprintf(stderr, ">>>\n");
+		x509_printf(x509, stderr);
+		fprintf(stderr, "<<<\n");
 #endif /* PRINT_CERTS */
 
-	X509_free(x509); x509 = NULL;
+		X509_free(x509); x509 = NULL;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	if (NULL != num_loaded) {
+		*num_loaded = stored_pems;
+	}
+
+	if (0 == stored_pems) {
+		goto fail;
+	}
 
 	return 0;
 
 fail:
-	if (NULL != fin) {
-		fclose(fin);
+	if (NULL != bio) {
+		BIO_free(bio);
 	}
 	if (NULL != x509) {
 		X509_free(x509);
@@ -1216,9 +1254,9 @@ const char *pem_files[] = {
 	postsignum_qca2_sub_file,
 	postsignum_qca3_sub_file,
 //	equifax_ca_file,
-	NULL,
+//	NULL,
 //	all_certs_file,
-//	NULL
+	NULL
 };
 
 /*
