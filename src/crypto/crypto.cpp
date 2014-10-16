@@ -1138,6 +1138,47 @@ const char *postsignum_qca2_sub_pem =
 "Dcn+""\n"
 "-----END CERTIFICATE-----";
 
+const char *postsignum_qca3_sub_file = "postsignum_qca3_sub.pem";
+const char *postsignum_qca3_sub_name = "PostSignum Qualified CA 3";
+const char *postsignum_qca3_sub_pem =
+"-----BEGIN CERTIFICATE-----""\n"
+"MIIGYDCCBUigAwIBAgICAKQwDQYJKoZIhvcNAQELBQAwWzELMAkGA1UEBhMCQ1ox""\n"
+"LDAqBgNVBAoMI8SMZXNrw6EgcG/FoXRhLCBzLnAuIFtJxIwgNDcxMTQ5ODNdMR4w""\n"
+"HAYDVQQDExVQb3N0U2lnbnVtIFJvb3QgUUNBIDIwHhcNMTQwMzI2MDgwMTMyWhcN""\n"
+"MjQwMzI2MDcwMDM2WjBfMQswCQYDVQQGEwJDWjEsMCoGA1UECgwjxIxlc2vDoSBw""\n"
+"b8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xIjAgBgNVBAMTGVBvc3RTaWdudW0g""\n"
+"UXVhbGlmaWVkIENBIDMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCX""\n"
+"Ou7d2frODVCZuo7IEWxoF5f1KE9aelb8FUyoZCL6iyvBe7YaL1pH4FJ5DPFbf3mz""\n"
+"6rLnSiDY/YSpipstdNUHM2BZkhiEulb7ltvMC+v4gf+H9ApVkmNspEWcO8+Thj4b""\n"
+"m0anXJ8oFKRCkPQYAPQQyRq0erqlXTkXS4NePI0TU4mvtaokZCqBBqzP6GnXOvZA""\n"
+"zxo/KkK7nvgEwibZEXnrI3ZN20dzmvT/m+igHsPfBuTJsRXO1ytqxD+xz8L9eoAX""\n"
+"yOWbQTLJI9FXE3utZ9fr0mhEUc0xcaQfVwdGahJ6/ex1asZH7XFD2VyHaTSqXomD""\n"
+"iyo71Zp0EnGjdLACkUtdAgMBAAGjggMoMIIDJDCB8QYDVR0gBIHpMIHmMIHjBgRV""\n"
+"HSAAMIHaMIHXBggrBgEFBQcCAjCByhqBx1RlbnRvIGt2YWxpZmlrb3Zhbnkgc3lz""\n"
+"dGVtb3Z5IGNlcnRpZmlrYXQgYnlsIHZ5ZGFuIHBvZGxlIHpha29uYSAyMjcvMjAw""\n"
+"MFNiLiBhIG5hdmF6bnljaCBwcmVkcGlzdS9UaGlzIHF1YWxpZmllZCBzeXN0ZW0g""\n"
+"Y2VydGlmaWNhdGUgd2FzIGlzc3VlZCBhY2NvcmRpbmcgdG8gTGF3IE5vIDIyNy8y""\n"
+"MDAwQ29sbC4gYW5kIHJlbGF0ZWQgcmVndWxhdGlvbnMwEgYDVR0TAQH/BAgwBgEB""\n"
+"/wIBADCBvAYIKwYBBQUHAQEEga8wgawwNwYIKwYBBQUHMAKGK2h0dHA6Ly93d3cu""\n"
+"cG9zdHNpZ251bS5jei9jcnQvcHNyb290cWNhMi5jcnQwOAYIKwYBBQUHMAKGLGh0""\n"
+"dHA6Ly93d3cyLnBvc3RzaWdudW0uY3ovY3J0L3Bzcm9vdHFjYTIuY3J0MDcGCCsG""\n"
+"AQUFBzAChitodHRwOi8vcG9zdHNpZ251bS50dGMuY3ovY3J0L3Bzcm9vdHFjYTIu""\n"
+"Y3J0MA4GA1UdDwEB/wQEAwIBBjCBgwYDVR0jBHwweoAUFSmMxUVpq7izw+r+S7gx""\n"
+"2Nzw53ahX6RdMFsxCzAJBgNVBAYTAkNaMSwwKgYDVQQKDCPEjGVza8OhIHBvxaF0""\n"
+"YSwgcy5wLiBbScSMIDQ3MTE0OTgzXTEeMBwGA1UEAxMVUG9zdFNpZ251bSBSb290""\n"
+"IFFDQSAyggFkMIGlBgNVHR8EgZ0wgZowMaAvoC2GK2h0dHA6Ly93d3cucG9zdHNp""\n"
+"Z251bS5jei9jcmwvcHNyb290cWNhMi5jcmwwMqAwoC6GLGh0dHA6Ly93d3cyLnBv""\n"
+"c3RzaWdudW0uY3ovY3JsL3Bzcm9vdHFjYTIuY3JsMDGgL6AthitodHRwOi8vcG9z""\n"
+"dHNpZ251bS50dGMuY3ovY3JsL3Bzcm9vdHFjYTIuY3JsMB0GA1UdDgQWBBTy+Mwq""\n"
+"V2HaKxczWeWCLewGHIpPSjANBgkqhkiG9w0BAQsFAAOCAQEAVHG9oYU7dATQI/yV""\n"
+"gwhboNVX9Iat8Ji6PvVnoM6TQ8WjUQ5nErZG1fV5QQgN7slMBWnXKNjUSxMDpfht""\n"
+"N2RbJHniaw/+vDqKtlmoKAnmIRzRaIqBLwGZs6RGHFrMPiol3La55fBoa4JPliRT""\n"
+"Fw5xVOK5FdJh/5Pbfg+XNZ0RzO0/tk/oKRXfgRNb9ZBL2pe8sr9g9QywpsGKt2gP""\n"
+"9t0q/+dhKAGc0+eimChM8Bmq4WNUxK4qdo4ARH6344uIVlIu+9Gq3H54noyZd/Oh""\n"
+"RTnuoXuQOdx9DooTp6SPpPfZXj/djsseT22QVpYBP7v8AVK/paqphINL2XmQdiw6""\n"
+"5KhDYA==""\n"
+"-----END CERTIFICATE-----";
+
 const char *equifax_ca_file = "equifax_ca.pem";
 const char *equifax_ca_name = "Equifax Secure Certificate Authority";
 const char *equifax_ca_pem =
@@ -1173,6 +1214,8 @@ const char *pem_files[] = {
 	postsignum_qca_sub_file,
 	postsignum_qca2_root_file,
 	postsignum_qca2_sub_file,
+	postsignum_qca3_sub_file,
+//	equifax_ca_file,
 	NULL,
 //	all_certs_file,
 //	NULL
@@ -1186,6 +1229,7 @@ const struct pem_str pem_strs[] = {
 	{postsignum_qca_sub_name, postsignum_qca_sub_pem},
 	{postsignum_qca2_root_name, postsignum_qca2_root_pem},
 	{postsignum_qca2_sub_name, postsignum_qca2_sub_pem},
+	{postsignum_qca3_sub_name, postsignum_qca3_sub_pem},
 //	{equifax_ca_name, equifax_ca_pem},
 	{NULL, NULL}
 };
