@@ -16,23 +16,48 @@
 #include "src/log/log.h"
 
 
-extern
-const char *postsignum_qca_root_pem;
-extern
-const char *postsignum_qca_sub_pem;
-extern
-const char *postsignum_qca2_root_pem;
-extern
-const char *postsignum_qca2_sub_pem;
-extern
-const char *pem; /* TODO -- This certificate is what for? */
+/*
+ * Directory to search for certificate. The name mist end with a slash.
+ */
+#define CERT_DIR "trusted_certs/"
 
+/*
+ * Defies path prefix where to search for CERT_DIR.
+ * The directory name must contain trailing slash.
+ */
+#ifndef CERT_PATH_PREFIX
+#define CERT_PATH_PREFIX ""
+#endif /* CERT_PATH_PREFIX */
+
+/*!
+ * @brief Holds NULL-terminated list of PEM encoded certificate files.
+ */
+extern const char *pem_files[];
+
+
+/*!
+ * @brief Holds a PEM encoded certificate string and a certificate name.
+ */
+struct pem_str {
+	const char *name; /*!< Certificate name. */
+	const char *pem; /*!< PEM encoded certificate. */
+};
+
+
+/*!
+ * @brief Holds NULL-terminated list of PEM encoded certificates.
+ */
+extern const struct pem_str pem_strs[];
+
+/*!
+ * @brief Certificates used for CMS validation.
+ */
 static
 X509_STORE *ca_certs = NULL;
 
 
 /*!
- * @brief Read certificate from a der string.
+ * @brief Read certificate from a DER string.
  */
 static
 int X509_store_add_cert_der(X509_STORE *store, const char *der_str);
@@ -124,12 +149,6 @@ int x509_printf(X509 *x509, FILE *fout);
 #endif /* PRINT_CERTS */
 
 
-#define CERT_FILE0 "trusted_certs/all_trusted.pem"
-#define CERT_FILE1 "trusted_certs/postsignum_qca_root.pem"
-#define CERT_FILE2 "trusted_certs/postsignum_qca_sub.pem"
-#define CERT_FILE3 "trusted_certs/postsignum_qca2_root.pem"
-#define CERT_FILE4 "trusted_certs/postsignum_qca2_sub.pem"
-
 /* ========================================================================= */
 /*
  * @brief Initialises cryptographic back-end.
@@ -137,6 +156,13 @@ int x509_printf(X509 *x509, FILE *fout);
 int init_crypto(void)
 /* ========================================================================= */
 {
+	const char **pem_file;
+	const struct pem_str *pem_desc;
+	int loaded_certificates = 0;
+#define MAX_PATH_LEN 256
+	size_t crt_dir_path_len, file_name_len;
+	char file_path[MAX_PATH_LEN];
+
 	debug_func_call();
 
 	OpenSSL_add_all_algorithms(); /* Needed for CMS validation. */
@@ -154,37 +180,53 @@ int init_crypto(void)
 		goto fail;
 	}
 
-#if 0
-//	if (0 != X509_store_add_cert_file(ca_certs, CERT_FILE0)) {
-//		goto fail;
-//	}
-	if (0 != X509_store_add_cert_file(ca_certs, CERT_FILE1)) {
-		goto fail;
+	/* Load from files. */
+	pem_file = pem_files;
+	assert(NULL != pem_file);
+	while (NULL != *pem_file) {
+		/* Construct full file name. */
+		crt_dir_path_len = strlen(CERT_PATH_PREFIX CERT_DIR);
+		if (crt_dir_path_len >= MAX_PATH_LEN) {
+			logError("File path buffer is to short for '%s%s'.\n",
+			    CERT_PATH_PREFIX, CERT_DIR);
+			continue;
+		}
+		memcpy(file_path, CERT_PATH_PREFIX CERT_DIR, crt_dir_path_len);
+		file_path[crt_dir_path_len] = '\0';
+		file_name_len = strlen(*pem_file);
+		if ((crt_dir_path_len + file_name_len) >= MAX_PATH_LEN) {
+			logError(
+			    "File path buffer is to short for '%s%s%s'.\n",
+			    CERT_PATH_PREFIX, CERT_DIR, *pem_file);
+			continue;
+		}
+		memcpy(file_path + crt_dir_path_len, *pem_file, file_name_len);
+		file_path[crt_dir_path_len + file_name_len] = '\0';
+
+		if (0 != X509_store_add_cert_file(ca_certs, file_path)) {
+			logWarning("Could not load certificate file '%s'.\n",
+			    file_path);
+		} else {
+			++loaded_certificates;
+		}
+		++pem_file;
 	}
-	if (0 != X509_store_add_cert_file(ca_certs, CERT_FILE2)) {
-		goto fail;
+
+	/* Load from built-in certificates. */
+	pem_desc = pem_strs;
+	assert(NULL != pem_desc);
+	while ((NULL != pem_desc->name) && (NULL != pem_desc->pem)) {
+		if (0 != X509_store_add_cert_der(ca_certs, pem_desc->pem)) {
+			logWarning("Could not load certificate '%s'.\n",
+			    pem_desc->name);
+		} else {
+			++loaded_certificates;
+		}
+		++pem_desc;
 	}
-	if (0 != X509_store_add_cert_file(ca_certs, CERT_FILE3)) {
-		goto fail;
-	}
-	if (0 != X509_store_add_cert_file(ca_certs, CERT_FILE4)) {
-		goto fail;
-	}
-#endif
-	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca_root_pem)) {
-		goto fail;
-	}
-	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca_sub_pem)) {
-		goto fail;
-	}
-	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca2_root_pem)) {
-		goto fail;
-	}
-	if (0 != X509_store_add_cert_der(ca_certs, postsignum_qca2_sub_pem)) {
-		goto fail;
-	}
-	if (0 != X509_store_add_cert_der(ca_certs, pem)) {
-		goto fail;
+
+	if (0 == loaded_certificates) {
+		logError("%s\n", "Did not load any certificate.");
 	}
 
 	return 0;
@@ -194,6 +236,7 @@ fail:
 		X509_STORE_free(ca_certs); ca_certs = NULL;
 	}
 	return -1;
+#undef MAX_PATH_LEN
 }
 
 
@@ -483,6 +526,12 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname)
 		}
 		goto fail;
 	}
+
+#if defined PRINT_CERTS
+	fprintf(stderr, ">>>\n");
+	x509_printf(x509, stderr);
+	fprintf(stderr, "<<<\n");
+#endif /* PRINT_CERTS */
 
 	X509_free(x509); x509 = NULL;
 
@@ -933,6 +982,8 @@ fail:
 #endif /* PRINT_CERTS */
 
 
+const char *postsignum_qca_root_file = "postsignum_qca_root.pem";
+const char *postsignum_qca_root_name = "PostSignum Root QCA";
 const char *postsignum_qca_root_pem =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGKjCCBRKgAwIBAgIBATANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
@@ -970,6 +1021,8 @@ const char *postsignum_qca_root_pem =
 "KQuvApdC79JbGojTzZiMOVBH9H+v/8suZgFdQqBwF82mwSZwxHmn149grQLkJg==""\n"
 "-----END CERTIFICATE-----";
 
+const char *postsignum_qca_sub_file = "postsignum_qca_sub.pem";
+const char *postsignum_qca_sub_name = "PostSignum Qualified CA";
 const char *postsignum_qca_sub_pem =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGLjCCBRagAwIBAgIBHDANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
@@ -1008,6 +1061,8 @@ const char *postsignum_qca_sub_pem =
 "Xr0=""\n"
 "-----END CERTIFICATE-----";
 
+const char *postsignum_qca2_root_file = "postsignum_qca2_root.pem";
+const char *postsignum_qca2_root_name = "PostSignum Root QCA 2";
 const char *postsignum_qca2_root_pem =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIFnDCCBISgAwIBAgIBZDANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
@@ -1042,6 +1097,8 @@ const char *postsignum_qca2_root_pem =
 "Y+jUu/G0zAdLyeU4vaXdQm1A8AEiJPTd0Z9LAxL6Sq2iraLNN36+NyEK/ts3mPLL""\n"
 "-----END CERTIFICATE-----";
 
+const char *postsignum_qca2_sub_file = "postsignum_qca2_sub.pem";
+const char *postsignum_qca2_sub_name = "PostSignum Qualified CA 2";
 const char *postsignum_qca2_sub_pem =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGXzCCBUegAwIBAgIBcTANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
@@ -1081,7 +1138,9 @@ const char *postsignum_qca2_sub_pem =
 "Dcn+""\n"
 "-----END CERTIFICATE-----";
 
-const char *pem =
+const char *equifax_ca_file = "equifax_ca.pem";
+const char *equifax_ca_name = "Equifax Secure Certificate Authority";
+const char *equifax_ca_pem =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIDIDCCAomgAwIBAgIENd70zzANBgkqhkiG9w0BAQUFADBOMQswCQYDVQQGEwJV""\n"
 "UzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMkRXF1aWZheCBTZWN1cmUgQ2Vy""\n"
@@ -1101,3 +1160,32 @@ const char *pem =
 "7qj/WsjTVbJmcVfewCHrPSqnI0kBBIZCe/zuf6IWUrVnZ9NA2zsmWLIodz2uFHdh""\n"
 "1voqZiegDfqnc1zqcPGUIWVEX/r87yloqaKHee9570+sB3c4""\n"
 "-----END CERTIFICATE-----";
+
+const char *all_certs_file = "all_trusted.pem";
+
+
+/*!
+ * @brief Holds NULL-terminated list of PEM encoded certificate files.
+ */
+const char *pem_files[] = {
+	NULL, /* Don't use this list. */
+	postsignum_qca_root_file,
+	postsignum_qca_sub_file,
+	postsignum_qca2_root_file,
+	postsignum_qca2_sub_file,
+	NULL,
+//	all_certs_file,
+//	NULL
+};
+
+/*
+ * Holds NULL-terminated list of PEM encoded certificates.
+ */
+const struct pem_str pem_strs[] = {
+	{postsignum_qca_root_name, postsignum_qca_root_pem},
+	{postsignum_qca_sub_name, postsignum_qca_sub_pem},
+	{postsignum_qca2_root_name, postsignum_qca2_root_pem},
+	{postsignum_qca2_sub_name, postsignum_qca2_sub_pem},
+//	{equifax_ca_name, equifax_ca_pem},
+	{NULL, NULL}
+};
