@@ -8,11 +8,16 @@
 
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
+    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, QString userName)
     : QDialog(parent),
-    m_recipientTableWidget(recipientTableWidget),
     m_action(action),
-    m_userName(userName)
+    m_recipientTableWidget(recipientTableWidget),
+    m_dbType(dbType),
+    m_dbEffectiveOVM(dbEffectiveOVM),
+    m_dbOpenAddressing(dbOpenAddressing),
+    m_userName(userName),
+    m_showInfoLabel(false)
 {
 	setupUi(this);
 	initSearchWindow();
@@ -26,10 +31,44 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 void DlgDsSearch::initSearchWindow(void)
 /* ========================================================================= */
 {
+	QString dbOpenAddressing = "";
+	QString toolTipInfo = "";
+
+	if ("OVM" != m_dbType && !m_dbEffectiveOVM) {
+		if (m_dbOpenAddressing) {
+			toolTipInfo = tr("Your account is of type")
+			    + " " + m_dbType + ".\n" +
+			    tr("You have also Post Data Messages activated.\n"
+			    "This means you can only search for accounts of "
+			    "type OVM and accounts that have Post Data "
+			    "Messages delivery activated.\nBecause of this "
+			    "limitation the results of your current search "
+			    "might not contain all otherwise matching"
+			    " databoxes.");
+			dbOpenAddressing = " - " +
+			    tr("commercial messages are enabled");
+		} else {
+			toolTipInfo = tr("Your account is of type")
+			    + " " + m_dbType + ".\n" +
+			    tr("This means you can only search for accounts of "
+			    "type OVM.\nThe current search settings will thus "
+			    "probably yield no result.");
+			dbOpenAddressing = " - " +
+			    tr("commercial messages are disabled");
+		}
+		m_showInfoLabel = true;
+	}
+
+	this->accountInfo->setText("<strong>" + m_userName +
+	    "</strong>" + " - " + m_dbType + dbOpenAddressing);
+
+	this->infoLabel->setStyleSheet("QLabel { color: red }");
+	this->infoLabel->setToolTip(toolTipInfo);
+	this->infoLabel->hide();
+
 	this->dataBoxTypeCBox->addItem(tr("OVM – Orgán veřejné moci"));
 	this->dataBoxTypeCBox->addItem(tr("PO – Právnická osoba"));
-	this->dataBoxTypeCBox->addItem(
-	    tr("PFO – Podnikající fyzická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("PFO – Podnikající fyzická osoba"));
 	this->dataBoxTypeCBox->addItem(tr("FO – Fyzická osoba"));
 
 	this->resultsTableWidget->setColumnWidth(0,20);
@@ -64,6 +103,8 @@ void DlgDsSearch::initSearchWindow(void)
 	connect(pingTimer, SIGNAL(timeout()), this,
 	    SLOT(pingIsdsServer()));
 
+
+
 	checkInputFields();
 }
 
@@ -94,12 +135,23 @@ void DlgDsSearch::checkInputFields(void)
 	switch (this->dataBoxTypeCBox->currentIndex()) {
 	/* OVM */
 	case 0:
+		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Subject Name:"));
+		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		this->infoLabel->hide();
+		break;
 	/* PO */
 	case 1:
 		this->iCLineEdit->setEnabled(true);
 		this->labelName->setText(tr("Subject Name:"));
 		this->labelName->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
 		break;
 	/* FPO */
 	case 2:
@@ -109,6 +161,11 @@ void DlgDsSearch::checkInputFields(void)
 		    "firm name."));
 		this->nameLineEdit->setToolTip(tr("Enter PFO last name or "
 		    "firm name."));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
 		break;
 	/* FO */
 	case 3:
@@ -118,6 +175,11 @@ void DlgDsSearch::checkInputFields(void)
 		    "birth last name of FO."));
 		this->nameLineEdit->setToolTip(tr("Enter last name or "
 		    "birth last name of FO."));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
 		break;
 	default:
 		break;

@@ -22,6 +22,7 @@ public:
 	};
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
+	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QWidget *parent = 0, QString useName = "");
 
 private slots:
@@ -37,9 +38,13 @@ private:
 	void initSearchWindow(void);
 	void addContactsToTable(const QList< QVector<QString> > &contactList);
 
-	QTableWidget *m_recipientTableWidget;
 	Action m_action;
+	QTableWidget *m_recipientTableWidget;
+	QString m_dbType;
+	bool m_dbEffectiveOVM;
+	bool m_dbOpenAddressing;
 	const QString m_userName;
+	bool m_showInfoLabel;
 };
 
 

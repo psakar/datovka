@@ -3041,8 +3041,20 @@ void MainWindow::findDatabox(void)
 	}
 
 	QString userName = accountUserName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+	QList<QString> accountData =
+	    m_accountDb.getUserDataboxInfo(userName + "___True");
+
+	if (accountData.isEmpty()) {
+		return;
+	}
+
+	QString dbType = accountData.at(0);
+	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
+	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    this, userName);
+	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
 	dsSearch->show();
 }
 
