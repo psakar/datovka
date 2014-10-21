@@ -77,17 +77,21 @@ void DlgSendMessage::initNewMessageDialog(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	QString dbOpenAddressing;
-	if (m_dbOpenAddressing) {
-		dbOpenAddressing = tr("PDZ is enabled");
-	} else {
-		dbOpenAddressing = tr("PDZ is disabled");
-	}
+	QString dbOpenAddressing = "";
 
+	if (!m_dbEffectiveOVM) {
+		if (m_dbOpenAddressing) {
+			dbOpenAddressing =
+			    " - " + tr("commercial messages are enabled");
+		} else {
+			dbOpenAddressing =
+			    " - " + tr("commercial messages are disabled");
+		}
+	}
 
 	this->fromUser->setText("<strong>" + accountItemTop->text() +
 	    "</strong>" + " (" + itemSettings[USER].toString() + ") - "
-	    + m_dbType + ": " + dbOpenAddressing);
+	    + m_dbType + dbOpenAddressing);
 
 	index = m_messageList.currentIndex();
 	m_userName = itemSettings[USER].toString();
@@ -339,7 +343,8 @@ void DlgSendMessage::addRecipientData(void)
 /* ========================================================================= */
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, this, m_userName);
+	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
+	    m_dbOpenAddressing, this, m_userName);
 	dsSearch->show();
 }
 
