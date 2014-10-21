@@ -1,5 +1,16 @@
 
 
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
+
+
+#include <cstdlib>
+#include <isds.h>
+#include <openssl/crypto.h> /* SSLeay_version(3) */
 #include <QFile>
 
 #include "dlg_about.h"
@@ -24,6 +35,22 @@ void aboutDialog::initAboutDialog(void)
 	this->labelUrl->setTextFormat(Qt::RichText);
 	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelUrl->setOpenExternalLinks(true);
+
+	char * isdsVer = isds_version();
+	QString isdsVerStr("libisds ");
+	isdsVerStr += isdsVer;
+	free(isdsVer); isdsVer = NULL;
+
+	QString librariesStr("<b>");
+	librariesStr += QObject::tr("Depends on libraries:");
+	librariesStr += "</b><br/>";
+	librariesStr += QString("Qt ") + qVersion() + "<br/>";
+	librariesStr += isdsVerStr + "<br/>" + SSLeay_version(SSLEAY_VERSION);
+	this->labelLibs->setAlignment(Qt::AlignHCenter);
+	this->labelLibs->setTextFormat(Qt::RichText);
+	this->labelLibs->setWordWrap(true);
+	this->labelLibs->setText(librariesStr);
+	
 
 	connect(this->pushButtonLicence, SIGNAL(clicked()), this,
 	    SLOT(showLicence()));
