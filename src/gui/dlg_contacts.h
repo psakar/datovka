@@ -31,6 +31,7 @@ private slots:
 
 private:
 	bool isInRecipientTable(const QString &idDs) const;
+	QString getUserInfoFormIsds(QString idDbox);
 
 	QTableWidget &m_recipientTableWidget;
 	const MessageDb &m_messDb;
@@ -39,7 +40,6 @@ private:
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
 	const QString m_userName;
-	QString getUserInfoFormIsds(QString idDbox);
 };
 
 

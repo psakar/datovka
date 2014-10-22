@@ -1,7 +1,7 @@
 
-
 #include "dlg_contacts.h"
 #include "src/io/isds_sessions.h"
+
 
 DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
     QTableWidget &recipientTableWidget,
@@ -42,7 +42,12 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 }
 
 
+/* ========================================================================= */
+/*
+ * Apply filter text on the tablewidget
+ */
 void DlgContacts::filterContact(const QString &text)
+/* ========================================================================= */
 {
 	this->clearPushButton->setEnabled(true);
 	if (!text.isEmpty()) {
@@ -62,13 +67,25 @@ void DlgContacts::filterContact(const QString &text)
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ * Clear search text in the filterLineEdit
+ */
 void DlgContacts::clearContactText(void)
+/* ========================================================================= */
 {
 	this->filterLineEdit->clear();
 	this->clearPushButton->setEnabled(false);
 }
 
+
+/* ========================================================================= */
+/*
+ * Get contacts from message db and fill wablewidget
+ */
 void DlgContacts::fillContactsFromMessageDb()
+/* ========================================================================= */
 {
 	QList<QVector<QString>> contactList;
 	contactList = m_messDb.uniqueContacts();
@@ -94,7 +111,13 @@ void DlgContacts::fillContactsFromMessageDb()
 	this->contactTableWidget->resizeColumnsToContents();
 }
 
+
+/* ========================================================================= */
+/*
+ * Enable ok (add) button if some contact was selected
+ */
 void DlgContacts::enableOkButton(void)
+/* ========================================================================= */
 {
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -107,7 +130,12 @@ void DlgContacts::enableOkButton(void)
 }
 
 
+/* ========================================================================= */
+/*
+ * Test if recipient exists in recipient tablewidget
+ */
 bool DlgContacts::isInRecipientTable(const QString &idDs) const
+/* ========================================================================= */
 {
 	for (int i = 0; i < this->m_recipientTableWidget.rowCount(); i++) {
 		if (this->m_recipientTableWidget.item(i,0)->text() == idDs)
@@ -117,8 +145,12 @@ bool DlgContacts::isInRecipientTable(const QString &idDs) const
 }
 
 
-
+/* ========================================================================= */
+/*
+ * Insert selected recipients into send message dialog tablewidget
+ */
 void DlgContacts::insertDsItems(void)
+/* ========================================================================= */
 {
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {
@@ -159,7 +191,7 @@ void DlgContacts::insertDsItems(void)
 
 /* ========================================================================= */
 /*
- * return dbEffectiveOVM for recipient
+ * Get and return dbEffectiveOVM info for recipient
  */
 QString DlgContacts::getUserInfoFormIsds(QString idDbox)
 /* ========================================================================= */
