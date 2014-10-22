@@ -131,7 +131,7 @@ void DlgContacts::insertDsItems(void)
 				this->m_recipientTableWidget.setItem(row, 1,
 				    item);
 				item = new QTableWidgetItem;
-				item->setText(this->contactTableWidget->\
+				item->setText(this->contactTableWidget->
 				    item(i,3)->text());
 				this->m_recipientTableWidget.setItem(row, 2,
 				    item);

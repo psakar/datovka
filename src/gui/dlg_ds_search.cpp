@@ -31,6 +31,8 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 void DlgDsSearch::initSearchWindow(void)
 /* ========================================================================= */
 {
+	this->resultsTableWidget->setColumnHidden(5, true);
+
 	QString dbOpenAddressing = "";
 	QString toolTipInfo = "";
 
@@ -352,6 +354,7 @@ void DlgDsSearch::searchDataBox(void)
 		contact.append(name);
 		contact.append(address);
 		contact.append(QString(item->address->adZipCode));
+		contact.append(*item->dbEffectiveOVM ? QString() : tr("yes"));
 
 		list_contacts.append(contact);
 		addContactsToTable(list_contacts);
@@ -415,6 +418,9 @@ void DlgDsSearch::addContactsToTable(
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(3));
 		this->resultsTableWidget->setItem(row,4,item);
+		item = new QTableWidgetItem;
+		item->setText(contactList[i].at(4));
+		this->resultsTableWidget->setItem(row,5,item);
 	}
 }
 
@@ -465,9 +471,14 @@ void DlgDsSearch::insertDsItems(void)
 			    item(i,2)->text());
 			this->m_recipientTableWidget->setItem(row,1,item);
 			item = new QTableWidgetItem;
-			item->setText(this->resultsTableWidget->\
-			    item(i,3)->text());
+			item->setText(this->resultsTableWidget->
+			    item(i,3)->text() + " " +
+			    this->resultsTableWidget->item(i,4)->text());
 			this->m_recipientTableWidget->setItem(row,2,item);
+			item = new QTableWidgetItem;
+			item->setText(this->resultsTableWidget->
+			    item(i,5)->text());
+			this->m_recipientTableWidget->setItem(row,3,item);
 		}
 	}
 }

@@ -234,6 +234,11 @@ p, li { white-space: pre-wrap; }
        <string>Postal code</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>PDZ</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

@@ -496,12 +496,63 @@ void isds_message_copy_free_void(void **message_copy)
 
 /* ========================================================================= */
 /*
+ * Dialog informs user that message contains one or more PDZs.
+ */
+int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
+/* ========================================================================= */
+{
+	QString title;
+	QString info;
+
+	if (pdzCnt > 1) {
+		title = tr("Message contains Commercial messages (PDZ)");
+		info = tr("Your message contains %1 non-OVM recipients "
+		    "therefore these messages will be sent as a"
+		    "Commercial messages (PDZ)").arg(pdzCnt);
+		info += "\n\n";
+		info += tr("Do you want to send all messages?");
+	} else {
+		title = tr("Message contains Commercial message (PDZ)");
+		info = tr("Your message contains %1 non-OVM recipient "
+		    "therefore this message will be sent as "
+		    "Commercial message (PDZ)").arg(pdzCnt);
+		info += "\n\n";
+		info += tr("Do you want to send message?");
+	}
+
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setText(title);
+	msgBox.setInformativeText(info);
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::Yes);
+	return msgBox.exec();
+}
+
+
+
+/* ========================================================================= */
+/*
  * Send message/multiple message
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
+
+	int pdzCnt = 0;
+
+	for (int i = 0; i < this->recipientTableWidget->rowCount(); i++) {
+		if (!this->recipientTableWidget->item(i,3)->text().isNull()) {
+			pdzCnt++;
+		}
+	}
+
+	if (pdzCnt > 0) {
+		if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
+			return;
+		}
+	}
 
 	// init bool pointers
 	_Bool *dmPersonalDelivery = NULL;
