@@ -294,6 +294,11 @@ private slots:
 	void deleteThreadSyncOne(void);
 
 	/*!
+	 * @brief Delete worker and thread objects, enable sync buttons.
+	 */
+	void deleteThreadDownMsgComplete(void);
+
+	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
 	void setProgressBarFromWorker(QString label, int value);
@@ -326,10 +331,16 @@ private slots:
 	void setAndShowNotificationDialog(QList<QString> errorDmId,
 	   int successCnt);
 
+	/*!
+	 * @brief Set tablewidget when message download worker is done.
+	 */
+	void postDownloadSelectedMessageAttachments(const QModelIndex acntTopIdx,
+	    QString dmId);
+
 private:
 
-	QThread *threadSyncAll, *threadSyncOne;
-	Worker *workerSyncAll, *workerSyncOne;
+	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
+	Worker *workerSyncAll, *workerSyncOne, *workerDownMsgComplete;
 	QTimer *timer;
 	int timeout;
 

@@ -1243,15 +1243,15 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 {
 	debug_func_call();
 
+	bool incoming = true;
+
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
 	Q_ASSERT(messageIndex.isValid());
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
 	accountIndex = AccountModel::indexTop(accountIndex);
-	    /* selection().indexes() ? */
-
-	bool incoming = true;
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
 
 	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
 	switch (AccountModel::nodeType(index)) {
@@ -1269,26 +1269,80 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		break;
 	}
 
-	m_statusProgressBar->setFormat("downloadMessage");
-	m_statusProgressBar->repaint();
+	QList<MessageDb*> messageDbList;
+	QList<bool> downloadThisAccount;
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
+	messageDbList.clear();
+	downloadThisAccount.clear();
+	downloadThisAccount.append(incoming);
 
-	/* TODO -- Check return value. */
+	MessageDb *messageDb = accountMessageDb(accountItem);
+	messageDbList.append(messageDb);
+
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(accountIndex, true)) {
-			/* TODO */
-			//return Q_CONNECT_ERROR;
+			return;
 		}
 	}
-	Worker::downloadMessage(accountIndex,
-	    messageIndex.sibling(messageIndex.row(), 0).data().toString(),
-	    true, incoming, *messageDb);
 
-	setDefaultProgressStatus();
+	threadDownMsgComplete = new QThread();
+	workerDownMsgComplete = new Worker(accountIndex,
+	    messageIndex.sibling(messageIndex.row(), 0).data().toString(),
+	    m_accountDb, m_accountModel, 0, messageDbList, downloadThisAccount,
+	    0);
+
+	workerDownMsgComplete->moveToThread(threadDownMsgComplete);
+
+	connect(workerDownMsgComplete, SIGNAL(valueChanged(QString, int)),
+	    this, SLOT(setProgressBarFromWorker(QString, int)));
+
+	connect(workerDownMsgComplete,
+	    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
+	    this, SLOT(postDownloadSelectedMessageAttachments(
+	        const QModelIndex, QString)));
+
+
+	connect(workerDownMsgComplete, SIGNAL(workRequested()),
+	    threadDownMsgComplete, SLOT(start()));
+	connect(threadDownMsgComplete, SIGNAL(started()),
+	    workerDownMsgComplete, SLOT(downloadCompleteMessage()));
+	connect(workerDownMsgComplete, SIGNAL(finished()),
+	    threadDownMsgComplete, SLOT(quit()), Qt::DirectConnection);
+	connect(threadDownMsgComplete, SIGNAL(finished()),
+	    this, SLOT(deleteThreadDownMsgComplete()));
+
+	workerDownMsgComplete->requestWork();
+}
+
+
+/* ========================================================================= */
+/*
+ * Set tablewidget when message download worker is done.
+ */
+void MainWindow::postDownloadSelectedMessageAttachments(
+    const QModelIndex acntTopIdx, QString dmId)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	QModelIndex messageIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+	Q_ASSERT(messageIndex.isValid());
+	QModelIndex accountIndex = ui->accountList->currentIndex();
+	Q_ASSERT(accountIndex.isValid());
+	accountIndex = AccountModel::indexTop(accountIndex);
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
+
+	QString msgIds = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toString();
+
+	/* Test if account index or message index were changed */
+	if (!(accountIndex == acntTopIdx && msgIds == dmId)) {
+		return;
+	}
 
 	/*
 	 * TODO -- Create a separate function for reloading attachment
@@ -1305,10 +1359,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		         QModelIndex)));
 	}
 
-	int msgId = messageIndex.sibling(messageIndex.row(), 0).data().toInt();
-	//qDebug() << "message index" << msgId;
+	MessageDb *messageDb = accountMessageDb(accountItem);
 
-	/* Show files related to message. */
+	int msgId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toInt();
 
 	/* Generate and show message information. */
 	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
@@ -3408,6 +3462,30 @@ void MainWindow::deleteThreadSyncOne(void)
 
 	delete workerSyncOne;
 	delete threadSyncOne;
+
+	qDebug() << "Delete Worker and Thread objects";
+}
+
+
+/* ========================================================================= */
+/*
+* Delete worker and thread objects, enable buttons
+*/
+void MainWindow::deleteThreadDownMsgComplete(void)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	int accountCount = ui->accountList->model()->rowCount();
+	if (accountCount > 0) {
+		ui->actionSync_all_accounts->setEnabled(true);
+		ui->actionReceived_all->setEnabled(true);
+		ui->actionDownload_messages->setEnabled(true);
+		ui->actionGet_messages->setEnabled(true);
+	}
+
+	delete workerDownMsgComplete;
+	delete threadDownMsgComplete;
 
 	qDebug() << "Delete Worker and Thread objects";
 }

@@ -37,7 +37,8 @@ public:
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
 	    const QString dmId, bool signedMsg, bool incoming,
-	    MessageDb &messageDb);
+	    MessageDb &messageDb, bool progress, QString label,
+	    QProgressBar *pBar, Worker *worker);
 
 	/*!
 	 * @brief Download sent/received message list from ISDS for current
@@ -112,7 +113,15 @@ signals:
 	 */
 	void valueChanged(QString label, int value);
 
+	/*!
+	 * @brief This signal is emitted when process is finished
+	 */
 	void refreshAccountList(const QModelIndex);
+
+	/*!
+	 * @brief This signal is emitted when message downloading is finished
+	 */
+	void refreshAttachmentList(const QModelIndex, QString);
 
 	/*!
 	 * @brief This signal is emitted when process is finished
