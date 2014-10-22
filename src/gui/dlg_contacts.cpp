@@ -1,14 +1,20 @@
 
 
 #include "dlg_contacts.h"
-
+#include "src/io/isds_sessions.h"
 
 DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
-    QTableWidget &recipientTableWidget, QWidget *parent)
+    QTableWidget &recipientTableWidget,
+    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
+    QWidget *parent, QString userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
     m_messDb(db),
-    m_dbId(dbId)
+    m_dbId(dbId),
+    m_dbType(dbType),
+    m_dbEffectiveOVM(dbEffectiveOVM),
+    m_dbOpenAddressing(dbOpenAddressing),
+    m_userName(userName)
 {
 	setupUi(this);
 
@@ -135,7 +141,47 @@ void DlgContacts::insertDsItems(void)
 				    item(i,3)->text());
 				this->m_recipientTableWidget.setItem(row, 2,
 				    item);
+
+				item = new QTableWidgetItem;
+				if (!m_dbEffectiveOVM) {
+					item->setText(getUserInfoFormIsds(
+					    this->contactTableWidget->item(i,1)
+					    ->text()));
+				} else {
+					item->setText(tr("no"));
+				}
+				this->m_recipientTableWidget.setItem(row,3,item);
 			}
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * return dbEffectiveOVM for recipient
+ */
+QString DlgContacts::getUserInfoFormIsds(QString idDbox)
+/* ========================================================================= */
+{
+	QString str = tr("no");
+	struct isds_list *box = NULL;
+	struct isds_PersonName *personName = NULL;
+	struct isds_Address *address = NULL;
+	isds_DbType dbType = DBTYPE_FO;
+
+	isds_DbOwnerInfo_search(&box, m_userName, idDbox, dbType, "",
+	    personName, "", NULL, address, "", "", "", "", "", 0, false, false);
+
+	if (0 != box) {
+		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+		Q_ASSERT(0 != item);
+		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
+	}
+
+	isds_PersonName_free(&personName);
+	isds_Address_free(&address);
+	isds_list_free(&box);
+
+	return str;
 }

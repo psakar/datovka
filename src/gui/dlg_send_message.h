@@ -73,6 +73,7 @@ private:
 	int cmptAttachmentSize(void);
 	int showErrorMessageBox(int status);
 	int showInfoAboutPDZ(int pdzCnt);
+	QString getUserInfoFormIsds(QString idDbox);
 };
 
 

@@ -118,6 +118,14 @@ void DlgSendMessage::initNewMessageDialog(void)
 		item = new QTableWidgetItem;
 		item->setText(m_senderAddress);
 		this->recipientTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+
+		if (!m_dbEffectiveOVM) {
+			item->setText(getUserInfoFormIsds(m_senderId));
+		} else {
+			item->setText(tr("no"));
+		}
+		this->recipientTableWidget->setItem(row,3,item);
 	}
 
 	this->OptionalWidget->setHidden(true);
@@ -192,6 +200,36 @@ void DlgSendMessage::initNewMessageDialog(void)
 	/* TODO */
 	this->payRecipient->setEnabled(false);
 	this->payRecipient->hide();
+}
+
+
+/* ========================================================================= */
+/*
+ * return dbEffectiveOVM for recipient
+ */
+QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
+/* ========================================================================= */
+{
+	QString str = tr("no");
+	struct isds_list *box = NULL;
+	struct isds_PersonName *personName = NULL;
+	struct isds_Address *address = NULL;
+	isds_DbType dbType = DBTYPE_FO;
+
+	isds_DbOwnerInfo_search(&box, m_userName, idDbox, dbType, "",
+	    personName, "", NULL, address, "", "", "", "", "", 0, false, false);
+
+	if (0 != box) {
+		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+		Q_ASSERT(0 != item);
+		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
+	}
+
+	isds_PersonName_free(&personName);
+	isds_Address_free(&address);
+	isds_list_free(&box);
+
+	return str;
 }
 
 
@@ -434,7 +472,8 @@ void DlgSendMessage::findRecipientData(void)
 /* ========================================================================= */
 {
 	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
-	    *(this->recipientTableWidget), this);
+	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
+	    m_dbOpenAddressing, this, m_userName);
 	dlg_cont->show();
 }
 
@@ -543,7 +582,7 @@ void DlgSendMessage::sendMessage(void)
 	int pdzCnt = 0;
 
 	for (int i = 0; i < this->recipientTableWidget->rowCount(); i++) {
-		if (!this->recipientTableWidget->item(i,3)->text().isNull()) {
+		if (this->recipientTableWidget->item(i,3)->text() ==tr("yes")) {
 			pdzCnt++;
 		}
 	}

@@ -354,7 +354,7 @@ void DlgDsSearch::searchDataBox(void)
 		contact.append(name);
 		contact.append(address);
 		contact.append(QString(item->address->adZipCode));
-		contact.append(*item->dbEffectiveOVM ? QString() : tr("yes"));
+		contact.append(*item->dbEffectiveOVM ? tr("no") : tr("yes"));
 
 		list_contacts.append(contact);
 		addContactsToTable(list_contacts);

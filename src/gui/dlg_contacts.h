@@ -18,7 +18,9 @@ class DlgContacts : public QDialog, public Ui::Contacts
 
 public:
 	DlgContacts(const MessageDb &db, const QString &dbId,
-	    QTableWidget &recipientTableWidget, QWidget *parent = 0);
+	    QTableWidget &recipientTableWidget,
+	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QWidget *parent = 0, QString useName = "");
 
 private slots:
 	void filterContact(const QString &text);
@@ -33,6 +35,11 @@ private:
 	QTableWidget &m_recipientTableWidget;
 	const MessageDb &m_messDb;
 	const QString m_dbId;
+	QString m_dbType;
+	bool m_dbEffectiveOVM;
+	bool m_dbOpenAddressing;
+	const QString m_userName;
+	QString getUserInfoFormIsds(QString idDbox);
 };
 
 
