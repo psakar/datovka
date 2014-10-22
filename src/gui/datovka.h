@@ -33,8 +33,8 @@ public:
 	void setDefaultProgressStatus(void);
 
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
-	QLabel *statusInfoLabel;
 	QLabel *statusOnlineLabel;
+	QStatusBar *statusBar;
 
 private slots:
 	/*!

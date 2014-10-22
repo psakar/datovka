@@ -88,11 +88,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_pushButton, SIGNAL(clicked()), this,
 	    SLOT(clearFilterField()));
 
-	/* Create status bar info label */
-	statusInfoLabel = new QLabel(this);
-	statusInfoLabel->setText(tr("Ready"));
-	statusInfoLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-	ui->statusBar->addWidget(statusInfoLabel,1);
+	statusBar = new QStatusBar(this);
+	ui->statusBar->addWidget(statusBar,1);
+
+	statusBar->showMessage(tr("Welcome"), TIMER_STATUS_TIMEOUT_MS);
 
 	/* Create status bar online/offline label */
 	statusOnlineLabel = new QLabel(this);
@@ -1248,6 +1247,15 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
 	Q_ASSERT(messageIndex.isValid());
+
+	QString dmIDs = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toString();
+
+	statusBar->clearMessage();
+	statusBar->showMessage(
+	    tr("Download complete message \"%1\" from ISDS server...").arg(dmIDs),
+	    TIMER_STATUS_TIMEOUT_MS);
+
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
 	accountIndex = AccountModel::indexTop(accountIndex);
@@ -1290,9 +1298,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	threadDownMsgComplete = new QThread();
 	workerDownMsgComplete = new Worker(accountIndex,
-	    messageIndex.sibling(messageIndex.row(), 0).data().toString(),
-	    m_accountDb, m_accountModel, 0, messageDbList, downloadThisAccount,
-	    0);
+	    dmIDs, m_accountDb, m_accountModel, 0, messageDbList,
+	    downloadThisAccount, 0);
 
 	workerDownMsgComplete->moveToThread(threadDownMsgComplete);
 
@@ -1493,6 +1500,11 @@ void MainWindow::synchroniseAllAccounts(void)
 	 * be defined somewhere outside of the worker object.
 	 */
 
+	statusBar->clearMessage();
+	statusBar->showMessage(
+	    tr("Synchronise all accounts with ISDS server..."),
+	    TIMER_STATUS_TIMEOUT_MS);
+
 	if (globPref.download_on_background) {
 		timer->stop();
 	}
@@ -1582,6 +1594,12 @@ void MainWindow::synchroniseSelectedAccount(void)
 
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	statusBar->clearMessage();
+	statusBar->showMessage(
+	    tr("Synchronise account \"%1\" with ISDS server...")
+	    .arg(accountInfo.accountName()),
+	    TIMER_STATUS_TIMEOUT_MS);
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
@@ -2670,6 +2688,11 @@ void MainWindow::deleteSelectedAccount(void)
 		saveSettings();
 	}
 
+	statusBar->clearMessage();
+	statusBar->showMessage(
+	    tr("Account \"%1\" was deleted...").arg(itemTop->text()),
+	    TIMER_STATUS_TIMEOUT_MS);
+
 	if (ui->accountList->model()->rowCount() < 1) {
 		defaultUiMainWindowSettings();
 	}
@@ -3109,7 +3132,7 @@ void MainWindow::findDatabox(void)
 
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
 	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
-	dsSearch->show();
+	dsSearch->exec();
 }
 
 
@@ -3625,6 +3648,10 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		if (messageDb->msgsDeleteMessageData(dmID)) {
 			qDebug() << "Message" << dmID <<
 			    "was deleted from ISDS and db";
+			statusBar->clearMessage();
+			statusBar->showMessage(
+			tr("Message %1 was deleted from ISDS and db").arg(dmID),
+			    TIMER_STATUS_TIMEOUT_MS);
 			return Q_SUCCESS;
 		} else {
 			qDebug() << "Message" << dmID <<
