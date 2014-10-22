@@ -4666,9 +4666,24 @@ void MainWindow::showSignatureDetails(void)
 {
 	debug_func_call();
 
-	QDialog *signature_detail = new DlgSignatureDetail(this);
-	signature_detail->exec();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
+	Q_ASSERT(msgIdx.isValid());
+	if (!msgIdx.isValid()) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		return;
+	}
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	QDialog *signature_detail = new DlgSignatureDetail(*messageDb, dmID,
+	    this);
+	signature_detail->exec();
 }
 
 

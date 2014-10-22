@@ -181,6 +181,14 @@ public:
 	bool msgsVerificationAttempted(int dmId) const;
 
 	/*!
+	 * @brief Returns whether message is verified.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return True if message was verified successfully.
+	 */
+	bool msgsVerified(int dmId) const;
+
+	/*!
 	 * @brief Was message locally read.
 	 * 
 	 * @param[in] dmId Message id.
@@ -413,14 +421,6 @@ private:
 	 * @brief Create empty tables if tables do not already exist.
 	 */
 	void createEmptyMissingTables(void);
-
-	/*!
-	 * @brief Returns whether message is verified.
-	 *
-	 * @param[in] dmId Message identifier.
-	 * @return True if message was verified successfully.
-	 */
-	bool msgsVerified(int dmId) const;
 
 	/*!
 	 * @brief Returns verification date (in local time).
