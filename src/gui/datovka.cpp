@@ -1055,13 +1055,22 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 
 	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
+		showStatusText(tr("Saving attachment of message to "
+		    "files was not successful!"));
 		return;
 	}
+
+	QModelIndex messageIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+	QString dmId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toString();
 
 	QModelIndex fileNameIndex =
 	    selectedIndex.sibling(selectedIndex.row(), 3);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
+		showStatusText(tr("Saving attachment of message \"%1\" to "
+		    "files was not successful!").arg(dmId));
 		return;
 	}
 	QString fileName = fileNameIndex.data().toString();
@@ -1078,6 +1087,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
+		showStatusText(tr("Saving attachment of message \"%1\" to "
+		    "files was not successful!").arg(dmId));
 		return; /* TODO -- Error message. */
 	}
 
@@ -1085,16 +1096,21 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
+		showStatusText(tr("Saving attachment of message \"%1\" to "
+		    "files was not successful!").arg(dmId));
 		return;
 	}
-	//qDebug() << "Data index." << dataIndex;
 
 	QByteArray data =
 	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 	int written = fout.write(data);
 	if (written != data.size()) {
-		/* TODO -- Error message? */
+		showStatusText(tr("Saving attachment of message \"%1\" to "
+		    "file was not successful!").arg(dmId));
+	} else {
+		showStatusText(tr("Saving attachment of message \"%1\" to "
+		    "file was successful...").arg(dmId));
 	}
 
 	fout.close();
@@ -1112,6 +1128,12 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 	int attachments = ui->messageAttachmentList->model()->rowCount();
 
+	QModelIndex messageIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+
+	QString dmId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toString();
+
 	QString newdir = QFileDialog::getExistingDirectory(this,
 	    tr("Save attachments"), QDir::homePath(),
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -1120,19 +1142,24 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		return;
 	}
 
+	bool success = true;
+
 	for (int i = 0; i < attachments; ++i) {
 
-		QModelIndex index = ui->messageAttachmentList->model()->index(i,0);
+		QModelIndex index = ui->messageAttachmentList->model()
+		    ->index(i,0);
 
 		Q_ASSERT(index.isValid());
 		if (!index.isValid()) {
-			return;
+			success = false;
+			continue;
 		}
 
 		QModelIndex fileNameIndex = index.sibling(index.row(), 3);
 		Q_ASSERT(fileNameIndex.isValid());
 		if(!fileNameIndex.isValid()) {
-			return;
+			success = false;
+			continue;
 		}
 
 		QString fileName = fileNameIndex.data().toString();
@@ -1142,13 +1169,15 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		QFile fout(fileName);
 		if (!fout.open(QIODevice::WriteOnly)) {
-			return;
+			success = false;
+			continue;
 		}
 
 		QModelIndex dataIndex = index.sibling(index.row(), 2);
 		Q_ASSERT(dataIndex.isValid());
 		if (!dataIndex.isValid()) {
-			return;
+			success = false;
+			continue;
 		}
 
 		QByteArray data =
@@ -1156,10 +1185,19 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		int written = fout.write(data);
 		if (written != data.size()) {
-		/* TODO ? */
+			success = false;
+			continue;
 		}
 
 		fout.close();
+	}
+
+	if (success) {
+		showStatusText(tr("All attachments of "
+		    "message \"%1\" were saved...").arg(dmId));
+	} else {
+		showStatusText(tr("Some attachments of "
+		    "message \"%1\" were not saved to disk!").arg(dmId));
 	}
 }
 
@@ -1577,16 +1615,16 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
 		if (accoutName.isNull()) {
 			showStatusText(tr("Messages on the server") + ": " +
 			    QString::number(rt) + " " + tr("received") +
-			    " (" + QString::number(rn) + " " + tr("news")
+			    " (" + QString::number(rn) + " " + tr("new")
 			    + "); "+ QString::number(st) + " " + tr("sent") +
-			    " (" + QString::number(sn) + " " + tr("news") + ")");
+			    " (" + QString::number(sn) + " " + tr("new") + ")");
 		} else {
 			showStatusText(accoutName + ": "+
 			    tr("Messages on the server") + ": " +
 			    QString::number(rt) + " " + tr("received") +
-			    " (" + QString::number(rn) + " " + tr("news")
+			    " (" + QString::number(rn) + " " + tr("new")
 			    + "); "+ QString::number(st) + " " + tr("sent") +
-			    " (" + QString::number(sn) + " " + tr("news") + ")");
+			    " (" + QString::number(sn) + " " + tr("new") + ")");
 		}
 	} else {
 		showStatusText(tr("Synchronise accounts %1 with ISDS server...")
