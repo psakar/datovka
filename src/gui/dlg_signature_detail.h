@@ -25,7 +25,12 @@ private:
 	/*!
 	 * @brief Check message signature, show result in dialog.
 	 */
-	void validate_message_signature(void);
+	void validateMessageSignature(void);
+
+	/*!
+	 * @brief Check time stamp signature, show detail in dialog.
+	 */
+	void validateMessageTimestamp(void);
 };
 
 

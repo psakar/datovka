@@ -189,6 +189,29 @@ public:
 	bool msgsVerified(int dmId) const;
 
 	/*!
+	 * @brief Returns time-stamp validity.
+	 *
+	 * @param[in]  dmId Message identifier.
+	 * @param[out] qTst Qualified time-stamp value.
+	 * @return Return time-stamp validity check, tst is invalid if none
+	 *     found.
+	 */
+	bool msgsCheckTimestamp(int dmId, QDateTime &qTst) const;
+
+	/*!
+	 * @brief Time stamp certificate information.
+	 *
+	 * @param[in]  dmId Message identifier.
+	 * @param[out] oStr  Organisation name.
+	 * @param[out] ouStr Organisation unit name.
+	 * @param[out] nStr  Common name.
+	 * @param[out] cStr  Country name.
+	 * @return False on failure.
+	 */
+	bool msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
+	    QString &nStr, QString &cStr) const;
+
+	/*!
 	 * @brief Was message locally read.
 	 * 
 	 * @param[in] dmId Message id.
@@ -428,15 +451,6 @@ private:
 	QDateTime msgsVerificationDate(int dmId) const;
 
 	/*!
-	 * @brief Returns time-stamp validity.
-	 *
-	 * @param[out] qTst Qualified time-stamp value.
-	 * @return Return time-stamp validity check, tst is invalid if none
-	 *     found.
-	 */
-	bool msgsCheckTimestamp(int dmId, QDateTime &qTst) const;
-
-	/*!
 	 * @brief Read data from supplementary message data table.
 	 */
 	QJsonDocument smsgdCustomData(int msgId) const;
@@ -445,6 +459,14 @@ private:
 	 * @brief Certificates related to given message.
 	 */
 	QList<QSslCertificate> msgCerts(int dmId) const;
+
+	/*!
+	 * @brief Returns time stamp in DER format.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return Qualified time stamp in DER format.
+	 */
+	QByteArray msgsTimestampDER(int dmId) const;
 
 	/*!
 	 * @brief Check whether message signature was valid at given date

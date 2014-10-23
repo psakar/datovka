@@ -50,4 +50,32 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 int verify_qualified_timestamp(const void *data, size_t data_len,
     time_t *utc_time);
 
+/*!
+ * @brief Retrieve signing certificate from supplied CMS.
+ *
+ * @patam[in]  data      CMS data.
+ * @param[in]  data_len  Size of the data portion.
+ * @param[out] sign_cert Retrieved signing certificate in DER format.
+ * @param[out] cert_len  Size of signing certificate.
+ * @return 0 on success, -1 else. The received certificate must be freed.
+ */
+int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
+    size_t *cert_len);
+
+/*!
+ * @brief Get some certificate information.
+ *
+ * @param[in]  data     Certificate data.
+ * @param[in]  data_len Certificate data length.
+ * @param[out] o        Organisation string.
+ * @param[out] ou       Organisation unit.
+ * @param[out] n        Name.
+ * @param[out] c        Country.
+ * @return 0 on success, -1 on error.
+ *
+ * @note Use free() to free all returned strings.
+ */
+int cert_information(const void *data, size_t data_len,
+    char **o, char **ou, char **n, char **c);
+
 #endif /* _CRYPTO_H_ */

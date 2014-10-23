@@ -90,6 +90,15 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
 
 
 /*!
+ * @brief Load X509 from buffer.
+ *
+ * @return NULL on failure.
+ */
+static
+X509 * load_x509(const void *raw, size_t raw_len);
+
+
+/*!
  * @brief Verifies CMS signature.
  *
  * @param[in,out] cms       CMS message.
@@ -145,6 +154,17 @@ int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time);
  */
 static
 time_t timegm_utc(struct tm *tm);
+
+
+/*!
+ * @brief Converts X509 certificate to DER.
+ *
+ * @param[in]  x509    Certificate.
+ * @param[out] der     Pointer to allocated buffer. Use free() top free memory.
+ * @param[out] der_len Size of the allocate buffer.
+ */
+static
+int x509_get_pem(X509 *x509, void **der, size_t *der_len);
 
 
 //#define PRINT_CERTS 1
@@ -409,6 +429,151 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Retrieve signing certificate from supplied CMS.
+ */
+int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
+    size_t *cert_len)
+/* ========================================================================= */
+{
+	int ret;
+	CMS_ContentInfo * cms = NULL;
+	STACK_OF(X509) *signers = NULL;
+	int num_signers;
+
+	cms = load_cms(data, data_len);
+	if (NULL == cms) {
+		logError("%s\n", "Could not load CMS.");
+		goto fail;
+	}
+
+	ret = cms_verify_signature(cms, NULL, 0);
+
+	if (1 != ret) {
+		logError("%s\n", "Could not validate CMS");
+		goto fail;
+	}
+
+	signers = CMS_get0_signers(cms);
+	if (NULL == signers) {
+		goto fail;
+	}
+
+	num_signers = sk_X509_num(signers);
+	if (1 != num_signers) {
+		logError("Only one CMS signer expected, got %d.\n",
+		    num_signers);
+		goto fail;
+	}
+
+	if (-1 == x509_get_pem(sk_X509_value(signers, 0),
+	        sign_cert, cert_len)) {
+		goto fail;
+	}
+
+	sk_X509_free(signers); signers = NULL;
+
+	CMS_ContentInfo_free(cms); cms = NULL;
+
+	return 0;
+fail:
+	if (NULL != cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	if (NULL != signers) {
+		sk_X509_free(signers);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get some certificate information.
+ */
+int cert_information(const void *data, size_t data_len,
+    char **o, char **ou, char **n, char **c)
+/* ========================================================================= */
+{
+	X509 *x509 = NULL;
+	const X509_NAME *subject;
+	const STACK_OF(X509_NAME_ENTRY) *entries;
+	int num_entries, i;
+	X509_NAME_ENTRY *entry;
+	ASN1_OBJECT *object;
+	int nid;
+	ASN1_STRING *str;
+	char **out_str;
+
+	x509 = load_x509(data, data_len);
+	if (NULL == x509) {
+		goto fail;
+	}
+
+	subject = X509_get_subject_name(x509);
+	if (NULL == subject) {
+		goto fail;
+	}
+
+	entries = subject->entries;
+	num_entries = sk_X509_NAME_ENTRY_num(entries);
+
+	for (i = 0; i < num_entries; ++i) {
+		entry = sk_X509_NAME_ENTRY_value(entries, i);
+		object = X509_NAME_ENTRY_get_object(entry);
+		/* Reading object->nid doesn't work. */
+		nid = OBJ_obj2nid(object);
+		str = X509_NAME_ENTRY_get_data(entry);
+
+		switch (nid) {
+		case NID_organizationName:
+			if (NULL != o) {
+				out_str = o;
+			}
+			break;
+		case NID_organizationalUnitName:
+			if (NULL != ou) {
+				out_str = ou;
+			}
+			break;
+		case NID_commonName:
+			if (NULL != n) {
+				out_str = n;
+			}
+			break;
+		case NID_countryName:
+			if (NULL != c) {
+				out_str = c;
+			}
+			break;
+		default:
+			out_str = NULL;
+		}
+
+		if (NULL != out_str) {
+			*out_str = (char *) malloc(
+			    ASN1_STRING_length(str) + 1);
+			if (NULL != *out_str) {
+				memcpy(*out_str, ASN1_STRING_data(str),
+				    ASN1_STRING_length(str));
+				(*out_str)[ASN1_STRING_length(str)] = '\0';
+			}
+		}
+	}
+
+	X509_free(x509); x509 = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != x509) {
+		X509_free(x509);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
 /*!
  * @brief Read certificate from der string.
  */
@@ -623,6 +788,52 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len)
 	BIO_free(bio); bio = NULL;
 
 	return cms;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
+ * Load X509 from buffer.
+ */
+static
+X509 * load_x509(const void *raw, size_t raw_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	X509 *x509 = NULL;
+	unsigned long err;
+
+	debug_func_call();
+
+	bio = BIO_new_mem_buf((void *) raw, raw_len);
+	if (NULL == bio) {
+		logError("%s\n", "Cannot create memory BIO.");
+		while (0 != (err = ERR_get_error())) {
+			logError("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	x509 = d2i_X509_bio(bio, NULL);
+	if (NULL == x509) {
+		logError("%s\n", "Cannot parse X509.");
+		while (0 != (err = ERR_get_error())) {
+			logError("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	return x509;
 
 fail:
 	if (NULL != bio) {
@@ -979,6 +1190,63 @@ time_t timegm_utc(struct tm *tm)
 #else /* WIN32 */
 	return timegm_win(tm);
 #endif /* !WIN32 */
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts X509 certificate to DER.
+ */
+static
+int x509_get_pem(X509 *x509, void **der, size_t *der_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	BUF_MEM *bptr = NULL;
+
+	assert(NULL != x509);
+	if (NULL == x509) {
+		goto fail;
+	}
+	assert(NULL != der);
+	if (NULL == der) {
+		goto fail;
+	}
+	assert(NULL != der_len);
+	if (NULL == der_len) {
+		goto fail;
+	}
+
+	bio = BIO_new(BIO_s_mem());
+
+	if (!i2d_X509_bio(bio, x509)) {
+		logError("%s\n", "Could not write X509 to bio.");
+		goto fail;
+	}
+
+	BIO_get_mem_ptr(bio, &bptr);
+	if (!BIO_set_close(bio, BIO_NOCLOSE)) {
+		goto fail;
+	}
+	BIO_free(bio); bio = NULL;
+
+	/* Extract DER from buffer. */
+	*der = bptr->data; bptr->data = NULL;
+	*der_len = bptr->length; bptr->length = 0;
+	bptr->max = 0;
+
+	BUF_MEM_free(bptr); bptr = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	if (NULL != bptr) {
+		BUF_MEM_free(bptr);
+	}
+	return -1;
 }
 
 

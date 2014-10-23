@@ -2539,30 +2539,12 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
 /* ========================================================================= */
 {
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<QSslCertificate> certs;
+	debug_func_call();
 
 	qTst = QDateTime();
 
-	queryStr = "SELECT "
-	    "dmQTimestamp"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		//qDebug() << "timestamp" << query.value(0).toString();
-		QByteArray byteArray = query.value(0).toByteArray();
-		if (byteArray.isEmpty()) {
-			return false;
-		}
-
-		QByteArray tstData = QByteArray::fromBase64(byteArray);
+	QByteArray tstData = msgsTimestampDER(dmId);
+	if (!tstData.isEmpty()) {
 
 		time_t utc_time = 0;
 		int ret = verify_qualified_timestamp(tstData.data(),
@@ -2584,6 +2566,111 @@ bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
 	}
 
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Time stamp certificate information.
+ */
+bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
+    QString &nStr, QString &cStr) const
+/* ========================================================================= */
+{
+	char *der = NULL;
+	size_t der_len = 0;
+	char *o = NULL, *ou = NULL, *n = NULL, *c = NULL;
+
+	debug_func_call();
+
+	QByteArray tstData = msgsTimestampDER(dmId);
+	if (tstData.isEmpty()) {
+		return false;
+	}
+
+	if (0 != cms_signing_cert(tstData.data(), tstData.size(),
+	        (void **) &der, &der_len)) {
+		goto fail;
+	}
+
+	if (0 != cert_information(der, der_len, &o, &ou, &n, &c)) {
+		goto fail;
+	}
+
+	free(der); der = NULL;
+
+	if (NULL != o) {
+		oStr = o;
+		free(o); o = NULL;
+	}
+
+	if (NULL != ou) {
+		ouStr = ou;
+		free(ou); ou = NULL;
+	}
+
+	if (NULL != n) {
+		nStr = n;
+		free(n); n = NULL;
+	}
+
+	if (NULL != c) {
+		cStr = c;
+		free(c); c = NULL;
+	}
+
+	return true;
+
+fail:
+	if (NULL != der) {
+		free(der);
+	}
+	if (NULL != o) {
+		free(o);
+	}
+	if (NULL != ou) {
+		free(ou);
+	}
+	if (NULL != n) {
+		free(n);
+	}
+	if (NULL != c) {
+		free(c);
+	}
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns time stamp in DER format.
+ */
+QByteArray MessageDb::msgsTimestampDER(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "dmQTimestamp"
+	    " FROM messages WHERE "
+	    "dmID = :dmId";
+	//qDebug() << queryStr;
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		QByteArray byteArray = query.value(0).toByteArray();
+		if (byteArray.isEmpty()) {
+			return QByteArray();
+		}
+
+		return QByteArray::fromBase64(byteArray);
+	}
+
+	return QByteArray();
 }
 
 
