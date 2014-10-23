@@ -525,6 +525,8 @@ int cert_information(const void *data, size_t data_len,
 		nid = OBJ_obj2nid(object);
 		str = X509_NAME_ENTRY_get_data(entry);
 
+		out_str = NULL;
+
 		switch (nid) {
 		case NID_organizationName:
 			if (NULL != o) {
@@ -547,7 +549,7 @@ int cert_information(const void *data, size_t data_len,
 			}
 			break;
 		default:
-			out_str = NULL;
+			break;
 		}
 
 		if (NULL != out_str) {
