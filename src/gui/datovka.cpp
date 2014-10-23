@@ -38,6 +38,12 @@
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
 
+#define showStatusText(qStr) \
+	do { \
+		statusBar->clearMessage(); \
+		statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS); \
+	} while(0)
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -88,23 +94,17 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_pushButton, SIGNAL(clicked()), this,
 	    SLOT(clearFilterField()));
 
+	/* Create info status bar */
 	statusBar = new QStatusBar(this);
-	ui->statusBar->addWidget(statusBar,1);
-
-	statusBar->showMessage(tr("Welcome"), TIMER_STATUS_TIMEOUT_MS);
 	statusBar->setSizeGripEnabled(false);
+	ui->statusBar->addWidget(statusBar,1);
+	showStatusText(tr("Welcome"));
 
 	/* Create status bar online/offline label */
 	statusOnlineLabel = new QLabel(this);
 	statusOnlineLabel->setText(tr("Mode: offline"));
-	statusOnlineLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	ui->statusBar->addWidget(statusOnlineLabel,1);
-
-	/* Create status bar label */
-	QLabel* statusLabel = new QLabel(this);
-	statusLabel->setText(tr("Status:"));
-	statusLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-	ui->statusBar->addWidget(statusLabel,1);
+	statusOnlineLabel->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	ui->statusBar->addWidget(statusOnlineLabel,0);
 
 	/* Create progress bar object and set default value */
 	m_statusProgressBar = new QProgressBar(this);
@@ -1252,10 +1252,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	QString dmIDs = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toString();
 
-	statusBar->clearMessage();
-	statusBar->showMessage(
-	    tr("Download complete message \"%1\" from ISDS server...").arg(dmIDs),
-	    TIMER_STATUS_TIMEOUT_MS);
+	showStatusText(tr("Download complete message \"%1\" "
+	    "from ISDS server...").arg(dmIDs));
 
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
@@ -1501,10 +1499,7 @@ void MainWindow::synchroniseAllAccounts(void)
 	 * be defined somewhere outside of the worker object.
 	 */
 
-	statusBar->clearMessage();
-	statusBar->showMessage(
-	    tr("Synchronise all accounts with ISDS server..."),
-	    TIMER_STATUS_TIMEOUT_MS);
+	showStatusText(tr("Synchronise all accounts with ISDS server..."));
 
 	if (globPref.download_on_background) {
 		timer->stop();
@@ -1596,11 +1591,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	statusBar->clearMessage();
-	statusBar->showMessage(
-	    tr("Synchronise account \"%1\" with ISDS server...")
-	    .arg(accountInfo.accountName()),
-	    TIMER_STATUS_TIMEOUT_MS);
+	showStatusText(tr("Synchronise account \"%1\" with ISDS server...")
+	    .arg(accountInfo.accountName()));
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
@@ -2689,10 +2681,7 @@ void MainWindow::deleteSelectedAccount(void)
 		saveSettings();
 	}
 
-	statusBar->clearMessage();
-	statusBar->showMessage(
-	    tr("Account \"%1\" was deleted...").arg(itemTop->text()),
-	    TIMER_STATUS_TIMEOUT_MS);
+	showStatusText(tr("Account \"%1\" was deleted...").arg(itemTop->text()));
 
 	if (ui->accountList->model()->rowCount() < 1) {
 		defaultUiMainWindowSettings();
@@ -3649,10 +3638,8 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		if (messageDb->msgsDeleteMessageData(dmID)) {
 			qDebug() << "Message" << dmID <<
 			    "was deleted from ISDS and db";
-			statusBar->clearMessage();
-			statusBar->showMessage(
-			tr("Message %1 was deleted from ISDS and db").arg(dmID),
-			    TIMER_STATUS_TIMEOUT_MS);
+			showStatusText(tr("Message %1 was deleted from "
+			    "ISDS and db").arg(dmID));
 			return Q_SUCCESS;
 		} else {
 			qDebug() << "Message" << dmID <<
@@ -3851,6 +3838,7 @@ void MainWindow::importDatabaseDirectory(void)
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (importDir.isEmpty() || importDir.isNull()) {
+		showStatusText(tr("Import database directory was canceled..."));
 		return;
 	}
 
@@ -3864,6 +3852,8 @@ void MainWindow::importDatabaseDirectory(void)
 
 	if (dbFiles.isEmpty()) {
 		qDebug() << "No *.db files in the path" << importDir;
+		showStatusText(tr("Database file not found in selected "
+		    "directory..."));
 		return;
 	}
 
@@ -3890,6 +3880,8 @@ void MainWindow::importDatabaseDirectory(void)
 	if (testAccounts.empty() && legalAccounts.empty()) {
 		qDebug() << "No valid account database file(s) in the path"
 		    << importDir;
+		showStatusText(tr("Import failed. No valid db file in "
+		    "directory..."));
 		return;
 	}
 
@@ -3968,57 +3960,18 @@ void MainWindow::importDatabaseDirectory(void)
 	qDebug() << totalAccounts <<
 	    "database file(s) was/were imported from path" << importDir;
 
+	if (totalAccounts > 1) {
+		showStatusText(tr("%1 database files were imported...")
+		    .arg(totalAccounts));
+	} else {
+		showStatusText(tr("%1 database file was imported...")
+		    .arg(totalAccounts));
+	}
+
 	saveSettings();
 	activeAccountMenuAndButtons(true);
 
 	ui->accountList->expandAll();
-}
-
-
-/* ========================================================================= */
-/*
-* Authenticate message form db
-*/
-qdatovka_error MainWindow::authenticateMessageFromDb(const QModelIndex &acntTopIdx,
-    const QModelIndex &msgIdx)
-/* ========================================================================= */
-{
-	debug_func_call();
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-
-	isds_error status;
-
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	size_t length;
-	QByteArray bytes;
-
-
-	length = bytes.size();
-
-	/* TODO - get message raw from db */
-
-	status = isds_authenticate_message(isdsSessions.session(
-	    accountInfo.userName()), bytes.data(), length);
-
-	if (IE_NOTEQUAL == status) {
-		return Q_NOTEQUAL;
-	}
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
 }
 
 
@@ -4094,33 +4047,44 @@ void MainWindow::authenticateMessageFile(void)
 
 	switch (authenticateMessageFromZFO()) {
 	case Q_SUCCESS:
+		showStatusText(tr("ISDS confirms that the message is valid..."));
 		QMessageBox::information(this, tr("Message is authentic"),
 		    tr("ISDS confirms that the message is valid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
+		showStatusText(tr("ISDS confirms that the message is invalid..."));
 		QMessageBox::warning(this, tr("Message is not authentic"),
 		    tr("ISDS confirms that the message is invalid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Message authentication error"),
-		    tr("Authentication of message has been stopped because the connection to ISDS failed!\nCheck your internet connection."),
+		    tr("Authentication of message has been stopped because "
+		    "the connection to ISDS failed!\nCheck your internet "
+		    "connection."),
 		    QMessageBox::Ok);
 		break;
 	case Q_CONNECT_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Message authentication error"),
-		    tr("Authentication of message has been stopped because the connection to ISDS failed!\nCheck your internet connection."),
+		    tr("Authentication of message has been stopped because the "
+		    "connection to ISDS failed!\nCheck your internet "
+		    "connection."),
 		    QMessageBox::Ok);
 		break;
 	case Q_FILE_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Message authentication error"),
-		    tr("Authentication of message has been stopped because the message file has wrong format!"),
+		    tr("Authentication of message has been stopped because "
+		    "the message file has wrong format!"),
 		    QMessageBox::Ok);
 		break;
 	case Q_CANCEL:
 		break;
 	default:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Message authentication error"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
@@ -4144,31 +4108,43 @@ void MainWindow::verifyMessage(void)
 
 	switch (verifySelectedMessage(acntTopIdx, msgIdx)) {
 	case Q_SUCCESS:
+		showStatusText(tr("ISDS confirms that the message is valid..."));
 		QMessageBox::information(this, tr("Message is valid"),
-		    tr("Hash of message corresponds to ISDS message hash.\nMessage is valid."),
+		    tr("Hash of message corresponds to ISDS message "
+		    "hash.\nMessage is valid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
+		showStatusText(tr("ISDS confirms that the message is invalid..."));
 		QMessageBox::warning(this, tr("Message is not authentic"),
-		    tr("ISDS confirms that the message hash is invalid!\nMessage is invalid."),
+		    tr("ISDS confirms that the message hash is "
+		    "invalid!\nMessage is invalid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::warning(this, tr("Authenticate message error"),
-		    tr("The message hash cannot be verified because the connection to ISDS failed!\nCheck your internet connection."),
+		    tr("The message hash cannot be verified because the "
+		    "connection to ISDS failed!\nCheck your internet "
+		    "connection."),
 		    QMessageBox::Ok);
 		break;
 	case Q_SQL_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::warning(this, tr("Authenticate message warning"),
-		    tr("The message hash is not in local database.\nPlease download complete message form ISDS and try again."),
+		    tr("The message hash is not in local database.\nPlease "
+		    "download complete message form ISDS and try again."),
 		    QMessageBox::Ok);
 		break;
 	case Q_GLOBAL_ERROR:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Authenticate message error"),
-		    tr("The message hash cannot be verified because an internal error occurred!\nTry again."),
+		    tr("The message hash cannot be verified because an internal"
+		    " error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
 	default:
+		showStatusText(tr("Message authentication failed..."));
 		QMessageBox::critical(this, tr("Authenticate message error"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
@@ -4255,9 +4231,6 @@ void MainWindow::exportCorrespondenceOverview(void)
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
-	const AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
 	    *messageDb, dbId, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
@@ -4293,26 +4266,48 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
+		showStatusText(tr("Export of message to "
+		    "ZFO was not successful!"));
 		return;
 	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
+
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setWindowTitle(tr("Message export error!"));
+		msgBox.setText(tr("Can not export complete message.")
+		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You must download message firstly before its export..."));
-		msgBox.exec();
-		return;
+		    tr("You must download message firstly before export.") +
+		    "\n\n" +
+		    tr("Do you want to download complete message now?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			if (!downloadCompleteMessage(dmId)) {
+				showStatusText(tr("Export of message "
+				"\"%1\" to ZFO was not successful!")
+				.arg(dmId));
+				return;
+			} else {
+				raw = QString(messageDb->
+				     msgsGetMessageRaw(dmID)).toUtf8();
+			}
+		} else {
+			showStatusText(tr("Export of message "
+			"\"%1\" to ZFO was not successful!").arg(dmId));
+			return;
+		}
 	}
 
 	QDir dirPath;
@@ -4326,6 +4321,8 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	    tr("Save message as ZFO file"), fileName);
 
 	if (fileName.isEmpty()) {
+		showStatusText(tr("Export of message \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
 		return;
 	}
 
@@ -4335,19 +4332,77 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
-		return; /* TODO -- Error message. */
+		showStatusText(tr("Export of message \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
+		return;
 	}
-
 
 	QByteArray rawutf8= QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
 	int written = fout.write(data);
 	if (written != data.size()) {
-
+		showStatusText(tr("Export of message \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
+	} else {
+		showStatusText(tr("Export of message \"%1\" to "
+		    "ZFO was successful...").arg(dmId));
 	}
 
 	fout.close();
+}
+
+
+/* ========================================================================= */
+/*
+ * Download complete message synchronously without worker and thread
+ */
+bool MainWindow::downloadCompleteMessage(QString dmId)
+/* ========================================================================= */
+{
+	QModelIndex accountIndex = ui->accountList->currentIndex();
+	Q_ASSERT(accountIndex.isValid());
+	accountIndex = AccountModel::indexTop(accountIndex);
+	    /* selection().indexes() ? */
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	bool incoming = true;
+
+	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
+	switch (AccountModel::nodeType(index)) {
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeReceivedYear:
+		incoming = true;
+		break;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeSentYear:
+		incoming = false;
+		break;
+	default:
+		break;
+	}
+
+	const AccountModel::SettingsMap accountInfo =
+	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(accountIndex, true)) {
+			return false;
+		}
+	}
+
+	if (Q_SUCCESS == Worker::downloadMessage(
+	    accountIndex, dmId, true, incoming, *messageDb, false, QString(),
+	    0, 0)) {
+		/* TODO -- Wouldn't it be better with selection changed?*/
+		postDownloadSelectedMessageAttachments(accountIndex, dmId);
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -4361,26 +4416,48 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
+		showStatusText(tr("Export of message delivery info to "
+		    "ZFO was not successful!"));
 		return;
 	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
+
 		QMessageBox msgBox;
-		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Can not export the delivery info ") + dmId);
+		msgBox.setWindowTitle(tr("Delivery info export error!"));
+		msgBox.setText(tr("Can not export delivery info for message.")
+		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You must download message firstly before export..."));
-		msgBox.exec();
-		return;
+		    tr("You must download message firstly before export.") +
+		    "\n\n" +
+		    tr("Do you want to download complete message now?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			if (!downloadCompleteMessage(dmId)) {
+				showStatusText(tr("Export of message delivery"
+				" info \"%1\" to ZFO was not successful!")
+				.arg(dmId));
+				return;
+			} else {
+				raw = QString(messageDb->
+				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+			}
+		} else {
+			showStatusText(tr("Export of message delivery "
+			"info \"%1\" to ZFO was not successful!").arg(dmId));
+			return;
+		}
 	}
 
 	QDir dirPath;
@@ -4394,6 +4471,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	    tr("Save delivery info as ZFO file"), fileName);
 
 	if (fileName.isEmpty()) {
+		showStatusText(tr("Export of message delivery info \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
 		return;
 	}
 
@@ -4403,16 +4482,21 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
-		return; /* TODO -- Error message. */
+		showStatusText(tr("Export of message delivery info \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
+		return;
 	}
-
 
 	QByteArray rawutf8= QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
 	int written = fout.write(data);
 	if (written != data.size()) {
-
+		showStatusText(tr("Export of message delivery info \"%1\" to "
+		    "ZFO was not successful!").arg(dmId));
+	} else {
+		showStatusText(tr("Export of message delivery info \"%1\" to "
+		    "ZFO was successful...").arg(dmId));
 	}
 
 	fout.close();
@@ -4429,13 +4513,15 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	int dmID = atoi(dmId.toStdString().c_str());
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
-		return;
+		showStatusText(tr("Export of message devilery info to "
+		    "PDF was not successful!"));
 	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	int dmID = atoi(dmId.toStdString().c_str());
 
 	QDir dirPath;
 
@@ -4446,7 +4532,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	    tr("Save delivery info as PDF file"), fileName);
 
 	if (fileName.isEmpty()) {
-		return;
+		showStatusText(tr("Export of message devilery info \"%1\" to "
+		    "PDF was not successful!").arg(dmId));
 	}
 
 	/* remember path for settings */
@@ -4470,6 +4557,9 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
 	pdf_dialog.close();
+
+	showStatusText(tr("Export of message devilery info \"%1\" to "
+	    "PDF was successful...").arg(dmId));
 }
 
 
@@ -4483,13 +4573,16 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	debug_func_call();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	int dmID = atoi(dmId.toStdString().c_str());
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
+		showStatusText(tr("Export of message envelope to "
+		    "PDF was not successful!"));
 		return;
 	}
+
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	int dmID = atoi(dmId.toStdString().c_str());
 
 	QDir dirPath;
 
@@ -4500,6 +4593,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	    tr("Save message envelope as PDF file"), fileName);
 
 	if (fileName.isEmpty()) {
+		showStatusText(tr("Export of message envelope \"%1\" to "
+		    "PDF was not successful!").arg(dmId));
 		return;
 	}
 
@@ -4513,6 +4608,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
 	if (accountData.isEmpty()) {
+		showStatusText(tr("Export of message envelope \"%1\" to "
+		    "PDF was not successful!").arg(dmId));
 		return;
 	}
 
@@ -4531,6 +4628,9 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
 	pdf_dialog.close();
+
+	showStatusText(tr("Export of message envelope \"%1\" to "
+	    "PDF was successful...").arg(dmId));
 }
 
 
@@ -4770,6 +4870,9 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		    "File/Proxy settings menu.");
 		break;
 	}
+
+	showStatusText(tr("It was not possible to connect to your"
+	    " databox form account \"%1\"...").arg(accountName));
 
 	QMessageBox::critical(this, msgBoxTitle, msgBoxContent, QMessageBox::Ok);
 }

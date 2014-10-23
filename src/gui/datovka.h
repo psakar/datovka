@@ -535,12 +535,6 @@ private:
 	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	/*!
-	 * @brief Authenticate message form db.
-	 */
-	qdatovka_error authenticateMessageFromDb(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx);
-
-	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
@@ -595,6 +589,12 @@ private:
 	 * @brief Sent and check a new version of Datovka.
 	 */
 	void checkNewDatovkaVersion(QString version);
+
+	/*!
+	 * @brief Download complete message synchronously
+	 * without worker and thread.
+	 */
+	bool downloadCompleteMessage(QString dmId);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
