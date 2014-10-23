@@ -92,11 +92,12 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->statusBar->addWidget(statusBar,1);
 
 	statusBar->showMessage(tr("Welcome"), TIMER_STATUS_TIMEOUT_MS);
+	statusBar->setSizeGripEnabled(false);
 
 	/* Create status bar online/offline label */
 	statusOnlineLabel = new QLabel(this);
 	statusOnlineLabel->setText(tr("Mode: offline"));
-	statusOnlineLabel->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	statusOnlineLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	ui->statusBar->addWidget(statusOnlineLabel,1);
 
 	/* Create status bar label */
