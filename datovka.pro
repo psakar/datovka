@@ -80,6 +80,7 @@ macx {
 		/opt/local/include
 	LIBPATH += /usr/local/lib \
 		/opt/local/lib
+	QMAKE_MAC_SDK=macosx10.9
 }
 
 win32 {
