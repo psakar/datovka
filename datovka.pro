@@ -104,7 +104,7 @@ win32 {
 }
 
 SOURCES += src/common.cpp \
-    src/crypto/crypto.cpp \
+    src/crypto/crypto.c \
     src/gui/datovka.cpp \
     src/gui/dlg_change_pwd.cpp \
     src/gui/dlg_contacts.cpp \
@@ -119,6 +119,7 @@ SOURCES += src/common.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
     src/log/log.cpp \
+    src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
     src/gui/dlg_about.cpp \
@@ -144,6 +145,8 @@ HEADERS += src/common.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
     src/log/log.h \
+    src/log/log_c.h \
+    src/log/log_common.h \
     src/models/accounts_model.h \
     src/gui/dlg_about.h \
     src/gui/dlg_view_zfo.h \

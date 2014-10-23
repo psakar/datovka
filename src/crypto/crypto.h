@@ -1,15 +1,26 @@
 
+
 #ifndef _CRYPTO_H_
 #define _CRYPTO_H_
 
 
-#include <ctime>
+#ifdef __cplusplus
+#  include <ctime>
+#else
+#  include <time.h>
+#endif
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /*
  * @brief Initialises cryptographic back-end.
  */
 int init_crypto(void);
+
 
 /*!
  * @brief Verifies signed message signature.
@@ -21,6 +32,7 @@ int init_crypto(void);
  *         -1 on other errors.
  */
 int verify_raw_message_signature(const void *raw, size_t raw_len);
+
 
 /*!
  * @brief Verifies whether message signature was valid at given date.
@@ -36,6 +48,7 @@ int verify_raw_message_signature(const void *raw, size_t raw_len);
 int verify_raw_message_signature_date(const void *raw, size_t raw_len,
     time_t utc_time, int crl_check);
 
+
 /*!
  * @brief Verifies qualified time-stamp signature and parses the time-stamp
  *     value. Time-stamp format follows RFC 3161.
@@ -50,6 +63,7 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 int verify_qualified_timestamp(const void *data, size_t data_len,
     time_t *utc_time);
 
+
 /*!
  * @brief Retrieve signing certificate from supplied CMS.
  *
@@ -61,6 +75,7 @@ int verify_qualified_timestamp(const void *data, size_t data_len,
  */
 int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
     size_t *cert_len);
+
 
 /*!
  * @brief Get some certificate information.
@@ -77,5 +92,11 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
  */
 int cert_information(const void *data, size_t data_len,
     char **o, char **ou, char **n, char **c);
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 
 #endif /* _CRYPTO_H_ */

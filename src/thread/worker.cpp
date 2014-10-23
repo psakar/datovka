@@ -291,7 +291,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
     QProgressBar *pBar, Worker *worker, int &total, int &news)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	int newcnt = 0;
 	int allcnt = 0;
@@ -582,7 +582,7 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
     int msgIdx, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	QString dmId = QString::number(msgIdx);
 	const AccountModel::SettingsMap accountInfo =
@@ -635,7 +635,7 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	isds_error status;
 	struct timeval *expiration = NULL;
@@ -682,7 +682,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
     bool progress, QString label, QProgressBar *pBar, Worker *worker)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	qDebug() << "Downloading complete message" << dmId;
 
@@ -1058,7 +1058,7 @@ bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
     const QString dmId)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();

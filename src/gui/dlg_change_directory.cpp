@@ -75,7 +75,7 @@ void DlgChangeDirectory::onDirectoryChange(void)
 void DlgChangeDirectory::setNewDataDirectory(void)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	QString action;
 	if (this->moveDataRadioButton->isChecked()) {

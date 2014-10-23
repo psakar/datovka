@@ -835,7 +835,7 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	debug_func_call();
+	debugFuncCall();
 
 	queryStr = "SELECT "
 	    "is_verified"
@@ -2479,7 +2479,7 @@ bool MessageDb::msgsSetVerified(int dmId, bool verified)
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	debug_func_call();
+	debugFuncCall();
 
 	queryStr = "UPDATE messages "
 	    "SET is_verified = :verified WHERE "
@@ -2539,7 +2539,7 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	qTst = QDateTime();
 
@@ -2581,7 +2581,7 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 	size_t der_len = 0;
 	char *o = NULL, *ou = NULL, *n = NULL, *c = NULL;
 
-	debug_func_call();
+	debugFuncCall();
 
 	QByteArray tstData = msgsTimestampDER(dmId);
 	if (tstData.isEmpty()) {
@@ -2847,7 +2847,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 QString MessageDb::msgsGetMessageRaw(int dmId) const
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -3006,7 +3006,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
     bool ignoreMissingCrlCheck) const
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	QByteArray rawBytes =
 	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());

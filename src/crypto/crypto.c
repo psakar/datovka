@@ -1,8 +1,7 @@
 
 
-#include <cassert>
-#include <cctype> /* isdigit(3) */
-#include <cstring>
+#include <assert.h>
+#include <ctype.h> /* isdigit(3) */
 #include <openssl/bio.h>
 #include <openssl/cms.h>
 #include <openssl/err.h>
@@ -10,10 +9,11 @@
 #include <openssl/pem.h>
 #include <openssl/ts.h>
 #include <openssl/x509v3.h>
+#include <string.h>
 
 #include "src/compat/compat_win.h"
 #include "src/crypto/crypto.h"
-#include "src/log/log.h"
+#include "src/log/log_c.h"
 
 
 /*
@@ -217,7 +217,7 @@ int init_crypto(void)
 		/* Construct full file name. */
 		crt_dir_path_len = strlen(CERT_PATH_PREFIX CERT_DIR);
 		if (crt_dir_path_len >= MAX_PATH_LEN) {
-			logError("File path buffer is to short for '%s%s'.\n",
+			log_error("File path buffer is to short for '%s%s'.\n",
 			    CERT_PATH_PREFIX, CERT_DIR);
 			continue;
 		}
@@ -225,7 +225,7 @@ int init_crypto(void)
 		file_path[crt_dir_path_len] = '\0';
 		file_name_len = strlen(*pem_file);
 		if ((crt_dir_path_len + file_name_len) >= MAX_PATH_LEN) {
-			logError(
+			log_error(
 			    "File path buffer is to short for '%s%s%s'.\n",
 			    CERT_PATH_PREFIX, CERT_DIR, *pem_file);
 			continue;
@@ -235,7 +235,7 @@ int init_crypto(void)
 
 		if (0 != X509_store_add_cert_file(ca_certs, file_path,
 		             &loaded_at_once)) {
-			logWarning("Could not load certificate file '%s'.\n",
+			log_warning("Could not load certificate file '%s'.\n",
 			    file_path);
 		} else {
 			loaded_certificates += loaded_at_once;
@@ -248,7 +248,7 @@ int init_crypto(void)
 	assert(NULL != pem_desc);
 	while ((NULL != pem_desc->name) && (NULL != pem_desc->pem)) {
 		if (0 != X509_store_add_cert_der(ca_certs, pem_desc->pem)) {
-			logWarning("Could not load certificate '%s'.\n",
+			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
 			++loaded_certificates;
@@ -257,7 +257,7 @@ int init_crypto(void)
 	}
 
 	if (0 == loaded_certificates) {
-		logError("%s\n", "Did not load any certificate.");
+		log_error("%s\n", "Did not load any certificate.");
 	}
 
 	return 0;
@@ -286,7 +286,7 @@ int verify_raw_message_signature(const void *raw, size_t raw_len)
 
 	cms = load_cms(raw, raw_len);
 	if (NULL == cms) {
-		logError("%s\n", "Could not load CMS.");
+		log_error("%s\n", "Could not load CMS.");
 		goto fail;
 	}
 
@@ -322,7 +322,7 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 
 	cms = load_cms(raw, raw_len);
 	if (NULL == cms) {
-		logError("%s\n", "Could not load CMS.");
+		log_error("%s\n", "Could not load CMS.");
 		goto fail;
 	}
 
@@ -331,9 +331,9 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 	if (1 == ret) {
 		signers = CMS_get0_signers(cms);
 		if (NULL == signers) {
-			logError("%s\n", "Could not get CMS signers.");
+			log_error("%s\n", "Could not get CMS signers.");
 			while (0 != (err = ERR_get_error())) {
-				logError("openssl error: %s\n",
+				log_error("openssl error: %s\n",
 				    ERR_error_string(err, NULL));
 			}
 			ret = -1;
@@ -342,7 +342,7 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 
 		num_signers = sk_X509_num(signers);
 		if (1 != num_signers) {
-			logError("Only one CMS signer expected, got %d.\n",
+			log_error("Only one CMS signer expected, got %d.\n",
 			    num_signers);
 			ret = -1;
 			goto fail;
@@ -388,7 +388,7 @@ int verify_qualified_timestamp(const void *data, size_t data_len,
 
 	cms = load_cms(data, data_len);
 	if (NULL == cms) {
-		logError("%s\n", "Could not load CMS.");
+		log_error("%s\n", "Could not load CMS.");
 		goto fail;
 	}
 
@@ -443,14 +443,14 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
 
 	cms = load_cms(data, data_len);
 	if (NULL == cms) {
-		logError("%s\n", "Could not load CMS.");
+		log_error("%s\n", "Could not load CMS.");
 		goto fail;
 	}
 
 	ret = cms_verify_signature(cms, NULL, 0);
 
 	if (1 != ret) {
-		logError("%s\n", "Could not validate CMS");
+		log_error("%s\n", "Could not validate CMS");
 		goto fail;
 	}
 
@@ -461,7 +461,7 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
 
 	num_signers = sk_X509_num(signers);
 	if (1 != num_signers) {
-		logError("Only one CMS signer expected, got %d.\n",
+		log_error("Only one CMS signer expected, got %d.\n",
 		    num_signers);
 		goto fail;
 	}
@@ -551,8 +551,7 @@ int cert_information(const void *data, size_t data_len,
 		}
 
 		if (NULL != out_str) {
-			*out_str = (char *) malloc(
-			    ASN1_STRING_length(str) + 1);
+			*out_str = malloc(ASN1_STRING_length(str) + 1);
 			if (NULL != *out_str) {
 				memcpy(*out_str, ASN1_STRING_data(str),
 				    ASN1_STRING_length(str));
@@ -598,9 +597,9 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
 
 	bio = BIO_new_mem_buf((void *) der_str, strlen(der_str));
 	if (NULL == bio) {
-		logError("%s\n", "Cannot create memory BIO.");
+		log_error("%s\n", "Cannot create memory BIO.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -608,9 +607,9 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
 
 	x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
 	if (x509 == NULL) {
-		logError("%s\n", "Cannot parse certificate from BIO.");
+		log_error("%s\n", "Cannot parse certificate from BIO.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -620,9 +619,9 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
 
 	if (X509_STORE_add_cert(store, x509) == 0) {
 		err = ERR_get_error();
-		logError("%s\n", "Cannot store certificate.");
+		log_error("%s\n", "Cannot store certificate.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -678,7 +677,7 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname,
 
 	bio = BIO_new_file(fname, "r");
 	if (NULL == bio) {
-		logError("Cannot open certificate file '%s'.\n", fname);
+		log_error("Cannot open certificate file '%s'.\n", fname);
 		goto fail;
 	}
 
@@ -690,10 +689,10 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname,
 				 * Print error only if no certificate
 				 * has been read.
 				 */
-				logError("Cannot parse certificate (%d) "
+				log_error("Cannot parse certificate (%d) "
 				    "file '%s'.\n", read_pems, fname);
 				while (0 != (err = ERR_get_error())) {
-					logError("openssl error: %s\n",
+					log_error("openssl error: %s\n",
 					    ERR_error_string(err, NULL));
 				}
 			}
@@ -706,11 +705,11 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname,
 
 		if (X509_STORE_add_cert(store, x509) == 0) {
 			err = ERR_get_error();
-			logError(
+			log_error(
 			    "Cannot store certificate (%d) from file '%s'.\n",
 			    read_pems, fname);
 			while (0 != (err = ERR_get_error())) {
-				logError("openssl error: %s\n",
+				log_error("openssl error: %s\n",
 				    ERR_error_string(err, NULL));
 			}
 		} else {
@@ -767,9 +766,9 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len)
 
 	bio = BIO_new_mem_buf((void *) raw, raw_len);
 	if (NULL == bio) {
-		logError("%s\n", "Cannot create memory BIO.");
+		log_error("%s\n", "Cannot create memory BIO.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -777,9 +776,9 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len)
 
 	cms = d2i_CMS_bio(bio, NULL);
 	if (NULL == cms) {
-		logError("%s\n", "Cannot parse CMS.");
+		log_error("%s\n", "Cannot parse CMS.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -813,9 +812,9 @@ X509 * load_x509(const void *raw, size_t raw_len)
 
 	bio = BIO_new_mem_buf((void *) raw, raw_len);
 	if (NULL == bio) {
-		logError("%s\n", "Cannot create memory BIO.");
+		log_error("%s\n", "Cannot create memory BIO.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -823,9 +822,9 @@ X509 * load_x509(const void *raw, size_t raw_len)
 
 	x509 = d2i_X509_bio(bio, NULL);
 	if (NULL == x509) {
-		logError("%s\n", "Cannot parse X509.");
+		log_error("%s\n", "Cannot parse X509.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -883,9 +882,9 @@ int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
 
 	if (!CMS_verify(cms, NULL, ca_store, NULL, NULL,
 	        verify_flags)) {
-		logWarning("%s\n", "Could not verify CMS.");
+		log_warning("%s\n", "Could not verify CMS.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		return 0;
@@ -944,9 +943,9 @@ int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time)
 
 	bio = BIO_new_mem_buf((*pos)->data, (*pos)->length);
 	if (NULL == bio) {
-		logError("%s\n", "Cannot create memory bio.");
+		log_error("%s\n", "Cannot create memory bio.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -954,9 +953,9 @@ int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time)
 
 	ts_info = d2i_TS_TST_INFO_bio(bio, NULL);
 	if (NULL == ts_info) {
-		logError("%s\n", "Could not read ts info.");
+		log_error("%s\n", "Could not read ts info.");
 		while (0 != (err = ERR_get_error())) {
-			logError("openssl error: %s\n",
+			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
 		}
 		goto fail;
@@ -1220,7 +1219,7 @@ int x509_get_pem(X509 *x509, void **der, size_t *der_len)
 	bio = BIO_new(BIO_s_mem());
 
 	if (!i2d_X509_bio(bio, x509)) {
-		logError("%s\n", "Could not write X509 to bio.");
+		log_error("%s\n", "Could not write X509 to bio.");
 		goto fail;
 	}
 
@@ -1288,9 +1287,9 @@ fail:
 #endif /* PRINT_CERTS */
 
 
-const char *postsignum_qca_root_file = "postsignum_qca_root.pem";
-const char *postsignum_qca_root_name = "PostSignum Root QCA";
-const char *postsignum_qca_root_pem =
+const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
+const char postsignum_qca_root_name[] = "PostSignum Root QCA";
+const char postsignum_qca_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGKjCCBRKgAwIBAgIBATANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -1327,9 +1326,9 @@ const char *postsignum_qca_root_pem =
 "KQuvApdC79JbGojTzZiMOVBH9H+v/8suZgFdQqBwF82mwSZwxHmn149grQLkJg==""\n"
 "-----END CERTIFICATE-----";
 
-const char *postsignum_qca_sub_file = "postsignum_qca_sub.pem";
-const char *postsignum_qca_sub_name = "PostSignum Qualified CA";
-const char *postsignum_qca_sub_pem =
+const char postsignum_qca_sub_file[] = "postsignum_qca_sub.pem";
+const char postsignum_qca_sub_name[] = "PostSignum Qualified CA";
+const char postsignum_qca_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGLjCCBRagAwIBAgIBHDANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -1367,9 +1366,9 @@ const char *postsignum_qca_sub_pem =
 "Xr0=""\n"
 "-----END CERTIFICATE-----";
 
-const char *postsignum_qca2_root_file = "postsignum_qca2_root.pem";
-const char *postsignum_qca2_root_name = "PostSignum Root QCA 2";
-const char *postsignum_qca2_root_pem =
+const char postsignum_qca2_root_file[] = "postsignum_qca2_root.pem";
+const char postsignum_qca2_root_name[] = "PostSignum Root QCA 2";
+const char postsignum_qca2_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIFnDCCBISgAwIBAgIBZDANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -1403,9 +1402,9 @@ const char *postsignum_qca2_root_pem =
 "Y+jUu/G0zAdLyeU4vaXdQm1A8AEiJPTd0Z9LAxL6Sq2iraLNN36+NyEK/ts3mPLL""\n"
 "-----END CERTIFICATE-----";
 
-const char *postsignum_qca2_sub_file = "postsignum_qca2_sub.pem";
-const char *postsignum_qca2_sub_name = "PostSignum Qualified CA 2";
-const char *postsignum_qca2_sub_pem =
+const char postsignum_qca2_sub_file[] = "postsignum_qca2_sub.pem";
+const char postsignum_qca2_sub_name[] = "PostSignum Qualified CA 2";
+const char postsignum_qca2_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGXzCCBUegAwIBAgIBcTANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -1444,9 +1443,9 @@ const char *postsignum_qca2_sub_pem =
 "Dcn+""\n"
 "-----END CERTIFICATE-----";
 
-const char *postsignum_qca3_sub_file = "postsignum_qca3_sub.pem";
-const char *postsignum_qca3_sub_name = "PostSignum Qualified CA 3";
-const char *postsignum_qca3_sub_pem =
+const char postsignum_qca3_sub_file[] = "postsignum_qca3_sub.pem";
+const char postsignum_qca3_sub_name[] = "PostSignum Qualified CA 3";
+const char postsignum_qca3_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGYDCCBUigAwIBAgICAKQwDQYJKoZIhvcNAQELBQAwWzELMAkGA1UEBhMCQ1ox""\n"
 "LDAqBgNVBAoMI8SMZXNrw6EgcG/FoXRhLCBzLnAuIFtJxIwgNDcxMTQ5ODNdMR4w""\n"
@@ -1485,9 +1484,9 @@ const char *postsignum_qca3_sub_pem =
 "5KhDYA==""\n"
 "-----END CERTIFICATE-----";
 
-const char *equifax_ca_file = "equifax_ca.pem";
-const char *equifax_ca_name = "Equifax Secure Certificate Authority";
-const char *equifax_ca_pem =
+const char equifax_ca_file[] = "equifax_ca.pem";
+const char equifax_ca_name[] = "Equifax Secure Certificate Authority";
+const char equifax_ca_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIDIDCCAomgAwIBAgIENd70zzANBgkqhkiG9w0BAQUFADBOMQswCQYDVQQGEwJV""\n"
 "UzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMkRXF1aWZheCBTZWN1cmUgQ2Vy""\n"
@@ -1508,11 +1507,14 @@ const char *equifax_ca_pem =
 "1voqZiegDfqnc1zqcPGUIWVEX/r87yloqaKHee9570+sB3c4""\n"
 "-----END CERTIFICATE-----";
 
-const char *all_certs_file = "all_trusted.pem";
+const char all_certs_file[] = "all_trusted.pem";
 
 
 /*!
  * @brief Holds NULL-terminated list of PEM encoded certificate files.
+ *
+ * @note In C file names may be string literals or 'cost char str[]'.
+ * C++ allows 'const char * str'.
  */
 const char *pem_files[] = {
 	NULL, /* Don't use this list. */

@@ -3,9 +3,11 @@
 #define _LOG_H_
 
 
+#include <cstdarg>
 #include <QMutex>
 #include <QString>
-#include <QtGlobal>
+
+#include "src/log/log_common.h"
 
 
 /*!
@@ -16,13 +18,32 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 
 
 /*!
+ * @brief Debugging using Qt-defined output.
+ *
+ * @param[in] fmt Format string.
+ */
+void qDebugCall(const char *fmt, ...);
+
+
+/*!
+ * @brief Debugging using Qt-defined output.
+ *
+ * @param[in] fmt Format string.
+ */
+void qDebugCallV(const char *fmt, va_list ap);
+
+
+/*!
  * @brief Generates location debug information.
  */
 #ifdef DEBUG
-#  define debug_func_call() do {qDebug(">> %s() '%s'", __func__, __FILE__);} while(0)
+#  define debugFuncCall() \
+	do { \
+		qDebugCall(">> %s() '%s'", __func__, __FILE__); \
+	} while(0)
 #else
    /* Forces the semicolon after the macro. */
-#  define debug_func_call() do {} while(0)
+#  define debugFuncCall() do {} while(0)
 #endif
 
 
@@ -36,32 +57,6 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
  * @brief Maximal number of sources to write to log facility.
  */
 #define MAX_SOURCES 64
-
-
-/*!
- * @brief Identifies the default source.
- */
-#define LOGSRC_DEF 0
-
-
-/*!
- * @brief Identifies all sources.
- */
-#define LOGSRC_ANY -1
-
-
-/* Taken from syslog.h */
-#define LOG_EMERG   0 /* system is unusable */
-#define LOG_ALERT   1 /* action must be taken immediately */
-#define LOG_CRIT    2 /* critical conditions */
-#define LOG_ERR     3 /* error conditions */
-#define LOG_WARNING 4 /* warning conditions */
-#define LOG_NOTICE  5 /* normal but significant condition */
-#define LOG_INFO    6 /* informational */
-#define LOG_DEBUG   7 /* debug-level messages */
-
-#define LOG_MASK(pri) (1 << (pri)) /* mask for one priority */
-#define LOG_UPTO(pri) ((1 << ((pri)+1)) - 1) /* all priorities through pri */
 
 
 /*!
@@ -175,6 +170,18 @@ public:
 	int log(int source, uint8_t level, const char *fmt, ...);
 
 	/*!
+	 * @brief Log message.
+	 *
+	 * @param[in]     source Source identifier.
+	 * @param[in]     level  Message urgency level.
+	 * @param[in]     fmt    Format of the log message -- follows printf(3)
+	 *     format.
+	 * @param[in,out] ap     Variable argument list.
+	 * @return -1 if error, 0 else.
+	 */
+	int logVlog(int source, uint8_t level, const char *fmt, va_list ap);
+
+	/*!
 	 * @brief Log multi-line message.
 	 *
 	 * Every new line is merged with the same prefix.
@@ -186,6 +193,20 @@ public:
 	 * @return -1 if error, 0 else.
 	 */
 	int logMl(int source, uint8_t level, const char *fmt, ...);
+
+	/*!
+	 * @brief Log multi-line message.
+	 *
+	 * Every new line is merged with the same prefix.
+	 *
+	 * @param[in]     source Source identifier.
+	 * @param[in]     level  Message urgency level.
+	 * @param[in]     fmt    Format of the log message -- follows printf(3)
+	 *     format.
+	 * @param[in,out] ap     Variable argument list.
+	 * @return -1 if error, 0 else.
+	 */
+	int logVlogMl(int source, uint8_t level, const char *fmt, va_list ap);
 
 	friend void globalLogOutput(QtMsgType type,
 	    const QMessageLogContext &context, const QString &msg);

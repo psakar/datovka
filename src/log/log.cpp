@@ -21,8 +21,8 @@ GlobLog globLog;
 
 
 /* ========================================================================= */
-/*!
- * @brief Message output function.
+/*
+ * Message output function.
  */
 void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
     const QString &msg)
@@ -57,6 +57,40 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 		abort();
 		break;
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Debugging using Qt-defined output.
+ */
+void qDebugCall(const char *fmt, ...)
+/* ========================================================================= */
+{
+	va_list argp;
+
+	va_start(argp, fmt);
+
+	QString outStr;
+	outStr.vsprintf(fmt, argp);
+
+	qDebug("%s", outStr.toStdString().c_str());
+
+	va_end(argp);
+}
+
+
+/* ========================================================================= */
+/*
+ * Debugging using Qt-defined output.
+ */
+void qDebugCallV(const char *fmt, va_list ap)
+/* ========================================================================= */
+{
+	QString outStr;
+	outStr.vsprintf(fmt, ap);
+
+	qDebug("%s", outStr.toStdString().c_str());
 }
 
 
@@ -364,6 +398,33 @@ int GlobLog::log(int source, uint8_t level, const char *fmt, ...)
 
 /* ========================================================================= */
 /*
+ * Log message.
+ */
+int GlobLog::logVlog(int source, uint8_t level, const char *fmt, va_list ap)
+/* ========================================================================= */
+{
+	const char *prefix;
+
+	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
+	Q_ASSERT(level < 8);
+
+	prefix = urgencyPrefix(level);
+	if (prefix == NULL) {
+		return -1;
+	}
+
+	m_mutex.lock();
+
+	logPrefixVlog(source, level, prefix, fmt, ap);
+
+	m_mutex.unlock();
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
  * Log multi-line message.
  */
 int GlobLog::logMl(int source, uint8_t level, const char *fmt, ...)
@@ -389,6 +450,33 @@ int GlobLog::logMl(int source, uint8_t level, const char *fmt, ...)
 	m_mutex.unlock();
 
 	va_end(argp);
+
+	return 0;
+}
+
+
+/* ========================================================================= */
+/*
+ * Log multi-line message.
+ */
+int GlobLog::logVlogMl(int source, uint8_t level, const char *fmt, va_list ap)
+/* ========================================================================= */
+{
+	const char *prefix;
+
+	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
+	Q_ASSERT(level < 8);
+
+	prefix = urgencyPrefix(level);
+	if (prefix == NULL) {
+		return -1;
+	}
+
+	m_mutex.lock();
+
+	logPrefixVlogMl(source, level, prefix, fmt, ap);
+
+	m_mutex.unlock();
 
 	return 0;
 }

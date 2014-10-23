@@ -276,7 +276,7 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 void DlgCreateAccount::saveAccount(void)
 /* ========================================================================= */
 {
-	debug_func_call();
+	debugFuncCall();
 
 	/* get current account model */
 	AccountModel *model = dynamic_cast<AccountModel*>(
