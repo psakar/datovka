@@ -1546,6 +1546,10 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	connect(workerSyncAll,
+	    SIGNAL(changeStatusBarInfo(bool, QString, int, int, int, int)),
+	    this,
+	    SLOT(dataFromWorkerToStatusBarInfo(bool, QString, int, int, int, int)));
 	connect(workerSyncAll, SIGNAL(refreshAccountList(const QModelIndex)),
 	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
 	connect(workerSyncAll, SIGNAL(workRequested()),
@@ -1563,8 +1567,38 @@ void MainWindow::synchroniseAllAccounts(void)
 
 /* ========================================================================= */
 /*
+* Set info status bar from worker.
+*/
+void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
+    QString accoutName, int rt, int rn, int st, int sn)
+/* ========================================================================= */
+{
+	if (completed) {
+		if (accoutName.isNull()) {
+			showStatusText(tr("Messages on the server") + ": " +
+			    QString::number(rt) + " " + tr("received") +
+			    " (" + QString::number(rn) + " " + tr("news")
+			    + "); "+ QString::number(st) + " " + tr("sent") +
+			    " (" + QString::number(sn) + " " + tr("news") + ")");
+		} else {
+			showStatusText(accoutName + ": "+
+			    tr("Messages on the server") + ": " +
+			    QString::number(rt) + " " + tr("received") +
+			    " (" + QString::number(rn) + " " + tr("news")
+			    + "); "+ QString::number(st) + " " + tr("sent") +
+			    " (" + QString::number(sn) + " " + tr("news") + ")");
+		}
+	} else {
+		showStatusText(tr("Synchronise accounts %1 with ISDS server...")
+		    .arg(accoutName));
+	}
+}
+
+
+/* ========================================================================= */
+/*
 * Download sent/received message list for current (selected) account
- */
+*/
 void MainWindow::synchroniseSelectedAccount(void)
 /* ========================================================================= */
 {
@@ -1607,6 +1641,10 @@ void MainWindow::synchroniseSelectedAccount(void)
 
 	connect(workerSyncOne, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	connect(workerSyncOne,
+	    SIGNAL(changeStatusBarInfo(bool, QString, int, int, int, int)),
+	    this,
+	    SLOT(dataFromWorkerToStatusBarInfo(bool, QString, int, int, int, int)));
 	connect(workerSyncOne, SIGNAL(refreshAccountList(const QModelIndex)),
 	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
 	connect(workerSyncOne, SIGNAL(workRequested()),
@@ -2599,8 +2637,11 @@ void MainWindow::createAndSendMessage(void)
 				//return Q_CONNECT_ERROR;
 			}
 		}
+
+		/* Messages counters total/news are returned from worker */
+		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
-		    QString(), m_statusProgressBar, NULL);
+		    QString(), m_statusProgressBar, NULL, total, news);
 	}
 	setDefaultProgressStatus();
 }
@@ -3079,8 +3120,11 @@ void MainWindow::createAndSendMessageReply(void)
 				//return Q_CONNECT_ERROR;
 			}
 		}
+
+		/* Messages counters total/news are returned from worker */
+		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
-		    QString(), m_statusProgressBar, NULL);
+		    QString(), m_statusProgressBar, NULL, total, news);
 	}
 	setDefaultProgressStatus();
 }

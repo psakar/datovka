@@ -337,6 +337,12 @@ private slots:
 	void postDownloadSelectedMessageAttachments(const QModelIndex acntTopIdx,
 	    QString dmId);
 
+	/*!
+	 * @brief Set info status bar from worker.
+	 */
+	void dataFromWorkerToStatusBarInfo(bool completed, QString accoutName,
+	    int rt, int rn, int st, int sn);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;

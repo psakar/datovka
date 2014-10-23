@@ -22,7 +22,7 @@
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 #define MAX_ATTACHMENT_SIZE 10000000 // 10MB
-#define TIMER_STATUS_TIMEOUT_MS 3000 // 3s will message in status bar shown
+#define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
 
 typedef enum {
 	USER_NAME = 0,

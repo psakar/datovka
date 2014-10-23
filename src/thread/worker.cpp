@@ -68,6 +68,21 @@ void Worker::syncAllAccounts(void)
 	bool success = true;
 	MessageDb *messageDb;
 
+	/* Messages counters
+	 * rt = receivedTotal, rn = receivedNews,
+	 * st = sentTotal, sn = sentNews,
+	 * rcvTtl, rcvNews, sntTtl, sntNews are send to mainwindow and
+	 * shown in info-statusbar.
+	*/
+	int rt = 0;
+	int rn = 0;
+	int st = 0;
+	int sn = 0;
+	int rcvTtl = 0;
+	int rcvNews = 0;
+	int sntTtl = 0;
+	int sntNews = 0;
+
 	for (int i = 0; i < m_count; i++) {
 
 		if (!m_downloadThisAccounts.at(i)) {
@@ -87,6 +102,8 @@ void Worker::syncAllAccounts(void)
 		QStandardItem *itemTop = AccountModel::itemTop(item);
 		messageDb = m_messageDbList.at(i);
 
+		emit changeStatusBarInfo(false, itemTop->text(), 0, 0 ,0, 0);
+
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading message list for account"
 		    << itemTop->text();
@@ -94,18 +111,25 @@ void Worker::syncAllAccounts(void)
 
 		if (Q_CONNECT_ERROR ==
 		    downloadMessageList(index,"received", *messageDb,
-		    "GetListOfReceivedMessages", 0, this)) {
+		    "GetListOfReceivedMessages", 0, this, rt, rn)) {
 			success = false;
 			continue;
 		}
+
+		rcvTtl += rt;
+		rcvNews += rn;
+
 		emit refreshAccountList(index);
 
 		if (Q_CONNECT_ERROR ==
 		    downloadMessageList(index,"sent", *messageDb,
-		    "GetListOfSentMessages", 0, this)) {
+		    "GetListOfSentMessages", 0, this, st, sn)) {
 			success = false;
 			continue;
 		}
+
+		sntTtl += st;
+		sntNews += sn;
 
 		emit refreshAccountList(index);
 
@@ -129,6 +153,9 @@ void Worker::syncAllAccounts(void)
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
+
+	emit changeStatusBarInfo(true, QString(), rcvTtl, rcvNews,
+	    sntTtl, sntNews);
 
 	downloadMessagesMutex.unlock();
 
@@ -156,12 +183,19 @@ void Worker::syncOneAccount(void)
 	bool success = true;
 	MessageDb *messageDb;
 
-	const AccountModel::SettingsMap accountInfo =
-	    m_acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
 	QStandardItem *item = m_accountModel.itemFromIndex(m_acntTopIdx);
 	QStandardItem *itemTop = AccountModel::itemTop(item);
 	messageDb = m_messageDbList.at(0);
+
+	/* Messages counters
+	 * rt = receivedTotal, rn = receivedNews,
+	 * st = sentTotal, sn = sentNews.
+	 * Message counters are send to mainwindow and show in info-statusbar.
+	*/
+	int rt = 0;
+	int rn = 0;
+	int st = 0;
+	int sn = 0;
 
 	qDebug() << "-----------------------------------------------";
 	qDebug() << "Downloading message list for account" << itemTop->text();
@@ -169,7 +203,7 @@ void Worker::syncOneAccount(void)
 
 	if (Q_CONNECT_ERROR ==
 	    downloadMessageList(m_acntTopIdx,"received", *messageDb,
-	    "GetListOfReceivedMessages", 0, this)) {
+	    "GetListOfReceivedMessages", 0, this, rt, rn)) {
 		success = false;
 	}
 
@@ -177,7 +211,7 @@ void Worker::syncOneAccount(void)
 
 	if (Q_CONNECT_ERROR ==
 	    downloadMessageList(m_acntTopIdx,"sent", *messageDb,
-	    "GetListOfSentMessages", 0, this)) {
+	    "GetListOfSentMessages", 0, this, st, sn)) {
 		success = false;
 	}
 
@@ -201,6 +235,8 @@ void Worker::syncOneAccount(void)
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
+
+	emit changeStatusBarInfo(true, itemTop->text(), rt, rn , st, sn);
 
 	downloadMessagesMutex.unlock();
 
@@ -252,10 +288,13 @@ void Worker::downloadCompleteMessage(void)
 */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
     const QString messageType, MessageDb &messageDb, QString label,
-    QProgressBar *pBar, Worker *worker)
+    QProgressBar *pBar, Worker *worker, int &total, int &news)
 /* ========================================================================= */
 {
 	debug_func_call();
+
+	int newcnt = 0;
+	int allcnt = 0;
 
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
@@ -304,8 +343,6 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	struct isds_list *box;
 	box = messageList;
-	int newcnt = 0;
-	int allcnt = 0;
 	int delta = 0;
 	int diff = 0;
 
@@ -454,6 +491,10 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		qDebug() << "#Sent total:" << allcnt;
 		qDebug() << "#Sent new:" << newcnt;
 	}
+
+	total = allcnt;
+	news =  newcnt;
+
 	return Q_SUCCESS;
 }
 

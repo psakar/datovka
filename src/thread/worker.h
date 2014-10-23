@@ -47,7 +47,7 @@ public:
 	static
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
 	    const QString messageType, MessageDb &messageDb, QString label,
-	    QProgressBar *pBar, Worker *worker);
+	    QProgressBar *pBar, Worker *worker, int &total, int &news);
 
 private:
 
@@ -122,6 +122,11 @@ signals:
 	 * @brief This signal is emitted when message downloading is finished
 	 */
 	void refreshAttachmentList(const QModelIndex, QString);
+
+	/*!
+	 * @brief This signal is emitted when accout is proccessed
+	 */
+	void changeStatusBarInfo(bool, QString, int, int, int, int);
 
 	/*!
 	 * @brief This signal is emitted when process is finished
