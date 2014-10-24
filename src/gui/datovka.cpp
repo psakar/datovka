@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+			QModelIndex)));
 	}
 	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageAttachmentList,
@@ -356,7 +356,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-		         QModelIndex)));
+			 QModelIndex)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -462,7 +462,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-		         QModelIndex)));
+			 QModelIndex)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -507,7 +507,7 @@ setmodel:
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+			QModelIndex)));
 		connect(ui->messageList->model(),
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -626,7 +626,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-		         QModelIndex)));
+			 QModelIndex)));
 	}
 
 	/* Disable model for attachment list. */
@@ -673,7 +673,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			Q_ASSERT(modelIndex.isValid());
 			m_messageModel->overideRead(
 			    current.sibling(modelIndex.row(),
-			        0).data().toInt(), true);
+				0).data().toInt(), true);
 		}
 
 		/* Generate and show message information. */
@@ -709,7 +709,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+			QModelIndex)));
 	} else {
 		ui->messageInfo->setHtml("");
 		ui->messageInfo->setReadOnly(true);
@@ -915,7 +915,7 @@ void MainWindow::messageItemRestoreSelection(void)
 					 */
 					index = model->index(row, 0);
 					if (largestSoFar < model->
-					        index(row, 0).data().toInt()) {
+						index(row, 0).data().toInt()) {
 						index = model->index(row, 0);
 						largestSoFar =
 						    index.data().toInt();
@@ -927,7 +927,7 @@ void MainWindow::messageItemRestoreSelection(void)
 				acntIdx = AccountModel::indexTop(acntIdx);
 				const AccountModel::SettingsMap accountInfo =
 				    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).
-				        toMap();
+					toMap();
 				QString msgLastId = accountInfo.lastMsg();
 				if (!msgLastId.isEmpty()) {
 					int msgId = msgLastId.toInt();
@@ -1110,7 +1110,7 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 		    "file was not successful!").arg(dmId));
 	} else {
 		showStatusText(tr("Saving attachment of message \"%1\" to "
-		    "file was successful...").arg(dmId));
+		    "file was successful.").arg(dmId));
 	}
 
 	fout.close();
@@ -1194,7 +1194,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 	if (success) {
 		showStatusText(tr("All attachments of "
-		    "message \"%1\" were saved...").arg(dmId));
+		    "message \"%1\" were saved.").arg(dmId));
 	} else {
 		showStatusText(tr("Some attachments of "
 		    "message \"%1\" were not saved to disk!").arg(dmId));
@@ -1291,7 +1291,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    messageIndex.row(), 0).data().toString();
 
 	showStatusText(tr("Download complete message \"%1\" "
-	    "from ISDS server...").arg(dmIDs));
+	    "from ISDS server.").arg(dmIDs));
 
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
@@ -1346,7 +1346,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	connect(workerDownMsgComplete,
 	    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
 	    this, SLOT(postDownloadSelectedMessageAttachments(
-	        const QModelIndex, QString)));
+		const QModelIndex, QString)));
 
 
 	connect(workerDownMsgComplete, SIGNAL(workRequested()),
@@ -1388,6 +1388,9 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
+	showStatusText(tr("Message \"%1\" "
+	    " was downloaded from ISDS server.").arg(msgIds));
+
 	/*
 	 * TODO -- Create a separate function for reloading attachment
 	 * contents. Similar code is used for handling message selection
@@ -1400,7 +1403,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-		         QModelIndex)));
+			 QModelIndex)));
 	}
 
 	MessageDb *messageDb = accountMessageDb(accountItem);
@@ -1436,7 +1439,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	connect(ui->messageAttachmentList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(attachmentItemSelectionChanged(QModelIndex,
-	        QModelIndex)));
+		QModelIndex)));
 }
 
 
@@ -1469,6 +1472,8 @@ void MainWindow::accountItemMarkAllRead(void)
 
 	/* Regenerate account tree. */
 	regenerateAllAccountModelYears();
+
+	showStatusText(tr("All messages were marked as locally read."));
 
 	/* Restore selection. */
 	if (selectedAcntIndex.isValid()) {
@@ -1537,7 +1542,7 @@ void MainWindow::synchroniseAllAccounts(void)
 	 * be defined somewhere outside of the worker object.
 	 */
 
-	showStatusText(tr("Synchronise all accounts with ISDS server..."));
+	showStatusText(tr("Synchronise all accounts with ISDS server."));
 
 	if (globPref.download_on_background) {
 		timer->stop();
@@ -1627,8 +1632,8 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
 			    " (" + QString::number(sn) + " " + tr("new") + ")");
 		}
 	} else {
-		showStatusText(tr("Synchronise accounts %1 with ISDS server...")
-		    .arg(accoutName));
+		showStatusText(tr("Synchronise accounts \"%1\" with "
+		    "ISDS server.").arg(accoutName));
 	}
 }
 
@@ -1663,7 +1668,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	showStatusText(tr("Synchronise account \"%1\" with ISDS server...")
+	showStatusText(tr("Synchronise account \"%1\" with ISDS server.")
 	    .arg(accountInfo.accountName()));
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
@@ -1745,7 +1750,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
 					    QString::number(
-					        accountEntry.value(key).toInt())));
+						accountEntry.value(key).toInt())));
 				}
 				break;
 			case DB_TEXT:
@@ -1757,14 +1762,14 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 				html.append(strongAccountInfoLine(
 				    accntinfTbl.attrProps[key].desc,
 				    accountEntry.value(key).toBool() ?
-				        tr("Yes") : tr("No")));
+					tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				html.append(strongAccountInfoLine(
 				    accntinfTbl.attrProps[key].desc,
 				    dateTimeStrFromDbFormat(
-				        accountEntry.value(key).toString(),
-				        dateTimeDisplayFormat)));
+					accountEntry.value(key).toString(),
+					dateTimeDisplayFormat)));
 				break;
 			default:
 				Q_ASSERT(0);
@@ -2662,6 +2667,8 @@ void MainWindow::createAndSendMessage(void)
 		}
 	}
 
+	showStatusText(tr("Create and send a new message."));
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
@@ -2676,11 +2683,15 @@ void MainWindow::createAndSendMessage(void)
 			}
 		}
 
+		showStatusText(tr("Message from account \"%1\" was "
+		    "send.").arg(accountInfo.accountName()));
+
 		/* Messages counters total/news are returned from worker */
 		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
 	}
+
 	setDefaultProgressStatus();
 }
 
@@ -2700,6 +2711,8 @@ void MainWindow::addNewAccount(void)
 	connect(newAccountDialog, SIGNAL(getAccountUserDataboxInfo(
 	    QModelIndex, bool)),
 	    this, SLOT(getOwnerInfoFromLogin(const QModelIndex, bool)));
+
+	showStatusText(tr("Create a new account."));
 
 	if (QDialog::Accepted == newAccountDialog->exec()) {
 		if (ui->accountList->model()->rowCount() > 0) {
@@ -2740,6 +2753,8 @@ void MainWindow::deleteSelectedAccount(void)
 		QString userName = accountUserName();
 		const AccountModel::SettingsMap &itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+		QString accountName = itemSettings.accountName();
 		QString dbDir = itemSettings[DB_DIR].toString();
 
 		if (itemTop->hasChildren()) {
@@ -2756,11 +2771,13 @@ void MainWindow::deleteSelectedAccount(void)
 		Q_ASSERT(0 != db);
 		m_messageDbs.deleteMessageDb(db);
 
+
+		showStatusText(tr("Account \"%1\" was deleted.")
+		    .arg(accountName));
+
 		/* Save changed configuration. */
 		saveSettings();
 	}
-
-	showStatusText(tr("Account \"%1\" was deleted...").arg(itemTop->text()));
 
 	if (ui->accountList->model()->rowCount() < 1) {
 		defaultUiMainWindowSettings();
@@ -2788,6 +2805,8 @@ bool MainWindow::deleteNewAccount(const QModelIndex acntTopIdx)
 	QString userName = accountUserName();
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QString accountName = itemSettings.accountName();
 	QString dbDir = itemSettings[DB_DIR].toString();
 
 	if (itemTop->hasChildren()) {
@@ -2804,6 +2823,9 @@ bool MainWindow::deleteNewAccount(const QModelIndex acntTopIdx)
 	    itemSettings[TEST].toBool());
 	Q_ASSERT(0 != db);
 	m_messageDbs.deleteMessageDb(db);
+
+	showStatusText(tr("It was not possible to create account"
+		" \"%1\"!").arg(accountName));
 
 	/* Save changed configuration. */
 	saveSettings();
@@ -2841,6 +2863,9 @@ void MainWindow::changeAccountPassword(void)
 		}
 	}
 
+	showStatusText(tr("Change password of account "
+	    "\"%1\".").arg(accountInfo.accountName()));
+
 	QDialog *changePwd = new DlgChangePwd(dbId, *(ui->accountList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	changePwd->exec();
@@ -2868,11 +2893,16 @@ void MainWindow::manageAccountProperties(void)
 //		}
 //	}
 
+	showStatusText(tr("Change properties of account "
+	    "\"%1\".").arg(accountInfo.accountName()));
+
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
 	//editAccountDialog->exec();
 
 	if (QDialog::Accepted == editAccountDialog->exec()) {
+		showStatusText(tr("Account \"%1\" was updated.")
+		    .arg(accountInfo.userName()));
 		saveSettings();
 	}
 }
@@ -2904,6 +2934,9 @@ void MainWindow::moveSelectedAccountUp(void)
 	//ui->accountList->expandAll();
 	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
+
+	showStatusText(tr("Account was moved up."));
+
 }
 
 /* ========================================================================= */
@@ -2933,6 +2966,8 @@ void MainWindow::moveSelectedAccountDown(void)
 	//ui->accountList->expandAll();
 	index = itemModel->indexFromItem(itemTop);
 	ui->accountList->setCurrentIndex(index.child(0,0));
+
+	showStatusText(tr("Account was moved down."));
 }
 
 
@@ -2957,6 +2992,9 @@ void MainWindow::changeDataDirectory(void)
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
 	}
+
+	showStatusText(tr("Change data dierctory of account \"%1\".")
+	    .arg(itemSettings.accountName()));
 
 	QDialog *change_directory = new DlgChangeDirectory(dbDir, this);
 
@@ -3144,6 +3182,8 @@ void MainWindow::createAndSendMessageReply(void)
 		}
 	}
 
+	showStatusText(tr("Create and send reply on the message."));
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
@@ -3152,6 +3192,10 @@ void MainWindow::createAndSendMessageReply(void)
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+		showStatusText(tr("Message from account \"%1\" was "
+		    "send.").arg(accountInfo.accountName()));
+
 		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
@@ -3201,6 +3245,9 @@ void MainWindow::findDatabox(void)
 	QString dbType = accountData.at(0);
 	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+
+	showStatusText(tr("Find databoxes from "
+	    "account \"%1\".").arg(accountInfo.accountName()));
 
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
 	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
@@ -3720,8 +3767,8 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		if (messageDb->msgsDeleteMessageData(dmID)) {
 			qDebug() << "Message" << dmID <<
 			    "was deleted from ISDS and db";
-			showStatusText(tr("Message %1 was deleted from "
-			    "ISDS and db").arg(dmID));
+			showStatusText(tr("Message \"%1\" was deleted from "
+			    "ISDS and db.").arg(dmID));
 			return Q_SUCCESS;
 		} else {
 			qDebug() << "Message" << dmID <<
@@ -3817,33 +3864,33 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add)
 	    convertDbTypeToString(*db_owner_info->dbType),
 	    ic,
 	    db_owner_info->personName ?
-	        db_owner_info->personName->pnFirstName : NULL,
+		db_owner_info->personName->pnFirstName : NULL,
 	    db_owner_info->personName ?
-	        db_owner_info->personName->pnMiddleName : NULL,
+		db_owner_info->personName->pnMiddleName : NULL,
 	    db_owner_info->personName ?
-	        db_owner_info->personName->pnLastName : NULL,
+		db_owner_info->personName->pnLastName : NULL,
 	    db_owner_info->personName ?
-	        db_owner_info->personName->pnLastNameAtBirth : NULL,
+		db_owner_info->personName->pnLastNameAtBirth : NULL,
 	    db_owner_info->firmName,
 	    birthDate,
 	    db_owner_info->birthInfo ?
-	        db_owner_info->birthInfo->biCity : NULL,
+		db_owner_info->birthInfo->biCity : NULL,
 	    db_owner_info->birthInfo ?
-	        db_owner_info->birthInfo->biCounty : NULL,
+		db_owner_info->birthInfo->biCounty : NULL,
 	    db_owner_info->birthInfo ?
-	        db_owner_info->birthInfo->biState : NULL,
+		db_owner_info->birthInfo->biState : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adCity : NULL,
+		db_owner_info->address->adCity : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adStreet : NULL,
+		db_owner_info->address->adStreet : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adNumberInStreet : NULL,
+		db_owner_info->address->adNumberInStreet : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adNumberInMunicipality : NULL,
+		db_owner_info->address->adNumberInMunicipality : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adZipCode : NULL,
+		db_owner_info->address->adZipCode : NULL,
 	    db_owner_info->address ?
-	        db_owner_info->address->adState : NULL,
+		db_owner_info->address->adState : NULL,
 	    db_owner_info->nationality,
 	    db_owner_info->identifier,
 	    db_owner_info->registryCode,
@@ -3920,7 +3967,6 @@ void MainWindow::importDatabaseDirectory(void)
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (importDir.isEmpty() || importDir.isNull()) {
-		showStatusText(tr("Import database directory was canceled..."));
 		return;
 	}
 
@@ -3935,7 +3981,7 @@ void MainWindow::importDatabaseDirectory(void)
 	if (dbFiles.isEmpty()) {
 		qDebug() << "No *.db files in the path" << importDir;
 		showStatusText(tr("Database file not found in selected "
-		    "directory..."));
+		    "directory."));
 		return;
 	}
 
@@ -3963,7 +4009,7 @@ void MainWindow::importDatabaseDirectory(void)
 		qDebug() << "No valid account database file(s) in the path"
 		    << importDir;
 		showStatusText(tr("Import failed. No valid db file in "
-		    "directory..."));
+		    "directory."));
 		return;
 	}
 
@@ -4043,10 +4089,10 @@ void MainWindow::importDatabaseDirectory(void)
 	    "database file(s) was/were imported from path" << importDir;
 
 	if (totalAccounts > 1) {
-		showStatusText(tr("%1 database files were imported...")
+		showStatusText(tr("%1 database files were imported.")
 		    .arg(totalAccounts));
 	} else {
-		showStatusText(tr("%1 database file was imported...")
+		showStatusText(tr("%1 database file was imported.")
 		    .arg(totalAccounts));
 	}
 
@@ -4129,19 +4175,19 @@ void MainWindow::authenticateMessageFile(void)
 
 	switch (authenticateMessageFromZFO()) {
 	case Q_SUCCESS:
-		showStatusText(tr("ISDS confirms that the message is valid..."));
+		showStatusText(tr("ISDS confirms that the message is valid."));
 		QMessageBox::information(this, tr("Message is authentic"),
 		    tr("ISDS confirms that the message is valid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
-		showStatusText(tr("ISDS confirms that the message is invalid..."));
+		showStatusText(tr("ISDS confirms that the message is invalid."));
 		QMessageBox::warning(this, tr("Message is not authentic"),
 		    tr("ISDS confirms that the message is invalid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Message authentication error"),
 		    tr("Authentication of message has been stopped because "
 		    "the connection to ISDS failed!\nCheck your internet "
@@ -4149,7 +4195,7 @@ void MainWindow::authenticateMessageFile(void)
 		    QMessageBox::Ok);
 		break;
 	case Q_CONNECT_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Message authentication error"),
 		    tr("Authentication of message has been stopped because the "
 		    "connection to ISDS failed!\nCheck your internet "
@@ -4157,7 +4203,7 @@ void MainWindow::authenticateMessageFile(void)
 		    QMessageBox::Ok);
 		break;
 	case Q_FILE_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Message authentication error"),
 		    tr("Authentication of message has been stopped because "
 		    "the message file has wrong format!"),
@@ -4166,7 +4212,7 @@ void MainWindow::authenticateMessageFile(void)
 	case Q_CANCEL:
 		break;
 	default:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Message authentication error"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
@@ -4190,21 +4236,21 @@ void MainWindow::verifyMessage(void)
 
 	switch (verifySelectedMessage(acntTopIdx, msgIdx)) {
 	case Q_SUCCESS:
-		showStatusText(tr("ISDS confirms that the message is valid..."));
+		showStatusText(tr("ISDS confirms that the message is valid."));
 		QMessageBox::information(this, tr("Message is valid"),
 		    tr("Hash of message corresponds to ISDS message "
 		    "hash.\nMessage is valid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
-		showStatusText(tr("ISDS confirms that the message is invalid..."));
+		showStatusText(tr("ISDS confirms that the message is invalid."));
 		QMessageBox::warning(this, tr("Message is not authentic"),
 		    tr("ISDS confirms that the message hash is "
 		    "invalid!\nMessage is invalid."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Authenticate message error"),
 		    tr("The message hash cannot be verified because the "
 		    "connection to ISDS failed!\nCheck your internet "
@@ -4212,21 +4258,21 @@ void MainWindow::verifyMessage(void)
 		    QMessageBox::Ok);
 		break;
 	case Q_SQL_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Authenticate message warning"),
 		    tr("The message hash is not in local database.\nPlease "
 		    "download complete message form ISDS and try again."),
 		    QMessageBox::Ok);
 		break;
 	case Q_GLOBAL_ERROR:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Authenticate message error"),
 		    tr("The message hash cannot be verified because an internal"
 		    " error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
 	default:
-		showStatusText(tr("Message authentication failed..."));
+		showStatusText(tr("Message authentication failed."));
 		QMessageBox::critical(this, tr("Authenticate message error"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
@@ -4263,7 +4309,7 @@ void MainWindow::viewMessageFromZFO(void)
 	dummy_session = isds_ctx_create();
 	if (NULL == dummy_session) {
 		qDebug() << "Cannot create dummy ISDS session.";
-		
+
 	}
 
 	message = loadZfoFile(dummy_session, fileName);
@@ -4428,7 +4474,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		    "ZFO was not successful!").arg(dmId));
 	} else {
 		showStatusText(tr("Export of message \"%1\" to "
-		    "ZFO was successful...").arg(dmId));
+		    "ZFO was successful.").arg(dmId));
 	}
 
 	fout.close();
@@ -4578,7 +4624,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		    "ZFO was not successful!").arg(dmId));
 	} else {
 		showStatusText(tr("Export of message delivery info \"%1\" to "
-		    "ZFO was successful...").arg(dmId));
+		    "ZFO was successful.").arg(dmId));
 	}
 
 	fout.close();
@@ -4641,7 +4687,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	pdf_dialog.close();
 
 	showStatusText(tr("Export of message devilery info \"%1\" to "
-	    "PDF was successful...").arg(dmId));
+	    "PDF was successful.").arg(dmId));
 }
 
 
@@ -4712,7 +4758,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	pdf_dialog.close();
 
 	showStatusText(tr("Export of message envelope \"%1\" to "
-	    "PDF was successful...").arg(dmId));
+	    "PDF was successful.").arg(dmId));
 }
 
 
@@ -4887,10 +4933,10 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
 		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
 		    tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br>" +
+			"environment setting.") + "<br>" +
 		    tr("It is possible that your password has expired - "
-		        "in this case, you need to use the official web "
-		        "interface of Datové schránky to change it.");
+			"in this case, you need to use the official web "
+			"interface of Datové schránky to change it.");
 		break;
 
 	case IE_PARTIAL_SUCCESS:
@@ -4900,10 +4946,10 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
 		    "<b>" + tr("Authorization via OTP failed!") + "</b>" + "<br><br>" +
 		    tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br>" +
+			"environment setting.") + "<br>" +
 		    tr("It is aslo possible that your password has expired - "
-		        "in this case, you need to use the official web "
-		        "interface of Datové schránky to change it.");
+			"in this case, you need to use the official web "
+			"interface of Datové schránky to change it.");
 		break;
 
 	case IE_TIMED_OUT:
@@ -4954,7 +5000,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 	}
 
 	showStatusText(tr("It was not possible to connect to your"
-	    " databox form account \"%1\"...").arg(accountName));
+	    " databox form account \"%1\".").arg(accountName));
 
 	QMessageBox::critical(this, msgBoxTitle, msgBoxContent, QMessageBox::Ok);
 }
