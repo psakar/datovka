@@ -737,13 +737,15 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	debugFuncCall();
 
 	QModelIndex index = ui->messageList->indexAt(point);
-	QMenu *menu = new QMenu;
-
-	/* Remember last selected message. */
-	messageItemStoreSelection(
-	    index.model()->itemData(index).first().toInt());
 
 	if (index.isValid()) {
+
+		QMenu *menu = new QMenu;
+
+		/* Remember last selected message. */
+		messageItemStoreSelection(
+		    index.model()->itemData(index).first().toInt());
+
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 		    tr("Download message signed"), this,
@@ -796,12 +798,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    tr("Delete message"), this,
 		    SLOT(messageItemDeleteMessage()))->
 		    setEnabled(ui->actionDelete_message->isEnabled());
-	} else {
-		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
-		    tr("Create a new message"),
-		    this, SLOT(createAndSendMessage()));
+		menu->exec(QCursor::pos());
 	}
-	menu->exec(QCursor::pos());
 }
 
 
