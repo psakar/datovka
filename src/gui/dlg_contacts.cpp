@@ -182,6 +182,7 @@ void DlgContacts::insertDsItems(void)
 				} else {
 					item->setText(tr("no"));
 				}
+				item->setTextAlignment(Qt::AlignCenter);
 				this->m_recipientTableWidget.setItem(row,3,item);
 			}
 		}

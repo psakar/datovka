@@ -478,6 +478,7 @@ void DlgDsSearch::insertDsItems(void)
 			item = new QTableWidgetItem;
 			item->setText(this->resultsTableWidget->
 			    item(i,5)->text());
+			item->setTextAlignment(Qt::AlignCenter);
 			this->m_recipientTableWidget->setItem(row,3,item);
 		}
 	}

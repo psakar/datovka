@@ -59,8 +59,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	const QStandardItem *item;
 
 	this->recipientTableWidget->setColumnWidth(0,60);
-	this->recipientTableWidget->setColumnWidth(1,140);
-	this->recipientTableWidget->setColumnWidth(2,150);
+	this->recipientTableWidget->setColumnWidth(1,180);
+	this->recipientTableWidget->setColumnWidth(2,240);
 
 	this->attachmentTableWidget->setColumnWidth(0,150);
 	this->attachmentTableWidget->setColumnWidth(1,40);
@@ -125,6 +125,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 		} else {
 			item->setText(tr("no"));
 		}
+		item->setTextAlignment(Qt::AlignCenter);
 		this->recipientTableWidget->setItem(row,3,item);
 	}
 
