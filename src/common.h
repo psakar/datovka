@@ -23,6 +23,8 @@
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 #define MAX_ATTACHMENT_SIZE 10000000 // 10MB
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
+#define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/page/2425/"
+#define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 
 typedef enum {
 	USER_NAME = 0,

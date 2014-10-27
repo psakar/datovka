@@ -4391,7 +4391,9 @@ void MainWindow::showHelp(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
-	/* TODO - load help content from html file to browser */
+
+	QDesktopServices::openUrl(QUrl(DATOVKA_ONLINE_HELP_URL,
+	    QUrl::TolerantMode));
 }
 
 
