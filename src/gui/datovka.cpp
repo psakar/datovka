@@ -4421,7 +4421,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 
-		QMessageBox msgBox;
+		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
 		msgBox.setText(tr("Can not export complete message.")
 		    + " " + dmId);
@@ -4571,7 +4571,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 
-		QMessageBox msgBox;
+		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
 		msgBox.setText(tr("Can not export delivery info for message.")
 		    + " " + dmId);
@@ -4795,7 +4795,7 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
-		QMessageBox msgBox;
+		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
@@ -4857,7 +4857,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
 	if (raw.isEmpty()) {
-		QMessageBox msgBox;
+		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
@@ -5386,7 +5386,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
 	debugFuncCall();
 
-	QMessageBox msgBox;
+	QMessageBox msgBox(this);
 	msgBox.setWindowTitle(tr("Datovka"));
 
 	/* check if some worker works now
