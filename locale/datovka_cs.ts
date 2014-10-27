@@ -1758,7 +1758,7 @@ Zkuzte to unova.</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5409"/>
         <source>Datovka cannot be closed now because downloading of messages on the background is running...</source>
-        <translation>Datovka teď nemůže být ukončena, protože se právě synchronizuje účet nebo zpráva na pozadí applikace...</translation>
+        <translation>Datovka teď nemůže být ukončena, protože se právě synchronizuje účet nebo zpráva na pozadí aplikace...</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5411"/>
