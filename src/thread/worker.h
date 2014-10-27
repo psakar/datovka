@@ -18,6 +18,10 @@ class Worker : public QObject {
     Q_OBJECT
 
 public:
+
+	static
+	QMutex downloadMessagesMutex;
+
 	/*!
 	 * @brief Construtor.
 	 */
@@ -58,9 +62,6 @@ private:
 	int m_count;
 	QList<MessageDb*> m_messageDbList;
 	QList<bool> m_downloadThisAccounts;
-
-	static
-	QMutex downloadMessagesMutex;
 
 	/*!
 	 * @brief Get list of sent message state changes

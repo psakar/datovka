@@ -1,4 +1,5 @@
 #include <cmath> /* ceil(3) */
+#include <QCloseEvent>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
@@ -5372,4 +5373,44 @@ void MainWindow::setAndShowNotificationDialog(QList<QString> errorDmId,
 
 	QMessageBox::warning(this,
 	    QObject::tr("Correspondence export error"), msg, QMessageBox::Ok);
+}
+
+
+/* ========================================================================= */
+/*
+ * Check if some worker is not working on the background and show
+ * dialog if user want to close application
+ */
+void MainWindow::closeEvent(QCloseEvent *event)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QMessageBox msgBox;
+	msgBox.setWindowTitle(tr("Datovka"));
+
+	/* check if some worker works now
+	 * if any worker is not working, lock mutex and show exit dialog,
+	 * else waits for worker until he is done.
+	*/
+	if (Worker::downloadMessagesMutex.tryLock()) {
+		msgBox.setIcon(QMessageBox::Question);
+		msgBox.setText(tr("Do you want to close application Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		if (QMessageBox::No == msgBox.exec()) {
+			event->ignore();
+		}
+		Worker::downloadMessagesMutex.unlock();
+
+	} else {
+		event->ignore();
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setText(tr("Datovka cannot be closed now because "
+		    "downloading of messages on the background is running..."));
+		msgBox.setInformativeText(tr("Wait until the action will "
+		    "finished and try again."));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
+	}
 }

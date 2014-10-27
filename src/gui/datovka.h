@@ -36,6 +36,13 @@ public:
 	QLabel *statusOnlineLabel;
 	QStatusBar *statusBar;
 
+protected:
+	/*!
+	 * Check if some worker is working on the background and show
+	 * dialog if user want to close application
+	 */
+	void closeEvent(QCloseEvent *event);
+
 private slots:
 	/*!
 	 * @brief Redraws widgets according to selected account item.
