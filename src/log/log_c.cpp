@@ -19,7 +19,7 @@ void q_debug_call(const char *fmt, ...)
 
 	va_start(argp, fmt);
 
-	return qDebugCallV(fmt, argp);
+	qDebugCallV(fmt, argp);
 
 	va_end(argp);
 }
