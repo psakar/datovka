@@ -12,6 +12,7 @@
 #include <QVariant>
 
 #include "account_db.h"
+#include "src/common.h"
 #include "src/io/db_tables.h"
 
 
@@ -98,7 +99,11 @@ bool AccountDb::openDb(const QString &fileName)
 {
 	bool ret;
 
-	m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	if (globPref.store_additional_data_on_disk) {
+		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	} else {
+		m_db.setDatabaseName(":memory:");
+	}
 
 	/* TODO -- generate warning when no database is present. */
 

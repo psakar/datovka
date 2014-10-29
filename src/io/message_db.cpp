@@ -205,7 +205,11 @@ bool MessageDb::openDb(const QString &fileName)
 {
 	bool ret;
 
-	m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	if (globPref.store_messages_on_disk) {
+		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	} else {
+		m_db.setDatabaseName(":memory:");
+	}
 
 	ret = m_db.open();
 
