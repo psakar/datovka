@@ -38,7 +38,7 @@ private slots:
 	void checkInputFields(void);
 
 signals:
-	void getAccountUserDataboxInfo(QModelIndex, bool);
+	void getAccountUserDataboxInfo(AccountModel::SettingsMap);
 
 private:
 	void initAccountDialog(void);

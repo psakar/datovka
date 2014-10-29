@@ -353,16 +353,7 @@ void DlgCreateAccount::saveAccount(void)
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
-		index = model->addAccount(this->accountLineEdit->text(),
-		    itemSettings);
-		/* Change selection. */
-		qDebug() << "Changing selection" << index;
-		m_accountList.selectionModel()->setCurrentIndex(index,
-		    QItemSelectionModel::ClearAndSelect);
-		/* Expand the tree. */
-		m_accountList.expand(index);
-		emit getAccountUserDataboxInfo(index, true);
-		/* TODO -- Save/update related account DB entry. */
+		emit getAccountUserDataboxInfo(itemSettings);
 		break;
 	default:
 		Q_ASSERT(0);

@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_export_correspond_dir(""),
     m_on_export_zfo_activate(""),
     m_on_import_database_dir_activate(""),
+    isMainWindow(false),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
@@ -271,6 +272,8 @@ void MainWindow::setWindowsAfterInit(void)
 			synchroniseAllAccounts();
 		}
 	}
+
+	isMainWindow = true;
 }
 
 
@@ -420,10 +423,15 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		qWarning() << "Missing user entry of" << userName
 		    << "in account db.";
 
-		/* TODO - paasword dialog is shown before gui is loaded */
+		if (!isMainWindow) {
+			/* eliminate several problems as:
+			 * password dialog is shown before gui is loaded
+			 * database was not still open
+			*/
+			return;
+		}
 
-		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current),
-		    false)) {
+		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current))) {
 		/* TODO -- What to do when no ISDS connection is present? */
 			return;
 		}
@@ -2736,9 +2744,9 @@ void MainWindow::addNewAccount(void)
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
 
-	connect(newAccountDialog, SIGNAL(getAccountUserDataboxInfo(
-	    QModelIndex, bool)),
-	    this, SLOT(getOwnerInfoFromLogin(const QModelIndex, bool)));
+	connect(newAccountDialog,
+	    SIGNAL(getAccountUserDataboxInfo(AccountModel::SettingsMap)),
+	    this, SLOT(getAccountUserDataboxInfo(AccountModel::SettingsMap)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -2810,59 +2818,6 @@ void MainWindow::deleteSelectedAccount(void)
 	if (ui->accountList->model()->rowCount() < 1) {
 		defaultUiMainWindowSettings();
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Delete new account if is not possilbe connect to isds
- */
-bool MainWindow::deleteNewAccount(const QModelIndex acntTopIdx)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QStandardItem *item = m_accountModel.itemFromIndex(acntTopIdx);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-	int currentTopRow = itemTop->row();
-
-	if (currentTopRow < 0) {
-		return false;
-	}
-
-	QString userName = accountUserName();
-	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	QString accountName = itemSettings.accountName();
-	QString dbDir = itemSettings[DB_DIR].toString();
-
-	if (itemTop->hasChildren()) {
-		itemTop->removeRows(0, itemTop->rowCount());
-	}
-
-	m_accountDb.deleteAccountInfo(userName + "___True");
-
-	ui->accountList->model()->removeRow(currentTopRow);
-
-	/* Delete message db from disk. */
-	MessageDb *db;
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
-	m_messageDbs.deleteMessageDb(db);
-
-	showStatusTextWithTimeout(tr("It was not possible to create account"
-		" \"%1\"!").arg(accountName));
-
-	/* Save changed configuration. */
-	saveSettings();
-
-	if (ui->accountList->model()->rowCount() < 1) {
-		defaultUiMainWindowSettings();
-	}
-
-	return true;
 }
 
 
@@ -3818,14 +3773,10 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 /*
  * Get data about logged in user and his box.
  */
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add)
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
 	debugFuncCall();
-
-	if (!add) {
-		return false;
-	}
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3833,33 +3784,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add)
 	isds_error status;
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, false)) {
-
-			QString msgBoxTitle = accountInfo.accountName() +
-			    ": " + tr("Account error");
-			QString msgBoxContent =
-			    tr("It was not possible to get user info and "
-			    "databox info for this account from server.")
-			    +"<br><br><b>" +
-			    tr("Connection to ISDS or user authentication failed!")
-			    + "</b><br><br>" +
-			    tr("Please check your internet connection and "
-			    "try again or it is possible that your password "
-			    "(certificate) has expired - in this case, you "
-			    "need to use the official web interface of Datové "
-			    "schránky to change it.")
-			    + "<br><br><b>" + tr("The account \"") +
-			    accountInfo.accountName() + "\" ("
-			    + accountInfo.userName() + ")"+
-			    tr(" was not created!") + "</b>";
-
-			deleteNewAccount(acntTopIdx);
-
-			QMessageBox::critical(this,
-			    msgBoxTitle,
-			    msgBoxContent,
-			    QMessageBox::Ok);
-
+		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
 	}
@@ -5075,11 +5000,6 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 {
 	isds_error status = IE_ERROR;
 
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return false;
-	}
-
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName());
 	}
@@ -5118,11 +5038,6 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 {
 	isds_error status = IE_ERROR;
 
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return false;
-	}
-
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName());
 	}
@@ -5160,11 +5075,6 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
-
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return false;
-	}
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName());
@@ -5210,11 +5120,6 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 {
 	isds_error status = IE_ERROR;
 
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return false;
-	}
-
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName());
 	}
@@ -5253,15 +5158,9 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 {
 	isds_error status = IE_ERROR;
 
-	Q_ASSERT(acntTopIdx.isValid());
-	if (!acntTopIdx.isValid()) {
-		return false;
-	}
-
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName());
 	}
-
 
 	QString pwd = accountInfo.password();
 	if (pwd.isNull() ||
@@ -5317,7 +5216,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 
 /* ========================================================================= */
 /*
- * Connect to databox
+ * Connect to databox from exist account
  */
 bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 /* ========================================================================= */
@@ -5362,6 +5261,50 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 	/* Login method based username, password and OTP */
 	} else {
 		return loginMethodUserNamePwdOtp(acntTopIdx, accountInfo,
+		    showDialog);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * First connect to databox from new account
+ */
+bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap accountInfo,
+    bool showDialog)
+/* ========================================================================= */
+{
+	/* Login method based on username and password */
+	if (accountInfo.loginMethod() == "username") {
+		return loginMethodUserNamePwd(QModelIndex(), accountInfo,
+		    showDialog);
+
+	/* Login method based on certificate only */
+	} else if (accountInfo.loginMethod() == "certificate") {
+		return loginMethodCertificateOnly(QModelIndex(), accountInfo,
+		    showDialog);
+
+	/* Login method based on certificate together with username */
+	} else if (accountInfo.loginMethod() == "user_certificate") {
+
+		return loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
+		    showDialog);
+
+		/* TODO - next method is situation when certificate will be used
+		 * and password missing. The username shifts meaning to box ID.
+		 * This is used for hosted services. It is not dokumented and
+		 * we not support this method now.
+
+		if (accountInfo.password().isNull() ||
+		    accountInfo.password().isEmpty()) {
+			return loginMethodCertificateIdBox(QModelIndex(),
+			    accountInfo, showDialog);
+		}
+		*/
+
+	/* Login method based username, password and OTP */
+	} else {
+		return loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
 		    showDialog);
 	}
 }
@@ -5437,3 +5380,56 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		msgBox.exec();
 	}
 }
+
+
+/* ========================================================================= */
+/*
+ * Verify if is a connection to ISDS and databox exists for a new account
+ */
+void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!firstConnectToIsds(accountInfo, false)) {
+			QString msgBoxTitle = tr("New account error") +
+			    ": " + accountInfo.accountName();
+			QString msgBoxContent =
+			    tr("It was not possible to get user info and "
+			    "databox info from ISDS server for account")
+			    + " \"" + accountInfo.accountName() + "\"."
+			    + "<br><br><b>" +
+			    tr("Connection to ISDS or user authentication failed!")
+			    + "</b><br><br>" +
+			    tr("Please check your internet connection and "
+			    "try again or it is possible that your password "
+			    "(certificate) has expired - in this case, you "
+			    "need to use the official web interface of Datové "
+			    "schránky to change it.")
+			    + "<br><br><b>" +
+			    tr("Account") + "<i>" + " \"" +
+			    accountInfo.accountName() + "\" " + "("
+			    + accountInfo.userName() + ") </i> " +
+			    tr("was not created!") + "</b>";
+
+			QMessageBox::critical(this,
+			    msgBoxTitle,
+			    msgBoxContent,
+			    QMessageBox::Ok);
+
+			return;
+		}
+	}
+
+	QModelIndex index = m_accountModel.addAccount(accountInfo.accountName(),
+	    accountInfo);
+
+	qDebug() << "Changing selection" << index;
+	/* get current account model */
+	ui->accountList->selectionModel()->setCurrentIndex(index,
+	    QItemSelectionModel::ClearAndSelect);
+	/* Expand the tree. */
+	ui->accountList->expand(index);
+}
+

@@ -45,6 +45,13 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 private slots:
+
+	/*!
+	 * @brief Verify if is a connection to ISDS and databox
+	 * exists for a new account
+	 */
+	void getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo);
+
 	/*!
 	 * @brief Redraws widgets according to selected account item.
 	 */
@@ -331,7 +338,7 @@ private slots:
 	/*!
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, bool add);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	/*!
 	 * @brief Set and show correspondence error dialog.
@@ -357,11 +364,6 @@ private:
 	Worker *workerSyncAll, *workerSyncOne, *workerDownMsgComplete;
 	QTimer *timer;
 	int timeout;
-
-	/*!
-	 * @brief Delete new account if is not possilbe connect to isds.
-	 */
-	bool deleteNewAccount(const QModelIndex acntTopIdx);
 
 	/*!
 	 * @brief Connects top menu-bar buttons to appropriate actions.
@@ -565,9 +567,15 @@ private:
 	    bool showDialog);
 
 	/*!
-	 * @brief connect to ISDS databox
+	 * @brief connect to ISDS databox from exist account
 	 */
 	bool connectToIsds(const QModelIndex acntTopIdx, bool showDialog);
+
+	/*!
+	 * @brief connect to ISDS databox from new account
+	 */
+	bool firstConnectToIsds(AccountModel::SettingsMap accountInfo,
+	    bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username and password only.
@@ -639,6 +647,7 @@ private:
 	QString m_export_correspond_dir;
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;
+	bool isMainWindow;
 
 	Ui::MainWindow *ui;
 };
