@@ -20,6 +20,7 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
 //	this->tImage->setIcon(QIcon(ICON_16x16_PATH "datovka-ok.png"));
 
 	validateMessageSignature();
+	validateSigningCertificate();
 	validateMessageTimestamp();
 }
 
@@ -36,17 +37,17 @@ void DlgSignatureDetail::validateMessageSignature(void)
 
 	if (!m_messageDb.msgsVerificationAttempted(m_dmId)) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = "<b>";
-		resStr += QObject::tr("Message signature is not present.");
-		resStr += "</b>";
+		resStr = QObject::tr("Message signature is not present.");
 	} else if (!m_messageDb.msgsVerified(m_dmId)) {
 		iconPath = ICON_16x16_PATH "datovka-error.png";
-		resStr = "<span style=\"color:#aa0000;\"><b>";
+		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr += "<span style=\"color:#aa0000;\"><b>";
 		resStr += QObject::tr("No");
 		resStr += "</b></span>";
 	} else {
 		iconPath = ICON_16x16_PATH "datovka-ok.png";
-		resStr = "<span style=\"color:#00aa00;\"><b>";
+		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr += "<span style=\"color:#00aa00;\"><b>";
 		resStr += QObject::tr("Yes");
 		resStr += "</b></span>";
 	}
@@ -54,6 +55,41 @@ void DlgSignatureDetail::validateMessageSignature(void)
 	this->mSignatureImage->setIcon(QIcon(iconPath));
 	this->mSignatureStatus->setTextFormat(Qt::RichText);
 	this->mSignatureStatus->setText(resStr);
+}
+
+
+/* ========================================================================= */
+/*
+ * Validate signing certificate, show result in dialog.
+ */
+void DlgSignatureDetail::validateSigningCertificate(void)
+/* ========================================================================= */
+{
+	QString iconPath;
+	QString resStr;
+
+	if (!m_messageDb.msgsVerificationAttempted(m_dmId)) {
+		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		resStr = QObject::tr("Message signature is not present.") +
+		    "<br/>";
+		resStr += QObject::tr("Cannot check signing certificate");
+	} else if (!m_messageDb.msgsSigningCertValid(m_dmId)) {
+		iconPath = ICON_16x16_PATH "datovka-error.png";
+		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr += "<span style=\"color:#aa0000;\"><b>";
+		resStr += QObject::tr("No");
+		resStr += "</b></span>";
+	} else {
+		iconPath = ICON_16x16_PATH "datovka-ok.png";
+		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr += "<span style=\"color:#00aa00;\"><b>";
+		resStr += QObject::tr("Yes");
+		resStr += "</b></span>";
+	}
+
+	this->cImage->setIcon(QIcon(iconPath));
+	this->cStatus->setTextFormat(Qt::RichText);
+	this->cStatus->setText(resStr);
 }
 
 
@@ -73,18 +109,17 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	QString timeStampStr;
 	if (!tst.isValid()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = "<b>";
-		resStr += QObject::tr("Time stamp not present.");
-		resStr += "</b>";
+		resStr = QObject::tr("Time stamp not present.");
 	} else {
+		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
 		if (!valid) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
-			resStr = "<span style=\"color:#aa0000;\"><b>";
+			resStr += "<span style=\"color:#aa0000;\"><b>";
 			resStr += QObject::tr("No");
 			resStr += "</b></span>";
 		} else {
 			iconPath = ICON_16x16_PATH "datovka-ok.png";
-			resStr = "<span style=\"color:#00aa00;\"><b>";
+			resStr += "<span style=\"color:#00aa00;\"><b>";
 			resStr += QObject::tr("Yes");
 			resStr += "</b></span>";
 

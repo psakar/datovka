@@ -189,6 +189,14 @@ public:
 	bool msgsVerified(int dmId) const;
 
 	/*!
+	 * @brief Return whether signing certificate is valid.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return True if signing certificate was verified successfully.
+	 */
+	bool msgsSigningCertValid(int dmId) const;
+
+	/*!
 	 * @brief Returns time-stamp validity.
 	 *
 	 * @param[in]  dmId Message identifier.

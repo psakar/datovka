@@ -94,6 +94,16 @@ int cert_information(const void *data, size_t data_len,
     char **o, char **ou, char **n, char **c);
 
 
+/*!
+ * @brief Verify certificate.
+ *
+ * @return  1 if certificate valid,
+ *          0 if certificate invalid,
+ *         -1 on other errors.
+ */
+int cert_verify(const void *der, size_t der_len);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

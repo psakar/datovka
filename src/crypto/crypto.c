@@ -575,6 +575,70 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Verify certificate.
+ */
+int cert_verify(const void *der, size_t der_len)
+/* ========================================================================= */
+{
+	int ret = 0;
+	X509 *x509 = NULL;
+	X509_STORE_CTX *csc = NULL;
+	unsigned long err;
+
+	x509 = load_x509(der, der_len);
+	if (NULL == x509) {
+		goto fail;
+	}
+
+	csc = X509_STORE_CTX_new();
+	if (NULL == csc) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = -1;
+		goto fail;
+	}
+
+	if (!X509_STORE_CTX_init(csc, ca_certs, x509, NULL)) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = -1;
+		goto fail;
+	}
+
+	/* TODO -- CRL */
+
+	if (0 < X509_verify_cert(csc)) {
+		ret = 1;
+	} else {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = 0;
+	}
+
+	X509_free(x509); x509 = NULL;
+	X509_STORE_CTX_free(csc); csc = NULL;
+
+	return ret;
+
+fail:
+	if (NULL != x509) {
+		X509_free(x509);
+	}
+	if (NULL != csc) {
+		X509_STORE_CTX_free(csc);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
 /*!
  * @brief Read certificate from der string.
  */

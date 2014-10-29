@@ -28,6 +28,11 @@ private:
 	void validateMessageSignature(void);
 
 	/*!
+	 * @brief Validate signing certificate, show result in dialog.
+	 */
+	void validateSigningCertificate(void);
+
+	/*!
 	 * @brief Check time stamp signature, show detail in dialog.
 	 */
 	void validateMessageTimestamp(void);

@@ -2475,6 +2475,44 @@ bool MessageDb::msgsVerified(int dmId) const
 
 /* ========================================================================= */
 /*
+ * Return whether signing certificate is valid.
+ */
+bool MessageDb::msgsSigningCertValid(int dmId) const
+/* ========================================================================= */
+{
+	void *signing_cert = NULL;
+	size_t cert_size;
+	int ret;
+
+	debugFuncCall();
+
+	QByteArray rawBytes =
+	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
+
+	if (rawBytes.isEmpty()) {
+		goto fail;
+	}
+
+	if (0 != cms_signing_cert(rawBytes.data(), rawBytes.size(),
+	        &signing_cert, &cert_size)) {
+		goto fail;
+	}
+
+	ret = cert_verify(signing_cert, cert_size);
+
+	free(signing_cert); signing_cert = NULL;
+	return 1 == ret;
+
+fail:
+	if (NULL != signing_cert) {
+		free(signing_cert);
+	}
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Set the verification result.
  */
 bool MessageDb::msgsSetVerified(int dmId, bool verified)
