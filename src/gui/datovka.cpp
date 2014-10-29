@@ -105,7 +105,14 @@ MainWindow::MainWindow(QWidget *parent)
 	statusBar = new QStatusBar(this);
 	statusBar->setSizeGripEnabled(false);
 	ui->statusBar->addWidget(statusBar,1);
-	showStatusTextWithTimeout(tr("Welcome"));
+	showStatusTextWithTimeout(tr("Welcome..."));
+
+	/* Create status bar label shows database mode memory/disk */
+	statusDbMode = new QLabel(this);
+	statusDbMode->setText(tr("Storage: disk | disk"));
+	statusDbMode->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	ui->statusBar->addWidget(statusDbMode,0);
+
 
 	/* Create status bar online/offline label */
 	statusOnlineLabel = new QLabel(this);
@@ -224,6 +231,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 	QTimer::singleShot(RUN_FIRST_ACTION_MS, this,
 	    SLOT(setWindowsAfterInit()));
+
+	QString msgStrg = tr("disk");
+	QString acntStrg = tr("disk");
+
+	if (!globPref.store_messages_on_disk) {
+		msgStrg = tr("memory");
+	}
+
+	if (!globPref.store_additional_data_on_disk) {
+		acntStrg = tr("memory");
+	}
+
+	statusDbMode->setText(tr("Storage:") + " " + msgStrg + " | "
+	    + acntStrg + "   ");
 }
 
 

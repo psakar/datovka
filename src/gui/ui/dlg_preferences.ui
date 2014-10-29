@@ -24,7 +24,7 @@
    <item>
     <widget class="QTabWidget" name="PrefWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -80,6 +80,11 @@
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>When allowed, Datovka will automatically download messages 
+on the background of application without blocking of user interface.
+Download period you can set bellow.</string>
             </property>
             <property name="text">
              <string>Automatically download new messages on background</string>
@@ -156,6 +161,13 @@
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>When accessing your Databox, only envelopes of messages are downloaded at first. 
+You can then download the whole message, including any attachments, manually. 
+When this option is turned on, Datovka will perform the download of complete 
+message for you. The only downside to this approach is longer waiting time on 
+slower internet connections.</string>
+            </property>
             <property name="text">
              <string>Automatically download whole messages (may be slow)</string>
             </property>
@@ -168,6 +180,10 @@
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>When allowed, Datovka will automatically synchronise accounts 
+and also download new messages on background at startup.</string>
             </property>
             <property name="text">
              <string>Automatically synchronize all accounts on startup</string>
@@ -197,6 +213,10 @@
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>When this option is active, Datovka will automatically
+check for new Datovka versions on startup.</string>
+            </property>
             <property name="text">
              <string>Check for new Datovka versions on startup</string>
             </property>
@@ -215,6 +235,15 @@
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>When this option is active, Datovka will send information about your 
+Datovka version and related data as part of the request for new versions. 
+This data contains the version of Datovka, version of libraries, operating 
+system platform and an ID randomly created for your application at first start.
+
+No personal data of any kind is sent. 
+The data is used solely for statistical purposes.</string>
             </property>
             <property name="text">
              <string>Send version info alongside the request</string>
@@ -281,6 +310,13 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>When allowed, messages are stored in a database in your home directory. 
+Such storage might be compromised by an attacker and the content of 
+messages might be modified. When turned off, messages are freshly 
+downloaded each time you start Datovka. In this case messages older 
+than 90 day may not be available.</string>
+            </property>
             <property name="text">
              <string>Allow message storage</string>
             </property>
@@ -296,6 +332,12 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>Datovka stores some additional data outside the message database. 
+These are data about the databox which allow for example warning 
+about an expiring password. These data might be also changed by 
+an attacker, but their nature makes it a relatively harmless possibility.</string>
             </property>
             <property name="text">
              <string>Allow storage of additional data</string>
@@ -348,6 +390,10 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>After an account is opened,
+the newest message will be activated.</string>
+            </property>
             <property name="text">
              <string>Newest message</string>
             </property>
@@ -364,6 +410,10 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>When account is opened, the last message
+displayed in this account will be selected.</string>
+            </property>
             <property name="text">
              <string>Last displayed message</string>
             </property>
@@ -376,6 +426,10 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>When account is opened, random message
+displayed in this account will be selected.</string>
             </property>
             <property name="text">
              <string>Nothing</string>
@@ -425,6 +479,11 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Validity of the signing certificate will be checked against
+the current date. This gives the highest protection against
+compromised certificate exploit.</string>
+            </property>
             <property name="text">
              <string>Check against current date (safer)</string>
             </property>
@@ -440,6 +499,13 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>The validity of signing certificate is checked against a
+stored download date. This allows long-term storage 
+of messages without false alarms about invalid signature. 
+It is less safe, because the attacker could modify the 
+download date in the Datovka database.</string>
             </property>
             <property name="text">
              <string>Check against the date of download</string>
@@ -460,6 +526,9 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>Check certificate revocation list (CRL).</string>
             </property>
             <property name="text">
              <string>Check certificate revocation list (CRL)</string>

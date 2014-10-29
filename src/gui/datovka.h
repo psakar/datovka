@@ -34,6 +34,7 @@ public:
 
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 	QLabel *statusOnlineLabel;
+	QLabel *statusDbMode;
 	QStatusBar *statusBar;
 
 protected:
