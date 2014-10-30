@@ -534,10 +534,53 @@ struct x509_crt * x509_crt_from_der(const void *der, size_t der_size)
 
 /* ========================================================================= */
 /*
+ * Initialises values inside the structure.
+ */
+void crt_issuer_info_init(struct crt_issuer_info *cii)
+/* ========================================================================= */
+{
+	assert(NULL != cii);
+	if (NULL == cii) {
+		return;
+	}
+
+	memset(cii, 0, sizeof(*cii));
+}
+
+
+/* ========================================================================= */
+/*
+ * Clear values inside the structure.
+ */
+void crt_issuer_info_clear(struct crt_issuer_info *cii)
+/* ========================================================================= */
+{
+	assert(NULL != cii);
+	if (NULL == cii) {
+		return;
+	}
+
+	if (NULL != cii->o) {
+		free(cii->o); cii->o = NULL;
+	}
+	if (NULL != cii->ou) {
+		free(cii->ou); cii->ou = NULL;
+	}
+	if (NULL != cii->n) {
+		free(cii->n); cii->n = NULL;
+	}
+	if (NULL != cii->c) {
+		free(cii->c); cii->c = NULL;
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Get information about the certificate issuer.
  */
 int x509_crt_issuer_info(struct x509_crt *x509_crt,
-    char **o, char **ou, char **n, char **c)
+    struct crt_issuer_info *cii)
 /* ========================================================================= */
 {
 	const X509_NAME *subject;
@@ -550,6 +593,15 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 	char **out_str;
 
 	debug_func_call();
+
+	assert(NULL != x509_crt);
+	if (NULL == x509_crt) {
+		goto fail;
+	}
+	assert(NULL != cii);
+	if (NULL == cii) {
+		goto fail;
+	}
 
 	subject = X509_get_subject_name((X509 *) x509_crt);
 	if (NULL == subject) {
@@ -570,24 +622,16 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 
 		switch (nid) {
 		case NID_organizationName:
-			if (NULL != o) {
-				out_str = o;
-			}
+			out_str = &cii->o;
 			break;
 		case NID_organizationalUnitName:
-			if (NULL != ou) {
-				out_str = ou;
-			}
+			out_str = &cii->ou;
 			break;
 		case NID_commonName:
-			if (NULL != n) {
-				out_str = n;
-			}
+			out_str = &cii->n;
 			break;
 		case NID_countryName:
-			if (NULL != c) {
-				out_str = c;
-			}
+			out_str = &cii->c;
 			break;
 		default:
 			break;

@@ -112,19 +112,44 @@ struct x509_crt * x509_crt_from_der(const void *der, size_t der_size);
 
 
 /*!
+ * @brief Certificate issuer information.
+ */
+struct crt_issuer_info {
+	char *o; /*!< Organisation name. */
+	char *ou; /*!< Organisation unit name. */
+	char *n; /*!< Common name. */
+	char *c; /*!< Country name. */
+};
+
+
+/*!
+ * @brief Initialises values inside the structure.
+ *
+ * @param[in,out] cii Certificate issuer information.
+ */
+void crt_issuer_info_init(struct crt_issuer_info *cii);
+
+
+/*!
+ * @brief Clear values inside the structure.
+ *
+ * @param[in,out] cii Certificate issuer information.
+ */
+void crt_issuer_info_clear(struct crt_issuer_info *cii);
+
+
+/*!
  * @brief Get information about the certificate issuer.
  *
  * @param[in]  x509_crt X509 certificate.
- * @param[out] o        Organisation string.
- * @param[out] ou       Organisation unit.
- * @param[out] n        Name.
- * @param[out] c        Country.
+ * @param[out] cii      Certificate issuer information to be set.
  * @return 0 on success, -1 on error.
  *
- * @note Use free() to free all returned strings.
+ * @note Use free() to free all returned strings. The function is
+ *     implemented because QSslCertificate somehow ignores OU.
  */
 int x509_crt_issuer_info(struct x509_crt *x509_crt,
-    char **o, char **ou, char **n, char **c);
+    struct crt_issuer_info *cii);
 
 
 /*!

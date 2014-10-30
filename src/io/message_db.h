@@ -209,7 +209,7 @@ public:
 	/*!
 	 * @brief Time stamp certificate information.
 	 *
-	 * @param[in]  dmId Message identifier.
+	 * @param[in]  dmId  Message identifier.
 	 * @param[out] oStr  Organisation name.
 	 * @param[out] ouStr Organisation unit name.
 	 * @param[out] nStr  Common name.
@@ -218,6 +218,14 @@ public:
 	 */
 	bool msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 	    QString &nStr, QString &cStr) const;
+
+	/*!
+	 * @brief Returns signing certificate of message.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return Null certificate on failure.
+	 */
+	QSslCertificate rmsgdtSigningCertificate(int dmId) const;
 
 	/*!
 	 * @brief Was message locally read.

@@ -2619,9 +2619,11 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 /* ========================================================================= */
 {
 	struct x509_crt *signing_cert = NULL;
-	char *o = NULL, *ou = NULL, *n = NULL, *c = NULL;
+	struct crt_issuer_info cii;
 
 	debugFuncCall();
+
+	crt_issuer_info_init(&cii);
 
 	QByteArray tstData = msgsTimestampDER(dmId);
 	if (tstData.isEmpty()) {
@@ -2633,31 +2635,29 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 		goto fail;
 	}
 
-	if (0 != x509_crt_issuer_info(signing_cert, &o, &ou, &n, &c)) {
+	if (0 != x509_crt_issuer_info(signing_cert, &cii)) {
 		goto fail;
 	}
 
 	x509_crt_destroy(signing_cert); signing_cert = NULL;
 
-	if (NULL != o) {
-		oStr = o;
-		free(o); o = NULL;
+	if (NULL != cii.o) {
+		oStr = cii.o;
 	}
 
-	if (NULL != ou) {
-		ouStr = ou;
-		free(ou); ou = NULL;
+	if (NULL != cii.ou) {
+		ouStr = cii.ou;
 	}
 
-	if (NULL != n) {
-		nStr = n;
-		free(n); n = NULL;
+	if (NULL != cii.n) {
+		nStr = cii.n;
 	}
 
-	if (NULL != c) {
-		cStr = c;
-		free(c); c = NULL;
+	if (NULL != cii.c) {
+		cStr = cii.c;
 	}
+
+	crt_issuer_info_clear(&cii);
 
 	return true;
 
@@ -2665,19 +2665,45 @@ fail:
 	if (NULL != signing_cert) {
 		x509_crt_destroy(signing_cert);
 	}
-	if (NULL != o) {
-		free(o);
-	}
-	if (NULL != ou) {
-		free(ou);
-	}
-	if (NULL != n) {
-		free(n);
-	}
-	if (NULL != c) {
-		free(c);
-	}
+	crt_issuer_info_clear(&cii);
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns signing certificate of message.
+ */
+QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId) const
+/* ========================================================================= */
+{
+	struct x509_crt *x509_crt = NULL;
+	void *der = NULL;
+	size_t der_size;
+
+	QByteArray rawBytes =
+	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
+	Q_ASSERT(rawBytes.size() > 0);
+	if (rawBytes.isEmpty()) {
+		return QSslCertificate();
+	}
+
+	x509_crt = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
+	if (NULL == x509_crt) {
+		return QSslCertificate();
+	}
+
+	if (0 != x509_crt_to_der(x509_crt, &der, &der_size)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return QSslCertificate();
+	}
+
+	x509_crt_destroy(x509_crt); x509_crt = NULL;
+
+	QByteArray certRawBytes((char *) der, der_size);
+	free(der); der = NULL;
+
+	return QSslCertificate(certRawBytes, QSsl::Der);
 }
 
 
