@@ -2480,8 +2480,7 @@ bool MessageDb::msgsVerified(int dmId) const
 bool MessageDb::msgsSigningCertValid(int dmId) const
 /* ========================================================================= */
 {
-	void *signing_cert = NULL;
-	size_t cert_size;
+	struct x509_crt *signing_cert = NULL;
 	int ret;
 
 	debugFuncCall();
@@ -2493,19 +2492,19 @@ bool MessageDb::msgsSigningCertValid(int dmId) const
 		goto fail;
 	}
 
-	if (0 != cms_signing_cert(rawBytes.data(), rawBytes.size(),
-	        &signing_cert, &cert_size)) {
+	signing_cert = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
+	if (NULL == signing_cert) {
 		goto fail;
 	}
 
-	ret = cert_verify(signing_cert, cert_size);
+	ret = x509_crt_verify(signing_cert);
 
-	free(signing_cert); signing_cert = NULL;
+	x509_crt_destroy(signing_cert); signing_cert = NULL;
 	return 1 == ret;
 
 fail:
 	if (NULL != signing_cert) {
-		free(signing_cert);
+		x509_crt_destroy(signing_cert);
 	}
 	return false;
 }
@@ -2589,8 +2588,8 @@ bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
 	if (!tstData.isEmpty()) {
 
 		time_t utc_time = 0;
-		int ret = verify_qualified_timestamp(tstData.data(),
-		    tstData.size(), &utc_time);
+		int ret = raw_tst_verify(tstData.data(), tstData.size(),
+		    &utc_time);
 
 		if (-1 != ret) {
 			qTst = QDateTime::fromTime_t(utc_time);
@@ -2619,8 +2618,7 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
     QString &nStr, QString &cStr) const
 /* ========================================================================= */
 {
-	char *der = NULL;
-	size_t der_len = 0;
+	struct x509_crt *signing_cert = NULL;
 	char *o = NULL, *ou = NULL, *n = NULL, *c = NULL;
 
 	debugFuncCall();
@@ -2630,16 +2628,16 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 		return false;
 	}
 
-	if (0 != cms_signing_cert(tstData.data(), tstData.size(),
-	        (void **) &der, &der_len)) {
+	signing_cert = raw_cms_signing_cert(tstData.data(), tstData.size());
+	if (NULL == signing_cert) {
 		goto fail;
 	}
 
-	if (0 != cert_information(der, der_len, &o, &ou, &n, &c)) {
+	if (0 != x509_crt_issuer_info(signing_cert, &o, &ou, &n, &c)) {
 		goto fail;
 	}
 
-	free(der); der = NULL;
+	x509_crt_destroy(signing_cert); signing_cert = NULL;
 
 	if (NULL != o) {
 		oStr = o;
@@ -2664,8 +2662,8 @@ bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
 	return true;
 
 fail:
-	if (NULL != der) {
-		free(der);
+	if (NULL != signing_cert) {
+		x509_crt_destroy(signing_cert);
 	}
 	if (NULL != o) {
 		free(o);
@@ -3065,7 +3063,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	//qDebug() << "UTC offset" << utcOffset << local << tZone;
 	time_t utcTime = dateTime.toTime_t();
 
-	return 1 == verify_raw_message_signature_date(
+	return 1 == raw_msg_verify_signature_date(
 	    rawBytes.data(), rawBytes.size(), utcTime, 0);
 //	    ignoreMissingCrlCheck ? 0 : 1);
 }

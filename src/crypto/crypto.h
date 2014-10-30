@@ -16,6 +16,12 @@ extern "C" {
 #endif
 
 
+/* Opaque structures to hide cryptographic implementation details. */
+//struct cms_msg;
+//struct cms_tst;
+struct x509_crt;
+
+
 /*
  * @brief Initialises cryptographic back-end.
  */
@@ -23,65 +29,92 @@ int init_crypto(void);
 
 
 /*!
- * @brief Verifies signed message signature.
+ * @brief Verifies signature of raw signed message.
  *
- * @param[in] raw     Raw signed message buffer.
- * @param[in] raw_len Signed message size.
+ * @param[in] der      Buffer containing DER encoded CMS.
+ * @param[in] der_size DER size.
  * @return  1 if signature is valid,
  *          0 if signature is invalid,
  *         -1 on other errors.
  */
-int verify_raw_message_signature(const void *raw, size_t raw_len);
+int raw_msg_verify_signature(const void *der, size_t der_size);
 
 
 /*!
- * @brief Verifies whether message signature was valid at given date.
+ * @brief Verifies whether raw message signature is valid at given date.
  *
- * @param[in] raw       Raw signed message buffer.
- * @param[in] raw_len   Signed message size.
- * @param[in] date      Date against to check the certificate.
+ * @param[in] der       Buffer containing DER encoded CMS.
+ * @param[in] der_size  DER size.
+ * @param[in] utc_time  Date against to check the certificate.
  * @param[in] crl_check Whether to check the CRL if available.
  * @return  1 if signature is valid at given date,
  *          0 if signature is invalid at given date,
  *         -1 on other errors.
  */
-int verify_raw_message_signature_date(const void *raw, size_t raw_len,
+int raw_msg_verify_signature_date(const void *der, size_t der_size,
     time_t utc_time, int crl_check);
 
 
 /*!
- * @brief Verifies qualified time-stamp signature and parses the time-stamp
- *     value. Time-stamp format follows RFC 3161.
+ * @brief Verifies signature of raw qualified time-stamp and parses
+ *     the time-stamp value. Time-stamp format follows RFC 3161.
  *
- * @param[in] data      Times-tamp data.
- * @param[in] data_len  Size of data in buffer.
+ * @param[in]  der      Buffer containing DER encoded CMS.
+ * @param[in]  der_size DER size.
  * @param[out] utc_time Value of time-stamp if valid.
  * @return  1 if signature is valid,
  *          0 if signature is invalid,
  *         -1 on other errors.
  */
-int verify_qualified_timestamp(const void *data, size_t data_len,
-    time_t *utc_time);
+int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time);
 
 
 /*!
- * @brief Retrieve signing certificate from supplied CMS.
+ * @brief Returns X509 certificate structure from certificate obtained from
+ *     supplied raw CMS message.
  *
- * @patam[in]  data      CMS data.
- * @param[in]  data_len  Size of the data portion.
- * @param[out] sign_cert Retrieved signing certificate in DER format.
- * @param[out] cert_len  Size of signing certificate.
- * @return 0 on success, -1 else. The received certificate must be freed.
+ * @param[in] der      Buffer containing DER encoded CMS.
+ * @param[in] der_size DER size.
+ * @return Pointer to new certificate structure, NULL on failure.
  */
-int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
-    size_t *cert_len);
+struct x509_crt * raw_cms_signing_cert(const void *der, size_t der_size);
 
 
 /*!
- * @brief Get some certificate information.
+ * @brief Destroy certificate structure.
  *
- * @param[in]  data     Certificate data.
- * @param[in]  data_len Certificate data length.
+ * @param[in,out] x509_crt X09 certificate structure to destroy.
+ */
+void x509_crt_destroy(struct x509_crt *x509_crt);
+
+
+/*!
+ * @brief Write X509 certificate in DER format into a buffer.
+ *
+ * @param[in] x509_crt  X509 certificate.
+ * @param[out] der_out  Output buffer.
+ * @param[out] out_size Generated buffer size.
+ * @return  0 on success,
+ *         -1 else.
+ */
+int x509_crt_to_der(struct x509_crt *x509_crt, void **der_out,
+    size_t *out_size);
+
+
+/*!
+ * @brief Read X509 certificate from DER buffer.
+ *
+ * @param[in] der      DER buffer containing X509 certificate.
+ * @param[in] der_size DER size.
+ * @return Pointer to new certificate structure, NULL on failure.
+ */
+struct x509_crt * x509_crt_from_der(const void *der, size_t der_size);
+
+
+/*!
+ * @brief Get information about the certificate issuer.
+ *
+ * @param[in]  x509_crt X509 certificate.
  * @param[out] o        Organisation string.
  * @param[out] ou       Organisation unit.
  * @param[out] n        Name.
@@ -90,18 +123,19 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
  *
  * @note Use free() to free all returned strings.
  */
-int cert_information(const void *data, size_t data_len,
+int x509_crt_issuer_info(struct x509_crt *x509_crt,
     char **o, char **ou, char **n, char **c);
 
 
 /*!
  * @brief Verify certificate.
  *
+ * @param[in] x509_crt X509 certificate.
  * @return  1 if certificate valid,
  *          0 if certificate invalid,
  *         -1 on other errors.
  */
-int cert_verify(const void *der, size_t der_len);
+int x509_crt_verify(struct x509_crt *x509_crt);
 
 
 #ifdef __cplusplus

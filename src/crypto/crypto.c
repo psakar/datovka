@@ -57,14 +57,14 @@ X509_STORE *ca_certs = NULL;
 
 
 /*!
- * @brief Read certificate from a DER string.
+ * @brief Read certificate from a PEM string.
  *
  * @param[in,out] store   Certificate storage.
- * @param[in]     der_str Certificate string.
+ * @param[in]     pem_str Certificate string.
  * @return 0 certificate was parsed and was stored, -1 else.
  */
 static
-int X509_store_add_cert_der(X509_STORE *store, const char *der_str);
+int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str);
 
 
 /*!
@@ -164,7 +164,7 @@ time_t timegm_utc(struct tm *tm);
  * @param[out] der_len Size of the allocate buffer.
  */
 static
-int x509_get_pem(X509 *x509, void **der, size_t *der_len);
+int x509_get_der(X509 *x509, void **der, size_t *der_len);
 
 
 //#define PRINT_CERTS 1
@@ -181,7 +181,7 @@ int x509_printf(X509 *x509, FILE *fout);
 
 /* ========================================================================= */
 /*
- * @brief Initialises cryptographic back-end.
+ * Initialises cryptographic back-end.
  */
 int init_crypto(void)
 /* ========================================================================= */
@@ -247,7 +247,7 @@ int init_crypto(void)
 	pem_desc = pem_strs;
 	assert(NULL != pem_desc);
 	while ((NULL != pem_desc->name) && (NULL != pem_desc->pem)) {
-		if (0 != X509_store_add_cert_der(ca_certs, pem_desc->pem)) {
+		if (0 != X509_store_add_cert_pem(ca_certs, pem_desc->pem)) {
 			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
@@ -275,16 +275,15 @@ fail:
 /*
  * Verifies signed message signature.
  */
-int verify_raw_message_signature(const void *raw, size_t raw_len)
+int raw_msg_verify_signature(const void *der, size_t der_size)
 /* ========================================================================= */
 {
 	int ret;
-
 	CMS_ContentInfo *cms = NULL;
 
 	debug_func_call();
 
-	cms = load_cms(raw, raw_len);
+	cms = load_cms(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -306,9 +305,9 @@ fail:
 
 /* ========================================================================= */
 /*
- * Verifies whether message signature was valid at given date.
+ * Verifies whether raw message signature is valid at given date.
  */
-int verify_raw_message_signature_date(const void *raw, size_t raw_len,
+int raw_msg_verify_signature_date(const void *der, size_t der_size,
     time_t utc_time, int crl_check)
 /* ========================================================================= */
 {
@@ -320,7 +319,7 @@ int verify_raw_message_signature_date(const void *raw, size_t raw_len,
 
 	debug_func_call();
 
-	cms = load_cms(raw, raw_len);
+	cms = load_cms(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -370,11 +369,10 @@ fail:
 
 /* ========================================================================= */
 /*
- * Verifies qualified time-stamp signature and parses the time-stamp
- *     value. Time-stamp format follows RFC 3161.
+ * Verifies signature of raw qualified time-stamp and parses
+ *     the time-stamp value. Time-stamp format follows RFC 3161.
  */
-int verify_qualified_timestamp(const void *data, size_t data_len,
-    time_t *utc_time)
+int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 /* ========================================================================= */
 {
 	int ret;
@@ -386,7 +384,7 @@ int verify_qualified_timestamp(const void *data, size_t data_len,
 
 	debug_func_call();
 
-	cms = load_cms(data, data_len);
+	cms = load_cms(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -430,18 +428,21 @@ fail:
 
 /* ========================================================================= */
 /*
- * Retrieve signing certificate from supplied CMS.
+ * Returns X509 certificate structure from certificate obtained from
+ *     supplied raw CMS message.
  */
-int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
-    size_t *cert_len)
+struct x509_crt * raw_cms_signing_cert(const void *der, size_t der_size)
 /* ========================================================================= */
 {
 	int ret;
 	CMS_ContentInfo * cms = NULL;
 	STACK_OF(X509) *signers = NULL;
+	X509 *x509 = NULL;
 	int num_signers;
 
-	cms = load_cms(data, data_len);
+	debug_func_call();
+
+	cms = load_cms(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -466,8 +467,9 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
 		goto fail;
 	}
 
-	if (-1 == x509_get_pem(sk_X509_value(signers, 0),
-	        sign_cert, cert_len)) {
+	x509 = X509_dup(sk_X509_value(signers, 0));
+	if (NULL == x509) {
+		log_error("%s\n", "Cannot copy X509.");
 		goto fail;
 	}
 
@@ -475,7 +477,7 @@ int cms_signing_cert(const void *data, size_t data_len, void **sign_cert,
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 
-	return 0;
+	return (struct x509_crt *) x509;
 fail:
 	if (NULL != cms) {
 		CMS_ContentInfo_free(cms);
@@ -483,19 +485,61 @@ fail:
 	if (NULL != signers) {
 		sk_X509_free(signers);
 	}
-	return -1;
+	return NULL;
 }
 
 
 /* ========================================================================= */
 /*
- * Get some certificate information.
+ * Destroy certificate structure.
  */
-int cert_information(const void *data, size_t data_len,
+void x509_crt_destroy(struct x509_crt *x509_crt)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	assert(NULL != x509_crt);
+
+	X509_free((X509 *) x509_crt);
+}
+
+
+/* ========================================================================= */
+/*
+ * Write X509 certificate in DER format into a buffer.
+ */
+int x509_crt_to_der(struct x509_crt *x509_crt, void **der_out,
+    size_t *out_size)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	return x509_get_der((X509 *) x509_crt, der_out, out_size);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Read X509 certificate from DER buffer.
+ */
+struct x509_crt * x509_crt_from_der(const void *der, size_t der_size)
+/* ========================================================================= */
+{
+	debug_func_call();
+
+	return (struct x509_crt *) load_x509(der, der_size);
+}
+
+
+/* ========================================================================= */
+/*
+ * Get information about the certificate issuer.
+ */
+int x509_crt_issuer_info(struct x509_crt *x509_crt,
     char **o, char **ou, char **n, char **c)
 /* ========================================================================= */
 {
-	X509 *x509 = NULL;
 	const X509_NAME *subject;
 	const STACK_OF(X509_NAME_ENTRY) *entries;
 	int num_entries, i;
@@ -505,12 +549,9 @@ int cert_information(const void *data, size_t data_len,
 	ASN1_STRING *str;
 	char **out_str;
 
-	x509 = load_x509(data, data_len);
-	if (NULL == x509) {
-		goto fail;
-	}
+	debug_func_call();
 
-	subject = X509_get_subject_name(x509);
+	subject = X509_get_subject_name((X509 *) x509_crt);
 	if (NULL == subject) {
 		goto fail;
 	}
@@ -562,14 +603,9 @@ int cert_information(const void *data, size_t data_len,
 		}
 	}
 
-	X509_free(x509); x509 = NULL;
-
 	return 0;
 
 fail:
-	if (NULL != x509) {
-		X509_free(x509);
-	}
 	return -1;
 }
 
@@ -578,18 +614,18 @@ fail:
 /*
  * Verify certificate.
  */
-int cert_verify(const void *der, size_t der_len)
+int x509_crt_verify(struct x509_crt *x509_crt)
 /* ========================================================================= */
 {
 	int ret = 0;
-	X509 *x509 = NULL;
 	X509_STORE_CTX *csc = NULL;
 	unsigned long err;
 
-	x509 = load_x509(der, der_len);
-	if (NULL == x509) {
-		goto fail;
-	}
+	debug_func_call();
+
+#if defined PRINT_CERTS
+	x509_printf((X509 *) x509_crt, stderr);
+#endif /* PRINT_CERTS */
 
 	csc = X509_STORE_CTX_new();
 	if (NULL == csc) {
@@ -601,7 +637,7 @@ int cert_verify(const void *der, size_t der_len)
 		goto fail;
 	}
 
-	if (!X509_STORE_CTX_init(csc, ca_certs, x509, NULL)) {
+	if (!X509_STORE_CTX_init(csc, ca_certs, (X509 *) x509_crt, NULL)) {
 		while (0 != (err = ERR_get_error())) {
 			log_error("openssl error: %s\n",
 			    ERR_error_string(err, NULL));
@@ -622,15 +658,11 @@ int cert_verify(const void *der, size_t der_len)
 		ret = 0;
 	}
 
-	X509_free(x509); x509 = NULL;
 	X509_STORE_CTX_free(csc); csc = NULL;
 
 	return ret;
 
 fail:
-	if (NULL != x509) {
-		X509_free(x509);
-	}
 	if (NULL != csc) {
 		X509_STORE_CTX_free(csc);
 	}
@@ -639,11 +671,11 @@ fail:
 
 
 /* ========================================================================= */
-/*!
- * @brief Read certificate from der string.
+/*
+ * Read certificate from PEM string.
  */
 static
-int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
+int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 /* ========================================================================= */
 {
 	BIO *bio = NULL;
@@ -656,12 +688,12 @@ int X509_store_add_cert_der(X509_STORE *store, const char *der_str)
 	if (NULL == store) {
 		goto fail;
 	}
-	assert(NULL != der_str);
-	if (NULL == der_str) {
+	assert(NULL != pem_str);
+	if (NULL == pem_str) {
 		goto fail;
 	}
 
-	bio = BIO_new_mem_buf((void *) der_str, strlen(der_str));
+	bio = BIO_new_mem_buf((void *) pem_str, strlen(pem_str));
 	if (NULL == bio) {
 		log_error("%s\n", "Cannot create memory BIO.");
 		while (0 != (err = ERR_get_error())) {
@@ -1067,6 +1099,8 @@ int x509_check_date(const X509 *x509, time_t utc_time)
 
 	/* ASN1_TIME is an alias for ASN1_STRING. */
 
+	debug_func_call();
+
 	assert(NULL != x509);
 	if (NULL == x509) {
 		goto fail;
@@ -1263,7 +1297,7 @@ time_t timegm_utc(struct tm *tm)
  * Converts X509 certificate to DER.
  */
 static
-int x509_get_pem(X509 *x509, void **der, size_t *der_len)
+int x509_get_der(X509 *x509, void **der, size_t *der_len)
 /* ========================================================================= */
 {
 	BIO *bio = NULL;

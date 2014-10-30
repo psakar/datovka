@@ -857,7 +857,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	if (signedMsg) {
 		/* Verify message signature. */
-		int ret = verify_raw_message_signature(message->raw,
+		int ret = raw_msg_verify_signature(message->raw,
 		    message->raw_length);
 		qDebug() << "Verification ret" << ret;
 		if (1 == ret) {
