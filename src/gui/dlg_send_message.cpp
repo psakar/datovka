@@ -58,7 +58,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	QModelIndex index;
 	const QStandardItem *item;
 
-	this->recipientTableWidget->setColumnWidth(0,60);
+	this->recipientTableWidget->setColumnWidth(0,70);
 	this->recipientTableWidget->setColumnWidth(1,180);
 	this->recipientTableWidget->setColumnWidth(2,240);
 
