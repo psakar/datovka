@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
 #include <QPrinter>
 //#include <QPrinterInfo>
 #include <QSettings>
@@ -12,6 +14,7 @@
 #include <QTableView>
 #include <QTemporaryFile>
 #include <QTimer>
+#include <QUrl>
 
 #include "datovka.h"
 #include "src/common.h"
@@ -38,6 +41,8 @@
 #define WIN_POSITION_Y "y"
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
+
+QNetworkAccessManager* nam;
 
 #define showStatusTextWithTimeout(qStr) \
 	do { \
@@ -257,7 +262,6 @@ void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
 	if (globPref.check_new_versions) {
-
 		if (globPref.send_stats_with_version_checks) {
 			checkNewDatovkaVersion(QCoreApplication::applicationVersion());
 		} else {
@@ -287,10 +291,43 @@ void MainWindow::checkNewDatovkaVersion(QString version)
 	debugFuncCall();
 
 	if (version.isNull()) {
-		/* TODO - check new version only */
+		nam = new QNetworkAccessManager(this);
+		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
+		QNetworkReply* reply = nam->get(QNetworkRequest(url));
 	} else {
-		/* TODO - sent current version and check new version */
+		/* TODO */
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Version response slot
+ */
+void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	 if (reply->error() == QNetworkReply::NoError) {
+		QByteArray bytes = reply->readAll();
+		QString str = QString::fromUtf8(bytes.data(), bytes.size());
+		if (str > QCoreApplication::applicationVersion()) {
+			QMessageBox::information(this,
+			    tr("New version of Datovka"),
+			    tr("New version of Datovka is available.") + "\n\n" +
+			    tr("Current version is %1").arg(QCoreApplication::applicationVersion())
+			    + "\n" +
+			    tr("New version is %1").arg(str) +
+			    + "\n\n" +
+			    tr("Do you wnat to update Datovka now?"),
+			    QMessageBox::Yes | QMessageBox::No);
+		}
+	 }
+
+	delete reply;
 }
 
 

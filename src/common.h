@@ -25,6 +25,9 @@
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
 #define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/page/2425/"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
+#define DATOVKA_CHECK_NEW_VERSION_URL "http://mates.php5.cz/Version"
+
+
 
 typedef enum {
 	USER_NAME = 0,

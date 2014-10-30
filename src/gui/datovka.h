@@ -11,6 +11,7 @@
 #include <QProgressBar>
 #include <QThread>
 #include <QPushButton>
+#include <QNetworkReply>
 
 #include "src/common.h"
 #include "src/io/account_db.h"
@@ -47,8 +48,13 @@ protected:
 private slots:
 
 	/*!
+	 * @brief Version response slot.
+	 */
+	void datovkaVersionResponce(QNetworkReply* reply);
+
+	/*!
 	 * @brief Verify if is a connection to ISDS and databox
-	 * exists for a new account
+	 * exists for a new account.
 	 */
 	void getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo);
 
