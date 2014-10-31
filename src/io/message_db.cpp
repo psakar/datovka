@@ -2674,12 +2674,14 @@ fail:
 /*
  * Returns signing certificate of message.
  */
-QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId) const
+QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId,
+    QString &saId, QString &saName) const
 /* ========================================================================= */
 {
 	struct x509_crt *x509_crt = NULL;
 	void *der = NULL;
 	size_t der_size;
+	char *sa_id = NULL, *sa_name = NULL;
 
 	QByteArray rawBytes =
 	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
@@ -2698,7 +2700,18 @@ QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId) const
 		return QSslCertificate();
 	}
 
+	if (0 != x509_crt_algorithm_info(x509_crt, &sa_id, &sa_name)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return QSslCertificate();
+	}
+
 	x509_crt_destroy(x509_crt); x509_crt = NULL;
+
+	saId = sa_id;
+	saName = sa_name;
+
+	free(sa_id); sa_id = NULL;
+	free(sa_name); sa_name = NULL;
 
 	QByteArray certRawBytes((char *) der, der_size);
 	free(der); der = NULL;

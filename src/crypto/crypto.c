@@ -656,6 +656,68 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Get signature algorithm information.
+ */
+int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
+    char **sa_name)
+/* ========================================================================= */
+{
+/* According to documentation of OBJ_obj2txt 80 should be enough. */
+#define MAX_ID_LEN 80
+	const X509_ALGOR *sa;
+	const ASN1_OBJECT *alg;
+	int sig_nid;
+	const char *ln;
+	char id[MAX_ID_LEN];
+	int id_len;
+
+	debug_func_call();
+
+	assert(NULL != x509_crt);
+	if (NULL == x509_crt) {
+		goto fail;
+	}
+
+#if defined PRINT_CERTS
+	fprintf(stderr, ">>>\n");
+	x509_printf((X509 *) x509_crt, stderr);
+	fprintf(stderr, "<<<\n");
+#endif /* PRINT_CERTS */
+
+	sa = ((X509 *) x509_crt)->sig_alg;
+	alg = sa->algorithm;
+
+	if (NULL != sa_id) {
+		id_len = OBJ_obj2txt(id, MAX_ID_LEN, alg, 1);
+		id[MAX_ID_LEN - 1] = '\0';
+		*sa_id = malloc(id_len + 1);
+		if (NULL != *sa_id) {
+			memcpy(*sa_id, id, id_len);
+			(*sa_id)[id_len] = '\0';
+		}
+	}
+
+	if (NULL != sa_name) {
+		sig_nid = OBJ_obj2nid(alg);
+		ln = OBJ_nid2ln(sig_nid);
+		*sa_name = malloc(strlen(ln) + 1);
+		if (NULL != *sa_name) {
+			memcpy(*sa_name, ln, strlen(ln));
+			(*sa_name)[strlen(ln)] = '\0';
+		}
+	}
+
+	return 0;
+
+fail:
+	return -1;
+
+#undef MAX_ID_LEN
+}
+
+
+/* ========================================================================= */
+/*
  * Verify certificate.
  */
 int x509_crt_verify(struct x509_crt *x509_crt)
@@ -668,7 +730,9 @@ int x509_crt_verify(struct x509_crt *x509_crt)
 	debug_func_call();
 
 #if defined PRINT_CERTS
+	fprintf(stderr, ">>>\n");
 	x509_printf((X509 *) x509_crt, stderr);
+	fprintf(stderr, "<<<\n");
 #endif /* PRINT_CERTS */
 
 	csc = X509_STORE_CTX_new();

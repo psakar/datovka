@@ -1,5 +1,7 @@
 
 
+#include <QSslCertificate>
+
 #include "dlg_signature_detail.h"
 #include "ui_dlg_signature_detail.h"
 
@@ -90,6 +92,29 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	this->cImage->setIcon(QIcon(iconPath));
 	this->cStatus->setTextFormat(Qt::RichText);
 	this->cStatus->setText(resStr);
+
+	QString saId, saName;
+	QSslCertificate signingCert =
+	    m_messageDb.rmsgdtSigningCertificate(m_dmId, saId, saName);
+
+	/* TODO -- Various check results. */
+
+	resStr.clear();
+	if (!signingCert.isNull()) {
+		/* Certificate information. */
+		resStr = "<b>" + QObject::tr("Version: ") + "</b>" +
+		    QString(signingCert.version()) + "<br/>";
+		resStr += "<b>" + QObject::tr("Serial number: ") + "</b>" +
+		    QString(signingCert.serialNumber()) + " (" +
+		    QString::number( /* Convert do decimal. */
+		        ("0x" + QString(signingCert.serialNumber()).replace(
+		                    ":", "")).toUInt(0, 16), 10) + ")<br/>";
+		resStr += "<b>" + QObject::tr("Signature algorithm: ") +
+		    "</b>" + saId + " (" + saName + ")<br/>";
+
+		this->cDetail->setTextFormat(Qt::RichText);
+		this->cDetail->setText(resStr);
+	}
 }
 
 

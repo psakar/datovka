@@ -145,11 +145,26 @@ void crt_issuer_info_clear(struct crt_issuer_info *cii);
  * @param[out] cii      Certificate issuer information to be set.
  * @return 0 on success, -1 on error.
  *
- * @note Use free() to free all returned strings. The function is
+ * @note Don;t forget to free the returned value. The function is
  *     implemented because QSslCertificate somehow ignores OU.
  */
 int x509_crt_issuer_info(struct x509_crt *x509_crt,
     struct crt_issuer_info *cii);
+
+
+/*!
+ * @brief Get signature algorithm information.
+ *
+ * @param[in]  x509_crt X509 certificate.
+ * @param[out] sa_id    Signature algorithm identifier string.
+ * @param[out] sa_name  Signature algorithm name.
+ * @return 0 on success, -1 on error.
+ *
+ * @note Use free() to free all returned values. The function is
+ *     implemented because QSslCertificate does not support this functionality.
+ */
+int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
+    char **sa_name);
 
 
 /*!

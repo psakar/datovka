@@ -222,10 +222,13 @@ public:
 	/*!
 	 * @brief Returns signing certificate of message.
 	 *
-	 * @param[in] dmId Message identifier.
+	 * @param[in]  dmId   Message identifier.
+	 * @param[out] saId   Signature algorithm identifier.
+	 * @param[out] saName Signature algorithm name.
 	 * @return Null certificate on failure.
 	 */
-	QSslCertificate rmsgdtSigningCertificate(int dmId) const;
+	QSslCertificate rmsgdtSigningCertificate(int dmId,
+	    QString &saId, QString &saName) const;
 
 	/*!
 	 * @brief Was message locally read.
