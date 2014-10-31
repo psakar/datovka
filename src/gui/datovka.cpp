@@ -261,12 +261,10 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
+	isMainWindow = true;
+
 	if (globPref.check_new_versions) {
-		if (globPref.send_stats_with_version_checks) {
-			checkNewDatovkaVersion(QCoreApplication::applicationVersion());
-		} else {
-			checkNewDatovkaVersion(QString());
-		}
+		checkNewDatovkaVersion();
 	}
 
 	if (ui->accountList->model()->rowCount() <= 0) {
@@ -276,8 +274,6 @@ void MainWindow::setWindowsAfterInit(void)
 			synchroniseAllAccounts();
 		}
 	}
-
-	isMainWindow = true;
 }
 
 
@@ -285,19 +281,19 @@ void MainWindow::setWindowsAfterInit(void)
 /*
  * Sent and check a new version of Datovka
  */
-void MainWindow::checkNewDatovkaVersion(QString version)
+void MainWindow::checkNewDatovkaVersion(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	if (version.isNull()) {
+	if (globPref.send_stats_with_version_checks) {
+		/* TODO - sent info about datovka, libs and OS to our server */
+	} else {
 		nam = new QNetworkAccessManager(this);
 		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
 		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
 		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
-		QNetworkReply* reply = nam->get(QNetworkRequest(url));
-	} else {
-		/* TODO */
+		nam->get(QNetworkRequest(url));
 	}
 }
 
@@ -315,17 +311,36 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 		QByteArray bytes = reply->readAll();
 		QString str = QString::fromUtf8(bytes.data(), bytes.size());
 		if (str > QCoreApplication::applicationVersion()) {
-			QMessageBox::information(this,
+#ifdef WIN32
+			int res = QMessageBox::information(this,
 			    tr("New version of Datovka"),
-			    tr("New version of Datovka is available.") + "\n\n" +
-			    tr("Current version is %1").arg(QCoreApplication::applicationVersion())
+			    tr("New version of Datovka is available.") +"\n\n"+
+			    tr("Current version is %1").
+			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
 			    tr("New version is %1").arg(str) +
 			    + "\n\n" +
-			    tr("Do you wnat to update Datovka now?"),
+			    tr("Do you want to download new version?"),
 			    QMessageBox::Yes | QMessageBox::No);
+			if (QMessageBox::Yes == res) {
+				QDesktopServices::openUrl(
+				QUrl(DATOVKA_DOWNLOAD_URL,
+				QUrl::TolerantMode));
+			}
+#else
+			QMessageBox::information(this,
+			    tr("New version of Datovka"),
+			    tr("New version of Datovka is available.") +"\n\n"+
+			    tr("Current version is %1").
+			        arg(QCoreApplication::applicationVersion())
+			    + "\n" +
+			    tr("New version is %1").arg(str)
+			    + "\n\n" +
+			    tr("Update your application..."),
+			    QMessageBox::Ok);
+#endif
 		}
-	 }
+	}
 
 	delete reply;
 }

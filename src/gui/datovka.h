@@ -616,7 +616,7 @@ private:
 	/*!
 	 * @brief Sent and check a new version of Datovka.
 	 */
-	void checkNewDatovkaVersion(QString version);
+	void checkNewDatovkaVersion(void);
 
 	/*!
 	 * @brief Download complete message synchronously

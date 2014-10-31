@@ -26,6 +26,7 @@
 #define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/page/2425/"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 #define DATOVKA_CHECK_NEW_VERSION_URL "http://mates.php5.cz/Version"
+#define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
 
 
 
