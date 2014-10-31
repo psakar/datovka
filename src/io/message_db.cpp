@@ -105,9 +105,9 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    Qt::DisplayRole).toInt();
 			if ((m_overridden.value(dmId, false)) ||
 			    QSqlQueryModel::data(index).toBool()) {
-				return QIcon(ICON_3PARTY_PATH "tick_16.png");
+				return QIcon(ICON_14x14_PATH "green.png");
 			} else {
-				return QIcon(ICON_3PARTY_PATH "delete_16.png");
+				return QIcon(ICON_14x14_PATH "grey.png");
 			}
 		}
 
