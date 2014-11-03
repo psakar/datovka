@@ -70,5 +70,12 @@
         <file>icons/14x14/grey.png</file>
         <file>icons/14x14/green.png</file>
         <file>icons/14x14/blue.png</file>
+        <file>icons/16x16/grey.png</file>
+        <file>icons/16x16/green.png</file>
+        <file>icons/16x16/red.png</file>
+        <file>icons/16x16/yellow.png</file>
+        <file>icons/16x16/blue.png</file>
+        <file>icons/16x16/black.png</file>
+        <file>icons/16x16/brown.png</file>
     </qresource>
 </RCC>
