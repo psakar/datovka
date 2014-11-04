@@ -294,6 +294,9 @@
                     <height>0</height>
                    </size>
                   </property>
+                  <property name="toolTip">
+                   <string>Verify signature of message</string>
+                  </property>
                   <property name="text">
                    <string>Verify
 signature</string>
@@ -321,7 +324,7 @@ signature</string>
                    </size>
                   </property>
                   <property name="toolTip">
-                   <string/>
+                   <string>Show details about electronic signature of this message</string>
                   </property>
                   <property name="text">
                    <string>Signature
@@ -340,19 +343,37 @@ details</string>
                 </item>
                 <item>
                  <widget class="QComboBox" name="messageStateCombo">
+                  <property name="toolTip">
+                   <string>For current message you can locally set
+if the message is not processed, if the 
+message is in progress or if was already 
+sent reply on this message</string>
+                  </property>
                   <item>
                    <property name="text">
                     <string>Unsettled</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../../../res/resources.qrc">
+                     <normaloff>:/icons/16x16/red.png</normaloff>:/icons/16x16/red.png</iconset>
                    </property>
                   </item>
                   <item>
                    <property name="text">
                     <string>In progress</string>
                    </property>
+                   <property name="icon">
+                    <iconset resource="../../../res/resources.qrc">
+                     <normaloff>:/icons/16x16/yellow.png</normaloff>:/icons/16x16/yellow.png</iconset>
+                   </property>
                   </item>
                   <item>
                    <property name="text">
                     <string>Settled</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../../../res/resources.qrc">
+                     <normaloff>:/icons/16x16/grey.png</normaloff>:/icons/16x16/grey.png</iconset>
                    </property>
                   </item>
                  </widget>

@@ -79,5 +79,6 @@
         <file>icons/16x16/brown.png</file>
         <file>icons/14x14/attachment.png</file>
         <file>icons/16x16/readcol.png</file>
+        <file>icons/16x16/flag.png</file>
     </qresource>
 </RCC>
