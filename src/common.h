@@ -30,7 +30,7 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
 
 
-
+/* retrun values of Datovka login methods */
 typedef enum {
 	USER_NAME = 0,
 	CERTIFICATE = 1,
@@ -39,7 +39,14 @@ typedef enum {
 	TOTP = 4
 } LoginMethodsIndex;
 
-/* retrun values of qDatovka functions */
+/* retrun values of Datovka message state */
+typedef enum {
+	UNSETTLED = 0,
+	IN_PROGRESS = 1,
+	SETTLED = 2
+} MessageProcessState;
+
+/* retrun values of Datovka functions */
 typedef enum {
 	Q_SUCCESS = 0,   // all operations success
 	Q_CANCEL,	 // operation cancelled or file dialog cancelled

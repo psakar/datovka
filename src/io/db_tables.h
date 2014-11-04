@@ -109,6 +109,7 @@ extern Tbl msgsTbl; /*!< Table 'messages'. */
 extern Tbl flsTbl; /*!< Table 'files'. */
 extern Tbl hshsTbl; /*!< Table 'hashes'. */
 extern Tbl evntsTbl; /*!< Table 'events'. */
+extern Tbl prcstTbl; /*!< Table 'process_state'. */
 extern Tbl rwmsgdtTbl; /*!< Table 'raw_message_data'. */
 extern Tbl rwdlvrinfdtTbl; /*!< Table 'raw_delivery_info_data'. */
 extern Tbl smsgdtTbl; /*!< Table 'supplementary_message_data'. */

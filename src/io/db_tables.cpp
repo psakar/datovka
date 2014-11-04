@@ -656,3 +656,32 @@ namespace MsgcrtdtTbl {
 Tbl msgcrtdtTbl(MsgcrtdtTbl::tabName, MsgcrtdtTbl::knownAttrs,
     MsgcrtdtTbl::attrProps, MsgcrtdtTbl::colConstraints,
     MsgcrtdtTbl::tblConstraint);
+
+
+namespace PrcstTbl {
+	const QString tabName("process_state");
+
+	const QVector< QPair<QString, EntryType> > knownAttrs = {
+	{"message_id", DB_INTEGER},
+	{"state",      DB_INTEGER}
+	/*
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID"),
+	 */
+	};
+
+	const QMap<QString, QString> colConstraints; /* Empty. */
+
+	const QString &tblConstraint(
+	    ",\n"
+	    "        FOREIGN KEY(message_id) REFERENCES messages (dmID)"
+	);
+
+	const QMap<QString, AttrProp> attrProps = {
+	{"message_id", {DB_INTEGER, ""}},
+	{"state",      {DB_INTEGER, ""}}
+	};
+} /* namespace PrcstTbl */
+Tbl prcstTbl(PrcstTbl::tabName, PrcstTbl::knownAttrs,
+    PrcstTbl::attrProps, PrcstTbl::colConstraints,
+    PrcstTbl::tblConstraint);
+

@@ -425,6 +425,17 @@ public:
 	 */
 	bool msgsSetVerified(int dmId, bool verified);
 
+	/*!
+	 * @brief Set process state of received message.
+	 * @return True if update/insert was successful.
+	 */
+	bool msgSetProcessState(int dmId, int state, bool insert);
+
+	/*!
+	 * @brief Get process state of received message.
+	 */
+	int msgGetProcessState(int dmId);
+
 
 protected:
 	/*!

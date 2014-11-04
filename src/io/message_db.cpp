@@ -2208,13 +2208,13 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 	query.bindValue(":download_date", dmDownloadTime);
 	query.bindValue(":custom_data", "null");
 
-	if (query.exec()) {
-		return true;
-	} else {
+	if (!query.exec()) {
 		qDebug() << "Insert supplementary_message_data error:"
 		    << query.lastError();
 		return false;
 	}
+
+	return msgSetProcessState(dmId, UNSETTLED, true);
 }
 
 
@@ -2528,6 +2528,11 @@ void MessageDb::createEmptyMissingTables(void)
 		ret = msgcrtdtTbl.createEmpty(this->m_db);
 		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
 	}
+	if (!prcstTbl.existsInDb(this->m_db)) {
+		ret = prcstTbl.createEmpty(this->m_db);
+		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
+	}
+
 }
 
 
@@ -2617,6 +2622,64 @@ bool MessageDb::msgsSetVerified(int dmId, bool verified)
 	}
 	query.bindValue(":verified", verified);
 	query.bindValue(":dmId", dmId);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Get process state of received message
+ */
+int MessageDb::msgGetProcessState(int dmId)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT state FROM process_state WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		return -1;
+	}
+
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	}
+
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process state of received message
+ */
+bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	if (insert) {
+		queryStr = "INSERT INTO process_state ("
+		    "message_id, state) VALUES (:dmId, :state)";
+	} else {
+		queryStr = "UPDATE process_state SET state = :state WHERE "
+		    "message_id = :dmId";
+	}
+
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":state", state);
 	return query.exec();
 }
 

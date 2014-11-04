@@ -364,6 +364,11 @@ private slots:
 	void dataFromWorkerToStatusBarInfo(bool completed, QString accoutName,
 	    int rt, int rn, int st, int sn);
 
+	/*!
+	 * @brief set message process state into db
+	 */
+	void msgSetProcessStateToDb(int state);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;

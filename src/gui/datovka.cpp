@@ -423,7 +423,7 @@ void MainWindow::proxySettings(void)
 
 /* ========================================================================= */
 /*
- * Redraws widgets according to selected account item.
+ * Redraws widgets according to dd account item.
  */
 void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
@@ -708,6 +708,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	ui->signatureDetails->setEnabled(false);
 	ui->actionSave_attachment->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
+	ui->messageStateCombo->setEnabled(false);
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
 	 * handled multiple times.
@@ -734,6 +735,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 	/* Disable message/attachment related buttons. */
 	ui->downloadComplete->setEnabled(true);
+	ui->messageStateCombo->setEnabled(true);
 
 	if (0 != msgTblMdl) {
 		QModelIndex index = msgTblMdl->index(
@@ -773,6 +775,17 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
 		    ui->verifySignature));
 		ui->messageInfo->setReadOnly(true);
+
+		int msgState = messageDb->msgGetProcessState(msgId);
+		qDebug() << msgState;
+		/* msgState is -1 if message is not in database */
+		if (msgState >= 0) {
+			ui->messageStateCombo->setCurrentIndex(msgState);
+		} else {
+			/* insert message state into database */
+			messageDb->msgSetProcessState(msgId, UNSETTLED, true);
+			ui->messageStateCombo->setCurrentIndex(UNSETTLED);
+		}
 
 		/* Enable buttons according to database content. */
 		ui->verifySignature->setEnabled(
@@ -2284,6 +2297,9 @@ void MainWindow::connectMessageActionBarSlots(void)
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->signatureDetails, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
+	/* Message progress state currentIndexChanged */
+	connect(ui->messageStateCombo, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(msgSetProcessStateToDb(int)));
 }
 
 
@@ -5504,3 +5520,24 @@ void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo
 	ui->accountList->expand(index);
 }
 
+
+/* ========================================================================= */
+/*
+ * Set message process state into db
+ */
+void MainWindow::msgSetProcessStateToDb(int state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QModelIndex messageIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+
+	int msgId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toInt();
+
+	messageDb->msgSetProcessState(msgId, state, false);
+}
