@@ -777,7 +777,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageInfo->setReadOnly(true);
 
 		int msgState = messageDb->msgGetProcessState(msgId);
-		qDebug() << msgState;
+
 		/* msgState is -1 if message is not in database */
 		if (msgState >= 0) {
 			ui->messageStateCombo->setCurrentIndex(msgState);
