@@ -759,12 +759,14 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			 * the whole model.
 			 */
 			Q_ASSERT(0 != m_messageModel);
-			QModelIndex modelIndex =
-			    ui->messageList->selectionModel()->currentIndex();
-			Q_ASSERT(modelIndex.isValid());
 			m_messageModel->overrideRead(
-			    current.sibling(modelIndex.row(),
-				0).data().toInt(), true);
+			    current.sibling(current.row(),
+			        0).data().toInt(), true);
+			/* Inform the view that the model has changed. */
+			emit m_messageModel->dataChanged(
+			    current.sibling(current.row(), 0),
+			    current.sibling(current.row(),
+			        m_messageModel->columnCount() - 1));
 		}
 
 		/* Generate and show message information. */
@@ -1492,7 +1494,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	emit m_messageModel->dataChanged(
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
-	    m_messageModel->columnCount() - 1));
+	        m_messageModel->columnCount() - 1));
 
 	/*
 	 * TODO -- Create a separate function for reloading attachment

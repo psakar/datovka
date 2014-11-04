@@ -179,6 +179,12 @@ bool DbMsgsTblModel::overrideRead(int dmId, bool forceRead)
 {
 	m_overriddenRL[dmId] = forceRead;
 
+	/*
+	 * The model should be forced to emit dataChanged(). However, finding
+	 * the proper model index here is painful. Therefore ensure that the
+	 * signal is emitted after calling this function.
+	 */
+
 	return true;
 }
 
