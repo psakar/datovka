@@ -74,6 +74,10 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
 }
 
 
+#define READLOC_COL 5 /* Read locally. */
+#define ATTDOWN_COL 6 /* Attachment downloaded. */
+
+
 /* ========================================================================= */
 /*
  * Used for data conversion on display.
@@ -81,11 +85,9 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */
 {
-#define READLOC_COL 5 /* Read locally. */
-#define ATTDOWN_COL 6 /* Attachment downloaded. */
 	switch (role) {
 	case Qt::DisplayRole:
-		if (this->headerData(index.column(), Qt::Horizontal,
+		if (QSqlQueryModel::headerData(index.column(), Qt::Horizontal,
 		         ROLE_MSGS_DB_ENTRY_TYPE).toInt() == DB_DATETIME) {
 			/* Convert date on display. */
 			return dateTimeStrFromDbFormat(
@@ -93,8 +95,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    dateTimeDisplayFormat);
 		}
 		if ((READLOC_COL == index.column()) &&
-		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'read locally'. */
 			return QVariant();
 		}
@@ -110,8 +112,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case Qt::DecorationRole:
 		if ((READLOC_COL == index.column()) &&
-		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
@@ -124,8 +126,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			}
 		}
 		if ((ATTDOWN_COL == index.column()) &&
-		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'is downloaded'. */
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
@@ -142,8 +144,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if (DB_BOOLEAN == headerData(READLOC_COL, Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
+		if (DB_BOOLEAN == QSqlQueryModel::headerData(READLOC_COL,
+		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
 			/* In read messages. */
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
@@ -165,9 +167,68 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QSqlQueryModel::data(index, role);
 		break;
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Convert viewed header data.
+ */
+QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
+    int role) const
+/* ========================================================================= */
+{
+	switch (role) {
+	case Qt::DisplayRole:
+		if (READLOC_COL == section) {
+			/* Hide text for 'read locally'. */
+			return QVariant();
+		}
+		if (ATTDOWN_COL == section) {
+			/* Hide text for 'is downloaded'. */
+			return QVariant();
+		}
+
+		return QSqlQueryModel::headerData(section, orientation, role);
+		break;
+
+	case Qt::DecorationRole:
+		if (READLOC_COL == section) {
+			/* Show icon for 'read locally'. */
+			return QIcon(ICON_16x16_PATH "readcol.png");
+		}
+		if (ATTDOWN_COL == section) {
+			/* Show icon for 'is downloaded'. */
+			return QIcon(ICON_14x14_PATH "attachment.png");
+		}
+
+		return QSqlQueryModel::headerData(section, orientation, role);
+		break;
+
+	case Qt::ToolTipRole:
+		if (READLOC_COL == section) {
+			/* Tool tip for 'read locally'. */
+			return QSqlQueryModel::headerData(section, orientation,
+			    Qt::EditRole);
+		}
+		if (ATTDOWN_COL == section) {
+			/* Tool top for 'is downloaded'. */
+			return QSqlQueryModel::headerData(section, orientation,
+			    Qt::EditRole);
+		}
+
+		return QVariant();
+		break;
+
+	default:
+		return QSqlQueryModel::headerData(section, orientation, role);
+		break;
+	}
+}
+
+
 #undef READLOC_COL
 #undef ATTDOWN_COL
-}
 
 
 /* ========================================================================= */

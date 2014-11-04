@@ -40,6 +40,12 @@ public:
 	virtual QVariant data(const QModelIndex &index, int role) const;
 
 	/*!
+	 * @brief Convert viewed header data.
+	 */
+	virtual QVariant headerData(int section, Qt::Orientation orientation,
+	    int role) const;
+
+	/*!
 	 * @brief Override message as being read.
 	 *
 	 * @param[in] dmId      Message id.
