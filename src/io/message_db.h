@@ -45,13 +45,29 @@ public:
 	 * @param[in] dmId      Message id.
 	 * @param[in] forceRead Set whether to force read state.
 	 */
-	virtual bool overideRead(int dmId, bool forceRead = true);
+	virtual bool overrideRead(int dmId, bool forceRead = true);
+
+	/*!
+	 * @brief Override message as having its attachments having downloaded.
+	 *
+	 * @param[in] dmId            Message id.
+	 * @param[in] forceDownloaded Set whether to force attachments
+	 *                            downloaded state.
+	 */
+	virtual bool overrideDownloaded(int dmId, bool forceDownloaded = true);
 	/*
 	 * The view's proxy model cannot be accessed, so the message must be
 	 * addressed via its id rather than using the index.
 	 */
 private:
-	QMap<int, bool> m_overridden; /*!< Holds overriding information. */
+	QMap<int, bool> m_overriddenRL; /*!<
+	                                 * Holds overriding information for
+	                                 * read locally.
+	                                 */
+	QMap<int, bool> m_overriddenAD; /*!<
+	                                 * Holds overriding information for
+	                                 * downloaded attachments.
+	                                 */
 };
 
 

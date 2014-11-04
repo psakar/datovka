@@ -762,7 +762,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			QModelIndex modelIndex =
 			    ui->messageList->selectionModel()->currentIndex();
 			Q_ASSERT(modelIndex.isValid());
-			m_messageModel->overideRead(
+			m_messageModel->overrideRead(
 			    current.sibling(modelIndex.row(),
 				0).data().toInt(), true);
 		}
@@ -1467,7 +1467,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
 	accountIndex = AccountModel::indexTop(accountIndex);
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
+	QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(accountIndex);
 
 	QString msgIds = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toString();
@@ -1479,6 +1480,19 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 	showStatusTextWithTimeout(tr("Message \"%1\" "
 	    " was downloaded from ISDS server.").arg(msgIds));
+
+	/*
+	 * Mark message as having attachment downloaded without reloading
+	 * the whole model.
+	 */
+	Q_ASSERT(0 != m_messageModel);
+	m_messageModel->overrideDownloaded(
+	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(), true);
+	/* Inform the view that the model has changed. */
+	emit m_messageModel->dataChanged(
+	    messageIndex.sibling(messageIndex.row(), 0),
+	    messageIndex.sibling(messageIndex.row(),
+	    m_messageModel->columnCount() - 1));
 
 	/*
 	 * TODO -- Create a separate function for reloading attachment
