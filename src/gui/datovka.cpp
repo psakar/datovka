@@ -2292,14 +2292,14 @@ void MainWindow::connectMessageActionBarSlots(void)
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
-	/* Downloading attachments also trigers signature verification. */
+	/* Downloading attachments also triggers signature verification. */
 	connect(ui->verifySignature, SIGNAL(clicked()), this,
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->signatureDetails, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
-	/* Message progress state currentIndexChanged */
+	/* Sets message processing state. */
 	connect(ui->messageStateCombo, SIGNAL(currentIndexChanged(int)),
-	    this, SLOT(msgSetProcessStateToDb(int)));
+	    this, SLOT(msgSetSelectedMessageProcessState(int)));
 }
 
 
@@ -5525,10 +5525,27 @@ void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo
 /*
  * Set message process state into db
  */
-void MainWindow::msgSetProcessStateToDb(int state)
+void MainWindow::msgSetSelectedMessageProcessState(int state)
 /* ========================================================================= */
 {
 	debugFuncCall();
+
+	MessageProcessState procSt;
+	switch (state) {
+	case UNSETTLED:
+		procSt = UNSETTLED;
+		break;
+	case IN_PROGRESS:
+		procSt = IN_PROGRESS;
+		break;
+	case SETTLED:
+		procSt = SETTLED;
+		break;
+	default:
+		Q_ASSERT(0);
+		return;
+		break;
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -5540,4 +5557,14 @@ void MainWindow::msgSetProcessStateToDb(int state)
 	    messageIndex.row(), 0).data().toInt();
 
 	messageDb->msgSetProcessState(msgId, state, false);
+
+	Q_ASSERT(0 != m_messageModel);
+	m_messageModel->overrideProcessing(
+	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(),
+	    procSt);
+	/* Inform the view that the model has changed. */
+	emit m_messageModel->dataChanged(
+	    messageIndex.sibling(messageIndex.row(), 0),
+	    messageIndex.sibling(messageIndex.row(),
+	    m_messageModel->columnCount() - 1));
 }

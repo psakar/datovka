@@ -19,6 +19,8 @@
 #include <QVariant>
 #include <QVector>
 
+#include "src/common.h"
+
 
 /*!
  * @brief Custom message model class.
@@ -61,6 +63,15 @@ public:
 	 *                            downloaded state.
 	 */
 	virtual bool overrideDownloaded(int dmId, bool forceDownloaded = true);
+
+	/*!
+	 * @brief Override message processing state.
+	 *
+	 * @param[in] dmId       Message id.
+	 * @param[in] forceState Set forced value.
+	 */
+	virtual bool overrideProcessing(int dmId,
+	    MessageProcessState forceState);
 	/*
 	 * The view's proxy model cannot be accessed, so the message must be
 	 * addressed via its id rather than using the index.
@@ -74,6 +85,10 @@ private:
 	                                 * Holds overriding information for
 	                                 * downloaded attachments.
 	                                 */
+	QMap<int, int> m_overriddenPS; /*!<
+	                                * Holds overriding information for
+	                                * message processing state.
+	                                */
 };
 
 

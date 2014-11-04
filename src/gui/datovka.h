@@ -367,7 +367,7 @@ private slots:
 	/*!
 	 * @brief set message process state into db
 	 */
-	void msgSetProcessStateToDb(int state);
+	void msgSetSelectedMessageProcessState(int state);
 
 private:
 

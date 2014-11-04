@@ -40,7 +40,7 @@
  */
 const QVector<QString> MessageDb::receivedItemIds = {"dmID", "dmAnnotation",
     "dmSender", "dmDeliveryTime", "dmAcceptanceTime", "read_locally",
-    "is_downloaded"};
+    "is_downloaded", "process_status"};
 
 
 const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
@@ -69,13 +69,15 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
 /* ========================================================================= */
     : QSqlQueryModel(parent),
     m_overriddenRL(),
-    m_overriddenAD()
+    m_overriddenAD(),
+    m_overriddenPS()
 {
 }
 
 
 #define READLOC_COL 5 /* Read locally. */
 #define ATTDOWN_COL 6 /* Attachment downloaded. */
+#define PROCSNG_COL 7 /* Processing state. */
 
 
 /* ========================================================================= */
@@ -101,9 +103,15 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			return QVariant();
 		}
 		if ((ATTDOWN_COL == index.column()) &&
-		    (DB_BOOLEAN == headerData(index.column(), Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'is downloaded'. */
+			return QVariant();
+		}
+		if ((PROCSNG_COL == index.column()) &&
+		    (DB_INTEGER == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+			/* Hide text for 'process status'. */
 			return QVariant();
 		}
 
@@ -138,6 +146,30 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			} else {
 				return QVariant(); /* No icon. */
 			}
+		}
+		if ((PROCSNG_COL == index.column()) &&
+		    (DB_INTEGER == QSqlQueryModel::headerData(index.column(),
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+			/* Show icon for 'process status'. */
+			int dmId = QSqlQueryModel::data(
+			    index.sibling(index.row(), 0),
+			    Qt::DisplayRole).toInt();
+			switch (m_overriddenPS.value(dmId,
+			            QSqlQueryModel::data(index).toInt())) {
+			case UNSETTLED:
+				return QIcon(ICON_16x16_PATH "red.png");
+				break;
+			case IN_PROGRESS:
+				return QIcon(ICON_16x16_PATH "yellow.png");
+				break;
+			case SETTLED:
+				return QIcon(ICON_16x16_PATH "grey.png");
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+			return QVariant();
 		}
 
 		return QSqlQueryModel::data(index, role);
@@ -188,6 +220,10 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 			/* Hide text for 'is downloaded'. */
 			return QVariant();
 		}
+		if (PROCSNG_COL == section) {
+			/* Hide text for 'process status'. */
+			return QVariant();
+		}
 
 		return QSqlQueryModel::headerData(section, orientation, role);
 		break;
@@ -201,6 +237,10 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 			/* Show icon for 'is downloaded'. */
 			return QIcon(ICON_14x14_PATH "attachment.png");
 		}
+		if (PROCSNG_COL == section) {
+			/* Show icon for 'process status'. */
+			return QIcon(ICON_16x16_PATH "flag.png");
+		}
 
 		return QSqlQueryModel::headerData(section, orientation, role);
 		break;
@@ -212,7 +252,12 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 			    Qt::EditRole);
 		}
 		if (ATTDOWN_COL == section) {
-			/* Tool top for 'is downloaded'. */
+			/* Tool tip for 'is downloaded'. */
+			return QSqlQueryModel::headerData(section, orientation,
+			    Qt::EditRole);
+		}
+		if (PROCSNG_COL == section) {
+			/* Tool top for 'process status'. */
 			return QSqlQueryModel::headerData(section, orientation,
 			    Qt::EditRole);
 		}
@@ -229,6 +274,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 #undef READLOC_COL
 #undef ATTDOWN_COL
+#undef PROCSNG_COL
 
 
 /* ========================================================================= */
@@ -258,6 +304,26 @@ bool DbMsgsTblModel::overrideDownloaded(int dmId, bool forceDownloaded)
 /* ========================================================================= */
 {
 	m_overriddenAD[dmId] = forceDownloaded;
+
+	/*
+	 * The model should be forced to emit dataChanged(). However, finding
+	 * the proper model index here is painful. Therefore ensure that the
+	 * signal is emitted after calling this function.
+	 */
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Override message processing state.
+ */
+bool DbMsgsTblModel::overrideProcessing(int dmId,
+    MessageProcessState forceState)
+/* ========================================================================= */
+{
+	m_overriddenPS[dmId] = forceState;
 
 	/*
 	 * The model should be forced to emit dataChanged(). However, finding
@@ -356,16 +422,19 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
-	    "AS is_downloaded";
+	    "AS is_downloaded" ", ";
+	queryStr += "ifnull(process_state.state, 0) AS process_status";
 	queryStr += " FROM messages "
 	    "LEFT JOIN supplementary_message_data "
 	    "ON (messages.dmID = supplementary_message_data.message_id) "
 	    "LEFT JOIN raw_message_data "
 	    "ON (messages.dmId = raw_message_data.message_id) "
+	    "LEFT JOIN process_state "
+	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE (dbIDRecipient = :recipDbId) ";
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
@@ -403,6 +472,13 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("process_status" == receivedItemIds[i]) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Processing state"));
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -422,16 +498,19 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
-	    "AS is_downloaded";
+	    "AS is_downloaded" ", ";
+	queryStr += "ifnull(process_state.state, 0) AS process_status";
 	queryStr += " FROM messages "
 	    "LEFT JOIN supplementary_message_data "
 	    "ON (messages.dmID = supplementary_message_data.message_id) "
 	    "LEFT JOIN raw_message_data "
 	    "ON (messages.dmId = raw_message_data.message_id) "
+	    "LEFT JOIN process_state "
+	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE "
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
@@ -472,6 +551,13 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("process_status" == receivedItemIds[i]) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Processing state"));
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -491,16 +577,19 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (receivedItemIds.size() - 1); ++i) {
+	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
-	    "AS is_downloaded";
+	    "AS is_downloaded" ", ";
+	queryStr += "ifnull(process_state.state, 0) AS process_status";
 	queryStr += " FROM messages "
 	    "LEFT JOIN supplementary_message_data "
 	    "ON (messages.dmID = supplementary_message_data.message_id) "
 	    "LEFT JOIN raw_message_data "
 	    "ON (messages.dmId = raw_message_data.message_id) "
+	    "LEFT JOIN process_state "
+	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE "
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
@@ -542,6 +631,13 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("process_status" == receivedItemIds[i]) {
+			/* Description. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Processing state"));
+			/* Data type. */
+			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
+			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
