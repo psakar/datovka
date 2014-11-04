@@ -212,15 +212,21 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 {
 	switch (role) {
 	case Qt::DisplayRole:
-		if (READLOC_COL == section) {
+		if ((READLOC_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'read locally'. */
 			return QVariant();
 		}
-		if (ATTDOWN_COL == section) {
+		if ((ATTDOWN_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'is downloaded'. */
 			return QVariant();
 		}
-		if (PROCSNG_COL == section) {
+		if ((PROCSNG_COL == section) &&
+		    (DB_INTEGER == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Hide text for 'process status'. */
 			return QVariant();
 		}
@@ -229,15 +235,21 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::DecorationRole:
-		if (READLOC_COL == section) {
+		if ((READLOC_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'read locally'. */
 			return QIcon(ICON_16x16_PATH "readcol.png");
 		}
-		if (ATTDOWN_COL == section) {
+		if ((ATTDOWN_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'is downloaded'. */
 			return QIcon(ICON_14x14_PATH "attachment.png");
 		}
-		if (PROCSNG_COL == section) {
+		if ((PROCSNG_COL == section) &&
+		    (DB_INTEGER == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Show icon for 'process status'. */
 			return QIcon(ICON_16x16_PATH "flag.png");
 		}
@@ -246,17 +258,23 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::ToolTipRole:
-		if (READLOC_COL == section) {
+		if ((READLOC_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Tool tip for 'read locally'. */
 			return QSqlQueryModel::headerData(section, orientation,
 			    Qt::EditRole);
 		}
-		if (ATTDOWN_COL == section) {
+		if ((ATTDOWN_COL == section) &&
+		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Tool tip for 'is downloaded'. */
 			return QSqlQueryModel::headerData(section, orientation,
 			    Qt::EditRole);
 		}
-		if (PROCSNG_COL == section) {
+		if ((PROCSNG_COL == section) &&
+		    (DB_INTEGER == QSqlQueryModel::headerData(section,
+		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
 			/* Tool top for 'process status'. */
 			return QSqlQueryModel::headerData(section, orientation,
 			    Qt::EditRole);
