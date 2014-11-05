@@ -1,6 +1,8 @@
 
 
+#include <QDateTime>
 #include <QSslCertificate>
+#include <QTimeZone>
 
 #include "dlg_signature_detail.h"
 #include "ui_dlg_signature_detail.h"
@@ -101,6 +103,8 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 
 	resStr.clear();
 	if (!signingCert.isNull()) {
+		QStringList strList;
+
 		/* Certificate information. */
 		resStr = "<b>" + QObject::tr("Version: ") + "</b>" +
 		    QString(signingCert.version()) + "<br/>";
@@ -111,6 +115,75 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		                    ":", "")).toUInt(0, 16), 10) + ")<br/>";
 		resStr += "<b>" + QObject::tr("Signature algorithm: ") +
 		    "</b>" + saId + " (" + saName + ")<br/>";
+
+		resStr += "<b>" + QObject::tr("Issuer: ") + "</b><br/>";
+		strList = signingCert.issuerInfo(
+		    QSslCertificate::Organization);
+		if (strList.size() > 0) {
+			Q_ASSERT(1 == strList.size());
+			resStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Organisation: ") +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCert.issuerInfo(
+		    QSslCertificate::CommonName);
+		if (strList.size() > 0) {
+			Q_ASSERT(1 == strList.size());
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Name: ") +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCert.issuerInfo(
+		    QSslCertificate::CountryName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Country: ") +
+			    strList.first() + "<br/>";
+		}
+
+		resStr += "<b>" + QObject::tr("Validity: ") + "</b><br/>";
+		/*
+		 * QSslCertificate::effectiveDate() and
+		 * QSslCertificate::expiryDate() tend to wrong time zone
+		 * conversion.
+		 */
+		QDateTime incept, expir;
+		if (m_messageDb.rmsgdtSigningCertificateTimes(m_dmId, incept,
+		        expir)) {
+			resStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Valid from: ") +
+			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    incept.timeZone().abbreviation(incept) + "<br/>";
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Valid to: ") +
+			    expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    expir.timeZone().abbreviation(expir) + "<br/>";
+		}
+
+		resStr += "<b>" + QObject::tr("Subject: ") + "</b><br/>";
+		strList = signingCert.subjectInfo(
+		    QSslCertificate::Organization);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Organisation: ") +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCert.subjectInfo(
+		    QSslCertificate::CommonName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Name: ") +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCert.subjectInfo(
+		    QSslCertificate::SerialNumber);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Serial number: ") +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCert.subjectInfo(
+		    QSslCertificate::CountryName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Country: ") +
+			    strList.first() + "<br/>";
+		}
 
 		this->cDetail->setTextFormat(Qt::RichText);
 		this->cDetail->setText(resStr);

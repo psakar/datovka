@@ -3046,6 +3046,45 @@ QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId,
 
 /* ========================================================================= */
 /*
+ * Returns signing certificate inception and expiration date.
+ */
+bool MessageDb::rmsgdtSigningCertificateTimes(int dmId, QDateTime &incTime,
+    QDateTime &expTime) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	struct x509_crt *x509_crt = NULL;
+	time_t incept, expir;
+
+	QByteArray rawBytes =
+	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
+	Q_ASSERT(rawBytes.size() > 0);
+	if (rawBytes.isEmpty()) {
+		return false;
+	}
+
+	x509_crt = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
+	if (NULL == x509_crt) {
+		return false;
+	}
+
+	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return false;
+	}
+
+	x509_crt_destroy(x509_crt); x509_crt = NULL;
+
+	incTime = QDateTime::fromTime_t(incept);
+	expTime = QDateTime::fromTime_t(expir);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
  * Returns time stamp in DER format.
  */
 QByteArray MessageDb::msgsTimestampDER(int dmId) const

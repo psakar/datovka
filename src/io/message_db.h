@@ -268,6 +268,17 @@ public:
 	    QString &saId, QString &saName) const;
 
 	/*!
+	 * @brief Returns signing certificate inception and expiration date.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @param[out] incTime Inception time.
+	 * @param[out] expTime Expiration time.
+	 * @return True on success.
+	 */
+	bool rmsgdtSigningCertificateTimes(int dmId, QDateTime &incTime,
+	    QDateTime &expTime) const;
+
+	/*!
 	 * @brief Was message locally read.
 	 * 
 	 * @param[in] dmId Message id.
