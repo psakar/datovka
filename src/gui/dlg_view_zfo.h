@@ -89,9 +89,7 @@ public:
 	DlgViewZfo(const isds_message *isdsMsg, QWidget *parent = 0);
 
 	/*
-	 * TODO
-	 * -- Signature checking.
-	 * -- Callback for signature details.
+	 * TODO -- Signature checking.
 	 */
 
 private slots:
@@ -120,6 +118,11 @@ private slots:
 	 */
 	void openSelectedAttachment(void);
 
+	/*!
+	 * @brief View signature details.
+	 */
+	void showSignatureDetails(void);
+
 private:
 	/*!
 	 * @brief Returns selected attachment index.
@@ -142,9 +145,9 @@ private:
 	const isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
 	 * (char *) m_message->raw
-	 *     message->raw_length
-	 * (char *) message->envelope->timestamp
-	 *     message->envelope->timestamp_length
+	 *     m_message->raw_length
+	 * (char *) m_message->envelope->timestamp
+	 *     m_message->envelope->timestamp_length
 	 */
 	AttachmentModel m_attachmentModel; /*!< Attachment model. */
 };

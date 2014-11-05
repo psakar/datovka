@@ -10,6 +10,7 @@
 #include <QUrl>
 
 #include "src/common.h"
+#include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 
@@ -211,6 +212,10 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, QWidget *parent)
 	    this, SLOT(attachmentItemRightClicked(QPoint)));
 	connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
+
+	/* Signature details. */
+	connect(signaturePushButton, SIGNAL(clicked()), this,
+	    SLOT(showSignatureDetails()));
 }
 
 
@@ -363,6 +368,24 @@ void DlgViewZfo::openSelectedAttachment(void)
 	//qDebug() << "file://" + fileName;
 	QDesktopServices::openUrl(QUrl("file://" + fileName));
 	/* TODO -- Handle openUrl() return value. */
+}
+
+
+/* ========================================================================= */
+/*
+ * View signature details.
+ */
+void DlgViewZfo::showSignatureDetails(void)
+/* ========================================================================= */
+{
+	Q_ASSERT(NULL != m_message);
+	Q_ASSERT(NULL != m_message->envelope);
+
+	QDialog *signature_detail = new DlgSignatureDetail(
+	    (char *) m_message->raw, m_message->raw_length,
+	    (char *) m_message->envelope->timestamp,
+	    m_message->envelope->timestamp_length, this);
+	signature_detail->exec();
 }
 
 

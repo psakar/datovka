@@ -18,6 +18,8 @@ class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
 public:
 	DlgSignatureDetail(const MessageDb &messageDb, int dmId,
 	    QWidget *parent = 0);
+	DlgSignatureDetail(const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
 
 private:
 	const QByteArray m_msgDER; /*!< Message CMS. */

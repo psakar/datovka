@@ -25,8 +25,27 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
     m_dbIsVerified(messageDb.msgsVerified(dmId))
 {
 	setupUi(this);
-//	this->cImage->setIcon(QIcon(ICON_3PARTY_PATH "warning_16.png"));
-//	this->tImage->setIcon(QIcon(ICON_16x16_PATH "datovka-ok.png"));
+
+	validateMessageSignature();
+	validateSigningCertificate();
+	validateMessageTimestamp();
+}
+
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
+DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
+    const void *tstDER, size_t tstSize, QWidget *parent)
+/* ========================================================================= */
+    : QDialog(parent),
+    m_msgDER((char *) msgDER, msgSize),
+    m_tstDER((char *) tstDER, tstSize),
+    m_constructedFromDb(false),
+    m_dbIsVerified(false)
+{
+	setupUi(this);
 
 	validateMessageSignature();
 	validateSigningCertificate();
@@ -53,10 +72,9 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		if (m_constructedFromDb) {
 			verified = m_dbIsVerified;
 		} else {
-			Q_ASSERT(0);
-			/*
-			 * TODO -- Remove assertion when explicitly validating.
-			 */
+			verified =
+			    1 == raw_msg_verify_signature(m_msgDER.data(),
+			        m_msgDER.size());
 		}
 
 		if (!verified) {
