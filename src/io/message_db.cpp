@@ -3009,7 +3009,6 @@ QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId,
 
 	QByteArray rawBytes =
 	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
-	Q_ASSERT(rawBytes.size() > 0);
 	if (rawBytes.isEmpty()) {
 		return QSslCertificate();
 	}
