@@ -168,6 +168,18 @@ int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
 
 
 /*!
+ * @brief Read inception and expiry date from X509 certificate.
+ *
+ * @param[in] x509_crt X509 certificate.
+ * @param[out] utc_inception UTC inception time.
+ * @param[out] utc_expiration UTC expiration time.
+ * @return 0 on success, -1 on error.
+ */
+int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
+    time_t *utc_expiration);
+
+
+/*!
  * @brief Verify certificate.
  *
  * @param[in] x509_crt X509 certificate.

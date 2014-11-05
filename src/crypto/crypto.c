@@ -718,6 +718,59 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Read inception and expiry date from X509 certificate.
+ */
+int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
+    time_t *utc_expiration)
+/* ========================================================================= */
+{
+	X509_CINF *cinf;
+	X509_VAL *val;
+	ASN1_TIME *notBefore, *notAfter;
+
+	/* ASN1_TIME is an alias for ASN1_STRING. */
+
+	debug_func_call();
+
+	assert(NULL != x509_crt);
+	if (NULL == x509_crt) {
+		goto fail;
+	}
+	cinf = ((X509 *) x509_crt)->cert_info;
+
+	assert(NULL != cinf);
+	if (NULL == cinf) {
+		goto fail;
+	}
+	val = cinf->validity;
+
+	notBefore = val->notBefore;
+	assert(NULL != notBefore);
+	if (NULL == notBefore) {
+		goto fail;
+	}
+	notAfter = val->notAfter;
+	assert(NULL != notAfter);
+	if (NULL == notAfter) {
+		goto fail;
+	}
+
+	if (NULL != utc_inception) {
+		asn1_time_to_utc_time(notBefore, utc_inception);
+	}
+	if (NULL != utc_expiration) {
+		asn1_time_to_utc_time(notAfter, utc_expiration);
+	}
+
+	return 0;
+
+fail:
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
  * Verify certificate.
  */
 int x509_crt_verify(struct x509_crt *x509_crt)
