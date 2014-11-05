@@ -1716,12 +1716,20 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 
 	/* Time-stamp. */
 	QDateTime tst;
-	bool valid = msgsCheckTimestamp(dmId, tst);
+	QByteArray tstData = msgsTimestampDER(dmId);
 	QString timeStampStr;
-	if (!tst.isValid()) {
+	if (tstData.isEmpty()) {
 		timeStampStr = QObject::tr("Not present");
 	} else {
-		timeStampStr = valid ? QObject::tr("Valid") : QObject::tr("Invalid");
+		time_t utc_time = 0;
+		int ret = raw_tst_verify(tstData.data(), tstData.size(),
+		    &utc_time);
+
+		if (-1 != ret) {
+			tst = QDateTime::fromTime_t(utc_time);
+		}
+
+		timeStampStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
 		timeStampStr +=
 		    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + ")";
 	}
@@ -2741,43 +2749,6 @@ bool MessageDb::msgsVerified(int dmId) const
 
 /* ========================================================================= */
 /*
- * Return whether signing certificate is valid.
- */
-bool MessageDb::msgsSigningCertValid(int dmId) const
-/* ========================================================================= */
-{
-	struct x509_crt *signing_cert = NULL;
-	int ret;
-
-	debugFuncCall();
-
-	QByteArray rawBytes =
-	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
-
-	if (rawBytes.isEmpty()) {
-		goto fail;
-	}
-
-	signing_cert = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
-	if (NULL == signing_cert) {
-		goto fail;
-	}
-
-	ret = x509_crt_verify(signing_cert);
-
-	x509_crt_destroy(signing_cert); signing_cert = NULL;
-	return 1 == ret;
-
-fail:
-	if (NULL != signing_cert) {
-		x509_crt_destroy(signing_cert);
-	}
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
  * Set the verification result.
  */
 bool MessageDb::msgsSetVerified(int dmId, bool verified)
@@ -2894,191 +2865,6 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 	}
 
 	return QDateTime::currentDateTime();
-}
-
-
-/* ========================================================================= */
-/*
- * Returns time-stamp validity.
- */
-bool MessageDb::msgsCheckTimestamp(int dmId, QDateTime &qTst) const
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	qTst = QDateTime();
-
-	QByteArray tstData = msgsTimestampDER(dmId);
-	if (!tstData.isEmpty()) {
-
-		time_t utc_time = 0;
-		int ret = raw_tst_verify(tstData.data(), tstData.size(),
-		    &utc_time);
-
-		if (-1 != ret) {
-			qTst = QDateTime::fromTime_t(utc_time);
-		}
-
-		return 1 == ret;
-
-		/*
-		 * TODO -- Time from base64 encoded timestamp.
-		 * RFC3161 (ASN.1 encoded).
-		 * ISDS provozni rad, appendix 2 -- Manipulace s datovymi
-		 * zpravami.
-		 */
-
-	}
-
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Time stamp certificate information.
- */
-bool MessageDb::msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
-    QString &nStr, QString &cStr) const
-/* ========================================================================= */
-{
-	struct x509_crt *signing_cert = NULL;
-	struct crt_issuer_info cii;
-
-	debugFuncCall();
-
-	crt_issuer_info_init(&cii);
-
-	QByteArray tstData = msgsTimestampDER(dmId);
-	if (tstData.isEmpty()) {
-		return false;
-	}
-
-	signing_cert = raw_cms_signing_cert(tstData.data(), tstData.size());
-	if (NULL == signing_cert) {
-		goto fail;
-	}
-
-	if (0 != x509_crt_issuer_info(signing_cert, &cii)) {
-		goto fail;
-	}
-
-	x509_crt_destroy(signing_cert); signing_cert = NULL;
-
-	if (NULL != cii.o) {
-		oStr = cii.o;
-	}
-
-	if (NULL != cii.ou) {
-		ouStr = cii.ou;
-	}
-
-	if (NULL != cii.n) {
-		nStr = cii.n;
-	}
-
-	if (NULL != cii.c) {
-		cStr = cii.c;
-	}
-
-	crt_issuer_info_clear(&cii);
-
-	return true;
-
-fail:
-	if (NULL != signing_cert) {
-		x509_crt_destroy(signing_cert);
-	}
-	crt_issuer_info_clear(&cii);
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns signing certificate of message.
- */
-QSslCertificate MessageDb::rmsgdtSigningCertificate(int dmId,
-    QString &saId, QString &saName) const
-/* ========================================================================= */
-{
-	struct x509_crt *x509_crt = NULL;
-	void *der = NULL;
-	size_t der_size;
-	char *sa_id = NULL, *sa_name = NULL;
-
-	QByteArray rawBytes =
-	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
-	if (rawBytes.isEmpty()) {
-		return QSslCertificate();
-	}
-
-	x509_crt = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
-	if (NULL == x509_crt) {
-		return QSslCertificate();
-	}
-
-	if (0 != x509_crt_to_der(x509_crt, &der, &der_size)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
-		return QSslCertificate();
-	}
-
-	if (0 != x509_crt_algorithm_info(x509_crt, &sa_id, &sa_name)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
-		return QSslCertificate();
-	}
-
-	x509_crt_destroy(x509_crt); x509_crt = NULL;
-
-	saId = sa_id;
-	saName = sa_name;
-
-	free(sa_id); sa_id = NULL;
-	free(sa_name); sa_name = NULL;
-
-	QByteArray certRawBytes((char *) der, der_size);
-	free(der); der = NULL;
-
-	return QSslCertificate(certRawBytes, QSsl::Der);
-}
-
-
-/* ========================================================================= */
-/*
- * Returns signing certificate inception and expiration date.
- */
-bool MessageDb::rmsgdtSigningCertificateTimes(int dmId, QDateTime &incTime,
-    QDateTime &expTime) const
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	struct x509_crt *x509_crt = NULL;
-	time_t incept, expir;
-
-	QByteArray rawBytes =
-	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
-	Q_ASSERT(rawBytes.size() > 0);
-	if (rawBytes.isEmpty()) {
-		return false;
-	}
-
-	x509_crt = raw_cms_signing_cert(rawBytes.data(), rawBytes.size());
-	if (NULL == x509_crt) {
-		return false;
-	}
-
-	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
-		return false;
-	}
-
-	x509_crt_destroy(x509_crt); x509_crt = NULL;
-
-	incTime = QDateTime::fromTime_t(incept);
-	expTime = QDateTime::fromTime_t(expir);
-
-	return true;
 }
 
 
@@ -3285,7 +3071,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 /*
  * Get raw message data from raw_message_data table.
  */
-QString MessageDb::msgsGetMessageRaw(int dmId) const
+QString MessageDb::msgsMessageBase64(int dmId) const
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -3293,7 +3079,8 @@ QString MessageDb::msgsGetMessageRaw(int dmId) const
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	queryStr = "SELECT data FROM raw_message_data WHERE message_id = :dmId";
+	queryStr =
+	    "SELECT data FROM raw_message_data WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
@@ -3306,6 +3093,19 @@ QString MessageDb::msgsGetMessageRaw(int dmId) const
 		return query.value(0).toString();
 	}
 	return QString();
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message data in DER format.
+ */
+QByteArray MessageDb::msgsMessageDER(int dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	return QByteArray::fromBase64(msgsMessageBase64(dmId).toUtf8());
 }
 
 
@@ -3449,8 +3249,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 {
 	debugFuncCall();
 
-	QByteArray rawBytes =
-	    QByteArray::fromBase64(msgsGetMessageRaw(dmId).toUtf8());
+	QByteArray rawBytes = msgsMessageDER(dmId);
 	Q_ASSERT(rawBytes.size() > 0);
 
 	if (!ignoreMissingCrlCheck) {

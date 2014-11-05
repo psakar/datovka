@@ -65,6 +65,10 @@ int raw_msg_verify_signature_date(const void *der, size_t der_size,
  * @return  1 if signature is valid,
  *          0 if signature is invalid,
  *         -1 on other errors.
+ *
+ * @note RFC3161 (ASN.1 encoded).
+ *     ISDS provozni rad, appendix 2 -- Manipulace s datovymi
+ *     zpravami.
  */
 int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time);
 

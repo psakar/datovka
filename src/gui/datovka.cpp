@@ -4453,7 +4453,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 
 		QMessageBox msgBox(this);;
@@ -4475,7 +4475,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 				return;
 			} else {
 				raw = QString(messageDb->
-				     msgsGetMessageRaw(dmID)).toUtf8();
+				     msgsMessageBase64(dmID)).toUtf8();
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -4830,7 +4830,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
@@ -4892,7 +4892,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetMessageRaw(dmID)).toUtf8();
+	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));

@@ -125,7 +125,7 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
 
 	dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(m_messDb.msgsGetMessageRaw(dmID)).toUtf8();
+	QString raw = QString(m_messDb.msgsMessageBase64(dmID)).toUtf8();
 	if (raw.isEmpty()) {
 		return false;
 	}

@@ -226,59 +226,6 @@ public:
 	bool msgsVerified(int dmId) const;
 
 	/*!
-	 * @brief Return whether signing certificate is valid.
-	 *
-	 * @param[in] dmId Message identifier.
-	 * @return True if signing certificate was verified successfully.
-	 */
-	bool msgsSigningCertValid(int dmId) const;
-
-	/*!
-	 * @brief Returns time-stamp validity.
-	 *
-	 * @param[in]  dmId Message identifier.
-	 * @param[out] qTst Qualified time-stamp value.
-	 * @return Return time-stamp validity check, tst is invalid if none
-	 *     found.
-	 */
-	bool msgsCheckTimestamp(int dmId, QDateTime &qTst) const;
-
-	/*!
-	 * @brief Time stamp certificate information.
-	 *
-	 * @param[in]  dmId  Message identifier.
-	 * @param[out] oStr  Organisation name.
-	 * @param[out] ouStr Organisation unit name.
-	 * @param[out] nStr  Common name.
-	 * @param[out] cStr  Country name.
-	 * @return False on failure.
-	 */
-	bool msgsTimestampInfo(int dmId, QString &oStr, QString &ouStr,
-	    QString &nStr, QString &cStr) const;
-
-	/*!
-	 * @brief Returns signing certificate of message.
-	 *
-	 * @param[in]  dmId   Message identifier.
-	 * @param[out] saId   Signature algorithm identifier.
-	 * @param[out] saName Signature algorithm name.
-	 * @return Null certificate on failure.
-	 */
-	QSslCertificate rmsgdtSigningCertificate(int dmId,
-	    QString &saId, QString &saName) const;
-
-	/*!
-	 * @brief Returns signing certificate inception and expiration date.
-	 *
-	 * @param[in] dmId Message identifier.
-	 * @param[out] incTime Inception time.
-	 * @param[out] expTime Expiration time.
-	 * @return True on success.
-	 */
-	bool rmsgdtSigningCertificateTimes(int dmId, QDateTime &incTime,
-	    QDateTime &expTime) const;
-
-	/*!
 	 * @brief Was message locally read.
 	 * 
 	 * @param[in] dmId Message id.
@@ -402,7 +349,12 @@ public:
 	/*!
 	 * @brief get raw message data from raw_message_data table.
 	 */
-	QString msgsGetMessageRaw(int dmId) const;
+	QString msgsMessageBase64(int dmId) const;
+
+	/*!
+	 * @brief Get message data in DER format.
+	 */
+	QByteArray msgsMessageDER(int dmId) const;
 
 	/*!
 	 * @brief Get delivery info raw from raw_delivery_info_data table.
@@ -467,6 +419,14 @@ public:
 	 * @brief Get process state of received message.
 	 */
 	int msgGetProcessState(int dmId);
+
+	/*!
+	 * @brief Returns time stamp in DER format.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return Qualified time stamp in DER format.
+	 */
+	QByteArray msgsTimestampDER(int dmId) const;
 
 
 protected:
@@ -537,14 +497,6 @@ private:
 	 * @brief Certificates related to given message.
 	 */
 	QList<QSslCertificate> msgCerts(int dmId) const;
-
-	/*!
-	 * @brief Returns time stamp in DER format.
-	 *
-	 * @param[in] dmId Message identifier.
-	 * @return Qualified time stamp in DER format.
-	 */
-	QByteArray msgsTimestampDER(int dmId) const;
 
 	/*!
 	 * @brief Check whether message signature was valid at given date

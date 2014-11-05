@@ -5,6 +5,8 @@
 #include <QTimeZone>
 
 #include "dlg_signature_detail.h"
+#include "src/crypto/crypto.h"
+#include "src/log/log.h"
 #include "ui_dlg_signature_detail.h"
 
 
@@ -16,8 +18,11 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
     QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
-    m_messageDb(messageDb),
-    m_dmId(dmId)
+    m_msgDER(messageDb.msgsVerificationAttempted(dmId) ?
+        messageDb.msgsMessageDER(dmId): QByteArray()),
+    m_tstDER(messageDb.msgsTimestampDER(dmId)),
+    m_constructedFromDb(true),
+    m_dbIsVerified(messageDb.msgsVerified(dmId))
 {
 	setupUi(this);
 //	this->cImage->setIcon(QIcon(ICON_3PARTY_PATH "warning_16.png"));
@@ -39,21 +44,34 @@ void DlgSignatureDetail::validateMessageSignature(void)
 	QString iconPath;
 	QString resStr;
 
-	if (!m_messageDb.msgsVerificationAttempted(m_dmId)) {
+	if (m_msgDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Message signature is not present.");
-	} else if (!m_messageDb.msgsVerified(m_dmId)) {
-		iconPath = ICON_16x16_PATH "datovka-error.png";
-		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
-		resStr += "<span style=\"color:#aa0000;\"><b>";
-		resStr += QObject::tr("No");
-		resStr += "</b></span>";
 	} else {
-		iconPath = ICON_16x16_PATH "datovka-ok.png";
-		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
-		resStr += "<span style=\"color:#00aa00;\"><b>";
-		resStr += QObject::tr("Yes");
-		resStr += "</b></span>";
+		bool verified = false;
+
+		if (m_constructedFromDb) {
+			verified = m_dbIsVerified;
+		} else {
+			Q_ASSERT(0);
+			/*
+			 * TODO -- Remove assertion when explicitly validating.
+			 */
+		}
+
+		if (!verified) {
+			iconPath = ICON_16x16_PATH "datovka-error.png";
+			resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+			resStr += "<span style=\"color:#aa0000;\"><b>";
+			resStr += QObject::tr("No");
+			resStr += "</b></span>";
+		} else {
+			iconPath = ICON_16x16_PATH "datovka-ok.png";
+			resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+			resStr += "<span style=\"color:#00aa00;\"><b>";
+			resStr += QObject::tr("Yes");
+			resStr += "</b></span>";
+		}
 	}
 
 	this->mSignatureImage->setIcon(QIcon(iconPath));
@@ -72,12 +90,12 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	QString iconPath;
 	QString resStr;
 
-	if (!m_messageDb.msgsVerificationAttempted(m_dmId)) {
+	if (m_msgDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Message signature is not present.") +
 		    "<br/>";
 		resStr += QObject::tr("Cannot check signing certificate");
-	} else if (!m_messageDb.msgsSigningCertValid(m_dmId)) {
+	} else if (!msgSigningCertValid()) {
 		iconPath = ICON_16x16_PATH "datovka-error.png";
 		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
 		resStr += "<span style=\"color:#aa0000;\"><b>";
@@ -96,8 +114,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	this->cStatus->setText(resStr);
 
 	QString saId, saName;
-	QSslCertificate signingCert =
-	    m_messageDb.rmsgdtSigningCertificate(m_dmId, saId, saName);
+	QSslCertificate signingCert = msgSigningCert(saId, saName);
 
 	/* TODO -- Various check results. */
 
@@ -146,8 +163,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		 * conversion.
 		 */
 		QDateTime incept, expir;
-		if (m_messageDb.rmsgdtSigningCertificateTimes(m_dmId, incept,
-		        expir)) {
+		if (msgSigningCertTimes(incept, expir)) {
 			resStr += "&nbsp;&nbsp;" +
 			    QObject::tr("Valid from: ") +
 			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
@@ -203,14 +219,19 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	QString detailStr;
 
 	QDateTime tst;
-	bool valid = m_messageDb.msgsCheckTimestamp(m_dmId, tst);
-	QString timeStampStr;
-	if (!tst.isValid()) {
+	if (m_tstDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Time stamp not present.");
 	} else {
+		time_t utc_time = 0;
+		int ret = raw_tst_verify(m_tstDER.data(), m_tstDER.size(),
+		    &utc_time);
+
+		if (-1 != ret) {
+			tst = QDateTime::fromTime_t(utc_time);
+		}
 		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
-		if (!valid) {
+		if (1 != ret) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
 			resStr += "<span style=\"color:#aa0000;\"><b>";
 			resStr += QObject::tr("No");
@@ -225,7 +246,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 			    tst.toString("dd.MM.yyyy hh:mm:ss") + "<br/>";
 
 			QString o, ou, n, c;
-			m_messageDb.msgsTimestampInfo(m_dmId, o, ou, n, c);
+			tstInfo(o, ou, n, c);
 
 			detailStr += "<b>" + QObject::tr("Issuer:") +
 			    "</b><br/>";
@@ -257,4 +278,182 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	this->tImage->setIcon(QIcon(iconPath));
 	this->tStatus->setTextFormat(Qt::RichText);
 	this->tStatus->setText(resStr);
+}
+
+
+/* ========================================================================= */
+/*
+ * Return whether signing certificate is valid.
+ */
+bool DlgSignatureDetail::msgSigningCertValid(void) const
+/* ========================================================================= */
+{
+	struct x509_crt *signing_cert = NULL;
+	int ret;
+
+	debugFuncCall();
+
+	if (m_msgDER.isEmpty()) {
+		goto fail;
+	}
+
+	signing_cert = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	if (NULL == signing_cert) {
+		goto fail;
+	}
+
+	ret = x509_crt_verify(signing_cert);
+
+	x509_crt_destroy(signing_cert); signing_cert = NULL;
+	return 1 == ret;
+
+fail:
+	if (NULL != signing_cert) {
+		x509_crt_destroy(signing_cert);
+	}
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns signing certificate of message.
+ */
+QSslCertificate DlgSignatureDetail::msgSigningCert(QString &saId,
+    QString &saName) const
+/* ========================================================================= */
+{
+	struct x509_crt *x509_crt = NULL;
+	void *der = NULL;
+	size_t der_size;
+	char *sa_id = NULL, *sa_name = NULL;
+
+	debugFuncCall();
+
+	if (m_msgDER.isEmpty()) {
+		return QSslCertificate();
+	}
+
+	x509_crt = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	if (NULL == x509_crt) {
+		return QSslCertificate();
+	}
+
+	if (0 != x509_crt_to_der(x509_crt, &der, &der_size)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return QSslCertificate();
+	}
+
+	if (0 != x509_crt_algorithm_info(x509_crt, &sa_id, &sa_name)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return QSslCertificate();
+	}
+
+	x509_crt_destroy(x509_crt); x509_crt = NULL;
+
+	saId = sa_id;
+	saName = sa_name;
+
+	free(sa_id); sa_id = NULL;
+	free(sa_name); sa_name = NULL;
+
+	QByteArray certRawBytes((char *) der, der_size);
+	free(der); der = NULL;
+
+	return QSslCertificate(certRawBytes, QSsl::Der);
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns signing certificate inception and expiration date.
+ */
+bool DlgSignatureDetail::msgSigningCertTimes(QDateTime &incTime,
+    QDateTime &expTime) const
+/* ========================================================================= */
+{
+	struct x509_crt *x509_crt = NULL;
+	time_t incept, expir;
+
+	debugFuncCall();
+
+	if (m_msgDER.isEmpty()) {
+		return false;
+	}
+
+	x509_crt = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	if (NULL == x509_crt) {
+		return false;
+	}
+
+	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return false;
+	}
+
+	x509_crt_destroy(x509_crt); x509_crt = NULL;
+
+	incTime = QDateTime::fromTime_t(incept);
+	expTime = QDateTime::fromTime_t(expir);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Time stamp certificate information.
+ */
+bool DlgSignatureDetail::tstInfo(QString &oStr, QString &ouStr, QString &nStr,
+    QString &cStr) const
+/* ========================================================================= */
+{
+	struct x509_crt *signing_cert = NULL;
+	struct crt_issuer_info cii;
+
+	debugFuncCall();
+
+	crt_issuer_info_init(&cii);
+
+	if (m_tstDER.isEmpty()) {
+		return false;
+	}
+
+	signing_cert = raw_cms_signing_cert(m_tstDER.data(), m_tstDER.size());
+	if (NULL == signing_cert) {
+		goto fail;
+	}
+
+	if (0 != x509_crt_issuer_info(signing_cert, &cii)) {
+		goto fail;
+	}
+
+	x509_crt_destroy(signing_cert); signing_cert = NULL;
+
+	if (NULL != cii.o) {
+		oStr = cii.o;
+	}
+
+	if (NULL != cii.ou) {
+		ouStr = cii.ou;
+	}
+
+	if (NULL != cii.n) {
+		nStr = cii.n;
+	}
+
+	if (NULL != cii.c) {
+		cStr = cii.c;
+	}
+
+	crt_issuer_info_clear(&cii);
+
+	return true;
+
+fail:
+	if (NULL != signing_cert) {
+		x509_crt_destroy(signing_cert);
+	}
+	crt_issuer_info_clear(&cii);
+	return false;
 }

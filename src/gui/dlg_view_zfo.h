@@ -92,8 +92,6 @@ public:
 	 * TODO
 	 * -- Signature checking.
 	 * -- Callback for signature details.
-	 * -- Attachment viewing.
-	 * -- Callback for opening attachments.
 	 */
 
 private slots:
@@ -142,6 +140,12 @@ private:
 	QString descriptionHtml(int attachmentCount);
 
 	const isds_message *m_message; /*!< ISDS message pointer copy. */
+	/*
+	 * (char *) m_message->raw
+	 *     message->raw_length
+	 * (char *) message->envelope->timestamp
+	 *     message->envelope->timestamp_length
+	 */
 	AttachmentModel m_attachmentModel; /*!< Attachment model. */
 };
 
