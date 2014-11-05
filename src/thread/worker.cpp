@@ -265,11 +265,12 @@ void Worker::downloadCompleteMessage(void)
 	messageDb = m_messageDbList.at(0);
 
 	/* sent message */
-	downloadMessage(m_acntTopIdx, m_dmId, true,
-	    m_downloadThisAccounts.at(0), *messageDb, true,
-	    "DownloadMessage", 0, this);
-
-	emit refreshAttachmentList(m_acntTopIdx, m_dmId);
+	if (Q_SUCCESS == downloadMessage(m_acntTopIdx, m_dmId, true,
+	        m_downloadThisAccounts.at(0), *messageDb, true,
+	        "DownloadMessage", 0, this)) {
+		/* Only on successful download. */
+		emit refreshAttachmentList(m_acntTopIdx, m_dmId);
+	}
 
 	emit valueChanged("Idle", 0);
 

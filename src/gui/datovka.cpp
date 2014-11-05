@@ -4534,6 +4534,8 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 bool MainWindow::downloadCompleteMessage(QString dmId)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	QModelIndex accountIndex = ui->accountList->currentIndex();
 	Q_ASSERT(accountIndex.isValid());
 	accountIndex = AccountModel::indexTop(accountIndex);
@@ -4571,7 +4573,7 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 	if (Q_SUCCESS == Worker::downloadMessage(
 	    accountIndex, dmId, true, incoming, *messageDb, false, QString(),
 	    0, 0)) {
-		/* TODO -- Wouldn't it be better with selection changed?*/
+		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(accountIndex, dmId);
 		return true;
 	}
