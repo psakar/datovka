@@ -464,7 +464,7 @@ private:
 	/*!
 	 * @brief Set received message column widths.
 	 */
-	void setReciveidColumnWidths(void);
+	void setReceivedColumnWidths(void);
 
 	/*!
 	 * @brief Set sent message column widths.

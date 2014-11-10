@@ -182,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Set default column size. */
 	/* TODO -- Check whether received or sent messages are shown? */
-	setReciveidColumnWidths();
+	setReceivedColumnWidths();
 
 	/* Attachment list. */
 	if (0 != ui->messageAttachmentList->selectionModel()) {
@@ -442,7 +442,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-			 QModelIndex)));
+		        QModelIndex)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -576,29 +576,34 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
+		/* Set model. */
+		Q_ASSERT(0 != msgTblMdl);
+		m_messageModel = msgTblMdl;
+		ui->messageList->setModel(m_messageModel);
 		/* Set specific column width. */
-		setReciveidColumnWidths();
+		setReceivedColumnWidths();
 		received = true;
 		goto setmodel;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
+		/* Set model. */
+		Q_ASSERT(0 != msgTblMdl);
+		m_messageModel = msgTblMdl;
+		ui->messageList->setModel(m_messageModel);
 		/* Set specific column width. */
 		setSentColumnWidths();
 		received = false;
 
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
-		Q_ASSERT(0 != msgTblMdl);
-		m_messageModel = msgTblMdl;
-		ui->messageList->setModel(m_messageModel);
 		/* Apply message filter. */
 		filterMessages(m_searchLine->text());
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-			QModelIndex)));
+		        QModelIndex)));
 		connect(ui->messageList->model(),
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -632,7 +637,7 @@ setmodel:
 		break;
 	}
 	/* Set specific column width. */
-	received ? setReciveidColumnWidths() : setSentColumnWidths();
+	received ? setReceivedColumnWidths() : setSentColumnWidths();
 }
 
 /* ========================================================================= */
@@ -3369,14 +3374,17 @@ void MainWindow::filterMessages(const QString &text)
 /*
 * Set received message column widths and sort order.
  */
-void MainWindow::setReciveidColumnWidths(void)
+void MainWindow::setReceivedColumnWidths(void)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_received_1);
 	ui->messageList->setColumnWidth(2, m_received_2);
-	ui->messageList->resizeColumnToContents(3);
-	ui->messageList->resizeColumnToContents(4);
+	for (int i = 3; i < MessageDb::receivedItemIds.size(); ++i) {
+		ui->messageList->resizeColumnToContents(i);
+	}
 	if (m_sort_order == "SORT_ASCENDING") {
 		ui->messageList->sortByColumn(m_sort_column,
 		    Qt::AscendingOrder);
@@ -3393,14 +3401,16 @@ void MainWindow::setReciveidColumnWidths(void)
 void MainWindow::setSentColumnWidths(void)
 /* ========================================================================= */
 {
+	int i;
+
 	debugFuncCall();
 
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
 	ui->messageList->setColumnWidth(2, m_sent_2);
-	ui->messageList->resizeColumnToContents(3);
-	ui->messageList->resizeColumnToContents(4);
-	ui->messageList->resizeColumnToContents(5);
+	for (int i = 3; i < MessageDb::sentItemIds.size(); ++i) {
+		ui->messageList->resizeColumnToContents(i);
+	}
 	if (m_sort_order == "SORT_ASCENDING") {
 		ui->messageList->sortByColumn(m_sort_column,
 		    Qt::AscendingOrder);

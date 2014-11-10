@@ -428,6 +428,11 @@ public:
 	 */
 	QByteArray msgsTimestampDER(int dmId) const;
 
+	static
+	const QVector<QString> receivedItemIds;
+	static
+	const QVector<QString> sentItemIds;
+
 
 protected:
 	/*!
@@ -463,10 +468,6 @@ protected:
 	bool reopenDb(const QString &newFileName);
 
 private:
-	static
-	const QVector<QString> receivedItemIds;
-	static
-	const QVector<QString> sentItemIds;
 	static
 	const QVector<QString> msgAttribs2;
 	static

@@ -130,6 +130,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	this->cImage->setIcon(QIcon(iconPath));
 	this->cStatus->setTextFormat(Qt::RichText);
 	this->cStatus->setText(resStr);
+	this->cDetail->setText(QString());
 
 	QString saId, saName;
 	QSslCertificate signingCert = msgSigningCert(saId, saName);
