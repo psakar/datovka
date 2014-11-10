@@ -275,7 +275,7 @@ fail:
 /*
  * Verifies signed message signature.
  */
-int raw_msg_verify_signature(const void *der, size_t der_size)
+int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert)
 /* ========================================================================= */
 {
 	int ret;
@@ -289,7 +289,8 @@ int raw_msg_verify_signature(const void *der, size_t der_size)
 		goto fail;
 	}
 
-	ret = cms_verify_signature(cms, ca_certs, 0);
+	ret = cms_verify_signature(cms,
+	    (0 == verify_cert) ? NULL : ca_certs, 0);
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 

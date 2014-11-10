@@ -859,7 +859,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	if (signedMsg) {
 		/* Verify message signature. */
 		int ret = raw_msg_verify_signature(message->raw,
-		    message->raw_length);
+		    message->raw_length, 1);
 		qDebug() << "Verification ret" << ret;
 		if (1 == ret) {
 			bool update_ret = messageDb.msgsSetVerified(dmID,

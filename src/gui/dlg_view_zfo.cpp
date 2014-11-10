@@ -1,15 +1,18 @@
 
 
 #include <QAbstractTableModel>
+#include <QDateTime>
 #include <QDesktopServices>
 #include <QDialog>
 #include <QDir>
 #include <QFileDialog>
 #include <QMenu>
 #include <QTemporaryFile>
+#include <QTimeZone>
 #include <QUrl>
 
 #include "src/common.h"
+#include "src/crypto/crypto.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
@@ -200,7 +203,10 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, QWidget *parent)
 	m_attachmentModel.setModelData(isdsMsg);
 
 	envelopeTextEdit->setHtml(
-	    descriptionHtml(m_attachmentModel.rowCount()));
+	    descriptionHtml(m_attachmentModel.rowCount(),
+	        m_message->raw, m_message->raw_length,
+	        m_message->envelope->timestamp,
+	        m_message->envelope->timestamp_length));
 	envelopeTextEdit->setReadOnly(true);
 
 	/* Attachment list. */
@@ -382,8 +388,8 @@ void DlgViewZfo::showSignatureDetails(void)
 	Q_ASSERT(NULL != m_message->envelope);
 
 	QDialog *signature_detail = new DlgSignatureDetail(
-	    (char *) m_message->raw, m_message->raw_length,
-	    (char *) m_message->envelope->timestamp,
+	    m_message->raw, m_message->raw_length,
+	    m_message->envelope->timestamp,
 	    m_message->envelope->timestamp_length, this);
 	signature_detail->exec();
 }
@@ -393,7 +399,8 @@ void DlgViewZfo::showSignatureDetails(void)
 /*
  * Generate description from supplied message.
  */
-QString DlgViewZfo::descriptionHtml(int attachmentCount)
+QString DlgViewZfo::descriptionHtml(int attachmentCount,
+    const void *msgDER, size_t msgSize, const void *tstDER, size_t tstSize)
 /* ========================================================================= */
 {
 	const isds_envelope *envelope;
@@ -447,9 +454,39 @@ QString DlgViewZfo::descriptionHtml(int attachmentCount)
 
 	html += "<h3>" + tr("Signature") + "</h3>";
 
-	html += strongAccountInfoLine(tr("Message signature"), "TODO");
-	html += strongAccountInfoLine(tr("Signing certificate"), "TODO");
-	html += strongAccountInfoLine(tr("Time-stamp"), "TODO");
+	QString resultStr;
+	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0)) {
+		resultStr = QObject::tr("Valid");
+	} else {
+		resultStr = QObject::tr("Invalid")  + " -- " +
+		    QObject::tr("Message signature and content do not "
+		        "correspond!");
+	}
+	html += strongAccountInfoLine(tr("Message signature"), resultStr);
+	if (1 == raw_msg_verify_signature_date(msgDER, msgSize,
+	        QDateTime::currentDateTime().toTime_t(), 0)) {
+		resultStr = QObject::tr("Valid");
+	} else {
+		resultStr = QObject::tr("Invalid");
+	}
+	if (!globPref.check_crl) {
+		resultStr += " (" +
+		    QObject::tr("Certificate revocation check is turned off!") +
+		    ")";
+	}
+	html += strongAccountInfoLine(tr("Signing certificate"), resultStr);
+	time_t utc_time = 0;
+	QDateTime tst;
+	int ret = raw_tst_verify(tstDER, tstSize, &utc_time);
+	if (-1 != ret) {
+		tst = QDateTime::fromTime_t(utc_time);
+	}
+	resultStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
+	if (-1 != ret) {
+		resultStr += " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+		    tst.timeZone().abbreviation(tst) + ")";
+	}
+	html += strongAccountInfoLine(tr("Time stamp"), resultStr);
 
 	return html;
 }

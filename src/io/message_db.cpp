@@ -1,6 +1,7 @@
 
 
 #include <QAbstractTableModel>
+#include <QDateTime>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -21,7 +22,7 @@
 #include <QSqlQueryModel>
 #include <QSslCertificate>
 #include <QString>
-//#include <QTimeZone>
+#include <QTimeZone>
 #include <QVariant>
 #include <QVector>
 
@@ -1782,10 +1783,13 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		}
 
 		timeStampStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
-		timeStampStr +=
-		    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + ")";
+		if (-1 != ret) {
+			timeStampStr +=
+			    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    tst.timeZone().abbreviation(tst) + ")";
+		}
 	}
-	html += strongAccountInfoLine(QObject::tr("Time-stamp"),
+	html += strongAccountInfoLine(QObject::tr("Time stamp"),
 	    timeStampStr);
 
 	html += divEnd;

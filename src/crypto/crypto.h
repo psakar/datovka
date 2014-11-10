@@ -31,13 +31,15 @@ int init_crypto(void);
 /*!
  * @brief Verifies signature of raw signed message.
  *
- * @param[in] der      Buffer containing DER encoded CMS.
- * @param[in] der_size DER size.
+ * @param[in] der         Buffer containing DER encoded CMS.
+ * @param[in] der_size    DER size.
+ * @param[in] verify_cert Set 0 if you don't want to verify certificate.
  * @return  1 if signature is valid,
  *          0 if signature is invalid,
  *         -1 on other errors.
  */
-int raw_msg_verify_signature(const void *der, size_t der_size);
+int raw_msg_verify_signature(const void *der, size_t der_size,
+    int verify_cert);
 
 
 /*!

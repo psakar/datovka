@@ -74,7 +74,7 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		} else {
 			verified =
 			    1 == raw_msg_verify_signature(m_msgDER.data(),
-			        m_msgDER.size());
+			        m_msgDER.size(), 0);
 		}
 
 		if (!verified) {
@@ -261,7 +261,8 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 			resStr += "</b></span>";
 
 			detailStr = "<b>" + QObject::tr("Time:") + "</b> " +
-			    tst.toString("dd.MM.yyyy hh:mm:ss") + "<br/>";
+			    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    tst.timeZone().abbreviation(tst) + "<br/>";
 
 			QString o, ou, n, c;
 			tstInfo(o, ou, n, c);

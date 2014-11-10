@@ -23,9 +23,9 @@ public:
 
 private:
 	const QByteArray m_msgDER; /*!< Message CMS. */
-	const QByteArray m_tstDER; /*!< Timestamp CMS. */
+	const QByteArray m_tstDER; /*!< Time stamp CMS. */
 	const bool m_constructedFromDb; /*!< True if constructed from db. */
-	const bool m_dbIsVerified; /*!< Set if constucted from db. */
+	const bool m_dbIsVerified; /*!< Set if constructed from db. */
 
 	/*!
 	 * @brief Check message signature, show result in dialog.

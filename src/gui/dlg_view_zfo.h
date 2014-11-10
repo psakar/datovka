@@ -140,7 +140,9 @@ private:
 	 * @param[in] attachmentCount Number of attached files.
 	 * @return String containing description in HTML format.
 	 */
-	QString descriptionHtml(int attachmentCount);
+	QString descriptionHtml(int attachmentCount,
+	    const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize);
 
 	const isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
