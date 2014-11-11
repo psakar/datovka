@@ -455,7 +455,7 @@ QString DlgViewZfo::descriptionHtml(int attachmentCount,
 	html += "<h3>" + tr("Signature") + "</h3>";
 
 	QString resultStr;
-	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0)) {
+	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0, 0)) {
 		resultStr = QObject::tr("Valid");
 	} else {
 		resultStr = QObject::tr("Invalid")  + " -- " +

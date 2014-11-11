@@ -74,7 +74,7 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		} else {
 			verified =
 			    1 == raw_msg_verify_signature(m_msgDER.data(),
-			        m_msgDER.size(), 0);
+			        m_msgDER.size(), 0, 0);
 		}
 
 		if (!verified) {

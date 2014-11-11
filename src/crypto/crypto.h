@@ -22,10 +22,24 @@ extern "C" {
 struct x509_crt;
 
 
-/*
+/*!
  * @brief Initialises cryptographic back-end.
+ *
+ * @return  0 on success,
+ *         -1 else.
  */
 int init_crypto(void);
+
+
+/*!
+ * @brief Set certificate revocation list.
+ *
+ * @param[in] der      Buffer containing DER encoded signed CRL.
+ * @param[in] der_size DER size.
+ * @return  0 on success,
+ *         -1 else.
+ */
+int crypto_add_crl(const void *der, size_t der_size);
 
 
 /*!
@@ -38,8 +52,8 @@ int init_crypto(void);
  *          0 if signature is invalid,
  *         -1 on other errors.
  */
-int raw_msg_verify_signature(const void *der, size_t der_size,
-    int verify_cert);
+int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
+    int crl_check);
 
 
 /*!

@@ -8,6 +8,7 @@
 #include <openssl/evp.h> /* OpenSSL_add_all_algorithms() */
 #include <openssl/pem.h>
 #include <openssl/ts.h>
+#include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
 #include <string.h>
 
@@ -96,6 +97,15 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
  */
 static
 X509 * load_x509(const void *raw, size_t raw_len);
+
+
+/*!
+ * @brief Load X509_CRL from buffer.
+ *
+ * @return NULL on failure.
+ */
+static
+X509_CRL *load_x509_crl(const void *raw, size_t raw_len);
 
 
 /*!
@@ -271,11 +281,88 @@ fail:
 }
 
 
+//#define USE_VERIFY_PARAM
+/*
+ * Using of X509_V_FLAG_CRL_CHECK causes the X509_V_ERR_UNABLE_TO_GET_CRL error
+ * to be generated.
+ */
+#define VERIFY_FLAGS (X509_V_FLAG_CRL_CHECK_ALL)
+
+
+/* ========================================================================= */
+/*
+ * Set certificate revocation list.
+ */
+int crypto_add_crl(const void *der, size_t der_size)
+/* ========================================================================= */
+{
+#ifdef USE_VERIFY_PARAM
+	X509_VERIFY_PARAM *param = NULL;
+#endif /* USE_VERIFY_PARAM */
+	X509_CRL *x509_crl = NULL;
+
+	assert(NULL != ca_certs);
+	if (NULL == ca_certs) {
+		log_error("%s\n",
+		    "Cryptographic context has not been initialised.");
+		goto fail;
+	}
+
+	x509_crl = load_x509_crl(der, der_size);
+	if (NULL == x509_crl) {
+		log_error("%s\n", "Could not load CRL.");
+		goto fail;
+	}
+
+	if (!X509_STORE_add_crl(ca_certs, x509_crl)) {
+		log_error("%s\n", "Could not store CRL.");
+		goto fail;
+	}
+	x509_crl = NULL;
+
+#ifndef USE_VERIFY_PARAM
+	if (!X509_STORE_set_flags(ca_certs, VERIFY_FLAGS)) {
+		log_error("%s\n", "Error setting CRL check flags.");
+		goto fail;
+	}
+#else /* !USE_VERIFY_PARAM */
+	param = X509_VERIFY_PARAM_new();
+	if (NULL == param) {
+		goto fail;
+	}
+
+	if (!X509_VERIFY_PARAM_set_flags(param, VERIFY_FLAGS)) {
+		goto fail;
+	}
+
+	if (!X509_STORE_set1_param(ca_certs, param)) {
+		goto fail;
+	}
+
+	X509_VERIFY_PARAM_free(param); param = NULL;
+#endif /* USE_VERIFY_PARAM */
+
+	return 0;
+
+fail:
+#ifdef USE_VERIFY_PARAM
+	if (NULL != param) {
+		X509_VERIFY_PARAM_free(param);
+	}
+#endif /* USE_VERIFY_PARAM */
+	if (NULL != x509_crl) {
+		X509_CRL_free(x509_crl);
+	}
+	return -1;
+}
+
+
 /* ========================================================================= */
 /*
  * Verifies signed message signature.
  */
-int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert)
+int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
+    int crl_check)
 /* ========================================================================= */
 {
 	int ret;
@@ -290,7 +377,7 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert)
 	}
 
 	ret = cms_verify_signature(cms,
-	    (0 == verify_cert) ? NULL : ca_certs, 0);
+	    (0 == verify_cert) ? NULL : ca_certs, crl_check);
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 
@@ -1093,6 +1180,52 @@ X509 * load_x509(const void *raw, size_t raw_len)
 	BIO_free(bio); bio = NULL;
 
 	return x509;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
+ * Load X509_CRL from buffer.
+ */
+static
+X509_CRL *load_x509_crl(const void *raw, size_t raw_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	X509_CRL *x509_crl = NULL;
+	unsigned long err;
+
+	debug_func_call();
+
+	bio = BIO_new_mem_buf((void *) raw, raw_len);
+	if (NULL == bio) {
+		log_error("%s\n", "Cannot create memory BIO.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	x509_crl = d2i_X509_CRL_bio(bio, NULL);
+	if (NULL == x509_crl) {
+		log_error("%s\n", "Cannot parse X509_CRL.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	return x509_crl;
 
 fail:
 	if (NULL != bio) {
