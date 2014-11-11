@@ -30,8 +30,8 @@
 #define CERT_PATH_PREFIX ""
 #endif /* CERT_PATH_PREFIX */
 
-/*!
- * @brief Holds NULL-terminated list of PEM encoded certificate files.
+/*
+ * Holds NULL-terminated list of PEM encoded certificate files.
  */
 extern const char *pem_files[];
 
@@ -51,6 +51,11 @@ struct pem_str {
 extern const struct pem_str pem_strs[];
 
 /*!
+ * @brief Holds NULL-terminated list of PEM encoded root certificates.
+ */
+extern const struct pem_str root_pem_strs[];
+
+/*!
  * @brief Certificates used for CMS validation.
  */
 static
@@ -65,7 +70,7 @@ X509_STORE *ca_certs = NULL;
  * @return 0 certificate was parsed and was stored, -1 else.
  */
 static
-int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str);
+int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str);
 
 
 /*!
@@ -77,7 +82,7 @@ int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str);
  * @return 0 if at least one certificate could be loaded, -1 else.
  */
 static
-int X509_store_add_cert_file(X509_STORE *store, const char *fname,
+int x509_store_add_cert_file(X509_STORE *store, const char *fname,
     int *num_loaded);
 
 
@@ -87,7 +92,7 @@ int X509_store_add_cert_file(X509_STORE *store, const char *fname,
  * @return NULL on failure.
  */
 static
-CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
+CMS_ContentInfo * cms_load_der(const void *raw, size_t raw_len);
 
 
 /*!
@@ -96,7 +101,16 @@ CMS_ContentInfo * load_cms(const void *raw, size_t raw_len);
  * @return NULL on failure.
  */
 static
-X509 * load_x509(const void *raw, size_t raw_len);
+X509 * x509_load_der(const void *raw, size_t raw_len);
+
+
+/*!
+ * @brief Load X509 from buffer.
+ *
+ * @return NULL on failure.
+ */
+static
+X509 * x509_load_pem(const char *pem_str);
 
 
 /*!
@@ -105,7 +119,20 @@ X509 * load_x509(const void *raw, size_t raw_len);
  * @return NULL on failure.
  */
 static
-X509_CRL *load_x509_crl(const void *raw, size_t raw_len);
+X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len);
+
+
+/*!
+ * @brief Verify the signature of the CRL.
+ *
+ * @param[in] x509_clr CRL to be checked.
+ *
+ * @return  1 if signature valid,
+ *          0 if signature invalid,
+ *         -1 on error.
+ */
+static
+int x509_crl_verify_signature(X509_CRL *x509_crl);
 
 
 /*!
@@ -243,7 +270,7 @@ int init_crypto(void)
 		memcpy(file_path + crt_dir_path_len, *pem_file, file_name_len);
 		file_path[crt_dir_path_len + file_name_len] = '\0';
 
-		if (0 != X509_store_add_cert_file(ca_certs, file_path,
+		if (0 != x509_store_add_cert_file(ca_certs, file_path,
 		             &loaded_at_once)) {
 			log_warning("Could not load certificate file '%s'.\n",
 			    file_path);
@@ -257,7 +284,7 @@ int init_crypto(void)
 	pem_desc = pem_strs;
 	assert(NULL != pem_desc);
 	while ((NULL != pem_desc->name) && (NULL != pem_desc->pem)) {
-		if (0 != X509_store_add_cert_pem(ca_certs, pem_desc->pem)) {
+		if (0 != x509_store_add_cert_pem(ca_certs, pem_desc->pem)) {
 			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
@@ -308,9 +335,14 @@ int crypto_add_crl(const void *der, size_t der_size)
 		goto fail;
 	}
 
-	x509_crl = load_x509_crl(der, der_size);
+	x509_crl = x509_crl_load_der(der, der_size);
 	if (NULL == x509_crl) {
 		log_error("%s\n", "Could not load CRL.");
+		goto fail;
+	}
+
+	if (1 != x509_crl_verify_signature(x509_crl)) {
+		log_error("%s\n", "Could not verify CRL signature.");
 		goto fail;
 	}
 
@@ -370,7 +402,7 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 
 	debug_func_call();
 
-	cms = load_cms(der, der_size);
+	cms = cms_load_der(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -407,7 +439,7 @@ int raw_msg_verify_signature_date(const void *der, size_t der_size,
 
 	debug_func_call();
 
-	cms = load_cms(der, der_size);
+	cms = cms_load_der(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -472,7 +504,7 @@ int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 
 	debug_func_call();
 
-	cms = load_cms(der, der_size);
+	cms = cms_load_der(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -530,7 +562,7 @@ struct x509_crt * raw_cms_signing_cert(const void *der, size_t der_size)
 
 	debug_func_call();
 
-	cms = load_cms(der, der_size);
+	cms = cms_load_der(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
 		goto fail;
@@ -616,7 +648,7 @@ struct x509_crt * x509_crt_from_der(const void *der, size_t der_size)
 {
 	debug_func_call();
 
-	return (struct x509_crt *) load_x509(der, der_size);
+	return (struct x509_crt *) x509_load_der(der, der_size);
 }
 
 
@@ -924,10 +956,9 @@ fail:
  * Read certificate from PEM string.
  */
 static
-int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
+int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 /* ========================================================================= */
 {
-	BIO *bio = NULL;
 	X509 *x509 = NULL;
 	unsigned long err;
 
@@ -942,27 +973,10 @@ int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 		goto fail;
 	}
 
-	bio = BIO_new_mem_buf((void *) pem_str, strlen(pem_str));
-	if (NULL == bio) {
-		log_error("%s\n", "Cannot create memory BIO.");
-		while (0 != (err = ERR_get_error())) {
-			log_error("openssl error: %s\n",
-			    ERR_error_string(err, NULL));
-		}
+	x509 = x509_load_pem(pem_str);
+	if (NULL == x509) {
 		goto fail;
 	}
-
-	x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
-	if (x509 == NULL) {
-		log_error("%s\n", "Cannot parse certificate from BIO.");
-		while (0 != (err = ERR_get_error())) {
-			log_error("openssl error: %s\n",
-			    ERR_error_string(err, NULL));
-		}
-		goto fail;
-	}
-
-	BIO_free(bio); bio = NULL;
 
 	if (X509_STORE_add_cert(store, x509) == 0) {
 		err = ERR_get_error();
@@ -985,9 +999,6 @@ int X509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 	return 0;
 
 fail:
-	if (NULL != bio) {
-		BIO_free(bio);
-	}
 	if (NULL != x509) {
 		X509_free(x509);
 	}
@@ -1000,7 +1011,7 @@ fail:
  * Read certificate file.
  */
 static
-int X509_store_add_cert_file(X509_STORE *store, const char *fname,
+int x509_store_add_cert_file(X509_STORE *store, const char *fname,
     int *num_loaded)
 /* ========================================================================= */
 {
@@ -1102,7 +1113,7 @@ fail:
  * Load CMS from buffer.
  */
 static
-CMS_ContentInfo * load_cms(const void *raw, size_t raw_len)
+CMS_ContentInfo * cms_load_der(const void *raw, size_t raw_len)
 /* ========================================================================= */
 {
 	BIO *bio = NULL;
@@ -1148,7 +1159,7 @@ fail:
  * Load X509 from buffer.
  */
 static
-X509 * load_x509(const void *raw, size_t raw_len)
+X509 * x509_load_der(const void *raw, size_t raw_len)
 /* ========================================================================= */
 {
 	BIO *bio = NULL;
@@ -1191,10 +1202,54 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Load X509 from buffer.
+ */
+static
+X509 * x509_load_pem(const char *pem_str)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	X509 *x509 = NULL;
+	unsigned long err;
+
+	bio = BIO_new_mem_buf((void *) pem_str, strlen(pem_str));
+	if (NULL == bio) {
+		log_error("%s\n", "Cannot create memory BIO.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+	if (x509 == NULL) {
+		log_error("%s\n", "Cannot parse certificate from BIO.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	return x509;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
  * Load X509_CRL from buffer.
  */
 static
-X509_CRL *load_x509_crl(const void *raw, size_t raw_len)
+X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len)
 /* ========================================================================= */
 {
 	BIO *bio = NULL;
@@ -1232,6 +1287,54 @@ fail:
 		BIO_free(bio);
 	}
 	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
+ * Verify the signature of the CRL.
+ */
+static
+int x509_crl_verify_signature(X509_CRL *x509_crl)
+/* ========================================================================= */
+{
+	X509 *x509 = NULL;
+	const struct pem_str *pem_desc;
+	EVP_PKEY *pkey = NULL;
+	int verified = -1;
+
+	pem_desc = root_pem_strs;
+	assert(NULL != pem_desc);
+	while ((1 != verified) &&
+	       (NULL != pem_desc->name) && (NULL != pem_desc->pem)) {
+		x509 = x509_load_pem(pem_desc->pem);
+		if (NULL == x509) {
+			/* Don't generate an error. */
+			goto next;
+		}
+
+		pkey = X509_get_pubkey(x509);
+		if (NULL == pkey) {
+			goto next;
+		}
+
+		if (X509_CRL_verify(x509_crl, pkey)) {
+			verified = 1;
+		} else if (-1 == verified) {
+			verified = 0;
+		}
+
+next:
+		if (NULL != x509) {
+			X509_free(x509); x509 = NULL;
+		}
+		if (NULL != pkey) {
+			EVP_PKEY_free(pkey); pkey = NULL;
+		}
+		++pem_desc;
+	}
+
+	return verified;
 }
 
 
@@ -1934,5 +2037,14 @@ const struct pem_str pem_strs[] = {
 	{postsignum_qca2_sub_name, postsignum_qca2_sub_pem},
 	{postsignum_qca3_sub_name, postsignum_qca3_sub_pem},
 //	{equifax_ca_name, equifax_ca_pem},
+	{NULL, NULL}
+};
+
+/*
+ * Holds NULL-terminated list of PEM encoded root certificates.
+ */
+const struct pem_str root_pem_strs[] = {
+	{postsignum_qca_root_name, postsignum_qca_root_pem},
+	{postsignum_qca2_root_name, postsignum_qca2_root_pem},
 	{NULL, NULL}
 };
