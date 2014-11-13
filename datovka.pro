@@ -116,6 +116,7 @@ SOURCES += src/common.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
+    src/io/file_downloader.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
     src/log/log.cpp \
@@ -142,6 +143,7 @@ HEADERS += src/common.h \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
+    src/io/file_downloader.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
     src/log/log.h \

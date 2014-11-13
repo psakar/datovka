@@ -23,6 +23,21 @@ struct x509_crt;
 
 
 /*!
+ * @brief Holds locations of the CRL files.
+ */
+struct crl_location {
+	const char *file_name; /*!< CRL file name. */
+	const char **urls; /*!< NULL-terminated list of URLs. */
+};
+
+
+/*!
+ * @brief NULL-terminated list of CRL files.
+ */
+extern const struct crl_location crl_locations[];
+
+
+/*!
  * @brief Initialises cryptographic back-end.
  *
  * @return  0 on success,
@@ -48,6 +63,7 @@ int crypto_add_crl(const void *der, size_t der_size);
  * @param[in] der         Buffer containing DER encoded CMS.
  * @param[in] der_size    DER size.
  * @param[in] verify_cert Set 0 if you don't want to verify certificate.
+ * @param[in] crl_check   Set 0 if you don't want to perform CRL check.
  * @return  1 if signature is valid,
  *          0 if signature is invalid,
  *         -1 on other errors.

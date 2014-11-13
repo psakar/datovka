@@ -2048,3 +2048,29 @@ const struct pem_str root_pem_strs[] = {
 	{postsignum_qca2_root_name, postsignum_qca2_root_pem},
 	{NULL, NULL}
 };
+
+
+const char psrootqca_file[] = "psrootqca.crl";
+const char *psrootqca_urls[] = {
+	"http://www.postsignum.cz/crl/psrootqca.crl",
+	"http://postsignum.ttc.cz/crl/psrootqca.crl",
+	NULL
+};
+
+const char psrootqca2_file[] = "psrootqca2.crl";
+const char *psrootqca2_urls[] = {
+	"http://www.postsignum.cz/crl/psrootqca2.crl",
+	"http://www2.postsignum.cz/crl/psrootqca2.crl",
+	"http://postsignum.ttc.cz/crl/psrootqca2.crl",
+	NULL
+};
+
+
+/*
+ * NULL-terminated list of CRL files.
+ */
+const struct crl_location crl_locations[] = {
+	{psrootqca_file, psrootqca_urls},
+	{psrootqca2_file, psrootqca2_urls},
+	{NULL, NULL}
+};
