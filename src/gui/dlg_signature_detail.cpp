@@ -22,7 +22,8 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
         messageDb.msgsMessageDER(dmId): QByteArray()),
     m_tstDER(messageDb.msgsTimestampDER(dmId)),
     m_constructedFromDb(true),
-    m_dbIsVerified(messageDb.msgsVerified(dmId))
+    m_dbIsVerified(messageDb.msgsVerified(dmId)),
+    dSize(QSize())
 {
 	setupUi(this);
 
@@ -36,6 +37,9 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
 	validateMessageSignature();
 	validateSigningCertificate();
 	validateMessageTimestamp();
+
+	/* remember size of dialog */
+	dSize = this->sizeHint();
 }
 
 
@@ -50,7 +54,8 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
     m_msgDER((char *) msgDER, msgSize),
     m_tstDER((char *) tstDER, tstSize),
     m_constructedFromDb(false),
-    m_dbIsVerified(false)
+    m_dbIsVerified(false),
+    dSize(QSize())
 {
 	setupUi(this);
 
@@ -64,6 +69,9 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	validateMessageSignature();
 	validateSigningCertificate();
 	validateMessageTimestamp();
+
+	/* remember size of dialog */
+	dSize = this->sizeHint();
 }
 
 
@@ -75,6 +83,7 @@ void DlgSignatureDetail::showCertificateDetail(int state)
 /* ========================================================================= */
 {
 	this->certDetailWidget->setHidden(Qt::Unchecked == state);
+	this->setMaximumSize(dSize);
 }
 
 
@@ -86,6 +95,7 @@ void DlgSignatureDetail::showVerificationDetail(int state)
 /* ========================================================================= */
 {
 	this->verifyWidget->setHidden(Qt::Unchecked == state);
+	this->setMaximumSize(dSize);
 }
 
 

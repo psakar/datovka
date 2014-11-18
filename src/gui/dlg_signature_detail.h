@@ -83,6 +83,8 @@ private:
 	 */
 	bool tstInfo(QString &oStr, QString &ouStr, QString &nStr,
 	    QString &cStr) const;
+
+	 QSize dSize;
 };
 
 
