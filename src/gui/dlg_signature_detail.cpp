@@ -144,11 +144,16 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	QString iconPath;
 	QString resStr;
 
+	this->showCertDetail->setHidden(false);
+	this->showVerifyDetail->setHidden(false);
+
 	if (m_msgDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Message signature is not present.") +
 		    "<br/>";
 		resStr += QObject::tr("Cannot check signing certificate");
+		this->showCertDetail->setHidden(true);
+		this->showVerifyDetail->setHidden(true);
 	} else if (!msgSigningCertValid()) {
 		iconPath = ICON_16x16_PATH "datovka-error.png";
 		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
