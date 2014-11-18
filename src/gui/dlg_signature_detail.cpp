@@ -26,6 +26,13 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
 {
 	setupUi(this);
 
+	this->verifyWidget->setHidden(true);
+	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showVerificationDetail(int)));
+	this->certDetailWidget->setHidden(true);
+	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showCertificateDetail(int)));
+
 	validateMessageSignature();
 	validateSigningCertificate();
 	validateMessageTimestamp();
@@ -47,9 +54,38 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
 {
 	setupUi(this);
 
+	this->verifyWidget->setHidden(true);
+	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showVerificationDetail(int)));
+	this->certDetailWidget->setHidden(true);
+	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showCertificateDetail(int)));
+
 	validateMessageSignature();
 	validateSigningCertificate();
 	validateMessageTimestamp();
+}
+
+
+/* ========================================================================= */
+/*
+ * Show/hide certificate details
+ */
+void DlgSignatureDetail::showCertificateDetail(int state)
+/* ========================================================================= */
+{
+	this->certDetailWidget->setHidden(Qt::Unchecked == state);
+}
+
+
+/* ========================================================================= */
+/*
+ * Show/hide Verification Details
+ */
+void DlgSignatureDetail::showVerificationDetail(int state)
+/* ========================================================================= */
+{
+	this->verifyWidget->setHidden(Qt::Unchecked == state);
 }
 
 

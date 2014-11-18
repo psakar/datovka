@@ -21,6 +21,10 @@ public:
 	DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
 
+private slots:
+	void showCertificateDetail(int);
+	void showVerificationDetail(int);
+
 private:
 	const QByteArray m_msgDER; /*!< Message CMS. */
 	const QByteArray m_tstDER; /*!< Time stamp CMS. */
