@@ -125,13 +125,13 @@ void DlgSignatureDetail::validateMessageSignature(void)
 
 		if (!verified) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
-			resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 			resStr += "<span style=\"color:#aa0000;\"><b>";
 			resStr += QObject::tr("No");
 			resStr += "</b></span>";
 		} else {
 			iconPath = ICON_16x16_PATH "datovka-ok.png";
-			resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 			resStr += "<span style=\"color:#00aa00;\"><b>";
 			resStr += QObject::tr("Yes");
 			resStr += "</b></span>";
@@ -161,18 +161,18 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Message signature is not present.") +
 		    "<br/>";
-		resStr += QObject::tr("Cannot check signing certificate");
+		resStr += QObject::tr("Cannot check signing certificate.");
 		this->showCertDetail->setHidden(true);
 		this->showVerifyDetail->setHidden(true);
 	} else if (!msgSigningCertValid()) {
 		iconPath = ICON_16x16_PATH "datovka-error.png";
-		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 		resStr += "<span style=\"color:#aa0000;\"><b>";
 		resStr += QObject::tr("No");
 		resStr += "</b></span>";
 	} else {
 		iconPath = ICON_16x16_PATH "datovka-ok.png";
-		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 		resStr += "<span style=\"color:#00aa00;\"><b>";
 		resStr += QObject::tr("Yes");
 		resStr += "</b></span>";
@@ -193,40 +193,40 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		QStringList strList;
 
 		/* Certificate information. */
-		resStr = "<b>" + QObject::tr("Version: ") + "</b>" +
+		resStr = "<b>" + QObject::tr("Version") + ": </b>" +
 		    QString(signingCert.version()) + "<br/>";
-		resStr += "<b>" + QObject::tr("Serial number: ") + "</b>" +
+		resStr += "<b>" + QObject::tr("Serial number") + ": </b>" +
 		    QString(signingCert.serialNumber()) + " (" +
 		    QString::number( /* Convert do decimal. */
 		        ("0x" + QString(signingCert.serialNumber()).replace(
 		                    ":", "")).toUInt(0, 16), 10) + ")<br/>";
-		resStr += "<b>" + QObject::tr("Signature algorithm: ") +
-		    "</b>" + saId + " (" + saName + ")<br/>";
+		resStr += "<b>" + QObject::tr("Signature algorithm") +
+		    ": </b>" + saId + " (" + saName + ")<br/>";
 
-		resStr += "<b>" + QObject::tr("Issuer: ") + "</b><br/>";
+		resStr += "<b>" + QObject::tr("Issuer") + ": </b><br/>";
 		strList = signingCert.issuerInfo(
 		    QSslCertificate::Organization);
 		if (strList.size() > 0) {
 			Q_ASSERT(1 == strList.size());
 			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisation: ") +
+			    QObject::tr("Organisation") + ": " +
 			    strList.first() + "<br/>";
 		}
 		strList = signingCert.issuerInfo(
 		    QSslCertificate::CommonName);
 		if (strList.size() > 0) {
 			Q_ASSERT(1 == strList.size());
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Name: ") +
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Name") + ": " +
 			    strList.first() + "<br/>";
 		}
 		strList = signingCert.issuerInfo(
 		    QSslCertificate::CountryName);
 		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Country: ") +
-			    strList.first() + "<br/>";
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Country") +
+			    ": " + strList.first() + "<br/>";
 		}
 
-		resStr += "<b>" + QObject::tr("Validity: ") + "</b><br/>";
+		resStr += "<b>" + QObject::tr("Validity") + ": </b><br/>";
 		/*
 		 * QSslCertificate::effectiveDate() and
 		 * QSslCertificate::expiryDate() tend to wrong time zone
@@ -235,40 +235,40 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		QDateTime incept, expir;
 		if (msgSigningCertTimes(incept, expir)) {
 			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Valid from: ") +
+			    QObject::tr("Valid from") + ": " +
 			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
 			    incept.timeZone().abbreviation(incept) + "<br/>";
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Valid to: ") +
-			    expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Valid to") +
+			    ": " +expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
 			    expir.timeZone().abbreviation(expir) + "<br/>";
 		}
 
-		resStr += "<b>" + QObject::tr("Subject: ") + "</b><br/>";
+		resStr += "<b>" + QObject::tr("Subject") + ": </b><br/>";
 		strList = signingCert.subjectInfo(
 		    QSslCertificate::Organization);
 		if (strList.size() > 0) {
 			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisation: ") +
+			    QObject::tr("Organisation") + ": " +
 			    strList.first() + "<br/>";
 		}
 		strList = signingCert.subjectInfo(
 		    QSslCertificate::CommonName);
 		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Name: ") +
-			    strList.first() + "<br/>";
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Name") +
+			    ": " + strList.first() + "<br/>";
 		}
 		strList = signingCert.subjectInfo(
 		    QSslCertificate::SerialNumber);
 		if (strList.size() > 0) {
 			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Serial number: ") +
+			    QObject::tr("Serial number") + ": " +
 			    strList.first() + "<br/>";
 		}
 		strList = signingCert.subjectInfo(
 		    QSslCertificate::CountryName);
 		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Country: ") +
-			    strList.first() + "<br/>";
+			resStr += "&nbsp;&nbsp;" + QObject::tr("Country") +
+			    ": " + strList.first() + "<br/>";
 		}
 
 		this->cDetail->setTextFormat(Qt::RichText);
@@ -300,7 +300,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		if (-1 != ret) {
 			tst = QDateTime::fromTime_t(utc_time);
 		}
-		resStr = "<b>" + QObject::tr("Valid: ") + "</b>";
+		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 		if (1 != ret) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
 			resStr += "<span style=\"color:#aa0000;\"><b>";
@@ -312,32 +312,32 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 			resStr += QObject::tr("Yes");
 			resStr += "</b></span>";
 
-			detailStr = "<b>" + QObject::tr("Time:") + "</b> " +
+			detailStr = "<b>" + QObject::tr("Time") + ": </b> " +
 			    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
 			    tst.timeZone().abbreviation(tst) + "<br/>";
 
 			QString o, ou, n, c;
 			tstInfo(o, ou, n, c);
 
-			detailStr += "<b>" + QObject::tr("Issuer:") +
-			    "</b><br/>";
+			detailStr += "<b>" + QObject::tr("Issuer") +
+			    ": </b><br/>";
 			if (!o.isEmpty()) {
 				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Organisation: ") + o +
+				    QObject::tr("Organisation") + ": " + o +
 				    "<br/>";
 			}
 			if (!ou.isEmpty()) {
 				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Organisational unit: ") + ou +
-				    "<br/>";
+				    QObject::tr("Organisational unit") + ": " +
+				     ou + "<br/>";
 			}
 			if (!n.isEmpty()) {
 				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Name: ") + n + "<br/>";
+				    QObject::tr("Name") + ": " + n + "<br/>";
 			}
 			if (!c.isEmpty()) {
 				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Country: ") + c + "<br/>";
+				    QObject::tr("Country") + ": " + c + "<br/>";
 			}
 
 			this->tDetail->setAlignment(Qt::AlignLeft);
