@@ -3401,8 +3401,6 @@ void MainWindow::setReceivedColumnWidths(void)
 void MainWindow::setSentColumnWidths(void)
 /* ========================================================================= */
 {
-	int i;
-
 	debugFuncCall();
 
 	ui->messageList->resizeColumnToContents(0);

@@ -14,8 +14,8 @@
 /*!
  * @brief Encapsulates network connection.
  *
- * @note The class uses its own event loop so it can used outside the main
- *     event loop.
+ * @note The class uses its own event loop so its instances can be used outside
+ *     the main event loop.
  */
 class FileDownloader : public QObject {
 	Q_OBJECT

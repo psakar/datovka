@@ -205,6 +205,7 @@ int x509_get_der(X509 *x509, void **der, size_t *der_len);
 
 
 //#define PRINT_CERTS 1
+//#define CUSTOM_VERIFY_CB 1
 
 
 #if defined PRINT_CERTS
@@ -214,6 +215,17 @@ int x509_get_der(X509 *x509, void **der, size_t *der_len);
 static
 int x509_printf(X509 *x509, FILE *fout);
 #endif /* PRINT_CERTS */
+
+
+#if defined CUSTOM_VERIFY_CB
+/*!
+ * @brief Custom certificate verification callback.
+ *
+ * @note Can be used to override some verification errors.
+ */
+static
+int cert_verify_cb(int ok, X509_STORE_CTX *ctx);
+#endif /* CUSTOM_VERIFY_CB */
 
 
 /* ========================================================================= */
@@ -296,6 +308,10 @@ int init_crypto(void)
 	if (0 == loaded_certificates) {
 		log_error("%s\n", "Did not load any certificate.");
 	}
+
+#ifdef CUSTOM_VERIFY_CB
+	X509_STORE_set_verify_cb(ca_certs, cert_verify_cb);
+#endif /* CUSTOM_VERIFY_CB */
 
 	return 0;
 
@@ -397,8 +413,13 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
     int crl_check)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 	int ret;
 	CMS_ContentInfo *cms = NULL;
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
+	STACK_OF(X509) *signers = NULL;
+#endif /* PRINT_CERTS */
 
 	debug_func_call();
 
@@ -410,6 +431,11 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 
 	ret = cms_verify_signature(cms,
 	    (0 == verify_cert) ? NULL : ca_certs, crl_check);
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
+	signers = CMS_get0_signers(cms);
+	x509_printf(sk_X509_value(signers, 0), stderr);
+	sk_X509_free(signers); signers = NULL;
+#endif /* PRINT_CERTS */
 
 	CMS_ContentInfo_free(cms); cms = NULL;
 
@@ -420,6 +446,10 @@ fail:
 		CMS_ContentInfo_free(cms);
 	}
 	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -495,12 +525,13 @@ fail:
 int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 	int ret;
 	CMS_ContentInfo *cms = NULL;
-//	unsigned long err;
-#if defined PRINT_CERTS
 	STACK_OF(X509) *signers = NULL;
-#endif /* PRINT_CERTS */
+	X509 *x509;
+	int num_signers;
 
 	debug_func_call();
 
@@ -514,24 +545,55 @@ int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 	 * The timestamps are provided by the postsignum.cz certification
 	 * authority.
 	 * TODO -- Currently the signing certificate is not checked against
-	 * any other certificate.
+	 * any other certificate here. This is because the check fails
+	 * signalling invalid certificate purpose. Therefore an explicit
+	 * certificate check is performed.
 	 */
 	ret = cms_verify_signature(cms, NULL, 0);
-#if defined PRINT_CERTS
+	if (-1 == ret) {
+		goto fail;
+	}
+
 	signers = CMS_get0_signers(cms);
-	x509_printf(sk_X509_value(signers, 0), stderr);
-	sk_X509_free(signers); signers = NULL;
+	if (NULL == signers) {
+		goto fail;
+	}
+
+	num_signers = sk_X509_num(signers);
+	if (1 != num_signers) {
+		log_error("Only one CMS signer expected, got %d.\n",
+		    num_signers);
+		goto fail;
+	}
+
+	x509 = sk_X509_value(signers, 0);
+
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
+	x509_printf(x509, stderr);
 #endif /* PRINT_CERTS */
 
-	if (-1 != ret) {
-		assert(NULL != utc_time);
-		if (NULL == utc_time) {
-			goto fail;
-		}
+	/* Explicitly verify signature. */
+	ret = x509_crt_verify(x509);
+	if (-1 == ret) {
+		goto fail;
+	}
 
-		if (-1 == cms_get_timestamp_value(cms, utc_time)) {
-			goto fail;
-		}
+	if (1 == ret) {
+		/* Check certificate purpose. */
+		ret = X509_check_purpose(x509, X509_PURPOSE_TIMESTAMP_SIGN,
+		    0) ? 1 : 0;
+	}
+
+	x509 = NULL;
+	sk_X509_free(signers); signers = NULL;
+
+	assert(NULL != utc_time);
+	if (NULL == utc_time) {
+		goto fail;
+	}
+
+	if (-1 == cms_get_timestamp_value(cms, utc_time)) {
+		goto fail;
 	}
 
 	CMS_ContentInfo_free(cms); cms = NULL;
@@ -542,7 +604,14 @@ fail:
 	if (NULL != cms) {
 		CMS_ContentInfo_free(cms);
 	}
+	if (NULL != signers) {
+		sk_X509_free(signers);
+	}
 	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -782,6 +851,8 @@ int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
     char **sa_name)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 /* According to documentation of OBJ_obj2txt 80 should be enough. */
 #define MAX_ID_LEN 80
 	const X509_ALGOR *sa;
@@ -798,7 +869,7 @@ int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
 		goto fail;
 	}
 
-#if defined PRINT_CERTS
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 	fprintf(stderr, ">>>\n");
 	x509_printf((X509 *) x509_crt, stderr);
 	fprintf(stderr, "<<<\n");
@@ -833,6 +904,10 @@ fail:
 	return -1;
 
 #undef MAX_ID_LEN
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -896,13 +971,15 @@ fail:
 int x509_crt_verify(struct x509_crt *x509_crt)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 	int ret = 0;
 	X509_STORE_CTX *csc = NULL;
 	unsigned long err;
 
 	debug_func_call();
 
-#if defined PRINT_CERTS
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 	fprintf(stderr, ">>>\n");
 	x509_printf((X509 *) x509_crt, stderr);
 	fprintf(stderr, "<<<\n");
@@ -948,6 +1025,10 @@ fail:
 		X509_STORE_CTX_free(csc);
 	}
 	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -959,6 +1040,8 @@ static
 int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 	X509 *x509 = NULL;
 	unsigned long err;
 
@@ -988,7 +1071,7 @@ int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 		goto fail;
 	}
 
-#if defined PRINT_CERTS
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 	fprintf(stderr, ">>>\n");
 	x509_printf(x509, stderr);
 	fprintf(stderr, "<<<\n");
@@ -1003,6 +1086,10 @@ fail:
 		X509_free(x509);
 	}
 	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -1015,6 +1102,8 @@ int x509_store_add_cert_file(X509_STORE *store, const char *fname,
     int *num_loaded)
 /* ========================================================================= */
 {
+//#define PRINT_HANDLED_CERT
+
 	BIO *bio = NULL;
 	X509 *x509 = NULL;
 	unsigned long err;
@@ -1076,7 +1165,7 @@ int x509_store_add_cert_file(X509_STORE *store, const char *fname,
 
 		++read_pems;
 
-#if defined PRINT_CERTS
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 		fprintf(stderr, ">>>\n");
 		x509_printf(x509, stderr);
 		fprintf(stderr, "<<<\n");
@@ -1105,6 +1194,10 @@ fail:
 		X509_free(x509);
 	}
 	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
 }
 
 
@@ -1783,6 +1876,35 @@ fail:
 	return -1;
 }
 #endif /* PRINT_CERTS */
+
+
+#if defined CUSTOM_VERIFY_CB
+/* ========================================================================= */
+/*
+ * Custom certificate verification callback.
+ */
+static
+int cert_verify_cb(int ok, X509_STORE_CTX *ctx)
+/* ========================================================================= */
+{
+	int error;
+
+	error = X509_STORE_CTX_get_error(ctx);
+
+	log_info("X509_V_ERR %d, ok %d\n", error, ok);
+
+	/*
+	 * Override certificate purpose check. Especially the validation of
+	 * time stamp CMS containers fails with this error.
+	 */
+	if (X509_V_ERR_INVALID_PURPOSE == error) {
+		return 1;
+	}
+
+	return ok;
+
+}
+#endif /* CUSTOM_VERIFY_CB */
 
 
 const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
