@@ -47,6 +47,15 @@ int init_crypto(void);
 
 
 /*!
+ * @brief Check whether certificates have been loaded.
+ *
+ * @return 1 if certificates have been loaded,
+ *         0 if certificates have not been loaded.
+ */
+int crypto_certificates_loaded(void);
+
+
+/*!
  * @brief Set certificate revocation list.
  *
  * @param[in] der      Buffer containing DER encoded signed CRL.

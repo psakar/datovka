@@ -61,6 +61,12 @@ extern const struct pem_str root_pem_strs[];
 static
 X509_STORE *ca_certs = NULL;
 
+/*!
+ * @brief Number of certificates loaded.
+ */
+static
+int loaded_ca_certs = 0;
+
 
 /*!
  * @brief Read certificate from a PEM string.
@@ -237,7 +243,7 @@ int init_crypto(void)
 {
 	const char **pem_file;
 	const struct pem_str *pem_desc;
-	int loaded_certificates = 0, loaded_at_once;
+	int loaded_at_once;
 #define MAX_PATH_LEN 256
 	size_t crt_dir_path_len, file_name_len;
 	char file_path[MAX_PATH_LEN];
@@ -252,6 +258,7 @@ int init_crypto(void)
 
 	if (NULL != ca_certs) {
 		X509_STORE_free(ca_certs); ca_certs = NULL;
+		loaded_ca_certs = 0;
 	}
 
 	ca_certs = X509_STORE_new();
@@ -287,7 +294,7 @@ int init_crypto(void)
 			log_warning("Could not load certificate file '%s'.\n",
 			    file_path);
 		} else {
-			loaded_certificates += loaded_at_once;
+			loaded_ca_certs += loaded_at_once;
 		}
 		++pem_file;
 	}
@@ -300,12 +307,12 @@ int init_crypto(void)
 			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
-			++loaded_certificates;
+			++loaded_ca_certs;
 		}
 		++pem_desc;
 	}
 
-	if (0 == loaded_certificates) {
+	if (0 == loaded_ca_certs) {
 		log_error("%s\n", "Did not load any certificate.");
 	}
 
@@ -321,6 +328,17 @@ fail:
 	}
 	return -1;
 #undef MAX_PATH_LEN
+}
+
+
+/* ========================================================================= */
+/*
+ * Check whether certificates have been loaded.
+ */
+int crypto_certificates_loaded(void)
+/* ========================================================================= */
+{
+	return (NULL != ca_certs) && (0 < loaded_ca_certs);
 }
 
 
@@ -433,7 +451,9 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 	    (0 == verify_cert) ? NULL : ca_certs, crl_check);
 #if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 	signers = CMS_get0_signers(cms);
+	fprintf(stderr, ">>>\n");
 	x509_printf(sk_X509_value(signers, 0), stderr);
+	fprintf(stderr, "<<<\n");
 	sk_X509_free(signers); signers = NULL;
 #endif /* PRINT_CERTS */
 
@@ -569,11 +589,13 @@ int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 	x509 = sk_X509_value(signers, 0);
 
 #if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
+	fprintf(stderr, ">>>\n");
 	x509_printf(x509, stderr);
+	fprintf(stderr, "<<<\n");
 #endif /* PRINT_CERTS */
 
 	/* Explicitly verify signature. */
-	ret = x509_crt_verify(x509);
+	ret = x509_crt_verify((struct x509_crt *) x509);
 	if (-1 == ret) {
 		goto fail;
 	}
@@ -624,7 +646,7 @@ struct x509_crt * raw_cms_signing_cert(const void *der, size_t der_size)
 /* ========================================================================= */
 {
 	int ret;
-	CMS_ContentInfo * cms = NULL;
+	CMS_ContentInfo *cms = NULL;
 	STACK_OF(X509) *signers = NULL;
 	X509 *x509 = NULL;
 	int num_signers;

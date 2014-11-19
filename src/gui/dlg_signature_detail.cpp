@@ -99,6 +99,17 @@ void DlgSignatureDetail::showVerificationDetail(int state)
 }
 
 
+#define YES \
+	("<span style=\"color:#008800;\"><b>" + QObject::tr("Yes") + \
+	"</b></span>")
+#define NO \
+	("<span style=\"color:#880000;\"><b>" + QObject::tr("No") + \
+	"</b></span>")
+#define UNAVAILABLE \
+	("<span style=\"color:#f7910e;\"><b>" + \
+	QObject::tr("Information not available") + "</b></span>")
+
+
 /* ========================================================================= */
 /*
  * Check message signature, show result in dialog.
@@ -126,15 +137,11 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		if (!verified) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
 			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-			resStr += "<span style=\"color:#aa0000;\"><b>";
-			resStr += QObject::tr("No");
-			resStr += "</b></span>";
+			resStr += NO;
 		} else {
 			iconPath = ICON_16x16_PATH "datovka-ok.png";
 			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-			resStr += "<span style=\"color:#00aa00;\"><b>";
-			resStr += QObject::tr("Yes");
-			resStr += "</b></span>";
+			resStr += YES;
 		}
 	}
 
@@ -164,18 +171,23 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += QObject::tr("Cannot check signing certificate.");
 		this->showCertDetail->setHidden(true);
 		this->showVerifyDetail->setHidden(true);
-	} else if (!msgSigningCertValid()) {
-		iconPath = ICON_16x16_PATH "datovka-error.png";
-		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-		resStr += "<span style=\"color:#aa0000;\"><b>";
-		resStr += QObject::tr("No");
-		resStr += "</b></span>";
 	} else {
-		iconPath = ICON_16x16_PATH "datovka-ok.png";
 		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-		resStr += "<span style=\"color:#00aa00;\"><b>";
-		resStr += QObject::tr("Yes");
-		resStr += "</b></span>";
+
+		if (!msgSigningCertValid()) {
+			iconPath = ICON_16x16_PATH "datovka-error.png";
+			resStr += NO;
+		} else {
+			iconPath = ICON_16x16_PATH "datovka-ok.png";
+			resStr += YES;
+		}
+
+		if (!globPref.check_crl) {
+//			iconPath = ICON_3PARTY_PATH "warning_16.png";
+			resStr += " <b>(" +
+			    QObject::tr("Certificate revocation check is "
+			        "turned off!") + ")</b>";
+		}
 	}
 
 	this->cImage->setIcon(QIcon(iconPath));
@@ -186,7 +198,60 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	QString saId, saName;
 	QSslCertificate signingCert = msgSigningCert(saId, saName);
 
-	/* TODO -- Various check results. */
+	resStr.clear();
+	if (!signingCert.isNull()) {
+		/* TODO -- Various check results. */
+		QString checkResult;
+
+		checkResult = crypto_certificates_loaded() ? YES : NO;
+		resStr = "<b>" +
+		    QObject::tr("Trusted certificates were found") +
+		    ": </b>" + checkResult + "<br/>";
+
+#if 0
+		resStr += "<b>" +
+		    QObject::tr("Signing algorithm supported") +
+		    ": </b>" + "n/a<br/>";
+#endif
+
+#if 0
+		resStr += "<b>" +
+		    QObject::tr("Trusted parent certificate found") +
+		    ": </b>" + "n/a<br/>";
+#endif
+
+#if 0
+		resStr += "<b>" +
+		    QObject::tr("Certificate time validity is ok") +
+		    ": </b>" + "n/a<br/>";
+#endif
+
+#if 0
+		if (!globPref.check_crl) {
+			checkResult = UNAVAILABLE;
+		} else {
+			/* TODO */
+			checkResult = "n/a";
+		}
+		resStr += "<b>" +
+		    QObject::tr("Certificate was not revoked") +
+		    ": </b>" + checkResult + "<br/>";
+		if (!globPref.check_crl) {
+			resStr += "&nbsp;&nbsp;" "<i>" +
+			    QObject::tr("Certificate revocation check is "
+			        "turned off!") + "</i><br/>";
+		}
+#endif
+
+#if 0
+		resStr += "<b>" +
+		    QObject::tr("Certificate signature verified") +
+		    ": </b>" + "n/a<br/>";
+#endif
+
+		this->vDetail->setTextFormat(Qt::RichText);
+		this->vDetail->setText(resStr);
+	}
 
 	resStr.clear();
 	if (!signingCert.isNull()) {
@@ -303,14 +368,10 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
 		if (1 != ret) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
-			resStr += "<span style=\"color:#aa0000;\"><b>";
-			resStr += QObject::tr("No");
-			resStr += "</b></span>";
+			resStr += NO;
 		} else {
 			iconPath = ICON_16x16_PATH "datovka-ok.png";
-			resStr += "<span style=\"color:#00aa00;\"><b>";
-			resStr += QObject::tr("Yes");
-			resStr += "</b></span>";
+			resStr += YES;
 
 			detailStr = "<b>" + QObject::tr("Time") + ": </b> " +
 			    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
