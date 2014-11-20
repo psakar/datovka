@@ -28,7 +28,7 @@
 
 #include "message_db.h"
 #include "src/common.h"
-#include "src/crypto/crypto.h"
+#include "src/crypto/crypto_threadsafe.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
@@ -1775,7 +1775,7 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		timeStampStr = QObject::tr("Not present");
 	} else {
 		time_t utc_time = 0;
-		int ret = raw_tst_verify(tstData.data(), tstData.size(),
+		int ret = rawTstVerify(tstData.data(), tstData.size(),
 		    &utc_time);
 
 		if (-1 != ret) {
@@ -3319,7 +3319,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	//qDebug() << "UTC offset" << utcOffset << local << tZone;
 	time_t utcTime = dateTime.toTime_t();
 
-	return 1 == raw_msg_verify_signature_date(
+	return 1 == rawMsgVerifySignatureDate(
 	    rawBytes.data(), rawBytes.size(), utcTime, 0);
 //	    ignoreMissingCrlCheck ? 0 : 1);
 }

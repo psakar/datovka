@@ -14,6 +14,7 @@
 
 #include "src/compat/compat_win.h"
 #include "src/crypto/crypto.h"
+#include "src/crypto/crypto_nonthreadsafe.h"
 #include "src/log/log_c.h"
 
 
@@ -238,7 +239,7 @@ int cert_verify_cb(int ok, X509_STORE_CTX *ctx);
 /*
  * Initialises cryptographic back-end.
  */
-int init_crypto(void)
+int crypto_init(void)
 /* ========================================================================= */
 {
 	const char **pem_file;

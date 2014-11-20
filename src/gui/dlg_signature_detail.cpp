@@ -6,6 +6,7 @@
 
 #include "dlg_signature_detail.h"
 #include "src/crypto/crypto.h"
+#include "src/crypto/crypto_threadsafe.h"
 #include "src/log/log.h"
 #include "ui_dlg_signature_detail.h"
 
@@ -130,7 +131,7 @@ void DlgSignatureDetail::validateMessageSignature(void)
 			verified = m_dbIsVerified;
 		} else {
 			verified =
-			    1 == raw_msg_verify_signature(m_msgDER.data(),
+			    1 == rawMsgVerifySignature(m_msgDER.data(),
 			        m_msgDER.size(), 0, 0);
 		}
 
@@ -203,7 +204,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		/* TODO -- Various check results. */
 		QString checkResult;
 
-		checkResult = crypto_certificates_loaded() ? YES : NO;
+		checkResult = cryptoCertificatesLoaded() ? YES : NO;
 		resStr = "<b>" +
 		    QObject::tr("Trusted certificates were found") +
 		    ": </b>" + checkResult + "<br/>";
@@ -359,7 +360,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		resStr = QObject::tr("Time stamp not present.");
 	} else {
 		time_t utc_time = 0;
-		int ret = raw_tst_verify(m_tstDER.data(), m_tstDER.size(),
+		int ret = rawTstVerify(m_tstDER.data(), m_tstDER.size(),
 		    &utc_time);
 
 		if (-1 != ret) {
@@ -429,19 +430,19 @@ bool DlgSignatureDetail::msgSigningCertValid(void) const
 		goto fail;
 	}
 
-	signing_cert = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	signing_cert = rawCmsSigningCert(m_msgDER.data(), m_msgDER.size());
 	if (NULL == signing_cert) {
 		goto fail;
 	}
 
-	ret = x509_crt_verify(signing_cert);
+	ret = x509CrtVerify(signing_cert);
 
-	x509_crt_destroy(signing_cert); signing_cert = NULL;
+	x509CrtDestroy(signing_cert); signing_cert = NULL;
 	return 1 == ret;
 
 fail:
 	if (NULL != signing_cert) {
-		x509_crt_destroy(signing_cert);
+		x509CrtDestroy(signing_cert);
 	}
 	return false;
 }
@@ -466,22 +467,22 @@ QSslCertificate DlgSignatureDetail::msgSigningCert(QString &saId,
 		return QSslCertificate();
 	}
 
-	x509_crt = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	x509_crt = rawCmsSigningCert(m_msgDER.data(), m_msgDER.size());
 	if (NULL == x509_crt) {
 		return QSslCertificate();
 	}
 
-	if (0 != x509_crt_to_der(x509_crt, &der, &der_size)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
+	if (0 != x509CrtToDer(x509_crt, &der, &der_size)) {
+		x509CrtDestroy(x509_crt); x509_crt = NULL;
 		return QSslCertificate();
 	}
 
-	if (0 != x509_crt_algorithm_info(x509_crt, &sa_id, &sa_name)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
+	if (0 != x509CrtAlgorithmInfo(x509_crt, &sa_id, &sa_name)) {
+		x509CrtDestroy(x509_crt); x509_crt = NULL;
 		return QSslCertificate();
 	}
 
-	x509_crt_destroy(x509_crt); x509_crt = NULL;
+	x509CrtDestroy(x509_crt); x509_crt = NULL;
 
 	saId = sa_id;
 	saName = sa_name;
@@ -513,17 +514,17 @@ bool DlgSignatureDetail::msgSigningCertTimes(QDateTime &incTime,
 		return false;
 	}
 
-	x509_crt = raw_cms_signing_cert(m_msgDER.data(), m_msgDER.size());
+	x509_crt = rawCmsSigningCert(m_msgDER.data(), m_msgDER.size());
 	if (NULL == x509_crt) {
 		return false;
 	}
 
-	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
+	if (0 != x509CrtDateInfo(x509_crt, &incept, &expir)) {
+		x509CrtDestroy(x509_crt); x509_crt = NULL;
 		return false;
 	}
 
-	x509_crt_destroy(x509_crt); x509_crt = NULL;
+	x509CrtDestroy(x509_crt); x509_crt = NULL;
 
 	incTime = QDateTime::fromTime_t(incept);
 	expTime = QDateTime::fromTime_t(expir);
@@ -545,22 +546,22 @@ bool DlgSignatureDetail::tstInfo(QString &oStr, QString &ouStr, QString &nStr,
 
 	debugFuncCall();
 
-	crt_issuer_info_init(&cii);
+	crtIssuerInfoInit(&cii);
 
 	if (m_tstDER.isEmpty()) {
 		return false;
 	}
 
-	signing_cert = raw_cms_signing_cert(m_tstDER.data(), m_tstDER.size());
+	signing_cert = rawCmsSigningCert(m_tstDER.data(), m_tstDER.size());
 	if (NULL == signing_cert) {
 		goto fail;
 	}
 
-	if (0 != x509_crt_issuer_info(signing_cert, &cii)) {
+	if (0 != x509CrtIssuerInfo(signing_cert, &cii)) {
 		goto fail;
 	}
 
-	x509_crt_destroy(signing_cert); signing_cert = NULL;
+	x509CrtDestroy(signing_cert); signing_cert = NULL;
 
 	if (NULL != cii.o) {
 		oStr = cii.o;
@@ -578,14 +579,14 @@ bool DlgSignatureDetail::tstInfo(QString &oStr, QString &ouStr, QString &nStr,
 		cStr = cii.c;
 	}
 
-	crt_issuer_info_clear(&cii);
+	crtIssuerInfoClear(&cii);
 
 	return true;
 
 fail:
 	if (NULL != signing_cert) {
-		x509_crt_destroy(signing_cert);
+		x509CrtDestroy(signing_cert);
 	}
-	crt_issuer_info_clear(&cii);
+	crtIssuerInfoClear(&cii);
 	return false;
 }

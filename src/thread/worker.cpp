@@ -6,7 +6,7 @@
 
 #include "worker.h"
 #include "src/common.h"
-#include "src/crypto/crypto.h"
+#include "src/crypto/crypto_threadsafe.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
@@ -858,15 +858,15 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	if (signedMsg) {
 		/* Verify message signature. */
-		int ret = raw_msg_verify_signature(message->raw,
+		int ret = rawMsgVerifySignature(message->raw,
 		    message->raw_length, 1, globPref.check_crl ? 1 : 0);
 		qDebug() << "Verification ret" << ret;
 		if (1 == ret) {
-			bool update_ret = messageDb.msgsSetVerified(dmID,
+			messageDb.msgsSetVerified(dmID,
 			    true);
 			/* TODO -- handle return error. */
 		} else if (0 == ret){
-			bool update_ret = messageDb.msgsSetVerified(dmID,
+			messageDb.msgsSetVerified(dmID,
 			    false);
 			/* TODO -- handle return error. */
 		} else {

@@ -8,6 +8,7 @@
 
 #include "src/common.h"
 #include "src/crypto/crypto.h"
+#include "src/crypto/crypto_threadsafe.h"
 #include "src/gui/datovka.h"
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
 	start = QDateTime::currentMSecsSinceEpoch();
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 
-	if (0 != init_crypto()) {
+	if (0 != cryptoInit()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
 		/* TODO -- throw a dialog notifying the user. */
 		/*
@@ -133,7 +134,7 @@ int main(int argc, char *argv[])
 
 			QByteArray data = fDown.download(urlList, 2000);
 			if (!data.isEmpty()) {
-				if (0 != crypto_add_crl(data.data(),
+				if (0 != cryptoAddCrl(data.data(),
 				        data.size())) {
 					logWarning("Couldn't load downloaded "
 					    "CRL file '%s'.\n", crl->file_name);
