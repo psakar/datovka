@@ -66,4 +66,8 @@ int x509CrtDateInfo(struct x509_crt *x509_crt, time_t *utc_inception,
 int x509CrtVerify(struct x509_crt *x509_crt);
 
 
+int x509CrtTrackVerification(struct x509_crt *x509_crt,
+    struct crt_verif_outcome *cvo);
+
+
 #endif /* _CRYPTO_THREADSAFE_H_ */

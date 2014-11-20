@@ -52,7 +52,7 @@ private:
 	 * @param[in] dmId Message identifier.
 	 * @return True if signing certificate was verified successfully.
 	 */
-	bool msgSigningCertValid(void) const;
+	bool msgSigningCertValid(struct crt_verif_outcome &cvo) const;
 
 	/*!
 	 * @brief Returns signing certificate of message.

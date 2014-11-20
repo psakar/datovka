@@ -48,6 +48,17 @@ struct crt_issuer_info {
 };
 
 
+/*!
+ * @brief Certificate verification outcome structure.
+ */
+struct crt_verif_outcome {
+	int parent_crt_not_found;
+	int time_validity_fail;
+	int crt_revoked;
+	int crt_signature_invalid;
+};
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

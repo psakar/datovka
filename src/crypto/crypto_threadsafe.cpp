@@ -232,3 +232,20 @@ int x509CrtVerify(struct x509_crt *x509_crt)
 
 	return ret;
 }
+
+
+/* ========================================================================= */
+int x509CrtTrackVerification(struct x509_crt *x509_crt,
+    struct crt_verif_outcome *cvo)
+/* ========================================================================= */
+{
+	int ret;
+
+	cryptoMutex.lock();
+
+	ret = x509_crt_track_verification(x509_crt, cvo);
+
+	cryptoMutex.unlock();
+
+	return ret;
+}

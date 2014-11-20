@@ -235,6 +235,14 @@ int cert_verify_cb(int ok, X509_STORE_CTX *ctx);
 #endif /* CUSTOM_VERIFY_CB */
 
 
+/*!
+ * @brief Forces verification success and sets various variables according to
+ *     verification progress.
+ */
+static
+int cert_force_success(int ok, X509_STORE_CTX *ctx);
+
+
 /* ========================================================================= */
 /*
  * Initialises cryptographic back-end.
@@ -319,6 +327,8 @@ int crypto_init(void)
 
 #ifdef CUSTOM_VERIFY_CB
 	X509_STORE_set_verify_cb(ca_certs, cert_verify_cb);
+#else /* !CUSTOM_VERIFY_CB */
+	X509_STORE_set_verify_cb(ca_certs, NULL);
 #endif /* CUSTOM_VERIFY_CB */
 
 	return 0;
@@ -1002,6 +1012,13 @@ int x509_crt_verify(struct x509_crt *x509_crt)
 
 	debug_func_call();
 
+	assert(NULL != ca_certs);
+	if (NULL == ca_certs) {
+		log_error("%s\n",
+		    "Cryptographic context has not been initialised.");
+		goto fail;
+	}
+
 #if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
 	fprintf(stderr, ">>>\n");
 	x509_printf((X509 *) x509_crt, stderr);
@@ -1037,6 +1054,107 @@ int x509_crt_verify(struct x509_crt *x509_crt)
 			    ERR_error_string(err, NULL));
 		}
 		ret = 0;
+	}
+
+	X509_STORE_CTX_free(csc); csc = NULL;
+
+	return ret;
+
+fail:
+	if (NULL != csc) {
+		X509_STORE_CTX_free(csc);
+	}
+	return -1;
+
+#ifdef PRINT_HANDLED_CERT
+#  undef PRINT_HANDLED_CERT
+#endif /* PRINT_HANDLED_CERT */
+}
+
+
+static
+struct crt_verif_outcome glob_cvo;
+
+
+/* ========================================================================= */
+/*
+ * Tracks certificate verification.
+ */
+int x509_crt_track_verification(struct x509_crt *x509_crt,
+    struct crt_verif_outcome *cvo)
+/* ========================================================================= */
+{
+//#define PRINT_HANDLED_CERT
+
+	/* TODO -- This function is nearly the same as x509_crt_verify(). */
+
+	int ret = 0;
+	X509_STORE_CTX *csc = NULL;
+	unsigned long err;
+
+	debug_func_call();
+
+	glob_cvo.parent_crt_not_found = 0;
+	glob_cvo.time_validity_fail = 0;
+	glob_cvo.crt_revoked = 0;
+	glob_cvo.crt_signature_invalid = 0;
+
+	assert(NULL != ca_certs);
+	if (NULL == ca_certs) {
+		log_error("%s\n",
+		    "Cryptographic context has not been initialised.");
+		goto fail;
+	}
+
+#if defined PRINT_CERTS && defined PRINT_HANDLED_CERT
+	fprintf(stderr, ">>>\n");
+	x509_printf((X509 *) x509_crt, stderr);
+	fprintf(stderr, "<<<\n");
+#endif /* PRINT_CERTS */
+
+	csc = X509_STORE_CTX_new();
+	if (NULL == csc) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = -1;
+		goto fail;
+	}
+
+	if (!X509_STORE_CTX_init(csc, ca_certs, (X509 *) x509_crt, NULL)) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = -1;
+		goto fail;
+	}
+
+	/* Force verification tracking. */
+	X509_STORE_CTX_set_verify_cb(csc, cert_force_success);
+
+	/* TODO -- CRL */
+
+	if (0 < X509_verify_cert(csc)) {
+		ret = 1;
+	} else {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		ret = 0;
+	}
+
+	/* Restore default behaviour. */
+#if defined CUSTOM_VERIFY_CB
+	X509_STORE_CTX_set_verify_cb(csc, cert_verify_cb);
+#else /* !CUSTOM_VERIFY_CB */
+	X509_STORE_CTX_set_verify_cb(csc, NULL);
+#endif /* CUSTOM_VERIFY_CB */
+
+	if (NULL != cvo) {
+		*cvo = glob_cvo;
 	}
 
 	X509_STORE_CTX_free(csc); csc = NULL;
@@ -1928,6 +2046,58 @@ int cert_verify_cb(int ok, X509_STORE_CTX *ctx)
 
 }
 #endif /* CUSTOM_VERIFY_CB */
+
+
+/* ========================================================================= */
+/*
+ * Forces verification success and sets various variables according to
+ *     verification progress.
+ */
+static
+int cert_force_success(int ok, X509_STORE_CTX *ctx)
+/* ========================================================================= */
+{
+//	X509 *err_cert;
+	int err;
+//	int depth;
+
+//	err_cert = X509_STORE_CTX_get_current_cert(ctx);
+	err = X509_STORE_CTX_get_error(ctx);
+//	depth = X509_STORE_CTX_get_error_depth(ctx);
+
+	if (0 == ok) {
+		switch (err) {
+		case X509_V_OK:
+			break;
+		case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT:
+			glob_cvo.parent_crt_not_found = 1;
+			break;
+		case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE:
+		case X509_V_ERR_CERT_SIGNATURE_FAILURE:
+			glob_cvo.crt_signature_invalid = 1;
+			break;
+		case X509_V_ERR_CERT_NOT_YET_VALID:
+		case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD:
+		case X509_V_ERR_CERT_HAS_EXPIRED:
+		case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD:
+			glob_cvo.time_validity_fail = 1;
+			break;
+		case X509_V_ERR_CERT_REVOKED:
+			glob_cvo.crt_revoked = 1;
+			break;
+		default:
+			log_error("%s\n",
+			    "Unknown certificate verification error.");
+			break;
+		}
+	}
+
+	if ((X509_V_OK == err) && (2 == ok)) {
+		/* Print out policies. */
+	}
+
+	return 1;
+}
 
 
 const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";

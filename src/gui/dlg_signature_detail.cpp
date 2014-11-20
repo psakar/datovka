@@ -172,23 +172,27 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += QObject::tr("Cannot check signing certificate.");
 		this->showCertDetail->setHidden(true);
 		this->showVerifyDetail->setHidden(true);
+
+		return;
+	}
+
+	struct crt_verif_outcome cvo;
+
+	resStr = "<b>" + QObject::tr("Valid") + ": </b>";
+
+	if (!msgSigningCertValid(cvo)) {
+		iconPath = ICON_16x16_PATH "datovka-error.png";
+		resStr += NO;
 	} else {
-		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
+		iconPath = ICON_16x16_PATH "datovka-ok.png";
+		resStr += YES;
+	}
 
-		if (!msgSigningCertValid()) {
-			iconPath = ICON_16x16_PATH "datovka-error.png";
-			resStr += NO;
-		} else {
-			iconPath = ICON_16x16_PATH "datovka-ok.png";
-			resStr += YES;
-		}
-
-		if (!globPref.check_crl) {
-//			iconPath = ICON_3PARTY_PATH "warning_16.png";
-			resStr += " <b>(" +
-			    QObject::tr("Certificate revocation check is "
-			        "turned off!") + ")</b>";
-		}
+	if (!globPref.check_crl) {
+//		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		resStr += " <b>(" +
+		    QObject::tr("Certificate revocation check is "
+		        "turned off!") + ")</b>";
 	}
 
 	this->cImage->setIcon(QIcon(iconPath));
@@ -215,24 +219,20 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		    ": </b>" + "n/a<br/>";
 #endif
 
-#if 0
+		checkResult = cvo.parent_crt_not_found ? NO : YES;
 		resStr += "<b>" +
 		    QObject::tr("Trusted parent certificate found") +
-		    ": </b>" + "n/a<br/>";
-#endif
+		    ": </b>" + checkResult + "<br/>";
 
-#if 0
+		checkResult = cvo.time_validity_fail ? NO : YES;
 		resStr += "<b>" +
 		    QObject::tr("Certificate time validity is ok") +
-		    ": </b>" + "n/a<br/>";
-#endif
+		    ": </b>" + checkResult + "<br/>";
 
-#if 0
 		if (!globPref.check_crl) {
 			checkResult = UNAVAILABLE;
 		} else {
-			/* TODO */
-			checkResult = "n/a";
+			checkResult = cvo.crt_revoked ? NO : YES;
 		}
 		resStr += "<b>" +
 		    QObject::tr("Certificate was not revoked") +
@@ -242,13 +242,11 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 			    QObject::tr("Certificate revocation check is "
 			        "turned off!") + "</i><br/>";
 		}
-#endif
 
-#if 0
+		checkResult = cvo.crt_signature_invalid ? NO : YES;
 		resStr += "<b>" +
 		    QObject::tr("Certificate signature verified") +
-		    ": </b>" + "n/a<br/>";
-#endif
+		    ": </b>" + checkResult + "<br/>";
 
 		this->vDetail->setTextFormat(Qt::RichText);
 		this->vDetail->setText(resStr);
@@ -418,7 +416,8 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 /*
  * Return whether signing certificate is valid.
  */
-bool DlgSignatureDetail::msgSigningCertValid(void) const
+bool DlgSignatureDetail::msgSigningCertValid(
+    struct crt_verif_outcome &cvo) const
 /* ========================================================================= */
 {
 	struct x509_crt *signing_cert = NULL;
@@ -436,6 +435,8 @@ bool DlgSignatureDetail::msgSigningCertValid(void) const
 	}
 
 	ret = x509CrtVerify(signing_cert);
+
+	x509CtrTrackVerification(signing_cert, &cvo);
 
 	x509CrtDestroy(signing_cert); signing_cert = NULL;
 	return 1 == ret;

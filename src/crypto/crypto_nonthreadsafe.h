@@ -201,6 +201,18 @@ int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
 int x509_crt_verify(struct x509_crt *x509_crt);
 
 
+/*!
+ * @brief Tracks certificate verification.
+ *
+ * @param[in]  x509_crt X509 certificate.
+ * @param[out] cvo      Why the validation fails.
+ * @return  1 if tracking ended without any error,
+ *         -1 on errors.
+ */
+int x509_crt_track_verification(struct x509_crt *x509_crt,
+    struct crt_verif_outcome *cvo);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
