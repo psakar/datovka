@@ -133,7 +133,7 @@ SOURCES += src/common.cpp \
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
-    src/crypto/crypto_non_threadsafe.h \
+    src/crypto/crypto_nonthreadsafe.h \
     src/crypto/crypto_threadsafe.h \
     src/gui/datovka.h \
     src/gui/dlg_change_pwd.h \

@@ -436,7 +436,7 @@ bool DlgSignatureDetail::msgSigningCertValid(
 
 	ret = x509CrtVerify(signing_cert);
 
-	x509CtrTrackVerification(signing_cert, &cvo);
+	x509CrtTrackVerification(signing_cert, &cvo);
 
 	x509CrtDestroy(signing_cert); signing_cert = NULL;
 	return 1 == ret;
