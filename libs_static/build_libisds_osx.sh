@@ -128,6 +128,7 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	make && make install || exit 1
 fi
 
+
 if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBCURL_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
@@ -139,10 +140,11 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
-	#--disable-shared
+	# --disable-shared
 	./configure --enable-ipv6 --with-darwinssl --without-axtls --disable-ldap --prefix="${BUILTDIR}" CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
 fi
+
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${OPENSSL_ARCHIVE}"
@@ -158,7 +160,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	# no-asm
 	# darwin-i386-cc
 	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 --prefix="${BUILTDIR}"
-	make && make install_sw exit 1
+	make && make install_sw || exit 1
 fi
 
 
@@ -174,11 +176,3 @@ if [ ! -z "${LIBISDS_GIT}" ]; then
 	make && make install || exit 1
 	mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
 fi
-
-#../libtool --tag=CC --mode=link i686-pc-mingw32-gcc -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
-
-#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc -O2 -g -std=c99 -Wall -version-info 8:0:3 -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -R${BUILTDIR}/lib -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
-
-#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o libisds.so libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
-
-# -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
