@@ -64,23 +64,46 @@ QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
 	-Wall -Wextra -pedantic
 
-INCLUDEPATH = \
-	src \
-	/usr/include/libxml2
+INCLUDEPATH += \
+	src
 
 LIBS = \
 	-lisds
+
+isEqual(STATIC, 1) {
+	warning(Linking statically.)
+} else {
+	INCLUDEPATH += \
+		/usr/include/libxml2
+}
 
 macx {
 	# See https://bugreports.qt-project.org/browse/QTBUG-28097
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
 	CONFIG += c++11
-	INCLUDEPATH += /usr/local/include \
-		/opt/local/include
-	LIBPATH += /usr/local/lib \
-		/opt/local/lib
 	QMAKE_MAC_SDK=macosx10.9
+
+	isEqual(STATIC, 1) {
+		QMAKE_CXXFLAGS += -arch i386
+
+		INCLUDEPATH += \
+			libs_static/built/include \
+			libs_static/built/include/libxml2
+		LIBPATH += \
+			libs_static/built/lib
+
+		LIBS += \
+			-lexpat \
+			-lxml2 \
+			-lcurl \
+			-liconv
+	} else {
+		INCLUDEPATH += /usr/local/include \
+			/opt/local/include
+		LIBPATH += /usr/local/lib \
+			/opt/local/lib
+	}
 }
 
 win32 {
