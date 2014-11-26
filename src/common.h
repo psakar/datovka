@@ -15,7 +15,7 @@
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
-#define VERSION "0.1.0"
+#define VERSION "0.2.0"
 #define TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define LICENCE_PATH "COPYING"
 #define CREDITS_PATH "AUTHORS"
@@ -26,9 +26,8 @@
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
 #define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/page/2425/"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
-#define DATOVKA_CHECK_NEW_VERSION_URL "http://mates.php5.cz/Version"
+#define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
-
 
 /* retrun values of Datovka login methods */
 typedef enum {

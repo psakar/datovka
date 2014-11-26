@@ -31,7 +31,10 @@ void aboutDialog::initAboutDialog(void)
 /* ========================================================================= */
 {
 	this->labelVersionNum->setText(VERSION);
-	this->labelUrl->setText("<a href=\"http://www.nic.cz/\">www.datovka.nic.cz</a>");
+
+	QString url = "<a href=\"" + QString(DATOVKA_ONLINE_HELP_URL) + "\">" +
+	    QString(DATOVKA_ONLINE_HELP_URL) + "</a>";
+	this->labelUrl->setText(url);
 	this->labelUrl->setTextFormat(Qt::RichText);
 	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelUrl->setOpenExternalLinks(true);

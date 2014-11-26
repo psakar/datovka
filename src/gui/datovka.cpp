@@ -310,6 +310,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 	 if (reply->error() == QNetworkReply::NoError) {
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
+		vstr.remove(QRegExp("[\n\t\r]"));
 		if (vstr > QCoreApplication::applicationVersion()) {
 			showStatusTextWithTimeout(
 			    tr("New version of Datovka is available:") +
@@ -334,10 +335,10 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is %1").
+			    tr("Current version is \"%1\"").
 			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
-			    tr("New version is %1").arg(vstr)
+			    tr("New version is \"%1\"").arg(vstr)
 			    + "\n\n" +
 			    tr("Update your application..."),
 			    QMessageBox::Ok);
