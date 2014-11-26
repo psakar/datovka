@@ -78,6 +78,8 @@ isEqual(STATIC, 1) {
 }
 
 macx {
+	ICON = res/datovka.icns
+
 	# See https://bugreports.qt-project.org/browse/QTBUG-28097
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
