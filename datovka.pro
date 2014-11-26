@@ -107,6 +107,8 @@ macx {
 }
 
 win32 {
+        RC_FILE += res/icon.rc
+
 	DEFINES += WIN32=1
 
 	INCLUDEPATH = \
