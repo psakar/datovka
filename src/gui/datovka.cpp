@@ -288,6 +288,11 @@ void MainWindow::checkNewDatovkaVersion(void)
 
 	if (globPref.send_stats_with_version_checks) {
 		/* TODO - sent info about datovka, libs and OS to our server */
+        nam = new QNetworkAccessManager(this);
+        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+        this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+        QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
+        nam->get(QNetworkRequest(url));
 	} else {
 		nam = new QNetworkAccessManager(this);
 		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),

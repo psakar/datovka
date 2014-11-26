@@ -228,7 +228,7 @@ check for new Datovka versions on startup.</string>
           <item>
            <widget class="QCheckBox" name="send_stats_with_version_checks">
             <property name="enabled">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="font">
              <font>

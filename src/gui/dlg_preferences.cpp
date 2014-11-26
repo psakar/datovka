@@ -17,13 +17,13 @@ void DlgPreferences::initPrefDialog(void)
 	this->auto_download_whole_messages->setChecked(globPref.auto_download_whole_messages);
 	this->download_on_background->setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
-	this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
+    this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
 	this->check_new_versions->setChecked(globPref.check_new_versions);
 	this->store_messages_on_disk->setChecked(globPref.store_messages_on_disk);
 	this->store_additional_data_on_disk->setChecked(globPref.store_additional_data_on_disk);
 	this->check_crl->setChecked(globPref.check_crl);
 	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
-	this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
+    //this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
 	this->timerLabelPre->setEnabled(this->download_on_background->isChecked());
 	this->timerLabelPost->setEnabled(this->download_on_background->isChecked());
 	this->timerSpinBox->setEnabled(this->download_on_background->isChecked());
