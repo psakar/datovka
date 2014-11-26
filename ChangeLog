@@ -1,0 +1,17 @@
+0.2.0 /
+ * Added PostSignum Qualified CA 3 certificate.
+ * CA store can be initialised using a single PEM file.
+ * Fixes in account search dialog.
+ * Complete message download runs in a separate thread.
+ * Signature details dialog shows certificate information.
+ * Time-stamp certificates are being validated.
+ * Fixes in OS X and Windows building procedures.
+ * Application cannot be exited while download in progress.
+ * Application can be run without storing database on file system.
+ * Message list shows whether attachments have been downloaded.
+ * Message processing state can be set. It is displayed in message list.
+ * Application downloads, verifies and uses a CRL.
+ * Additional bug fixes.
+
+0.1.0 / 2014-10-15
+ * Initial testing release.
