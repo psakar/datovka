@@ -98,9 +98,9 @@ void DlgCorrespondenceOverview::getMsgListFromDates(QDate fromDate, QDate toDate
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(ok);
 
-	QString sentInfo = tr("(messages: ") +
+	QString sentInfo = "(" + tr("messages: ") +
 	    QString::number(sentCnt) + ")";
-	QString receivedInfo = tr("(messages: ") +
+	QString receivedInfo = "(" + tr("messages: ") +
 	    QString::number(receivedCnt) + ")";
 
 	this->sentCntLabel->setText(sentInfo);
