@@ -11,6 +11,10 @@
  * Message list shows whether attachments have been downloaded.
  * Message processing state can be set. It is displayed in message list.
  * Application downloads, verifies and uses a CRL.
+ * Fixed come Czech translations.
+ * Automatic check for new application version.
+ * Added status information.
+ * Application remembers the last viewed message.
  * Additional bug fixes.
 
 0.1.0 / 2014-10-15
