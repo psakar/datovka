@@ -1,4 +1,4 @@
-0.2.0 /
+0.2.0 / 2014-11-27
  * Added PostSignum Qualified CA 3 certificate.
  * CA store can be initialised using a single PEM file.
  * Fixes in account search dialog.

@@ -1,0 +1,6 @@
+How to build DATOVKA installer?
+
+1. Create folder "app" in this directory.
+2. Copy all required files and directories of Datovka into
+   "app" folder and run datovka-install.nsi with NSIS.
+   Instalation package will generated into "datovka-install" folder.
