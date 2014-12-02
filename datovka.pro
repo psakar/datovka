@@ -35,30 +35,54 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 DEFINES += \
 	DEBUG=1
 
-isEmpty(PREFIX) {
-	PREFIX = "/usr/local"
-}
+TEMPLATE = app
 
 APP_NAME = datovka
 
-application.target = $${APP_NAME}
-application.path = "$${PREFIX}/bin"
-application.files = $${APP_NAME}
+unix {
+	isEmpty(PREFIX) {
+		PREFIX = "/usr/local"
+	}
 
-LOCALE_INST_DIR = "$${PREFIX}/share/$${APP_NAME}/localisations"
+	BINDIR="$${PREFIX}/bin"
+	DATADIR="$${PREFIX}/share"
 
-localisation.path = "$${LOCALE_INST_DIR}"
-localisation.files = locale/datovka_cs.qm \
-	locale/datovka_en.qm
+	LOCALE_INST_DIR = "$${DATADIR}/$${APP_NAME}/localisations"
 
-DEFINES += LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\""
+	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
+		PKGDATADIR=\\\"$$PKGDATADIR\\\"
 
-TEMPLATE = app
+	application.target = $${APP_NAME}
+	application.path = "$${BINDIR}"
+	application.files = $${APP_NAME}
 
-INSTALLS += application
-INSTALLS += localisation
+	desktop.path = "$${DATADIR}/applications"
+	desktop.files += datovka.desktop
 
-TEMPLATE = app
+	icon16.path = "$${DATADIR}/icons/hicolor/16x16/apps"
+	icon16.files += "res/icons/16x16/datovka.png"
+
+	icon24.path = "$${DATADIR}/icons/hicolor/24x24/apps"
+	icon24.files += "res/icons/24x24/datovka.png"
+
+	icon128.path = "$${DATADIR}/icons/hicolor/128x128/apps"
+	icon128.files += "res/icons/128x128/datovka.png"
+
+	localisation.path = "$${LOCALE_INST_DIR}"
+	localisation.files += locale/datovka_cs.qm \
+		locale/datovka_en.qm
+
+	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
+		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
+		LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\""
+
+	INSTALLS += application \
+		desktop \
+		icon16 \
+		icon24 \
+		icon128 \
+		localisation
+}
 
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
