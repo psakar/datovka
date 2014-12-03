@@ -25,7 +25,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
-    <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+    <normaloff>:/icons/48x48/datovka.png</normaloff>:/icons/48x48/datovka.png</iconset>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
