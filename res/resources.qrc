@@ -80,5 +80,36 @@
         <file>icons/14x14/attachment.png</file>
         <file>icons/16x16/readcol.png</file>
         <file>icons/16x16/flag.png</file>
+        <file>icons/256x256/datovka.png</file>
+        <file>icons/64x64/datovka.png</file>
+        <file>icons/64x64/datovka-account-sync.png</file>
+        <file>icons/64x64/datovka-all-accounts-sync.png</file>
+        <file>icons/64x64/datovka-error.png</file>
+        <file>icons/64x64/datovka-message.png</file>
+        <file>icons/64x64/datovka-message-download.png</file>
+        <file>icons/64x64/datovka-message-reply.png</file>
+        <file>icons/64x64/datovka-message-verify.png</file>
+        <file>icons/64x64/datovka-ok.png</file>
+        <file>icons/64x64/datovka-stock-keyring.png</file>
+        <file>icons/48x48/datovka.png</file>
+        <file>icons/48x48/datovka-account-sync.png</file>
+        <file>icons/48x48/datovka-all-accounts-sync.png</file>
+        <file>icons/48x48/datovka-error.png</file>
+        <file>icons/48x48/datovka-message.png</file>
+        <file>icons/48x48/datovka-message-download.png</file>
+        <file>icons/48x48/datovka-message-reply.png</file>
+        <file>icons/48x48/datovka-message-verify.png</file>
+        <file>icons/48x48/datovka-ok.png</file>
+        <file>icons/48x48/datovka-stock-keyring.png</file>
+        <file>icons/32x32/datovka.png</file>
+        <file>icons/32x32/datovka-account-sync.png</file>
+        <file>icons/32x32/datovka-all-accounts-sync.png</file>
+        <file>icons/32x32/datovka-error.png</file>
+        <file>icons/32x32/datovka-message.png</file>
+        <file>icons/32x32/datovka-message-download.png</file>
+        <file>icons/32x32/datovka-message-reply.png</file>
+        <file>icons/32x32/datovka-message-verify.png</file>
+        <file>icons/32x32/datovka-ok.png</file>
+        <file>icons/32x32/datovka-stock-keyring.png</file>
     </qresource>
 </RCC>
