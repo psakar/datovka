@@ -65,8 +65,20 @@ unix {
 	icon24.path = "$${DATADIR}/icons/hicolor/24x24/apps"
 	icon24.files += "res/icons/24x24/datovka.png"
 
+	icon32.path = "$${DATADIR}/icons/hicolor/32x32/apps"
+	icon32.files += "res/icons/32x32/datovka.png"
+
+	icon48.path = "$${DATADIR}/icons/hicolor/48x48/apps"
+	icon48.files += "res/icons/48x48/datovka.png"
+
+	icon64.path = "$${DATADIR}/icons/hicolor/64x64/apps"
+	icon64.files += "res/icons/64x64/datovka.png"
+
 	icon128.path = "$${DATADIR}/icons/hicolor/128x128/apps"
 	icon128.files += "res/icons/128x128/datovka.png"
+
+	icon256.path = "$${DATADIR}/icons/hicolor/256x256/apps"
+	icon256.files += "res/icons/256x256/datovka.png"
 
 	localisation.path = "$${LOCALE_INST_DIR}"
 	localisation.files += locale/datovka_cs.qm \
@@ -80,7 +92,11 @@ unix {
 		desktop \
 		icon16 \
 		icon24 \
+		icon32 \
+		icon48 \
+		icon64 \
 		icon128 \
+		icon256 \
 		localisation
 }
 
