@@ -824,8 +824,6 @@ QString suppliedTextFileLocation(const QString &fName)
 		}
 		filePath = directory.absolutePath() + QDir::separator() +
 		    "Resources";
-
-		qDebug() << "Dir" << filePath;
 	}
 #endif
 	filePath += QDir::separator() + fName;
