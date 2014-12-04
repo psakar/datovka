@@ -27,6 +27,17 @@ void q_debug_call(const char *fmt, ...)
 
 /* ========================================================================= */
 /*
+ * Get logging verbosity.
+ */
+int glob_log_verbosity(void)
+/* ========================================================================= */
+{
+	return globLog.logVerbosity();
+}
+
+
+/* ========================================================================= */
+/*
  * Get debug verbosity.
  */
 int glob_debug_verbosity(void)

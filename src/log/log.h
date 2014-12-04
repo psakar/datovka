@@ -37,9 +37,25 @@ void qDebugCallV(const char *fmt, va_list ap);
  * @brief Generates location debug information.
  */
 #ifdef DEBUG
+#  define debugSlotCall() \
+	do { \
+		/* qDebugCall("<SLOT> %s() '%s'", __func__, __FILE__); */ \
+		logDebugLv1NL("<SLOT> %s() '%s'", __func__, __FILE__); \
+	} while(0)
+#else
+   /* Forces the semicolon after the macro. */
+#  define debugSlotCall() do {} while(0)
+#endif
+
+
+/*!
+ * @brief Generates location debug information.
+ */
+#ifdef DEBUG
 #  define debugFuncCall() \
 	do { \
-		qDebugCall(">> %s() '%s'", __func__, __FILE__); \
+		/* qDebugCall("<FUNC> %s() '%s'", __func__, __FILE__); */ \
+		logDebugLv2NL("<FUNC> %s() '%s'", __func__, __FILE__); \
 	} while(0)
 #else
    /* Forces the semicolon after the macro. */
@@ -275,7 +291,7 @@ extern GlobLog globLog; /*!< Global log facility. */
 /*!
  * @brief A macro which logs a function name followed with given debugging
  * information. The data are logged only when the global verbosity variable
- * exceeds the given threshold.
+ * exceeds the given threshold. Automatic newline is added.
  *
  * @param[in] verbThresh Verbosity threshold.
  * @param[in] format     Format of the messages, follows printf syntax.
@@ -285,13 +301,19 @@ extern GlobLog globLog; /*!< Global log facility. */
  * is defined then it won't generate any code.
  */
 #if DEBUG
-#define logDebug(verbThresh, format, ...) \
+#define logDebugNL(verbThresh, format, ...) \
 	if (globLog.debugVerbosity() > verbThresh) { \
-		globLog.log(LOGSRC_DEF, LOG_DEBUG, "%s %s() %d: " format, \
-		    __FILE__, __func__, __LINE__, __VA_ARGS__); \
+		if (globLog.logVerbosity() > 0) { \
+			globLog.log(LOGSRC_DEF, LOG_DEBUG, \
+			    format " (%s:%d, %s())\n", \
+			    __VA_ARGS__, __FILE__, __LINE__, __func__); \
+		} else { \
+			globLog.log(LOGSRC_DEF, LOG_DEBUG, \
+			    format "\n", __VA_ARGS__); \
+		} \
 	}
 #else /* !DEBUG */
-#define logDebug(verbThresh, format, ...) \
+#define logDebugNL(verbThresh, format, ...) \
 	(void) 0
 #endif /* DEBUG */
 
@@ -302,8 +324,8 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define logDebugLv0(format, ...) \
-	logDebug(-1, format, __VA_ARGS__)
+#define logDebugLv0NL(format, ...) \
+	logDebugNL(-1, format, __VA_ARGS__)
 
 
 /*!
@@ -312,8 +334,8 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define logDebugLv1(format, ...) \
-	logDebug(0, format, __VA_ARGS__)
+#define logDebugLv1NL(format, ...) \
+	logDebugNL(0, format, __VA_ARGS__)
 
 
 /*!
@@ -322,8 +344,8 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define logDebugLv2(format, ...) \
-	logDebug(1, format, __VA_ARGS__)
+#define logDebugLv2NL(format, ...) \
+	logDebugNL(1, format, __VA_ARGS__)
 
 
 /*!
@@ -332,8 +354,8 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define logDebugLv3(format, ...) \
-	logDebug(2, format, __VA_ARGS__)
+#define logDebugLv3NL(format, ...) \
+	logDebugNL(2, format, __VA_ARGS__)
 
 
 /*!

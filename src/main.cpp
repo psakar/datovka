@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
 		Q_ASSERT(0);
 	}
 	QCommandLineOption logVerb(QStringList() << "L" << "log-verbosity",
-	    QObject::tr("Set verbosity of logged messages to <level>. Default is ") +
-	    QString::number(globLog.logVerbosity()) + ".",
+	    QObject::tr("Set verbosity of logged messages to <level>. "
+	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
 	    QObject::tr("level"));
 	parser.addOption(logVerb);
 	/* Boolean options. */
@@ -71,6 +71,11 @@ int main(int argc, char *argv[])
 	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
 	    "Enable debugging information.");
 	parser.addOption(debugOpt);
+	QCommandLineOption debugVerb(QStringList() << "V" << "debug-verbosity",
+	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
+	    QString::number(globLog.debugVerbosity()) + ".",
+	    QObject::tr("level"));
+	parser.addOption(debugVerb);
 #endif /* DEBUG */
 	/* Process command-line arguments. */
 	parser.process(app);
@@ -89,15 +94,27 @@ int main(int argc, char *argv[])
 		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 		    LOG_UPTO(LOG_DEBUG));
 	}
+	if (parser.isSet(debugVerb)) {
+		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+		    LOG_UPTO(LOG_DEBUG));
+		bool ok;
+		int value = parser.value(debugVerb).toInt(&ok, 10);
+		if (!ok) {
+			logError("%s\n", "Invalid debug-verbosity parameter.");
+			exit(1);
+		}
+		logInfo("Setting debugging verbosity to value '%d'.\n", value);
+		globLog.setDebugVerbosity(value);
+	}
 #endif /* DEBUG */
 	if (parser.isSet(logVerb)) {
 		bool ok;
-		qDebug() << parser.value(logVerb);
 		int value = parser.value(logVerb).toInt(&ok, 10);
 		if (!ok) {
 			logError("%s\n", "Invalid log-verbosity parameter.");
 			exit(1);
 		}
+		logInfo("Setting logging verbosity to value '%d'.\n", value);
 		globLog.setLogVerbosity(value);
 	}
 

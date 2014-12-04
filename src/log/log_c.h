@@ -15,7 +15,8 @@
 #ifdef DEBUG
 #  define debug_func_call() \
 	do { \
-		q_debug_call(">> %s() '%s'", __func__, __FILE__); \
+		/* q_debug_call("<FUNC> %s() '%s'", __func__, __FILE__); */ \
+		log_debug_lv2_nl("<FUNC> %s() '%s'", __func__, __FILE__); \
 	} while(0)
 #else
    /* Forces the semicolon after the macro. */
@@ -34,6 +35,14 @@ extern "C" {
  * @param[in] fmt Format string.
  */
 void q_debug_call(const char *fmt, ...);
+
+
+/*!
+ * @brief Get logging verbosity.
+ *
+ * @return Logging verbosity.
+ */
+int glob_log_verbosity(void);
 
 
 /*!
@@ -88,13 +97,19 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  * is defined then it won't generate any code.
  */
 #if DEBUG
-#define log_debug(verb_thresh, format, ...) \
+#define log_debug_nl(verb_thresh, format, ...) \
 	if (glob_debug_verbosity() > verb_thresh) { \
-		glob_log(LOGSRC_DEF, LOG_DEBUG, "%s %s() %d: " format, \
-		    __FILE__, __func__, __LINE__, __VA_ARGS__); \
+		if (glob_log_verbosity() > 0) { \
+			glob_log(LOGSRC_DEF, LOG_DEBUG, \
+			    format " (%s:%d, %s())\n", \
+			    __VA_ARGS__, __FILE__, __LINE__, __func__); \
+		} else { \
+			glob_log(LOGSRC_DEF, LOG_DEBUG, \
+			    format "\n", __VA_ARGS__); \
+		} \
 	}
 #else /* !DEBUG */
-#define log_debug(verb_rhresh, format, ...) \
+#define log_debug_nl(verb_rhresh, format, ...) \
 	(void) 0
 #endif /* DEBUG */
 
@@ -105,8 +120,8 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define log_debug_lv0(format, ...) \
-	log_debug(-1, format, __VA_ARGS__)
+#define log_debug_lv0_nl(format, ...) \
+	log_debug_nl(-1, format, __VA_ARGS__)
 
 
 /*!
@@ -115,8 +130,8 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define log_debug_lv1(format, ...) \
-	log_debug(0, format, __VA_ARGS__)
+#define log_debug_lv1_nl(format, ...) \
+	log_debug_nl(0, format, __VA_ARGS__)
 
 
 /*!
@@ -125,8 +140,8 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define log_debug_lv2(format, ...) \
-	log_debug(1, format, __VA_ARGS__)
+#define log_debug_lv2_nl(format, ...) \
+	log_debug_nl(1, format, __VA_ARGS__)
 
 
 /*!
@@ -135,8 +150,8 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  * @param[in] format Format of the message, follows printf syntax.
  * @param[in] ...    Variadic arguments.
  */
-#define log_debug_lv3(format, ...) \
-	log_debug(2, format, __VA_ARGS__)
+#define log_debug_lv3_nl(format, ...) \
+	log_debug_nl(2, format, __VA_ARGS__)
 
 
 /*!
