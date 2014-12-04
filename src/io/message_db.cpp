@@ -3308,20 +3308,15 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	QByteArray rawBytes = msgsMessageDER(dmId);
 	Q_ASSERT(rawBytes.size() > 0);
 
-	if (!ignoreMissingCrlCheck) {
-		/* TODO */
+	if (ignoreMissingCrlCheck) {
 		logWarning("CRL check is not performed for message %d.\n",
 		    dmId);
 	}
-	//QDateTime local(QDateTime::currentDateTime());
-	//QTimeZone tZone = QDateTime::currentDateTime().timeZone();
-	//int utcOffset = tZone.offsetFromUtc(dateTime);
-	//qDebug() << "UTC offset" << utcOffset << local << tZone;
 	time_t utcTime = dateTime.toTime_t();
 
 	return 1 == rawMsgVerifySignatureDate(
-	    rawBytes.data(), rawBytes.size(), utcTime, 0);
-//	    ignoreMissingCrlCheck ? 0 : 1);
+	    rawBytes.data(), rawBytes.size(), utcTime,
+	    ignoreMissingCrlCheck ? 0 : 1);
 }
 
 
