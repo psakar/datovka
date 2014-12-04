@@ -17,8 +17,6 @@
 #define ICON_3PARTY_PATH ":/icons/3party/"
 #define VERSION "0.2.0"
 #define TIMEOUT_MS 10000 /* libisds connection time-out. */
-#define LICENCE_PATH "COPYING"
-#define CREDITS_PATH "AUTHORS"
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
@@ -29,7 +27,7 @@
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
 
-/* retrun values of Datovka login methods */
+/* return values of Datovka login methods */
 typedef enum {
 	USER_NAME = 0,
 	CERTIFICATE = 1,
@@ -38,17 +36,17 @@ typedef enum {
 	TOTP = 4
 } LoginMethodsIndex;
 
-/* retrun values of Datovka message state */
+/* return values of Datovka message state */
 typedef enum {
 	UNSETTLED = 0,
 	IN_PROGRESS = 1,
 	SETTLED = 2
 } MessageProcessState;
 
-/* retrun values of Datovka functions */
+/* return values of Datovka functions */
 typedef enum {
 	Q_SUCCESS = 0,   // all operations success
-	Q_CANCEL,	 // operation cancelled or file dialog cancelled
+	Q_CANCEL,        // operation cancelled or file dialog cancelled
 	Q_GLOBAL_ERROR,  // any qdatovka error
 	Q_CONNECT_ERROR, // ISDS login error
 	Q_NETWORK_ERROR, // error
@@ -61,7 +59,7 @@ typedef enum {
 
 
 /*
- * Defined roles accross the application. 
+ * Defined roles across the application.
  */
 #define ROLE_ACNT_CONF_SETTINGS (Qt::UserRole + 1) /*
                                                     * Used to access
@@ -311,5 +309,20 @@ QString fromBase64(const QString &base64);
  * @brief Converts string into base64.
  */
 QString toBase64(const QString &plain);
+
+
+/*!
+ * @brief Text files supplied with the application.
+ */
+enum text_file {
+	TEXT_FILE_CREDITS = 1,
+	TEXT_FILE_LICENCE
+};
+
+
+/*!
+ * @brief Returns the content of the supplied text file.
+ */
+QString suppliedTextFileContent(enum text_file textFile);
 
 #endif /* _COMMON_H_ */

@@ -1,5 +1,6 @@
 
 
+#include <QApplication>
 #include <QDir>
 #include <QFile>
 #include "common.h"
@@ -21,6 +22,13 @@ static const
 GlobPreferences dlftlGlobPref; /* Defaults. */
 static const
 GlobProxySettings dfltGlobProxSet;
+
+
+/*!
+ * @brief Searches for the location of the supplied text file.
+ */
+static
+QString suppliedTextFileLocation(const QString &fName);
 
 
 /* ========================================================================= */
@@ -732,4 +740,90 @@ QString toBase64(const QString &plain)
 /* ========================================================================= */
 {
 	return QString::fromUtf8(plain.toUtf8().toBase64());
+}
+
+
+#define CREDITS_FILE "AUTHORS"
+#define LICENCE_FILE "COPYING"
+
+
+/* ========================================================================= */
+/*
+ * Returns the content of the supplied text file.
+ */
+QString suppliedTextFileContent(enum text_file textFile)
+/* ========================================================================= */
+{
+	const char *fileName = NULL;
+	QString content;
+
+	switch (textFile) {
+	case TEXT_FILE_CREDITS:
+		fileName = CREDITS_FILE;
+		break;
+	case TEXT_FILE_LICENCE:
+		fileName = LICENCE_FILE;
+		break;
+	default:
+		fileName = NULL;
+	}
+
+	if (NULL == fileName) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	QString fileLocation = suppliedTextFileLocation(fileName);
+	if (fileLocation.isEmpty()) {
+		return QString();
+	}
+
+	QFile file(fileLocation);
+	QTextStream textStream(&file);
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		content = textStream.readAll();
+	}
+
+	file.close();
+
+	return content;
+}
+
+
+/* ========================================================================= */
+/*
+ * Searches for the location of the supplied text file.
+ */
+static
+QString suppliedTextFileLocation(const QString &fName)
+/* ========================================================================= */
+{
+	QString filePath;
+
+#ifdef TEXT_FILES_INST_DIR
+	/*
+	 * Search in installation location if supplied.
+	 */
+
+	filePath = QString(TEXT_FILES_INST_DIR) + QDir::separator() + fName;
+
+	if (QFile::exists(filePath)) {
+		return filePath;
+	} else {
+		filePath.clear();
+	}
+#endif /* TEXT_FILES_INST_DIR */
+
+	/* Search in application location. */
+	filePath = QCoreApplication::applicationDirPath();
+
+	filePath += QDir::separator() + fName;
+
+	if (QFile::exists(filePath)) {
+		return filePath;
+	} else {
+		filePath.clear();
+	}
+
+	return filePath;
 }

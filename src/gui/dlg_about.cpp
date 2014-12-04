@@ -14,6 +14,7 @@
 #include <QFile>
 
 #include "dlg_about.h"
+#include "src/common.h"
 
 
 aboutDialog::aboutDialog(QWidget *parent) :
@@ -72,23 +73,8 @@ void aboutDialog::initAboutDialog(void)
 void aboutDialog::showLicence(void)
 /* ========================================================================= */
 {
-	QString filename = LICENCE_PATH;
-	QString content = "";
-	QFile file(filename);
-
-	if(!file.exists()) {
-		qDebug() << "Licence file " << filename << "not found";
-	}
-
-	QTextStream textStream(&file);
-	this->textEdit->clear();
-	this->textEdit->setReadOnly(true);
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		content = textStream.readAll();
-	}
-
-	file.close();
-	this->textEdit->setPlainText(content);
+	this->textEdit->setPlainText(
+	    suppliedTextFileContent(TEXT_FILE_LICENCE));
 }
 
 
@@ -99,23 +85,8 @@ void aboutDialog::showLicence(void)
 void aboutDialog::showCredits(void)
 /* ========================================================================= */
 {
-	QString filename = CREDITS_PATH;
-	QString content = "";
-	QFile file(filename);
-
-	if(!file.exists()){
-		qDebug() << "Credits file " << filename << "not found";
-	}
-
-	QTextStream textStream(&file);
-	this->textEdit->clear();
-	this->textEdit->setReadOnly(true);
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		content = textStream.readAll();
-	}
-
-	file.close();
-	this->textEdit->setPlainText(content);
+	this->textEdit->setPlainText(
+	    suppliedTextFileContent(TEXT_FILE_CREDITS));
 }
 
 

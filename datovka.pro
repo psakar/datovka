@@ -47,6 +47,7 @@ unix {
 	BINDIR="$${PREFIX}/bin"
 	DATADIR="$${PREFIX}/share"
 
+	TEXT_FILES_INST_DIR = "$${DATADIR}/$${APP_NAME}/doc"
 	LOCALE_INST_DIR = "$${DATADIR}/$${APP_NAME}/localisations"
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
@@ -84,9 +85,15 @@ unix {
 	localisation.files += locale/datovka_cs.qm \
 		locale/datovka_en.qm
 
+	additional.files = \
+		AUTHORS \
+		COPYING
+	additional.path = "$${TEXT_FILES_INST_DIR}"
+
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
 		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
-		LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\""
+		LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\"" \
+		TEXT_FILES_INST_DIR="\"\\\"$${TEXT_FILES_INST_DIR}\\\"\""
 
 	INSTALLS += application \
 		desktop \
@@ -97,7 +104,8 @@ unix {
 		icon64 \
 		icon128 \
 		icon256 \
-		localisation
+		localisation \
+		additional
 }
 
 QMAKE_CXXFLAGS = \
@@ -147,6 +155,11 @@ macx {
 		LIBPATH += /usr/local/lib \
 			/opt/local/lib
 	}
+
+	additional.files = \
+		AUTHORS \
+		COPYING
+	additional.path = Contents/Resources
 }
 
 win32 {
