@@ -40,9 +40,9 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QString dmId, bool signedMsg, bool incoming,
-	    MessageDb &messageDb, bool progress, QString label,
-	    QProgressBar *pBar, Worker *worker);
+	    const QString &dmId, bool signedMsg, bool incoming,
+	    MessageDb &messageDb,
+	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
 	/*!
 	 * @brief Download sent/received message list from ISDS for current
@@ -50,8 +50,9 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString messageType, MessageDb &messageDb, QString label,
-	    QProgressBar *pBar, Worker *worker, int &total, int &news);
+	    const QString &messageType, MessageDb &messageDb,
+	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
+	    int &total, int &news);
 
 private:
 
@@ -67,7 +68,7 @@ private:
 	 * @brief Get list of sent message state changes
 	 */
 	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-	    MessageDb &messageDb, QString label);
+	    MessageDb &messageDb, const QString &label);
 
 	/*!
 	* @brief Get password expiration info for account index
@@ -87,21 +88,21 @@ private:
 	 */
 	static
 	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
-	    const QString dmId, bool signedMsg, MessageDb &messageDb);
+	    const QString &dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!
 	 * @brief Get additional info about author (sender)
 	 */
 	static
 	bool getMessageAuthor(const QModelIndex &acntTopIdx,
-	    const QString dmId, MessageDb &messageDb);
+	    const QString &dmId, MessageDb &messageDb);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.
 	 */
 	static
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-	    const QString dmId);
+	    const QString &dmId);
 
 signals:
 	/*!

@@ -73,7 +73,7 @@ void Worker::syncAllAccounts(void)
 	 * st = sentTotal, sn = sentNews,
 	 * rcvTtl, rcvNews, sntTtl, sntNews are send to mainwindow and
 	 * shown in info-statusbar.
-	*/
+	 */
 	int rt = 0;
 	int rn = 0;
 	int st = 0;
@@ -178,6 +178,7 @@ void Worker::syncOneAccount(void)
 		qDebug() << "Invalid Account index! Downloading is canceled.";
 		downloadMessagesMutex.unlock();
 		emit finished();
+		return;
 	}
 
 	bool success = true;
@@ -259,6 +260,7 @@ void Worker::downloadCompleteMessage(void)
 		qDebug() << "Invalid message ID! Downloading is canceled.";
 		downloadMessagesMutex.unlock();
 		emit finished();
+		return;
 	}
 
 	MessageDb *messageDb;
@@ -266,7 +268,7 @@ void Worker::downloadCompleteMessage(void)
 
 	/* sent message */
 	if (Q_SUCCESS == downloadMessage(m_acntTopIdx, m_dmId, true,
-	        m_downloadThisAccounts.at(0), *messageDb, true,
+	        m_downloadThisAccounts.at(0), *messageDb,
 	        "DownloadMessage", 0, this)) {
 		/* Only on successful download. */
 		emit refreshAttachmentList(m_acntTopIdx, m_dmId);
@@ -288,8 +290,9 @@ void Worker::downloadCompleteMessage(void)
 * Download sent/received message list from ISDS for current account index
 */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
-    const QString messageType, MessageDb &messageDb, QString label,
-    QProgressBar *pBar, Worker *worker, int &total, int &news)
+    const QString &messageType, MessageDb &messageDb,
+    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
+    int &total, int &news)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -303,7 +306,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	}
 
 	if (0 != pBar) { pBar->setValue(0); }
-	if (0 != worker) { emit worker->valueChanged(label, 0); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 0); }
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -311,7 +314,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (0 != pBar) { pBar->setValue(10); }
-	if (0 != worker) { emit worker->valueChanged(label, 10); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 10); }
 
 	struct isds_list *messageList = NULL;
 
@@ -334,7 +337,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	}
 
 	if (0 != pBar) { pBar->setValue(20); }
-	if (0 != worker) { emit worker->valueChanged(label, 20); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (status != IE_SUCCESS) {
 		qDebug() << status << isds_strerror(status);
@@ -356,7 +359,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	if (allcnt == 0) {
 		if (0 != pBar) { pBar->setValue(50); }
-		if (0 != worker) { emit worker->valueChanged(label, 50); }
+		if (0 != worker) { emit worker->valueChanged(progressLabel, 50); }
 	} else {
 		delta = ceil(80 / allcnt);
 	}
@@ -365,7 +368,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		diff = diff + delta;
 		if (0 != pBar) { pBar->setValue(20+diff); }
-		if (0 != worker) { emit worker->valueChanged(label, 20+diff); }
+		if (0 != worker) { emit worker->valueChanged(progressLabel, 20+diff); }
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
@@ -471,7 +474,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			if (globPref.auto_download_whole_messages) {
 				downloadMessage(acntTopIdx, item->envelope->dmID,
 				    true, "received" == messageType, messageDb,
-				    false, "", pBar, worker);
+				    "", 0, 0);
 			}
 
 			newcnt++;
@@ -483,7 +486,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	isds_list_free(&messageList);
 
 	if (0 != pBar) { pBar->setValue(100); }
-	if (0 != worker) { emit worker->valueChanged(label, 100); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 100); }
 
 	if (messageType == "received") {
 		qDebug() << "#Received total:" << allcnt;
@@ -505,7 +508,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 * Get list of sent message state changes
 */
 bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-    MessageDb &messageDb, QString label)
+    MessageDb &messageDb, const QString &label)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
@@ -679,18 +682,16 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
-    const QString dmId, bool signedMsg, bool incoming, MessageDb &messageDb,
-    bool progress, QString label, QProgressBar *pBar, Worker *worker)
+    const QString &dmId, bool signedMsg, bool incoming, MessageDb &messageDb,
+    const QString &progressLabel, QProgressBar *pBar, Worker *worker)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
 	qDebug() << "Downloading complete message" << dmId;
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(0); }
-		if (0 != worker) { emit worker->valueChanged(label, 0); }
-	}
+	if (0 != pBar) { pBar->setValue(0); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 0); }
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -700,10 +701,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	// message structures - all members
 	struct isds_message *message = NULL;
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(10); }
-		if (0 != worker) { emit worker->valueChanged(label, 10); }
-	}
+	if (0 != pBar) { pBar->setValue(10); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 10); }
 
 	/* download signed message? */
 	if (signedMsg) {
@@ -727,10 +726,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		    &message);
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(20); }
-		if (0 != worker) { emit worker->valueChanged(label, 20); }
-	}
+	if (0 != pBar) { pBar->setValue(20); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -750,10 +747,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		: qDebug() << "ERROR: Message raw data update!";
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(30); }
-		if (0 != worker) { emit worker->valueChanged(label, 30); }
-	}
+	if (0 != pBar) { pBar->setValue(30); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 30); }
 
 	QString timestamp = QByteArray((char *)message->envelope->timestamp,
 	    message->envelope->timestamp_length).toBase64();
@@ -807,10 +802,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		    message->envelope->dmAcceptanceTime);
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(40); }
-		if (0 != worker) { emit worker->valueChanged(label, 40); }
-	}
+	if (0 != pBar) { pBar->setValue(40); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 40); }
 
 	/* Update message envelope in db. */
 	(messageDb.msgsUpdateMessageEnvelope(dmID,
@@ -851,10 +844,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(50); }
-		if (0 != worker) { emit worker->valueChanged(label, 50); }
-	}
+	if (0 != pBar) { pBar->setValue(50); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 50); }
 
 	if (signedMsg) {
 		/* Verify message signature. */
@@ -874,10 +865,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		}
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(60); }
-		if (0 != worker) { emit worker->valueChanged(label, 60); }
-	}
+	if (0 != pBar) { pBar->setValue(60); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 60); }
 
 	/* insert/update hash into db */
 	QString hashValue = QByteArray((char*)message->envelope->hash->value,
@@ -887,10 +876,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	? qDebug() << "Message hash was stored into db..."
 	: qDebug() << "ERROR: Message hash insert!";
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(70); }
-		if (0 != worker) { emit worker->valueChanged(label, 70); }
-	}
+	if (0 != pBar) { pBar->setValue(70); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
 
 	/* Insert/update all attachment files */
 	struct isds_list *file;
@@ -914,10 +901,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		file = file->next;
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(90); }
-		if (0 != worker) { emit worker->valueChanged(label, 90); }
-	}
+	if (0 != pBar) { pBar->setValue(90); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 90); }
 
 	if (incoming) {
 		/* Download and save delivery info and message events */
@@ -941,11 +926,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
 	}
 
-	if (progress) {
-		if (0 != pBar) { pBar->setValue(100); }
-		if (0 != worker) { emit worker->valueChanged(label, 100); }
-	}
-
+	if (0 != pBar) { pBar->setValue(100); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 100); }
 
 	isds_list_free(&message->documents);
 	isds_message_free(&message);
@@ -961,7 +943,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 * Download message delivery info, raw and get list of events message
 */
 bool Worker::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
-    const QString dmId, bool signedMsg, MessageDb &messageDb)
+    const QString &dmId, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
 
@@ -1019,7 +1001,7 @@ bool Worker::getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
 * Get additional info about author (sender)
 */
 bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
-    const QString dmId, MessageDb &messageDb)
+    const QString &dmId, MessageDb &messageDb)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
@@ -1056,7 +1038,7 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 * Set message as downloaded from ISDS.
 */
 bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-    const QString dmId)
+    const QString &dmId)
 /* ========================================================================= */
 {
 	debugFuncCall();

@@ -4585,8 +4585,7 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 	}
 
 	if (Q_SUCCESS == Worker::downloadMessage(
-	    accountIndex, dmId, true, incoming, *messageDb, false, QString(),
-	    0, 0)) {
+	    accountIndex, dmId, true, incoming, *messageDb, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(accountIndex, dmId);
 		return true;
