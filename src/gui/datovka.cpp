@@ -261,6 +261,8 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	isMainWindow = true;
 
 	if (globPref.check_new_versions) {
@@ -284,7 +286,7 @@ void MainWindow::setWindowsAfterInit(void)
 void MainWindow::checkNewDatovkaVersion(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	if (globPref.send_stats_with_version_checks) {
 		/* TODO - sent info about datovka, libs and OS to our server */
@@ -389,7 +391,7 @@ MainWindow::~MainWindow(void)
 void MainWindow::applicationPreferences(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QDialog *dlgPrefs = new DlgPreferences(this);
 	dlgPrefs->exec();
@@ -420,7 +422,7 @@ void MainWindow::applicationPreferences(void)
 void MainWindow::proxySettings(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QDialog *dlgProxy = new DlgProxysets(this);
 	dlgProxy->exec();
@@ -435,7 +437,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	(void) previous; /* Unused. */
 
@@ -559,7 +561,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
-			 QModelIndex)));
+		        QModelIndex)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -654,6 +656,8 @@ setmodel:
 void MainWindow::accountItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
 
@@ -708,6 +712,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	(void) previous; /* Unused. */
 
 	/* Disable message/attachment related buttons. */
@@ -845,7 +851,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 void MainWindow::messageItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex index = ui->messageList->indexAt(point);
 
@@ -921,7 +927,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 void MainWindow::messageItemStoreSelection(long msgId)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	m_lastSelectedMessageId = msgId;
 	qDebug() << "Last selected" << m_lastSelectedMessageId;
@@ -957,7 +963,7 @@ void MainWindow::messageItemStoreSelection(long msgId)
 void MainWindow::messageItemStoreSelectionOnModelChange(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	m_lastStoredMessageId = m_lastSelectedMessageId;
 	qDebug() << "Last stored position" << m_lastStoredMessageId;
@@ -971,7 +977,7 @@ void MainWindow::messageItemStoreSelectionOnModelChange(void)
 void MainWindow::messageItemRestoreSelection(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex index;
 
@@ -1096,6 +1102,8 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	(void) previous;
 
 	Q_ASSERT(current.isValid());
@@ -1120,6 +1128,8 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
 void MainWindow::attachmentItemRightClicked(const QPoint &point)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	QModelIndex index = ui->messageAttachmentList->indexAt(point);
 	QMenu *menu = new QMenu;
 
@@ -1147,6 +1157,8 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	(void) index;
 	//qDebug() << "Attachment double clicked.";
 	openSelectedAttachment();
@@ -1160,7 +1172,7 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 void MainWindow::saveSelectedAttachmentToFile(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex selectedIndex =
 	    ui->messageAttachmentList->selectionModel()->currentIndex();
@@ -1239,7 +1251,7 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 void MainWindow::saveAllAttachmentsToDir(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	int attachments = ui->messageAttachmentList->model()->rowCount();
 
@@ -1324,7 +1336,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 void MainWindow::openSelectedAttachment(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex selectedIndex =
 	    ui->messageAttachmentList->selectionModel()->currentIndex();
@@ -1394,7 +1406,7 @@ void MainWindow::openSelectedAttachment(void)
 void MainWindow::downloadSelectedMessageAttachments(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	bool incoming = true;
 
@@ -1485,7 +1497,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
     const QModelIndex acntTopIdx, QString dmId)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
@@ -1579,7 +1591,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 void MainWindow::accountItemMarkAllRead(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/* Save current index. */
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
@@ -1626,7 +1638,7 @@ void MainWindow::accountItemMarkAllRead(void)
 void MainWindow::messageItemDeleteMessage(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -1665,14 +1677,15 @@ void MainWindow::messageItemDeleteMessage(void)
 void MainWindow::synchroniseAllAccounts(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/*
 	 * TODO -- The actual work (function) which the worker performs should
 	 * be defined somewhere outside of the worker object.
 	 */
 
-	showStatusTextPermanently(tr("Synchronise all accounts with ISDS server."));
+	showStatusTextPermanently(
+	    tr("Synchronise all accounts with ISDS server."));
 
 	if (globPref.download_on_background) {
 		timer->stop();
@@ -1746,6 +1759,8 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
     QString accoutName, int rt, int rn, int st, int sn)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	if (completed) {
 		if (accoutName.isNull()) {
 			showStatusTextWithTimeout(tr("Messages on the server")
@@ -1776,7 +1791,7 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
 void MainWindow::synchroniseSelectedAccount(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/*
 	 * TODO -- Save/restore the position of selected account and message.
@@ -1799,8 +1814,9 @@ void MainWindow::synchroniseSelectedAccount(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	showStatusTextPermanently(tr("Synchronise account \"%1\" with ISDS server.")
-	    .arg(accountInfo.accountName()));
+	showStatusTextPermanently(
+	    tr("Synchronise account \"%1\" with ISDS server.")
+	        .arg(accountInfo.accountName()));
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
@@ -2768,7 +2784,7 @@ void MainWindow::saveSettings(void) const
 void MainWindow::createAndSendMessage(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/*
 	 * TODO -- This method copies createAndSendMessageReply().
@@ -2837,7 +2853,7 @@ void MainWindow::createAndSendMessage(void)
 void MainWindow::addNewAccount(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
@@ -2864,7 +2880,7 @@ void MainWindow::addNewAccount(void)
 void MainWindow::deleteSelectedAccount(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
@@ -2926,7 +2942,7 @@ void MainWindow::deleteSelectedAccount(void)
 void MainWindow::changeAccountPassword(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
@@ -2960,7 +2976,7 @@ void MainWindow::changeAccountPassword(void)
 void MainWindow::manageAccountProperties(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex index = ui->accountList->currentIndex();
 	Q_ASSERT(index.isValid());
@@ -2996,7 +3012,7 @@ void MainWindow::manageAccountProperties(void)
 void MainWindow::moveSelectedAccountUp(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
 	    (ui->accountList->model());
@@ -3027,7 +3043,7 @@ void MainWindow::moveSelectedAccountUp(void)
 void MainWindow::moveSelectedAccountDown(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
 	    (ui->accountList->model());
@@ -3059,7 +3075,7 @@ void MainWindow::moveSelectedAccountDown(void)
 void MainWindow::changeDataDirectory(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
@@ -3095,7 +3111,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
     QString action)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
@@ -3219,7 +3235,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 void MainWindow::createAndSendMessageReply(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/*
 	 * TODO -- This method copies createAndSendMessage().
@@ -3299,7 +3315,7 @@ void MainWindow::createAndSendMessageReply(void)
 void MainWindow::findDatabox(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex index = ui->accountList->currentIndex();
 	Q_ASSERT(index.isValid());
@@ -3343,7 +3359,7 @@ void MainWindow::findDatabox(void)
 void MainWindow::clearFilterField(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	m_searchLine->clear();
 }
@@ -3356,7 +3372,7 @@ void MainWindow::clearFilterField(void)
 void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QAbstractItemModel *tableModel = m_messageModel;
 	if (0 == tableModel) {
@@ -3431,7 +3447,7 @@ void MainWindow::setSentColumnWidths(void)
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	(void) oldSize;
 	QModelIndex current = ui->accountList->currentIndex();
@@ -3467,7 +3483,7 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 void MainWindow::onTableColumnSort(int column)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	m_sort_column = column;
 	if (ui->messageList->horizontalHeader()->sortIndicatorOrder()
@@ -3615,7 +3631,7 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
@@ -3635,6 +3651,8 @@ void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
 void MainWindow::setProgressBarFromWorker(QString label, int value)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	m_statusProgressBar->setFormat(label);
 	m_statusProgressBar->setValue(value);
 	m_statusProgressBar->repaint();
@@ -3648,7 +3666,7 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 void MainWindow::deleteThreadSyncAll(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
@@ -3676,7 +3694,7 @@ void MainWindow::deleteThreadSyncAll(void)
 void MainWindow::deleteThreadSyncOne(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
@@ -3700,7 +3718,7 @@ void MainWindow::deleteThreadSyncOne(void)
 void MainWindow::deleteThreadDownMsgComplete(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
@@ -3877,7 +3895,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -4000,7 +4018,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 void MainWindow::aboutApplication(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QDialog *abDialog = new aboutDialog(this);
 	abDialog->exec();
@@ -4014,7 +4032,7 @@ void MainWindow::aboutApplication(void)
 void MainWindow::importDatabaseDirectory(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QString importDir = QFileDialog::getExistingDirectory(this,
 	    tr("Import database directory"), m_on_import_database_dir_activate,
@@ -4225,7 +4243,7 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 void MainWindow::authenticateMessageFile(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	switch (authenticateMessageFromZFO()) {
 	case Q_SUCCESS:
@@ -4284,7 +4302,7 @@ void MainWindow::authenticateMessageFile(void)
 void MainWindow::verifyMessage(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
@@ -4346,7 +4364,7 @@ void MainWindow::verifyMessage(void)
 void MainWindow::viewMessageFromZFO(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
@@ -4406,7 +4424,7 @@ fail:
 void MainWindow::exportCorrespondenceOverview(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
@@ -4437,7 +4455,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 void MainWindow::showHelp(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QDesktopServices::openUrl(QUrl(DATOVKA_ONLINE_HELP_URL,
 	    QUrl::TolerantMode));
@@ -4451,7 +4469,7 @@ void MainWindow::showHelp(void)
 void MainWindow::exportSelectedMessageAsZFO(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 
@@ -4602,7 +4620,7 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 void MainWindow::exportDeliveryInfoAsZFO(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 
@@ -4699,14 +4717,14 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 void MainWindow::exportDeliveryInfoAsPDF(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message devilery info to "
-		    "PDF was not successful!"));
+		showStatusTextWithTimeout(tr("Export of message devilery info "
+		    "to PDF was not successful!"));
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4759,7 +4777,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 void MainWindow::exportMessageEnvelopeAsPDF(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 
@@ -4830,7 +4848,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 void MainWindow::openSelectedMessageExternally(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4892,7 +4910,7 @@ void MainWindow::openSelectedMessageExternally(void)
 void MainWindow::openDeliveryInfoExternally(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4954,7 +4972,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 void MainWindow::showSignatureDetails(void)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -5420,7 +5438,7 @@ void MainWindow::setAndShowNotificationDialog(QList<QString> errorDmId,
    int successCnt)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	QString msg;
 
@@ -5491,7 +5509,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!firstConnectToIsds(accountInfo, false)) {
@@ -5543,7 +5561,7 @@ void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo
 void MainWindow::msgSetSelectedMessageProcessState(int state)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	MessageProcessState procSt;
 	switch (state) {
