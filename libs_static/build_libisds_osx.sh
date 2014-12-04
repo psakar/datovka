@@ -18,6 +18,12 @@ if [ ! -d "${BUILTDIR}" ]; then
 	mkdir "${BUILTDIR}"
 fi
 
+USE_SYSTEM_CURL="yes"
+
+
+SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+ISYSROOT="${SDKROOT}/MacOSX10.7.sdk"
+
 ZLIB_ARCHIVE=zlib-1.2.8.tar.xz
 EXPAT_ARCHIVE=expat-2.1.0.tar.gz
 LIBTOOL_ARCHIVE=libtool-2.4.3.tar.xz
@@ -26,6 +32,7 @@ LIBICONV_ARCHIVE=libiconv-1.14.tar.gz
 LIBXML2_ARCHIVE=libxml2-2.9.2.tar.gz
 GETTEXT_ARCHIVE=gettext-0.19.3.tar.xz
 
+# Libcurl is already available in the system.
 LIBCURL_ARCHIVE=curl-7.39.0.tar.gz
 OPENSSL_ARCHIVE=openssl-1.0.1j.tar.gz
 
@@ -129,7 +136,7 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 fi
 
 
-if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
+if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBCURL_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
 		echo "Missing ${ARCHIVE}"
@@ -141,8 +148,8 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
 	# --disable-shared
-	./configure --enable-ipv6 --with-darwinssl --without-axtls --disable-ldap --prefix="${BUILTDIR}" CFLAGS="-arch i386" CXXFLAGS="-arch i386"
-	make && make install || exit 1
+	./configure --enable-ipv6 --with-darwinssl --without-axtls --disable-ldap --prefix="${BUILTDIR}" CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" LDFLAGS="-arch i386 -isysroot ${ISYSROOT}"
+	#make ##&& make install || exit 1
 fi
 
 
@@ -172,7 +179,9 @@ if [ ! -z "${LIBISDS_GIT}" ]; then
 	cd "${WORKDIR}"/libisds*
 	git checkout "${LIBISDS_BRANCH}"
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
-	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-arch i386 -L${BUILTDIR}/lib"
+	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
 	make && make install || exit 1
-	mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
+	if [ -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
+		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
+	fi
 fi

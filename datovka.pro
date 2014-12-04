@@ -124,7 +124,7 @@ macx {
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
 	CONFIG += c++11
-	QMAKE_MAC_SDK=macosx10.9
+	QMAKE_MAC_SDK=macosx10.7
 	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
 
 	isEqual(STATIC, 1) {
