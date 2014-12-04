@@ -816,7 +816,18 @@ QString suppliedTextFileLocation(const QString &fName)
 
 	/* Search in application location. */
 	filePath = QCoreApplication::applicationDirPath();
+#ifdef Q_OS_OSX
+	{
+		QDir directory(filePath);
+		if ("MacOS" == directory.dirName()) {
+			directory.cdUp();
+		}
+		filePath = directory.absolutePath() + QDir::separator() +
+		    "Resources";
 
+		qDebug() << "Dir" << filePath;
+	}
+#endif
 	filePath += QDir::separator() + fName;
 
 	if (QFile::exists(filePath)) {

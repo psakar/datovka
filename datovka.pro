@@ -160,6 +160,9 @@ macx {
 		AUTHORS \
 		COPYING
 	additional.path = Contents/Resources
+
+	QMAKE_BUNDLE_DATA +=\
+		additional
 }
 
 win32 {
