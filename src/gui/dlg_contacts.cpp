@@ -119,7 +119,6 @@ void DlgContacts::fillContactsFromMessageDb()
 void DlgContacts::enableOkButton(void)
 /* ========================================================================= */
 {
-
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {

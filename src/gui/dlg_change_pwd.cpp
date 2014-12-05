@@ -63,7 +63,6 @@ void DlgChangePwd::initPwdChangeDialog(void)
  */
 void DlgChangePwd::pingIsdsServer(void)
 /* ========================================================================= */
-
 {
 	if (isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		qDebug() << "Connection to ISDS is alive :)";

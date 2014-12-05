@@ -105,8 +105,6 @@ void DlgDsSearch::initSearchWindow(void)
 	connect(pingTimer, SIGNAL(timeout()), this,
 	    SLOT(pingIsdsServer()));
 
-
-
 	checkInputFields();
 }
 
@@ -117,7 +115,6 @@ void DlgDsSearch::initSearchWindow(void)
  */
 void DlgDsSearch::pingIsdsServer(void)
 /* ========================================================================= */
-
 {
 	if (isdsSessions.isConnectToIsds(m_userName)) {
 		qDebug() << "Connection to ISDS is alive :)";
@@ -128,12 +125,11 @@ void DlgDsSearch::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- *  Checke input fields in the dialog
+ * Check input fields in the dialog
  */
 void DlgDsSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-
 	switch (this->dataBoxTypeCBox->currentIndex()) {
 	/* OVM */
 	case 0:
@@ -229,7 +225,7 @@ void DlgDsSearch::checkInputFields(void)
 
 /* ========================================================================= */
 /*
- *  Call ISDS and find databoxes via given criteria
+ * Call ISDS and find data boxes with given criteria
  */
 void DlgDsSearch::searchDataBox(void)
 /* ========================================================================= */
@@ -373,7 +369,7 @@ exit:
 
 /* ========================================================================= */
 /*
- *  Enable action button
+ * Enable action button
  */
 void DlgDsSearch::enableOkButton(void)
 /* ========================================================================= */
@@ -427,7 +423,7 @@ void DlgDsSearch::addContactsToTable(
 
 /* ========================================================================= */
 /*
- *  Test if the selected item is not in recipient list
+ * Test if the selected item is not in recipient list
  */
 bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
 /* ========================================================================= */
@@ -445,7 +441,7 @@ bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
 
 /* ========================================================================= */
 /*
- *  Insert selected item into recipient list of the sent message dialog
+ * Insert selected item into recipient list of the sent message dialog
  */
 void DlgDsSearch::insertDsItems(void)
 /* ========================================================================= */

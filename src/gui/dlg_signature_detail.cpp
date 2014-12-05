@@ -71,7 +71,7 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	validateSigningCertificate();
 	validateMessageTimestamp();
 
-	/* remember size of dialog */
+	/* Remember the size of the dialog. */
 	dSize = this->sizeHint();
 }
 

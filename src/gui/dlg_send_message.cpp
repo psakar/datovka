@@ -240,7 +240,6 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
  */
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
-
 {
 	if (isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		qDebug() << "Connection to ISDS is alive :)";
@@ -257,7 +256,6 @@ void DlgSendMessage::pingIsdsServer(void)
 void DlgSendMessage::addAttachmentFile(void)
 /* ========================================================================= */
 {
-
 	QFileDialog dialog(this);
 	dialog.setDirectory(QDir::homePath());
 	dialog.setFileMode(QFileDialog::ExistingFiles);
@@ -410,7 +408,6 @@ void DlgSendMessage::deleteAttachmentFile(void)
  */
 int DlgSendMessage::cmptAttachmentSize(void)
 /* ========================================================================= */
-
 {
 	int attachSize = 0;
 
@@ -481,12 +478,11 @@ void DlgSendMessage::findRecipientData(void)
 
 /* ========================================================================= */
 /*
-* Open attachment in default application.
+ * Open attachment in default application.
  */
 void DlgSendMessage::openAttachmentFile(void)
 /* ========================================================================= */
 {
-
 	QModelIndex selectedIndex = this->attachmentTableWidget->currentIndex();
 
 	Q_ASSERT(selectedIndex.isValid());
