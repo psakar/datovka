@@ -173,8 +173,8 @@ void GlobLog::setLogVerbosity(int verb)
 
 	if (verb < 0) {
 		verb = 0;
-	} else if (verb > 2) {
-		verb = 2;
+	} else if (verb > 3) {
+		verb = 3;
 	}
 
 	m_logVerbosity = verb;
@@ -555,10 +555,16 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 	 */
 
 	if (m_logVerbosity > 1) {
-		msgPrefix = dateTime + " " + globLog.m_hostName + " " +
+		msgPrefix = dateTime;
+	}
+	if (m_logVerbosity > 2) {
+		msgPrefix += " " + globLog.m_hostName + " " +
 		    QCoreApplication::applicationName() + "[" +
 		    QString::number(QCoreApplication::applicationPid()) +
-		    "]: ";
+		    "]";
+	}
+	if (m_logVerbosity > 1) {
+		msgPrefix += ": ";
 	}
 
 	if (NULL != prefix) {
