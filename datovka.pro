@@ -172,6 +172,8 @@ macx {
 	localisation.path = "Contents/Resources/locale"
 	localisation.files += locale/datovka_cs.qm \
 		locale/datovka_en.qm
+	localisation.files += locale/qtbase_cs.qm \
+		locale/qtbase_uk.qm
 
 	additional.path = "Contents/Resources"
 	additional.files = \
