@@ -671,15 +671,23 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId) const
+QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
+     enum sorting sorting) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
-	    "dbIDRecipient = :recipDbId"
-	    " ORDER BY dmDeliveryTime ASC";
+	    "dbIDRecipient = :recipDbId";
+	switch (sorting) {
+	case ASCENDING:
+		queryStr += " ORDER BY dmDeliveryTime ASC";
+	case DESCENDING:
+		queryStr += " ORDER BY dmDeliveryTime DESC";
+	default:
+		break;
+	}
 	//qDebug() << "Generating received year list" << recipDbId;
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
@@ -704,11 +712,11 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId) const
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
-    const QString &recipDbId) const
+    const QString &recipDbId, enum sorting sorting) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsRcvdYears(recipDbId);
+	QList<QString> yearList = msgsRcvdYears(recipDbId, sorting);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -975,15 +983,23 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
+QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
+    enum sorting sorting) const
 /* ========================================================================= */
 {
 	QList<QString> yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
-	    "dbIDSender = :sendDbId"
-	    " ORDER BY dmDeliveryTime ASC";
+	    "dbIDSender = :sendDbId";
+	switch (sorting) {
+	case ASCENDING:
+		queryStr += " ORDER BY dmDeliveryTime ASC";
+	case DESCENDING:
+		queryStr += " ORDER BY dmDeliveryTime DESC";
+	default:
+		break;
+	}
 	//qDebug() << "Generating received year list" << recipDbId;
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
@@ -1008,11 +1024,11 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId) const
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
-    const QString &sendDbId) const
+    const QString &sendDbId, enum sorting sorting) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsSntYears(sendDbId);
+	QList<QString> yearList = msgsSntYears(sendDbId, sorting);
 	QSqlQuery query(m_db);
 	QString queryStr;
 

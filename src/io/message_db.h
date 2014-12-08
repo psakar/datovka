@@ -22,6 +22,13 @@
 #include "src/common.h"
 
 
+enum sorting {
+	UNSORTED = 0,
+	ASCENDING,
+	DESCENDING
+};
+
+
 /*!
  * @brief Custom message model class.
  *
@@ -143,15 +150,24 @@ public:
 	    const QString &year);
 
 	/*!
-	 * @brief Return list of yearly counts in database.
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param recipDbId Recipient identifier.
+	 * @param sorting   Sorting.
+	 * @return List of years.
 	 */
-	QList<QString> msgsRcvdYears(const QString &recipDbId) const;
+	QList<QString> msgsRcvdYears(const QString &recipDbId,
+	    enum sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param recipDbId Recipient identifier.
+	 * @param sorting   Sorting.
+	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    const QString &recipDbId) const;
+	    const QString &recipDbId, enum sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages received within past 90
@@ -184,14 +200,23 @@ public:
 
 	/*!
 	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param sendDbId Sender identifier.
+	 * @param sorting  Sorting.
+	 * @return List of years.
 	 */
-	QList<QString> msgsSntYears(const QString &sendDbId) const;
+	QList<QString> msgsSntYears(const QString &sendDbId,
+	    enum sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param sendDbId Sender identifier.
+	 * @param sorting  Sorting.
+	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    const QString &sendDbId) const;
+	    const QString &sendDbId, enum sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages sent within past 90

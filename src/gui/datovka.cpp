@@ -523,8 +523,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
-		    messageDb->msgsRcvdYearlyCounts(dbId),
-		    messageDb->msgsSntYearlyCounts(dbId));
+		    messageDb->msgsRcvdYearlyCounts(dbId, DESCENDING),
+		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
 		ui->actionDelete_message->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
@@ -2580,7 +2580,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
-	yearList = db->msgsRcvdYears(dbId);
+	yearList = db->msgsRcvdYears(dbId, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = db->msgsRcvdUnreadInYear(dbId, yearList.value(j));
@@ -2592,7 +2592,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentSent, 0);
-	yearList = db->msgsSntYears(dbId);
+	yearList = db->msgsSntYears(dbId, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
 		//unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
@@ -2644,7 +2644,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
-	yearList = db->msgsRcvdYears(dbId);
+	yearList = db->msgsRcvdYears(dbId, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = db->msgsRcvdUnreadInYear(dbId, yearList.value(j));
@@ -2655,7 +2655,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentSent, 0);
-	yearList = db->msgsSntYears(dbId);
+	yearList = db->msgsSntYears(dbId, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
 		//unreadMsgs = db->msgsSntUnreadInYear(dbId, yearList.value(j));
@@ -2706,7 +2706,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		unreadMsgs = db->msgsRcvdUnreadWithin90Days(dbId);
 		m_accountModel.updateRecentUnread(itemTop,
 		    AccountModel::nodeRecentReceived, unreadMsgs);
-		yearList = db->msgsRcvdYears(dbId);
+		yearList = db->msgsRcvdYears(dbId, DESCENDING);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
 			unreadMsgs = db->msgsRcvdUnreadInYear(dbId,
@@ -2719,7 +2719,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		//unreadMsgs = db->msgsSntUnreadWithin90Days(dbId);
 		m_accountModel.updateRecentUnread(itemTop,
 		    AccountModel::nodeRecentSent, 0);
-		yearList = db->msgsSntYears(dbId);
+		yearList = db->msgsSntYears(dbId, DESCENDING);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
 			//unreadMsgs = db->msgsSntUnreadInYear(dbId,

@@ -1,3 +1,13 @@
+x.y.z /
+ * Message years are shown in descending order.
+ * Improvements in debugging messages.
+ * Credits and licence files are displayed on OS X and Unix-like systems.
+ * Datovka can be build using OS X SDK 10.7.
+ * CRL is checked when message displayed.
+ * Main window icon resolution is now 48x48.
+ * Added high-resolution Datovka icons.
+ * Added .desktop file.
+
 0.2.0 / 2014-11-27
  * Added PostSignum Qualified CA 3 certificate.
  * CA store can be initialised using a single PEM file.
