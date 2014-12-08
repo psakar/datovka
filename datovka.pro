@@ -10,6 +10,19 @@ QT += printsupport
 # Generate localisation.
 system(lrelease datovka.pro)
 
+# Copy Qt localisation on architectures.
+macx {
+	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
+	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
+	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
+}
+win32 {
+	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
+	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
+	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
+}
+
+
 # Required Qt versions
 REQUIRED_MAJOR = 5
 REQUIRED_MINOR = 2
