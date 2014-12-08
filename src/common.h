@@ -331,6 +331,13 @@ QString suppliedTextFileContent(enum text_file textFile);
 /*!
  * @brief Returns the path to directory where supplied localisation resides.
  */
-QString suppliedLocalisationDir(void);
+QString appLocalisationDir(void);
+
+
+/*!
+ * @brief Returns the path to directory where supplied localisation resides.
+ */
+QString qtLocalisationDir(void);
+
 
 #endif /* _COMMON_H_ */

@@ -186,42 +186,61 @@ int main(int argc, char *argv[])
 		QString language =
 		    settings.value("preferences/language").toString();
 
-		/* Check for localisation location. */
-		QString localisationDir = suppliedLocalisationDir();
+		/* Check for application localisation location. */
+		QString localisationDir;
+		QString localisationFile;
 
-		logInfo("Loading localisation from path '%s'.\n",
+
+		localisationDir = appLocalisationDir();
+
+		logInfo("Loading application localisation from path '%s'.\n",
 		    localisationDir.toStdString().c_str());
 
-		QString qtLocalisation, datovkaLocalisation;
+		localisationFile = "datovka_";
 
 		if (language == "cs") {
-			datovkaLocalisation = "datovka_cs";
-			qtLocalisation = "qtbase_cs";
+			localisationFile += "cs";
 		} else if (language == "en") {
-			datovkaLocalisation = "datovka_en";
-			qtLocalisation = "qtbase_uk";
+			localisationFile += "en";
 		} else {
 			/* Use system locale. */
-			datovkaLocalisation =
-			    "datovka_" + QLocale::system().name();
-			qtLocalisation = "qtbase_" + QLocale::system().name();
+			localisationFile += QLocale::system().name();
 		}
 
-		if (!appTranslator.load(datovkaLocalisation,
-		        localisationDir)) {
-			logWarning("Could not load '%s' from '%s'.\n",
-			    datovkaLocalisation.toStdString().c_str(),
+		if (!appTranslator.load(localisationFile, localisationDir)) {
+			logWarning("Could not load localisation file '%s' "
+			    "from directory '%s'.\n",
+			    localisationFile.toStdString().c_str(),
 			    localisationDir.toStdString().c_str());
 		}
 
-		if (!qtTranslator.load(qtLocalisation, localisationDir)) {
-			logWarning("Could not load '%s' from '%s'.\n",
-			    qtLocalisation.toStdString().c_str(),
+		app.installTranslator(&appTranslator);
+
+
+		localisationDir = qtLocalisationDir();
+
+		logInfo("Loading Qt localisation from path '%s'.\n",
+		    localisationDir.toStdString().c_str());
+
+		localisationFile = "qtbase_";
+
+		if (language == "cs") {
+			localisationFile += "cs";
+		} else if (language == "en") {
+			localisationFile += "uk";
+		} else {
+			/* Use system locale. */
+			localisationFile += QLocale::system().name();
+		}
+
+		if (!qtTranslator.load(localisationFile, localisationDir)) {
+			logWarning("Could not load localisation file '%s' "
+			    "from directory '%s'.\n",
+			    localisationFile.toStdString().c_str(),
 			    localisationDir.toStdString().c_str());
 		}
 
 		app.installTranslator(&qtTranslator);
-		app.installTranslator(&appTranslator);
 	}
 
 	/* Localise description in tables. */

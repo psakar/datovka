@@ -208,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* It fires when any column was clicked. */
 	connect(ui->messageList->horizontalHeader(),
 	    SIGNAL(sectionClicked(int)),
-	    this, SLOT(onTableColumnSort(int)));
+	    this, SLOT(onTableColumnHeaderSectionClicked(int)));
 
 	/* Connect non-automatic menu actions. */
 	connectTopMenuBarSlots();
@@ -3487,17 +3487,17 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /*
  * Set actual sort order for current column.
  */
-void MainWindow::onTableColumnSort(int column)
+void MainWindow::onTableColumnHeaderSectionClicked(int column)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
 	m_sort_column = column;
-	if (ui->messageList->horizontalHeader()->sortIndicatorOrder()
-	    == Qt::AscendingOrder) {
+	if (ui->messageList->horizontalHeader()->sortIndicatorOrder() ==
+	    Qt::AscendingOrder) {
 		m_sort_order = "SORT_ASCENDING";
-	} else if (ui->messageList->horizontalHeader()->sortIndicatorOrder()
-	    == Qt::DescendingOrder) {
+	} else if (ui->messageList->horizontalHeader()->sortIndicatorOrder() ==
+	           Qt::DescendingOrder) {
 		m_sort_order = "SORT_DESCENDING";
 	} else {
 		m_sort_order = "";
@@ -4497,11 +4497,11 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Can not export message")
-		    + " " + dmId + ".");
+		msgBox.setText(tr("Can not export complete message.")
+		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		    tr("You have to download message firstly before export.") +
+		    tr("You must download message firstly before export.") +
 		    "\n\n" +
 		    tr("Do you want to download complete message now?"));
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -4648,8 +4648,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Can not export delivery info for message")
-		    + " " + dmId + ".");
+		msgBox.setText(tr("Can not export delivery info for message.")
+		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("You must download message firstly before export.") +
@@ -4732,7 +4732,6 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	if (!msgIdx.isValid()) {
 		showStatusTextWithTimeout(tr("Export of message devilery info "
 		    "to PDF was not successful!"));
-		return;
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4744,12 +4743,11 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	    "DD_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as PDF file"), fileName);
+	    tr("Save delivery info as PDF file"), fileName);//, QString(), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message devilery "
 		    "info \"%1\" to PDF was not successful!").arg(dmId));
-		return;
 	}
 
 	/* remember path for settings */
@@ -4761,13 +4759,18 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
 
-	showStatusTextPermanently(tr("Printing of delivery info \"%1\" to "
-	    "PDF. Please wait...").arg(dmId));
+	/* TODO - Slow printer initialization */
+
+	QDialog pdf_dialog(this);
+	pdf_dialog.setModal(false);
+	pdf_dialog.setWindowTitle(tr("PDF printing"));
+	pdf_dialog.show();
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
+	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message devilery info \"%1\" to "
 	    "PDF was successful.").arg(dmId));
@@ -4827,13 +4830,18 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID, accountData.at(0)));
 
-	showStatusTextPermanently(tr("Printing of message envelope \"%1\" to "
-	    "PDF. Please wait...").arg(dmId));
+	/* TODO - Slow printer initialization */
+
+	QDialog pdf_dialog(this);
+	pdf_dialog.setModal(false);
+	pdf_dialog.setWindowTitle(tr("PDF printing"));
+	pdf_dialog.show();
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
+	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message envelope \"%1\" to "
 	    "PDF was successful.").arg(dmId));
@@ -4929,7 +4937,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You have to download message firstly before its export..."));
+		  tr("You must download message firstly before its export..."));
 		msgBox.exec();
 		return;
 	}

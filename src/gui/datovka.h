@@ -302,7 +302,7 @@ private slots:
 	/*!
 	 * @brief Set actual sort order for current column.
 	 */
-	void onTableColumnSort(int column);
+	void onTableColumnHeaderSectionClicked(int column);
 
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.

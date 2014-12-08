@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QLibraryInfo>
 #include "common.h"
 #include "src/io/isds_sessions.h"
 
@@ -792,15 +793,16 @@ QString suppliedTextFileContent(enum text_file textFile)
 }
 
 
+#define LOCALE_SRC_PATH "locale"
+
+
 /* ========================================================================= */
 /*
  * Returns the path to directory where supplied localisation resides.
  */
-QString suppliedLocalisationDir(void)
+QString appLocalisationDir(void)
 /* ========================================================================= */
 {
-#define LOCALE_SRC_PATH "locale"
-
 	QString dirPath;
 
 #ifdef LOCALE_INST_DIR
@@ -837,11 +839,59 @@ QString suppliedLocalisationDir(void)
 		dirPath.clear();
 	}
 
-	/* TODO -- QLibraryInfo::location(QLibraryInfo::TranslationsPath) ? */
+	return dirPath;
+}
+
+
+/* ========================================================================= */
+/*!
+ * @brief Returns the path to directory where supplied localisation resides.
+ */
+QString qtLocalisationDir(void)
+/* ========================================================================= */
+{
+	QString dirPath;
+
+#ifdef LOCALE_INST_DIR
+	/*
+	 * This variable is set in UNIX-like systems. Use default Qt location
+	 * directory.
+	 */
+
+	dirPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+
+	if (QFileInfo::exists(dirPath)) {
+		return dirPath;
+	} else {
+		dirPath.clear();
+	}
+#endif /* LOCALE_INST_DIR */
+
+	/* Search in application location. */
+	dirPath = QCoreApplication::applicationDirPath();
+#ifdef Q_OS_OSX
+	{
+		QDir directory(dirPath);
+		if ("MacOS" == directory.dirName()) {
+			directory.cdUp();
+		}
+		dirPath = directory.absolutePath() + QDir::separator() +
+		    "Resources";
+	}
+#endif /* Q_OS_OSX */
+	dirPath += QDir::separator() + QString(LOCALE_SRC_PATH);
+
+	if (QFileInfo::exists(dirPath)) {
+		return dirPath;
+	} else {
+		dirPath.clear();
+	}
 
 	return dirPath;
-#undef LOCALE_SRC_PATH
 }
+
+
+#undef LOCALE_SRC_PATH
 
 
 /* ========================================================================= */
