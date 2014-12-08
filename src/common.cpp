@@ -418,12 +418,12 @@ const QString msgStatusToText(int status)
 		 * konecny stav zpravy pred smazanim.
 		 */
 		return QObject::tr("Message did not pass through AV check; "
-		    "infected paper deleted; final status before deletion");
+		    "infected paper deleted; final status before deletion.");
 		break;
 	case 4:
 		/* Zprava dodana do ISDS (zapsan cas dodani). */
 		return QObject::tr("Message handed into ISDS "
-		    "(delivery time recorded)");
+		    "(delivery time recorded).");
 		break;
 	case 5:
 		/*
@@ -447,7 +447,7 @@ const QString msgStatusToText(int status)
 	case 7:
 		/* Zprava byla prectena (na portale nebo akci ESS). */
 		return QObject::tr("Message has been read (on the portal or "
-		    "by ESS action)");
+		    "by ESS action).");
 		break;
 	case 8:
 		/*

@@ -98,6 +98,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(m_searchLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterMessages(QString)));
 	m_searchLine->setFixedWidth(200);
+	m_searchLine->setToolTip(tr("Enter search word"));
 	ui->toolBar->addWidget(m_searchLine);
 	/* Clear message filter button. */
 	m_pushButton = new QPushButton(this);
