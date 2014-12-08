@@ -283,7 +283,7 @@ Založeno na knihovně libisds.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="231"/>
         <source>Export ZFO of selected messages</source>
-        <translation>Exportovat vybrané zpravy do ZFO</translation>
+        <translation>Exportovat vybrané zprávy do souboru ZFO</translation>
     </message>
 </context>
 <context>
@@ -632,8 +632,10 @@ Založeno na knihovně libisds.</translation>
 This means you can only search for accounts of type OVM and accounts that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not contain all otherwise matching databoxes.</source>
         <translation>Máte také aktivovány poštovní datové zprávy.
-To znamená, že můžete vyhledávat pouze schránky typu OVM a schránky, které mají aktivováno doručování poštovních datových zpráv.
-Vzhledem k tomuto omezení nemusí výsledky tohoto hledání obsahovat všechny datové schránky, které by jinak vyhovovaly parametrům.</translation>
+To znamená, že můžete vyhledávat pouze schránky typu OVM a schránky, 
+které mají aktivováno doručování poštovních datových zpráv.
+Vzhledem k tomuto omezení nemusí výsledky tohoto hledání obsahovat 
+všechny datové schránky, které by jinak vyhovovaly parametrům.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="51"/>
@@ -1725,21 +1727,29 @@ Zkuste to znova.</translation>
         <translation>Chyba exportu zprávy!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4494"/>
         <source>Can not export complete message.</source>
-        <translation>Nelze exportovat kompletní zprávu.</translation>
+        <translation type="vanished">Nelze exportovat zprávu </translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4498"/>
         <location filename="../src/gui/datovka.cpp" line="4649"/>
         <source>You must download message firstly before export.</source>
-        <translation>Musíte nejprve stáhnout kompletní zprávu před exportem.</translation>
+        <translation>Musíte nejprve stáhnout kompletní zprávu před jejím exportem.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4500"/>
         <location filename="../src/gui/datovka.cpp" line="4651"/>
         <source>Do you want to download complete message now?</source>
         <translation>Chcete stáhnout kompletní zprávu nyní a pokračovat v akci?</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4494"/>
+        <source>Can not export message</source>
+        <translation>Nelze exportovat zprávu</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4498"/>
+        <source>You have to download message firstly before export.</source>
+        <translation>Musíte nejprve stáhnout kompletní zprávu před jejím exportem.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4505"/>
@@ -1766,9 +1776,8 @@ Zkuste to znova.</translation>
         <translation>Chyba exportu informací o doručení!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4645"/>
         <source>Can not export delivery info for message.</source>
-        <translation>Nelze exportovat informace o doručení.</translation>
+        <translation type="vanished">Nelze exportovat informace o doručení.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4656"/>
@@ -1898,8 +1907,12 @@ Zkuste to znova.</translation>
         <translation>Neznáný nebo bez expirace</translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="4645"/>
+        <source>Can not export delivery info for message</source>
+        <translation>Nelze exportovat dodejku zprávy</translation>
+    </message>
+    <message>
         <location filename="../src/gui/datovka.cpp" line="4872"/>
-        <location filename="../src/gui/datovka.cpp" line="4934"/>
         <source>You must download message firstly before its export...</source>
         <translation>Musíte nejprve stáhnout kompletní zprávu před exportem...</translation>
     </message>
@@ -1936,6 +1949,11 @@ Zkuste to znova.</translation>
         <location filename="../src/gui/datovka.cpp" line="4801"/>
         <source>Save message envelope as PDF file</source>
         <translation>Uložit obálku zprávy do soubor PDF</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4934"/>
+        <source>You have to download message firstly before its export...</source>
+        <translation>Musíte nejprve stáhnout kompletní zprávu před jejím exportem...</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5011"/>

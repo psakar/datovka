@@ -1325,6 +1325,26 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="4494"/>
+        <source>Can not export message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4498"/>
+        <source>You have to download message firstly before export.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4645"/>
+        <source>Can not export delivery info for message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="4934"/>
+        <source>You have to download message firstly before its export...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/datovka.cpp" line="5517"/>
         <source>New account error</source>
         <translation type="unfinished"></translation>
@@ -1637,12 +1657,6 @@ Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4494"/>
-        <source>Can not export complete message.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="4498"/>
         <location filename="../src/gui/datovka.cpp" line="4649"/>
         <source>You must download message firstly before export.</source>
         <translation type="unfinished"></translation>
@@ -1675,11 +1689,6 @@ Try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4644"/>
         <source>Delivery info export error!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="4645"/>
-        <source>Can not export delivery info for message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1747,7 +1756,6 @@ Try again.</source>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4872"/>
-        <location filename="../src/gui/datovka.cpp" line="4934"/>
         <source>You must download message firstly before its export...</source>
         <translation type="unfinished"></translation>
     </message>

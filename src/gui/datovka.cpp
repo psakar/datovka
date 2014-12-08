@@ -8,7 +8,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
-//#include <QPrinterInfo>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
@@ -4498,11 +4497,11 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Can not export complete message.")
-		    + " " + dmId);
+		msgBox.setText(tr("Can not export message")
+		    + " " + dmId + ".");
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		    tr("You must download message firstly before export.") +
+		    tr("You have to download message firstly before export.") +
 		    "\n\n" +
 		    tr("Do you want to download complete message now?"));
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -4649,8 +4648,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Can not export delivery info for message.")
-		    + " " + dmId);
+		msgBox.setText(tr("Can not export delivery info for message")
+		    + " " + dmId + ".");
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("You must download message firstly before export.") +
@@ -4733,6 +4732,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	if (!msgIdx.isValid()) {
 		showStatusTextWithTimeout(tr("Export of message devilery info "
 		    "to PDF was not successful!"));
+		return;
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4749,6 +4749,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message devilery "
 		    "info \"%1\" to PDF was not successful!").arg(dmId));
+		return;
 	}
 
 	/* remember path for settings */
@@ -4761,7 +4762,6 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
 
 	/* TODO - Slow printer initialization */
-
 	QDialog pdf_dialog(this);
 	pdf_dialog.setModal(false);
 	pdf_dialog.setWindowTitle(tr("PDF printing"));
@@ -4938,7 +4938,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		msgBox.setText(tr("Can not export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You must download message firstly before its export..."));
+		  tr("You have to download message firstly before its export..."));
 		msgBox.exec();
 		return;
 	}
