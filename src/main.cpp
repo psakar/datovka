@@ -15,8 +15,6 @@
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 
-#define LOCALE_SRC_PATH "locale"
-
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
 #define SAVE_CONF_OPT "save-conf"
@@ -189,18 +187,10 @@ int main(int argc, char *argv[])
 		    settings.value("preferences/language").toString();
 
 		/* Check for localisation location. */
-		QDir dir;
-		dir.setPath(app.applicationDirPath() + QDir::separator() +
-		    LOCALE_SRC_PATH);
-		if (!dir.exists()) {
-			dir.setPath(LOCALE_INST_DIR);
-			if (!dir.exists()) {
-				dir.setPath("");
-			}
-		}
+		QString localisationDir = suppliedLocalisationDir();
 
 		logInfo("Loading localisation from path '%s'.\n",
-		    dir.path().toStdString().c_str());
+		    localisationDir.toStdString().c_str());
 
 		QString qtLocalisation, datovkaLocalisation;
 
@@ -217,16 +207,17 @@ int main(int argc, char *argv[])
 			qtLocalisation = "qtbase_" + QLocale::system().name();
 		}
 
-		if (!appTranslator.load(datovkaLocalisation, dir.path())) {
+		if (!appTranslator.load(datovkaLocalisation,
+		        localisationDir)) {
 			logWarning("Could not load '%s' from '%s'.\n",
 			    datovkaLocalisation.toStdString().c_str(),
-			    dir.path().toStdString().c_str());
+			    localisationDir.toStdString().c_str());
 		}
 
-		if (!qtTranslator.load(qtLocalisation, dir.path())) {
+		if (!qtTranslator.load(qtLocalisation, localisationDir)) {
 			logWarning("Could not load '%s' from '%s'.\n",
 			    qtLocalisation.toStdString().c_str(),
-			    dir.path().toStdString().c_str());
+			    localisationDir.toStdString().c_str());
 		}
 
 		app.installTranslator(&qtTranslator);

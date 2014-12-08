@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include "common.h"
 #include "src/io/isds_sessions.h"
 
@@ -793,6 +794,58 @@ QString suppliedTextFileContent(enum text_file textFile)
 
 /* ========================================================================= */
 /*
+ * Returns the path to directory where supplied localisation resides.
+ */
+QString suppliedLocalisationDir(void)
+/* ========================================================================= */
+{
+#define LOCALE_SRC_PATH "locale"
+
+	QString dirPath;
+
+#ifdef LOCALE_INST_DIR
+	/*
+	 * Search in installation location if supplied.
+	 */
+
+	dirPath = QString(LOCALE_INST_DIR);
+
+	if (QFileInfo::exists(dirPath)) {
+		return dirPath;
+	} else {
+		dirPath.clear();
+	}
+#endif /* LOCALE_INST_DIR */
+
+	/* Search in application location. */
+	dirPath = QCoreApplication::applicationDirPath();
+#ifdef Q_OS_OSX
+	{
+		QDir directory(dirPath);
+		if ("MacOS" == directory.dirName()) {
+			directory.cdUp();
+		}
+		dirPath = directory.absolutePath() + QDir::separator() +
+		    "Resources";
+	}
+#endif /* Q_OS_OSX */
+	dirPath += QDir::separator() + QString(LOCALE_SRC_PATH);
+
+	if (QFileInfo::exists(dirPath)) {
+		return dirPath;
+	} else {
+		dirPath.clear();
+	}
+
+	/* TODO -- QLibraryInfo::location(QLibraryInfo::TranslationsPath) ? */
+
+	return dirPath;
+#undef LOCALE_SRC_PATH
+}
+
+
+/* ========================================================================= */
+/*
  * Searches for the location of the supplied text file.
  */
 static
@@ -826,7 +879,7 @@ QString suppliedTextFileLocation(const QString &fName)
 		filePath = directory.absolutePath() + QDir::separator() +
 		    "Resources";
 	}
-#endif
+#endif /* Q_OS_OSX */
 	filePath += QDir::separator() + fName;
 
 	if (QFile::exists(filePath)) {

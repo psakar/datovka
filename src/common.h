@@ -327,4 +327,10 @@ enum text_file {
  */
 QString suppliedTextFileContent(enum text_file textFile);
 
+
+/*!
+ * @brief Returns the path to directory where supplied localisation resides.
+ */
+QString suppliedLocalisationDir(void);
+
 #endif /* _COMMON_H_ */
