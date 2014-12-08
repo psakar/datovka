@@ -206,15 +206,15 @@ int main(int argc, char *argv[])
 
 		if (language == "cs") {
 			datovkaLocalisation = "datovka_cs";
-			qtLocalisation = "qt_cs";
+			qtLocalisation = "qtbase_cs";
 		} else if (language == "en") {
 			datovkaLocalisation = "datovka_en";
-			qtLocalisation = "qt_uk";
+			qtLocalisation = "qtbase_uk";
 		} else {
 			/* Use system locale. */
 			datovkaLocalisation =
 			    "datovka_" + QLocale::system().name();
-			qtLocalisation = "qt_" + QLocale::system().name();
+			qtLocalisation = "qtbase_" + QLocale::system().name();
 		}
 
 		if (!appTranslator.load(datovkaLocalisation, dir.path())) {
