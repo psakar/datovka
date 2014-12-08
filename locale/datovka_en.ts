@@ -2640,132 +2640,132 @@ download date in the Datovka database.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/common.cpp" line="346"/>
+        <location filename="../src/common.cpp" line="347"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="349"/>
+        <location filename="../src/common.cpp" line="350"/>
         <source>Initializing postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="352"/>
+        <location filename="../src/common.cpp" line="353"/>
         <source>Reply postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="355"/>
+        <location filename="../src/common.cpp" line="356"/>
         <source>Initializing postal data message - expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="359"/>
+        <location filename="../src/common.cpp" line="360"/>
         <source>Initializing postal data message - used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="377"/>
+        <location filename="../src/common.cpp" line="378"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="380"/>
+        <location filename="../src/common.cpp" line="381"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="383"/>
+        <location filename="../src/common.cpp" line="384"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="386"/>
+        <location filename="../src/common.cpp" line="387"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="389"/>
+        <location filename="../src/common.cpp" line="390"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="406"/>
+        <location filename="../src/common.cpp" line="407"/>
         <source>Message bas submitted (originates at ISDS )</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="413"/>
+        <location filename="../src/common.cpp" line="414"/>
         <source>Data message and papers signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="421"/>
+        <location filename="../src/common.cpp" line="422"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="426"/>
+        <location filename="../src/common.cpp" line="427"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="450"/>
+        <location filename="../src/common.cpp" line="451"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="435"/>
+        <location filename="../src/common.cpp" line="436"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="445"/>
+        <location filename="../src/common.cpp" line="446"/>
         <source>A person authorised to read this message has logged-in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="458"/>
+        <location filename="../src/common.cpp" line="459"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="466"/>
+        <location filename="../src/common.cpp" line="467"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="471"/>
+        <location filename="../src/common.cpp" line="472"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="707"/>
+        <location filename="../src/common.cpp" line="708"/>
         <source>DS je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="710"/>
+        <location filename="../src/common.cpp" line="711"/>
         <source>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="713"/>
+        <location filename="../src/common.cpp" line="714"/>
         <source>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="717"/>
+        <location filename="../src/common.cpp" line="718"/>
         <source>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="720"/>
+        <location filename="../src/common.cpp" line="721"/>
         <source>DS je smazána (přesto existuje v ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="721"/>
+        <location filename="../src/common.cpp" line="722"/>
         <source>Došlo k chybě při zjišťování stavu</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3014,49 +3014,49 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="44"/>
+        <location filename="../src/main.cpp" line="42"/>
         <source>Data box application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/main.cpp" line="47"/>
         <source>Use &lt;conf-subdir&gt; subdirectory for configuration.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="51"/>
+        <location filename="../src/main.cpp" line="49"/>
         <source>conf-subdir</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="55"/>
+        <location filename="../src/main.cpp" line="53"/>
         <source>On start load &lt;conf&gt; file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="56"/>
-        <location filename="../src/main.cpp" line="61"/>
+        <location filename="../src/main.cpp" line="54"/>
+        <location filename="../src/main.cpp" line="59"/>
         <source>conf</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="60"/>
+        <location filename="../src/main.cpp" line="58"/>
         <source>On stop save &lt;conf&gt; file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="65"/>
+        <location filename="../src/main.cpp" line="63"/>
         <source>Set verbosity of logged messages to &lt;level&gt;. Default is </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="67"/>
-        <location filename="../src/main.cpp" line="77"/>
+        <location filename="../src/main.cpp" line="65"/>
+        <location filename="../src/main.cpp" line="75"/>
         <source>level</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="75"/>
+        <location filename="../src/main.cpp" line="73"/>
         <source>Set debugging verbosity to &lt;level&gt;. Default is </source>
         <translation type="unfinished"></translation>
     </message>
@@ -3550,214 +3550,263 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="127"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="114"/>
+        <source>Enter subject of the message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="130"/>
         <source>Show optional fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="158"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="161"/>
         <source>Mandate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="173"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="176"/>
         <source>/</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="183"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="186"/>
         <source>§</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="193"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="196"/>
         <source>paragraph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="203"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="206"/>
         <source>letter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="215"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="218"/>
         <source>Our reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="225"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="228"/>
         <source>Our file mark:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="235"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="238"/>
         <source>Your reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="245"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="248"/>
         <source>Your file mark:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="255"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="258"/>
         <source>Personal delivery:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="269"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="272"/>
         <source>To hands:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="297"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="300"/>
         <source>Recipients:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="310"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="313"/>
         <source>Add a recipient to the current message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="313"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="535"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="316"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="554"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="333"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="336"/>
         <source>Remove selected recipient from the list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="336"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="558"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="339"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="577"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="357"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="360"/>
         <source>Add recipient from contacts selected from existing messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="360"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="363"/>
         <source>Find</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="420"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="423"/>
         <source>Id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="425"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="431"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="430"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="434"/>
+        <source>Full name of recipient
+or name of organization</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="440"/>
         <source>Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="435"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="443"/>
+        <source>Address of recipient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="448"/>
         <source>PDZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="443"/>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Even if recipient did not read this message, message is considered as delivered after (currently) 10 days. This is delivery through fiction.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="451"/>
+        <source>The message for recipient will be
+sent as Poštovní Datová Zpráva</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="446"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="460"/>
+        <source>Even if recipient did not read this message,
+message is considered as delivered after 
+(currently) 10 days. This is delivery through fiction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="551"/>
+        <source>Add a new file to the attachments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="574"/>
+        <source>Remove the selected file from attachments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="604"/>
+        <source>Open selected file in associated application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="465"/>
         <source>Allow delivery through fiction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="462"/>
-        <source>Include sender identification</source>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="426"/>
+        <source>Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="481"/>
+        <source>Include sender identification</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="500"/>
         <source>Pay transfer charges for reply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="497"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="516"/>
         <source>Use offered payment of transfer charges by recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="519"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="538"/>
         <source>Attachments:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="532"/>
-        <source>Add a new attachment to the current message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="555"/>
-        <source>Remove the selected attachment from current message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="585"/>
-        <source>Open selected attachment in associated application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="588"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="607"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="623"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="642"/>
         <source>Attachment size is larger than 10 MB. Message cannot be sent!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="667"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="686"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="672"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="689"/>
+        <source>File name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="694"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="677"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="699"/>
         <source>MimeType</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="682"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="702"/>
+        <source>MIME type of file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="707"/>
         <source>Size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="687"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="710"/>
+        <source>Size of file in bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="715"/>
         <source>FilePath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="719"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="718"/>
+        <source>Absolute path of file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="750"/>
         <source>Send message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="722"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="753"/>
         <source>Send</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="735"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="766"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>

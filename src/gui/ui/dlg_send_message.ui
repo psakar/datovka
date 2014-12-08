@@ -110,6 +110,9 @@
          <bold>false</bold>
         </font>
        </property>
+       <property name="toolTip">
+        <string>Enter subject of the message</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -419,20 +422,34 @@
       <property name="text">
        <string>Id</string>
       </property>
+      <property name="toolTip">
+       <string>Databox ID</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Name</string>
+      </property>
+      <property name="toolTip">
+       <string>Full name of recipient
+or name of organization</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Address</string>
       </property>
+      <property name="toolTip">
+       <string>Address of recipient</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>PDZ</string>
+      </property>
+      <property name="toolTip">
+       <string>The message for recipient will be
+sent as Poštovní Datová Zpráva</string>
       </property>
      </column>
     </widget>
@@ -440,7 +457,9 @@
    <item>
     <widget class="QCheckBox" name="dmAllowSubstDelivery">
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Even if recipient did not read this message, message is considered as delivered after (currently) 10 days. This is delivery through fiction.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>Even if recipient did not read this message,
+message is considered as delivered after 
+(currently) 10 days. This is delivery through fiction.</string>
      </property>
      <property name="text">
       <string>Allow delivery through fiction</string>
@@ -529,7 +548,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Add a new attachment to the current message</string>
+        <string>Add a new file to the attachments</string>
        </property>
        <property name="text">
         <string>Add</string>
@@ -552,7 +571,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Remove the selected attachment from current message</string>
+        <string>Remove the selected file from attachments</string>
        </property>
        <property name="text">
         <string>Remove</string>
@@ -582,7 +601,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Open selected attachment in associated application</string>
+        <string>Open selected file in associated application</string>
        </property>
        <property name="text">
         <string>Open</string>
@@ -666,6 +685,9 @@
       <property name="text">
        <string>File</string>
       </property>
+      <property name="toolTip">
+       <string>File name</string>
+      </property>
      </column>
      <column>
       <property name="text">
@@ -676,15 +698,24 @@
       <property name="text">
        <string>MimeType</string>
       </property>
+      <property name="toolTip">
+       <string>MIME type of file</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Size</string>
       </property>
+      <property name="toolTip">
+       <string>Size of file in bytes</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>FilePath</string>
+      </property>
+      <property name="toolTip">
+       <string>Absolute path of file</string>
       </property>
      </column>
     </widget>
