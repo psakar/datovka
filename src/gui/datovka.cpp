@@ -4497,12 +4497,12 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Can not export complete message.")
+		msgBox.setText(tr("Cannot export complete message.")
 		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		    tr("You must download message firstly before export.") +
-		    "\n\n" +
+		    tr("First you must download the whole message before "
+		        "exporting.") + "\n\n" +
 		    tr("Do you want to download complete message now?"));
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::Yes);
@@ -4648,11 +4648,11 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Can not export delivery info for message.")
+		msgBox.setText(tr("Cannot export delivery info for message.")
 		    + " " + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		    tr("You must download message firstly before export.") +
+		    tr("First you must download message before export.") +
 		    "\n\n" +
 		    tr("Do you want to download complete message now?"));
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -4719,7 +4719,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 /* ========================================================================= */
 /*
- * Export delivery information as PDF file dialog.
+ * Export delivery information as PDF file dialogue.
  */
 void MainWindow::exportDeliveryInfoAsPDF(void)
 /* ========================================================================= */
@@ -4730,8 +4730,9 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message devilery info "
+		showStatusTextWithTimeout(tr("Export of message delivery info "
 		    "to PDF was not successful!"));
+		return;
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
@@ -4743,11 +4744,13 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	    "DD_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as PDF file"), fileName);//, QString(), 0, QFileDialog::DontUseNativeDialog);
+	    tr("Save delivery info as PDF file"), fileName);
+	//, QString(), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(tr("Export of message devilery "
+		showStatusTextWithTimeout(tr("Export of message delivery "
 		    "info \"%1\" to PDF was not successful!").arg(dmId));
+		return;
 	}
 
 	/* remember path for settings */
@@ -4772,8 +4775,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	doc.print(&printer);
 	pdf_dialog.close();
 
-	showStatusTextWithTimeout(tr("Export of message devilery info \"%1\" to "
-	    "PDF was successful.").arg(dmId));
+	showStatusTextWithTimeout(tr("Export of message delivery info "
+	    "\"%1\" to PDF was successful.").arg(dmId));
 }
 
 
@@ -4872,10 +4875,10 @@ void MainWindow::openSelectedMessageExternally(void)
 	if (raw.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setText(tr("Cannot export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You must download message firstly before its export..."));
+		  tr("First you must download message before its export..."));
 		msgBox.exec();
 		return;
 	}
@@ -4934,10 +4937,10 @@ void MainWindow::openDeliveryInfoExternally(void)
 	if (raw.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Can not export the message ") + dmId);
+		msgBox.setText(tr("Cannot export the message ") + dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
-		  tr("You must download message firstly before its export..."));
+		  tr("First you must download message before its export..."));
 		msgBox.exec();
 		return;
 	}
