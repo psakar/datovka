@@ -85,10 +85,10 @@ unix {
 	localisation.files += locale/datovka_cs.qm \
 		locale/datovka_en.qm
 
+	additional.path = "$${TEXT_FILES_INST_DIR}"
 	additional.files = \
 		AUTHORS \
 		COPYING
-	additional.path = "$${TEXT_FILES_INST_DIR}"
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
 		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
@@ -156,12 +156,17 @@ macx {
 			/opt/local/lib
 	}
 
+	localisation.path = "Contents/Resources/locale"
+	localisation.files += locale/datovka_cs.qm \
+		locale/datovka_en.qm
+
+	additional.path = "Contents/Resources"
 	additional.files = \
 		AUTHORS \
 		COPYING
-	additional.path = Contents/Resources
 
 	QMAKE_BUNDLE_DATA +=\
+		localisation \
 		additional
 }
 
