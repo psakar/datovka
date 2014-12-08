@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 
 	qDebug() << "GUI main thread: " << QThread::currentThreadId();
 
-	QTranslator translator;
+	QTranslator qtTranslator, appTranslator;
 
 	qDebug() << "App path : " << app.applicationDirPath();
 
@@ -199,19 +199,38 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		qDebug() << "Loading localisation from path" << dir.path();
+		logInfo("Loading localisation from path '%s'.\n",
+		    dir.path().toStdString().c_str());
+
+		QString qtLocalisation, datovkaLocalisation;
 
 		if (language == "cs") {
-			translator.load("datovka_cs", dir.path());
+			datovkaLocalisation = "datovka_cs";
+			qtLocalisation = "qt_cs";
 		} else if (language == "en") {
-			translator.load("datovka_en", dir.path());
+			datovkaLocalisation = "datovka_en";
+			qtLocalisation = "qt_uk";
 		} else {
 			/* Use system locale. */
-			translator.load("datovka_" + QLocale::system().name(),
-			    dir.path());
+			datovkaLocalisation =
+			    "datovka_" + QLocale::system().name();
+			qtLocalisation = "qt_" + QLocale::system().name();
 		}
 
-		app.installTranslator(&translator);
+		if (!appTranslator.load(datovkaLocalisation, dir.path())) {
+			logWarning("Could not load '%s' from '%s'.\n",
+			    datovkaLocalisation.toStdString().c_str(),
+			    dir.path().toStdString().c_str());
+		}
+
+		if (!qtTranslator.load(qtLocalisation, dir.path())) {
+			logWarning("Could not load '%s' from '%s'.\n",
+			    qtLocalisation.toStdString().c_str(),
+			    dir.path().toStdString().c_str());
+		}
+
+		app.installTranslator(&qtTranslator);
+		app.installTranslator(&appTranslator);
 	}
 
 	/* Localise description in tables. */
