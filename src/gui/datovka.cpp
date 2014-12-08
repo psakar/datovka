@@ -4761,17 +4761,13 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
 
-	/* TODO - Slow printer initialization */
-	QDialog pdf_dialog(this);
-	pdf_dialog.setModal(false);
-	pdf_dialog.setWindowTitle(tr("PDF printing"));
-	pdf_dialog.show();
+	showStatusTextPermanently(tr("Printing of delivery info \"%1\" to "
+	    "PDF. Please wait...").arg(dmId));
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
-	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message devilery info \"%1\" to "
 	    "PDF was successful.").arg(dmId));
@@ -4831,18 +4827,13 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID, accountData.at(0)));
 
-	/* TODO - Slow printer initialization */
-
-	QDialog pdf_dialog(this);
-	pdf_dialog.setModal(false);
-	pdf_dialog.setWindowTitle(tr("PDF printing"));
-	pdf_dialog.show();
+	showStatusTextPermanently(tr("Printing of message envelope \"%1\" to "
+	    "PDF. Please wait...").arg(dmId));
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
-	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message envelope \"%1\" to "
 	    "PDF was successful.").arg(dmId));
