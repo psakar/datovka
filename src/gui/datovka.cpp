@@ -1897,8 +1897,8 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 				} else {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
-					    QString::number(
-						accountEntry.value(key).toInt())));
+					    QString::number(accountEntry.
+					        value(key).toInt())));
 				}
 				break;
 			case DB_TEXT:
@@ -1910,14 +1910,21 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 				html.append(strongAccountInfoLine(
 				    accntinfTbl.attrProps[key].desc,
 				    accountEntry.value(key).toBool() ?
-					tr("Yes") : tr("No")));
+				        tr("Yes") : tr("No")));
 				break;
 			case DB_DATETIME:
 				html.append(strongAccountInfoLine(
 				    accntinfTbl.attrProps[key].desc,
 				    dateTimeStrFromDbFormat(
-					accountEntry.value(key).toString(),
-					dateTimeDisplayFormat)));
+				        accountEntry.value(key).toString(),
+				        dateTimeDisplayFormat)));
+				break;
+			case DB_DATE:
+				html.append(strongAccountInfoLine(
+				    accntinfTbl.attrProps[key].desc,
+				    dateStrFromDbFormat(
+				        accountEntry.value(key).toString(),
+				        dateDisplayFormat)));
 				break;
 			default:
 				Q_ASSERT(0);
@@ -3355,7 +3362,7 @@ void MainWindow::findDatabox(void)
 
 /* ========================================================================= */
 /*
-* Clear message filter text
+ * Clear message filter text
  */
 void MainWindow::clearFilterField(void)
 /* ========================================================================= */
@@ -3368,7 +3375,7 @@ void MainWindow::clearFilterField(void)
 
 /* ========================================================================= */
 /*
-* Message filter
+ * Message filter
  */
 void MainWindow::filterMessages(const QString &text)
 /* ========================================================================= */
@@ -3395,7 +3402,7 @@ void MainWindow::filterMessages(const QString &text)
 
 /* ========================================================================= */
 /*
-* Set received message column widths and sort order.
+ * Set received message column widths and sort order.
  */
 void MainWindow::setReceivedColumnWidths(void)
 /* ========================================================================= */
@@ -3419,7 +3426,7 @@ void MainWindow::setReceivedColumnWidths(void)
 
 /* ========================================================================= */
 /*
-* Set sent message column widths and sort order.
+ * Set sent message column widths and sort order.
  */
 void MainWindow::setSentColumnWidths(void)
 /* ========================================================================= */
@@ -3492,7 +3499,7 @@ void MainWindow::onTableColumnSort(int column)
 		m_sort_order = "SORT_ASCENDING";
 	} else if (ui->messageList->horizontalHeader()->sortIndicatorOrder()
 	    == Qt::DescendingOrder) {
-	    m_sort_order = "SORT_DESCENDING";
+		m_sort_order = "SORT_DESCENDING";
 	} else {
 		m_sort_order = "";
 	}

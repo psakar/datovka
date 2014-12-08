@@ -21,6 +21,9 @@ const QString dbDateTimeFormat("yyyy-MM-dd HH:mm:ss.zzz");
 static
 const QString dbShortDateTimeFormat("yyyy-MM-dd HH:mm:ss");
 
+static
+const QString dbDateFormat("yyyy-MM-dd");
+
 
 /* ========================================================================= */
 /*
@@ -59,6 +62,34 @@ QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
 
 	if (dateTime.isValid()) {
 		return dateTime.toString(tgtFmt);
+	} else {
+		return QString();
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts date from database format into desired format if possible.
+ */
+QDate dateFromDbFormat(const QString &dateDbStr)
+/* ========================================================================= */
+{
+	return QDate::fromString(dateDbStr, dbDateFormat);
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts date from database format into desired format if possible.
+ */
+QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt)
+/* ========================================================================= */
+{
+	QDate date = dateFromDbFormat(dateDbStr);
+
+	if (date.isValid()) {
+		return date.toString(tgtFmt);
 	} else {
 		return QString();
 	}

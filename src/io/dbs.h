@@ -4,21 +4,36 @@
 #define _DBS_H_
 
 
+#include <QDate>
 #include <QDateTime>
 #include <QString>
 
 
 /*!
- * @brief Converts date from database format into desired format if possible.
+ * @brief Converts date and time from database format into desired format if
+ *     possible.
  */
 QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr);
 
 
 /*!
- * @brief Converts date from database format into desired format if possible.
+ * @brief Converts date and time from database format into desired format if
+ *     possible.
  */
 QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt);
+
+
+/*!
+ * @brief Converts date from database format into desired format if possible.
+ */
+QDate dateFromDbFormat(const QString &dateDbStr);
+
+
+/*!
+ * @brief Converts date from database format into desired format if possible.
+ */
+QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt);
 
 
 /*!
@@ -31,6 +46,7 @@ QString timevalToDbFormat(const struct timeval *tv);
  * @brief Converts date format to be stored in database.
  */
 QString tmToDbFormat(const struct tm *t);
+
 
 /*!
  * @brief Converts date format to be stored in database.

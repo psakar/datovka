@@ -222,7 +222,9 @@ extern GlobProxySettings globProxSet;
  * @brief Date/time format used in the application.
  */
 extern
-QString dateTimeDisplayFormat;
+const QString dateTimeDisplayFormat;
+extern
+const QString dateDisplayFormat;
 
 
 /*!

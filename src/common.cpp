@@ -326,7 +326,8 @@ void GlobProxySettings::saveToSettings(QSettings &settings) const
 }
 
 
-QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
+const QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
+const QString dateDisplayFormat("dd.MM.yyyy");
 
 
 /* ========================================================================= */

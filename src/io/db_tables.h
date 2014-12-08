@@ -18,7 +18,8 @@ enum EntryType{
 	DB_INTEGER = 1,
 	DB_TEXT,
 	DB_BOOLEAN,
-	DB_DATETIME
+	DB_DATETIME,
+	DB_DATE
 };
 
 
