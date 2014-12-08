@@ -218,10 +218,10 @@ int main(int argc, char *argv[])
 	accntinfTbl.reloadLocalisedDescription();
 	pwdexpdtTbl.reloadLocalisedDescription();
 	msgsTbl.reloadLocalisedDescription();
-	msgsTbl.reloadLocalisedDescription();
 	flsTbl.reloadLocalisedDescription();
 	hshsTbl.reloadLocalisedDescription();
 	evntsTbl.reloadLocalisedDescription();
+	prcstTbl.reloadLocalisedDescription();
 	rwmsgdtTbl.reloadLocalisedDescription();
 	rwdlvrinfdtTbl.reloadLocalisedDescription();
 	smsgdtTbl.reloadLocalisedDescription();
