@@ -16,12 +16,15 @@ public:
 	DlgProxysets(QWidget *parent = 0);
 
 private slots:
+	void toggleHttpProxyPassword(int state);
+	void toggleHttpsProxyPassword(int state);
+
 	void saveChanges(void) const;
-	void setActiveTextEdit1(bool state);
-	void setActiveTextEdit2(bool state);
+	void setActiveHttpProxyEdit(bool state);
+	void setActiveHttpsProxyEdit(bool state);
 
 private:
-	void initProxyDialog(void);
+	void loadProxyDialog(const GlobProxySettings &proxySettings);
 };
 
 
