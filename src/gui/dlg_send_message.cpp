@@ -860,11 +860,11 @@ int DlgSendMessage::showErrorMessageBox(int status)
 		msgBoxTitle = tr("Multiple message error!");
 		msgBoxContent =
 		    tr("It was not possible to send message to all recipients.")
-		    + "<br><br>" +
+		    + "<br/><br/>" +
 		    "<b>" + tr("Send multiple message finished with error!")
-		    + "</b>" + "<br><br>" +
+		    + "</b>" + "<br/><br/>" +
 		    tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br>" +
+		        "environment setting.") + "<br/>" +
 		    tr("It is possible that your password has expired - "
 		        "in this case, you need to use the official web "
 		        "interface of Datové schránky to change it.");
@@ -872,10 +872,10 @@ int DlgSendMessage::showErrorMessageBox(int status)
 
 	case IE_NOT_LOGGED_IN:
 		msgBoxTitle = tr("Send message error!");
-		    tr("It was not possible to send message to ISDS.") + "<br><br>" +
-		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
+		    tr("It was not possible to send message to ISDS.") + "<br/><br/>" +
+		    "<b>" + tr("Authorization failed!") + "</b>" + "<br/><br/>" +
 		    tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br>" +
+		        "environment setting.") + "<br/>" +
 		    tr("It is possible that your password has expired - "
 		        "in this case, you need to use the official web "
 		        "interface of Datové schránky to change it.");
@@ -885,14 +885,15 @@ int DlgSendMessage::showErrorMessageBox(int status)
 		msgBoxTitle = tr("Send message error!");
 		msgBoxContent =
 		    tr("It was not possible to send message to ISDS.")
-		    + "<br><br>" +
+		    + "<br/><br/>" +
 		    "<b>" + tr("Send message to ISDS timeout!")
-		    + "</b>" + "<br><br>" +
+		    + "</b>" + "<br/><br/>" +
 		    tr("It was not possible to establish a connection "
-		    "within a set time.") + "<br>" +
+		    "within a set time.") + "<br/>" +
 		    tr("Please check your internet connection and try again.");
 		break;
-
+/*
+ *	TODO - add another dialogs for this reasults
 	case IE_INVAL:
 	case IE_ENUM:
 	case IE_NOMEM:
@@ -900,20 +901,20 @@ int DlgSendMessage::showErrorMessageBox(int status)
 	case IE_NOTSUP:
 	case IE_HTTP:
 	case IE_ERROR:
+*/
 	default:
 		msgBoxTitle = tr("Send message error!");
 		msgBoxContent =
 		    tr("It was not possible to send message to ISDS.")
 		    + "<br><br>" +
-		    "<b>" + tr("Connection to ISDS failed!")
+		    "<b>" + tr("Internal error!")
 		    + "</b>" + "<br><br>" +
-		    tr("It was not possible a connection between your computer "
-		    "and the server of Datove schranky.") + " " +
-		    tr("Please check your internet connection and try again.");
+		    tr("It was not possible a create send message request "
+		    "because an internal error has occurred.");
 		break;
 	}
 
-	msgBoxContent += "<br><br><b>" +
+	msgBoxContent += "<br/><br/><b>" +
 	    tr("Do you want to close send message dialog") + "</b>";
 
 	return QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
