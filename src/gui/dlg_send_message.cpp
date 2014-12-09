@@ -641,8 +641,20 @@ void DlgSendMessage::sendMessage(void)
 		document->is_xml = false;
 		document->dmFileDescr = strdup(this->attachmentTableWidget->
 		    item(i,0)->text().toStdString().c_str());
-		// TODO - set dmFileMetaType based on isds_FileMetaType
-		document->dmFileMetaType = FILEMETATYPE_MAIN;
+
+		// set document structure
+		 // TODO - document is binary document only -> is_xml = false;
+		document->is_xml = false;
+
+		document->dmFileDescr = strdup(this->attachmentTableWidget->
+		    item(i,0)->text().toStdString().c_str());
+
+		if (i == 0) {
+			document->dmFileMetaType = FILEMETATYPE_MAIN;
+		} else {
+			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
+		}
+
 		document->dmMimeType = strdup(this->attachmentTableWidget->
 		    item(i,2)->text().toStdString().c_str());
 		QString filePath =
