@@ -4,42 +4,42 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="70"/>
         <source>Version:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="14"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="20"/>
         <source>About Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="30"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="36"/>
         <source>Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="101"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="107"/>
         <source>Free graphical interface for &apos;Datové schránky&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="156"/>
         <source>Copyright © 2014 CZ.NIC &lt;http://www.nic.cz&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="160"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="166"/>
         <source>www.nic.cz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="179"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="185"/>
         <source>Licence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="186"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="192"/>
         <source>Credits</source>
         <translation type="unfinished"></translation>
     </message>
@@ -691,152 +691,152 @@ The current search settings will thus probably yield no result.</source>
 <context>
     <name>DlgSendMessage</name>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="85"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="84"/>
         <source>commercial messages are enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="88"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="87"/>
         <source>commercial messages are disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="126"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="214"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="226"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="125"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="213"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="225"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="226"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="582"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="225"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="581"/>
         <source>yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="360"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="359"/>
         <source>Your reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="365"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="364"/>
         <source>Enter reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="544"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="543"/>
         <source>Message contains Commercial messages (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="545"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="544"/>
         <source>Your message contains %1 non-OVM recipients therefore these messages will be sent as aCommercial messages (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="549"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="548"/>
         <source>Do you want to send all messages?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="551"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="550"/>
         <source>Message contains Commercial message (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="552"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="551"/>
         <source>Your message contains %1 non-OVM recipient therefore this message will be sent as Commercial message (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="556"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="555"/>
         <source>Do you want to send message?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="817"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="816"/>
         <source>Message was sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="818"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="817"/>
         <source>Messages was sent into ISDS successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="848"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="849"/>
         <source>Multiple message error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="850"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="851"/>
         <source>It was not possible to send message to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="852"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="853"/>
         <source>Send multiple message finished with error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="854"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="865"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="855"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="866"/>
         <source>Please check your credentials including the test-environment setting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="856"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="867"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="857"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="868"/>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="862"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="873"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="892"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="863"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="874"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="893"/>
         <source>Send message error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="863"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="875"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="894"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="864"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="876"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="895"/>
         <source>It was not possible to send message to ISDS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="864"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="865"/>
         <source>Authorization failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="877"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="878"/>
         <source>Send message to ISDS timeout!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="879"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="880"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="881"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="900"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="882"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="901"/>
         <source>Please check your internet connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="896"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
         <source>Connection to ISDS failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="898"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="899"/>
         <source>It was not possible a connection between your computer and the server of Datove schranky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="905"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="906"/>
         <source>Do you want to close send message dialog</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2667,132 +2667,132 @@ download date in the Datovka database.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/common.cpp" line="348"/>
+        <location filename="../src/common.cpp" line="337"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="351"/>
+        <location filename="../src/common.cpp" line="340"/>
         <source>Initializing postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="354"/>
+        <location filename="../src/common.cpp" line="343"/>
         <source>Reply postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="357"/>
+        <location filename="../src/common.cpp" line="346"/>
         <source>Initializing postal data message - expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="361"/>
+        <location filename="../src/common.cpp" line="350"/>
         <source>Initializing postal data message - used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="379"/>
+        <location filename="../src/common.cpp" line="368"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="382"/>
+        <location filename="../src/common.cpp" line="371"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="385"/>
+        <location filename="../src/common.cpp" line="374"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="388"/>
+        <location filename="../src/common.cpp" line="377"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="391"/>
+        <location filename="../src/common.cpp" line="380"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="408"/>
+        <location filename="../src/common.cpp" line="397"/>
         <source>Message bas submitted (originates at ISDS )</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="415"/>
+        <location filename="../src/common.cpp" line="404"/>
         <source>Data message and papers signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="423"/>
+        <location filename="../src/common.cpp" line="412"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="428"/>
+        <location filename="../src/common.cpp" line="417"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="452"/>
+        <location filename="../src/common.cpp" line="441"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="437"/>
+        <location filename="../src/common.cpp" line="426"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="447"/>
+        <location filename="../src/common.cpp" line="436"/>
         <source>A person authorised to read this message has logged-in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="460"/>
+        <location filename="../src/common.cpp" line="449"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="468"/>
+        <location filename="../src/common.cpp" line="457"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="473"/>
+        <location filename="../src/common.cpp" line="462"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="709"/>
+        <location filename="../src/common.cpp" line="698"/>
         <source>DS je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="712"/>
+        <location filename="../src/common.cpp" line="701"/>
         <source>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="715"/>
+        <location filename="../src/common.cpp" line="704"/>
         <source>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="719"/>
+        <location filename="../src/common.cpp" line="708"/>
         <source>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="722"/>
+        <location filename="../src/common.cpp" line="711"/>
         <source>DS je smazána (přesto existuje v ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="723"/>
+        <location filename="../src/common.cpp" line="712"/>
         <source>Došlo k chybě při zjišťování stavu</source>
         <translation type="unfinished"></translation>
     </message>

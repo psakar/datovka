@@ -4,17 +4,17 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="70"/>
         <source>Version:</source>
         <translation>Verze:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="14"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="20"/>
         <source>About Datovka</source>
         <translation>O Datovce</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="30"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="36"/>
         <source>Datovka</source>
         <translation>Datovka</translation>
     </message>
@@ -31,27 +31,27 @@ Based on the libisds library.</source>
 Založeno na knihovně libisds.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="101"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="107"/>
         <source>Free graphical interface for &apos;Datové schránky&apos;.</source>
         <translation>Svobodné grafické rozhraní pro &quot;Datové schránky&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="156"/>
         <source>Copyright © 2014 CZ.NIC &lt;http://www.nic.cz&gt;</source>
         <translation>Copyright © 2014 CZ.NIC &lt;http://www.nic.cz&gt;</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="160"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="166"/>
         <source>www.nic.cz</source>
         <translation>www.nic.cz</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="179"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="185"/>
         <source>Licence</source>
         <translation>Licence</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_about.ui" line="186"/>
+        <location filename="../src/gui/ui/dlg_about.ui" line="192"/>
         <source>Credits</source>
         <translation>Zásluhy</translation>
     </message>
@@ -758,154 +758,154 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">PDZ je zakázaná</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="85"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="84"/>
         <source>commercial messages are enabled</source>
         <translation>poštovní datové zprávy jsou povoleny</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="88"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="87"/>
         <source>commercial messages are disabled</source>
         <translation>poštovní datové zprávy jsou vypnuty</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="126"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="214"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="226"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="125"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="213"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="225"/>
         <source>no</source>
         <translation>ne</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="226"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="582"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="225"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="581"/>
         <source>yes</source>
         <translation>ano</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="360"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="359"/>
         <source>Your reference number:</source>
         <translation>Vaše referenční číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="365"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="364"/>
         <source>Enter reference number:</source>
-        <translation>Zadejte nějake Vaše referenční číslo:</translation>
+        <translation>Zadejte Vaše referenční číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="544"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="543"/>
         <source>Message contains Commercial messages (PDZ)</source>
         <translation>Zpráva obsahuje poštovní datové zprávy (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="545"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="544"/>
         <source>Your message contains %1 non-OVM recipients therefore these messages will be sent as aCommercial messages (PDZ)</source>
-        <translation>Vaše zpráva obsahuje %1 ne-OVM příjmců, proto bude těmto příjemcům zpráva odeslaná v režimu Poštovní datová zpráva (PDZ)</translation>
+        <translation>Vaše zpráva obsahuje %1 ne-OVM příjmců, proto bude těmto příjemcům zpráva odeslaná v režimu placená Poštovní datová zpráva (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="549"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="548"/>
         <source>Do you want to send all messages?</source>
         <translation>Chcete opravdu odeslat tuto zprávu všem příjemcům?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="551"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="550"/>
         <source>Message contains Commercial message (PDZ)</source>
-        <translation>Zpráva obsahuje poštovní datové zprávu (PDZ)</translation>
+        <translation>Zpráva obsahuje poštovní datovou zprávu (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="552"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="551"/>
         <source>Your message contains %1 non-OVM recipient therefore this message will be sent as Commercial message (PDZ)</source>
-        <translation>Vaše zpráva obsahuje %1 ne-OVM příjmce, proto bude tato zpráva odeslaná tomuto příjemci v režimu Poštovní datová zpráva (PDZ)</translation>
+        <translation>Vaše zpráva obsahuje %1 ne-OVM příjmce, proto bude tato zpráva odeslaná tomuto příjemci v režimu placená Poštovní datová zpráva (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="556"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="555"/>
         <source>Do you want to send message?</source>
         <translation>Chcete opravdu odeslat zprávu tomuto příjemci?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="817"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="816"/>
         <source>Message was sent</source>
         <translation>Zpráva byla odeslána</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="818"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="817"/>
         <source>Messages was sent into ISDS successfully.</source>
-        <translation>Zpráva byla úspěšné odeslána.</translation>
+        <translation>Zpráva byla úspěšné odeslána do systému Datových schránek.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="848"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="849"/>
         <source>Multiple message error!</source>
-        <translation>Chyba odesílání více příjemcům!</translation>
+        <translation>Chyba při odesílání zprávy více příjemcům!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="850"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="851"/>
         <source>It was not possible to send message to all recipients.</source>
         <translation>Zpráva nebyla odeslaná některým příjemcům.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="852"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="853"/>
         <source>Send multiple message finished with error!</source>
         <translation>Odeslaní zprávy více přijemcům skončilo s chybou!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="854"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="865"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="855"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="866"/>
         <source>Please check your credentials including the test-environment setting.</source>
-        <translation>Prosím zkontrolujte své přihlašovací údaje, včetně nastavení testovacíh účtů.</translation>
+        <translation>Prosím, zkontrolujte svoje přihlašovací údaje včetně nastavení testovacích účtů.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="856"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="867"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="857"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="868"/>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation>Je možné, že vypršela platnost vašeho hesla. V tomto případě potřebujete navštívit oficiální webové rozhraní Datových schránek a změnit ho.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="862"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="873"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="892"/>
-        <source>Send message error!</source>
-        <translation>Chyba při odeslání zprávy!</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="863"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="875"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="894"/>
-        <source>It was not possible to send message to ISDS.</source>
-        <translation>Nebylo možné doeslat zprávu na server datových shránek.</translation>
+        <location filename="../src/gui/dlg_send_message.cpp" line="874"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="893"/>
+        <source>Send message error!</source>
+        <translation>Chyba při odeslání zprávy na server Datové schránky!</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="864"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="876"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="895"/>
+        <source>It was not possible to send message to ISDS.</source>
+        <translation>Nebylo možné odeslat zprávu na server Datové schránky.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="865"/>
         <source>Authorization failed!</source>
         <translation>Chyba autorizace!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="877"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="878"/>
         <source>Send message to ISDS timeout!</source>
-        <translation>Chyba při odesílání zprávy!</translation>
+        <translation>Chyba při odesílání zprávy - vypršel timeout!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="879"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="880"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation>Nebylo možné vytvořit spojení ve stanoveném čase.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="881"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="900"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="882"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="901"/>
         <source>Please check your internet connection and try again.</source>
-        <translation>Prosím, zkontrolujte Vaše připojení k internetu a zkuste to znovu.</translation>
+        <translation>Prosím, zkontrolujte Vaše připojení k internetu a zkuste akci opakovat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="896"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
         <source>Connection to ISDS failed!</source>
         <translation>Připojení k datové schránce selhalo!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="898"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="899"/>
         <source>It was not possible a connection between your computer and the server of Datove schranky.</source>
-        <translation>Nebylo možné navázat spojení mezi Vaším počítačem a serverem datoé schránky.</translation>
+        <translation>Nebylo možné navázat spojení mezi Vaším počítačem a serverem Datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="905"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="906"/>
         <source>Do you want to close send message dialog</source>
-        <translation>Chcete zrušit odeslání zprávy a zavřít dialog</translation>
+        <translation>Chcete zrušit odesílání zprávy a zahodit vyplněné údaje</translation>
     </message>
 </context>
 <context>
@@ -3227,77 +3227,77 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/common.cpp" line="348"/>
+        <location filename="../src/common.cpp" line="337"/>
         <source>Postal data message</source>
         <translation>Poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="351"/>
+        <location filename="../src/common.cpp" line="340"/>
         <source>Initializing postal data message</source>
         <translation>Inicializační poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="354"/>
+        <location filename="../src/common.cpp" line="343"/>
         <source>Reply postal data message</source>
         <translation>Odpovědní poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="357"/>
+        <location filename="../src/common.cpp" line="346"/>
         <source>Initializing postal data message - expired</source>
         <translation>Inicializační poštovní datová zpráva - propadlá</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="361"/>
+        <location filename="../src/common.cpp" line="350"/>
         <source>Initializing postal data message - used</source>
         <translation>Inicializační poštovní datová zpráva - použitá</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="379"/>
+        <location filename="../src/common.cpp" line="368"/>
         <source>Primary user</source>
         <translation>Oprávněná osoba</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="382"/>
+        <location filename="../src/common.cpp" line="371"/>
         <source>Entrusted user</source>
         <translation>Pověřená osoba</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="385"/>
+        <location filename="../src/common.cpp" line="374"/>
         <source>Administrator</source>
         <translation>Administrátor</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="388"/>
+        <location filename="../src/common.cpp" line="377"/>
         <source>Official</source>
         <translation>Oficiální</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="391"/>
+        <location filename="../src/common.cpp" line="380"/>
         <source>Virtual</source>
         <translation>Virtuální</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="408"/>
+        <location filename="../src/common.cpp" line="397"/>
         <source>Message bas submitted (originates at ISDS )</source>
         <translation>Zpráva byla podána (vznikla v ISDS)</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="415"/>
+        <location filename="../src/common.cpp" line="404"/>
         <source>Data message and papers signed with time-stamp.</source>
         <translation>Datová zprava včetně písemností podepsaná časovým razítkem.</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="423"/>
+        <location filename="../src/common.cpp" line="412"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation>Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="428"/>
+        <location filename="../src/common.cpp" line="417"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation>Zpráva dodána do ISDS (zapsán čas dodání).</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="452"/>
+        <location filename="../src/common.cpp" line="441"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation>Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
     </message>
@@ -3310,12 +3310,12 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <translation type="vanished">Zpráva dodána do ISDS (zapsán čas dodání)</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="437"/>
+        <location filename="../src/common.cpp" line="426"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
         <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u neOVM DS).</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="447"/>
+        <location filename="../src/common.cpp" line="436"/>
         <source>A person authorised to read this message has logged-in -- delivered message has been accepted.</source>
         <translation>Osoba oprávněná číst tuto zprávu se přihlásila - dodaná zpráva byla doručena.</translation>
     </message>
@@ -3324,47 +3324,47 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <translation type="vanished">Zpráva byla přečtena (na portále nebo akcí ESS)</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="460"/>
+        <location filename="../src/common.cpp" line="449"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="468"/>
+        <location filename="../src/common.cpp" line="457"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="473"/>
+        <location filename="../src/common.cpp" line="462"/>
         <source>Message resides in data vault.</source>
         <translation>Zpráva je v Datovém trezoru.</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="709"/>
+        <location filename="../src/common.cpp" line="698"/>
         <source>DS je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat</source>
         <translation>DS je přístupná, lze do ní dodávat zprávy, na portále lze vyhledat</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="712"/>
+        <location filename="../src/common.cpp" line="701"/>
         <source>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</source>
         <translation>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="715"/>
+        <location filename="../src/common.cpp" line="704"/>
         <source>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</source>
         <translation>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="719"/>
+        <location filename="../src/common.cpp" line="708"/>
         <source>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</source>
         <translation>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="722"/>
+        <location filename="../src/common.cpp" line="711"/>
         <source>DS je smazána (přesto existuje v ISDS)</source>
         <translation>DS je smazána (přesto existuje v ISDS)</translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="723"/>
+        <location filename="../src/common.cpp" line="712"/>
         <source>Došlo k chybě při zjišťování stavu</source>
         <translation>Došlo k chybě při zjišťování stavu</translation>
     </message>
