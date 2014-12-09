@@ -4320,46 +4320,51 @@ void MainWindow::verifyMessage(void)
 
 	switch (verifySelectedMessage(acntTopIdx, msgIdx)) {
 	case Q_SUCCESS:
-		showStatusTextWithTimeout(tr("ISDS confirms that the "
-		    "message is valid."));
+		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
+		    "that the message is valid."));
 		QMessageBox::information(this, tr("Message is valid"),
-		    tr("Hash of message corresponds to ISDS message "
-		    "hash.\nMessage is valid."),
+		    tr("Message was <b>successfully verified</b> "
+		    "against data on the server Datové schránky.") +
+		    "<br/><br/>" +
+		    tr("This message has passed through the system of "
+		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
-		showStatusTextWithTimeout(tr("ISDS confirms that the "
-		    "message is invalid."));
-		QMessageBox::critical(this, tr("Message is not authentic"),
-		    tr("ISDS confirms that the message hash is "
-		    "invalid!\nMessage is invalid."),
-		    QMessageBox::Ok);
+		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
+		    "that the message is not valid."));
+		QMessageBox::critical(this, tr("Message is not valid"),
+		    tr("Message was <b>not</b> authenticated as processed "
+		    "by the system Datové schránky.") + "<br/><br/>" +
+		    tr("It is either not a valid ZFO file or it was modified "
+		    "since it was downloaded from Datové schránky."),
+		     QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::warning(this, tr("Authenticate message error"),
-		    tr("The message hash cannot be verified because the "
-		    "connection to ISDS failed!\nCheck your internet "
-		    "connection."),
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::warning(this, tr("Verification failed"),
+		    tr("Authentication of message has been stopped because "
+		    "the connection to server Datové schránky failed!\n"
+		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
 	case Q_SQL_ERROR:
-		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::warning(this, tr("Authenticate message warning"),
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::warning(this, tr("Verification error"),
 		    tr("The message hash is not in local database.\nPlease "
 		    "download complete message form ISDS and try again."),
 		    QMessageBox::Ok);
 		break;
 	case Q_GLOBAL_ERROR:
-		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Authenticate message error"),
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::critical(this, tr("Verification error"),
 		    tr("The message hash cannot be verified because an internal"
 		    " error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
 	default:
-		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Authenticate message error"),
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::critical(this, tr("Verification error"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
