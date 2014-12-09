@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>404</height>
+    <height>566</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>360</height>
+    <height>400</height>
    </size>
   </property>
   <property name="sizeIncrement">
@@ -65,7 +65,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QRadioButton" name="noProxyRadioButton2">
+       <widget class="QRadioButton" name="httpsNoProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -78,7 +78,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="autoProxyRadioButton2">
+       <widget class="QRadioButton" name="httpsAutoProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -94,7 +94,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="manualProxyRadioButton2">
+       <widget class="QRadioButton" name="httpsManualProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -107,9 +107,9 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayou_https">
+       <layout class="QHBoxLayout" name="httpsHorizontalLayou">
         <item>
-         <widget class="QLabel" name="label_21">
+         <widget class="QLabel" name="httpsLabel_1">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -122,7 +122,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="hostnameLineEdit2">
+         <widget class="QLineEdit" name="httpsHostnameLineEdit">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -132,7 +132,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_22">
+         <widget class="QLabel" name="httpsLabel_2">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -145,7 +145,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="portLineEdit2">
+         <widget class="QLineEdit" name="httpsPortLineEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -161,6 +161,68 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="Line" name="httpsLine">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="httpsAuthenticationCheckbox">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Show HTTPS proxy authentication.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="httpsProxyAuth" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="httpsUnameLabel">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Username:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="httpsUnameEdit"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="httpsPwdLabel">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Password:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="httpsPwdEdit">
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -178,7 +240,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QRadioButton" name="noProxyRadioButton1">
+       <widget class="QRadioButton" name="httpNoProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -191,7 +253,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="autoProxyRadioButton1">
+       <widget class="QRadioButton" name="httpAutoProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -207,7 +269,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="manualProxyRadioButton1">
+       <widget class="QRadioButton" name="httpManualProxyRadioButton">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -220,9 +282,9 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_http">
+       <layout class="QHBoxLayout" name="httpHorizontalLayout">
         <item>
-         <widget class="QLabel" name="label_11">
+         <widget class="QLabel" name="httpLabel_1">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -235,7 +297,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="hostnameLineEdit1">
+         <widget class="QLineEdit" name="httpHostnameLineEdit">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -245,7 +307,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_12">
+         <widget class="QLabel" name="httpLabel_2">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -258,7 +320,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="portLineEdit1">
+         <widget class="QLineEdit" name="httpPortLineEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -286,6 +348,68 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="Line" name="httpLine">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="httpAuthenticationCheckbox">
+        <property name="font">
+         <font>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Show HTTP proxy authentication.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="httpProxyAuth" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="httpUnameLabel">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Username:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="httpUnameEdit"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="httpPwdLabel">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Password:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="httpPwdEdit">
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </widget>
