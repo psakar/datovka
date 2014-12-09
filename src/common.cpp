@@ -504,7 +504,7 @@ void fixBackSlashesInFile(const QString &fileName)
 /*
  * Fix account password format = compatability with old datovka.
  */
-void removeQuoteFromAccountPassword(const QString &fileName)
+void removeDoubleQuotesFromAccountPassword(const QString &fileName)
 /* ========================================================================= */
 {
 	QString fileContent;

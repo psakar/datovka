@@ -376,9 +376,6 @@ MainWindow::~MainWindow(void)
 	/* Save settings on exit. */
 	saveSettings();
 
-	/* remove " symbols from passwords in dsgui.conf */
-	removeQuoteFromAccountPassword(globPref.loadConfPath());
-
 	delete timer;
 	delete ui;
 }
@@ -425,7 +422,10 @@ void MainWindow::proxySettings(void)
 	debugSlotCall();
 
 	QDialog *dlgProxy = new DlgProxysets(this);
-	dlgProxy->exec();
+	if (QDialog::Accepted == dlgProxy->exec()) {
+		/* Dialog accepted, store all settings. */
+		saveSettings();
+	}
 }
 
 
@@ -2748,6 +2748,8 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 void MainWindow::saveSettings(void) const
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	/*
 	 * TODO -- Target file name differs from source for testing purposes.
 	 */
@@ -2781,6 +2783,9 @@ void MainWindow::saveSettings(void) const
 	globPref.saveToSettings(settings);
 
 	settings.sync();
+
+	/* Remove " symbols from passwords in dsgui.conf */
+	removeDoubleQuotesFromAccountPassword(globPref.saveConfPath());
 }
 
 
