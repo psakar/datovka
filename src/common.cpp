@@ -311,19 +311,8 @@ void GlobProxySettings::saveToSettings(QSettings &settings) const
 /* ========================================================================= */
 {
 	settings.beginGroup("connection");
-
-	if ("-1" == https_proxy) {
-		settings.setValue("https_proxy", https_proxy);
-	} else {
-		/* TODO */
-	}
-
-	if ("-1" == http_proxy) {
-		settings.setValue("http_proxy", http_proxy);
-	} else {
-		/* TODO */
-	}
-
+	settings.setValue("https_proxy", https_proxy);
+	settings.setValue("http_proxy", http_proxy);
 	settings.endGroup();
 }
 

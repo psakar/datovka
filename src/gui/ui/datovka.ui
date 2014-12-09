@@ -439,7 +439,7 @@ sent reply on this message</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -595,7 +595,7 @@ sent reply on this message</string>
   </action>
   <action name="actionProxy_settings">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
