@@ -4221,6 +4221,9 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 		return Q_FILE_ERROR;
 	}
 
+	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
+	    .arg(attachFileName));
+
 	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
@@ -4254,38 +4257,38 @@ void MainWindow::authenticateMessageFile(void)
 
 	switch (authenticateMessageFromZFO()) {
 	case Q_SUCCESS:
-		showStatusTextWithTimeout(tr("ISDS confirms that the "
-		    "message is valid."));
+		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
+		    "that the message is authentic."));
 		QMessageBox::information(this, tr("Message is authentic"),
-		    tr("ISDS confirms that the message is valid."),
+		    tr("Message was <b>successfully verified</b> "
+		    "against data on the server Datové schránky.") +
+		    "<br/><br/>" +
+		    tr("This message has passed through the system of "
+		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
 	case Q_NOTEQUAL:
-		showStatusTextWithTimeout(tr("ISDS confirms that the "
-		    "message is invalid."));
-		QMessageBox::warning(this, tr("Message is not authentic"),
-		    tr("ISDS confirms that the message is invalid."),
+		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
+		    "that the message is not authentic."));
+		QMessageBox::critical(this, tr("Message is not authentic"),
+		    tr("Message was <b>not</b> authenticated as processed "
+		    "by the system Datové schránky.") + "<br/><br/>" +
+		    tr("It is either not a valid ZFO file or it was modified "
+		    "since it was downloaded from Datové schránky."),
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Message authentication error"),
-		    tr("Authentication of message has been stopped because "
-		    "the connection to ISDS failed!\nCheck your internet "
-		    "connection."),
-		    QMessageBox::Ok);
-		break;
 	case Q_CONNECT_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Message authentication error"),
-		    tr("Authentication of message has been stopped because the "
-		    "connection to ISDS failed!\nCheck your internet "
-		    "connection."),
+		QMessageBox::warning(this, tr("Message authentication failed"),
+		    tr("Authentication of message has been stopped because "
+		    "the connection to server Datové schránky failed!\n"
+		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
 	case Q_FILE_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Message authentication error"),
+		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
 		    "the message file has wrong format!"),
 		    QMessageBox::Ok);
@@ -4294,7 +4297,7 @@ void MainWindow::authenticateMessageFile(void)
 		break;
 	default:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
-		QMessageBox::critical(this, tr("Message authentication error"),
+		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("An undefined error occurred!\nTry again."),
 		    QMessageBox::Ok);
 		break;
@@ -4327,7 +4330,7 @@ void MainWindow::verifyMessage(void)
 	case Q_NOTEQUAL:
 		showStatusTextWithTimeout(tr("ISDS confirms that the "
 		    "message is invalid."));
-		QMessageBox::warning(this, tr("Message is not authentic"),
+		QMessageBox::critical(this, tr("Message is not authentic"),
 		    tr("ISDS confirms that the message hash is "
 		    "invalid!\nMessage is invalid."),
 		    QMessageBox::Ok);
