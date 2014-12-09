@@ -4497,8 +4497,8 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Cannot export complete message.")
-		    + " " + dmId);
+		msgBox.setText(tr("Cannot export complete message")
+		    + " " + dmId + ".");
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download the whole message before "
@@ -4531,7 +4531,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	Q_ASSERT(!fileName.isEmpty());
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message as ZFO file"), fileName);
+	    tr("Save message as ZFO file"), fileName, tr("ZFO file (*.zfo)"));
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
@@ -4648,8 +4648,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Cannot export delivery info for message.")
-		    + " " + dmId);
+		msgBox.setText(tr("Cannot export delivery info for message")
+		    + " " + dmId + ".");
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download message before export.") +
@@ -4682,7 +4682,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	Q_ASSERT(!fileName.isEmpty());
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as ZFO file"), fileName);
+	    tr("Save delivery info as ZFO file"), fileName,
+	    tr("ZFO file (*.zfo)"));
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
@@ -4744,7 +4745,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	    "DD_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as PDF file"), fileName);
+	    tr("Save delivery info as PDF file"), fileName,
+	    tr("PDF file (*.pdf)"));
 	//, QString(), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName.isEmpty()) {
@@ -4762,18 +4764,13 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
 
-	/* TODO - Slow printer initialization */
-
-	QDialog pdf_dialog(this);
-	pdf_dialog.setModal(false);
-	pdf_dialog.setWindowTitle(tr("PDF printing"));
-	pdf_dialog.show();
+	showStatusTextPermanently(tr("Printing of delivery info \"%1\" to "
+	    "PDF. Please wait...").arg(dmId));
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
-	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message delivery info "
 	    "\"%1\" to PDF was successful.").arg(dmId));
@@ -4807,7 +4804,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	    "OZ_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message envelope as PDF file"), fileName);
+	    tr("Save message envelope as PDF file"), fileName,
+	    tr("PDF file (*.pdf)"));
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message "
@@ -4833,18 +4831,13 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QTextDocument doc;
 	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID, accountData.at(0)));
 
-	/* TODO - Slow printer initialization */
-
-	QDialog pdf_dialog(this);
-	pdf_dialog.setModal(false);
-	pdf_dialog.setWindowTitle(tr("PDF printing"));
-	pdf_dialog.show();
+	showStatusTextPermanently(tr("Printing of message envelope \"%1\" to "
+	    "PDF. Please wait...").arg(dmId));
 
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
-	pdf_dialog.close();
 
 	showStatusTextWithTimeout(tr("Export of message envelope \"%1\" to "
 	    "PDF was successful.").arg(dmId));
