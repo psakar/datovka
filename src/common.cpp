@@ -7,8 +7,10 @@
 #include <QLibraryInfo>
 #include <QNetworkProxyQuery>
 #include <QUrl>
+
 #include "common.h"
 #include "src/io/isds_sessions.h"
+#include "src/log/log.h"
 
 #define WIN_PREFIX "AppData/Roaming"
 /*!< Default configuration folder location. */
@@ -917,11 +919,24 @@ QPair<QString, int> detectHttpProxy(void)
 		return QPair<QString, int>(proxyUrl.host(), proxyUrl.port());
 		// proxyUrl.userName(), proxyUrl.password();
 	}
-
-	return QPair<QString, int>(QString(), 0);
 #else
 	QNetworkProxyQuery npq(QUrl("http://www.nic.cz"));
+
+	QList<QNetworkProxy> listOfProxies =
+	   QNetworkProxyFactory::systemProxyForQuery(npq);
+
+	if (1 < listOfProxies.size()) {
+		logWarning("%s/n", "Multiple proxies detected. Using first.");
+	}
+
+	foreach (QNetworkProxy p, listOfProxies) {
+		if (!p.hostName().isEmpty()) {
+			return QPair<QString, int>(p.hostName(), p.port());
+		}
+	}
 #endif /* Q_OS_UNIX && !Q_OS_MAC */
+
+	return QPair<QString, int>(QString(), 0);
 }
 
 
