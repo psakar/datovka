@@ -698,15 +698,6 @@ void DlgSendMessage::sendMessage(void)
 	    text().toStdString().c_str());
 
 	// set optional fields
-	sent_envelope->dmLegalTitlePoint =
-	    !this->dmLegalTitlePoint->text().isEmpty() ?
-	    strdup(this->dmLegalTitlePoint->text().toStdString().c_str()):NULL;
-	sent_envelope->dmLegalTitlePar =
-	    !this->dmLegalTitlePar->text().isEmpty() ?
-	    strdup(this->dmLegalTitlePar->text().toStdString().c_str()) :NULL;
-	sent_envelope->dmLegalTitleSect =
-	    !this->dmLegalTitleSect->text().isEmpty() ?
-	    strdup(this->dmLegalTitleSect->text().toStdString().c_str()) :NULL;
 	sent_envelope->dmSenderIdent = !this->dmSenderIdent->text().isEmpty() ?
 	    strdup(this->dmSenderIdent->text().toStdString().c_str()) : NULL;
 	sent_envelope->dmRecipientIdent =
@@ -718,18 +709,36 @@ void DlgSendMessage::sendMessage(void)
 	sent_envelope->dmRecipientRefNumber =
 	    !this->dmRecipientRefNumber->text().isEmpty() ?
 	  strdup(this->dmRecipientRefNumber->text().toStdString().c_str()):NULL;
-	sent_envelope->dmLegalTitleYear =
-	    !this->dmLegalTitleYear->text().isEmpty() ?
-	    (long int *)this->dmLegalTitleYear->text().toLong() : NULL;
-	sent_envelope->dmLegalTitleLaw =
-	    !this->dmLegalTitleLaw->text().isEmpty() ?
-	    (long int *)this->dmLegalTitleLaw->text().toLong() : NULL;
 	sent_envelope->dmToHands = !this->dmToHands->text().isEmpty() ?
 	    strdup(this->dmToHands->text().toStdString().c_str()) : NULL;
 
-	if (this->payReply->isChecked()) {
-		dmType = "I";
+	if (!this->dmLegalTitleLaw->text().isEmpty()) {
+		long int *number = NULL;
+		number = (long int *) malloc(sizeof(*number));
+		*number = this->dmLegalTitleLaw->text().toLong();
+		sent_envelope->dmLegalTitleLaw = number;
+	} else {
+		sent_envelope->dmLegalTitleLaw = NULL;
 	}
+	if (!this->dmLegalTitleYear->text().isEmpty()) {
+		long int *number = NULL;
+		number = (long int *) malloc(sizeof(*number));
+		*number = this->dmLegalTitleYear->text().toLong();
+		sent_envelope->dmLegalTitleYear = number;
+	} else {
+		sent_envelope->dmLegalTitleYear = NULL;
+	}
+
+	sent_envelope->dmLegalTitleSect =
+	    !this->dmLegalTitleSect->text().isEmpty() ?
+	    strdup(this->dmLegalTitleSect->text().toStdString().c_str()) :NULL;
+	sent_envelope->dmLegalTitlePar =
+	    !this->dmLegalTitlePar->text().isEmpty() ?
+	    strdup(this->dmLegalTitlePar->text().toStdString().c_str()) :NULL;
+	sent_envelope->dmLegalTitlePoint =
+	    !this->dmLegalTitlePoint->text().isEmpty() ?
+	    strdup(this->dmLegalTitlePoint->text().toStdString().c_str()):NULL;
+
 
 	dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
 	*dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
@@ -766,16 +775,14 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->envelope = sent_envelope;
 	sent_message->documents = documents;
 
-
 	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		goto finish;
 	}
 
-
 	/* Sent message to 1 recipient */
 	if (this->recipientTableWidget->rowCount() == 1) {
 
-		qDebug() << "sending message for user name" << m_userName;
+		qDebug() << "sending message form user name" << m_userName;
 		status = isds_send_message(isdsSessions.session(m_userName),
 		    sent_message);
 
@@ -784,7 +791,8 @@ void DlgSendMessage::sendMessage(void)
 		struct isds_list *copies = NULL;
 		struct isds_list *last = NULL;
 
-		for (int i=0; i < this->recipientTableWidget->rowCount(); i++) {
+		int i = 0;
+		for (i = 0; i < this->recipientTableWidget->rowCount(); i++) {
 
 			struct isds_message_copy *message_copy = NULL;
 			message_copy = (struct isds_message_copy *)
@@ -819,6 +827,8 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
+		qDebug() << "sending" << i << "messages from user name"
+		    << m_userName;
 		status = isds_send_message_to_multiple_recipients(
 		    isdsSessions.session(m_userName), sent_message, copies);
 	}
@@ -855,45 +865,63 @@ int DlgSendMessage::showErrorMessageBox(int status)
 	QString msgBoxTitle = "";
 	QString msgBoxContent = "";
 
+	qDebug() << status << isds_strerror((isds_error)status);
+
 	switch(status) {
 	case IE_PARTIAL_SUCCESS:
-		msgBoxTitle = tr("Multiple message error!");
+		msgBoxTitle = tr("Send multiple message problem!");
 		msgBoxContent =
 		    tr("It was not possible to send message to all recipients.")
 		    + "<br/><br/>" +
-		    "<b>" + tr("Send multiple message finished with error!")
+		    "<b>" + tr("Send multiple message finished with an problem!")
 		    + "</b>" + "<br/><br/>" +
-		    tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br/>" +
-		    tr("It is possible that your password has expired - "
-		        "in this case, you need to use the official web "
-		        "interface of Datové schránky to change it.");
+		    tr("It can be caused sending of the message to the "
+		    "unactivated databox or some of recipient does not exist.")
+		    + "<br/>" +
+		    tr("Download list of sent messages and check which "
+		    "recipients didn't receive your message.");
+		QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
+		    QMessageBox::Ok);
+		return QMessageBox::Yes;
 		break;
-
 	case IE_NOT_LOGGED_IN:
 		msgBoxTitle = tr("Send message error!");
-		    tr("It was not possible to send message to ISDS.") + "<br/><br/>" +
-		    "<b>" + tr("Authorization failed!") + "</b>" + "<br/><br/>" +
-		    tr("Please check your credentials including the test-"
+		    tr("It was not possible to send message to server "
+		    "Datové schránky.") + "<br/><br/>" +
+		    "<b>" + tr("Authorization failed!") + "</b>" + "<br/><br/>"
+		     + tr("Please check your credentials including the test-"
 		        "environment setting.") + "<br/>" +
 		    tr("It is possible that your password has expired - "
 		        "in this case, you need to use the official web "
 		        "interface of Datové schránky to change it.");
 		break;
-
 	case IE_TIMED_OUT:
+	case IE_CONNECTION_CLOSED:
 		msgBoxTitle = tr("Send message error!");
 		msgBoxContent =
-		    tr("It was not possible to send message to ISDS.")
-		    + "<br/><br/>" +
-		    "<b>" + tr("Send message to ISDS timeout!")
+		    tr("It was not possible to send message to server "
+		    "Datové schránky.") + "<br/><br/>" +
+		    "<b>" + tr("Connection to the server timed out!")
 		    + "</b>" + "<br/><br/>" +
 		    tr("It was not possible to establish a connection "
 		    "within a set time.") + "<br/>" +
 		    tr("Please check your internet connection and try again.");
 		break;
+	case IE_ISDS:
+		msgBoxTitle = tr("Send message error!");
+		msgBoxContent =
+		    tr("Sent message was refused by server Datové schránky.")
+		    + "<br/><br/>" +
+		    "<b>" + tr("Problem with attachment of message!")
+		    + "</b>" + "<br/><br/>" +
+		    tr("Server did not accept message for this databox "
+		    "and returned message back.") + " " +
+		    tr("It can be caused by a wrong/unsupported MIME type of "
+		    "some file in the attachment or if an attachment "
+		    "contains an archive.");
+		break;
 /*
- *	TODO - add another dialogs for this reasults
+ *	TODO - add another dialogs for this reasults - libisds internal errors
 	case IE_INVAL:
 	case IE_ENUM:
 	case IE_NOMEM:
@@ -905,18 +933,19 @@ int DlgSendMessage::showErrorMessageBox(int status)
 	default:
 		msgBoxTitle = tr("Send message error!");
 		msgBoxContent =
-		    tr("It was not possible to send message to ISDS.")
-		    + "<br><br>" +
-		    "<b>" + tr("Internal error!")
+		    tr("It was not possible to send message to the "
+		    "server Datové schránky.") + "<br><br>" +
+		    "<b>" + tr("Error: ") + isds_strerror((isds_error)status) +
 		    + "</b>" + "<br><br>" +
-		    tr("It was not possible a create send message request "
+		    tr("It was not possible create send message request "
 		    "because an internal error has occurred.");
 		break;
 	}
 
 	msgBoxContent += "<br/><br/><b>" +
-	    tr("Do you want to close send message dialog") + "</b>";
+	    tr("Do you want to abort sending of the message and "
+	    "close the send message dialog?") + "</b>";
 
 	return QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
-		QMessageBox::Yes|QMessageBox::No);
+		QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
 }
