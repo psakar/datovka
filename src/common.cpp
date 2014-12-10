@@ -296,10 +296,17 @@ void GlobProxySettings::loadFromSettings(const QSettings &settings)
 {
 	https_proxy = settings.value("connection/https_proxy",
 	    dfltGlobProxSet.https_proxy).toString();
+	https_proxy_username =
+	    settings.value("connection/https_proxy_username").toString();
+	https_proxy_password = fromBase64(
+	   settings.value("connection/https_proxy_password").toString());
+
 	http_proxy = settings.value("connection/http_proxy",
 	    dfltGlobProxSet.http_proxy).toString();
-
-	/* TODO */
+	http_proxy_username =
+	    settings.value("connection/http_proxy_username").toString();
+	http_proxy_password = fromBase64(
+	    settings.value("connection/http_proxy_password").toString());
 }
 
 
@@ -311,8 +318,26 @@ void GlobProxySettings::saveToSettings(QSettings &settings) const
 /* ========================================================================= */
 {
 	settings.beginGroup("connection");
+
 	settings.setValue("https_proxy", https_proxy);
+	if (!https_proxy_username.isEmpty()) {
+		settings.setValue("https_proxy_username",
+		    https_proxy_username);
+	}
+	if (!https_proxy_password.isEmpty()) {
+		settings.setValue("https_proxy_password",
+		    toBase64(https_proxy_password));
+	}
+
 	settings.setValue("http_proxy", http_proxy);
+	if (!http_proxy_username.isEmpty()) {
+		settings.setValue("http_proxy_username", http_proxy_username);
+	}
+	if (!http_proxy_password.isEmpty()) {
+		settings.setValue("http_proxy_password",
+		    toBase64(http_proxy_password));
+	}
+
 	settings.endGroup();
 }
 

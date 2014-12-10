@@ -53,23 +53,12 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpHostnameLineEdit->setText(hostport[0]);
 		this->httpPortLineEdit->setText(hostport[1]);
 	}
+	this->httpUnameEdit->setText(globProxSet.http_proxy_username);
+	this->httpPwdEdit->setText(globProxSet.http_proxy_password);
 
 	this->httpsProxyAuth->setHidden(true);
 	this->httpsAuthenticationCheckbox->setCheckState(Qt::Unchecked);
 
-	/* Currently ignore HTTPS proxy settings. */
-	this->httpsNoProxyRadioButton->setChecked(true);
-	this->httpsNoProxyRadioButton->setEnabled(false);
-	this->httpsAutoProxyRadioButton->setChecked(false);
-	this->httpsAutoProxyRadioButton->setEnabled(false);
-	this->httpsManualProxyRadioButton->setChecked(false);
-	this->httpsManualProxyRadioButton->setEnabled(false);
-	this->httpsHostnameLineEdit->setEnabled(false);
-	this->httpsPortLineEdit->setEnabled(false);
-	this->httpsUnameEdit->setEnabled(false);
-	this->httpsPwdEdit->setEnabled(false);
-
-/*
 	if (proxySettings.https_proxy == "-1") {
 		this->httpsNoProxyRadioButton->setChecked(false);
 		this->httpsAutoProxyRadioButton->setChecked(true);
@@ -91,7 +80,20 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpsHostnameLineEdit->setText(hostport[0]);
 		this->httpsPortLineEdit->setText(hostport[1]);
 	}
-*/
+	this->httpsUnameEdit->setText(globProxSet.https_proxy_username);
+	this->httpsPwdEdit->setText(globProxSet.https_proxy_password);
+
+	/* Currently ignore HTTPS proxy settings. */
+	this->httpsNoProxyRadioButton->setChecked(true);
+	this->httpsNoProxyRadioButton->setEnabled(false);
+	this->httpsAutoProxyRadioButton->setChecked(false);
+	this->httpsAutoProxyRadioButton->setEnabled(false);
+	this->httpsManualProxyRadioButton->setChecked(false);
+	this->httpsManualProxyRadioButton->setEnabled(false);
+	this->httpsHostnameLineEdit->setEnabled(false);
+	this->httpsPortLineEdit->setEnabled(false);
+	this->httpsUnameEdit->setEnabled(false);
+	this->httpsPwdEdit->setEnabled(false);
 }
 
 
@@ -117,6 +119,8 @@ void DlgProxysets::saveChanges(void) const
 		globProxSet.http_proxy = this->httpHostnameLineEdit->text() +
 		    ":" + this->httpPortLineEdit->text();
 	}
+	globProxSet.http_proxy_username = this->httpUnameEdit->text();
+	globProxSet.http_proxy_password = this->httpPwdEdit->text();
 
 	if (this->httpsNoProxyRadioButton->isChecked()) {
 		globProxSet.https_proxy = "None";
@@ -126,6 +130,8 @@ void DlgProxysets::saveChanges(void) const
 		globProxSet.https_proxy = this->httpsHostnameLineEdit->text() +
 		    ":" + this->httpsPortLineEdit->text();
 	}
+	globProxSet.https_proxy_username = this->httpsUnameEdit->text();
+	globProxSet.https_proxy_password = this->httpsPwdEdit->text();
 }
 
 

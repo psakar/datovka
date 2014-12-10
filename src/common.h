@@ -199,8 +199,11 @@ public:
 	~GlobProxySettings(void);
 
 	QString https_proxy;
+	QString https_proxy_username;
+	QString https_proxy_password;
 	QString http_proxy;
-	/* TODO -- Additional settings according to ProxyManager on Datovka. */
+	QString http_proxy_username;
+	QString http_proxy_password;
 
 	/*!
 	 * @brief Load data from supplied settings.
