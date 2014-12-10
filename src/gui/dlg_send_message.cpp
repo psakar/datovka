@@ -18,7 +18,9 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
-    const QString &senderAddress)
+    const QString &senderAddress, const QString &dmType,
+    const QString &dmSenderRefNumber
+    )
     : QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
@@ -32,6 +34,8 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_senderId(senderId),
     m_sender(sender),
     m_senderAddress(senderAddress),
+    m_dmType(dmType),
+    m_dmSenderRefNumber(dmSenderRefNumber),
     m_userName(""),
     m_messDb(db)
 {
@@ -104,8 +108,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(tableItemInsRem()));
 
 	if (ACT_REPLY == m_action) {
-		this->subjectText->setText("Re: " + m_reSubject);
-
+		this->subjectText->setText("Re: " + m_reSubject);	
+		this->dmRecipientRefNumber->setText(m_dmSenderRefNumber);
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
 
@@ -752,12 +756,15 @@ void DlgSendMessage::sendMessage(void)
 		*dmAllowSubstDelivery = this->dmAllowSubstDelivery->isChecked();
 	}
 
-	/* TODO - set dmType
-	dmType = "O";
-	*/
-
-	if (this->payReply->isChecked()) {
-		dmType = "I";
+	if (m_dmType == "I") {
+		dmType = "O";
+		sent_envelope->dmRecipientRefNumber =
+		    !m_dmSenderRefNumber.isEmpty() ?
+		    strdup(m_dmSenderRefNumber.toStdString().c_str()):NULL;
+	} else {
+		if (this->payReply->isChecked()) {
+			dmType = "I";
+		}
 	}
 
 	sent_envelope->dmType = !dmType.isNull() ?

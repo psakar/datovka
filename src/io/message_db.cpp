@@ -1132,13 +1132,13 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 /* ========================================================================= */
 {
-	QVector<QString> reply(4);
+	QVector<QString> reply(6);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "SELECT "
-	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress"
-	    " FROM messages WHERE "
+	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress, _dmType, "
+	    "dmSenderRefNumber FROM messages WHERE "
 	    "dmID = :dmId";
 	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
@@ -1152,6 +1152,8 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 			reply[1] = query.value(1).toString();
 			reply[2] = query.value(2).toString();
 			reply[3] = query.value(3).toString();
+			reply[4] = query.value(4).toString();
+			reply[5] = query.value(5).toString();
 		}
 	}
 

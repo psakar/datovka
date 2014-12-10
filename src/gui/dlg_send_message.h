@@ -32,7 +32,10 @@ public:
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
 	    const QString &sender = QString(),
-	    const QString &senderAddress = QString());
+	    const QString &senderAddress = QString(),
+	    const QString &dmType = QString(),
+	    const QString &dmSenderRefNumber = QString()
+	    );
 
 private slots:
 	void on_cancelButton_clicked(void);
@@ -66,6 +69,8 @@ private:
 	QString m_senderId;
 	QString m_sender;
 	QString m_senderAddress;
+	QString m_dmType;
+	QString m_dmSenderRefNumber;
 	QString m_userName;
 	MessageDb &m_messDb;
 	int m_attachSize;

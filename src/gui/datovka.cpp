@@ -3297,7 +3297,7 @@ void MainWindow::createAndSendMessageReply(void)
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
 	    dbType, dbEffectiveOVM, dbOpenAddressing, this,
-	    replyTo[0], replyTo[1], replyTo[2], replyTo[3]);
+	    replyTo[0], replyTo[1], replyTo[2], replyTo[3], replyTo[4], replyTo[5]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
