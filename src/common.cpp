@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QLibraryInfo>
+#include <QNetworkProxyQuery>
+#include <QUrl>
 #include "common.h"
 #include "src/io/isds_sessions.h"
 
@@ -808,8 +810,6 @@ QString suppliedTextFileContent(enum text_file textFile)
 
 
 #define LOCALE_SRC_PATH "locale"
-
-
 /* ========================================================================= */
 /*
  * Returns the path to directory where supplied localisation resides.
@@ -903,9 +903,26 @@ QString qtLocalisationDir(void)
 
 	return dirPath;
 }
-
-
 #undef LOCALE_SRC_PATH
+
+
+/* ========================================================================= */
+QPair<QString, int> detectHttpProxy(void)
+/* ========================================================================= */
+{
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+	QUrl proxyUrl(QString::fromLatin1(qgetenv("http_proxy")));
+
+	if (proxyUrl.isValid()) {
+		return QPair<QString, int>(proxyUrl.host(), proxyUrl.port());
+		// proxyUrl.userName(), proxyUrl.password();
+	}
+
+	return QPair<QString, int>(QString(), 0);
+#else
+	QNetworkProxyQuery npq(QUrl("http://www.nic.cz"));
+#endif /* Q_OS_UNIX && !Q_OS_MAC */
+}
 
 
 /* ========================================================================= */

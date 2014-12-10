@@ -343,4 +343,10 @@ QString appLocalisationDir(void);
 QString qtLocalisationDir(void);
 
 
+/*!
+ * @brief Detect HTTP proxy. Return host and port number.
+ */
+QPair<QString, int> detectHttpProxy(void);
+
+
 #endif /* _COMMON_H_ */

@@ -16,8 +16,14 @@ public:
 	DlgProxysets(QWidget *parent = 0);
 
 private slots:
-	void toggleHttpProxyPassword(int state);
-	void toggleHttpsProxyPassword(int state);
+	void showHttpProxyPassword(int state);
+	void showHttpsProxyPassword(int state);
+
+	void toggleHttpProxyDetection(bool state);
+	void toggleHttpsProxyDetection(bool state);
+
+	void toggleHttpProxyPassword(bool state);
+	void toggleHttpsProxyPassword(bool state);
 
 	void saveChanges(void) const;
 	void setActiveHttpProxyEdit(bool state);
