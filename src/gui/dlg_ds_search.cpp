@@ -130,6 +130,11 @@ void DlgDsSearch::pingIsdsServer(void)
 void DlgDsSearch::checkInputFields(void)
 /* ========================================================================= */
 {
+	this->nameLineEdit->setEnabled(true);
+	this->pscLineEdit->setEnabled((true));
+	this->iCLineEdit->setEnabled((true));
+	this->iDLineEdit->setEnabled((true));
+
 	switch (this->dataBoxTypeCBox->currentIndex()) {
 	/* OVM */
 	case 0:
