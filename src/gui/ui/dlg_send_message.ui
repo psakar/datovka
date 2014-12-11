@@ -515,6 +515,9 @@ message is considered as delivered after
      <property name="text">
       <string>Use offered payment of transfer charges by recipient</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>

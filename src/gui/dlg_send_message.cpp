@@ -113,9 +113,26 @@ void DlgSendMessage::initNewMessageDialog(void)
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
 
+		this->payRecipient->setEnabled(false);
+		this->payRecipient->setChecked(false);
+		this->payRecipient->hide();
+		this->payReply->show();
+		this->payReply->setEnabled(true);
+
+		QString pdz;
+		if (!m_dbEffectiveOVM) {
+			pdz = getUserInfoFormIsds(m_senderId);
+		} else {
+			pdz = tr("no");
+		}
+
 		if (m_dmType == "I") {
 			this->payReply->hide();
 			this->payReply->setEnabled(false);
+			this->payRecipient->setEnabled(true);
+			this->payRecipient->setChecked(true);
+			this->payRecipient->show();
+			pdz = tr("yes");
 		}
 
 		QTableWidgetItem *item = new QTableWidgetItem;
@@ -128,14 +145,25 @@ void DlgSendMessage::initNewMessageDialog(void)
 		item->setText(m_senderAddress);
 		this->recipientTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
+		item->setText(pdz);
 
-		if (!m_dbEffectiveOVM) {
-			item->setText(getUserInfoFormIsds(m_senderId));
-		} else {
-			item->setText(tr("no"));
-		}
 		item->setTextAlignment(Qt::AlignCenter);
 		this->recipientTableWidget->setItem(row,3,item);
+	} else {
+
+		if (m_dbOpenAddressing) {
+			this->payReply->setEnabled(true);
+			this->payReply->show();
+		} else {
+			this->payReply->setEnabled(false);
+			this->payReply->hide();
+		}
+
+		connect(this->payReply, SIGNAL(stateChanged(int)), this,
+		    SLOT(showOptionalFormAndSet(int)));
+
+		this->payRecipient->setEnabled(false);
+		this->payRecipient->hide();
 	}
 
 	this->OptionalWidget->setHidden(true);
@@ -195,21 +223,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 		this->dmAllowSubstDelivery->setEnabled(false);
 		this->dmAllowSubstDelivery->hide();
 	}
-
-	if (m_dbOpenAddressing) {
-		this->payReply->setEnabled(true);
-		this->payReply->show();
-	} else {
-		this->payReply->setEnabled(false);
-		this->payReply->hide();
-	}
-
-	connect(this->payReply, SIGNAL(stateChanged(int)), this,
-	    SLOT(showOptionalFormAndSet(int)));
-
-	/* TODO */
-	this->payRecipient->setEnabled(false);
-	this->payRecipient->hide();
 }
 
 
@@ -762,7 +775,11 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	if (m_dmType == "I") {
-		dmType = "O";
+		if (this->payRecipient->isChecked()) {
+			dmType = "O";
+		} else {
+			dmType = "K";
+		}
 		sent_envelope->dmRecipientRefNumber =
 		    !m_dmSenderRefNumber.isEmpty() ?
 		    strdup(m_dmSenderRefNumber.toStdString().c_str()):NULL;
