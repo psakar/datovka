@@ -113,6 +113,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
 
+		if (m_dmType == "I") {
+			this->payReply->hide();
+			this->payReply->setEnabled(false);
+		}
+
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(m_senderId);
 		this->recipientTableWidget->setItem(row,0,item);
