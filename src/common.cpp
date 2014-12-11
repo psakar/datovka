@@ -330,11 +330,10 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 			https.port = -1;
 		}
 	}
-	https.userName = settings.value("connection/https_proxy",
-	    dfltGlobProxSet.https.hostName).toString().section(":", -1, -1);
+	https.userName =
 	    settings.value("connection/https_proxy_username").toString();
 	https.password = fromBase64(
-	   settings.value("connection/https_proxy_password").toString());
+	    settings.value("connection/https_proxy_password").toString());
 
 	auxStr = settings.value("connection/http_proxy").toString();
 	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
