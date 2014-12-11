@@ -131,13 +131,13 @@ int main(int argc, char *argv[])
 	}
 
 	{
+		/* Obey proxy settings. */
 		{
 			QSettings settings(globPref.loadConfPath(),
 			    QSettings::IniFormat);
 			settings.setIniCodec("UTF-8");
 			globProxSet.loadFromSettings(settings);
 		}
-		/* TODO -- Obey proxy settings. */
 
 		/* Start downloading the CRL files. */
 		QList<QUrl> urlList;
@@ -158,7 +158,8 @@ int main(int argc, char *argv[])
 				if (0 != cryptoAddCrl(data.data(),
 				        data.size())) {
 					logWarning("Couldn't load downloaded "
-					    "CRL file '%s'.\n", crl->file_name);
+					    "CRL file '%s'.\n",
+					    crl->file_name);
 				} else {
 					logInfo("Loaded CRL file '%s'.\n",
 					    crl->file_name);

@@ -43,6 +43,16 @@ public:
 	 */
 	QByteArray download(const QList<QUrl> &urlList, int msec);
 
+
+	/*!
+	 * @brief Set up a HTTP proxy according to global settings.
+	 *
+	 * @param[in,out] netMngr Network access manager to be set up.
+	 * @return True if proxy has been set up.
+	 */
+	static
+	bool setUpHttpProxyAccordingToGlobals(QNetworkAccessManager &netMngr);
+
 private slots:
 	/*!
 	 * @brief Process received reply.
