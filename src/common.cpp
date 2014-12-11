@@ -330,7 +330,6 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 			https.port = -1;
 		}
 	}
-	qDebug() << "HTTPS host name" << https.hostName << https.port;
 	https.userName = settings.value("connection/https_proxy",
 	    dfltGlobProxSet.https.hostName).toString().section(":", -1, -1);
 	    settings.value("connection/https_proxy_username").toString();
@@ -358,7 +357,6 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 			http.port = -1;
 		}
 	}
-	qDebug() << "HTTP host name" << http.hostName << http.port;
 	http.userName =
 	    settings.value("connection/http_proxy_username").toString();
 	http.password = fromBase64(
@@ -422,8 +420,6 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 	QByteArray envVar = qgetenv("http_proxy");
 	QUrl proxyUrl(QString::fromLatin1(envVar));
-
-	qDebug() << "Detected" << qgetenv("http_proxy");
 
 	if (proxyUrl.isValid()) {
 		qDebug() << "Detected URL" << proxyUrl <<

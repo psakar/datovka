@@ -23,43 +23,65 @@ FileDownloader::FileDownloader(bool useGlobalProxySettings, QObject *parent)
 	connect(&m_netMngr, SIGNAL(finished(QNetworkReply *)),
 	    this, SLOT(fileDownloaded(QNetworkReply *)));
 
-	if (useGlobalProxySettings &&
-	    (ProxiesSettings::noProxyStr != globProxSet.http.hostName)) {
-
+	if (useGlobalProxySettings) {
 		ProxiesSettings::ProxySettings proxySettings;
 		QNetworkProxy proxy;
 
 		if (ProxiesSettings::autoProxyStr ==
-		           globProxSet.http.hostName) {
+		    globProxSet.http.hostName) {
 			proxySettings = ProxiesSettings::detectHttpProxy();
+
+			/*
+			 * TODO -- Is it better to handle
+			 * proxyAuthenticationRequired() ?
+			 */
+
+			/*
+			 * Add user name and password if those were not
+			 * detected but were supplied by the user.
+			 */
+			if (proxySettings.userName.isEmpty()) {
+				proxySettings.userName =
+				    globProxSet.http.userName;
+			}
+			if (proxySettings.password.isEmpty()) {
+				proxySettings.password =
+				    globProxSet.http.password;
+			}
 		} else if (!globProxSet.http.hostName.isEmpty() &&
 		           (globProxSet.http.port >= 0)) {
 			proxySettings = globProxSet.http;
 		}
 
-		proxy.setHostName(proxySettings.hostName);
-		proxy.setPort(proxySettings.port);
-//		proxy.setType(QNetworkProxy::DefaultProxy);
-//		proxy.setType(QNetworkProxy::Socks5Proxy);
-		proxy.setType(QNetworkProxy::HttpProxy);
-		if (!proxySettings.userName.isEmpty()) {
-			proxy.setUser(proxySettings.userName);
-		}
-		if (!proxySettings.password.isEmpty()) {
-			proxy.setPassword(proxySettings.password);
-		}
+		/* If something detected or set up. */
+		if (ProxiesSettings::noProxyStr != proxySettings.hostName) {
+			proxy.setHostName(proxySettings.hostName);
+			proxy.setPort(proxySettings.port);
+//			proxy.setType(QNetworkProxy::DefaultProxy);
+//			proxy.setType(QNetworkProxy::Socks5Proxy);
+			proxy.setType(QNetworkProxy::HttpProxy);
+			if (!proxySettings.userName.isEmpty()) {
+				proxy.setUser(proxySettings.userName);
+			}
+			if (!proxySettings.password.isEmpty()) {
+				proxy.setPassword(proxySettings.password);
+			}
 
-		m_netMngr.setProxy(proxy);
+			m_netMngr.setProxy(proxy);
 
-		logDebugLv0NL("Using proxy host='%s' port='%d' "
-		    "user='%s' password='%s'",
-		    proxy.hostName().toStdString().c_str(), proxy.port(),
-		    proxy.user().isEmpty() ? "" :
-		        proxy.user().toStdString().c_str(),
-		    proxy.password().isEmpty() ? "" :
-		        proxy.password().toStdString().c_str());
+			logDebugLv0NL("Using proxy host='%s' port='%d' "
+			    "user='%s' password='%s'",
+			    proxy.hostName().toStdString().c_str(),
+			    proxy.port(),
+			    proxy.user().isEmpty() ? "" :
+			        proxy.user().toStdString().c_str(),
+			    proxy.password().isEmpty() ? "" :
+			        proxy.password().toStdString().c_str());
+		} else {
+			logDebugLv0NL("%s", "Using no proxy.");
+		}
 	} else {
-		logDebugLv0NL("%s", "Using no proxy.");
+		logDebugLv0NL("%s", "Forcing no proxy.");
 	}
 }
 
