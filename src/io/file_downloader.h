@@ -30,7 +30,8 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	explicit FileDownloader(QObject *parent = 0);
+	explicit FileDownloader(bool useGlobalProxySettings,
+	    QObject *parent = 0);
 
 	/*!
 	 * @brief Download a file. The function iterates through the list of

@@ -22,12 +22,14 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	    this, SLOT(showHttpProxyPassword(int)));
 
 	{
-		QPair<QString, int> proxy = detectHttpProxy();
-		if (!proxy.first.isEmpty()) {
+		ProxiesSettings::ProxySettings proxy =
+		    ProxiesSettings::detectHttpProxy();
+		if (!proxy.hostName.isEmpty() &&
+		    (ProxiesSettings::noProxyStr != proxy.hostName)) {
 			this->httpProxyDetectionLabel->setText(
 			    tr("Proxy has been detected") + ": " +
-			    proxy.first + ":" +
-			    QString::number(proxy.second, 10));
+			    proxy.hostName + ":" +
+			    QString::number(proxy.port, 10));
 		} else {
 			this->httpProxyDetectionLabel->setText(
 			    tr("No proxy detected, direct connection "
@@ -50,14 +52,12 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	loadProxyDialog(globProxSet);
 }
 
-void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
+void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 {
-	QStringList hostport;
-
 	this->httpProxyAuth->setHidden(true);
 	this->httpAuthenticationCheckbox->setCheckState(Qt::Unchecked);
 
-	if (proxySettings.http_proxy == "-1") {
+	if (ProxiesSettings::autoProxyStr == proxySettings.http.hostName) {
 		this->httpNoProxyRadioButton->setChecked(false);
 		this->httpAutoProxyRadioButton->setChecked(true);
 		this->httpProxyDetectionLabel->setEnabled(true);
@@ -71,7 +71,8 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpPwdLabel->setEnabled(true);
 		this->httpUnameEdit->setEnabled(true);
 		this->httpPwdEdit->setEnabled(true);
-	} else if (proxySettings.http_proxy == "None") {
+	} else if (ProxiesSettings::noProxyStr ==
+	           proxySettings.http.hostName) {
 		this->httpNoProxyRadioButton->setChecked(true);
 		this->httpAutoProxyRadioButton->setChecked(false);
 		this->httpProxyDetectionLabel->setEnabled(false);
@@ -93,22 +94,25 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpLabel_1->setEnabled(true);
 		this->httpLabel_2->setEnabled(true);
 		this->httpHostnameLineEdit->setEnabled(true);
-		hostport = proxySettings.http_proxy.split(":");
-		this->httpHostnameLineEdit->setText(hostport[0]);
-		this->httpPortLineEdit->setText(hostport[1]);
+		this->httpHostnameLineEdit->setText(
+		    proxySettings.http.hostName);
+		this->httpPortLineEdit->setText(
+		    (proxySettings.http.port >= 0) ?
+		        QString::number(proxySettings.http.port, 10) :
+		        QString());
 
 		this->httpUnameLabel->setEnabled(true);
 		this->httpPwdLabel->setEnabled(true);
 		this->httpUnameEdit->setEnabled(true);
 		this->httpPwdEdit->setEnabled(true);
 	}
-	this->httpUnameEdit->setText(globProxSet.http_proxy_username);
-	this->httpPwdEdit->setText(globProxSet.http_proxy_password);
+	this->httpUnameEdit->setText(globProxSet.http.userName);
+	this->httpPwdEdit->setText(globProxSet.http.password);
 
 	this->httpsProxyAuth->setHidden(true);
 	this->httpsAuthenticationCheckbox->setCheckState(Qt::Unchecked);
 
-	if (proxySettings.https_proxy == "-1") {
+	if (ProxiesSettings::autoProxyStr == proxySettings.https.hostName) {
 		this->httpsNoProxyRadioButton->setChecked(false);
 		this->httpsAutoProxyRadioButton->setChecked(true);
 		this->httpsProxyDetectionLabel->setEnabled(true);
@@ -122,7 +126,8 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpsPwdLabel->setEnabled(true);
 		this->httpsUnameEdit->setEnabled(true);
 		this->httpsPwdEdit->setEnabled(true);
-	} else if (proxySettings.https_proxy == "None") {
+	} else if (ProxiesSettings::noProxyStr ==
+	           proxySettings.https.hostName) {
 		this->httpsNoProxyRadioButton->setChecked(true);
 		this->httpsAutoProxyRadioButton->setChecked(false);
 		this->httpsProxyDetectionLabel->setEnabled(false);
@@ -144,17 +149,20 @@ void DlgProxysets::loadProxyDialog(const GlobProxySettings &proxySettings)
 		this->httpsLabel_1->setEnabled(true);
 		this->httpsLabel_2->setEnabled(true);
 		this->httpsHostnameLineEdit->setEnabled(true);
-		hostport = proxySettings.https_proxy.split(":");
-		this->httpsHostnameLineEdit->setText(hostport[0]);
-		this->httpsPortLineEdit->setText(hostport[1]);
+		this->httpsHostnameLineEdit->setText(
+		    proxySettings.https.hostName);
+		this->httpsPortLineEdit->setText(
+		    (proxySettings.https.port >= 0) ?
+		        QString::number(proxySettings.https.port, 10) :
+		        QString());
 
 		this->httpsUnameLabel->setEnabled(true);
 		this->httpsPwdLabel->setEnabled(true);
 		this->httpsUnameEdit->setEnabled(true);
 		this->httpsPwdEdit->setEnabled(true);
 	}
-	this->httpsUnameEdit->setText(globProxSet.https_proxy_username);
-	this->httpsPwdEdit->setText(globProxSet.https_proxy_password);
+	this->httpsUnameEdit->setText(globProxSet.https.userName);
+	this->httpsPwdEdit->setText(globProxSet.https.password);
 
 #if 1
 	/* Currently ignore HTTPS proxy settings. */
@@ -221,27 +229,44 @@ void DlgProxysets::toggleHttpsProxyPassword(bool state)
 
 void DlgProxysets::saveChanges(void) const
 {
+	bool ok;
+
+	/* TODO -- Checks and notification about incorrect values. */
+
 	if (this->httpNoProxyRadioButton->isChecked()) {
-		globProxSet.http_proxy = "None";
+		globProxSet.http.hostName = ProxiesSettings::noProxyStr;
+		globProxSet.http.port = -1;
 	} else if (this->httpAutoProxyRadioButton->isChecked()) {
-		globProxSet.http_proxy = "-1";
+		globProxSet.http.hostName = ProxiesSettings::autoProxyStr;
+		globProxSet.http.port = -1;
 	} else {
-		globProxSet.http_proxy = this->httpHostnameLineEdit->text() +
-		    ":" + this->httpPortLineEdit->text();
+		globProxSet.http.hostName = this->httpHostnameLineEdit->text();
+		globProxSet.http.port =
+		    this->httpPortLineEdit->text().toInt(&ok, 10);
+		if (!ok) {
+			globProxSet.http.port = -1;
+		}
 	}
-	globProxSet.http_proxy_username = this->httpUnameEdit->text();
-	globProxSet.http_proxy_password = this->httpPwdEdit->text();
+	globProxSet.http.userName = this->httpUnameEdit->text();
+	globProxSet.http.password = this->httpPwdEdit->text();
 
 	if (this->httpsNoProxyRadioButton->isChecked()) {
-		globProxSet.https_proxy = "None";
+		globProxSet.https.hostName = ProxiesSettings::noProxyStr;
+		globProxSet.https.port = -1;
 	} else if (this->httpsAutoProxyRadioButton->isChecked()) {
-		globProxSet.https_proxy = "-1";
+		globProxSet.https.hostName = ProxiesSettings::autoProxyStr;
+		globProxSet.https.port = -1;
 	} else {
-		globProxSet.https_proxy = this->httpsHostnameLineEdit->text() +
-		    ":" + this->httpsPortLineEdit->text();
+		globProxSet.https.hostName =
+		    this->httpsHostnameLineEdit->text();
+		globProxSet.https.port =
+		    this->httpsPortLineEdit->text().toInt(&ok, 10);
+		if (!ok) {
+			globProxSet.https.port = -1;
+		}
 	}
-	globProxSet.https_proxy_username = this->httpsUnameEdit->text();
-	globProxSet.https_proxy_password = this->httpsPwdEdit->text();
+	globProxSet.https.userName = this->httpsUnameEdit->text();
+	globProxSet.https.password = this->httpsPwdEdit->text();
 }
 
 

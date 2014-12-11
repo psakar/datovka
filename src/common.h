@@ -192,18 +192,27 @@ public:
 };
 
 
-class GlobProxySettings {
-
+class ProxiesSettings {
 public:
-	GlobProxySettings(void);
-	~GlobProxySettings(void);
+	static
+	const QString noProxyStr;
+	static
+	const QString autoProxyStr;
 
-	QString https_proxy;
-	QString https_proxy_username;
-	QString https_proxy_password;
-	QString http_proxy;
-	QString http_proxy_username;
-	QString http_proxy_password;
+	class ProxySettings {
+	public:
+		ProxySettings(void);
+
+		QString hostName;
+		int port;
+		QString userName;
+		QString password;
+	};
+
+	ProxiesSettings(void);
+
+	ProxySettings https;
+	ProxySettings http;
 
 	/*!
 	 * @brief Load data from supplied settings.
@@ -214,12 +223,18 @@ public:
 	 * @brief Store data to settings structure.
 	 */
 	void saveToSettings(QSettings &settings) const;
+
+	/*!
+	 * @brief Detect HTTP proxy. Return host and port number.
+	 */
+	static
+	ProxiesSettings::ProxySettings detectHttpProxy(void);
 };
 
 
 /* Global preferences structure. */
 extern GlobPreferences globPref;
-extern GlobProxySettings globProxSet;
+extern ProxiesSettings globProxSet;
 
 /*!
  * @brief Date/time format used in the application.
@@ -341,12 +356,6 @@ QString appLocalisationDir(void);
  * @brief Returns the path to directory where supplied localisation resides.
  */
 QString qtLocalisationDir(void);
-
-
-/*!
- * @brief Detect HTTP proxy. Return host and port number.
- */
-QPair<QString, int> detectHttpProxy(void);
 
 
 #endif /* _COMMON_H_ */

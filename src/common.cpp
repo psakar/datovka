@@ -21,13 +21,13 @@
 
 
 GlobPreferences globPref;
-GlobProxySettings globProxSet;
+ProxiesSettings globProxSet;
 
 /* Defaults. */
 static const
 GlobPreferences dlftlGlobPref; /* Defaults. */
 static const
-GlobProxySettings dfltGlobProxSet;
+ProxiesSettings dfltGlobProxSet;
 
 
 /*!
@@ -275,18 +275,26 @@ QString GlobPreferences::confDir(void) const
 }
 
 
+const QString ProxiesSettings::noProxyStr("None");
+const QString ProxiesSettings::autoProxyStr("-1");
+
+
 /* ========================================================================= */
-GlobProxySettings::GlobProxySettings(void)
+ProxiesSettings::ProxySettings::ProxySettings(void)
 /* ========================================================================= */
-    : https_proxy("-1"),
-    http_proxy("-1")
+    : hostName("-1"),
+    port(-1),
+    userName(),
+    password()
 {
 }
 
 
 /* ========================================================================= */
-GlobProxySettings::~GlobProxySettings(void)
+ProxiesSettings::ProxiesSettings(void)
 /* ========================================================================= */
+    : https(),
+    http()
 {
 }
 
@@ -295,21 +303,65 @@ GlobProxySettings::~GlobProxySettings(void)
 /*
  * Load data from supplied settings.
  */
-void GlobProxySettings::loadFromSettings(const QSettings &settings)
+void ProxiesSettings::loadFromSettings(const QSettings &settings)
 /* ========================================================================= */
 {
-	https_proxy = settings.value("connection/https_proxy",
-	    dfltGlobProxSet.https_proxy).toString();
-	https_proxy_username =
+	QString auxStr;
+	bool ok;
+
+	auxStr = settings.value("connection/https_proxy").toString();
+	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
+		https.hostName = noProxyStr;
+		https.port = -1;
+	} else if (autoProxyStr == auxStr) {
+		https.hostName = autoProxyStr;
+		https.port = -1;
+	} else {
+		if (auxStr.contains(":")) {
+			https.hostName = auxStr.section(":", 0, -2);
+			https.port =
+			    auxStr.section(":", -1, -1).toInt(&ok, 10);
+			if (!ok) {
+				https.hostName = noProxyStr;
+				https.port = -1;
+			}
+		} else {
+			https.hostName = noProxyStr;
+			https.port = -1;
+		}
+	}
+	qDebug() << "HTTPS host name" << https.hostName << https.port;
+	https.userName = settings.value("connection/https_proxy",
+	    dfltGlobProxSet.https.hostName).toString().section(":", -1, -1);
 	    settings.value("connection/https_proxy_username").toString();
-	https_proxy_password = fromBase64(
+	https.password = fromBase64(
 	   settings.value("connection/https_proxy_password").toString());
 
-	http_proxy = settings.value("connection/http_proxy",
-	    dfltGlobProxSet.http_proxy).toString();
-	http_proxy_username =
+	auxStr = settings.value("connection/http_proxy").toString();
+	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
+		http.hostName = noProxyStr;
+		http.port = -1;
+	} else if (autoProxyStr == auxStr) {
+		http.hostName = autoProxyStr;
+		http.port = -1;
+	} else {
+		if (auxStr.contains(":")) {
+			http.hostName = auxStr.section(":", 0, -2);
+			http.port =
+			    auxStr.section(":", -1, -1).toInt(&ok, 10);
+			if (!ok) {
+				http.hostName = noProxyStr;
+				http.port = -1;
+			}
+		} else {
+			http.hostName = noProxyStr;
+			http.port = -1;
+		}
+	}
+	qDebug() << "HTTP host name" << http.hostName << http.port;
+	http.userName =
 	    settings.value("connection/http_proxy_username").toString();
-	http_proxy_password = fromBase64(
+	http.password = fromBase64(
 	    settings.value("connection/http_proxy_password").toString());
 }
 
@@ -318,31 +370,92 @@ void GlobProxySettings::loadFromSettings(const QSettings &settings)
 /*
  * Store data to settings structure.
  */
-void GlobProxySettings::saveToSettings(QSettings &settings) const
+void ProxiesSettings::saveToSettings(QSettings &settings) const
 /* ========================================================================= */
 {
+	QString auxStr;
+
 	settings.beginGroup("connection");
 
-	settings.setValue("https_proxy", https_proxy);
-	if (!https_proxy_username.isEmpty()) {
-		settings.setValue("https_proxy_username",
-		    https_proxy_username);
+	auxStr = https.hostName;
+	if (https.port >= 0) {
+		auxStr += ":" + QString::number(https.port, 10);
 	}
-	if (!https_proxy_password.isEmpty()) {
+	settings.setValue("https_proxy", auxStr);
+	if (!https.userName.isEmpty()) {
+		settings.setValue("https_proxy_username",
+		    https.userName);
+	}
+	if (!https.password.isEmpty()) {
 		settings.setValue("https_proxy_password",
-		    toBase64(https_proxy_password));
+		    toBase64(https.password));
 	}
 
-	settings.setValue("http_proxy", http_proxy);
-	if (!http_proxy_username.isEmpty()) {
-		settings.setValue("http_proxy_username", http_proxy_username);
+	auxStr = http.hostName;
+	if (http.port >= 0) {
+		auxStr += ":" + QString::number(http.port, 10);
 	}
-	if (!http_proxy_password.isEmpty()) {
+	settings.setValue("http_proxy", auxStr);
+	if (!http.userName.isEmpty()) {
+		settings.setValue("http_proxy_username", http.userName);
+	}
+	if (!http.password.isEmpty()) {
 		settings.setValue("http_proxy_password",
-		    toBase64(http_proxy_password));
+		    toBase64(http.password));
 	}
 
 	settings.endGroup();
+}
+
+
+/* ========================================================================= */
+ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
+/* ========================================================================= */
+{
+	ProxySettings settings;
+
+	settings.hostName = noProxyStr;
+	settings.port = -1;
+
+	/* TODO -- Try to contact the proxy to check whether it works? */
+
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+	QByteArray envVar = qgetenv("http_proxy");
+	QUrl proxyUrl(QString::fromLatin1(envVar));
+
+	qDebug() << "Detected" << qgetenv("http_proxy");
+
+	if (proxyUrl.isValid()) {
+		qDebug() << "Detected URL" << proxyUrl <<
+		    proxyUrl.userName() << proxyUrl.password();
+		settings.hostName = proxyUrl.host();
+		settings.port = proxyUrl.port();
+		settings.userName = proxyUrl.userName();
+		settings.password = proxyUrl.password();
+		return settings;
+	}
+#else
+	QNetworkProxyQuery npq(QUrl("http://www.nic.cz"));
+
+	QList<QNetworkProxy> listOfProxies =
+	   QNetworkProxyFactory::systemProxyForQuery(npq);
+
+	if (1 < listOfProxies.size()) {
+		logWarning("%s/n", "Multiple proxies detected. Using first.");
+	}
+
+	foreach (QNetworkProxy p, listOfProxies) {
+		if (!p.hostName().isEmpty()) {
+			settings.hostName = p.hostName();
+			settings.port = p.port();
+			settings.userName = p.user();
+			settings.password = p.password();
+			return settings;
+		}
+	}
+#endif /* Q_OS_UNIX && !Q_OS_MAC */
+
+	return settings;
 }
 
 
@@ -906,38 +1019,6 @@ QString qtLocalisationDir(void)
 	return dirPath;
 }
 #undef LOCALE_SRC_PATH
-
-
-/* ========================================================================= */
-QPair<QString, int> detectHttpProxy(void)
-/* ========================================================================= */
-{
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-	QUrl proxyUrl(QString::fromLatin1(qgetenv("http_proxy")));
-
-	if (proxyUrl.isValid()) {
-		return QPair<QString, int>(proxyUrl.host(), proxyUrl.port());
-		// proxyUrl.userName(), proxyUrl.password();
-	}
-#else
-	QNetworkProxyQuery npq(QUrl("http://www.nic.cz"));
-
-	QList<QNetworkProxy> listOfProxies =
-	   QNetworkProxyFactory::systemProxyForQuery(npq);
-
-	if (1 < listOfProxies.size()) {
-		logWarning("%s/n", "Multiple proxies detected. Using first.");
-	}
-
-	foreach (QNetworkProxy p, listOfProxies) {
-		if (!p.hostName().isEmpty()) {
-			return QPair<QString, int>(p.hostName(), p.port());
-		}
-	}
-#endif /* Q_OS_UNIX && !Q_OS_MAC */
-
-	return QPair<QString, int>(QString(), 0);
-}
 
 
 /* ========================================================================= */

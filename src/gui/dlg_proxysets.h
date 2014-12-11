@@ -30,7 +30,7 @@ private slots:
 	void setActiveHttpsProxyEdit(bool state);
 
 private:
-	void loadProxyDialog(const GlobProxySettings &proxySettings);
+	void loadProxyDialog(const ProxiesSettings &proxySettings);
 };
 
 

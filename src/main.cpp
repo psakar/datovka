@@ -131,11 +131,17 @@ int main(int argc, char *argv[])
 	}
 
 	{
+		{
+			QSettings settings(globPref.loadConfPath(),
+			    QSettings::IniFormat);
+			settings.setIniCodec("UTF-8");
+			globProxSet.loadFromSettings(settings);
+		}
 		/* TODO -- Obey proxy settings. */
 
 		/* Start downloading the CRL files. */
 		QList<QUrl> urlList;
-		FileDownloader fDown;
+		FileDownloader fDown(true);
 		const struct crl_location *crl = crl_locations;
 		const char **url;
 		while ((NULL != crl) && (NULL != crl->file_name)) {
@@ -153,6 +159,9 @@ int main(int argc, char *argv[])
 				        data.size())) {
 					logWarning("Couldn't load downloaded "
 					    "CRL file '%s'.\n", crl->file_name);
+				} else {
+					logInfo("Loaded CRL file '%s'.\n",
+					    crl->file_name);
 				}
 			} else {
 				logWarning(
