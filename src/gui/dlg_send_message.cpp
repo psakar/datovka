@@ -107,8 +107,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
 	    SLOT(tableItemInsRem()));
 
+	connect(this->payReply, SIGNAL(stateChanged(int)), this,
+	    SLOT(showOptionalFormAndSet(int)));
+
 	if (ACT_REPLY == m_action) {
-		this->subjectText->setText("Re: " + m_reSubject);	
+		this->subjectText->setText("Re: " + m_reSubject);
 		this->dmRecipientRefNumber->setText(m_dmSenderRefNumber);
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
@@ -116,13 +119,15 @@ void DlgSendMessage::initNewMessageDialog(void)
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->setChecked(false);
 		this->payRecipient->hide();
-		this->payReply->show();
-		this->payReply->setEnabled(true);
 
 		QString pdz;
 		if (!m_dbEffectiveOVM) {
 			pdz = getUserInfoFormIsds(m_senderId);
+			this->payReply->show();
+			this->payReply->setEnabled(true);
 		} else {
+			this->payReply->setEnabled(false);
+			this->payReply->hide();
 			pdz = tr("no");
 		}
 
@@ -158,9 +163,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 			this->payReply->setEnabled(false);
 			this->payReply->hide();
 		}
-
-		connect(this->payReply, SIGNAL(stateChanged(int)), this,
-		    SLOT(showOptionalFormAndSet(int)));
 
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->hide();
