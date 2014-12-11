@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
-    <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
+    <normaloff>:/icons/48x48/datovka-message-reply.png</normaloff>:/icons/48x48/datovka-message-reply.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
