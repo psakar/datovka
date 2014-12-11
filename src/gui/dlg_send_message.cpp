@@ -599,6 +599,7 @@ void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
+	QString isdsMsg;
 
 	int pdzCnt = 0;
 
@@ -864,6 +865,8 @@ void DlgSendMessage::sendMessage(void)
 		    isdsSessions.session(m_userName), sent_message, copies);
 	}
 
+	isdsMsg = isds_long_message(isdsSessions.session(m_userName));
+
 finish:
 	if (status == IE_SUCCESS) {
 		QMessageBox::information(this,
@@ -875,14 +878,14 @@ finish:
 		this->close();
 		return;
 	} else {
-		if (showErrorMessageBox((int)status) == QMessageBox::Yes) {
+		if (showErrorMessageBox((int)status, isdsMsg) == QMessageBox::Yes) {
 			isds_message_free(&sent_message);
 			this->close();
 			return;
 		};
 	}
 
-	isds_message_free(&sent_message);
+
 }
 
 
@@ -890,10 +893,10 @@ finish:
 /*
 * This is call if an error of send message procedure was obtained
 */
-int DlgSendMessage::showErrorMessageBox(int status)
+int DlgSendMessage::showErrorMessageBox(int status, QString isdsMsg)
 /* ========================================================================= */
 {
-	QString msgBoxTitle = "";
+	QString msgBoxTitle = tr("Send message error!");
 	QString msgBoxContent = "";
 
 	qDebug() << status << isds_strerror((isds_error)status);
@@ -916,58 +919,118 @@ int DlgSendMessage::showErrorMessageBox(int status)
 		return QMessageBox::Yes;
 		break;
 	case IE_NOT_LOGGED_IN:
-		msgBoxTitle = tr("Send message error!");
-		    tr("It was not possible to send message to server "
-		    "Datové schránky.") + "<br/><br/>" +
-		    "<b>" + tr("Authorization failed!") + "</b>" + "<br/><br/>"
-		     + tr("Please check your credentials including the test-"
-		        "environment setting.") + "<br/>" +
-		    tr("It is possible that your password has expired - "
-		        "in this case, you need to use the official web "
-		        "interface of Datové schránky to change it.");
+		if (isdsMsg.isNull()) {
+			msgBoxContent =
+			    tr("It was not possible to send message to server "
+			    "Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("Error: ") +
+			    tr("Authorization failed!") + " " +
+			    isds_strerror((isds_error)status)
+			    + "</b><br/><br/>" +
+			    tr("Please check your credentials including the test-"
+			        "environment setting.") + "<br/>" +
+			    tr("It is possible that your password has expired - "
+			        "in this case, you need to use the official web "
+			        "interface of Datové schránky to change it.");
+		} else {
+			msgBoxContent =
+			    tr("It was not possible to send message to server "
+			    "Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("ISDS error") + ": " + isdsMsg
+			    + "</b><br/><br/>" +
+			    tr("Please check your credentials including the test-"
+			        "environment setting.") + "<br/>" +
+			    tr("It is possible that your password has expired - "
+			        "in this case, you need to use the official web "
+			        "interface of Datové schránky to change it.");
+		}
 		break;
 	case IE_TIMED_OUT:
 	case IE_CONNECTION_CLOSED:
-		msgBoxTitle = tr("Send message error!");
-		msgBoxContent =
-		    tr("It was not possible to send message to server "
-		    "Datové schránky.") + "<br/><br/>" +
-		    "<b>" + tr("Connection to the server timed out!")
-		    + "</b>" + "<br/><br/>" +
-		    tr("It was not possible to establish a connection "
-		    "within a set time.") + "<br/>" +
-		    tr("Please check your internet connection and try again.");
+		if (isdsMsg.isNull()) {
+			msgBoxContent =
+			    tr("It was not possible to send message to server "
+			    "Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("Error: ") +
+			    tr("Connection to the server timed out!") + " " +
+			    isds_strerror((isds_error)status)
+			    + "</b><br/><br/>" +
+			    tr("It was not possible to establish a connection "
+			    "within a set time.") + "<br/>" +
+			    tr("Please check your internet connection and try again.");
+		} else {
+			msgBoxContent =
+			    tr("It was not possible to send message to server "
+			    "Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("ISDS error") + ": " + isdsMsg
+			    + "</b><br/><br/>" +
+			    tr("It was not possible to establish a connection "
+			    "within a set time.") + "<br/>" +
+			    tr("Please check your internet connection and try again.");
+		}
 		break;
 	case IE_ISDS:
-		msgBoxTitle = tr("Send message error!");
-		msgBoxContent =
-		    tr("Sent message was refused by server Datové schránky.")
-		    + "<br/><br/>" +
-		    "<b>" + tr("Problem with attachment of message!")
-		    + "</b>" + "<br/><br/>" +
-		    tr("Server did not accept message for this databox "
-		    "and returned message back.") + " " +
-		    tr("It can be caused by a wrong/unsupported MIME type of "
-		    "some file in the attachment or if an attachment "
-		    "contains an archive.");
+		if (isdsMsg.isNull()) {
+			msgBoxContent =
+			    tr("Sent message was refused by server Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("Error: ") + isds_strerror((isds_error)status) +
+			    + "</b><br/><br/>" +
+			    tr("Server did not accept message for this databox "
+			    "and returned message back.") + " " +
+			    tr("It can be caused by a wrong/unsupported MIME type of "
+			    "some file in the attachment or if an attachment "
+			    "contains an archive.");
+		} else {
+			msgBoxContent =
+			    tr("Sent message was refused by server Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("ISDS error") + ": " + isdsMsg
+			    + "</b><br/><br/>" +
+			    tr("Server did not accept message for this databox "
+			    "and returned message back.");
+		}
 		break;
-/*
- *	TODO - add another dialogs for this reasults - libisds internal errors
 	case IE_INVAL:
 	case IE_ENUM:
 	case IE_NOMEM:
 	case IE_INVALID_CONTEXT:
 	case IE_NOTSUP:
 	case IE_HTTP:
+		if (isdsMsg.isNull()) {
+			msgBoxContent =
+			    tr("It was not possible to send message to the "
+			    "server Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("Error: ") + isds_strerror((isds_error)status) +
+			    + "</b><br/><br/>" +
+			    tr("It was not possible create send message request "
+			    "because an internal error has occurred.");
+		} else {
+			msgBoxContent =
+			    tr("It was not possible to send message to the "
+			    "server Datové schránky.")
+			    + "<br/><br/><b>" +
+			    tr("Error: ") + isds_strerror((isds_error)status) +
+			    + "<br/>" +
+			    isdsMsg
+			    + "</b><br/><br/>" +
+			    tr("It was not possible create send message request "
+			    "because an internal error has occurred.");
+		}
+		break;
+
 	case IE_ERROR:
-*/
 	default:
-		msgBoxTitle = tr("Send message error!");
 		msgBoxContent =
 		    tr("It was not possible to send message to the "
-		    "server Datové schránky.") + "<br><br>" +
-		    "<b>" + tr("Error: ") + isds_strerror((isds_error)status) +
-		    + "</b>" + "<br><br>" +
+		    "server Datové schránky.") + "<br/><br/><b>" +
+		    tr("Error: ") + isds_strerror((isds_error)status) +
+		    + "</b><br/><br/>" +
 		    tr("It was not possible create send message request "
 		    "because an internal error has occurred.");
 		break;
