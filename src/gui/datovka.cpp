@@ -1394,7 +1394,7 @@ void MainWindow::openSelectedAttachment(void)
 	fout.close();
 
 	//qDebug() << "file://" + fileName;
-	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	QDesktopServices::openUrl(QUrl("file:///" + fileName));
 	/* TODO -- Handle openUrl() return value. */
 }
 
@@ -4915,7 +4915,7 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	fout.close();
 
-	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	QDesktopServices::openUrl(QUrl("file:///" + fileName));
 }
 
 
@@ -4977,7 +4977,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	fout.close();
 
-	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	QDesktopServices::openUrl(QUrl("file:///" + fileName));
 }
 
 

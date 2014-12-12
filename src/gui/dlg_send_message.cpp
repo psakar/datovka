@@ -526,7 +526,7 @@ void DlgSendMessage::openAttachmentFile(void)
 	if (fileName.isEmpty()) {
 		return;
 	}
-	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	QDesktopServices::openUrl(QUrl("file:///" + fileName));
 }
 
 
