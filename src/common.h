@@ -73,6 +73,11 @@ typedef enum {
                                                     * Used to determine the db
                                                     * data type of the column.
                                                     */
+#define ROLE_MSGS_DB_PROXYSORT (Qt::UserRole + 4) /*
+                                                   * Used for sorting according
+                                                   * to boolean values which
+                                                   * are displayed as icons.
+                                                   */
 
 
 #define strongAccountInfoLine(title, value) \

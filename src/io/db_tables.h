@@ -16,8 +16,11 @@
  */
 enum EntryType{
 	DB_INTEGER = 1,
+	DB_INT_PROCESSING_STATE, /* Integer. */
 	DB_TEXT,
 	DB_BOOLEAN,
+	DB_BOOL_READ_LOCALLY, /* Boolean. */
+	DB_BOOL_ATTACHMENT_DOWNLOADED, /* Boolean. */
 	DB_DATETIME,
 	DB_DATE
 };

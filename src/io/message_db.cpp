@@ -89,97 +89,105 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 /* ========================================================================= */
 {
+	int dataType;
+
 	switch (role) {
 	case Qt::DisplayRole:
-		if (QSqlQueryModel::headerData(index.column(), Qt::Horizontal,
-		         ROLE_MSGS_DB_ENTRY_TYPE).toInt() == DB_DATETIME) {
+		dataType = QSqlQueryModel::headerData(index.column(),
+		    Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_DATETIME:
 			/* Convert date on display. */
 			return dateTimeStrFromDbFormat(
 			    QSqlQueryModel::data(index, role).toString(),
 			    dateTimeDisplayFormat);
-		}
-		if ((READLOC_COL == index.column()) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'read locally'. */
+			break;
+		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
+		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
+		case DB_INT_PROCESSING_STATE: /* 'process status' */
+			/* Hide text. */
 			return QVariant();
+			break;
+		default:
+			return QSqlQueryModel::data(index, role);
+			break;
 		}
-		if ((ATTDOWN_COL == index.column()) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'is downloaded'. */
-			return QVariant();
-		}
-		if ((PROCSNG_COL == index.column()) &&
-		    (DB_INTEGER == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'process status'. */
-			return QVariant();
-		}
-
-		return QSqlQueryModel::data(index, role);
 		break;
 
 	case Qt::DecorationRole:
-		if ((READLOC_COL == index.column()) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'read locally'. */
-			int dmId = QSqlQueryModel::data(
-			    index.sibling(index.row(), 0),
-			    Qt::DisplayRole).toInt();
-			if ((m_overriddenRL.value(dmId, false)) ||
-			    QSqlQueryModel::data(index).toBool()) {
-				return QIcon(ICON_16x16_PATH "grey.png");
-			} else {
-				return QIcon(ICON_16x16_PATH "green.png");
+		dataType = QSqlQueryModel::headerData(index.column(),
+		    Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_BOOL_READ_LOCALLY:
+			{
+				/* Show icon for 'read locally'. */
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				if ((m_overriddenRL.value(dmId, false)) ||
+				    QSqlQueryModel::data(index).toBool()) {
+					return QIcon(
+					    ICON_16x16_PATH "grey.png");
+				} else {
+					return QIcon(
+					    ICON_16x16_PATH "green.png");
+				}
 			}
-		}
-		if ((ATTDOWN_COL == index.column()) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'is downloaded'. */
-			int dmId = QSqlQueryModel::data(
-			    index.sibling(index.row(), 0),
-			    Qt::DisplayRole).toInt();
-			if ((m_overriddenAD.value(dmId, false)) ||
-			    QSqlQueryModel::data(index).toBool()) {
-				return QIcon(ICON_14x14_PATH "attachment.png");
-			} else {
-				return QVariant(); /* No icon. */
+			break;
+		case DB_BOOL_ATTACHMENT_DOWNLOADED:
+			{
+				/* Show icon for 'is downloaded'. */
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				if ((m_overriddenAD.value(dmId, false)) ||
+				    QSqlQueryModel::data(index).toBool()) {
+					return QIcon(
+					    ICON_14x14_PATH "attachment.png");
+				} else {
+					return QVariant(); /* No icon. */
+				}
 			}
-		}
-		if ((PROCSNG_COL == index.column()) &&
-		    (DB_INTEGER == QSqlQueryModel::headerData(index.column(),
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'process status'. */
-			int dmId = QSqlQueryModel::data(
-			    index.sibling(index.row(), 0),
-			    Qt::DisplayRole).toInt();
-			switch (m_overriddenPS.value(dmId,
-			            QSqlQueryModel::data(index).toInt())) {
-			case UNSETTLED:
-				return QIcon(ICON_16x16_PATH "red.png");
-				break;
-			case IN_PROGRESS:
-				return QIcon(ICON_16x16_PATH "yellow.png");
-				break;
-			case SETTLED:
-				return QIcon(ICON_16x16_PATH "grey.png");
-				break;
-			default:
-				Q_ASSERT(0);
-				break;
+			break;
+		case DB_INT_PROCESSING_STATE:
+			{
+				/* Show icon for 'process status'. */
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				switch (m_overriddenPS.value(dmId,
+				            QSqlQueryModel::data(
+				                index).toInt())) {
+				case UNSETTLED:
+					return QIcon(
+					    ICON_16x16_PATH "red.png");
+					break;
+				case IN_PROGRESS:
+					return QIcon(
+					    ICON_16x16_PATH "yellow.png");
+					break;
+				case SETTLED:
+					return QIcon(
+					    ICON_16x16_PATH "grey.png");
+					break;
+				default:
+					Q_ASSERT(0);
+					break;
+				}
+				return QVariant();
 			}
-			return QVariant();
-		}
+			break;
 
-		return QSqlQueryModel::data(index, role);
+		default:
+			return QSqlQueryModel::data(index, role);
+			break;
+		}
 		break;
 
 	case Qt::FontRole:
-		if (DB_BOOLEAN == QSqlQueryModel::headerData(READLOC_COL,
-		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
+		if (DB_BOOL_READ_LOCALLY == QSqlQueryModel::headerData(
+		        READLOC_COL, Qt::Horizontal,
+		        ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
 			/* In read messages. */
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
@@ -197,6 +205,46 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QSqlQueryModel::data(index, role);
 		break;
 
+	case ROLE_MSGS_DB_PROXYSORT:
+		dataType = QSqlQueryModel::headerData(index.column(),
+		    Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_BOOLEAN:
+		case DB_BOOL_READ_LOCALLY:
+		case DB_BOOL_ATTACHMENT_DOWNLOADED:
+			{
+				qint64 id;
+				id = QSqlQueryModel::data(index,
+				    Qt::DisplayRole).toBool() ? 1 : 0;
+//				qDebug() << "Old sort Value." << id;
+				id = id << 48;
+				id += QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+//				qDebug() << "New sort Value." << id;
+				return id;
+			}
+			break;
+		case DB_INT_PROCESSING_STATE:
+			{
+				qint64 id;
+				id = QSqlQueryModel::data(index,
+				    Qt::DisplayRole).toInt();
+//				qDebug() << "Old sort Value." << id;
+				id = id << 48;
+				id += QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+//				qDebug() << "New sort Value." << id;
+			return id;
+			}
+			break;
+		default:
+			return QSqlQueryModel::data(index, Qt::DisplayRole);
+			break;
+		}
+		break;
+
 	default:
 		return QSqlQueryModel::data(index, role);
 		break;
@@ -212,77 +260,77 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 /* ========================================================================= */
 {
+	int dataType;
+
 	switch (role) {
 	case Qt::DisplayRole:
-		if ((READLOC_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'read locally'. */
-			return QVariant();
-		}
-		if ((ATTDOWN_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'is downloaded'. */
-			return QVariant();
-		}
-		if ((PROCSNG_COL == section) &&
-		    (DB_INTEGER == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Hide text for 'process status'. */
-			return QVariant();
+		if ((section < READLOC_COL) || (section > PROCSNG_COL)) {
+			return QSqlQueryModel::headerData(section, orientation,
+			    role);
 		}
 
-		return QSqlQueryModel::headerData(section, orientation, role);
+		dataType = QSqlQueryModel::headerData(section, Qt::Horizontal,
+		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
+		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
+		case DB_INT_PROCESSING_STATE: /* 'process status' */
+			/* Hide text. */
+			return QVariant();
+			break;
+		default:
+			return QSqlQueryModel::headerData(section, orientation,
+			    role);
+			break;
+		}
 		break;
 
 	case Qt::DecorationRole:
-		if ((READLOC_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'read locally'. */
-			return QIcon(ICON_16x16_PATH "readcol.png");
-		}
-		if ((ATTDOWN_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'is downloaded'. */
-			return QIcon(ICON_14x14_PATH "attachment.png");
-		}
-		if ((PROCSNG_COL == section) &&
-		    (DB_INTEGER == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Show icon for 'process status'. */
-			return QIcon(ICON_16x16_PATH "flag.png");
+		if ((section < READLOC_COL) || (section > PROCSNG_COL)) {
+			return QSqlQueryModel::headerData(section, orientation,
+			    role);
 		}
 
-		return QSqlQueryModel::headerData(section, orientation, role);
+		dataType = QSqlQueryModel::headerData(section, Qt::Horizontal,
+		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_BOOL_READ_LOCALLY:
+			/* Show icon for 'read locally'. */
+			return QIcon(ICON_16x16_PATH "readcol.png");
+			break;
+		case DB_BOOL_ATTACHMENT_DOWNLOADED:
+			/* Show icon for 'is downloaded'. */
+			return QIcon(ICON_14x14_PATH "attachment.png");
+			break;
+		case DB_INT_PROCESSING_STATE:
+			return QIcon(ICON_16x16_PATH "flag.png");
+			break;
+		default:
+			return QSqlQueryModel::headerData(section, orientation,
+			    role);
+			break;
+		}
 		break;
 
 	case Qt::ToolTipRole:
-		if ((READLOC_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Tool tip for 'read locally'. */
-			return QSqlQueryModel::headerData(section, orientation,
-			    Qt::EditRole);
-		}
-		if ((ATTDOWN_COL == section) &&
-		    (DB_BOOLEAN == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Tool tip for 'is downloaded'. */
-			return QSqlQueryModel::headerData(section, orientation,
-			    Qt::EditRole);
-		}
-		if ((PROCSNG_COL == section) &&
-		    (DB_INTEGER == QSqlQueryModel::headerData(section,
-		         Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
-			/* Tool top for 'process status'. */
-			return QSqlQueryModel::headerData(section, orientation,
-			    Qt::EditRole);
+		if ((section < READLOC_COL) || (section > PROCSNG_COL)) {
+			return QVariant();
 		}
 
-		return QVariant();
+		dataType = QSqlQueryModel::headerData(section, Qt::Horizontal,
+		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_BOOL_READ_LOCALLY: /* 'read locally'. */
+		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded'. */
+		case DB_INT_PROCESSING_STATE: /* 'process status'. */
+			/* Tool tip. */
+			return QSqlQueryModel::headerData(section, orientation,
+			    Qt::EditRole);
+			break;
+		default:
+			return QVariant();
+			break;
+		}
 		break;
 
 	default:
@@ -491,14 +539,15 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if ("process_status" == receivedItemIds[i]) {
 			/* Description. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    QObject::tr("Processing state"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -570,14 +619,15 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if ("process_status" == receivedItemIds[i]) {
 			/* Description. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    QObject::tr("Processing state"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -650,14 +700,15 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else if ("process_status" == receivedItemIds[i]) {
 			/* Description. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
 			    QObject::tr("Processing state"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INTEGER, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -854,7 +905,8 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -911,7 +963,8 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}
@@ -969,7 +1022,8 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 			    QObject::tr("Attachments downloaded"));
 			/* Data type. */
 			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOLEAN, ROLE_MSGS_DB_ENTRY_TYPE);
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
 		}

@@ -62,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_statusProgressBar(NULL),
     m_accountModel(this),
     m_accountDb("accountDb"),
-    m_messageModel(NULL),
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
@@ -586,8 +585,9 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
 		Q_ASSERT(0 != msgTblMdl);
-		m_messageModel = msgTblMdl;
-		ui->messageList->setModel(m_messageModel);
+		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
+		m_messageListProxyModel.setSourceModel(msgTblMdl);
+		ui->messageList->setModel(&m_messageListProxyModel);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		received = true;
@@ -597,8 +597,9 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		/* Set model. */
 		Q_ASSERT(0 != msgTblMdl);
-		m_messageModel = msgTblMdl;
-		ui->messageList->setModel(m_messageModel);
+		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
+		m_messageListProxyModel.setSourceModel(msgTblMdl);
+		ui->messageList->setModel(&m_messageListProxyModel);
 		/* Set specific column width. */
 		setSentColumnWidths();
 		received = false;
@@ -777,15 +778,17 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			 * Mark message as read without reloading
 			 * the whole model.
 			 */
-			Q_ASSERT(0 != m_messageModel);
-			m_messageModel->overrideRead(
+			DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+			    m_messageListProxyModel.sourceModel();
+			Q_ASSERT(0 != messageModel);
+			messageModel->overrideRead(
 			    current.sibling(current.row(),
 			        0).data().toInt(), true);
 			/* Inform the view that the model has changed. */
-			emit m_messageModel->dataChanged(
+			emit messageModel->dataChanged(
 			    current.sibling(current.row(), 0),
 			    current.sibling(current.row(),
-			        m_messageModel->columnCount() - 1));
+			        messageModel->columnCount() - 1));
 		}
 
 		/* Generate and show message information. */
@@ -1523,14 +1526,16 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	 * Mark message as having attachment downloaded without reloading
 	 * the whole model.
 	 */
-	Q_ASSERT(0 != m_messageModel);
-	m_messageModel->overrideDownloaded(
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+	messageModel->overrideDownloaded(
 	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(), true);
 	/* Inform the view that the model has changed. */
-	emit m_messageModel->dataChanged(
+	emit messageModel->dataChanged(
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
-	        m_messageModel->columnCount() - 1));
+	        messageModel->columnCount() - 1));
 
 	/*
 	 * TODO -- Create a separate function for reloading attachment
@@ -3386,16 +3391,9 @@ void MainWindow::filterMessages(const QString &text)
 {
 	debugSlotCall();
 
-	QAbstractItemModel *tableModel = m_messageModel;
-	if (0 == tableModel) {
-		return;
-	}
+	/* The model is always associated to the proxy model. */
 
-	if (tableModel != &m_messageListProxyModel) { /* TODO -- UNNECESSARY */
-		/* Prohibit the proxy model to be the source of itself. */
-		m_messageListProxyModel.setSourceModel(tableModel);
-	}
-	ui->messageList->setModel(&m_messageListProxyModel);
+	m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 
 	m_messageListProxyModel.setFilterRegExp(QRegExp(text,
 	    Qt::CaseInsensitive, QRegExp::FixedString));
@@ -5607,13 +5605,15 @@ void MainWindow::msgSetSelectedMessageProcessState(int state)
 
 	messageDb->msgSetProcessState(msgId, state, false);
 
-	Q_ASSERT(0 != m_messageModel);
-	m_messageModel->overrideProcessing(
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+	messageModel->overrideProcessing(
 	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(),
 	    procSt);
 	/* Inform the view that the model has changed. */
-	emit m_messageModel->dataChanged(
+	emit messageModel->dataChanged(
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
-	    m_messageModel->columnCount() - 1));
+	    messageModel->columnCount() - 1));
 }

@@ -564,7 +564,7 @@ namespace SmsgdtTbl {
 	const QVector< QPair<QString, EntryType> > knownAttrs = {
 	{"message_id", DB_INTEGER}, /* NOT NULL */
 	{"message_type", DB_INTEGER},
-	{"read_locally", DB_BOOLEAN},
+	{"read_locally", DB_BOOL_READ_LOCALLY},
 	{"download_date", DB_DATETIME},
 	{"custom_data", DB_TEXT}
 	/*
@@ -588,7 +588,7 @@ namespace SmsgdtTbl {
 	const QMap<QString, AttrProp> attrProps = {
 	{"message_id",    {DB_INTEGER, ""}},
 	{"message_type",  {DB_INTEGER, ""}},
-	{"read_locally",  {DB_BOOLEAN, QObject::tr("Read locally")}},
+	{"read_locally",  {DB_BOOL_READ_LOCALLY, QObject::tr("Read locally")}},
 	{"download_date", {DB_DATETIME, ""}},
 	{"custom_data",   {DB_TEXT, ""}}
 	};
