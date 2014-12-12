@@ -371,8 +371,8 @@ void DlgViewZfo::openSelectedAttachment(void)
 
 	fout.close();
 
-	//qDebug() << "file://" + fileName;
-	QDesktopServices::openUrl(QUrl("file://" + fileName));
+	//qDebug() << "file:///" + fileName;
+	QDesktopServices::openUrl(QUrl("file:///" + fileName));
 	/* TODO -- Handle openUrl() return value. */
 }
 
