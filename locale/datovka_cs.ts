@@ -3881,7 +3881,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <location filename="../src/io/message_db.cpp" line="577"/>
         <location filename="../src/io/message_db.cpp" line="657"/>
         <source>Processing state</source>
-        <translation>Stav vyřízování</translation>
+        <translation>Stav vyřizování</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1344"/>
