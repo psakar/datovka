@@ -717,16 +717,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 	(void) previous; /* Unused. */
 
-	/* Disable message/attachment related buttons. */
-	ui->downloadComplete->setEnabled(false);
-	ui->saveAttachments->setEnabled(false);
-	ui->saveAttachment->setEnabled(false);
-	ui->openAttachment->setEnabled(false);
-	ui->verifySignature->setEnabled(false);
-	ui->signatureDetails->setEnabled(false);
-	ui->actionSave_attachment->setEnabled(false);
-	ui->actionOpen_attachment->setEnabled(false);
-	ui->messageStateCombo->setEnabled(false);
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
 	 * handled multiple times.
@@ -738,6 +728,17 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
 			 QModelIndex)));
 	}
+
+	/* Disable message/attachment related buttons. */
+	ui->downloadComplete->setEnabled(false);
+	ui->saveAttachments->setEnabled(false);
+	ui->saveAttachment->setEnabled(false);
+	ui->openAttachment->setEnabled(false);
+	ui->verifySignature->setEnabled(false);
+	ui->signatureDetails->setEnabled(false);
+	ui->actionSave_attachment->setEnabled(false);
+	ui->actionOpen_attachment->setEnabled(false);
+	ui->messageStateCombo->setEnabled(false);
 
 	/* Disable model for attachment list. */
 	ui->messageAttachmentList->setModel(0);
