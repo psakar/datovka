@@ -1,4 +1,11 @@
 x.y.z /
+ * Fixed issues with message sorting.
+ * Fixed double-click attachment opening by default application on Windows.
+ * Improvements in message send procedure.
+ * Proxy dialogue supports HTTP proxy configuration. Application can use HTTP
+   proxies to download CRLs.
+ * Fixed bug which was preventing the application to send messages with
+   multiple attachments.
  * Message years are shown in descending order.
  * Improvements in debugging messages.
  * Credits and licence files are displayed on OS X and Unix-like systems.
