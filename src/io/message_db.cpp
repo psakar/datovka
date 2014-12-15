@@ -268,6 +268,10 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				return id;
 			}
 			break;
+		case DB_TEXT: /* Ignore case for sorting. */
+			return QSqlQueryModel::data(index,
+			    Qt::DisplayRole).toString().toLower();
+			break;
 		default:
 			return QSqlQueryModel::data(index, Qt::DisplayRole);
 			break;
