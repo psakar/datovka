@@ -214,21 +214,18 @@ MainWindow::MainWindow(QWidget *parent)
 	connectTopToolBarSlots();
 	connectMessageActionBarSlots();
 
-	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this,
+	/* Initialisation of message download timer. */
+	connect(&m_timerSyncAccounts, SIGNAL(timeout()), this,
 	    SLOT(synchroniseAllAccounts()));
-
-	// initialization of Timer
 	if (globPref.download_on_background) {
-
 		if (globPref.timer_value > 4) {
-			timeout = globPref.timer_value * 60000;
-			timer->start(timeout);
+			m_timeoutSyncAccounts = globPref.timer_value * 60000;
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 			qDebug() << "Timer set on" << globPref.timer_value <<
 			    "minutes";
 		} else {
-			timeout = TIMER_DEFAULT_TIMEOUT_MS;
-			timer->start(timeout);
+			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 			qDebug() << "Timer set on" <<
 			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
 		}
@@ -375,7 +372,6 @@ MainWindow::~MainWindow(void)
 	/* Save settings on exit. */
 	saveSettings();
 
-	delete timer;
 	delete ui;
 }
 
@@ -392,21 +388,21 @@ void MainWindow::applicationPreferences(void)
 	QDialog *dlgPrefs = new DlgPreferences(this);
 	dlgPrefs->exec();
 
-	// set actuall timer value from settings if is enable
+	// set actual download timer value from settings if is enable
 	if (globPref.download_on_background) {
 		if (globPref.timer_value > 4) {
-			timeout = globPref.timer_value * 60000;
-			timer->start(timeout);
+			m_timeoutSyncAccounts = globPref.timer_value * 60000;
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 			qDebug() << "Timer set on" << globPref.timer_value <<
 			    "minutes";
 		} else {
-			timeout = TIMER_DEFAULT_TIMEOUT_MS;
-			timer->start(timeout);
+			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 			qDebug() << "Timer set on" <<
 			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
 		}
 	} else {
-		timer->stop();
+		m_timerSyncAccounts.stop();
 	}
 }
 
@@ -1694,7 +1690,7 @@ void MainWindow::synchroniseAllAccounts(void)
 	    tr("Synchronise all accounts with ISDS server."));
 
 	if (globPref.download_on_background) {
-		timer->stop();
+		m_timerSyncAccounts.stop();
 	}
 
 	int accountCount = ui->accountList->model()->rowCount();
@@ -3672,8 +3668,8 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 
 /* ========================================================================= */
 /*
-* Delete worker and thread objects, enable buttons and set timer
-*/
+ * Delete worker and thread objects, enable buttons and set download timer
+ */
 void MainWindow::deleteThreadSyncAll(void)
 /* ========================================================================= */
 {
@@ -3691,7 +3687,7 @@ void MainWindow::deleteThreadSyncAll(void)
 	delete threadSyncAll;
 
 	if (globPref.download_on_background) {
-		timer->start(timeout);
+		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 	}
 
 	qDebug() << "Delete Worker and Thread objects";

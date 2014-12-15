@@ -3,6 +3,7 @@
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
+
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
@@ -10,6 +11,7 @@
 #include <QStandardItemModel>
 #include <QProgressBar>
 #include <QThread>
+#include <QTimer>
 #include <QPushButton>
 #include <QNetworkReply>
 
@@ -18,6 +20,7 @@
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 #include "thread/worker.h"
+
 
 namespace Ui {
 	class MainWindow;
@@ -373,8 +376,8 @@ private:
 
 	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
 	Worker *workerSyncAll, *workerSyncOne, *workerDownMsgComplete;
-	QTimer *timer;
-	int timeout;
+	QTimer m_timerSyncAccounts;
+	int m_timeoutSyncAccounts;
 
 	/*!
 	 * @brief Connects top menu-bar buttons to appropriate actions.
