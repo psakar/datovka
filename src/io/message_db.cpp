@@ -124,7 +124,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				int dmId = QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-				if ((m_overriddenRL.value(dmId, false)) ||
+				if (m_overriddenRL.value(dmId, false) ||
 				    QSqlQueryModel::data(index).toBool()) {
 					return QIcon(
 					    ICON_16x16_PATH "grey.png");
@@ -140,7 +140,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				int dmId = QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-				if ((m_overriddenAD.value(dmId, false)) ||
+				if (m_overriddenAD.value(dmId, false) ||
 				    QSqlQueryModel::data(index).toBool()) {
 					return QIcon(
 					    ICON_14x14_PATH "attachment.png");
@@ -210,33 +210,62 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
 		case DB_BOOLEAN:
-		case DB_BOOL_READ_LOCALLY:
-		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			{
 				qint64 id;
 				id = QSqlQueryModel::data(index,
 				    Qt::DisplayRole).toBool() ? 1 : 0;
-//				qDebug() << "Old sort Value." << id;
 				id = id << 48;
 				id += QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-//				qDebug() << "New sort Value." << id;
+				return id;
+			}
+			break;
+		case DB_BOOL_READ_LOCALLY:
+			{
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				qint64 id;
+				id = (m_overriddenRL.value(dmId, false) ||
+				    QSqlQueryModel::data(index,
+				        Qt::DisplayRole).toBool()) ? 1 : 0;
+				id = id << 48;
+				id += QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				return id;
+			}
+		case DB_BOOL_ATTACHMENT_DOWNLOADED:
+			{
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
+				qint64 id;
+				id = (m_overriddenAD.value(dmId, false) ||
+				    QSqlQueryModel::data(index,
+				        Qt::DisplayRole).toBool()) ? 1 : 0;
+				id = id << 48;
+				id += QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toInt();
 				return id;
 			}
 			break;
 		case DB_INT_PROCESSING_STATE:
 			{
-				qint64 id;
-				id = QSqlQueryModel::data(index,
+				int dmId = QSqlQueryModel::data(
+				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-//				qDebug() << "Old sort Value." << id;
+				qint64 id;
+				id = m_overriddenPS.value(dmId,
+				    QSqlQueryModel::data(index,
+				        Qt::DisplayRole).toInt());
 				id = id << 48;
 				id += QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-//				qDebug() << "New sort Value." << id;
-			return id;
+				return id;
 			}
 			break;
 		default:
