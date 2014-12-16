@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>553</width>
-    <height>704</height>
+    <height>725</height>
    </rect>
   </property>
   <property name="font">
@@ -116,6 +116,25 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="replyLabel">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>This is a PDZ prepaid reply. It means that PDZ is paid by recipient.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_5">
@@ -508,9 +527,12 @@ message is considered as delivered after
      </property>
      <property name="font">
       <font>
-       <weight>50</weight>
-       <bold>false</bold>
+       <weight>75</weight>
+       <bold>true</bold>
       </font>
+     </property>
+     <property name="toolTip">
+      <string>Use offered payment of transfer charges by recipient</string>
      </property>
      <property name="text">
       <string>Use offered payment of transfer charges by recipient</string>

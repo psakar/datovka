@@ -81,6 +81,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	this->replyLabel->hide();
+	this->replyLabel->setEnabled(false);
+
 	QString dbOpenAddressing = "";
 
 	if (!m_dbEffectiveOVM) {
@@ -132,6 +135,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 		}
 
 		if (m_dmType == "I") {
+			this->addRecipient->setEnabled(false);
+			this->removeRecipient->setEnabled(false);
+			this->findRecipient->setEnabled(false);
+			this->replyLabel->show();
+			this->replyLabel->setEnabled(true);
 			this->payReply->hide();
 			this->payReply->setEnabled(false);
 			this->payRecipient->setEnabled(true);
@@ -341,7 +349,11 @@ void DlgSendMessage::attItemSelect(void)
 void DlgSendMessage::recItemSelect(void)
 /* ========================================================================= */
 {
-	this->removeRecipient->setEnabled(true);
+	if (m_dmType == "I") {
+		this->removeRecipient->setEnabled(false);
+	} else {
+		this->removeRecipient->setEnabled(true);
+	}
 }
 
 
@@ -610,8 +622,20 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	if (pdzCnt > 0) {
-		if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
-			return;
+		if (m_dmType == "I") {
+			if (!this->payRecipient->isChecked()) {
+				if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
+					return;
+				}
+			} else {
+				/* TODO
+				 * may be: inform sender about prepaid reply?
+				 */
+			}
+		} else {
+			if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
+				return;
+			}
 		}
 	}
 
