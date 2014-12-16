@@ -2236,10 +2236,11 @@ bool MessageDb::msgsInsertUpdateMessageHash(int dmId, const QString &value,
 /*
  * Insert raw message data into raw_message_data table
  */
-bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
-	int message_type)
+bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
+    int message_type)
 /* ========================================================================= */
 {
+	/* TODO -- The whole operation must fail or succeed. */
 
 	QSqlQuery query(m_db);
 	int dbId;
@@ -2258,7 +2259,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
 	if (!query.exec()) {
 		qDebug() << "Error: msgsInsertUpdateMessageRaw"
 		    << query.lastError();
-	 	return false;
+		return false;
 	} else {
 		query.first();
 		if (query.isValid()) {
@@ -2276,8 +2277,9 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
 		queryStr = "INSERT INTO raw_message_data "
 		"(message_id, message_type, data) "
 		"VALUES (:dmId, :message_type, :data)";
-
 	}
+
+	QString base64 = raw.toBase64();
 
 	if (!query.prepare(queryStr)) {
 		qDebug() << "Error: msgsInsertUpdateMessageRaw"
@@ -2285,19 +2287,174 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
 		return false;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":data", raw);
+	query.bindValue(":data", base64);
 	query.bindValue(":message_type", message_type);
 	if (dbId != 0) {
-	    query.bindValue(":dbId", dbId);
+		query.bindValue(":dbId", dbId);
 	}
-
-	if (query.exec()) {
-		return true;
-	} else {
+	if (!query.exec()) {
 		qDebug() << "Error: msgsInsertUpdateMessageRaw"
 		    << query.lastError();
 		return false;
 	}
+
+	/* Get certificate data. */
+	QString crtBase64;
+	struct x509_crt *crt = rawCmsSigningCert(raw.data(), raw.size());
+	if (NULL != crt) {
+		QByteArray crtDer;
+
+		void *der = NULL;
+		size_t derSize = 0;
+		if (0 == x509CrtToDer(crt, &der, &derSize)) {
+			crtDer.setRawData((char *) der, derSize);
+
+			crtBase64 = crtDer.toBase64();
+
+			free(der); der = NULL; derSize = 0;
+		}
+
+		x509CrtDestroy(crt); crt = NULL;
+	}
+	if (!crtBase64.isEmpty()) {
+		msgsInsertUpdateMessageCertBase64(dmId, crtBase64);
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Add/update message certificate in database.
+ */
+bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
+    const QString &crtBase64)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int certId;
+
+	/* Search for certificate in 'certificate_data' table. */
+	QString queryStr = "SELECT id FROM certificate_data WHERE "
+	    "der_data = :der_data";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	}
+	query.bindValue(":der_data", crtBase64);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	} else {
+		query.first();
+		if (query.isValid()) {
+			certId = query.value(0).toInt(); /* Found. */
+		} else {
+			certId = -1; /* Not found. */
+		}
+	}
+
+	/* If certificate was not found. */
+	if (certId < 0) {
+		/* Create unique certificate identifier. */
+		queryStr = "SELECT max(id) from certificate_data";
+		if (!query.prepare(queryStr)) {
+			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+			    << query.lastError();
+			return false;
+		}
+		if (!query.exec()) {
+			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+			    << query.lastError();
+			return false;
+		} else {
+			query.first();
+			if (query.isValid()) {
+				certId = query.value(0).toInt();
+			} else {
+				certId = -1;
+			}
+		}
+		if (certId <= 0) {
+			certId = 1; /* First certificate. */
+		} else {
+			++certId;
+		}
+
+		/* Insert missing certificate. */
+		queryStr = "INSERT INTO certificate_data "
+		    "(id, der_data) VALUES (:id, :der_data)";
+		if (!query.prepare(queryStr)) {
+			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+			    << query.lastError();
+			return false;
+		}
+		query.bindValue(":id", certId);
+		query.bindValue(":der_data", crtBase64);
+		if (!query.exec()) {
+			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+			    << query.lastError();
+			return false;
+		}
+	}
+
+	/*
+	 * Abort operation if there is still no matching certificate available.
+	 */
+	if (certId <= 0) {
+		return false;
+	}
+
+	/*
+	 * Tie certificate to message. Find whether there is already
+	 * an entry for the message.
+	 */
+	bool entryFound = false;
+	queryStr = "SELECT * FROM message_certificate_data WHERE"
+	    " message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	}
+	query.first();
+	entryFound = query.isValid();
+	/*
+	 * Create or update message entry depending on whether a corresponding
+	 * entry was found.
+	 */
+	if (entryFound) {
+		queryStr = "UPDATE message_certificate_data SET "
+		    "certificate_id = :certificate_id WHERE "
+		    "message_id = :message_id";
+	} else {
+		queryStr = "INSERT INTO message_certificate_data "
+		    "(message_id, certificate_id) VALUES "
+		    "(:message_id, :certificate_id)";
+	}
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":certificate_id", certId);
+	if (!query.exec()) {
+		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
+		    << query.lastError();
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -2308,7 +2465,6 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
 bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
 /* ========================================================================= */
 {
-
 	QSqlQuery query(m_db);
 	int dbId;
 
@@ -3157,7 +3313,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
-	 	return false;
+		return false;
 	} else {
 		query.first();
 		if (query.isValid()) {
@@ -3178,7 +3334,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	}
 
 	/* Select certificate id from message_certificate_data table */
-	bool deleteCert = true;
+	bool deleteCert = false;
 	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
 	    "certificate_id = :certificate_id";
 	if (!query.prepare(queryStr)) {
@@ -3191,6 +3347,8 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 		if (query.isValid()) {
 			if (query.value(0).toInt() > 0) {
 				deleteCert = false;
+			} else {
+				deleteCert = true;
 			}
 		}
 	}

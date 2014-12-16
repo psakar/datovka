@@ -368,7 +368,7 @@ public:
 	/*!
 	 * @brief Insert/update raw message data into raw_message_data table.
 	 */
-	bool msgsInsertUpdateMessageRaw(int dmId, const QString &raw,
+	bool msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
 	    int message_type);
 
 	/*!
@@ -491,6 +491,12 @@ protected:
 	 * @note The old database file is left untouched.
 	 */
 	bool reopenDb(const QString &newFileName);
+
+	/*!
+	 * @brief Add/update message certificate in database.
+	 */
+	bool msgsInsertUpdateMessageCertBase64(int dmId,
+	    const QString &crtBase64);
 
 private:
 	static

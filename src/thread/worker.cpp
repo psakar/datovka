@@ -739,10 +739,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
-		QString raw = QByteArray((char*)message->raw,
-		    message->raw_length).toBase64();
-
-		(messageDb.msgsInsertUpdateMessageRaw(dmID, raw, 0))
+		(messageDb.msgsInsertUpdateMessageRaw(dmID,
+		    QByteArray((char*)message->raw, message->raw_length), 0))
 		? qDebug() << "Message raw data were updated..."
 		: qDebug() << "ERROR: Message raw data update!";
 	}
