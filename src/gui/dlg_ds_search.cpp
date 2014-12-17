@@ -308,10 +308,11 @@ void DlgDsSearch::searchDataBox(void)
 
 		QString name;
 
-		if (*item->dbType == DBTYPE_FO) {
+		if ((item->dbType != NULL) && (*item->dbType == DBTYPE_FO)) {
 			name = QString(item->personName->pnFirstName) +
 			    " " + QString(item->personName->pnLastName);
-		} else if (*item->dbType == DBTYPE_PFO) {
+		} else if ((item->dbType != NULL) &&
+		           (*item->dbType == DBTYPE_PFO)) {
 			QString firmName = item->firmName;
 			if (firmName.isEmpty() || firmName == " ") {
 				name = QString(item->personName->pnFirstName) +
@@ -323,42 +324,44 @@ void DlgDsSearch::searchDataBox(void)
 			name = item->firmName;
 		}
 
-		QString address;
-		QString street = item->address->adStreet;
-		QString adNumberInStreet = item->address->adNumberInStreet;
-		QString adNumberInMunicipality =
-		    item->address->adNumberInMunicipality;
+		QString address, street, adNumberInStreet, adNumberInMunicipality;
+		if (NULL != item->address) {
 
-		if (street.isEmpty() || street == " ") {
-			address = item->address->adCity;
-		} else {
-			address = street;
-			if (adNumberInStreet.isEmpty() ||
-			    adNumberInStreet == " ") {
-				address += + " " +
-				    adNumberInMunicipality +
-				    ", " + QString(item->address->adCity);
-			} else if (adNumberInMunicipality.isEmpty() ||
-			    adNumberInMunicipality == " ") {
-				address += + " " +
-				    adNumberInStreet +
-				    ", " + QString(item->address->adCity);
+			street = item->address->adStreet;
+			adNumberInStreet = item->address->adNumberInStreet;
+			adNumberInMunicipality = item->address->adNumberInMunicipality;
+
+			if (street.isEmpty() || street == " ") {
+				address = item->address->adCity;
 			} else {
-				address += + " "+
-				    adNumberInMunicipality
-				    + "/" +
-				    adNumberInStreet +
-				", " + QString(item->address->adCity);
+				address = street;
+				if (adNumberInStreet.isEmpty() ||
+				    adNumberInStreet == " ") {
+					address += + " " +
+					    adNumberInMunicipality +
+					    ", " + QString(item->address->adCity);
+				} else if (adNumberInMunicipality.isEmpty() ||
+				    adNumberInMunicipality == " ") {
+					address += + " " +
+					    adNumberInStreet +
+					    ", " + QString(item->address->adCity);
+				} else {
+					address += + " "+
+					    adNumberInMunicipality
+					    + "/" +
+					    adNumberInStreet +
+					", " + QString(item->address->adCity);
+				}
 			}
+
+			contact.append(name);
+			contact.append(address);
+			contact.append(QString(item->address->adZipCode));
+			contact.append(*item->dbEffectiveOVM ? tr("no") : tr("yes"));
+
+			list_contacts.append(contact);
+			addContactsToTable(list_contacts);
 		}
-
-		contact.append(name);
-		contact.append(address);
-		contact.append(QString(item->address->adZipCode));
-		contact.append(*item->dbEffectiveOVM ? tr("no") : tr("yes"));
-
-		list_contacts.append(contact);
-		addContactsToTable(list_contacts);
 
 		box = box->next;
 	}
