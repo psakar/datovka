@@ -1,4 +1,4 @@
-x.y.z /
+4.0.0 / 2014-12-17
  * Fixed issues with message sorting.
  * Fixed double-click attachment opening by default application on Windows.
  * Improvements in message send procedure.
