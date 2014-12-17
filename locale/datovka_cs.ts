@@ -737,12 +737,12 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Nebylo možné vyhledat záznamy, protože došlo k chybě...</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="358"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="360"/>
         <source>no</source>
         <translation>ne</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="358"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="360"/>
         <source>yes</source>
         <translation>ano</translation>
     </message>
@@ -783,111 +783,111 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="134"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="245"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="257"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="246"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="258"/>
         <source>no</source>
         <translation>ne</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="147"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="257"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="618"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="148"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="258"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="619"/>
         <source>yes</source>
         <translation>ano</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="395"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="396"/>
         <source>Your reference number:</source>
         <translation>Vaše referenční číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="400"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="401"/>
         <source>Enter reference number:</source>
         <translation>Zadejte Vaše referenční číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="579"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="580"/>
         <source>Message contains Commercial messages (PDZ)</source>
         <translation>Zpráva obsahuje poštovní datové zprávy (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="580"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="581"/>
         <source>Your message contains %1 non-OVM recipients therefore these messages will be sent as aCommercial messages (PDZ)</source>
         <translation>Vaše zpráva obsahuje %1 ne-OVM příjmců, proto bude těmto příjemcům zpráva odeslaná v režimu placená Poštovní datová zpráva (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="584"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="585"/>
         <source>Do you want to send all messages?</source>
         <translation>Chcete opravdu odeslat tuto zprávu všem příjemcům?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="586"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="587"/>
         <source>Message contains Commercial message (PDZ)</source>
         <translation>Zpráva obsahuje poštovní datovou zprávu (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="587"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="588"/>
         <source>Your message contains %1 non-OVM recipient therefore this message will be sent as Commercial message (PDZ)</source>
         <translation>Vaše zpráva obsahuje %1 ne-OVM příjmce, proto bude tato zpráva odeslaná tomuto příjemci v režimu placená Poštovní datová zpráva (PDZ)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="591"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="592"/>
         <source>Do you want to send message?</source>
         <translation>Chcete opravdu odeslat zprávu tomuto příjemci?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="896"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
         <source>Message was sent</source>
         <translation>Zpráva byla odeslána</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="898"/>
         <source>Messages was sent into ISDS successfully.</source>
         <translation>Zpráva byla úspěšné odeslána do systému Datových schránek.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="929"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="930"/>
         <source>Send multiple message problem!</source>
         <translation>Problém při odesílání zprávy více příjemcům!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="933"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="934"/>
         <source>Send multiple message finished with an problem!</source>
         <translation>Nepodařilo se odeslat zprávu některým příjemcům!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="935"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="936"/>
         <source>It can be caused sending of the message to the unactivated databox or some of recipient does not exist.</source>
         <translation>Pravděpodobně některý z příjemců buď nemá momentálně aktivní datovou schránku nebo již neexistuje.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="938"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="939"/>
         <source>Download list of sent messages and check which recipients didn&apos;t receive your message.</source>
         <translation>Stáhněte seznam odesláných zpráv ze serveru Datové schránky a zjistěte, kteří přijemci Vaší zprávu neobdrželi.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="947"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="961"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="977"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="989"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="948"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="962"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="978"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="990"/>
         <source>It was not possible to send message to server Datové schránky.</source>
         <translation>Nebylo možné odeslat zprávu na server Datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="964"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="992"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1015"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="965"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="993"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1016"/>
         <source>ISDS error</source>
         <translation>Chyba ISDS</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="981"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="982"/>
         <source>Connection to the server timed out!</source>
         <translation>Nepodařilo se navázat spojení v předepsaném čase!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1002"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1013"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1003"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1014"/>
         <source>Sent message was refused by server Datové schránky.</source>
         <translation>Odeslaná zpráva byla odmítnuta serverem Datové schránky.</translation>
     </message>
@@ -896,42 +896,42 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">Problém s přílohou zprávy!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1006"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1017"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1007"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1018"/>
         <source>Server did not accept message for this databox and returned message back.</source>
         <translation>Server Datové schránky nepřijal zprávu do systému a vrátil ji zpět.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1009"/>
         <source>It can be caused by a wrong/unsupported MIME type of some file in the attachment or if an attachment contains an archive.</source>
         <translation>Pravděpodobně zpráva obsahuje špatné nebo nepodporované MIME typy některých přiložených souborů nebo obsahuje nějaký komprimovaný archiv.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1029"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1038"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1053"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1030"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1039"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1054"/>
         <source>It was not possible to send message to the server Datové schránky.</source>
         <translation>Nebylo možné odeslat zprávu na server Datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="950"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="980"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1004"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1032"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1041"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1055"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="951"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="981"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1005"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1033"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1056"/>
         <source>Error: </source>
         <translation>Chyba: </translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1034"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1045"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1057"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1035"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1046"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1058"/>
         <source>It was not possible create send message request because an internal error has occurred.</source>
         <translation>Nebylo možné vytvořit požadavek na odeslání nové zprávy na server Datové schránky, protože se vyskytla interní chyba aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1063"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1064"/>
         <source>Do you want to abort sending of the message and close the send message dialog?</source>
         <translation>Chcete ukončit odesílání této zprávy a zavřít okno s vytvořenou zprávou? </translation>
     </message>
@@ -940,7 +940,7 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">Chyba při odesílání zprávy více příjemcům!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="931"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="932"/>
         <source>It was not possible to send message to all recipients.</source>
         <translation>Zpráva nebyla odeslaná některým příjemcům.</translation>
     </message>
@@ -949,19 +949,19 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">Odeslaní zprávy více přijemcům skončilo s chybou!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="954"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="966"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="955"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="967"/>
         <source>Please check your credentials including the test-environment setting.</source>
         <translation>Prosím, zkontrolujte svoje přihlašovací údaje včetně nastavení testovacích účtů.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="956"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="968"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="957"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="969"/>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation>Je možné, že vypršela platnost vašeho hesla. V tomto případě potřebujete navštívit oficiální webové rozhraní Datových schránek a změnit ho.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="922"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="923"/>
         <source>Send message error!</source>
         <translation>Chyba při odeslání zprávy na server Datové schránky!</translation>
     </message>
@@ -970,7 +970,7 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">Nebylo možné odeslat zprávu na server Datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="951"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="952"/>
         <source>Authorization failed!</source>
         <translation>Chyba autorizace!</translation>
     </message>
@@ -979,14 +979,14 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation type="vanished">Chyba při odesílání zprávy - vypršel timeout!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="984"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="994"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="985"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="995"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation>Nebylo možné vytvořit spojení ve stanoveném čase.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="986"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="996"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="987"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="997"/>
         <source>Please check your internet connection and try again.</source>
         <translation>Prosím, zkontrolujte Vaše připojení k internetu a zkuste akci opakovat.</translation>
     </message>

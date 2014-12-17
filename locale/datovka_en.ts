@@ -678,12 +678,12 @@ The current search settings will thus probably yield no result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="358"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="360"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="358"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="360"/>
         <source>yes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -716,190 +716,190 @@ The current search settings will thus probably yield no result.</source>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="134"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="245"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="257"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="246"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="258"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="147"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="257"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="618"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="148"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="258"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="619"/>
         <source>yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="395"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="396"/>
         <source>Your reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="400"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="401"/>
         <source>Enter reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="579"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="580"/>
         <source>Message contains Commercial messages (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="580"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="581"/>
         <source>Your message contains %1 non-OVM recipients therefore these messages will be sent as aCommercial messages (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="584"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="585"/>
         <source>Do you want to send all messages?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="586"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="587"/>
         <source>Message contains Commercial message (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="587"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="588"/>
         <source>Your message contains %1 non-OVM recipient therefore this message will be sent as Commercial message (PDZ)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="591"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="592"/>
         <source>Do you want to send message?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="896"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
         <source>Message was sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="897"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="898"/>
         <source>Messages was sent into ISDS successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="929"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="930"/>
         <source>Send multiple message problem!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="933"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="934"/>
         <source>Send multiple message finished with an problem!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="935"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="936"/>
         <source>It can be caused sending of the message to the unactivated databox or some of recipient does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="938"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="939"/>
         <source>Download list of sent messages and check which recipients didn&apos;t receive your message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="947"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="961"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="977"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="989"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="948"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="962"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="978"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="990"/>
         <source>It was not possible to send message to server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="964"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="992"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1015"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="965"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="993"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1016"/>
         <source>ISDS error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="981"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="982"/>
         <source>Connection to the server timed out!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1002"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1013"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1003"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1014"/>
         <source>Sent message was refused by server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1006"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1017"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1007"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1018"/>
         <source>Server did not accept message for this databox and returned message back.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1009"/>
         <source>It can be caused by a wrong/unsupported MIME type of some file in the attachment or if an attachment contains an archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1029"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1038"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1053"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1030"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1039"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1054"/>
         <source>It was not possible to send message to the server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="950"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="980"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1004"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1032"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1041"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1055"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="951"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="981"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1005"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1033"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1056"/>
         <source>Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1034"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1045"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1057"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1035"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1046"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1058"/>
         <source>It was not possible create send message request because an internal error has occurred.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1063"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1064"/>
         <source>Do you want to abort sending of the message and close the send message dialog?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="931"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="932"/>
         <source>It was not possible to send message to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="954"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="966"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="955"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="967"/>
         <source>Please check your credentials including the test-environment setting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="956"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="968"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="957"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="969"/>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="922"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="923"/>
         <source>Send message error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="951"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="952"/>
         <source>Authorization failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="984"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="994"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="985"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="995"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="986"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="996"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="987"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="997"/>
         <source>Please check your internet connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
