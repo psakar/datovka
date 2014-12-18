@@ -1,4 +1,4 @@
-4.0.1 / xxx
+4.0.1 / 2014-12-18
  * Processing state drop-down menu is disabled on sent messages.
  * Fixed bug causing the application to crash during account database
    initialisation.
