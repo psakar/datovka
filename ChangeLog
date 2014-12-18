@@ -1,3 +1,7 @@
+4.0.1 / xxx
+ * Fixed bug causing the application to crash during account database
+   initialisation.
+
 4.0.0 / 2014-12-17
  * Fixed issues with message sorting.
  * Fixed double-click attachment opening by default application on Windows.

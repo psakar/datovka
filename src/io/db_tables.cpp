@@ -25,20 +25,27 @@ const QString & entryTypeStr(EntryType entryType)
 	static const QString text("TEXT");
 	static const QString boolean("BOOLEAN");
 	static const QString datetime("DATETIME");
+	static const QString date("DATE");
 	static const QString invalid;
 
 	switch (entryType) {
 	case DB_INTEGER:
+	case DB_INT_PROCESSING_STATE:
 		return integer;
 		break;
 	case DB_TEXT:
 		return text;
 		break;
 	case DB_BOOLEAN:
+	case DB_BOOL_READ_LOCALLY:
+	case DB_BOOL_ATTACHMENT_DOWNLOADED:
 		return boolean;
 		break;
 	case DB_DATETIME:
 		return datetime;
+		break;
+	case DB_DATE:
+		return date;
 		break;
 	default:
 		Q_ASSERT(0);
