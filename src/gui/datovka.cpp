@@ -439,6 +439,9 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	QString html;
 	DbMsgsTblModel *msgTblMdl = 0;
 
+	/* Disable the menu, re-enable only on received messages. */
+	ui->messageStateCombo->setEnabled(false);
+
 //	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -584,6 +587,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
+		ui->messageStateCombo->setEnabled(true);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		received = true;
@@ -734,7 +738,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	ui->signatureDetails->setEnabled(false);
 	ui->actionSave_attachment->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
-	ui->messageStateCombo->setEnabled(false);
+//	ui->messageStateCombo->setEnabled(false);
 
 	/* Disable model for attachment list. */
 	ui->messageAttachmentList->setModel(0);
@@ -748,9 +752,9 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 	const QAbstractItemModel *msgTblMdl = current.model();
 
-	/* Disable message/attachment related buttons. */
+	/* Enable message/attachment related buttons. */
 	ui->downloadComplete->setEnabled(true);
-	ui->messageStateCombo->setEnabled(true);
+//	ui->messageStateCombo->setEnabled(true);
 
 	if (0 != msgTblMdl) {
 		QModelIndex index = msgTblMdl->index(
