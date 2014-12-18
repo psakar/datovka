@@ -7,6 +7,9 @@
 QT += core gui network sql
 QT += printsupport
 
+TEMPLATE = app
+APP_NAME = datovka
+# VERSION must contain only three dot-separated numbers because of OS X deployment.
 VERSION = 4.0.1
 
 # Generate localisation.
@@ -51,10 +54,6 @@ DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"
 
-TEMPLATE = app
-
-APP_NAME = datovka
-
 unix {
 	isEmpty(PREFIX) {
 		PREFIX = "/usr/local"
@@ -74,7 +73,7 @@ unix {
 	application.files = $${APP_NAME}
 
 	desktop.path = "$${DATADIR}/applications"
-	desktop.files += datovka.desktop
+	desktop.files += deployment/datovka.desktop
 
 	icon16.path = "$${DATADIR}/icons/hicolor/16x16/apps"
 	icon16.files += "res/icons/16x16/datovka.png"
@@ -148,8 +147,13 @@ macx {
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
 	CONFIG += c++11
-	QMAKE_MAC_SDK=macosx10.7
+	QMAKE_MAC_SDK = macosx10.7
 	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
+
+	QMAKE_INFO_PLIST = deployment/datovka.plist
+	SED_EXT = -e
+	QMAKE_POST_LINK += sed -i "$${SED_EXT}" "s/@VERSION@/$${VERSION}/g" "./$${TARGET}.app/Contents/Info.plist";
+	QMAKE_POST_LINK += rm -f "./$${TARGET}.app/Contents/Info.plist$${SED_EXT}";
 
 	isEqual(STATIC, 1) {
 		QMAKE_CXXFLAGS += -arch i386
