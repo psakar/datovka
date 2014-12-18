@@ -7,6 +7,8 @@
 QT += core gui network sql
 QT += printsupport
 
+VERSION = 4.0.1
+
 # Generate localisation.
 system(lrelease datovka.pro)
 
@@ -46,7 +48,8 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 #LIBISDS_PREFIX = "$$HOME/third_party/built"
 
 DEFINES += \
-	DEBUG=1
+	DEBUG=1 \
+	VERSION=\\\"$${VERSION}\\\"
 
 TEMPLATE = app
 

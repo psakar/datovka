@@ -15,7 +15,6 @@
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
-#define VERSION "4.0.1"
 #define TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
