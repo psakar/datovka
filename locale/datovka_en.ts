@@ -3173,32 +3173,32 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="113"/>
+        <location filename="../src/models/accounts_model.cpp" line="115"/>
         <source>Accounts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="285"/>
+        <location filename="../src/models/accounts_model.cpp" line="297"/>
         <source>Recent Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="287"/>
+        <location filename="../src/models/accounts_model.cpp" line="299"/>
         <source>Recent Sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="289"/>
+        <location filename="../src/models/accounts_model.cpp" line="301"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="291"/>
+        <location filename="../src/models/accounts_model.cpp" line="303"/>
         <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="293"/>
+        <location filename="../src/models/accounts_model.cpp" line="305"/>
         <source>Sent</source>
         <translation type="unfinished"></translation>
     </message>
