@@ -1,3 +1,7 @@
+4.0.2 / 2014-12-19
+ * Fixed issue with missing account names that contained comma character.
+ * OS X package Info.plist contains application version.
+
 4.0.1 / 2014-12-18
  * Processing state drop-down menu is disabled on sent messages.
  * Fixed bug causing the application to crash during account database
