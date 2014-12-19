@@ -2,8 +2,10 @@
 
 #include <QDebug>
 #include <QRegExp>
+
 #include "accounts_model.h"
 #include "src/common.h"
+#include "src/log/log.h"
 
 
 /* ========================================================================= */
@@ -168,6 +170,8 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 void AccountModel::loadFromSettings(const QSettings &settings)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	QStringList groups = settings.childGroups();
 	QRegExp credRe(CREDENTIALS".*");
 	SettingsMap itemSettings;
@@ -180,8 +184,16 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 		/* Matches regular expression. */
 		if (credRe.exactMatch(groups.at(i))) {
 			itemSettings.clear();
+			/*
+			 * String containing comma character are loaded as
+			 * a string list.
+			 *
+			 * FIXME -- Any white-space characters trailing
+			 * the comma are lost.
+			 */
 			itemSettings.insert(NAME,
-			    settings.value(groups.at(i) + "/" + NAME, ""));
+			    settings.value(groups.at(i) + "/" + NAME,
+			        "").toStringList().join(", "));
 			itemSettings.insert(USER,
 			    settings.value(groups.at(i) + "/" + USER, ""));
 			itemSettings.insert(LOGIN,
