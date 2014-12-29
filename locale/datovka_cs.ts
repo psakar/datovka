@@ -3155,7 +3155,7 @@ povaha činí tuto možnost relativně neškodnou.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="382"/>
         <source>When account is opened, select</source>
-        <translation>Když je vyrán účet, tak označit</translation>
+        <translation>Když je vybrán účet, tak označit</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="394"/>
