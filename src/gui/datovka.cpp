@@ -73,9 +73,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_sent_2(200),
     m_sort_column(0),
     m_sort_order(""),
-    m_export_correspond_dir(""),
-    m_on_export_zfo_activate(""),
-    m_on_import_database_dir_activate(""),
+    m_save_attach_dir(QDir::homePath()),
+    m_export_correspond_dir(QDir::homePath()),
+    m_on_export_zfo_activate(QDir::homePath()),
+    m_on_import_database_dir_activate(QDir::homePath()),
     isMainWindow(false),
     ui(new Ui::MainWindow)
 {
@@ -469,6 +470,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	QString userName = accountUserName(accountItem);
 	MessageDb *messageDb = accountMessageDb(accountItem);
 
+	setAccountStoragePaths(accountItem);
+
 	//qDebug() << "Selected user account" << userName << dbDir;
 	//qDebug() << current.model() << accountItem->text();
 	//qDebug() << "\n";
@@ -645,6 +648,7 @@ setmodel:
 		Q_ASSERT(0);
 		break;
 	}
+
 	/* Set specific column width. */
 	received ? setReceivedColumnWidths() : setSentColumnWidths();
 }
@@ -960,6 +964,30 @@ void MainWindow::messageItemStoreSelection(long msgId)
 }
 
 
+
+/* ========================================================================= */
+/*
+ * Saves account export paths.
+ */
+void MainWindow::storeExportPath(void)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QModelIndex acntIdx = ui->accountList->currentIndex();
+	acntIdx = AccountModel::indexTop(acntIdx);
+	AccountModel::SettingsMap accountInfo =
+	    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	accountInfo.setLastAttachPath(m_save_attach_dir);
+	accountInfo.setLastCorrespPath(m_export_correspond_dir);
+	accountInfo.setLastZFOExportPath(m_on_export_zfo_activate);
+	ui->accountList->model()->setData(acntIdx, accountInfo,
+		    ROLE_ACNT_CONF_SETTINGS);
+	saveSettings();
+}
+
+
+
 /* ========================================================================= */
 /*
  * Saves message selection when model changes.
@@ -1207,14 +1235,19 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	QString fileName = fileNameIndex.data().toString();
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Remember directory? */
+
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"), fileName);
+	    tr("Save attachment"), m_save_attach_dir + "/" + fileName);
 
 	//qDebug() << "Selected file: " << fileName;
 
 	if (fileName.isEmpty()) {
 		return;
 	}
+
+	/* TODO - do we want to remember file path? */
+	//m_save_attach_dir = fileName;
+	//storeExportPath();
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
@@ -1266,12 +1299,15 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	    messageIndex.row(), 0).data().toString();
 
 	QString newdir = QFileDialog::getExistingDirectory(this,
-	    tr("Save attachments"), QDir::homePath(),
+	    tr("Save attachments"), m_save_attach_dir,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (newdir.isNull() || newdir.isEmpty()) {
 		return;
 	}
+
+	m_save_attach_dir = newdir;
+	storeExportPath();
 
 	bool success = true;
 
@@ -2077,6 +2113,41 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	Q_ASSERT(0 != db);
 
 	return db;
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Get storage paths to selected account item.
+ */
+void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	const QStandardItem *accountItemTop;
+
+	if (0 == accountItem) {
+		accountItem = m_accountModel.itemFromIndex(
+		    ui->accountList->selectionModel()->currentIndex());
+	}
+
+	accountItemTop = AccountModel::itemTop(accountItem);
+	Q_ASSERT(0 != accountItemTop);
+
+	const AccountModel::SettingsMap &itemSettings =
+	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!itemSettings[LASTATTACH].toString().isEmpty()) {
+		m_save_attach_dir = itemSettings[LASTATTACH].toString();
+	}
+	if (!itemSettings[LASTCORRESP].toString().isEmpty()) {
+		m_export_correspond_dir = itemSettings[LASTCORRESP].toString();
+	}
+	if (!itemSettings[LASTZFO].toString().isEmpty()) {
+		m_on_export_zfo_activate = itemSettings[LASTZFO].toString();
+	}
 }
 
 
@@ -4465,6 +4536,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 	    SLOT(setAndShowNotificationDialog(QList<QString>, int)));
 
 	correspondence_overview->exec();
+	storeExportPath();
 }
 
 /* ========================================================================= */
@@ -4554,6 +4626,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	/* remember path for settings */
 	dirPath = QFileInfo(fileName).absoluteDir();
 	m_on_export_zfo_activate = dirPath.absolutePath();
+	storeExportPath();
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
@@ -4706,6 +4779,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	/* remember path for settings */
 	dirPath = QFileInfo(fileName).absoluteDir();
 	m_on_export_zfo_activate = dirPath.absolutePath();
+	storeExportPath();
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
@@ -4770,6 +4844,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	/* remember path for settings */
 	dirPath = QFileInfo(fileName).absoluteDir();
 	m_on_export_zfo_activate = dirPath.absolutePath();
+	storeExportPath();
 
 	MessageDb *messageDb = accountMessageDb(0);
 
@@ -4828,6 +4903,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	/* remember path for settings */
 	dirPath = QFileInfo(fileName).absoluteDir();
 	m_on_export_zfo_activate = dirPath.absolutePath();
+	storeExportPath();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	QString userName = accountUserName();

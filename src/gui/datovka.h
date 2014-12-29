@@ -91,6 +91,11 @@ private slots:
 	void messageItemStoreSelection(long msgId);
 
 	/*!
+	 * @brief Saves account export paths.
+	 */
+	void storeExportPath(void);
+
+	/*!
 	 * @brief Saves message selection when model changes.
 	 */
 	void messageItemStoreSelectionOnModelChange(void);
@@ -549,6 +554,14 @@ private:
 	MessageDb * accountMessageDb(const QStandardItem *accountItem);
 
 	/*!
+	 * @brief Set export paths to selected account item.
+	 *
+	 * @note If accountItem is 0 then currently selected account is
+	 *     processed.
+	 */
+	void setAccountStoragePaths(const QStandardItem *accountItem);
+
+	/*!
 	 * @brief Delete message from long term storage in ISDS.
 	 */
 	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
@@ -658,6 +671,7 @@ private:
 	int m_sent_2;
 	int m_sort_column;
 	QString m_sort_order;
+	QString m_save_attach_dir;
 	QString m_export_correspond_dir;
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;

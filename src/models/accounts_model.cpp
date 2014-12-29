@@ -81,6 +81,28 @@ void AccountModel::SettingsMap::setLastMsg(const QString &dmId)
 
 
 /* ========================================================================= */
+void AccountModel::SettingsMap::setLastAttachPath(const QString &path)
+/* ========================================================================= */
+{
+	(*this)[LASTATTACH] = path;
+}
+
+/* ========================================================================= */
+void AccountModel::SettingsMap::setLastCorrespPath(const QString &path)
+/* ========================================================================= */
+{
+	(*this)[LASTCORRESP] = path;
+}
+
+/* ========================================================================= */
+void AccountModel::SettingsMap::setLastZFOExportPath(const QString &path)
+/* ========================================================================= */
+{
+	(*this)[LASTZFO] = path;
+}
+
+
+/* ========================================================================= */
 bool AccountModel::SettingsMap::testAccount(void) const
 /* ========================================================================= */
 {
@@ -102,6 +124,26 @@ QString AccountModel::SettingsMap::lastMsg(void) const
 	return (*this)[LASTMSG].toString();
 }
 
+/* ========================================================================= */
+QString AccountModel::SettingsMap::lastAttachPath(void) const
+/* ========================================================================= */
+{
+	return (*this)[LASTATTACH].toString();
+}
+
+/* ========================================================================= */
+QString AccountModel::SettingsMap::lastCorrespPath(void) const
+/* ========================================================================= */
+{
+	return (*this)[LASTCORRESP].toString();
+}
+
+/* ========================================================================= */
+QString AccountModel::SettingsMap::lastZFOExportPath(void) const
+/* ========================================================================= */
+{
+	return (*this)[LASTZFO].toString();
+}
 
 /* ========================================================================= */
 /*
@@ -218,6 +260,15 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.insert(LASTMSG,
 			    settings.value(groups.at(i) + "/" + LASTMSG,
 			        "").toString());
+			itemSettings.insert(LASTATTACH,
+			    settings.value(groups.at(i) + "/" + LASTATTACH,
+			        "").toString());
+			itemSettings.insert(LASTCORRESP,
+			    settings.value(groups.at(i) + "/" + LASTCORRESP,
+			        "").toString());
+			itemSettings.insert(LASTZFO,
+			    settings.value(groups.at(i) + "/" + LASTZFO,
+			        "").toString());
 
 			/* Associate map with item node. */
 			addAccount(itemSettings[NAME].toString(),
@@ -276,6 +327,27 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		    itemSettings.value(LASTMSG).isValid() &&
 		    !itemSettings.value(LASTMSG).toString().isEmpty()) {
 			settings.setValue(LASTMSG, itemSettings.value(LASTMSG));
+		}
+
+		/* save last attachments path */
+		if (!itemSettings.value(LASTATTACH).isNull() &&
+		    itemSettings.value(LASTATTACH).isValid() &&
+		    !itemSettings.value(LASTATTACH).toString().isEmpty()) {
+			settings.setValue(LASTATTACH, itemSettings.value(LASTATTACH));
+		}
+
+		/* save last corresopndence exprt path */
+		if (!itemSettings.value(LASTCORRESP).isNull() &&
+		    itemSettings.value(LASTCORRESP).isValid() &&
+		    !itemSettings.value(LASTCORRESP).toString().isEmpty()) {
+			settings.setValue(LASTCORRESP, itemSettings.value(LASTCORRESP));
+		}
+
+		/* save last ZFO exprt path */
+		if (!itemSettings.value(LASTZFO).isNull() &&
+		    itemSettings.value(LASTZFO).isValid() &&
+		    !itemSettings.value(LASTZFO).toString().isEmpty()) {
+			settings.setValue(LASTZFO, itemSettings.value(LASTZFO));
 		}
 
 		settings.endGroup();

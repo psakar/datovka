@@ -22,7 +22,9 @@
 #define SYNC "sync_with_all"
 #define P12FILE "p12file"
 #define LASTMSG "last_message_id"
-
+#define LASTATTACH "last_attach_path"
+#define LASTCORRESP "last_export_corresp_path"
+#define LASTZFO "last_export_zfo_path"
 
 /*!
  * @brief Account hierarchy.
@@ -41,9 +43,15 @@ public:
 		void setPassword(QString &pwd);
 		void setDirectory(const QString &path);
 		void setLastMsg(const QString &dmId);
+		void setLastAttachPath(const QString &path);
+		void setLastCorrespPath(const QString &path);
+		void setLastZFOExportPath(const QString &path);
 		bool testAccount(void) const;
 		QString certPath(void) const;
 		QString lastMsg(void) const;
+		QString lastAttachPath(void) const;
+		QString lastCorrespPath(void) const;
+		QString lastZFOExportPath(void) const;
 	};
 
 	/*
