@@ -5090,11 +5090,16 @@ void MainWindow::showSignatureDetails(void)
 /*
 * This is call if connection to ISDS fails. Message info for user is generated.
 */
-void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
+void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
+   QString isdsMsg)
 /* ========================================================================= */
 {
 	QString msgBoxTitle = "";
 	QString msgBoxContent = "";
+
+	if (isdsMsg.isNull() || isdsMsg.isEmpty()) {
+		isdsMsg = isds_strerror((isds_error)status);
+	}
 
 	switch(status) {
 	case IE_NOT_LOGGED_IN:
@@ -5102,6 +5107,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		msgBoxContent =
 		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
 		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
+		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("Please check your credentials including the test-"
 			"environment setting.") + "<br>" +
 		    tr("It is possible that your password has expired - "
@@ -5115,6 +5121,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		msgBoxContent =
 		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
 		    "<b>" + tr("Authorization via OTP failed!") + "</b>" + "<br><br>" +
+		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("Please check your credentials including the test-"
 			"environment setting.") + "<br>" +
 		    tr("It is aslo possible that your password has expired - "
@@ -5129,6 +5136,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		    tr("It was not possible to establish a connection "
 		    "within a set time.") + "<br><br>" +
 		    "<b>" + tr("Connection to ISDS timeout!") + "</b>" + "<br><br>" +
+		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("This is either caused by an extremely slow and/or "
 		    "unstable connection or by an improper setup.") + "<br>" +
 		    tr("Please check your internet connection and try again.")
@@ -5149,6 +5157,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		msgBoxContent =
 		    tr("It was not possible to establish a connection "
 		    "to server Datové Schránky.") + "<br><br>" +
+		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    "<b>" + tr("Datovka internal error!") + "</b>" + "<br><br>" +
 		    tr("Please check your internet connection and try again.");
 		break;
@@ -5160,6 +5169,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 		    tr("It was not possible a connection between your computer "
 		    "and the server of Datove schranky.") + "<br><br>" +
 		    "<b>" + tr("Connection to ISDS failed!") + "</b>" + "<br><br>" +
+		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("This is usually caused by either lack of internet "
 		    "connection or by a firewall on the way.") + "<br>" +
 		    tr("Please check your internet connection and try again.")
@@ -5181,7 +5191,7 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName)
 * Check if connection to ISDS fails.
 */
 bool MainWindow::checkConnectionError(int status, QString accountName,
-    bool showDialog)
+    bool showDialog, QString isdsMsg)
 /* ========================================================================= */
 {
 	switch (status) {
@@ -5193,7 +5203,7 @@ bool MainWindow::checkConnectionError(int status, QString accountName,
 		qDebug() << "Account" << accountName << ":"
 		    << isds_strerror((isds_error)status) << status;
 		if (showDialog) {
-			showConnectionErrorMessageBox(status, accountName);
+			showConnectionErrorMessageBox(status, accountName, isdsMsg);
 		}
 		return false;
 		break;
@@ -5234,8 +5244,11 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	status = isdsLoginUserName(isdsSessions.session(accountInfo.userName()),
 	    accountInfo.userName(), pwd, accountInfo.testAccount());
 
+	QString isdsMsg =
+	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+
 	return checkConnectionError(status, accountInfo.accountName(),
-	    showDialog);
+	    showDialog, isdsMsg);
 }
 
 
@@ -5272,8 +5285,11 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	    isdsSessions.session(accountInfo.userName()),
 	    certPath, accountInfo.testAccount());
 
+	QString isdsMsg =
+	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+
 	return checkConnectionError(status, accountInfo.accountName(),
-	    showDialog);
+	    showDialog, isdsMsg);
 }
 
 
@@ -5316,8 +5332,11 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	    accountInfo.userName(), pwd, certPath, accountInfo.testAccount());
 
 
+	QString isdsMsg =
+	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+
 	return checkConnectionError(status, accountInfo.accountName(),
-	    showDialog);
+	    showDialog, isdsMsg);
 }
 
 
@@ -5354,8 +5373,11 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
 	    idBox, certPath, accountInfo.testAccount());
 
+	QString isdsMsg =
+	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+
 	return checkConnectionError(status, accountInfo.accountName(),
-	    showDialog);
+	    showDialog, isdsMsg);
 }
 
 
@@ -5384,33 +5406,81 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 			pwd = accountInfoNew.password();
 			saveSettings();
-	} else {
+		} else {
 			return false;
 		}
 	}
-	/* sent OTP request */
-	status = isdsLoginUserOtp(
-	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd,
-	    accountInfo.testAccount(),
-	    accountInfo.loginMethod(),
-	    QString());
-	if (!checkConnectionError(status, accountInfo.accountName(), true)) {
-		return false;
-	}
-	bool ok;
+
 	QString code = "";
-	while (code.isEmpty()) {
-		code = QInputDialog::getText(this,
-		    tr("Server connection for ")
-		    + accountInfo.accountName(),
-		    tr("Enter security code for account ")
-		    + accountInfo.accountName()
-		    + " (" + accountInfo.userName() + ")",
-		    QLineEdit::Password, "", &ok,
-		    Qt::WindowStaysOnTopHint);
-		if (!ok) {
+
+	QString isdsMsg;
+	/* sent SMS request */
+	if (accountInfo.loginMethod() == "totp") {
+
+		QMessageBox::StandardButton reply = QMessageBox::question(this,
+		    tr("SMS code for account ") + accountInfo.accountName(),
+		    tr("Account requires"
+		    " authentication via SMS code.") +
+		    + "\n\n" +
+		    tr("Do you want to sent SMS code on your mobile phone?"),
+		    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+		if (reply == QMessageBox::No) {
 			return false;
+		}
+
+		status = isdsLoginUserOtp(
+		    isdsSessions.session(accountInfo.userName()),
+		    accountInfo.userName(), pwd,
+		    accountInfo.testAccount(),
+		    accountInfo.loginMethod(),
+		    QString());
+
+		if (status == IE_PARTIAL_SUCCESS) {
+			bool ok;
+			while (code.isEmpty()) {
+				code = QInputDialog::getText(this,
+				    tr("Enter SMS code for ")
+				    + accountInfo.accountName(),
+				    tr("SMS code has been sent "
+				    "on your mobile phone...") +
+				    "\n\n" +
+				    tr("Enter SMS code for account ")
+				    + accountInfo.accountName()
+				    + " (" + accountInfo.userName() + ")",
+				    QLineEdit::Password, "", &ok,
+				    Qt::WindowStaysOnTopHint);
+				if (!ok) {
+					return false;
+				}
+			}
+		} else {
+			isdsMsg = isds_long_message(
+			isdsSessions.session(accountInfo.userName()));
+			if (!checkConnectionError(status,
+			    accountInfo.accountName(), true, isdsMsg)) {
+				return false;
+			}
+		}
+
+	} else {
+	/* HOTP - hardware token is required */
+		bool ok;
+		while (code.isEmpty()) {
+			code = QInputDialog::getText(this,
+			    tr("Enter security code for ")
+			    + accountInfo.accountName(),
+			    tr("Account requires"
+			    " authentication with security code.") +
+			    + "\n\n" +
+			    tr("Enter security code for account ")
+			    + accountInfo.accountName()
+			    + " (" + accountInfo.userName() + ")",
+			    QLineEdit::Password, "", &ok,
+			    Qt::WindowStaysOnTopHint);
+			if (!ok) {
+				return false;
+			}
 		}
 	}
 
@@ -5420,8 +5490,10 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	    accountInfo.userName(), pwd,
 	    accountInfo.testAccount(), accountInfo.loginMethod(), code);
 
+	isdsMsg = isds_long_message(isdsSessions.session(accountInfo.userName()));
+
 	return checkConnectionError(status, accountInfo.accountName(),
-	    showDialog);
+	    showDialog, isdsMsg);
 }
 
 

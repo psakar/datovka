@@ -585,13 +585,14 @@ private:
 	/*!
 	 * @brief Show message info for user if connection to ISDS fails.
 	 */
-	void showConnectionErrorMessageBox(int status, QString accountName);
+	void showConnectionErrorMessageBox(int status, QString accountName,
+	    QString isdsMsg);
 
 	/*!
 	 * @brief Check if connection to ISDS fails.
 	 */
 	bool checkConnectionError(int status, QString accountName,
-	    bool showDialog);
+	    bool showDialog, QString isdsMsg);
 
 	/*!
 	 * @brief connect to ISDS databox from exist account

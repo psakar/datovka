@@ -338,7 +338,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	}
 	memset(otp, 0, sizeof(struct isds_otp));
 
-	if (otpMethod == "hopt") {
+	if (otpMethod == "hotp") {
 		otp->method = OTP_HMAC;
 	} else {
 		otp->method = OTP_TIME;
