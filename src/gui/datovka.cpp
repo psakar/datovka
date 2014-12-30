@@ -5105,8 +5105,11 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
 	case IE_NOT_LOGGED_IN:
 		msgBoxTitle = accountName + ": " + tr("Authentication error!");
 		msgBoxContent =
-		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
-		    "<b>" + tr("Authorization failed!") + "</b>" + "<br><br>" +
+		    tr("It was not possible to connect to your Databox "
+		    "from account \"%1\"").arg(accountName) + "." +
+		    + "<br><br>" +
+		    "<b>" + accountName + ": " + tr("Authorization failed!")
+		    + "</b>" + "<br><br>" +
 		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("Please check your credentials including the test-"
 			"environment setting.") + "<br>" +
@@ -5119,8 +5122,10 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
 		msgBoxTitle = accountName +
 		    ": " + tr("OTP authentication error!");
 		msgBoxContent =
-		    tr("It was not possible to connect to your Databox.") + "<br><br>" +
-		    "<b>" + tr("Authorization via OTP failed!") + "</b>" + "<br><br>" +
+		    tr("It was not possible to connect to your Databox.")
+		    + "<br><br>" +
+		    "<b>" + tr("Authorization via OTP failed!") + "</b>"
+		    + "<br><br>" +
 		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("Please check your credentials including the test-"
 			"environment setting.") + "<br>" +
@@ -5135,7 +5140,8 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
 		msgBoxContent =
 		    tr("It was not possible to establish a connection "
 		    "within a set time.") + "<br><br>" +
-		    "<b>" + tr("Connection to ISDS timeout!") + "</b>" + "<br><br>" +
+		    "<b>" + tr("Connection to ISDS timeout!") + "</b>"
+		    + "<br><br>" +
 		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
 		    tr("This is either caused by an extremely slow and/or "
 		    "unstable connection or by an improper setup.") + "<br>" +
@@ -5237,6 +5243,9 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 			pwd = accountInfoNew.password();
 			saveSettings();
 		} else {
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your databox form account \"%1\".")
+			    .arg(accountInfo.accountName()));
 			return false;
 		}
 	}
@@ -5277,6 +5286,9 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 			certPath = accountInfoNew.certPath();
 			saveSettings();
 		} else {
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your databox form account \"%1\".")
+			    .arg(accountInfo.accountName()));
 			return false;
 		}
 	}
@@ -5323,6 +5335,9 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 			pwd = accountInfoNew.password();
 			saveSettings();
 		} else {
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your databox form account \"%1\".")
+			    .arg(accountInfo.accountName()));
 			return false;
 		}
 	}
@@ -5367,6 +5382,9 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		idBox = accountInfoNew.userName();
 		saveSettings();
 	} else {
+		showStatusTextWithTimeout(tr("It was not possible to "
+		    "connect to your databox form account \"%1\".")
+		    .arg(accountInfo.accountName()));
 		return false;
 	}
 
@@ -5407,25 +5425,34 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			pwd = accountInfoNew.password();
 			saveSettings();
 		} else {
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your databox form account \"%1\".")
+			    .arg(accountInfo.accountName()));
 			return false;
 		}
 	}
 
 	QString code = "";
-
 	QString isdsMsg;
-	/* sent SMS request */
+
+	/* sent SMS request - TOTP */
 	if (accountInfo.loginMethod() == "totp") {
 
 		QMessageBox::StandardButton reply = QMessageBox::question(this,
 		    tr("SMS code for account ") + accountInfo.accountName(),
-		    tr("Account requires"
-		    " authentication via SMS code.") +
-		    + "\n\n" +
-		    tr("Do you want to sent SMS code on your mobile phone?"),
+		    tr("Account \"%1\" requires authentication via security code "
+		    "for connection to databox.").arg(accountInfo.accountName())
+		    + "<br/>" +
+		    tr("Security code will be sent you via Premium SMS.") +
+		    "<br/><br/>" +
+		    tr("Do you want to send Premium SMS with "
+		    "security code into your mobile phone?"),
 		    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
 		if (reply == QMessageBox::No) {
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your databox form account \"%1\".")
+			    .arg(accountInfo.accountName()));
 			return false;
 		}
 
@@ -5440,17 +5467,23 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			bool ok;
 			while (code.isEmpty()) {
 				code = QInputDialog::getText(this,
-				    tr("Enter SMS code for ")
-				    + accountInfo.accountName(),
-				    tr("SMS code has been sent "
-				    "on your mobile phone...") +
-				    "\n\n" +
-				    tr("Enter SMS code for account ")
+				    tr("Enter SMS security code"),
+				    tr("SMS security code for account \"%1\"<br/>"
+				    "has been sent on your mobile phone...")
+				    .arg(accountInfo.accountName())
+				     + "<br/><br/>" +
+				    tr("Enter SMS security code for account")
+				    + "<br/><b>"
 				    + accountInfo.accountName()
-				    + " (" + accountInfo.userName() + ")",
+				    + " </b>(" + accountInfo.userName() + ").",
 				    QLineEdit::Password, "", &ok,
 				    Qt::WindowStaysOnTopHint);
 				if (!ok) {
+					showStatusTextWithTimeout(
+					    tr("It was not possible to "
+					    "connect to your databox form "
+					    "account \"%1\".")
+					    .arg(accountInfo.accountName()));
 					return false;
 				}
 			}
@@ -5459,6 +5492,11 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			isdsSessions.session(accountInfo.userName()));
 			if (!checkConnectionError(status,
 			    accountInfo.accountName(), true, isdsMsg)) {
+				showStatusTextWithTimeout(
+				    tr("It was not possible to "
+				    "connect to your databox form "
+				    "account \"%1\".")
+				    .arg(accountInfo.accountName()));
 				return false;
 			}
 		}
@@ -5468,18 +5506,24 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		bool ok;
 		while (code.isEmpty()) {
 			code = QInputDialog::getText(this,
-			    tr("Enter security code for ")
-			    + accountInfo.accountName(),
-			    tr("Account requires"
-			    " authentication with security code.") +
-			    + "\n\n" +
-			    tr("Enter security code for account ")
+			    tr("Enter OTP security code"),
+			    tr("Account \"%1\" requires authentication via OTP "
+			    "<br/> security code for connection to databox.")
+			    .arg(accountInfo.accountName()) + "<br/><br/>" +
+			    tr("Enter OTP security code for account")
+			    + "<br/><b>"
 			    + accountInfo.accountName()
-			    + " (" + accountInfo.userName() + ")",
+			    + " </b>(" + accountInfo.userName() + ").",
 			    QLineEdit::Password, "", &ok,
 			    Qt::WindowStaysOnTopHint);
 			if (!ok) {
+				showStatusTextWithTimeout(
+				    tr("It was not possible to "
+				    "connect to your databox form "
+				    "account \"%1\".").
+				    arg(accountInfo.accountName()));
 				return false;
+
 			}
 		}
 	}
