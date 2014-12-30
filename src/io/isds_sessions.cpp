@@ -316,7 +316,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &otpMethod, const QString &otpCode)
+    const QString &otpMethod, const QString &otpCode, isds_otp_resolution &res)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -359,6 +359,8 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
 	    userName.toStdString().c_str(), pwd.toStdString().c_str(),
 	    NULL, otp);
+
+	res = otp->resolution;
 
 	free(otp->otp_code);
 	free(otp);

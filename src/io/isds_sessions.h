@@ -97,7 +97,7 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &otpMethod, const QString &otpCode);
+    const QString &otpMethod, const QString &otpCode, isds_otp_resolution &res);
 
 /*!
  * @brief Add items into isds_PersonName structure.
