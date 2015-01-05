@@ -3,6 +3,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
@@ -995,7 +996,7 @@ void MainWindow::storeExportPath(void)
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
 	accountInfo.setLastZFOExportPath(m_on_export_zfo_activate);
 	ui->accountList->model()->setData(acntIdx, accountInfo,
-		    ROLE_ACNT_CONF_SETTINGS);
+	    ROLE_ACNT_CONF_SETTINGS);
 	saveSettings();
 }
 
@@ -1258,9 +1259,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 		return;
 	}
 
-	/* TODO - do we want to remember file path? */
-	//m_save_attach_dir = fileName;
-	//storeExportPath();
+	m_save_attach_dir = QFileInfo(fileName).absoluteDir().absolutePath();
+	storeExportPath();
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
@@ -1311,15 +1311,15 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	QString dmId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toString();
 
-	QString newdir = QFileDialog::getExistingDirectory(this,
+	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Save attachments"), m_save_attach_dir,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (newdir.isNull() || newdir.isEmpty()) {
+	if (newDir.isNull() || newDir.isEmpty()) {
 		return;
 	}
 
-	m_save_attach_dir = newdir;
+	m_save_attach_dir = newDir;
 	storeExportPath();
 
 	bool success = true;
@@ -1345,7 +1345,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		QString fileName = fileNameIndex.data().toString();
 		Q_ASSERT(!fileName.isEmpty());
 
-		fileName = newdir + "/" + fileName;
+		fileName = newDir + "/" + fileName;
 
 		QFile fout(fileName);
 		if (!fout.open(QIODevice::WriteOnly)) {
@@ -4478,7 +4478,6 @@ void MainWindow::viewMessageFromZFO(void)
 	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
 	QDialog *viewDialog;
-	QDir dirPath;
 
 	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), m_on_export_zfo_activate,
@@ -4488,8 +4487,8 @@ void MainWindow::viewMessageFromZFO(void)
 		goto fail;
 	}
 
-	dirPath = QFileInfo(fileName).absoluteDir();
-	m_on_export_zfo_activate = dirPath.absolutePath();
+	m_on_export_zfo_activate =
+	    QFileInfo(fileName).absoluteDir().absolutePath();
 
 	dummy_session = isds_ctx_create();
 	if (NULL == dummy_session) {
@@ -4626,8 +4625,6 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		}
 	}
 
-	QDir dirPath;
-
 	QString fileName = m_on_export_zfo_activate + "/" +
 	    "DDZ_" + dmId + ".zfo";
 
@@ -4643,8 +4640,8 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	}
 
 	/* remember path for settings */
-	dirPath = QFileInfo(fileName).absoluteDir();
-	m_on_export_zfo_activate = dirPath.absolutePath();
+	m_on_export_zfo_activate =
+	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
 	QFile fout(fileName);
@@ -4778,8 +4775,6 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		}
 	}
 
-	QDir dirPath;
-
 	QString fileName = m_on_export_zfo_activate + "/" +
 	    "DDZ_" + dmId + "_info.zfo";
 
@@ -4796,8 +4791,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	}
 
 	/* remember path for settings */
-	dirPath = QFileInfo(fileName).absoluteDir();
-	m_on_export_zfo_activate = dirPath.absolutePath();
+	m_on_export_zfo_activate =
+	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
 	QFile fout(fileName);
@@ -4844,8 +4839,6 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QDir dirPath;
-
 	QString fileName = m_on_export_zfo_activate + "/" +
 	    "DD_" + dmId + ".pdf";
 
@@ -4861,8 +4854,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	}
 
 	/* remember path for settings */
-	dirPath = QFileInfo(fileName).absoluteDir();
-	m_on_export_zfo_activate = dirPath.absolutePath();
+	m_on_export_zfo_activate =
+	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
 	MessageDb *messageDb = accountMessageDb(0);
@@ -4904,8 +4897,6 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QDir dirPath;
-
 	QString fileName = m_on_export_zfo_activate + "/" +
 	    "OZ_" + dmId + ".pdf";
 
@@ -4920,8 +4911,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	}
 
 	/* remember path for settings */
-	dirPath = QFileInfo(fileName).absoluteDir();
-	m_on_export_zfo_activate = dirPath.absolutePath();
+	m_on_export_zfo_activate =
+	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
 	MessageDb *messageDb = accountMessageDb(0);

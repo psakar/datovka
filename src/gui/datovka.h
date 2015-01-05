@@ -91,11 +91,6 @@ private slots:
 	void messageItemStoreSelection(long msgId);
 
 	/*!
-	 * @brief Saves account export paths.
-	 */
-	void storeExportPath(void);
-
-	/*!
 	 * @brief Saves message selection when model changes.
 	 */
 	void messageItemStoreSelectionOnModelChange(void);
@@ -478,6 +473,11 @@ private:
 	 * @brief Set sent message column widths.
 	 */
 	void setSentColumnWidths(void);
+
+	/*!
+	 * @brief Saves account export paths.
+	 */
+	void storeExportPath(void);
 
 	/*!
 	 * @brief Store geometry to settings.
