@@ -238,6 +238,15 @@ void DlgDsSearch::searchDataBox(void)
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
 
+	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
+		QMessageBox::information(this, tr("Search result"),
+		    tr("This is a special ID for system databox of "
+		    "Datové schránky. You can't use this ID for "
+		    "message delivery. Try again."),
+		    QMessageBox::Ok);
+		return;
+	}
+
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_list *boxes = NULL;

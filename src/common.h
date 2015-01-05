@@ -10,6 +10,7 @@
 
 #define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
 
+#define ID_ISDS_SYS_DATABOX "aaaaaaa"
 #define ICON_14x14_PATH ":/icons/14x14/"
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
