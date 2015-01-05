@@ -187,7 +187,11 @@
          <number>1</number>
         </property>
         <item>
-         <widget class="QLineEdit" name="dmLegalTitleLaw"/>
+         <widget class="QLineEdit" name="dmLegalTitleLaw">
+          <property name="toolTip">
+           <string>Number of law</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_2">
@@ -197,7 +201,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="dmLegalTitleYear"/>
+         <widget class="QLineEdit" name="dmLegalTitleYear">
+          <property name="toolTip">
+           <string>Year of law</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_3">
@@ -207,7 +215,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="dmLegalTitleSect"/>
+         <widget class="QLineEdit" name="dmLegalTitleSect">
+          <property name="toolTip">
+           <string>Section of law</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_4">
@@ -217,7 +229,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="dmLegalTitlePar"/>
+         <widget class="QLineEdit" name="dmLegalTitlePar">
+          <property name="toolTip">
+           <string>Paragraph of the corresponding section of the law</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_5">
@@ -227,7 +243,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="dmLegalTitlePoint"/>
+         <widget class="QLineEdit" name="dmLegalTitlePoint">
+          <property name="toolTip">
+           <string>Letter of the paragraph</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -496,6 +516,9 @@ message is considered as delivered after
        <bold>false</bold>
       </font>
      </property>
+     <property name="toolTip">
+      <string>Include sender identification</string>
+     </property>
      <property name="text">
       <string>Include sender identification</string>
      </property>
@@ -514,6 +537,11 @@ message is considered as delivered after
        <weight>50</weight>
        <bold>false</bold>
       </font>
+     </property>
+     <property name="toolTip">
+      <string>You will pay the transfer charges of the reply message.
+This is useful when the recipient does not have sending
+of postal data messages active.</string>
      </property>
      <property name="text">
       <string>Pay transfer charges for reply</string>

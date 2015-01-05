@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>314</height>
+    <height>322</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -60,7 +60,11 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="accountLineEdit"/>
+      <widget class="QLineEdit" name="accountLineEdit">
+       <property name="toolTip">
+        <string>You can give a descriptive name to your account.</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="Line" name="Line_0">
@@ -94,6 +98,11 @@
      </item>
      <item row="3" column="1">
       <widget class="QCheckBox" name="testAccountCheckBox">
+       <property name="toolTip">
+        <string>If the credentials you entered are for a test account,
+select this option. For normal account
+(created at a Czech Point) leave this unchecked.</string>
+       </property>
        <property name="text">
         <string>This is a test account</string>
        </property>
@@ -145,6 +154,12 @@
      </item>
      <item row="8" column="1">
       <widget class="QCheckBox" name="rememberPswcheckBox">
+       <property name="toolTip">
+        <string>The password will be saved in a readable form in the 
+configuration file of Datovka in your home directory.
+Do not use this unless you are pretty sure about
+your account security.</string>
+       </property>
        <property name="text">
         <string>Remember password</string>
        </property>
