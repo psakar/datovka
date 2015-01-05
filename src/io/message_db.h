@@ -345,6 +345,13 @@ public:
 	    const QString messtype);
 
 	/*!
+	 * @brief Update exist message envelope delivery info in db.
+	 */
+	bool msgsUpdateMessageDeliveryInfo(int dmId,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    int dmMessageStatus);
+
+	/*!
 	 * @brief Insert/update message files into files table.
 	 */
 	bool msgsInsertUpdateMessageFile(int dmId,

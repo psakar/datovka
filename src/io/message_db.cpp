@@ -2847,6 +2847,44 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 }
 
 
+
+/* ========================================================================= */
+/*
+ * Update exist message envelope delivery info in db.
+ */
+bool MessageDb::msgsUpdateMessageDeliveryInfo(int dmId,
+    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+    int dmMessageStatus)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "UPDATE messages SET "
+	    "dmDeliveryTime = :dmDeliveryTime, "
+	    "dmAcceptanceTime = :dmAcceptanceTime, "
+	    "dmMessageStatus = :dmMessageStatus "
+	    "WHERE dmID = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		/* TODO -- Handle error. */
+		qDebug() << "Update messages error:" << query.lastError();
+		return false;
+	}
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
+	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
+	query.bindValue(":dmMessageStatus", dmMessageStatus);
+
+	if (!query.exec()) {
+		qDebug() << "Update messages error:" << query.lastError();
+		return false;
+	}
+
+	return true;
+}
+
+
 /* ========================================================================= */
 /*
  * Close database file.

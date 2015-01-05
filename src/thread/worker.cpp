@@ -542,8 +542,6 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 		stateList = stateList->next;
 	}
 
-	stateListFirst = stateList;
-
 	emit valueChanged(label, 30);
 
 	int delta = 0;
@@ -612,6 +610,25 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 	/* TODO - if signedMsg == true then decode signed message (raw ) */
 
 	int dmID = atoi(message->envelope->dmID);
+
+
+	QString dmDeliveryTime = "";
+	if (0 != message->envelope->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    message->envelope->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != message->envelope->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    message->envelope->dmAcceptanceTime);
+	}
+
+	/* Update message envelope delivery info in db. */
+	(messageDb.msgsUpdateMessageDeliveryInfo(dmID,
+	    dmDeliveryTime, dmAcceptanceTime,
+	    convertHexToDecIndex(*message->envelope->dmMessageStatus)))
+	    ? qDebug() << "Message envelope delivery info was updated..."
+	    : qDebug() << "ERROR: Message envelope delivery info update!";
 
 	struct isds_list *event;
 	event = message->envelope->events;
