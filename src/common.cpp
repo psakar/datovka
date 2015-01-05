@@ -264,6 +264,26 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 QString GlobPreferences::confDir(void) const
 /* ========================================================================= */
 {
+#ifdef PORTABLE_APPLICATION
+	QString dirPath;
+
+	/* Search in application location. */
+	dirPath = QCoreApplication::applicationDirPath();
+#  ifdef Q_OS_OSX
+	{
+		QDir directory(dirPath);
+		if ("MacOS" == directory.dirName()) {
+			directory.cdUp();
+		}
+		dirPath = directory.absolutePath() + QDir::separator() +
+		    "Resources";
+	}
+#  endif /* Q_OS_OSX */
+
+	dirPath += QDir::separator() + confSubdir;
+	return dirPath;
+
+#else /* !PORTABLE_APPLICATION */
 	QDir homeDir(QDir::homePath());
 
 	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(confSubdir)) {
@@ -271,7 +291,8 @@ QString GlobPreferences::confDir(void) const
 		homeDir.cd(WIN_PREFIX);
 	}
 
-	return homeDir.path() + "/" + confSubdir;
+	return homeDir.path() + QDir::separator() + confSubdir;
+#endif /* PORTABLE_APPLICATION */
 }
 
 

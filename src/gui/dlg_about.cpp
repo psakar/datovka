@@ -31,6 +31,10 @@ aboutDialog::aboutDialog(QWidget *parent) :
 void aboutDialog::initAboutDialog(void)
 /* ========================================================================= */
 {
+#ifdef PORTABLE_APPLICATION
+	this->labelDatovka->setText(this->labelDatovka->text() + " - " +
+	    tr("Portable version"));
+#endif /* PORTABLE_APPLICATION */
 	this->labelVersionNum->setText(VERSION);
 
 	QString url = "<a href=\"" + QString(DATOVKA_ONLINE_HELP_URL) + "\">" +

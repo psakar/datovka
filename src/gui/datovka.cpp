@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QInputDialog>
+#include <QMenu>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -81,6 +82,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
+
+	/* Window title. */
+	setWindowTitle(tr(
+	    "Datovka - Free interface for Datov\303\251 schr\303\241nky"));
+#ifdef PORTABLE_APPLICATION
+	setWindowTitle(windowTitle() + " - " + tr("Portable version"));
+#endif /* PORTABLE_APPLICATION */
 
 	/* Generate messages search filter */
 	QWidget *spacer = new QWidget();
@@ -665,6 +673,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
+	QAction *action;
 
 	if (index.isValid()) {
 		menu->addAction(
@@ -696,9 +705,13 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    tr("Move account down"),
 		    this, SLOT(moveSelectedAccountDown()));
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
+		action = menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "folder_16.png"),
 		    tr("Change data directory"),
 		    this, SLOT(changeDataDirectory()));
+#ifdef PORTABLE_APPLICATION
+		action->setEnabled(false);
+#endif /* PORTABLE_APPLICATION */
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
@@ -2043,6 +2056,9 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 	QString html = "<br><center>";
 	html += "<h2>" +
 	    tr("Datovka - Free interface for Datové schránky") + "</h2>";
+#ifdef PORTABLE_APPLICATION
+	html += "<h3>" + tr("Portable version") + "</h3>";
+#endif /* PORTABLE_APPLICATION */
 	html += strongAccountInfoLine(tr("Version"), version);
 	html += QString("<br><img src=") + ICON_128x128_PATH +
 	    "datovka.png />";
@@ -2298,6 +2314,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(moveSelectedAccountDown()));
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
+#ifdef PORTABLE_APPLICATION
+	ui->actionChange_data_directory->setEnabled(false);
+#endif /* PORTABLE_APPLICATION */
 
 	/* Message. */
 	connect(ui->actionDownload_message_signed, SIGNAL(triggered()), this,

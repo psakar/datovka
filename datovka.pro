@@ -192,6 +192,11 @@ macx {
 		additional
 }
 
+!isEmpty(PORTABLE_APPLICATION) {
+	warning(Building portable version.)
+	DEFINES += PORTABLE_APPLICATION=1
+}
+
 win32 {
         RC_FILE += res/icon.rc
 

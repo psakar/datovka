@@ -21,7 +21,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Datovka - Free interface for Datové schránky</string>
+   <string>Datovka</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
