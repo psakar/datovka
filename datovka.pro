@@ -110,17 +110,20 @@ unix {
 		LOCALE_INST_DIR="\"\\\"$${LOCALE_INST_DIR}\\\"\"" \
 		TEXT_FILES_INST_DIR="\"\\\"$${TEXT_FILES_INST_DIR}\\\"\""
 
-	INSTALLS += application \
-		desktop \
-		icon16 \
-		icon24 \
-		icon32 \
-		icon48 \
-		icon64 \
-		icon128 \
-		icon256 \
-		localisation \
-		additional
+	# Portable version cannot be installed.
+	isEmpty(PORTABLE_APPLICATION) {
+		INSTALLS += application \
+			desktop \
+			icon16 \
+			icon24 \
+			icon32 \
+			icon48 \
+			icon64 \
+			icon128 \
+			icon256 \
+			localisation \
+			additional
+	}
 }
 
 QMAKE_CXXFLAGS = \
@@ -138,6 +141,12 @@ isEqual(STATIC, 1) {
 } else {
 	INCLUDEPATH += \
 		/usr/include/libxml2
+}
+
+!isEmpty(PORTABLE_APPLICATION) {
+	warning(Building portable version.)
+	DEFINES += PORTABLE_APPLICATION=1
+	TARGET = $${APP_NAME}-portable
 }
 
 macx {
@@ -190,11 +199,6 @@ macx {
 	QMAKE_BUNDLE_DATA +=\
 		localisation \
 		additional
-}
-
-!isEmpty(PORTABLE_APPLICATION) {
-	warning(Building portable version.)
-	DEFINES += PORTABLE_APPLICATION=1
 }
 
 win32 {
