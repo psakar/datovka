@@ -899,14 +899,13 @@ finish:
 		    QMessageBox::Ok);
 
 		isds_message_free(&sent_message);
+		this->accept(); /* Set return code to accepted. */
+		return;
+	} else if (showErrorMessageBox((int)status, isdsMsg) ==
+	           QMessageBox::Yes) {
+		isds_message_free(&sent_message);
 		this->close();
 		return;
-	} else {
-		if (showErrorMessageBox((int)status, isdsMsg) == QMessageBox::Yes) {
-			isds_message_free(&sent_message);
-			this->close();
-			return;
-		};
 	}
 
 
