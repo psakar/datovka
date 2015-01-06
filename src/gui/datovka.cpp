@@ -54,6 +54,7 @@
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
+#include "src/gui/dlg_import_zfo.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -103,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_export_correspond_dir(QDir::homePath()),
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
+    m_import_zfo_path(QDir::homePath()),
     isMainWindow(false),
     ui(new Ui::MainWindow)
 {
@@ -2402,6 +2404,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(viewMessageFromZFO()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
 	    SLOT(exportCorrespondenceOverview()));
+	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
+	    SLOT(prepareImportZFOintoDatabase()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -4036,6 +4040,19 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		}
 	} else if (IE_INVAL == status) {
 		qDebug() << "Error: " << status << isds_strerror(status);
+		MessageDb *messageDb = accountMessageDb(0);
+		int dmID = atoi(dmId.toStdString().c_str());
+		if (messageDb->msgsDeleteMessageData(dmID)) {
+			qDebug() << "Message" << dmID <<
+			    "was deleted from ISDS and db";
+			showStatusTextWithTimeout(tr("Message \"%1\" was "
+			    "deleted from ISDS and db.").arg(dmID));
+			return Q_SUCCESS;
+		} else {
+			qDebug() << "Message" << dmID <<
+			    "was deleted from ISDS and db";
+			return Q_SQL_ERROR;
+		}
 		return Q_ISDS_ERROR;
 	} else {
 		return Q_ISDS_ERROR;
@@ -4692,6 +4709,374 @@ void MainWindow::exportCorrespondenceOverview(void)
 	correspondence_overview->exec();
 	storeExportPath();
 }
+
+
+/* ========================================================================= */
+/*
+ * Prepare import ZFO file(s) into database.
+ */
+void MainWindow::prepareImportZFOintoDatabase(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QDialog *importZfo = new ImportZFODialog(this);
+	connect(importZfo,
+	    SIGNAL(returnZFOAction(int)), this,
+	    SLOT(createZFOListForImport(int)));
+	importZfo->exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Execute the import ZFO file(s) into database.
+ */
+void MainWindow::executeImportZFOintoDatabase(QStringList files)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	int fileCnt = files.size();
+
+	if (fileCnt == 0) {
+		return;
+	}
+
+	/*
+	 * First import phase:
+	 * Recognize target database for import of ZFO and type of message
+	 * {sent,received}
+	 */
+
+	accountDataStruct accountData;
+	QList<accountDataStruct> accountList;
+	accountList.clear();
+
+	int accountCount = ui->accountList->model()->rowCount();
+	QString userName;
+
+	/* get username and ID of databox for all accounts from DB */
+	for (int i = 0; i < accountCount; i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+		MessageDb *messageDb = accountMessageDb(accountItem);
+
+		userName = accountInfo.userName();
+		accountData.username = userName;
+		accountData.databoxID = m_accountDb.dbId(userName + "___True");
+		accountData.messageDb = messageDb;
+		accountList.append(accountData);
+	}
+
+	/* for every ZFO file detect its database and message type */
+	for (int i = 0; i < fileCnt; ++i) {
+
+		struct isds_message *message = NULL;
+		struct isds_ctx *dummy_session = NULL;
+
+		dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			qDebug() << "Cannot create dummy ISDS session.";
+		}
+
+		message = loadZfoFile(dummy_session, files.at(i));
+		if (NULL == message) {
+			qDebug() << "Cannot parse file" << files.at(i);
+			QMessageBox::warning(this,
+			    tr("Content parsing error"),
+			    tr("Cannot parse the content of ") + files.at(i) +
+			     ".", QMessageBox::Ok);
+			/* TODO */
+			continue;
+		}
+
+		Q_ASSERT(message->envelope);
+
+		QString dbIDSender = message->envelope->dbIDSender;
+		QString dbIDRecipient = message->envelope->dbIDRecipient;
+
+		/* save database username where message will be inserted */
+		QString isSent;
+		QString isReceived;
+		int dmId = atoi(message->envelope->dmID);
+
+		/* message type recognization {sent,received} */
+		for (int i = 0; i < accountList.size(); i++) {
+
+			/* sent */
+			if (accountList.at(i).databoxID == dbIDSender) {
+				isSent = accountList.at(i).username;
+				qDebug() << dmId << "isSent" << isSent;
+				if (!accountList.at(i).messageDb->isInMessageDb(dmId)) {
+					InsertZFOmsgIntoDb(message,
+					    accountList.at(i).messageDb, "sent");
+				} else {
+					/* TODO - show dialog */
+				}
+			}
+
+			/* received */
+			if (accountList.at(i).databoxID == dbIDRecipient) {
+				isReceived = accountList.at(i).username;
+				qDebug() << dmId << "isReceived" << isReceived;
+				if (!accountList.at(i).messageDb->isInMessageDb(dmId)) {
+					InsertZFOmsgIntoDb(message,
+					    accountList.at(i).messageDb, "received");
+				} else {
+					/* TODO - show dialog */
+				}
+			}
+		}
+
+		if (isReceived.isNull() && isSent.isNull()) {
+			qDebug() << dmId << "Error: database for "
+			    "message doesn't exists";
+			/* TODO - error, database not exists */
+			continue;
+		}
+
+	// +++
+
+		isds_message_free(&message);
+		isds_ctx_free(&dummy_session);
+	}
+}
+
+/* ========================================================================= */
+/*
+ * Insert ZFO message into database.
+ */
+bool MainWindow::InsertZFOmsgIntoDb(struct isds_message *message,
+    MessageDb *messageDb, QString messageType)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	bool ret = false;
+
+	int dmId = atoi(message->envelope->dmID);
+
+	ret = messageDb->msgsInsertUpdateMessageRaw(dmId,
+	    QByteArray((char*)message->raw, message->raw_length), 0);
+
+	ret ? qDebug() << "Message raw data were updated..."
+	: qDebug() << "ERROR: Message raw data update!";
+
+	QString timestamp = QByteArray((char *)message->envelope->timestamp,
+	    message->envelope->timestamp_length).toBase64();
+	QString dmAmbiguousRecipient;
+	if (0 == message->envelope->dmAmbiguousRecipient) {
+		dmAmbiguousRecipient = "0";
+	} else {
+		dmAmbiguousRecipient = QString::number(
+		    *message->envelope->dmAmbiguousRecipient);
+	}
+	QString dmLegalTitleYear;
+	if (0 == message->envelope->dmLegalTitleYear) {
+		dmLegalTitleYear = "";
+	} else {
+		dmLegalTitleYear = QString::number(
+		    *message->envelope->dmLegalTitleYear);
+	}
+	QString dmLegalTitleLaw;
+	if (0 == message->envelope->dmLegalTitleLaw) {
+		dmLegalTitleLaw = "";
+	} else {
+		dmLegalTitleLaw = QString::number(
+		    *message->envelope->dmLegalTitleLaw);
+	}
+	QString dmSenderOrgUnitNum;
+	if (0 == message->envelope->dmSenderOrgUnitNum) {
+		dmSenderOrgUnitNum = "";
+	} else {
+		dmSenderOrgUnitNum =
+		    *message->envelope->dmSenderOrgUnitNum != 0
+		    ? QString::number(*message->envelope->
+		    dmSenderOrgUnitNum) : "";
+	}
+	QString dmRecipientOrgUnitNum;
+	if (0 == message->envelope->dmRecipientOrgUnitNum) {
+		dmRecipientOrgUnitNum = "";
+	} else {
+		dmRecipientOrgUnitNum =
+		  *message->envelope->dmRecipientOrgUnitNum != 0
+		    ? QString::number(*message->envelope->
+		    dmRecipientOrgUnitNum) : "";
+	}
+	QString dmDeliveryTime = "";
+	if (0 != message->envelope->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    message->envelope->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != message->envelope->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    message->envelope->dmAcceptanceTime);
+	}
+
+	(messageDb->msgsInsertMessageEnvelope(dmId,
+	    "tReturnedMessage",
+	    message->envelope->dbIDSender,
+	    message->envelope->dmSender,
+	    message->envelope->dmSenderAddress,
+	    (int)*message->envelope->dmSenderType,
+	    message->envelope->dmRecipient,
+	    message->envelope->dmRecipientAddress,
+	    dmAmbiguousRecipient,
+	    message->envelope->dmSenderOrgUnit,
+	    dmSenderOrgUnitNum,
+	    message->envelope->dbIDRecipient,
+	    message->envelope->dmRecipientOrgUnit,
+	    dmRecipientOrgUnitNum,
+	    message->envelope->dmToHands,
+	    message->envelope->dmAnnotation,
+	    message->envelope->dmRecipientRefNumber,
+	    message->envelope->dmSenderRefNumber,
+	    message->envelope->dmRecipientIdent,
+	    message->envelope->dmSenderIdent,
+	    dmLegalTitleLaw,
+	    dmLegalTitleYear,
+	    message->envelope->dmLegalTitleSect,
+	    message->envelope->dmLegalTitlePar,
+	    message->envelope->dmLegalTitlePoint,
+	    message->envelope->dmPersonalDelivery,
+	    message->envelope->dmAllowSubstDelivery,
+	    timestamp,
+	    dmDeliveryTime,
+	    dmAcceptanceTime,
+	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
+	    (int)*message->envelope->dmAttachmentSize,
+	    message->envelope->dmType,
+	    messageType))
+	? qDebug() << "Message" << dmId  << "was inserted into db..."
+	: qDebug() << "ERROR: Message " << dmId << "insert!";
+
+
+
+
+	/* insert/update hash into db */
+	QString hashValue = QByteArray((char*)message->envelope->hash->value,
+	    message->envelope->hash->length).toBase64();
+	(messageDb->msgsInsertUpdateMessageHash(dmId,
+	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
+	? qDebug() << "Message hash was stored into db..."
+	: qDebug() << "ERROR: Message hash insert!";
+
+	/* Insert/update all attachment files */
+	struct isds_list *file;
+	file = message->documents;
+	while (0 != file) {
+		isds_document *item = (isds_document *) file->data;
+
+		QString dmEncodedContent = QByteArray((char *)item->data,
+		    item->data_length).toBase64();
+
+		/* Insert/update file to db */
+		(messageDb->msgsInsertUpdateMessageFile(dmId,
+		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
+		   item->dmMimeType, item->dmFormat,
+		   convertAttachmentType(item->dmFileMetaType),
+		   dmEncodedContent))
+		? qDebug() << "Message file" << item->dmFileDescr <<
+		    "was stored into db..."
+		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
+		    "insert!";
+		file = file->next;
+	}
+
+	isds_list_free(&message->documents);
+
+	struct isds_list *event;
+	event = message->envelope->events;
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb->msgsInsertUpdateMessageEvent(dmId,
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
+		event = event->next;
+	}
+
+	isds_list_free(&message->envelope->events);
+
+	return true;
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Create ZFO file(s) list for import into database.
+ */
+void MainWindow::createZFOListForImport(int action)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QString importDir;
+	QStringList fileList, filePathList;
+	QStringList nameFilter("*.zfo");
+	QDir directory(QDir::home());
+	fileList.clear();
+	filePathList.clear();
+
+	switch (action) {
+	case ImportZFODialog::IMPOR_FROM_DIR:
+		importDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select directory"), m_import_zfo_path,
+		    QFileDialog::ShowDirsOnly |
+		    QFileDialog::DontResolveSymlinks);
+
+		if (importDir.isEmpty()) {
+			return;
+		}
+
+		m_import_zfo_path = importDir;
+		directory.setPath(importDir);
+		fileList = directory.entryList(nameFilter);
+
+		if (fileList.isEmpty()) {
+			qDebug() << "No *.zfo selected file(s)";
+			/* TODO - show dialog*/
+			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
+			    "selected directory."));
+			return;
+		}
+
+		for (int i = 0; i < fileList.size(); ++i) {
+			filePathList.append(importDir + "/" + fileList.at(i));
+		}
+
+		break;
+
+	case ImportZFODialog::IMPOR_SEL_FILES:
+		filePathList = QFileDialog::getOpenFileNames(this,
+		    tr("Select ZFO file(s)"), m_import_zfo_path,
+		    tr("ZFO file (*.zfo)"));
+
+		if (filePathList.isEmpty()) {
+			qDebug() << "No *.zfo selected file(s)";
+			showStatusTextWithTimeout(
+			    tr("ZFO file(s) not selected."));
+			return;
+		}
+
+		m_import_zfo_path =
+		    QFileInfo(filePathList.at(0)).absoluteDir().absolutePath();
+		break;
+
+	default:
+		return;
+		break;
+	}
+
+	executeImportZFOintoDatabase(filePathList);
+}
+
 
 /* ========================================================================= */
 /*

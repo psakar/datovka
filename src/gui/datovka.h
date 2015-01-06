@@ -62,6 +62,14 @@ public:
 	QLabel *statusDbMode;
 	QStatusBar *statusBar;
 
+	/* tmp account info struct for ZFO import */
+	class accountDataStruct {
+	public:
+		QString databoxID;
+		QString username;
+		MessageDb *messageDb;
+	};
+
 protected:
 	/*!
 	 * Check if some worker is working on the background and show
@@ -304,6 +312,21 @@ private slots:
 	void exportCorrespondenceOverview(void);
 
 	/*!
+	 * @brief Prepare import ZFO file(s) into database.
+	 */
+	void prepareImportZFOintoDatabase(void);
+
+	/*!
+	 * @brief Create ZFO file(s) list for import into database.
+	 */
+	void createZFOListForImport(int action);
+
+	/*!
+	 * @brief Import ZFO file(s) list into database.
+	 */
+	void executeImportZFOintoDatabase(QStringList files);
+
+	/*!
 	 * @brief About application dialog.
 	 */
 	void aboutApplication(void);
@@ -493,6 +516,12 @@ private:
 	 * @brief Set sent message column widths.
 	 */
 	void setSentColumnWidths(void);
+
+	/*!
+	 * @brief Insert ZFO message into database.
+	 */
+	bool InsertZFOmsgIntoDb(struct isds_message *item,
+		MessageDb *messageDb, QString messageType);
 
 	/*!
 	 * @brief Saves account export paths.
@@ -701,6 +730,7 @@ private:
 	QString m_export_correspond_dir;
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;
+	QString m_import_zfo_path;
 	bool isMainWindow;
 
 	Ui::MainWindow *ui;
