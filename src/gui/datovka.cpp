@@ -156,9 +156,16 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(messageItemRightClicked(QPoint)));
+//	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui->messageList->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui->messageList->setFocusPolicy(Qt::StrongFocus);
+	/* TODO -- Use a delegate? */
+//	ui->messageList->setStyleSheet(
+//	    "QTableView::item:focus { border-color:green; "
+//	    "border-style:outset; border-width:2px; color:black; }");
 
-	qDebug() << "Load " << globPref.loadConfPath();
+	qDebug() << "Load" << globPref.loadConfPath();
 	qDebug() << "Save" << globPref.saveConfPath();
 
 	/* Change "\" to "/" */
@@ -436,7 +443,7 @@ void MainWindow::proxySettings(void)
 
 /* ========================================================================= */
 /*
- * Redraws widgets according to dd account item.
+ * Redraws widgets according to selected account item.
  */
 void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
@@ -733,7 +740,11 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 {
 	debugSlotCall();
 
-	(void) previous; /* Unused. */
+	/* If the row has not been changed then do nothing. */
+	if (current.isValid() && previous.isValid() &&
+	    (current.row() == previous.row())) {
+		return;
+	}
 
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
@@ -744,7 +755,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-			 QModelIndex)));
+		        QModelIndex)));
 	}
 
 	/* Disable message/attachment related buttons. */
@@ -854,7 +865,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-			QModelIndex)));
+		        QModelIndex)));
 	} else {
 		ui->messageInfo->setHtml("");
 		ui->messageInfo->setReadOnly(true);
@@ -1088,7 +1099,7 @@ void MainWindow::messageItemRestoreSelection(void)
 						    index.data().toInt();
 					}
 				}
-				ui->messageList-> setCurrentIndex(index);
+				ui->messageList->setCurrentIndex(index);
 			} else if (GlobPreferences::SELECT_LAST_VISITED ==
 			    globPref.after_start_select) {
 				acntIdx = AccountModel::indexTop(acntIdx);
@@ -1150,7 +1161,11 @@ void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
 {
 	debugSlotCall();
 
-	(void) previous;
+	/* If the row has not been changed then do nothing. */
+	if (current.isValid() && previous.isValid() &&
+	    (current.row() == previous.row())) {
+		return;
+	}
 
 	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
