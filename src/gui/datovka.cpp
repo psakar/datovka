@@ -3502,11 +3502,17 @@ void MainWindow::setReceivedColumnWidths(void)
 {
 	debugFuncCall();
 
+	int i;
+
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_received_1);
 	ui->messageList->setColumnWidth(2, m_received_2);
-	for (int i = 3; i < MessageDb::receivedItemIds.size(); ++i) {
+	for (i = 3; i < (MessageDb::receivedItemIds.size() - 3); ++i) {
 		ui->messageList->resizeColumnToContents(i);
+	}
+	/* Last three columns display icons. */
+	for (; i < MessageDb::receivedItemIds.size(); ++i) {
+		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
 		ui->messageList->sortByColumn(m_sort_column,
@@ -3526,11 +3532,17 @@ void MainWindow::setSentColumnWidths(void)
 {
 	debugFuncCall();
 
+	int i;
+
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
 	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (int i = 3; i < MessageDb::sentItemIds.size(); ++i) {
+	for (i = 3; i < (MessageDb::sentItemIds.size() - 1); ++i) {
 		ui->messageList->resizeColumnToContents(i);
+	}
+	/* Last column displays an icon. */
+	for (; i < MessageDb::receivedItemIds.size(); ++i) {
+		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
 		ui->messageList->sortByColumn(m_sort_column,
