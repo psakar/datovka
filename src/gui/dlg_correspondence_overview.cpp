@@ -130,7 +130,7 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
 		return false;
 	}
 
-	fileName = exportPath + "/" + fileName;
+	fileName = exportPath + QDir::separator() + fileName;
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly)) {
@@ -238,7 +238,7 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(QString exportPath)
 	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
 	    ".html";
 
-	fileName = exportPath + "/" + fileName;
+	fileName = exportPath + QDir::separator() + fileName;
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -359,7 +359,7 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(QString exportPath)
 	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
 	    ".txt";
 
-	fileName = exportPath + "/" + fileName;
+	fileName = exportPath + QDir::separator() + fileName;
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {

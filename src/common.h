@@ -7,6 +7,7 @@
 #include <QSettings>
 #include <QString>
 #include <QDebug>
+#include <QDir>
 
 #define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
 
@@ -174,7 +175,7 @@ public:
 	inline
 	QString loadConfPath(void) const
 	{
-		return confDir() + "/" + loadFromConf;
+		return confDir() + QDir::separator() + loadFromConf;
 	}
 
 	/*!
@@ -183,7 +184,7 @@ public:
 	inline
 	QString saveConfPath(void) const
 	{
-		return confDir() + "/" + saveToConf;
+		return confDir() + QDir::separator() + saveToConf;
 	}
 
 	/*!
@@ -192,7 +193,7 @@ public:
 	inline
 	QString accountDbPath(void) const
 	{
-		return confDir() + "/" + accountDbFile;
+		return confDir() + QDir::separator() + accountDbFile;
 	}
 };
 
@@ -275,7 +276,7 @@ void fixBackSlashesInFile(const QString &fileName);
 
 
 /*!
- * @brief Fix account password format = compatability with old datovka.
+ * @brief Fix account password format = compatibility with old Datovka.
  */
 void removeDoubleQuotesFromAccountPassword(const QString &fileName);
 
@@ -361,6 +362,26 @@ QString appLocalisationDir(void);
  * @brief Returns the path to directory where supplied localisation resides.
  */
 QString qtLocalisationDir(void);
+
+
+enum WriteFileState {
+	WF_SUCCESS = 0, /*!< File was successfully created and written. */
+	WF_CANNOT_CREATE, /*!< File could not be created. */
+	WF_CANNOT_WRITE_WHOLE, /*!< File could not be entirely written. */
+	WF_ERROR /*!< Different error. */
+};
+
+
+/*!
+ * @brief Create and write data to file.
+ *
+ * @param[in] fileName      File name.
+ * @param[in] data          Data to be written into file.
+ * @param[in] deleteOnError Delete created file when cannot be entirely
+ *                          written.
+ */
+enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
+    bool deleteOnError = false);
 
 
 #endif /* _COMMON_H_ */

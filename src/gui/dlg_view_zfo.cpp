@@ -352,7 +352,7 @@ void DlgViewZfo::openSelectedAttachment(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
 	if (!fout.open()) {
 		return; /* TODO -- Error message. */
 	}

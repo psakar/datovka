@@ -1083,3 +1083,36 @@ QString suppliedTextFileLocation(const QString &fName)
 
 	return filePath;
 }
+
+
+/* ========================================================================= */
+/*
+ * Create and write data to file.
+ */
+enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
+    bool deleteOnError)
+/* ========================================================================= */
+{
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return WF_ERROR;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly)) {
+		return WF_CANNOT_CREATE;
+	}
+
+	int written = fout.write(data);
+	bool flushed = fout.flush();
+	fout.close();
+
+	if ((written != data.size()) || !flushed) {
+		if (deleteOnError) {
+			QFile::remove(fileName);
+		}
+		return WF_CANNOT_WRITE_WHOLE;
+	}
+
+	return WF_SUCCESS;
+}

@@ -1266,7 +1266,7 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	/* TODO -- Remember directory? */
 
 	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"), m_save_attach_dir + "/" + fileName);
+	    tr("Save attachment"), m_save_attach_dir + QDir::separator() + fileName);
 
 	//qDebug() << "Selected file: " << fileName;
 
@@ -1276,13 +1276,6 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 
 	m_save_attach_dir = QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
-
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly)) {
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to files was not successful!").arg(dmId));
-		return; /* TODO -- Error message. */
-	}
 
 	/* Get data from base64. */
 	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
@@ -1296,16 +1289,18 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	QByteArray data =
 	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
-	int written = fout.write(data);
-	if (written != data.size()) {
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to file was not successful!").arg(dmId));
-	} else {
+	enum WriteFileState ret = writeFile(fileName, data);
+	if (WF_SUCCESS == ret) {
 		showStatusTextWithTimeout(tr("Saving attachment of message "
 		"\"%1\" to file was successful.").arg(dmId));
+	} else {
+		showStatusTextWithTimeout(tr("Saving attachment of message "
+		"\"%1\" to file was not successful!").arg(dmId));
+		QMessageBox::warning(this,
+		    tr("Error saving attachment of message '%1'.").arg(dmId),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 	}
-
-	fout.close();
 }
 
 
@@ -1337,7 +1332,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	m_save_attach_dir = newDir;
 	storeExportPath();
 
-	bool success = true;
+	bool unspecifiedFailed = false;
+	QList<QString> unsuccessfullFiles;
 
 	for (int i = 0; i < attachments; ++i) {
 
@@ -1346,53 +1342,65 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		Q_ASSERT(index.isValid());
 		if (!index.isValid()) {
-			success = false;
+			unspecifiedFailed = true;
 			continue;
 		}
 
 		QModelIndex fileNameIndex = index.sibling(index.row(), 3);
 		Q_ASSERT(fileNameIndex.isValid());
 		if(!fileNameIndex.isValid()) {
-			success = false;
+			unspecifiedFailed = true;
 			continue;
 		}
 
 		QString fileName = fileNameIndex.data().toString();
 		Q_ASSERT(!fileName.isEmpty());
 
-		fileName = newDir + "/" + fileName;
-
-		QFile fout(fileName);
-		if (!fout.open(QIODevice::WriteOnly)) {
-			success = false;
-			continue;
-		}
+		fileName = newDir + QDir::separator() + fileName;
 
 		QModelIndex dataIndex = index.sibling(index.row(), 2);
 		Q_ASSERT(dataIndex.isValid());
 		if (!dataIndex.isValid()) {
-			success = false;
+			unsuccessfullFiles.append(fileName);
 			continue;
 		}
 
 		QByteArray data =
 		    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
-		int written = fout.write(data);
-		if (written != data.size()) {
-			success = false;
+		if (WF_SUCCESS != writeFile(fileName, data)) {
+			unsuccessfullFiles.append(fileName);
 			continue;
 		}
-
-		fout.close();
 	}
 
-	if (success) {
-		showStatusTextWithTimeout(tr("All attachments of "
-		    "message \"%1\" were saved.").arg(dmId));
-	} else {
+	if (unspecifiedFailed) {
 		showStatusTextWithTimeout(tr("Some attachments of "
 		    "message \"%1\" were not saved to disk!").arg(dmId));
+		QMessageBox::warning(this,
+		    tr("Error saving attachments of message '%1'.").arg(dmId),
+		    tr("Could not save all attachments of message '%1'.")
+		        .arg(dmId),
+		    QMessageBox::Ok);
+	} else if (!unsuccessfullFiles.isEmpty()) {
+		showStatusTextWithTimeout(tr("Some attachments of "
+		    "message \"%1\" were not saved to disk!").arg(dmId));
+		QString warnMsg =
+		    tr("In total %1 attachment files could not be written.")
+		        .arg(unsuccessfullFiles.size());
+		warnMsg += "\n" +
+		    tr("These are:").arg(unsuccessfullFiles.size()) + "\n";
+		int i;
+		for (i = 0; i < (unsuccessfullFiles.size() - 1); ++i) {
+			warnMsg += "    '" + unsuccessfullFiles.at(i) + "'\n";
+		}
+		warnMsg += "    '" + unsuccessfullFiles.at(i) + "'.";
+		QMessageBox::warning(this,
+		    tr("Error saving attachments of message '%1'.").arg(dmId),
+		    warnMsg, QMessageBox::Ok);
+	} else {
+		showStatusTextWithTimeout(tr("All attachments of "
+		    "message \"%1\" were saved.").arg(dmId));
 	}
 }
 
@@ -1434,7 +1442,7 @@ void MainWindow::openSelectedAttachment(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
 	if (!fout.open()) {
 		return; /* TODO -- Error message. */
 	}
@@ -1455,15 +1463,19 @@ void MainWindow::openSelectedAttachment(void)
 	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 	int written = fout.write(data);
-	if (written != data.size()) {
-		/* TODO -- Error message? */
-	}
-
+	bool flushed = fout.flush();
 	fout.close();
-
-	//qDebug() << "file://" + fileName;
-	QDesktopServices::openUrl(QUrl("file:///" + fileName));
-	/* TODO -- Handle openUrl() return value. */
+	if ((written != data.size()) || !flushed) {
+		/* TODO -- Error message? */
+		QMessageBox::warning(this,
+		    tr("Error opening attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
+	} else {
+		//qDebug() << "file://" + fileName;
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	}
 }
 
 
@@ -4600,7 +4612,7 @@ void MainWindow::showHelp(void)
 
 /* ========================================================================= */
 /*
- * Export message into as ZFO file dialog.
+ * Export message into as ZFO file dialogue.
  */
 void MainWindow::exportSelectedMessageAsZFO(void)
 /* ========================================================================= */
@@ -4652,7 +4664,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + "/" +
+	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "DDZ_" + dmId + ".zfo";
 
 	Q_ASSERT(!fileName.isEmpty());
@@ -4671,26 +4683,21 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly)) {
-		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
-		    "ZFO was not successful!").arg(dmId));
-		return;
-	}
-
-	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
-	int written = fout.write(data);
-	if (written != data.size()) {
+	enum WriteFileState ret = writeFile(fileName, data);
+	if (WF_SUCCESS == ret) {
 		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
-		    "ZFO was not successful!").arg(dmId));
+		    "ZFO was successful!").arg(dmId));
 	} else {
 		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
-		    "ZFO was successful.").arg(dmId));
+		    "ZFO was not successful.").arg(dmId));
+		QMessageBox::warning(this,
+		    tr("Error exporting message '%1'.").arg(dmId),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 	}
-
-	fout.close();
 }
 
 
@@ -4802,7 +4809,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + "/" +
+	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "DDZ_" + dmId + "_info.zfo";
 
 	Q_ASSERT(!fileName.isEmpty());
@@ -4822,26 +4829,22 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly)) {
-		showStatusTextWithTimeout(tr("Export of message delivery "
-		    "info \"%1\" to ZFO was not successful!").arg(dmId));
-		return;
-	}
-
 	QByteArray rawutf8= QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
-	int written = fout.write(data);
-	if (written != data.size()) {
-		showStatusTextWithTimeout(tr("Export of message delivery "
-		    "info \"%1\" to ZFO was not successful!").arg(dmId));
-	} else {
+	enum WriteFileState ret = writeFile(fileName, data);
+	if (WF_SUCCESS == ret) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
 		    "info \"%1\" to ZFO was successful.").arg(dmId));
+	} else {
+		showStatusTextWithTimeout(tr("Export of message delivery "
+		    "info \"%1\" to ZFO was not successful!").arg(dmId));
+		QMessageBox::warning(this,
+		    tr("Error exporting message delivery info '%1'.")
+		        .arg(dmId),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 	}
-
-	fout.close();
 }
 
 
@@ -4866,7 +4869,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString fileName = m_on_export_zfo_activate + "/" +
+	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "DD_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
@@ -4924,7 +4927,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString fileName = m_on_export_zfo_activate + "/" +
+	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "OZ_" + dmId + ".pdf";
 
 	fileName = QFileDialog::getSaveFileName(this,
@@ -4979,7 +4982,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -5008,7 +5011,7 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
 	if (!fout.open()) {
 		return; /* TODO -- Error message. */
 	}
@@ -5017,17 +5020,20 @@ void MainWindow::openSelectedMessageExternally(void)
 	/* Get whole path. */
 	fileName = fout.fileName();
 
-	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
 	int written = fout.write(data);
-	if (written != data.size()) {
-
-	}
-
+	bool flushed = fout.flush();
 	fout.close();
-
-	QDesktopServices::openUrl(QUrl("file:///" + fileName));
+	if ((written != data.size()) || !flushed) {
+		QMessageBox::warning(this,
+		    tr("Error opening message '%1'.").arg(dmId),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
+	} else {
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+	}
 }
 
 
@@ -5041,7 +5047,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	debugSlotCall();
 
 	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -5070,7 +5076,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + "/" + fileName);
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
 	if (!fout.open()) {
 		return; /* TODO -- Error message. */
 	}
@@ -5079,17 +5085,20 @@ void MainWindow::openDeliveryInfoExternally(void)
 	/* Get whole path. */
 	fileName = fout.fileName();
 
-	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
 	int written = fout.write(data);
-	if (written != data.size()) {
-
-	}
-
+	bool flushed = fout.flush();
 	fout.close();
-
-	QDesktopServices::openUrl(QUrl("file:///" + fileName));
+	if ((written != data.size()) || !flushed) {
+		QMessageBox::warning(this,
+		    tr("Error opening message delivery info '%1'.").arg(dmId),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
+	} else {
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+	}
 }
 
 

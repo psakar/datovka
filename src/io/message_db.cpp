@@ -3871,7 +3871,8 @@ QString dbContainer::constructDbFileName(const QString &key,
     const QString &locDir, bool testing)
 /* ========================================================================= */
 {
-	return locDir + "/" + key + "___" + (testing ? "1" : "0") + ".db";
+	return locDir + QDir::separator() +
+	    key + "___" + (testing ? "1" : "0") + ".db";
 }
 
 
