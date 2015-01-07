@@ -4855,21 +4855,21 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		int resISDS = 0;
 
 		/* message type recognization {sent,received}, insert into DB */
-		for (int i = 0; i < accountList.size(); i++) {
+		for (int j = 0; j < accountList.size(); j++) {
 			/* is sent */
-			if (accountList.at(i).databoxID == dbIDSender) {
+			if (accountList.at(j).databoxID == dbIDSender) {
 
-				isSent = accountList.at(i).username;
+				isSent = accountList.at(j).username;
 				qDebug() << dmId << "isSent" << isSent;
 
 				/* Is/was ZFO message in ISDS */
 				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(i).acntIndex);
+				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
-					if (!accountList.at(i).messageDb->
+					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
 						InsertZFOmsgIntoDb(message,
-						    accountList.at(i).messageDb,
+						    accountList.at(j).messageDb,
 						    "sent");
 					} else {
 						/* TODO - message is in the database */
@@ -4882,17 +4882,17 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 			}
 
 			/* is received */
-			if (accountList.at(i).databoxID == dbIDRecipient) {
-				isReceived = accountList.at(i).username;
+			if (accountList.at(j).databoxID == dbIDRecipient) {
+				isReceived = accountList.at(j).username;
 				qDebug() << dmId << "isReceived" << isReceived;
 				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(i).acntIndex);
+				    accountList.at(j).acntIndex);
 
 				if (resISDS == MSG_IS_IN_ISDS) {
-					if (!accountList.at(i).messageDb->
+					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
 						InsertZFOmsgIntoDb(message,
-						    accountList.at(i).messageDb,
+						    accountList.at(j).messageDb,
 						    "received");
 					} else {
 						/* TODO - message is in the database */
