@@ -1575,8 +1575,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
 	    this, SLOT(postDownloadSelectedMessageAttachments(
 		const QModelIndex, QString)));
-
-
+	connect(workerDownMsgComplete,
+	    SIGNAL(clearStatusBarAndShowDialog(QString)),this,
+	    SLOT(clearInfoInStatusBarAndShowDialog(QString)));
 	connect(workerDownMsgComplete, SIGNAL(workRequested()),
 	    threadDownMsgComplete, SLOT(start()));
 	connect(threadDownMsgComplete, SIGNAL(started()),
@@ -1587,6 +1588,29 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    this, SLOT(deleteThreadDownMsgComplete()));
 
 	workerDownMsgComplete->requestWork();
+}
+
+
+/* ========================================================================= */
+/*
+ * Clear status bar if download of complete message fails.
+ */
+void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	showStatusTextWithTimeout(tr("It was not possible download complete "
+	    "message \"%1\" from ISDS server.").arg(msgID));
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setWindowTitle(tr("Download message error"));
+	msgBox.setText(tr("It was not possible download complete "
+	    "message \"%1\" from server Datové schránky.").arg(msgID));
+	msgBox.setInformativeText(tr("It is likely that the message has been "
+	    "deleted from the server."));
+	msgBox.exec();
 }
 
 
@@ -4829,6 +4853,9 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 	/* for every ZFO file detect its database and message type */
 	for (int i = 0; i < fileCnt; ++i) {
 
+		showStatusTextPermanently(tr("Import of ZFO: %1 ...").
+		    arg(files.at(i)));
+
 		struct isds_message *message = NULL;
 		struct isds_ctx *dummy_session = NULL;
 
@@ -4960,6 +4987,8 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		isds_ctx_free(&dummy_session);
 	} //for
 
+	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Done"));
+
 	showNotificationDialogWithResult(fileCnt, imported, errImportList);
 }
 
@@ -4975,13 +5004,14 @@ void MainWindow::showNotificationDialogWithResult(int filesCnt, int imported,
 	debugFuncCall();
 
 	if (filesCnt == imported) {
-		QMessageBox msgBox(this);;
+		QMessageBox msgBox(this);
 		msgBox.setIcon(QMessageBox::Information);
 		msgBox.setWindowTitle(tr("ZFO file(s) import result"));
 		msgBox.setText(tr("Import of ZFO file(s) was "
 		    "successfully done."));
 		msgBox.setInformativeText(
-		  tr("Number of successfully imported messages: %1").arg(imported));
+		    tr("Number of successfully imported "
+		    "messages: %1").arg(imported));
 		msgBox.exec();
 	} else {
 		QDialog *importZfoResult = new ImportZFOResultDialog(
@@ -5101,7 +5131,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
+		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Message export error!"));
 		msgBox.setText(tr("Cannot export complete message")
 		    + " " + dmId + ".");
@@ -5244,7 +5274,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
+		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
 		msgBox.setText(tr("Cannot export delivery info for message")
 		    + " " + dmId + ".");

@@ -177,6 +177,12 @@ signals:
 	void changeStatusBarInfo(bool, QString, int, int, int, int);
 
 	/*!
+	 * @brief This signal is emitted when download of message fails =
+	 * clear info in status bar.
+	 */
+	void clearStatusBarAndShowDialog(QString);
+
+	/*!
 	 * @brief This signal is emitted when process is finished
 	 */
 	void finished(void);

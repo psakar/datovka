@@ -89,6 +89,11 @@ protected:
 private slots:
 
 	/*!
+	 * @brief Clear info status bar if download of complete message fails.
+	 */
+	void clearInfoInStatusBarAndShowDialog(QString msgID);
+
+	/*!
 	 * @brief Version response slot.
 	 */
 	void datovkaVersionResponce(QNetworkReply* reply);

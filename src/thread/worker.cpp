@@ -279,6 +279,8 @@ void Worker::downloadCompleteMessage(void)
 	        "DownloadMessage", 0, this)) {
 		/* Only on successful download. */
 		emit refreshAttachmentList(m_acntTopIdx, m_dmId);
+	} else {
+		emit clearStatusBarAndShowDialog(m_dmId);
 	}
 
 	emit valueChanged("Idle", 0);
