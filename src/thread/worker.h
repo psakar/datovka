@@ -10,6 +10,7 @@
 
 #include "src/common.h"
 #include "src/io/account_db.h"
+#include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
@@ -35,6 +36,11 @@ public:
 	 */
 	void requestWork(void);
 
+	static
+	qdatovka_error storeMessage(bool signedMsg, bool incoming,
+	    MessageDb &messageDb, const struct isds_message *msg,
+	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
+
 	/*!
 	 * @brief Download attachments, envelope and raw for message.
 	 */
@@ -43,6 +49,13 @@ public:
 	    const QString &dmId, bool signedMsg, bool incoming,
 	    MessageDb &messageDb,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
+
+	/*!
+	 * @brief Store envelope into database.
+	 */
+	static
+	qdatovka_error storeEnvelope(const QString &messageType,
+	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Download sent/received message list from ISDS for current

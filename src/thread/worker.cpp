@@ -286,6 +286,125 @@ void Worker::downloadCompleteMessage(void)
 
 
 /* ========================================================================= */
+/*!
+ * @brief Store envelope into database.
+ */
+qdatovka_error Worker::storeEnvelope(const QString &messageType,
+    MessageDb &messageDb, const struct isds_envelope *envel)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	Q_ASSERT(NULL != envel);
+	if (NULL == envel) {
+		return Q_GLOBAL_ERROR;
+	}
+
+	int dmId = atoi(envel->dmID);
+
+	QString dmAmbiguousRecipient;
+	if (0 == envel->dmAmbiguousRecipient) {
+		dmAmbiguousRecipient = "0";
+	} else {
+		dmAmbiguousRecipient = QString::number(
+		    *envel->dmAmbiguousRecipient);
+	}
+
+	QString dmLegalTitleYear;
+	if (0 == envel->dmLegalTitleYear) {
+		dmLegalTitleYear = "";
+	} else {
+		dmLegalTitleYear = QString::number(
+		    *envel->dmLegalTitleYear);
+	}
+
+	QString dmLegalTitleLaw;
+	if (0 == envel->dmLegalTitleLaw) {
+		dmLegalTitleLaw = "";
+	} else {
+		dmLegalTitleLaw = QString::number(
+		    *envel->dmLegalTitleLaw);
+	}
+
+	QString dmSenderOrgUnitNum;
+	if (0 == envel->dmSenderOrgUnitNum) {
+		dmSenderOrgUnitNum = "";
+	} else {
+		dmSenderOrgUnitNum =
+		    *envel->dmSenderOrgUnitNum != 0 ?
+		    QString::number(*envel->
+		    dmSenderOrgUnitNum) : "";
+	}
+
+	QString dmRecipientOrgUnitNum;
+	if (0 == envel->dmRecipientOrgUnitNum) {
+		dmRecipientOrgUnitNum = "";
+	} else {
+		dmRecipientOrgUnitNum =
+		    *envel->dmRecipientOrgUnitNum != 0
+		    ? QString::number(*envel->
+		    dmRecipientOrgUnitNum) : "";
+	}
+
+	QString dmDeliveryTime = "";
+	if (0 != envel->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    envel->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != envel->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    envel->dmAcceptanceTime);
+	}
+
+	/* insert message envelope in db */
+	if (messageDb.msgsInsertMessageEnvelope(dmId,
+	    /* TODO - set correctly next two values */
+	    "tRecord",
+	    envel->dbIDSender,
+	    envel->dmSender,
+	    envel->dmSenderAddress,
+	    (int)*envel->dmSenderType,
+	    envel->dmRecipient,
+	    envel->dmRecipientAddress,
+	    dmAmbiguousRecipient,
+	    envel->dmSenderOrgUnit,
+	    dmSenderOrgUnitNum,
+	    envel->dbIDRecipient,
+	    envel->dmRecipientOrgUnit,
+	    dmRecipientOrgUnitNum,
+	    envel->dmToHands,
+	    envel->dmAnnotation,
+	    envel->dmRecipientRefNumber,
+	    envel->dmSenderRefNumber,
+	    envel->dmRecipientIdent,
+	    envel->dmSenderIdent,
+	    dmLegalTitleLaw,
+	    dmLegalTitleYear,
+	    envel->dmLegalTitleSect,
+	    envel->dmLegalTitlePar,
+	    envel->dmLegalTitlePoint,
+	    envel->dmPersonalDelivery,
+	    envel->dmAllowSubstDelivery,
+	    (char*)envel->timestamp,
+	    dmDeliveryTime,
+	    dmAcceptanceTime,
+	    convertHexToDecIndex(*envel->dmMessageStatus),
+	    (int)*envel->dmAttachmentSize,
+	    envel->dmType,
+	    messageType)) {
+		qDebug() << "Message envelope" << dmId <<
+		    "was inserted into db...";
+		return Q_SUCCESS;
+	} else {
+		qDebug() << "ERROR: Message envelope " << dmId <<
+		    "insert!";
+		return Q_GLOBAL_ERROR;
+	}
+}
+
+
+/* ========================================================================= */
 /*
 * Download sent/received message list from ISDS for current account index
 */
@@ -375,101 +494,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		if (!messageDb.isInMessageDb(dmId)) {
 
-			QString dmAmbiguousRecipient;
-			if (0 == item->envelope->dmAmbiguousRecipient) {
-				dmAmbiguousRecipient = "0";
-			} else {
-				dmAmbiguousRecipient = QString::number(
-				    *item->envelope->dmAmbiguousRecipient);
-			}
-
-			QString dmLegalTitleYear;
-			if (0 == item->envelope->dmLegalTitleYear) {
-				dmLegalTitleYear = "";
-			} else {
-				dmLegalTitleYear = QString::number(
-				    *item->envelope->dmLegalTitleYear);
-			}
-
-			QString dmLegalTitleLaw;
-			if (0 == item->envelope->dmLegalTitleLaw) {
-				dmLegalTitleLaw = "";
-			} else {
-				dmLegalTitleLaw = QString::number(
-				    *item->envelope->dmLegalTitleLaw);
-			}
-
-			QString dmSenderOrgUnitNum;
-			if (0 == item->envelope->dmSenderOrgUnitNum) {
-				dmSenderOrgUnitNum = "";
-			} else {
-				dmSenderOrgUnitNum =
-				    *item->envelope->dmSenderOrgUnitNum != 0 ?
-				    QString::number(*item->envelope->
-				    dmSenderOrgUnitNum) : "";
-			}
-
-			QString dmRecipientOrgUnitNum;
-			if (0 == item->envelope->dmRecipientOrgUnitNum) {
-				dmRecipientOrgUnitNum = "";
-			} else {
-				dmRecipientOrgUnitNum =
-				    *item->envelope->dmRecipientOrgUnitNum != 0
-				    ? QString::number(*item->envelope->
-				    dmRecipientOrgUnitNum) : "";
-			}
-
-			QString dmDeliveryTime = "";
-			if (0 != item->envelope->dmDeliveryTime) {
-				dmDeliveryTime = timevalToDbFormat(
-				    item->envelope->dmDeliveryTime);
-			}
-			QString dmAcceptanceTime = "";
-			if (0 != item->envelope->dmAcceptanceTime) {
-				dmAcceptanceTime = timevalToDbFormat(
-				    item->envelope->dmAcceptanceTime);
-			}
-
-			/* insert message envelope in db */
-			(messageDb.msgsInsertMessageEnvelope(dmId,
-			    /* TODO - set correctly next two values */
-			    "tRecord",
-			    item->envelope->dbIDSender,
-			    item->envelope->dmSender,
-			    item->envelope->dmSenderAddress,
-			    (int)*item->envelope->dmSenderType,
-			    item->envelope->dmRecipient,
-			    item->envelope->dmRecipientAddress,
-			    dmAmbiguousRecipient,
-			    item->envelope->dmSenderOrgUnit,
-			    dmSenderOrgUnitNum,
-			    item->envelope->dbIDRecipient,
-			    item->envelope->dmRecipientOrgUnit,
-			    dmRecipientOrgUnitNum,
-			    item->envelope->dmToHands,
-			    item->envelope->dmAnnotation,
-			    item->envelope->dmRecipientRefNumber,
-			    item->envelope->dmSenderRefNumber,
-			    item->envelope->dmRecipientIdent,
-			    item->envelope->dmSenderIdent,
-			    dmLegalTitleLaw,
-			    dmLegalTitleYear,
-			    item->envelope->dmLegalTitleSect,
-			    item->envelope->dmLegalTitlePar,
-			    item->envelope->dmLegalTitlePoint,
-			    item->envelope->dmPersonalDelivery,
-			    item->envelope->dmAllowSubstDelivery,
-			    (char*)item->envelope->timestamp,
-			    dmDeliveryTime,
-			    dmAcceptanceTime,
-			    convertHexToDecIndex(*item->envelope->dmMessageStatus),
-			    (int)*item->envelope->dmAttachmentSize,
-			    item->envelope->dmType,
-			    messageType))
-			? qDebug() << "Message envelope" << dmId <<
-			    "was inserted into db..."
-			: qDebug() << "ERROR: Message envelope " << dmId <<
-			    "insert!";
+			storeEnvelope(messageType, messageDb, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
 				downloadMessage(acntTopIdx, item->envelope->dmID,
@@ -695,6 +720,199 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 
 
 /* ========================================================================= */
+qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
+    MessageDb &messageDb, const struct isds_message *msg,
+    const QString &progressLabel, QProgressBar *pBar, Worker *worker)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!signedMsg) {
+		assert(0); /* Only signed messages can be downloaded. */
+		return Q_GLOBAL_ERROR;
+	}
+
+	Q_ASSERT(NULL != msg);
+	if (NULL == msg) {
+		return Q_GLOBAL_ERROR;
+	}
+
+	const struct isds_envelope *envel = msg->envelope;
+
+	Q_ASSERT(NULL != envel);
+	if (NULL == envel) {
+		return Q_GLOBAL_ERROR;
+	}
+
+	int dmID = atoi(envel->dmID);
+
+	/* Get signed raw data from message and store to db. */
+	if (signedMsg) {
+		(messageDb.msgsInsertUpdateMessageRaw(dmID,
+		    QByteArray((char*) msg->raw, msg->raw_length), 0))
+		? qDebug() << "Message raw data were updated..."
+		: qDebug() << "ERROR: Message raw data update!";
+	}
+
+	if (0 != pBar) { pBar->setValue(30); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 30); }
+
+	QString timestamp = QByteArray((char *) envel->timestamp,
+	    envel->timestamp_length).toBase64();
+	QString dmAmbiguousRecipient;
+	if (0 == envel->dmAmbiguousRecipient) {
+		dmAmbiguousRecipient = "0";
+	} else {
+		dmAmbiguousRecipient = QString::number(
+		    *envel->dmAmbiguousRecipient);
+	}
+	QString dmLegalTitleYear;
+	if (0 == envel->dmLegalTitleYear) {
+		dmLegalTitleYear = "";
+	} else {
+		dmLegalTitleYear = QString::number(
+		    *envel->dmLegalTitleYear);
+	}
+	QString dmLegalTitleLaw;
+	if (0 == envel->dmLegalTitleLaw) {
+		dmLegalTitleLaw = "";
+	} else {
+		dmLegalTitleLaw = QString::number(
+		    *envel->dmLegalTitleLaw);
+	}
+	QString dmSenderOrgUnitNum;
+	if (0 == envel->dmSenderOrgUnitNum) {
+		dmSenderOrgUnitNum = "";
+	} else {
+		dmSenderOrgUnitNum =
+		    *envel->dmSenderOrgUnitNum != 0
+		    ? QString::number(*envel->
+		    dmSenderOrgUnitNum) : "";
+	}
+	QString dmRecipientOrgUnitNum;
+	if (0 == envel->dmRecipientOrgUnitNum) {
+		dmRecipientOrgUnitNum = "";
+	} else {
+		dmRecipientOrgUnitNum =
+		  *envel->dmRecipientOrgUnitNum != 0
+		    ? QString::number(*envel->
+		    dmRecipientOrgUnitNum) : "";
+	}
+	QString dmDeliveryTime = "";
+	if (0 != envel->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(
+		    envel->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime = "";
+	if (0 != envel->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(
+		    envel->dmAcceptanceTime);
+	}
+
+	if (0 != pBar) { pBar->setValue(40); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 40); }
+
+	/* Update message envelope in db. */
+	(messageDb.msgsUpdateMessageEnvelope(dmID,
+	    /* TODO - set correctly next two values */
+	    "tReturnedMessage",
+	    envel->dbIDSender,
+	    envel->dmSender,
+	    envel->dmSenderAddress,
+	    (int)*envel->dmSenderType,
+	    envel->dmRecipient,
+	    envel->dmRecipientAddress,
+	    dmAmbiguousRecipient,
+	    envel->dmSenderOrgUnit,
+	    dmSenderOrgUnitNum,
+	    envel->dbIDRecipient,
+	    envel->dmRecipientOrgUnit,
+	    dmRecipientOrgUnitNum,
+	    envel->dmToHands,
+	    envel->dmAnnotation,
+	    envel->dmRecipientRefNumber,
+	    envel->dmSenderRefNumber,
+	    envel->dmRecipientIdent,
+	    envel->dmSenderIdent,
+	    dmLegalTitleLaw,
+	    dmLegalTitleYear,
+	    envel->dmLegalTitleSect,
+	    envel->dmLegalTitlePar,
+	    envel->dmLegalTitlePoint,
+	    envel->dmPersonalDelivery,
+	    envel->dmAllowSubstDelivery,
+	    timestamp,
+	    dmDeliveryTime,
+	    dmAcceptanceTime,
+	    convertHexToDecIndex(*envel->dmMessageStatus),
+	    (int)*envel->dmAttachmentSize,
+	    envel->dmType,
+	    (incoming) ? "received" : "sent"))
+	    ? qDebug() << "Message envelope was updated..."
+	    : qDebug() << "ERROR: Message envelope update!";
+
+	if (0 != pBar) { pBar->setValue(50); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 50); }
+
+	if (signedMsg) {
+		/* Verify message signature. */
+		int ret = rawMsgVerifySignature(msg->raw,
+		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
+		qDebug() << "Verification ret" << ret;
+		if (1 == ret) {
+			messageDb.msgsSetVerified(dmID,
+			    true);
+			/* TODO -- handle return error. */
+		} else if (0 == ret){
+			messageDb.msgsSetVerified(dmID,
+			    false);
+			/* TODO -- handle return error. */
+		} else {
+			/* TODO -- handle this error. */
+		}
+	}
+
+	if (0 != pBar) { pBar->setValue(60); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 60); }
+
+	/* insert/update hash into db */
+	QString hashValue = QByteArray((char*)envel->hash->value,
+	    envel->hash->length).toBase64();
+	(messageDb.msgsInsertUpdateMessageHash(dmID,
+	    hashValue, convertHashAlg(envel->hash->algorithm)))
+	? qDebug() << "Message hash was stored into db..."
+	: qDebug() << "ERROR: Message hash insert!";
+
+	if (0 != pBar) { pBar->setValue(70); }
+	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
+
+	/* Insert/update all attachment files */
+	struct isds_list *file;
+	file = msg->documents;
+	while (0 != file) {
+		isds_document *item = (isds_document *) file->data;
+
+		QString dmEncodedContent = QByteArray((char *)item->data,
+		    item->data_length).toBase64();
+
+		/* Insert/update file to db */
+		(messageDb.msgsInsertUpdateMessageFile(dmID,
+		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
+		   item->dmMimeType, item->dmFormat,
+		   convertAttachmentType(item->dmFileMetaType),
+		   dmEncodedContent))
+		? qDebug() << "Message file" << item->dmFileDescr <<
+		    "was stored into db..."
+		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
+		    "insert!";
+		file = file->next;
+	}
+
+	return Q_SUCCESS;
+}
+
+
+/* ========================================================================= */
 /*
  * Download attachments, envelope and raw for message.
  */
@@ -737,6 +955,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		}
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
+		return Q_GLOBAL_ERROR;
 		status = isds_get_received_message(isdsSessions.session(
 		    accountInfo.userName()),
 		    dmId.toStdString().c_str(),
@@ -754,167 +973,8 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	int dmID = atoi(message->envelope->dmID);
 
-	/* Get signed raw data from message and store to db. */
-	if (signedMsg) {
-		(messageDb.msgsInsertUpdateMessageRaw(dmID,
-		    QByteArray((char*)message->raw, message->raw_length), 0))
-		? qDebug() << "Message raw data were updated..."
-		: qDebug() << "ERROR: Message raw data update!";
-	}
-
-	if (0 != pBar) { pBar->setValue(30); }
-	if (0 != worker) { emit worker->valueChanged(progressLabel, 30); }
-
-	QString timestamp = QByteArray((char *)message->envelope->timestamp,
-	    message->envelope->timestamp_length).toBase64();
-	QString dmAmbiguousRecipient;
-	if (0 == message->envelope->dmAmbiguousRecipient) {
-		dmAmbiguousRecipient = "0";
-	} else {
-		dmAmbiguousRecipient = QString::number(
-		    *message->envelope->dmAmbiguousRecipient);
-	}
-	QString dmLegalTitleYear;
-	if (0 == message->envelope->dmLegalTitleYear) {
-		dmLegalTitleYear = "";
-	} else {
-		dmLegalTitleYear = QString::number(
-		    *message->envelope->dmLegalTitleYear);
-	}
-	QString dmLegalTitleLaw;
-	if (0 == message->envelope->dmLegalTitleLaw) {
-		dmLegalTitleLaw = "";
-	} else {
-		dmLegalTitleLaw = QString::number(
-		    *message->envelope->dmLegalTitleLaw);
-	}
-	QString dmSenderOrgUnitNum;
-	if (0 == message->envelope->dmSenderOrgUnitNum) {
-		dmSenderOrgUnitNum = "";
-	} else {
-		dmSenderOrgUnitNum =
-		    *message->envelope->dmSenderOrgUnitNum != 0
-		    ? QString::number(*message->envelope->
-		    dmSenderOrgUnitNum) : "";
-	}
-	QString dmRecipientOrgUnitNum;
-	if (0 == message->envelope->dmRecipientOrgUnitNum) {
-		dmRecipientOrgUnitNum = "";
-	} else {
-		dmRecipientOrgUnitNum =
-		  *message->envelope->dmRecipientOrgUnitNum != 0
-		    ? QString::number(*message->envelope->
-		    dmRecipientOrgUnitNum) : "";
-	}
-	QString dmDeliveryTime = "";
-	if (0 != message->envelope->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(
-		    message->envelope->dmDeliveryTime);
-	}
-	QString dmAcceptanceTime = "";
-	if (0 != message->envelope->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(
-		    message->envelope->dmAcceptanceTime);
-	}
-
-	if (0 != pBar) { pBar->setValue(40); }
-	if (0 != worker) { emit worker->valueChanged(progressLabel, 40); }
-
-	/* Update message envelope in db. */
-	(messageDb.msgsUpdateMessageEnvelope(dmID,
-	    /* TODO - set correctly next two values */
-	    "tReturnedMessage",
-	    message->envelope->dbIDSender,
-	    message->envelope->dmSender,
-	    message->envelope->dmSenderAddress,
-	    (int)*message->envelope->dmSenderType,
-	    message->envelope->dmRecipient,
-	    message->envelope->dmRecipientAddress,
-	    dmAmbiguousRecipient,
-	    message->envelope->dmSenderOrgUnit,
-	    dmSenderOrgUnitNum,
-	    message->envelope->dbIDRecipient,
-	    message->envelope->dmRecipientOrgUnit,
-	    dmRecipientOrgUnitNum,
-	    message->envelope->dmToHands,
-	    message->envelope->dmAnnotation,
-	    message->envelope->dmRecipientRefNumber,
-	    message->envelope->dmSenderRefNumber,
-	    message->envelope->dmRecipientIdent,
-	    message->envelope->dmSenderIdent,
-	    dmLegalTitleLaw,
-	    dmLegalTitleYear,
-	    message->envelope->dmLegalTitleSect,
-	    message->envelope->dmLegalTitlePar,
-	    message->envelope->dmLegalTitlePoint,
-	    message->envelope->dmPersonalDelivery,
-	    message->envelope->dmAllowSubstDelivery,
-	    timestamp,
-	    dmDeliveryTime,
-	    dmAcceptanceTime,
-	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
-	    (int)*message->envelope->dmAttachmentSize,
-	    message->envelope->dmType,
-	    (incoming) ? "received" : "sent"))
-	    ? qDebug() << "Message envelope was updated..."
-	    : qDebug() << "ERROR: Message envelope update!";
-
-	if (0 != pBar) { pBar->setValue(50); }
-	if (0 != worker) { emit worker->valueChanged(progressLabel, 50); }
-
-	if (signedMsg) {
-		/* Verify message signature. */
-		int ret = rawMsgVerifySignature(message->raw,
-		    message->raw_length, 1, globPref.check_crl ? 1 : 0);
-		qDebug() << "Verification ret" << ret;
-		if (1 == ret) {
-			messageDb.msgsSetVerified(dmID,
-			    true);
-			/* TODO -- handle return error. */
-		} else if (0 == ret){
-			messageDb.msgsSetVerified(dmID,
-			    false);
-			/* TODO -- handle return error. */
-		} else {
-			/* TODO -- handle this error. */
-		}
-	}
-
-	if (0 != pBar) { pBar->setValue(60); }
-	if (0 != worker) { emit worker->valueChanged(progressLabel, 60); }
-
-	/* insert/update hash into db */
-	QString hashValue = QByteArray((char*)message->envelope->hash->value,
-	    message->envelope->hash->length).toBase64();
-	(messageDb.msgsInsertUpdateMessageHash(dmID,
-	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
-	? qDebug() << "Message hash was stored into db..."
-	: qDebug() << "ERROR: Message hash insert!";
-
-	if (0 != pBar) { pBar->setValue(70); }
-	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
-
-	/* Insert/update all attachment files */
-	struct isds_list *file;
-	file = message->documents;
-	while (0 != file) {
-		isds_document *item = (isds_document *) file->data;
-
-		QString dmEncodedContent = QByteArray((char *)item->data,
-		    item->data_length).toBase64();
-
-		/* Insert/update file to db */
-		(messageDb.msgsInsertUpdateMessageFile(dmID,
-		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
-		   item->dmMimeType, item->dmFormat,
-		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContent))
-		? qDebug() << "Message file" << item->dmFileDescr <<
-		    "was stored into db..."
-		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
-		    "insert!";
-		file = file->next;
-	}
+	storeMessage(signedMsg, incoming, messageDb, message,
+	    progressLabel, pBar, worker);
 
 	if (0 != pBar) { pBar->setValue(90); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 90); }
