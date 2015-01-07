@@ -24,7 +24,7 @@ public:
 	QMutex downloadMessagesMutex;
 
 	/*!
-	 * @brief Construtor.
+	 * @brief Constructor.
 	 */
 	explicit Worker(QModelIndex acntTopIdx, QString dmId,
 	    AccountDb &accountDb, AccountModel &accountModel,
@@ -36,10 +36,27 @@ public:
 	 */
 	void requestWork(void);
 
+	/*!
+	 * @brief Store message into database.
+	 */
 	static
 	qdatovka_error storeMessage(bool signedMsg, bool incoming,
 	    MessageDb &messageDb, const struct isds_message *msg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
+
+	/*!
+	 * @brief Store received message delivery information into database.
+	 */
+	static
+	qdatovka_error storeReceivedDeliveryInfo(bool signedMsg,
+	    MessageDb &messageDb, const struct isds_message *msg);
+
+	/*!
+	 * @brief Store sent message delivery information into database.
+	 */
+	static
+	qdatovka_error storeSentDeliveryInfo(bool signedMsg,
+	    MessageDb &messageDb, const struct isds_message *msg);
 
 	/*!
 	 * @brief Download attachments, envelope and raw for message.
@@ -100,7 +117,7 @@ private:
 	 * @brief Download delivery info for message.
 	 */
 	static
-	bool getReceivedsDeliveryInfo(const QModelIndex &acntTopIdx,
+	bool getReceivedDeliveryInfo(const QModelIndex &acntTopIdx,
 	    const QString &dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!
