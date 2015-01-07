@@ -4871,9 +4871,8 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
-						if (InsertZFOmsgIntoDb(message,
-						    accountList.at(j).messageDb,
-						    "sent")) {
+						Worker::storeEnvelope("sent", *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, false, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
 						} else {
 							errInfoText =
@@ -4912,9 +4911,8 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
-						if (InsertZFOmsgIntoDb(message,
-						    accountList.at(j).messageDb,
-						    "received")) {
+						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
 						} else {
 							errInfoText =
@@ -4991,169 +4989,6 @@ void MainWindow::showNotificationDialogWithResult(int filesCnt, int imported,
 		importZfoResult->exec();
 	}
 }
-
-
-/* ========================================================================= */
-/*
- * Insert ZFO message into database.
- */
-bool MainWindow::InsertZFOmsgIntoDb(struct isds_message *message,
-    MessageDb *messageDb, QString messageType)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	bool ret = false;
-
-	int dmId = atoi(message->envelope->dmID);
-
-	ret = messageDb->msgsInsertUpdateMessageRaw(dmId,
-	    QByteArray((char*)message->raw, message->raw_length), 0);
-
-	ret ? qDebug() << "Message raw data were updated..."
-	: qDebug() << "ERROR: Message raw data update!";
-
-	QString timestamp = QByteArray((char *)message->envelope->timestamp,
-	    message->envelope->timestamp_length).toBase64();
-	QString dmAmbiguousRecipient;
-	if (0 == message->envelope->dmAmbiguousRecipient) {
-		dmAmbiguousRecipient = "0";
-	} else {
-		dmAmbiguousRecipient = QString::number(
-		    *message->envelope->dmAmbiguousRecipient);
-	}
-	QString dmLegalTitleYear;
-	if (0 == message->envelope->dmLegalTitleYear) {
-		dmLegalTitleYear = "";
-	} else {
-		dmLegalTitleYear = QString::number(
-		    *message->envelope->dmLegalTitleYear);
-	}
-	QString dmLegalTitleLaw;
-	if (0 == message->envelope->dmLegalTitleLaw) {
-		dmLegalTitleLaw = "";
-	} else {
-		dmLegalTitleLaw = QString::number(
-		    *message->envelope->dmLegalTitleLaw);
-	}
-	QString dmSenderOrgUnitNum;
-	if (0 == message->envelope->dmSenderOrgUnitNum) {
-		dmSenderOrgUnitNum = "";
-	} else {
-		dmSenderOrgUnitNum =
-		    *message->envelope->dmSenderOrgUnitNum != 0
-		    ? QString::number(*message->envelope->
-		    dmSenderOrgUnitNum) : "";
-	}
-	QString dmRecipientOrgUnitNum;
-	if (0 == message->envelope->dmRecipientOrgUnitNum) {
-		dmRecipientOrgUnitNum = "";
-	} else {
-		dmRecipientOrgUnitNum =
-		  *message->envelope->dmRecipientOrgUnitNum != 0
-		    ? QString::number(*message->envelope->
-		    dmRecipientOrgUnitNum) : "";
-	}
-	QString dmDeliveryTime = "";
-	if (0 != message->envelope->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(
-		    message->envelope->dmDeliveryTime);
-	}
-	QString dmAcceptanceTime = "";
-	if (0 != message->envelope->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(
-		    message->envelope->dmAcceptanceTime);
-	}
-
-	(messageDb->msgsInsertMessageEnvelope(dmId,
-	    "tReturnedMessage",
-	    message->envelope->dbIDSender,
-	    message->envelope->dmSender,
-	    message->envelope->dmSenderAddress,
-	    (int)*message->envelope->dmSenderType,
-	    message->envelope->dmRecipient,
-	    message->envelope->dmRecipientAddress,
-	    dmAmbiguousRecipient,
-	    message->envelope->dmSenderOrgUnit,
-	    dmSenderOrgUnitNum,
-	    message->envelope->dbIDRecipient,
-	    message->envelope->dmRecipientOrgUnit,
-	    dmRecipientOrgUnitNum,
-	    message->envelope->dmToHands,
-	    message->envelope->dmAnnotation,
-	    message->envelope->dmRecipientRefNumber,
-	    message->envelope->dmSenderRefNumber,
-	    message->envelope->dmRecipientIdent,
-	    message->envelope->dmSenderIdent,
-	    dmLegalTitleLaw,
-	    dmLegalTitleYear,
-	    message->envelope->dmLegalTitleSect,
-	    message->envelope->dmLegalTitlePar,
-	    message->envelope->dmLegalTitlePoint,
-	    message->envelope->dmPersonalDelivery,
-	    message->envelope->dmAllowSubstDelivery,
-	    timestamp,
-	    dmDeliveryTime,
-	    dmAcceptanceTime,
-	    convertHexToDecIndex(*message->envelope->dmMessageStatus),
-	    (int)*message->envelope->dmAttachmentSize,
-	    message->envelope->dmType,
-	    messageType))
-	? qDebug() << "Message" << dmId  << "was inserted into db..."
-	: qDebug() << "ERROR: Message " << dmId << "insert!";
-
-
-
-
-	/* insert/update hash into db */
-	QString hashValue = QByteArray((char*)message->envelope->hash->value,
-	    message->envelope->hash->length).toBase64();
-	(messageDb->msgsInsertUpdateMessageHash(dmId,
-	    hashValue, convertHashAlg(message->envelope->hash->algorithm)))
-	? qDebug() << "Message hash was stored into db..."
-	: qDebug() << "ERROR: Message hash insert!";
-
-	/* Insert/update all attachment files */
-	struct isds_list *file;
-	file = message->documents;
-	while (0 != file) {
-		isds_document *item = (isds_document *) file->data;
-
-		QString dmEncodedContent = QByteArray((char *)item->data,
-		    item->data_length).toBase64();
-
-		/* Insert/update file to db */
-		(messageDb->msgsInsertUpdateMessageFile(dmId,
-		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
-		   item->dmMimeType, item->dmFormat,
-		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContent))
-		? qDebug() << "Message file" << item->dmFileDescr <<
-		    "was stored into db..."
-		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
-		    "insert!";
-		file = file->next;
-	}
-
-	isds_list_free(&message->documents);
-
-	struct isds_list *event;
-	event = message->envelope->events;
-
-	while (0 != event) {
-		isds_event *item = (isds_event *) event->data;
-		messageDb->msgsInsertUpdateMessageEvent(dmId,
-		    timevalToDbFormat(item->time),
-		    convertEventTypeToString(*item->type),
-		    item->description);
-		event = event->next;
-	}
-
-	isds_list_free(&message->envelope->events);
-
-	return true;
-}
-
 
 
 /* ========================================================================= */

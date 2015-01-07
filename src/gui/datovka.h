@@ -538,12 +538,6 @@ private:
 	void setSentColumnWidths(void);
 
 	/*!
-	 * @brief Insert ZFO message into database.
-	 */
-	bool InsertZFOmsgIntoDb(struct isds_message *item,
-		MessageDb *messageDb, QString messageType);
-
-	/*!
 	 * @brief Saves account export paths.
 	 */
 	void storeExportPath(void);
