@@ -55,6 +55,7 @@
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/gui/dlg_import_zfo_result.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -4728,7 +4729,6 @@ void MainWindow::prepareImportZFOintoDatabase(void)
 }
 
 
-
 /* ========================================================================= */
 /*
  * Check if import ZFO file is/was in ISDS.
@@ -4792,6 +4792,7 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 {
 	debugFuncCall();
 
+	int imported = 0;
 	int fileCnt = files.size();
 
 	if (fileCnt == 0) {
@@ -4801,6 +4802,10 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 	accountDataStruct accountData;
 	QList<accountDataStruct> accountList;
 	accountList.clear();
+	QPair<QString,QString> errImportZFO;
+	QList<QPair<QString,QString>> errImportList;
+	errImportList.clear();
+	QString errInfoText = "";
 
 	int accountCount = ui->accountList->model()->rowCount();
 	QString userName;
@@ -4833,17 +4838,14 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		}
 
 		message = loadZfoFile(dummy_session, files.at(i));
-		if (NULL == message) {
-			qDebug() << "Cannot parse file" << files.at(i);
-			QMessageBox::warning(this,
-			    tr("Content parsing error"),
-			    tr("Cannot parse the content of ") + files.at(i) +
-			     ".", QMessageBox::Ok);
-			/* TODO */
+		if (NULL == message || message->envelope == NULL) {
+			errImportZFO.first = files.at(i);
+			errImportZFO.second = tr("Wrong ZFO format. "
+			    "This file does not contain correct "
+			    "message data for import.");
+			errImportList.append(errImportZFO);
 			continue;
 		}
-
-		Q_ASSERT(message->envelope);
 
 		QString dbIDSender = message->envelope->dbIDSender;
 		QString dbIDRecipient = message->envelope->dbIDRecipient;
@@ -4853,6 +4855,7 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		QString isReceived;
 		int dmId = atoi(message->envelope->dmID);
 		int resISDS = 0;
+		bool success = false;
 
 		/* message type recognization {sent,received}, insert into DB */
 		for (int j = 0; j < accountList.size(); j++) {
@@ -4868,16 +4871,34 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
-						InsertZFOmsgIntoDb(message,
+						if (InsertZFOmsgIntoDb(message,
 						    accountList.at(j).messageDb,
-						    "sent");
+						    "sent")) {
+							success = true;
+						} else {
+							errInfoText =
+							    tr("This file was "
+							    "not inserted into"
+							    " local database "
+							    "because an error "
+							    "was detected "
+							    "during insertion "
+							    "process.");
+						}
 					} else {
-						/* TODO - message is in the database */
+						errInfoText = tr("This file "
+						    "already exists in the "
+						    "local database.");
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-					/* TODO - not in ISDS */
+					errInfoText = tr("This file (envelope)"
+					    " does not exist on the server "
+					    "Datové schránky.");
 				} else {
-					/* TODO - error */
+					errInfoText = tr("It is not possible "
+					    "to connect to server Datové "
+					    "schránky and verify validity of "
+					    "this ZFO file.");
 				}
 			}
 
@@ -4891,32 +4912,86 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (!accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
-						InsertZFOmsgIntoDb(message,
+						if (InsertZFOmsgIntoDb(message,
 						    accountList.at(j).messageDb,
-						    "received");
+						    "received")) {
+							success = true;
+						} else {
+							errInfoText =
+							    tr("This file was "
+							    "not inserted into"
+							    " local database "
+							    "because an error "
+							    "was detected "
+							    "during insertion "
+							    "process.");
+						}
 					} else {
-						/* TODO - message is in the database */
+						errInfoText = tr("This file "
+						    "already exists in the "
+						    "local database.");
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-					/* TODO - not in ISDS */
+					errInfoText = tr("This file (envelope)"
+					    " does not exist on the server "
+					    "Datové schránky.");
 				} else {
-					/* TODO - error */
+					errInfoText = tr("It is not possible "
+					    "to connect to server Datové "
+					    "schránky and verify validity of "
+					    "this ZFO file.");
 				}
 			}
-		}
+		} //for
 
 		if (isReceived.isNull() && isSent.isNull()) {
-			qDebug() << dmId << "Error: database for "
-			    "message doesn't exists";
-			/* TODO - error, database not exists */
-			continue;
+			errImportZFO.first = files.at(i);
+			errImportZFO.second = tr("For this message does not "
+			    "exist correct databox or relevant account.");
+			errImportList.append(errImportZFO);
+		} else if (!success) {
+			errImportZFO.first = files.at(i);
+			errImportZFO.second = errInfoText;
+			errImportList.append(errImportZFO);
+
+		} else {
+			imported++;
 		}
-	// +++
 
 		isds_message_free(&message);
 		isds_ctx_free(&dummy_session);
+	} //for
+
+	showNotificationDialogWithResult(fileCnt, imported, errImportList);
+}
+
+
+/* ========================================================================= */
+/*
+ * Show ZFO import notification dialog with results of import
+ */
+void MainWindow::showNotificationDialogWithResult(int filesCnt, int imported,
+    QList<QPair<QString,QString>> errImportList)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (filesCnt == imported) {
+		QMessageBox msgBox(this);;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("ZFO file(s) import result"));
+		msgBox.setText(tr("Import of ZFO file(s) was "
+		    "successfully done."));
+		msgBox.setInformativeText(
+		  tr("Number of successfully imported messages: %1").arg(imported));
+		msgBox.exec();
+	} else {
+		QDialog *importZfoResult = new ImportZFOResultDialog(
+		    filesCnt, imported, errImportList, this);
+		importZfoResult->exec();
 	}
 }
+
 
 /* ========================================================================= */
 /*

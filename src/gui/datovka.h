@@ -335,6 +335,12 @@ private slots:
 	 */
 	void executeImportZFOintoDatabase(QStringList files);
 
+	/*!
+	 * @brief Show ZFO import notification dialog with results of import.
+	 */
+	void showNotificationDialogWithResult(int filesCnt, int imported,
+	    QList<QPair<QString,QString>> errImportList);
+
  	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.
 	 */
