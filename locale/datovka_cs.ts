@@ -60,7 +60,7 @@ Založeno na knihovně libisds.</translation>
     <name>AccountDb</name>
     <message>
         <source>unknown or without expiration</source>
-        <translation type="vanished">Neznáný nebo bez expirace</translation>
+        <translation type="vanished">Neznámý nebo bez expirace</translation>
     </message>
 </context>
 <context>
@@ -95,7 +95,7 @@ Založeno na knihovně libisds.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_change_directory.ui" line="14"/>
         <source>Change data directory for current  account</source>
-        <translation>Změnit datové uložiště pro vybraný účet</translation>
+        <translation>Změnit datové úložiště pro vybraný účet</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_change_directory.ui" line="20"/>
@@ -1178,7 +1178,7 @@ This means you can only search for accounts of type OVM and accounts
 that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not 
 contain all otherwise matching databoxes.</source>
-        <translation type="obsolete">Váš účet je typu FO a máte aktivované příjímaní poštovních datových zpráv.
+        <translation type="obsolete">Váš účet je typu FO a máte aktivované příjímání poštovních datových zpráv.
 This means you can only search for accounts of type OVM and accounts
 that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not 
@@ -1605,7 +1605,7 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
     <message>
         <location filename="../src/gui/datovka.cpp" line="1473"/>
         <source>Download complete message &quot;%1&quot; from ISDS server.</source>
-        <translation>Stáhuje se kompletní zpráva &quot;%1&quot; ze serveru ISDS.</translation>
+        <translation>Stahuje se kompletní zpráva &quot;%1&quot; ze serveru ISDS.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1572"/>
@@ -1773,7 +1773,7 @@ Zkontrolujte připojení k internetu.</translation>
         <source>The message hash is not in local database.
 Please download complete message from ISDS and try again.</source>
         <translation>Otisk zprávy nebyl nalezen v lokální databázi.
-Prosím, shántěte kompletní zprávu ze serveru Datové schránky a zkuste to znova.</translation>
+Prosím, stáhněte kompletní zprávu ze serveru Datové schránky a zkuste to znova.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4602"/>
@@ -2018,7 +2018,7 @@ Zpráva není validní.</translation>
     <message>
         <source>The message hash cannot be verified because the connection to ISDS failed!
 Check your internet connection.</source>
-        <translation type="vanished">Ověření otisku zpávy nebylo provedeno, protože selhalo připojení k serveru Datové schránky!
+        <translation type="vanished">Ověření otisku zprávy nebylo provedeno, protože selhalo připojení k serveru Datové schránky!
 Zkontrolujte Vaše připojení k internetu.</translation>
     </message>
     <message>
@@ -2276,7 +2276,7 @@ Zkuste to znova.</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="109"/>
         <source>Enter search word</source>
-        <translation>Zadejte hleadané slovo</translation>
+        <translation>Zadejte hledané slovo</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="123"/>
@@ -2286,12 +2286,12 @@ Zkuste to znova.</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="127"/>
         <source>Storage: disk | disk</source>
-        <translation>Uložiště: disk | disk</translation>
+        <translation>Úložiště: disk | disk</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1994"/>
         <source>unknown or without expiration</source>
-        <translation>Neznáný nebo bez expirace</translation>
+        <translation>Neznámý nebo bez expirace</translation>
     </message>
     <message>
         <source>Can not export delivery info for message</source>
@@ -2409,7 +2409,7 @@ Zkuste to znova.</translation>
     </message>
     <message>
         <source>Connection to ISDS timeout!</source>
-        <translation type="vanished">Chyba navázování spojení se serverem Datové schránky!</translation>
+        <translation type="vanished">Chyba navazování spojení se serverem Datové schránky!</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5153"/>
@@ -2641,7 +2641,7 @@ Zkuste to znova.</translation>
         <location filename="../src/gui/ui/datovka.ui" line="301"/>
         <source>Verify
 signature</source>
-        <translation>Oveřit
+        <translation>Ověřit
 podpis</translation>
     </message>
     <message>
@@ -3126,7 +3126,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
         <source>Not present</source>
-        <translation type="vanished">nepřítoný</translation>
+        <translation type="vanished">nepřítomný</translation>
     </message>
     <message>
         <source>Invalid</source>
@@ -3210,7 +3210,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
 on the background of application without blocking of user interface.
 Download period you can set bellow.</source>
         <translation>Pokud povolíte tuto možnost, Datovka bude automaticky stahovat
-nové zprávy na pozadí aplikace bez blokování uřivatelského rozhraní.
+nové zprávy na pozadí aplikace bez blokování uživatelského rozhraní.
 Periodu stahování můžete nastavit níže.</translation>
     </message>
     <message>
@@ -3264,7 +3264,7 @@ Odeslaná data jsou použita pouze pro účely statistiky.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="249"/>
         <source>Send version info alongside the request</source>
-        <translation>Posílat inforamci o stavající verzi s dotazem</translation>
+        <translation>Posílat informaci o stávající verzi s dotazem</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="276"/>
@@ -3399,7 +3399,7 @@ stored download date. This allows long-term storage
 of messages without false alarms about invalid signature. 
 It is less safe, because the attacker could modify the 
 download date in the Datovka database.</source>
-        <translation>Platnost podepisujícího certifikátu je kontolována proti uloženému času
+        <translation>Platnost podepisujícího certifikátu je kontrolována proti uloženému času
 stažení. Toto nastavení umožňuje dlouhodobé ukládání zpráv bez chybných
 hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
 útočník by mohl upravit čas stažení zprávy v databázi Datovky.</translation>
@@ -3436,8 +3436,8 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="591"/>
-        <source>Čestina</source>
-        <translation>Čestina</translation>
+        <source>Czech</source>
+        <translation>Čeština</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="596"/>
@@ -3613,7 +3613,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
     <message>
         <location filename="../src/common.cpp" line="584"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
-        <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u neOVM DS).</translation>
+        <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS).</translation>
     </message>
     <message>
         <location filename="../src/common.cpp" line="594"/>
@@ -3916,7 +3916,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
     <message>
         <location filename="../src/main.cpp" line="42"/>
         <source>Data box application</source>
-        <translation></translation>
+        <translation>Aplikace pro datové schránky</translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="47"/>
@@ -4050,7 +4050,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <location filename="../src/io/message_db.cpp" line="996"/>
         <location filename="../src/io/message_db.cpp" line="1055"/>
         <source>Attachments downloaded</source>
-        <translation>Přílohy stáhnuty</translation>
+        <translation>Přílohy staženy</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="580"/>
@@ -4357,7 +4357,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
     <message>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="172"/>
         <source>Cannot check signing certificate.</source>
-        <translation>Nelze zkotrolovat podpisový certifikát.</translation>
+        <translation>Nelze zkontrolovat podpisový certifikát.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="213"/>
@@ -4631,7 +4631,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="339"/>
         <source>Recipients:</source>
-        <translation>Přijemci:</translation>
+        <translation>Příjemci:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="352"/>
@@ -4699,7 +4699,7 @@ nebo název organizace</translation>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="482"/>
         <source>Address of recipient</source>
-        <translation>Addresa příjemce</translation>
+        <translation>Adresa příjemce</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="487"/>
@@ -4710,7 +4710,7 @@ nebo název organizace</translation>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="490"/>
         <source>The message for recipient will be
 sent as Poštovní Datová Zpráva</source>
-        <translation>Zpráva bude odesláná jako
+        <translation>Zpráva bude odeslána jako
 placená Poštovní Datová Zpráva</translation>
     </message>
     <message>
@@ -4779,7 +4779,7 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
     </message>
     <message>
         <source>Add a new attachment to the current message</source>
-        <translation type="vanished">Přidat novou přílohu do zrávy</translation>
+        <translation type="vanished">Přidat novou přílohu do zprávy</translation>
     </message>
     <message>
         <source>Remove the selected attachment from current message</source>
@@ -4907,7 +4907,7 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_view_zfo.ui" line="14"/>
         <source>View message from ZFO</source>
-        <translation>Zobrazit zpávu ze souboru ZFO</translation>
+        <translation>Zobrazit zprávu ze souboru ZFO</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_view_zfo.ui" line="53"/>
