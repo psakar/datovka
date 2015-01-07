@@ -4728,6 +4728,61 @@ void MainWindow::prepareImportZFOintoDatabase(void)
 }
 
 
+
+/* ========================================================================= */
+/*
+ * Check if import ZFO file is/was in ISDS.
+ */
+int MainWindow::isImportMsgInISDS(QString zfofile, QModelIndex accountIndex)
+/* ========================================================================= */
+{
+	Q_ASSERT(accountIndex.isValid());
+
+	size_t length;
+	isds_error status;
+	QByteArray bytes;
+	QFile file(zfofile);
+
+	if (file.exists()) {
+		if (!file.open(QIODevice::ReadOnly)) {
+			qDebug() << "Couldn't open the file" << zfofile;
+			return MSG_FILE_ERROR;
+		}
+
+		bytes = file.readAll();
+		length = bytes.size();
+	} else {
+		return MSG_FILE_ERROR;
+	}
+
+	accountIndex = AccountModel::indexTop(accountIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(accountIndex, true)) {
+			return MSG_ISDS_ERROR;
+		}
+	}
+
+	status = isds_authenticate_message(isdsSessions.session(
+	    accountInfo.userName()), bytes.data(), length);
+
+	// not in ISDS
+	if (IE_NOTEQUAL == status) {
+		return MSG_IS_NOT_IN_ISDS;
+	}
+
+	if (IE_SUCCESS == status) {
+		// is/was in ISDS
+		return MSG_IS_IN_ISDS;
+	} else {
+		// any error
+		qDebug() << status << isds_strerror(status);
+		return MSG_ISDS_ERROR;
+	}
+}
+
+
 /* ========================================================================= */
 /*
  * Execute the import ZFO file(s) into database.
@@ -4742,12 +4797,6 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 	if (fileCnt == 0) {
 		return;
 	}
-
-	/*
-	 * First import phase:
-	 * Recognize target database for import of ZFO and type of message
-	 * {sent,received}
-	 */
 
 	accountDataStruct accountData;
 	QList<accountDataStruct> accountList;
@@ -4765,6 +4814,7 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		MessageDb *messageDb = accountMessageDb(accountItem);
 
 		userName = accountInfo.userName();
+		accountData.acntIndex = index;
 		accountData.username = userName;
 		accountData.databoxID = m_accountDb.dbId(userName + "___True");
 		accountData.messageDb = messageDb;
@@ -4802,31 +4852,55 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 		QString isSent;
 		QString isReceived;
 		int dmId = atoi(message->envelope->dmID);
+		int resISDS = 0;
 
-		/* message type recognization {sent,received} */
+		/* message type recognization {sent,received}, insert into DB */
 		for (int i = 0; i < accountList.size(); i++) {
-
-			/* sent */
+			/* is sent */
 			if (accountList.at(i).databoxID == dbIDSender) {
+
 				isSent = accountList.at(i).username;
 				qDebug() << dmId << "isSent" << isSent;
-				if (!accountList.at(i).messageDb->isInMessageDb(dmId)) {
-					InsertZFOmsgIntoDb(message,
-					    accountList.at(i).messageDb, "sent");
+
+				/* Is/was ZFO message in ISDS */
+				resISDS = isImportMsgInISDS(files.at(i),
+				    accountList.at(i).acntIndex);
+				if (resISDS == MSG_IS_IN_ISDS) {
+					if (!accountList.at(i).messageDb->
+					    isInMessageDb(dmId)) {
+						InsertZFOmsgIntoDb(message,
+						    accountList.at(i).messageDb,
+						    "sent");
+					} else {
+						/* TODO - message is in the database */
+					}
+				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+					/* TODO - not in ISDS */
 				} else {
-					/* TODO - show dialog */
+					/* TODO - error */
 				}
 			}
 
-			/* received */
+			/* is received */
 			if (accountList.at(i).databoxID == dbIDRecipient) {
 				isReceived = accountList.at(i).username;
 				qDebug() << dmId << "isReceived" << isReceived;
-				if (!accountList.at(i).messageDb->isInMessageDb(dmId)) {
-					InsertZFOmsgIntoDb(message,
-					    accountList.at(i).messageDb, "received");
+				resISDS = isImportMsgInISDS(files.at(i),
+				    accountList.at(i).acntIndex);
+
+				if (resISDS == MSG_IS_IN_ISDS) {
+					if (!accountList.at(i).messageDb->
+					    isInMessageDb(dmId)) {
+						InsertZFOmsgIntoDb(message,
+						    accountList.at(i).messageDb,
+						    "received");
+					} else {
+						/* TODO - message is in the database */
+					}
+				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+					/* TODO - not in ISDS */
 				} else {
-					/* TODO - show dialog */
+					/* TODO - error */
 				}
 			}
 		}
@@ -4837,7 +4911,6 @@ void MainWindow::executeImportZFOintoDatabase(QStringList files)
 			/* TODO - error, database not exists */
 			continue;
 		}
-
 	// +++
 
 		isds_message_free(&message);

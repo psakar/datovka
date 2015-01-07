@@ -68,7 +68,16 @@ public:
 		QString databoxID;
 		QString username;
 		MessageDb *messageDb;
+		QModelIndex acntIndex;
 	};
+
+	enum isdsResult {
+		MSG_IS_IN_ISDS,
+		MSG_IS_NOT_IN_ISDS,
+		MSG_ISDS_ERROR,
+		MSG_FILE_ERROR
+	};
+
 
 protected:
 	/*!
@@ -325,6 +334,11 @@ private slots:
 	 * @brief Import ZFO file(s) list into database.
 	 */
 	void executeImportZFOintoDatabase(QStringList files);
+
+ 	/*!
+	 * @brief Check if import ZFO file is/was in ISDS.
+	 */
+	int isImportMsgInISDS(QString zfofile, QModelIndex accountIndex);
 
 	/*!
 	 * @brief About application dialog.
