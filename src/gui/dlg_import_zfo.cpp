@@ -10,9 +10,19 @@ ImportZFODialog::ImportZFODialog(QWidget *parent) :
 
 void ImportZFODialog::ImportFiles(void)
 {
-	if (this->radioImportAll->isChecked()) {
-		emit returnZFOAction(IMPOR_FROM_DIR);
-	} else if (this->radioImportSelected->isChecked()) {
-		emit returnZFOAction(IMPOR_SEL_FILES);
+	int zfoType, zfoAaction;
+
+	if (this->messageZFO->isChecked()) {
+		zfoType = IMPORT_MESSAGE_ZFO;
+	} else if (this->deliveryZFO->isChecked()) {
+		zfoType = IMPORT_DELIVERY_ZFO;
 	}
+
+	if (this->radioImportAll->isChecked()) {
+		zfoAaction = IMPORT_FROM_DIR;
+	} else if (this->radioImportSelected->isChecked()) {
+		zfoAaction = IMPORT_SEL_FILES;
+	}
+
+	emit returnZFOAction(zfoType, zfoAaction);
 }

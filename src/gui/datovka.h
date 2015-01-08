@@ -326,30 +326,42 @@ private slots:
 	void exportCorrespondenceOverview(void);
 
 	/*!
-	 * @brief Prepare import ZFO file(s) into database.
+	 * @brief Show dialog with settings of import ZFO file(s) into database.
 	 */
-	void prepareImportZFOintoDatabase(void);
+	void showImportZFOActionDialog(void);
 
 	/*!
 	 * @brief Create ZFO file(s) list for import into database.
 	 */
-	void createZFOListForImport(int action);
+	void createZFOListForImport(int zfoType, int zfoAction);
 
 	/*!
-	 * @brief Import ZFO file(s) list into database.
+	 * @brief Prepare import ZFO file(s) into database by ZFO type.
 	 */
-	void executeImportZFOintoDatabase(QStringList files);
+	void prepareImportZFOintoDatabase(QStringList files, int zfoType);
+
+	/*!
+	 * @brief Import only delivery info ZFO file(s) into database.
+	 */
+	void importDeliveryInfoZFO(QList<accountDataStruct> accountList,
+	    QStringList files, int zfoType);
+
+	/*!
+	 * @brief Import only message ZFO file(s) into database.
+	 */
+	void importMessageZFO(QList<accountDataStruct> accountList,
+	    QStringList files, int zfoType);
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
 	void showNotificationDialogWithResult(int filesCnt, int imported,
-	    QList<QPair<QString,QString>> errImportList);
+	    QList<QPair<QString,QString>> errImportList, int zfoType);
 
  	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.
 	 */
-	int isImportMsgInISDS(QString zfofile, QModelIndex accountIndex);
+	int isImportMsgInISDS(QString zfoFile, QModelIndex accountIndex);
 
 	/*!
 	 * @brief About application dialog.

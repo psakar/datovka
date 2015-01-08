@@ -19,7 +19,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Number of ZFO file(s) for import to databse:</string>
+        <string>Number of ZFO files for import to databse:</string>
        </property>
       </widget>
      </item>
@@ -53,7 +53,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="labelDone">
        <property name="text">
-        <string>Number of successfully imported messages:</string>
+        <string>Number of successfully imported files:</string>
        </property>
       </widget>
      </item>
@@ -73,7 +73,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="labelError">
        <property name="text">
-        <string>Number of unsuccessfully imported  messages:</string>
+        <string>Number of unsuccessfully imported files:</string>
        </property>
       </widget>
      </item>
@@ -95,7 +95,7 @@
    <item>
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>List of unsuccessfully imported ZFO file(s):</string>
+      <string>List of unsuccessfully imported ZFO files:</string>
      </property>
     </widget>
    </item>

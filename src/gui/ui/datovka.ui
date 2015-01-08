@@ -1089,7 +1089,7 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
    </property>
    <property name="text">
-    <string>Import ZFO file into database</string>
+    <string>Import ZFO file(s) into database</string>
    </property>
   </action>
  </widget>

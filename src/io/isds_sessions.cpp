@@ -30,6 +30,7 @@
 #include <QObject>
 
 #include "isds_sessions.h"
+#include "src/gui/dlg_import_zfo.h"
 
 
 
@@ -796,7 +797,7 @@ fail:
  * Create a isds message from zfo file.
  */
 struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
-    const QString &fileName)
+    const QString &fileName, int zfoType)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -823,10 +824,16 @@ struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
 		goto fail;
 	}
 
-	status = isds_load_message(isdsSession, raw_type, content.data(),
-	    content.size(), &message, BUFFER_COPY);
+	if (zfoType == ImportZFODialog::IMPOR_MESSAGE_ZFO) {
+		status = isds_load_message(isdsSession, raw_type,
+		    content.data(), content.size(), &message, BUFFER_COPY);
+	} else {
+		status = isds_load_delivery_info(isdsSession, raw_type,
+		    content.data(), content.size(), &message, BUFFER_COPY);
+	}
+
 	if (IE_SUCCESS != status) {
-		qWarning() << "Error while loading message from file"
+		qWarning() << "Error while loading data from file"
 		    << fileName;
 		goto fail;
 	}

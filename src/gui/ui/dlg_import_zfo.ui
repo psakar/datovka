@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>137</height>
+    <height>233</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,9 +15,35 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>What do you want to import?</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QRadioButton" name="messageZFO">
+        <property name="text">
+         <string>Message ZFO file(s)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="deliveryZFO">
+        <property name="text">
+         <string>Delivery info ZFO file(s)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>What do you like to do?</string>
+      <string>How do you want to import?</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>

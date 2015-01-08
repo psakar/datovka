@@ -11,14 +11,20 @@ class ImportZFODialog : public QDialog, public Ui::ImportZFO
 
 public:
 	enum ZFOaction {
-		IMPOR_FROM_DIR,
-		IMPOR_SEL_FILES
+		IMPORT_FROM_DIR,
+		IMPORT_SEL_FILES
 	};
+
+	enum ZFOtype {
+		IMPORT_MESSAGE_ZFO,
+		IMPORT_DELIVERY_ZFO
+	};
+
 
 public:
 	ImportZFODialog(QWidget *parent = 0);
 signals:
-	void returnZFOAction(int);
+	void returnZFOAction(int, int);
 
 private slots:
 	void ImportFiles(void);
