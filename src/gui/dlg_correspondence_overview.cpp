@@ -1,19 +1,18 @@
+
+#include <QMessageBox>
 #include <QPushButton>
 
 #include "dlg_correspondence_overview.h"
 
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(
-    MessageDb &db, QString &dbId,
-    QTreeView &accountList, QTableView &messageList,
+    const MessageDb &db, const QString &dbId,
     const AccountModel::SettingsMap &accountInfo,
-    QString &export_correspond_dir, QWidget *parent) :
+    QString &exportCorrespondDir, QWidget *parent) :
     QDialog(parent),
     m_messDb(db),
     m_dbId(dbId),
-    m_accountList(accountList),
-    m_messageList(messageList),
     m_accountInfo(accountInfo),
-    m_export_correspond_dir(export_correspond_dir)
+    m_exportCorrespondDir(exportCorrespondDir)
 {
 	setupUi(this);
 	initDialog();
@@ -60,7 +59,7 @@ void DlgCorrespondenceOverview::initDialog(void)
 /*
  * Slot: fires when date was changed in CalendarWidgets
  */
-void DlgCorrespondenceOverview::dateCalendarsChange(QDate date)
+void DlgCorrespondenceOverview::dateCalendarsChange(const QDate &date)
 /* ========================================================================= */
 {
 	(void) date; // not used
@@ -77,20 +76,21 @@ void DlgCorrespondenceOverview::dateCalendarsChange(QDate date)
 /*
  * Slot: fires when date was changed in CalendarWidgets
  */
-void DlgCorrespondenceOverview::getMsgListFromDates(QDate fromDate, QDate toDate)
+void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
+    const QDate &toDate)
 /* ========================================================================= */
 {
 	bool ok = false;
 	int sentCnt = 0;
 	int receivedCnt = 0;
 
-	messages.sentdmIDs = m_messDb.msgsDateInterval(fromDate,
+	m_messages.sentdmIDs = m_messDb.msgsDateInterval(fromDate,
 	    toDate, true);
-	sentCnt = messages.sentdmIDs.count();
+	sentCnt = m_messages.sentdmIDs.count();
 
-	messages.receivedmIDs = m_messDb.msgsDateInterval(fromDate,
+	m_messages.receivedmIDs = m_messDb.msgsDateInterval(fromDate,
 	    toDate, false);
-	receivedCnt = messages.receivedmIDs.count();
+	receivedCnt = m_messages.receivedmIDs.count();
 
 	if (sentCnt > 0 || receivedCnt > 0) {
 		ok = true;
@@ -116,14 +116,13 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
     QString exportPath)
 /* ========================================================================= */
 {
-	int dmID;
 	QString fileName = "DDZ_" + dmId + ".zfo";
 
 	if (dmId.isNull() || dmId.isEmpty()) {
 		return false;
 	}
 
-	dmID = atoi(dmId.toStdString().c_str());
+	int dmID = atoi(dmId.toStdString().c_str());
 
 	QString raw = QString(m_messDb.msgsMessageBase64(dmID)).toUtf8();
 	if (raw.isEmpty()) {
@@ -132,22 +131,10 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
 
 	fileName = exportPath + QDir::separator() + fileName;
 
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly)) {
-		return false;
-	}
-
 	QByteArray rawutf8= QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
-	int written = fout.write(data);
-	if (written != data.size()) {
-
-	}
-
-	fout.close();
-
-	return true;
+	return WF_SUCCESS == writeFile(fileName, data);
 }
 
 
@@ -155,15 +142,14 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
 /*
  * Add message to HTML.
  */
-QString DlgCorrespondenceOverview::addMessageToHtml(QString dmId)
+QString DlgCorrespondenceOverview::addMessageToHtml(const QString &dmId)
 /* ========================================================================= */
 {
 	if (dmId.isNull() || dmId.isEmpty()) {
 		return "";
 	}
 
-	int dmID;
-	dmID = atoi(dmId.toStdString().c_str());
+	int dmID = atoi(dmId.toStdString().c_str());
 	QList<QString> messageItems = m_messDb.getMsgForHtmlExport(dmID);
 
 	if (messageItems.empty()) {
@@ -200,17 +186,16 @@ QString DlgCorrespondenceOverview::addMessageToHtml(QString dmId)
 /*
  * Add message to CSV.
  */
-QString DlgCorrespondenceOverview::addMessageToCsv(QString dmId)
+QString DlgCorrespondenceOverview::addMessageToCsv(const QString &dmId)
 /* ========================================================================= */
 {
 	QString content;
-	int dmID;
 
 	if (dmId.isNull() || dmId.isEmpty()) {
 		return "";
 	}
 
-	dmID = atoi(dmId.toStdString().c_str());
+	int dmID = atoi(dmId.toStdString().c_str());
 	QList<QString> messageItems = m_messDb.getMsgForCsvExport(dmID);
 
 	content = dmId;
@@ -229,16 +214,15 @@ QString DlgCorrespondenceOverview::addMessageToCsv(QString dmId)
 /*
  * Export messages to HTML.
  */
-bool DlgCorrespondenceOverview::exportMessagesToHtml(QString exportPath)
+bool DlgCorrespondenceOverview::exportMessagesToHtml(const QString &fileName)
 /* ========================================================================= */
 {
 	qDebug() << "Files are export to HTML format";
 
-	QString fileName = QString(tr("Overview-")) +
-	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    ".html";
-
-	fileName = exportPath + QDir::separator() + fileName;
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return false;
+	}
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -246,47 +230,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(QString exportPath)
 	}
 
 	QTextStream f(&fout);
-	f << addHeaderToHtml();
-
-
-	/* sent messages */
-	if (this->sentCheckBox->isChecked()) {
-
-		f << "<h2>" << tr("Sent") << "</h2>\n";
-
-		for (int i = 0; i < messages.sentdmIDs.count(); ++i) {
-			f << addMessageToHtml(messages.sentdmIDs.at(i));
-		}
-	}
-
-	/* received messages */
-	if (this->receivedCheckBox->isChecked()) {
-
-		f << "<h2>" << tr("Received") << "</h2>\n";
-
-		for (int i = 0; i < messages.receivedmIDs.count(); ++i){
-			f << addMessageToHtml(messages.receivedmIDs.at(i));
-		}
-	}
-
-	f << "</body>\n</html>";
-
-	fout.close();
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Add header to html.
- */
-QString DlgCorrespondenceOverview::addHeaderToHtml(void)
-/* ========================================================================= */
-{
-	QDateTime now = QDateTime().currentDateTime();
-
-	return "<!DOCTYPE html\n"
+	/* Generate CSV header. */
+	f << "<!DOCTYPE html\n"
 	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
 	    "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
 	    "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
@@ -317,32 +262,38 @@ QString DlgCorrespondenceOverview::addHeaderToHtml(void)
 	    "</td></tr><tr><td>"
 	    + tr("Generated:") +
 	    "</td><td>"
-	    + now.toString("dd.MM.yyyy hh:mm:ss") +
+	    + QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss") +
 	    "</td></tr></table>\n";
-}
 
 
-/* ========================================================================= */
-/*
- * Add header to CSV.
- */
-QString DlgCorrespondenceOverview::addHeaderToCsv(void)
-/* ========================================================================= */
-{
-	return "ID," +
-	    tr("Status") + "," +
-	    tr("Message type") + "," +
-	    tr("Delivery time") + "," +
-	    tr("Acceptance time") + "," +
-	    tr("Subject") + "," +
-	    tr("Sender") + "," +
-	    tr("Sender Address") + "," +
-	    tr("Recipient") + "," +
-	    tr("Recipient Address") + "," +
-	    tr("Our file mark") + "," +
-	    tr("Our reference number") + "," +
-	    tr("Your file mark") + "," +
-	    tr("Your reference number") + "\n";
+	/* sent messages */
+	if (this->sentCheckBox->isChecked()) {
+
+		f << "<h2>" << tr("Sent") << "</h2>\n";
+
+		for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
+			f << addMessageToHtml(m_messages.sentdmIDs.at(i));
+		}
+	}
+
+	/* received messages */
+	if (this->receivedCheckBox->isChecked()) {
+
+		f << "<h2>" << tr("Received") << "</h2>\n";
+
+		for (int i = 0; i < m_messages.receivedmIDs.count(); ++i){
+			f << addMessageToHtml(m_messages.receivedmIDs.at(i));
+		}
+	}
+
+	f << "</body>\n</html>";
+
+	if (!fout.flush()) {
+		return false;
+	}
+	fout.close();
+
+	return true;
 }
 
 
@@ -350,16 +301,15 @@ QString DlgCorrespondenceOverview::addHeaderToCsv(void)
 /*
  * Export messages to CSV.
  */
-bool DlgCorrespondenceOverview::exportMessagesToCsv(QString exportPath)
+bool DlgCorrespondenceOverview::exportMessagesToCsv(const QString &fileName)
 /* ========================================================================= */
 {
 	qDebug() << "Files are export to CSV format";
 
-	QString fileName = QString(tr("Overview-")) +
-	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    ".txt";
-
-	fileName = exportPath + QDir::separator() + fileName;
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return false;
+	}
 
 	QFile fout(fileName);
 	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -367,22 +317,32 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(QString exportPath)
 	}
 
 	QTextStream f(&fout);
-	f << addHeaderToCsv();
+	/* Generate CSV header. */
+	f << "ID," + tr("Status") + "," + tr("Message type") + "," +
+	    tr("Delivery time") + "," + tr("Acceptance time") + "," +
+	    tr("Subject") + "," + tr("Sender") + "," +
+	    tr("Sender Address") + "," + tr("Recipient") + "," +
+	    tr("Recipient Address") + "," + tr("Our file mark") + "," +
+	    tr("Our reference number") + "," + tr("Your file mark") + "," +
+	    tr("Your reference number") + "\n";
 
 	/* sent messages */
 	if (this->sentCheckBox->isChecked()) {
-		for (int i = 0; i < messages.sentdmIDs.count(); ++i) {
-			f << addMessageToCsv(messages.sentdmIDs.at(i));
+		for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
+			f << addMessageToCsv(m_messages.sentdmIDs.at(i));
 		}
 	}
 
 	/* received messages */
 	if (this->receivedCheckBox->isChecked()) {
-		for (int i = 0; i < messages.receivedmIDs.count(); ++i) {
-			f << addMessageToCsv(messages.receivedmIDs.at(i));
+		for (int i = 0; i < m_messages.receivedmIDs.count(); ++i) {
+			f << addMessageToCsv(m_messages.receivedmIDs.at(i));
 		}
 	}
 
+	if (!fout.flush()) {
+		return false;
+	}
 	fout.close();
 
 	return true;
@@ -396,23 +356,47 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(QString exportPath)
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString importDir = QFileDialog::getExistingDirectory(this,
+	QString exportDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select directory to save correspondence"),
-	    m_export_correspond_dir,
+	    m_exportCorrespondDir,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (importDir.isEmpty() || importDir.isNull()) {
+	if (exportDir.isEmpty() || exportDir.isNull()) {
 		return;
 	}
 
-	m_export_correspond_dir = importDir;
+	m_exportCorrespondDir = exportDir;
 
-	qDebug() << "Files are export to:" << importDir;
+	qDebug() << "Files are export to:" << exportDir;
+
+	QString overiviewFileName;
 
 	if (this->outputFormatComboBox->currentText() == "HTML") {
-		exportMessagesToHtml(importDir);
+		overiviewFileName = exportDir + QDir::separator() +
+		    tr("Overview-") +
+		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
+		    ".html";
+
+		if (!exportMessagesToHtml(overiviewFileName)) {
+			QMessageBox::warning(this, QObject::tr(
+			        "Correspondence overview export error."),
+			    tr("Correspondence overview file '%1' could not "
+			        "be written.").arg(overiviewFileName),
+			    QMessageBox::Ok);
+		}
 	} else {
-		exportMessagesToCsv(importDir);
+		overiviewFileName = exportDir + QDir::separator() +
+		    tr("Overview-") +
+		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
+		    ".txt";
+
+		if (!exportMessagesToCsv(overiviewFileName)) {
+			QMessageBox::warning(this, QObject::tr(
+			        "Correspondence overview export error"),
+			    tr("Correspondence overview file '%1' could not "
+			        "be written.").arg(overiviewFileName),
+			    QMessageBox::Ok);
+		}
 	}
 
 	QList<QString> errorDmId;
@@ -424,14 +408,14 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
 
-			for (int i = 0; i < messages.sentdmIDs.count(); ++i) {
-				if (!exportMessageAsZFO(messages.sentdmIDs.at(i),
-				    importDir)) {
+			for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
+				if (!exportMessageAsZFO(m_messages.sentdmIDs.at(i),
+				    exportDir)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ"
-					    << messages.sentdmIDs.at(i)
+					    << m_messages.sentdmIDs.at(i)
 					    << "export error";
-					errorDmId.append(messages.sentdmIDs.at(i));
+					errorDmId.append(m_messages.sentdmIDs.at(i));
 				} else {
 					successCnt++;
 				}
@@ -441,14 +425,14 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
 
-			for (int i = 0; i < messages.receivedmIDs.count(); ++i) {
-				if (!exportMessageAsZFO(messages.receivedmIDs.at(i),
-				    importDir)) {
+			for (int i = 0; i < m_messages.receivedmIDs.count(); ++i) {
+				if (!exportMessageAsZFO(m_messages.receivedmIDs.at(i),
+				    exportDir)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ"
-					    << messages.receivedmIDs.at(i)
+					    << m_messages.receivedmIDs.at(i)
 					    << "export error";
-					errorDmId.append(messages.receivedmIDs.at(i));
+					errorDmId.append(m_messages.receivedmIDs.at(i));
 				} else {
 					successCnt++;
 				}
@@ -457,6 +441,22 @@ void DlgCorrespondenceOverview::exportData(void)
 	}
 
 	if (!errorDmId.isEmpty()) {
-		emit showNotificationDialog(errorDmId, successCnt);
+		QString msg = tr("There were some errors during saving of "
+		    "the overview:") + "\n\n";
+
+		for (int i = 0; i < errorDmId.count(); ++i) {
+			msg += tr("Message") + " " + errorDmId.at(i) + " " +
+			   tr("does not contain data necessary for ZFO export") + ".\n";
+			if (i > 10) {
+				msg += tr("And many more") + "...\n";
+				break;
+			}
+		}
+
+		msg += "\n" + QString::number(successCnt) + " " +
+		    tr("messages were successfully exported to ZFO") + ".\n";
+
+		QMessageBox::warning(this,
+		    QObject::tr("Correspondence export error"), msg, QMessageBox::Ok);
 	}
 }

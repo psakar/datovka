@@ -24,36 +24,28 @@ public:
 		QList<QString> receivedmIDs;
 	};
 
-	DlgCorrespondenceOverview(MessageDb &db, QString &dbId,
-	    QTreeView &accountList, QTableView &messageList,
+	DlgCorrespondenceOverview(const MessageDb &db, const QString &dbId,
 	    const AccountModel::SettingsMap &accountInfo,
-	    QString &export_correspond_dir, QWidget *parent = 0);
-
-signals:
-	void showNotificationDialog(QList<QString>, int);
+	    QString &exportCorrespondDir, QWidget *parent = 0);
 
 private slots:
-	void dateCalendarsChange(QDate date);
+	void dateCalendarsChange(const QDate &date);
 	void exportData(void);
 
 private:
-	MessageDb &m_messDb;
+	const MessageDb &m_messDb;
 	const QString m_dbId;
-	QTreeView &m_accountList;
-	QTableView &m_messageList;
-	AccountModel::SettingsMap m_accountInfo;
-	exportMessages messages;
-	QString &m_export_correspond_dir;
+	const AccountModel::SettingsMap m_accountInfo;
+	exportMessages m_messages;
+	QString &m_exportCorrespondDir;
 
 	void initDialog(void);
-	void getMsgListFromDates(QDate fromDate, QDate toDate);
-	QString  addMessageToCsv(QString dmId);
-	QString  addMessageToHtml(QString dmId);
+	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
+	QString addMessageToCsv(const QString &dmId);
+	QString addMessageToHtml(const QString &dmId);
 	bool exportMessageAsZFO(QString dmId, QString exportPath);
-	bool exportMessagesToCsv(QString exportPath);
-	bool exportMessagesToHtml(QString exportPath);
-	QString addHeaderToCsv(void);
-	QString addHeaderToHtml(void);
+	bool exportMessagesToCsv(const QString &fileName);
+	bool exportMessagesToHtml(const QString &fileName);
 
 };
 
