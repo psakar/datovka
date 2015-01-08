@@ -1,9 +1,15 @@
 
+
 #include <QMessageBox>
 #include <QPushButton>
 
 #include "dlg_correspondence_overview.h"
 
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(
     const MessageDb &db, const QString &dbId,
     const AccountModel::SettingsMap &accountInfo,
@@ -13,19 +19,10 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(
     m_dbId(dbId),
     m_accountInfo(accountInfo),
     m_exportCorrespondDir(exportCorrespondDir)
+/* ========================================================================= */
 {
 	setupUi(this);
-	initDialog();
-}
 
-
-/* ========================================================================= */
-/*
- * Init dialog
- */
-void DlgCorrespondenceOverview::initDialog(void)
-/* ========================================================================= */
-{
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
 	QString accountName = m_accountInfo.accountName()
@@ -112,24 +109,24 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 /*
  * Export message into ZFO file.
  */
-bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
-    QString exportPath)
+bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
+    const QString &fileName) const
 /* ========================================================================= */
 {
-	QString fileName = "DDZ_" + dmId + ".zfo";
-
-	if (dmId.isNull() || dmId.isEmpty()) {
+	Q_ASSERT(dmId >= 0);
+	if (dmId < 0) {
 		return false;
 	}
 
-	int dmID = atoi(dmId.toStdString().c_str());
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return false;
+	}
 
-	QString raw = QString(m_messDb.msgsMessageBase64(dmID)).toUtf8();
+	QString raw = QString(m_messDb.msgsMessageBase64(dmId)).toUtf8();
 	if (raw.isEmpty()) {
 		return false;
 	}
-
-	fileName = exportPath + QDir::separator() + fileName;
 
 	QByteArray rawutf8= QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
@@ -142,23 +139,22 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(QString dmId,
 /*
  * Add message to HTML.
  */
-QString DlgCorrespondenceOverview::addMessageToHtml(const QString &dmId)
+QString DlgCorrespondenceOverview::msgInHtml(int dmId) const
 /* ========================================================================= */
 {
-	if (dmId.isNull() || dmId.isEmpty()) {
-		return "";
+	Q_ASSERT(dmId >= 0);
+	if (dmId < 0) {
+		return QString();
 	}
 
-	int dmID = atoi(dmId.toStdString().c_str());
-	QList<QString> messageItems = m_messDb.getMsgForHtmlExport(dmID);
-
+	QList<QString> messageItems = m_messDb.getMsgForHtmlExport(dmId);
 	if (messageItems.empty()) {
-		return "";
+		return QString();
 	}
 
 	return "<div><table><tr><td><table>"
 	    "<tr><td><b>"
-	    + dmId +
+	    + QString::number(dmId) +
 	    "</b></td></tr>"
 	    "<tr><td class=\"smaller\">"
 	    + messageItems.at(3) +
@@ -186,25 +182,24 @@ QString DlgCorrespondenceOverview::addMessageToHtml(const QString &dmId)
 /*
  * Add message to CSV.
  */
-QString DlgCorrespondenceOverview::addMessageToCsv(const QString &dmId)
+QString DlgCorrespondenceOverview::msgInCsv(int dmId) const
 /* ========================================================================= */
 {
-	QString content;
-
-	if (dmId.isNull() || dmId.isEmpty()) {
-		return "";
+	Q_ASSERT(dmId >= 0);
+	if (dmId < 0) {
+		return QString();
 	}
 
-	int dmID = atoi(dmId.toStdString().c_str());
-	QList<QString> messageItems = m_messDb.getMsgForCsvExport(dmID);
+	QList<QString> messageItems = m_messDb.getMsgForCsvExport(dmId);
+	if (messageItems.empty()) {
+		return QString();
+	}
 
-	content = dmId;
+	QString content = QString::number(dmId);
 
 	for (int i = 0; i < messageItems.count(); ++i) {
 		content += "," + messageItems.at(i);
 	}
-
-	content += "\n";
 
 	return content;
 }
@@ -214,7 +209,8 @@ QString DlgCorrespondenceOverview::addMessageToCsv(const QString &dmId)
 /*
  * Export messages to HTML.
  */
-bool DlgCorrespondenceOverview::exportMessagesToHtml(const QString &fileName)
+bool DlgCorrespondenceOverview::exportMessagesToHtml(
+    const QString &fileName) const
 /* ========================================================================= */
 {
 	qDebug() << "Files are export to HTML format";
@@ -271,8 +267,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(const QString &fileName)
 
 		f << "<h2>" << tr("Sent") << "</h2>\n";
 
-		for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
-			f << addMessageToHtml(m_messages.sentdmIDs.at(i));
+		foreach (int dmId, m_messages.sentdmIDs) {
+			f << msgInHtml(dmId);
 		}
 	}
 
@@ -281,8 +277,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(const QString &fileName)
 
 		f << "<h2>" << tr("Received") << "</h2>\n";
 
-		for (int i = 0; i < m_messages.receivedmIDs.count(); ++i){
-			f << addMessageToHtml(m_messages.receivedmIDs.at(i));
+		foreach (int dmId, m_messages.receivedmIDs) {
+			f << msgInHtml(dmId);
 		}
 	}
 
@@ -301,7 +297,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(const QString &fileName)
 /*
  * Export messages to CSV.
  */
-bool DlgCorrespondenceOverview::exportMessagesToCsv(const QString &fileName)
+bool DlgCorrespondenceOverview::exportMessagesToCsv(
+    const QString &fileName) const
 /* ========================================================================= */
 {
 	qDebug() << "Files are export to CSV format";
@@ -328,15 +325,15 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(const QString &fileName)
 
 	/* sent messages */
 	if (this->sentCheckBox->isChecked()) {
-		for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
-			f << addMessageToCsv(m_messages.sentdmIDs.at(i));
+		foreach (int dmId, m_messages.sentdmIDs) {
+			f << msgInCsv(dmId) + "\n";
 		}
 	}
 
 	/* received messages */
 	if (this->receivedCheckBox->isChecked()) {
-		for (int i = 0; i < m_messages.receivedmIDs.count(); ++i) {
-			f << addMessageToCsv(m_messages.receivedmIDs.at(i));
+		foreach (int dmId, m_messages.receivedmIDs) {
+			f << msgInCsv(dmId) + "\n";
 		}
 	}
 
@@ -369,10 +366,8 @@ void DlgCorrespondenceOverview::exportData(void)
 
 	qDebug() << "Files are export to:" << exportDir;
 
-	QString overiviewFileName;
-
 	if (this->outputFormatComboBox->currentText() == "HTML") {
-		overiviewFileName = exportDir + QDir::separator() +
+		QString overiviewFileName = exportDir + QDir::separator() +
 		    tr("Overview-") +
 		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
 		    ".html";
@@ -385,7 +380,7 @@ void DlgCorrespondenceOverview::exportData(void)
 			    QMessageBox::Ok);
 		}
 	} else {
-		overiviewFileName = exportDir + QDir::separator() +
+		QString overiviewFileName = exportDir + QDir::separator() +
 		    tr("Overview-") +
 		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
 		    ".txt";
@@ -399,7 +394,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		}
 	}
 
-	QList<QString> errorDmId;
+	QList<int> errorDmId;
 	errorDmId.clear();
 	int successCnt = 0;
 
@@ -408,14 +403,15 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
 
-			for (int i = 0; i < m_messages.sentdmIDs.count(); ++i) {
-				if (!exportMessageAsZFO(m_messages.sentdmIDs.at(i),
-				    exportDir)) {
+			foreach (int dmId, m_messages.sentdmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DDZ_" + QString::number(dmId) + ".zfo";
+				if (!exportMessageAsZFO(dmId, fileName)) {
 					/* TODO - add dialog describes error */
-					qDebug() << "DDZ"
-					    << m_messages.sentdmIDs.at(i)
+					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(m_messages.sentdmIDs.at(i));
+					errorDmId.append(dmId);
 				} else {
 					successCnt++;
 				}
@@ -425,14 +421,15 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
 
-			for (int i = 0; i < m_messages.receivedmIDs.count(); ++i) {
-				if (!exportMessageAsZFO(m_messages.receivedmIDs.at(i),
-				    exportDir)) {
+			foreach (int dmId, m_messages.receivedmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DDZ_" + QString::number(dmId) + ".zfo";
+				if (!exportMessageAsZFO(dmId, fileName)) {
 					/* TODO - add dialog describes error */
-					qDebug() << "DDZ"
-					    << m_messages.receivedmIDs.at(i)
+					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(m_messages.receivedmIDs.at(i));
+					errorDmId.append(dmId);
 				} else {
 					successCnt++;
 				}
@@ -445,7 +442,8 @@ void DlgCorrespondenceOverview::exportData(void)
 		    "the overview:") + "\n\n";
 
 		for (int i = 0; i < errorDmId.count(); ++i) {
-			msg += tr("Message") + " " + errorDmId.at(i) + " " +
+			msg += tr("Message") + " " +
+			   QString::number(errorDmId.at(i)) + " " +
 			   tr("does not contain data necessary for ZFO export") + ".\n";
 			if (i > 10) {
 				msg += tr("And many more") + "...\n";

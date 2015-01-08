@@ -3880,13 +3880,13 @@ QString dbContainer::constructDbFileName(const QString &key,
 /*
  * Return id of messages in database correspond with date interval.
  */
-QList<QString> MessageDb::msgsDateInterval(QDate fromDate,
+QList<int> MessageDb::msgsDateInterval(QDate fromDate,
     QDate toDate, bool sent) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	QList<QString> dmIDs;
+	QList<int> dmIDs;
 
 	if (sent) {
 		queryStr = "SELECT dmID "
@@ -3914,7 +3914,7 @@ QList<QString> MessageDb::msgsDateInterval(QDate fromDate,
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-			dmIDs.append(query.value(0).toString());
+			dmIDs.append(query.value(0).toString().toInt());
 			query.next();
 		}
 	}

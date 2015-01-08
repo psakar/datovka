@@ -418,7 +418,7 @@ public:
 	 * @brief Return id of messages in database correspond with
 	 * date interval.
 	 */
-	QList<QString> msgsDateInterval(QDate fromDate,
+	QList<int> msgsDateInterval(QDate fromDate,
 	    QDate toDate, bool sent) const;
 
 	/*!

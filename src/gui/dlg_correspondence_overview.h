@@ -19,9 +19,10 @@ class DlgCorrespondenceOverview : public QDialog,
     Q_OBJECT
 
 public:
-	struct exportMessages {
-		QList<QString> sentdmIDs;
-		QList<QString> receivedmIDs;
+	class ExportedMessageList {
+	public:
+		QList<int> sentdmIDs;
+		QList<int> receivedmIDs;
 	};
 
 	DlgCorrespondenceOverview(const MessageDb &db, const QString &dbId,
@@ -36,16 +37,15 @@ private:
 	const MessageDb &m_messDb;
 	const QString m_dbId;
 	const AccountModel::SettingsMap m_accountInfo;
-	exportMessages m_messages;
+	ExportedMessageList m_messages;
 	QString &m_exportCorrespondDir;
 
-	void initDialog(void);
 	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
-	QString addMessageToCsv(const QString &dmId);
-	QString addMessageToHtml(const QString &dmId);
-	bool exportMessageAsZFO(QString dmId, QString exportPath);
-	bool exportMessagesToCsv(const QString &fileName);
-	bool exportMessagesToHtml(const QString &fileName);
+	QString msgInCsv(int dmId) const;
+	QString msgInHtml(int dmId) const;
+	bool exportMessageAsZFO(int dmId, const QString &fileName) const;
+	bool exportMessagesToCsv(const QString &fileName) const;
+	bool exportMessagesToHtml(const QString &fileName) const;
 
 };
 
