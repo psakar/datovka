@@ -186,9 +186,14 @@ private slots:
 	void accountItemMarkAllRead(void);
 
 	/*!
-	 * @brief Deletes selected message from message list.
+	 * @brief Delete selected message from local database.
 	 */
-	void messageItemDeleteMessage(void);
+	void deleteMessageFromLocalDatabase(void);
+
+	/*!
+	 * @brief Delete selected message from local database and ISDS.
+	 */
+	void deleteMessageFromLocalDbAndIsds(void);
 
 	/*!
 	 * @brief Downloads new messages from server for all accounts.
@@ -642,9 +647,11 @@ private:
 	void setAccountStoragePaths(const QStandardItem *accountItem);
 
 	/*!
-	 * @brief Delete message from long term storage in ISDS.
+	 * @brief Delete message from long term storage in ISDS and
+	 * local database - based on delFromIsds parameter.
 	 */
-	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
+	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId,
+	    bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.

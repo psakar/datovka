@@ -553,43 +553,51 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentSent:
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
 		    messageDb->msgsRcvdYearlyCounts(dbId, DESCENDING),
 		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	case AccountModel::nodeSent:
 		msgTblMdl = messageDb->msgsSntModel(dbId);
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsRcvdInYearModel(dbId,
 		    accountItem->text());
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsSntInYearModel(dbId,
 		    accountItem->text());
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -977,9 +985,14 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Delete message"), this,
-		    SLOT(messageItemDeleteMessage()))->
-		    setEnabled(ui->actionDelete_message->isEnabled());
+		    tr("Delete message from local database"), this,
+		    SLOT(deleteMessageFromLocalDatabase()))->
+		    setEnabled(ui->actionDelete_message_from_db->isEnabled());
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
+		    tr("Delete message from server"), this,
+		    SLOT(deleteMessageFromLocalDbAndIsds()))->
+		    setEnabled(ui->actionDelete_message_from_server->isEnabled());
 		menu->exec(QCursor::pos());
 	}
 }
@@ -1760,9 +1773,9 @@ void MainWindow::accountItemMarkAllRead(void)
 
 /* ========================================================================= */
 /*
- * Deletes selected message from message list.
+ * Delete selected message from local database and ISDS.
  */
-void MainWindow::messageItemDeleteMessage(void)
+void MainWindow::deleteMessageFromLocalDbAndIsds(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -1774,13 +1787,13 @@ void MainWindow::messageItemDeleteMessage(void)
 
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this,
-	    tr("Delete message ") + dmId,
-	    tr("Do you want to delete message") +  " '" + dmId +
-	    "'?",
+	    tr("Delete message"),
+	    tr("Do you want to delete message \"%1\" from "
+	         "server Datové schránky and local database?").arg(dmId),
 	    QMessageBox::Yes | QMessageBox::No);
 
 	if (reply == QMessageBox::Yes) {
-		switch (eraseMessage(acntTopIdx, dmId)) {
+		switch (eraseMessage(acntTopIdx, dmId, true)) {
 		case Q_SUCCESS:
 			/*
 			 *  Hide deleted message in view. The view/model will
@@ -1794,6 +1807,137 @@ void MainWindow::messageItemDeleteMessage(void)
 			break;
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete selected message from local database.
+ */
+void MainWindow::deleteMessageFromLocalDatabase(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+	    tr("Delete message"),
+	    tr("Do you want to delete message \"%1\" from "
+	         "local database?").arg(dmId),
+	    QMessageBox::Yes | QMessageBox::No);
+
+	if (reply == QMessageBox::Yes) {
+		switch (eraseMessage(acntTopIdx, dmId, false)) {
+		case Q_SUCCESS:
+			/*
+			 *  Hide deleted message in view. The view/model will
+			 *  be regenerated according to the updated content
+			 *  of the DB when the account selection has been
+			 *  changed.
+			 */
+			ui->messageList->hideRow(msgIdx.row());
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete message from long term storage in ISDS and
+ * local database - based on action parameter.
+*/
+qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
+    QString dmId, bool delFromIsds)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	if (!delFromIsds) {
+		if (messageDb->msgsDeleteMessageData(dmID)) {
+			qDebug() << "Message" << dmID <<
+			    "was deleted from local database";
+			showStatusTextWithTimeout(tr("Message \"%1\" was "
+			    "deleted from local database.").arg(dmID));
+			return Q_SUCCESS;
+		}
+	} else {
+
+		isds_error status;
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			if (!connectToIsds(acntTopIdx, true)) {
+				return Q_CONNECT_ERROR;
+			}
+		}
+
+		bool incoming = true;
+		QModelIndex index = ui->accountList->
+		    selectionModel()->currentIndex();
+
+		switch (AccountModel::nodeType(index)) {
+		case AccountModel::nodeRecentReceived:
+		case AccountModel::nodeReceived:
+		case AccountModel::nodeReceivedYear:
+			incoming = true;
+			break;
+		case AccountModel::nodeRecentSent:
+		case AccountModel::nodeSent:
+		case AccountModel::nodeSentYear:
+			incoming = false;
+			break;
+		default:
+			break;
+		}
+		/* first delete message on ISDS */
+		status = isds_delete_message_from_storage(isdsSessions.session(
+		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    incoming);
+
+		if (IE_SUCCESS == status) {
+			if (messageDb->msgsDeleteMessageData(dmID)) {
+				qDebug() << "Message" << dmID <<
+				    "was deleted from ISDS and local databse";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted from ISDS and local database.")
+				    .arg(dmID));
+				return Q_SUCCESS;
+			} else {
+				qDebug() << "Message" << dmID <<
+				    "was deleted only from ISDS.";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted only from ISDS.").arg(dmID));
+				return Q_SQL_ERROR;
+			}
+		} else if (IE_INVAL == status) {
+			qDebug() << "Error: "<< status << isds_strerror(status);
+			if (messageDb->msgsDeleteMessageData(dmID)) {
+				qDebug() << "Message" << dmID <<
+				    "was deleted only from local database.";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted only from local database.")
+				    .arg(dmID));
+				return Q_ISDS_ERROR;
+			}
+		}
+	}
+
+	qDebug() << "Message" << dmID << "was not deleted.";
+	showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
+	    .arg(dmID));
+	return Q_ISDS_ERROR;
 }
 
 
@@ -2417,8 +2561,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
-	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
-	    SLOT(messageItemDeleteMessage()));
+	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
+	    SLOT(deleteMessageFromLocalDatabase()));
+	connect(ui->actionDelete_message_from_server, SIGNAL(triggered()), this,
+	    SLOT(deleteMessageFromLocalDbAndIsds()));
 
 	/* Tools. */
 	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
@@ -4000,86 +4146,6 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
-* Delete message from long term storage in ISDS.
-*/
-qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
-    QString dmId)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	isds_error status;
-
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	bool incoming = true;
-
-	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
-	switch (AccountModel::nodeType(index)) {
-	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeReceived:
-	case AccountModel::nodeReceivedYear:
-		incoming = true;
-		break;
-	case AccountModel::nodeRecentSent:
-	case AccountModel::nodeSent:
-	case AccountModel::nodeSentYear:
-		incoming = false;
-		break;
-	default:
-		break;
-	}
-
-	status = isds_delete_message_from_storage(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str(), incoming);
-
-	if (IE_SUCCESS == status) {
-		MessageDb *messageDb = accountMessageDb(0);
-		int dmID = atoi(dmId.toStdString().c_str());
-		if (messageDb->msgsDeleteMessageData(dmID)) {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from ISDS and db.").arg(dmID));
-			return Q_SUCCESS;
-		} else {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			return Q_SQL_ERROR;
-		}
-	} else if (IE_INVAL == status) {
-		qDebug() << "Error: " << status << isds_strerror(status);
-		MessageDb *messageDb = accountMessageDb(0);
-		int dmID = atoi(dmId.toStdString().c_str());
-		if (messageDb->msgsDeleteMessageData(dmID)) {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from ISDS and db.").arg(dmID));
-			return Q_SUCCESS;
-		} else {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			return Q_SQL_ERROR;
-		}
-		return Q_ISDS_ERROR;
-	} else {
 		return Q_ISDS_ERROR;
 	}
 
