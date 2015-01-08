@@ -13,7 +13,6 @@
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
-#include <QTemporaryFile>
 #include <QTimer>
 #include <QUrl>
 
@@ -1418,8 +1417,6 @@ void MainWindow::openSelectedAttachment(void)
 	    ui->messageAttachmentList->selectionModel()->currentIndex();
 	    /* selection().indexes() ? */
 
-	//qDebug() << "Open attachment." << selectedIndex;
-
 	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
 		return;
@@ -1431,25 +1428,13 @@ void MainWindow::openSelectedAttachment(void)
 	if(!fileNameIndex.isValid()) {
 		return;
 	}
-	QString fileName = fileNameIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
-	/* TODO -- Add message id into file name? */
-	fileName = TMP_ATTACHMENT_PREFIX + fileName;
-
-	//qDebug() << "Selected file: " << fileName;
-
-	if (fileName.isEmpty()) {
+	QString attachName = fileNameIndex.data().toString();
+	Q_ASSERT(!attachName.isEmpty());
+	if (attachName.isEmpty()) {
 		return;
 	}
-
-	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
-	if (!fout.open()) {
-		return; /* TODO -- Error message. */
-	}
-	fout.setAutoRemove(false);
-
-	/* Get whole path. */
-	fileName = fout.fileName();
+	/* TODO -- Add message id into file name? */
+	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
 	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
@@ -1457,24 +1442,23 @@ void MainWindow::openSelectedAttachment(void)
 	if (!dataIndex.isValid()) {
 		return;
 	}
-	//qDebug() << "Data index." << dataIndex;
 
 	QByteArray data =
 	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
-	int written = fout.write(data);
-	bool flushed = fout.flush();
-	fout.close();
-	if ((written != data.size()) || !flushed) {
-		/* TODO -- Error message? */
+	fileName = writeTemporaryFile(fileName, data);
+	if (!fileName.isEmpty()) {
+		showStatusTextWithTimeout(tr("Attachment '%1' stored to "
+		    "temporary file '%2'.").arg(attachName).arg(fileName));
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	} else {
+		showStatusTextWithTimeout(tr("Attachment '%1' couldn't be "
+		    "stored to temporary file.").arg(attachName));
 		QMessageBox::warning(this,
 		    tr("Error opening attachment."),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
-	} else {
-		//qDebug() << "file://" + fileName;
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
-		/* TODO -- Handle openUrl() return value. */
 	}
 }
 
@@ -4773,7 +4757,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		return;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
@@ -4829,7 +4813,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QByteArray rawutf8= QString(raw).toUtf8();
+	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
 	enum WriteFileState ret = writeFile(fileName, data);
@@ -5011,28 +4995,22 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
-	if (!fout.open()) {
-		return; /* TODO -- Error message. */
-	}
-	fout.setAutoRemove(false);
-
-	/* Get whole path. */
-	fileName = fout.fileName();
-
 	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
-	int written = fout.write(data);
-	bool flushed = fout.flush();
-	fout.close();
-	if ((written != data.size()) || !flushed) {
+	fileName = writeTemporaryFile(fileName, data);
+	if (!fileName.isEmpty()) {
+		showStatusTextWithTimeout(tr("Message '%1' stored to "
+		    "temporary file '%2'.").arg(dmId).arg(fileName));
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	} else {
+		showStatusTextWithTimeout(tr("Message '%1' couldn't be "
+		    "stored to temporary file.").arg(dmId));
 		QMessageBox::warning(this,
 		    tr("Error opening message '%1'.").arg(dmId),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
-	} else {
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
 	}
 }
 
@@ -5076,28 +5054,23 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
-	if (!fout.open()) {
-		return; /* TODO -- Error message. */
-	}
-	fout.setAutoRemove(false);
-
-	/* Get whole path. */
-	fileName = fout.fileName();
-
 	QByteArray rawutf8 = QString(raw).toUtf8();
 	QByteArray data = QByteArray::fromBase64(rawutf8);
 
-	int written = fout.write(data);
-	bool flushed = fout.flush();
-	fout.close();
-	if ((written != data.size()) || !flushed) {
+	fileName = writeTemporaryFile(fileName, data);
+	if (!fileName.isEmpty()) {
+		showStatusTextWithTimeout(tr("Message delivery information "
+		    "'%1' stored to temporary file '%2'.").arg(dmId)
+		    .arg(fileName));
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	} else {
+		showStatusTextWithTimeout(tr("Message delivery information "
+		    "'%1' couldn't be stored to temporary file.").arg(dmId));
 		QMessageBox::warning(this,
-		    tr("Error opening message delivery info '%1'.").arg(dmId),
+		    tr("Error opening message '%1'.").arg(dmId),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
-	} else {
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
 	}
 }
 

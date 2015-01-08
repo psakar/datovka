@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QLibraryInfo>
 #include <QNetworkProxyQuery>
+#include <QTemporaryFile>
 #include <QUrl>
 
 #include "common.h"
@@ -1115,4 +1116,41 @@ enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
 	}
 
 	return WF_SUCCESS;
+}
+
+
+/* ========================================================================= */
+/*
+ * Create and write data to temporary file.
+ */
+QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
+    bool deleteOnError)
+/* ========================================================================= */
+{
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return QString();
+	}
+
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
+	if (!fout.open()) {
+		return QString();
+	}
+	fout.setAutoRemove(false);
+
+	/* Get whole path. */
+	QString fullName = fout.fileName();
+
+	int written = fout.write(data);
+	bool flushed = fout.flush();
+	fout.close();
+
+	if ((written != data.size()) || !flushed) {
+		if (deleteOnError) {
+			QFile::remove(fullName);
+		}
+		return QString();
+	}
+
+	return fullName;
 }

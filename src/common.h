@@ -384,4 +384,17 @@ enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
     bool deleteOnError = false);
 
 
+/*!
+ * @brief Create and write data to temporary file.
+ *
+ * @param[in] fileName      File name.
+ * @param[in] data          Data to be written into file.
+ * @param[in] deleteOnError Delete created file when cannot be entirely
+ *                          written.
+ * @return Full path to written file on success, empty string on failure.
+ */
+QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
+    bool deleteOnError = false);
+
+
 #endif /* _COMMON_H_ */
