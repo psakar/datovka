@@ -292,6 +292,9 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 
 	QString fileName = selectedIndex.data().toString();
 	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return;
+	}
 	/* TODO -- Remember directory? */
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"), fileName);
@@ -319,7 +322,68 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 /* ========================================================================= */
 {
-	/* TODO */
+	QModelIndexList selectedIndexes = selectedAttachmentIndexes();
+
+	Q_ASSERT(!selectedIndexes.isEmpty());
+	if (selectedIndexes.isEmpty()) {
+		return;
+	}
+
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Save attachments"), NULL,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (newDir.isNull() || newDir.isEmpty()) {
+		return;
+	}
+	/* TODO -- Remember directory? */
+
+	bool unspecifiedFailed = false;
+	QList<QString> unsuccessfullFiles;
+
+	foreach (QModelIndex idx, selectedIndexes) {
+		Q_ASSERT(idx.isValid());
+		if (!idx.isValid()) {
+			unspecifiedFailed = true;
+			continue;
+		}
+
+		QString fileName = idx.data().toString();
+		Q_ASSERT(!fileName.isEmpty());
+		if (fileName.isEmpty()) {
+			unspecifiedFailed = true;
+			continue;
+		}
+
+		fileName = newDir + QDir::separator() + fileName;
+
+		QByteArray data = m_attachmentModel.attachmentData(idx.row());
+
+		if (WF_SUCCESS != writeFile(fileName, data)) {
+			unsuccessfullFiles.append(fileName);
+			continue;
+		}
+	}
+
+	if (unspecifiedFailed) {
+		QMessageBox::warning(this,
+		    tr("Error saving attachments."),
+		    tr("Could not save all attachments."),
+		    QMessageBox::Ok);
+	} else if (!unsuccessfullFiles.isEmpty()) {
+		QString warnMsg =
+		    tr("In total %1 attachment files could not be written.")
+		        .arg(unsuccessfullFiles.size());
+		warnMsg += "\n" +
+		    tr("These are:").arg(unsuccessfullFiles.size()) + "\n";
+		int i;
+		for (i = 0; i < (unsuccessfullFiles.size() - 1); ++i) {
+			warnMsg += "    '" + unsuccessfullFiles.at(i) + "'\n";
+		}
+		warnMsg += "    '" + unsuccessfullFiles.at(i) + "'.";
+		QMessageBox::warning(this, tr("Error saving attachments."),
+		    warnMsg, QMessageBox::Ok);
+	}
 }
 
 
@@ -484,6 +548,9 @@ QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != attachmentTable->selectionModel());
+	if (0 == attachmentTable->selectionModel()) {
+		return QModelIndex();
+	}
 
 	QModelIndex selectedIndex =
 	    attachmentTable->selectionModel()->currentIndex();
@@ -505,6 +572,9 @@ QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != attachmentTable->selectionModel());
+	if (0 == attachmentTable->selectionModel()) {
+		return QModelIndexList();
+	}
 
 	return attachmentTable->selectionModel()->selectedRows(0);
 }

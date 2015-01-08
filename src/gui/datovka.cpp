@@ -1354,6 +1354,10 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		QString fileName = fileNameIndex.data().toString();
 		Q_ASSERT(!fileName.isEmpty());
+		if (fileName.isEmpty()) {
+			unspecifiedFailed = true;
+			continue;
+		}
 
 		fileName = newDir + QDir::separator() + fileName;
 
