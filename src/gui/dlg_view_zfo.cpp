@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QMenu>
+#include <QMessageBox>
 #include <QTemporaryFile>
 #include <QTimeZone>
 #include <QUrl>
@@ -299,20 +300,15 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 		return;
 	}
 
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly)) {
-		return; /* TODO -- Error message. */
-	}
-
 	QByteArray data =
 	    m_attachmentModel.attachmentData(selectedIndex.row());
 
-	int written = fout.write(data);
-	if (written != data.size()) {
-		/* TODO -- Error message? */
+	if (WF_SUCCESS != writeFile(fileName, data)) {
+		QMessageBox::warning(this,
+		    tr("Error saving attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 	}
-
-	fout.close();
 }
 
 
@@ -341,39 +337,27 @@ void DlgViewZfo::openSelectedAttachment(void)
 		return;
 	}
 
-	QString fileName = selectedIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
-	/* TODO -- Add message id into file name? */
-	fileName = TMP_ATTACHMENT_PREFIX + fileName;
-
-	//qDebug() << "Selected file: " << fileName;
-
-	if (fileName.isEmpty()) {
+	QString attachName = selectedIndex.data().toString();
+	Q_ASSERT(!attachName.isEmpty());
+	if (attachName.isEmpty()) {
 		return;
 	}
-
-	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
-	if (!fout.open()) {
-		return; /* TODO -- Error message. */
-	}
-	fout.setAutoRemove(false);
-
-	/* Get whole path. */
-	fileName = fout.fileName();
+	/* TODO -- Add message id into file name? */
+	QString fileName = TMP_ATTACHMENT_PREFIX + fileName;
 
 	QByteArray data =
 	    m_attachmentModel.attachmentData(selectedIndex.row());
 
-	int written = fout.write(data);
-	if (written != data.size()) {
-		/* TODO -- Error message? */
+	fileName = writeTemporaryFile(fileName, data);
+	if (!fileName.isEmpty()) {
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	} else {
+		QMessageBox::warning(this,
+		    tr("Error opening attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 	}
-
-	fout.close();
-
-	//qDebug() << "file:///" + fileName;
-	QDesktopServices::openUrl(QUrl("file:///" + fileName));
-	/* TODO -- Handle openUrl() return value. */
 }
 
 
