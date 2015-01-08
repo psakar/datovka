@@ -1,3 +1,15 @@
+x.y.z /
+ * Added checks whether saving of files succeeded. The user is notified on
+   failure.
+ * Implemented saving of attachments of a message that has been opened from
+   a ZFO file.
+ * Fixed bug causing that the delivery time in sent messages was not updated.
+ * Portable version for Windows stores all data in the application directory.
+ * Fixed authentication with OTP.
+ * Application remembers paths to recent directories which have been used for
+   data exporting.
+ * Fixes in translations.
+
 4.0.2 / 2014-12-19
  * Fixed issue with missing account names that contained comma character.
  * OS X package Info.plist contains application version.
