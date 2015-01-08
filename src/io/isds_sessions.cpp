@@ -824,7 +824,7 @@ struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
 		goto fail;
 	}
 
-	if (zfoType == ImportZFODialog::IMPOR_MESSAGE_ZFO) {
+	if (zfoType == ImportZFODialog::IMPORT_MESSAGE_ZFO) {
 		status = isds_load_message(isdsSession, raw_type,
 		    content.data(), content.size(), &message, BUFFER_COPY);
 	} else {
