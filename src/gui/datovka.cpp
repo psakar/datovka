@@ -4855,7 +4855,39 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+
+		QMessageBox msgBox(this);;
+		msgBox.setWindowTitle(tr("Delivery info export error!"));
+		msgBox.setText(tr("Cannot export delivery info for message")
+		    + " " + dmId + ".");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		    tr("First you must download message before export.") +
+		    "\n\n" +
+		    tr("Do you want to download complete message now?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			if (!downloadCompleteMessage(dmId)) {
+				showStatusTextWithTimeout(tr("Export of "
+				    "message delivery info \"%1\" to PDF was "
+				    "not successful!").arg(dmId));
+				return;
+			} else {
+				raw = QString(messageDb->
+				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+			}
+		} else {
+			showStatusTextWithTimeout(tr("Export of message delivery "
+			"info \"%1\" to PDF was not successful!").arg(dmId));
+			return;
+		}
+	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "DD_" + dmId + ".pdf";
@@ -4875,8 +4907,6 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	m_on_export_zfo_activate =
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
-
-	MessageDb *messageDb = accountMessageDb(0);
 
 	QTextDocument doc;
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
@@ -4913,7 +4943,39 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	}
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
+
+	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
+	if (raw.isEmpty()) {
+
+		QMessageBox msgBox(this);;
+		msgBox.setWindowTitle(tr("Message export error!"));
+		msgBox.setText(tr("Cannot export complete message")
+		    + " " + dmId + ".");
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setInformativeText(
+		    tr("First you must download the whole message before "
+		        "exporting.") + "\n\n" +
+		    tr("Do you want to download complete message now?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			if (!downloadCompleteMessage(dmId)) {
+				showStatusTextWithTimeout(tr("Export of message "
+				"envelope \"%1\" to PDF was not successful!")
+				.arg(dmId));
+				return;
+			} else {
+				raw = QString(messageDb->
+				     msgsMessageBase64(dmID)).toUtf8();
+			}
+		} else {
+			showStatusTextWithTimeout(tr("Export of message "
+			"envelope \"%1\" to PDF was not successful!").arg(dmId));
+			return;
+		}
+	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
 	    "OZ_" + dmId + ".pdf";
@@ -4933,7 +4995,6 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	MessageDb *messageDb = accountMessageDb(0);
 	QString userName = accountUserName();
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
