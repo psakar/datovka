@@ -3408,8 +3408,9 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 		}
 	}
 
-	/* Delete message from messages table */
-	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
+	/* Delete process state information from process_state table.*/
+	queryStr = "DELETE FROM process_state WHERE "
+	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
 		return false;
@@ -3417,6 +3418,18 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+
+	/* Delete message from messages table */
+	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
+	if (!query.prepare(queryStr)) {
+		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
+		return false;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
 		return false;
 	}
 

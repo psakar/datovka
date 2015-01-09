@@ -680,6 +680,7 @@ namespace PrcstTbl {
 
 	const QString &tblConstraint(
 	    ",\n"
+	    "        PRIMARY KEY (message_id),\n"
 	    "        FOREIGN KEY(message_id) REFERENCES messages (dmID)"
 	);
 
