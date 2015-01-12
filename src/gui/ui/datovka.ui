@@ -574,9 +574,6 @@ sent reply on this message</string>
    <property name="text">
     <string>Sync all accounts</string>
    </property>
-   <property name="shortcut">
-    <string>Shift+F5</string>
-   </property>
   </action>
   <action name="actionAdd_account">
    <property name="icon">
@@ -655,9 +652,6 @@ sent reply on this message</string>
    <property name="text">
     <string>Get messages</string>
    </property>
-   <property name="shortcut">
-    <string>F5</string>
-   </property>
   </action>
   <action name="actionSend_message">
    <property name="icon">
@@ -666,9 +660,6 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Create message</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionMark_all_as_read">
@@ -897,9 +888,6 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Reply to message</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionSignature_detail">
