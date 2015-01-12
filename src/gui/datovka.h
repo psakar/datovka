@@ -198,9 +198,14 @@ private slots:
 	void deleteSelectedAccount(void);
 
 	/*!
-	 * @brief Import database directory dialog.
+	 * @brief Show import database directory dialog.
 	 */
-	void importDatabaseDirectory(void);
+	void showImportDatabaseDialog(void);
+
+	/*!
+	 * @brief Prepare import database directory.
+	 */
+	void prepareImportDatabase(int importType);
 
 	/*!
 	 * @brief Proxy setting dialog.
@@ -633,6 +638,11 @@ private:
 	 * @brief Sent and check a new version of Datovka.
 	 */
 	void checkNewDatovkaVersion(void);
+
+	/*!
+	 * @brief Sent and check a new version of Datovka.
+	 */
+	void importDatabaseFileList(QStringList filePathList);
 
 	/*!
 	 * @brief Download complete message synchronously
