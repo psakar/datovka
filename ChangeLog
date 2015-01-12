@@ -1,4 +1,6 @@
 x.y.z /
+ * Fixed bug where message processing state was not removed upon message
+   deletion.
  * Added checks whether saving of files succeeded. The user is notified on
    failure.
  * Implemented saving of attachments of a message that has been opened from
