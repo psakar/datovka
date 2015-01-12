@@ -2316,7 +2316,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* Databox. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
-	connect(ui->actionSent_message, SIGNAL(triggered()), this,
+	connect(ui->actionSend_message, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountItemMarkAllRead()));

@@ -470,7 +470,7 @@ sent reply on this message</string>
      <string>Databox</string>
     </property>
     <addaction name="actionGet_messages"/>
-    <addaction name="actionSent_message"/>
+    <addaction name="actionSend_message"/>
     <addaction name="actionMark_all_as_read"/>
     <addaction name="separator"/>
     <addaction name="actionChange_password"/>
@@ -574,6 +574,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Sync all accounts</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
   </action>
   <action name="actionAdd_account">
    <property name="icon">
@@ -652,14 +655,20 @@ sent reply on this message</string>
    <property name="text">
     <string>Get messages</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
   </action>
-  <action name="actionSent_message">
+  <action name="actionSend_message">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-message.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
    </property>
    <property name="text">
     <string>Create message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionMark_all_as_read">
@@ -817,9 +826,6 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>Received messages from all accounts at once</string>
    </property>
-   <property name="shortcut">
-    <string>Alt+A</string>
-   </property>
   </action>
   <action name="actionDownload_messages">
    <property name="icon">
@@ -832,9 +838,6 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>Download messages from the box</string>
    </property>
-   <property name="shortcut">
-    <string>Alt+D</string>
-   </property>
   </action>
   <action name="actionCreate_message">
    <property name="icon">
@@ -846,9 +849,6 @@ sent reply on this message</string>
    </property>
    <property name="toolTip">
     <string>Create and send a new message</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+M</string>
    </property>
   </action>
   <action name="actionReply_to_the_sender">
@@ -865,9 +865,6 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>Reply to the sender</string>
    </property>
-   <property name="shortcut">
-    <string>Alt+R</string>
-   </property>
   </action>
   <action name="actionVerify_a_message">
    <property name="enabled">
@@ -882,9 +879,6 @@ sent reply on this message</string>
    </property>
    <property name="toolTip">
     <string>Verify a message</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+V</string>
    </property>
   </action>
   <action name="actionDownload_message_signed">
@@ -903,6 +897,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Reply to message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionSignature_detail">
