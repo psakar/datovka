@@ -4576,10 +4576,6 @@ void MainWindow::exportCorrespondenceOverview(void)
 	    m_export_correspond_dir,
 	    this);
 
-	connect(correspondence_overview,
-	    SIGNAL(showNotificationDialog(QList<QString>, int)), this,
-	    SLOT(setAndShowNotificationDialog(QList<QString>, int)));
-
 	correspondence_overview->exec();
 	storeExportPath();
 }
