@@ -4311,8 +4311,9 @@ void MainWindow::importDatabaseFileList(QStringList filePathList)
 					m_accountModel.addAccount(accountName, itemSettings);
 					importDBinfo.first = filePathList.at(i);
 					importDBinfo.second = tr("This file has been "
-					    "set as a new database. It is test account "
-					   "with username \"%1\"").arg(accountName);
+					    "set as actual message database. "
+					    "It is test account with username"
+					    " \"%1\".").arg(accountName);
 				}
 
 			/* database is legal account */
@@ -4345,8 +4346,9 @@ void MainWindow::importDatabaseFileList(QStringList filePathList)
 					m_accountModel.addAccount(accountName, itemSettings);
 					importDBinfo.first = filePathList.at(i);
 					importDBinfo.second = tr("This file has been "
-					    "set as a new database. It is test account "
-					   "with username \"%1\"").arg(accountName);
+					    "set as actual message database. "
+					    "It is legal account with username"
+					    " \"%1\".").arg(accountName);
 				}
 
 			} else {
