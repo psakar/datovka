@@ -23,7 +23,6 @@
 
 
 #include <cassert>
-#include <cmath> /* ceil(3) */
 #include <QDebug>
 #include <QThread>
 
@@ -489,8 +488,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 	struct isds_list *box;
 	box = messageList;
-	int delta = 0;
-	int diff = 0;
+	float delta = 0.0;
+	float diff = 0.0;
 
 	while (0 != box) {
 		allcnt++;
@@ -503,14 +502,14 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		if (0 != pBar) { pBar->setValue(50); }
 		if (0 != worker) { emit worker->valueChanged(progressLabel, 50); }
 	} else {
-		delta = ceil(80 / allcnt);
+		delta = 80.0 / allcnt;
 	}
 
 	while (0 != box) {
 
-		diff = diff + delta;
-		if (0 != pBar) { pBar->setValue(20+diff); }
-		if (0 != worker) { emit worker->valueChanged(progressLabel, 20+diff); }
+		diff += delta;
+		if (0 != pBar) { pBar->setValue((int) (20 + diff)); }
+		if (0 != worker) { emit worker->valueChanged(progressLabel, (int) (20 + diff)); }
 
 		isds_message *item = (isds_message *) box->data;
 		int dmId = atoi(item->envelope->dmID);
@@ -592,21 +591,21 @@ bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
 
 	emit valueChanged(label, 30);
 
-	int delta = 0;
-	int diff = 0;
+	float delta = 0.0;
+	float diff = 0.0;
 
 	if (allcnt == 0) {
 		emit valueChanged(label, 60);
 	} else {
-		delta = ceil(70 / allcnt);
+		delta = 70.0 / allcnt;
 	}
 
 	while (0 != stateListFirst) {
 		isds_message_status_change *item =
 		    (isds_message_status_change *) stateListFirst->data;
 		int dmId = atoi(item->dmID);
-		diff = diff + delta;
-		emit valueChanged(label, 30+diff);
+		diff += delta;
+		emit valueChanged(label, (int) (30 + diff));
 		/* Download and save delivery info and message events */
 		(getSentDeliveryInfo(acntTopIdx, dmId, true, messageDb))
 		? qDebug() << "Delivery info of message was processed..."
