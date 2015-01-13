@@ -349,19 +349,20 @@ private slots:
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
 	void importDeliveryInfoZFO(QList<accountDataStruct> accountList,
-	    QStringList files, int zfoType);
+	    QStringList files);
 
 	/*!
 	 * @brief Import only message ZFO file(s) into database.
 	 */
 	void importMessageZFO(QList<accountDataStruct> accountList,
-	    QStringList files, int zfoType);
+	    QStringList files);
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
-	void showNotificationDialogWithResult(int filesCnt, int imported,
-	    QList<QPair<QString,QString>> errImportList, int zfoType);
+	void showNotificationDialogWithResult(int filesCnt,
+	    QList<QPair<QString,QString>> errorImportList,
+	    QList<QPair<QString,QString>> successImportList);
 
  	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.

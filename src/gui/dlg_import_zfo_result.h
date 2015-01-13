@@ -10,14 +10,15 @@ class ImportZFOResultDialog : public QDialog, public Ui::ImportZFOResult
 	Q_OBJECT
 
 public:
-	ImportZFOResultDialog(int filesCnt, int imported,
-	    QList<QPair<QString,QString>> errImportList, QWidget *parent = 0);
+	ImportZFOResultDialog(int filesCnt,
+	    QList<QPair<QString,QString>> errImportList,
+	    QList<QPair<QString,QString>> succImportList,
+	    QWidget *parent = 0);
 
 private:
 	int m_filesCnt;
-	int m_imported;
 	QList<QPair<QString,QString>> m_errImportList;
-
+	QList<QPair<QString,QString>> m_succImportList;
 };
 
 #endif // DLG_IMPORT_ZFO_RESULT_H
