@@ -1,4 +1,4 @@
-x.y.z /
+4.0.3 / 2014-01-13
  * Fixed bug where message processing state was not removed upon message
    deletion.
  * Added checks whether saving of files succeeded. The user is notified on
