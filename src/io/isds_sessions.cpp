@@ -354,8 +354,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 	struct isds_otp *otp = NULL;
 
-	otp = (struct isds_otp *)
-	    malloc(sizeof(struct isds_otp));
+	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 	if (otp == NULL) {
 		return status;
 	}
@@ -371,7 +370,8 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 		otp->otp_code = NULL;
 	} else {
 		char *new_str;
-		const char *old_str = otpCode.toStdString().c_str();
+		QByteArray optCodeBytes = otpCode.toLocal8Bit();
+		const char *old_str = optCodeBytes.data();
 		size_t len = strlen(old_str) + 1;
 		new_str = (char *) malloc(len);
 		memcpy(new_str, old_str, len);
