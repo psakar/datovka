@@ -3710,7 +3710,8 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
     const QString &locDir, bool testing)
 /* ========================================================================= */
 {
-	MessageDb *db;
+	MessageDb *db = NULL;
+	bool open_ret;
 
 	/* Already opened. */
 	if (this->find(key) != this->end()) {
@@ -3719,16 +3720,23 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	}
 
 	// qDebug() << "creating new" << key;
-	db = new MessageDb(key);
+	db = new(std::nothrow) MessageDb(key);
+	Q_ASSERT(NULL != db);
+	if (NULL == db) {
+		return NULL;
+	}
 
-	// qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
-	// qDebug() << "opening";
 	/*
 	 * Test accounts have ___1 in their names, ___0 relates to standard
 	 * accounts.
 	 */
-	db->openDb(constructDbFileName(key, locDir, testing));
+	open_ret = db->openDb(constructDbFileName(key, locDir, testing));
+	Q_ASSERT(open_ret);
+	if (!open_ret) {
+		delete db;
+		return NULL;
+	}
 
 	this->insert(key, db);
 	return db;
