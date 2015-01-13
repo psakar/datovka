@@ -789,8 +789,10 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
+		break;
 	case DESCENDING:
 		queryStr += " ORDER BY dmDeliveryTime DESC";
+		break;
 	default:
 		break;
 	}
@@ -1104,8 +1106,10 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
+		break;
 	case DESCENDING:
 		queryStr += " ORDER BY dmDeliveryTime DESC";
+		break;
 	default:
 		break;
 	}
