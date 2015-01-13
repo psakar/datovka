@@ -90,7 +90,7 @@ private:
 	QString m_senderId;
 	QString m_sender;
 	QString m_senderAddress;
-	QString m_dmType;
+	const QString m_dmType;
 	QString m_dmSenderRefNumber;
 	QString m_userName;
 	MessageDb &m_messDb;

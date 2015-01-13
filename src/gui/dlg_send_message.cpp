@@ -635,13 +635,27 @@ void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
-	QString isdsMsg;
+	QString errorMsg;
 
-	int pdzCnt = 0;
+	/* Sent message. */
+	struct isds_message *sent_message = NULL;
+	/* All remaining structures are created to be a part of the message. */
+	struct isds_document *document = NULL; /* Attachment. */
+	struct isds_list *documents = NULL; /* Attachment list. */
+	struct isds_envelope *sent_envelope = NULL; /* Message envelope. */
+	struct isds_message_copy *message_copy = NULL;
+	struct isds_list *copies = NULL; /* Message copy recipients. */
 
-	for (int i = 0; i < this->recipientTableWidget->rowCount(); i++) {
-		if (this->recipientTableWidget->item(i,3)->text() ==tr("yes")) {
-			pdzCnt++;
+	struct isds_list *last = NULL; /* No need to free it explicitly. */
+
+	int pdzCnt = 0; /* Number of paid messages. */
+	QString dmType;
+
+	/* Compute number of messages which the sender has to pay for. */
+	for (int i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
+		if (this->recipientTableWidget->item(i, 3)->text() ==
+		    tr("yes")) {
+			++pdzCnt;
 		}
 	}
 
@@ -663,95 +677,85 @@ void DlgSendMessage::sendMessage(void)
 		}
 	}
 
-	// init bool pointers
-	_Bool *dmPersonalDelivery = NULL;
-	_Bool *dmOVM = NULL;
-	_Bool *dmPublishOwnID = NULL;
-	_Bool *dmAllowSubstDelivery = NULL;
-	QString dmType;
-
-	// message and envleople structures
-	struct isds_message *sent_message = NULL;
-	struct isds_envelope *sent_envelope = NULL;
-
-	// attachments
-	struct isds_list *documents = NULL;
-	struct isds_list *last = NULL;
-
 	sent_envelope = (struct isds_envelope *)
 	    malloc(sizeof(struct isds_envelope));
-
 	if (sent_envelope == NULL) {
-		free(sent_envelope);
+		errorMsg = "Out of memory.";
 		goto finish;
 	}
 	memset(sent_envelope, 0, sizeof(struct isds_envelope));
 
 	sent_message = (struct isds_message *)
 	    malloc(sizeof(struct isds_message));
-
 	if (sent_message == NULL) {
-		free(sent_message);
+		errorMsg = "Out of memory.";
 		goto finish;
 	}
 	memset(sent_message, 0, sizeof(struct isds_message));
 
-	// load attachments
-	for (int i=0; i < this->attachmentTableWidget->rowCount(); i++) {
+	/* Load attachments. */
+	for (int i = 0; i < this->attachmentTableWidget->rowCount(); ++i) {
 
-		struct isds_document *document = NULL;
 		document = (struct isds_document *)
 		    malloc(sizeof(struct isds_document));
-		Q_ASSERT(0 != document);
-
-		if (document == NULL) {
+		if (NULL == document) {
+			errorMsg = "Out of memory.";
 			goto finish;
 		}
 		memset(document, 0, sizeof(struct isds_document));
 
-		// set document structure
+		/* Set document content. */
 		 // TODO - document is binary document only -> is_xml = false;
 		document->is_xml = false;
 		document->dmFileDescr = strdup(this->attachmentTableWidget->
-		    item(i,0)->text().toStdString().c_str());
+		    item(i, 0)->text().toStdString().c_str());
+		if (NULL == document->dmFileDescr) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
 
-		// set document structure
-		 // TODO - document is binary document only -> is_xml = false;
-		document->is_xml = false;
-
-		document->dmFileDescr = strdup(this->attachmentTableWidget->
-		    item(i,0)->text().toStdString().c_str());
-
-		if (i == 0) {
+		if (0 == i) {
 			document->dmFileMetaType = FILEMETATYPE_MAIN;
 		} else {
 			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
 		}
 
 		document->dmMimeType = strdup(this->attachmentTableWidget->
-		    item(i,2)->text().toStdString().c_str());
-		QString filePath =
-		    this->attachmentTableWidget->item(i,4)->text();
-		QFile file(filePath);
+		    item(i, 2)->text().toStdString().c_str());
+		if (NULL == document->dmMimeType) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
 
+		QString filePath =
+		    this->attachmentTableWidget->item(i, 4)->text();
+		QFile file(filePath);
 		if (file.exists()) {
-			if (!file.open(QIODevice::ReadOnly))
-			{
+			if (!file.open(QIODevice::ReadOnly)) {
 				qDebug("Couldn't open the file");
-				return;
+				errorMsg = "Couldn't open file '" +
+				    filePath + "'.";
+				goto finish;
 			}
 			QByteArray bytes = file.readAll();
 			document->data_length = bytes.size();
 			document->data = malloc(bytes.size());
+			if (NULL == document->data) {
+				errorMsg = "Out of memory.";
+				goto finish;
+			}
 			memcpy(document->data, bytes.data(),
 			    document->data_length);
 		}
 
-		// add document on the list of document
+		/* Add document on the list of document. */
 		struct isds_list *newListItem = (struct isds_list *) malloc(
 		    sizeof(struct isds_list));
-		Q_ASSERT(0 != newListItem);
-		newListItem->data = (struct isds_document *)document;
+		if (NULL == newListItem) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+		newListItem->data = document; document = NULL;
 		newListItem->next = NULL;
 		newListItem->destructor = isds_document_free_void;
 		if (last == NULL) {
@@ -762,15 +766,23 @@ void DlgSendMessage::sendMessage(void)
 		}
 	}
 
-	// set mandatory fields of envelope
+	/* Set mandatory fields of envelope. */
 	sent_envelope->dmID = NULL;
 	sent_envelope->dmAnnotation =
 	    strdup(this->subjectText->text().toStdString().c_str());
+	if (NULL == sent_envelope->dmAnnotation) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
 	sent_envelope->dbIDRecipient =
 	    strdup(this->recipientTableWidget->item(0,0)->
 	    text().toStdString().c_str());
+	if (NULL == sent_envelope->dbIDRecipient) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
 
-	// set optional fields
+	/* Set optional fields. */
 	sent_envelope->dmSenderIdent = !this->dmSenderIdent->text().isEmpty() ?
 	    strdup(this->dmSenderIdent->text().toStdString().c_str()) : NULL;
 	sent_envelope->dmRecipientIdent =
@@ -786,18 +798,26 @@ void DlgSendMessage::sendMessage(void)
 	    strdup(this->dmToHands->text().toStdString().c_str()) : NULL;
 
 	if (!this->dmLegalTitleLaw->text().isEmpty()) {
-		long int *number = NULL;
-		number = (long int *) malloc(sizeof(*number));
-		*number = this->dmLegalTitleLaw->text().toLong();
-		sent_envelope->dmLegalTitleLaw = number;
+		sent_envelope->dmLegalTitleLaw =
+		    (long int *) malloc(sizeof(long int));
+		if (NULL == sent_envelope->dmLegalTitleLaw) {
+			errorMsg = "Out of memory.";
+			goto finish; 
+		}
+		*sent_envelope->dmLegalTitleLaw =
+		    this->dmLegalTitleLaw->text().toLong();
 	} else {
 		sent_envelope->dmLegalTitleLaw = NULL;
 	}
 	if (!this->dmLegalTitleYear->text().isEmpty()) {
-		long int *number = NULL;
-		number = (long int *) malloc(sizeof(*number));
-		*number = this->dmLegalTitleYear->text().toLong();
-		sent_envelope->dmLegalTitleYear = number;
+		sent_envelope->dmLegalTitleYear =
+		    (long int *) malloc(sizeof(long int));
+		if (NULL == sent_envelope->dmLegalTitleYear) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+		*sent_envelope->dmLegalTitleYear =
+		    this->dmLegalTitleYear->text().toLong();
 	} else {
 		sent_envelope->dmLegalTitleYear = NULL;
 	}
@@ -813,16 +833,24 @@ void DlgSendMessage::sendMessage(void)
 	    strdup(this->dmLegalTitlePoint->text().toStdString().c_str()):NULL;
 
 
-	dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
-	*dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
-	sent_envelope->dmPersonalDelivery = dmPersonalDelivery;
+	sent_envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmPersonalDelivery) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
+	*sent_envelope->dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
 
 	/* only OVM can changes */
-	dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
+	sent_envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmAllowSubstDelivery) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		*dmAllowSubstDelivery = true;
+		*sent_envelope->dmAllowSubstDelivery = true;
 	} else {
-		*dmAllowSubstDelivery = this->dmAllowSubstDelivery->isChecked();
+		*sent_envelope->dmAllowSubstDelivery =
+		    this->dmAllowSubstDelivery->isChecked();
 	}
 
 	if (m_dmType == "I") {
@@ -833,27 +861,33 @@ void DlgSendMessage::sendMessage(void)
 		}
 		sent_envelope->dmRecipientRefNumber =
 		    !m_dmSenderRefNumber.isEmpty() ?
-		    strdup(m_dmSenderRefNumber.toStdString().c_str()):NULL;
+		    strdup(m_dmSenderRefNumber.toStdString().c_str()) : NULL;
 	} else {
 		if (this->payReply->isChecked()) {
 			dmType = "I";
 		}
 	}
 
-	sent_envelope->dmType = !dmType.isNull() ?
+	sent_envelope->dmType = !dmType.isEmpty() ?
 	    strdup(dmType.toStdString().c_str()) : NULL;
 
-	sent_envelope->dmAllowSubstDelivery = dmAllowSubstDelivery;
-	dmOVM = (_Bool *) malloc(sizeof(_Bool));
-	*dmOVM = m_dbEffectiveOVM;
-	sent_envelope->dmOVM = dmOVM;
-	dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
-	*dmPublishOwnID = this->dmPublishOwnID->isChecked();
-	sent_envelope->dmPublishOwnID  = dmPublishOwnID;
+	sent_envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmOVM) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
+	*sent_envelope->dmOVM = m_dbEffectiveOVM;
 
-	// set envelop and attachments to message structure
-	sent_message->envelope = sent_envelope;
-	sent_message->documents = documents;
+	sent_envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmPublishOwnID) {
+		errorMsg = "Out of memory.";
+		goto finish;
+	}
+	*sent_envelope->dmPublishOwnID = this->dmPublishOwnID->isChecked();
+
+	/* Set envelope and attachments to message structure. */
+	sent_message->envelope = sent_envelope; sent_envelope = NULL;
+	sent_message->documents = documents; documents = NULL;
 
 	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		goto finish;
@@ -868,35 +902,44 @@ void DlgSendMessage::sendMessage(void)
 
 	/* Sent message for multiple recipients */
 	} else {
-		struct isds_list *copies = NULL;
-		struct isds_list *last = NULL;
+		last = NULL;
 
 		int i = 0;
-		for (i = 0; i < this->recipientTableWidget->rowCount(); i++) {
+		for (i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
 
-			struct isds_message_copy *message_copy = NULL;
 			message_copy = (struct isds_message_copy *)
-			malloc(sizeof(struct isds_message_copy));
-			Q_ASSERT(0 != message_copy);
-
-			if (message_copy == NULL) {
+			    malloc(sizeof(struct isds_message_copy));
+			if (NULL == message_copy) {
+				errorMsg = "Out of memory.";
 				goto finish;
 			}
-			memset(message_copy,0,sizeof(struct isds_message_copy));
+			memset(message_copy, 0,
+			    sizeof(struct isds_message_copy));
 
 			message_copy->dbIDRecipient =
 			    strdup(this->recipientTableWidget->item(i,0)->
 			    text().toStdString().c_str());
+			if (NULL == message_copy->dbIDRecipient) {
+				errorMsg = "Out of memory.";
+				goto finish;
+			}
 			message_copy->dmToHands =
 			    !this->dmToHands->text().isEmpty() ?
 			    strdup(this->dmToHands->
 			    text().toStdString().c_str()) : NULL;
+			if (NULL == message_copy->dmToHands) {
+				errorMsg = "Out of memory.";
+				goto finish;
+			}
 
-			// add message_copy to the list (copies)
+			/* Add message_copy to the list (copies). */
 			struct isds_list *newListItem = (struct isds_list *)
 			    malloc(sizeof(struct isds_list));
-			Q_ASSERT(0 != newListItem);
-			newListItem->data = (struct isds_message_copy *)copies;
+			if (NULL == newListItem) {
+				errorMsg = "Out of memory.";
+				goto finish;
+			}
+			newListItem->data = message_copy; message_copy = NULL;
 			newListItem->next = NULL;
 			newListItem->destructor = isds_message_copy_free_void;
 			if (last == NULL) {
@@ -913,7 +956,7 @@ void DlgSendMessage::sendMessage(void)
 		    isdsSessions.session(m_userName), sent_message, copies);
 	}
 
-	isdsMsg = isds_long_message(isdsSessions.session(m_userName));
+	errorMsg = isds_long_message(isdsSessions.session(m_userName));
 
 finish:
 	if (status == IE_SUCCESS) {
@@ -922,17 +965,34 @@ finish:
 		    tr("Messages was sent into ISDS successfully."),
 		    QMessageBox::Ok);
 
+		isds_document_free(&document);
+		isds_list_free(&documents);
+		isds_envelope_free(&sent_envelope);
+		isds_message_copy_free(&message_copy);
+		isds_list_free(&copies);
 		isds_message_free(&sent_message);
 		this->accept(); /* Set return code to accepted. */
 		return;
-	} else if (showErrorMessageBox((int)status, isdsMsg) ==
+	} else if (showErrorMessageBox((int)status, errorMsg) ==
 	           QMessageBox::Yes) {
+
+		isds_document_free(&document);
+		isds_list_free(&documents);
+		isds_envelope_free(&sent_envelope);
+		isds_message_copy_free(&message_copy);
+		isds_list_free(&copies);
 		isds_message_free(&sent_message);
 		this->close();
 		return;
 	}
 
-
+	/* Functions do nothing on NULL pointers. */
+	isds_document_free(&document);
+	isds_list_free(&documents);
+	isds_envelope_free(&sent_envelope);
+	isds_message_copy_free(&message_copy);
+	isds_list_free(&copies);
+	isds_message_free(&sent_message);
 }
 
 
