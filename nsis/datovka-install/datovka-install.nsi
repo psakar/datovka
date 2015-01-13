@@ -1,4 +1,4 @@
-Ôªø# The NSIS (http://nsis.sourceforge.net) install script.
+# The NSIS (http://nsis.sourceforge.net) install script.
 # This script is BSD licensed.
 SetCompressor /solid /final lzma
 
@@ -6,8 +6,8 @@ SetCompressor /solid /final lzma
 !include MUI2.nsh
 !include "FileFunc.nsh"
 
-!define VERSION "0.2.0"
-!define QUADVERSION "0.2.0.0"
+!define VERSION "4.0.3"
+!define QUADVERSION "4.0.3.0"
 !define guid '{C1B3CE89-4773-4FF3-BFF7-12144DEF2F15}'
 !define PROGRAM_NAME "Datovka"
 
@@ -20,9 +20,9 @@ installDirRegKey HKLM "Software\${PROGRAM_NAME}" "InstallLocation"
 RequestExecutionLevel admin
 #give credits to Nullsoft: BrandingText ""
 VIAddVersionKey "ProductName" "${PROGRAM_NAME} ${VERSION}"
-VIAddVersionKey "CompanyName" "CZ.NIC Labs"
+VIAddVersionKey "CompanyName" "CZ.NIC, z. s. p. o."
 VIAddVersionKey "FileDescription" "(un)install the ${PROGRAM_NAME} ${VERSION}"
-VIAddVersionKey "LegalCopyright" "Copyright 2014, CZ.NIC Labs"
+VIAddVersionKey "LegalCopyright" "Copyright 2014 - 2015, CZ.NIC, z. s. p. o."
 VIAddVersionKey "FileVersion" "${QUADVERSION}"
 VIAddVersionKey "ProductVersion" "${QUADVERSION}"
 VIProductVersion "${QUADVERSION}"
@@ -81,10 +81,10 @@ section "-hidden.postinstall"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "NoModify" "1"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "NoRepair" "1"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "URLInfoAbout" "https://labs.nic.cz/page/2425/nova-datovka/"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Publisher" "CZ.NIC Labs"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Publisher" "CZ.NIC, z. s. p. o."
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Version" "${VERSION}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "DisplayVersion" "${VERSION}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Contact" "CZ.NIC Labs"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "Contact" "CZ.NIC, z. s. p. o."
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" "DisplayIcon" "$\"$INSTDIR\datovka.ico$\""
 	${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
 	IntFmt $0 "0x%08X" $0
@@ -147,8 +147,8 @@ Function .onInit
 
 		${If} $LANGUAGE == ${LANG_CZECH}
 		MessageBox MB_OK|MB_ICONEXCLAMATION \
-		"${PROGRAM_NAME} u≈æ je na Va≈°em poƒç√≠taƒçi nainstalov√°na. $\n$\nStisknƒõte OK pro jej√≠ odinstalov√°n√≠ \
-	  	a nahr√°n√≠ nov√© verze ${VERSION}." \
+		"${PROGRAM_NAME} uû je na Vaöem poËÌtaËi nainstalov·na. $\n$\nStisknÏte OK pro jejÌ odinstalov·nÌ \
+	  	a nahr·nÌ novÈ verze ${VERSION}." \
 		IDOK uninst
 		Abort
 		${EndIf}
