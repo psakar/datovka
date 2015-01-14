@@ -19,12 +19,10 @@ system(lrelease datovka.pro)
 macx {
 	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
 	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
-	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
 }
 win32 {
 	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
 	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
-	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
 }
 
 
@@ -54,7 +52,7 @@ DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"
 
-unix {
+unix:!macx {
 	isEmpty(PREFIX) {
 		PREFIX = "/usr/local"
 	}
@@ -188,8 +186,7 @@ macx {
 	localisation.path = "Contents/Resources/locale"
 	localisation.files += locale/datovka_cs.qm \
 		locale/datovka_en.qm
-	localisation.files += locale/qtbase_cs.qm \
-		locale/qtbase_uk.qm
+	localisation.files += locale/qtbase_cs.qm
 
 	additional.path = "Contents/Resources"
 	additional.files = \

@@ -259,13 +259,14 @@ int main(int argc, char *argv[])
 		if (language == "cs") {
 			localisationFile += "cs";
 		} else if (language == "en") {
-			localisationFile += "uk";
+			localisationFile += QString();
 		} else {
 			/* Use system locale. */
 			localisationFile += QLocale::system().name();
 		}
 
-		if (!qtTranslator.load(localisationFile, localisationDir)) {
+		if (!localisationFile.isEmpty() &&
+		    !qtTranslator.load(localisationFile, localisationDir)) {
 			logWarning("Could not load localisation file '%s' "
 			    "from directory '%s'.\n",
 			    localisationFile.toStdString().c_str(),
