@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 		if (language == "cs") {
 			localisationFile += "cs";
 		} else if (language == "en") {
-			localisationFile += QString();
+			localisationFile = QString();
 		} else {
 			/* Use system locale. */
 			localisationFile += QLocale::system().name();
