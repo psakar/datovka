@@ -3,9 +3,6 @@
  <author>CZ.NIC</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -32,9 +29,6 @@
   </property>
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
-  </property>
-  <property name="animated">
-   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidgetWindows">
    <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -441,9 +435,6 @@ sent reply on this message</string>
      <width>800</width>
      <height>20</height>
     </rect>
-   </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
