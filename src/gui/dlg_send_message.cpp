@@ -927,10 +927,6 @@ void DlgSendMessage::sendMessage(void)
 			    !this->dmToHands->text().isEmpty() ?
 			    strdup(this->dmToHands->
 			    text().toStdString().c_str()) : NULL;
-			if (NULL == message_copy->dmToHands) {
-				errorMsg = "Out of memory.";
-				goto finish;
-			}
 
 			/* Add message_copy to the list (copies). */
 			struct isds_list *newListItem = (struct isds_list *)
