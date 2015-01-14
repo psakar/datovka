@@ -783,19 +783,46 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	/* Set optional fields. */
-	sent_envelope->dmSenderIdent = !this->dmSenderIdent->text().isEmpty() ?
-	    strdup(this->dmSenderIdent->text().toStdString().c_str()) : NULL;
-	sent_envelope->dmRecipientIdent =
-	    !this->dmRecipientIdent->text().isEmpty() ?
-	    strdup(this->dmRecipientIdent->text().toStdString().c_str()) :NULL;
-	sent_envelope->dmSenderRefNumber =
-	    !this->dmSenderRefNumber->text().isEmpty() ?
-	    strdup(this->dmSenderRefNumber->text().toStdString().c_str()):NULL;
-	sent_envelope->dmRecipientRefNumber =
-	    !this->dmRecipientRefNumber->text().isEmpty() ?
-	  strdup(this->dmRecipientRefNumber->text().toStdString().c_str()):NULL;
-	sent_envelope->dmToHands = !this->dmToHands->text().isEmpty() ?
-	    strdup(this->dmToHands->text().toStdString().c_str()) : NULL;
+	if (!this->dmSenderIdent->text().isEmpty()) {
+		sent_envelope->dmSenderIdent =
+		    strdup(this->dmSenderIdent->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmSenderIdent) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmRecipientIdent->text().isEmpty()) {
+		sent_envelope->dmRecipientIdent =
+		    strdup(this->dmRecipientIdent->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmRecipientIdent) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmSenderRefNumber->text().isEmpty()) {
+		sent_envelope->dmSenderRefNumber =
+		    strdup(this->dmSenderRefNumber->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmSenderRefNumber) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmRecipientRefNumber->text().isEmpty()) {
+		sent_envelope->dmRecipientRefNumber =
+		    strdup(this->dmRecipientRefNumber->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmRecipientRefNumber) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmToHands->text().isEmpty()) {
+		sent_envelope->dmToHands =
+		    strdup(this->dmToHands->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmToHands) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
 
 	if (!this->dmLegalTitleLaw->text().isEmpty()) {
 		sent_envelope->dmLegalTitleLaw =
@@ -822,15 +849,30 @@ void DlgSendMessage::sendMessage(void)
 		sent_envelope->dmLegalTitleYear = NULL;
 	}
 
-	sent_envelope->dmLegalTitleSect =
-	    !this->dmLegalTitleSect->text().isEmpty() ?
-	    strdup(this->dmLegalTitleSect->text().toStdString().c_str()) :NULL;
-	sent_envelope->dmLegalTitlePar =
-	    !this->dmLegalTitlePar->text().isEmpty() ?
-	    strdup(this->dmLegalTitlePar->text().toStdString().c_str()) :NULL;
-	sent_envelope->dmLegalTitlePoint =
-	    !this->dmLegalTitlePoint->text().isEmpty() ?
-	    strdup(this->dmLegalTitlePoint->text().toStdString().c_str()):NULL;
+	if (!this->dmLegalTitleSect->text().isEmpty()) {
+		sent_envelope->dmLegalTitleSect =
+		    strdup(this->dmLegalTitleSect->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmLegalTitleSect) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmLegalTitlePar->text().isEmpty()) {
+		sent_envelope->dmLegalTitlePar =
+		    strdup(this->dmLegalTitlePar->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmLegalTitlePar) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
+	if (!this->dmLegalTitlePoint->text().isEmpty()) {
+		sent_envelope->dmLegalTitlePoint =
+		    strdup(this->dmLegalTitlePoint->text().toStdString().c_str());
+		if (NULL == sent_envelope->dmLegalTitlePoint) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
 
 
 	sent_envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
@@ -859,17 +901,27 @@ void DlgSendMessage::sendMessage(void)
 		} else {
 			dmType = "K";
 		}
-		sent_envelope->dmRecipientRefNumber =
-		    !m_dmSenderRefNumber.isEmpty() ?
-		    strdup(m_dmSenderRefNumber.toStdString().c_str()) : NULL;
+		if (!m_dmSenderRefNumber.isEmpty()) {
+			sent_envelope->dmRecipientRefNumber =
+			    strdup(m_dmSenderRefNumber.toStdString().c_str());
+			if (NULL == sent_envelope->dmRecipientRefNumber) {
+				errorMsg = "Out of memory.";
+				goto finish;
+			}
+		}
 	} else {
 		if (this->payReply->isChecked()) {
 			dmType = "I";
 		}
 	}
 
-	sent_envelope->dmType = !dmType.isEmpty() ?
-	    strdup(dmType.toStdString().c_str()) : NULL;
+	if (!dmType.isEmpty()) {
+		sent_envelope->dmType = strdup(dmType.toStdString().c_str());
+		if (NULL == sent_envelope->dmType) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
+	}
 
 	sent_envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
 	if (NULL == sent_envelope->dmOVM) {
@@ -923,10 +975,15 @@ void DlgSendMessage::sendMessage(void)
 				errorMsg = "Out of memory.";
 				goto finish;
 			}
-			message_copy->dmToHands =
-			    !this->dmToHands->text().isEmpty() ?
-			    strdup(this->dmToHands->
-			    text().toStdString().c_str()) : NULL;
+			if (!this->dmToHands->text().isEmpty()) {
+				message_copy->dmToHands =
+				    strdup(this->dmToHands->
+				        text().toStdString().c_str());
+				if (NULL == message_copy->dmToHands) {
+					errorMsg = "Out of memory.";
+					goto finish;
+				}
+			}
 
 			/* Add message_copy to the list (copies). */
 			struct isds_list *newListItem = (struct isds_list *)
