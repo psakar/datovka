@@ -5706,7 +5706,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		otpcode = "";
 		while (otpcode.isEmpty()) {
 			otpcode = QInputDialog::getText(this, msgTitle,
-			    msgBody, QLineEdit::Password, "", &ok,
+			    msgBody, QLineEdit::Normal, "", &ok,
 			    Qt::WindowStaysOnTopHint);
 			if (!ok) {
 				showStatusTextWithTimeout(
