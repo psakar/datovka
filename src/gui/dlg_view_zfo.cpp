@@ -429,7 +429,7 @@ void DlgViewZfo::openSelectedAttachment(void)
 		return;
 	}
 	/* TODO -- Add message id into file name? */
-	QString fileName = TMP_ATTACHMENT_PREFIX + fileName;
+	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	QByteArray data =
 	    m_attachmentModel.attachmentData(selectedIndex.row());
