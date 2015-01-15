@@ -1414,7 +1414,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 	    "dmRecipientRefNumber, dmRecipientIdent, "
 	    "dmSenderRefNumber, dmSenderIdent, "
 	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
-	    "dmAcceptanceTime "
+	    "dmAcceptanceTime, dbIDSender, dbIDRecipient "
 	    "FROM messages WHERE "
 	    "dmID = :dmId";
 
@@ -1428,7 +1428,8 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		/* Sender info */
 		html += messageTableSectionPdf(QObject::tr("Sender"));
 		html += messageTableInfoStartPdf();
-		tmp = query.value(0).toString() + QString(", ") +
+		tmp = query.value(0).toString() + QString(" (") +
+		    query.value(21).toString() + QString("), ") +
 		    query.value(1).toString();
 		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
 		html += messageTableInfoEndPdf();
@@ -1436,7 +1437,8 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		/* Recipient info */
 		html += messageTableSectionPdf(QObject::tr("Recipient"));
 		html += messageTableInfoStartPdf();
-		tmp = query.value(4).toString() + QString(", ") +
+		tmp = query.value(4).toString() + QString(" (") +
+		    query.value(22).toString() + QString("), ") +
 		    query.value(5).toString();
 		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
 		html += messageTableInfoEndPdf();
@@ -1558,7 +1560,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 	    "dmLegalTitlePar, dmLegalTitlePoint, "
 	    "dmRecipientRefNumber, dmRecipientIdent, "
 	    "dmSenderRefNumber, dmSenderIdent, "
-	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery "
+	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, dbIDRecipient "
 	    "FROM messages WHERE "
 	    "dmID = :dmId";
 
@@ -1587,6 +1589,8 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 		tmp = query.value(4).toString() + QString(", ") +
 		    query.value(5).toString();
 		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
+		html += messageTableInfoPdf(QObject::tr("Databox ID"),
+		    query.value(20).toString());
 		html += messageTableInfoPdf(QObject::tr("Delivery"),
 		        dateTimeStrFromDbFormat(query.value(6).toString(),
 		        dateTimeDisplayFormat));
@@ -1684,12 +1688,12 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	html += indentDivStart;
 	html += "<h3>" + QObject::tr("Identification") + "</h3>";
 	if (showId) {
-		html += strongAccountInfoLine(QObject::tr("ID"), QString::number(dmId));
+		html += strongAccountInfoLine(QObject::tr("Message ID"), QString::number(dmId));
 	}
 
 	queryStr = "SELECT "
 	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
-	    "dmRecipient, dmRecipientAddress"
+	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
 	//qDebug() << queryStr;
@@ -1710,8 +1714,10 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		html += "<br/>";
 
 		/* Information about message author. */
-		html += strongAccountInfoLine(QObject::tr("From"),
+		html += strongAccountInfoLine(QObject::tr("Sender"),
 		    query.value(2).toString());
+		html += strongAccountInfoLine(QObject::tr("Sender Databox ID"),
+		    query.value(6).toString());
 		html += strongAccountInfoLine(QObject::tr("Sender Address"),
 		    query.value(3).toString());
 		/* Custom data. */
@@ -1735,8 +1741,10 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 
 		html += "<br/>";
 
-		html += strongAccountInfoLine(QObject::tr("To"),
+		html += strongAccountInfoLine(QObject::tr("Recipient"),
 		    query.value(4).toString());
+		html += strongAccountInfoLine(QObject::tr("Recipient Databox ID"),
+		    query.value(7).toString());
 		html += strongAccountInfoLine(QObject::tr("Recipient Address"),
 		    query.value(5).toString());
 	}

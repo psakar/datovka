@@ -298,7 +298,7 @@ public:
 	 * @brief Return message HTML formatted description.
 	 */
 	QString descriptionHtml(int dmId, QAbstractButton *verifySignature,
-	    bool showId = false, bool warnOld = true) const;
+	    bool showId = true, bool warnOld = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to PDF.
