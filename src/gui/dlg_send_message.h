@@ -75,9 +75,9 @@ private slots:
 	void addAttachmentFile(void);
 	void deleteAttachmentFile(void);
 	void openAttachmentFile(void);
-	void addRecipientData(void);
+	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
-	void findRecipientData(void);
+	void findAndAddRecipient(void);
 	void recItemSelect(void);
 	void attItemSelect(void);
 	void checkInputFields(void);

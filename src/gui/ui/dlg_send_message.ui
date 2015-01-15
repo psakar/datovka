@@ -349,7 +349,7 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Add a recipient to the current message</string>
+        <string>Add recipient from contacts selected from existing messages</string>
        </property>
        <property name="text">
         <string>Add</string>
@@ -396,7 +396,7 @@
         <bool>true</bool>
        </property>
        <property name="toolTip">
-        <string>Add recipient from contacts selected from existing messages</string>
+        <string>Find and add a recipient from Datové schránky server</string>
        </property>
        <property name="text">
         <string>Find</string>

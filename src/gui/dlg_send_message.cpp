@@ -113,10 +113,10 @@ void DlgSendMessage::initNewMessageDialog(void)
 	if (!m_dbEffectiveOVM) {
 		if (m_dbOpenAddressing) {
 			dbOpenAddressing =
-			    " - " + tr("commercial messages are enabled");
+			    " - " + tr("sending of PDZ: enabled");
 		} else {
 			dbOpenAddressing =
-			    " - " + tr("commercial messages are disabled");
+			    " - " + tr("sending of PDZ: disabled");
 		}
 	}
 
@@ -205,11 +205,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(showOptionalForm(int)));
 
 	connect(this->addRecipient, SIGNAL(clicked()), this,
-	    SLOT(addRecipientData()));
+	    SLOT(addRecipientFromLocalContact()));
 	connect(this->removeRecipient, SIGNAL(clicked()), this,
 	    SLOT(deleteRecipientData()));
 	connect(this->findRecipient, SIGNAL(clicked()), this,
-	    SLOT(findRecipientData()));
+	    SLOT(findAndAddRecipient()));
 
 	connect(this->addAttachment, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
@@ -434,15 +434,15 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 
 /* ========================================================================= */
 /*
- * Add recipient from search dialog
+ * Add recipient from local contact list
  */
-void DlgSendMessage::addRecipientData(void)
+void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
+	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
+	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
-	dsSearch->show();
+	dlg_cont->show();
 }
 
 
@@ -472,7 +472,8 @@ int DlgSendMessage::cmptAttachmentSize(void)
 	int attachSize = 0;
 
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
-		attachSize += this->attachmentTableWidget->item(i,3)->text().toInt();
+		attachSize += this->attachmentTableWidget->item(i,3)->text().
+		    toInt();
 	}
 
 	return attachSize;
@@ -524,15 +525,15 @@ void DlgSendMessage::deleteRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Find recipent in contact list
+ * Find recipent in the ISDS
  */
-void DlgSendMessage::findRecipientData(void)
+void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
 {
-	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
-	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
+	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
+	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
-	dlg_cont->show();
+	dsSearch->show();
 }
 
 
@@ -591,15 +592,16 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 	if (pdzCnt > 1) {
 		title = tr("Message contains non-OVM recipients.");
 		info = tr("Your message contains %1 non-OVM recipients "
-		    "therefore this message will be sent as a"
-		    "Commercial messages (PDZ) for these recipients.").arg(pdzCnt);
+		    "therefore this message will be sent as a "
+		    "commercial messages (PDZ) for these recipients.").
+		    arg(pdzCnt);
 		info += "\n\n";
 		info += tr("Do you want to send all messages?");
 	} else {
 		title = tr("Message contains non-OVM recipient.");
 		info = tr("Your message contains non-OVM recipient "
-		    "therefore this message will be sent as "
-		    "Commercial message (PDZ) for this recipient.");
+		    "therefore this message will be sent as a "
+		    "commercial message (PDZ) for this recipient.");
 		info += "\n\n";
 		info += tr("Do you want to send message?");
 	}
