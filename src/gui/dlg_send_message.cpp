@@ -268,22 +268,27 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 /* ========================================================================= */
 {
 	QString str = tr("no");
+	struct isds_DbOwnerInfo *doi = NULL;
 	struct isds_list *box = NULL;
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
 	isds_DbType dbType = DBTYPE_FO;
 
-	isds_DbOwnerInfo_search(&box, m_userName, idDbox, dbType, "",
-	    personName, "", NULL, address, "", "", "", "", "", 0, false, false);
+	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
+	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
+	    QString(), QString(), 0, false, false);
+	if (NULL == doi) {
+		return str;
+	}
 
-	if (0 != box) {
-		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
-		Q_ASSERT(0 != item);
+	isdsSearch(&box, m_userName, doi);
+	isds_DbOwnerInfo_free(&doi);
+
+	if (NULL != box) {
+		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
+		    box->data;
+		Q_ASSERT(NULL != item);
 		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
 	}
 
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
 	isds_list_free(&box);
 
 	return str;

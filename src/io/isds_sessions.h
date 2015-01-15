@@ -123,31 +123,45 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 /*!
  * @brief Add items into isds_PersonName structure.
+ *
+ * @return NULL on failure.
  */
- isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
+struct isds_PersonName * isds_PersonName_create(const QString &pnFirstName,
     const QString &pnMiddleName, const QString &pnLastName,
     const QString &pnLastNameAtBirth);
 
 /*!
  * @brief Add items into isds_Address structure.
+ *
+ * @return NULL on failure.
  */
-isds_Address * isds_Address_add(const QString &adCity,
+struct isds_Address * isds_Address_create(const QString &adCity,
     const QString &adStreet, const QString &adNumberInStreet,
     const QString &adNumberInMunicipality, const QString &adZipCode,
     const QString &adState);
 
 /*!
  * @brief Add items into isds_BirthInfo structure.
+ *
+ * @return NULL on failure.
+ *
+ * @note All structure pointers are consumed. The structures are not copied.
+ *     Don't use the structures after a successful return from this function.
  */
- isds_BirthInfo * isds_BirthInfo_add(struct tm *biDate,
-    const QString &biCity, const QString &biCountry,
-    const QString &biState);
+struct isds_BirthInfo * isds_BirthInfo_createConsume(struct tm *biDate,
+    const QString &biCity, const QString &biCountry, const QString &biState);
+
 
 /*!
- * @brief Create DbOwnerInfo structure and Search DataBoxes.
+ * @brief Create new isds_DbOwnerInfo structure according to the supplied
+ *     values.
+ *
+ * @return NULL on failure.
+ *
+ * @note All structure pointers are consumed. The structures are not copied.
+ *     Don't use the structures after a successful return from this function.
  */
-isds_error isds_DbOwnerInfo_search(struct isds_list **result, const QString &userName,
-    const QString &dbID,
+struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
     isds_DbType dbType, const QString &ic,
     struct isds_PersonName *personName, const QString &firmName,
     struct isds_BirthInfo *birthInfo, struct isds_Address *address,
@@ -157,9 +171,21 @@ isds_error isds_DbOwnerInfo_search(struct isds_list **result, const QString &use
 
 
 /*!
- * @brief Create DbUserInfo structure.
+ * @brief Search DataBoxes.
  */
-isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
+isds_error isdsSearch(struct isds_list **result, const QString &userName,
+    const struct isds_DbOwnerInfo *ownerInfo);
+
+
+/*!
+ * @brief Create DbUserInfo structure.
+ *
+ * @return NULL on failure.
+ *
+ * @note All structure pointers are consumed. The structures are not copied.
+ *     Don't use the structures after a successful return from this function.
+ */
+struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
     isds_UserType userType, long int userPrivils,
     struct isds_PersonName *personName, struct isds_Address *address,
     const QString &ic, const QString &firmName, const QString &caStreet,
