@@ -580,18 +580,6 @@ void isds_document_free_void(void **document)
 
 /* ========================================================================= */
 /*
- * Free message_copy list
- */
-static
-void isds_message_copy_free_void(void **message_copy)
-/* ========================================================================= */
-{
-	isds_message_copy_free((struct isds_message_copy **) message_copy);
-}
-
-
-/* ========================================================================= */
-/*
  * Dialog informs user that message contains one or more PDZs.
  */
 int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
@@ -601,17 +589,17 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 	QString info;
 
 	if (pdzCnt > 1) {
-		title = tr("Message contains Commercial messages (PDZ)");
+		title = tr("Message contains non-OVM recipients.");
 		info = tr("Your message contains %1 non-OVM recipients "
-		    "therefore these messages will be sent as a"
-		    "Commercial messages (PDZ)").arg(pdzCnt);
+		    "therefore this message will be sent as a"
+		    "Commercial messages (PDZ) for these recipients.").arg(pdzCnt);
 		info += "\n\n";
 		info += tr("Do you want to send all messages?");
 	} else {
-		title = tr("Message contains Commercial message (PDZ)");
-		info = tr("Your message contains %1 non-OVM recipient "
+		title = tr("Message contains non-OVM recipient.");
+		info = tr("Your message contains non-OVM recipient "
 		    "therefore this message will be sent as "
-		    "Commercial message (PDZ)").arg(pdzCnt);
+		    "Commercial message (PDZ) for this recipient.");
 		info += "\n\n";
 		info += tr("Do you want to send message?");
 	}
@@ -636,6 +624,7 @@ void DlgSendMessage::sendMessage(void)
 {
 	isds_error status = IE_ERROR;
 	QString errorMsg;
+	QString detailText = "";
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -643,11 +632,13 @@ void DlgSendMessage::sendMessage(void)
 	struct isds_document *document = NULL; /* Attachment. */
 	struct isds_list *documents = NULL; /* Attachment list. */
 	struct isds_envelope *sent_envelope = NULL; /* Message envelope. */
-	struct isds_message_copy *message_copy = NULL;
-	struct isds_list *copies = NULL; /* Message copy recipients. */
-
 	struct isds_list *last = NULL; /* No need to free it explicitly. */
 
+	/* List of send message result */
+	QList<sendMsgResultStruct> sendMsgResultList;
+	sendMsgResultList.clear();
+
+	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
 	QString dmType;
 
@@ -665,10 +656,6 @@ void DlgSendMessage::sendMessage(void)
 				if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
 					return;
 				}
-			} else {
-				/* TODO
-				 * may be: inform sender about prepaid reply?
-				 */
 			}
 		} else {
 			if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
@@ -774,13 +761,6 @@ void DlgSendMessage::sendMessage(void)
 		errorMsg = "Out of memory.";
 		goto finish;
 	}
-	sent_envelope->dbIDRecipient =
-	    strdup(this->recipientTableWidget->item(0,0)->
-	    text().toStdString().c_str());
-	if (NULL == sent_envelope->dbIDRecipient) {
-		errorMsg = "Out of memory.";
-		goto finish;
-	}
 
 	/* Set optional fields. */
 	if (!this->dmSenderIdent->text().isEmpty()) {
@@ -815,15 +795,6 @@ void DlgSendMessage::sendMessage(void)
 			goto finish;
 		}
 	}
-	if (!this->dmToHands->text().isEmpty()) {
-		sent_envelope->dmToHands =
-		    strdup(this->dmToHands->text().toStdString().c_str());
-		if (NULL == sent_envelope->dmToHands) {
-			errorMsg = "Out of memory.";
-			goto finish;
-		}
-	}
-
 	if (!this->dmLegalTitleLaw->text().isEmpty()) {
 		sent_envelope->dmLegalTitleLaw =
 		    (long int *) malloc(sizeof(long int));
@@ -873,8 +844,6 @@ void DlgSendMessage::sendMessage(void)
 			goto finish;
 		}
 	}
-
-
 	sent_envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
 	if (NULL == sent_envelope->dmPersonalDelivery) {
 		errorMsg = "Out of memory.";
@@ -938,104 +907,158 @@ void DlgSendMessage::sendMessage(void)
 	*sent_envelope->dmPublishOwnID = this->dmPublishOwnID->isChecked();
 
 	/* Set envelope and attachments to message structure. */
-	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 	sent_message->documents = documents; documents = NULL;
+	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
 	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
 		goto finish;
 	}
 
-	/* Sent message to 1 recipient */
-	if (this->recipientTableWidget->rowCount() == 1) {
+	for (int i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
 
-		qDebug() << "sending message form user name" << m_userName;
-		status = isds_send_message(isdsSessions.session(m_userName),
-		    sent_message);
+		if (NULL != sent_message->envelope->dbIDRecipient) {
+			free(sent_message->envelope->dbIDRecipient);
+			sent_message->envelope->dbIDRecipient = NULL;
+		}
+		sent_message->envelope->dbIDRecipient =
+		    strdup(this->recipientTableWidget->item(i,0)->
+		    text().toStdString().c_str());
+		if (NULL == sent_message->envelope->dbIDRecipient) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
 
-	/* Sent message for multiple recipients */
-	} else {
-		last = NULL;
-
-		int i = 0;
-		for (i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
-
-			message_copy = (struct isds_message_copy *)
-			    malloc(sizeof(struct isds_message_copy));
-			if (NULL == message_copy) {
+		if (NULL != sent_message->envelope->dmToHands) {
+			free(sent_message->envelope->dmToHands);
+			sent_message->envelope->dmToHands = NULL;
+		}
+		if (!this->dmToHands->text().isEmpty()) {
+			sent_message->envelope->dmToHands =
+			    strdup(this->dmToHands->text().toStdString().c_str());
+			if (NULL == sent_message->envelope->dmToHands) {
 				errorMsg = "Out of memory.";
 				goto finish;
-			}
-			memset(message_copy, 0,
-			    sizeof(struct isds_message_copy));
-
-			message_copy->dbIDRecipient =
-			    strdup(this->recipientTableWidget->item(i,0)->
-			    text().toStdString().c_str());
-			if (NULL == message_copy->dbIDRecipient) {
-				errorMsg = "Out of memory.";
-				goto finish;
-			}
-			if (!this->dmToHands->text().isEmpty()) {
-				message_copy->dmToHands =
-				    strdup(this->dmToHands->
-				        text().toStdString().c_str());
-				if (NULL == message_copy->dmToHands) {
-					errorMsg = "Out of memory.";
-					goto finish;
-				}
-			}
-
-			/* Add message_copy to the list (copies). */
-			struct isds_list *newListItem = (struct isds_list *)
-			    malloc(sizeof(struct isds_list));
-			if (NULL == newListItem) {
-				errorMsg = "Out of memory.";
-				goto finish;
-			}
-			newListItem->data = message_copy; message_copy = NULL;
-			newListItem->next = NULL;
-			newListItem->destructor = isds_message_copy_free_void;
-			if (last == NULL) {
-				copies = last = newListItem;
-			} else {
-				last->next = newListItem;
-				last = newListItem;
 			}
 		}
 
-		qDebug() << "sending" << i << "messages from user name"
-		    << m_userName;
-		status = isds_send_message_to_multiple_recipients(
-		    isdsSessions.session(m_userName), sent_message, copies);
+		qDebug() << "sending message from user name" << m_userName;
+		status = isds_send_message(isdsSessions.session(m_userName),
+		    sent_message);
+
+		sendMsgResultStruct sendMsgResults;
+		sendMsgResults.dbID = this->recipientTableWidget->
+		    item(i,0)->text();
+		sendMsgResults.recipientName = this->recipientTableWidget->
+		    item(i,1)->text();
+		sendMsgResults.dmID = sent_message->envelope->dmID;
+		sendMsgResults.isPDZ = (this->recipientTableWidget->
+		    item(i, 3)->text() == tr("yes")) ? true : false;
+		sendMsgResults.status = (int) status;
+		sendMsgResults.errInfo = isds_long_message(isdsSessions.session(m_userName));
+		sendMsgResultList.append(sendMsgResults);
+
+		if (status == IE_SUCCESS) {
+			successSendCnt++;
+		}
 	}
 
-	errorMsg = isds_long_message(isdsSessions.session(m_userName));
+	for (int i = 0; i < sendMsgResultList.size(); ++i) {
+		if (sendMsgResultList.at(i).status == IE_SUCCESS) {
+			if (sendMsgResultList.at(i).isPDZ) {
+				detailText += tr("Message was successfully "
+				"sent to <i>%1 (%2)</i> as PDZ with number "
+				    "<i>%3</i>.").
+				    arg(sendMsgResultList.at(i).recipientName).
+				    arg(sendMsgResultList.at(i).dbID).
+				    arg(sendMsgResultList.at(i).dmID) + "<br/>";
+			} else {
+				detailText += tr("Message was successfully "
+				    "sent to <i>%1 (%2)</i> as message number "
+				    "<i>%3</i>.").
+				    arg(sendMsgResultList.at(i).recipientName).
+				    arg(sendMsgResultList.at(i).dbID).
+				    arg(sendMsgResultList.at(i).dmID) + "<br/>";
+			}
+		} else {
+			detailText += tr("Message was NOT successfully "
+			"sent to <i>%1 (%2)</i>. Server says: %3").
+			    arg(sendMsgResultList.at(i).recipientName).
+			    arg(sendMsgResultList.at(i).dbID).
+			    arg(sendMsgResultList.at(i).errInfo) + "<br/>";
+		}
+	}
 
-finish:
-	if (status == IE_SUCCESS) {
-		QMessageBox::information(this,
-		    tr("Message was sent"),
-		    tr("Messages was sent into ISDS successfully."),
-		    QMessageBox::Ok);
+	if (this->recipientTableWidget->rowCount() == successSendCnt) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message was sent"));
+		msgBox.setText("<b>"+tr("Message was successfully sent to "
+		    "all recipients.")+"</b>");
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
 
 		isds_document_free(&document);
 		isds_list_free(&documents);
 		isds_envelope_free(&sent_envelope);
-		isds_message_copy_free(&message_copy);
-		isds_list_free(&copies);
 		isds_message_free(&sent_message);
+
 		this->accept(); /* Set return code to accepted. */
 		return;
-	} else if (showErrorMessageBox((int)status, errorMsg) ==
-	           QMessageBox::Yes) {
+	} else {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message was sent with error"));
+		msgBox.setText("<b>"+tr("Message was NOT successfully sent "
+		    "to all recipients.")+"</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") +"</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			isds_document_free(&document);
+			isds_list_free(&documents);
+			isds_envelope_free(&sent_envelope);
+			isds_message_free(&sent_message);
+			this->accept(); /* Set return code to accepted. */
+			return;
+		} else {
+			isds_document_free(&document);
+			isds_list_free(&documents);
+			isds_envelope_free(&sent_envelope);
+			isds_message_free(&sent_message);
+			return;
+		}
+	}
 
+finish:
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Critical);
+	msgBox.setWindowTitle(tr("Send message error"));
+	msgBox.setText("<b>"+tr("It was not possible to send message "
+	    "to the server Datové schránky.")+"</b>");
+	detailText += tr("It can be caused by following") +  ":<br/><br/>";
+	detailText += "1. " + tr("It was not possible to establish a "
+	    "connection to the server.") + "<br/>";
+	detailText += "2. " + tr("Authorization on the server "
+	    "failed.") + "<br/>";
+	detailText += "3. " + tr("Wrong/unsupported MIME type of some file in "
+	    "the attachment.") + "<br/>";
+	detailText += "4. " + tr("An internal error has occurred in "
+	    "the application.") + "<br/>";
+	detailText += "<br/><br/><b>" +
+	    tr("Do you want to close the Send message form?") + "</b>";
+	msgBox.setInformativeText(detailText);
+	msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::Yes);
+	if (msgBox.exec() == QMessageBox::No) {
 		isds_document_free(&document);
 		isds_list_free(&documents);
 		isds_envelope_free(&sent_envelope);
-		isds_message_copy_free(&message_copy);
-		isds_list_free(&copies);
 		isds_message_free(&sent_message);
-		this->close();
+		this->close(); /* Set return code to accepted. */
 		return;
 	}
 
@@ -1043,163 +1066,5 @@ finish:
 	isds_document_free(&document);
 	isds_list_free(&documents);
 	isds_envelope_free(&sent_envelope);
-	isds_message_copy_free(&message_copy);
-	isds_list_free(&copies);
 	isds_message_free(&sent_message);
-}
-
-
-/* ========================================================================= */
-/*
-* This is call if an error of send message procedure was obtained
-*/
-int DlgSendMessage::showErrorMessageBox(int status, QString isdsMsg)
-/* ========================================================================= */
-{
-	QString msgBoxTitle = tr("Send message error!");
-	QString msgBoxContent = "";
-
-	qDebug() << status << isds_strerror((isds_error)status);
-
-	switch(status) {
-	case IE_PARTIAL_SUCCESS:
-		msgBoxTitle = tr("Send multiple message problem!");
-		msgBoxContent =
-		    tr("It was not possible to send message to all recipients.")
-		    + "<br/><br/>" +
-		    "<b>" + tr("Send multiple message finished with an problem!")
-		    + "</b>" + "<br/><br/>" +
-		    tr("It can be caused sending of the message to the "
-		    "unactivated databox or some of recipient does not exist.")
-		    + "<br/>" +
-		    tr("Download list of sent messages and check which "
-		    "recipients didn't receive your message.");
-		QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
-		    QMessageBox::Ok);
-		return QMessageBox::Yes;
-		break;
-	case IE_NOT_LOGGED_IN:
-		if (isdsMsg.isNull()) {
-			msgBoxContent =
-			    tr("It was not possible to send message to server "
-			    "Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("Error: ") +
-			    tr("Authorization failed!") + " " +
-			    isds_strerror((isds_error)status)
-			    + "</b><br/><br/>" +
-			    tr("Please check your credentials including the test-"
-			        "environment setting.") + "<br/>" +
-			    tr("It is possible that your password has expired - "
-			        "in this case, you need to use the official web "
-			        "interface of Datové schránky to change it.");
-		} else {
-			msgBoxContent =
-			    tr("It was not possible to send message to server "
-			    "Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("ISDS error") + ": " + isdsMsg
-			    + "</b><br/><br/>" +
-			    tr("Please check your credentials including the test-"
-			        "environment setting.") + "<br/>" +
-			    tr("It is possible that your password has expired - "
-			        "in this case, you need to use the official web "
-			        "interface of Datové schránky to change it.");
-		}
-		break;
-	case IE_TIMED_OUT:
-	case IE_CONNECTION_CLOSED:
-		if (isdsMsg.isNull()) {
-			msgBoxContent =
-			    tr("It was not possible to send message to server "
-			    "Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("Error: ") +
-			    tr("Connection to the server timed out!") + " " +
-			    isds_strerror((isds_error)status)
-			    + "</b><br/><br/>" +
-			    tr("It was not possible to establish a connection "
-			    "within a set time.") + "<br/>" +
-			    tr("Please check your internet connection and try again.");
-		} else {
-			msgBoxContent =
-			    tr("It was not possible to send message to server "
-			    "Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("ISDS error") + ": " + isdsMsg
-			    + "</b><br/><br/>" +
-			    tr("It was not possible to establish a connection "
-			    "within a set time.") + "<br/>" +
-			    tr("Please check your internet connection and try again.");
-		}
-		break;
-	case IE_ISDS:
-		if (isdsMsg.isNull()) {
-			msgBoxContent =
-			    tr("Sent message was refused by server Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("Error: ") + isds_strerror((isds_error)status) +
-			    + "</b><br/><br/>" +
-			    tr("Server did not accept message for this databox "
-			    "and returned message back.") + " " +
-			    tr("It can be caused by a wrong/unsupported MIME type of "
-			    "some file in the attachment or if an attachment "
-			    "contains an archive.");
-		} else {
-			msgBoxContent =
-			    tr("Sent message was refused by server Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("ISDS error") + ": " + isdsMsg
-			    + "</b><br/><br/>" +
-			    tr("Server did not accept message for this databox "
-			    "and returned message back.");
-		}
-		break;
-	case IE_INVAL:
-	case IE_ENUM:
-	case IE_NOMEM:
-	case IE_INVALID_CONTEXT:
-	case IE_NOTSUP:
-	case IE_HTTP:
-		if (isdsMsg.isNull()) {
-			msgBoxContent =
-			    tr("It was not possible to send message to the "
-			    "server Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("Error: ") + isds_strerror((isds_error)status) +
-			    + "</b><br/><br/>" +
-			    tr("It was not possible create send message request "
-			    "because an internal error has occurred.");
-		} else {
-			msgBoxContent =
-			    tr("It was not possible to send message to the "
-			    "server Datové schránky.")
-			    + "<br/><br/><b>" +
-			    tr("Error: ") + isds_strerror((isds_error)status) +
-			    + "<br/>" +
-			    isdsMsg
-			    + "</b><br/><br/>" +
-			    tr("It was not possible create send message request "
-			    "because an internal error has occurred.");
-		}
-		break;
-
-	case IE_ERROR:
-	default:
-		msgBoxContent =
-		    tr("It was not possible to send message to the "
-		    "server Datové schránky.") + "<br/><br/><b>" +
-		    tr("Error: ") + isds_strerror((isds_error)status) +
-		    + "</b><br/><br/>" +
-		    tr("It was not possible create send message request "
-		    "because an internal error has occurred.");
-		break;
-	}
-
-	msgBoxContent += "<br/><br/><b>" +
-	    tr("Do you want to abort sending of the message and "
-	    "close the send message dialog?") + "</b>";
-
-	return QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
-		QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
 }

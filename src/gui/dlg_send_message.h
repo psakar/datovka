@@ -45,6 +45,16 @@ public:
 		ACT_REPLY
 	};
 
+	class sendMsgResultStruct {
+	public:
+		QString dbID;
+		QString recipientName;
+		QString dmID;
+		bool isPDZ;
+		int status;
+		QString errInfo;
+	};
+
 	DlgSendMessage(MessageDb &db, QString &dbId, Action action,
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
@@ -97,7 +107,6 @@ private:
 	int m_attachSize;
 
 	int cmptAttachmentSize(void);
-	int showErrorMessageBox(int status, QString isdsMsg);
 	int showInfoAboutPDZ(int pdzCnt);
 	QString getUserInfoFormIsds(QString idDbox);
 };
