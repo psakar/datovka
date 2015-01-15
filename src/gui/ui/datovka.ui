@@ -565,6 +565,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Sync all accounts</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -664,6 +667,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Get messages</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -675,6 +681,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Create message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -945,6 +954,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Reply to message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
