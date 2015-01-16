@@ -4725,6 +4725,7 @@ void MainWindow::viewMessageFromZFO(void)
 
 	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
+	int zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
 	QDialog *viewDialog;
 
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -4747,16 +4748,21 @@ void MainWindow::viewMessageFromZFO(void)
 	message = loadZfoFile(dummy_session, fileName,
 	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
 	if (NULL == message) {
-		qDebug() << "Cannot parse file" << fileName;
-		QMessageBox::warning(this,
-		    tr("Content parsing error"),
-		    tr("Cannot parse the content of ") + fileName + ".",
-		    QMessageBox::Ok);
-		goto fail;
+		message = loadZfoFile(dummy_session, fileName,
+		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		    zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		if (NULL == message) {
+			qDebug() << "Cannot parse file" << fileName;
+			QMessageBox::warning(this,
+			    tr("Content parsing error"),
+			    tr("Cannot parse the content of ") + fileName + ".",
+			    QMessageBox::Ok);
+			goto fail;
+		}
 	}
 
 	/* Generate dialog showing message content. */
-	viewDialog = new DlgViewZfo(message, this);
+	viewDialog = new DlgViewZfo(message, zfoType, this);
 	viewDialog->exec();
 
 	isds_message_free(&message);

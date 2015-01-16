@@ -39,7 +39,7 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
-
+#include "src/gui/dlg_import_zfo.h"
 
 #define COL_NUM 2
 #define FNAME_COL 0
@@ -211,36 +211,51 @@ QByteArray AttachmentModel::attachmentData(int indexRow) const
 /*
  * Constructor.
  */
-DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, QWidget *parent)
+DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, int zfoType,
+    QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
     m_message(isdsMsg),
+    m_zfoType(zfoType),
     m_attachmentModel(0)
 {
 	setupUi(this);
 
-	/* TODO -- Adjust splitter sizes. */
-
 	Q_ASSERT(NULL != m_message);
 
-	m_attachmentModel.setModelData(isdsMsg);
+	/* TODO -- Adjust splitter sizes. */
 
-	envelopeTextEdit->setHtml(
-	    descriptionHtml(m_attachmentModel.rowCount(),
-	        m_message->raw, m_message->raw_length,
-	        m_message->envelope->timestamp,
-	        m_message->envelope->timestamp_length));
-	envelopeTextEdit->setReadOnly(true);
+	if (m_zfoType == ImportZFODialog::IMPORT_DELIVERY_ZFO) {
+		this->attachmentTable->hide();
+		envelopeTextEdit->setHtml(
+		    deliveryDescriptionHtml(
+		        m_message->raw, m_message->raw_length,
+		        m_message->envelope->timestamp,
+		        m_message->envelope->timestamp_length));
+		envelopeTextEdit->setReadOnly(true);
 
-	/* Attachment list. */
-	attachmentTable->setModel(&m_attachmentModel);
-	attachmentTable->resizeColumnToContents(0);
+	} else {
+		this->attachmentTable->setEnabled(true);
+		this->attachmentTable->show();
+		m_attachmentModel.setModelData(isdsMsg);
+		envelopeTextEdit->setHtml(
+		    messageDescriptionHtml(m_attachmentModel.rowCount(),
+		        m_message->raw, m_message->raw_length,
+		        m_message->envelope->timestamp,
+		        m_message->envelope->timestamp_length));
+		envelopeTextEdit->setReadOnly(true);
 
-	attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
-	    this, SLOT(attachmentItemRightClicked(QPoint)));
-	connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
-	    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
+		/* Attachment list. */
+		attachmentTable->setModel(&m_attachmentModel);
+		attachmentTable->resizeColumnToContents(0);
+
+		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
+		    this, SLOT(attachmentItemRightClicked(QPoint)));
+		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
+		    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
+
+	}
 
 	/* Signature details. */
 	connect(signaturePushButton, SIGNAL(clicked()), this,
@@ -469,7 +484,7 @@ void DlgViewZfo::showSignatureDetails(void)
 /*
  * Generate description from supplied message.
  */
-QString DlgViewZfo::descriptionHtml(int attachmentCount,
+QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
     const void *msgDER, size_t msgSize, const void *tstDER, size_t tstSize)
 /* ========================================================================= */
 {
@@ -494,13 +509,15 @@ QString DlgViewZfo::descriptionHtml(int attachmentCount,
 	html += "<br/>";
 
 	/* Information about message author. */
-	html += strongAccountInfoLine("From", envelope->dmSender);
-	html += strongAccountInfoLine("Sender Address",
+	html += strongAccountInfoLine(tr("Sender"), envelope->dmSender);
+	html += strongAccountInfoLine(tr("Sender Databox ID"), envelope->dbIDSender);
+	html += strongAccountInfoLine(tr("Sender Address"),
 	    envelope->dmSenderAddress);
 
 	html += "<br/>";
 
-	html += strongAccountInfoLine(tr("To"), envelope->dmRecipient);
+	html += strongAccountInfoLine(tr("Recipient"), envelope->dmRecipient);
+	html += strongAccountInfoLine(tr("Recipient Databox ID"), envelope->dbIDRecipient);
 	html += strongAccountInfoLine(tr("Recipient Address"),
 	    envelope->dmRecipientAddress);
 
@@ -561,6 +578,119 @@ QString DlgViewZfo::descriptionHtml(int attachmentCount,
 	return html;
 }
 
+
+
+/* ========================================================================= */
+/*
+ * Generate description from supplied delivery info.
+ */
+QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
+    size_t msgSize, const void *tstDER, size_t tstSize)
+/* ========================================================================= */
+{
+	const isds_envelope *envelope;
+	const struct isds_list *event;
+	isds_message_status *state;
+
+	envelope = m_message->envelope;
+	Q_ASSERT(NULL != envelope);
+
+	event = m_message->envelope->events;
+	Q_ASSERT(NULL != event);
+
+	state = envelope->dmMessageStatus;
+	Q_ASSERT(NULL != state);
+
+	QString html;
+
+	html += indentDivStart;
+	html += "<h3>" + tr("Identification") + "</h3>";
+
+	html += strongAccountInfoLine(tr("ID"), envelope->dmID);
+	html += strongAccountInfoLine(tr("Subject"), envelope->dmAnnotation);
+	html += strongAccountInfoLine(tr("Message type"), envelope->dmType);
+
+	html += "<br/>";
+
+	/* Information about message author. */
+	html += strongAccountInfoLine(tr("Sender"), envelope->dmSender);
+	html += strongAccountInfoLine(tr("Sender Databox ID"), envelope->dbIDSender);
+	html += strongAccountInfoLine(tr("Sender Address"),
+	    envelope->dmSenderAddress);
+
+	html += "<br/>";
+
+	html += strongAccountInfoLine(tr("Recipient"), envelope->dmRecipient);
+	html += strongAccountInfoLine(tr("Recipient Databox ID"), envelope->dbIDRecipient);
+	html += strongAccountInfoLine(tr("Recipient Address"),
+	    envelope->dmRecipientAddress);
+
+	html += "<h3>" + tr("Status") + "</h3>";
+
+	html += strongAccountInfoLine(tr("Delivery time"),
+	    dateTimeStrFromDbFormat(
+	        timevalToDbFormat(envelope->dmDeliveryTime),
+	        dateTimeDisplayFormat));
+	html += strongAccountInfoLine(tr("Acceptance time"),
+	    dateTimeStrFromDbFormat(
+	        timevalToDbFormat(envelope->dmAcceptanceTime),
+	        dateTimeDisplayFormat));
+	html += strongAccountInfoLine(tr("Status"),
+	    QString::number(convertHexToDecIndex(
+	        *(envelope->dmMessageStatus))) + " -- " +
+	    msgStatusToText(convertHexToDecIndex(
+	        *(envelope->dmMessageStatus))));
+	html += strongAccountInfoLine(tr("Events"),"");
+
+	html += indentDivStart;
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		html += strongAccountInfoLine(
+		        dateTimeStrFromDbFormat(timevalToDbFormat(item->time),
+		        dateTimeDisplayFormat),
+		        item->description);
+		event = event->next;
+	}
+	html += divEnd;
+
+	html += "<h3>" + tr("Signature") + "</h3>";
+
+	QString resultStr;
+	if (1 == rawMsgVerifySignature(msgDER, msgSize, 0, 0)) {
+		resultStr = QObject::tr("Valid");
+	} else {
+		resultStr = QObject::tr("Invalid")  + " -- " +
+		    QObject::tr("Message signature and content do not "
+		        "correspond!");
+	}
+	html += strongAccountInfoLine(tr("Message signature"), resultStr);
+	if (1 == rawMsgVerifySignatureDate(msgDER, msgSize,
+	        QDateTime::currentDateTime().toTime_t(), 0)) {
+		resultStr = QObject::tr("Valid");
+	} else {
+		resultStr = QObject::tr("Invalid");
+	}
+	if (!globPref.check_crl) {
+		resultStr += " (" +
+		    QObject::tr("Certificate revocation check is turned off!") +
+		    ")";
+	}
+	html += strongAccountInfoLine(tr("Signing certificate"), resultStr);
+	time_t utc_time = 0;
+	QDateTime tst;
+	int ret = rawTstVerify(tstDER, tstSize, &utc_time);
+	if (-1 != ret) {
+		tst = QDateTime::fromTime_t(utc_time);
+	}
+	resultStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
+	if (-1 != ret) {
+		resultStr += " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+		    tst.timeZone().abbreviation(tst) + ")";
+	}
+	html += strongAccountInfoLine(tr("Time stamp"), resultStr);
+
+	return html;
+}
 
 /* ========================================================================= */
 /*

@@ -107,7 +107,8 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	DlgViewZfo(const isds_message *isdsMsg, QWidget *parent = 0);
+	DlgViewZfo(const isds_message *isdsMsg, int zfoType,
+	    QWidget *parent = 0);
 
 	/*
 	 * TODO -- Signature checking.
@@ -161,9 +162,14 @@ private:
 	 * @param[in] attachmentCount Number of attached files.
 	 * @return String containing description in HTML format.
 	 */
-	QString descriptionHtml(int attachmentCount,
+	QString messageDescriptionHtml(int attachmentCount,
 	    const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize);
+
+	QString deliveryDescriptionHtml(
+	    const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize);
+
 
 	const isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
@@ -172,6 +178,8 @@ private:
 	 * (char *) m_message->envelope->timestamp
 	 *     m_message->envelope->timestamp_length
 	 */
+
+	int m_zfoType;
 	AttachmentModel m_attachmentModel; /*!< Attachment model. */
 };
 
