@@ -4855,9 +4855,12 @@ void MainWindow::createZFOListForImport(int zfoType, int zfoAction)
 
 		if (fileList.isEmpty()) {
 			qDebug() << "No *.zfo selected file(s)";
-			/* TODO - show dialog*/
 			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
 			    "selected directory."));
+			QMessageBox::warning(this,
+			    tr("No ZFO file(s)"),
+			    tr("ZFO file(s) not found in selected directory."),
+			    QMessageBox::Ok);
 			return;
 		}
 
@@ -4983,25 +4986,40 @@ void MainWindow::importDeliveryInfoZFO(QList<accountDataStruct> accountList,
 			continue;
 		}
 
+		int resISDS = 0;
 		bool success = false;
 		int dmId = atoi(message->envelope->dmID);
 
 		for (int j = 0; j < accountList.size(); j++) {
 			if (accountList.at(j).messageDb->isInMessageDb(dmId)) {
-				if (Q_SUCCESS ==
-				    Worker::storeReceivedDeliveryInfo(true,
-				    *(accountList.at(j).messageDb), message)) {
-					importZFOInfo.first = files.at(i);
-					importZFOInfo.second = tr("This file (delivery info) has been imported to message number \"%1\" into account \"%2\".").arg(dmId).arg(accountList.at(j).username);
-					successImportList.append(importZFOInfo);
-					success = true;
+				/* Is/was ZFO message in ISDS */
+				resISDS = isImportMsgInISDS(files.at(i),
+				    accountList.at(j).acntIndex);
+				if (resISDS == MSG_IS_IN_ISDS) {
+					if (Q_SUCCESS ==
+					    Worker::storeReceivedDeliveryInfo(true,
+					    *(accountList.at(j).messageDb), message)) {
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = tr("This file (delivery info) has been imported to message number \"%1\" into account \"%2\".").arg(dmId).arg(accountList.at(j).username);
+						successImportList.append(importZFOInfo);
+						success = true;
+					} else {
+						infoText = tr("This file "
+						     "(delivery info) has "
+						    "not been inserted into local "
+						    "database because an error was "
+						    "detected during insertion "
+						    "process.");
+					}
+				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+					infoText = tr("This file (message envelope)"
+					    " does not exists on the server "
+					    "Datové schránky.");
 				} else {
-					infoText = tr("This file "
-					     "(delivery info) has "
-					    "not been inserted into local "
-					    "database because an error was "
-					    "detected during insertion "
-					    "process.");
+					infoText = tr("It is not possible "
+					    "to connect to server Datové "
+					    "schránky and verify validity of "
+					    "this ZFO file.");
 				}
 			} else {
 				infoText = tr("This file (delivery info) has "

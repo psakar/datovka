@@ -5,13 +5,21 @@ ImportZFODialog::ImportZFODialog(QWidget *parent) :
     QDialog(parent)
 {
 	setupUi(this);
-	this->info->setText(tr("Zde je možné importovat do lokální databáze kompletní zprávy a informace o doručení zprávy ze souborů ZFO. Import kompletní zprávy bude úspěšný pouze pro takové ZFO soubory u kterých bude možné na serveru Datové schránky ověřit jejich pravost. Informace o doručení zprávy budou do databáze vloženy ze souboru ZFO pouze tehdy, existuje-li v lokální databáze adekvátní kompletní zpráva."));
+	this->info->setText(tr("Here you can import whole messages and "
+	    "message delivery information from ZFO files into local database."
+	    " The message or delivery information import will succeed only "
+	    "for those files whose validity can be approved by the Datové "
+	    "schránky server (working connection to server is required). "
+	    "Delivery information ZFO will be inserted into local database "
+	    "only if a corresponding complete message already exists in the "
+	    "database."));
 	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(ImportFiles()));
 }
 
 void ImportZFODialog::ImportFiles(void)
 {
-	int zfoType, zfoAaction;
+	int zfoType = IMPORT_MESSAGE_ZFO;
+	int zfoAaction = IMPORT_FROM_DIR;
 
 	if (this->messageZFO->isChecked()) {
 		zfoType = IMPORT_MESSAGE_ZFO;
