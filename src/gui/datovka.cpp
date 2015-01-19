@@ -990,7 +990,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    setEnabled(ui->actionDelete_message_from_db->isEnabled());
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Delete message from server"), this,
+		    tr("Delete message from server and local database"), this,
 		    SLOT(deleteMessageFromLocalDbAndIsds()))->
 		    setEnabled(ui->actionDelete_message_from_server->isEnabled());
 		menu->exec(QCursor::pos());

@@ -1099,7 +1099,7 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
    </property>
    <property name="text">
-    <string>Delete message from server</string>
+    <string>Delete message from server and local database</string>
    </property>
   </action>
  </widget>
