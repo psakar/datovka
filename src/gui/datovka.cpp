@@ -1855,7 +1855,7 @@ void MainWindow::deleteMessageFromLocalDatabase(void)
  * local database - based on action parameter.
 */
 qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
-    QString dmId, bool delFromIsds)
+    const QString &dmId, bool delFromIsds)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -4905,7 +4905,8 @@ void MainWindow::createZFOListForImport(int zfoType, int zfoAction)
 /*
  * Prepare import ZFO file(s) into database by ZFO type.
  */
-void MainWindow::prepareImportZFOintoDatabase(QStringList files, int zfoType)
+void MainWindow::prepareImportZFOintoDatabase(const QStringList &files,
+    int zfoType)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -4950,8 +4951,8 @@ void MainWindow::prepareImportZFOintoDatabase(QStringList files, int zfoType)
 /*
  * Execute the import of delivery info ZFO file(s) into database.
  */
-void MainWindow::importDeliveryInfoZFO(QList<accountDataStruct> accountList,
-    QStringList files)
+void MainWindow::importDeliveryInfoZFO(
+    const QList<accountDataStruct> &accountList, const QStringList &files)
 /* ========================================================================= */
 {
 	int fileCnt = files.size();
@@ -5056,8 +5057,8 @@ void MainWindow::importDeliveryInfoZFO(QList<accountDataStruct> accountList,
 /*
  * Execute the import of message ZFO file(s) into database.
  */
-void MainWindow::importMessageZFO(QList<accountDataStruct> accountList,
-    QStringList files)
+void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
+    const QStringList &files)
 /* ========================================================================= */
 {
 	int fileCnt = files.size();
@@ -5078,7 +5079,7 @@ void MainWindow::importMessageZFO(QList<accountDataStruct> accountList,
 		struct isds_ctx *dummy_session = NULL;
 
 		dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {			
+		if (NULL == dummy_session) {
 			qDebug() << "Cannot create dummy ISDS session.";
 			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
 			    "failed!"));
@@ -5225,7 +5226,8 @@ void MainWindow::importMessageZFO(QList<accountDataStruct> accountList,
 /*
  * Check if import ZFO file is/was in ISDS.
  */
-int MainWindow::isImportMsgInISDS(QString zfoFile, QModelIndex accountIndex)
+int MainWindow::isImportMsgInISDS(const QString &zfoFile,
+    QModelIndex accountIndex)
 /* ========================================================================= */
 {
 	Q_ASSERT(accountIndex.isValid());
@@ -5280,8 +5282,8 @@ int MainWindow::isImportMsgInISDS(QString zfoFile, QModelIndex accountIndex)
  * Show ZFO import notification dialog with results of import
  */
 void MainWindow::showNotificationDialogWithResult(int filesCnt,
-    QList<QPair<QString,QString>> errorImportList,
-    QList<QPair<QString,QString>> successImportList)
+    const QList<QPair<QString,QString>> &errorImportList,
+    const QList<QPair<QString,QString>> &successImportList)
 /* ========================================================================= */
 {
 	debugFuncCall();

@@ -343,31 +343,33 @@ private slots:
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
 	 */
-	void prepareImportZFOintoDatabase(QStringList files, int zfoType);
+	void prepareImportZFOintoDatabase(const QStringList &files,
+	    int zfoType);
 
 	/*!
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
-	void importDeliveryInfoZFO(QList<accountDataStruct> accountList,
-	    QStringList files);
+	void importDeliveryInfoZFO(const QList<accountDataStruct> &accountList,
+	    const QStringList &files);
 
 	/*!
 	 * @brief Import only message ZFO file(s) into database.
 	 */
-	void importMessageZFO(QList<accountDataStruct> accountList,
-	    QStringList files);
+	void importMessageZFO(const QList<accountDataStruct> &accountList,
+	    const QStringList &files);
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
 	void showNotificationDialogWithResult(int filesCnt,
-	    QList<QPair<QString,QString>> errorImportList,
-	    QList<QPair<QString,QString>> successImportList);
+	    const QList<QPair<QString,QString>> &errorImportList,
+	    const QList<QPair<QString,QString>> &successImportList);
 
- 	/*!
+	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.
 	 */
-	int isImportMsgInISDS(QString zfoFile, QModelIndex accountIndex);
+	int isImportMsgInISDS(const QString &zfoFile,
+	    QModelIndex accountIndex);
 
 	/*!
 	 * @brief About application dialog.
@@ -651,8 +653,8 @@ private:
 	 * @brief Delete message from long term storage in ISDS and
 	 * local database - based on delFromIsds parameter.
 	 */
-	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId,
-	    bool delFromIsds);
+	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx,
+	    const QString &dmId, bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
