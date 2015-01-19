@@ -1367,8 +1367,10 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 	QList<QVector<QString>> list_contacts;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT "
-	   "dbIDSender, dmSender, dmSenderAddress"
-	   " FROM messages";
+	    "dbIDRecipient, dmRecipient, dmRecipientAddress FROM messages "
+	    "UNION SELECT DISTINCT dbIDSender, dmSender, dmSenderAddress "
+	    "FROM messages";
+
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
 	}
