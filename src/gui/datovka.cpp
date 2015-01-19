@@ -1792,16 +1792,25 @@ void MainWindow::deleteMessageFromLocalDbAndIsds(void)
 	         "server Datové schránky and local database?").arg(dmId),
 	    QMessageBox::Yes | QMessageBox::No);
 
+	/* Save current index. */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
 	if (reply == QMessageBox::Yes) {
 		switch (eraseMessage(acntTopIdx, dmId, true)) {
 		case Q_SUCCESS:
 			/*
-			 *  Hide deleted message in view. The view/model will
-			 *  be regenerated according to the updated content
-			 *  of the DB when the account selection has been
-			 *  changed.
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
 			 */
-			ui->messageList->hideRow(msgIdx.row());
+			if (selectedAcntIndex.isValid()) {
+				accountItemSelectionChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
 			break;
 		default:
 			break;
@@ -1831,16 +1840,25 @@ void MainWindow::deleteMessageFromLocalDatabase(void)
 	         "local database?").arg(dmId),
 	    QMessageBox::Yes | QMessageBox::No);
 
+	/* Save current index. */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
 	if (reply == QMessageBox::Yes) {
 		switch (eraseMessage(acntTopIdx, dmId, false)) {
 		case Q_SUCCESS:
 			/*
-			 *  Hide deleted message in view. The view/model will
-			 *  be regenerated according to the updated content
-			 *  of the DB when the account selection has been
-			 *  changed.
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
 			 */
-			ui->messageList->hideRow(msgIdx.row());
+			if (selectedAcntIndex.isValid()) {
+				accountItemSelectionChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
 			break;
 		default:
 			break;
