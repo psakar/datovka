@@ -48,7 +48,7 @@ LIBISDS_ARCHIVE="${_LIBISDS_ARCHIVE}"
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${ZLIB_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# zlib
@@ -64,7 +64,7 @@ fi
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${EXPAT_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# expat
@@ -81,7 +81,7 @@ fi
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBTOOL_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# libtool
@@ -98,7 +98,7 @@ fi
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBICONV_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# libiconv
@@ -115,7 +115,7 @@ fi
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBXML2_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# libxml2
@@ -132,7 +132,7 @@ fi
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${GETTEXT_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# gettext
@@ -149,7 +149,7 @@ fi
 if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${LIBCURL_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# libcurl
@@ -167,7 +167,7 @@ fi
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	ARCHIVE="${SRCDIR}/${OPENSSL_ARCHIVE}"
 	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}"
+		echo "Missing ${ARCHIVE}" >&2
 		exit 1
 	fi
 	# OpenSSL
@@ -180,6 +180,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	# mingw
 	./Configure mingw enable-static-engine shared no-krb5 --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
 	make && make install_sw || exit 1
+
 	cp libeay32.dll "${BUILTDIR}/bin/"
 	cp ssleay32.dll "${BUILTDIR}/bin/"
 fi

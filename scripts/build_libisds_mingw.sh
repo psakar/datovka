@@ -182,6 +182,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	# no-asm
 	./Configure mingw enable-static-engine shared no-krb5 --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
 	make && make install_sw || exit 1
+
 	cp libeay32.dll "${BUILTDIR}/bin/"
 	cp ssleay32.dll "${BUILTDIR}/bin/"
 fi

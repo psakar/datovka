@@ -52,6 +52,7 @@ if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/zlib*
+
 	./configure --prefix=${BUILTDIR} --static --archs="-arch i386"
 	make && make install || exit 1
 fi
@@ -68,6 +69,7 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/expat*
+
 	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
 fi
@@ -84,6 +86,7 @@ if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libtool*
+
 	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
 fi
@@ -100,6 +103,7 @@ if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libiconv*
+
 	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
 fi
@@ -116,6 +120,7 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libxml2*
+
 	./configure --without-python --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386" --with-iconv="${BUILTDIR}"
 	make && make install || exit 1
 fi
@@ -132,6 +137,7 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/gettext*
+
 	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386" --with-libxml2-prefix="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include" LDFLAGS="-L${BUILTDIR}/lib"
 	make && make install || exit 1
 fi
@@ -148,6 +154,7 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
+
 	# --disable-shared
 	./configure --enable-ipv6 --with-darwinssl --without-axtls --disable-ldap --prefix="${BUILTDIR}" CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" LDFLAGS="-arch i386 -isysroot ${ISYSROOT}"
 	#make ##&& make install || exit 1
@@ -165,6 +172,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/openssl*
+
 	# no-asm
 	# darwin-i386-cc
 	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 --prefix="${BUILTDIR}"
@@ -173,8 +181,8 @@ fi
 
 
 if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
-        echo "Select libisds archive or git repository." >&2
-        exit 1
+	echo "Select libisds archive or git repository." >&2
+	exit 1
 elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	# libisds with OpenSSL back-end
 	ARCHIVE="${SRCDIR}/${LIBISDS_ARCHIVE}"
@@ -203,6 +211,7 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	if [ ! -z "${LIBISDS_BRANCH}" ]; then
 		git checkout "${LIBISDS_BRANCH}"
 	fi
+
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
 	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
 	make && make install || exit 1
