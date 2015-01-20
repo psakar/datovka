@@ -155,6 +155,8 @@ void Worker::syncAllAccounts(void)
 
 		emit refreshAccountList(index);
 
+#if 0
+		/* This function is not being used. May be removed in future. */
 		if (!getListSentMessageStateChanges(index, *messageDb,
 		    "GetMessageStateChanges")) {
 			success = false;
@@ -162,6 +164,7 @@ void Worker::syncAllAccounts(void)
 		}
 
 		emit refreshAccountList(index);
+#endif
 
 		if (!getPasswordInfo(index)) {
 			success = false;
@@ -239,14 +242,15 @@ void Worker::syncOneAccount(void)
 	}
 
 	emit refreshAccountList(m_acntTopIdx);
-
+#if 0
+	/* This function is not being used. May be removed in future. */
 	if (!getListSentMessageStateChanges(m_acntTopIdx, *messageDb,
 	    "GetMessageStateChanges")) {
 		success = false;
 	}
 
 	emit refreshAccountList(m_acntTopIdx);
-
+#endif
 	if (!getPasswordInfo(m_acntTopIdx)) {
 		success = false;
 	}
@@ -509,13 +513,23 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		diff += delta;
 		if (0 != pBar) { pBar->setValue((int) (20 + diff)); }
-		if (0 != worker) { emit worker->valueChanged(progressLabel, (int) (20 + diff)); }
+		if (0 != worker) { emit worker->valueChanged(progressLabel,
+		    (int) (20 + diff)); }
+
 
 		isds_message *item = (isds_message *) box->data;
+
+		if (NULL == item->envelope) {
+			/* TODO - free allocated stuff */
+			return Q_ISDS_ERROR;
+		}
+
 		int dmId = atoi(item->envelope->dmID);
 
-		if (!messageDb.isInMessageDb(dmId)) {
+		int dmDbMsgStatus = messageDb.isInMessageDb(dmId);
 
+		/* message is not in db (-1) */
+		if (-1 == dmDbMsgStatus) {
 			storeEnvelope(messageType, messageDb, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
@@ -523,9 +537,27 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 				    true, "received" == messageType, messageDb,
 				    "", 0, 0);
 			}
-
 			newcnt++;
+
+		/* message is in db (dmDbMsgStatus <> -1) */
+		} else {
+			if (messageType == "sent") {
+				int dmNewMsgStatus = convertHexToDecIndex(
+				     *item->envelope->dmMessageStatus);
+
+				if (dmDbMsgStatus != dmNewMsgStatus) {
+
+					QString dmAcceptanceTime = "";
+					if (0 != item->envelope->dmAcceptanceTime) {
+						dmAcceptanceTime = timevalToDbFormat(
+						item->envelope->dmAcceptanceTime);
+					}
+					getSentDeliveryInfo(acntTopIdx,
+					    dmId, true, messageDb);
+				}
+			}
 		}
+
 		box = box->next;
 
 	}

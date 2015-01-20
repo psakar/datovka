@@ -316,9 +316,10 @@ public:
 	QAbstractTableModel * flsModel(int msgId);
 
 	/*!
-	 * @brief Check if any message (dmID) exists in the table.
+	 * @brief Check if any message (dmID) exists in the table
+	 * Return -1 = message is not exists or dmMessageStatus
 	 */
-	bool isInMessageDb(int dmId) const;
+	int isInMessageDb(int dmId) const;
 
 	/*!
 	 * @brief Insert message envelope into messages table.

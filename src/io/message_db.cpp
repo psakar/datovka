@@ -1990,38 +1990,36 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 /*
  * Check if any message (dmID) exists in the table
  */
-bool MessageDb::isInMessageDb(int dmId) const
+int MessageDb::isInMessageDb(int dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	bool inMessages = false;
+	int ret = -1;
 	bool inSupplementary = false;
 
-	queryStr = "SELECT count(*) FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
+	queryStr = "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		/* TODO -- Handle error. */
+		return -1;
 	}
+
 	query.bindValue(":dmId", dmId);
+
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			Q_ASSERT(query.value(0).toInt() < 2);
-			inMessages = (1 == query.value(0).toInt());
+			ret = query.value(0).toInt();
+		} else {
+			return -1;
 		}
 	}
 
-	/*
-	 * Entry in supplementary_message_data must exist if exists in
-	 * messages.
-	 */
 	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		return -1;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
@@ -2032,9 +2030,11 @@ bool MessageDb::isInMessageDb(int dmId) const
 		}
 	}
 
-	Q_ASSERT(inMessages == inSupplementary);
-
-	return inMessages && inSupplementary;
+	if (inSupplementary) {
+		return ret;
+	} else {
+		return -1;
+	}
 }
 
 
