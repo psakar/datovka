@@ -2962,8 +2962,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	}
 
 	queryStr = "UPDATE supplementary_message_data SET "
-	    "message_type = :message_type, read_locally = :read_locally, "
-	    "custom_data = :custom_data "
+	    "message_type = :message_type, "
 	    "WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
@@ -2976,8 +2975,6 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	} else {
 		query.bindValue(":message_type", 2);
 	}
-	query.bindValue(":read_locally", true);
-	query.bindValue(":custom_data", "null");
 
 	if (query.exec()) {
 		return true;

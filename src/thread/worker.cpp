@@ -1053,10 +1053,12 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
 		return Q_GLOBAL_ERROR;
+		/*
 		status = isds_get_received_message(isdsSessions.session(
 		    accountInfo.userName()),
 		    dmId.toStdString().c_str(),
 		    &message);
+		*/
 	}
 
 	if (0 != pBar) { pBar->setValue(20); }
