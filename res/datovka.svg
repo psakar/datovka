@@ -412,11 +412,11 @@
           </cc:Agent>
         </dc:creator>
         <cc:license
-           rdf:resource="http://creativecommons.org/licenses/GPL/2.0/" />
+           rdf:resource="https://www.gnu.org/licenses/gpl-3.0.html" />
         <dc:title></dc:title>
       </cc:Work>
       <cc:License
-         rdf:about="http://creativecommons.org/licenses/GPL/2.0/">
+         rdf:about="https://www.gnu.org/licenses/gpl-3.0.html">
         <cc:permits
            rdf:resource="http://web.resource.org/cc/Reproduction" />
         <cc:permits
