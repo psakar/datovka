@@ -538,6 +538,112 @@ QString MessageDb::fileName(void) const
 
 /* ========================================================================= */
 /*
+ * Begin a transaction.
+ */
+bool MessageDb::beginTransaction(void)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr("BEGIN DEFERRED TRANSACTION");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * End a transaction.
+ */
+bool MessageDb::commitTransaction(void)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr("COMMIT TRANSACTION");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Begin named transaction.
+ */
+bool MessageDb::savePoint(const QString &savePointName)
+/* ========================================================================= */
+{
+	Q_ASSERT(!savePointName.isEmpty());
+	if (savePointName.isEmpty()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr("SAVEPOINT :name");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":name", savePointName);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * End named transaction.
+ */
+bool MessageDb::releaseSavePoint(const QString &savePointName)
+/* ========================================================================= */
+{
+	Q_ASSERT(!savePointName.isEmpty());
+	if (savePointName.isEmpty()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr("RELEASE SAVEPOINT :name");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":name", savePointName);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Roll back transaction.
+ */
+bool MessageDb::rollbackTransaction(const QString &savePointName)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	if (savePointName.isEmpty()) {
+
+		QString queryStr("ROLLBACK TRANSACTION");
+		if (!query.prepare(queryStr)) {
+			return false;
+		}
+		return query.exec();
+
+	} else {
+
+		QString queryStr("ROLLBACK TRANSACTION TO SAVEPOINT :name");
+		if (!query.prepare(queryStr)) {
+			return false;
+		}
+		query.bindValue(":name", savePointName);
+		return query.exec();
+
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Return received messages model.
  */
 DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)

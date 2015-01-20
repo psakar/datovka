@@ -155,6 +155,42 @@ public:
 	QString fileName(void) const;
 
 	/*!
+	 * @brief Begin a transaction.
+	 *
+	 * @return True on success.
+	 */
+	bool beginTransaction(void);
+
+	/*!
+	 * @brief End transaction.
+	 */
+	bool commitTransaction(void);
+
+	/*!
+	 * @brief Begin named transaction.
+	 *
+	 * @param[in] savePointName  Name of the save point.
+	 * @return True on success.
+	 */
+	bool savePoint(const QString &savePointName);
+
+	/*!
+	 * @brief End named transaction.
+	 *
+	 * @param[in] savePointName  Name of the save point.
+	 * @return True on success.
+	 */
+	bool releaseSavePoint(const QString &savePointName);
+
+	/*!
+	 * @brief Roll back transaction.
+	 *
+	 * @param[in] savepointName  Name of the save point.
+	 * @return True on success.
+	 */
+	bool rollbackTransaction(const QString &savePointName = QString());
+
+	/*!
 	 * @brief Return received messages model.
 	 */
 	DbMsgsTblModel * msgsRcvdModel(const QString &recipDbId);

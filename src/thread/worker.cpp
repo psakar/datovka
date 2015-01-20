@@ -432,14 +432,15 @@ qdatovka_error Worker::storeEnvelope(const QString &messageType,
 
 /* ========================================================================= */
 /*
-* Download sent/received message list from ISDS for current account index
-*/
+ * Download sent/received message list from ISDS for current account index
+ */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
     const QString &messageType, MessageDb &messageDb,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
     int &total, int &news)
 /* ========================================================================= */
 {
+#define USE_TRANSACTIONS 1
 	debugFuncCall();
 
 	int newcnt = 0;
@@ -509,6 +510,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		delta = 80.0 / allcnt;
 	}
 
+#ifdef USE_TRANSACTIONS
+	messageDb.beginTransaction();
+#endif /* USE_TRANSACTIONS */
 	while (0 != box) {
 
 		diff += delta;
@@ -561,6 +565,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		box = box->next;
 
 	}
+#ifdef USE_TRANSACTIONS
+	messageDb.commitTransaction();
+#endif /* USE_TRANSACTIONS */
 
 	isds_list_free(&messageList);
 
@@ -579,6 +586,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	news =  newcnt;
 
 	return Q_SUCCESS;
+#undef USE_TRANSACTIONS
 }
 
 
