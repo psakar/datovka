@@ -34,7 +34,8 @@
 /*!
  * @brief Mutexes to be used by OpenSSL.
  */
-static QVector<QMutex *> openssl_mutexes;
+static
+QVector<QMutex *> openssl_mutexes;
 
 
 /*!
@@ -51,14 +52,14 @@ static
 void openssl_mutex_cb(int mode, int n, const char *file, int line);
 
 
-/*
+/*!
  * @brief Initialise mutexes for OpenSSL usage.
  */
 static
 void openssl_mutexes_init(void);
 
 
-/*
+/*!
  * @brief Destroy mutexes for OpenSSL usage.
  */
 static
@@ -95,7 +96,7 @@ void crypto_init_threads(void)
 
 /* ========================================================================= */
 /*
- * Perform clean-up.
+ * Perform clean-up of thread-related structures.
  */
 void crypto_cleanup_threads(void)
 /* ========================================================================= */
@@ -191,5 +192,5 @@ void openssl_threadid_cb(CRYPTO_THREADID *openssl_id)
 /* ========================================================================= */
 {
 	QThread *id = QThread::currentThread();
-	CRYPTO_THREADID_set_pointer(openssl_id, (void *)id);
+	CRYPTO_THREADID_set_pointer(openssl_id, (void *) id);
 }

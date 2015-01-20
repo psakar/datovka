@@ -38,7 +38,7 @@ void crypto_init_threads(void);
 
 
 /*!
- * @brief Perform clean-up.
+ * @brief Perform clean-up of thread-related structures.
  */
 void crypto_cleanup_threads(void);
 
