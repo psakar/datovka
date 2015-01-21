@@ -5046,13 +5046,37 @@ void MainWindow::importDeliveryInfoZFO(
 					infoText = tr("This file (message envelope)"
 					    " does not exists on the server "
 					    "Datové schránky.");
+				} else if (resISDS == MSG_FILE_ERROR) {
+					infoText = tr("Couldn't open this file "
+					    "(delivery info) for "
+					    "authentication on the "
+					    "server Datové schránky.");
 				} else {
-					infoText = tr("It is not possible "
-					    "to connect to server Datové "
-					    "schránky and verify validity of "
-					    "this ZFO file.");
-
-					/* TODO - add break dialog */
+					QMessageBox msgBox(this);
+					msgBox.setIcon(QMessageBox::Warning);
+					msgBox.setWindowTitle(tr("ZFO import problem"));
+					msgBox.setText(tr("Do you want to continue with import?"));
+					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+					msgBox.setDefaultButton(QMessageBox::No);
+					if (QMessageBox::No == msgBox.exec()) {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+						infoText += "<br/><br/>" + tr("Action was canceled by user...");
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = infoText;
+						errorImportList.append(importZFOInfo);
+						isds_message_free(&message);
+						isds_ctx_free(&dummy_session);
+						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+						goto endImport;
+					} else {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+					}
 				}
 			} else {
 				infoText = tr("This file (delivery info) has "
@@ -5074,6 +5098,8 @@ void MainWindow::importDeliveryInfoZFO(
 	}
 
 	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Done"));
+
+endImport:
 
 	showNotificationDialogWithResult(fileCnt, errorImportList,
 	    successImportList);
@@ -5180,13 +5206,37 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 					infoText = tr("This file (message envelope)"
 					    " does not exists on the server "
 					    "Datové schránky.");
+				} else if (resISDS == MSG_FILE_ERROR) {
+					infoText = tr("Couldn't open this file "
+					    "(message) for "
+					    "authentication on the "
+					    "server Datové schránky.");
 				} else {
-					infoText = tr("It is not possible "
-					    "to connect to server Datové "
-					    "schránky and verify validity of "
-					    "this ZFO file.");
-
-					/* TODO - add break dialog */
+					QMessageBox msgBox(this);
+					msgBox.setIcon(QMessageBox::Warning);
+					msgBox.setWindowTitle(tr("ZFO import problem"));
+					msgBox.setText(tr("Do you want to continue with import?"));
+					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+					msgBox.setDefaultButton(QMessageBox::No);
+					if (QMessageBox::No == msgBox.exec()) {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+						infoText += "<br/><br/>" + tr("Action was canceled by user...");
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = infoText;
+						errorImportList.append(importZFOInfo);
+						isds_message_free(&message);
+						isds_ctx_free(&dummy_session);
+						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+						goto endImport;
+					} else {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+					}
 				}
 			}
 
@@ -5230,13 +5280,37 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 					infoText = tr("This file (message envelope)"
 					    " does not exists on the server "
 					    "Datové schránky.");
+				} else if (resISDS == MSG_FILE_ERROR) {
+					infoText = tr("Couldn't open this file "
+					    "(message) for "
+					    "authentication on the "
+					    "server Datové schránky.");
 				} else {
-					infoText = tr("It is not possible "
-					    "to connect to server Datové "
-					    "schránky and verify validity of "
-					    "this ZFO file.");
-
-					/* TODO - add break dialog */
+					QMessageBox msgBox(this);
+					msgBox.setIcon(QMessageBox::Warning);
+					msgBox.setWindowTitle(tr("ZFO import problem"));
+					msgBox.setText(tr("Do you want to continue with import?"));
+					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+					msgBox.setDefaultButton(QMessageBox::No);
+					if (QMessageBox::No == msgBox.exec()) {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+						infoText += "<br/><br/>" + tr("Action was canceled by user...");
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = infoText;
+						errorImportList.append(importZFOInfo);
+						isds_message_free(&message);
+						isds_ctx_free(&dummy_session);
+						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+						goto endImport;
+					} else {
+						infoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+					}
 				}
 			}
 		} //for
@@ -5250,7 +5324,6 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 			importZFOInfo.first = files.at(i);
 			importZFOInfo.second = infoText;
 			errorImportList.append(importZFOInfo);
-
 		}
 
 		isds_message_free(&message);
@@ -5258,6 +5331,8 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 	} //for
 
 	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Done"));
+
+endImport:
 
 	showNotificationDialogWithResult(fileCnt, errorImportList,
 	    successImportList);
