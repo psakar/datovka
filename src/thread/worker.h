@@ -70,14 +70,14 @@ public:
 	 * @brief Store received message delivery information into database.
 	 */
 	static
-	qdatovka_error storeReceivedDeliveryInfo(bool signedMsg,
+	qdatovka_error storeDeliveryInfo(bool signedMsg,
 	    MessageDb &messageDb, const struct isds_message *msg);
 
 	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static
-	qdatovka_error storeSentDeliveryInfo(bool signedMsg,
+	qdatovka_error updateMessageState(bool signedMsg,
 	    MessageDb &messageDb, const struct isds_message *msg);
 
 	/*!
@@ -117,12 +117,6 @@ private:
 	QList<bool> m_downloadThisAccounts;
 
 	/*!
-	 * @brief Get list of sent message state changes
-	 */
-	bool getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-	    MessageDb &messageDb, const QString &label);
-
-	/*!
 	* @brief Get password expiration info for account index
 	*/
 	bool getPasswordInfo(const QModelIndex &acntTopIdx);
@@ -132,14 +126,14 @@ private:
 	* message
 	*/
 	static
-	bool getSentDeliveryInfo(const QModelIndex &acntTopIdx,
+	bool getMessageState(const QModelIndex &acntTopIdx,
 	    int msgIdx, bool signedMsg, MessageDb &messageDb);
 
 	/*!
 	 * @brief Download delivery info for message.
 	 */
 	static
-	bool getReceivedDeliveryInfo(const QModelIndex &acntTopIdx,
+	bool getDeliveryInfo(const QModelIndex &acntTopIdx,
 	    const QString &dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!

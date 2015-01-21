@@ -155,17 +155,6 @@ void Worker::syncAllAccounts(void)
 
 		emit refreshAccountList(index);
 
-#if 0
-		/* This function is not being used. May be removed in future. */
-		if (!getListSentMessageStateChanges(index, *messageDb,
-		    "GetMessageStateChanges")) {
-			success = false;
-			continue;
-		}
-
-		emit refreshAccountList(index);
-#endif
-
 		if (!getPasswordInfo(index)) {
 			success = false;
 		}
@@ -242,15 +231,7 @@ void Worker::syncOneAccount(void)
 	}
 
 	emit refreshAccountList(m_acntTopIdx);
-#if 0
-	/* This function is not being used. May be removed in future. */
-	if (!getListSentMessageStateChanges(m_acntTopIdx, *messageDb,
-	    "GetMessageStateChanges")) {
-		success = false;
-	}
 
-	emit refreshAccountList(m_acntTopIdx);
-#endif
 	if (!getPasswordInfo(m_acntTopIdx)) {
 		success = false;
 	}
@@ -556,7 +537,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 						dmAcceptanceTime = timevalToDbFormat(
 						item->envelope->dmAcceptanceTime);
 					}
-					getSentDeliveryInfo(acntTopIdx,
+					getMessageState(acntTopIdx,
 					    dmId, true, messageDb);
 				}
 			}
@@ -592,82 +573,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 /* ========================================================================= */
 /*
-* Get list of sent message state changes
-*/
-bool Worker::getListSentMessageStateChanges(const QModelIndex &acntTopIdx,
-    MessageDb &messageDb, const QString &label)
-/* ========================================================================= */
-{
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	emit valueChanged(label, 0);
-	isds_error status = IE_ERROR;
-
-	emit valueChanged(label, 10);
-
-	struct isds_list *stateList = NULL;
-
-	status = isds_get_list_of_sent_message_state_changes(
-	    isdsSessions.session(accountInfo.userName()),NULL,NULL, &stateList);
-
-	if (IE_SUCCESS != status) {
-		isds_list_free(&stateList);
-		qDebug() << status << isds_strerror(status);
-		return false;
-	}
-
-	emit valueChanged(label, 20);
-
-	struct isds_list *stateListFirst = NULL;
-	stateListFirst = stateList;
-
-	int allcnt = 0;
-
-	while (0 != stateList) {
-		allcnt++;
-		stateList = stateList->next;
-	}
-
-	emit valueChanged(label, 30);
-
-	float delta = 0.0;
-	float diff = 0.0;
-
-	if (allcnt == 0) {
-		emit valueChanged(label, 60);
-	} else {
-		delta = 70.0 / allcnt;
-	}
-
-	while (0 != stateListFirst) {
-		isds_message_status_change *item =
-		    (isds_message_status_change *) stateListFirst->data;
-		int dmId = atoi(item->dmID);
-		diff += delta;
-		emit valueChanged(label, (int) (30 + diff));
-		/* Download and save delivery info and message events */
-		(getSentDeliveryInfo(acntTopIdx, dmId, true, messageDb))
-		? qDebug() << "Delivery info of message was processed..."
-		: qDebug() << "ERROR: Delivery info of message not found!";
-
-		stateListFirst = stateListFirst->next;
-	}
-
-	isds_list_free(&stateList);
-
-	emit valueChanged(label, 100);
-//	regenerateAccountModelYears(acntTopIdx);
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
  * Store sent message delivery information into database.
  */
-qdatovka_error Worker::storeSentDeliveryInfo(bool signedMsg,
+qdatovka_error Worker::updateMessageState(bool signedMsg,
     MessageDb &messageDb, const struct isds_message *msg)
 /* ========================================================================= */
 {
@@ -700,7 +608,7 @@ qdatovka_error Worker::storeSentDeliveryInfo(bool signedMsg,
 	}
 
 	/* Update message envelope delivery info in db. */
-	(messageDb.msgsUpdateMessageDeliveryInfo(dmID,
+	(messageDb.msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    convertHexToDecIndex(*envel->dmMessageStatus)))
 	    ? qDebug() << "Message envelope delivery info was updated..."
@@ -726,7 +634,7 @@ qdatovka_error Worker::storeSentDeliveryInfo(bool signedMsg,
 /*
 * Download sent message delivery info and get list of events message
 */
-bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
+bool Worker::getMessageState(const QModelIndex &acntTopIdx,
     int msgIdx, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
@@ -759,7 +667,7 @@ bool Worker::getSentDeliveryInfo(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	storeSentDeliveryInfo(signedMsg, messageDb, message);
+	updateMessageState(signedMsg, messageDb, message);
 
 	isds_list_free(&message->envelope->events);
 	isds_message_free(&message);
@@ -1070,8 +978,6 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		return Q_ISDS_ERROR;
 	}
 
-	int dmID = atoi(message->envelope->dmID);
-
 	/* Download and store the message. */
 	storeMessage(signedMsg, incoming, messageDb, message,
 	    progressLabel, pBar, worker);
@@ -1079,26 +985,19 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	if (0 != pBar) { pBar->setValue(90); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 90); }
 
+	/* Download and save delivery info and message events */
+	(getDeliveryInfo(acntTopIdx, message->envelope->dmID,
+	    signedMsg, messageDb))
+	? qDebug() << "Delivery info of message was processed..."
+	: qDebug() << "ERROR: Delivery info of message not found!";
+
+	getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
+
 	if (incoming) {
-		/* Download and save delivery info and message events */
-		(getReceivedDeliveryInfo(acntTopIdx, message->envelope->dmID,
-		    signedMsg, messageDb))
-		? qDebug() << "Delivery info of message was processed..."
-		: qDebug() << "ERROR: Delivery info of message not found!";
-
-		getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
-
 		/*  Mark this message as downloaded in ISDS */
 		(markMessageAsDownloaded(acntTopIdx, message->envelope->dmID))
 		? qDebug() << "Message was marked as downloaded..."
 		: qDebug() << "ERROR: Message was not marked as downloaded!";
-	} else {
-		/* Download and save delivery info and message events */
-		(getSentDeliveryInfo(acntTopIdx, dmID, true, messageDb))
-		? qDebug() << "Delivery info of message was processed..."
-		: qDebug() << "ERROR: Delivery info of message not found!";
-
-		getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
 	}
 
 	if (0 != pBar) { pBar->setValue(100); }
@@ -1117,7 +1016,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 /*
  * Store received message delivery information into database.
  */
-qdatovka_error Worker::storeReceivedDeliveryInfo(bool signedMsg,
+qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
     MessageDb &messageDb, const struct isds_message *msg)
 /* ========================================================================= */
 {
@@ -1164,7 +1063,7 @@ qdatovka_error Worker::storeReceivedDeliveryInfo(bool signedMsg,
 /*
 * Download message delivery info, raw and get list of events message
 */
-bool Worker::getReceivedDeliveryInfo(const QModelIndex &acntTopIdx,
+bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
     const QString &dmId, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
@@ -1195,7 +1094,7 @@ bool Worker::getReceivedDeliveryInfo(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	storeReceivedDeliveryInfo(signedMsg, messageDb, message);
+	storeDeliveryInfo(signedMsg, messageDb, message);
 
 	isds_list_free(&message->envelope->events);
 	isds_message_free(&message);
