@@ -5008,6 +5008,7 @@ void MainWindow::importDeliveryInfoZFO(
 			    "format. This file does not contain correct "
 			    "delivery info data for import.");
 			errorImportList.append(importZFOInfo);
+			isds_ctx_free(&dummy_session);
 			continue;
 		}
 
@@ -5016,7 +5017,7 @@ void MainWindow::importDeliveryInfoZFO(
 		int dmId = atoi(message->envelope->dmID);
 
 		for (int j = 0; j < accountList.size(); j++) {
-			if (accountList.at(j).messageDb->isInMessageDb(dmId)) {
+			if (-1 != accountList.at(j).messageDb->isInMessageDb(dmId)) {
 				/* Is/was ZFO message in ISDS */
 				resISDS = isImportMsgInISDS(files.at(i),
 				    accountList.at(j).acntIndex);
@@ -5025,16 +5026,21 @@ void MainWindow::importDeliveryInfoZFO(
 					    Worker::storeReceivedDeliveryInfo(true,
 					    *(accountList.at(j).messageDb), message)) {
 						importZFOInfo.first = files.at(i);
-						importZFOInfo.second = tr("This file (delivery info) has been imported to message number \"%1\" into account \"%2\".").arg(dmId).arg(accountList.at(j).username);
+						importZFOInfo.second = tr("This file (delivery info) "
+						    "has been imported to message number \"%1\" "
+						    "into account \"%2\".").arg(dmId).
+						    arg(accountList.at(j).username);
 						successImportList.append(importZFOInfo);
 						success = true;
 					} else {
 						infoText = tr("This file "
 						     "(delivery info) has "
 						    "not been inserted into local "
-						    "database because an error was "
+						    "database for account \"%1\" "
+						    "because an error was "
 						    "detected during insertion "
-						    "process.");
+						    "process.").
+						    arg(accountList.at(j).username);
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
 					infoText = tr("This file (message envelope)"
@@ -5045,12 +5051,15 @@ void MainWindow::importDeliveryInfoZFO(
 					    "to connect to server Datové "
 					    "schránky and verify validity of "
 					    "this ZFO file.");
+
+					/* TODO - add break dialog */
 				}
 			} else {
 				infoText = tr("This file (delivery info) has "
 				    "not been inserted into database because "
-				    "there isn't any related message in "
-				    "the database.");
+				    "there isn't any related message (%1) in "
+				    "the database for account \"%2\".").arg(dmId)
+				    .arg(accountList.at(j).username);
 			}
 		}
 
@@ -5113,6 +5122,7 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 			    "This file does not contain correct "
 			    "message data for import.");
 			errorImportList.append(importZFOInfo);
+			isds_ctx_free(&dummy_session);
 			continue;
 		}
 
@@ -5138,28 +5148,33 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 				resISDS = isImportMsgInISDS(files.at(i),
 				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
-					if (!accountList.at(j).messageDb->
+					if (-1 == accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
 						Worker::storeEnvelope("sent", *(accountList.at(j).messageDb), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, false, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
 							importZFOInfo.first = files.at(i);
-							importZFOInfo.second = tr("This file (message) has been imported as sent message number \"%1\" into account \"%2\".").arg(dmId).arg(accountList.at(j).username);
+							importZFOInfo.second = tr("This file (message) "
+							    "has been imported as sent message number "
+							    "\"%1\" into account \"%2\".").
+							    arg(dmId).arg(accountList.at(j).username);
 							successImportList.append(importZFOInfo);
 						} else {
 							infoText =
 							    tr("This file (message) has "
-							    "not been inserted into"
-							    " local database "
+							    "not been inserted as sent message into"
+							    " local database for account \"%1\" "
 							    "because an error "
 							    "was detected "
 							    "during insertion "
-							    "process.");
+							    "process.").
+							    arg(accountList.at(j).username);
 						}
 					} else {
 						infoText = tr("This file (message) "
-						    "already exists in the "
-						    "local database.");
+						    "already exists as sent message (%1) in the "
+						    "local database for account \"%2\".").
+						    arg(dmId).arg(accountList.at(j).username);
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
 					infoText = tr("This file (message envelope)"
@@ -5170,6 +5185,8 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 					    "to connect to server Datové "
 					    "schránky and verify validity of "
 					    "this ZFO file.");
+
+					/* TODO - add break dialog */
 				}
 			}
 
@@ -5181,28 +5198,33 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 				    accountList.at(j).acntIndex);
 
 				if (resISDS == MSG_IS_IN_ISDS) {
-					if (!accountList.at(j).messageDb->
+					if (-1 == accountList.at(j).messageDb->
 					    isInMessageDb(dmId)) {
 						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
 							importZFOInfo.first = files.at(i);
-							importZFOInfo.second = tr("This file (message) has been imported as received message number \"%1\" into account \"%2\".").arg(dmId).arg(accountList.at(j).username);
+							importZFOInfo.second = tr("This file (message) "
+							    "has been imported as received message number "
+							    "\"%1\" into account \"%2\".").arg(dmId).
+							    arg(accountList.at(j).username);
 							successImportList.append(importZFOInfo);
 						} else {
 							infoText =
 							    tr("This file (message) has "
-							    "not been inserted into"
-							    " local database "
+							    "not been inserted as received message into"
+							    " local database for account \"%1\" "
 							    "because an error "
 							    "was detected "
 							    "during insertion "
-							    "process.");
+							    "process.").
+							    arg(accountList.at(j).username);
 						}
 					} else {
 						infoText = tr("This file (message) "
-						    "already exists in the "
-						    "local database.");
+						    "already exists as received message (%1) in the "
+						    "local database for account \"%2\".").
+						    arg(dmId).arg(accountList.at(j).username);
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
 					infoText = tr("This file (message envelope)"
@@ -5213,6 +5235,8 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 					    "to connect to server Datové "
 					    "schránky and verify validity of "
 					    "this ZFO file.");
+
+					/* TODO - add break dialog */
 				}
 			}
 		} //for
