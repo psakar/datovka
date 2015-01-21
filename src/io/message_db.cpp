@@ -2142,7 +2142,7 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 
 	/* Time-stamp. */
 	QDateTime tst;
-	QByteArray tstData = msgsTimestampDER(dmId);
+	QByteArray tstData = msgsTimestampRaw(dmId);
 	QString timeStampStr;
 	if (tstData.isEmpty()) {
 		timeStampStr = QObject::tr("Not present");
@@ -2567,7 +2567,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
 	}
 
 	/* Get certificate data. */
-	QString crtBase64;
+	QByteArray crtBase64;
 	struct x509_crt *crt = rawCmsSigningCert(raw.data(), raw.size());
 	if (NULL != crt) {
 		QByteArray crtDer;
@@ -2597,7 +2597,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
  * Add/update message certificate in database.
  */
 bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
-    const QString &crtBase64)
+    const QByteArray &crtBase64)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -3466,7 +3466,7 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 /*
  * Returns time stamp in DER format.
  */
-QByteArray MessageDb::msgsTimestampDER(int dmId) const
+QByteArray MessageDb::msgsTimestampRaw(int dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);

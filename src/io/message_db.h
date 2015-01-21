@@ -577,12 +577,12 @@ public:
 	int msgGetProcessState(int dmId);
 
 	/*!
-	 * @brief Returns time stamp in DER format.
+	 * @brief Returns time stamp in raw (DER) format.
 	 *
 	 * @param[in] dmId Message identifier.
 	 * @return Qualified time stamp in DER format.
 	 */
-	QByteArray msgsTimestampDER(int dmId) const;
+	QByteArray msgsTimestampRaw(int dmId) const;
 
 	static
 	const QVector<QString> receivedItemIds;
@@ -627,7 +627,7 @@ protected:
 	 * @brief Add/update message certificate in database.
 	 */
 	bool msgsInsertUpdateMessageCertBase64(int dmId,
-	    const QString &crtBase64);
+	    const QByteArray &crtBase64);
 
 private:
 	static

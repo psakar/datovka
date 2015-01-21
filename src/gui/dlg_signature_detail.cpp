@@ -43,7 +43,7 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
     : QDialog(parent),
     m_msgDER(messageDb.msgsVerificationAttempted(dmId) ?
         messageDb.msgsMessageRaw(dmId): QByteArray()),
-    m_tstDER(messageDb.msgsTimestampDER(dmId)),
+    m_tstDER(messageDb.msgsTimestampRaw(dmId)),
     m_constructedFromDb(true),
     m_dbIsVerified(messageDb.msgsVerified(dmId)),
     dSize(QSize())
