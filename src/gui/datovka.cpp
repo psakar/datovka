@@ -5023,7 +5023,7 @@ void MainWindow::importDeliveryInfoZFO(
 				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (Q_SUCCESS ==
-					    Worker::storeReceivedDeliveryInfo(true,
+					    Worker::storeDeliveryInfo(true,
 					    *(accountList.at(j).messageDb), message)) {
 						importZFOInfo.first = files.at(i);
 						importZFOInfo.second = tr("This file (delivery info) "
