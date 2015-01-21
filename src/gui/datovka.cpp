@@ -4721,13 +4721,13 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		return;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
@@ -4747,8 +4747,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 				.arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsMessageBase64(dmID)).toUtf8();
+				base64 = messageDb->msgsMessageBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -4776,8 +4775,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	enum WriteFileState ret = writeFile(fileName, data);
 	if (WF_SUCCESS == ret) {
@@ -5051,8 +5049,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
@@ -5072,8 +5070,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 				.arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsMessageBase64(dmID)).toUtf8();
+				base64 = messageDb->msgsMessageBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -5146,8 +5143,8 @@ void MainWindow::openSelectedMessageExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Cannot export the message ") + dmId);
@@ -5165,8 +5162,7 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
@@ -5205,8 +5201,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Cannot export the message ") + dmId);
@@ -5224,8 +5220,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {

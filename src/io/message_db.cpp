@@ -3678,7 +3678,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 /*
  * Get raw message data from raw_message_data table.
  */
-QString MessageDb::msgsMessageBase64(int dmId) const
+QByteArray MessageDb::msgsMessageBase64(int dmId) const
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -3688,31 +3688,36 @@ QString MessageDb::msgsMessageBase64(int dmId) const
 
 	queryStr =
 	    "SELECT data FROM raw_message_data WHERE message_id = :dmId";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
-
 	query.bindValue(":dmId", dmId);
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		return query.value(0).toString();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toByteArray();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
-	return QString();
+
+fail:
+	return QByteArray();
 }
 
 
 /* ========================================================================= */
 /*
- * Get message data in DER format.
+ * Get message data in DER (raw) format.
  */
-QByteArray MessageDb::msgsMessageDER(int dmId) const
+QByteArray MessageDb::msgsMessageRaw(int dmId) const
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	return QByteArray::fromBase64(msgsMessageBase64(dmId).toUtf8());
+	return QByteArray::fromBase64(msgsMessageBase64(dmId));
 }
 
 
@@ -3856,7 +3861,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 {
 	debugFuncCall();
 
-	QByteArray rawBytes = msgsMessageDER(dmId);
+	QByteArray rawBytes = msgsMessageRaw(dmId);
 	Q_ASSERT(rawBytes.size() > 0);
 
 	if (ignoreMissingCrlCheck) {

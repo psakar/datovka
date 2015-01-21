@@ -493,20 +493,24 @@ public:
 	    const QString &dmEventType, const QString &dmEventDescr);
 
 	/*!
-	 * @brief Insert/update raw message data into raw_message_data table.
+	 * @brief Insert/update raw (DER) message data into raw_message_data
+	 *     table.
 	 */
 	bool msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
 	    int message_type);
 
 	/*!
-	 * @brief get raw message data from raw_message_data table.
+	 * @brief Get base64 encoded raw message data.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Empty byte array on error.
 	 */
-	QString msgsMessageBase64(int dmId) const;
+	QByteArray msgsMessageBase64(int dmId) const;
 
 	/*!
-	 * @brief Get message data in DER format.
+	 * @brief Get message data in DER (raw) format.
 	 */
-	QByteArray msgsMessageDER(int dmId) const;
+	QByteArray msgsMessageRaw(int dmId) const;
 
 	/*!
 	 * @brief Get delivery info raw from raw_delivery_info_data table.

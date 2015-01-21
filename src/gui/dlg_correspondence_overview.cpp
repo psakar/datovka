@@ -145,13 +145,12 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
 		return false;
 	}
 
-	QString raw = QString(m_messDb.msgsMessageBase64(dmId)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = m_messDb.msgsMessageBase64(dmId);
+	if (base64.isEmpty()) {
 		return false;
 	}
 
-	QByteArray rawutf8= QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	return WF_SUCCESS == writeFile(fileName, data);
 }
