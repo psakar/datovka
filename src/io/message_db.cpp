@@ -2730,7 +2730,8 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
 /*
  * Insert raw delivery info into raw_delivery_info_data table
  */
-bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QByteArray &raw)
+bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(int dmId,
+    const QByteArray &raw)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
