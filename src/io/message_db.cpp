@@ -2991,7 +2991,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 /*
  * Update exist message envelope delivery info in db.
  */
-bool MessageDb::msgsUpdateMessageDeliveryInfo(int dmId,
+bool MessageDb::msgsUpdateMessageState(int dmId,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     int dmMessageStatus)
 /* ========================================================================= */

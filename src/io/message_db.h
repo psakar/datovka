@@ -406,7 +406,7 @@ public:
 	/*!
 	 * @brief Update exist message envelope delivery info in db.
 	 */
-	bool msgsUpdateMessageDeliveryInfo(int dmId,
+	bool msgsUpdateMessageState(int dmId,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    int dmMessageStatus);
 
