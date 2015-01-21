@@ -2730,7 +2730,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
 /*
  * Insert raw delivery info into raw_delivery_info_data table
  */
-bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
+bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QByteArray &raw)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -2769,13 +2769,15 @@ bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
 
 	}
 
+	QString base64 = raw.toBase64();
+
 	if (!query.prepare(queryStr)) {
 		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
 		    << query.lastError();
 		return false;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":data", raw);
+	query.bindValue(":data", base64);
 	if (dbId != 0) {
 	    query.bindValue(":dbId", dbId);
 	}
@@ -3725,25 +3727,33 @@ QByteArray MessageDb::msgsMessageRaw(int dmId) const
 /*
  * Get raw delivery info from raw_delivery_info_data table.
  */
-QString MessageDb::msgsGetDeliveryInfoRaw(int dmId)
+QByteArray MessageDb::msgsGetDeliveryInfoBase64(int dmId) const
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	queryStr = "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
-
+	queryStr =
+	    "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
-
 	query.bindValue(":dmId", dmId);
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		return query.value(0).toString();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toByteArray();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
-	return "";
+
+fail:
+	return QByteArray();
 }
 
 

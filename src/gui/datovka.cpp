@@ -4869,8 +4869,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
@@ -4890,8 +4890,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 				    "not successful!").arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+				base64 =
+				    messageDb->msgsGetDeliveryInfoBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "
@@ -4920,8 +4920,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	enum WriteFileState ret = writeFile(fileName, data);
 	if (WF_SUCCESS == ret) {
@@ -4961,8 +4960,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
@@ -4982,8 +4981,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 				    "not successful!").arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+				base64 =
+				    messageDb->msgsGetDeliveryInfoBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "

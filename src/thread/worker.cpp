@@ -1036,9 +1036,8 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		QString raw = QByteArray((char*)msg->raw,
-		    msg->raw_length).toBase64();
-		(messageDb.msgsInsertUpdateDeliveryRaw(dmID, raw))
+		(messageDb.msgsInsertUpdateDeliveryRaw(dmID,
+		    QByteArray((char*)msg->raw, msg->raw_length)))
 		? qDebug() << "Message raw delivery info was updated..."
 		: qDebug() << "ERROR: Message raw delivery info update!";
 	}

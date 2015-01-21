@@ -515,12 +515,12 @@ public:
 	/*!
 	 * @brief Get delivery info raw from raw_delivery_info_data table.
 	 */
-	QString msgsGetDeliveryInfoRaw(int dmId);
+	QByteArray msgsGetDeliveryInfoBase64(int dmId) const;
 
 	/*!
-	 * @brief Insert/update raw delivery info into raw_delivery_info_data.
+	 * @brief Insert/update raw (DER) delivery info into raw_delivery_info_data.
 	 */
-	bool msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw);
+	bool msgsInsertUpdateDeliveryRaw(int dmId, const QByteArray &raw);
 
 	/*!
 	 * @brief Insert additional info about author (sender) into db.
