@@ -34,6 +34,7 @@
 #include <QModelIndex>
 #include <QObject>
 #include <QPair>
+#include <QStringList>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
 #include <QSslCertificate>
@@ -146,11 +147,16 @@ public:
 
 	/*!
 	 * @brief Open database file.
+	 *
+	 * @param[in] fileName  File name.
+	 * @return True on success.
 	 */
 	bool openDb(const QString &fileName);
 
 	/*!
 	 * @brief Get file name.
+	 *
+	 * @return Database file name.
 	 */
 	QString fileName(void) const;
 
@@ -185,24 +191,42 @@ public:
 	/*!
 	 * @brief Roll back transaction.
 	 *
-	 * @param[in] savepointName  Name of the save point.
+	 * @param[in] savePointName  Name of the save point.
 	 * @return True on success.
+	 *
+	 * @note If no save-point name is supplied then a complete roll-back is
+	 *     performed.
 	 */
 	bool rollbackTransaction(const QString &savePointName = QString());
 
 	/*!
-	 * @brief Return received messages model.
+	 * @brief Return all received messages model.
+	 *
+	 * @param[in] recipDbId  Recipient data box identifier.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsRcvdModel(const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
+	 *
+	 * @param[in] recipDbId  Recipient data box identifier.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(
-	    const QString &recipDbId);
+	DbMsgsTblModel * msgsRcvdWithin90DaysModel(const QString &recipDbId);
 
 	/*!
 	 * @brief Return received messages within given year.
+	 *
+	 * @param[in] recipDbId  Recipient data box identifier.
+	 * @param[in] year       Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsRcvdInYearModel(const QString &recipDbId,
 	    const QString &year);
@@ -210,18 +234,18 @@ public:
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param recipDbId Recipient identifier.
-	 * @param sorting   Sorting.
+	 * @param[in] recipDbId  Recipient data box identifier.
+	 * @param[in] sorting    Sorting.
 	 * @return List of years.
 	 */
-	QList<QString> msgsRcvdYears(const QString &recipDbId,
+	QStringList msgsRcvdYears(const QString &recipDbId,
 	    enum sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param recipDbId Recipient identifier.
-	 * @param sorting   Sorting.
+	 * @param[in] recipDbId  Recipient identifier.
+	 * @param[in] sorting    Sorting.
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
@@ -230,28 +254,50 @@ public:
 	/*!
 	 * @brief Return number of unread messages received within past 90
 	 *     days.
+	 *
+	 * @param[in] recipDbId  Recipient identifier.
+	 * @return Number of unread messages, -1 on error.
 	 */
 	int msgsRcvdUnreadWithin90Days(const QString &recipDbId) const;
 
 	/*!
 	 * @brief Return number of unread received messages in year.
+	 *
+	 * @param[in] recipDbId  Recipient identifier.
+	 * @param[in] year       Year number.
+	 * @return Number of unread messages, -1 on error.
 	 */
 	int msgsRcvdUnreadInYear(const QString &recipDbId,
 	    const QString &year) const;
 
 	/*!
-	 * @brief Return sent messages model.
+	 * @brief Return all sent messages model.
+	 *
+	 * @param[in] sendDbId  Sender data box identifier.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsSntModel(const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
+	 *
+	 * @param[in] sendDbId  Sender data box identifier.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(
-	    const QString &sendDbId);
+	DbMsgsTblModel * msgsSntWithin90DaysModel(const QString &sendDbId);
 
 	/*!
 	 * @brief Return sent messages within given year.
+	 *
+	 * @param[in] sendDbId  Sender data box identifier.
+	 * @param[in] year      Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsSntInYearModel(const QString &sendDbId,
 	    const QString &year);
@@ -259,18 +305,18 @@ public:
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param sendDbId Sender identifier.
-	 * @param sorting  Sorting.
+	 * @param[in] sendDbId  Sender identifier.
+	 * @param[in] sorting   Sorting.
 	 * @return List of years.
 	 */
-	QList<QString> msgsSntYears(const QString &sendDbId,
+	QStringList msgsSntYears(const QString &sendDbId,
 	    enum sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param sendDbId Sender identifier.
-	 * @param sorting  Sorting.
+	 * @param[in] sendDbId  Sender identifier.
+	 * @param[in] sorting   Sorting.
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsSntYearlyCounts(
@@ -279,48 +325,63 @@ public:
 	/*!
 	 * @brief Return number of unread messages sent within past 90
 	 *     days.
+	 *
+	 * @param sendDbId  Sender identifier.
+	 * @return Number of unread messages, -1 on error.
 	 */
 	int msgsSntUnreadWithin90Days(const QString &sendDbId) const;
 
 	/*!
 	 * @brief Return number of unread sent messages in year.
+	 *
+	 * @param sendDbId  Sender identifier.
+	 * @param year      Year number.
+	 * @return Number of unread messages, -1 on error.
 	 */
 	int msgsSntUnreadInYear(const QString &sendDbId,
 	    const QString &year) const;
 
 	/*!
-	 * @brief Generate information for reply dialog.
+	 * @brief Generate information for reply dialogue.
 	 *
-	 * @note title, senderId, sender, senderAddress
+	 * @param[in] dmId  Message id.
+	 * @return Vector containing title, senderId, sender, senderAddress,
+	 *     mesageType, senderRefNumber.
+	 *     Returns empty vector in failure.
 	 */
 	QVector<QString> msgsReplyDataTo(int dmId) const;
 
 	/*!
 	 * @brief Returns true if verification attempt was performed.
+	 *
+	 * @param[in] dmId  Message id.
+	 * @return True is message has been verified. False may be returned
+	 *     also on error.
 	 */
 	bool msgsVerificationAttempted(int dmId) const;
 
 	/*!
 	 * @brief Returns whether message is verified.
 	 *
-	 * @param[in] dmId Message identifier.
-	 * @return True if message was verified successfully.
+	 * @param[in] dmId  Message identifier.
+	 * @return True if message was verified successfully. False may be
+	 *     returned also on error.
 	 */
 	bool msgsVerified(int dmId) const;
 
 	/*!
-	 * @brief Was message locally read.
+	 * @brief Returns whether message was read locally.
 	 * 
-	 * @param[in] dmId Message id.
+	 * @param[in] dmId  Message id.
 	 * @retunrn False if not read or on failure.
 	 */
 	bool smsgdtLocallyRead(int dmId) const;
 
 	/*!
-	 * @brief Set message status to locally read.
+	 * @brief Set message read locally status.
 	 *
-	 * @param[in] dmId Message id.
-	 * @param[in] read New read status.
+	 * @param[in] dmId  Message id.
+	 * @param[in] read  New read status.
 	 * @return True on success.
 	 */
 	bool smsgdtSetLocallyRead(int dmId, bool read = true);

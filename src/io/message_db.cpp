@@ -644,7 +644,7 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 
 /* ========================================================================= */
 /*
- * Return received messages model.
+ * Return all received messages model.
  */
 DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /* ========================================================================= */
@@ -665,12 +665,15 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	    "LEFT JOIN process_state "
 	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE (dbIDRecipient = :recipDbId) ";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -711,10 +714,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -722,8 +729,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /*
  * Return received messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
-    const QString &recipDbId)
+DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -745,12 +751,15 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -791,10 +800,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -825,13 +838,16 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":year", year);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -872,10 +888,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -883,11 +903,11 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
+QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
      enum sorting sorting) const
 /* ========================================================================= */
 {
-	QList<QString> yearList;
+	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
@@ -902,21 +922,22 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
 	default:
 		break;
 	}
-	//qDebug() << "Generating received year list" << recipDbId;
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
 	}
 
+fail:
 	return yearList;
 }
 
@@ -939,19 +960,27 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    "(dbIDRecipient = :recipDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("%s\n", "Cannot prepare SQL query.");
+			goto fail;
 		}
 		query.bindValue(":recipDbId", recipDbId);
 		query.bindValue(":year", yearList[i]);
-		if (query.exec() && query.isActive()) {
-			query.first();
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid()) {
 			yearlyCounts.append(QPair<QString, int>(yearList[i],
 			    query.value(0).toInt()));
+		} else {
+			logError("%s\n",
+			    "Cannot execute SQL query and/or read SQL data.");
+			goto fail;
 		}
 	}
 
+	return yearlyCounts;
+
+fail:
+	yearlyCounts.clear();
 	return yearlyCounts;
 }
 
@@ -976,17 +1005,22 @@ int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
 	    "(dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << recipDbId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() &&query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -1010,24 +1044,29 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 	    "(strftime('%Y', dmDeliveryTime) = :year)"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << recipDbId << year;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":year", year);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
 /* ========================================================================= */
 /*
- * Return sent messages model.
+ * Return all sent messages model.
  */
 DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /* ========================================================================= */
@@ -1043,12 +1082,15 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	    "LEFT JOIN raw_message_data "
 	    "ON (messages.dmId = raw_message_data.message_id) "
 	    "WHERE dbIDSender = :sendDbId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -1072,10 +1114,14 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1083,8 +1129,7 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /*
  * Return sent messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
-    const QString &sendDbId)
+DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1101,12 +1146,15 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
 	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -1130,10 +1178,14 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1159,13 +1211,16 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":year", year);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -1189,10 +1244,14 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1200,11 +1259,11 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
+QStringList MessageDb::msgsSntYears(const QString &sendDbId,
     enum sorting sorting) const
 /* ========================================================================= */
 {
-	QList<QString> yearList;
+	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
@@ -1219,21 +1278,22 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
 	default:
 		break;
 	}
-	//qDebug() << "Generating received year list" << recipDbId;
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
 	}
 
+fail:
 	return yearList;
 }
 
@@ -1256,21 +1316,27 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 		    "(dbIDSender = :sendDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("%s\n", "Cannot prepare SQL query.");
+			goto fail;
 		}
 		query.bindValue(":sendDbId", sendDbId);
 		query.bindValue(":year", yearList[i]);
-		if (query.exec() && query.isActive()) {
-			query.first();
-			if (query.isValid()) {
-				yearlyCounts.append(QPair<QString, int>(
-				    yearList[i], query.value(0).toInt()));
-			}
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid()) {
+			yearlyCounts.append(QPair<QString, int>(
+			    yearList[i], query.value(0).toInt()));
+		} else {
+			logError("%s\n",
+			    "Cannot execute SQL query and/or read SQL data.");
+			goto fail;
 		}
 	}
 
+	return yearlyCounts;
+
+fail:
+	yearlyCounts.clear();
 	return yearlyCounts;
 }
 
@@ -1295,17 +1361,22 @@ int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
 	    "(dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << sendDbId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -1329,18 +1400,23 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 	    "(strftime('%Y', dmDeliveryTime) = :year)"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << sendDbId << year;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":year", year);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -1359,24 +1435,29 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress, _dmType, "
 	    "dmSenderRefNumber FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			reply[0] = query.value(0).toString();
-			reply[1] = query.value(1).toString();
-			reply[2] = query.value(2).toString();
-			reply[3] = query.value(3).toString();
-			reply[4] = query.value(4).toString();
-			reply[5] = query.value(5).toString();
-		}
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		reply[0] = query.value(0).toString();
+		reply[1] = query.value(1).toString();
+		reply[2] = query.value(2).toString();
+		reply[3] = query.value(3).toString();
+		reply[4] = query.value(4).toString();
+		reply[5] = query.value(5).toString();
+
+		return reply;
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
-	return reply;
+fail:
+	return QVector<QString>();
 }
 
 
@@ -1396,26 +1477,63 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	    "is_verified"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
-	// qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
 		bool ret = ! query.value(0).isNull();
-		qDebug() << "Verification attempted" << ret;
 		return ret;
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
+fail:
 	return false;
 }
 
 
 /* ========================================================================= */
 /*
- * Was message locally read.
+ * Returns whether message is verified.
+ */
+bool MessageDb::msgsVerified(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "is_verified"
+	    " FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toBool();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns whether message was read locally.
  */
 bool MessageDb::smsgdtLocallyRead(int dmId) const
 /* ========================================================================= */
@@ -1426,23 +1544,28 @@ bool MessageDb::smsgdtLocallyRead(int dmId) const
 	queryStr = "SELECT read_locally FROM supplementary_message_data "
 	    "WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		return false;
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
+fail:
 	return false;
 }
 
 
 /* ========================================================================= */
 /*
- * Set message status to locally read.
+ * Set message read locally status.
  */
 bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 /* ========================================================================= */
@@ -1453,13 +1576,16 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 	queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		return false;
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":read", read);
 	query.bindValue(":dmId", dmId);
 	return query.exec();
+
+fail:
+	return false;
 }
 
 
@@ -3210,34 +3336,6 @@ void MessageDb::createEmptyMissingTables(void)
 		Q_ASSERT(ret); /* TODO -- Proper check and recovery? */
 	}
 
-}
-
-
-/* ========================================================================= */
-/*
- * Returns whether message is verified.
- */
-bool MessageDb::msgsVerified(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT "
-	    "is_verified"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toBool();
-	}
-
-	return false;
 }
 
 
