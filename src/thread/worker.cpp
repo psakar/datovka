@@ -511,7 +511,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		int dmId = atoi(item->envelope->dmID);
 
-		int dmDbMsgStatus = messageDb.isInMessageDb(dmId);
+		int dmDbMsgStatus = messageDb.msgsStatusIfExists(dmId);
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {

@@ -388,6 +388,9 @@ public:
 
 	/*!
 	 * @brief Return contacts from message db.
+	 *
+	 * @return List of vectors containing recipientId, recipientName,
+	 *     recipentAddress.
 	 */
 	QList< QVector<QString> > uniqueContacts(void) const;
 
@@ -409,14 +412,22 @@ public:
 
 	/*!
 	 * @brief Return files related to given message.
+	 *
+	 * @param[in] msgId  Message identifier.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel * flsModel(int msgId);
 
 	/*!
-	 * @brief Check if any message (dmID) exists in the table
-	 * Return -1 = message is not exists or dmMessageStatus
+	 * @brief Check if any message with given id exists in database.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message status if message exists, on error or if message
+	 *     does not exist in database.
 	 */
-	int isInMessageDb(int dmId) const;
+	int msgsStatusIfExists(int dmId) const;
 
 	/*!
 	 * @brief Insert message envelope into messages table.
