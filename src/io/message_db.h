@@ -395,18 +395,36 @@ public:
 	QList< QVector<QString> > uniqueContacts(void) const;
 
 	/*!
-	 * @brief Return message HTML formatted description.
+	 * @brief Return HTML formatted message description.
+	 *
+	 * @param[in]     dmId             Message identifier.
+	 * @param[in,out] verifySignature  Button to activate/deactivate
+	 *                                 according to message content.
+	 * @param[in]     showId           Whether to also show the message id.
+	 * @param[in]     warnOld
+	 * @return HTML formatted string containing message information.
+	 *     Empty string is returned on error.
 	 */
 	QString descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	    bool showId = true, bool warnOld = true) const;
 
 	/*!
-	 * @brief Return message envelope HTML to PDF.
+	 * @brief Return message envelope HTML to be used to generate a PDF.
+	 *
+	 * @param[in] dmId    Message identifier.
+	 * @param[in] dbType  Data-box type string.
+	 * @return HTML formatted string generated from message envelope.
+	 *     Empty string is returned on error.
 	 */
-	QString envelopeInfoHtmlToPdf(int dmId, QString dbType) const;
+	QString envelopeInfoHtmlToPdf(int dmId, const QString &dbType) const;
 
 	/*!
-	 * @brief Return message delivery info HTML to PDF.
+	 * @brief Return message delivery info HTML to be used to generate
+	 *     a PDF.
+	 *
+	 * @paramp[in] dmId  Message identifier.
+	 * @return HTML formatted string generated from message delivery
+	 *     information. Empty string is returned on error.
 	 */
 	QString deliveryInfoHtmlToPdf(int dmId) const;
 
@@ -642,7 +660,7 @@ protected:
 
 private:
 	static
-	const QVector<QString> msgAttribs2;
+	const QVector<QString> msgPrintedAttribs;
 	static
 	const QVector<QString> msgStatus;
 	static

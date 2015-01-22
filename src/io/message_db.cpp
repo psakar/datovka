@@ -71,7 +71,7 @@ const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
     "is_downloaded"};
 
 
-const QVector<QString> MessageDb::msgAttribs2 = {"dmSenderIdent",
+const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
     "dmToHands", "dmLegalTitleLaw", "dmLegalTitleYear", "dmLegalTitleSect",
     "dmLegalTitlePar", "dmLegalTitlePoint"};
@@ -1626,7 +1626,7 @@ fail:
 
 /* ========================================================================= */
 /*
- * Return message HTML formatted description.
+ * Return HTML formatted message description.
  */
 QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
     bool showId, bool warnOld) const
@@ -1647,13 +1647,13 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		html += strongAccountInfoLine(QObject::tr("Subject"),
 		    query.value(0).toString());
 		if (!query.value(1).toString().isEmpty() &&
@@ -1698,29 +1698,37 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		    query.value(7).toString());
 		html += strongAccountInfoLine(QObject::tr("Recipient Address"),
 		    query.value(5).toString());
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (msgAttribs2.size() - 1); ++i) {
-		queryStr += msgAttribs2[i] + ", ";
+	for (int i = 0; i < (msgPrintedAttribs.size() - 1); ++i) {
+		queryStr += msgPrintedAttribs[i] + ", ";
 	}
-	queryStr += msgAttribs2.last();
+	queryStr += msgPrintedAttribs.last();
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		for (int i = 0; i < msgAttribs2.size(); ++i) {
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		for (int i = 0; i < msgPrintedAttribs.size(); ++i) {
 			if (!query.value(i).toString().isEmpty()) {
 				html += strongAccountInfoLine(
-				    msgsTbl.attrProps[msgAttribs2[i]].desc,
+				    msgsTbl.attrProps[msgPrintedAttribs[i]].desc,
 				    query.value(i).toString());
 			}
 		}
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
 	html += "<h3>" + QObject::tr("Status") + "</h3>";
@@ -1732,13 +1740,13 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	queryStr += msgStatus.last();
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		html += strongAccountInfoLine(
 		    msgsTbl.attrProps[msgStatus[0]].desc,
 		    dateTimeStrFromDbFormat(query.value(0).toString(),
@@ -1751,6 +1759,10 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
 		    msgStatusToText(query.value(2).toInt()));
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 	/* Events. */
 	queryStr = "SELECT "
@@ -1758,9 +1770,9 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	    " FROM events WHERE "
 	    "message_id = :dmId"
 	    " ORDER BY dmEventTime ASC";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
@@ -1779,14 +1791,17 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 			    divEnd;
 			query.next();
 		} 
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
 	/* Attachments. */
 	queryStr = "SELECT COUNT(*) AS nrFiles "
 	    " FROM files WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
@@ -1800,21 +1815,27 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		    "dmAttachmentSize"
 		    " FROM messages WHERE "
 		    "dmID = :dmId";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("%s\n", "Cannot prepare SQL query.");
+			goto fail;
 		}
 		query.bindValue(":dmId", dmId);
-		if (query.exec() && query.isActive() &&
-		    query.first() && query.isValid() &&
-		   (query.value(0).toInt() > 0)) {
-			html += strongAccountInfoLine(QObject::tr("Attachments"),
+		if (query.exec() && query.isActive()) {
+			query.first();
+			if (query.isValid() && (query.value(0).toInt() > 0)) {
+			html += strongAccountInfoLine(
+			    QObject::tr("Attachments"),
 			    QObject::tr("not downloaded yet, ~") +
 			    QString::number(query.value(0).toInt()) +
 			    QObject::tr(" KB; use 'Download' to get them."));
+			} else {
+				html += strongAccountInfoLine(
+				    QObject::tr("Attachments"),
+				    QObject::tr("(not available)"));
+			}
 		} else {
-			html += strongAccountInfoLine(QObject::tr("Attachments"),
-			    QObject::tr("(not available)"));
+			logError("%s\n", "Cannot execute SQL query.");
+			goto fail;
 		}
 	}
 	if (warnOld) {
@@ -1839,64 +1860,69 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	} else if (!msgsVerified(dmId)) {
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Invalid")  + " -- " +
-		    QObject::tr("Message signature and content do not correspond!"));
+		    QObject::tr(
+		        "Message signature and content do not correspond!"));
 	} else {
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Valid"));
 		/* Check signing certificate. */
-		// qDebug() << msgsVerificationDate(dmId);
 		bool verified = msgCertValidAtDate(dmId,
 		    msgsVerificationDate(dmId), !globPref.check_crl);
-		QString verifiedText = verified ? QObject::tr("Valid") : QObject::tr("Invalid");
+		QString verifiedText = verified ? QObject::tr("Valid") :
+		    QObject::tr("Invalid");
 		if (!globPref.check_crl) {
 			verifiedText += " (" +
-			    QObject::tr("Certificate revocation check is turned off!") +
+			    QObject::tr(
+			        "Certificate revocation check is turned off!") +
 			    ")";
 		}
-		html += strongAccountInfoLine(QObject::tr("Signing certificate"),
-		    verifiedText);
+		html += strongAccountInfoLine(
+		    QObject::tr("Signing certificate"), verifiedText);
 	}
 
-	/* Time-stamp. */
-	QDateTime tst;
-	QByteArray tstData = msgsTimestampRaw(dmId);
-	QString timeStampStr;
-	if (tstData.isEmpty()) {
-		timeStampStr = QObject::tr("Not present");
-	} else {
-		time_t utc_time = 0;
-		int ret = rawTstVerify(tstData.data(), tstData.size(),
-		    &utc_time);
+	{
+		/* Time-stamp. */
+		QDateTime tst;
+		QByteArray tstData = msgsTimestampRaw(dmId);
+		QString timeStampStr;
+		if (tstData.isEmpty()) {
+			timeStampStr = QObject::tr("Not present");
+		} else {
+			time_t utc_time = 0;
+			int ret = rawTstVerify(tstData.data(), tstData.size(),
+			    &utc_time);
 
-		if (-1 != ret) {
-			tst = QDateTime::fromTime_t(utc_time);
-		}
+			if (-1 != ret) {
+				tst = QDateTime::fromTime_t(utc_time);
+			}
 
-		timeStampStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
-		if (-1 != ret) {
-			timeStampStr +=
-			    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
-			    tst.timeZone().abbreviation(tst) + ")";
+			timeStampStr = (1 == ret) ? QObject::tr("Valid") :
+			    QObject::tr("Invalid");
+			if (-1 != ret) {
+				timeStampStr +=
+				    " (" +
+				    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+				    tst.timeZone().abbreviation(tst) + ")";
+			}
 		}
+		html += strongAccountInfoLine(QObject::tr("Time stamp"),
+		    timeStampStr);
 	}
-	html += strongAccountInfoLine(QObject::tr("Time stamp"),
-	    timeStampStr);
 
 	html += divEnd;
 
-	//html += QString::number(dmId);
-	// qDebug() << html;
-	/* TODO */
-
 	return html;
+
+fail:
+	return QString();
 }
 
 
 /* ========================================================================= */
 /*
- * Return message envelope HTML to PDF
+ * Return message envelope HTML to be used to generate a PDF.
  */
-QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
+QString MessageDb::envelopeInfoHtmlToPdf(int dmId, const QString &dbType) const
 /* ========================================================================= */
 {
 	QString html;
@@ -1906,9 +1932,12 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 
 	html += indentDivStart;
 
-	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Envelope")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
+	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
+	    "font-size: 20px;\"><tr><td>" +
+	    strongMessagePdf(QObject::tr("Envelope")) +
+	    "</td><td align=\"right\">" +
+	    QObject::tr("Message ID:") + " " +
+	    strongMessagePdf(QString::number(dmId)) +
 	    "</td></tr></table><br/><br/>";
 
 	queryStr = "SELECT "
@@ -1918,16 +1947,17 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 	    "dmLegalTitlePar, dmLegalTitlePoint, "
 	    "dmRecipientRefNumber, dmRecipientIdent, "
 	    "dmSenderRefNumber, dmSenderIdent, "
-	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, dbIDRecipient "
+	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
+	    "dbIDRecipient "
 	    "FROM messages WHERE "
 	    "dmID = :dmId";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 
 		/* Sender info */
 		html += messageTableSectionPdf(QObject::tr("Sender"));
@@ -1955,16 +1985,23 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 		html += messageTableInfoEndPdf();
 
 		/* General info */
-		html += messageTableSectionPdf(QObject::tr("General Information"));
+		html += messageTableSectionPdf(
+		    QObject::tr("General Information"));
 		html += messageTableInfoStartPdf();
 		html += messageTableInfoPdf(QObject::tr("Subject"),
 		    query.value(7).toString());
 
-		query.value(8).toString().isEmpty() ? tmp = "0" :
-		    tmp = query.value(8).toString();
+		if (query.value(8).toString().isEmpty()) {
+			tmp = "0";
+		} else {
+			tmp = query.value(8).toString();
+		}
 		tmp += QString(" / ");
-		query.value(9).toString().isEmpty() ? tmp += "0" :
-		    tmp += query.value(9).toString();
+		if (query.value(9).toString().isEmpty()) {
+			tmp += "0";
+		} else {
+			tmp += query.value(9).toString();
+		}
 		tmp += QString(" § ") + " " +
 		    query.value(10).toString() + " " +
 		    QString(QObject::tr("paragraph")) + " " +
@@ -1974,39 +2011,67 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 
 		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
 
-		(query.value(13).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(13).toString();
-		html += messageTableInfoPdf(QObject::tr("Our ref.number"), tmp);
-		(query.value(14).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(14).toString();
+		if (query.value(13).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(13).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our ref.number"),
+		    tmp);
+		if (query.value(14).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(14).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
-		(query.value(15).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(15).toString();
-		html += messageTableInfoPdf(QObject::tr("Your ref.number"), tmp);
-		(query.value(16).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(16).toString();
+		if (query.value(15).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(15).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your ref.number"),
+		    tmp);
+		if (query.value(16).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(16).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
-		(query.value(17).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(17).toString();
+		if (query.value(17).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(17).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
 
 
-		((query.value(18)).toInt()) ? tmp = QObject::tr("yes")
-		: tmp = QObject::tr("no");
-		html += messageTableInfoPdf(QObject::tr("Personal Delivery"), tmp);
-
-		((query.value(19)).toInt()) ? tmp = QObject::tr("no")
-		: tmp = QObject::tr("yes");
-		html += messageTableInfoPdf(QObject::tr("Prohibit Delivery by Fiction"),
+		if (query.value(18).toInt()) {
+			tmp = QObject::tr("yes");
+		} else {
+			tmp = QObject::tr("no");
+		}
+		html += messageTableInfoPdf(QObject::tr("Personal Delivery"),
 		    tmp);
 
+		if (query.value(19).toInt()) {
+			tmp = QObject::tr("no");
+		} else {
+			tmp = QObject::tr("yes");
+		}
+		html += messageTableInfoPdf(
+		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+
 		html += messageTableInfoEndPdf();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
 	queryStr = "SELECT _dmFileDescr FROM files WHERE message_id = :dmId";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 
 	query.bindValue(":dmId", dmId);
@@ -2023,11 +2088,17 @@ QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
 			i++;
 		}
 		html += messageTableInfoEndPdf();
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
 
 	html += divEnd;
 
 	return html;
+
+fail:
+	return QString();
 }
 
 
@@ -2045,9 +2116,12 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 
 	html += indentDivStart;
 
-	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Advice of Delivery")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
+	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
+	    "font-size: 20px;\"><tr><td>" +
+	    strongMessagePdf(QObject::tr("Advice of Delivery")) +
+	    "</td><td align=\"right\">" +
+	    QObject::tr("Message ID:") + " " +
+	    strongMessagePdf(QString::number(dmId)) +
 	    "</td></tr></table><br/><br/>";
 
 	queryStr = "SELECT "
@@ -2063,11 +2137,12 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 	    "dmID = :dmId";
 
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 
 		/* Sender info */
 		html += messageTableSectionPdf(QObject::tr("Sender"));
@@ -2088,16 +2163,23 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		html += messageTableInfoEndPdf();
 
 		/* General info */
-		html += messageTableSectionPdf(QObject::tr("General Information"));
+		html += messageTableSectionPdf(
+		    QObject::tr("General Information"));
 		html += messageTableInfoStartPdf();
 		html += messageTableInfoPdf(QObject::tr("Subject"),
 		    query.value(7).toString());
 
-		query.value(8).toString().isEmpty() ? tmp = "0" :
-		    tmp = query.value(8).toString();
+		if (query.value(8).toString().isEmpty()) {
+			tmp = "0";
+		} else {
+			tmp = query.value(8).toString();
+		}
 		tmp += QString(" / ");
-		query.value(9).toString().isEmpty() ? tmp += "0" :
-		    tmp += query.value(9).toString();
+		if (query.value(9).toString().isEmpty()) {
+			tmp += "0";
+		} else {
+			tmp += query.value(9).toString();
+		}
 		tmp += QString(" § ") + " " +
 		    query.value(10).toString() + " " +
 		    QString(QObject::tr("paragraph")) + " " +
@@ -2107,30 +2189,54 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 
 		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
 
-		(query.value(13).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(13).toString();
-		html += messageTableInfoPdf(QObject::tr("Our ref.number"), tmp);
-		(query.value(14).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(14).toString();
+		if (query.value(13).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(13).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our ref.number"),
+		    tmp);
+		if (query.value(14).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(14).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
-		(query.value(15).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(15).toString();
-		html += messageTableInfoPdf(QObject::tr("Your ref.number"), tmp);
-		(query.value(16).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(16).toString();
+		if (query.value(15).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(15).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your ref.number"),
+		   tmp);
+		if (query.value(16).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(16).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
-		(query.value(17).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(17).toString();
+		if (query.value(17).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(17).toString();
+		}
 		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
 
-		((query.value(18)).toInt()) ? tmp = QObject::tr("yes")
-		: tmp = QObject::tr("no");
-		html += messageTableInfoPdf(QObject::tr("Personal Delivery"), tmp);
-
-		((query.value(19)).toInt()) ? tmp = QObject::tr("no")
-		: tmp = QObject::tr("yes");
-		html += messageTableInfoPdf(QObject::tr("Prohibit Delivery by Fiction"),
+		if ((query.value(18)).toInt()) {
+			tmp = QObject::tr("yes");
+		} else {
+			tmp = QObject::tr("no");
+		}
+		html += messageTableInfoPdf(QObject::tr("Personal Delivery"),
 		    tmp);
+
+		if (query.value(19).toInt()) {
+			tmp = QObject::tr("no");
+		} else {
+			tmp = QObject::tr("yes");
+		}
+		html += messageTableInfoPdf(
+		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
 
 		html += messageTableInfoEndPdf();
 
@@ -2145,13 +2251,18 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		        dateTimeStrFromDbFormat(query.value(20).toString(),
 		        dateTimeDisplayFormat));
 		html += messageTableInfoEndPdf();
+	} else {
+		logError("%s\n",
+		    "Cannot execute SQL query and/or read SQL data.");
+		goto fail;
 	}
 
 	queryStr = "SELECT dmEventTime, dmEventDescr "
 	    "FROM events WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
 	}
 
 	query.bindValue(":dmId", dmId);
@@ -2160,21 +2271,26 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		/* Attachments info */
 		html += messageTableSectionPdf(QObject::tr("Events"));
 		html += messageTableInfoStartPdf();
-		int i = 1;
 		while (query.isValid()) {
-			tmp = dateTimeStrFromDbFormat(query.value(0).toString(),
+			tmp = dateTimeStrFromDbFormat(
+			    query.value(0).toString(),
 			    dateTimeDisplayFormat) + " - " +
 			    query.value(1).toString();
 			html += messageTableInfoPdf(QObject::tr("Time"), tmp);
 			query.next();
-			i++;
 		}
 		html += messageTableInfoEndPdf();
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
 
 	html += divEnd;
 
 	return html;
+
+fail:
+	return QString();
 }
 
 
