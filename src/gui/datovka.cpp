@@ -5017,73 +5017,81 @@ void MainWindow::importDeliveryInfoZFO(
 		int dmId = atoi(message->envelope->dmID);
 
 		for (int j = 0; j < accountList.size(); j++) {
+			/* check if message envelope is in database */
 			if (-1 != accountList.at(j).messageDb->isInMessageDb(dmId)) {
-				/* Is/was ZFO message in ISDS */
-				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).acntIndex);
-				if (resISDS == MSG_IS_IN_ISDS) {
-					if (Q_SUCCESS ==
-					    Worker::storeDeliveryInfo(true,
-					    *(accountList.at(j).messageDb), message)) {
-						importZFOInfo.first = files.at(i);
-						importZFOInfo.second = tr("This file (delivery info) "
-						    "has been imported to message number \"%1\" "
-						    "into account \"%2\".").arg(dmId).
-						    arg(accountList.at(j).username);
-						successImportList.append(importZFOInfo);
-						success = true;
+				/* check if raw is in database */
+				if (!accountList.at(j).messageDb->isDeliveryInfoRawDb(dmId)) {
+					/* Is/was ZFO message in ISDS */
+					resISDS = isImportMsgInISDS(files.at(i),
+					    accountList.at(j).acntIndex);
+					if (resISDS == MSG_IS_IN_ISDS) {
+						if (Q_SUCCESS ==
+						    Worker::storeDeliveryInfo(true,
+						    *(accountList.at(j).messageDb), message)) {
+							importZFOInfo.first = files.at(i);
+							importZFOInfo.second = tr("This file (delivery info) "
+							    "has been imported to message number \"%1\" "
+							    "into account \"%2\".").arg(dmId).
+							    arg(accountList.at(j).username);
+							successImportList.append(importZFOInfo);
+							success = true;
+						} else {
+							infoText = tr("This file "
+							     "(delivery info) has "
+							    "not been inserted into local "
+							    "database for account \"%1\" "
+							    "because an error was "
+							    "detected during insertion "
+							    "process.").
+							    arg(accountList.at(j).username);
+						}
+					} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+						infoText = tr("This file (message envelope)"
+						    " does not exists on the server "
+						    "Datové schránky.");
+					} else if (resISDS == MSG_FILE_ERROR) {
+						infoText = tr("Couldn't open this file "
+						    "(delivery info) for "
+						    "authentication on the "
+						    "server Datové schránky.");
 					} else {
-						infoText = tr("This file "
-						     "(delivery info) has "
-						    "not been inserted into local "
-						    "database for account \"%1\" "
-						    "because an error was "
-						    "detected during insertion "
-						    "process.").
-						    arg(accountList.at(j).username);
+						QMessageBox msgBox(this);
+						msgBox.setIcon(QMessageBox::Warning);
+						msgBox.setWindowTitle(tr("ZFO import problem"));
+						msgBox.setText(tr("Do you want to continue with import?"));
+						msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+						msgBox.setDefaultButton(QMessageBox::No);
+						if (QMessageBox::No == msgBox.exec()) {
+							infoText = tr("It is not possible "
+							    "to connect to server Datové "
+							    "schránky and verify validity of "
+							    "this ZFO file.");
+							infoText += "<br/><br/>" + tr("Action was canceled by user...");
+							importZFOInfo.first = files.at(i);
+							importZFOInfo.second = infoText;
+							errorImportList.append(importZFOInfo);
+							isds_message_free(&message);
+							isds_ctx_free(&dummy_session);
+							showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+							goto endImport;
+						} else {
+							infoText = tr("It is not possible "
+							    "to connect to server Datové "
+							    "schránky and verify validity of "
+							    "this ZFO file.");
+						}
 					}
-				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-					infoText = tr("This file (message envelope)"
-					    " does not exists on the server "
-					    "Datové schránky.");
-				} else if (resISDS == MSG_FILE_ERROR) {
-					infoText = tr("Couldn't open this file "
-					    "(delivery info) for "
-					    "authentication on the "
-					    "server Datové schránky.");
 				} else {
-					QMessageBox msgBox(this);
-					msgBox.setIcon(QMessageBox::Warning);
-					msgBox.setWindowTitle(tr("ZFO import problem"));
-					msgBox.setText(tr("Do you want to continue with import?"));
-					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-					msgBox.setDefaultButton(QMessageBox::No);
-					if (QMessageBox::No == msgBox.exec()) {
-						infoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-						infoText += "<br/><br/>" + tr("Action was canceled by user...");
-						importZFOInfo.first = files.at(i);
-						importZFOInfo.second = infoText;
-						errorImportList.append(importZFOInfo);
-						isds_message_free(&message);
-						isds_ctx_free(&dummy_session);
-						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
-						goto endImport;
-					} else {
-						infoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-					}
+					infoText = tr("This file (delivery info) "
+					    "already exists in the local database"
+					    " for message \"%1\", account \"%2\".").
+					    arg(dmId).arg(accountList.at(j).username);
 				}
 			} else {
 				infoText = tr("This file (delivery info) has "
 				    "not been inserted into database because "
 				    "there isn't any related message (%1) in "
-				    "the database for account \"%2\".").arg(dmId)
-				    .arg(accountList.at(j).username);
+				    "the database.").arg(dmId);
 			}
 		}
 

@@ -448,6 +448,15 @@ public:
 	int msgsStatusIfExists(int dmId) const;
 
 	/*!
+	 * @brief Check if delivery info exists in the table.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return True if delivery information exist in database.
+	 *     Fail is also returned on error.
+	 */
+	bool isDeliveryInfoRawDb(int dmId) const;
+
+	/*!
 	 * @brief Insert message envelope into messages table.
 	 *
 	 * @return True on success.
