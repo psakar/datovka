@@ -5018,7 +5018,7 @@ void MainWindow::importDeliveryInfoZFO(
 
 		for (int j = 0; j < accountList.size(); j++) {
 			/* check if message envelope is in database */
-			if (-1 != accountList.at(j).messageDb->isInMessageDb(dmId)) {
+			if (-1 != accountList.at(j).messageDb->msgsStatusIfExists(dmId)) {
 				/* check if raw is in database */
 				if (!accountList.at(j).messageDb->isDeliveryInfoRawDb(dmId)) {
 					/* Is/was ZFO message in ISDS */
@@ -5183,7 +5183,7 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == accountList.at(j).messageDb->
-					    isInMessageDb(dmId)) {
+					    msgsStatusIfExists(dmId)) {
 						Worker::storeEnvelope("sent", *(accountList.at(j).messageDb), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, false, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
@@ -5257,7 +5257,7 @@ void MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == accountList.at(j).messageDb->
-					    isInMessageDb(dmId)) {
+					    msgsStatusIfExists(dmId)) {
 						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							success = true;
