@@ -3139,22 +3139,64 @@ fail:
 
 /* ========================================================================= */
 /*
- * Get message hash from db
+ * Update information about author (sender).
  */
-QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
+bool MessageDb::updateMessageAuthorInfo(int dmId, const QString &senderType,
+    const QString &senderName)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QList<QString> retitem;
-	QString queryStr;
 
-	queryStr = "SELECT value,_algorithm FROM hashes WHERE "
-	    "message_id = :dmId";
+	QJsonObject authorObject;
+	authorObject.insert("userType", senderType.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : senderType);
+	authorObject.insert("authorName", senderName.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : senderName);
+	QJsonObject object;
+	object.insert("message_author", authorObject);
 
+	QJsonDocument document;
+	document.setObject(object);
+	QString json = document.toJson(QJsonDocument::Compact);
+
+	QString queryStr = "UPDATE supplementary_message_data SET "
+	    "custom_data = :custom_data WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Select hashes errro:" << query.lastError();
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":custom_data", json);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
 
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message hash from db
+ */
+QStringList MessageDb::msgsGetHashFromDb(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QStringList retitem;
+	QString queryStr;
+
+	queryStr = "SELECT value, _algorithm FROM hashes WHERE "
+	    "message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
 	query.bindValue(":dmId", dmId);
 
 	if (query.exec() && query.isActive()) {
@@ -3164,54 +3206,207 @@ QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
 			retitem.append(query.value(1).toString());
 			return retitem;
 		}
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
-	retitem.append("");
-	retitem.append("");
-	return retitem;
+
+fail:
+	return QStringList();
 }
 
 
 /* ========================================================================= */
 /*
- * Insert additional info about author (sender) into db
+ * Delete message records from db.
  */
-bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
-    const QString &sender_name)
+bool MessageDb::msgsDeleteMessageData(int dmId) const
 /* ========================================================================= */
 {
+	/* TODO -- The whole operation must fail or succeed. */
+
 	QSqlQuery query(m_db);
+	QString queryStr;
 
-	QJsonObject authorObject;
-	authorObject.insert("userType", sender_type.isEmpty() ?
-	    QJsonValue(QJsonValue::Null) : sender_type);
-	authorObject.insert("authorName", sender_name.isEmpty() ?
-	    QJsonValue(QJsonValue::Null) : sender_name);
-	QJsonObject object;
-	object.insert("message_author", authorObject);
+	int certificateId = -1;
+	bool deleteCert = false;
 
-	QJsonDocument document;
-	document.setObject(object);
-	QString  json = document.toJson(QJsonDocument::Compact);
-
-	QString queryStr = "UPDATE supplementary_message_data SET "
-	    "custom_data = :custom_data WHERE message_id = :dmId";
-
+	/* Delete hash from hashes table. */
+	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Update supplementary_message_data error:"
-		    << query.lastError();
-		return false;
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
 
-	query.bindValue(":dmId", dmID);
-	query.bindValue(":custom_data", json);
+	/* Delete file(s) from files table. */
+	queryStr = "DELETE FROM files WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
 
-	if (query.exec()) {
-		return true;
+	/* Delete event(s) from events table. */
+	queryStr = "DELETE FROM events WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Delete raw message data from raw_message_data table. */
+	queryStr= "DELETE FROM raw_message_data WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Delete raw info data from raw_delivery_info_data table. */
+	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Delete supplementary from supplementary_message_data table. */
+	queryStr = "DELETE FROM supplementary_message_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Select certificate_id from message_certificate_data table. */
+	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			certificateId = query.value(0).toInt();
+		}
 	} else {
-		qDebug() << "Update supplementary_message_data error:"
-		    << query.lastError();
-		return false;
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
 	}
+
+	Q_ASSERT(-1 != certificateId);
+
+	/* Delete certificate reference from message_certificate_data table. */
+	queryStr = "DELETE FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Select certificate id from message_certificate_data table. */
+	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
+	    "certificate_id = :certificate_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":certificate_id", certificateId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() > 0) {
+				deleteCert = false;
+			} else {
+				/* No message uses this certificate. */
+				deleteCert = true;
+			}
+		}
+	} else {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/*
+	 * Delete certificate data from certificate_data table if no messages.
+	 */
+	if (deleteCert) {
+		queryStr = "DELETE FROM certificate_data WHERE "
+		    "id = :certificate_id";
+		if (!query.prepare(queryStr)) {
+			logError("%s\n", "Cannot prepare SQL query.");
+			goto fail;
+		}
+		query.bindValue(":certificate_id", certificateId);
+		if (!query.exec()) {
+			logError("%s\n", "Cannot execute SQL query.");
+			goto fail;
+		}
+	}
+
+	/* Delete process state information from process_state table. */
+	queryStr = "DELETE FROM process_state WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	/* Delete message from messages table. */
+	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("%s\n", "Cannot prepare SQL query.");
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("%s\n", "Cannot execute SQL query.");
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
 }
 
 
@@ -3689,187 +3884,6 @@ QByteArray MessageDb::msgsTimestampRaw(int dmId) const
 	}
 
 	return QByteArray();
-}
-
-
-/* ========================================================================= */
-/*
- * Delete message records from db
- */
-bool MessageDb::msgsDeleteMessageData(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	/* Delete hash from hashes table */
-	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete file(s) from files table */
-	queryStr = "DELETE FROM files WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete event(s) from events table */
-	queryStr = "DELETE FROM events WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete raw message data from raw_message_data table */
-	queryStr= "DELETE FROM raw_message_data WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete raw info data from raw_delivery_info_data table */
-	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete supplementary from supplementary_message_data table */
-	queryStr = "DELETE FROM supplementary_message_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Select certificate_id from message_certificate_data table */
-	int certificate_id = 0;
-	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
-		return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			certificate_id = query.value(0).toInt();
-		}
-	}
-	/* Delete certificate reference from message_certificate_data table */
-	queryStr = "DELETE FROM message_certificate_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Select certificate id from message_certificate_data table */
-	bool deleteCert = false;
-	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
-	    "certificate_id = :certificate_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error9: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":certificate_id", certificate_id);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			if (query.value(0).toInt() > 0) {
-				deleteCert = false;
-			} else {
-				deleteCert = true;
-			}
-		}
-	}
-
-	/* Delete certificate data from certificate_data table if no messages */
-	if (deleteCert) {
-		queryStr = "DELETE FROM certificate_data WHERE "
-		    "id = :certificate_id";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error9: msgsDeleteMessageData"
-			    << query.lastError();
-			return false;
-		}
-		query.bindValue(":certificate_id", certificate_id);
-		if (!query.exec()) {
-			qDebug() << "Error9: msgsDeleteMessageData"
-			    << query.lastError();
-			return false;
-		}
-	}
-
-	/* Delete process state information from process_state table.*/
-	queryStr = "DELETE FROM process_state WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete message from messages table */
-	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	return true;
 }
 
 

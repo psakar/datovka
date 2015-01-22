@@ -3939,11 +3939,10 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QList<QString> hashLocaldata;
-	hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
+	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
 
 	/* TODO - check if hash info is in db */
-	if (hashLocaldata[0].isEmpty()) {
+	if (hashLocaldata.isEmpty()) {
 		isds_hash_free(&hashLocal);
 		isds_hash_free(&hashIsds);
 		return Q_SQL_ERROR;

@@ -1139,10 +1139,12 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	(messageDb.addMessageAuthorInfo(dmID,
-	    convertSenderTypeToString((int)*sender_type), sender_name))
-	? qDebug() << "Author info of message was added..."
-	: qDebug() << "ERROR: Author info of message wrong!";
+	if (messageDb.updateMessageAuthorInfo(dmID,
+	        convertSenderTypeToString((int) *sender_type), sender_name)) {
+		qDebug() << "Author info of message was added...";
+	} else {
+		qDebug() << "ERROR: Author info of message wrong!";
+	}
 
 	return true;
 }

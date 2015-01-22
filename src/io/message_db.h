@@ -598,18 +598,30 @@ public:
 	bool msgsInsertUpdateDeliveryInfoRaw(int dmId, const QByteArray &raw);
 
 	/*!
-	 * @brief Insert additional info about author (sender) into db.
+	 * @brief Update information about author (sender).
+	 *
+	 * @param[in] dmId        Message identifier.
+	 * @param[in] senderType  Type of sender.
+	 * @param[in] senderName  Name of sender.
+	 * @return True on success.
 	 */
-	bool addMessageAuthorInfo(int dmID, const QString &sender_type,
-	    const QString &sender_name);
+	bool updateMessageAuthorInfo(int dmId, const QString &senderType,
+	    const QString &senderName);
 
 	/*!
 	 * @brief Return hash of message from db.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return List of string containing base64-encoded hash value and
+	 *     algorithm identifier. Empty list is returned on error.
 	 */
-	QList<QString> msgsGetHashFromDb(int dmId) const;
+	QStringList msgsGetHashFromDb(int dmId) const;
 
 	/*!
 	 * @brief Delete all message records from db.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return True on success.
 	 */
 	bool msgsDeleteMessageData(int dmId) const;
 
