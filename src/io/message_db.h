@@ -498,7 +498,12 @@ public:
 	    const QString &messtype);
 
 	/*!
-	 * @brief Update exist message envelope delivery info in db.
+	 * @brief Update message envelope delivery information.
+	 *
+	 * @param[in] dmId              Message identifier.
+	 * @param[in] dmDeliveryTime    Delivery time in database format.
+	 * @param[in] dmAcceptanceTime  Acceptance time in database format.
+	 * @return True on success.
 	 */
 	bool msgsUpdateMessageState(int dmId,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
@@ -506,21 +511,41 @@ public:
 
 	/*!
 	 * @brief Insert/update message files into files table.
+	 *
+	 * @param[in] dmId                    Message identifier.
+	 * @param[in] dmFileDescr             File name.
+	 * @param[in] dmUpFileGuid
+	 * @param[in] dmMimeType
+	 * @param[in] dmFormat
+	 * @param[in] dmFileMetaType
+	 * @param[in] dmEncodedContentBase64  Base64-encoded file content.
+	 * @return True on success.
 	 */
 	bool msgsInsertUpdateMessageFile(int dmId,
 	    const QString &dmFileDescr, const QString &dmUpFileGuid,
 	    const QString &dmFileGuid, const QString &dmMimeType,
 	    const QString &dmFormat, const QString &dmFileMetaType,
-	    const QString &dmEncodedContent);
+	    const QByteArray &dmEncodedContentBase64);
 
 	/*!
 	 * @brief Insert/update message hash into hashes table.
+	 *
+	 * @param[in] dmId         Message identifier.
+	 * @param[in] valueBase64  Base64-encoded has value.
+	 * @param[in] algorithm    Algorithm identifier.
+	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageHash(int dmId, const QString &value,
-	    const QString &algorithm);
+	bool msgsInsertUpdateMessageHash(int dmId,
+	    const QByteArray &valueBase64, const QString &algorithm);
 
 	/*!
-	 * @brief Insert/update message event into events table.
+	 * @brief Insert/update message events into events table.
+	 *
+	 * @param[in] dmId          Message identifier.
+	 * @param[in] dmEventTime   Event time in database format.
+	 * @param[in] dmEventType   Event type identifier.
+	 * @param[in] dmEventDescr  Event description.
+	 * @return True on success.
 	 */
 	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
 	    const QString &dmEventType, const QString &dmEventDescr);
@@ -528,9 +553,14 @@ public:
 	/*!
 	 * @brief Insert/update raw (DER) message data into raw_message_data
 	 *     table.
+	 *
+	 * @param[in] dmId         Message identifier.
+	 * @param[in] raw          Raw (non-base64 encoded) message data.
+	 * @param[in] messageType  Message type.
+	 * @return True on success.
 	 */
 	bool msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
-	    int message_type);
+	    int messageType);
 
 	/*!
 	 * @brief Get base64 encoded raw message data.
@@ -542,16 +572,28 @@ public:
 
 	/*!
 	 * @brief Get message data in DER (raw) format.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Empty byte array on error.
 	 */
 	QByteArray msgsMessageRaw(int dmId) const;
 
 	/*!
-	 * @brief Get delivery info raw from raw_delivery_info_data table.
+	 * @brief Get base64-encoded delivery info from
+	 *     raw_delivery_info_data table.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Empty byte array on error.
 	 */
 	QByteArray msgsGetDeliveryInfoBase64(int dmId) const;
 
 	/*!
-	 * @brief Insert/update raw (DER) delivery info into raw_delivery_info_data.
+	 * @brief Insert/update raw (DER) delivery info into
+	 *     raw_delivery_info_data.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] raw   Raw (in DER format) delivery information.
+	 * @return True on success.
 	 */
 	bool msgsInsertUpdateDeliveryInfoRaw(int dmId, const QByteArray &raw);
 

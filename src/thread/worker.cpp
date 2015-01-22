@@ -883,12 +883,18 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 60); }
 
 	/* insert/update hash into db */
-	QString hashValue = QByteArray((char*)envel->hash->value,
-	    envel->hash->length).toBase64();
-	(messageDb.msgsInsertUpdateMessageHash(dmID,
-	    hashValue, convertHashAlg(envel->hash->algorithm)))
-	? qDebug() << "Message hash was stored into db..."
-	: qDebug() << "ERROR: Message hash insert!";
+	if (NULL != envel->hash) {
+		const struct isds_hash *hash = envel->hash;
+
+		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
+		    hash->length).toBase64();
+		if (messageDb.msgsInsertUpdateMessageHash(dmID,
+		        hashValueBase64, convertHashAlg(hash->algorithm))) {
+			qDebug() << "Message hash was stored into db...";
+		} else {
+			qDebug() << "ERROR: Message hash insert!";
+		}
+	}
 
 	if (0 != pBar) { pBar->setValue(70); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
@@ -899,15 +905,16 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	while (0 != file) {
 		isds_document *item = (isds_document *) file->data;
 
-		QString dmEncodedContent = QByteArray((char *)item->data,
-		    item->data_length).toBase64();
+		QByteArray dmEncodedContentBase64 =
+		    QByteArray((char *)item->data,
+		        item->data_length).toBase64();
 
 		/* Insert/update file to db */
 		(messageDb.msgsInsertUpdateMessageFile(dmID,
 		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
 		   item->dmMimeType, item->dmFormat,
 		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContent))
+		   dmEncodedContentBase64))
 		? qDebug() << "Message file" << item->dmFileDescr <<
 		    "was stored into db..."
 		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
