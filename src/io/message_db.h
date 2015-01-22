@@ -449,6 +449,8 @@ public:
 
 	/*!
 	 * @brief Insert message envelope into messages table.
+	 *
+	 * @return True on success.
 	 */
 	bool msgsInsertMessageEnvelope(int dmId,
 	    const QString &_origin, const QString &dbIDSender,
@@ -465,13 +467,15 @@ public:
 	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
 	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
 	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-	    const QString &dmQTimestamp, const QString &dmDeliveryTime,
-	    const QString &dmAcceptanceTime, int dmMessageStatus,
-	    int dmAttachmentSize, const QString &_dmType,
-	    const QString messtype);
+	    const QByteArray &dmQTimestampBase64,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
+	    const QString &messtype);
 
 	/*!
 	 * @brief Update message envelope into messages table.
+	 *
+	 * @return True on success.
 	 */
 	bool msgsUpdateMessageEnvelope(int dmId,
 	    const QString &_origin, const QString &dbIDSender,
@@ -488,10 +492,10 @@ public:
 	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
 	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
 	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-	    const QString &dmQTimestamp, const QString &dmDeliveryTime,
-	    const QString &dmAcceptanceTime, int dmMessageStatus,
-	    int dmAttachmentSize, const QString &_dmType,
-	    const QString messtype);
+	    const QByteArray &dmQTimestampBase64,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
+	    const QString &messtype);
 
 	/*!
 	 * @brief Update exist message envelope delivery info in db.

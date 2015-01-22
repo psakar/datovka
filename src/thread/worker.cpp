@@ -371,7 +371,7 @@ qdatovka_error Worker::storeEnvelope(const QString &messageType,
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,
-	    (int)*envel->dmSenderType,
+	    (int) *envel->dmSenderType,
 	    envel->dmRecipient,
 	    envel->dmRecipientAddress,
 	    dmAmbiguousRecipient,
@@ -393,11 +393,13 @@ qdatovka_error Worker::storeEnvelope(const QString &messageType,
 	    envel->dmLegalTitlePoint,
 	    envel->dmPersonalDelivery,
 	    envel->dmAllowSubstDelivery,
-	    (char*)envel->timestamp,
+	    (NULL != envel->timestamp) ?
+	        QByteArray((char *) envel->timestamp,
+	            envel->timestamp_length).toBase64() : QByteArray(),
 	    dmDeliveryTime,
 	    dmAcceptanceTime,
 	    convertHexToDecIndex(*envel->dmMessageStatus),
-	    (int)*envel->dmAttachmentSize,
+	    (int) *envel->dmAttachmentSize,
 	    envel->dmType,
 	    messageType)) {
 		qDebug() << "Message envelope" << dmId <<
@@ -762,8 +764,6 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	if (0 != pBar) { pBar->setValue(30); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 30); }
 
-	QString timestamp = QByteArray((char *) envel->timestamp,
-	    envel->timestamp_length).toBase64();
 	QString dmAmbiguousRecipient;
 	if (0 == envel->dmAmbiguousRecipient) {
 		dmAmbiguousRecipient = "0";
@@ -824,7 +824,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,
-	    (int)*envel->dmSenderType,
+	    (int) *envel->dmSenderType,
 	    envel->dmRecipient,
 	    envel->dmRecipientAddress,
 	    dmAmbiguousRecipient,
@@ -846,11 +846,13 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	    envel->dmLegalTitlePoint,
 	    envel->dmPersonalDelivery,
 	    envel->dmAllowSubstDelivery,
-	    timestamp,
+	    (NULL != envel->timestamp) ?
+	        QByteArray((char *) envel->timestamp,
+	            envel->timestamp_length).toBase64() : QByteArray(),
 	    dmDeliveryTime,
 	    dmAcceptanceTime,
 	    convertHexToDecIndex(*envel->dmMessageStatus),
-	    (int)*envel->dmAttachmentSize,
+	    (int) *envel->dmAttachmentSize,
 	    envel->dmType,
 	    (incoming) ? "received" : "sent"))
 	    ? qDebug() << "Message envelope was updated..."
