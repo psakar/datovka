@@ -718,6 +718,9 @@ protected:
 	/*!
 	 * @brief Copy db.
 	 *
+	 * @param[in] newFileName  New location name.
+	 * @return True on success.
+	 *
 	 * @note The copy is continued to be used. Original is closed.
 	 */
 	bool copyDb(const QString &newFileName);
