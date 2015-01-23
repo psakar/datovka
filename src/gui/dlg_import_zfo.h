@@ -12,6 +12,7 @@ class ImportZFODialog : public QDialog, public Ui::ImportZFO
 public:
 	enum ZFOaction {
 		IMPORT_FROM_DIR,
+		IMPORT_FROM_SUBDIR,
 		IMPORT_SEL_FILES
 	};
 
@@ -29,6 +30,7 @@ signals:
 
 private slots:
 	void ImportFiles(void);
+	void ChangeRadioBox(void);
 };
 
 #endif // DLG_IMPORT_ZFO_H

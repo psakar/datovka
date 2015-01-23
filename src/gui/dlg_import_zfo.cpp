@@ -13,7 +13,21 @@ ImportZFODialog::ImportZFODialog(QWidget *parent) :
 	    "Delivery information ZFO will be inserted into local database "
 	    "only if a corresponding complete message already exists in the "
 	    "database."));
+
 	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(ImportFiles()));
+	connect(this->radioImportAll, SIGNAL(clicked()),
+	    this, SLOT(ChangeRadioBox()));
+	connect(this->radioImportSelected, SIGNAL(clicked()),
+	    this, SLOT(ChangeRadioBox()));
+}
+
+void ImportZFODialog::ChangeRadioBox(void)
+{
+	if (this->radioImportAll->isChecked()) {
+		this->includeSubDir->setEnabled(true);
+	} else {
+		this->includeSubDir->setEnabled(false);
+	}
 }
 
 void ImportZFODialog::ImportFiles(void)
@@ -30,7 +44,11 @@ void ImportZFODialog::ImportFiles(void)
 	}
 
 	if (this->radioImportAll->isChecked()) {
-		zfoAaction = IMPORT_FROM_DIR;
+		if (this->includeSubDir->isChecked()) {
+			zfoAaction = IMPORT_FROM_SUBDIR;
+		} else {
+			zfoAaction = IMPORT_FROM_DIR;
+		}
 	} else if (this->radioImportSelected->isChecked()) {
 		zfoAaction = IMPORT_SEL_FILES;
 	}
