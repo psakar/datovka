@@ -31,9 +31,9 @@ ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
 	} else {
 
 		for (int i = 0; i < m_succImportList.size(); i++) {
-			zfoList += QString::number(i+1) +
-			    ". <b>" + m_succImportList.at(i).first + "</b><br/>"
-			    + m_succImportList.at(i).second + "<br/><br/>";
+			zfoList += " <b>" + QString::number(i+1) +
+			    ". " + m_succImportList.at(i).first + "</b><br/>"
+			    + m_succImportList.at(i).second;
 		}
 		this->successList->setText(zfoList);
 	}
@@ -48,9 +48,9 @@ ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
 		this->existList->hide();
 	} else {
 		for (int i = 0; i < m_existImportList.size(); i++) {
-			zfoList += QString::number(i+1) +
-			    ". <b>" + m_existImportList.at(i).first + "</b><br/>"
-			    + m_existImportList.at(i).second + "<br/><br/>";
+			zfoList += " <b>" + QString::number(i+1) +
+			    ". " + m_existImportList.at(i).first + "</b><br/>"
+			    + m_existImportList.at(i).second;
 		}
 
 		this->existList->setText(zfoList);
@@ -65,9 +65,9 @@ ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
 		this->errorList->hide();
 	} else {
 		for (int i = 0; i < m_errImportList.size(); i++) {
-			zfoList += QString::number(i+1) +
-			    ". <b>" + m_errImportList.at(i).first + "</b><br/>"
-			    + m_errImportList.at(i).second + "<br/><br/>";
+			zfoList += " <b>" + QString::number(i+1) +
+			    ". " + m_errImportList.at(i).first + "</b><br/>"
+			    + m_errImportList.at(i).second + "<br/>";
 		}
 
 		this->errorList->setText(zfoList);

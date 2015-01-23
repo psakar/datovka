@@ -5213,9 +5213,10 @@ void MainWindow::importDeliveryInfoZFO(
 					}
 				} else {
 					exists = true;
-					eInfoText = tr("Delivery info for message \"%1\" already exists in the "
+					eInfoText += tr("Delivery info for message \"%1\" already exists in the "
 					    "local database, account \"%2\".").
 					    arg(dmId).arg(accountList.at(j).accountName);
+					eInfoText += "<br/>";
 				}
 			} else {
 				nInfoText = tr("This file (delivery info) has "
@@ -5337,9 +5338,10 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 						}
 					} else {
 						exists = true;
-						eInfoText = tr("Message \"%1\" already exists in the "
+						eInfoText += tr("Message \"%1\" already exists in the "
 						    "local database, account \"%2\".").
 						    arg(dmId).arg(accountList.at(j).accountName);
+						eInfoText += "<br/>";
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
 					nInfoText = tr("Message \"%1\""
@@ -5406,9 +5408,10 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 						}
 					} else {
 						exists = true;
-						eInfoText = tr("Message \"%1\" already exists in the "
+						eInfoText += tr("Message \"%1\" already exists in the "
 						    "local database, account \"%2\".").
 						    arg(dmId).arg(accountList.at(j).accountName);
+						eInfoText += "<br/>";
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
 					nInfoText = tr("Message \"%1\""
