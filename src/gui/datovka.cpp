@@ -4827,9 +4827,8 @@ void MainWindow::showImportZFOActionDialog(void)
 	debugSlotCall();
 
 	QDialog *importZfo = new ImportZFODialog(this);
-	connect(importZfo,
-	    SIGNAL(returnZFOAction(int, int)), this,
-	    SLOT(createZFOListForImport(int, int)));
+	connect(importZfo, SIGNAL(returnZFOAction(int, int)),
+	    this, SLOT(createZFOListForImport(int, int)));
 	importZfo->exec();
 }
 
@@ -5018,12 +5017,9 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	QPair<QString,QString> impZFOInfo;
 	QList<QPair<QString,QString>> errorFilesList; // red
 	QList<QPair<QString,QString>> existFilesList; // black
-	QList<QPair<QString,QString>> successFilesList; // breen
+	QList<QPair<QString,QString>> successFilesList; // green
 	QStringList messageZFOList;
 	QStringList deliveryZFOList;
-	errorFilesList.clear();
-	messageZFOList.clear();
-	deliveryZFOList.clear();
 
 
 	/* sort ZFOs by format type */
@@ -5053,10 +5049,18 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	case ImportZFODialog::IMPORT_ALL_ZFO:
 		qDebug() << "ZFO-IMPORT:" << "IMPORT_ALL_ZFO";
 		if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
+			/*
+			 * TODO -- Inform the user, that the selection does
+			 * not contain any valid ZFO files. Do not display
+			 * the result overview. Just the aforementioned
+			 * message.
+			 */
 			goto showResults;
 		}
+		/* First, import messages. */
 		importMessageZFO(accountList, messageZFOList,
 		    successFilesList, existFilesList, errorFilesList);
+		/* Second, import delivery information. */
 		importDeliveryInfoZFO(accountList, deliveryZFOList,
 		    successFilesList, existFilesList, errorFilesList);
 		break;
@@ -5064,6 +5068,12 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	case ImportZFODialog::IMPORT_MESSAGE_ZFO:
 		qDebug() << "ZFO-IMPORT:" << "IMPORT_MESSAGE_ZFO";
 		if (messageZFOList.isEmpty()) {
+			/*
+			 * TODO -- Inform the user, that the selection does
+			 * not contain any valid ZFO messages. Do not display
+			 * the result overview. Just the aforementioned
+			 * message.
+			 */
 			goto showResults;
 		}
 		importMessageZFO(accountList, messageZFOList,
@@ -5073,6 +5083,12 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	case ImportZFODialog::IMPORT_DELIVERY_ZFO:
 		qDebug() << "ZFO-IMPORT:" << "IMPORT_DELIVERY_ZFO";
 		if (deliveryZFOList.isEmpty()) {
+			/*
+			 * TODO -- Inform the user, that the selection does
+			 * not contain any valid ZFO delivery infos. Do not
+			 * display the result overview. Just the aforementioned
+			 * message.
+			 */
 			goto showResults;
 		}
 		importDeliveryInfoZFO(accountList, deliveryZFOList,
@@ -5306,7 +5322,7 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 		bool import = false;
 		bool exists = false;
 
-		/* message type recognization {sent,received}, insert into DB */
+		/* message type recognition {sent,received}, insert into DB */
 		for (int j = 0; j < accountList.size(); j++) {
 			/* is sent */
 			if (accountList.at(j).databoxID == dbIDSender) {
