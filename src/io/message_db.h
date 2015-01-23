@@ -626,21 +626,35 @@ public:
 	bool msgsDeleteMessageData(int dmId) const;
 
 	/*!
-	 * @brief Return id of messages in database correspond with
-	 * date interval.
+	 * @brief Return list of message ids corresponding to given date
+	 *     interval.
+	 *
+	 * @param[in] fromDate  Start date.
+	 * @param[in] toDate    Stop date.
+	 * @param[in] sent      True for sent messages, false for received.
+	 * @return List of message ids. Empty list on error.
 	 */
-	QList<int> msgsDateInterval(QDate fromDate,
-	    QDate toDate, bool sent) const;
+	QList<int> msgsDateInterval(const QDate &fromDate, const QDate &toDate,
+	    bool sent) const;
 
 	/*!
-	 * @brief Return some message items for export correspondence to html.
+	 * @brief Return some message items in order to export correspondence
+	 *     to HTML.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return String list containing sender, recipient, annotation, ...
+	 *    Empty list is returned on error.
 	 */
-	QList<QString> getMsgForHtmlExport(int dmId) const;
+	QStringList getMsgForHtmlExport(int dmId) const;
 
 	/*!
 	 * @brief Return some message items for export correspondence to csv.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return String containing message status, message type, ...
+	 *    Empty list is returned on error.
 	 */
-	QList<QString> getMsgForCsvExport(int dmId) const;
+	QStringList getMsgForCsvExport(int dmId) const;
 
 	/*!
 	 * @brief Set the verification result.
@@ -654,20 +668,28 @@ public:
 
 	/*!
 	 * @brief Set process state of received message.
+	 *
+	 * @param[in] dmId    Message identifier.
+	 * @param[in] state   Message state to be set.
+	 * @param[in] insert  Whether to insert or update an information.
 	 * @return True if update/insert was successful.
 	 */
 	bool msgSetProcessState(int dmId, int state, bool insert);
 
 	/*!
 	 * @brief Get process state of received message.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message processing state, -1 on error.
 	 */
-	int msgGetProcessState(int dmId);
+	int msgGetProcessState(int dmId) const;
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.
 	 *
-	 * @param[in] dmId Message identifier.
+	 * @param[in] dmId  Message identifier.
 	 * @return Qualified time stamp in DER format.
+	 *     Empty byte array on error.
 	 */
 	QByteArray msgsTimestampRaw(int dmId) const;
 
@@ -680,6 +702,8 @@ public:
 protected:
 	/*!
 	 * @brief Adds _dmType column.
+	 *
+	 * @return True on success.
 	 *
 	 * @note This code may be needed to update database between different
 	 * versions.

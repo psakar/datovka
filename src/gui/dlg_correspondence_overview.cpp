@@ -168,7 +168,7 @@ QString DlgCorrespondenceOverview::msgInHtml(int dmId) const
 		return QString();
 	}
 
-	QList<QString> messageItems = m_messDb.getMsgForHtmlExport(dmId);
+	QStringList messageItems = m_messDb.getMsgForHtmlExport(dmId);
 	if (messageItems.empty()) {
 		return QString();
 	}
@@ -211,7 +211,7 @@ QString DlgCorrespondenceOverview::msgInCsv(int dmId) const
 		return QString();
 	}
 
-	QList<QString> messageItems = m_messDb.getMsgForCsvExport(dmId);
+	QStringList messageItems = m_messDb.getMsgForCsvExport(dmId);
 	if (messageItems.empty()) {
 		return QString();
 	}
