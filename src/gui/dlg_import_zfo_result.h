@@ -13,12 +13,14 @@ public:
 	ImportZFOResultDialog(int filesCnt,
 	    QList<QPair<QString,QString>> errImportList,
 	    QList<QPair<QString,QString>> succImportList,
+	    QList<QPair<QString,QString>> existImportList,
 	    QWidget *parent = 0);
 
 private:
 	int m_filesCnt;
 	QList<QPair<QString,QString>> m_errImportList;
 	QList<QPair<QString,QString>> m_succImportList;
+	QList<QPair<QString,QString>> m_existImportList;
 };
 
 #endif // DLG_IMPORT_ZFO_RESULT_H

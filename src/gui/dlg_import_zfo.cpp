@@ -25,6 +25,8 @@ void ImportZFODialog::ImportFiles(void)
 		zfoType = IMPORT_MESSAGE_ZFO;
 	} else if (this->deliveryZFO->isChecked()) {
 		zfoType = IMPORT_DELIVERY_ZFO;
+	} else {
+		zfoType = IMPORT_ALL_ZFO;
 	}
 
 	if (this->radioImportAll->isChecked()) {

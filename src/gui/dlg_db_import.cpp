@@ -38,14 +38,15 @@ DbImportDialog::DbImportDialog(QWidget *parent) :
 	    " advice you to back-up all important files before importing a "
 	    "database file. In order for the import to succeed you will need "
 	    "an active connection to the ISDS server."));
-	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(ImportDbFiles()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(ImportDbFilesAction()));
 }
 
-void DbImportDialog::ImportDbFiles(void)
+void DbImportDialog::ImportDbFilesAction(void)
 {
 	if (this->directory->isChecked()) {
-		emit returnDbAction(IMPORT_FROM_DIR);
+		emit returnDbAction(true);
 	} else {
-		emit returnDbAction(IMPORT_SEL_FILES);
+		emit returnDbAction(false);
 	}
 }

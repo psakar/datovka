@@ -66,6 +66,7 @@ public:
 	class accountDataStruct {
 	public:
 		QString databoxID;
+		QString accountName;
 		QString username;
 		MessageDb *messageDb;
 		QModelIndex acntIndex;
@@ -253,7 +254,7 @@ private slots:
 	/*!
 	 * @brief Prepare import database directory.
 	 */
-	void prepareImportDatabase(int importType);
+	void prepareImportDatabase(bool fromDirectory);
 
 	/*!
 	 * @brief Proxy setting dialog.
@@ -338,32 +339,51 @@ private slots:
 	/*!
 	 * @brief Create ZFO file(s) list for import into database.
 	 */
-	void createZFOListForImport(int zfoType, int zfoAction);
+	void createZFOListForImport(int zfoType, int importType);
+
+ 	/*!
+	 * @brief Get message type of import ZFO file (message/delivery/unknown).
+	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
+	 */
+	int getMessageTypeFromZFO(QString file);
+
+	/*!
+	 * @brief Create account info for ZFO file(s) import into database.
+	 */
+	 QList<accountDataStruct> createAccountInfoForZFOImport(void);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
 	 */
-	void prepareImportZFOintoDatabase(const QStringList &files,
-	    int zfoType);
+	void prepareZFOImportIntoDatabase(const QStringList &files, int zfoType);
 
 	/*!
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
-	void importDeliveryInfoZFO(const QList<accountDataStruct> &accountList,
-	    const QStringList &files);
+	void importDeliveryInfoZFO(
+	    const QList<accountDataStruct> &accountList,
+	    const QStringList &files,
+	    QList<QPair<QString,QString>> &successFilesList,
+	    QList<QPair<QString,QString>> &existFilesList,
+	    QList<QPair<QString,QString>> &errorFilesList);
 
 	/*!
 	 * @brief Import only message ZFO file(s) into database.
 	 */
-	void importMessageZFO(const QList<accountDataStruct> &accountList,
-	    const QStringList &files);
+	void importMessageZFO(
+	    const QList<accountDataStruct> &accountList,
+	    const QStringList &files,
+	    QList<QPair<QString,QString>> &successFilesList,
+	    QList<QPair<QString,QString>> &existFilesList,
+	    QList<QPair<QString,QString>> &errorFilesList);
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
 	void showNotificationDialogWithResult(int filesCnt,
-	    const QList<QPair<QString,QString>> &errorImportList,
-	    const QList<QPair<QString,QString>> &successImportList);
+	    const QList<QPair<QString,QString>> &successFilesList,
+	    const QList<QPair<QString,QString>> &existFilesList,
+	    const QList<QPair<QString,QString>> &errorFilesList);
 
 	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.

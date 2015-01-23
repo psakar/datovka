@@ -16,6 +16,7 @@ public:
 	};
 
 	enum ZFOtype {
+		IMPORT_ALL_ZFO,
 		IMPORT_MESSAGE_ZFO,
 		IMPORT_DELIVERY_ZFO
 	};
