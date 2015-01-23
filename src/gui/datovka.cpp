@@ -705,7 +705,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
+#ifdef PORTABLE_APPLICATION
 	QAction *action;
+#endif /* PORTABLE_APPLICATION */
 
 	if (index.isValid()) {
 		menu->addAction(
@@ -737,10 +739,13 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    tr("Move account down"),
 		    this, SLOT(moveSelectedAccountDown()));
 		menu->addSeparator();
-		action = menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "folder_16.png"),
-		    tr("Change data directory"),
-		    this, SLOT(changeDataDirectory()));
+#ifdef PORTABLE_APPLICATION
+		action =
+#endif /* PORTABLE_APPLICATION */
+		    menu->addAction(
+		        QIcon(ICON_3PARTY_PATH "folder_16.png"),
+		        tr("Change data directory"),
+		        this, SLOT(changeDataDirectory()));
 #ifdef PORTABLE_APPLICATION
 		action->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
