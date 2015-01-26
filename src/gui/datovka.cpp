@@ -1744,12 +1744,10 @@ void MainWindow::accountItemMarkAllRead(void)
 
 	int count = msgTblMdl->rowCount();
 
-	if (0 != msgTblMdl) {
-		for (int i = 0; i < count; i++) {
-			QModelIndex index = msgTblMdl->index(i, 0);
-			int msgId = msgTblMdl->itemData(index).first().toInt();
-			messageDb->smsgdtSetLocallyRead(msgId);
-		}
+	for (int i = 0; i < count; ++i) {
+		QModelIndex index = msgTblMdl->index(i, 0);
+		int msgId = msgTblMdl->itemData(index).first().toInt();
+		messageDb->smsgdtSetLocallyRead(msgId);
 	}
 
 	/* Regenerate account tree. */
