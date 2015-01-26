@@ -498,7 +498,8 @@ sent reply on this message</string>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
     <addaction name="separator"/>
-    <addaction name="actionDelete_message"/>
+    <addaction name="actionDelete_message_from_db"/>
+    <addaction name="actionDelete_message_from_server"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -509,6 +510,7 @@ sent reply on this message</string>
     <addaction name="actionAuthenticate_message_file"/>
     <addaction name="actionView_message_from_ZPO_file"/>
     <addaction name="actionExport_correspondence_overview"/>
+    <addaction name="actionImport_ZFO_file_into_database"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -986,13 +988,13 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionDelete_message">
+  <action name="actionDelete_message_from_db">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
    </property>
    <property name="text">
-    <string>Delete message</string>
+    <string>Delete message from local database</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1080,6 +1082,24 @@ sent reply on this message</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionImport_ZFO_file_into_database">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import ZFO file(s) into database</string>
+   </property>
+  </action>
+  <action name="actionDelete_message_from_server">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete message from server and local database</string>
    </property>
   </action>
  </widget>

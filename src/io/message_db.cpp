@@ -2477,7 +2477,41 @@ fail:
 
 /* ========================================================================= */
 /*
- * Insert message envelope into messages table
+ * Check if delivery info exists in the table.
+ */
+bool MessageDb::isDeliveryInfoRawDb(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT count(*) FROM raw_delivery_info_data "
+	    "WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return 0 < query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert message envelope into messages table.
  */
 bool MessageDb::msgsInsertMessageEnvelope(int dmId,
     const QString &_origin, const QString &dbIDSender,

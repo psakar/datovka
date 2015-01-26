@@ -34,18 +34,12 @@ class DbImportDialog : public QDialog, public Ui::DbImport
 	Q_OBJECT
 
 public:
-	enum DbAction {
-		IMPORT_FROM_DIR,
-		IMPORT_SEL_FILES
-	};
-
-public:
 	DbImportDialog(QWidget *parent = 0);
 signals:
-	void returnDbAction(int);
+	void returnDbAction(bool);
 
 private slots:
-	void ImportDbFiles(void);
+	void ImportDbFilesAction(void);
 };
 
 

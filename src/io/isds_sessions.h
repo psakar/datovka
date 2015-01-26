@@ -200,6 +200,6 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
  * @return Pointer to message structure, NULL on error.
  */
 struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
-    const QString &fName);
+    const QString &fName, int zfoType);
 
 #endif /* _ISDS_SESSIONS_H_ */
