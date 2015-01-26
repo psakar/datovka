@@ -660,9 +660,11 @@ bool Worker::getMessageState(const QModelIndex &acntTopIdx,
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
 		return false;
+		/*
 		status = isds_get_delivery_info(isdsSessions.session(
 		    accountInfo.userName()), dmId.toStdString().c_str(),
 		    &message);
+		*/
 	}
 
 	if (IE_SUCCESS != status) {
@@ -1093,9 +1095,11 @@ bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
 		return false;
+		/*
 		status = isds_get_delivery_info(isdsSessions.session(
 		    accountInfo.userName()), dmId.toStdString().c_str(),
 		    &message);
+		*/
 	}
 
 	if (IE_SUCCESS != status) {
