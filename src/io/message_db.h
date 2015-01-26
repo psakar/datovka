@@ -742,7 +742,7 @@ protected:
 	bool moveDb(const QString &newFileName);
 
 	/*!
-	 * @brief Open a new different database file.
+	 * @brief Open a new empty database file.
 	 *
 	 * @note The old database file is left untouched.
 	 */
@@ -822,6 +822,11 @@ public:
 
 	/*!
 	 * @brief Access/create+open message database related to item.
+	 *
+	 * @param[in] key      Part of database file name, usually the login.
+	 * @param[in] locDir   Directory where to search for the file.
+	 * @param[in] testing  True for testing accounts.
+	 * @return Pointer to database, zero pointer on error.
 	 */
 	MessageDb * accessMessageDb(const QString &key, const QString &locDir,
 	    bool testing);
@@ -830,7 +835,7 @@ public:
 	 * @brief Creates a copy of the current database into a given new
 	 *     directory.
 	 *
-	 * @param[in] newLocDir New location directory.
+	 * @param[in] newLocDir  New location directory.
 	 * @return True if database was copied and re-opened.
 	 */
 	bool copyMessageDb(MessageDb *db, const QString &newLocDir);
@@ -844,7 +849,8 @@ public:
 	bool moveMessageDb(MessageDb *db, const QString &newLocDir);
 
 	/*!
-	 * @brief Re-open a new database file. The old file is left untouched.
+	 * @brief Re-open a new empty database file. The old file is left
+	 *     untouched.
 	 *
 	 * @param[in] newLocDir New location directory.
 	 * @return True if database was re-opened.
@@ -873,17 +879,6 @@ public:
 	static
 	bool dbDriverSupport(void);
 
-#if 0
-	/*!
-	 * @brief Close message database related to item.
-	 */
-	void closeMessageDb(const QString &key);
-
-	/*!
-	 * @brief Delete message db.
-	 */
-	void deleteMessageDb(const QString &key);
-#endif
 private:
 	/*!
 	 * @brief Creates the database name from supplied information.

@@ -3738,7 +3738,6 @@ bool MessageDb::msgsSetVerified(int dmId, bool verified)
 	queryStr = "UPDATE messages "
 	    "SET is_verified = :verified WHERE "
 	    "dmID = :dmId";
-	qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
@@ -4034,7 +4033,7 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 /* ========================================================================= */
 /*
- * Open a new different database file.
+ * Open a new empty database file.
  */
 bool MessageDb::reopenDb(const QString &newFileName)
 /* ========================================================================= */
@@ -4419,11 +4418,9 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 
 	/* Already opened. */
 	if (this->find(key) != this->end()) {
-		// qDebug() << key << "db found";
 		return (*this)[key];
 	}
 
-	// qDebug() << "creating new" << key;
 	db = new(std::nothrow) MessageDb(key);
 	Q_ASSERT(NULL != db);
 	if (NULL == db) {
@@ -4518,7 +4515,8 @@ bool dbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 
 /* ========================================================================= */
 /*
- * Re-open a new database file. The old file is left untouched.
+ * Re-open a new empty database file. The old file is left
+ *     untouched.
  */
 bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
@@ -4554,7 +4552,7 @@ bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /*
  * Delete message db.
  */
-bool dbContainer::deleteMessageDb(MessageDb * db)
+bool dbContainer::deleteMessageDb(MessageDb *db)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -4583,10 +4581,12 @@ bool dbContainer::deleteMessageDb(MessageDb * db)
 	delete db;
 
 	/* Delete file. */
-	qDebug() << "Deleting database file" << fileName;
+	logInfo("Deleting database file '%s'.\n",
+	    fileName.toUtf8().constData());
 
 	if (!QFile::remove(fileName)) {
-		qWarning() << "Failed deleting database file" << fileName;
+		logError("Failed deleting database file '%s'.\n",
+		    fileName.toUtf8().constData());
 		return false;
 	}
 
