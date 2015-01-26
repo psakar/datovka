@@ -53,6 +53,7 @@ private slots:
 	void enableOkButton(void);
 	void searchDataBox(void);
 	void pingIsdsServer(void);
+	void setFirtsColumnActive(void);
 
 private:
 	QTimer *pingTimer;

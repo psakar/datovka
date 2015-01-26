@@ -100,6 +100,10 @@ void DlgDsSearch::initSearchWindow(void)
 	this->resultsTableWidget->setColumnWidth(2,120);
 	this->resultsTableWidget->setColumnWidth(3,100);
 
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemSelectionChanged()), this,
+	    SLOT(setFirtsColumnActive()));
+
 	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 	connect(this->iCLineEdit, SIGNAL(textChanged(QString)),
@@ -131,6 +135,19 @@ void DlgDsSearch::initSearchWindow(void)
 	    SLOT(pingIsdsServer()));
 
 	checkInputFields();
+}
+
+
+/* ========================================================================= */
+/*
+ * Set first column with checkbox active if item was changed
+ */
+void DlgDsSearch::setFirtsColumnActive(void)
+/* ========================================================================= */
+{
+	this->resultsTableWidget->selectColumn(0);
+	this->resultsTableWidget->selectRow(
+	    this->resultsTableWidget->currentRow());
 }
 
 
@@ -477,6 +494,12 @@ void DlgDsSearch::addContactsToTable(
 		item->setText(contactList[i].at(4));
 		this->resultsTableWidget->setItem(row,5,item);
 	}
+
+	if (this->resultsTableWidget->rowCount() > 0) {
+		this->resultsTableWidget->selectColumn(0);
+		this->resultsTableWidget->selectRow(0);
+	}
+
 }
 
 
