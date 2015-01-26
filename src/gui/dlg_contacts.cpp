@@ -55,6 +55,9 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 	connect(this->contactTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
+	connect(this->contactTableWidget,
+	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
 	connect(this->clearPushButton, SIGNAL(clicked()), this,
 	    SLOT(clearContactText()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,

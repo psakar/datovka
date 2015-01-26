@@ -112,6 +112,9 @@ void DlgDsSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->resultsTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
 	    this, SLOT(enableOkButton()));
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(insertDsItems()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
