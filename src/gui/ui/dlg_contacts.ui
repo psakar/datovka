@@ -35,7 +35,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="filterLineEdit"/>
+      <widget class="QLineEdit" name="filterLineEdit">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="clearPushButton">

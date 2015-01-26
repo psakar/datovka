@@ -50,6 +50,7 @@ private slots:
 	void fillContactsFromMessageDb(void);
 	void enableOkButton(void);
 	void insertDsItems(void);
+	void setFirtsColumnActive(void);
 
 private:
 	bool isInRecipientTable(const QString &idDs) const;

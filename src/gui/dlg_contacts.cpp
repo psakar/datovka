@@ -50,6 +50,15 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 
 	fillContactsFromMessageDb();
 
+	if (this->contactTableWidget->rowCount() > 0) {
+
+		this->contactTableWidget->selectColumn(0);
+		this->contactTableWidget->selectRow(0);
+	}
+
+	connect(this->contactTableWidget,
+	    SIGNAL(itemSelectionChanged()), this,
+	    SLOT(setFirtsColumnActive()));
 	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
 	connect(this->contactTableWidget,
@@ -65,6 +74,19 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+
+/* ========================================================================= */
+/*
+ * Set first column with checkbox active if item was changed
+ */
+void DlgContacts::setFirtsColumnActive(void)
+/* ========================================================================= */
+{
+	this->contactTableWidget->selectColumn(0);
+	this->contactTableWidget->selectRow(
+	    this->contactTableWidget->currentRow());
 }
 
 
