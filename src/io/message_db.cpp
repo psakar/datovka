@@ -2708,7 +2708,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	}
 
 	queryStr = "UPDATE supplementary_message_data SET "
-	    "message_type = :message_type, "
+	    "message_type = :message_type "
 	    "WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
