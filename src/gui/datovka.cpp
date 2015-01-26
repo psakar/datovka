@@ -5416,6 +5416,8 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							import = true;
+							/* update message state into database */
+							accountList.at(j).messageDb->msgSetProcessState(dmId, SETTLED, false);
 							pInfoText += tr("Imported as received message "
 							    "\"%1\" into account \"%2\".").
 							    arg(dmId).arg(accountList.at(j).accountName);
