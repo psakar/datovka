@@ -736,11 +736,14 @@ protected:
 
 	/*!
 	 * @brief Move db.
+	 *
+	 * @param[in] newFileName  New location name.
+	 * @return True on success.
 	 */
 	bool moveDb(const QString &newFileName);
 
 	/*!
-	 * @brief Re-open a different database file.
+	 * @brief Open a new different database file.
 	 *
 	 * @note The old database file is left untouched.
 	 */
@@ -748,6 +751,10 @@ protected:
 
 	/*!
 	 * @brief Add/update message certificate in database.
+	 *
+	 * @brief[in] dmId       Message identifier.
+	 * @brief[in] crtBase64  Base64-encoded certificate.
+	 * @return True on success.
 	 */
 	bool msgsInsertUpdateMessageCertBase64(int dmId,
 	    const QByteArray &crtBase64);
@@ -771,11 +778,18 @@ private:
 
 	/*!
 	 * @brief Returns verification date (in local time).
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message verification date. Invalid value is returned on
+	 *     error.
 	 */
 	QDateTime msgsVerificationDate(int dmId) const;
 
 	/*!
 	 * @brief Read data from supplementary message data table.
+	 *
+	 * @brief msgId  Message identifier.
+	 * @return Stored json document data. Returns empty document on error.
 	 */
 	QJsonDocument smsgdCustomData(int msgId) const;
 

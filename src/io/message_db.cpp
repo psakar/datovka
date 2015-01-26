@@ -3949,7 +3949,7 @@ bool MessageDb::copyDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	logInfo("Moving database file '%s' to location '%s'.\n",
+	logInfo("Copying database file '%s' to location '%s'.\n",
 	    oldFileName.toUtf8().constData(),
 	    newFileName.toUtf8().constData());
 
@@ -3986,140 +3986,6 @@ bool MessageDb::copyDb(const QString &newFileName)
 
 /* ========================================================================= */
 /*
- * Add/update message certificate in database.
- */
-bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
-    const QByteArray &crtBase64)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	int certId;
-
-	/* Search for certificate in 'certificate_data' table. */
-	QString queryStr = "SELECT id FROM certificate_data WHERE "
-	    "der_data = :der_data";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":der_data", crtBase64);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			certId = query.value(0).toInt(); /* Found. */
-		} else {
-			certId = -1; /* Not found. */
-		}
-	}
-
-	/* If certificate was not found. */
-	if (certId < 0) {
-		/* Create unique certificate identifier. */
-		queryStr = "SELECT max(id) from certificate_data";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-		if (!query.exec()) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		} else {
-			query.first();
-			if (query.isValid()) {
-				certId = query.value(0).toInt();
-			} else {
-				certId = -1;
-			}
-		}
-		if (certId <= 0) {
-			certId = 1; /* First certificate. */
-		} else {
-			++certId;
-		}
-
-		/* Insert missing certificate. */
-		queryStr = "INSERT INTO certificate_data "
-		    "(id, der_data) VALUES (:id, :der_data)";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-		query.bindValue(":id", certId);
-		query.bindValue(":der_data", crtBase64);
-		if (!query.exec()) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-	}
-
-	/*
-	 * Abort operation if there is still no matching certificate available.
-	 */
-	if (certId <= 0) {
-		return false;
-	}
-
-	/*
-	 * Tie certificate to message. Find whether there is already
-	 * an entry for the message.
-	 */
-	bool entryFound = false;
-	queryStr = "SELECT * FROM message_certificate_data WHERE"
-	    " message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.first();
-	entryFound = query.isValid();
-	/*
-	 * Create or update message entry depending on whether a corresponding
-	 * entry was found.
-	 */
-	if (entryFound) {
-		queryStr = "UPDATE message_certificate_data SET "
-		    "certificate_id = :certificate_id WHERE "
-		    "message_id = :message_id";
-	} else {
-		queryStr = "INSERT INTO message_certificate_data "
-		    "(message_id, certificate_id) VALUES "
-		    "(:message_id, :certificate_id)";
-	}
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	query.bindValue(":certificate_id", certId);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
  * Move db.
  */
 bool MessageDb::moveDb(const QString &newFileName)
@@ -4132,11 +3998,16 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	qDebug() << oldFileName << "-move->" << newFileName;
+	logInfo("Moving database file '%s' to location '%s'.\n",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
 	if (oldFileName == newFileName) {
+		logWarning("Moving of database file '%s' aborted. "
+		    "Target and source are equal.\n",
+		    oldFileName.toUtf8().constData());
 		return false;
 	}
 
@@ -4150,9 +4021,12 @@ bool MessageDb::moveDb(const QString &newFileName)
 	open_ret = openDb(move_ret ? newFileName : oldFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
-		qDebug() << "File" << (move_ret ? newFileName : oldFileName)
-		    << "could not be opened.";
+		logError("File '%s' could not be opened.\n",
+		    move_ret ?
+		        newFileName.toUtf8().constData() :
+		        oldFileName.toUtf8().constData());
 		/* TODO -- qFatal() ? */
+		return false;
 	}
 
 	return move_ret;
@@ -4161,7 +4035,7 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 /* ========================================================================= */
 /*
- * Re-open a different database file.
+ * Open a new different database file.
  */
 bool MessageDb::reopenDb(const QString &newFileName)
 /* ========================================================================= */
@@ -4173,11 +4047,16 @@ bool MessageDb::reopenDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	qDebug() << oldFileName << "-reopen->" << newFileName;
+	logInfo("Closing database file '%s' re-opening file '%s'.\n",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
 	if (oldFileName == newFileName) {
+		logWarning("Re-opening of database file '%s' aborted. "
+		    "Target and source are equal.\n",
+		    oldFileName.toUtf8().constData());
 		return false;
 	}
 
@@ -4190,15 +4069,155 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	/* Open database. */
 	if (!reopen_ret) {
 		open_ret = openDb(oldFileName);
-		Q_ASSERT(open_ret);
 		if (!open_ret) {
-			qDebug() << "File" << oldFileName
-			    << "could not be opened.";
+			logError("File '%s' could not be opened.\n",
+			    oldFileName.toUtf8().constData());
 			/* TODO -- qFatal() ? */
+			return false;
 		}
 	}
 
 	return reopen_ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Add/update message certificate in database.
+ */
+bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
+    const QByteArray &crtBase64)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int certId = -1;
+	bool certEntryFound = false;
+
+	/* Search for certificate in 'certificate_data' table. */
+	QString queryStr = "SELECT id FROM certificate_data WHERE "
+	    "der_data = :der_data";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":der_data", crtBase64);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			certId = query.value(0).toInt(); /* Found. */
+		} else {
+			certId = -1; /* Not found. */
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* If certificate was not found. */
+	if (-1 == certId) {
+		/* Create unique certificate identifier. */
+		queryStr = "SELECT max(id) from certificate_data";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			query.first();
+			if (query.isValid()) {
+				certId = query.value(0).toInt();
+			} else {
+				certId = -1;
+			}
+		} else {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+
+		if (-1 == certId) {
+			certId = 1; /* First certificate. */
+		} else {
+			++certId;
+		}
+
+		/* Insert missing certificate. */
+		queryStr = "INSERT INTO certificate_data "
+		    "(id, der_data) VALUES (:id, :der_data)";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		query.bindValue(":id", certId);
+		query.bindValue(":der_data", crtBase64);
+		if (!query.exec()) {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	/*
+	 * Abort operation if there is still no matching certificate available.
+	 */
+	if (-1 == certId) {
+		return false;
+	}
+
+	/*
+	 * Tie certificate to message. Find whether there is already
+	 * an entry for the message.
+	 */
+	queryStr = "SELECT * FROM message_certificate_data WHERE"
+	    " message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		certEntryFound = query.isValid();
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/*
+	 * Create or update message entry depending on whether a corresponding
+	 * entry was found.
+	 */
+	if (certEntryFound) {
+		queryStr = "UPDATE message_certificate_data SET "
+		    "certificate_id = :certificate_id WHERE "
+		    "message_id = :message_id";
+	} else {
+		queryStr = "INSERT INTO message_certificate_data "
+		    "(message_id, certificate_id) VALUES "
+		    "(:message_id, :certificate_id)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":certificate_id", certId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
 }
 
 
@@ -4257,7 +4276,7 @@ void MessageDb::createEmptyMissingTables(void)
 
 /* ========================================================================= */
 /*
- * Returns verification date (in localtime).
+ * Returns verification date (in local time).
  */
 QDateTime MessageDb::msgsVerificationDate(int dmId) const
 /* ========================================================================= */
@@ -4272,24 +4291,33 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 		    "download_date"
 		    " FROM supplementary_message_data WHERE "
 		    "message_id = :dmId";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 		query.bindValue(":dmId", dmId);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
-			// qDebug() << "dateTime" << query.value(0).toString();
 			QDateTime dateTime =
 			    dateTimeFromDbFormat(query.value(0).toString());
 
 			if (dateTime.isValid()) {
 				return dateTime;
 			}
+		} else {
+			logError(
+			    "Cannot execute SQL query and/or read SQL data: "
+			    "%s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 
 	return QDateTime::currentDateTime();
+
+fail:
+	return QDateTime();
 }
 
 
@@ -4308,9 +4336,10 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 	    "custom_data"
 	    " FROM supplementary_message_data WHERE "
 	    "message_id = :msgId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":msgId", msgId);
 	if (query.exec() && query.isActive()) {
@@ -4319,9 +4348,16 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 			jsonDoc = QJsonDocument::fromJson(
 			    query.value(0).toByteArray());
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	return jsonDoc;
+
+fail:
+	return QJsonDocument();
 }
 
 
