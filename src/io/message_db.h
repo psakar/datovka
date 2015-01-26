@@ -37,7 +37,6 @@
 #include <QStringList>
 #include <QSqlDatabase>
 #include <QSqlQueryModel>
-#include <QSslCertificate>
 #include <QString>
 #include <QVariant>
 #include <QVector>
@@ -792,11 +791,6 @@ private:
 	 * @return Stored json document data. Returns empty document on error.
 	 */
 	QJsonDocument smsgdCustomData(int msgId) const;
-
-	/*!
-	 * @brief Certificates related to given message.
-	 */
-	QList<QSslCertificate> msgCerts(int dmId) const;
 
 	/*!
 	 * @brief Check whether message signature was valid at given date

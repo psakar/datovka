@@ -42,7 +42,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
-#include <QSslCertificate>
 #include <QString>
 #include <QTimeZone>
 #include <QVariant>
@@ -4358,76 +4357,6 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 
 fail:
 	return QJsonDocument();
-}
-
-
-/* ========================================================================= */
-/*
- * Certificates related to given message.
- */
-QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
-/* ========================================================================= */
-{
-	QList<QSslCertificate> certList;
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<int> certIds;
-
-	queryStr = "SELECT "
-	    "certificate_id"
-	    " FROM message_certificate_data WHERE "
-	    "message_id = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			bool ok;
-			int ret;
-			ret = query.value(0).toInt(&ok);
-			Q_ASSERT(ok);
-			if (ok) {
-				certIds.append(ret);
-			}
-		}
-	}
-
-	if (certIds.size() > 0) {
-		queryStr = "SELECT "
-		    "der_data"
-		    " FROM certificate_data WHERE ";
-		for (int i = 0; i < (certIds.size() - 1); ++i) {
-			queryStr += "(id = ?) or ";
-		}
-		queryStr += "(id = ?)";
-		//qDebug() << queryStr;
-		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
-		}
-		for (int i = 0; i < certIds.size(); ++i) {
-			query.addBindValue(certIds[i]);
-		}
-		if (query.exec() && query.isActive()) {
-			query.first();
-			while (query.isValid()) {
-				QList<QSslCertificate> certs =
-				    QSslCertificate::fromData(
-				        QByteArray::fromBase64(
-				            query.value(0).toByteArray()),
-				        QSsl::Der);
-				Q_ASSERT(1 == certs.size());
-
-				certList.append(certs.first());
-
-				query.next();
-			}
-		}
-	}
-
-	return certList;
 }
 
 
