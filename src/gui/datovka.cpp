@@ -797,7 +797,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
-#define MARK_READ_TIMEOUT_MS 5000
 	debugSlotCall();
 
 	/* If the row has not been changed then do nothing. */
@@ -861,7 +860,8 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			    << "Starting timer to mark as read for message"
 			    << msgId;
 			m_messageMarker.setSingleShot(true);
-			m_messageMarker.start(MARK_READ_TIMEOUT_MS);
+			m_messageMarker.start(
+			    globPref.message_mark_as_read_timeout);
 		} else {
 			m_messageMarker.stop();
 		}
@@ -918,7 +918,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	}
 
 	/* TODO */
-#undef MARK_READ_TIMEOUT_MS
 }
 
 
