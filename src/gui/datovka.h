@@ -124,6 +124,11 @@ private slots:
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
+	 * @brief Used for toggling the message read state.
+	 */
+	void messageItemClicked(const QModelIndex &index);
+
+	/*!
 	 * @brief Generates menu to selected message item.
 	 *     (And redraws widgets.)
 	 */

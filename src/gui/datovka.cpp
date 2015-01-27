@@ -555,6 +555,13 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
+	/*
+	 * Disconnect message clicked. This slot will be enabled only for
+	 * received messages.
+	 */
+	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
+	    this, SLOT(messageItemClicked(QModelIndex)));
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
@@ -567,6 +574,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
@@ -585,6 +594,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSent:
 		msgTblMdl = messageDb->msgsSntModel(dbId);
@@ -597,6 +608,8 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
@@ -849,30 +862,6 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			    << msgId;
 			m_messageMarker.setSingleShot(true);
 			m_messageMarker.start(MARK_READ_TIMEOUT_MS);
-#if 0
-			messageDb->smsgdtSetLocallyRead(msgId);
-			/*
-			 * Reload/update account model only for
-			 * affected account.
-			 */
-			updateExistingAccountModelUnread(ui->accountList->
-			    selectionModel()->currentIndex());
-			/*
-			 * Mark message as read without reloading
-			 * the whole model.
-			 */
-			DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-			    m_messageListProxyModel.sourceModel();
-			Q_ASSERT(0 != messageModel);
-			messageModel->overrideRead(
-			    current.sibling(current.row(),
-			        0).data().toInt(), true);
-			/* Inform the view that the model has changed. */
-			emit messageModel->dataChanged(
-			    current.sibling(current.row(), 0),
-			    current.sibling(current.row(),
-			        messageModel->columnCount() - 1));
-#endif
 		} else {
 			m_messageMarker.stop();
 		}
@@ -930,6 +919,55 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 	/* TODO */
 #undef MARK_READ_TIMEOUT_MS
+}
+
+
+/* ========================================================================= */
+/*
+ * Used for toggling the message read state.
+ */
+void MainWindow::messageItemClicked(const QModelIndex &index)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	if (DbMsgsTblModel::READLOC_COL != index.column()) {
+		qDebug() << "Not clicked read locally.";
+		return;
+	}
+
+	/* Stop the timer. */
+	m_messageMarker.stop();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	int msgId = index.sibling(index.row(), 0).data().toInt();
+
+	/* Get message state from database and toggle the value. */
+	bool isRead = messageDb->smsgdtLocallyRead(msgId);
+	messageDb->smsgdtSetLocallyRead(msgId, !isRead);
+
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
+
+	/*
+	 * Mark message as read without reloading
+	 * the whole model.
+	 */
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	messageModel->overrideRead(msgId, !isRead);
+	/* Inform the view that the model has changed. */
+	emit messageModel->dataChanged(
+	    index.sibling(index.row(), 0),
+	    index.sibling(index.row(), messageModel->columnCount() - 1));
 }
 
 
