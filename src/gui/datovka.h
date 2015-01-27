@@ -341,7 +341,7 @@ private slots:
 	 */
 	void createZFOListForImport(int zfoType, int importType);
 
- 	/*!
+	/*!
 	 * @brief Get message type of import ZFO file (message/delivery/unknown).
 	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
 	 */
