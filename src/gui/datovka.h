@@ -124,6 +124,11 @@ private slots:
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
+	 * @brief Used for toggling the message read state.
+	 */
+	void messageItemClicked(const QModelIndex &index);
+
+	/*!
 	 * @brief Generates menu to selected message item.
 	 *     (And redraws widgets.)
 	 */
@@ -480,6 +485,11 @@ private slots:
 	 */
 	void msgSetSelectedMessageProcessState(int state);
 
+	/*!
+	 * @brief Mark selected message as read.
+	 */
+	void msgSetSelectedMessageRead(void);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
@@ -778,6 +788,7 @@ private:
 	                                                * filtering.
 	                                                */
 
+	QTimer m_messageMarker; /*!< Used for marging messages as read. */
 	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	long m_lastStoredMessageId; /*!< Last stored message selection. */
 

@@ -98,11 +98,6 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
 }
 
 
-#define READLOC_COL 5 /* Read locally. */
-#define ATTDOWN_COL 6 /* Attachment downloaded. */
-#define PROCSNG_COL 7 /* Processing state. */
-
-
 /* ========================================================================= */
 /*
  * Used for data conversion on display.
@@ -145,8 +140,9 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				int dmId = QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-				if (m_overriddenRL.value(dmId, false) ||
-				    QSqlQueryModel::data(index).toBool()) {
+				if (m_overriddenRL.value(dmId,
+				        QSqlQueryModel::data(
+				            index).toBool())) {
 					return QIcon(
 					    ICON_16x16_PATH "grey.png");
 				} else {
@@ -213,9 +209,9 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
 			    Qt::DisplayRole).toInt();
-			if ((!QSqlQueryModel::data(index.sibling(index.row(),
-			         READLOC_COL)).toBool()) &&
-			    (!m_overriddenRL.value(dmId, false))) {
+			if (!m_overriddenRL.value(dmId,
+			        QSqlQueryModel::data(index.sibling(index.row(),
+			            READLOC_COL)).toBool())) {
 				/* Unread messages are shown bold. */
 				QFont boldFont;
 				boldFont.setBold(true);
@@ -248,7 +244,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
 				qint64 id;
-				id = (m_overriddenRL.value(dmId, false) ||
+				id = m_overriddenRL.value(dmId,
 				    QSqlQueryModel::data(index,
 				        Qt::DisplayRole).toBool()) ? 1 : 0;
 				id = id << 48;
@@ -392,11 +388,6 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 	}
 }
-
-
-#undef READLOC_COL
-#undef ATTDOWN_COL
-#undef PROCSNG_COL
 
 
 /* ========================================================================= */

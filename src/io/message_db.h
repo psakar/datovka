@@ -60,6 +60,12 @@ enum sorting {
  */
 class DbMsgsTblModel : public QSqlQueryModel {
 public:
+	enum ColumnNumbers {
+		READLOC_COL = 5, /* Read locally. */
+		ATTDOWN_COL = 6, /* Attachment downloaded. */
+		PROCSNG_COL = 7  /* Processing state. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 */
@@ -68,7 +74,8 @@ public:
 	/*!
 	 * @brief Convert viewed data in date/time columns.
 	 */
-	virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual QVariant data(const QModelIndex &index,
+	    int role = Qt::DisplayRole) const;
 
 	/*!
 	 * @brief Convert viewed header data.

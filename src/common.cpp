@@ -81,7 +81,8 @@ GlobPreferences::GlobPreferences(void)
     download_at_start(false),
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
-    after_start_select(SELECT_NEWEST)
+    after_start_select(SELECT_NEWEST),
+    message_mark_as_read_timeout(5000)
 {
 }
 
