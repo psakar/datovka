@@ -480,6 +480,11 @@ private slots:
 	 */
 	void msgSetSelectedMessageProcessState(int state);
 
+	/*!
+	 * @brief Mark selected message as read.
+	 */
+	void msgSetSelectedMessageRead(void);
+
 private:
 
 	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
@@ -778,6 +783,7 @@ private:
 	                                                * filtering.
 	                                                */
 
+	QTimer m_messageMarker; /*!< Used for marging messages as read. */
 	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	long m_lastStoredMessageId; /*!< Last stored message selection. */
 

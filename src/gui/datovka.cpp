@@ -94,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
+    m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
     m_received_1(200),
@@ -258,6 +259,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connectTopMenuBarSlots();
 	connectTopToolBarSlots();
 	connectMessageActionBarSlots();
+
+	/* Message marking timer. */
+	connect(&m_messageMarker, SIGNAL(timeout()),
+	    this, SLOT(msgSetSelectedMessageRead()));
 
 	/* Initialisation of message download timer. */
 	connect(&m_timerSyncAccounts, SIGNAL(timeout()), this,
@@ -779,6 +784,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
+#define MARK_READ_TIMEOUT_MS 5000
 	debugSlotCall();
 
 	/* If the row has not been changed then do nothing. */
@@ -838,6 +844,12 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 		/* Mark message locally read. */
 		if (!messageDb->smsgdtLocallyRead(msgId)) {
+			qDebug()
+			    << "Starting timer to mark as read for message"
+			    << msgId;
+			m_messageMarker.setSingleShot(true);
+			m_messageMarker.start(MARK_READ_TIMEOUT_MS);
+#if 0
 			messageDb->smsgdtSetLocallyRead(msgId);
 			/*
 			 * Reload/update account model only for
@@ -860,6 +872,9 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 			    current.sibling(current.row(), 0),
 			    current.sibling(current.row(),
 			        messageModel->columnCount() - 1));
+#endif
+		} else {
+			m_messageMarker.stop();
 		}
 
 		/* Generate and show message information. */
@@ -914,6 +929,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	}
 
 	/* TODO */
+#undef MARK_READ_TIMEOUT_MS
 }
 
 
@@ -6896,4 +6912,46 @@ void MainWindow::msgSetSelectedMessageProcessState(int state)
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
 	    messageModel->columnCount() - 1));
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark selected message as read.
+ */
+void MainWindow::msgSetSelectedMessageRead(void)
+/* ========================================================================= */
+{
+	qDebug() << "Timer timed out, marking message"
+	    << m_lastSelectedMessageId << "as read.";
+
+	QModelIndex current = ui->messageList->
+	    selectionModel()->currentIndex();
+
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(current);
+	QString userName = accountUserName(accountItem);
+	MessageDb *messageDb = accountMessageDb(accountItem);
+
+	messageDb->smsgdtSetLocallyRead(m_lastSelectedMessageId);
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
+	/*
+	 * Mark message as read without reloading
+	 * the whole model.
+	 */
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+	messageModel->overrideRead(
+	    current.sibling(current.row(), 0).data().toInt(), true);
+	/* Inform the view that the model has changed. */
+	emit messageModel->dataChanged(
+	    current.sibling(current.row(), 0),
+	    current.sibling(current.row(),
+	        messageModel->columnCount() - 1));
 }
