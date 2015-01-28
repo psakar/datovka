@@ -1,3 +1,32 @@
+4.1.0 / 2015-01-28
+ * Message read status can be toggled when clicking on the green/grey ball.
+ * Messages are being marked as read only when they are being selected at
+   least for 5 seconds.
+ * Messages and delivery information can be imported into the databases
+   provided corresponding account exist.
+ * Added missing error messages to database code.
+ * Fixed bug causing new messages to be marked as being already read when
+   downloading whole new messages when synchronising accounts.
+ * Improved speed when downloading message list by introducing database
+   transactions.
+ * Added code support for OpenSSL internal locking.
+ * Fixed searching for contacts in message database.
+ * Enhancements in scripts for building library dependencies.
+ * Message identifier is being shown in exported PDF file.
+ * Sending of messages to multiple recipients is performed by sending a bunch
+   of individual messages. Multi-messages were causing troubles when combining
+   OVM and non-OVM recipients.
+ * Fixed bug in temporary file naming when opening message attachments in view
+   ZFO dialogue.
+ * Added short-cuts for create new message, create message reply and account
+   synchronisation.
+ * Application uses OS X native menus.
+ * Fixed error when application was using wrong Qt translation when set to
+   English localisation.
+ * Fixed memory leaks while constructing message before sending.
+ * Fixed potential bug in generating years in account view for received
+   messages.
+
 4.0.3 / 2015-01-13
  * Fixed bug where message processing state was not removed upon message
    deletion.
