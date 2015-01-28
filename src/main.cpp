@@ -30,6 +30,7 @@
 
 #include "src/common.h"
 #include "src/crypto/crypto.h"
+#include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_threadsafe.h"
 #include "src/gui/datovka.h"
 #include "src/io/db_tables.h"
@@ -151,6 +152,7 @@ int main(int argc, char *argv[])
 		 */
 		return EXIT_FAILURE;
 	}
+	crypto_init_threads();
 
 	{
 		/* Obey proxy settings. */
@@ -259,13 +261,14 @@ int main(int argc, char *argv[])
 		if (language == "cs") {
 			localisationFile += "cs";
 		} else if (language == "en") {
-			localisationFile += "uk";
+			localisationFile = QString();
 		} else {
 			/* Use system locale. */
 			localisationFile += QLocale::system().name();
 		}
 
-		if (!qtTranslator.load(localisationFile, localisationDir)) {
+		if (!localisationFile.isEmpty() &&
+		    !qtTranslator.load(localisationFile, localisationDir)) {
 			logWarning("Could not load localisation file '%s' "
 			    "from directory '%s'.\n",
 			    localisationFile.toStdString().c_str(),
@@ -299,6 +302,8 @@ int main(int argc, char *argv[])
 	diff = stop - start;
 	logInfo("Stopping at %lld.%03lld; ran for %lld.%03lld seconds.\n",
 	    stop / 1000, stop % 1000, diff / 1000, diff % 1000);
+
+	crypto_cleanup_threads();
 
 	return ret;
 }

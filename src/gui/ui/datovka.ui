@@ -3,9 +3,6 @@
  <author>CZ.NIC</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -32,9 +29,6 @@
   </property>
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
-  </property>
-  <property name="animated">
-   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralWidgetWindows">
    <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -442,9 +436,6 @@ sent reply on this message</string>
      <height>20</height>
     </rect>
    </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
-   </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
@@ -507,7 +498,8 @@ sent reply on this message</string>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
     <addaction name="separator"/>
-    <addaction name="actionDelete_message"/>
+    <addaction name="actionDelete_message_from_db"/>
+    <addaction name="actionDelete_message_from_server"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -518,6 +510,7 @@ sent reply on this message</string>
     <addaction name="actionAuthenticate_message_file"/>
     <addaction name="actionView_message_from_ZPO_file"/>
     <addaction name="actionExport_correspondence_overview"/>
+    <addaction name="actionImport_ZFO_file_into_database"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -574,6 +567,12 @@ sent reply on this message</string>
    <property name="text">
     <string>Sync all accounts</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAdd_account">
    <property name="icon">
@@ -583,6 +582,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Add account</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionDelete_account">
    <property name="icon">
@@ -591,6 +593,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Remove account</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionProxy_settings">
@@ -604,6 +609,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Proxy settings</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionPreferences">
    <property name="icon">
@@ -612,6 +620,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Preferences</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
    </property>
   </action>
   <action name="actionPrefs">
@@ -634,6 +645,9 @@ sent reply on this message</string>
    <property name="shortcut">
     <string>Ctrl+Q</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
   </action>
   <action name="actionImport_database_directory">
    <property name="icon">
@@ -642,6 +656,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Import database directory</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionGet_messages">
@@ -652,6 +669,12 @@ sent reply on this message</string>
    <property name="text">
     <string>Get messages</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionSend_message">
    <property name="icon">
@@ -660,6 +683,12 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Create message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionMark_all_as_read">
@@ -670,6 +699,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Mark all as read</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionChange_password">
    <property name="icon">
@@ -678,6 +710,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Change password</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionChange_pwd">
@@ -706,6 +741,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Account properties</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionMove_account_up">
    <property name="icon">
@@ -714,6 +752,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Move account up</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionMove_account_down">
@@ -724,6 +765,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Move account down</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionChange_data_directory">
    <property name="icon">
@@ -732,6 +776,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Change data directory</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionAbout_Datovka">
@@ -745,6 +792,9 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>About Datovka application</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
   </action>
   <action name="actionHelp">
    <property name="enabled">
@@ -756,6 +806,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Help index</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionUpdate">
@@ -778,6 +831,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Find Data Box</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAuthenticate_message_file">
    <property name="icon">
@@ -786,6 +842,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Authenticate message file</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionView_message_from_ZPO_file">
@@ -796,6 +855,9 @@ sent reply on this message</string>
    <property name="text">
     <string>View message from ZFO file</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionExport_correspondence_overview">
    <property name="icon">
@@ -804,6 +866,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Export correspondence overview</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionReceived_all">
@@ -880,6 +945,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Download message signed</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionReply">
    <property name="icon">
@@ -888,6 +956,12 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Reply to message</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionSignature_detail">
@@ -898,6 +972,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Signature details</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionAuthenticate_message">
    <property name="icon">
@@ -907,44 +984,68 @@ sent reply on this message</string>
    <property name="text">
     <string>Authenticate message</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
-  <action name="actionDelete_message">
+  <action name="actionDelete_message_from_db">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
    </property>
    <property name="text">
-    <string>Delete message</string>
+    <string>Delete message from local database</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionExport_as_ZFO">
    <property name="text">
     <string>Export message as ZFO</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionOpen_message_externally">
    <property name="text">
     <string>Open message externally</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionOpen_delivery_info_externally">
    <property name="text">
     <string>Open delivery info externally</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionExport_delivery_info_as_ZFO">
    <property name="text">
     <string>Export delivery info as ZFO</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionExport_delivery_info_as_PDF">
    <property name="text">
     <string>Export delivery info as PDF</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionExport_message_envelope_as_PDF">
    <property name="text">
     <string>Export message envelope as PDF</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionOpen_attachment">
@@ -955,6 +1056,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Open attachment</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionSave_attachment">
    <property name="icon">
@@ -964,6 +1068,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Save attachment</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionSave_all_attachments">
    <property name="icon">
@@ -972,6 +1079,27 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Save all attachments</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionImport_ZFO_file_into_database">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import ZFO file(s) into database</string>
+   </property>
+  </action>
+  <action name="actionDelete_message_from_server">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete message from server and local database</string>
    </property>
   </action>
  </widget>

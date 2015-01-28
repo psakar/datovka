@@ -62,6 +62,24 @@ public:
 	QLabel *statusDbMode;
 	QStatusBar *statusBar;
 
+	/* tmp account info struct for ZFO import */
+	class accountDataStruct {
+	public:
+		QString databoxID;
+		QString accountName;
+		QString username;
+		MessageDb *messageDb;
+		QModelIndex acntIndex;
+	};
+
+	enum isdsResult {
+		MSG_IS_IN_ISDS,
+		MSG_IS_NOT_IN_ISDS,
+		MSG_ISDS_ERROR,
+		MSG_FILE_ERROR
+	};
+
+
 protected:
 	/*!
 	 * Check if some worker is working on the background and show
@@ -70,6 +88,11 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 private slots:
+
+	/*!
+	 * @brief Clear info status bar if download of complete message fails.
+	 */
+	void clearInfoInStatusBarAndShowDialog(QString msgID);
 
 	/*!
 	 * @brief Version response slot.
@@ -99,6 +122,11 @@ private slots:
 	 */
 	void messageItemSelectionChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
+
+	/*!
+	 * @brief Used for toggling the message read state.
+	 */
+	void messageItemClicked(const QModelIndex &index);
 
 	/*!
 	 * @brief Generates menu to selected message item.
@@ -164,9 +192,14 @@ private slots:
 	void accountItemMarkAllRead(void);
 
 	/*!
-	 * @brief Deletes selected message from message list.
+	 * @brief Delete selected message from local database.
 	 */
-	void messageItemDeleteMessage(void);
+	void deleteMessageFromLocalDatabase(void);
+
+	/*!
+	 * @brief Delete selected message from local database and ISDS.
+	 */
+	void deleteMessageFromLocalDbAndIsds(void);
 
 	/*!
 	 * @brief Downloads new messages from server for all accounts.
@@ -226,7 +259,7 @@ private slots:
 	/*!
 	 * @brief Prepare import database directory.
 	 */
-	void prepareImportDatabase(int importType);
+	void prepareImportDatabase(bool fromDirectory);
 
 	/*!
 	 * @brief Proxy setting dialog.
@@ -302,6 +335,66 @@ private slots:
 	 * @brief Export correspondence overview dialog.
 	 */
 	void exportCorrespondenceOverview(void);
+
+	/*!
+	 * @brief Show dialog with settings of import ZFO file(s) into database.
+	 */
+	void showImportZFOActionDialog(void);
+
+	/*!
+	 * @brief Create ZFO file(s) list for import into database.
+	 */
+	void createZFOListForImport(int zfoType, int importType);
+
+	/*!
+	 * @brief Get message type of import ZFO file (message/delivery/unknown).
+	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
+	 */
+	int getMessageTypeFromZFO(QString file);
+
+	/*!
+	 * @brief Create account info for ZFO file(s) import into database.
+	 */
+	 QList<accountDataStruct> createAccountInfoForZFOImport(void);
+
+	/*!
+	 * @brief Prepare import ZFO file(s) into database by ZFO type.
+	 */
+	void prepareZFOImportIntoDatabase(const QStringList &files, int zfoType);
+
+	/*!
+	 * @brief Import only delivery info ZFO file(s) into database.
+	 */
+	void importDeliveryInfoZFO(
+	    const QList<accountDataStruct> &accountList,
+	    const QStringList &files,
+	    QList<QPair<QString,QString>> &successFilesList,
+	    QList<QPair<QString,QString>> &existFilesList,
+	    QList<QPair<QString,QString>> &errorFilesList);
+
+	/*!
+	 * @brief Import only message ZFO file(s) into database.
+	 */
+	void importMessageZFO(
+	    const QList<accountDataStruct> &accountList,
+	    const QStringList &files,
+	    QList<QPair<QString,QString>> &successFilesList,
+	    QList<QPair<QString,QString>> &existFilesList,
+	    QList<QPair<QString,QString>> &errorFilesList);
+
+	/*!
+	 * @brief Show ZFO import notification dialog with results of import.
+	 */
+	void showNotificationDialogWithResult(int filesCnt,
+	    const QList<QPair<QString,QString>> &successFilesList,
+	    const QList<QPair<QString,QString>> &existFilesList,
+	    const QList<QPair<QString,QString>> &errorFilesList);
+
+	/*!
+	 * @brief Check if import ZFO file is/was in ISDS.
+	 */
+	int isImportMsgInISDS(const QString &zfoFile,
+	    QModelIndex accountIndex);
 
 	/*!
 	 * @brief About application dialog.
@@ -391,6 +484,11 @@ private slots:
 	 * @brief set message process state into db
 	 */
 	void msgSetSelectedMessageProcessState(int state);
+
+	/*!
+	 * @brief Mark selected message as read.
+	 */
+	void msgSetSelectedMessageRead(void);
 
 private:
 
@@ -582,9 +680,11 @@ private:
 	void setAccountStoragePaths(const QStandardItem *accountItem);
 
 	/*!
-	 * @brief Delete message from long term storage in ISDS.
+	 * @brief Delete message from long term storage in ISDS and
+	 * local database - based on delFromIsds parameter.
 	 */
-	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx, QString dmId);
+	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx,
+	    const QString &dmId, bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
@@ -688,6 +788,7 @@ private:
 	                                                * filtering.
 	                                                */
 
+	QTimer m_messageMarker; /*!< Used for marging messages as read. */
 	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	long m_lastStoredMessageId; /*!< Last stored message selection. */
 
@@ -701,6 +802,7 @@ private:
 	QString m_export_correspond_dir;
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;
+	QString m_import_zfo_path;
 	bool isMainWindow;
 
 	Ui::MainWindow *ui;

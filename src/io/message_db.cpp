@@ -42,7 +42,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
-#include <QSslCertificate>
 #include <QString>
 #include <QTimeZone>
 #include <QVariant>
@@ -71,7 +70,7 @@ const QVector<QString> MessageDb::sentItemIds = {"dmID", "dmAnnotation",
     "is_downloaded"};
 
 
-const QVector<QString> MessageDb::msgAttribs2 = {"dmSenderIdent",
+const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
     "dmToHands", "dmLegalTitleLaw", "dmLegalTitleYear", "dmLegalTitleSect",
     "dmLegalTitlePar", "dmLegalTitlePoint"};
@@ -97,11 +96,6 @@ DbMsgsTblModel::DbMsgsTblModel(QObject *parent)
     m_overriddenPS()
 {
 }
-
-
-#define READLOC_COL 5 /* Read locally. */
-#define ATTDOWN_COL 6 /* Attachment downloaded. */
-#define PROCSNG_COL 7 /* Processing state. */
 
 
 /* ========================================================================= */
@@ -146,8 +140,9 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				int dmId = QSqlQueryModel::data(
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
-				if (m_overriddenRL.value(dmId, false) ||
-				    QSqlQueryModel::data(index).toBool()) {
+				if (m_overriddenRL.value(dmId,
+				        QSqlQueryModel::data(
+				            index).toBool())) {
 					return QIcon(
 					    ICON_16x16_PATH "grey.png");
 				} else {
@@ -214,9 +209,9 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			int dmId = QSqlQueryModel::data(
 			    index.sibling(index.row(), 0),
 			    Qt::DisplayRole).toInt();
-			if ((!QSqlQueryModel::data(index.sibling(index.row(),
-			         READLOC_COL)).toBool()) &&
-			    (!m_overriddenRL.value(dmId, false))) {
+			if (!m_overriddenRL.value(dmId,
+			        QSqlQueryModel::data(index.sibling(index.row(),
+			            READLOC_COL)).toBool())) {
 				/* Unread messages are shown bold. */
 				QFont boldFont;
 				boldFont.setBold(true);
@@ -249,7 +244,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toInt();
 				qint64 id;
-				id = (m_overriddenRL.value(dmId, false) ||
+				id = m_overriddenRL.value(dmId,
 				    QSqlQueryModel::data(index,
 				        Qt::DisplayRole).toBool()) ? 1 : 0;
 				id = id << 48;
@@ -395,11 +390,6 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 }
 
 
-#undef READLOC_COL
-#undef ATTDOWN_COL
-#undef PROCSNG_COL
-
-
 /* ========================================================================= */
 /*
  * Override message as being read.
@@ -538,7 +528,113 @@ QString MessageDb::fileName(void) const
 
 /* ========================================================================= */
 /*
- * Return received messages model.
+ * Begin a transaction.
+ */
+bool MessageDb::beginTransaction(void)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr("BEGIN DEFERRED TRANSACTION");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * End a transaction.
+ */
+bool MessageDb::commitTransaction(void)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr("COMMIT TRANSACTION");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Begin named transaction.
+ */
+bool MessageDb::savePoint(const QString &savePointName)
+/* ========================================================================= */
+{
+	Q_ASSERT(!savePointName.isEmpty());
+	if (savePointName.isEmpty()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr("SAVEPOINT :name");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":name", savePointName);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * End named transaction.
+ */
+bool MessageDb::releaseSavePoint(const QString &savePointName)
+/* ========================================================================= */
+{
+	Q_ASSERT(!savePointName.isEmpty());
+	if (savePointName.isEmpty()) {
+		return false;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr("RELEASE SAVEPOINT :name");
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.bindValue(":name", savePointName);
+	return query.exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Roll back transaction.
+ */
+bool MessageDb::rollbackTransaction(const QString &savePointName)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	if (savePointName.isEmpty()) {
+
+		QString queryStr("ROLLBACK TRANSACTION");
+		if (!query.prepare(queryStr)) {
+			return false;
+		}
+		return query.exec();
+
+	} else {
+
+		QString queryStr("ROLLBACK TRANSACTION TO SAVEPOINT :name");
+		if (!query.prepare(queryStr)) {
+			return false;
+		}
+		query.bindValue(":name", savePointName);
+		return query.exec();
+
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Return all received messages model.
  */
 DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /* ========================================================================= */
@@ -559,12 +655,17 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	    "LEFT JOIN process_state "
 	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE (dbIDRecipient = :recipDbId) ";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -605,10 +706,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -616,8 +721,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 /*
  * Return received messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
-    const QString &recipDbId)
+DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -639,12 +743,17 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -685,10 +794,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -719,13 +832,18 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	    "(dbIDRecipient = :recipDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":year", year);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
@@ -766,10 +884,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -777,11 +899,11 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
+QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
      enum sorting sorting) const
 /* ========================================================================= */
 {
-	QList<QString> yearList;
+	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
@@ -789,26 +911,31 @@ QList<QString> MessageDb::msgsRcvdYears(const QString &recipDbId,
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
+		break;
 	case DESCENDING:
 		queryStr += " ORDER BY dmDeliveryTime DESC";
+		break;
 	default:
 		break;
 	}
-	//qDebug() << "Generating received year list" << recipDbId;
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
 	}
 
+fail:
 	return yearList;
 }
 
@@ -831,19 +958,30 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    "(dbIDRecipient = :recipDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 		query.bindValue(":recipDbId", recipDbId);
 		query.bindValue(":year", yearList[i]);
-		if (query.exec() && query.isActive()) {
-			query.first();
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid()) {
 			yearlyCounts.append(QPair<QString, int>(yearList[i],
 			    query.value(0).toInt()));
+		} else {
+			logError(
+			    "Cannot execute SQL query and/or read SQL data: "
+			    "%s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 
+	return yearlyCounts;
+
+fail:
+	yearlyCounts.clear();
 	return yearlyCounts;
 }
 
@@ -868,17 +1006,24 @@ int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
 	    "(dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << recipDbId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() &&query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -902,24 +1047,31 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 	    "(strftime('%Y', dmDeliveryTime) = :year)"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << recipDbId << year;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":year", year);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
 /* ========================================================================= */
 /*
- * Return sent messages model.
+ * Return all sent messages model.
  */
 DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /* ========================================================================= */
@@ -935,12 +1087,17 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	    "LEFT JOIN raw_message_data "
 	    "ON (messages.dmId = raw_message_data.message_id) "
 	    "WHERE dbIDSender = :sendDbId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -964,10 +1121,14 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -975,8 +1136,7 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 /*
  * Return sent messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
-    const QString &sendDbId)
+DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -993,12 +1153,17 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
 	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -1022,10 +1187,14 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1051,13 +1220,18 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	    "(dbIDSender = :sendDbId)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":year", year);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
@@ -1081,10 +1255,14 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
 		} else {
 			Q_ASSERT(0);
+			goto fail;
 		}
 	}
 
 	return &m_sqlMsgsModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1092,11 +1270,11 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 /*
  * Return list of years (strings) in database.
  */
-QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
+QStringList MessageDb::msgsSntYears(const QString &sendDbId,
     enum sorting sorting) const
 /* ========================================================================= */
 {
-	QList<QString> yearList;
+	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
 	    "FROM messages WHERE "
@@ -1104,26 +1282,31 @@ QList<QString> MessageDb::msgsSntYears(const QString &sendDbId,
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
+		break;
 	case DESCENDING:
 		queryStr += " ORDER BY dmDeliveryTime DESC";
+		break;
 	default:
 		break;
 	}
-	//qDebug() << "Generating received year list" << recipDbId;
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
-			// qDebug() << query.value(0).toString();
 			yearList.append(query.value(0).toString());
 			query.next();
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
 	}
 
+fail:
 	return yearList;
 }
 
@@ -1146,21 +1329,30 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 		    "(dbIDSender = :sendDbId)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 		query.bindValue(":sendDbId", sendDbId);
 		query.bindValue(":year", yearList[i]);
-		if (query.exec() && query.isActive()) {
-			query.first();
-			if (query.isValid()) {
-				yearlyCounts.append(QPair<QString, int>(
-				    yearList[i], query.value(0).toInt()));
-			}
+		if (query.exec() && query.isActive() &&
+		    query.first() && query.isValid()) {
+			yearlyCounts.append(QPair<QString, int>(
+			    yearList[i], query.value(0).toInt()));
+		} else {
+			logError(
+			    "Cannot execute SQL query and/or read SQL data: "
+			    "%s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 
+	return yearlyCounts;
+
+fail:
+	yearlyCounts.clear();
 	return yearlyCounts;
 }
 
@@ -1185,17 +1377,24 @@ int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
 	    "(dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << sendDbId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -1219,18 +1418,25 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 	    "(strftime('%Y', dmDeliveryTime) = :year)"
 	    " and "
 	    "(read_locally = 0)";
-	//qDebug() << queryStr << sendDbId << year;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":year", year);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	return 0;
+fail:
+	return -1;
 }
 
 
@@ -1249,24 +1455,31 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress, _dmType, "
 	    "dmSenderRefNumber FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			reply[0] = query.value(0).toString();
-			reply[1] = query.value(1).toString();
-			reply[2] = query.value(2).toString();
-			reply[3] = query.value(3).toString();
-			reply[4] = query.value(4).toString();
-			reply[5] = query.value(5).toString();
-		}
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		reply[0] = query.value(0).toString();
+		reply[1] = query.value(1).toString();
+		reply[2] = query.value(2).toString();
+		reply[3] = query.value(3).toString();
+		reply[4] = query.value(4).toString();
+		reply[5] = query.value(5).toString();
+
+		return reply;
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	return reply;
+fail:
+	return QVector<QString>();
 }
 
 
@@ -1286,26 +1499,67 @@ bool MessageDb::msgsVerificationAttempted(int dmId) const
 	    "is_verified"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
-	// qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
 		bool ret = ! query.value(0).isNull();
-		qDebug() << "Verification attempted" << ret;
 		return ret;
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
+fail:
 	return false;
 }
 
 
 /* ========================================================================= */
 /*
- * Was message locally read.
+ * Returns whether message is verified.
+ */
+bool MessageDb::msgsVerified(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "is_verified"
+	    " FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toBool();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns whether message was read locally.
  */
 bool MessageDb::smsgdtLocallyRead(int dmId) const
 /* ========================================================================= */
@@ -1316,23 +1570,30 @@ bool MessageDb::smsgdtLocallyRead(int dmId) const
 	queryStr = "SELECT read_locally FROM supplementary_message_data "
 	    "WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		return false;
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
+fail:
 	return false;
 }
 
 
 /* ========================================================================= */
 /*
- * Set message status to locally read.
+ * Set message read locally status.
  */
 bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 /* ========================================================================= */
@@ -1343,13 +1604,17 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 	queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr << dmId;
 	if (!query.prepare(queryStr)) {
-		return false;
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":read", read);
 	query.bindValue(":dmId", dmId);
 	return query.exec();
+
+fail:
+	return false;
 }
 
 
@@ -1360,13 +1625,17 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 /* ========================================================================= */
 {
-	QList<QVector<QString>> list_contacts;
+	QList< QVector<QString> > list_contacts;
 	QSqlQuery query(m_db);
+
 	QString queryStr = "SELECT DISTINCT "
-	   "dbIDSender, dmSender, dmSenderAddress"
-	   " FROM messages";
+	    "dbIDRecipient, dmRecipient, dmRecipientAddress FROM messages "
+	    "UNION SELECT DISTINCT dbIDSender, dmSender, dmSenderAddress "
+	    "FROM messages";
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	if (query.exec()) {
 		query.first();
@@ -1379,295 +1648,15 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 			query.next();
 		}
 	}
+
+fail:
 	return list_contacts;
 }
 
 
 /* ========================================================================= */
 /*
- * Return message delivery info HTML to PDF
- */
-QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
-/* ========================================================================= */
-{
-	QString html;
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QString tmp;
-
-	html += indentDivStart;
-
-	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Advice of Delivery")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
-	    "</td></tr></table><br/><br/>";
-
-	queryStr = "SELECT "
-	    "dmSender, dmSenderAddress, dbIDSender, _dmType, "
-	    "dmRecipient, dmRecipientAddress, dmDeliveryTime, dmAnnotation, "
-	    "dmLegalTitleLaw, dmLegalTitleYear, dmLegalTitleSect, "
-	    "dmLegalTitlePar, dmLegalTitlePoint, "
-	    "dmRecipientRefNumber, dmRecipientIdent, "
-	    "dmSenderRefNumber, dmSenderIdent, "
-	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
-	    "dmAcceptanceTime "
-	    "FROM messages WHERE "
-	    "dmID = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-
-		/* Sender info */
-		html += messageTableSectionPdf(QObject::tr("Sender"));
-		html += messageTableInfoStartPdf();
-		tmp = query.value(0).toString() + QString(", ") +
-		    query.value(1).toString();
-		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
-		html += messageTableInfoEndPdf();
-
-		/* Recipient info */
-		html += messageTableSectionPdf(QObject::tr("Recipient"));
-		html += messageTableInfoStartPdf();
-		tmp = query.value(4).toString() + QString(", ") +
-		    query.value(5).toString();
-		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
-		html += messageTableInfoEndPdf();
-
-		/* General info */
-		html += messageTableSectionPdf(QObject::tr("General Information"));
-		html += messageTableInfoStartPdf();
-		html += messageTableInfoPdf(QObject::tr("Subject"),
-		    query.value(7).toString());
-
-		query.value(8).toString().isEmpty() ? tmp = "0" :
-		    tmp = query.value(8).toString();
-		tmp += QString(" / ");
-		query.value(9).toString().isEmpty() ? tmp += "0" :
-		    tmp += query.value(9).toString();
-		tmp += QString(" § ") + " " +
-		    query.value(10).toString() + " " +
-		    QString(QObject::tr("paragraph")) + " " +
-		    query.value(11).toString() + " " +
-		    QString(QObject::tr("letter")) + " " +
-		    query.value(12).toString();
-
-		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
-
-		(query.value(13).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(13).toString();
-		html += messageTableInfoPdf(QObject::tr("Our ref.number"), tmp);
-		(query.value(14).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(14).toString();
-		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
-		(query.value(15).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(15).toString();
-		html += messageTableInfoPdf(QObject::tr("Your ref.number"), tmp);
-		(query.value(16).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(16).toString();
-		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
-		(query.value(17).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(17).toString();
-		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
-
-		((query.value(18)).toInt()) ? tmp = QObject::tr("yes")
-		: tmp = QObject::tr("no");
-		html += messageTableInfoPdf(QObject::tr("Personal Delivery"), tmp);
-
-		((query.value(19)).toInt()) ? tmp = QObject::tr("no")
-		: tmp = QObject::tr("yes");
-		html += messageTableInfoPdf(QObject::tr("Prohibit Delivery by Fiction"),
-		    tmp);
-
-		html += messageTableInfoEndPdf();
-
-		/* Delivery info */
-		html += messageTableSectionPdf(
-		    QObject::tr("Delivery/Acceptance Information"));
-		html += messageTableInfoStartPdf();
-		html += messageTableInfoPdf(QObject::tr("Delivery"),
-		        dateTimeStrFromDbFormat(query.value(6).toString(),
-		        dateTimeDisplayFormat));
-		html += messageTableInfoPdf(QObject::tr("Acceptance"),
-		        dateTimeStrFromDbFormat(query.value(20).toString(),
-		        dateTimeDisplayFormat));
-		html += messageTableInfoEndPdf();
-	}
-
-	queryStr = "SELECT dmEventTime, dmEventDescr "
-	    "FROM events WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		/* Attachments info */
-		html += messageTableSectionPdf(QObject::tr("Events"));
-		html += messageTableInfoStartPdf();
-		int i = 1;
-		while (query.isValid()) {
-			tmp = dateTimeStrFromDbFormat(query.value(0).toString(),
-			    dateTimeDisplayFormat) + " - " +
-			    query.value(1).toString();
-			html += messageTableInfoPdf(QObject::tr("Time"), tmp);
-			query.next();
-			i++;
-		}
-		html += messageTableInfoEndPdf();
-	}
-
-	html += divEnd;
-
-	return html;
-}
-
-
-/* ========================================================================= */
-/*
- * Return message envelope HTML to PDF
- */
-QString MessageDb::envelopeInfoHtmlToPdf(int dmId, QString dbType) const
-/* ========================================================================= */
-{
-	QString html;
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QString tmp;
-
-	html += indentDivStart;
-
-	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Envelope")) + "</td><td align=\"right\">" +
-	    QObject::tr("Message ID:") + " " + strongMessagePdf(QString::number(dmId)) +
-	    "</td></tr></table><br/><br/>";
-
-	queryStr = "SELECT "
-	    "dmSender, dmSenderAddress, dbIDSender, _dmType, "
-	    "dmRecipient, dmRecipientAddress, dmDeliveryTime, dmAnnotation, "
-	    "dmLegalTitleLaw, dmLegalTitleYear, dmLegalTitleSect, "
-	    "dmLegalTitlePar, dmLegalTitlePoint, "
-	    "dmRecipientRefNumber, dmRecipientIdent, "
-	    "dmSenderRefNumber, dmSenderIdent, "
-	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery "
-	    "FROM messages WHERE "
-	    "dmID = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-
-		/* Sender info */
-		html += messageTableSectionPdf(QObject::tr("Sender"));
-		html += messageTableInfoStartPdf();
-		tmp = query.value(0).toString() + QString(", ") +
-		    query.value(1).toString();
-		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
-		html += messageTableInfoPdf(QObject::tr("Databox ID"),
-		    query.value(2).toString());
-		html += messageTableInfoPdf(QObject::tr("Databox Type"),
-		    dbType);
-		html += messageTableInfoEndPdf();
-
-		/* Recipient info */
-		html += messageTableSectionPdf(QObject::tr("Recipient"));
-		html += messageTableInfoStartPdf();
-		tmp = query.value(4).toString() + QString(", ") +
-		    query.value(5).toString();
-		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
-		html += messageTableInfoPdf(QObject::tr("Delivery"),
-		        dateTimeStrFromDbFormat(query.value(6).toString(),
-		        dateTimeDisplayFormat));
-		html += messageTableInfoEndPdf();
-
-		/* General info */
-		html += messageTableSectionPdf(QObject::tr("General Information"));
-		html += messageTableInfoStartPdf();
-		html += messageTableInfoPdf(QObject::tr("Subject"),
-		    query.value(7).toString());
-
-		query.value(8).toString().isEmpty() ? tmp = "0" :
-		    tmp = query.value(8).toString();
-		tmp += QString(" / ");
-		query.value(9).toString().isEmpty() ? tmp += "0" :
-		    tmp += query.value(9).toString();
-		tmp += QString(" § ") + " " +
-		    query.value(10).toString() + " " +
-		    QString(QObject::tr("paragraph")) + " " +
-		    query.value(11).toString() + " " +
-		    QString(QObject::tr("letter")) + " " +
-		    query.value(12).toString();
-
-		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
-
-		(query.value(13).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(13).toString();
-		html += messageTableInfoPdf(QObject::tr("Our ref.number"), tmp);
-		(query.value(14).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(14).toString();
-		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
-		(query.value(15).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(15).toString();
-		html += messageTableInfoPdf(QObject::tr("Your ref.number"), tmp);
-		(query.value(16).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(16).toString();
-		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
-		(query.value(17).toString()).isEmpty() ? tmp=QObject::tr("Not specified")
-		: tmp = query.value(17).toString();
-		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
-
-
-		((query.value(18)).toInt()) ? tmp = QObject::tr("yes")
-		: tmp = QObject::tr("no");
-		html += messageTableInfoPdf(QObject::tr("Personal Delivery"), tmp);
-
-		((query.value(19)).toInt()) ? tmp = QObject::tr("no")
-		: tmp = QObject::tr("yes");
-		html += messageTableInfoPdf(QObject::tr("Prohibit Delivery by Fiction"),
-		    tmp);
-
-		html += messageTableInfoEndPdf();
-	}
-
-	queryStr = "SELECT _dmFileDescr FROM files WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		/* Attachments info */
-		html += messageTableSectionPdf(QObject::tr("Attachments"));
-		html += messageTableInfoStartPdf();
-		int i = 1;
-		while (query.isValid()) {
-			html += messageTableInfoPdf(QString::number(i),
-			query.value(0).toString());
-			query.next();
-			i++;
-		}
-		html += messageTableInfoEndPdf();
-	}
-
-	html += divEnd;
-
-	return html;
-}
-
-
-/* ========================================================================= */
-/*
- * Return message HTML formatted description.
+ * Return HTML formatted message description.
  */
 QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
     bool showId, bool warnOld) const
@@ -1680,21 +1669,22 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	html += indentDivStart;
 	html += "<h3>" + QObject::tr("Identification") + "</h3>";
 	if (showId) {
-		html += strongAccountInfoLine(QObject::tr("ID"), QString::number(dmId));
+		html += strongAccountInfoLine(QObject::tr("Message ID"), QString::number(dmId));
 	}
 
 	queryStr = "SELECT "
 	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
-	    "dmRecipient, dmRecipientAddress"
+	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient"
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		html += strongAccountInfoLine(QObject::tr("Subject"),
 		    query.value(0).toString());
 		if (!query.value(1).toString().isEmpty() &&
@@ -1706,8 +1696,10 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		html += "<br/>";
 
 		/* Information about message author. */
-		html += strongAccountInfoLine(QObject::tr("From"),
+		html += strongAccountInfoLine(QObject::tr("Sender"),
 		    query.value(2).toString());
+		html += strongAccountInfoLine(QObject::tr("Sender Databox ID"),
+		    query.value(6).toString());
 		html += strongAccountInfoLine(QObject::tr("Sender Address"),
 		    query.value(3).toString());
 		/* Custom data. */
@@ -1731,33 +1723,47 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 
 		html += "<br/>";
 
-		html += strongAccountInfoLine(QObject::tr("To"),
+		html += strongAccountInfoLine(QObject::tr("Recipient"),
 		    query.value(4).toString());
+		html += strongAccountInfoLine(
+		    QObject::tr("Recipient Databox ID"),
+		    query.value(7).toString());
 		html += strongAccountInfoLine(QObject::tr("Recipient Address"),
 		    query.value(5).toString());
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (msgAttribs2.size() - 1); ++i) {
-		queryStr += msgAttribs2[i] + ", ";
+	for (int i = 0; i < (msgPrintedAttribs.size() - 1); ++i) {
+		queryStr += msgPrintedAttribs[i] + ", ";
 	}
-	queryStr += msgAttribs2.last();
+	queryStr += msgPrintedAttribs.last();
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		for (int i = 0; i < msgAttribs2.size(); ++i) {
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		for (int i = 0; i < msgPrintedAttribs.size(); ++i) {
 			if (!query.value(i).toString().isEmpty()) {
 				html += strongAccountInfoLine(
-				    msgsTbl.attrProps[msgAttribs2[i]].desc,
+				    msgsTbl.attrProps[msgPrintedAttribs[i]].desc,
 				    query.value(i).toString());
 			}
 		}
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	html += "<h3>" + QObject::tr("Status") + "</h3>";
@@ -1769,13 +1775,14 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	queryStr += msgStatus.last();
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
 		html += strongAccountInfoLine(
 		    msgsTbl.attrProps[msgStatus[0]].desc,
 		    dateTimeStrFromDbFormat(query.value(0).toString(),
@@ -1788,6 +1795,11 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
 		    msgStatusToText(query.value(2).toInt()));
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	/* Events. */
 	queryStr = "SELECT "
@@ -1795,9 +1807,10 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	    " FROM events WHERE "
 	    "message_id = :dmId"
 	    " ORDER BY dmEventTime ASC";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
@@ -1816,14 +1829,19 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 			    divEnd;
 			query.next();
 		} 
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	/* Attachments. */
 	queryStr = "SELECT COUNT(*) AS nrFiles "
 	    " FROM files WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
@@ -1837,21 +1855,29 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 		    "dmAttachmentSize"
 		    " FROM messages WHERE "
 		    "dmID = :dmId";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 		query.bindValue(":dmId", dmId);
-		if (query.exec() && query.isActive() &&
-		    query.first() && query.isValid() &&
-		   (query.value(0).toInt() > 0)) {
-			html += strongAccountInfoLine(QObject::tr("Attachments"),
+		if (query.exec() && query.isActive()) {
+			query.first();
+			if (query.isValid() && (query.value(0).toInt() > 0)) {
+			html += strongAccountInfoLine(
+			    QObject::tr("Attachments"),
 			    QObject::tr("not downloaded yet, ~") +
 			    QString::number(query.value(0).toInt()) +
 			    QObject::tr(" KB; use 'Download' to get them."));
+			} else {
+				html += strongAccountInfoLine(
+				    QObject::tr("Attachments"),
+				    QObject::tr("(not available)"));
+			}
 		} else {
-			html += strongAccountInfoLine(QObject::tr("Attachments"),
-			    QObject::tr("(not available)"));
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 	if (warnOld) {
@@ -1876,56 +1902,443 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	} else if (!msgsVerified(dmId)) {
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Invalid")  + " -- " +
-		    QObject::tr("Message signature and content do not correspond!"));
+		    QObject::tr(
+		        "Message signature and content do not correspond!"));
 	} else {
 		html += strongAccountInfoLine(QObject::tr("Message signature"),
 		    QObject::tr("Valid"));
 		/* Check signing certificate. */
-		// qDebug() << msgsVerificationDate(dmId);
 		bool verified = msgCertValidAtDate(dmId,
 		    msgsVerificationDate(dmId), !globPref.check_crl);
-		QString verifiedText = verified ? QObject::tr("Valid") : QObject::tr("Invalid");
+		QString verifiedText = verified ? QObject::tr("Valid") :
+		    QObject::tr("Invalid");
 		if (!globPref.check_crl) {
 			verifiedText += " (" +
-			    QObject::tr("Certificate revocation check is turned off!") +
+			    QObject::tr(
+			        "Certificate revocation check is turned off!") +
 			    ")";
 		}
-		html += strongAccountInfoLine(QObject::tr("Signing certificate"),
-		    verifiedText);
+		html += strongAccountInfoLine(
+		    QObject::tr("Signing certificate"), verifiedText);
 	}
 
-	/* Time-stamp. */
-	QDateTime tst;
-	QByteArray tstData = msgsTimestampDER(dmId);
-	QString timeStampStr;
-	if (tstData.isEmpty()) {
-		timeStampStr = QObject::tr("Not present");
-	} else {
-		time_t utc_time = 0;
-		int ret = rawTstVerify(tstData.data(), tstData.size(),
-		    &utc_time);
+	{
+		/* Time-stamp. */
+		QDateTime tst;
+		QByteArray tstData = msgsTimestampRaw(dmId);
+		QString timeStampStr;
+		if (tstData.isEmpty()) {
+			timeStampStr = QObject::tr("Not present");
+		} else {
+			time_t utc_time = 0;
+			int ret = rawTstVerify(tstData.data(), tstData.size(),
+			    &utc_time);
 
-		if (-1 != ret) {
-			tst = QDateTime::fromTime_t(utc_time);
-		}
+			if (-1 != ret) {
+				tst = QDateTime::fromTime_t(utc_time);
+			}
 
-		timeStampStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
-		if (-1 != ret) {
-			timeStampStr +=
-			    " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
-			    tst.timeZone().abbreviation(tst) + ")";
+			timeStampStr = (1 == ret) ? QObject::tr("Valid") :
+			    QObject::tr("Invalid");
+			if (-1 != ret) {
+				timeStampStr +=
+				    " (" +
+				    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+				    tst.timeZone().abbreviation(tst) + ")";
+			}
 		}
+		html += strongAccountInfoLine(QObject::tr("Time stamp"),
+		    timeStampStr);
 	}
-	html += strongAccountInfoLine(QObject::tr("Time stamp"),
-	    timeStampStr);
 
 	html += divEnd;
 
-	//html += QString::number(dmId);
-	// qDebug() << html;
-	/* TODO */
+	return html;
+
+fail:
+	return QString();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return message envelope HTML to be used to generate a PDF.
+ */
+QString MessageDb::envelopeInfoHtmlToPdf(int dmId, const QString &dbType) const
+/* ========================================================================= */
+{
+	QString html;
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QString tmp;
+
+	html += indentDivStart;
+
+	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
+	    "font-size: 20px;\"><tr><td>" +
+	    strongMessagePdf(QObject::tr("Envelope")) +
+	    "</td><td align=\"right\">" +
+	    QObject::tr("Message ID:") + " " +
+	    strongMessagePdf(QString::number(dmId)) +
+	    "</td></tr></table><br/><br/>";
+
+	queryStr = "SELECT "
+	    "dmSender, dmSenderAddress, dbIDSender, _dmType, "
+	    "dmRecipient, dmRecipientAddress, dmDeliveryTime, dmAnnotation, "
+	    "dmLegalTitleLaw, dmLegalTitleYear, dmLegalTitleSect, "
+	    "dmLegalTitlePar, dmLegalTitlePoint, "
+	    "dmRecipientRefNumber, dmRecipientIdent, "
+	    "dmSenderRefNumber, dmSenderIdent, "
+	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
+	    "dbIDRecipient "
+	    "FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+
+		/* Sender info */
+		html += messageTableSectionPdf(QObject::tr("Sender"));
+		html += messageTableInfoStartPdf();
+		tmp = query.value(0).toString() + QString(", ") +
+		    query.value(1).toString();
+		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
+		html += messageTableInfoPdf(QObject::tr("Databox ID"),
+		    query.value(2).toString());
+		html += messageTableInfoPdf(QObject::tr("Databox Type"),
+		    dbType);
+		html += messageTableInfoEndPdf();
+
+		/* Recipient info */
+		html += messageTableSectionPdf(QObject::tr("Recipient"));
+		html += messageTableInfoStartPdf();
+		tmp = query.value(4).toString() + QString(", ") +
+		    query.value(5).toString();
+		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
+		html += messageTableInfoPdf(QObject::tr("Databox ID"),
+		    query.value(20).toString());
+		html += messageTableInfoPdf(QObject::tr("Delivery"),
+		        dateTimeStrFromDbFormat(query.value(6).toString(),
+		        dateTimeDisplayFormat));
+		html += messageTableInfoEndPdf();
+
+		/* General info */
+		html += messageTableSectionPdf(
+		    QObject::tr("General Information"));
+		html += messageTableInfoStartPdf();
+		html += messageTableInfoPdf(QObject::tr("Subject"),
+		    query.value(7).toString());
+
+		if (query.value(8).toString().isEmpty()) {
+			tmp = "0";
+		} else {
+			tmp = query.value(8).toString();
+		}
+		tmp += QString(" / ");
+		if (query.value(9).toString().isEmpty()) {
+			tmp += "0";
+		} else {
+			tmp += query.value(9).toString();
+		}
+		tmp += QString(" § ") + " " +
+		    query.value(10).toString() + " " +
+		    QString(QObject::tr("paragraph")) + " " +
+		    query.value(11).toString() + " " +
+		    QString(QObject::tr("letter")) + " " +
+		    query.value(12).toString();
+
+		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
+
+		if (query.value(13).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(13).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our ref.number"),
+		    tmp);
+		if (query.value(14).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(14).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
+		if (query.value(15).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(15).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your ref.number"),
+		    tmp);
+		if (query.value(16).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(16).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
+		if (query.value(17).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(17).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
+
+
+		if (query.value(18).toInt()) {
+			tmp = QObject::tr("yes");
+		} else {
+			tmp = QObject::tr("no");
+		}
+		html += messageTableInfoPdf(QObject::tr("Personal Delivery"),
+		    tmp);
+
+		if (query.value(19).toInt()) {
+			tmp = QObject::tr("no");
+		} else {
+			tmp = QObject::tr("yes");
+		}
+		html += messageTableInfoPdf(
+		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+
+		html += messageTableInfoEndPdf();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "SELECT _dmFileDescr FROM files WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		/* Attachments info */
+		html += messageTableSectionPdf(QObject::tr("Attachments"));
+		html += messageTableInfoStartPdf();
+		int i = 1;
+		while (query.isValid()) {
+			html += messageTableInfoPdf(QString::number(i),
+			query.value(0).toString());
+			query.next();
+			i++;
+		}
+		html += messageTableInfoEndPdf();
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	html += divEnd;
 
 	return html;
+
+fail:
+	return QString();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return message delivery info HTML to PDF
+ */
+QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
+/* ========================================================================= */
+{
+	QString html;
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QString tmp;
+
+	html += indentDivStart;
+
+	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
+	    "font-size: 20px;\"><tr><td>" +
+	    strongMessagePdf(QObject::tr("Advice of Delivery")) +
+	    "</td><td align=\"right\">" +
+	    QObject::tr("Message ID:") + " " +
+	    strongMessagePdf(QString::number(dmId)) +
+	    "</td></tr></table><br/><br/>";
+
+	queryStr = "SELECT "
+	    "dmSender, dmSenderAddress, dbIDSender, _dmType, "
+	    "dmRecipient, dmRecipientAddress, dmDeliveryTime, dmAnnotation, "
+	    "dmLegalTitleLaw, dmLegalTitleYear, dmLegalTitleSect, "
+	    "dmLegalTitlePar, dmLegalTitlePoint, "
+	    "dmRecipientRefNumber, dmRecipientIdent, "
+	    "dmSenderRefNumber, dmSenderIdent, "
+	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
+	    "dmAcceptanceTime, dbIDSender, dbIDRecipient "
+	    "FROM messages WHERE "
+	    "dmID = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+
+		/* Sender info */
+		html += messageTableSectionPdf(QObject::tr("Sender"));
+		html += messageTableInfoStartPdf();
+		tmp = query.value(0).toString() + QString(" (") +
+		    query.value(21).toString() + QString("), ") +
+		    query.value(1).toString();
+		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
+		html += messageTableInfoEndPdf();
+
+		/* Recipient info */
+		html += messageTableSectionPdf(QObject::tr("Recipient"));
+		html += messageTableInfoStartPdf();
+		tmp = query.value(4).toString() + QString(" (") +
+		    query.value(22).toString() + QString("), ") +
+		    query.value(5).toString();
+		html += messageTableInfoPdf(QObject::tr("Name"), tmp);
+		html += messageTableInfoEndPdf();
+
+		/* General info */
+		html += messageTableSectionPdf(
+		    QObject::tr("General Information"));
+		html += messageTableInfoStartPdf();
+		html += messageTableInfoPdf(QObject::tr("Subject"),
+		    query.value(7).toString());
+
+		if (query.value(8).toString().isEmpty()) {
+			tmp = "0";
+		} else {
+			tmp = query.value(8).toString();
+		}
+		tmp += QString(" / ");
+		if (query.value(9).toString().isEmpty()) {
+			tmp += "0";
+		} else {
+			tmp += query.value(9).toString();
+		}
+		tmp += QString(" § ") + " " +
+		    query.value(10).toString() + " " +
+		    QString(QObject::tr("paragraph")) + " " +
+		    query.value(11).toString() + " " +
+		    QString(QObject::tr("letter")) + " " +
+		    query.value(12).toString();
+
+		html += messageTableInfoPdf(QObject::tr("Delegation"), tmp);
+
+		if (query.value(13).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(13).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our ref.number"),
+		    tmp);
+		if (query.value(14).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(14).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Our doc.id"), tmp);
+		if (query.value(15).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(15).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your ref.number"),
+		   tmp);
+		if (query.value(16).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(16).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("Your doc.id"), tmp);
+		if (query.value(17).toString().isEmpty()) {
+			tmp = QObject::tr("Not specified");
+		} else {
+			tmp = query.value(17).toString();
+		}
+		html += messageTableInfoPdf(QObject::tr("To hands"), tmp);
+
+		if ((query.value(18)).toInt()) {
+			tmp = QObject::tr("yes");
+		} else {
+			tmp = QObject::tr("no");
+		}
+		html += messageTableInfoPdf(QObject::tr("Personal Delivery"),
+		    tmp);
+
+		if (query.value(19).toInt()) {
+			tmp = QObject::tr("no");
+		} else {
+			tmp = QObject::tr("yes");
+		}
+		html += messageTableInfoPdf(
+		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+
+		html += messageTableInfoEndPdf();
+
+		/* Delivery info */
+		html += messageTableSectionPdf(
+		    QObject::tr("Delivery/Acceptance Information"));
+		html += messageTableInfoStartPdf();
+		html += messageTableInfoPdf(QObject::tr("Delivery"),
+		        dateTimeStrFromDbFormat(query.value(6).toString(),
+		        dateTimeDisplayFormat));
+		html += messageTableInfoPdf(QObject::tr("Acceptance"),
+		        dateTimeStrFromDbFormat(query.value(20).toString(),
+		        dateTimeDisplayFormat));
+		html += messageTableInfoEndPdf();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "SELECT dmEventTime, dmEventDescr "
+	    "FROM events WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		/* Attachments info */
+		html += messageTableSectionPdf(QObject::tr("Events"));
+		html += messageTableInfoStartPdf();
+		while (query.isValid()) {
+			tmp = dateTimeStrFromDbFormat(
+			    query.value(0).toString(),
+			    dateTimeDisplayFormat) + " - " +
+			    query.value(1).toString();
+			html += messageTableInfoPdf(QObject::tr("Time"), tmp);
+			query.next();
+		}
+		html += messageTableInfoEndPdf();
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	html += divEnd;
+
+	return html;
+
+fail:
+	return QString();
 }
 
 
@@ -1945,12 +2358,17 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 	queryStr += fileItemIds.last();
 	queryStr += " FROM files WHERE "
 	    "message_id = :msgId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":msgId", msgId);
-	query.exec(); /* TODO -- Handle error. */
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 	/* First three columns ought to be hidden. */
 
@@ -1966,9 +2384,13 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 	}
 
 	/* Rename last column to file size. */
-	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal, QObject::tr("File Size"));
+	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal,
+	    QObject::tr("File Size"));
 
 	return &m_sqlFilesModel;
+
+fail:
+	return 0;
 }
 
 
@@ -1976,645 +2398,110 @@ QAbstractTableModel * MessageDb::flsModel(int msgId)
 /*
  * Check if any message (dmID) exists in the table
  */
-bool MessageDb::isInMessageDb(int dmId) const
+int MessageDb::msgsStatusIfExists(int dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	bool inMessages = false;
+	int ret = -1;
 	bool inSupplementary = false;
 
-	queryStr = "SELECT count(*) FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
+	queryStr = "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
+
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			Q_ASSERT(query.value(0).toInt() < 2);
-			inMessages = (1 == query.value(0).toInt());
+			ret = query.value(0).toInt();
+		} else {
+			/* No error message, just return. */
+			goto fail;
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	/*
-	 * Entry in supplementary_message_data must exist if exists in
-	 * messages.
-	 */
+	/* Also check whether supplementary message data have been set. */
 	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
 	    "message_id = :dmId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			Q_ASSERT(query.value(0).toInt() < 2);
-			inSupplementary = (1 == query.value(0).toInt());
-		}
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		Q_ASSERT(query.value(0).toInt() < 2);
+		inSupplementary = (1 == query.value(0).toInt());
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
-	Q_ASSERT(inMessages == inSupplementary);
+	if (inSupplementary) {
+		return ret;
+	} else {
+		/*
+		 * This should actually not happen, as the message was found
+		 * in messages table but not in supplementary_message_data
+		 * table.
+		 */
+		Q_ASSERT(0);
+	}
 
-	return inMessages && inSupplementary;
+fail:
+	return -1;
 }
 
 
 /* ========================================================================= */
 /*
- * Get message hash from db
+ * Check if delivery info exists in the table.
  */
-QList<QString> MessageDb::msgsGetHashFromDb(int dmId) const
+bool MessageDb::isDeliveryInfoRawDb(int dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QList<QString> retitem;
 	QString queryStr;
 
-	queryStr = "SELECT value,_algorithm FROM hashes WHERE "
-	    "message_id = :dmId";
-
+	queryStr = "SELECT count(*) FROM raw_delivery_info_data "
+	    "WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		qDebug() << "Select hashes errro:" << query.lastError();
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-
 	query.bindValue(":dmId", dmId);
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			retitem.append(query.value(0).toString());
-			retitem.append(query.value(1).toString());
-			return retitem;
-		}
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return 0 < query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-	retitem.append("");
-	retitem.append("");
-	return retitem;
+
+fail:
+	return false;
 }
 
 
 /* ========================================================================= */
 /*
- * Insert additional info about author (sender) into db
- */
-bool MessageDb::addMessageAuthorInfo(int dmID, const QString &sender_type,
-    const QString &sender_name)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-
-	QJsonObject authorObject;
-	authorObject.insert("userType", sender_type.isEmpty() ?
-	    QJsonValue(QJsonValue::Null) : sender_type);
-	authorObject.insert("authorName", sender_name.isEmpty() ?
-	    QJsonValue(QJsonValue::Null) : sender_name);
-	QJsonObject object;
-	object.insert("message_author", authorObject);
-
-	QJsonDocument document;
-	document.setObject(object);
-	QString  json = document.toJson(QJsonDocument::Compact);
-
-	QString queryStr = "UPDATE supplementary_message_data SET "
-	    "custom_data = :custom_data WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Update supplementary_message_data error:"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":dmId", dmID);
-	query.bindValue(":custom_data", json);
-
-	if (query.exec()) {
-		return true;
-	} else {
-		qDebug() << "Update supplementary_message_data error:"
-		    << query.lastError();
-		return false;
-	}
-}
-
-/* ========================================================================= */
-/*
- * Insert/update message file into file table
- */
-bool MessageDb::msgsInsertUpdateMessageFile(int dmId,
-    const QString &dmFileDescr, const QString &dmUpFileGuid,
-    const QString &dmFileGuid, const QString &dmMimeType,
-    const QString &dmFormat, const QString &dmFileMetaType,
-    const QString &dmEncodedContent)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	int dbId;
-
-	QString queryStr = "SELECT id FROM files WHERE "
-	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr "
-	    "AND _dmMimeType = :dmMimeType";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageFile"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmFileDescr", dmFileDescr);
-	query.bindValue(":dmMimeType", dmMimeType);
-
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageFile"
-		    << query.lastError();
-	 	return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toInt();
-		} else {
-			dbId = 0;
-		}
-	}
-
-	if (dbId != 0) {
-		queryStr = "UPDATE files SET "
-		" _dmFileDescr = :_dmFileDescr, _dmUpFileGuid = :_dmUpFileGuid,"
-		" _dmFileGuid = :_dmFileGuid, _dmMimeType = :_dmMimeType, "
-		"_dmFormat = :_dmFormat, _dmFileMetaType = :_dmFileMetaType, "
-		"dmEncodedContent = :dmEncodedContent "
-		"WHERE id = :dbId";
-	} else {
-		queryStr = "INSERT INTO files ("
-		    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
-		    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent"
-		    ") VALUES ("
-		    ":message_id, :_dmFileDescr, :_dmUpFileGuid, :_dmFileGuid,"
-		    " :_dmMimeType, :_dmFormat, :_dmFileMetaType, "
-		    ":dmEncodedContent)";
-	}
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageFile"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	query.bindValue(":_dmFileDescr", dmFileDescr);
-	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
-	query.bindValue(":_dmFileGuid", dmFileGuid);
-	query.bindValue(":_dmMimeType", dmMimeType);
-	query.bindValue(":_dmFormat", dmFormat);
-	query.bindValue(":_dmFileMetaType", dmFileMetaType);
-	query.bindValue(":dmEncodedContent", dmEncodedContent);
-	if (dbId != 0) {
-	    query.bindValue(":dbId", dbId);
-	}
-
-	if (query.exec()) {
-		return true;
-	} else {
-		qDebug() << "Error: msgsInsertUpdateMessageFile"
-		    << query.lastError();
-		return false;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Insert message hash into hashes table
- */
-bool MessageDb::msgsInsertUpdateMessageHash(int dmId, const QString &value,
-    const QString &algorithm)
-/* ========================================================================= */
-{
-
-	QSqlQuery query(m_db);
-	int dbId;
-
-	QString queryStr = "SELECT id FROM hashes WHERE "
-	    "message_id = :message_id";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageHash"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":message_id", dmId);
-
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageHash"
-		    << query.lastError();
-	 	return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toInt();
-		} else {
-			dbId = 0;
-		}
-	}
-
-	if (dbId != 0) {
-		queryStr = "UPDATE hashes SET "
-		"value = :value, _algorithm = :algorithm "
-		"WHERE id = :dbId";
-	} else {
-		queryStr = "INSERT INTO hashes (message_id, value, _algorithm)"
-		" VALUES (:dmId, :value, :algorithm)";
-
-	}
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageHash"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":value", value);
-	query.bindValue(":algorithm", algorithm);
-	if (dbId != 0) {
-	    query.bindValue(":dbId", dbId);
-	}
-
-	if (query.exec()) {
-		return true;
-	} else {
-		qDebug() << "Error: msgsInsertUpdateMessageHash"
-		    << query.lastError();
-		return false;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Insert raw message data into raw_message_data table
- */
-bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
-    int message_type)
-/* ========================================================================= */
-{
-	/* TODO -- The whole operation must fail or succeed. */
-
-	QSqlQuery query(m_db);
-	int dbId;
-
-	QString queryStr = "SELECT message_id FROM raw_message_data WHERE "
-	    "message_id = :message_id";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageRaw"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":message_id", dmId);
-
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageRaw"
-		    << query.lastError();
-		return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toInt();
-		} else {
-			dbId = 0;
-		}
-	}
-
-	if (dbId != 0) {
-		queryStr = "UPDATE raw_message_data SET "
-		"data = :data, message_type = :message_type "
-		"WHERE message_id = :dbId";
-	} else {
-		queryStr = "INSERT INTO raw_message_data "
-		"(message_id, message_type, data) "
-		"VALUES (:dmId, :message_type, :data)";
-	}
-
-	QString base64 = raw.toBase64();
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageRaw"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":data", base64);
-	query.bindValue(":message_type", message_type);
-	if (dbId != 0) {
-		query.bindValue(":dbId", dbId);
-	}
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageRaw"
-		    << query.lastError();
-		return false;
-	}
-
-	/* Get certificate data. */
-	QString crtBase64;
-	struct x509_crt *crt = rawCmsSigningCert(raw.data(), raw.size());
-	if (NULL != crt) {
-		QByteArray crtDer;
-
-		void *der = NULL;
-		size_t derSize = 0;
-		if (0 == x509CrtToDer(crt, &der, &derSize)) {
-			crtDer.setRawData((char *) der, derSize);
-
-			crtBase64 = crtDer.toBase64();
-
-			free(der); der = NULL; derSize = 0;
-		}
-
-		x509CrtDestroy(crt); crt = NULL;
-	}
-	if (!crtBase64.isEmpty()) {
-		msgsInsertUpdateMessageCertBase64(dmId, crtBase64);
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Add/update message certificate in database.
- */
-bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
-    const QString &crtBase64)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	int certId;
-
-	/* Search for certificate in 'certificate_data' table. */
-	QString queryStr = "SELECT id FROM certificate_data WHERE "
-	    "der_data = :der_data";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":der_data", crtBase64);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			certId = query.value(0).toInt(); /* Found. */
-		} else {
-			certId = -1; /* Not found. */
-		}
-	}
-
-	/* If certificate was not found. */
-	if (certId < 0) {
-		/* Create unique certificate identifier. */
-		queryStr = "SELECT max(id) from certificate_data";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-		if (!query.exec()) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		} else {
-			query.first();
-			if (query.isValid()) {
-				certId = query.value(0).toInt();
-			} else {
-				certId = -1;
-			}
-		}
-		if (certId <= 0) {
-			certId = 1; /* First certificate. */
-		} else {
-			++certId;
-		}
-
-		/* Insert missing certificate. */
-		queryStr = "INSERT INTO certificate_data "
-		    "(id, der_data) VALUES (:id, :der_data)";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-		query.bindValue(":id", certId);
-		query.bindValue(":der_data", crtBase64);
-		if (!query.exec()) {
-			qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-			    << query.lastError();
-			return false;
-		}
-	}
-
-	/*
-	 * Abort operation if there is still no matching certificate available.
-	 */
-	if (certId <= 0) {
-		return false;
-	}
-
-	/*
-	 * Tie certificate to message. Find whether there is already
-	 * an entry for the message.
-	 */
-	bool entryFound = false;
-	queryStr = "SELECT * FROM message_certificate_data WHERE"
-	    " message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.first();
-	entryFound = query.isValid();
-	/*
-	 * Create or update message entry depending on whether a corresponding
-	 * entry was found.
-	 */
-	if (entryFound) {
-		queryStr = "UPDATE message_certificate_data SET "
-		    "certificate_id = :certificate_id WHERE "
-		    "message_id = :message_id";
-	} else {
-		queryStr = "INSERT INTO message_certificate_data "
-		    "(message_id, certificate_id) VALUES "
-		    "(:message_id, :certificate_id)";
-	}
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	query.bindValue(":certificate_id", certId);
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageCertBase64"
-		    << query.lastError();
-		return false;
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Insert raw delivery info into raw_delivery_info_data table
- */
-bool MessageDb::msgsInsertUpdateDeliveryRaw(int dmId, const QString &raw)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	int dbId;
-
-	QString queryStr = "SELECT message_id FROM raw_delivery_info_data WHERE"
-	    " message_id = :message_id";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":message_id", dmId);
-
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
-		    << query.lastError();
-	 	return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toInt();
-		} else {
-			dbId = 0;
-		}
-	}
-
-	if (dbId != 0) {
-		queryStr = "UPDATE raw_delivery_info_data SET "
-		"data = :data WHERE message_id = :dbId";
-	} else {
-		queryStr = "INSERT INTO raw_delivery_info_data "
-		"(message_id, data) VALUES (:dmId, :data)";
-
-	}
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":data", raw);
-	if (dbId != 0) {
-	    query.bindValue(":dbId", dbId);
-	}
-
-	if (query.exec()) {
-		return true;
-	} else {
-		qDebug() << "Error: msgsInsertUpdateDeliveryRaw"
-		    << query.lastError();
-		return false;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Insert/update message event into events table
- */
-bool MessageDb::msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
-    const QString &dmEventType, const QString &dmEventDescr)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	int dbId;
-
-	QString queryStr = "SELECT id FROM events WHERE "
-	    "message_id = :message_id AND dmEventTime = :dmEventTime";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageEvent"
-		    << query.lastError();
-		return false;
-	}
-
-	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
-
-	if (!query.exec()) {
-		qDebug() << "Error: msgsInsertUpdateMessageEvent"
-		    << query.lastError();
-	 	return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toInt();
-		} else {
-			dbId = 0;
-		}
-	}
-
-	QString dmEventDescrType = dmEventType + dmEventDescr;
-
-	if (dbId != 0) {
-		queryStr = "UPDATE events SET "
-		"dmEventTime = :dmEventTime, dmEventDescr = :dmEventDescr "
-		"WHERE id = :dbId";
-	} else {
-		queryStr = "INSERT INTO events (message_id, dmEventTime, "
-		    "dmEventDescr) VALUES (:dmId, :dmEventTime, :dmEventDescr)";
-	}
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error: msgsInsertUpdateMessageEvent"
-		    << query.lastError();
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
-	query.bindValue(":dmEventDescr", dmEventDescrType);
-	if (dbId != 0) {
-	    query.bindValue(":dbId", dbId);
-	}
-
-	if (query.exec()) {
-		return true;
-	} else {
-		qDebug() << "Error: msgsInsertUpdateMessageEvent"
-		    << query.lastError();
-		return false;
-	}
-}
-
-/* ========================================================================= */
-/*
- * Insert message envelope into messages table
+ * Insert message envelope into messages table.
  */
 bool MessageDb::msgsInsertMessageEnvelope(int dmId,
     const QString &_origin, const QString &dbIDSender,
@@ -2631,12 +2518,11 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
     const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
     const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
     bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-    const QString &dmQTimestamp, const QString &dmDeliveryTime,
+    const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType, const QString messtype)
+    int dmAttachmentSize, const QString &_dmType, const QString &messtype)
 /* ========================================================================= */
 {
-
 	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT INTO messages ("
@@ -2664,9 +2550,10 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 	    ":dmDeliveryTime, :dmAcceptanceTime, :dmMessageStatus, "
 	    ":dmAttachmentSize, :_dmType"
 	    ")";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":_origin", _origin);
@@ -2695,7 +2582,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
 	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
 	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
-	query.bindValue(":dmQTimestamp", dmQTimestamp);
+	query.bindValue(":dmQTimestamp", dmQTimestampBase64);
 	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
 	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
 	query.bindValue(":dmMessageStatus", dmMessageStatus);
@@ -2703,23 +2590,20 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		qDebug() << "Insert messages error:"
-		    << query.lastError();
-		return false;
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	queryStr = "INSERT INTO supplementary_message_data ("
-	    "message_id, message_type, read_locally, download_date, custom_data"
-	    ") VALUES (:dmId, :message_type, :read_locally, :download_date,"
-	    ":custom_data)";
-
+	    "message_id, message_type, read_locally, download_date, "
+	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
+	    ":download_date, :custom_data)";
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-
-	QDateTime current = QDateTime::currentDateTime();
-	QString dmDownloadTime = qDateTimeToDbFormat(current);
-
 	query.bindValue(":dmId", dmId);
 	if (messtype == "received") {
 		query.bindValue(":message_type", 1);
@@ -2727,16 +2611,20 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 		query.bindValue(":message_type", 2);
 	}
 	query.bindValue(":read_locally", false);
-	query.bindValue(":download_date", dmDownloadTime);
+	query.bindValue(":download_date",
+	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
 	query.bindValue(":custom_data", "null");
 
 	if (!query.exec()) {
-		qDebug() << "Insert supplementary_message_data error:"
-		    << query.lastError();
-		return false;
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	return msgSetProcessState(dmId, UNSETTLED, true);
+
+fail:
+	return false;
 }
 
 
@@ -2759,10 +2647,10 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
     const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
     const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
     bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-    const QString &dmQTimestamp, const QString &dmDeliveryTime,
+    const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
     int dmAttachmentSize, const QString &_dmType,
-    const QString messtype)
+    const QString &messtype)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -2798,9 +2686,10 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	    "dmMessageStatus = :dmMessageStatus, "
 	    "dmAttachmentSize = :dmAttachmentSize, "
 	    "_dmType = :_dmType WHERE dmID = :dmId";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":_origin", _origin);
@@ -2829,7 +2718,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
 	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
 	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
-	query.bindValue(":dmQTimestamp", dmQTimestamp);
+	query.bindValue(":dmQTimestamp", dmQTimestampBase64);
 	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
 	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
 	query.bindValue(":dmMessageStatus", dmMessageStatus);
@@ -2837,44 +2726,44 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		qDebug() << "Update messages error:" << query.lastError();
-		return false;
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	queryStr = "UPDATE supplementary_message_data SET "
-	    "message_type = :message_type, read_locally = :read_locally, "
-	    "custom_data = :custom_data "
+	    "message_type = :message_type "
 	    "WHERE message_id = :dmId";
-
 	if (!query.prepare(queryStr)) {
-
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-
 	query.bindValue(":dmId", dmId);
 	if (messtype == "received") {
 		query.bindValue(":message_type", 1);
 	} else {
 		query.bindValue(":message_type", 2);
 	}
-	query.bindValue(":read_locally", true);
-	query.bindValue(":custom_data", "null");
 
 	if (query.exec()) {
 		return true;
 	} else {
-		qDebug() << "Update supplementary_message_data error:"
-		    << query.lastError();
-		return false;
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-}
 
+fail:
+	return false;
+}
 
 
 /* ========================================================================= */
 /*
- * Update exist message envelope delivery info in db.
+ * Update message envelope delivery information.
  */
-bool MessageDb::msgsUpdateMessageDeliveryInfo(int dmId,
+bool MessageDb::msgsUpdateMessageState(int dmId,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     int dmMessageStatus)
 /* ========================================================================= */
@@ -2886,24 +2775,1141 @@ bool MessageDb::msgsUpdateMessageDeliveryInfo(int dmId,
 	    "dmAcceptanceTime = :dmAcceptanceTime, "
 	    "dmMessageStatus = :dmMessageStatus "
 	    "WHERE dmID = :dmId";
-
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-		qDebug() << "Update messages error:" << query.lastError();
-		return false;
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
-
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
 	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
 	query.bindValue(":dmMessageStatus", dmMessageStatus);
 
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert/update message file into file table
+ */
+bool MessageDb::msgsInsertUpdateMessageFile(int dmId,
+    const QString &dmFileDescr, const QString &dmUpFileGuid,
+    const QString &dmFileGuid, const QString &dmMimeType,
+    const QString &dmFormat, const QString &dmFileMetaType,
+    const QByteArray &dmEncodedContentBase64)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int dbId = -1;
+
+	QString queryStr = "SELECT id FROM files WHERE "
+	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr "
+	    "AND _dmMimeType = :dmMimeType";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":dmFileDescr", dmFileDescr);
+	query.bindValue(":dmMimeType", dmMimeType);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = -1;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (-1 != dbId) {
+		queryStr = "UPDATE files SET "
+		    " _dmFileDescr = :_dmFileDescr, "
+		    "_dmUpFileGuid = :_dmUpFileGuid,"
+		    " _dmFileGuid = :_dmFileGuid, _dmMimeType = :_dmMimeType, "
+		    "_dmFormat = :_dmFormat, "
+		    "_dmFileMetaType = :_dmFileMetaType, "
+		    "dmEncodedContent = :dmEncodedContent "
+		    "WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO files ("
+		    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+		    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent"
+		    ") VALUES ("
+		    ":message_id, :_dmFileDescr, :_dmUpFileGuid, :_dmFileGuid,"
+		    " :_dmMimeType, :_dmFormat, :_dmFileMetaType, "
+		    ":dmEncodedContent)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":_dmFileDescr", dmFileDescr);
+	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
+	query.bindValue(":_dmFileGuid", dmFileGuid);
+	query.bindValue(":_dmMimeType", dmMimeType);
+	query.bindValue(":_dmFormat", dmFormat);
+	query.bindValue(":_dmFileMetaType", dmFileMetaType);
+	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
+	if (-1 != dbId) {
+		query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert/update message hash into hashes table.
+ */
+bool MessageDb::msgsInsertUpdateMessageHash(int dmId,
+    const QByteArray &valueBase64, const QString &algorithm)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int dbId = -1;
+
+	QString queryStr = "SELECT id FROM hashes WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = -1;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (-1 != dbId) {
+		queryStr = "UPDATE hashes SET "
+		    "value = :value, _algorithm = :algorithm "
+		    "WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO hashes (message_id, value, _algorithm)"
+		    " VALUES (:dmId, :value, :algorithm)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":value", valueBase64);
+	query.bindValue(":algorithm", algorithm);
+	if (-1 != dbId) {
+		query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert/update message events into events table.
+ */
+bool MessageDb::msgsInsertUpdateMessageEvent(int dmId,
+    const QString &dmEventTime, const QString &dmEventType,
+    const QString &dmEventDescr)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int dbId = -1;
+
+	QString queryStr = "SELECT id FROM events WHERE "
+	    "message_id = :message_id AND dmEventTime = :dmEventTime";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":dmEventTime", dmEventTime);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = -1;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (-1 != dbId) {
+		queryStr = "UPDATE events SET "
+		"dmEventTime = :dmEventTime, dmEventDescr = :dmEventDescr "
+		"WHERE id = :dbId";
+	} else {
+		queryStr = "INSERT INTO events (message_id, dmEventTime, "
+		    "dmEventDescr) VALUES (:dmId, :dmEventTime, "
+		    ":dmEventDescr)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmEventTime", dmEventTime);
+	query.bindValue(":dmEventDescr", dmEventType + dmEventDescr);
+	if (-1 != dbId) {
+		query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert/update raw (DER) message data into raw_message_data
+ *     table.
+ */
+bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
+    int messageType)
+/* ========================================================================= */
+{
+	/* TODO -- The whole operation must fail or succeed. */
+
+	QSqlQuery query(m_db);
+	int dbId = -1;
+	struct x509_crt *crt = NULL;
+
+	QString queryStr = "SELECT message_id FROM raw_message_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = -1;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (-1 != dbId) {
+		queryStr = "UPDATE raw_message_data SET "
+		"data = :data, message_type = :message_type "
+		"WHERE message_id = :dbId";
+	} else {
+		queryStr = "INSERT INTO raw_message_data "
+		"(message_id, message_type, data) "
+		"VALUES (:dmId, :message_type, :data)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":data", raw.toBase64());
+	query.bindValue(":message_type", messageType);
+	if (-1 != dbId) {
+		query.bindValue(":dbId", dbId);
+	}
 	if (!query.exec()) {
-		qDebug() << "Update messages error:" << query.lastError();
-		return false;
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Get certificate data. */
+	crt = rawCmsSigningCert(raw.data(), raw.size());
+	if (NULL != crt) {
+		QByteArray crtDer;
+
+		void *der = NULL;
+		size_t derSize = 0;
+		if (0 == x509CrtToDer(crt, &der, &derSize)) {
+			/* Method setRawData() does not copy the data! */
+			crtDer.setRawData((char *) der, derSize);
+
+			msgsInsertUpdateMessageCertBase64(dmId,
+			    crtDer.toBase64());
+
+			free(der); der = NULL; derSize = 0;
+		}
+
+		x509CrtDestroy(crt); crt = NULL;
 	}
 
 	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get raw message data from raw_message_data table.
+ */
+QByteArray MessageDb::msgsMessageBase64(int dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr =
+	    "SELECT data FROM raw_message_data WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toByteArray();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QByteArray();
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message data in DER (raw) format.
+ */
+QByteArray MessageDb::msgsMessageRaw(int dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	return QByteArray::fromBase64(msgsMessageBase64(dmId));
+}
+
+
+/* ========================================================================= */
+/*
+ * Get base64-encoded delivery info from
+ *     raw_delivery_info_data table.
+ */
+QByteArray MessageDb::msgsGetDeliveryInfoBase64(int dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr =
+	    "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toByteArray();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QByteArray();
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert raw (DER) delivery info into raw_delivery_info_data table.
+ */
+bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(int dmId,
+    const QByteArray &raw)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int dbId = -1;
+
+	QString queryStr = "SELECT message_id FROM raw_delivery_info_data "
+	    "WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			dbId = query.value(0).toInt();
+		} else {
+			dbId = -1;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (-1 != dbId) {
+		queryStr = "UPDATE raw_delivery_info_data SET "
+		    "data = :data WHERE message_id = :dbId";
+	} else {
+		queryStr = "INSERT INTO raw_delivery_info_data "
+		    "(message_id, data) VALUES (:dmId, :data)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":data", raw.toBase64());
+	if (-1 != dbId) {
+		query.bindValue(":dbId", dbId);
+	}
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Update information about author (sender).
+ */
+bool MessageDb::updateMessageAuthorInfo(int dmId, const QString &senderType,
+    const QString &senderName)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QJsonObject authorObject;
+	authorObject.insert("userType", senderType.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : senderType);
+	authorObject.insert("authorName", senderName.isEmpty() ?
+	    QJsonValue(QJsonValue::Null) : senderName);
+	QJsonObject object;
+	object.insert("message_author", authorObject);
+
+	QJsonDocument document;
+	document.setObject(object);
+	QString json = document.toJson(QJsonDocument::Compact);
+
+	QString queryStr = "UPDATE supplementary_message_data SET "
+	    "custom_data = :custom_data WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":custom_data", json);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message hash from db
+ */
+QStringList MessageDb::msgsGetHashFromDb(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QStringList retitem;
+	QString queryStr;
+
+	queryStr = "SELECT value, _algorithm FROM hashes WHERE "
+	    "message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			retitem.append(query.value(0).toString());
+			retitem.append(query.value(1).toString());
+			return retitem;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete message records from db.
+ */
+bool MessageDb::msgsDeleteMessageData(int dmId) const
+/* ========================================================================= */
+{
+	/* TODO -- The whole operation must fail or succeed. */
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	int certificateId = -1;
+	bool deleteCert = false;
+
+	/* Delete hash from hashes table. */
+	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete file(s) from files table. */
+	queryStr = "DELETE FROM files WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete event(s) from events table. */
+	queryStr = "DELETE FROM events WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete raw message data from raw_message_data table. */
+	queryStr=
+	    "DELETE FROM raw_message_data WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete raw info data from raw_delivery_info_data table. */
+	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete supplementary from supplementary_message_data table. */
+	queryStr = "DELETE FROM supplementary_message_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Select certificate_id from message_certificate_data table. */
+	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			certificateId = query.value(0).toInt();
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	Q_ASSERT(-1 != certificateId);
+
+	/* Delete certificate reference from message_certificate_data table. */
+	queryStr = "DELETE FROM message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Select certificate id from message_certificate_data table. */
+	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
+	    "certificate_id = :certificate_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":certificate_id", certificateId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() > 0) {
+				deleteCert = false;
+			} else {
+				/* No message uses this certificate. */
+				deleteCert = true;
+			}
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/*
+	 * Delete certificate data from certificate_data table if no messages.
+	 */
+	if (deleteCert) {
+		queryStr = "DELETE FROM certificate_data WHERE "
+		    "id = :certificate_id";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		query.bindValue(":certificate_id", certificateId);
+		if (!query.exec()) {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	/* Delete process state information from process_state table. */
+	queryStr = "DELETE FROM process_state WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete message from messages table. */
+	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return list of message ids corresponding to given date
+ *     interval.
+ */
+QList<int> MessageDb::msgsDateInterval(const QDate &fromDate,
+    const QDate &toDate, bool sent) const
+/* ========================================================================= */
+{
+	/* TODO -- Check whether time is interpreted in correct time zone! */
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QList<int> dmIDs;
+
+	if (sent) {
+		queryStr = "SELECT dmID "
+		    "FROM messages AS m LEFT JOIN supplementary_message_data "
+		    "AS s ON (m.dmID = s.message_id) WHERE "
+		    "message_type = 2 AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
+	} else {
+		queryStr = "SELECT dmID "
+		    "FROM messages AS m LEFT JOIN supplementary_message_data "
+		    "AS s ON (m.dmID = s.message_id) WHERE "
+		    "message_type = 1 AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
+		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":fromDate", fromDate);
+	query.bindValue(":toDate", toDate);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			dmIDs.append(query.value(0).toString().toInt());
+			query.next();
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+
+	return dmIDs;
+
+fail:
+	return QList<int>();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return some message items in order to export correspondence
+ *     to HTML.
+ */
+QStringList MessageDb::getMsgForHtmlExport(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QStringList messageItems;
+
+	queryStr =
+	    "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
+	    "FROM messages WHERE dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		messageItems.append(query.value(0).toString());
+		messageItems.append(query.value(1).toString());
+		messageItems.append(query.value(2).toString());
+		QDateTime dateTime =
+		    dateTimeFromDbFormat(query.value(3).toString());
+		messageItems.append(dateTime.toString("dd.MM.yyyy"));
+		messageItems.append(dateTime.toString("hh:mm:ss"));
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return messageItems;
+
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return some message items for export correspondence to csv.
+ */
+QStringList MessageDb::getMsgForCsvExport(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QStringList messageItems;
+
+	queryStr = "SELECT dmMessageStatus, _dmType, dmDeliveryTime, "
+	    "dmAcceptanceTime, dmAnnotation, dmSender, dmSenderAddress, "
+	    "dmRecipient, dmRecipientAddress, dmSenderOrgUnit, "
+	    "dmSenderOrgUnitNum, dmRecipientOrgUnit, dmRecipientOrgUnitNum "
+	    "FROM messages WHERE dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		messageItems.append(query.value(0).toString());
+		messageItems.append(query.value(1).toString());
+		messageItems.append(query.value(2).toString());
+		messageItems.append(query.value(3).toString());
+		messageItems.append(query.value(4).toString());
+		messageItems.append(query.value(5).toString());
+		messageItems.append(query.value(6).toString());
+		messageItems.append(query.value(7).toString());
+		messageItems.append(query.value(8).toString());
+		messageItems.append(query.value(9).toString());
+		messageItems.append(query.value(10).toString());
+		messageItems.append(query.value(11).toString());
+		messageItems.append(query.value(12).toString());
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return messageItems;
+
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Set the verification result.
+ */
+bool MessageDb::msgsSetVerified(int dmId, bool verified)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "UPDATE messages "
+	    "SET is_verified = :verified WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":verified", verified);
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process state of received message
+ */
+bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	if (insert) {
+		queryStr = "INSERT INTO process_state ("
+		    "message_id, state) VALUES (:dmId, :state)";
+	} else {
+		queryStr = "UPDATE process_state SET state = :state WHERE "
+		    "message_id = :dmId";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":state", state);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get process state of received message
+ */
+int MessageDb::msgGetProcessState(int dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT state FROM process_state WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns time stamp in raw (DER) format.
+ */
+QByteArray MessageDb::msgsTimestampRaw(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "dmQTimestamp"
+	    " FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		QByteArray byteArray = query.value(0).toByteArray();
+		if (byteArray.isEmpty()) {
+			return QByteArray();
+		}
+
+		return QByteArray::fromBase64(byteArray);
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QByteArray();
+}
+
+
+/* ========================================================================= */
+/*
+ * Adds _dmType column.
+ */
+bool MessageDb::addDmtypeColumn(void)
+/* ========================================================================= */
+{
+	if (false == m_db.isOpen()) {
+		return false;
+	}
+
+	/*
+	 * Create _dmType column if it does not exist.
+	 */
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT _dmType FROM messages LIMIT 1";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (false == query.exec()) {
+		query.clear();
+		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec()) {
+			return true;
+		} else {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	return true;
+
+fail:
+	return false;
 }
 
 
@@ -2932,11 +3938,16 @@ bool MessageDb::copyDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	qDebug() << oldFileName << "-copy->" << newFileName;
+	logInfo("Copying database file '%s' to location '%s'.\n",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
 	if (oldFileName == newFileName) {
+		logWarning("Copying of database file '%s' aborted. "
+		    "Target and source are equal.\n",
+		    oldFileName.toUtf8().constData());
 		return false;
 	}
 
@@ -2950,9 +3961,12 @@ bool MessageDb::copyDb(const QString &newFileName)
 	open_ret = openDb(copy_ret ? newFileName : oldFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
-		qDebug() << "File" << (copy_ret ? newFileName : oldFileName)
-		    << "could not be opened.";
+		logError("File '%s' could not be opened.\n",
+		    copy_ret ?
+		        newFileName.toUtf8().constData() :
+		        oldFileName.toUtf8().constData());
 		/* TODO -- qFatal() ? */
+		return false;
 	}
 
 	return copy_ret;
@@ -2973,11 +3987,16 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	qDebug() << oldFileName << "-move->" << newFileName;
+	logInfo("Moving database file '%s' to location '%s'.\n",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
 	if (oldFileName == newFileName) {
+		logWarning("Moving of database file '%s' aborted. "
+		    "Target and source are equal.\n",
+		    oldFileName.toUtf8().constData());
 		return false;
 	}
 
@@ -2991,9 +4010,12 @@ bool MessageDb::moveDb(const QString &newFileName)
 	open_ret = openDb(move_ret ? newFileName : oldFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
-		qDebug() << "File" << (move_ret ? newFileName : oldFileName)
-		    << "could not be opened.";
+		logError("File '%s' could not be opened.\n",
+		    move_ret ?
+		        newFileName.toUtf8().constData() :
+		        oldFileName.toUtf8().constData());
 		/* TODO -- qFatal() ? */
+		return false;
 	}
 
 	return move_ret;
@@ -3002,7 +4024,7 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 /* ========================================================================= */
 /*
- * Re-open a different database file.
+ * Open a new empty database file.
  */
 bool MessageDb::reopenDb(const QString &newFileName)
 /* ========================================================================= */
@@ -3014,11 +4036,16 @@ bool MessageDb::reopenDb(const QString &newFileName)
 
 	/* Backup old file name. */
 	QString oldFileName = fileName();
-	qDebug() << oldFileName << "-reopen->" << newFileName;
+	logInfo("Closing database file '%s' re-opening file '%s'.\n",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
 	if (oldFileName == newFileName) {
+		logWarning("Re-opening of database file '%s' aborted. "
+		    "Target and source are equal.\n",
+		    oldFileName.toUtf8().constData());
 		return false;
 	}
 
@@ -3031,15 +4058,155 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	/* Open database. */
 	if (!reopen_ret) {
 		open_ret = openDb(oldFileName);
-		Q_ASSERT(open_ret);
 		if (!open_ret) {
-			qDebug() << "File" << oldFileName
-			    << "could not be opened.";
+			logError("File '%s' could not be opened.\n",
+			    oldFileName.toUtf8().constData());
 			/* TODO -- qFatal() ? */
+			return false;
 		}
 	}
 
 	return reopen_ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Add/update message certificate in database.
+ */
+bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
+    const QByteArray &crtBase64)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	int certId = -1;
+	bool certEntryFound = false;
+
+	/* Search for certificate in 'certificate_data' table. */
+	QString queryStr = "SELECT id FROM certificate_data WHERE "
+	    "der_data = :der_data";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":der_data", crtBase64);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			certId = query.value(0).toInt(); /* Found. */
+		} else {
+			certId = -1; /* Not found. */
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* If certificate was not found. */
+	if (-1 == certId) {
+		/* Create unique certificate identifier. */
+		queryStr = "SELECT max(id) from certificate_data";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			query.first();
+			if (query.isValid()) {
+				certId = query.value(0).toInt();
+			} else {
+				certId = -1;
+			}
+		} else {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+
+		if (-1 == certId) {
+			certId = 1; /* First certificate. */
+		} else {
+			++certId;
+		}
+
+		/* Insert missing certificate. */
+		queryStr = "INSERT INTO certificate_data "
+		    "(id, der_data) VALUES (:id, :der_data)";
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		query.bindValue(":id", certId);
+		query.bindValue(":der_data", crtBase64);
+		if (!query.exec()) {
+			logError("Cannot execute SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	/*
+	 * Abort operation if there is still no matching certificate available.
+	 */
+	if (-1 == certId) {
+		return false;
+	}
+
+	/*
+	 * Tie certificate to message. Find whether there is already
+	 * an entry for the message.
+	 */
+	queryStr = "SELECT * FROM message_certificate_data WHERE"
+	    " message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		certEntryFound = query.isValid();
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/*
+	 * Create or update message entry depending on whether a corresponding
+	 * entry was found.
+	 */
+	if (certEntryFound) {
+		queryStr = "UPDATE message_certificate_data SET "
+		    "certificate_id = :certificate_id WHERE "
+		    "message_id = :message_id";
+	} else {
+		queryStr = "INSERT INTO message_certificate_data "
+		    "(message_id, certificate_id) VALUES "
+		    "(:message_id, :certificate_id)";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	query.bindValue(":certificate_id", certId);
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
 }
 
 
@@ -3098,118 +4265,7 @@ void MessageDb::createEmptyMissingTables(void)
 
 /* ========================================================================= */
 /*
- * Returns whether message is verified.
- */
-bool MessageDb::msgsVerified(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT "
-	    "is_verified"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toBool();
-	}
-
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Set the verification result.
- */
-bool MessageDb::msgsSetVerified(int dmId, bool verified)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	debugFuncCall();
-
-	queryStr = "UPDATE messages "
-	    "SET is_verified = :verified WHERE "
-	    "dmID = :dmId";
-	qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":verified", verified);
-	query.bindValue(":dmId", dmId);
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * Get process state of received message
- */
-int MessageDb::msgGetProcessState(int dmId)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT state FROM process_state WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		return -1;
-	}
-
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toInt();
-	}
-
-	return -1;
-}
-
-
-/* ========================================================================= */
-/*
- * Set process state of received message
- */
-bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	if (insert) {
-		queryStr = "INSERT INTO process_state ("
-		    "message_id, state) VALUES (:dmId, :state)";
-	} else {
-		queryStr = "UPDATE process_state SET state = :state WHERE "
-		    "message_id = :dmId";
-	}
-
-	if (!query.prepare(queryStr)) {
-		return false;
-	}
-
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":state", state);
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * Returns verification date (in localtime).
+ * Returns verification date (in local time).
  */
 QDateTime MessageDb::msgsVerificationDate(int dmId) const
 /* ========================================================================= */
@@ -3224,308 +4280,34 @@ QDateTime MessageDb::msgsVerificationDate(int dmId) const
 		    "download_date"
 		    " FROM supplementary_message_data WHERE "
 		    "message_id = :dmId";
-		//qDebug() << queryStr;
 		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 		query.bindValue(":dmId", dmId);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
-			// qDebug() << "dateTime" << query.value(0).toString();
 			QDateTime dateTime =
 			    dateTimeFromDbFormat(query.value(0).toString());
 
 			if (dateTime.isValid()) {
 				return dateTime;
 			}
+		} else {
+			logError(
+			    "Cannot execute SQL query and/or read SQL data: "
+			    "%s.\n",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 
 	return QDateTime::currentDateTime();
+
+fail:
+	return QDateTime();
 }
-
-
-/* ========================================================================= */
-/*
- * Returns time stamp in DER format.
- */
-QByteArray MessageDb::msgsTimestampDER(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT "
-	    "dmQTimestamp"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		QByteArray byteArray = query.value(0).toByteArray();
-		if (byteArray.isEmpty()) {
-			return QByteArray();
-		}
-
-		return QByteArray::fromBase64(byteArray);
-	}
-
-	return QByteArray();
-}
-
-
-/* ========================================================================= */
-/*
- * Delete message records from db
- */
-bool MessageDb::msgsDeleteMessageData(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	/* Delete hash from hashes table */
-	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error1: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete file(s) from files table */
-	queryStr = "DELETE FROM files WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error2: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete event(s) from events table */
-	queryStr = "DELETE FROM events WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error3: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete raw message data from raw_message_data table */
-	queryStr= "DELETE FROM raw_message_data WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error4: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete raw info data from raw_delivery_info_data table */
-	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error5: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete supplementary from supplementary_message_data table */
-	queryStr = "DELETE FROM supplementary_message_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error6: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Select certificate_id from message_certificate_data table */
-	int certificate_id = 0;
-	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error7: msgsDeleteMessageData" << query.lastError();
-		return false;
-	} else {
-		query.first();
-		if (query.isValid()) {
-			certificate_id = query.value(0).toInt();
-		}
-	}
-	/* Delete certificate reference from message_certificate_data table */
-	queryStr = "DELETE FROM message_certificate_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error8: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Select certificate id from message_certificate_data table */
-	bool deleteCert = false;
-	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
-	    "certificate_id = :certificate_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error9: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":certificate_id", certificate_id);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			if (query.value(0).toInt() > 0) {
-				deleteCert = false;
-			} else {
-				deleteCert = true;
-			}
-		}
-	}
-
-	/* Delete certificate data from certificate_data table if no messages */
-	if (deleteCert) {
-		queryStr = "DELETE FROM certificate_data WHERE "
-		    "id = :certificate_id";
-		if (!query.prepare(queryStr)) {
-			qDebug() << "Error9: msgsDeleteMessageData"
-			    << query.lastError();
-			return false;
-		}
-		query.bindValue(":certificate_id", certificate_id);
-		if (!query.exec()) {
-			qDebug() << "Error9: msgsDeleteMessageData"
-			    << query.lastError();
-			return false;
-		}
-	}
-
-	/* Delete process state information from process_state table.*/
-	queryStr = "DELETE FROM process_state WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error10: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	/* Delete message from messages table */
-	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-	query.bindValue(":message_id", dmId);
-	if (!query.exec()) {
-		qDebug() << "Error11: msgsDeleteMessageData" << query.lastError();
-		return false;
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Get raw message data from raw_message_data table.
- */
-QString MessageDb::msgsMessageBase64(int dmId) const
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr =
-	    "SELECT data FROM raw_message_data WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		return query.value(0).toString();
-	}
-	return QString();
-}
-
-
-/* ========================================================================= */
-/*
- * Get message data in DER format.
- */
-QByteArray MessageDb::msgsMessageDER(int dmId) const
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	return QByteArray::fromBase64(msgsMessageBase64(dmId).toUtf8());
-}
-
-
-/* ========================================================================= */
-/*
- * Get raw delivery info from raw_delivery_info_data table.
- */
-QString MessageDb::msgsGetDeliveryInfoRaw(int dmId)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		return query.value(0).toString();
-	}
-	return "";
-}
-
 
 
 /* ========================================================================= */
@@ -3543,9 +4325,10 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 	    "custom_data"
 	    " FROM supplementary_message_data WHERE "
 	    "message_id = :msgId";
-	//qDebug() << queryStr;
 	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.bindValue(":msgId", msgId);
 	if (query.exec() && query.isActive()) {
@@ -3554,79 +4337,16 @@ QJsonDocument MessageDb::smsgdCustomData(int msgId) const
 			jsonDoc = QJsonDocument::fromJson(
 			    query.value(0).toByteArray());
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	return jsonDoc;
-}
 
-
-/* ========================================================================= */
-/*
- * Certificates related to given message.
- */
-QList<QSslCertificate> MessageDb::msgCerts(int dmId) const
-/* ========================================================================= */
-{
-	QList<QSslCertificate> certList;
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<int> certIds;
-
-	queryStr = "SELECT "
-	    "certificate_id"
-	    " FROM message_certificate_data WHERE "
-	    "message_id = :dmId";
-	//qDebug() << queryStr;
-	if (!query.prepare(queryStr)) {
-		/* TODO -- Handle error. */
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			bool ok;
-			int ret;
-			ret = query.value(0).toInt(&ok);
-			Q_ASSERT(ok);
-			if (ok) {
-				certIds.append(ret);
-			}
-		}
-	}
-
-	if (certIds.size() > 0) {
-		queryStr = "SELECT "
-		    "der_data"
-		    " FROM certificate_data WHERE ";
-		for (int i = 0; i < (certIds.size() - 1); ++i) {
-			queryStr += "(id = ?) or ";
-		}
-		queryStr += "(id = ?)";
-		//qDebug() << queryStr;
-		if (!query.prepare(queryStr)) {
-			/* TODO -- Handle error. */
-		}
-		for (int i = 0; i < certIds.size(); ++i) {
-			query.addBindValue(certIds[i]);
-		}
-		if (query.exec() && query.isActive()) {
-			query.first();
-			while (query.isValid()) {
-				QList<QSslCertificate> certs =
-				    QSslCertificate::fromData(
-				        QByteArray::fromBase64(
-				            query.value(0).toByteArray()),
-				        QSsl::Der);
-				Q_ASSERT(1 == certs.size());
-
-				certList.append(certs.first());
-
-				query.next();
-			}
-		}
-	}
-
-	return certList;
+fail:
+	return QJsonDocument();
 }
 
 
@@ -3641,7 +4361,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 {
 	debugFuncCall();
 
-	QByteArray rawBytes = msgsMessageDER(dmId);
+	QByteArray rawBytes = msgsMessageRaw(dmId);
 	Q_ASSERT(rawBytes.size() > 0);
 
 	if (ignoreMissingCrlCheck) {
@@ -3653,32 +4373,6 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	return 1 == rawMsgVerifySignatureDate(
 	    rawBytes.data(), rawBytes.size(), utcTime,
 	    ignoreMissingCrlCheck ? 0 : 1);
-}
-
-
-/* ========================================================================= */
-/*
- * Adds _dmType column.
- */
-bool MessageDb::addDmtypeColumn(void)
-/* ========================================================================= */
-{
-	if (false == m_db.isOpen()) {
-		return false;
-	}
-
-	/*
-	 * Create _dmType column if it does not exist.
-	 */
-	QSqlQuery query(m_db);
-	query.prepare("SELECT _dmType FROM messages LIMIT 1");
-	if (false == query.exec()) {
-		query.clear();
-		query.prepare("ALTER TABLE messages ADD COLUMN _dmType TEXT");
-		query.exec();
-	}
-
-	return true;
 }
 
 
@@ -3710,25 +4404,31 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
     const QString &locDir, bool testing)
 /* ========================================================================= */
 {
-	MessageDb *db;
+	MessageDb *db = NULL;
+	bool open_ret;
 
 	/* Already opened. */
 	if (this->find(key) != this->end()) {
-		// qDebug() << key << "db found";
 		return (*this)[key];
 	}
 
-	// qDebug() << "creating new" << key;
-	db = new MessageDb(key);
+	db = new(std::nothrow) MessageDb(key);
+	Q_ASSERT(NULL != db);
+	if (NULL == db) {
+		return NULL;
+	}
 
-	// qDebug() << "searching for file" << key << "in" << locDir;
 	/* TODO -- Handle file name deviations! */
-	// qDebug() << "opening";
 	/*
 	 * Test accounts have ___1 in their names, ___0 relates to standard
 	 * accounts.
 	 */
-	db->openDb(constructDbFileName(key, locDir, testing));
+	open_ret = db->openDb(constructDbFileName(key, locDir, testing));
+	Q_ASSERT(open_ret);
+	if (!open_ret) {
+		delete db;
+		return NULL;
+	}
 
 	this->insert(key, db);
 	return db;
@@ -3806,7 +4506,8 @@ bool dbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 
 /* ========================================================================= */
 /*
- * Re-open a new database file. The old file is left untouched.
+ * Re-open a new empty database file. The old file is left
+ *     untouched.
  */
 bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
@@ -3842,7 +4543,7 @@ bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /*
  * Delete message db.
  */
-bool dbContainer::deleteMessageDb(MessageDb * db)
+bool dbContainer::deleteMessageDb(MessageDb *db)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -3871,10 +4572,12 @@ bool dbContainer::deleteMessageDb(MessageDb * db)
 	delete db;
 
 	/* Delete file. */
-	qDebug() << "Deleting database file" << fileName;
+	logInfo("Deleting database file '%s'.\n",
+	    fileName.toUtf8().constData());
 
 	if (!QFile::remove(fileName)) {
-		qWarning() << "Failed deleting database file" << fileName;
+		logError("Failed deleting database file '%s'.\n",
+		    fileName.toUtf8().constData());
 		return false;
 	}
 
@@ -3908,135 +4611,4 @@ QString dbContainer::constructDbFileName(const QString &key,
 {
 	return locDir + QDir::separator() +
 	    key + "___" + (testing ? "1" : "0") + ".db";
-}
-
-
-/* ========================================================================= */
-/*
- * Return id of messages in database correspond with date interval.
- */
-QList<int> MessageDb::msgsDateInterval(QDate fromDate,
-    QDate toDate, bool sent) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<int> dmIDs;
-
-	if (sent) {
-		queryStr = "SELECT dmID "
-		    "FROM messages AS m LEFT JOIN supplementary_message_data "
-		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 2 AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
-	} else {
-		queryStr = "SELECT dmID "
-		    "FROM messages AS m LEFT JOIN supplementary_message_data "
-		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 1 AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
-	}
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Select error:" << query.lastError();
-	}
-
-	query.bindValue(":fromDate", fromDate);
-	query.bindValue(":toDate", toDate);
-
-	if (query.exec()) {
-		query.first();
-		while (query.isValid()) {
-			dmIDs.append(query.value(0).toString().toInt());
-			query.next();
-		}
-	}
-
-
-	return dmIDs;
-}
-
-
-/* ========================================================================= */
-/*
- * Return some message items for export correspondence to html.
- */
-QList<QString> MessageDb::getMsgForHtmlExport(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<QString> messageItems;
-
-	queryStr = "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
-	    "FROM messages WHERE dmID = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Select error:" << query.lastError();
-	}
-
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			messageItems.append(query.value(0).toString());
-			messageItems.append(query.value(1).toString());
-			messageItems.append(query.value(2).toString());
-			QDateTime dateTime =
-			    dateTimeFromDbFormat(query.value(3).toString());
-			messageItems.append(dateTime.toString("dd.MM.yyyy"));
-			messageItems.append(dateTime.toString("hh:mm:ss"));
-		}
-	}
-
-	return messageItems;
-}
-
-
-/* ========================================================================= */
-/*
- * Return some message items for export correspondence to csv.
- */
-QList<QString> MessageDb::getMsgForCsvExport(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<QString> messageItems;
-
-	queryStr = "SELECT dmMessageStatus, _dmType, dmDeliveryTime, "
-	    "dmAcceptanceTime, dmAnnotation, dmSender, dmSenderAddress, "
-	    "dmRecipient, dmRecipientAddress, dmSenderOrgUnit, "
-	    "dmSenderOrgUnitNum, dmRecipientOrgUnit, dmRecipientOrgUnitNum "
-	    "FROM messages WHERE dmID = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		qDebug() << "Select error:" << query.lastError();
-	}
-
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			messageItems.append(query.value(0).toString());
-			messageItems.append(query.value(1).toString());
-			messageItems.append(query.value(2).toString());
-			messageItems.append(query.value(3).toString());
-			messageItems.append(query.value(4).toString());
-			messageItems.append(query.value(5).toString());
-			messageItems.append(query.value(6).toString());
-			messageItems.append(query.value(7).toString());
-			messageItems.append(query.value(8).toString());
-			messageItems.append(query.value(9).toString());
-			messageItems.append(query.value(10).toString());
-			messageItems.append(query.value(11).toString());
-			messageItems.append(query.value(12).toString());
-		}
-	}
-
-	return messageItems;
 }

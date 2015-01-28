@@ -100,6 +100,10 @@ void DlgDsSearch::initSearchWindow(void)
 	this->resultsTableWidget->setColumnWidth(2,120);
 	this->resultsTableWidget->setColumnWidth(3,100);
 
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemSelectionChanged()), this,
+	    SLOT(setFirtsColumnActive()));
+
 	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 	connect(this->iCLineEdit, SIGNAL(textChanged(QString)),
@@ -112,6 +116,9 @@ void DlgDsSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->resultsTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
 	    this, SLOT(enableOkButton()));
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(insertDsItems()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
@@ -128,6 +135,19 @@ void DlgDsSearch::initSearchWindow(void)
 	    SLOT(pingIsdsServer()));
 
 	checkInputFields();
+}
+
+
+/* ========================================================================= */
+/*
+ * Set first column with checkbox active if item was changed
+ */
+void DlgDsSearch::setFirtsColumnActive(void)
+/* ========================================================================= */
+{
+	this->resultsTableWidget->selectColumn(0);
+	this->resultsTableWidget->selectRow(
+	    this->resultsTableWidget->currentRow());
 }
 
 
@@ -271,6 +291,7 @@ void DlgDsSearch::searchDataBox(void)
 
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
+	struct isds_DbOwnerInfo *ownerInfo = NULL;
 	struct isds_list *boxes = NULL;
 	QList<QVector<QString>> list_contacts;
 
@@ -291,16 +312,31 @@ void DlgDsSearch::searchDataBox(void)
 		break;
 	}
 
-	personName = isds_PersonName_add("", "",
+	personName = isds_PersonName_create(QString(), QString(),
 	    this->nameLineEdit->text(), this->nameLineEdit->text());
-	address = isds_Address_add("","","","", this->pscLineEdit->text(), "");
+	if (NULL == personName) {
+		goto fail;
+	}
+	address = isds_Address_create(QString(), QString(), QString(),
+	    QString(), this->pscLineEdit->text(), QString());
+	if (NULL == address) {
+		goto fail;
+	}
+	ownerInfo = isds_DbOwnerInfo_createConsume(this->iDLineEdit->text(),
+	    dbType, this->iCLineEdit->text(), personName,
+	    this->nameLineEdit->text(), NULL, address, QString(), QString(),
+	    QString(), QString(), QString(), 0, false, false);
+	if (NULL != ownerInfo) {
+		personName = NULL;
+		address = NULL;
+	} else {
+		goto fail;
+	}
 
 	isds_error status;
 
-	status = isds_DbOwnerInfo_search(&boxes, m_userName,
-	    this->iDLineEdit->text(), dbType,
-	    this->iCLineEdit->text(), personName, this->nameLineEdit->text(),
-	    NULL, address, "", "", "", "", "", 0, false, false);
+	status = isdsSearch(&boxes, m_userName, ownerInfo);
+	isds_DbOwnerInfo_free(&ownerInfo);
 
 	switch (status) {
 	case IE_SUCCESS:
@@ -309,19 +345,19 @@ void DlgDsSearch::searchDataBox(void)
 		QMessageBox::information(this, tr("Search result"),
 		    tr("Sorry, item(s) not found.<br><br>Try again..."),
 		    QMessageBox::Ok);
-		goto exit;
+		goto fail;
 		break;
 	case IE_ISDS:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("Ambiguous lookup values.<br><br>Try again..."),
 		    QMessageBox::Ok);
-		goto exit;
+		goto fail;
 		break;
 	default:
 		QMessageBox::critical(this, tr("Search error"),
 		    tr("It is not possible find databox, because error..."),
 		    QMessageBox::Ok);
-		goto exit;
+		goto fail;
 		break;
 	}
 
@@ -399,9 +435,10 @@ void DlgDsSearch::searchDataBox(void)
 
 	this->resultsTableWidget->resizeColumnsToContents();
 
-exit:
+fail:
 	isds_PersonName_free(&personName);
 	isds_Address_free(&address);
+	isds_DbOwnerInfo_free(&ownerInfo);
 	isds_list_free(&boxes);
 }
 
@@ -457,6 +494,12 @@ void DlgDsSearch::addContactsToTable(
 		item->setText(contactList[i].at(4));
 		this->resultsTableWidget->setItem(row,5,item);
 	}
+
+	if (this->resultsTableWidget->rowCount() > 0) {
+		this->resultsTableWidget->selectColumn(0);
+		this->resultsTableWidget->selectRow(0);
+	}
+
 }
 
 

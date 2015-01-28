@@ -50,10 +50,22 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 
 	fillContactsFromMessageDb();
 
+	if (this->contactTableWidget->rowCount() > 0) {
+
+		this->contactTableWidget->selectColumn(0);
+		this->contactTableWidget->selectRow(0);
+	}
+
+	connect(this->contactTableWidget,
+	    SIGNAL(itemSelectionChanged()), this,
+	    SLOT(setFirtsColumnActive()));
 	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
 	connect(this->contactTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
+	connect(this->contactTableWidget,
+	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->clearPushButton, SIGNAL(clicked()), this,
 	    SLOT(clearContactText()));
@@ -62,6 +74,19 @@ DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+
+/* ========================================================================= */
+/*
+ * Set first column with checkbox active if item was changed
+ */
+void DlgContacts::setFirtsColumnActive(void)
+/* ========================================================================= */
+{
+	this->contactTableWidget->selectColumn(0);
+	this->contactTableWidget->selectRow(
+	    this->contactTableWidget->currentRow());
 }
 
 
@@ -220,22 +245,27 @@ QString DlgContacts::getUserInfoFormIsds(QString idDbox)
 /* ========================================================================= */
 {
 	QString str = tr("no");
+	struct isds_DbOwnerInfo *doi = NULL;
 	struct isds_list *box = NULL;
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
 	isds_DbType dbType = DBTYPE_FO;
 
-	isds_DbOwnerInfo_search(&box, m_userName, idDbox, dbType, "",
-	    personName, "", NULL, address, "", "", "", "", "", 0, false, false);
+	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
+	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
+	    QString(), QString(), 0, false, false);
+	if (NULL == doi) {
+		return str;
+	}
 
-	if (0 != box) {
-		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
-		Q_ASSERT(0 != item);
+	isdsSearch(&box, m_userName, doi);
+	isds_DbOwnerInfo_free(&doi);
+
+	if (NULL != box) {
+		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
+		    box->data;
+		Q_ASSERT(NULL != item);
 		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
 	}
 
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
 	isds_list_free(&box);
 
 	return str;

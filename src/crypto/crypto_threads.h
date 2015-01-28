@@ -22,25 +22,30 @@
  */
 
 
-#ifndef DLG_DB_IMPORT_H
-#define DLG_DB_IMPORT_H
-
-#include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_db_import.h"
-
-class DbImportDialog : public QDialog, public Ui::DbImport
-{
-	Q_OBJECT
-
-public:
-	DbImportDialog(QWidget *parent = 0);
-signals:
-	void returnDbAction(bool);
-
-private slots:
-	void ImportDbFilesAction(void);
-};
+#ifndef _CRYPTO_THREADS_H_
+#define _CRYPTO_THREADS_H_
 
 
-#endif // DLG_DB_IMPORT_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+/*!
+ * @brief Initialise cryptographic back-end for multi-threaded use.
+ */
+void crypto_init_threads(void);
+
+
+/*!
+ * @brief Perform clean-up of thread-related structures.
+ */
+void crypto_cleanup_threads(void);
+
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+
+#endif /* _CRYPTO_THREADS_H_ */

@@ -175,6 +175,7 @@ public:
 	DateFmt date_format;
 	QString language;
 	SelectType after_start_select;
+	const int message_mark_as_read_timeout;
 
 	/*!
 	 * @brief Load data from supplied settings.

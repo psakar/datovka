@@ -26,6 +26,7 @@
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QInputDialog>
@@ -54,6 +55,8 @@
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
+#include "src/gui/dlg_import_zfo.h"
+#include "src/gui/dlg_import_zfo_result.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -91,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageDbs(),
     m_searchLine(NULL),
     m_messageListProxyModel(this),
+    m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
     m_received_1(200),
@@ -103,6 +107,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_export_correspond_dir(QDir::homePath()),
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
+    m_import_zfo_path(QDir::homePath()),
     isMainWindow(false),
     ui(new Ui::MainWindow)
 {
@@ -255,6 +260,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connectTopToolBarSlots();
 	connectMessageActionBarSlots();
 
+	/* Message marking timer. */
+	connect(&m_messageMarker, SIGNAL(timeout()),
+	    this, SLOT(msgSetSelectedMessageRead()));
+
 	/* Initialisation of message download timer. */
 	connect(&m_timerSyncAccounts, SIGNAL(timeout()), this,
 	    SLOT(synchroniseAllAccounts()));
@@ -327,11 +336,11 @@ void MainWindow::checkNewDatovkaVersion(void)
 
 	if (globPref.send_stats_with_version_checks) {
 		/* TODO - sent info about datovka, libs and OS to our server */
-        nam = new QNetworkAccessManager(this);
-        QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-        this, SLOT(datovkaVersionResponce(QNetworkReply*)));
-        QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
-        nam->get(QNetworkRequest(url));
+		nam = new QNetworkAccessManager(this);
+		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
+		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
+		nam->get(QNetworkRequest(url));
 	} else {
 		nam = new QNetworkAccessManager(this);
 		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -546,47 +555,68 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
+	/*
+	 * Disconnect message clicked. This slot will be enabled only for
+	 * received messages.
+	 */
+	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
+	    this, SLOT(messageItemClicked(QModelIndex)));
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
 		html = createAccountInfoAllField(tr("All messages"),
 		    messageDb->msgsRcvdYearlyCounts(dbId, DESCENDING),
 		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
-		ui->actionDelete_message->setEnabled(false);
+		ui->actionDelete_message_from_db->setEnabled(false);
+		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSent:
 		msgTblMdl = messageDb->msgsSntModel(dbId);
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsRcvdInYearModel(dbId,
 		    accountItem->text());
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
+		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
+		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsSntInYearModel(dbId,
 		    accountItem->text());
-		ui->actionDelete_message->setEnabled(true);
+		ui->actionDelete_message_from_db->setEnabled(true);
+		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -705,7 +735,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
+#ifdef PORTABLE_APPLICATION
 	QAction *action;
+#endif /* PORTABLE_APPLICATION */
 
 	if (index.isValid()) {
 		menu->addAction(
@@ -737,10 +769,13 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		    tr("Move account down"),
 		    this, SLOT(moveSelectedAccountDown()));
 		menu->addSeparator();
-		action = menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "folder_16.png"),
-		    tr("Change data directory"),
-		    this, SLOT(changeDataDirectory()));
+#ifdef PORTABLE_APPLICATION
+		action =
+#endif /* PORTABLE_APPLICATION */
+		    menu->addAction(
+		        QIcon(ICON_3PARTY_PATH "folder_16.png"),
+		        tr("Change data directory"),
+		        this, SLOT(changeDataDirectory()));
 #ifdef PORTABLE_APPLICATION
 		action->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
@@ -821,28 +856,14 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 
 		/* Mark message locally read. */
 		if (!messageDb->smsgdtLocallyRead(msgId)) {
-			messageDb->smsgdtSetLocallyRead(msgId);
-			/*
-			 * Reload/update account model only for
-			 * affected account.
-			 */
-			updateExistingAccountModelUnread(ui->accountList->
-			    selectionModel()->currentIndex());
-			/*
-			 * Mark message as read without reloading
-			 * the whole model.
-			 */
-			DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-			    m_messageListProxyModel.sourceModel();
-			Q_ASSERT(0 != messageModel);
-			messageModel->overrideRead(
-			    current.sibling(current.row(),
-			        0).data().toInt(), true);
-			/* Inform the view that the model has changed. */
-			emit messageModel->dataChanged(
-			    current.sibling(current.row(), 0),
-			    current.sibling(current.row(),
-			        messageModel->columnCount() - 1));
+			qDebug()
+			    << "Starting timer to mark as read for message"
+			    << msgId;
+			m_messageMarker.setSingleShot(true);
+			m_messageMarker.start(
+			    globPref.message_mark_as_read_timeout);
+		} else {
+			m_messageMarker.stop();
 		}
 
 		/* Generate and show message information. */
@@ -897,6 +918,55 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	}
 
 	/* TODO */
+}
+
+
+/* ========================================================================= */
+/*
+ * Used for toggling the message read state.
+ */
+void MainWindow::messageItemClicked(const QModelIndex &index)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	if (DbMsgsTblModel::READLOC_COL != index.column()) {
+		qDebug() << "Not clicked read locally.";
+		return;
+	}
+
+	/* Stop the timer. */
+	m_messageMarker.stop();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	int msgId = index.sibling(index.row(), 0).data().toInt();
+
+	/* Get message state from database and toggle the value. */
+	bool isRead = messageDb->smsgdtLocallyRead(msgId);
+	messageDb->smsgdtSetLocallyRead(msgId, !isRead);
+
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
+
+	/*
+	 * Mark message as read without reloading
+	 * the whole model.
+	 */
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	messageModel->overrideRead(msgId, !isRead);
+	/* Inform the view that the model has changed. */
+	emit messageModel->dataChanged(
+	    index.sibling(index.row(), 0),
+	    index.sibling(index.row(), messageModel->columnCount() - 1));
 }
 
 
@@ -969,9 +1039,14 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Delete message"), this,
-		    SLOT(messageItemDeleteMessage()))->
-		    setEnabled(ui->actionDelete_message->isEnabled());
+		    tr("Delete message from local database"), this,
+		    SLOT(deleteMessageFromLocalDatabase()))->
+		    setEnabled(ui->actionDelete_message_from_db->isEnabled());
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
+		    tr("Delete message from server and local database"), this,
+		    SLOT(deleteMessageFromLocalDbAndIsds()))->
+		    setEnabled(ui->actionDelete_message_from_server->isEnabled());
 		menu->exec(QCursor::pos());
 	}
 }
@@ -1567,8 +1642,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
 	    this, SLOT(postDownloadSelectedMessageAttachments(
 		const QModelIndex, QString)));
-
-
+	connect(workerDownMsgComplete,
+	    SIGNAL(clearStatusBarAndShowDialog(QString)),this,
+	    SLOT(clearInfoInStatusBarAndShowDialog(QString)));
 	connect(workerDownMsgComplete, SIGNAL(workRequested()),
 	    threadDownMsgComplete, SLOT(start()));
 	connect(threadDownMsgComplete, SIGNAL(started()),
@@ -1579,6 +1655,29 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    this, SLOT(deleteThreadDownMsgComplete()));
 
 	workerDownMsgComplete->requestWork();
+}
+
+
+/* ========================================================================= */
+/*
+ * Clear status bar if download of complete message fails.
+ */
+void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	showStatusTextWithTimeout(tr("It was not possible download complete "
+	    "message \"%1\" from ISDS server.").arg(msgID));
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setWindowTitle(tr("Download message error"));
+	msgBox.setText(tr("It was not possible download complete "
+	    "message \"%1\" from server Datové schránky.").arg(msgID));
+	msgBox.setInformativeText(tr("It is likely that the message has been "
+	    "deleted from the server."));
+	msgBox.exec();
 }
 
 
@@ -1698,12 +1797,10 @@ void MainWindow::accountItemMarkAllRead(void)
 
 	int count = msgTblMdl->rowCount();
 
-	if (0 != msgTblMdl) {
-		for (int i = 0; i < count; i++) {
-			QModelIndex index = msgTblMdl->index(i, 0);
-			int msgId = msgTblMdl->itemData(index).first().toInt();
-			messageDb->smsgdtSetLocallyRead(msgId);
-		}
+	for (int i = 0; i < count; ++i) {
+		QModelIndex index = msgTblMdl->index(i, 0);
+		int msgId = msgTblMdl->itemData(index).first().toInt();
+		messageDb->smsgdtSetLocallyRead(msgId);
 	}
 
 	/* Regenerate account tree. */
@@ -1728,9 +1825,9 @@ void MainWindow::accountItemMarkAllRead(void)
 
 /* ========================================================================= */
 /*
- * Deletes selected message from message list.
+ * Delete selected message from local database and ISDS.
  */
-void MainWindow::messageItemDeleteMessage(void)
+void MainWindow::deleteMessageFromLocalDbAndIsds(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -1742,26 +1839,175 @@ void MainWindow::messageItemDeleteMessage(void)
 
 	QMessageBox::StandardButton reply;
 	reply = QMessageBox::question(this,
-	    tr("Delete message ") + dmId,
-	    tr("Do you want to delete message") +  " '" + dmId +
-	    "'?",
+	    tr("Delete message"),
+	    tr("Do you want to delete message \"%1\" from "
+	         "server Datové schránky and local database?").arg(dmId),
 	    QMessageBox::Yes | QMessageBox::No);
 
+	/* Save current index. */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
 	if (reply == QMessageBox::Yes) {
-		switch (eraseMessage(acntTopIdx, dmId)) {
+		switch (eraseMessage(acntTopIdx, dmId, true)) {
 		case Q_SUCCESS:
 			/*
-			 *  Hide deleted message in view. The view/model will
-			 *  be regenerated according to the updated content
-			 *  of the DB when the account selection has been
-			 *  changed.
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
 			 */
-			ui->messageList->hideRow(msgIdx.row());
+			if (selectedAcntIndex.isValid()) {
+				accountItemSelectionChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete selected message from local database.
+ */
+void MainWindow::deleteMessageFromLocalDatabase(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(this,
+	    tr("Delete message"),
+	    tr("Do you want to delete message \"%1\" from "
+	         "local database?").arg(dmId),
+	    QMessageBox::Yes | QMessageBox::No);
+
+	/* Save current index. */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
+	if (reply == QMessageBox::Yes) {
+		switch (eraseMessage(acntTopIdx, dmId, false)) {
+		case Q_SUCCESS:
+			/*
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
+			 */
+			if (selectedAcntIndex.isValid()) {
+				accountItemSelectionChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Delete message from long term storage in ISDS and
+ * local database - based on action parameter.
+*/
+qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
+    const QString &dmId, bool delFromIsds)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	int dmID = atoi(dmId.toStdString().c_str());
+
+	if (!delFromIsds) {
+		if (messageDb->msgsDeleteMessageData(dmID)) {
+			qDebug() << "Message" << dmID <<
+			    "was deleted from local database";
+			showStatusTextWithTimeout(tr("Message \"%1\" was "
+			    "deleted from local database.").arg(dmID));
+			return Q_SUCCESS;
+		}
+	} else {
+
+		isds_error status;
+		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+			if (!connectToIsds(acntTopIdx, true)) {
+				return Q_CONNECT_ERROR;
+			}
+		}
+
+		bool incoming = true;
+		QModelIndex index = ui->accountList->
+		    selectionModel()->currentIndex();
+
+		switch (AccountModel::nodeType(index)) {
+		case AccountModel::nodeRecentReceived:
+		case AccountModel::nodeReceived:
+		case AccountModel::nodeReceivedYear:
+			incoming = true;
+			break;
+		case AccountModel::nodeRecentSent:
+		case AccountModel::nodeSent:
+		case AccountModel::nodeSentYear:
+			incoming = false;
+			break;
+		default:
+			break;
+		}
+		/* first delete message on ISDS */
+		status = isds_delete_message_from_storage(isdsSessions.session(
+		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    incoming);
+
+		if (IE_SUCCESS == status) {
+			if (messageDb->msgsDeleteMessageData(dmID)) {
+				qDebug() << "Message" << dmID <<
+				    "was deleted from ISDS and local databse";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted from ISDS and local database.")
+				    .arg(dmID));
+				return Q_SUCCESS;
+			} else {
+				qDebug() << "Message" << dmID <<
+				    "was deleted only from ISDS.";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted only from ISDS.").arg(dmID));
+				return Q_SQL_ERROR;
+			}
+		} else if (IE_INVAL == status) {
+			qDebug() << "Error: "<< status << isds_strerror(status);
+			if (messageDb->msgsDeleteMessageData(dmID)) {
+				qDebug() << "Message" << dmID <<
+				    "was deleted only from local database.";
+				showStatusTextWithTimeout(tr("Message \"%1\" "
+				    "was deleted only from local database.")
+				    .arg(dmID));
+				return Q_ISDS_ERROR;
+			}
+		}
+	}
+
+	qDebug() << "Message" << dmID << "was not deleted.";
+	showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
+	    .arg(dmID));
+	return Q_ISDS_ERROR;
 }
 
 
@@ -2385,8 +2631,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(saveSelectedAttachmentToFile()));
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
-	connect(ui->actionDelete_message, SIGNAL(triggered()), this,
-	    SLOT(messageItemDeleteMessage()));
+	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
+	    SLOT(deleteMessageFromLocalDatabase()));
+	connect(ui->actionDelete_message_from_server, SIGNAL(triggered()), this,
+	    SLOT(deleteMessageFromLocalDbAndIsds()));
 
 	/* Tools. */
 	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
@@ -2397,6 +2645,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(viewMessageFromZFO()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
 	    SLOT(exportCorrespondenceOverview()));
+	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
+	    SLOT(showImportZFOActionDialog()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -3939,11 +4189,10 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QList<QString> hashLocaldata;
-	hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
+	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
 
 	/* TODO - check if hash info is in db */
-	if (hashLocaldata[0].isEmpty()) {
+	if (hashLocaldata.isEmpty()) {
 		isds_hash_free(&hashLocal);
 		isds_hash_free(&hashIsds);
 		return Q_SQL_ERROR;
@@ -3967,73 +4216,6 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
-* Delete message from long term storage in ISDS.
-*/
-qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
-    QString dmId)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	isds_error status;
-
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	bool incoming = true;
-
-	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
-	switch (AccountModel::nodeType(index)) {
-	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeReceived:
-	case AccountModel::nodeReceivedYear:
-		incoming = true;
-		break;
-	case AccountModel::nodeRecentSent:
-	case AccountModel::nodeSent:
-	case AccountModel::nodeSentYear:
-		incoming = false;
-		break;
-	default:
-		break;
-	}
-
-	status = isds_delete_message_from_storage(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str(), incoming);
-
-	if (IE_SUCCESS == status) {
-		MessageDb *messageDb = accountMessageDb(0);
-		int dmID = atoi(dmId.toStdString().c_str());
-		if (messageDb->msgsDeleteMessageData(dmID)) {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from ISDS and db.").arg(dmID));
-			return Q_SUCCESS;
-		} else {
-			qDebug() << "Message" << dmID <<
-			    "was deleted from ISDS and db";
-			return Q_SQL_ERROR;
-		}
-	} else if (IE_INVAL == status) {
-		qDebug() << "Error: " << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	} else {
 		return Q_ISDS_ERROR;
 	}
 
@@ -4185,13 +4367,10 @@ void MainWindow::aboutApplication(void)
 void MainWindow::showImportDatabaseDialog(void)
 /* ========================================================================= */
 {
-
 	QDialog *dbImport = new DbImportDialog(this);
-
 	connect(dbImport,
-	    SIGNAL(returnDbAction(int)), this,
-	    SLOT(prepareImportDatabase(int)));
-
+	    SIGNAL(returnDbAction(bool)), this,
+	    SLOT(prepareImportDatabase(bool)));
 	dbImport->exec();
 }
 
@@ -4200,7 +4379,7 @@ void MainWindow::showImportDatabaseDialog(void)
 /*
  * Prepare import database directory.
  */
-void MainWindow::prepareImportDatabase(int importType)
+void MainWindow::prepareImportDatabase(bool fromDirectory)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -4212,8 +4391,7 @@ void MainWindow::prepareImportDatabase(int importType)
 	fileList.clear();
 	filePathList.clear();
 
-	switch (importType) {
-	case DbImportDialog::IMPORT_FROM_DIR:
+	if (fromDirectory) {
 		importDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory"), m_on_import_database_dir_activate,
 		    QFileDialog::ShowDirsOnly |
@@ -4238,10 +4416,7 @@ void MainWindow::prepareImportDatabase(int importType)
 		for (int i = 0; i < fileList.size(); ++i) {
 			filePathList.append(importDir + "/" + fileList.at(i));
 		}
-
-		break;
-
-	case DbImportDialog::IMPORT_SEL_FILES:
+	} else {
 		filePathList = QFileDialog::getOpenFileNames(this,
 		    tr("Select db file(s)"), m_on_import_database_dir_activate,
 		    tr("Database file (*.db)"));
@@ -4255,11 +4430,6 @@ void MainWindow::prepareImportDatabase(int importType)
 
 		m_on_import_database_dir_activate =
 		    QFileInfo(filePathList.at(0)).absoluteDir().absolutePath();
-		break;
-
-	default:
-		return;
-		break;
 	}
 
 	importDatabaseFileList(filePathList);
@@ -4613,6 +4783,7 @@ void MainWindow::viewMessageFromZFO(void)
 
 	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
 	struct isds_message *message = NULL;
+	int zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
 	QDialog *viewDialog;
 
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -4632,18 +4803,24 @@ void MainWindow::viewMessageFromZFO(void)
 
 	}
 
-	message = loadZfoFile(dummy_session, fileName);
+	message = loadZfoFile(dummy_session, fileName,
+	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
 	if (NULL == message) {
-		qDebug() << "Cannot parse file" << fileName;
-		QMessageBox::warning(this,
-		    tr("Content parsing error"),
-		    tr("Cannot parse the content of ") + fileName + ".",
-		    QMessageBox::Ok);
-		goto fail;
+		message = loadZfoFile(dummy_session, fileName,
+		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		    zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		if (NULL == message) {
+			qDebug() << "Cannot parse file" << fileName;
+			QMessageBox::warning(this,
+			    tr("Content parsing error"),
+			    tr("Cannot parse the content of ") + fileName + ".",
+			    QMessageBox::Ok);
+			goto fail;
+		}
 	}
 
 	/* Generate dialog showing message content. */
-	viewDialog = new DlgViewZfo(message, this);
+	viewDialog = new DlgViewZfo(message, zfoType, this);
 	viewDialog->exec();
 
 	isds_message_free(&message);
@@ -4689,6 +4866,766 @@ void MainWindow::exportCorrespondenceOverview(void)
 	storeExportPath();
 }
 
+
+
+
+/* ========================================================================= */
+/*
+ * Show dialog with settings of import ZFO file(s) into database.
+ */
+void MainWindow::showImportZFOActionDialog(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QDialog *importZfo = new ImportZFODialog(this);
+	connect(importZfo, SIGNAL(returnZFOAction(int, int)),
+	    this, SLOT(createZFOListForImport(int, int)));
+	importZfo->exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Create ZFO file(s) list for import into database.
+ */
+void MainWindow::createZFOListForImport(int zfoType, int importType)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	bool includeSubdir = false;
+	QString importDir;
+	QStringList fileList, filePathList;
+	QStringList nameFilter("*.zfo");
+	QDir directory(QDir::home());
+	fileList.clear();
+	filePathList.clear();
+
+	switch (importType) {
+	case ImportZFODialog::IMPORT_FROM_SUBDIR:
+		includeSubdir = true;
+	case ImportZFODialog::IMPORT_FROM_DIR:
+		importDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select directory"), m_import_zfo_path,
+		    QFileDialog::ShowDirsOnly |
+		    QFileDialog::DontResolveSymlinks);
+
+		if (importDir.isEmpty()) {
+			return;
+		}
+
+		m_import_zfo_path = importDir;
+
+		if (includeSubdir) {
+			QDirIterator it(importDir, nameFilter, QDir::Files,
+			    QDirIterator::Subdirectories);
+			while (it.hasNext()) {
+				filePathList.append(it.next());
+			}
+		} else {
+			directory.setPath(importDir);
+			fileList = directory.entryList(nameFilter);
+			for (int i = 0; i < fileList.size(); ++i) {
+				filePathList.append(
+				    importDir + "/" + fileList.at(i));
+			}
+		}
+
+		if (filePathList.isEmpty()) {
+			qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the "
+			    "selected directory";
+			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
+			    "selected directory."));
+			QMessageBox::warning(this,
+			    tr("No ZFO file(s)"),
+			    tr("ZFO file(s) not found in selected directory."),
+			    QMessageBox::Ok);
+			return;
+		}
+
+		break;
+
+	case ImportZFODialog::IMPORT_SEL_FILES:
+		filePathList = QFileDialog::getOpenFileNames(this,
+		    tr("Select ZFO file(s)"), m_import_zfo_path,
+		    tr("ZFO file (*.zfo)"));
+
+		if (filePathList.isEmpty()) {
+			qDebug() << "ZFO-IMPORT:" <<"No *.zfo selected file(s)";
+			showStatusTextWithTimeout(
+			    tr("ZFO file(s) not selected."));
+			return;
+		}
+
+		m_import_zfo_path =
+		    QFileInfo(filePathList.at(0)).absoluteDir().absolutePath();
+		break;
+
+	default:
+		return;
+		break;
+	}
+
+	prepareZFOImportIntoDatabase(filePathList, zfoType);
+}
+
+
+/* ========================================================================= */
+/*
+ * Create account info for ZFO file(s) import into database.
+ */
+QList<MainWindow::accountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QString userName;
+	accountDataStruct accountData;
+	QList<accountDataStruct> accountList;
+	accountList.clear();
+
+	/* get username, accountName, ID of databox and pointer to database
+	 * for all accounts from settings */
+	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
+		MessageDb *messageDb = accountMessageDb(accountItem);
+		userName = accountInfo.userName();
+		accountData.acntIndex = index;
+		accountData.username = userName;
+		accountData.accountName = accountInfo.accountName();
+		accountData.databoxID = m_accountDb.dbId(userName + "___True");
+		accountData.messageDb = messageDb;
+		accountList.append(accountData);
+	}
+
+	return accountList;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message type of import ZFO file (message/delivery/unknown).
+ */
+int MainWindow::getMessageTypeFromZFO(QString file)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	int zfoType = -1;
+	struct isds_message *message = NULL;
+	struct isds_ctx *dummy_session = NULL;
+
+	dummy_session = isds_ctx_create();
+	if (NULL == dummy_session) {
+		qDebug() << "ZFO-TYPE:"<< "Cannot create dummy ISDS session.";
+		return zfoType;
+	}
+
+	/* Check ZFO type */
+	message = loadZfoFile(dummy_session, file,
+	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+	if (NULL == message) {
+		message = loadZfoFile(dummy_session, file,
+		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		if (NULL == message) {
+			/* ZFO format unknown */
+			zfoType = 0;
+		} else {
+			/* ZFO is delivery info */
+			zfoType = 2;
+		}
+	} else {
+		/* ZFO is message */
+		zfoType = 1;
+	}
+
+	isds_message_free(&message);
+	isds_ctx_free(&dummy_session);
+
+	return zfoType;
+}
+
+/* ========================================================================= */
+/*
+ * Prepare import ZFO file(s) into database by ZFO type.
+ */
+void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
+    int zfoType)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	int zfoCnt =  files.size();
+
+	qDebug() << "ZFO-IMPORT:" << "number of ZFO:" << zfoCnt;
+
+	if (zfoCnt == 0) {
+		qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the fileList";
+		showStatusTextWithTimeout(tr("No ZFO file(s) for import."));
+		return;
+	}
+
+	QList<accountDataStruct> const accountList =
+	    createAccountInfoForZFOImport();
+
+	if (accountList.isEmpty()) {
+		qDebug() << "ZFO-IMPORT:" << "There is no account for import.";
+		showStatusTextWithTimeout(tr("There is no account for "
+		    "import of ZFO file(s)."));
+		return;
+	}
+
+	int zfoFileType = 0;
+	QPair<QString,QString> impZFOInfo;
+	QList<QPair<QString,QString>> errorFilesList; // red
+	QList<QPair<QString,QString>> existFilesList; // black
+	QList<QPair<QString,QString>> successFilesList; // green
+	QStringList messageZFOList;
+	QStringList deliveryZFOList;
+
+
+	/* sort ZFOs by format type */
+	for (int i = 0; i < zfoCnt; i++) {
+		/* retrun -1=error, 0=unknown, 1=message, 2=delivery info */
+		zfoFileType = getMessageTypeFromZFO(files.at(i));
+		qDebug() << i << zfoFileType << files.at(i);
+
+
+		if (zfoFileType == 0) {
+			impZFOInfo.first = files.at(i);
+			impZFOInfo.second = tr("Wrong ZFO format. This "
+			    "file does not contain correct data for import.");
+			errorFilesList.append(impZFOInfo);
+		} else if (zfoFileType == 1) {
+			messageZFOList.append(files.at(i));
+		} else if (zfoFileType == 2) {
+			deliveryZFOList.append(files.at(i));
+		} else {
+			impZFOInfo.first = files.at(i);
+			impZFOInfo.second = tr("Error during file parsing.");
+			errorFilesList.append(impZFOInfo);
+		}
+	}
+
+	switch (zfoType) {
+	case ImportZFODialog::IMPORT_ALL_ZFO:
+		qDebug() << "ZFO-IMPORT:" << "IMPORT_ALL_ZFO";
+		if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
+			QMessageBox::warning(this, tr("No ZFO file(s)"),
+			    tr("The selection does not contain "
+			        "any valid ZFO files."),
+			    QMessageBox::Ok);
+			return;
+		}
+		/* First, import messages. */
+		importMessageZFO(accountList, messageZFOList,
+		    successFilesList, existFilesList, errorFilesList);
+		/* Second, import delivery information. */
+		importDeliveryInfoZFO(accountList, deliveryZFOList,
+		    successFilesList, existFilesList, errorFilesList);
+		break;
+
+	case ImportZFODialog::IMPORT_MESSAGE_ZFO:
+		qDebug() << "ZFO-IMPORT:" << "IMPORT_MESSAGE_ZFO";
+		if (messageZFOList.isEmpty()) {
+			QMessageBox::warning(this, tr("No ZFO file(s)"),
+			    tr("The selection does not contain "
+			         "any valid ZFO messages."),
+			    QMessageBox::Ok);
+			return;
+		}
+		importMessageZFO(accountList, messageZFOList,
+		    successFilesList, existFilesList, errorFilesList);
+		break;
+
+	case ImportZFODialog::IMPORT_DELIVERY_ZFO:
+		qDebug() << "ZFO-IMPORT:" << "IMPORT_DELIVERY_ZFO";
+		if (deliveryZFOList.isEmpty()) {
+			QMessageBox::warning(this, tr("No ZFO file(s)"),
+			    tr("The selection does not contain any valid "
+			        "ZFO delivery infos."),
+			    QMessageBox::Ok);
+			return;
+		}
+		importDeliveryInfoZFO(accountList, deliveryZFOList,
+		    successFilesList, existFilesList, errorFilesList);
+		break;
+
+	default:
+		return;
+		break;
+	}
+
+	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Completed"));
+
+	showNotificationDialogWithResult(zfoCnt, successFilesList,
+	    existFilesList, errorFilesList);
+}
+
+
+/* ========================================================================= */
+/*
+ * Execute the import of delivery info ZFO file(s) into database.
+ */
+void MainWindow::importDeliveryInfoZFO(
+    const QList<accountDataStruct> &accountList, const QStringList &files,
+    QList<QPair<QString,QString>> &successFilesList,
+    QList<QPair<QString,QString>> &existFilesList,
+    QList<QPair<QString,QString>> &errorFilesList)
+/* ========================================================================= */
+{
+	int fileCnt = files.size();
+	QPair<QString,QString> importZFOInfo;
+	QString pInfoText = "";
+	QString nInfoText = "";
+	QString eInfoText = "";
+
+	/* for every ZFO file detect if message is in the database */
+	for (int i = 0; i < fileCnt; ++i) {
+
+		pInfoText = "";
+		nInfoText = "";
+		eInfoText = "";
+
+		showStatusTextPermanently(tr("Processing of "
+		    "delivery info ZFO: %1 ...").arg(files.at(i)));
+
+		struct isds_message *message = NULL;
+		struct isds_ctx *dummy_session = NULL;
+
+		dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			qDebug() << "Cannot create dummy ISDS session.";
+			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
+			    "failed!"));
+			/* TODO */
+			return;
+		}
+
+		message = loadZfoFile(dummy_session, files.at(i),
+		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		if (NULL == message || message->envelope == NULL) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = tr("Wrong ZFO "
+			    "format. This file does not contain correct "
+			    "data for import.");
+			errorFilesList.append(importZFOInfo);
+			isds_ctx_free(&dummy_session);
+			continue;
+		}
+
+		int resISDS = 0;
+		bool imported = false;
+		bool exists = false;
+		int dmId = atoi(message->envelope->dmID);
+
+		for (int j = 0; j < accountList.size(); j++) {
+			/* check if message envelope is in database */
+			if (-1 != accountList.at(j).messageDb->msgsStatusIfExists(dmId)) {
+				/* check if raw is in database */
+				if (!accountList.at(j).messageDb->isDeliveryInfoRawDb(dmId)) {
+					/* Is/was ZFO message in ISDS */
+					resISDS = isImportMsgInISDS(files.at(i),
+					    accountList.at(j).acntIndex);
+					if (resISDS == MSG_IS_IN_ISDS) {
+						if (Q_SUCCESS ==
+						    Worker::storeDeliveryInfo(true,
+						    *(accountList.at(j).messageDb), message)) {
+							pInfoText += tr("Imported as delivery "
+							    "info for message "
+							    "\"%1\", account \"%2\".").
+							    arg(dmId).arg(accountList.at(j).accountName);
+							pInfoText += "<br/>";
+							imported = true;
+						} else {
+							nInfoText =
+							    tr("File has "
+							    "not been imported "
+							    "because an error "
+							    "was detected "
+							    "during insertion "
+							    "process.");
+						}
+					} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+						nInfoText = tr("Message \"%1\""
+						    " does not exists on the server "
+						    "Datové schránky.").arg(dmId);
+					} else if (resISDS == MSG_FILE_ERROR) {
+						nInfoText = tr("Couldn't open this file "
+						    "for authentication on the "
+						    "server Datové schránky.");
+					} else {
+						QMessageBox msgBox(this);
+						msgBox.setIcon(QMessageBox::Warning);
+						msgBox.setWindowTitle(tr("ZFO import problem"));
+						msgBox.setText(tr("Do you want to continue with import?"));
+						msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+						msgBox.setDefaultButton(QMessageBox::No);
+						if (QMessageBox::No == msgBox.exec()) {
+							nInfoText = tr("It is not possible "
+							    "to connect to server Datové "
+							    "schránky and verify validity of "
+							    "this ZFO file.");
+							nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
+							importZFOInfo.first = files.at(i);
+							importZFOInfo.second = nInfoText;
+							errorFilesList.append(importZFOInfo);
+							isds_message_free(&message);
+							isds_ctx_free(&dummy_session);
+							showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+							return;
+						} else {
+							nInfoText = tr("It is not possible "
+							    "to connect to server Datové "
+							    "schránky and verify validity of "
+							    "this ZFO file.");
+						}
+					}
+				} else {
+					exists = true;
+					eInfoText += tr("Delivery info for message \"%1\" already exists in the "
+					    "local database, account \"%2\".").
+					    arg(dmId).arg(accountList.at(j).accountName);
+					eInfoText += "<br/>";
+				}
+			} else {
+				nInfoText = tr("This file (delivery info) has "
+				    "not been inserted into database because "
+				    "there isn't any related message (%1) in "
+				    "the databases.").arg(dmId);
+			}
+		} // for
+
+		if (imported) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = pInfoText;
+			successFilesList.append(importZFOInfo);
+		} else if (exists){
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = eInfoText;
+			existFilesList.append(importZFOInfo);
+		} else {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = nInfoText;
+			errorFilesList.append(importZFOInfo);
+		}
+
+		isds_message_free(&message);
+		isds_ctx_free(&dummy_session);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Execute the import of message ZFO file(s) into database.
+ */
+void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
+    const QStringList &files, QList<QPair<QString,QString>> &successFilesList,
+    QList<QPair<QString,QString>> &existFilesList,
+    QList<QPair<QString,QString>> &errorFilesList)
+/* ========================================================================= */
+{
+	int fileCnt = files.size();
+	QPair<QString,QString> importZFOInfo;
+	QString pInfoText = "";
+	QString nInfoText = "";
+	QString eInfoText = "";
+
+	/* for every ZFO file detect its database and message type */
+	for (int i = 0; i < fileCnt; ++i) {
+
+		pInfoText = "";
+		nInfoText = "";
+		eInfoText = "";
+
+		showStatusTextPermanently(tr("Processing of "
+		    "message ZFO: %1 ...").arg(files.at(i)));
+
+		struct isds_message *message = NULL;
+		struct isds_ctx *dummy_session = NULL;
+
+		dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			qDebug() << "Cannot create dummy ISDS session.";
+			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
+			    "failed!"));
+			/* TODO */
+			return;
+		}
+
+		message = loadZfoFile(dummy_session, files.at(i),
+		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+		if (NULL == message || message->envelope == NULL) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = tr("Wrong ZFO format. "
+			    "File does not contain correct data for import.");
+			errorFilesList.append(importZFOInfo);
+			isds_ctx_free(&dummy_session);
+			continue;
+		}
+
+		QString dbIDSender = message->envelope->dbIDSender;
+		QString dbIDRecipient = message->envelope->dbIDRecipient;
+
+		/* save database username where message will be inserted */
+		QString isSent;
+		QString isReceived;
+		int dmId = atoi(message->envelope->dmID);
+		int resISDS = 0;
+		bool import = false;
+		bool exists = false;
+
+		/* message type recognition {sent,received}, insert into DB */
+		for (int j = 0; j < accountList.size(); j++) {
+			/* is sent */
+			if (accountList.at(j).databoxID == dbIDSender) {
+
+				isSent = accountList.at(j).username;
+				qDebug() << dmId << "isSent" << isSent;
+
+				/* Is/was ZFO message in ISDS */
+				resISDS = isImportMsgInISDS(files.at(i),
+				    accountList.at(j).acntIndex);
+				if (resISDS == MSG_IS_IN_ISDS) {
+					if (-1 == accountList.at(j).messageDb->
+					    msgsStatusIfExists(dmId)) {
+						Worker::storeEnvelope("sent", *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, false, *(accountList.at(j).messageDb), message, "", 0, 0)) {
+							import = true;
+							pInfoText += tr("Imported as sent message "
+							    "\"%1\" into account \"%2\".").
+							    arg(dmId).arg(accountList.at(j).accountName);
+							pInfoText += "<br/>";
+						} else {
+							nInfoText =
+							    tr("File has "
+							    "not been imported "
+							    "because an error "
+							    "was detected "
+							    "during insertion "
+							    "process.");
+						}
+					} else {
+						exists = true;
+						eInfoText += tr("Message \"%1\" already exists in the "
+						    "local database, account \"%2\".").
+						    arg(dmId).arg(accountList.at(j).accountName);
+						eInfoText += "<br/>";
+					}
+				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+					nInfoText = tr("Message \"%1\""
+					    " does not exists on the server "
+					    "Datové schránky.").arg(dmId);
+				} else if (resISDS == MSG_FILE_ERROR) {
+					nInfoText = tr("Couldn't open this file "
+					    "for authentication on the "
+					    "server Datové schránky.");
+				} else {
+					QMessageBox msgBox(this);
+					msgBox.setIcon(QMessageBox::Warning);
+					msgBox.setWindowTitle(tr("ZFO import problem"));
+					msgBox.setText(tr("Do you want to continue with import?"));
+					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+					msgBox.setDefaultButton(QMessageBox::No);
+					if (QMessageBox::No == msgBox.exec()) {
+						nInfoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = nInfoText;
+						errorFilesList.append(importZFOInfo);
+						isds_message_free(&message);
+						isds_ctx_free(&dummy_session);
+						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+						return;
+					} else {
+						nInfoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+					}
+				}
+			}
+
+			/* is received */
+			if (accountList.at(j).databoxID == dbIDRecipient) {
+				isReceived = accountList.at(j).username;
+				qDebug() << dmId << "isReceived" << isReceived;
+				resISDS = isImportMsgInISDS(files.at(i),
+				    accountList.at(j).acntIndex);
+
+				if (resISDS == MSG_IS_IN_ISDS) {
+					if (-1 == accountList.at(j).messageDb->
+					    msgsStatusIfExists(dmId)) {
+						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
+							import = true;
+							/* update message state into database */
+							accountList.at(j).messageDb->msgSetProcessState(dmId, SETTLED, false);
+							pInfoText += tr("Imported as received message "
+							    "\"%1\" into account \"%2\".").
+							    arg(dmId).arg(accountList.at(j).accountName);
+							pInfoText += "<br/>";
+						} else {
+							nInfoText =
+							    tr("File has "
+							    "not been imported "
+							    "because an error "
+							    "was detected "
+							    "during insertion "
+							    "process.");
+						}
+					} else {
+						exists = true;
+						eInfoText += tr("Message \"%1\" already exists in the "
+						    "local database, account \"%2\".").
+						    arg(dmId).arg(accountList.at(j).accountName);
+						eInfoText += "<br/>";
+					}
+				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
+					nInfoText = tr("Message \"%1\""
+					    " does not exists on the server "
+					    "Datové schránky.").arg(dmId);
+				} else if (resISDS == MSG_FILE_ERROR) {
+					nInfoText = tr("Couldn't open this file "
+					    "for authentication on the "
+					    "server Datové schránky.");
+				} else {
+					QMessageBox msgBox(this);
+					msgBox.setIcon(QMessageBox::Warning);
+					msgBox.setWindowTitle(tr("ZFO import problem"));
+					msgBox.setText(tr("Do you want to continue with import?"));
+					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+					msgBox.setDefaultButton(QMessageBox::No);
+					if (QMessageBox::No == msgBox.exec()) {
+						nInfoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
+						importZFOInfo.first = files.at(i);
+						importZFOInfo.second = nInfoText;
+						errorFilesList.append(importZFOInfo);
+						isds_message_free(&message);
+						isds_ctx_free(&dummy_session);
+						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
+						return;
+					} else {
+						nInfoText = tr("It is not possible "
+						    "to connect to server Datové "
+						    "schránky and verify validity of "
+						    "this ZFO file.");
+					}
+				}
+			}
+		} //for
+
+		/* */
+		if (isReceived.isNull() && isSent.isNull()) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = tr("For this file does not "
+			    "exist correct databox or relevant account.");
+			errorFilesList.append(importZFOInfo);
+		} else if (import) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = pInfoText;
+			successFilesList.append(importZFOInfo);
+		} else if (exists) {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = eInfoText;
+			existFilesList.append(importZFOInfo);
+		} else {
+			importZFOInfo.first = files.at(i);
+			importZFOInfo.second = nInfoText;
+			errorFilesList.append(importZFOInfo);
+		}
+
+		isds_message_free(&message);
+		isds_ctx_free(&dummy_session);
+	} //for
+}
+
+
+/* ========================================================================= */
+/*
+ * Check if import ZFO file is/was in ISDS.
+ */
+int MainWindow::isImportMsgInISDS(const QString &zfoFile,
+    QModelIndex accountIndex)
+/* ========================================================================= */
+{
+	Q_ASSERT(accountIndex.isValid());
+
+	size_t length;
+	isds_error status;
+	QByteArray bytes;
+	QFile file(zfoFile);
+
+	if (file.exists()) {
+		if (!file.open(QIODevice::ReadOnly)) {
+			qDebug() << "Couldn't open the file" << zfoFile;
+			return MSG_FILE_ERROR;
+		}
+
+		bytes = file.readAll();
+		length = bytes.size();
+	} else {
+		return MSG_FILE_ERROR;
+	}
+
+	accountIndex = AccountModel::indexTop(accountIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!connectToIsds(accountIndex, true)) {
+			return MSG_ISDS_ERROR;
+		}
+	}
+
+	status = isds_authenticate_message(isdsSessions.session(
+	    accountInfo.userName()), bytes.data(), length);
+
+	// not in ISDS
+	if (IE_NOTEQUAL == status) {
+		return MSG_IS_NOT_IN_ISDS;
+	}
+
+	if (IE_SUCCESS == status) {
+		// is/was in ISDS
+		return MSG_IS_IN_ISDS;
+	} else {
+		// any error
+		qDebug() << status << isds_strerror(status);
+		return MSG_ISDS_ERROR;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Show ZFO import notification dialog with results of import
+ */
+void MainWindow::showNotificationDialogWithResult(int filesCnt,
+    const QList<QPair<QString,QString>> &successFilesList,
+    const QList<QPair<QString,QString>> &existFilesList,
+    const QList<QPair<QString,QString>> &errorFilesList)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
+	    errorFilesList, successFilesList, existFilesList, this);
+	importZfoResult->exec();
+}
+
+
 /* ========================================================================= */
 /*
  * Show help.
@@ -4721,15 +5658,15 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		return;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
+		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Message export error!"));
 		msgBox.setText(tr("Cannot export complete message")
 		    + " " + dmId + ".");
@@ -4747,8 +5684,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 				.arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsMessageBase64(dmID)).toUtf8();
+				base64 = messageDb->msgsMessageBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -4776,8 +5712,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	enum WriteFileState ret = writeFile(fileName, data);
 	if (WF_SUCCESS == ret) {
@@ -4871,10 +5806,10 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
+		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
 		msgBox.setText(tr("Cannot export delivery info for message")
 		    + " " + dmId + ".");
@@ -4892,8 +5827,8 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 				    "not successful!").arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+				base64 =
+				    messageDb->msgsGetDeliveryInfoBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "
@@ -4922,8 +5857,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 	storeExportPath();
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	enum WriteFileState ret = writeFile(fileName, data);
 	if (WF_SUCCESS == ret) {
@@ -4963,8 +5897,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsGetDeliveryInfoRaw(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
@@ -4984,8 +5918,8 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 				    "not successful!").arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsGetDeliveryInfoRaw(dmID)).toUtf8();
+				base64 =
+				    messageDb->msgsGetDeliveryInfoBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "
@@ -5051,8 +5985,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
@@ -5072,8 +6006,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 				.arg(dmId));
 				return;
 			} else {
-				raw = QString(messageDb->
-				     msgsMessageBase64(dmID)).toUtf8();
+				base64 = messageDb->msgsMessageBase64(dmID);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -5146,8 +6079,8 @@ void MainWindow::openSelectedMessageExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Cannot export the message ") + dmId);
@@ -5165,8 +6098,7 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
@@ -5205,8 +6137,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	int dmID = atoi(dmId.toStdString().c_str());
 
-	QString raw = QString(messageDb->msgsMessageBase64(dmID)).toUtf8();
-	if (raw.isEmpty()) {
+	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
 		msgBox.setText(tr("Cannot export the message ") + dmId);
@@ -5224,8 +6156,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QByteArray rawutf8 = QString(raw).toUtf8();
-	QByteArray data = QByteArray::fromBase64(rawutf8);
+	QByteArray data = QByteArray::fromBase64(base64);
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
@@ -5706,7 +6637,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		otpcode = "";
 		while (otpcode.isEmpty()) {
 			otpcode = QInputDialog::getText(this, msgTitle,
-			    msgBody, QLineEdit::Password, "", &ok,
+			    msgBody, QLineEdit::Normal, "", &ok,
 			    Qt::WindowStaysOnTopHint);
 			if (!ok) {
 				showStatusTextWithTimeout(
@@ -6018,4 +6949,46 @@ void MainWindow::msgSetSelectedMessageProcessState(int state)
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
 	    messageModel->columnCount() - 1));
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark selected message as read.
+ */
+void MainWindow::msgSetSelectedMessageRead(void)
+/* ========================================================================= */
+{
+	qDebug() << "Timer timed out, marking message"
+	    << m_lastSelectedMessageId << "as read.";
+
+	QModelIndex current = ui->messageList->
+	    selectionModel()->currentIndex();
+
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(current);
+	QString userName = accountUserName(accountItem);
+	MessageDb *messageDb = accountMessageDb(accountItem);
+
+	messageDb->smsgdtSetLocallyRead(m_lastSelectedMessageId);
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
+	/*
+	 * Mark message as read without reloading
+	 * the whole model.
+	 */
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+	messageModel->overrideRead(
+	    current.sibling(current.row(), 0).data().toInt(), true);
+	/* Inform the view that the model has changed. */
+	emit messageModel->dataChanged(
+	    current.sibling(current.row(), 0),
+	    current.sibling(current.row(),
+	        messageModel->columnCount() - 1));
 }

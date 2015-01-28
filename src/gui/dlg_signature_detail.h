@@ -27,6 +27,7 @@
 
 #include <QByteArray>
 #include <QDialog>
+#include <QSslCertificate>
 
 #include "src/common.h"
 #include "src/io/message_db.h"

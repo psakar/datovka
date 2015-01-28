@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>500</height>
+    <width>433</width>
+    <height>332</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,9 @@
      </property>
      <widget class="QTextEdit" name="envelopeTextEdit"/>
      <widget class="QTableView" name="attachmentTable">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
       </property>

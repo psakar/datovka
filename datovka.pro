@@ -10,7 +10,7 @@ QT += printsupport
 TEMPLATE = app
 APP_NAME = datovka
 # VERSION must contain only three dot-separated numbers because of OS X deployment.
-VERSION = 4.0.3
+VERSION = 4.1.0
 
 # Generate localisation.
 system(lrelease datovka.pro)
@@ -19,12 +19,10 @@ system(lrelease datovka.pro)
 macx {
 	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
 	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
-	system(cp $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
 }
 win32 {
 	warning(Copying Qt translation from $$[QT_INSTALL_DATA].)
 	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
-	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_uk.qm locale/qtbase_uk.qm)
 }
 
 
@@ -54,7 +52,7 @@ DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"
 
-unix {
+unix:!macx {
 	isEmpty(PREFIX) {
 		PREFIX = "/usr/local"
 	}
@@ -188,8 +186,7 @@ macx {
 	localisation.path = "Contents/Resources/locale"
 	localisation.files += locale/datovka_cs.qm \
 		locale/datovka_en.qm
-	localisation.files += locale/qtbase_cs.qm \
-		locale/qtbase_uk.qm
+	localisation.files += locale/qtbase_cs.qm
 
 	additional.path = "Contents/Resources"
 	additional.files = \
@@ -225,6 +222,7 @@ win32 {
 
 SOURCES += src/common.cpp \
     src/crypto/crypto.c \
+    src/crypto/crypto_threads.cpp \
     src/crypto/crypto_threadsafe.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_change_pwd.cpp \
@@ -250,10 +248,13 @@ SOURCES += src/common.cpp \
     src/gui/dlg_signature_detail.cpp \
     src/gui/dlg_change_directory.cpp \
     src/gui/dlg_correspondence_overview.cpp \
-    src/gui/dlg_db_import.cpp
+    src/gui/dlg_db_import.cpp \
+    src/gui/dlg_import_zfo.cpp \
+    src/gui/dlg_import_zfo_result.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
+    src/crypto/crypto_threads.h \
     src/crypto/crypto_nonthreadsafe.h \
     src/crypto/crypto_threadsafe.h \
     src/gui/datovka.h \
@@ -280,7 +281,9 @@ HEADERS += src/common.h \
     src/gui/dlg_signature_detail.h \
     src/gui/dlg_change_directory.h \
     src/gui/dlg_correspondence_overview.h \
-    src/gui/dlg_db_import.h
+    src/gui/dlg_db_import.h \
+    src/gui/dlg_import_zfo.h \
+    src/gui/dlg_import_zfo_result.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \
@@ -295,7 +298,9 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_signature_detail.ui \
     src/gui/ui/dlg_change_directory.ui \
     src/gui/ui/dlg_correspondence_overview.ui \
-    src/gui/ui/dlg_db_import.ui
+    src/gui/ui/dlg_db_import.ui \
+    src/gui/ui/dlg_import_zfo.ui \
+    src/gui/ui/dlg_import_zfo_result.ui
 
 RESOURCES += \
     res/resources.qrc

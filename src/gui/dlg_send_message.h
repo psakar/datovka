@@ -45,6 +45,16 @@ public:
 		ACT_REPLY
 	};
 
+	class sendMsgResultStruct {
+	public:
+		QString dbID;
+		QString recipientName;
+		QString dmID;
+		bool isPDZ;
+		int status;
+		QString errInfo;
+	};
+
 	DlgSendMessage(MessageDb &db, QString &dbId, Action action,
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
@@ -65,9 +75,9 @@ private slots:
 	void addAttachmentFile(void);
 	void deleteAttachmentFile(void);
 	void openAttachmentFile(void);
-	void addRecipientData(void);
+	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
-	void findRecipientData(void);
+	void findAndAddRecipient(void);
 	void recItemSelect(void);
 	void attItemSelect(void);
 	void checkInputFields(void);
@@ -90,14 +100,13 @@ private:
 	QString m_senderId;
 	QString m_sender;
 	QString m_senderAddress;
-	QString m_dmType;
+	const QString m_dmType;
 	QString m_dmSenderRefNumber;
 	QString m_userName;
 	MessageDb &m_messDb;
 	int m_attachSize;
 
 	int cmptAttachmentSize(void);
-	int showErrorMessageBox(int status, QString isdsMsg);
 	int showInfoAboutPDZ(int pdzCnt);
 	QString getUserInfoFormIsds(QString idDbox);
 };

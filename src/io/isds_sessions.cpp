@@ -30,6 +30,7 @@
 #include <QObject>
 
 #include "isds_sessions.h"
+#include "src/gui/dlg_import_zfo.h"
 
 
 
@@ -354,8 +355,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 	struct isds_otp *otp = NULL;
 
-	otp = (struct isds_otp *)
-	    malloc(sizeof(struct isds_otp));
+	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 	if (otp == NULL) {
 		return status;
 	}
@@ -371,7 +371,8 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 		otp->otp_code = NULL;
 	} else {
 		char *new_str;
-		const char *old_str = otpCode.toStdString().c_str();
+		QByteArray optCodeBytes = otpCode.toLocal8Bit();
+		const char *old_str = optCodeBytes.data();
 		size_t len = strlen(old_str) + 1;
 		new_str = (char *) malloc(len);
 		memcpy(new_str, old_str, len);
@@ -396,59 +397,102 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 /*
  * Add items into isds_PersonName structure.
  */
-isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
+struct isds_PersonName * isds_PersonName_create(const QString &pnFirstName,
     const QString &pnMiddleName, const QString &pnLastName,
     const QString &pnLastNameAtBirth)
 /* ========================================================================= */
 {
-	struct isds_PersonName *tmp = NULL;
+	struct isds_PersonName *pn = NULL;
 
-	tmp =(struct isds_PersonName *)
-	    malloc(sizeof(struct isds_PersonName));
-	if (tmp == NULL) {
-		return NULL;
+	pn = (struct isds_PersonName *) malloc(sizeof(*pn));
+	if (NULL == pn) {
+		goto fail;
 	}
-	memset(tmp, 0, sizeof(struct isds_PersonName));
+	memset(pn, 0, sizeof(*pn));
 
-	tmp->pnFirstName = !pnFirstName.isEmpty() ?
-	    strdup(pnFirstName.toStdString().c_str()) : NULL;
-	tmp->pnMiddleName = !pnMiddleName.isEmpty() ?
-	    strdup(pnMiddleName.toStdString().c_str()) : NULL;
-	tmp->pnLastName = !pnLastName.isEmpty() ?
-	    strdup(pnLastName.toStdString().c_str()) : NULL;
-	tmp->pnLastNameAtBirth = !pnLastNameAtBirth.isEmpty() ?
-	    strdup(pnLastNameAtBirth.toStdString().c_str()) : NULL;
+	if (!pnFirstName.isEmpty()) {
+		pn->pnFirstName = strdup(pnFirstName.toStdString().c_str());
+		if (NULL == pn->pnFirstName) {
+			goto fail;
+		}
+	}
 
-	return tmp;
+	if (!pnMiddleName.isEmpty()) {
+		pn->pnMiddleName = strdup(pnMiddleName.toStdString().c_str());
+		if (NULL == pn->pnMiddleName) {
+			goto fail;
+		}
+	}
+
+	if (!pnLastName.isEmpty()) {
+		pn->pnLastName = strdup(pnLastName.toStdString().c_str());
+		if (NULL == pn->pnLastName) {
+			goto fail;
+		}
+	}
+
+	if (!pnLastNameAtBirth.isEmpty()) {
+		pn->pnLastNameAtBirth =
+		    strdup(pnLastNameAtBirth.toStdString().c_str());
+		if (NULL == pn->pnLastNameAtBirth) {
+			goto fail;
+		}
+	}
+
+	return pn;
+
+fail:
+	isds_PersonName_free(&pn);
+	return NULL;
 }
 
 /* ========================================================================= */
 /*
  * Add items into isds_BirthInfo structure.
  */
- isds_BirthInfo * isds_BirthInfo_add(struct tm *biDate,
-    const QString &biCity, const QString &biCountry,
-    const QString &biState)
+struct isds_BirthInfo * isds_BirthInfo_createConsume(struct tm *biDate,
+    const QString &biCity, const QString &biCountry, const QString &biState)
 /* ========================================================================= */
 {
-	struct isds_BirthInfo *tmp = NULL;
+	struct isds_BirthInfo *bi = NULL;
 
-	tmp =(struct isds_BirthInfo *)
-	    malloc(sizeof(struct isds_BirthInfo));
-	if (tmp == NULL) {
-		return NULL;
+	bi = (struct isds_BirthInfo *) malloc(sizeof(*bi));
+	if (NULL == bi) {
+		goto fail;
 	}
-	memset(tmp, 0, sizeof(struct isds_BirthInfo));
+	memset(bi, 0, sizeof(*bi));
 
-	tmp->biDate = biDate;
-	tmp->biCity = !biCity.isEmpty() ?
-	    strdup(biCity.toStdString().c_str()) : NULL;
-	tmp->biCounty = !biCountry.isEmpty() ?
-	    strdup(biCountry.toStdString().c_str()) : NULL;
-	tmp->biState = !biState.isEmpty() ?
-	    strdup(biState.toStdString().c_str()) : NULL;
+//	bi->biDate
 
-	return tmp;
+	if (!biCity.isEmpty()) {
+		bi->biCity = strdup(biCity.toStdString().c_str());
+		if (NULL == bi->biCity) {
+			goto fail;
+		}
+	}
+
+	if (!biCountry.isEmpty()) {
+		bi->biCounty = strdup(biCountry.toStdString().c_str());
+		if (NULL == bi->biCounty) {
+			goto fail;
+		}
+	}
+
+	if (!biState.isEmpty()) {
+		bi->biState = strdup(biState.toStdString().c_str());
+		if (NULL == bi->biState) {
+			goto fail;
+		}
+	}
+
+	/* Consumed pointers. */
+	bi->biDate = biDate;
+
+	return bi;
+
+fail:
+	isds_BirthInfo_free(&bi);
+	return NULL;
 }
 
 
@@ -456,43 +500,78 @@ isds_PersonName * isds_PersonName_add(const QString &pnFirstName,
 /*
  * Add items into isds_Address structure.
  */
-isds_Address * isds_Address_add(const QString &adCity,
+struct isds_Address * isds_Address_create(const QString &adCity,
     const QString &adStreet, const QString &adNumberInStreet,
     const QString &adNumberInMunicipality, const QString &adZipCode,
     const QString &adState)
 /* ========================================================================= */
 {
-	struct isds_Address *tmp = NULL;
+	struct isds_Address *addr = NULL;
 
-	tmp =(struct isds_Address *)
-	    malloc(sizeof(struct isds_Address));
-	if (tmp == NULL) {
-		return NULL;
+	addr = (struct isds_Address *) malloc(sizeof(*addr));
+	if (NULL == addr) {
+		goto fail;
 	}
-	memset(tmp, 0, sizeof(struct isds_Address));
+	memset(addr, 0, sizeof(*addr));
 
-	tmp->adCity = !adCity.isEmpty() ?
-	    strdup(adCity.toStdString().c_str()) : NULL;
-	tmp->adStreet = !adStreet.isEmpty() ?
-	    strdup(adStreet.toStdString().c_str()) : NULL;
-	tmp->adNumberInStreet = !adNumberInStreet.isEmpty() ?
-	    strdup(adNumberInStreet.toStdString().c_str()) : NULL;
-	tmp->adNumberInMunicipality = !adNumberInMunicipality.isEmpty() ?
-	    strdup(adNumberInMunicipality.toStdString().c_str()) : NULL;
-	tmp->adZipCode = !adZipCode.isEmpty() ?
-	    strdup(adZipCode.toStdString().c_str()) : NULL;
-	tmp->adState = !adState.isEmpty() ?
-	    strdup(adState.toStdString().c_str()) : NULL;
+	if (!adCity.isEmpty()) {
+		addr->adCity = strdup(adCity.toStdString().c_str());
+		if (NULL == addr->adCity) {
+			goto fail;
+		}
+	}
 
-	return tmp;
+	if (!adStreet.isEmpty()) {
+		addr->adStreet = strdup(adStreet.toStdString().c_str());
+		if (NULL == addr->adStreet) {
+			goto fail;
+		}
+	}
+
+	if (!adNumberInStreet.isEmpty()) {
+		addr->adNumberInStreet =
+		    strdup(adNumberInStreet.toStdString().c_str());
+		if (NULL == addr->adNumberInStreet) {
+			goto fail;
+		}
+	}
+
+	if (!adNumberInMunicipality.isEmpty()) {
+		addr->adNumberInMunicipality =
+		    strdup(adNumberInMunicipality.toStdString().c_str());
+		if (NULL == addr->adNumberInMunicipality) {
+			goto fail;
+		}
+	}
+
+	if (!adZipCode.isEmpty()) {
+		addr->adZipCode = strdup(adZipCode.toStdString().c_str());
+		if (NULL == addr->adZipCode) {
+			goto fail;
+		}
+	}
+
+	if (!adState.isEmpty()) {
+		addr->adState = strdup(adState.toStdString().c_str());
+		if (NULL == addr->adState) {
+			goto fail;
+		}
+	}
+
+	return addr;
+
+fail:
+	isds_Address_free(&addr);
+	return NULL;
 }
+
 
 /* ========================================================================= */
 /*
- * Create DbOwnerInfo structure and Search DataBoxes.
+ * Create new isds_DbOwnerInfo structure according to the supplied
+ *     values.
  */
-isds_error isds_DbOwnerInfo_search(struct isds_list **result,
-    const QString &userName, const QString &dbID,
+struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
     isds_DbType dbType, const QString &ic,
     struct isds_PersonName *personName, const QString &firmName,
     struct isds_BirthInfo *birthInfo, struct isds_Address *address,
@@ -501,88 +580,215 @@ isds_error isds_DbOwnerInfo_search(struct isds_list **result,
     bool dbEffectiveOVM, bool dbOpenAddressing)
 /* ========================================================================= */
 {
-	struct isds_DbOwnerInfo *tmp = NULL;
+	struct isds_DbOwnerInfo *doi = NULL;
 
-	tmp =(struct isds_DbOwnerInfo *)
-	    malloc(sizeof(struct isds_DbOwnerInfo));
-	if (tmp == NULL) {
+	doi = (struct isds_DbOwnerInfo *) malloc(sizeof(*doi));
+	if (doi == NULL) {
+		goto fail;
+	}
+	memset(doi, 0, sizeof(*doi));
+
+	if (!dbID.isEmpty()) {
+		doi->dbID = strdup(dbID.toStdString().c_str());
+		if (NULL == doi->dbID) {
+			goto fail;
+		}
+	}
+	doi->dbType = (isds_DbType *) malloc(sizeof(*doi->dbType));
+	if (NULL == doi->dbType) {
+		goto fail;
+	}
+	*doi->dbType = dbType;
+	if (!ic.isEmpty()) {
+		doi->ic = strdup(ic.toStdString().c_str());
+		if (NULL == doi->ic) {
+			goto fail;
+		}
+	}
+//	doi->personName
+	if (!firmName.isEmpty()) {
+		doi->firmName = strdup(firmName.toStdString().c_str());
+		if (NULL == doi->firmName) {
+			goto fail;
+		}
+	}
+//	doi->birthInfo
+//	doi->address
+	if (!nationality.isEmpty()) {
+		doi->nationality = strdup(nationality.toStdString().c_str());
+		if (NULL == doi->nationality) {
+			goto fail;
+		}
+	}
+	if (!email.isEmpty()) {
+		doi->email = strdup(email.toStdString().c_str());
+		if (NULL == doi->email) {
+			goto fail;
+		}
+	}
+	if (!telNumber.isEmpty()) {
+		doi->telNumber = strdup(telNumber.toStdString().c_str());
+		if (NULL == doi->telNumber) {
+			goto fail;
+		}
+	}
+	if (!identifier.isEmpty()) {
+		doi->identifier = strdup(identifier.toStdString().c_str());
+		if (NULL == doi->identifier) {
+			goto fail;
+		}
+	}
+	if (!registryCode.isEmpty()) {
+		doi->registryCode = strdup(registryCode.toStdString().c_str());
+		if (NULL == doi->registryCode) {
+			goto fail;
+		}
+	}
+	doi->dbState = (long int *) malloc(sizeof(*doi->dbState));
+	if (NULL == doi->dbState) {
+		goto fail;
+	}
+	*doi->dbState = dbState;
+	doi->dbEffectiveOVM = (_Bool *) malloc(sizeof(*doi->dbEffectiveOVM));
+	if (NULL == doi->dbEffectiveOVM) {
+		goto fail;
+	}
+	*doi->dbEffectiveOVM = dbEffectiveOVM;
+	doi->dbOpenAddressing = (_Bool *) malloc(sizeof(*doi->dbOpenAddressing));
+	if (NULL == doi->dbOpenAddressing) {
+		goto fail;
+	}
+	*doi->dbOpenAddressing = dbOpenAddressing;
+
+	/* COnsumed pointers. */
+	doi->personName = personName;
+	doi->address = address;
+	doi->birthInfo = birthInfo;
+
+	return doi;
+
+fail:
+	isds_DbOwnerInfo_free(&doi);
+	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
+ * Search DataBoxes.
+ */
+isds_error isdsSearch(struct isds_list **result, const QString &userName,
+    const struct isds_DbOwnerInfo *ownerInfo)
+/* ========================================================================= */
+{
+	isds_error ret = IE_ERROR;
+
+	if ((NULL == result) || (NULL == ownerInfo)) {
 		return IE_ERROR;
 	}
-	memset(tmp, 0, sizeof(struct isds_DbOwnerInfo));
 
-	tmp->dbID = !dbID.isEmpty() ?
-	    strdup(dbID.toStdString().c_str()) : NULL;
-	tmp->ic = !ic.isEmpty() ?
-	    strdup(ic.toStdString().c_str()) : NULL;
-	tmp->firmName = !firmName.isEmpty() ?
-	    strdup(firmName.toStdString().c_str()) : NULL;
-	tmp->nationality = !nationality.isEmpty() ?
-	    strdup(nationality.toStdString().c_str()) : NULL;
-	tmp->email = !email.isEmpty() ?
-	    strdup(email.toStdString().c_str()) : NULL;
-	tmp->telNumber = !telNumber.isEmpty() ?
-	    strdup(telNumber.toStdString().c_str()) : NULL;
-	tmp->identifier = !identifier.isEmpty() ?
-	    strdup(identifier.toStdString().c_str()) : NULL;
-	tmp->registryCode = !registryCode.isEmpty() ?
-	    strdup(registryCode.toStdString().c_str()) : NULL;
+	ret = isds_FindDataBox(isdsSessions.session(userName), ownerInfo,
+	    result);
 
-	tmp->dbType = &dbType;
-	tmp->dbEffectiveOVM = &dbEffectiveOVM;
-	tmp->dbOpenAddressing = &dbOpenAddressing;
-	tmp->personName = personName;
-	tmp->address = address;
-	tmp->birthInfo = birthInfo;
-	tmp->dbState = &dbState;
-
-	isds_error status;
-	status = isds_FindDataBox(isdsSessions.session(userName), tmp, result);
-
-	qDebug() << status << isds_strerror(status);
-	return status;
+	qDebug() << ret << isds_strerror(ret);
+	return ret;
 }
 
 /* ========================================================================= */
 /*
  * Create DbUserInfo structure and Search DataBoxes.
  */
-isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
+struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
     isds_UserType userType, long int userPrivils,
     struct isds_PersonName *personName, struct isds_Address *address,
     const QString &ic, const QString &firmName, const QString &caStreet,
     const QString &caCity, const QString &caZipCode, const QString &caState)
 /* ========================================================================= */
 {
-	struct isds_DbUserInfo  *tmp = NULL;
+	struct isds_DbUserInfo *dui = NULL;
 
-	tmp =(struct isds_DbUserInfo  *)
-	    malloc(sizeof(struct isds_DbUserInfo));
-	if (tmp == NULL) {
-		return NULL;
+	dui = (struct isds_DbUserInfo *) malloc(sizeof(*dui));
+	if (NULL == dui) {
+		goto fail;
 	}
-	memset(tmp, 0, sizeof(struct isds_DbUserInfo));
+	memset(dui, 0, sizeof(*dui));
 
-	tmp->userID = !userID.isEmpty() ?
-	    strdup(userID.toStdString().c_str()) : NULL;
-	tmp->ic = !ic.isEmpty() ?
-	    strdup(ic.toStdString().c_str()) : NULL;
-	tmp->firmName = !firmName.isEmpty() ?
-	    strdup(firmName.toStdString().c_str()) : NULL;
-	tmp->caStreet = !caStreet.isEmpty() ?
-	    strdup(caStreet.toStdString().c_str()) : NULL;
-	tmp->caCity = !caCity.isEmpty() ?
-	    strdup(caCity.toStdString().c_str()) : NULL;
-	tmp->caZipCode = !caZipCode.isEmpty() ?
-	    strdup(caZipCode.toStdString().c_str()) : NULL;
-	tmp->caState = !caState.isEmpty() ?
-	    strdup(caState.toStdString().c_str()) : NULL;
+	if (!userID.isEmpty()) {
+		dui->userID = strdup(userID.toStdString().c_str());
+		if (NULL == dui->userID) {
+			goto fail;
+		}
+	}
 
-	tmp->userType = &userType;
-	tmp->personName = personName;
-	tmp->address = address;
-	tmp->userPrivils = &userPrivils;
+	dui->userType = (isds_UserType *) malloc(sizeof(*dui->userType));
+	if (NULL == dui->userType) {
+		goto fail;
+	}
+	*dui->userType = userType;
 
-	return tmp;
+	dui->userPrivils = (long int *) malloc(sizeof(*dui->userPrivils));
+	if (NULL == dui->userPrivils) {
+		goto fail;
+	}
+	*dui->userPrivils = userPrivils;
+
+//	dui->personName
+
+//	dui->address
+
+//	bui->biDate = NULL;
+
+	if (!ic.isEmpty()) {
+		dui->ic = strdup(ic.toStdString().c_str());
+		if (NULL == dui->ic) {
+			goto fail;
+		}
+	}
+
+	if (!firmName.isEmpty()) {
+		dui->firmName = strdup(firmName.toStdString().c_str());
+		if (NULL == dui->firmName) {
+			goto fail;
+		}
+	}
+
+	if (!caStreet.isEmpty()) {
+		dui->caStreet = strdup(caStreet.toStdString().c_str());
+		if (NULL == dui->caStreet) {
+			goto fail;
+		}
+	}
+
+	if (!caCity.isEmpty()) {
+		dui->caCity = strdup(caCity.toStdString().c_str());
+		if (NULL == dui->caCity) {
+			goto fail;
+		}
+	}
+
+	if (!caZipCode.isEmpty()) {
+		dui->caZipCode = strdup(caZipCode.toStdString().c_str());
+		if (NULL == dui->caZipCode) {
+			goto fail;
+		}
+	}
+
+	if (!caState.isEmpty()) {
+		dui->caState = strdup(caState.toStdString().c_str());
+		if (NULL == dui->caState) {
+			goto fail;
+		}
+	}
+
+	/* Consumed pointers. */
+	dui->personName = personName;
+	dui->address = address;
+
+	return dui;
+
+fail:
+	isds_DbUserInfo_free(&dui);
+	return NULL;
 }
 
 
@@ -591,7 +797,7 @@ isds_DbUserInfo  * isds_DbOwnerInfo_add(const QString &userID,
  * Create a isds message from zfo file.
  */
 struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
-    const QString &fileName)
+    const QString &fileName, int zfoType)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -618,10 +824,16 @@ struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
 		goto fail;
 	}
 
-	status = isds_load_message(isdsSession, raw_type, content.data(),
-	    content.size(), &message, BUFFER_COPY);
+	if (zfoType == ImportZFODialog::IMPORT_MESSAGE_ZFO) {
+		status = isds_load_message(isdsSession, raw_type,
+		    content.data(), content.size(), &message, BUFFER_COPY);
+	} else {
+		status = isds_load_delivery_info(isdsSession, raw_type,
+		    content.data(), content.size(), &message, BUFFER_COPY);
+	}
+
 	if (IE_SUCCESS != status) {
-		qWarning() << "Error while loading message from file"
+		qWarning() << "Error while loading data from file"
 		    << fileName;
 		goto fail;
 	}
