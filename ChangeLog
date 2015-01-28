@@ -2,7 +2,10 @@
  * Message read status can be toggled when clicking on the green/grey ball.
  * Messages are being marked as read only when they are being selected at
    least for 5 seconds.
- * Messages and delivery information can be imported into the databases
+ * Fixed checkbox selection in the contacts by spacebar.
+ * The user can decide whether to delete a message from the local database only
+   or whether it shoudl be also deleted from ISDS.
+ * Messages and delivery information from ZFO can be imported into the databases
    provided corresponding account exist.
  * Added missing error messages to database code.
  * Fixed bug causing new messages to be marked as being already read when
@@ -12,7 +15,8 @@
  * Added code support for OpenSSL internal locking.
  * Fixed searching for contacts in message database.
  * Enhancements in scripts for building library dependencies.
- * Message identifier is being shown in exported PDF file.
+ * Databox identifier is being shown in exported PDF file amd message identification.
+ * OTP security code is not shown as password.
  * Sending of messages to multiple recipients is performed by sending a bunch
    of individual messages. Multi-messages were causing troubles when combining
    OVM and non-OVM recipients.
