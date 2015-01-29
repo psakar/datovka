@@ -458,11 +458,14 @@ void DlgCorrespondenceOverview::exportData(void)
 
 	qDebug() << "Files are export to:" << exportDir;
 
+	QString overiviewFileName = exportDir + QDir::separator() +
+	    tr("Overview") + "--" +
+	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
+	    "--" +
+	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate);
+
 	if (this->outputFormatComboBox->currentText() == "HTML") {
-		QString overiviewFileName = exportDir + QDir::separator() +
-		    tr("Overview-") +
-		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-		    ".html";
+		overiviewFileName += ".html";
 
 		if (!exportMessagesToHtml(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
@@ -470,12 +473,10 @@ void DlgCorrespondenceOverview::exportData(void)
 			    tr("Correspondence overview file '%1' could not "
 			        "be written.").arg(overiviewFileName),
 			    QMessageBox::Ok);
+			return;
 		}
 	} else {
-		QString overiviewFileName = exportDir + QDir::separator() +
-		    tr("Overview-") +
-		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-		    ".txt";
+		overiviewFileName += ".csv";
 
 		if (!exportMessagesToCsv(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
@@ -483,6 +484,7 @@ void DlgCorrespondenceOverview::exportData(void)
 			    tr("Correspondence overview file '%1' could not "
 			        "be written.").arg(overiviewFileName),
 			    QMessageBox::Ok);
+			return;
 		}
 	}
 
