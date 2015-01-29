@@ -445,28 +445,30 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString exportDir = QFileDialog::getExistingDirectory(this,
-	    tr("Select directory to save correspondence"),
-	    m_exportCorrespondDir,
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-	if (exportDir.isEmpty() || exportDir.isNull()) {
-		return;
-	}
-
-	m_exportCorrespondDir = exportDir;
-
-	qDebug() << "Files are export to:" << exportDir;
-
-	QString overiviewFileName = exportDir + QDir::separator() +
+	QString overiviewFileName = m_exportCorrespondDir + QDir::separator() +
 	    tr("Overview") + "--" +
 	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
 	    "--" +
-	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate);
+	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
+	    (("HTML" == this->outputFormatComboBox->currentText()) ?
+	        ".html" : ".csv");
+
+	QString exportFileName = QFileDialog::getSaveFileName(this,
+	    tr("Select file to save correspondence overview to"),
+	    overiviewFileName, tr("Files") + "(*.html *.txt *.csv)");
+
+	if (exportFileName.isEmpty() || exportFileName.isNull()) {
+		return;
+	}
+
+	QString exportDir =
+	    QFileInfo(exportFileName).absoluteDir().absolutePath();
+
+	m_exportCorrespondDir = exportDir;
+
+	qDebug() << "Correspondence file is exported to:" << exportDir;
 
 	if (this->outputFormatComboBox->currentText() == "HTML") {
-		overiviewFileName += ".html";
-
 		if (!exportMessagesToHtml(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
 			        "Correspondence overview export error."),
@@ -476,8 +478,6 @@ void DlgCorrespondenceOverview::exportData(void)
 			return;
 		}
 	} else {
-		overiviewFileName += ".csv";
-
 		if (!exportMessagesToCsv(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
 			        "Correspondence overview export error"),
@@ -487,6 +487,24 @@ void DlgCorrespondenceOverview::exportData(void)
 			return;
 		}
 	}
+
+
+	if (this->exportZfoCheckBox->isChecked() ||
+	    this->exportDeliveryZfoCheckBox->isChecked() ||
+	    this->exportMessageEnvelopePDFCheckBox->isChecked() ||
+	    this->exportDeliveryPDFCheckBox->isChecked()) {
+		exportDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select directory to save ZFO files"),
+		    m_exportCorrespondDir,
+		    QFileDialog::ShowDirsOnly |
+		        QFileDialog::DontResolveSymlinks); 
+
+		if (exportDir.isEmpty() || exportDir.isNull()) {
+			return;
+		} 
+		m_exportCorrespondDir = exportDir; 
+		qDebug() << "Files will be exported to:" << exportDir;
+	} 
 
 	QList<int> errorDmId;
 	errorDmId.clear();
