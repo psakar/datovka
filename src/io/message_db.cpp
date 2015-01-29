@@ -42,6 +42,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
+#include <QSqlRecord>
 #include <QString>
 #include <QTimeZone>
 #include <QVariant>
@@ -3687,19 +3688,17 @@ QStringList MessageDb::getMsgForCsvExport(int dmId) const
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		messageItems.append(query.value(0).toString());
-		messageItems.append(query.value(1).toString());
-		messageItems.append(query.value(2).toString());
-		messageItems.append(query.value(3).toString());
-		messageItems.append(query.value(4).toString());
-		messageItems.append(query.value(5).toString());
-		messageItems.append(query.value(6).toString());
-		messageItems.append(query.value(7).toString());
-		messageItems.append(query.value(8).toString());
-		messageItems.append(query.value(9).toString());
-		messageItems.append(query.value(10).toString());
-		messageItems.append(query.value(11).toString());
-		messageItems.append(query.value(12).toString());
+		int count = query.record().count();
+		Q_ASSERT(13 == count);
+		for (int i = 0; i < count; ++i) {
+			QString element = query.value(i).toString();
+
+			if (element.contains(',')) {
+				element = '"' + element + '"';
+			}
+
+			messageItems.append(element);
+		}
 	} else {
 		logError(
 		    "Cannot execute SQL query and/or read SQL data: %s.\n",
