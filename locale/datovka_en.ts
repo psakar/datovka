@@ -221,18 +221,43 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="158"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="156"/>
+        <source>Message type:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="164"/>
         <source>Sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="192"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="198"/>
         <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="231"/>
-        <source>Export ZFO of selected messages</source>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="233"/>
+        <source>Export selected messages also as:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="239"/>
+        <source>ZFO message files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="246"/>
+        <source>ZFO delivery info files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="253"/>
+        <source>PDF envelope files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="260"/>
+        <source>PDF delivery info files</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -414,161 +439,160 @@ your account security.</source>
 <context>
     <name>DlgCorrespondenceOverview</name>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="120"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="122"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="148"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="150"/>
         <source>messages: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="187"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="258"/>
         <source>Subject:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="191"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="262"/>
         <source>Sender:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="195"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="266"/>
         <source>Recipient:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="392"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="405"/>
-        <source>Overview-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="289"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="360"/>
         <source>Sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="299"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="370"/>
         <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="258"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="269"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="329"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="340"/>
         <source>Correspondence overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="272"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="343"/>
         <source>From date:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="276"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="347"/>
         <source>To date:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="280"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="351"/>
         <source>Generated:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="339"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="410"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="339"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="410"/>
         <source>Message type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="340"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="411"/>
         <source>Delivery time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="340"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="411"/>
         <source>Acceptance time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="341"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="412"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="341"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="412"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="342"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="413"/>
         <source>Sender Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="342"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="413"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="343"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="414"/>
         <source>Recipient Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="343"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="414"/>
         <source>Our file mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="344"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="415"/>
         <source>Our reference number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="344"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="415"/>
         <source>Your file mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="345"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="416"/>
         <source>Your reference number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="378"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="449"/>
         <source>Select directory to save correspondence</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="399"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="412"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
+        <source>Overview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="484"/>
         <source>Correspondence overview file &apos;%1&apos; could not be written.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="646"/>
         <source>There were some errors during saving of the overview:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="466"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="650"/>
         <source>Message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="468"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="652"/>
         <source>does not contain data necessary for ZFO export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="470"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="654"/>
         <source>And many more</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="476"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="660"/>
         <source>messages were successfully exported to ZFO</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3545,17 +3569,17 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="397"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="471"/>
         <source>Correspondence overview export error.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="410"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="482"/>
         <source>Correspondence overview export error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="479"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="663"/>
         <source>Correspondence export error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3687,9 +3711,9 @@ download date in the Datovka database.</source>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="373"/>
-        <location filename="../src/io/message_db.cpp" line="1699"/>
-        <location filename="../src/io/message_db.cpp" line="2006"/>
-        <location filename="../src/io/message_db.cpp" line="2195"/>
+        <location filename="../src/io/message_db.cpp" line="1700"/>
+        <location filename="../src/io/message_db.cpp" line="2007"/>
+        <location filename="../src/io/message_db.cpp" line="2196"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3700,9 +3724,9 @@ download date in the Datovka database.</source>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="376"/>
-        <location filename="../src/io/message_db.cpp" line="1726"/>
-        <location filename="../src/io/message_db.cpp" line="2018"/>
-        <location filename="../src/io/message_db.cpp" line="2204"/>
+        <location filename="../src/io/message_db.cpp" line="1727"/>
+        <location filename="../src/io/message_db.cpp" line="2019"/>
+        <location filename="../src/io/message_db.cpp" line="2205"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3713,8 +3737,8 @@ download date in the Datovka database.</source>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="384"/>
-        <location filename="../src/io/message_db.cpp" line="2088"/>
-        <location filename="../src/io/message_db.cpp" line="2270"/>
+        <location filename="../src/io/message_db.cpp" line="2089"/>
+        <location filename="../src/io/message_db.cpp" line="2271"/>
         <source>To hands</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3780,7 +3804,7 @@ download date in the Datovka database.</source>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="400"/>
-        <location filename="../src/io/message_db.cpp" line="1769"/>
+        <location filename="../src/io/message_db.cpp" line="1770"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3877,30 +3901,30 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="695"/>
-        <location filename="../src/io/message_db.cpp" line="783"/>
-        <location filename="../src/io/message_db.cpp" line="873"/>
-        <location filename="../src/io/message_db.cpp" line="1117"/>
-        <location filename="../src/io/message_db.cpp" line="1183"/>
-        <location filename="../src/io/message_db.cpp" line="1251"/>
+        <location filename="../src/io/message_db.cpp" line="696"/>
+        <location filename="../src/io/message_db.cpp" line="784"/>
+        <location filename="../src/io/message_db.cpp" line="874"/>
+        <location filename="../src/io/message_db.cpp" line="1118"/>
+        <location filename="../src/io/message_db.cpp" line="1184"/>
+        <location filename="../src/io/message_db.cpp" line="1252"/>
         <source>Attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="703"/>
-        <location filename="../src/io/message_db.cpp" line="791"/>
-        <location filename="../src/io/message_db.cpp" line="881"/>
+        <location filename="../src/io/message_db.cpp" line="704"/>
+        <location filename="../src/io/message_db.cpp" line="792"/>
+        <location filename="../src/io/message_db.cpp" line="882"/>
         <source>Processing state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2167"/>
+        <location filename="../src/io/message_db.cpp" line="2168"/>
         <source>Advice of Delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1981"/>
-        <location filename="../src/io/message_db.cpp" line="2169"/>
+        <location filename="../src/io/message_db.cpp" line="1982"/>
+        <location filename="../src/io/message_db.cpp" line="2170"/>
         <source>Message ID:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3908,243 +3932,243 @@ download date in the Datovka database.</source>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="305"/>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="343"/>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="418"/>
-        <location filename="../src/io/message_db.cpp" line="2010"/>
-        <location filename="../src/io/message_db.cpp" line="2022"/>
-        <location filename="../src/io/message_db.cpp" line="2200"/>
-        <location filename="../src/io/message_db.cpp" line="2209"/>
+        <location filename="../src/io/message_db.cpp" line="2011"/>
+        <location filename="../src/io/message_db.cpp" line="2023"/>
+        <location filename="../src/io/message_db.cpp" line="2201"/>
+        <location filename="../src/io/message_db.cpp" line="2210"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2032"/>
-        <location filename="../src/io/message_db.cpp" line="2214"/>
+        <location filename="../src/io/message_db.cpp" line="2033"/>
+        <location filename="../src/io/message_db.cpp" line="2215"/>
         <source>General Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="332"/>
-        <location filename="../src/io/message_db.cpp" line="1688"/>
-        <location filename="../src/io/message_db.cpp" line="2034"/>
-        <location filename="../src/io/message_db.cpp" line="2216"/>
+        <location filename="../src/io/message_db.cpp" line="1689"/>
+        <location filename="../src/io/message_db.cpp" line="2035"/>
+        <location filename="../src/io/message_db.cpp" line="2217"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2050"/>
-        <location filename="../src/io/message_db.cpp" line="2232"/>
+        <location filename="../src/io/message_db.cpp" line="2051"/>
+        <location filename="../src/io/message_db.cpp" line="2233"/>
         <source>paragraph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2052"/>
-        <location filename="../src/io/message_db.cpp" line="2234"/>
+        <location filename="../src/io/message_db.cpp" line="2053"/>
+        <location filename="../src/io/message_db.cpp" line="2235"/>
         <source>letter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2055"/>
-        <location filename="../src/io/message_db.cpp" line="2237"/>
+        <location filename="../src/io/message_db.cpp" line="2056"/>
+        <location filename="../src/io/message_db.cpp" line="2238"/>
         <source>Delegation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2058"/>
-        <location filename="../src/io/message_db.cpp" line="2065"/>
-        <location filename="../src/io/message_db.cpp" line="2071"/>
-        <location filename="../src/io/message_db.cpp" line="2078"/>
-        <location filename="../src/io/message_db.cpp" line="2084"/>
-        <location filename="../src/io/message_db.cpp" line="2240"/>
-        <location filename="../src/io/message_db.cpp" line="2247"/>
-        <location filename="../src/io/message_db.cpp" line="2253"/>
-        <location filename="../src/io/message_db.cpp" line="2260"/>
-        <location filename="../src/io/message_db.cpp" line="2266"/>
+        <location filename="../src/io/message_db.cpp" line="2059"/>
+        <location filename="../src/io/message_db.cpp" line="2066"/>
+        <location filename="../src/io/message_db.cpp" line="2072"/>
+        <location filename="../src/io/message_db.cpp" line="2079"/>
+        <location filename="../src/io/message_db.cpp" line="2085"/>
+        <location filename="../src/io/message_db.cpp" line="2241"/>
+        <location filename="../src/io/message_db.cpp" line="2248"/>
+        <location filename="../src/io/message_db.cpp" line="2254"/>
+        <location filename="../src/io/message_db.cpp" line="2261"/>
+        <location filename="../src/io/message_db.cpp" line="2267"/>
         <source>Not specified</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2062"/>
-        <location filename="../src/io/message_db.cpp" line="2244"/>
+        <location filename="../src/io/message_db.cpp" line="2063"/>
+        <location filename="../src/io/message_db.cpp" line="2245"/>
         <source>Our ref.number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2069"/>
-        <location filename="../src/io/message_db.cpp" line="2251"/>
+        <location filename="../src/io/message_db.cpp" line="2070"/>
+        <location filename="../src/io/message_db.cpp" line="2252"/>
         <source>Our doc.id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2075"/>
-        <location filename="../src/io/message_db.cpp" line="2257"/>
+        <location filename="../src/io/message_db.cpp" line="2076"/>
+        <location filename="../src/io/message_db.cpp" line="2258"/>
         <source>Your ref.number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2082"/>
-        <location filename="../src/io/message_db.cpp" line="2264"/>
+        <location filename="../src/io/message_db.cpp" line="2083"/>
+        <location filename="../src/io/message_db.cpp" line="2265"/>
         <source>Your doc.id</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2092"/>
-        <location filename="../src/io/message_db.cpp" line="2102"/>
-        <location filename="../src/io/message_db.cpp" line="2273"/>
-        <location filename="../src/io/message_db.cpp" line="2283"/>
+        <location filename="../src/io/message_db.cpp" line="2093"/>
+        <location filename="../src/io/message_db.cpp" line="2103"/>
+        <location filename="../src/io/message_db.cpp" line="2274"/>
+        <location filename="../src/io/message_db.cpp" line="2284"/>
         <source>yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2094"/>
-        <location filename="../src/io/message_db.cpp" line="2100"/>
-        <location filename="../src/io/message_db.cpp" line="2275"/>
-        <location filename="../src/io/message_db.cpp" line="2281"/>
+        <location filename="../src/io/message_db.cpp" line="2095"/>
+        <location filename="../src/io/message_db.cpp" line="2101"/>
+        <location filename="../src/io/message_db.cpp" line="2276"/>
+        <location filename="../src/io/message_db.cpp" line="2282"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2096"/>
-        <location filename="../src/io/message_db.cpp" line="2277"/>
+        <location filename="../src/io/message_db.cpp" line="2097"/>
+        <location filename="../src/io/message_db.cpp" line="2278"/>
         <source>Personal Delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2105"/>
-        <location filename="../src/io/message_db.cpp" line="2286"/>
+        <location filename="../src/io/message_db.cpp" line="2106"/>
+        <location filename="../src/io/message_db.cpp" line="2287"/>
         <source>Prohibit Delivery by Fiction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2292"/>
+        <location filename="../src/io/message_db.cpp" line="2293"/>
         <source>Delivery/Acceptance Information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2025"/>
-        <location filename="../src/io/message_db.cpp" line="2294"/>
+        <location filename="../src/io/message_db.cpp" line="2026"/>
+        <location filename="../src/io/message_db.cpp" line="2295"/>
         <source>Delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2297"/>
+        <location filename="../src/io/message_db.cpp" line="2298"/>
         <source>Acceptance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1819"/>
-        <location filename="../src/io/message_db.cpp" line="2319"/>
+        <location filename="../src/io/message_db.cpp" line="1820"/>
+        <location filename="../src/io/message_db.cpp" line="2320"/>
         <source>Events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1701"/>
+        <location filename="../src/io/message_db.cpp" line="1702"/>
         <source>Sender Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1729"/>
+        <location filename="../src/io/message_db.cpp" line="1730"/>
         <source>Recipient Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="397"/>
-        <location filename="../src/io/message_db.cpp" line="2326"/>
+        <location filename="../src/io/message_db.cpp" line="2327"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1979"/>
+        <location filename="../src/io/message_db.cpp" line="1980"/>
         <source>Envelope</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2011"/>
-        <location filename="../src/io/message_db.cpp" line="2023"/>
+        <location filename="../src/io/message_db.cpp" line="2012"/>
+        <location filename="../src/io/message_db.cpp" line="2024"/>
         <source>Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2013"/>
+        <location filename="../src/io/message_db.cpp" line="2014"/>
         <source>Databox Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1850"/>
-        <location filename="../src/io/message_db.cpp" line="1868"/>
-        <location filename="../src/io/message_db.cpp" line="1874"/>
-        <location filename="../src/io/message_db.cpp" line="2126"/>
+        <location filename="../src/io/message_db.cpp" line="1851"/>
+        <location filename="../src/io/message_db.cpp" line="1869"/>
+        <location filename="../src/io/message_db.cpp" line="1875"/>
+        <location filename="../src/io/message_db.cpp" line="2127"/>
         <source>Attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1670"/>
+        <location filename="../src/io/message_db.cpp" line="1671"/>
         <source>Identification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1672"/>
+        <location filename="../src/io/message_db.cpp" line="1673"/>
         <source>Message ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1692"/>
+        <location filename="../src/io/message_db.cpp" line="1693"/>
         <source>Message type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1703"/>
+        <location filename="../src/io/message_db.cpp" line="1704"/>
         <source>Sender Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1717"/>
+        <location filename="../src/io/message_db.cpp" line="1718"/>
         <source>Message author</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1731"/>
+        <location filename="../src/io/message_db.cpp" line="1732"/>
         <source>Recipient Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1852"/>
+        <location filename="../src/io/message_db.cpp" line="1853"/>
         <source>(downloaded and ready)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1869"/>
+        <location filename="../src/io/message_db.cpp" line="1870"/>
         <source>not downloaded yet, ~</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1871"/>
+        <location filename="../src/io/message_db.cpp" line="1872"/>
         <source> KB; use &apos;Download&apos; to get them.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1875"/>
+        <location filename="../src/io/message_db.cpp" line="1876"/>
         <source>(not available)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1892"/>
+        <location filename="../src/io/message_db.cpp" line="1893"/>
         <source>Signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1896"/>
-        <location filename="../src/io/message_db.cpp" line="1903"/>
-        <location filename="../src/io/message_db.cpp" line="1908"/>
+        <location filename="../src/io/message_db.cpp" line="1897"/>
+        <location filename="../src/io/message_db.cpp" line="1904"/>
+        <location filename="../src/io/message_db.cpp" line="1909"/>
         <source>Message signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1897"/>
-        <location filename="../src/io/message_db.cpp" line="1931"/>
+        <location filename="../src/io/message_db.cpp" line="1898"/>
+        <location filename="../src/io/message_db.cpp" line="1932"/>
         <source>Not present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1950"/>
+        <location filename="../src/io/message_db.cpp" line="1951"/>
         <source>Time stamp</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4155,16 +4179,16 @@ download date in the Datovka database.</source>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="662"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="671"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="685"/>
-        <location filename="../src/io/message_db.cpp" line="1904"/>
-        <location filename="../src/io/message_db.cpp" line="1914"/>
-        <location filename="../src/io/message_db.cpp" line="1942"/>
+        <location filename="../src/io/message_db.cpp" line="1905"/>
+        <location filename="../src/io/message_db.cpp" line="1915"/>
+        <location filename="../src/io/message_db.cpp" line="1943"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="549"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="663"/>
-        <location filename="../src/io/message_db.cpp" line="1905"/>
+        <location filename="../src/io/message_db.cpp" line="1906"/>
         <source>Message signature and content do not correspond!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4179,9 +4203,9 @@ download date in the Datovka database.</source>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="660"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="669"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="685"/>
-        <location filename="../src/io/message_db.cpp" line="1909"/>
-        <location filename="../src/io/message_db.cpp" line="1913"/>
-        <location filename="../src/io/message_db.cpp" line="1941"/>
+        <location filename="../src/io/message_db.cpp" line="1910"/>
+        <location filename="../src/io/message_db.cpp" line="1914"/>
+        <location filename="../src/io/message_db.cpp" line="1942"/>
         <source>Valid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4190,17 +4214,17 @@ download date in the Datovka database.</source>
         <location filename="../src/gui/dlg_signature_detail.cpp" line="264"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="561"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="675"/>
-        <location filename="../src/io/message_db.cpp" line="1917"/>
+        <location filename="../src/io/message_db.cpp" line="1918"/>
         <source>Certificate revocation check is turned off!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1922"/>
+        <location filename="../src/io/message_db.cpp" line="1923"/>
         <source>Signing certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="2388"/>
+        <location filename="../src/io/message_db.cpp" line="2389"/>
         <source>File Size</source>
         <translation type="unfinished"></translation>
     </message>
