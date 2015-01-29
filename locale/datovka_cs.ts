@@ -627,43 +627,57 @@ svého uživatelského účtu.</translation>
         <translation>Vaše číslo jednací</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="449"/>
         <source>Select directory to save correspondence</source>
-        <translation>Vyberte adresář pro uložení přehledu korespondence</translation>
+        <translation type="vanished">Vyberte adresář pro uložení přehledu korespondence</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="449"/>
         <source>Overview</source>
         <translation>Prehled</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="457"/>
+        <source>Select file to save correspondence overview to</source>
+        <translation>Vybrat soubor pro uložení přehledu korespondence</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="458"/>
+        <source>Files</source>
+        <translation>Soubory</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="475"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="484"/>
         <source>Correspondence overview file &apos;%1&apos; could not be written.</source>
         <translation>Soubor s přehledem korespondence &apos;%1&apos; nemohl být zapsán.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="646"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="497"/>
+        <source>Select directory to save ZFO files</source>
+        <translation>Vybrat adresář pro export ZFO souborů</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="664"/>
         <source>There were some errors during saving of the overview:</source>
         <translation>Při exportu přehledu se objevily problémy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="650"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="668"/>
         <source>Message</source>
         <translation>Zpráva</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="652"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="670"/>
         <source>does not contain data necessary for ZFO export</source>
         <translation>neobsahuje data potřebná k exportu do souboru ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="654"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="672"/>
         <source>And many more</source>
         <translation>A několik dalších</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="660"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="678"/>
         <source>messages were successfully exported to ZFO</source>
         <translation>zpráv bylo úspěšně exportováno do ZFO</translation>
     </message>
@@ -4530,7 +4544,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <translation>Došlo k chybě při zjišťování stavu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="471"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
         <source>Correspondence overview export error.</source>
         <translation>Chyba při exportu přehledu korespondence.</translation>
     </message>
@@ -4540,7 +4554,7 @@ hlášení o neplatném podpisu. Tato možnost je méně bezpečná, protože
         <translation>Chyba při exportu přehledu korespondence.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="663"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="681"/>
         <source>Correspondence export error</source>
         <translation>Chyba exportu korespondence</translation>
     </message>

@@ -557,42 +557,52 @@ your account security.</source>
     </message>
     <message>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="449"/>
-        <source>Select directory to save correspondence</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
         <source>Overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="457"/>
+        <source>Select file to save correspondence overview to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="458"/>
+        <source>Files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="475"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="484"/>
         <source>Correspondence overview file &apos;%1&apos; could not be written.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="646"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="497"/>
+        <source>Select directory to save ZFO files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="664"/>
         <source>There were some errors during saving of the overview:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="650"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="668"/>
         <source>Message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="652"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="670"/>
         <source>does not contain data necessary for ZFO export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="654"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="672"/>
         <source>And many more</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="660"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="678"/>
         <source>messages were successfully exported to ZFO</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3569,7 +3579,7 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="471"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
         <source>Correspondence overview export error.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3579,7 +3589,7 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="663"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="681"/>
         <source>Correspondence export error</source>
         <translation type="unfinished"></translation>
     </message>
