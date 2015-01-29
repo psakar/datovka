@@ -89,6 +89,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(
 void DlgCorrespondenceOverview::msgStateChanged(int state)
 /* ========================================================================= */
 {
+	(void) state; /* Unused. */
+
 	if ((!this->sentCheckBox->isChecked()) &&
 	    (!this->receivedCheckBox->isChecked())) {
 		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -220,6 +222,8 @@ bool DlgCorrespondenceOverview::exportMessageAsPDF(int dmId,
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	doc.print(&printer);
+
+	return true;
 }
 
 
