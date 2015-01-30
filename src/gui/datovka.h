@@ -28,7 +28,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
-#include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 #include <QProgressBar>
 #include <QThread>
@@ -40,6 +39,7 @@
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
+#include "src/models/sort_filter_proxy_model.h"
 #include "thread/worker.h"
 
 
@@ -782,7 +782,7 @@ private:
 	dbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
 	QPushButton *m_pushButton;
-	QSortFilterProxyModel m_messageListProxyModel; /*!<
+	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting and
 	                                                * filtering.

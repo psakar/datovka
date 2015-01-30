@@ -3778,8 +3778,11 @@ void MainWindow::filterMessages(const QString &text)
 
 	m_messageListProxyModel.setFilterRegExp(QRegExp(text,
 	    Qt::CaseInsensitive, QRegExp::FixedString));
-	/* Filter according to second column. */
-	m_messageListProxyModel.setFilterKeyColumn(1);
+	/* Filter according to second and third column. */
+	QList<int> columnList;
+	columnList.append(1);
+	columnList.append(2);
+	m_messageListProxyModel.setFilterKeyColumns(columnList);
 }
 
 
