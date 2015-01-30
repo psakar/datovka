@@ -7654,5 +7654,5 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 	debugSlotCall();
 
 	QDialog *msgSearch = new DlgMsgSearch(this);
-	msgSearch->exec();
+	msgSearch->show();
 }
