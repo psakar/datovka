@@ -52,6 +52,7 @@
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
@@ -7651,4 +7652,7 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	QDialog *msgSearch = new DlgMsgSearch(this);
+	msgSearch->exec();
 }
