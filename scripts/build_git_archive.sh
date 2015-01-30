@@ -37,4 +37,6 @@ fi
 
 echo "Building archive version '${DESIRED_VERSION}' from tag '${DESIRED_TAG}'."
 
-git archive --format=tar --prefix=datovka-${DESIRED_VERSION}/ "${DESIRED_TAG}" | xz -9 > "datovka-${DESIRED_VERSION}.tar.xz"
+TARGET_FILE="datovka-${DESIRED_VERSION}.tar.xz"
+rm -f "${TARGET_FILE}"
+git archive --format=tar --prefix=datovka-${DESIRED_VERSION}/ "${DESIRED_TAG}" | xz -9 > "${TARGET_FILE}"
