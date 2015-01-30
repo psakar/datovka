@@ -52,6 +52,7 @@
  * @brief Account hierarchy.
  */
 class AccountModel: public QStandardItemModel {
+	Q_OBJECT
 
 public:
 	class SettingsMap : public QMap<QString, QVariant> {

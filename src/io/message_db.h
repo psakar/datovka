@@ -59,6 +59,8 @@ enum sorting {
  * @note setItemDelegate and a custom ItemDelegate would also be the solution.
  */
 class DbMsgsTblModel : public QSqlQueryModel {
+	Q_OBJECT
+
 public:
 	enum ColumnNumbers {
 		READLOC_COL = 5, /* Read locally. */
