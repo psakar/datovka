@@ -3316,6 +3316,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
+	connect(ui->actionMsgAdvanceSearch, SIGNAL(triggered()), this,
+	    SLOT(showMsgAdvanceSearchDlg()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
 	connect(ui->actionChange_pwd, SIGNAL(triggered()), this,
@@ -7638,4 +7640,15 @@ void MainWindow::messageItemsSetProcessStatus(
 	 */
 	updateExistingAccountModelUnread(ui->accountList->
 	    selectionModel()->currentIndex());
+}
+
+
+/* ========================================================================= */
+/*
+ * Show message advance search dialogue.
+ */
+void MainWindow::showMsgAdvanceSearchDlg(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
 }

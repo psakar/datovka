@@ -532,6 +532,11 @@ private slots:
 	 */
 	void msgSetSelectedMessageProcessState(int stateIndex);
 
+	/*!
+	 * @brief Show message advance search dialogue.
+	 */
+	void showMsgAdvanceSearchDlg(void);
+
 private:
 
 	QThread *m_syncAcntThread;
