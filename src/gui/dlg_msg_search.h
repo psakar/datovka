@@ -29,13 +29,27 @@
 
 #include "src/common.h"
 #include "ui_dlg_msg_search.h"
+#include "src/io/message_db.h"
+#include "src/models/accounts_model.h"
 
 
 class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
 	Q_OBJECT
 
 public:
-	DlgMsgSearch(QWidget *parent = 0);
+	DlgMsgSearch(const QList<MessageDb*> messageDbList,
+	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
+
+private slots:
+	void checkInputFields(void);
+	void searchMessage(void);
+
+private:
+	const QList<MessageDb*> m_messageDbList;
+	const AccountModel::SettingsMap m_accountInfo;
+
+	void initSearchWindow(void);
+
 };
 
 #endif // DLG_MSG_SEARCH_H

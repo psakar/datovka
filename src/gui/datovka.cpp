@@ -3179,6 +3179,9 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionChange_pwd->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
+				ui->actionMsgAdvanceSearch->setEnabled(true);
+				ui->actionImport_ZFO_file_into_database->
+				    setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
 				ui->actionReceived_all->setEnabled(true);
 				break;
@@ -3385,6 +3388,8 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionSync_all_accounts->setEnabled(false);
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
+	ui->actionImport_ZFO_file_into_database->setEnabled(false);
+	ui->actionMsgAdvanceSearch->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
 }
@@ -3423,6 +3428,8 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
+	ui->actionMsgAdvanceSearch->setEnabled(action);
+	ui->actionImport_ZFO_file_into_database->setEnabled(action);
 }
 
 
@@ -7653,6 +7660,31 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 {
 	debugSlotCall();
 
-	QDialog *msgSearch = new DlgMsgSearch(this);
+	if (ui->accountList->model()->rowCount() == 0) {
+		return;
+	}
+
+	QList<MessageDb*> messageDbList;
+	messageDbList.clear();
+
+	QModelIndex currIndex = ui->accountList->currentIndex();
+	currIndex = AccountModel::indexTop(currIndex);
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+	messageDbList.append(messageDb);
+
+	/* get pointer to database for all accounts */
+	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		if (currIndex != index) {
+			QStandardItem *accountItem = m_accountModel.
+			    itemFromIndex(index);
+			MessageDb *messageDb = accountMessageDb(accountItem);
+			messageDbList.append(messageDb);
+		}
+	}
+
+	QDialog *msgSearch = new DlgMsgSearch(messageDbList,
+	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
 	msgSearch->show();
 }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>586</width>
-    <height>467</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="h0">
      <item>
       <widget class="QLabel" name="crntAcntLabel">
        <property name="text">
@@ -36,6 +36,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
    <item>
@@ -48,14 +61,7 @@
    <item>
     <widget class="QCheckBox" name="searchAllAcntCheckBox">
      <property name="text">
-      <string>Search over all accounts (it can be slow)</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <string>Search in other accounts (it can be slow)</string>
      </property>
     </widget>
    </item>
@@ -95,7 +101,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QHBoxLayout" name="h1">
         <item>
          <layout class="QFormLayout" name="formLayout_5">
           <item row="0" column="0">
@@ -127,7 +133,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="h2">
         <item>
          <layout class="QFormLayout" name="formLayout">
           <property name="fieldGrowthPolicy">
@@ -242,7 +248,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <layout class="QHBoxLayout" name="h3">
         <item>
          <widget class="QLabel" name="label_12">
           <property name="text">
@@ -251,7 +257,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="toHandsLineEdit"/>
+         <widget class="QLineEdit" name="addressLineEdit"/>
         </item>
         <item>
          <widget class="QLabel" name="label_11">
@@ -261,7 +267,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="addressLineEdit"/>
+         <widget class="QLineEdit" name="toHandsLineEdit"/>
         </item>
        </layout>
       </item>
