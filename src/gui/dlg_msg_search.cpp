@@ -47,6 +47,9 @@ void DlgMsgSearch::initSearchWindow(void)
 	+ " ("+ m_accountInfo.userName() + ")";
 	this->currentAccountName->setText(accountName);
 
+	this->tooMuchFields->setStyleSheet("QLabel { color: red }");
+	this->tooMuchFields->hide();
+
 	/* is only one account available */
 	if (m_messageDbList.count() <= 1) {
 		this->searchAllAcntCheckBox->setEnabled(false);
@@ -66,6 +69,20 @@ void DlgMsgSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->recipientNameLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+	connect(this->subjectLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->toHandsLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->addressLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->senderRefNumLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->senderFileMarkLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->recipientRefNumLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->recipientFileMarkLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchMessage()));
 
@@ -80,12 +97,17 @@ void DlgMsgSearch::initSearchWindow(void)
 void DlgMsgSearch::checkInputFields(void)
 /* ========================================================================= */
 {
+	qDebug() << "checkInputFields";
+
+	bool messageType = true;
+
 	this->searchPushButton->setEnabled(false);
+	this->tooMuchFields->hide();
 
 	/* is any message type checked? */
 	if (!this->searchReceivedMsgCheckBox->isChecked() &&
 	    !this->searchSentMsgCheckBox->isChecked()) {
-		return;
+		messageType = false;
 	}
 
 	/* search via message ID */
@@ -101,13 +123,7 @@ void DlgMsgSearch::checkInputFields(void)
 		this->recipientFileMarkLineEdit->setEnabled(false);
 		this->addressLineEdit->setEnabled(false);
 		this->toHandsLineEdit->setEnabled(false);
-		/* message ID > 3 chars */
-		if (this->messageIdLineEdit->text().size() > 2) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
-		return;
+		goto finish;
 	} else {
 		this->subjectLineEdit->setEnabled(true);
 		this->senderDbIdLineEdit->setEnabled(true);
@@ -120,68 +136,141 @@ void DlgMsgSearch::checkInputFields(void)
 		this->recipientFileMarkLineEdit->setEnabled(true);
 		this->addressLineEdit->setEnabled(true);
 		this->toHandsLineEdit->setEnabled(true);
-		this->searchPushButton->setEnabled(true);
-		this->searchPushButton->setEnabled(false);
 	}
 
 	/* search via sender databox ID */
 	if (!this->senderDbIdLineEdit->text().isEmpty()) {
 		this->senderDbIdLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(false);
 		this->senderNameLineEdit->setEnabled(false);
-		/* databox ID == 7 chars */
-		if (this->senderDbIdLineEdit->text().size() == 7) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
 	} else if (!this->senderNameLineEdit->text().isEmpty()){
-		this->senderNameLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(false);
 		this->senderDbIdLineEdit->setEnabled(false);
-		/* sender name > 3 chars */
-		if (this->senderNameLineEdit->text().size() > 2) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
+		this->senderNameLineEdit->setEnabled(true);
 	} else {
 		this->senderNameLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(true);
 		this->senderDbIdLineEdit->setEnabled(true);
-		this->searchPushButton->setEnabled(false);
 	}
-
 
 	/* search via recipient databox ID */
 	if (!this->recipientDbIdLineEdit->text().isEmpty()) {
 		this->recipientDbIdLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(false);
 		this->recipientNameLineEdit->setEnabled(false);
-		/* databox ID == 7 chars */
-		if (this->recipientDbIdLineEdit->text().size() == 7) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
 	} else if (!this->recipientNameLineEdit->text().isEmpty()){
-		this->recipientNameLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(false);
 		this->recipientDbIdLineEdit->setEnabled(false);
-		/* recipient name > 3 chars */
-		if (this->recipientNameLineEdit->text().size() > 2) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
+		this->recipientNameLineEdit->setEnabled(true);
 	} else {
 		this->recipientNameLineEdit->setEnabled(true);
-		this->messageIdLineEdit->setEnabled(true);
 		this->recipientDbIdLineEdit->setEnabled(true);
+	}
+
+finish:
+	/* search by message ID */
+	if (!this->messageIdLineEdit->text().isEmpty()) {
+		/* test if message ID is number */
+		QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
+		/* test if message is fill and message ID > 3 chars */
+		if (messageType &&
+		    (re.exactMatch(this->messageIdLineEdit->text())) &&
+		    this->messageIdLineEdit->text().size() > 2) {
+			this->searchPushButton->setEnabled(true);
+			return;
+		} else {
+			this->searchPushButton->setEnabled(false);
+			return;
+		}
+	}
+
+	bool isDbIdCorrect = false;
+	if (!this->senderDbIdLineEdit->text().isEmpty() &&
+	    !this->recipientDbIdLineEdit->text().isEmpty()) {
+		if (this->senderDbIdLineEdit->text().size()==7 &&
+		    this->recipientDbIdLineEdit->text().size() == 7) {
+			isDbIdCorrect = true;
+		}
+	} else if (!this->senderDbIdLineEdit->text().isEmpty()) {
+		/* databox ID must have 7 chars */
+		if (this->senderDbIdLineEdit->text().size() == 7) {
+			isDbIdCorrect = true;
+		}
+	} else if (!this->recipientDbIdLineEdit->text().isEmpty()) {
+		/* databox ID must have 7 chars */
+		if (messageType &&
+		    this->recipientDbIdLineEdit->text().size() == 7) {
+			isDbIdCorrect = true;
+		}
+	} else {
+		if (messageType) {
+			int fields = howManyFieldsAreFill();
+			if ((fields > 1) && (fields < 4)) {
+				this->searchPushButton->setEnabled(true);
+				this->tooMuchFields->hide();
+			} else {
+				this->searchPushButton->setEnabled(false);
+				this->tooMuchFields->show();
+			}
+		} else {
+			this->searchPushButton->setEnabled(false);
+		}
+		return;
+	}
+
+	if (messageType && isDbIdCorrect) {
+		this->searchPushButton->setEnabled(true);
+		return;
+	} else {
 		this->searchPushButton->setEnabled(false);
+		return;
 	}
 }
 
+
+/* ========================================================================= */
+/*
+ * Detect, how many search fileds are filled
+ */
+int DlgMsgSearch::howManyFieldsAreFill(void)
+/* ========================================================================= */
+{
+	int cnt = 0;
+
+	if (!this->subjectLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->senderDbIdLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->senderNameLineEdit->text().isEmpty())  {
+		cnt++;
+	}
+	if (!this->addressLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->recipientDbIdLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->recipientNameLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->addressLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->senderRefNumLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->senderFileMarkLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->recipientRefNumLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->recipientFileMarkLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+	if (!this->toHandsLineEdit->text().isEmpty()) {
+		cnt++;
+	}
+
+	return cnt;
+}
 
 /* ========================================================================= */
 /*
@@ -191,4 +280,25 @@ void DlgMsgSearch::searchMessage(void)
 /* ========================================================================= */
 {
 	qDebug() << "searchMessage";
+
+	QStringList dmIDList;
+	dmIDList = m_messageDbList.at(0)->msgsAdvanceSearchMessageEnvelope(
+	    this->messageIdLineEdit->text(),
+	    this->subjectLineEdit->text(),
+	    this->senderDbIdLineEdit->text(),
+	    this->senderNameLineEdit->text(),
+	    this->addressLineEdit->text(),
+	    this->recipientDbIdLineEdit->text(),
+	    this->recipientNameLineEdit->text(),
+	    this->addressLineEdit->text(),
+	    this->senderRefNumLineEdit->text(),
+	    this->senderFileMarkLineEdit->text(),
+	    this->recipientRefNumLineEdit->text(),
+	    this->recipientFileMarkLineEdit->text(),
+	    this->toHandsLineEdit->text(),
+	    QString(), QString(), QString());
+
+	for (int i = 0; i < dmIDList.size(); i++) {
+		qDebug() << dmIDList.at(i);
+	}
 }

@@ -49,6 +49,7 @@ private:
 	const AccountModel::SettingsMap m_accountInfo;
 
 	void initSearchWindow(void);
+	int howManyFieldsAreFill(void);
 
 };
 
