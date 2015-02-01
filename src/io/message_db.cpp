@@ -1980,7 +1980,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 			        query.value(1).toString()) +
 			    divEnd;
 			query.next();
-		} 
+		}
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -3055,6 +3055,223 @@ int MessageDb::messageState(qint64 dmId) const
 
 fail:
 	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Advance message envelope search.
+ */
+QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
+    const QString &dmAnnotation,
+    const QString &dbIDSender, const QString &dmSender,
+    const QString &dmSenderAddress,
+    const QString &dbIDRecipient, const QString &dmRecipient,
+    const QString &dmRecipientAddress,
+    const QString &dmSenderRefNumber,
+    const QString &dmSenderIdent,
+    const QString &dmRecipientRefNumber,
+    const QString &dmRecipientIdent,
+    const QString &dmToHands,
+    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+    const int msgType)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	(void) dmDeliveryTime; /* TODO - not used */
+	(void) dmAcceptanceTime; /* TODO - not used */
+
+	bool isMultiSelect = false;
+	QString queryStr = "";
+	QString andToken = " AND ";
+
+	if (msgType == MSG_ALL) {
+		/* select from all messages */
+		queryStr = "SELECT m.dmID FROM messages AS m WHERE ";
+	} else if (msgType == MSG_RECEIVED  || (msgType == MSG_SENT)) {
+		/* means select only received (1) or sent (2) messages */
+		isMultiSelect = true;
+		queryStr = "SELECT m.dmID, s.message_type FROM messages AS m "
+		    "LEFT JOIN supplementary_message_data AS s "
+		    "ON (m.dmID = s.message_id) "
+		    "WHERE ";
+	} else {
+		/* wrong input vaules from search dialog */
+		return QStringList();
+	}
+
+	QStringList dmIdList;
+	dmIdList.clear();
+
+	if (dmId.isNull() || dmId.isEmpty()) {
+
+		bool isNotFirst = false;
+
+
+		if (isMultiSelect) {
+			queryStr += "s.message_type = :message_type";
+			isNotFirst = true;
+		}
+
+		if (!dbIDSender.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dbIDSender = :dbIDSender";
+			//exprCnt++;
+		} else if (!dmSender.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmSender LIKE '%'||:dmSender||'%'";
+			//exprCnt++;
+		}
+
+		if (!dbIDRecipient.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dbIDRecipient = :dbIDRecipient";
+		} else if (!dmRecipient.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmRecipient LIKE '%'||:dmRecipient||'%'";
+		}
+
+		if (!dmSenderRefNumber.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmSenderRefNumber LIKE "
+			    "'%'||:dmSenderRefNumber||'%'";
+		}
+
+		if (!dmRecipientRefNumber.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmRecipientRefNumber LIKE "
+			    "'%'||:dmRecipientRefNumber||'%'";
+		}
+
+		if (!dmSenderIdent.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmSenderIdent LIKE "
+			    "'%'||:dmSenderIdent||'%'";
+		}
+
+		if (!dmRecipientIdent.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmRecipientIdent LIKE "
+			    "'%'||:dmRecipientIdent||'%'";
+		}
+
+		if (!dmSenderAddress.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmSenderAddress LIKE "
+			    "'%'||:dmSenderAddress||'%'";
+		} else if (!dmRecipientAddress.isEmpty()) {
+		    if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmRecipientAddress LIKE "
+			    "'%'||:dmRecipientAddress||'%'";
+		}
+
+		if (!dmAnnotation.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmAnnotation LIKE "
+			    "'%'||:dmAnnotation||'%'";
+		}
+
+		if (!dmToHands.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "m.dmToHands LIKE '%'||:dmToHands||'%'";
+		}
+
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			    query.lastError().text().toUtf8().constData());
+			return QStringList();
+		}
+
+		query.bindValue(":dbIDSender", dbIDSender);
+		query.bindValue(":dmSender", dmSender);
+		query.bindValue(":dmSenderAddress", dmSenderAddress);
+		query.bindValue(":dbIDRecipient", dbIDRecipient);
+		query.bindValue(":dmRecipient", dmRecipient);
+		query.bindValue(":dmRecipientAddress", dmRecipientAddress);
+		query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
+		query.bindValue(":dmSenderIdent", dmSenderIdent);
+		query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
+		query.bindValue(":dmRecipientIdent", dmRecipientIdent);
+		query.bindValue(":dmToHands", dmToHands);
+		query.bindValue(":dmAnnotation", dmAnnotation);
+
+		if (isMultiSelect) {
+			query.bindValue(":message_type", msgType);
+		}
+
+	} else {
+		if (isMultiSelect) {
+			queryStr += "s.message_type = :message_type";
+			queryStr += andToken;
+		}
+
+		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
+
+		if (!query.prepare(queryStr)) {
+			logError("Cannot prepare SQL query: %s.\n",
+			query.lastError().text().toUtf8().constData());
+			return QStringList();
+		}
+
+		query.bindValue(":dmId", dmId.toInt());
+
+		if (isMultiSelect) {
+			query.bindValue(":message_type", msgType);
+		}
+	}
+
+	//qDebug() << queryStr;
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			dmIdList.append(query.value(0).toString());
+			query.next();
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		return QStringList();
+	}
+
+	return dmIdList;
 }
 
 
