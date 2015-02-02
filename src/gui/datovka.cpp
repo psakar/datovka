@@ -2411,8 +2411,15 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
-	Q_ASSERT(0 != db);
+	    itemSettings[TEST].toBool(), false);
+
+	if (NULL == db) {
+		/* TODO -- Generate dialogue whether ot open emplty file? */
+		db = m_messageDbs.accessMessageDb(userName, dbDir,
+		    itemSettings[TEST].toBool(), true);
+	}
+
+	Q_ASSERT(NULL != db);
 
 	return db;
 }

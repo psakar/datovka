@@ -4400,7 +4400,7 @@ dbContainer::~dbContainer(void)
  * Access/create+open message database related to item.
  */
 MessageDb * dbContainer::accessMessageDb(const QString &key,
-    const QString &locDir, bool testing)
+    const QString &locDir, bool testing, bool create)
 /* ========================================================================= */
 {
 	MessageDb *db = NULL;
@@ -4422,7 +4422,26 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	 * Test accounts have ___1 in their names, ___0 relates to standard
 	 * accounts.
 	 */
-	open_ret = db->openDb(constructDbFileName(key, locDir, testing));
+	QString dbFileName = constructDbFileName(key, locDir, testing);
+	QFileInfo fileInfo(dbFileName);
+
+	if (!create && !fileInfo.isFile()) {
+		delete db;
+		return NULL;
+	} else if (!fileInfo.isFile()) {
+		/* Create missing directory. */
+		QDir dir = fileInfo.absoluteDir().absolutePath();
+		if (!dir.exists()) {
+			/* Empty file will be created automatically. */
+			if (!dir.mkpath(dir.absolutePath())) {
+				/* Cannot create directory. */
+				delete db;
+				return NULL;
+			}
+		}
+	}
+
+	open_ret = db->openDb(dbFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
 		delete db;

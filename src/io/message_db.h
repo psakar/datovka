@@ -835,10 +835,11 @@ public:
 	 * @param[in] key      Part of database file name, usually the login.
 	 * @param[in] locDir   Directory where to search for the file.
 	 * @param[in] testing  True for testing accounts.
+	 * @param[in] create   Whether to create non-existing file.
 	 * @return Pointer to database, zero pointer on error.
 	 */
 	MessageDb * accessMessageDb(const QString &key, const QString &locDir,
-	    bool testing);
+	    bool testing, bool create = false);
 
 	/*!
 	 * @brief Creates a copy of the current database into a given new
