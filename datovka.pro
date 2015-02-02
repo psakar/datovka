@@ -73,6 +73,9 @@ unix:!macx {
 	desktop.path = "$${DATADIR}/applications"
 	desktop.files += deployment/datovka.desktop
 
+	appdata.path = "$${DATADIR}/appdata"
+	appdata.files += deployment/datovka.appdata.xml
+
 	icon16.path = "$${DATADIR}/icons/hicolor/16x16/apps"
 	icon16.files += "res/icons/16x16/datovka.png"
 
@@ -113,6 +116,7 @@ unix:!macx {
 	isEmpty(PORTABLE_APPLICATION) {
 		INSTALLS += application \
 			desktop \
+			appdata \
 			icon16 \
 			icon24 \
 			icon32 \
