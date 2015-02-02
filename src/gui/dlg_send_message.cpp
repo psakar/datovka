@@ -302,7 +302,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
 {
-	if (isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+	if (isdsSessions.isConnectedToIsds(m_accountInfo.userName())) {
 		qDebug() << "Connection to ISDS is alive :)";
 	} else {
 		qDebug() << "Connection to ISDS is dead :(";
@@ -917,7 +917,7 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->documents = documents; documents = NULL;
 	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
-	if (!isdsSessions.isConnectToIsds(m_accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(m_accountInfo.userName())) {
 		goto finish;
 	}
 

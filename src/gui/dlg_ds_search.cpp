@@ -158,7 +158,7 @@ void DlgDsSearch::setFirtsColumnActive(void)
 void DlgDsSearch::pingIsdsServer(void)
 /* ========================================================================= */
 {
-	if (isdsSessions.isConnectToIsds(m_userName)) {
+	if (isdsSessions.isConnectedToIsds(m_userName)) {
 		qDebug() << "Connection to ISDS is alive :)";
 	} else {
 		qDebug() << "Connection to ISDS is dead :(";

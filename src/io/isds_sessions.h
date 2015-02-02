@@ -69,15 +69,24 @@ public:
 	/*!
 	 * @brief Ping of ISDS. Test if connection is active.
 	 */
-	bool isConnectToIsds(const QString userName);
+	bool isConnectedToIsds(const QString &userName);
 
 	/*!
 	 * @brief Creates new session.
 	 *
 	 * @return Pointer to new session or NULL on failure.
 	 */
-	struct isds_ctx * createCleanSession(const QString &userName);
+	struct isds_ctx * createCleanSession(const QString &userName,
+	    unsigned int connectionTimeoutMs);
 
+	/*!
+	 * @brief Set time-out in milliseconds to session associated to
+	 *     user name.
+	 *
+	 * @return True on success.
+	 */
+	bool setSessionTimeout(const QString &userName,
+	    unsigned int timeoutMs);
 
 private:
 	QMap<QString, struct isds_ctx *> m_sessions;

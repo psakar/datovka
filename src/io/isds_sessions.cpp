@@ -31,6 +31,7 @@
 
 #include "isds_sessions.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/log/log.h"
 
 
 
@@ -98,17 +99,20 @@ bool GlobIsdsSessions::holdsSession(const QString &userName) const
 /*
  * Is connect to databox given by account index
  */
-bool GlobIsdsSessions::isConnectToIsds(QString userName)
+bool GlobIsdsSessions::isConnectedToIsds(const QString &userName)
 /* ========================================================================= */
 {
-	isds_error status;
+	isds_error ping_status;
 
-	if (!isdsSessions.holdsSession(userName)) {
+	if (!holdsSession(userName)) {
 		return false;
 	}
 
-	status = isds_ping(isdsSessions.session(userName));
-	if (IE_SUCCESS == status) {
+	setSessionTimeout(userName, ISDS_PING_TIMEOUT_MS);
+	ping_status = isds_ping(session(userName));
+	setSessionTimeout(userName, ISDS_DOWNLOAD_TIMEOUT_MS);
+
+	if (IE_SUCCESS == ping_status) {
 		return true;
 	}
 	return false;
@@ -119,7 +123,8 @@ bool GlobIsdsSessions::isConnectToIsds(QString userName)
 /*
  * Creates new session.
  */
-struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
+struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
+    unsigned int connectionTimeoutMs)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -134,7 +139,7 @@ struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName)
 		goto fail;
 	}
 
-	status = isds_set_timeout(isds_session, TIMEOUT_MS);
+	status = isds_set_timeout(isds_session, connectionTimeoutMs);
 	if (IE_SUCCESS != status) {
 		qDebug() << "Error setting time-out.";
 		goto fail;
@@ -156,14 +161,43 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Set time-out in milliseconds to session associated to
+ *     user name.
+ */
+bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
+    unsigned int timeoutMs)
+/* ========================================================================= */
+{
+	struct isds_ctx *isds_session;
+	isds_error status;
+
+	Q_ASSERT(NULL != m_sessions.value(userName, NULL));
+
+	isds_session = m_sessions.value(userName, NULL);
+	if (NULL == isds_session) {
+		return false;
+	}
+
+	status = isds_set_timeout(isds_session, timeoutMs);
+	if (IE_SUCCESS != status) {
+		logError("%s\n", "Error setting time-out.");
+		return false;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
  * Returns associated session.
  */
 struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != m_sessions.value(userName, 0));
+	Q_ASSERT(NULL != m_sessions.value(userName, NULL));
 
-	return m_sessions.value(userName);
+	return m_sessions.value(userName, NULL);
 }
 
 

@@ -1622,7 +1622,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(accountIndex, true)) {
 			return;
 		}
@@ -1947,7 +1947,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	} else {
 
 		isds_error status;
-		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(acntTopIdx, true)) {
 				return Q_CONNECT_ERROR;
 			}
@@ -2047,7 +2047,7 @@ void MainWindow::synchroniseAllAccounts(void)
 
 		isConnectActive = true;
 
-		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			isConnectActive = connectToIsds(index, true);
 		}
 
@@ -2159,7 +2159,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	    tr("Synchronise account \"%1\" with ISDS server.")
 	        .arg(accountInfo.accountName()));
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
@@ -3207,7 +3207,7 @@ void MainWindow::createAndSendMessage(void)
 	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
-	if (!isdsSessions.isConnectToIsds(userName)) {
+	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
 			/* TODO - dialog to inform user about error */
 
@@ -3224,7 +3224,7 @@ void MainWindow::createAndSendMessage(void)
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
 				//return Q_CONNECT_ERROR;
@@ -3352,7 +3352,7 @@ void MainWindow::changeAccountPassword(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
@@ -3382,7 +3382,7 @@ void MainWindow::manageAccountProperties(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-//	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+//	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 //		if (!connectToIsds(index, true)) {
 //			//return;
 //		}
@@ -3671,7 +3671,7 @@ void MainWindow::createAndSendMessageReply(void)
 	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
-	if (!isdsSessions.isConnectToIsds(userName)) {
+	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
@@ -3691,7 +3691,7 @@ void MainWindow::createAndSendMessageReply(void)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
 				//return Q_CONNECT_ERROR;
@@ -3722,7 +3722,7 @@ void MainWindow::findDatabox(void)
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
@@ -4163,7 +4163,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 
 	isds_error status;
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
@@ -4240,7 +4240,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	isds_error status;
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
@@ -4326,7 +4326,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	isds_error status;
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
@@ -4627,7 +4627,7 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
 	    .arg(attachFileName));
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return Q_CONNECT_ERROR;
 		}
@@ -5586,7 +5586,7 @@ int MainWindow::isImportMsgInISDS(const QString &zfoFile,
 	accountIndex = AccountModel::indexTop(accountIndex);
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(accountIndex, true)) {
 			return MSG_ISDS_ERROR;
 		}
@@ -5769,7 +5769,7 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(accountIndex, true)) {
 			return false;
 		}
@@ -6348,7 +6348,8 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName());
+		isdsSessions.createCleanSession(accountInfo.userName(),
+		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString pwd = accountInfo.password();
@@ -6373,6 +6374,9 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	status = isdsLoginUserName(isdsSessions.session(accountInfo.userName()),
 	    accountInfo.userName(), pwd, accountInfo.testAccount());
 
+	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
@@ -6392,7 +6396,8 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName());
+		isdsSessions.createCleanSession(accountInfo.userName(),
+		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString certPath = accountInfo.certPath();
@@ -6417,6 +6422,9 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	    isdsSessions.session(accountInfo.userName()),
 	    certPath, accountInfo.testAccount());
 
+	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
@@ -6436,7 +6444,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName());
+		isdsSessions.createCleanSession(accountInfo.userName(),
+		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString certPath = accountInfo.certPath();
@@ -6470,6 +6479,9 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
+	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
 }
@@ -6486,7 +6498,8 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName());
+		isdsSessions.createCleanSession(accountInfo.userName(),
+		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString certPath = accountInfo.certPath();
@@ -6511,6 +6524,9 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
 	    idBox, certPath, accountInfo.testAccount());
 
+	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
@@ -6530,7 +6546,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	isds_error status = IE_ERROR;
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName());
+		isdsSessions.createCleanSession(accountInfo.userName(),
+		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString pwd = accountInfo.password();
@@ -6556,7 +6573,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 
 	/* HOTP - dialog info */
 	QString msgTitle = tr("Enter OTP security code");
-	QString	msgBody = tr("Account \"%1\" requires authentication via OTP "
+	QString msgBody = tr("Account \"%1\" requires authentication via OTP "
 		    "<br/> security code for connection to databox.")
 		    .arg(accountInfo.accountName()) + "<br/><br/>" +
 		    tr("Enter OTP security code for account")
@@ -6594,6 +6611,9 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		    accountInfo.userName(), pwd,
 		    accountInfo.testAccount(), accountInfo.loginMethod(),
 		    QString(), otpres);
+
+		isdsSessions.setSessionTimeout(accountInfo.userName(),
+		    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
 
 		/* if SMS was not send */
 		if (otpres != OTP_RESOLUTION_TOTP_SENT) {
@@ -6658,6 +6678,9 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		    accountInfo.userName(), pwd,
 		    accountInfo.testAccount(), accountInfo.loginMethod(),
 		    otpcode, otpres);
+
+		isdsSessions.setSessionTimeout(accountInfo.userName(),
+		    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
 
 		/* OTP login notification */
 		if (status == IE_NOT_LOGGED_IN) {
@@ -6861,7 +6884,7 @@ void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo
 {
 	debugSlotCall();
 
-	if (!isdsSessions.isConnectToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!firstConnectToIsds(accountInfo, false)) {
 			QString msgBoxTitle = tr("New account error") +
 			    ": " + accountInfo.accountName();
