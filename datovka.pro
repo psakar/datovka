@@ -101,7 +101,8 @@ unix:!macx {
 	additional.path = "$${TEXT_FILES_INST_DIR}"
 	additional.files = \
 		AUTHORS \
-		COPYING
+		COPYING \
+		README
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
 		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
