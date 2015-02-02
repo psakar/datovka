@@ -1645,15 +1645,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		break;
 	}
 
-	QList<MessageDb*> messageDbList;
-	QList<bool> downloadThisAccount;
-
-	messageDbList.clear();
-	downloadThisAccount.clear();
-	downloadThisAccount.append(incoming);
-
 	MessageDb *messageDb = accountMessageDb(accountItem);
-	messageDbList.append(messageDb);
 
 	const AccountModel::SettingsMap accountInfo =
 	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -1665,9 +1657,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	}
 
 	threadDownMsgComplete = new QThread();
-	workerDownMsgComplete = new Worker(accountIndex,
-	    dmIDs, m_accountDb, m_accountModel, 0, messageDbList,
-	    downloadThisAccount, 0);
+	workerDownMsgComplete = new Worker(accountIndex, m_accountDb,
+	    messageDb, dmIDs, incoming ? MSG_RECEIVED : MSG_SENT, 0);
 
 	workerDownMsgComplete->moveToThread(threadDownMsgComplete);
 
@@ -2062,10 +2053,8 @@ void MainWindow::synchroniseAllAccounts(void)
 	}
 
 	int accountCount = ui->accountList->model()->rowCount();
-	QList<MessageDb*> messageDbList;
-	QList<bool> downloadThisAccounts;
-	messageDbList.clear();
-	downloadThisAccounts.clear();
+	QList<QModelIndex> accountIndexes;
+	QList<MessageDb *> messageDbList;
 	bool isConnectActive = true;
 
 	for (int i = 0; i < accountCount; i++) {
@@ -2080,12 +2069,14 @@ void MainWindow::synchroniseAllAccounts(void)
 			isConnectActive = connectToIsds(index, true);
 		}
 
-		downloadThisAccounts.append(isConnectActive);
+		if (isConnectActive) {
+			accountIndexes.append(index);
 
-		const QStandardItem *accountItem =
-		    m_accountModel.itemFromIndex(index);
-		MessageDb *messageDb = accountMessageDb(accountItem);
-		messageDbList.append(messageDb);
+			const QStandardItem *accountItem =
+			    m_accountModel.itemFromIndex(index);
+			MessageDb *messageDb = accountMessageDb(accountItem);
+			messageDbList.append(messageDb);
+		}
 
 	}
 
@@ -2095,9 +2086,8 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionGet_messages->setEnabled(false);
 
 	threadSyncAll = new QThread();
-	workerSyncAll = new Worker(QModelIndex(), QString(),
-	    m_accountDb, m_accountModel, accountCount, messageDbList,
-	    downloadThisAccounts, 0);
+	workerSyncAll = new Worker(accountIndexes, m_accountDb,
+	    messageDbList, 0);
 	workerSyncAll->moveToThread(threadSyncAll);
 
 	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
@@ -2167,19 +2157,11 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	QList<MessageDb*> messageDbList;
-	QList<bool> downloadThisAccount;
-
-	messageDbList.clear();
-	downloadThisAccount.clear();
-	downloadThisAccount.append(true);
-
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 
 	MessageDb *messageDb = accountMessageDb(accountItem);
-	messageDbList.append(messageDb);
 
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -2195,8 +2177,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	}
 
 	threadSyncOne = new QThread();
-	workerSyncOne = new Worker(index, QString(), m_accountDb,
-	    m_accountModel, 0, messageDbList, downloadThisAccount, 0);
+	workerSyncOne = new Worker(index, m_accountDb, messageDb, 0);
 	workerSyncOne->moveToThread(threadSyncOne);
 
 	connect(workerSyncOne, SIGNAL(valueChanged(QString, int)),

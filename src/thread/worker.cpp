@@ -41,23 +41,62 @@ QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 
 /* ========================================================================= */
 /*
- * Constructor.
+ * Constructor for multiple accounts.
  */
-Worker::Worker(QModelIndex acntTopIdx, QString dmId,
-	    AccountDb &accountDb, AccountModel &accountModel, int count,
-	    QList<MessageDb*> messageDbList,
-	    QList<bool> downloadThisAccounts, QObject *parent = 0) :
-	m_acntTopIdx(acntTopIdx),
-	m_dmId(dmId),
-	m_accountDb(accountDb),
-	m_accountModel(accountModel),
-	m_count(count),
-	m_messageDbList(messageDbList),
-	m_downloadThisAccounts(downloadThisAccounts)
+Worker::Worker(QList<QModelIndex> acntTopIdxs, AccountDb &accountDb,
+    QList<MessageDb *> messageDbList, QObject *parent)
 /* ========================================================================= */
+: m_acntTopIdxs(acntTopIdxs),
+    m_accountDb(accountDb),
+    m_messageDbList(messageDbList),
+    m_dmId(),
+    m_msgDirection(MSG_SENT) /* Any value will do. */
 {
 	/* unused */
 	(void) parent;
+}
+
+
+/* ========================================================================= */
+/*
+ * Constructor for single account.
+ */
+Worker::Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
+    MessageDb *messageDb, QObject *parent)
+/* ========================================================================= */
+    : m_acntTopIdxs(),
+    m_accountDb(accountDb),
+    m_messageDbList(),
+    m_dmId(),
+    m_msgDirection(MSG_SENT) /* Any value will do. */
+{
+	/* unused */
+	(void) parent;
+
+	m_acntTopIdxs.append(acntTopIdx);
+	m_messageDbList.append(messageDb);
+}
+
+
+/* ========================================================================= */
+/*
+ * Constructor for download complete message.
+ */
+Worker::Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
+    MessageDb *messageDb, QString dmId,
+    enum MessageDirection msgDirection, QObject *parent)
+/* ========================================================================= */
+    : m_acntTopIdxs(),
+    m_accountDb(accountDb),
+    m_messageDbList(),
+    m_dmId(dmId),
+    m_msgDirection(msgDirection)
+{
+	/* unused */
+	(void) parent;
+
+	m_acntTopIdxs.append(acntTopIdx);
+	m_messageDbList.append(messageDb);
 }
 
 
@@ -105,13 +144,10 @@ void Worker::syncAllAccounts(void)
 	int sntTtl = 0;
 	int sntNews = 0;
 
-	for (int i = 0; i < m_count; i++) {
+	for (int i = 0; i < m_acntTopIdxs.size(); i++) {
+//	foreach (QModelIndex index, m_acntTopIdxs)
 
-		if (!m_downloadThisAccounts.at(i)) {
-			continue;
-		}
-
-		QModelIndex index = m_accountModel.index(i, 0);
+		QModelIndex index = m_acntTopIdxs[i];
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
@@ -120,15 +156,14 @@ void Worker::syncAllAccounts(void)
 			continue;
 		}
 
-		QStandardItem *item = m_accountModel.itemFromIndex(index);
-		QStandardItem *itemTop = AccountModel::itemTop(item);
 		messageDb = m_messageDbList.at(i);
 
-		emit changeStatusBarInfo(false, itemTop->text(), 0, 0 ,0, 0);
+		emit changeStatusBarInfo(false, index.data().toString(),
+		    0, 0 ,0, 0);
 
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading message list for account"
-		    << itemTop->text();
+		    << index.data().toString();
 		qDebug() << "-----------------------------------------------";
 
 		if (Q_CONNECT_ERROR ==
@@ -188,7 +223,7 @@ void Worker::syncOneAccount(void)
 	    << thread()->currentThreadId();
 
 	/* test account index valid */
-	if (!m_acntTopIdx.isValid()) {
+	if (!m_acntTopIdxs[0].isValid()) {
 		qDebug() << "Invalid Account index! Downloading is canceled.";
 		downloadMessagesMutex.unlock();
 		emit finished();
@@ -196,11 +231,6 @@ void Worker::syncOneAccount(void)
 	}
 
 	bool success = true;
-	MessageDb *messageDb;
-
-	QStandardItem *item = m_accountModel.itemFromIndex(m_acntTopIdx);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-	messageDb = m_messageDbList.at(0);
 
 	/* Messages counters
 	 * rt = receivedTotal, rn = receivedNews,
@@ -213,26 +243,27 @@ void Worker::syncOneAccount(void)
 	int sn = 0;
 
 	qDebug() << "-----------------------------------------------";
-	qDebug() << "Downloading message list for account" << itemTop->text();
+	qDebug() << "Downloading message list for account"
+	    << m_acntTopIdxs[0].data().toString();
 	qDebug() << "-----------------------------------------------";
 
 	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(m_acntTopIdx,"received", *messageDb,
+	    downloadMessageList(m_acntTopIdxs[0],"received", *m_messageDbList[0],
 	    "GetListOfReceivedMessages", 0, this, rt, rn)) {
 		success = false;
 	}
 
-	emit refreshAccountList(m_acntTopIdx);
+	emit refreshAccountList(m_acntTopIdxs[0]);
 
 	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(m_acntTopIdx,"sent", *messageDb,
+	    downloadMessageList(m_acntTopIdxs[0],"sent", *m_messageDbList[0],
 	    "GetListOfSentMessages", 0, this, st, sn)) {
 		success = false;
 	}
 
-	emit refreshAccountList(m_acntTopIdx);
+	emit refreshAccountList(m_acntTopIdxs[0]);
 
-	if (!getPasswordInfo(m_acntTopIdx)) {
+	if (!getPasswordInfo(m_acntTopIdxs[0])) {
 		success = false;
 	}
 
@@ -244,7 +275,8 @@ void Worker::syncOneAccount(void)
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
 
-	emit changeStatusBarInfo(true, itemTop->text(), rt, rn , st, sn);
+	emit changeStatusBarInfo(true, m_acntTopIdxs[0].data().toString(),
+	    rt, rn , st, sn);
 
 	downloadMessagesMutex.unlock();
 
@@ -274,11 +306,11 @@ void Worker::downloadCompleteMessage(void)
 	messageDb = m_messageDbList.at(0);
 
 	/* sent message */
-	if (Q_SUCCESS == downloadMessage(m_acntTopIdx, m_dmId, true,
-	        m_downloadThisAccounts.at(0), *messageDb,
+	if (Q_SUCCESS == downloadMessage(m_acntTopIdxs[0], m_dmId, true,
+	        MSG_RECEIVED == m_msgDirection, *messageDb,
 	        "DownloadMessage", 0, this)) {
 		/* Only on successful download. */
-		emit refreshAttachmentList(m_acntTopIdx, m_dmId);
+		emit refreshAttachmentList(m_acntTopIdxs[0], m_dmId);
 	} else {
 		emit clearStatusBarAndShowDialog(m_dmId);
 	}

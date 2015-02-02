@@ -46,12 +46,23 @@ public:
 	QMutex downloadMessagesMutex;
 
 	/*!
-	 * @brief Constructor.
+	 * @brief Constructor for multiple accounts.
 	 */
-	explicit Worker(QModelIndex acntTopIdx, QString dmId,
-	    AccountDb &accountDb, AccountModel &accountModel,
-	    int count, QList<MessageDb*> messageDbList,
-	    QList<bool> downloadThisAccounts, QObject *parent);
+	explicit Worker(QList<QModelIndex> acntTopIdxs, AccountDb &accountDb,
+	    QList<MessageDb *> messageDbList, QObject *parent);
+
+	/*!
+	 * @brief Constructor for single account.
+	 */
+	explicit Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
+	    MessageDb *messageDb, QObject *parent);
+
+	/*!
+	 * @brief Constructor for download complete message.
+	 */
+	explicit Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
+	    MessageDb *messageDb, QString dmId,
+	    enum MessageDirection msgDirection, QObject *parent);
 
 	/*!
 	 * @brief Requests the process to start
@@ -108,13 +119,11 @@ public:
 
 private:
 
-	QModelIndex m_acntTopIdx;
-	QString m_dmId;
-	AccountDb &m_accountDb;
-	AccountModel &m_accountModel;
-	int m_count;
-	QList<MessageDb*> m_messageDbList;
-	QList<bool> m_downloadThisAccounts;
+	QList<QModelIndex> m_acntTopIdxs; /*< List of account top indexes. */
+	AccountDb &m_accountDb; /*!< Account database. */
+	QList<MessageDb *> m_messageDbList; /*!< Corresponding databases.*/
+	QString m_dmId; /*!< Message id if downloading single message. */
+	enum MessageDirection m_msgDirection; /*!< Sent or received. */
 
 	/*!
 	* @brief Get password expiration info for account index
@@ -172,7 +181,7 @@ signals:
 	void refreshAttachmentList(const QModelIndex, QString);
 
 	/*!
-	 * @brief This signal is emitted when accout is proccessed
+	 * @brief This signal is emitted when account is processed
 	 */
 	void changeStatusBarInfo(bool, QString, int, int, int, int);
 
