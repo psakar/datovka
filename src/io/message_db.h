@@ -839,7 +839,7 @@ public:
 	 * @return Pointer to database, zero pointer on error.
 	 */
 	MessageDb * accessMessageDb(const QString &key, const QString &locDir,
-	    bool testing, bool create = false);
+	    bool testing, bool create = true);
 
 	/*!
 	 * @brief Creates a copy of the current database into a given new
