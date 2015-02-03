@@ -2414,7 +2414,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	    itemSettings[TEST].toBool(), false);
 
 	if (NULL == db) {
-		/* TODO -- Generate dialogue whether ot open emplty file? */
+		/* TODO -- Generate dialogue whether or open empty file? */
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
 		    itemSettings[TEST].toBool(), true);
 	}
@@ -2947,7 +2947,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 /* ========================================================================= */
 {
 	/*
-	 * Several nodes may be updated at once, because som messages may be
+	 * Several nodes may be updated at once, because some messages may be
 	 * referred from multiple nodes.
 	 */
 
@@ -2966,13 +2966,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	const QString &userName = itemSettings[USER].toString();
 	Q_ASSERT(!userName.isEmpty());
-	QString dbDir = itemSettings[DB_DIR].toString();
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = globPref.confDir();
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
+	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
@@ -3030,13 +3024,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	const QString &userName = itemSettings[USER].toString();
 	Q_ASSERT(!userName.isEmpty());
-	QString dbDir = itemSettings[DB_DIR].toString();
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = globPref.confDir();
-	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool());
+	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
@@ -3092,13 +3080,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		const QString &userName = itemSettings[USER].toString();
 		Q_ASSERT(!userName.isEmpty());
-		QString dbDir = itemSettings[DB_DIR].toString();
-		if (dbDir.isEmpty()) {
-			/* Set default directory name. */
-			dbDir = globPref.confDir();
-		}
-		db = m_messageDbs.accessMessageDb(userName, dbDir,
-		    itemSettings[TEST].toBool());
+		db = accountMessageDb(itemTop);
 		Q_ASSERT(0 != db);
 		QString dbId = m_accountDb.dbId(userName + "___True");
 
@@ -3310,7 +3292,10 @@ void MainWindow::deleteSelectedAccount(void)
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 		QString accountName = itemSettings.accountName();
-		QString dbDir = itemSettings[DB_DIR].toString();
+
+		MessageDb *db;
+		db = accountMessageDb(itemTop);
+		Q_ASSERT(0 != db);
 
 		if (itemTop->hasChildren()) {
 			itemTop->removeRows(0, itemTop->rowCount());
@@ -3320,12 +3305,7 @@ void MainWindow::deleteSelectedAccount(void)
 		ui->accountList->model()->removeRow(currentTopRow);
 
 		/* Delete message db from disk. */
-		MessageDb *db;
-		db = m_messageDbs.accessMessageDb(userName, dbDir,
-		    itemSettings[TEST].toBool());
-		Q_ASSERT(0 != db);
 		m_messageDbs.deleteMessageDb(db);
-
 
 		showStatusTextWithTimeout(tr("Account \"%1\" was deleted.")
 		    .arg(accountName));
@@ -3534,9 +3514,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		fileName = itemSettings[USER].toString() + "___0.db";
 	}
 
-	MessageDb *messageDb = m_messageDbs.accessMessageDb(
-	    itemSettings[USER].toString(), itemSettings[DB_DIR].toString(),
-	    itemSettings[TEST].toBool());
+	MessageDb *messageDb = accountMessageDb(item);
 	Q_ASSERT(0 != messageDb);
 
 	qDebug() << fileName << action;
