@@ -60,7 +60,7 @@ unix:!macx {
 	BINDIR="$${PREFIX}/bin"
 	DATADIR="$${PREFIX}/share"
 
-	TEXT_FILES_INST_DIR = "$${DATADIR}/$${APP_NAME}/doc"
+	TEXT_FILES_INST_DIR = "$${DATADIR}/doc/$${APP_NAME}"
 	LOCALE_INST_DIR = "$${DATADIR}/$${APP_NAME}/localisations"
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
@@ -72,6 +72,9 @@ unix:!macx {
 
 	desktop.path = "$${DATADIR}/applications"
 	desktop.files += deployment/datovka.desktop
+
+	appdata.path = "$${DATADIR}/appdata"
+	appdata.files += deployment/datovka.appdata.xml
 
 	icon16.path = "$${DATADIR}/icons/hicolor/16x16/apps"
 	icon16.files += "res/icons/16x16/datovka.png"
@@ -101,7 +104,8 @@ unix:!macx {
 	additional.path = "$${TEXT_FILES_INST_DIR}"
 	additional.files = \
 		AUTHORS \
-		COPYING
+		COPYING \
+		README
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
 		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
@@ -112,6 +116,7 @@ unix:!macx {
 	isEmpty(PORTABLE_APPLICATION) {
 		INSTALLS += application \
 			desktop \
+			appdata \
 			icon16 \
 			icon24 \
 			icon32 \

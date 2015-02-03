@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2015 CZ.NIC Labs -->
+<application>
+	<id type="desktop">datovka.desktop</id>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>GPL-3.0+</project_license>
+
+	<name>Datovka</name>
+	<name xml:lang="cs">Datovka</name>
+
+	<summary>A free graphical user interface for Datove schranky</summary>
+	<summary xml:lang="cs">Svobodné uživatelské rozhraní pro Datové schránky</summary>
+
+	<description>
+		<p>
+			Datovka is a multiplatform desktop application to access Datove schranky.
+		</p>
+		<p xml:lang="cs">
+			Datovka je multiplatformní desktopová aplikace pro přístup k Datovým schránkám.
+		</p>
+
+		<p>
+			Datovka allows receiving, sending, and checking integrity of messages,
+			exporting proofs of delivery or full messages, exporting complete
+			coresspondence for a defined period, etc..
+		</p>
+		<p xml:lang="cs">
+			Z Datovky je možné číst zprávy, odesílat zprávy, kontrolovat integritu zpráv,
+			exportovat doručenky i celé zprávy, exportovat přehled korespondence za určité
+			časové období, apod.
+		</p>
+
+		<p>
+			The user interface is very similar to common e-mail clients.
+		</p>
+		<p xml:lang="cs">
+			Uživatelské rozhraní aplikace se velice podobá běžným poštovním klientům. 
+		</p>
+	</description>
+
+	<screenshots>
+		<screenshot type="default">
+			<image>https://www.nic.cz/files/labs/datove_schranky/datovka-screen.png</image>
+			<caption>The main window showing the application in action</caption>
+			<caption xml:lang="cs">Hlavní okno aplikace</caption>
+		</screenshot>
+	</screenshots>
+
+	<updatecontact>datove-schranky@labs.nic.cz</updatecontact>
+	<url type="homepage">https://labs.nic.cz/cs/nova-datovka.html</url>
+</application>
