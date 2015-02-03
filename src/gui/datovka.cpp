@@ -1180,8 +1180,9 @@ void MainWindow::messageItemRestoreSelection(void)
 			    globPref.after_start_select) {
 				/*
 				 * Search for the message with the largest id.
-				 */
+				 */				
 				index = model->index(0, 0);
+				QModelIndex newIndex = index;
 				int largestSoFar = index.data().toInt();
 				for (row = 1; row < rowCount; ++row) {
 					/*
@@ -1196,9 +1197,12 @@ void MainWindow::messageItemRestoreSelection(void)
 						index = model->index(row, 0);
 						largestSoFar =
 						    index.data().toInt();
+						newIndex = index;
 					}
 				}
-				ui->messageList->setCurrentIndex(index);
+				if (newIndex.isValid()) {
+					ui->messageList->setCurrentIndex(newIndex);
+				}
 			} else if (GlobPreferences::SELECT_LAST_VISITED ==
 			    globPref.after_start_select) {
 				acntIdx = AccountModel::indexTop(acntIdx);
