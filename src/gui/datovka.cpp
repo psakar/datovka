@@ -1168,6 +1168,9 @@ void MainWindow::messageItemRestoreSelection(void)
 	if (row < rowCount) {
 		/* Message found. */
 		ui->messageList->setCurrentIndex(index);
+		if (index.isValid()) {
+			ui->messageList->scrollTo(index);
+		}
 	} else {
 		/*
 		 * If we selected a message from last received then restore the
@@ -1202,7 +1205,9 @@ void MainWindow::messageItemRestoreSelection(void)
 				}
 				if (newIndex.isValid()) {
 					ui->messageList->setCurrentIndex(newIndex);
+					ui->messageList->scrollTo(newIndex);
 				}
+
 			} else if (GlobPreferences::SELECT_LAST_VISITED ==
 			    globPref.after_start_select) {
 				acntIdx = AccountModel::indexTop(acntIdx);
@@ -1234,6 +1239,9 @@ void MainWindow::messageItemRestoreSelection(void)
 						/* Set selection if found. */
 						ui->messageList->
 						    setCurrentIndex(index);
+						if (index.isValid()) {
+							ui->messageList->scrollTo(index);
+						}
 					}
 				}
 			} else if (GlobPreferences::SELECT_NOTHING ==
@@ -1242,6 +1250,9 @@ void MainWindow::messageItemRestoreSelection(void)
 					index = model->index(rowCount - 1, 0);
 					ui->messageList->
 					    setCurrentIndex(index);
+					if (index.isValid()) {
+						ui->messageList->scrollTo(index);
+					}
 			} else {
 				Q_ASSERT(0);
 			}
@@ -1249,6 +1260,9 @@ void MainWindow::messageItemRestoreSelection(void)
 			/* Select last row. */
 			index = model->index(rowCount - 1, 0);
 			ui->messageList->setCurrentIndex(index);
+			if (index.isValid()) {
+				ui->messageList->scrollTo(index);
+			}
 		}
 	}
 }
