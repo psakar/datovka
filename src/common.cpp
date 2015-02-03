@@ -75,13 +75,13 @@ GlobPreferences::GlobPreferences(void)
     certificate_validation_date(DOWNLOAD_DATE),
     check_crl(true),
     check_new_versions(true),
-    send_stats_with_version_checks(true),
-    download_on_background(true),
+    send_stats_with_version_checks(false),
+    download_on_background(false),
     timer_value(10),
     download_at_start(false),
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
-    after_start_select(SELECT_NEWEST),
+    after_start_select(SELECT_NOTHING),
     message_mark_as_read_timeout(5000)
 {
 }
@@ -190,7 +190,7 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		after_start_select = SELECT_LAST_VISITED;
 		break;
 	case SELECT_NOTHING:
-		after_start_select = SELECT_LAST_VISITED;
+		after_start_select = SELECT_NOTHING;
 		break;
 	default:
 		after_start_select = dlftlGlobPref.after_start_select;
