@@ -100,7 +100,10 @@ public:
 		{
 			(*this)[PWD] = pwd;
 		}
-		QString dbDir(void) const;
+		inline QString dbDir(void) const
+		{
+			return (*this)[DB_DIR].toString();
+		}
 		void setDbDir(const QString &path);
 		void setLastMsg(const QString &dmId);
 		void setLastAttachPath(const QString &path);

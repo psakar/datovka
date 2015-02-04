@@ -47,14 +47,6 @@ AccountModel::SettingsMap::SettingsMap(const QMap<QString, QVariant> &map)
 
 
 /* ========================================================================= */
-QString AccountModel::SettingsMap::dbDir(void) const
-/* ========================================================================= */
-{
-	return (*this)[DB_DIR].toString();
-}
-
-
-/* ========================================================================= */
 void AccountModel::SettingsMap::setDbDir(const QString &path)
 /* ========================================================================= */
 {
@@ -260,8 +252,9 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.insert(REMEMBER,
 			    settings.value(groups.at(i) + "/" + REMEMBER,
 			        "").toBool());
-			itemSettings.insert(DB_DIR,
-			    settings.value(groups.at(i) + "/" + DB_DIR, ""));
+			itemSettings.setDbDir(
+			    settings.value(groups.at(i) + "/" + DB_DIR,
+			        "").toString());
 			itemSettings.insert(SYNC,
 			    settings.value(groups.at(i) + "/" + SYNC,
 			        "").toBool());
@@ -317,11 +310,10 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		}
 		settings.setValue(TEST, itemSettings.value(TEST));
 		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
-		if (!itemSettings.value(DB_DIR).isNull() &&
-		    itemSettings.value(DB_DIR).isValid() &&
-		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
+		if (!itemSettings.dbDir().isEmpty()) {
 			if (itemSettings.dbDir() != globPref.confDir()) {
-				settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
+				settings.setValue(DB_DIR,
+				    itemSettings.dbDir());
 			}
 		}
 		if (!itemSettings.value(P12FILE).isNull() &&

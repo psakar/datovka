@@ -2423,7 +2423,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 
-	QString dbDir = itemSettings[DB_DIR].toString();
+	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
@@ -3500,7 +3500,7 @@ void MainWindow::changeDataDirectory(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	QString dbDir = itemSettings[DB_DIR].toString();
+	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
@@ -4527,8 +4527,8 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 				itemSettings.setPassword("");
 				itemSettings[REMEMBER] = false;
 				itemSettings[SYNC] = false;
-				itemSettings[DB_DIR] =
-				    m_on_import_database_dir_activate;
+				itemSettings.setDbDir(
+				    m_on_import_database_dir_activate);
 				m_accountModel.addAccount(accountName,
 				    itemSettings);
 				importDBinfo.second =
