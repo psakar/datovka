@@ -248,8 +248,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.setDbDir(
 			    settings.value(groups.at(i) + "/" + DB_DIR,
 			        "").toString());
-			itemSettings.insert(SYNC,
-			    settings.value(groups.at(i) + "/" + SYNC,
+			itemSettings.setSyncWithAll(
+			    settings.value(groups.at(i) + "/" + SYNC_WITH_ALL,
 			        "").toBool());
 			itemSettings.insert(P12FILE,
 			    settings.value(groups.at(i) + "/" + P12FILE,
@@ -315,7 +315,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			settings.setValue(P12FILE, itemSettings.value(P12FILE));
 		}
 
-		settings.setValue(SYNC, itemSettings.value(SYNC));
+		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
 
 		if (!itemSettings.value(LASTMSG).isNull() &&
 		    itemSettings.value(LASTMSG).isValid() &&

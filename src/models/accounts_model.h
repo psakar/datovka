@@ -41,7 +41,7 @@
 #define TEST_ACCOUNT "test_account"
 #define REMEMBER_PWD "remember_password"
 #define DB_DIR "database_dir"
-#define SYNC "sync_with_all"
+#define SYNC_WITH_ALL "sync_with_all"
 #define P12FILE "p12file"
 #define LASTMSG "last_message_id"
 #define LASTATTACH "last_attach_path"
@@ -121,6 +121,14 @@ public:
 			return (*this)[DB_DIR].toString();
 		}
 		void setDbDir(const QString &path);
+		inline bool syncWithAll(void) const
+		{
+			return (*this)[SYNC_WITH_ALL].toBool();
+		}
+		inline void setSyncWithAll(bool sync)
+		{
+			(*this)[SYNC_WITH_ALL] = sync;
+		}
 		void setLastMsg(const QString &dmId);
 		void setLastAttachPath(const QString &path);
 		void setLastCorrespPath(const QString &path);

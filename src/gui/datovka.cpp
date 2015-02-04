@@ -4526,7 +4526,7 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 				itemSettings.setLoginMethod(LIM_USERNAME);
 				itemSettings.setPassword("");
 				itemSettings.setRememberPwd(false);
-				itemSettings[SYNC] = false;
+				itemSettings.setSyncWithAll(false);
 				itemSettings.setDbDir(
 				    m_on_import_database_dir_activate);
 				m_accountModel.addAccount(accountName,

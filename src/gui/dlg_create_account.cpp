@@ -185,7 +185,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	this->passwordLineEdit->setText(itemSettings.password());
 	this->testAccountCheckBox->setChecked(itemSettings.isTestAccount());
 	this->rememberPswcheckBox->setChecked(itemSettings.rememberPwd());
-	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
+	this->synchroCheckBox->setChecked(itemSettings.syncWithAll());
 
 	if (itemSettings[P12FILE].toString() != NULL) {
 		this->addCertificateButton->setText(QDir::
@@ -334,7 +334,7 @@ void DlgCreateAccount::saveAccount(void)
 	itemSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
 	itemSettings.setPassword(this->passwordLineEdit->text());
 	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
-	itemSettings[SYNC] = this->synchroCheckBox->isChecked();
+	itemSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
 		itemSettings.setLoginMethod(LIM_USERNAME);
