@@ -2223,7 +2223,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 
 	html.append("<div style=\"margin-left: 12px;\">");
 	html.append("<h3>");
-	if (itemSettings[TEST].toBool()) {
+	if (itemSettings.isTestAccount()) {
 		html.append(tr("Test account"));
 	} else {
 		html.append(tr("Standard account"));
@@ -2429,11 +2429,11 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool(), false);
+	    itemSettings.isTestAccount(), false);
 
 	if (NULL == db) {
-		QString dbFilePath = m_messageDbs.constructDbFileName(userName, dbDir,
-		    itemSettings[TEST].toBool());
+		QString dbFilePath = m_messageDbs.constructDbFileName(userName,
+		    dbDir, itemSettings.isTestAccount());
 		QMessageBox::warning(this,
 		    tr("Datovka: Loading database problem"),
 		    tr("Could not load data from the database "
@@ -2445,7 +2445,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		    tr("I'll try to create an empty one."),
 		    QMessageBox::Ok);
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
-		    itemSettings[TEST].toBool(), true);
+		    itemSettings.isTestAccount(), true);
 	}
 
 	/* TODO - removed assert */
@@ -3539,7 +3539,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	QString fileName;
 
 	/* 1 = is test account, 0 = is legal account */
-	if (itemSettings[TEST].toBool()) {
+	if (itemSettings.isTestAccount()) {
 		fileName = itemSettings.userName() + "___1.db";
 	} else {
 		fileName = itemSettings.userName() + "___0.db";
@@ -6348,7 +6348,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	}
 
 	status = isdsLoginUserName(isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, accountInfo.testAccount());
+	    accountInfo.userName(), pwd, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6396,7 +6396,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 
 	status = isdsLoginSystemCert(
 	    isdsSessions.session(accountInfo.userName()),
-	    certPath, accountInfo.testAccount());
+	    certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6449,7 +6449,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 
 	status = isdsLoginUserCertPwd(
 	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, certPath, accountInfo.testAccount());
+	    accountInfo.userName(), pwd, certPath,
+	    accountInfo.isTestAccount());
 
 
 	QString isdsMsg =
@@ -6497,8 +6498,9 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		return false;
 	}
 
-	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
-	    idBox, certPath, accountInfo.testAccount());
+	status = isdsLoginUserCert(isdsSessions.session(
+	    accountInfo.userName()),
+	    idBox, certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6585,7 +6587,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
-		    accountInfo.testAccount(), accountInfo.loginMethod(),
+		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    QString(), otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
@@ -6652,7 +6654,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
-		    accountInfo.testAccount(), accountInfo.loginMethod(),
+		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    otpcode, otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),

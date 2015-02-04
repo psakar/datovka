@@ -90,13 +90,6 @@ void AccountModel::SettingsMap::setLastZFOExportPath(const QString &path)
 
 
 /* ========================================================================= */
-bool AccountModel::SettingsMap::testAccount(void) const
-/* ========================================================================= */
-{
-	return (*this)[TEST].toBool();
-}
-
-/* ========================================================================= */
 QString AccountModel::SettingsMap::certPath(void) const
 /* ========================================================================= */
 {
@@ -246,8 +239,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.setPassword(fromBase64(
 			    settings.value(groups.at(i) + "/" + PWD,
 			        "").toString()));
-			itemSettings.insert(TEST,
-			    settings.value(groups.at(i) + "/" + TEST,
+			itemSettings.setTestAccount(
+			    settings.value(groups.at(i) + "/" + TEST_ACCOUNT,
 			        "").toBool());
 			itemSettings.insert(REMEMBER,
 			    settings.value(groups.at(i) + "/" + REMEMBER,
@@ -308,7 +301,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			settings.setValue(PWD,
 			    toBase64(itemSettings.password()));
 		}
-		settings.setValue(TEST, itemSettings.value(TEST));
+		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
 		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
 		if (!itemSettings.dbDir().isEmpty()) {
 			if (itemSettings.dbDir() != globPref.confDir()) {

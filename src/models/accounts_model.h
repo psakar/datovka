@@ -38,7 +38,7 @@
 #define USER "username"
 #define LOGIN "login_method"
 #define PWD "password"
-#define TEST "test_account"
+#define TEST_ACCOUNT "test_account"
 #define REMEMBER "remember_password"
 #define DB_DIR "database_dir"
 #define SYNC "sync_with_all"
@@ -100,6 +100,14 @@ public:
 		{
 			(*this)[PWD] = pwd;
 		}
+		inline bool isTestAccount(void) const
+		{
+			return (*this)[TEST_ACCOUNT].toBool();
+		}
+		inline void setTestAccount(bool isTesting)
+		{
+			(*this)[TEST_ACCOUNT] = isTesting;
+		}
 		inline QString dbDir(void) const
 		{
 			return (*this)[DB_DIR].toString();
@@ -109,7 +117,6 @@ public:
 		void setLastAttachPath(const QString &path);
 		void setLastCorrespPath(const QString &path);
 		void setLastZFOExportPath(const QString &path);
-		bool testAccount(void) const;
 		QString certPath(void) const;
 		QString lastMsg(void) const;
 		QString lastAttachPath(void) const;

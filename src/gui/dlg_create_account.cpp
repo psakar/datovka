@@ -183,7 +183,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	setActiveButton(itemindex);
 
 	this->passwordLineEdit->setText(itemSettings.password());
-	this->testAccountCheckBox->setChecked(itemSettings[TEST].toBool());
+	this->testAccountCheckBox->setChecked(itemSettings.isTestAccount());
 	this->rememberPswcheckBox->setChecked(itemSettings[REMEMBER].toBool());
 	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
 
@@ -333,7 +333,7 @@ void DlgCreateAccount::saveAccount(void)
 	itemSettings.setUserName(this->usernameLineEdit->text());
 	itemSettings[REMEMBER] = this->rememberPswcheckBox->isChecked();
 	itemSettings.setPassword(this->passwordLineEdit->text());
-	itemSettings[TEST] = this->testAccountCheckBox->isChecked();
+	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
 	itemSettings[SYNC] = this->synchroCheckBox->isChecked();
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
