@@ -2223,7 +2223,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 
 	html.append("<div style=\"margin-left: 12px;\">");
 	html.append("<h3>");
-	if (itemSettings[TEST].toBool()) {
+	if (itemSettings.isTestAccount()) {
 		html.append(tr("Test account"));
 	} else {
 		html.append(tr("Standard account"));
@@ -2231,14 +2231,14 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 	html.append("</h3>");
 
 	html.append(strongAccountInfoLine(tr("Account name"),
-	    itemSettings[NAME].toString()));
+	    itemSettings.accountName()));
 	html.append("<br>");
 	html.append(strongAccountInfoLine(tr("User name"),
-	    itemSettings[USER].toString()));
+	    itemSettings.userName()));
 
 	AccountEntry accountEntry;
 	accountEntry = m_accountDb.accountEntry(
-	    itemSettings[USER].toString() + "___True");
+	    itemSettings.userName() + "___True");
 
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
@@ -2292,7 +2292,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 	}
 
 	html.append("<br>");
-	QString key = itemSettings[USER].toString() + "___True";
+	QString key = itemSettings.userName() + "___True";
 	QString info = m_accountDb.getPwdExpirFromDb(key);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
@@ -2392,7 +2392,7 @@ QString MainWindow::accountUserName(const QStandardItem *accountItem) const
 
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString userName = itemSettings[USER].toString();
+	QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 
 	return userName;
@@ -2420,20 +2420,20 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	/* Get user name and db location. */
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 
-	QString dbDir = itemSettings[DB_DIR].toString();
+	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
 	}
 	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings[TEST].toBool(), false);
+	    itemSettings.isTestAccount(), false);
 
 	if (NULL == db) {
-		QString dbFilePath = m_messageDbs.constructDbFileName(userName, dbDir,
-		    itemSettings[TEST].toBool());
+		QString dbFilePath = m_messageDbs.constructDbFileName(userName,
+		    dbDir, itemSettings.isTestAccount());
 		QMessageBox::warning(this,
 		    tr("Datovka: Loading database problem"),
 		    tr("Could not load data from the database "
@@ -2445,7 +2445,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		    tr("I'll try to create an empty one."),
 		    QMessageBox::Ok);
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
-		    itemSettings[TEST].toBool(), true);
+		    itemSettings.isTestAccount(), true);
 	}
 
 	/* TODO - removed assert */
@@ -2478,14 +2478,14 @@ void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!itemSettings[LASTATTACH].toString().isEmpty()) {
-		m_save_attach_dir = itemSettings[LASTATTACH].toString();
+	if (!itemSettings.lastAttachPath().isEmpty()) {
+		m_save_attach_dir = itemSettings.lastAttachPath();
 	}
-	if (!itemSettings[LASTCORRESP].toString().isEmpty()) {
-		m_export_correspond_dir = itemSettings[LASTCORRESP].toString();
+	if (!itemSettings.lastCorrespPath().isEmpty()) {
+		m_export_correspond_dir = itemSettings.lastCorrespPath();
 	}
-	if (!itemSettings[LASTZFO].toString().isEmpty()) {
-		m_on_export_zfo_activate = itemSettings[LASTZFO].toString();
+	if (!itemSettings.lastZFOExportPath().isEmpty()) {
+		m_on_export_zfo_activate = itemSettings.lastZFOExportPath();
 	}
 }
 
@@ -2564,8 +2564,9 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 		int topItemCount = m_accountModel.rowCount();
 		for (int i = 0; i < topItemCount; i++) {
 			const QStandardItem *item = m_accountModel.item(i,0);
-			QString user = item->data(
-			    ROLE_ACNT_CONF_SETTINGS).toMap()[USER].toString();
+			const AccountModel::SettingsMap &itemSettings =
+			    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			QString user = itemSettings.userName();
 			if (user == username) {
 				QModelIndex index = m_accountModel.
 				    indexFromItem(item);
@@ -2960,7 +2961,7 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 
 		const AccountModel::SettingsMap &itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		const QString &userName = itemSettings[USER].toString();
+		const QString userName = itemSettings.userName();
 
 		settings.beginGroup("default_account");
 		settings.setValue("username", userName);
@@ -2994,7 +2995,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	Q_ASSERT(0 != topItem);
 	const AccountModel::SettingsMap &itemSettings =
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
@@ -3052,7 +3053,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	Q_ASSERT(0 != topItem);
 	const AccountModel::SettingsMap &itemSettings =
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
@@ -3108,7 +3109,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		Q_ASSERT(0 != itemTop);
 		const AccountModel::SettingsMap &itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		const QString &userName = itemSettings[USER].toString();
+		const QString userName = itemSettings.userName();
 		Q_ASSERT(!userName.isEmpty());
 		db = accountMessageDb(itemTop);
 		Q_ASSERT(0 != db);
@@ -3499,7 +3500,7 @@ void MainWindow::changeDataDirectory(void)
 	const AccountModel::SettingsMap &itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	QString dbDir = itemSettings[DB_DIR].toString();
+	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
@@ -3538,10 +3539,10 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	QString fileName;
 
 	/* 1 = is test account, 0 = is legal account */
-	if (itemSettings[TEST].toBool()) {
-		fileName = itemSettings[USER].toString() + "___1.db";
+	if (itemSettings.isTestAccount()) {
+		fileName = itemSettings.userName() + "___1.db";
 	} else {
-		fileName = itemSettings[USER].toString() + "___0.db";
+		fileName = itemSettings.userName() + "___0.db";
 	}
 
 	MessageDb *messageDb = accountMessageDb(item);
@@ -3553,7 +3554,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	if ("move" == action) {
 		if (m_messageDbs.moveMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -3582,7 +3583,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	} else if ("copy" == action) {
 		if (m_messageDbs.copyMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -3611,7 +3612,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	} else if ("new" == action) {
 		if (m_messageDbs.reopenMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -4511,23 +4512,23 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 				    arg(accountName);
 			} else {
 				if (fileNameParts[0] == "1") {
-					itemSettings[TEST] = true;
+					itemSettings.setTestAccount(true);
 				} else if (fileNameParts[0] == "0") {
-					itemSettings[TEST] = false;
+					itemSettings.setTestAccount(false);
 				} else {
 					importDBinfo.second =
 					    tr("This file does not contain a "
 					    "valid message database or file "
 					    "name has wrong format.");
 				}
-				itemSettings[NAME] = accountName;
-				itemSettings[USER] = accountName;
-				itemSettings[LOGIN] = "username";
-				itemSettings[PWD] = "";
-				itemSettings[REMEMBER] = false;
-				itemSettings[SYNC] = false;
-				itemSettings[DB_DIR] =
-				    m_on_import_database_dir_activate;
+				itemSettings.setAccountName(accountName);
+				itemSettings.setUserName(accountName);
+				itemSettings.setLoginMethod(LIM_USERNAME);
+				itemSettings.setPassword("");
+				itemSettings.setRememberPwd(false);
+				itemSettings.setSyncWithAll(false);
+				itemSettings.setDbDir(
+				    m_on_import_database_dir_activate);
 				m_accountModel.addAccount(accountName,
 				    itemSettings);
 				importDBinfo.second =
@@ -6347,7 +6348,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	}
 
 	status = isdsLoginUserName(isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, accountInfo.testAccount());
+	    accountInfo.userName(), pwd, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6375,7 +6376,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	if (certPath.isNull() || certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
 		    *(ui->accountList), m_accountDb, acntTopIdx,
@@ -6383,7 +6384,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-			certPath = accountInfoNew.certPath();
+			certPath = accountInfoNew.p12File();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -6395,7 +6396,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 
 	status = isdsLoginSystemCert(
 	    isdsSessions.session(accountInfo.userName()),
-	    certPath, accountInfo.testAccount());
+	    certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6423,7 +6424,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	QString pwd = accountInfo.password();
 
 	if (pwd.isNull() || pwd.isEmpty() ||
@@ -6435,7 +6436,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-			certPath = accountInfoNew.certPath();
+			certPath = accountInfoNew.p12File();
 			pwd = accountInfoNew.password();
 			saveSettings();
 		} else {
@@ -6448,7 +6449,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 
 	status = isdsLoginUserCertPwd(
 	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, certPath, accountInfo.testAccount());
+	    accountInfo.userName(), pwd, certPath,
+	    accountInfo.isTestAccount());
 
 
 	QString isdsMsg =
@@ -6477,7 +6479,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	QString idBox;
 
 	QDialog *editAccountDialog = new DlgCreateAccount(
@@ -6486,7 +6488,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		const AccountModel::SettingsMap accountInfoNew =
 		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		certPath = accountInfoNew.certPath();
+		certPath = accountInfoNew.p12File();
 		idBox = accountInfoNew.userName();
 		saveSettings();
 	} else {
@@ -6496,8 +6498,9 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		return false;
 	}
 
-	status = isdsLoginUserCert(isdsSessions.session(accountInfo.userName()),
-	    idBox, certPath, accountInfo.testAccount());
+	status = isdsLoginUserCert(isdsSessions.session(
+	    accountInfo.userName()),
+	    idBox, certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
@@ -6559,7 +6562,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	isds_otp_resolution otpres = OTP_RESOLUTION_SUCCESS;
 
 	/* SMS TOTP */
-	if (accountInfo.loginMethod() == "totp") {
+	if (accountInfo.loginMethod() == LIM_TOTP) {
 
 		/* show Premium SMS request dialog */
 		QMessageBox::StandardButton reply = QMessageBox::question(this,
@@ -6584,7 +6587,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
-		    accountInfo.testAccount(), accountInfo.loginMethod(),
+		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    QString(), otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
@@ -6651,7 +6654,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
-		    accountInfo.testAccount(), accountInfo.loginMethod(),
+		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    otpcode, otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
@@ -6731,17 +6734,17 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	/* Login method based on username and password */
-	if (accountInfo.loginMethod() == "username") {
+	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		return loginMethodUserNamePwd(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
-	} else if (accountInfo.loginMethod() == "certificate") {
+	} else if (accountInfo.loginMethod() == LIM_CERT) {
 		return loginMethodCertificateOnly(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
-	} else if (accountInfo.loginMethod() == "user_certificate") {
+	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
 		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
 		    showDialog);
@@ -6775,17 +6778,17 @@ bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap accountInfo,
 /* ========================================================================= */
 {
 	/* Login method based on username and password */
-	if (accountInfo.loginMethod() == "username") {
+	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		return loginMethodUserNamePwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
-	} else if (accountInfo.loginMethod() == "certificate") {
+	} else if (accountInfo.loginMethod() == LIM_CERT) {
 		return loginMethodCertificateOnly(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
-	} else if (accountInfo.loginMethod() == "user_certificate") {
+	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
 		return loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
 		    showDialog);

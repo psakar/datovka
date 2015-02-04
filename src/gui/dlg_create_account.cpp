@@ -46,14 +46,6 @@ DlgCreateAccount::DlgCreateAccount(QTreeView &accountList,
 }
 
 
-/* Login method descriptors. */
-#define LIM_USERNAME "username"
-#define LIM_CERT "certificate"
-#define LIM_USER_CERT "user_certificate"
-#define LIM_HOTP "hotp"
-#define LIM_TOTP "totp"
-
-
 /* ========================================================================= */
 /*
  * Init dialog
@@ -118,7 +110,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->setWindowTitle(tr("Update account") + " "
 		    + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
-		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setText(itemSettings.userName());
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_PWD:
@@ -128,7 +120,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setText(itemSettings.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
@@ -140,7 +132,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setText(itemSettings.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -152,7 +144,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setText(itemSettings.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		break;
@@ -163,7 +155,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings[USER].toString());
+		this->usernameLineEdit->setText(itemSettings.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -174,7 +166,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		break;
 	}
 
-	const QString login_method = itemSettings[LOGIN].toString();
+	const QString login_method = itemSettings.loginMethod();
 	if (LIM_USERNAME == login_method) {
 		itemindex = USER_NAME;
 	} else if (LIM_CERT == login_method) {
@@ -190,18 +182,17 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
 	setActiveButton(itemindex);
 
-	this->passwordLineEdit->setText(itemSettings[PWD].toString());
-	this->testAccountCheckBox->setChecked(itemSettings[TEST].toBool());
-	this->rememberPswcheckBox->setChecked(itemSettings[REMEMBER].toBool());
-	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
+	this->passwordLineEdit->setText(itemSettings.password());
+	this->testAccountCheckBox->setChecked(itemSettings.isTestAccount());
+	this->rememberPswcheckBox->setChecked(itemSettings.rememberPwd());
+	this->synchroCheckBox->setChecked(itemSettings.syncWithAll());
 
-	if (itemSettings[P12FILE].toString() != NULL) {
+	if (!itemSettings.p12File().isEmpty()) {
 		this->addCertificateButton->setText(QDir::
-		    toNativeSeparators(itemSettings[P12FILE].toString()));
+		    toNativeSeparators(itemSettings.p12File()));
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
-		m_certPath = QDir::toNativeSeparators(itemSettings[P12FILE].
-		   toString());
+		m_certPath = QDir::toNativeSeparators(itemSettings.p12File());
 	}
 }
 
@@ -337,29 +328,32 @@ void DlgCreateAccount::saveAccount(void)
 	}
 
 	/* set account items */
-	itemSettings[NAME] = this->accountLineEdit->text();
-	itemSettings[USER] = this->usernameLineEdit->text();
-	itemSettings[REMEMBER] = this->rememberPswcheckBox->isChecked();
-	itemSettings[PWD] = this->passwordLineEdit->text();
-	itemSettings[TEST] = this->testAccountCheckBox->isChecked();
-	itemSettings[SYNC] = this->synchroCheckBox->isChecked();
+	itemSettings.setAccountName(this->accountLineEdit->text());
+	itemSettings.setUserName(this->usernameLineEdit->text());
+	itemSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
+	itemSettings.setPassword(this->passwordLineEdit->text());
+	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
+	itemSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		itemSettings[LOGIN] = LIM_USERNAME;
-		itemSettings[P12FILE] = "";
+		itemSettings.setLoginMethod(LIM_USERNAME);
+		itemSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		itemSettings[LOGIN] = LIM_CERT;
-		itemSettings[PWD] = "";
-		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
-		itemSettings[LOGIN] = LIM_USER_CERT;
-		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
+		itemSettings.setLoginMethod(LIM_CERT);
+		itemSettings.setPassword("");
+		itemSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
+	} else if (this->loginmethodComboBox->currentIndex() ==
+	           USER_CERTIFICATE) {
+		itemSettings.setLoginMethod(LIM_USER_CERT);
+		itemSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
 	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		itemSettings[LOGIN] = LIM_HOTP;
-		itemSettings[P12FILE] = "";
+		itemSettings.setLoginMethod(LIM_HOTP);
+		itemSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
-		itemSettings[LOGIN] = LIM_TOTP;
-		itemSettings[P12FILE] = "";
+		itemSettings.setLoginMethod(LIM_TOTP);
+		itemSettings.setP12File("");
 	} else {
 		Q_ASSERT(0);
 	}

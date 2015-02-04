@@ -34,19 +34,28 @@
 
 
 #define CREDENTIALS "credentials"
-#define NAME "name"
+#define ACCOUNT_NAME "name"
 #define USER "username"
 #define LOGIN "login_method"
 #define PWD "password"
-#define TEST "test_account"
-#define REMEMBER "remember_password"
+#define TEST_ACCOUNT "test_account"
+#define REMEMBER_PWD "remember_password"
 #define DB_DIR "database_dir"
-#define SYNC "sync_with_all"
+#define SYNC_WITH_ALL "sync_with_all"
 #define P12FILE "p12file"
-#define LASTMSG "last_message_id"
-#define LASTATTACH "last_attach_path"
-#define LASTCORRESP "last_export_corresp_path"
-#define LASTZFO "last_export_zfo_path"
+#define LAST_MSG_ID "last_message_id"
+#define LAST_ATTACH "last_attach_path"
+#define LAST_CORRESP "last_export_corresp_path"
+#define LAST_ZFO "last_export_zfo_path"
+
+
+/* Login method descriptors. */
+#define LIM_USERNAME "username"
+#define LIM_CERT "certificate"
+#define LIM_USER_CERT "user_certificate"
+#define LIM_HOTP "hotp"
+#define LIM_TOTP "totp"
+
 
 /*!
  * @brief Account hierarchy.
@@ -59,22 +68,107 @@ public:
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
-		QString accountName(void) const;
-		QString loginMethod(void) const;
-		QString userName(void) const;
-		QString password(void) const;
-		void setPassword(QString &pwd);
-		void setDirectory(const QString &path);
-		void setLastMsg(const QString &dmId);
-		void setLastAttachPath(const QString &path);
-		void setLastCorrespPath(const QString &path);
-		void setLastZFOExportPath(const QString &path);
-		bool testAccount(void) const;
-		QString certPath(void) const;
-		QString lastMsg(void) const;
-		QString lastAttachPath(void) const;
-		QString lastCorrespPath(void) const;
-		QString lastZFOExportPath(void) const;
+		inline QString accountName(void) const
+		{
+			return (*this)[ACCOUNT_NAME].toString();
+		}
+		inline void setAccountName(const QString &name)
+		{
+			(*this)[ACCOUNT_NAME] = name;
+		}
+		inline QString userName(void) const
+		{
+			return (*this)[USER].toString();
+		}
+		inline void setUserName(const QString &userName)
+		{
+			(*this)[USER] = userName;
+		}
+		inline QString loginMethod(void) const
+		{
+			return (*this)[LOGIN].toString();
+		}
+		inline void setLoginMethod(const QString &method)
+		{
+			(*this)[LOGIN] = method;
+		}
+		inline QString password(void) const
+		{
+			return (*this)[PWD].toString();
+		}
+		inline void setPassword(const QString &pwd)
+		{
+			(*this)[PWD] = pwd;
+		}
+		inline bool isTestAccount(void) const
+		{
+			return (*this)[TEST_ACCOUNT].toBool();
+		}
+		inline void setTestAccount(bool isTesting)
+		{
+			(*this)[TEST_ACCOUNT] = isTesting;
+		}
+		inline bool rememberPwd(void) const
+		{
+			return (*this)[REMEMBER_PWD].toBool();
+		}
+		inline void setRememberPwd(bool remember)
+		{
+			(*this)[REMEMBER_PWD] = remember;
+		}
+		inline QString dbDir(void) const
+		{
+			return (*this)[DB_DIR].toString();
+		}
+		void setDbDir(const QString &path);
+		inline bool syncWithAll(void) const
+		{
+			return (*this)[SYNC_WITH_ALL].toBool();
+		}
+		inline void setSyncWithAll(bool sync)
+		{
+			(*this)[SYNC_WITH_ALL] = sync;
+		}
+		inline QString p12File(void) const
+		{
+			return (*this)[P12FILE].toString();
+		}
+		inline void setP12File(const QString &p12)
+		{
+			(*this)[P12FILE] = p12;
+		}
+		inline QString lastMsg(void) const
+		{
+			return (*this)[LAST_MSG_ID].toString();
+		}
+		inline void setLastMsg(const QString &dmId)
+		{
+			(*this)[LAST_MSG_ID] = dmId;
+		}
+		inline QString lastAttachPath(void) const
+		{
+			return (*this)[LAST_ATTACH].toString();
+		}
+		inline void setLastAttachPath(const QString &path)
+		{
+			(*this)[LAST_ATTACH] = path;
+		}
+		inline QString lastCorrespPath(void) const
+		{
+			return (*this)[LAST_CORRESP].toString();
+		}
+		inline void setLastCorrespPath(const QString &path)
+		{
+			(*this)[LAST_CORRESP] = path;
+		}
+		inline QString lastZFOExportPath(void) const
+		{
+			return (*this)[LAST_ZFO].toString();
+		}
+		inline void setLastZFOExportPath(const QString &path)
+		{
+			(*this)[LAST_ZFO] = path;
+		}
 	};
 
 	/*
@@ -107,7 +201,7 @@ public:
 	 *    .
 	 *    .
 	 */
-	typedef enum {
+	enum NodeType {
 		nodeUnknown = 0,
 		nodeAccountTop,
 		nodeRecentReceived,
@@ -117,7 +211,7 @@ public:
 		nodeSent,
 		nodeReceivedYear,
 		nodeSentYear
-	} NodeType;
+	};
 
 
 	/*!

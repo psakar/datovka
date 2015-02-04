@@ -47,125 +47,17 @@ AccountModel::SettingsMap::SettingsMap(const QMap<QString, QVariant> &map)
 
 
 /* ========================================================================= */
-QString AccountModel::SettingsMap::accountName(void) const
+void AccountModel::SettingsMap::setDbDir(const QString &path)
 /* ========================================================================= */
 {
-	return (*this)[NAME].toString();
+	if (path == globPref.confDir()) {
+		/* Default path is empty. */
+		(*this)[DB_DIR] = QString();
+	} else {
+		(*this)[DB_DIR] = path;
+	}
 }
 
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::loginMethod(void) const
-/* ========================================================================= */
-{
-	return (*this)[LOGIN].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::userName(void) const
-/* ========================================================================= */
-{
-	return (*this)[USER].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::password(void) const
-/* ========================================================================= */
-{
-	return (*this)[PWD].toString();
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setPassword(QString &pwd)
-/* ========================================================================= */
-{
-	(*this)[PWD] = pwd;
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setDirectory(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[DB_DIR] = path;
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastMsg(const QString &dmId)
-/* ========================================================================= */
-{
-	(*this)[LASTMSG] = dmId;
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastAttachPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTATTACH] = path;
-}
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastCorrespPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTCORRESP] = path;
-}
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastZFOExportPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTZFO] = path;
-}
-
-
-/* ========================================================================= */
-bool AccountModel::SettingsMap::testAccount(void) const
-/* ========================================================================= */
-{
-	return (*this)[TEST].toBool();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::certPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[P12FILE].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastMsg(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTMSG].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastAttachPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTATTACH].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastCorrespPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTCORRESP].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastZFOExportPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTZFO].toString();
-}
 
 /* ========================================================================= */
 /*
@@ -201,6 +93,20 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 
 		return QStandardItemModel::data(index, role);
 		break;
+
+#if 0
+	case Qt::DecorationRole:
+		if (nodeAccountTop == nodeType(index)) {
+			SettingsMap settingsMap =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			qDebug() << "A001" << globPref.confDir();
+			if (!settingsMap.dbDir().isEmpty()) {
+				return QIcon(ICON_16x16_PATH "grey.png");
+			}
+		}
+		return QStandardItemModel::data(index, role);
+		break;
+#endif
 
 	case Qt::FontRole:
 		if (nodeAccountTop == nodeType(index)) {
@@ -255,45 +161,48 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			 * FIXME -- Any white-space characters trailing
 			 * the comma are lost.
 			 */
-			itemSettings.insert(NAME,
-			    settings.value(groups.at(i) + "/" + NAME,
+			itemSettings.setAccountName(
+			    settings.value(groups.at(i) + "/" + ACCOUNT_NAME,
 			        "").toStringList().join(", "));
-			itemSettings.insert(USER,
-			    settings.value(groups.at(i) + "/" + USER, ""));
-			itemSettings.insert(LOGIN,
-			    settings.value(groups.at(i) + "/" + LOGIN, ""));
-			itemSettings.insert(PWD, fromBase64(
+			itemSettings.setUserName(
+			    settings.value(groups.at(i) + "/" + USER,
+			        "").toString());
+			itemSettings.setLoginMethod(
+			    settings.value(groups.at(i) + "/" + LOGIN,
+			    "").toString());
+			itemSettings.setPassword(fromBase64(
 			    settings.value(groups.at(i) + "/" + PWD,
 			        "").toString()));
-			itemSettings.insert(TEST,
-			    settings.value(groups.at(i) + "/" + TEST,
+			itemSettings.setTestAccount(
+			    settings.value(groups.at(i) + "/" + TEST_ACCOUNT,
 			        "").toBool());
-			itemSettings.insert(REMEMBER,
-			    settings.value(groups.at(i) + "/" + REMEMBER,
+			itemSettings.setRememberPwd(
+			    settings.value(groups.at(i) + "/" + REMEMBER_PWD,
 			        "").toBool());
-			itemSettings.insert(DB_DIR,
-			    settings.value(groups.at(i) + "/" + DB_DIR, ""));
-			itemSettings.insert(SYNC,
-			    settings.value(groups.at(i) + "/" + SYNC,
+			itemSettings.setDbDir(
+			    settings.value(groups.at(i) + "/" + DB_DIR,
+			        "").toString());
+			itemSettings.setSyncWithAll(
+			    settings.value(groups.at(i) + "/" + SYNC_WITH_ALL,
 			        "").toBool());
-			itemSettings.insert(P12FILE,
+			itemSettings.setP12File(
 			    settings.value(groups.at(i) + "/" + P12FILE,
 			        "").toString());
-			itemSettings.insert(LASTMSG,
-			    settings.value(groups.at(i) + "/" + LASTMSG,
+			itemSettings.setLastMsg(
+			    settings.value(groups.at(i) + "/" + LAST_MSG_ID,
 			        "").toString());
-			itemSettings.insert(LASTATTACH,
-			    settings.value(groups.at(i) + "/" + LASTATTACH,
+			itemSettings.setLastAttachPath(
+			    settings.value(groups.at(i) + "/" + LAST_ATTACH,
 			        "").toString());
-			itemSettings.insert(LASTCORRESP,
-			    settings.value(groups.at(i) + "/" + LASTCORRESP,
+			itemSettings.setLastCorrespPath(
+			    settings.value(groups.at(i) + "/" + LAST_CORRESP,
 			        "").toString());
-			itemSettings.insert(LASTZFO,
-			    settings.value(groups.at(i) + "/" + LASTZFO,
+			itemSettings.setLastZFOExportPath(
+			    settings.value(groups.at(i) + "/" + LAST_ZFO,
 			        "").toString());
 
 			/* Associate map with item node. */
-			addAccount(itemSettings[NAME].toString(),
+			addAccount(itemSettings[ACCOUNT_NAME].toString(),
 			    itemSettings);
 		}
 	}
@@ -317,59 +226,49 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		if (i > 0) {
 			groupName.append(QString::number(i + 1));
 		}
-//		qDebug() << this->item(i)->text() << groupName;
 		settings.beginGroup(groupName);
 
-		settings.setValue(NAME, itemSettings.value(NAME));
-		settings.setValue(USER, itemSettings.value(USER));
-		settings.setValue(LOGIN, itemSettings.value(LOGIN));
-		if (!itemSettings.value(PWD).isNull() &&
-		    itemSettings.value(PWD).isValid() &&
-		    itemSettings.value(REMEMBER).toBool() &&
-		    !itemSettings.value(PWD).toString().isEmpty()) {
+		settings.setValue(ACCOUNT_NAME, itemSettings.accountName());
+		settings.setValue(USER, itemSettings.userName());
+		settings.setValue(LOGIN, itemSettings.loginMethod());
+		if (!itemSettings.password().isEmpty()) {
 			settings.setValue(PWD,
-			    toBase64(itemSettings.value(PWD).toString()));
+			    toBase64(itemSettings.password()));
 		}
-		settings.setValue(TEST, itemSettings.value(TEST));
-		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
-		if (!itemSettings.value(DB_DIR).isNull() &&
-		    itemSettings.value(DB_DIR).isValid() &&
-		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
-			settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
+		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
+		settings.setValue(REMEMBER_PWD, itemSettings.rememberPwd());
+		if (!itemSettings.dbDir().isEmpty()) {
+			if (itemSettings.dbDir() != globPref.confDir()) {
+				settings.setValue(DB_DIR,
+				    itemSettings.dbDir());
+			}
 		}
-		if (!itemSettings.value(P12FILE).isNull() &&
-		    itemSettings.value(P12FILE).isValid() &&
-		    !itemSettings.value(P12FILE).toString().isEmpty()) {
-			settings.setValue(P12FILE, itemSettings.value(P12FILE));
-		}
-
-		settings.setValue(SYNC, itemSettings.value(SYNC));
-
-		if (!itemSettings.value(LASTMSG).isNull() &&
-		    itemSettings.value(LASTMSG).isValid() &&
-		    !itemSettings.value(LASTMSG).toString().isEmpty()) {
-			settings.setValue(LASTMSG, itemSettings.value(LASTMSG));
+		if (!itemSettings.p12File().isEmpty()) {
+			settings.setValue(P12FILE, itemSettings.p12File());
 		}
 
-		/* save last attachments path */
-		if (!itemSettings.value(LASTATTACH).isNull() &&
-		    itemSettings.value(LASTATTACH).isValid() &&
-		    !itemSettings.value(LASTATTACH).toString().isEmpty()) {
-			settings.setValue(LASTATTACH, itemSettings.value(LASTATTACH));
+		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
+
+		if (!itemSettings.lastMsg().isEmpty()) {
+			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
 		}
 
-		/* save last corresopndence exprt path */
-		if (!itemSettings.value(LASTCORRESP).isNull() &&
-		    itemSettings.value(LASTCORRESP).isValid() &&
-		    !itemSettings.value(LASTCORRESP).toString().isEmpty()) {
-			settings.setValue(LASTCORRESP, itemSettings.value(LASTCORRESP));
+		/* Save last attachments path. */
+		if (!itemSettings.lastAttachPath().isEmpty()) {
+			settings.setValue(LAST_ATTACH,
+			    itemSettings.lastAttachPath());
 		}
 
-		/* save last ZFO exprt path */
-		if (!itemSettings.value(LASTZFO).isNull() &&
-		    itemSettings.value(LASTZFO).isValid() &&
-		    !itemSettings.value(LASTZFO).toString().isEmpty()) {
-			settings.setValue(LASTZFO, itemSettings.value(LASTZFO));
+		/* Save last correspondence export path. */
+		if (!itemSettings.lastCorrespPath().isEmpty()) {
+			settings.setValue(LAST_CORRESP,
+			    itemSettings.lastCorrespPath());
+		}
+
+		/* save last ZFO export path */
+		if (!itemSettings.lastZFOExportPath().isEmpty()) {
+			settings.setValue(LAST_ZFO,
+			    itemSettings.lastZFOExportPath());
 		}
 
 		settings.endGroup();

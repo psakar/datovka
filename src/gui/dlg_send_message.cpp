@@ -121,11 +121,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	}
 
 	this->fromUser->setText("<strong>" + accountItemTop->text() +
-	    "</strong>" + " (" + itemSettings[USER].toString() + ") - "
+	    "</strong>" + " (" + itemSettings.userName() + ") - "
 	    + m_dbType + dbOpenAddressing);
 
 	index = m_messageList.currentIndex();
-	m_userName = itemSettings[USER].toString();
+	m_userName = itemSettings.userName();
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,

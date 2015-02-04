@@ -116,7 +116,7 @@ void Worker::syncAllAccounts(void)
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 		// if the account is not included to sync all, skip it.
-		if (!accountInfo[SYNC].toBool()) {
+		if (!accountInfo.syncWithAll()) {
 			continue;
 		}
 
@@ -701,8 +701,8 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 
 	QString key = accountInfo.userName() + "___True";
 
-	if (accountInfo.loginMethod() != "username" &&
-	    accountInfo.loginMethod() != "user_certificate") {
+	if (accountInfo.loginMethod() != LIM_USERNAME &&
+	    accountInfo.loginMethod() != LIM_USER_CERT) {
 		expirDate = "";
 		m_accountDb.setPwdExpirIntoDb(key, expirDate);
 		return true;
