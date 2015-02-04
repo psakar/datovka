@@ -202,8 +202,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			        "").toString());
 
 			/* Associate map with item node. */
-			addAccount(itemSettings[ACCOUNT_NAME].toString(),
-			    itemSettings);
+			addAccount(itemSettings.accountName(), itemSettings);
 		}
 	}
 }

@@ -65,6 +65,11 @@ class AccountModel: public QStandardItemModel {
 
 public:
 	class SettingsMap : public QMap<QString, QVariant> {
+#if 0 /* Uncomment this to see where the array oprator is used. */
+	private:
+		QVariant operator[](const QString &key);
+		const QVariant operator[](const QString &key) const;
+#endif
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
