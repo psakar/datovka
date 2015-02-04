@@ -39,7 +39,7 @@
 #define LOGIN "login_method"
 #define PWD "password"
 #define TEST_ACCOUNT "test_account"
-#define REMEMBER "remember_password"
+#define REMEMBER_PWD "remember_password"
 #define DB_DIR "database_dir"
 #define SYNC "sync_with_all"
 #define P12FILE "p12file"
@@ -107,6 +107,14 @@ public:
 		inline void setTestAccount(bool isTesting)
 		{
 			(*this)[TEST_ACCOUNT] = isTesting;
+		}
+		inline bool rememberPwd(void) const
+		{
+			return (*this)[REMEMBER_PWD].toBool();
+		}
+		inline void setRememberPwd(bool remember)
+		{
+			(*this)[REMEMBER_PWD] = remember;
 		}
 		inline QString dbDir(void) const
 		{

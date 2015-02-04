@@ -242,8 +242,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.setTestAccount(
 			    settings.value(groups.at(i) + "/" + TEST_ACCOUNT,
 			        "").toBool());
-			itemSettings.insert(REMEMBER,
-			    settings.value(groups.at(i) + "/" + REMEMBER,
+			itemSettings.setRememberPwd(
+			    settings.value(groups.at(i) + "/" + REMEMBER_PWD,
 			        "").toBool());
 			itemSettings.setDbDir(
 			    settings.value(groups.at(i) + "/" + DB_DIR,
@@ -302,7 +302,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			    toBase64(itemSettings.password()));
 		}
 		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
-		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
+		settings.setValue(REMEMBER_PWD, itemSettings.rememberPwd());
 		if (!itemSettings.dbDir().isEmpty()) {
 			if (itemSettings.dbDir() != globPref.confDir()) {
 				settings.setValue(DB_DIR,

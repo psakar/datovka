@@ -184,7 +184,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 
 	this->passwordLineEdit->setText(itemSettings.password());
 	this->testAccountCheckBox->setChecked(itemSettings.isTestAccount());
-	this->rememberPswcheckBox->setChecked(itemSettings[REMEMBER].toBool());
+	this->rememberPswcheckBox->setChecked(itemSettings.rememberPwd());
 	this->synchroCheckBox->setChecked(itemSettings[SYNC].toBool());
 
 	if (itemSettings[P12FILE].toString() != NULL) {
@@ -331,7 +331,7 @@ void DlgCreateAccount::saveAccount(void)
 	/* set account items */
 	itemSettings.setAccountName(this->accountLineEdit->text());
 	itemSettings.setUserName(this->usernameLineEdit->text());
-	itemSettings[REMEMBER] = this->rememberPswcheckBox->isChecked();
+	itemSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
 	itemSettings.setPassword(this->passwordLineEdit->text());
 	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
 	itemSettings[SYNC] = this->synchroCheckBox->isChecked();
