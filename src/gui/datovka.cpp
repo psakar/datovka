@@ -4512,9 +4512,9 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 				    arg(accountName);
 			} else {
 				if (fileNameParts[0] == "1") {
-					itemSettings[TEST] = true;
+					itemSettings.setTestAccount(true);
 				} else if (fileNameParts[0] == "0") {
-					itemSettings[TEST] = false;
+					itemSettings.setTestAccount(false);
 				} else {
 					importDBinfo.second =
 					    tr("This file does not contain a "
@@ -4525,7 +4525,7 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 				itemSettings.setUserName(accountName);
 				itemSettings.setLoginMethod(LIM_USERNAME);
 				itemSettings.setPassword("");
-				itemSettings[REMEMBER] = false;
+				itemSettings.setRememberPwd(false);
 				itemSettings[SYNC] = false;
 				itemSettings.setDbDir(
 				    m_on_import_database_dir_activate);
