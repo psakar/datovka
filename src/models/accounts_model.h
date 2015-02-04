@@ -43,10 +43,10 @@
 #define DB_DIR "database_dir"
 #define SYNC_WITH_ALL "sync_with_all"
 #define P12FILE "p12file"
-#define LASTMSG "last_message_id"
-#define LASTATTACH "last_attach_path"
-#define LASTCORRESP "last_export_corresp_path"
-#define LASTZFO "last_export_zfo_path"
+#define LAST_MSG_ID "last_message_id"
+#define LAST_ATTACH "last_attach_path"
+#define LAST_CORRESP "last_export_corresp_path"
+#define LAST_ZFO "last_export_zfo_path"
 
 
 /* Login method descriptors. */
@@ -129,15 +129,46 @@ public:
 		{
 			(*this)[SYNC_WITH_ALL] = sync;
 		}
-		void setLastMsg(const QString &dmId);
-		void setLastAttachPath(const QString &path);
-		void setLastCorrespPath(const QString &path);
-		void setLastZFOExportPath(const QString &path);
-		QString certPath(void) const;
-		QString lastMsg(void) const;
-		QString lastAttachPath(void) const;
-		QString lastCorrespPath(void) const;
-		QString lastZFOExportPath(void) const;
+		inline QString p12File(void) const
+		{
+			return (*this)[P12FILE].toString();
+		}
+		inline void setP12File(const QString &p12)
+		{
+			(*this)[P12FILE] = p12;
+		}
+		inline QString lastMsg(void) const
+		{
+			return (*this)[LAST_MSG_ID].toString();
+		}
+		inline void setLastMsg(const QString &dmId)
+		{
+			(*this)[LAST_MSG_ID] = dmId;
+		}
+		inline QString lastAttachPath(void) const
+		{
+			return (*this)[LAST_ATTACH].toString();
+		}
+		inline void setLastAttachPath(const QString &path)
+		{
+			(*this)[LAST_ATTACH] = path;
+		}
+		inline QString lastCorrespPath(void) const
+		{
+			return (*this)[LAST_CORRESP].toString();
+		}
+		inline void setLastCorrespPath(const QString &path)
+		{
+			(*this)[LAST_CORRESP] = path;
+		}
+		inline QString lastZFOExportPath(void) const
+		{
+			return (*this)[LAST_ZFO].toString();
+		}
+		inline void setLastZFOExportPath(const QString &path)
+		{
+			(*this)[LAST_ZFO] = path;
+		}
 	};
 
 	/*

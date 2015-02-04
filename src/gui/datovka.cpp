@@ -2478,14 +2478,14 @@ void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!itemSettings[LASTATTACH].toString().isEmpty()) {
-		m_save_attach_dir = itemSettings[LASTATTACH].toString();
+	if (!itemSettings.lastAttachPath().isEmpty()) {
+		m_save_attach_dir = itemSettings.lastAttachPath();
 	}
-	if (!itemSettings[LASTCORRESP].toString().isEmpty()) {
-		m_export_correspond_dir = itemSettings[LASTCORRESP].toString();
+	if (!itemSettings.lastCorrespPath().isEmpty()) {
+		m_export_correspond_dir = itemSettings.lastCorrespPath();
 	}
-	if (!itemSettings[LASTZFO].toString().isEmpty()) {
-		m_on_export_zfo_activate = itemSettings[LASTZFO].toString();
+	if (!itemSettings.lastZFOExportPath().isEmpty()) {
+		m_on_export_zfo_activate = itemSettings.lastZFOExportPath();
 	}
 }
 
@@ -6376,7 +6376,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	if (certPath.isNull() || certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
 		    *(ui->accountList), m_accountDb, acntTopIdx,
@@ -6384,7 +6384,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-			certPath = accountInfoNew.certPath();
+			certPath = accountInfoNew.p12File();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -6424,7 +6424,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	QString pwd = accountInfo.password();
 
 	if (pwd.isNull() || pwd.isEmpty() ||
@@ -6436,7 +6436,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-			certPath = accountInfoNew.certPath();
+			certPath = accountInfoNew.p12File();
 			pwd = accountInfoNew.password();
 			saveSettings();
 		} else {
@@ -6479,7 +6479,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
-	QString certPath = accountInfo.certPath();
+	QString certPath = accountInfo.p12File();
 	QString idBox;
 
 	QDialog *editAccountDialog = new DlgCreateAccount(
@@ -6488,7 +6488,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		const AccountModel::SettingsMap accountInfoNew =
 		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		certPath = accountInfoNew.certPath();
+		certPath = accountInfoNew.p12File();
 		idBox = accountInfoNew.userName();
 		saveSettings();
 	} else {

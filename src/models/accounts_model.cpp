@@ -60,72 +60,6 @@ void AccountModel::SettingsMap::setDbDir(const QString &path)
 
 
 /* ========================================================================= */
-void AccountModel::SettingsMap::setLastMsg(const QString &dmId)
-/* ========================================================================= */
-{
-	(*this)[LASTMSG] = dmId;
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastAttachPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTATTACH] = path;
-}
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastCorrespPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTCORRESP] = path;
-}
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setLastZFOExportPath(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[LASTZFO] = path;
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::certPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[P12FILE].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastMsg(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTMSG].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastAttachPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTATTACH].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastCorrespPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTCORRESP].toString();
-}
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::lastZFOExportPath(void) const
-/* ========================================================================= */
-{
-	return (*this)[LASTZFO].toString();
-}
-
-/* ========================================================================= */
 /*
  * Empty account model constructor.
  */
@@ -251,20 +185,20 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			itemSettings.setSyncWithAll(
 			    settings.value(groups.at(i) + "/" + SYNC_WITH_ALL,
 			        "").toBool());
-			itemSettings.insert(P12FILE,
+			itemSettings.setP12File(
 			    settings.value(groups.at(i) + "/" + P12FILE,
 			        "").toString());
-			itemSettings.insert(LASTMSG,
-			    settings.value(groups.at(i) + "/" + LASTMSG,
+			itemSettings.setLastMsg(
+			    settings.value(groups.at(i) + "/" + LAST_MSG_ID,
 			        "").toString());
-			itemSettings.insert(LASTATTACH,
-			    settings.value(groups.at(i) + "/" + LASTATTACH,
+			itemSettings.setLastAttachPath(
+			    settings.value(groups.at(i) + "/" + LAST_ATTACH,
 			        "").toString());
-			itemSettings.insert(LASTCORRESP,
-			    settings.value(groups.at(i) + "/" + LASTCORRESP,
+			itemSettings.setLastCorrespPath(
+			    settings.value(groups.at(i) + "/" + LAST_CORRESP,
 			        "").toString());
-			itemSettings.insert(LASTZFO,
-			    settings.value(groups.at(i) + "/" + LASTZFO,
+			itemSettings.setLastZFOExportPath(
+			    settings.value(groups.at(i) + "/" + LAST_ZFO,
 			        "").toString());
 
 			/* Associate map with item node. */
@@ -309,39 +243,32 @@ void AccountModel::saveToSettings(QSettings &settings) const
 				    itemSettings.dbDir());
 			}
 		}
-		if (!itemSettings.value(P12FILE).isNull() &&
-		    itemSettings.value(P12FILE).isValid() &&
-		    !itemSettings.value(P12FILE).toString().isEmpty()) {
-			settings.setValue(P12FILE, itemSettings.value(P12FILE));
+		if (!itemSettings.p12File().isEmpty()) {
+			settings.setValue(P12FILE, itemSettings.p12File());
 		}
 
 		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
 
-		if (!itemSettings.value(LASTMSG).isNull() &&
-		    itemSettings.value(LASTMSG).isValid() &&
-		    !itemSettings.value(LASTMSG).toString().isEmpty()) {
-			settings.setValue(LASTMSG, itemSettings.value(LASTMSG));
+		if (!itemSettings.lastMsg().isEmpty()) {
+			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
 		}
 
-		/* save last attachments path */
-		if (!itemSettings.value(LASTATTACH).isNull() &&
-		    itemSettings.value(LASTATTACH).isValid() &&
-		    !itemSettings.value(LASTATTACH).toString().isEmpty()) {
-			settings.setValue(LASTATTACH, itemSettings.value(LASTATTACH));
+		/* Save last attachments path. */
+		if (!itemSettings.lastAttachPath().isEmpty()) {
+			settings.setValue(LAST_ATTACH,
+			    itemSettings.lastAttachPath());
 		}
 
-		/* save last correspondence export path */
-		if (!itemSettings.value(LASTCORRESP).isNull() &&
-		    itemSettings.value(LASTCORRESP).isValid() &&
-		    !itemSettings.value(LASTCORRESP).toString().isEmpty()) {
-			settings.setValue(LASTCORRESP, itemSettings.value(LASTCORRESP));
+		/* Save last correspondence export path. */
+		if (!itemSettings.lastCorrespPath().isEmpty()) {
+			settings.setValue(LAST_CORRESP,
+			    itemSettings.lastCorrespPath());
 		}
 
 		/* save last ZFO export path */
-		if (!itemSettings.value(LASTZFO).isNull() &&
-		    itemSettings.value(LASTZFO).isValid() &&
-		    !itemSettings.value(LASTZFO).toString().isEmpty()) {
-			settings.setValue(LASTZFO, itemSettings.value(LASTZFO));
+		if (!itemSettings.lastZFOExportPath().isEmpty()) {
+			settings.setValue(LAST_ZFO,
+			    itemSettings.lastZFOExportPath());
 		}
 
 		settings.endGroup();

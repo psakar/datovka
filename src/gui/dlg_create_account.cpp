@@ -187,13 +187,12 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	this->rememberPswcheckBox->setChecked(itemSettings.rememberPwd());
 	this->synchroCheckBox->setChecked(itemSettings.syncWithAll());
 
-	if (itemSettings[P12FILE].toString() != NULL) {
+	if (!itemSettings.p12File().isEmpty()) {
 		this->addCertificateButton->setText(QDir::
-		    toNativeSeparators(itemSettings[P12FILE].toString()));
+		    toNativeSeparators(itemSettings.p12File()));
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
-		m_certPath = QDir::toNativeSeparators(itemSettings[P12FILE].
-		   toString());
+		m_certPath = QDir::toNativeSeparators(itemSettings.p12File());
 	}
 }
 
@@ -338,20 +337,23 @@ void DlgCreateAccount::saveAccount(void)
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
 		itemSettings.setLoginMethod(LIM_USERNAME);
-		itemSettings[P12FILE] = "";
+		itemSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
 		itemSettings.setLoginMethod(LIM_CERT);
 		itemSettings.setPassword("");
-		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
-	} else if (this->loginmethodComboBox->currentIndex() == USER_CERTIFICATE) {
+		itemSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
+	} else if (this->loginmethodComboBox->currentIndex() ==
+	           USER_CERTIFICATE) {
 		itemSettings.setLoginMethod(LIM_USER_CERT);
-		itemSettings[P12FILE] = QDir::fromNativeSeparators(m_certPath);
+		itemSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
 	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
 		itemSettings.setLoginMethod(LIM_HOTP);
-		itemSettings[P12FILE] = "";
+		itemSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
 		itemSettings.setLoginMethod(LIM_TOTP);
-		itemSettings[P12FILE] = "";
+		itemSettings.setP12File("");
 	} else {
 		Q_ASSERT(0);
 	}
