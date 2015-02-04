@@ -63,7 +63,7 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(changePassword(void)));
 
-	if (m_accountInfo.loginMethod() == "hotp" ||
+	if (m_accountInfo.loginMethod() == LIM_HOTP ||
 	    m_accountInfo.loginMethod() == "topt") {
 		this->secCodeLineEdit->setEnabled(true);
 		this->label_7->setEnabled(true);
@@ -172,14 +172,14 @@ void DlgChangePwd::changePassword(void)
 	isds_error status;
 	char * refnumber = NULL;
 
-	if (m_accountInfo.loginMethod() == "hotp" ||
+	if (m_accountInfo.loginMethod() == LIM_HOTP ||
 	    m_accountInfo.loginMethod() == "topt") {
 
 		struct isds_otp *otp = NULL;
 		otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 		memset(otp, 0, sizeof(struct isds_otp));
 
-		if (m_accountInfo.loginMethod() == "hotp") {
+		if (m_accountInfo.loginMethod() == LIM_HOTP) {
 			otp->method = OTP_HMAC;
 		} else {
 			otp->method = OTP_TIME;
@@ -220,7 +220,7 @@ void DlgChangePwd::changePassword(void)
 		QStandardItem *itemTop = AccountModel::itemTop(item);
 		AccountModel::SettingsMap itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		itemSettings[PWD] = this->newPwdLineEdit->text();
+		itemSettings.setPassword(this->newPwdLineEdit->text());
 	} else {
 		QMessageBox::warning(this, tr("Password error"),
 		    tr("An error occurred while password was changed")

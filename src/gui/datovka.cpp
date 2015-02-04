@@ -2231,14 +2231,14 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 	html.append("</h3>");
 
 	html.append(strongAccountInfoLine(tr("Account name"),
-	    itemSettings[NAME].toString()));
+	    itemSettings.accountName()));
 	html.append("<br>");
 	html.append(strongAccountInfoLine(tr("User name"),
-	    itemSettings[USER].toString()));
+	    itemSettings.userName()));
 
 	AccountEntry accountEntry;
 	accountEntry = m_accountDb.accountEntry(
-	    itemSettings[USER].toString() + "___True");
+	    itemSettings.userName() + "___True");
 
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
@@ -2292,7 +2292,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 	}
 
 	html.append("<br>");
-	QString key = itemSettings[USER].toString() + "___True";
+	QString key = itemSettings.userName() + "___True";
 	QString info = m_accountDb.getPwdExpirFromDb(key);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
@@ -2392,7 +2392,7 @@ QString MainWindow::accountUserName(const QStandardItem *accountItem) const
 
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString userName = itemSettings[USER].toString();
+	QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 
 	return userName;
@@ -2420,7 +2420,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	/* Get user name and db location. */
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 
 	QString dbDir = itemSettings[DB_DIR].toString();
@@ -2564,8 +2564,9 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 		int topItemCount = m_accountModel.rowCount();
 		for (int i = 0; i < topItemCount; i++) {
 			const QStandardItem *item = m_accountModel.item(i,0);
-			QString user = item->data(
-			    ROLE_ACNT_CONF_SETTINGS).toMap()[USER].toString();
+			const AccountModel::SettingsMap &itemSettings =
+			    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			QString user = itemSettings.userName();
 			if (user == username) {
 				QModelIndex index = m_accountModel.
 				    indexFromItem(item);
@@ -2960,7 +2961,7 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 
 		const AccountModel::SettingsMap &itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		const QString &userName = itemSettings[USER].toString();
+		const QString userName = itemSettings.userName();
 
 		settings.beginGroup("default_account");
 		settings.setValue("username", userName);
@@ -2994,7 +2995,7 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	Q_ASSERT(0 != topItem);
 	const AccountModel::SettingsMap &itemSettings =
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
@@ -3052,7 +3053,7 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	Q_ASSERT(0 != topItem);
 	const AccountModel::SettingsMap &itemSettings =
 	    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	const QString &userName = itemSettings[USER].toString();
+	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
 	db = accountMessageDb(topItem);
 	Q_ASSERT(0 != db);
@@ -3108,7 +3109,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		Q_ASSERT(0 != itemTop);
 		const AccountModel::SettingsMap &itemSettings =
 		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		const QString &userName = itemSettings[USER].toString();
+		const QString userName = itemSettings.userName();
 		Q_ASSERT(!userName.isEmpty());
 		db = accountMessageDb(itemTop);
 		Q_ASSERT(0 != db);
@@ -3539,9 +3540,9 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 
 	/* 1 = is test account, 0 = is legal account */
 	if (itemSettings[TEST].toBool()) {
-		fileName = itemSettings[USER].toString() + "___1.db";
+		fileName = itemSettings.userName() + "___1.db";
 	} else {
-		fileName = itemSettings[USER].toString() + "___0.db";
+		fileName = itemSettings.userName() + "___0.db";
 	}
 
 	MessageDb *messageDb = accountMessageDb(item);
@@ -3553,7 +3554,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	if ("move" == action) {
 		if (m_messageDbs.moveMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -3582,7 +3583,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	} else if ("copy" == action) {
 		if (m_messageDbs.copyMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -3611,7 +3612,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	} else if ("new" == action) {
 		if (m_messageDbs.reopenMessageDb(messageDb, newDir)) {
 
-			itemSettings.setDirectory(newDir);
+			itemSettings.setDbDir(newDir);
 			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
@@ -4520,10 +4521,10 @@ void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 					    "valid message database or file "
 					    "name has wrong format.");
 				}
-				itemSettings[NAME] = accountName;
-				itemSettings[USER] = accountName;
-				itemSettings[LOGIN] = "username";
-				itemSettings[PWD] = "";
+				itemSettings.setAccountName(accountName);
+				itemSettings.setUserName(accountName);
+				itemSettings.setLoginMethod(LIM_USERNAME);
+				itemSettings.setPassword("");
 				itemSettings[REMEMBER] = false;
 				itemSettings[SYNC] = false;
 				itemSettings[DB_DIR] =
@@ -6559,7 +6560,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	isds_otp_resolution otpres = OTP_RESOLUTION_SUCCESS;
 
 	/* SMS TOTP */
-	if (accountInfo.loginMethod() == "totp") {
+	if (accountInfo.loginMethod() == LIM_TOTP) {
 
 		/* show Premium SMS request dialog */
 		QMessageBox::StandardButton reply = QMessageBox::question(this,
@@ -6731,17 +6732,17 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	/* Login method based on username and password */
-	if (accountInfo.loginMethod() == "username") {
+	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		return loginMethodUserNamePwd(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
-	} else if (accountInfo.loginMethod() == "certificate") {
+	} else if (accountInfo.loginMethod() == LIM_CERT) {
 		return loginMethodCertificateOnly(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
-	} else if (accountInfo.loginMethod() == "user_certificate") {
+	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
 		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
 		    showDialog);
@@ -6775,17 +6776,17 @@ bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap accountInfo,
 /* ========================================================================= */
 {
 	/* Login method based on username and password */
-	if (accountInfo.loginMethod() == "username") {
+	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		return loginMethodUserNamePwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
-	} else if (accountInfo.loginMethod() == "certificate") {
+	} else if (accountInfo.loginMethod() == LIM_CERT) {
 		return loginMethodCertificateOnly(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
-	} else if (accountInfo.loginMethod() == "user_certificate") {
+	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
 		return loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
 		    showDialog);

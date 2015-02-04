@@ -47,50 +47,23 @@ AccountModel::SettingsMap::SettingsMap(const QMap<QString, QVariant> &map)
 
 
 /* ========================================================================= */
-QString AccountModel::SettingsMap::accountName(void) const
+QString AccountModel::SettingsMap::dbDir(void) const
 /* ========================================================================= */
 {
-	return (*this)[NAME].toString();
+	return (*this)[DB_DIR].toString();
 }
 
 
 /* ========================================================================= */
-QString AccountModel::SettingsMap::loginMethod(void) const
+void AccountModel::SettingsMap::setDbDir(const QString &path)
 /* ========================================================================= */
 {
-	return (*this)[LOGIN].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::userName(void) const
-/* ========================================================================= */
-{
-	return (*this)[USER].toString();
-}
-
-
-/* ========================================================================= */
-QString AccountModel::SettingsMap::password(void) const
-/* ========================================================================= */
-{
-	return (*this)[PWD].toString();
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setPassword(QString &pwd)
-/* ========================================================================= */
-{
-	(*this)[PWD] = pwd;
-}
-
-
-/* ========================================================================= */
-void AccountModel::SettingsMap::setDirectory(const QString &path)
-/* ========================================================================= */
-{
-	(*this)[DB_DIR] = path;
+	if (path == globPref.confDir()) {
+		/* Default path is empty. */
+		(*this)[DB_DIR] = QString();
+	} else {
+		(*this)[DB_DIR] = path;
+	}
 }
 
 
@@ -202,6 +175,20 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 		return QStandardItemModel::data(index, role);
 		break;
 
+#if 0
+	case Qt::DecorationRole:
+		if (nodeAccountTop == nodeType(index)) {
+			SettingsMap settingsMap =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			qDebug() << "A001" << globPref.confDir();
+			if (!settingsMap.dbDir().isEmpty()) {
+				return QIcon(ICON_16x16_PATH "grey.png");
+			}
+		}
+		return QStandardItemModel::data(index, role);
+		break;
+#endif
+
 	case Qt::FontRole:
 		if (nodeAccountTop == nodeType(index)) {
 			QFont retFont;
@@ -255,14 +242,16 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			 * FIXME -- Any white-space characters trailing
 			 * the comma are lost.
 			 */
-			itemSettings.insert(NAME,
-			    settings.value(groups.at(i) + "/" + NAME,
+			itemSettings.setAccountName(
+			    settings.value(groups.at(i) + "/" + ACCOUNT_NAME,
 			        "").toStringList().join(", "));
-			itemSettings.insert(USER,
-			    settings.value(groups.at(i) + "/" + USER, ""));
-			itemSettings.insert(LOGIN,
-			    settings.value(groups.at(i) + "/" + LOGIN, ""));
-			itemSettings.insert(PWD, fromBase64(
+			itemSettings.setUserName(
+			    settings.value(groups.at(i) + "/" + USER,
+			        "").toString());
+			itemSettings.setLoginMethod(
+			    settings.value(groups.at(i) + "/" + LOGIN,
+			    "").toString());
+			itemSettings.setPassword(fromBase64(
 			    settings.value(groups.at(i) + "/" + PWD,
 			        "").toString()));
 			itemSettings.insert(TEST,
@@ -293,7 +282,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 			        "").toString());
 
 			/* Associate map with item node. */
-			addAccount(itemSettings[NAME].toString(),
+			addAccount(itemSettings[ACCOUNT_NAME].toString(),
 			    itemSettings);
 		}
 	}
@@ -317,25 +306,23 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		if (i > 0) {
 			groupName.append(QString::number(i + 1));
 		}
-//		qDebug() << this->item(i)->text() << groupName;
 		settings.beginGroup(groupName);
 
-		settings.setValue(NAME, itemSettings.value(NAME));
-		settings.setValue(USER, itemSettings.value(USER));
-		settings.setValue(LOGIN, itemSettings.value(LOGIN));
-		if (!itemSettings.value(PWD).isNull() &&
-		    itemSettings.value(PWD).isValid() &&
-		    itemSettings.value(REMEMBER).toBool() &&
-		    !itemSettings.value(PWD).toString().isEmpty()) {
+		settings.setValue(ACCOUNT_NAME, itemSettings.accountName());
+		settings.setValue(USER, itemSettings.userName());
+		settings.setValue(LOGIN, itemSettings.loginMethod());
+		if (!itemSettings.password().isEmpty()) {
 			settings.setValue(PWD,
-			    toBase64(itemSettings.value(PWD).toString()));
+			    toBase64(itemSettings.password()));
 		}
 		settings.setValue(TEST, itemSettings.value(TEST));
 		settings.setValue(REMEMBER, itemSettings.value(REMEMBER));
 		if (!itemSettings.value(DB_DIR).isNull() &&
 		    itemSettings.value(DB_DIR).isValid() &&
 		    !itemSettings.value(DB_DIR).toString().isEmpty()) {
-			settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
+			if (itemSettings.dbDir() != globPref.confDir()) {
+				settings.setValue(DB_DIR, itemSettings.value(DB_DIR));
+			}
 		}
 		if (!itemSettings.value(P12FILE).isNull() &&
 		    itemSettings.value(P12FILE).isValid() &&
@@ -358,14 +345,14 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			settings.setValue(LASTATTACH, itemSettings.value(LASTATTACH));
 		}
 
-		/* save last corresopndence exprt path */
+		/* save last correspondence export path */
 		if (!itemSettings.value(LASTCORRESP).isNull() &&
 		    itemSettings.value(LASTCORRESP).isValid() &&
 		    !itemSettings.value(LASTCORRESP).toString().isEmpty()) {
 			settings.setValue(LASTCORRESP, itemSettings.value(LASTCORRESP));
 		}
 
-		/* save last ZFO exprt path */
+		/* save last ZFO export path */
 		if (!itemSettings.value(LASTZFO).isNull() &&
 		    itemSettings.value(LASTZFO).isValid() &&
 		    !itemSettings.value(LASTZFO).toString().isEmpty()) {
