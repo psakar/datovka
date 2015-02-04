@@ -22,6 +22,7 @@
  */
 
 
+#include <QtAlgorithms> /* qSort() */
 #include <QDebug>
 #include <QRegExp>
 
@@ -134,6 +135,48 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 
 
 /* ========================================================================= */
+/*!
+ * @brief Used for sorting credentials.
+ *
+ * @param[in] s1  credentials[0-9]*
+ * @param[in] s2  credentials[0-9]*
+ * @return True if s1 comes before s2.
+ *
+ * @note The number is taken by its value rather like a string of characters.
+ * cred < cred1 < cred2 < ... < cred10 < ... < cred100 < ...
+ */
+static
+bool credentialsLessThan(const QString &s1, const QString &s2)
+/* ========================================================================= */
+{
+	QRegExp trailingNumRe("(.*[^0-9]+)*([0-9]+)");
+	QString a1, a2;
+	int n1, n2;
+	int pos;
+
+	pos = trailingNumRe.indexIn(s1);
+	if (pos > -1) {
+		a1 = trailingNumRe.cap(1);
+		n1 = trailingNumRe.cap(2).toInt();
+	} else {
+		a1 = s1;
+		n1 = -1;
+	}
+
+	pos = trailingNumRe.indexIn(s2);
+	if (pos > -1) {
+		a2 = trailingNumRe.cap(1);
+		n2 = trailingNumRe.cap(2).toInt();
+	} else {
+		a2 = s2;
+		n2 = -1;
+	}
+
+	return (a1 != a2) ? (a1 < a2) : (n1 < n2);
+}
+
+
+/* ========================================================================= */
 /*
  * Load data from supplied settings.
  */
@@ -149,61 +192,70 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 	/* Clear present rows. */
 	this->removeRows(0, this->rowCount());
 
-	/* Get all credentials. */
+	QStringList credetialList;
+	/* Get list of credentials. */
 	for (int i = 0; i < groups.size(); ++i) {
 		/* Matches regular expression. */
 		if (credRe.exactMatch(groups.at(i))) {
-			itemSettings.clear();
-			/*
-			 * String containing comma character are loaded as
-			 * a string list.
-			 *
-			 * FIXME -- Any white-space characters trailing
-			 * the comma are lost.
-			 */
-			itemSettings.setAccountName(
-			    settings.value(groups.at(i) + "/" + ACCOUNT_NAME,
-			        "").toStringList().join(", "));
-			itemSettings.setUserName(
-			    settings.value(groups.at(i) + "/" + USER,
-			        "").toString());
-			itemSettings.setLoginMethod(
-			    settings.value(groups.at(i) + "/" + LOGIN,
-			    "").toString());
-			itemSettings.setPassword(fromBase64(
-			    settings.value(groups.at(i) + "/" + PWD,
-			        "").toString()));
-			itemSettings.setTestAccount(
-			    settings.value(groups.at(i) + "/" + TEST_ACCOUNT,
-			        "").toBool());
-			itemSettings.setRememberPwd(
-			    settings.value(groups.at(i) + "/" + REMEMBER_PWD,
-			        "").toBool());
-			itemSettings.setDbDir(
-			    settings.value(groups.at(i) + "/" + DB_DIR,
-			        "").toString());
-			itemSettings.setSyncWithAll(
-			    settings.value(groups.at(i) + "/" + SYNC_WITH_ALL,
-			        "").toBool());
-			itemSettings.setP12File(
-			    settings.value(groups.at(i) + "/" + P12FILE,
-			        "").toString());
-			itemSettings.setLastMsg(
-			    settings.value(groups.at(i) + "/" + LAST_MSG_ID,
-			        "").toString());
-			itemSettings.setLastAttachPath(
-			    settings.value(groups.at(i) + "/" + LAST_ATTACH,
-			        "").toString());
-			itemSettings.setLastCorrespPath(
-			    settings.value(groups.at(i) + "/" + LAST_CORRESP,
-			        "").toString());
-			itemSettings.setLastZFOExportPath(
-			    settings.value(groups.at(i) + "/" + LAST_ZFO,
-			        "").toString());
-
-			/* Associate map with item node. */
-			addAccount(itemSettings.accountName(), itemSettings);
+			credetialList.append(groups.at(i));
 		}
+	}
+
+	/* Sort the credentials list. */
+	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
+
+	/* For all credentials. */
+	foreach(QString group, credetialList) {
+		itemSettings.clear();
+		/*
+		 * String containing comma character are loaded as
+		 * a string list.
+		 *
+		 * FIXME -- Any white-space characters trailing
+		 * the comma are lost.
+		 */
+		itemSettings.setAccountName(
+		    settings.value(group + "/" + ACCOUNT_NAME,
+		        "").toStringList().join(", "));
+		itemSettings.setUserName(
+		    settings.value(group + "/" + USER,
+		        "").toString());
+		itemSettings.setLoginMethod(
+		    settings.value(group + "/" + LOGIN,
+		    "").toString());
+		itemSettings.setPassword(fromBase64(
+		    settings.value(group + "/" + PWD,
+		        "").toString()));
+		itemSettings.setTestAccount(
+		    settings.value(group + "/" + TEST_ACCOUNT,
+		        "").toBool());
+		itemSettings.setRememberPwd(
+		    settings.value(group + "/" + REMEMBER_PWD,
+		        "").toBool());
+		itemSettings.setDbDir(
+		    settings.value(group + "/" + DB_DIR,
+		        "").toString());
+		itemSettings.setSyncWithAll(
+		    settings.value(group + "/" + SYNC_WITH_ALL,
+		        "").toBool());
+		itemSettings.setP12File(
+		    settings.value(group + "/" + P12FILE,
+		        "").toString());
+		itemSettings.setLastMsg(
+		    settings.value(group + "/" + LAST_MSG_ID,
+		        "").toString());
+		itemSettings.setLastAttachPath(
+		    settings.value(group + "/" + LAST_ATTACH,
+		        "").toString());
+		itemSettings.setLastCorrespPath(
+		    settings.value(group + "/" + LAST_CORRESP,
+		        "").toString());
+		itemSettings.setLastZFOExportPath(
+		    settings.value(group + "/" + LAST_ZFO,
+		        "").toString());
+
+		/* Associate map with item node. */
+		addAccount(itemSettings.accountName(), itemSettings);
 	}
 }
 
