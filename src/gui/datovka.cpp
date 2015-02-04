@@ -2432,11 +2432,23 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	    itemSettings[TEST].toBool(), false);
 
 	if (NULL == db) {
-		/* TODO -- Generate dialogue whether or open empty file? */
+		QString dbFilePath = m_messageDbs.constructDbFileName(userName, dbDir,
+		    itemSettings[TEST].toBool());
+		QMessageBox::warning(this,
+		    tr("Datovka: Loading database problem"),
+		    tr("Could not load data from the database "
+		        "for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Database file '%1' is missing or "
+		        "corrupted.").arg(dbFilePath) +
+		    "\n\n" +
+		    tr("I'll try to create an empty one."),
+		    QMessageBox::Ok);
 		db = m_messageDbs.accessMessageDb(userName, dbDir,
 		    itemSettings[TEST].toBool(), true);
 	}
 
+	/* TODO - removed assert */
 	Q_ASSERT(NULL != db);
 
 	return db;

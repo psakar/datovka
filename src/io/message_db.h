@@ -876,6 +876,17 @@ public:
 	bool deleteMessageDb(MessageDb *db);
 
 	/*!
+	 * @brief Creates the database name from supplied information.
+	 *
+	 * @param[in] key     ISDS user name.
+	 * @param[in] locDir  Directory where to store the file.
+	 * @param[in] testing Whether it is a testing account.
+	 * @return Path to database file.
+	 */
+	QString constructDbFileName(const QString &key, const QString &locDir,
+	    bool testing);
+
+	/*!
 	 * @brief Database driver name.
 	 */
 	static
@@ -887,19 +898,7 @@ public:
 	 * @return True if database driver is present.
 	 */
 	static
-	bool dbDriverSupport(void);
-
-private:
-	/*!
-	 * @brief Creates the database name from supplied information.
-	 *
-	 * @param[in] key     ISDS user name.
-	 * @param[in] locDir  Directory where to store the file.
-	 * @param[in] testing Whether it is a testing account.
-	 * @return Path to database file.
-	 */
-	QString constructDbFileName(const QString &key, const QString &locDir,
-	    bool testing);
+	bool dbDriverSupport(void);	
 };
 
 
