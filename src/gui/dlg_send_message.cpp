@@ -714,8 +714,14 @@ void DlgSendMessage::sendMessage(void)
 			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
 		}
 
-		document->dmMimeType = strdup(this->attachmentTableWidget->
-		    item(i, 2)->text().toStdString().c_str());
+		/* Since 2011 Mime Type can be empty and MIME type will
+		 * be filled up on the ISDS server. It allows send files
+		 * with special mime type without recognition by application.
+		*/
+		QString mimeType = "";
+		//document->dmMimeType = strdup(this->attachmentTableWidget->
+		//    item(i, 2)->text().toStdString().c_str());
+		document->dmMimeType = strdup(mimeType.toStdString().c_str());
 		if (NULL == document->dmMimeType) {
 			errorMsg = "Out of memory.";
 			goto finish;
