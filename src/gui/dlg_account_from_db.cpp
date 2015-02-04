@@ -22,31 +22,31 @@
  */
 
 
-#include "dlg_db_import.h"
+#include "dlg_account_from_db.h"
 #include "src/common.h"
 
-DbImportDialog::DbImportDialog(QWidget *parent) :
+CreateAccountFromDbDialog::CreateAccountFromDbDialog(QWidget *parent) :
     QDialog(parent)
 {
 	setupUi(this);
 	this->info->setText(tr("A new account will be created according to "
 	    "the name and the content of the database file. This account will "
 	    "operate over the selected database. Should such an account or "
-	    "database file already exist in Datovka then the import will fail."
-	    " During the import no database file copy is created nor is the "
+	    "database file already exist in Datovka then the association will fail."
+	    " During the association no database file copy is created nor is the "
 	    "content of the database file modified. Nevertheless, we strongly"
-	    " advice you to back-up all important files before importing a "
-	    "database file. In order for the import to succeed you will need "
+	    " advice you to back-up all important files before associating a "
+	    "database file. In order for the association to succeed you will need "
 	    "an active connection to the ISDS server."));
 	connect(this->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(ImportDbFilesAction()));
+	    this, SLOT(CreateAccountFromDbDialogAction()));
 }
 
-void DbImportDialog::ImportDbFilesAction(void)
+void CreateAccountFromDbDialog::CreateAccountFromDbDialogAction(void)
 {
 	if (this->directory->isChecked()) {
-		emit returnDbAction(true);
+		emit returnAction(true);
 	} else {
-		emit returnDbAction(false);
+		emit returnAction(false);
 	}
 }

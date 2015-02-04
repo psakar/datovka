@@ -27,20 +27,19 @@
 
 #include <QDialog>
 #include "src/common.h"
-#include "ui_dlg_db_import.h"
+#include "ui_dlg_account_from_db.h"
 
-class DbImportDialog : public QDialog, public Ui::DbImport
+class CreateAccountFromDbDialog : public QDialog, public Ui::CreateAccountFromDb
 {
 	Q_OBJECT
 
 public:
-	DbImportDialog(QWidget *parent = 0);
+	CreateAccountFromDbDialog(QWidget *parent = 0);
 signals:
-	void returnDbAction(bool);
+	void returnAction(bool);
 
 private slots:
-	void ImportDbFilesAction(void);
+	void CreateAccountFromDbDialogAction(void);
 };
-
 
 #endif // DLG_DB_IMPORT_H

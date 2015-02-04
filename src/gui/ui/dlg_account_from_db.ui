@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DbImport</class>
- <widget class="QDialog" name="DbImport">
+ <class>CreateAccountFromDb</class>
+ <widget class="QDialog" name="CreateAccountFromDb">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>286</height>
+    <width>412</width>
+    <height>306</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Import database</string>
+   <string>Create account form database file</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -24,7 +24,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>How do you want to import?</string>
+      <string>What do you want to create the account(s) from?</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -64,7 +64,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DbImport</receiver>
+   <receiver>CreateAccountFromDb</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -80,7 +80,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DbImport</receiver>
+   <receiver>CreateAccountFromDb</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

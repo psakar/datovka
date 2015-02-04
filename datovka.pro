@@ -254,9 +254,9 @@ SOURCES += src/common.cpp \
     src/gui/dlg_signature_detail.cpp \
     src/gui/dlg_change_directory.cpp \
     src/gui/dlg_correspondence_overview.cpp \
-    src/gui/dlg_db_import.cpp \
     src/gui/dlg_import_zfo.cpp \
-    src/gui/dlg_import_zfo_result.cpp
+    src/gui/dlg_import_zfo_result.cpp \
+    src/gui/dlg_account_from_db.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
@@ -288,9 +288,9 @@ HEADERS += src/common.h \
     src/gui/dlg_signature_detail.h \
     src/gui/dlg_change_directory.h \
     src/gui/dlg_correspondence_overview.h \
-    src/gui/dlg_db_import.h \
     src/gui/dlg_import_zfo.h \
-    src/gui/dlg_import_zfo_result.h
+    src/gui/dlg_import_zfo_result.h \
+    src/gui/dlg_account_from_db.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \
@@ -305,9 +305,9 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_signature_detail.ui \
     src/gui/ui/dlg_change_directory.ui \
     src/gui/ui/dlg_correspondence_overview.ui \
-    src/gui/ui/dlg_db_import.ui \
     src/gui/ui/dlg_import_zfo.ui \
-    src/gui/ui/dlg_import_zfo_result.ui
+    src/gui/ui/dlg_import_zfo_result.ui \
+    src/gui/ui/dlg_account_from_db.ui
 
 RESOURCES += \
     res/resources.qrc

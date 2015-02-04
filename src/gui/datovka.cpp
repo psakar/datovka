@@ -45,7 +45,7 @@
 #include "src/common.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
-#include "src/gui/dlg_db_import.h"
+#include "src/gui/dlg_account_from_db.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
@@ -4385,11 +4385,11 @@ void MainWindow::aboutApplication(void)
 void MainWindow::showImportDatabaseDialog(void)
 /* ========================================================================= */
 {
-	QDialog *dbImport = new DbImportDialog(this);
-	connect(dbImport,
-	    SIGNAL(returnDbAction(bool)), this,
-	    SLOT(prepareImportDatabase(bool)));
-	dbImport->exec();
+	QDialog *prepareCreateAccount = new CreateAccountFromDbDialog(this);
+	connect(prepareCreateAccount,
+	    SIGNAL(returnAction(bool)), this,
+	    SLOT(prepareCreateAccountFromDatabaseFile(bool)));
+	prepareCreateAccount->exec();
 }
 
 
@@ -4397,7 +4397,7 @@ void MainWindow::showImportDatabaseDialog(void)
 /*
  * Prepare import database directory.
  */
-void MainWindow::prepareImportDatabase(bool fromDirectory)
+void MainWindow::prepareCreateAccountFromDatabaseFile(bool fromDirectory)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -4450,15 +4450,15 @@ void MainWindow::prepareImportDatabase(bool fromDirectory)
 		    QFileInfo(filePathList.at(0)).absoluteDir().absolutePath();
 	}
 
-	importDatabaseFileList(filePathList);
+	createAccountFromDatabaseFileList(filePathList);
 }
 
 
 /* ========================================================================= */
 /*
- * Import list of database directory to application
+ * Create accounts from list of database directory to application
  */
-void MainWindow::importDatabaseFileList(QStringList filePathList)
+void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
 /* ========================================================================= */
 {
 
@@ -4471,9 +4471,6 @@ void MainWindow::importDatabaseFileList(QStringList filePathList)
 	}
 
 	QPair<QString,QString> importDBinfo;
-	QList<QPair<QString,QString>> importDBinfoList;
-	importDBinfoList.clear();
-
 	QStringList fileNameParts;
 	QString accountName;
 
@@ -4489,85 +4486,59 @@ void MainWindow::importDatabaseFileList(QStringList filePathList)
 	}
 
 	for (int i = 0; i < filePathList.size(); ++i) {
+		importDBinfo.first = filePathList.at(i);
 		QString file = QFileInfo(filePathList.at(i)).fileName();
 		if (file.contains("___")) {
 			fileNameParts = file.split("___");
 			accountName = fileNameParts[0];
 			fileNameParts = fileNameParts[1].split(".");
-			/* database is test account */
-			if (fileNameParts[0] == "1") {
-				bool exists = false;
-				for (int j = 0; j < accountCount; ++j) {
-					if (currentAccountList.at(j) == accountName) {
-						exists = true;
-						break;
-					}
+
+			bool exists = false;
+			for (int j = 0; j < accountCount; ++j) {
+				if (currentAccountList.at(j) == accountName) {
+					exists = true;
+					break;
 				}
+			}
 
-				if (exists) {
-					importDBinfo.first = filePathList.at(i);
-					importDBinfo.second = tr("Account and "
-					"message database with username \"%1\""
-					" already exist. You have to remove "
-					"this account before database import.").
-					arg(accountName);
-				} else {
-					itemSettings[NAME] = accountName;
-					itemSettings[USER] = accountName;
-					itemSettings[LOGIN] = "username";
-					itemSettings[PWD] = "";
-					itemSettings[REMEMBER] = true;
-					itemSettings[TEST] = true;
-					itemSettings[SYNC] = true;
-					itemSettings[DB_DIR] = m_on_import_database_dir_activate;
-					m_accountModel.addAccount(accountName, itemSettings);
-					importDBinfo.first = filePathList.at(i);
-					importDBinfo.second = tr("This file has been "
-					    "set as actual message database. "
-					    "It is test account with username"
-					    " \"%1\".").arg(accountName);
-				}
-
-			/* database is legal account */
-			} else if (fileNameParts[0] == "0") {
-
-				bool exists = false;
-				for (int j = 0; j < accountCount; ++j) {
-					if (currentAccountList.at(j) == accountName) {
-						exists = true;
-						break;
-					}
-				}
-
-				if (exists) {
-					importDBinfo.first = filePathList.at(i);
-					importDBinfo.second = tr("Account and "
-					"message database with username \"%1\""
-					" already exist. You have to remove "
-					"this account before database import.").
-					arg(accountName);
-				} else {
-					itemSettings[NAME] = accountName;
-					itemSettings[USER] = accountName;
-					itemSettings[LOGIN] = "username";
-					itemSettings[PWD] = "";
-					itemSettings[REMEMBER] = true;
-					itemSettings[TEST] = false;
-					itemSettings[SYNC] = true;
-					itemSettings[DB_DIR] = m_on_import_database_dir_activate;
-					m_accountModel.addAccount(accountName, itemSettings);
-					importDBinfo.first = filePathList.at(i);
-					importDBinfo.second = tr("This file has been "
-					    "set as actual message database. "
-					    "It is legal account with username"
-					    " \"%1\".").arg(accountName);
-				}
-
+			if (exists) {
+				importDBinfo.second =
+				    tr("Account with username '%1' and "
+				    "its message database already exist. "
+				    "New account was not created and "
+				    "selected database file was not "
+				    "associated with this account.").
+				    arg(accountName);
 			} else {
-				importDBinfo.first = filePathList.at(i);
-				importDBinfo.second = tr("This file does not "
-				"contain a valid message database or file "
-				"name has wrong format.");
+				if (fileNameParts[0] == "1") {
+					itemSettings[TEST] = true;
+				} else if (fileNameParts[0] == "0") {
+					itemSettings[TEST] = false;
+				} else {
+					importDBinfo.second =
+					    tr("This file does not contain a "
+					    "valid message database or file "
+					    "name has wrong format.");
+				}
+				itemSettings[NAME] = accountName;
+				itemSettings[USER] = accountName;
+				itemSettings[LOGIN] = "username";
+				itemSettings[PWD] = "";
+				itemSettings[REMEMBER] = false;
+				itemSettings[SYNC] = false;
+				itemSettings[DB_DIR] =
+				    m_on_import_database_dir_activate;
+				m_accountModel.addAccount(accountName,
+				    itemSettings);
+				importDBinfo.second =
+				    tr("Account with name '%1' has been "
+				    "created (username '%1').").arg(accountName)
+				    + " " +
+				    tr("This database file has been set as "
+				    "actual message database for this account. "
+				    "Maybe you have to change account "
+				    "properties for correct login to the "
+				    "server Datové schránky.");
 			}
 		} else {
 			importDBinfo.first = filePathList.at(i);
@@ -4575,24 +4546,13 @@ void MainWindow::importDatabaseFileList(QStringList filePathList)
 			    " valid message database or file name has wrong "
 			    "format.");
 		}
-		importDBinfoList.append(importDBinfo);
+
+		QMessageBox::information(this,
+		    tr("Create account: %1").arg(accountName),
+		    tr("File") + ": " + importDBinfo.first +
+		    "\n\n" + importDBinfo.second,
+		    QMessageBox::Ok);
 	}
-
-	QString results = "";
-
-	for (int i = 0; i < importDBinfoList.size(); i++ ) {
-		results += "<b>" + importDBinfoList.at(i).first + "</b><br/>"
-		    + importDBinfoList.at(i).second + "<br/><br/>";
-	}
-
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setWindowTitle(tr("Import database directory"));
-	msgBox.setText(tr("Import of database directories finished with this result:"));
-	msgBox.setInformativeText(results);
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.exec();
 
 	saveSettings();
 	activeAccountMenuAndButtons(true);

@@ -259,7 +259,7 @@ private slots:
 	/*!
 	 * @brief Prepare import database directory.
 	 */
-	void prepareImportDatabase(bool fromDirectory);
+	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
 
 	/*!
 	 * @brief Proxy setting dialog.
@@ -763,7 +763,7 @@ private:
 	/*!
 	 * @brief Sent and check a new version of Datovka.
 	 */
-	void importDatabaseFileList(QStringList filePathList);
+	void createAccountFromDatabaseFileList(QStringList filePathList);
 
 	/*!
 	 * @brief Download complete message synchronously

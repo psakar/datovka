@@ -655,7 +655,7 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/address_16.png</normaloff>:/icons/3party/address_16.png</iconset>
    </property>
    <property name="text">
-    <string>Import database directory</string>
+    <string>Create account from database</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
