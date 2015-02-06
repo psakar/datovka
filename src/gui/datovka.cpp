@@ -3322,8 +3322,10 @@ void MainWindow::deleteSelectedAccount(void)
 	QString questionText = tr("Do you want to remove account") + " '" +
 	    itemTop->text() + "' (" + userName + ")?";
 	QString checkBoxText = tr("Delete also message database from storage");
-	QString detailText = tr("Warning: If you delete message database file "
-	    "then all message will be lost forever.");
+	QString detailText = tr(
+	    "Warning: If you delete the message database then all locally "
+	    "accessible messages that are not stored on the ISDS server "
+	    "will be lost.");
 
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
 	    questionText, checkBoxText, detailText, this);
