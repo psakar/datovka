@@ -192,14 +192,9 @@ private slots:
 	void accountItemMarkAllRead(void);
 
 	/*!
-	 * @brief Delete selected message from local database.
+	 * @brief Delete selected message(s) from local database and ISDS.
 	 */
-	void deleteMessageFromLocalDatabase(void);
-
-	/*!
-	 * @brief Delete selected message from local database and ISDS.
-	 */
-	void deleteMessageFromLocalDbAndIsds(void);
+	void deleteMessage(void);
 
 	/*!
 	 * @brief Downloads new messages from server for all accounts.

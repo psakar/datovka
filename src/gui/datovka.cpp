@@ -1010,10 +1010,6 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(verifyMessage()));
 		menu->addSeparator();
 		menu->addAction(
-		    tr("Export message as ZFO"), this,
-		    SLOT(exportSelectedMessageAsZFO()))->
-		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
-		menu->addAction(
 		    tr("Open message externally"), this,
 		    SLOT(openSelectedMessageExternally()))->
 		    setEnabled(ui->actionOpen_message_externally->isEnabled());
@@ -1022,6 +1018,11 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(openDeliveryInfoExternally()))->
 		    setEnabled(ui->actionOpen_delivery_info_externally->
 		    isEnabled());
+		menu->addSeparator();
+		menu->addAction(
+		    tr("Export message as ZFO"), this,
+		    SLOT(exportSelectedMessageAsZFO()))->
+		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
 		menu->addAction(
 		    tr("Export delivery info as ZFO"), this,
 		    SLOT(exportDeliveryInfoAsZFO()))->
@@ -1040,14 +1041,9 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Delete message from local database"), this,
-		    SLOT(deleteMessageFromLocalDatabase()))->
+		    tr("Delete message"), this,
+		    SLOT(deleteMessage()))->
 		    setEnabled(ui->actionDelete_message_from_db->isEnabled());
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Delete message from server and local database"), this,
-		    SLOT(deleteMessageFromLocalDbAndIsds()))->
-		    setEnabled(ui->actionDelete_message_from_server->isEnabled());
 		menu->exec(QCursor::pos());
 	}
 }
@@ -1846,76 +1842,69 @@ void MainWindow::accountItemMarkAllRead(void)
 /*
  * Delete selected message from local database and ISDS.
  */
-void MainWindow::deleteMessageFromLocalDbAndIsds(void)
+void MainWindow::deleteMessage(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this,
-	    tr("Delete message"),
-	    tr("Do you want to delete message \"%1\" from "
-	         "server Datové schránky and local database?").arg(dmId),
-	    QMessageBox::Yes | QMessageBox::No);
-
-	/* Save current index. */
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-
-	if (reply == QMessageBox::Yes) {
-		switch (eraseMessage(acntTopIdx, dmId, true)) {
-		case Q_SUCCESS:
-			/*
-			 * Hiding selected line in the message model actually
-			 * does not help. The model contains all the old data
-			 * and causes problems. Therefore the model must be
-			 * regenerated.
-			 */
-			if (selectedAcntIndex.isValid()) {
-				accountItemSelectionChanged(selectedAcntIndex);
-			}
-			/*
-			 * TODO -- Remove the year on account list if last
-			 * message was removed.
-			 */
-			break;
-		default:
-			break;
-		}
+	if (!acntTopIdx.isValid()) {
+		return;
 	}
-}
 
+	QModelIndexList msgIdxList =
+	    ui->messageList->selectionModel()->selectedRows();
 
-/* ========================================================================= */
-/*
- * Delete selected message from local database.
- */
-void MainWindow::deleteMessageFromLocalDatabase(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
+	if (msgIdxList.isEmpty()) {
+		return;
+	}
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+	QString dlgTitleText, questionText, checkBoxText, detailText, dmId;
 
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this,
-	    tr("Delete message"),
-	    tr("Do you want to delete message \"%1\" from "
-	         "local database?").arg(dmId),
-	    QMessageBox::Yes | QMessageBox::No);
+	int msgIdxCnt = msgIdxList.size();
+	if (msgIdxCnt == 1) {
+		dmId = msgIdxList.at(0).sibling(
+		    msgIdxList.at(0).row(), 0).data().toString();
+		dlgTitleText = tr("Delete message %1").arg(dmId);
+		questionText = tr("Do you want to delete "
+		    "message '%1'?").arg(dmId);
+		checkBoxText = tr("Delete this message also from server ISDS");
+		detailText = tr("Warning: If you delete the message "
+		    "from ISDS then this message will be lost forever.");
+	} else {
+		dlgTitleText = tr("Delete messages");
+		questionText = tr("Do you want to delete selected messages?");
+		checkBoxText =tr("Delete these messages also from server ISDS");
+		detailText = tr("Warning: If you delete selected messages from "
+		"ISDS then these message will be lost forever.");
+	}
 
-	/* Save current index. */
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	    questionText, checkBoxText, detailText, this);
+	int retVal = yesNoCheckDlg->exec();
+	bool delMsgIsds = false;
 
-	if (reply == QMessageBox::Yes) {
-		switch (eraseMessage(acntTopIdx, dmId, false)) {
+	if (retVal == YesNoCheckboxDialog::YesChecked) {
+		/* Delete message(s) in the local db and ISDS */
+		delMsgIsds = true;
+	} else if (retVal == YesNoCheckboxDialog::YesUnchecked) {
+		/* Delete message(s) only local */
+		delMsgIsds = false;
+	} else {
+		/* Cancel delete action */
+		return;
+	}
+
+	for (int i = 0; i < msgIdxCnt; i++) {
+		dmId = msgIdxList.at(i).sibling(
+		    msgIdxList.at(i).row(), 0).data().toString();
+
+		/* Save current account index */
+		QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+
+		switch (eraseMessage(acntTopIdx, dmId, delMsgIsds)) {
 		case Q_SUCCESS:
 			/*
 			 * Hiding selected line in the message model actually
@@ -2671,9 +2660,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
-	    SLOT(deleteMessageFromLocalDatabase()));
-	connect(ui->actionDelete_message_from_server, SIGNAL(triggered()), this,
-	    SLOT(deleteMessageFromLocalDbAndIsds()));
+	    SLOT(deleteMessage()));
 
 	/* Tools. */
 	connect(ui->actionFind_databox, SIGNAL(triggered()), this,

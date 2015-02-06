@@ -3465,7 +3465,7 @@ bool MessageDb::msgsDeleteMessageData(int dmId) const
 		goto fail;
 	}
 
-	Q_ASSERT(-1 != certificateId);
+	//Q_ASSERT(-1 != certificateId);
 
 	/* Delete certificate reference from message_certificate_data table. */
 	queryStr = "DELETE FROM message_certificate_data WHERE "
