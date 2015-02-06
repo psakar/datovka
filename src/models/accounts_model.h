@@ -44,8 +44,9 @@
 #define SYNC_WITH_ALL "sync_with_all"
 #define P12FILE "p12file"
 #define LAST_MSG_ID "last_message_id"
-#define LAST_ATTACH "last_attach_path"
-#define LAST_CORRESP "last_export_corresp_path"
+#define LAST_SAVE_ATTACH "last_save_attach_path"
+#define LAST_ADD_ATTACH "last_add_attach_path"
+#define LAST_CORRESPOND "last_export_corresp_path"
 #define LAST_ZFO "last_export_zfo_path"
 
 
@@ -150,21 +151,29 @@ public:
 		{
 			(*this)[LAST_MSG_ID] = dmId;
 		}
-		inline QString lastAttachPath(void) const
+		inline QString lastAttachSavePath(void) const
 		{
-			return (*this)[LAST_ATTACH].toString();
+			return (*this)[LAST_SAVE_ATTACH].toString();
 		}
-		inline void setLastAttachPath(const QString &path)
+		inline void setLastAttachSavePath(const QString &path)
 		{
-			(*this)[LAST_ATTACH] = path;
+			(*this)[LAST_SAVE_ATTACH] = path;
+		}
+		inline QString lastAttachAddPath(void) const
+		{
+			return (*this)[LAST_ADD_ATTACH].toString();
+		}
+		inline void setLastAttachAddPath(const QString &path)
+		{
+			(*this)[LAST_ADD_ATTACH] = path;
 		}
 		inline QString lastCorrespPath(void) const
 		{
-			return (*this)[LAST_CORRESP].toString();
+			return (*this)[LAST_CORRESPOND].toString();
 		}
 		inline void setLastCorrespPath(const QString &path)
 		{
-			(*this)[LAST_CORRESP] = path;
+			(*this)[LAST_CORRESPOND] = path;
 		}
 		inline QString lastZFOExportPath(void) const
 		{

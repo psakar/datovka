@@ -59,6 +59,7 @@ public:
 	    QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QString &lastAttAddPath,
 	    QWidget *parent = 0,
 	    const QString &reSubject = QString(),
 	    const QString &senderId = QString(),
@@ -96,6 +97,7 @@ private:
 	QString m_dbType;
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
+	QString &m_lastAttAddPath;
 	QString m_reSubject;
 	QString m_senderId;
 	QString m_sender;

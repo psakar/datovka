@@ -244,11 +244,14 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 		itemSettings.setLastMsg(
 		    settings.value(group + "/" + LAST_MSG_ID,
 		        "").toString());
-		itemSettings.setLastAttachPath(
-		    settings.value(group + "/" + LAST_ATTACH,
+		itemSettings.setLastAttachSavePath(
+		    settings.value(group + "/" + LAST_SAVE_ATTACH,
+		        "").toString());
+		itemSettings.setLastAttachAddPath(
+		    settings.value(group + "/" + LAST_ADD_ATTACH,
 		        "").toString());
 		itemSettings.setLastCorrespPath(
-		    settings.value(group + "/" + LAST_CORRESP,
+		    settings.value(group + "/" + LAST_CORRESPOND,
 		        "").toString());
 		itemSettings.setLastZFOExportPath(
 		    settings.value(group + "/" + LAST_ZFO,
@@ -304,15 +307,21 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
 		}
 
-		/* Save last attachments path. */
-		if (!itemSettings.lastAttachPath().isEmpty()) {
-			settings.setValue(LAST_ATTACH,
-			    itemSettings.lastAttachPath());
+		/* Save last attachments save path. */
+		if (!itemSettings.lastAttachSavePath().isEmpty()) {
+			settings.setValue(LAST_SAVE_ATTACH,
+			    itemSettings.lastAttachSavePath());
+		}
+
+		/* Save last attachments add path. */
+		if (!itemSettings.lastAttachAddPath().isEmpty()) {
+			settings.setValue(LAST_ADD_ATTACH,
+			    itemSettings.lastAttachAddPath());
 		}
 
 		/* Save last correspondence export path. */
 		if (!itemSettings.lastCorrespPath().isEmpty()) {
-			settings.setValue(LAST_CORRESP,
+			settings.setValue(LAST_CORRESPOND,
 			    itemSettings.lastCorrespPath());
 		}
 

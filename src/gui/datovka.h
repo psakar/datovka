@@ -794,6 +794,7 @@ private:
 	int m_sort_column;
 	QString m_sort_order;
 	QString m_save_attach_dir;
+	QString m_add_attach_dir;
 	QString m_export_correspond_dir;
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;

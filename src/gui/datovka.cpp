@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_sort_column(0),
     m_sort_order(""),
     m_save_attach_dir(QDir::homePath()),
+    m_add_attach_dir(QDir::homePath()),
     m_export_correspond_dir(QDir::homePath()),
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
@@ -1099,7 +1100,8 @@ void MainWindow::storeExportPath(void)
 	acntIdx = AccountModel::indexTop(acntIdx);
 	AccountModel::SettingsMap accountInfo =
 	    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	accountInfo.setLastAttachPath(m_save_attach_dir);
+	accountInfo.setLastAttachSavePath(m_save_attach_dir);
+	accountInfo.setLastAttachAddPath(m_add_attach_dir);
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
 	accountInfo.setLastZFOExportPath(m_on_export_zfo_activate);
 	ui->accountList->model()->setData(acntIdx, accountInfo,
@@ -2468,8 +2470,11 @@ void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
 	const AccountModel::SettingsMap &itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	if (!itemSettings.lastAttachPath().isEmpty()) {
-		m_save_attach_dir = itemSettings.lastAttachPath();
+	if (!itemSettings.lastAttachSavePath().isEmpty()) {
+		m_save_attach_dir = itemSettings.lastAttachSavePath();
+	}
+	if (!itemSettings.lastAttachAddPath().isEmpty()) {
+		m_add_attach_dir = itemSettings.lastAttachAddPath();
 	}
 	if (!itemSettings.lastCorrespPath().isEmpty()) {
 		m_export_correspond_dir = itemSettings.lastCorrespPath();
@@ -3225,13 +3230,17 @@ void MainWindow::createAndSendMessage(void)
 
 	showStatusTextWithTimeout(tr("Create and send a new message."));
 
+	AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString lastAttachAddPath = accountInfo.lastAttachAddPath();
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
-	    dbType, dbEffectiveOVM, dbOpenAddressing, this);
+	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
+	    lastAttachAddPath, this);
+
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		const AccountModel::SettingsMap accountInfo =
-		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		m_add_attach_dir = lastAttachAddPath;
+		storeExportPath();
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
@@ -3246,6 +3255,9 @@ void MainWindow::createAndSendMessage(void)
 		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
+	} else {
+		m_add_attach_dir = lastAttachAddPath;
+		storeExportPath();
 	}
 
 	setDefaultProgressStatus();
@@ -3700,18 +3712,20 @@ void MainWindow::createAndSendMessageReply(void)
 
 	showStatusTextWithTimeout(tr("Create and send reply on the message."));
 
+	AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString lastAttachAddPath = accountInfo.lastAttachAddPath();
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
-	    dbType, dbEffectiveOVM, dbOpenAddressing, this,
-	    replyTo[0], replyTo[1], replyTo[2], replyTo[3], replyTo[4], replyTo[5]);
+	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
+	    lastAttachAddPath, this, replyTo[0], replyTo[1], replyTo[2],
+	    replyTo[3], replyTo[4], replyTo[5]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		const AccountModel::SettingsMap accountInfo =
-		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
+		m_add_attach_dir = lastAttachAddPath;
+		storeExportPath();
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
-
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
@@ -3723,6 +3737,9 @@ void MainWindow::createAndSendMessageReply(void)
 		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
+	} else {
+		m_add_attach_dir = lastAttachAddPath;
+		storeExportPath();
 	}
 	setDefaultProgressStatus();
 }

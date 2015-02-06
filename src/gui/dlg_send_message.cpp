@@ -24,6 +24,7 @@
 
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QDir>
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
@@ -40,6 +41,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     QTreeView &accountList, QTableView &messageList,
     const AccountModel::SettingsMap &accountInfo,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
+    QString &lastAttAddPath,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
     const QString &senderAddress, const QString &dmType,
@@ -54,6 +56,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
+    m_lastAttAddPath(lastAttAddPath),
     m_reSubject(reSubject),
     m_senderId(senderId),
     m_sender(sender),
@@ -318,12 +321,14 @@ void DlgSendMessage::addAttachmentFile(void)
 /* ========================================================================= */
 {
 	QFileDialog dialog(this);
-	dialog.setDirectory(QDir::homePath());
+
+	dialog.setDirectory(m_lastAttAddPath);
 	dialog.setFileMode(QFileDialog::ExistingFiles);
 	QStringList fileNames;
 
 	if (dialog.exec()) {
 		fileNames = dialog.selectedFiles();
+		m_lastAttAddPath = dialog.directory().absolutePath();
 	}
 
 	for (int i = 0; i < fileNames.count(); ++i) {
