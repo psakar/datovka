@@ -57,6 +57,7 @@
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_import_zfo_result.h"
+#include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -3309,40 +3310,55 @@ void MainWindow::deleteSelectedAccount(void)
 		return;
 	}
 
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(this,
-	    tr("Remove account ") + itemTop->text(),
-	    tr("Do you want to remove account") +  " '" + itemTop->text() +
-	    "'?",
-	    QMessageBox::Yes | QMessageBox::No);
+	QString userName = accountUserName();
+	MessageDb *db = accountMessageDb(itemTop);
+	Q_ASSERT(0 != db);
 
-	if (reply == QMessageBox::Yes) {
+	const AccountModel::SettingsMap &itemSettings =
+	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString accountName = itemSettings.accountName();
 
-		QString userName = accountUserName();
-		const AccountModel::SettingsMap &itemSettings =
-		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString dlgTitleText = tr("Remove account ") + itemTop->text();
+	QString questionText = tr("Do you want to remove account") + " '" +
+	    itemTop->text() + "' (" + userName + ")?";
+	QString checkBoxText = tr("Delete also message database from storage");
+	QString detailText = tr("Warning: If you delete message database file "
+	    "then all message will be lost forever.");
 
-		QString accountName = itemSettings.accountName();
+	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	    questionText, checkBoxText, detailText, this);
+	int retVal = yesNoCheckDlg->exec();
 
-		MessageDb *db;
-		db = accountMessageDb(itemTop);
-		Q_ASSERT(0 != db);
-
+	switch (retVal) {
+	case YesNoCheckboxDialog::YesChecked:
+		/* Delete account and its message db */
 		if (itemTop->hasChildren()) {
 			itemTop->removeRows(0, itemTop->rowCount());
 		}
 		m_accountDb.deleteAccountInfo(userName + "___True");
-
 		ui->accountList->model()->removeRow(currentTopRow);
-
-		/* Delete message db from disk. */
-		m_messageDbs.deleteMessageDb(db);
-
-		showStatusTextWithTimeout(tr("Account \"%1\" was deleted.")
-		    .arg(accountName));
-
-		/* Save changed configuration. */
+		if (m_messageDbs.deleteMessageDb(db)) {
+			showStatusTextWithTimeout(tr("Account '%1' was deleted "
+			    "together with message database file.").arg(accountName));
+		} else {
+			showStatusTextWithTimeout(tr("Account '%1' was deleted "
+			    "but its message database file .").arg(accountName));
+		}
 		saveSettings();
+		break;
+	case YesNoCheckboxDialog::YesUnchecked:
+		/* Delete account and remove its items from the treeview */
+		if (itemTop->hasChildren()) {
+			itemTop->removeRows(0, itemTop->rowCount());
+		}
+		m_accountDb.deleteAccountInfo(userName + "___True");
+		ui->accountList->model()->removeRow(currentTopRow);
+		showStatusTextWithTimeout(tr("Account '%1' was deleted.")
+		    .arg(accountName));
+		saveSettings();
+		break;
+	default:
+		break;
 	}
 
 	if (ui->accountList->model()->rowCount() < 1) {
