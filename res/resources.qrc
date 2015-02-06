@@ -111,5 +111,6 @@
         <file>icons/32x32/datovka-message-verify.png</file>
         <file>icons/32x32/datovka-ok.png</file>
         <file>icons/32x32/datovka-stock-keyring.png</file>
+        <file>icons/48x48/datovka-question.png</file>
     </qresource>
 </RCC>

@@ -256,7 +256,8 @@ SOURCES += src/common.cpp \
     src/gui/dlg_correspondence_overview.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
-    src/gui/dlg_account_from_db.cpp
+    src/gui/dlg_account_from_db.cpp \
+    src/gui/dlg_yes_no_checkbox.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
@@ -290,7 +291,8 @@ HEADERS += src/common.h \
     src/gui/dlg_correspondence_overview.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
-    src/gui/dlg_account_from_db.h
+    src/gui/dlg_account_from_db.h \
+    src/gui/dlg_yes_no_checkbox.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \
@@ -307,7 +309,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_correspondence_overview.ui \
     src/gui/ui/dlg_import_zfo.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
-    src/gui/ui/dlg_account_from_db.ui
+    src/gui/ui/dlg_account_from_db.ui \
+    src/gui/ui/dlg_yes_no_checkbox.ui
 
 RESOURCES += \
     res/resources.qrc
