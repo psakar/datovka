@@ -1632,9 +1632,11 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 	QSqlQuery query(m_db);
 
 	QString queryStr = "SELECT DISTINCT "
-	    "dbIDRecipient, dmRecipient, dmRecipientAddress FROM messages "
-	    "UNION SELECT DISTINCT dbIDSender, dmSender, dmSenderAddress "
-	    "FROM messages";
+	    "dbIDRecipient, dmRecipient, dmRecipientAddress "
+	    "FROM messages GROUP BY dbIDRecipient "
+	    "UNION SELECT DISTINCT "
+	    "dbIDSender, dmSender, dmSenderAddress "
+	    "FROM messages GROUP BY dbIDSender";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
