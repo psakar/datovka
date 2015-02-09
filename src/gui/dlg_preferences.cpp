@@ -21,10 +21,10 @@
  * the two.
  */
 
+#include <QFileDialog>
 
 #include "dlg_preferences.h"
 #include "ui_dlg_preferences.h"
-
 
 DlgPreferences::DlgPreferences(QWidget * parent)
     : QDialog(parent)
@@ -36,37 +36,56 @@ DlgPreferences::DlgPreferences(QWidget * parent)
 void DlgPreferences::initPrefDialog(void)
 {
 	this->download_at_start->setChecked(globPref.download_at_start);
-	this->auto_download_whole_messages->setChecked(globPref.auto_download_whole_messages);
-	this->download_on_background->setChecked(globPref.download_on_background);
+	this->auto_download_whole_messages->
+	    setChecked(globPref.auto_download_whole_messages);
+	this->download_on_background->
+	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
-//	this->send_stats_with_version_checks->setChecked(globPref.send_stats_with_version_checks);
 	this->check_new_versions->setChecked(globPref.check_new_versions);
-	this->store_messages_on_disk->setChecked(globPref.store_messages_on_disk);
-	this->store_additional_data_on_disk->setChecked(globPref.store_additional_data_on_disk);
+	this->store_messages_on_disk->
+	    setChecked(globPref.store_messages_on_disk);
+	this->store_additional_data_on_disk->
+	    setChecked(globPref.store_additional_data_on_disk);
 	this->check_crl->setChecked(globPref.check_crl);
 	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
+	this->timerLabelPre->
+	    setEnabled(this->download_on_background->isChecked());
+	this->timerLabelPost->
+	    setEnabled(this->download_on_background->isChecked());
+	this->timerSpinBox->
+	    setEnabled(this->download_on_background->isChecked());
+	this->enableGlobalPaths->setChecked(globPref.use_global_paths);
+	this->savePath->setText(globPref.save_attachments_path);
+	this->addFilePath->setText(globPref.add_file_to_attachments_path);
+
 	/* TODO - this choice must be disabled */
-//	this->send_stats_with_version_checks->setEnabled(this->check_new_versions->isChecked());
-	this->timerLabelPre->setEnabled(this->download_on_background->isChecked());
-	this->timerLabelPost->setEnabled(this->download_on_background->isChecked());
-	this->timerSpinBox->setEnabled(this->download_on_background->isChecked());
+//	this->send_stats_with_version_checks->
+//	    setChecked(globPref.send_stats_with_version_checks);
+//	this->send_stats_with_version_checks->
+//	    setEnabled(this->check_new_versions->isChecked());
 
 	connect(this->check_new_versions, SIGNAL(stateChanged(int)),
 	    this, SLOT(setActiveCheckBox(int)));
 	connect(this->download_on_background, SIGNAL(stateChanged(int)),
 	    this, SLOT(setActiveTimerSetup(int)));
-
-	connect(this->prefButtonBox, SIGNAL(accepted()), this, SLOT(saveChanges(void)));
+	connect(this->savePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setSavePath()));
+	connect(this->addFilePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setAddFilePath()));
+	connect(this->prefButtonBox, SIGNAL(accepted()),
+	    this, SLOT(saveChanges(void)));
 
 	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
 		this->after_start_select_1->setChecked(true);
 		this->after_start_select_2->setChecked(false);
 		this->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_LAST_VISITED == globPref.after_start_select) {
+	} else if (GlobPreferences::SELECT_LAST_VISITED ==
+	   globPref.after_start_select) {
 		this->after_start_select_1->setChecked(false);
 		this->after_start_select_2->setChecked(true);
 		this->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_NOTHING == globPref.after_start_select) {
+	} else if (GlobPreferences::SELECT_NOTHING ==
+	    globPref.after_start_select) {
 		this->after_start_select_1->setChecked(false);
 		this->after_start_select_2->setChecked(false);
 		this->after_start_select_3->setChecked(true);
@@ -74,10 +93,12 @@ void DlgPreferences::initPrefDialog(void)
 		Q_ASSERT(0);
 	}
 
-	if (GlobPreferences::DOWNLOAD_DATE == globPref.certificate_validation_date) {
+	if (GlobPreferences::DOWNLOAD_DATE ==
+	    globPref.certificate_validation_date) {
 		this->certificate_validation_date_1->setChecked(true);
 		this->certificate_validation_date_2->setChecked(false);
-	} else if (GlobPreferences::CURRENT_DATE == globPref.certificate_validation_date) {
+	} else if (GlobPreferences::CURRENT_DATE ==
+	    globPref.certificate_validation_date) {
 		this->certificate_validation_date_1->setChecked(false);
 		this->certificate_validation_date_2->setChecked(true);
 	} else {
@@ -133,6 +154,24 @@ void DlgPreferences::setActiveCheckBox(int state)
 }
 
 
+void DlgPreferences::setSavePath(void)
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Select directory"), this->savePath->text(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	this->savePath->setText(newDir);
+}
+
+
+void DlgPreferences::setAddFilePath(void)
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Select directory"), this->addFilePath->text(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	this->addFilePath->setText(newDir);
+}
+
+
 void DlgPreferences::saveChanges(void) const
 {
 	globPref.auto_download_whole_messages =
@@ -164,4 +203,8 @@ void DlgPreferences::saveChanges(void) const
 	} else {
 		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
 	}
+
+	globPref.use_global_paths = this->enableGlobalPaths->isChecked();
+	globPref.save_attachments_path = this->savePath->text();
+	globPref.add_file_to_attachments_path = this->addFilePath->text();
 }

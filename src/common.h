@@ -178,6 +178,9 @@ public:
 	QString language;
 	SelectType after_start_select;
 	const int message_mark_as_read_timeout;
+	bool use_global_paths;
+	QString save_attachments_path;
+	QString add_file_to_attachments_path;
 
 	/*!
 	 * @brief Load data from supplied settings.

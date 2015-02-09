@@ -1381,17 +1381,27 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Remember directory? */
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"), m_save_attach_dir + QDir::separator() + fileName);
 
-	//qDebug() << "Selected file: " << fileName;
+	QString saveAttachPath;
+	if (globPref.use_global_paths) {
+		saveAttachPath = globPref.save_attachments_path;
+	} else {
+		saveAttachPath = m_save_attach_dir;
+	}
+
+	fileName = QFileDialog::getSaveFileName(this,
+	    tr("Save attachment"),
+	    saveAttachPath + QDir::separator() + fileName);
 
 	if (fileName.isEmpty()) {
 		return;
 	}
 
-	m_save_attach_dir = QFileInfo(fileName).absoluteDir().absolutePath();
-	storeExportPath();
+	if (!globPref.use_global_paths) {
+		m_save_attach_dir =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
 
 	/* Get data from base64. */
 	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
@@ -1437,16 +1447,25 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	QString dmId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toString();
 
+	QString saveAttachPath;
+	if (globPref.use_global_paths) {
+		saveAttachPath = globPref.save_attachments_path;
+	} else {
+		saveAttachPath = m_save_attach_dir;
+	}
+
 	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Save attachments"), m_save_attach_dir,
+	    tr("Save attachments"), saveAttachPath,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (newDir.isNull() || newDir.isEmpty()) {
 		return;
 	}
 
-	m_save_attach_dir = newDir;
-	storeExportPath();
+	if (!globPref.use_global_paths) {
+		m_save_attach_dir = newDir;
+		storeExportPath();
+	}
 
 	bool unspecifiedFailed = false;
 	QList<QString> unsuccessfullFiles;
@@ -3232,15 +3251,18 @@ void MainWindow::createAndSendMessage(void)
 
 	AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString lastAttachAddPath = accountInfo.lastAttachAddPath();
+	QString lastAttachAddPath;
+	if (globPref.use_global_paths) {
+		lastAttachAddPath = globPref.add_file_to_attachments_path;
+	} else {
+		lastAttachAddPath = accountInfo.lastAttachAddPath();
+	}
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this);
 
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		m_add_attach_dir = lastAttachAddPath;
-		storeExportPath();
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			if (!connectToIsds(index, true)) {
 				/* TODO */
@@ -3255,7 +3277,9 @@ void MainWindow::createAndSendMessage(void)
 		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
-	} else {
+	}
+
+	if (!globPref.use_global_paths) {
 		m_add_attach_dir = lastAttachAddPath;
 		storeExportPath();
 	}
@@ -3714,16 +3738,18 @@ void MainWindow::createAndSendMessageReply(void)
 
 	AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString lastAttachAddPath = accountInfo.lastAttachAddPath();
-
+	QString lastAttachAddPath;
+	if (globPref.use_global_paths) {
+		lastAttachAddPath = globPref.add_file_to_attachments_path;
+	} else {
+		lastAttachAddPath = accountInfo.lastAttachAddPath();
+	}
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this, replyTo[0], replyTo[1], replyTo[2],
 	    replyTo[3], replyTo[4], replyTo[5]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		m_add_attach_dir = lastAttachAddPath;
-		storeExportPath();
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
@@ -3737,10 +3763,13 @@ void MainWindow::createAndSendMessageReply(void)
 		int total = 0, news = 0;
 		Worker::downloadMessageList(index, "sent", *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
-	} else {
+	}
+
+	if (!globPref.use_global_paths) {
 		m_add_attach_dir = lastAttachAddPath;
 		storeExportPath();
 	}
+
 	setDefaultProgressStatus();
 }
 

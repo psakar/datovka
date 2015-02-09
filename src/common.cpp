@@ -82,7 +82,10 @@ GlobPreferences::GlobPreferences(void)
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
     after_start_select(SELECT_NOTHING),
-    message_mark_as_read_timeout(5000)
+    message_mark_as_read_timeout(5000),
+    use_global_paths(false),
+    save_attachments_path(QDir::homePath()),
+    add_file_to_attachments_path(QDir::homePath())
 {
 }
 
@@ -129,6 +132,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
+
+	use_global_paths = settings.value(
+	    "preferences/use_global_paths",
+	    dlftlGlobPref.use_global_paths).toBool();
 
 	value = settings.value("preferences/certificate_validation_date",
 	    dlftlGlobPref.certificate_validation_date).toInt();
@@ -196,6 +203,21 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		after_start_select = dlftlGlobPref.after_start_select;
 		Q_ASSERT(0);
 		break;
+	}
+
+	save_attachments_path = settings.value(
+	    "preferences/save_attachments_path",
+	    dlftlGlobPref.save_attachments_path).toString();
+	if (save_attachments_path.isEmpty()) {
+		save_attachments_path = dlftlGlobPref.save_attachments_path;
+	}
+
+	add_file_to_attachments_path = settings.value(
+	    "preferences/add_file_to_attachments_path",
+	    dlftlGlobPref.add_file_to_attachments_path).toString();
+	if (add_file_to_attachments_path.isEmpty()) {
+		add_file_to_attachments_path =
+		    dlftlGlobPref.add_file_to_attachments_path;
 	}
 }
 
@@ -270,11 +292,26 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	}
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {
-		settings.setValue("download_on_background", download_on_background);
+		settings.setValue("download_on_background",
+		    download_on_background);
 	}
 
 	if (dlftlGlobPref.download_at_start != download_at_start) {
 		settings.setValue("download_at_start", download_at_start);
+	}
+
+	if (dlftlGlobPref.use_global_paths != use_global_paths) {
+		settings.setValue("use_global_paths", use_global_paths);
+	}
+
+	if (dlftlGlobPref.save_attachments_path != save_attachments_path) {
+		settings.setValue("save_attachments_path",
+		    save_attachments_path);
+	}
+	if (dlftlGlobPref.add_file_to_attachments_path !=
+	    add_file_to_attachments_path) {
+		settings.setValue("add_file_to_attachments_path",
+		    add_file_to_attachments_path);
 	}
 
 	settings.endGroup();

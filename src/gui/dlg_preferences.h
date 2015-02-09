@@ -41,6 +41,8 @@ private slots:
 	void setActiveTimerSetup(int);
 	void setActiveCheckBox(int);
 	void saveChanges(void) const;
+	void setSavePath(void);
+	void setAddFilePath(void);
 
 private:
 	void initPrefDialog(void);
