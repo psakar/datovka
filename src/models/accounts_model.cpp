@@ -53,9 +53,9 @@ void AccountModel::SettingsMap::setDbDir(const QString &path)
 {
 	if (path == globPref.confDir()) {
 		/* Default path is empty. */
-		(*this)[DB_DIR] = QString();
+		QMap<QString, QVariant>::operator[](DB_DIR) = QString();
 	} else {
-		(*this)[DB_DIR] = path;
+		QMap<QString, QVariant>::operator[](DB_DIR) = path;
 	}
 }
 

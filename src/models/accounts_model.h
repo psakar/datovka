@@ -66,122 +66,142 @@ class AccountModel: public QStandardItemModel {
 
 public:
 	class SettingsMap : public QMap<QString, QVariant> {
-#if 0 /* Uncomment this to see where the array oprator is used. */
-	private:
+	private: /* Prohibit these methods in public interface. */
 		QVariant operator[](const QString &key);
 		const QVariant operator[](const QString &key) const;
-#endif
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
 		inline QString accountName(void) const
 		{
-			return (*this)[ACCOUNT_NAME].toString();
+			return QMap<QString, QVariant>::operator[](
+			    ACCOUNT_NAME).toString();
 		}
 		inline void setAccountName(const QString &name)
 		{
-			(*this)[ACCOUNT_NAME] = name;
+			QMap<QString, QVariant>::operator[](
+			    ACCOUNT_NAME) = name;
 		}
 		inline QString userName(void) const
 		{
-			return (*this)[USER].toString();
+			return QMap<QString, QVariant>::operator[](
+			    USER).toString();
 		}
 		inline void setUserName(const QString &userName)
 		{
-			(*this)[USER] = userName;
+			QMap<QString, QVariant>::operator[](USER) = userName;
 		}
 		inline QString loginMethod(void) const
 		{
-			return (*this)[LOGIN].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LOGIN).toString();
 		}
 		inline void setLoginMethod(const QString &method)
 		{
-			(*this)[LOGIN] = method;
+			QMap<QString, QVariant>::operator[](LOGIN) = method;
 		}
 		inline QString password(void) const
 		{
-			return (*this)[PWD].toString();
+			return QMap<QString, QVariant>::operator[](
+			    PWD).toString();
 		}
 		inline void setPassword(const QString &pwd)
 		{
-			(*this)[PWD] = pwd;
+			QMap<QString, QVariant>::operator[](PWD) = pwd;
 		}
 		inline bool isTestAccount(void) const
 		{
-			return (*this)[TEST_ACCOUNT].toBool();
+			return QMap<QString, QVariant>::operator[](
+			    TEST_ACCOUNT).toBool();
 		}
 		inline void setTestAccount(bool isTesting)
 		{
-			(*this)[TEST_ACCOUNT] = isTesting;
+			QMap<QString, QVariant>::operator[](
+			    TEST_ACCOUNT) = isTesting;
 		}
 		inline bool rememberPwd(void) const
 		{
-			return (*this)[REMEMBER_PWD].toBool();
+			return QMap<QString, QVariant>::operator[](
+			    REMEMBER_PWD).toBool();
 		}
 		inline void setRememberPwd(bool remember)
 		{
-			(*this)[REMEMBER_PWD] = remember;
+			QMap<QString, QVariant>::operator[](
+			    REMEMBER_PWD) = remember;
 		}
 		inline QString dbDir(void) const
 		{
-			return (*this)[DB_DIR].toString();
+			return QMap<QString, QVariant>::operator[](
+			    DB_DIR).toString();
 		}
 		void setDbDir(const QString &path);
 		inline bool syncWithAll(void) const
 		{
-			return (*this)[SYNC_WITH_ALL].toBool();
+			return QMap<QString, QVariant>::operator[](
+			    SYNC_WITH_ALL).toBool();
 		}
 		inline void setSyncWithAll(bool sync)
 		{
-			(*this)[SYNC_WITH_ALL] = sync;
+			QMap<QString, QVariant>::operator[](
+			    SYNC_WITH_ALL) = sync;
 		}
 		inline QString p12File(void) const
 		{
-			return (*this)[P12FILE].toString();
+			return QMap<QString, QVariant>::operator[](
+			    P12FILE).toString();
 		}
 		inline void setP12File(const QString &p12)
 		{
-			(*this)[P12FILE] = p12;
+			QMap<QString, QVariant>::operator[](P12FILE) = p12;
 		}
 		inline QString lastMsg(void) const
 		{
-			return (*this)[LAST_MSG_ID].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LAST_MSG_ID).toString();
 		}
 		inline void setLastMsg(const QString &dmId)
 		{
-			(*this)[LAST_MSG_ID] = dmId;
+			QMap<QString, QVariant>::operator[](
+			    LAST_MSG_ID) = dmId;
 		}
 		inline QString lastAttachSavePath(void) const
 		{
-			return (*this)[LAST_SAVE_ATTACH].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LAST_SAVE_ATTACH).toString();
 		}
 		inline void setLastAttachSavePath(const QString &path)
 		{
-			(*this)[LAST_SAVE_ATTACH] = path;
+			QMap<QString, QVariant>::operator[](
+			    LAST_SAVE_ATTACH) = path;
 		}
 		inline QString lastAttachAddPath(void) const
 		{
-			return (*this)[LAST_ADD_ATTACH].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LAST_ADD_ATTACH).toString();
 		}
 		inline void setLastAttachAddPath(const QString &path)
 		{
-			(*this)[LAST_ADD_ATTACH] = path;
+			QMap<QString, QVariant>::operator[](
+			    LAST_ADD_ATTACH) = path;
 		}
 		inline QString lastCorrespPath(void) const
 		{
-			return (*this)[LAST_CORRESPOND].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LAST_CORRESPOND).toString();
 		}
 		inline void setLastCorrespPath(const QString &path)
 		{
-			(*this)[LAST_CORRESPOND] = path;
+			QMap<QString, QVariant>::operator[](
+			    LAST_CORRESPOND) = path;
 		}
 		inline QString lastZFOExportPath(void) const
 		{
-			return (*this)[LAST_ZFO].toString();
+			return QMap<QString, QVariant>::operator[](
+			    LAST_ZFO).toString();
 		}
 		inline void setLastZFOExportPath(const QString &path)
 		{
-			(*this)[LAST_ZFO] = path;
+			QMap<QString, QVariant>::operator[](LAST_ZFO) = path;
 		}
 	};
 
