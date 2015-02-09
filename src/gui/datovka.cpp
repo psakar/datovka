@@ -3315,7 +3315,7 @@ void MainWindow::createAndSendMessage(void)
 
 		/* Messages counters total/news are returned from worker */
 		int total = 0, news = 0;
-		Worker::downloadMessageList(index, "sent", *messageDb,
+		Worker::downloadMessageList(index, MSG_SENT, *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
 	}
 
@@ -3803,7 +3803,7 @@ void MainWindow::createAndSendMessageReply(void)
 
 		/* Messages counters total/news are returned from worker */
 		int total = 0, news = 0;
-		Worker::downloadMessageList(index, "sent", *messageDb,
+		Worker::downloadMessageList(index, MSG_SENT, *messageDb,
 		    QString(), m_statusProgressBar, NULL, total, news);
 	}
 
@@ -5390,8 +5390,8 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == accountList.at(j).messageDb->
 					    msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope("sent", *(accountList.at(j).messageDb), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, false, *(accountList.at(j).messageDb), message, "", 0, 0)) {
+						Worker::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
@@ -5460,8 +5460,8 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == accountList.at(j).messageDb->
 					    msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope("received", *(accountList.at(j).messageDb), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, true, *(accountList.at(j).messageDb), message, "", 0, 0)) {
+						Worker::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDb), message->envelope);
+						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDb), message, "", 0, 0)) {
 							import = true;
 							/* update message state into database */
 							accountList.at(j).messageDb->msgSetProcessState(dmId, SETTLED, false);
@@ -5742,19 +5742,19 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
-	bool incoming = true;
+	enum MessageDirection msgDirect = MSG_RECEIVED;
 
 	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
 	switch (AccountModel::nodeType(index)) {
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		incoming = true;
+		msgDirect = MSG_RECEIVED;
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		incoming = false;
+		msgDirect = MSG_SENT;
 		break;
 	default:
 		break;
@@ -5768,8 +5768,8 @@ bool MainWindow::downloadCompleteMessage(QString dmId)
 		}
 	}
 
-	if (Q_SUCCESS == Worker::downloadMessage(
-	    accountIndex, dmId, true, incoming, *messageDb, QString(), 0, 0)) {
+	if (Q_SUCCESS == Worker::downloadMessage(accountIndex, dmId, true,
+	        msgDirect, *messageDb, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(accountIndex, dmId);
 		return true;

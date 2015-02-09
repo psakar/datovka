@@ -134,7 +134,8 @@ public:
 	 * @brief Store message into database.
 	 */
 	static
-	qdatovka_error storeMessage(bool signedMsg, bool incoming,
+	qdatovka_error storeMessage(bool signedMsg,
+	    enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_message *msg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
@@ -157,15 +158,15 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QString &dmId, bool signedMsg, bool incoming,
-	    MessageDb &messageDb,
+	    const QString &dmId, bool signedMsg,
+	    enum MessageDirection msgDirect, MessageDb &messageDb,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
 	/*!
 	 * @brief Store envelope into database.
 	 */
 	static
-	qdatovka_error storeEnvelope(const QString &messageType,
+	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 	/*!
@@ -174,7 +175,7 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString &messageType, MessageDb &messageDb,
+	    enum MessageDirection msgDirect, MessageDb &messageDb,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
 	    int &total, int &news);
 

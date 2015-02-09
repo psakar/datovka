@@ -192,7 +192,7 @@ void Worker::doJob(void)
 	if (!job.msgId.isEmpty()) {
 
 		if (Q_SUCCESS == downloadMessage(job.acntTopIdx, job.msgId,
-		        true, MSG_RECEIVED == job.msgDirect, *job.msgDb,
+		        true, job.msgDirect, *job.msgDb,
 		        "DownloadMessage", 0, this)) {
 			/* Only on successful download. */
 			emit refreshAttachmentList(job.acntTopIdx, job.msgId);
@@ -207,7 +207,8 @@ void Worker::doJob(void)
 		    << job.acntTopIdx.data().toString();
 		qDebug() << "-----------------------------------------------";
 		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(job.acntTopIdx, "received", *job.msgDb,
+		    downloadMessageList(job.acntTopIdx, MSG_RECEIVED,
+		        *job.msgDb,
 		        "GetListOfReceivedMessages", 0, this, rt, rn)) {
 			success = false;
 		}
@@ -234,7 +235,7 @@ void Worker::doJob(void)
 		    << job.acntTopIdx.data().toString();
 		qDebug() << "-----------------------------------------------";
 		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(job.acntTopIdx, "sent", *job.msgDb,
+		    downloadMessageList(job.acntTopIdx, MSG_SENT, *job.msgDb,
 		        "GetListOfSentMessages", 0, this, st, sn)) {
 			success = false;
 		}
@@ -271,7 +272,7 @@ void Worker::doJob(void)
 /*
  * Store envelope into database.
  */
-qdatovka_error Worker::storeEnvelope(const QString &messageType,
+qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
     MessageDb &messageDb, const struct isds_envelope *envel)
 /* ========================================================================= */
 {
@@ -376,7 +377,7 @@ qdatovka_error Worker::storeEnvelope(const QString &messageType,
 	    convertHexToDecIndex(*envel->dmMessageStatus),
 	    (int) *envel->dmAttachmentSize,
 	    envel->dmType,
-	    messageType)) {
+	    msgDirect)) {
 		qDebug() << "Message envelope" << dmId <<
 		    "was inserted into db...";
 		return Q_SUCCESS;
@@ -393,7 +394,7 @@ qdatovka_error Worker::storeEnvelope(const QString &messageType,
  * Download sent/received message list from ISDS for current account index
  */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
-    const QString &messageType, MessageDb &messageDb,
+    enum MessageDirection msgDirect, MessageDb &messageDb,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
     int &total, int &news)
 /* ========================================================================= */
@@ -423,7 +424,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */
-	if (messageType == "sent") {
+	if (MSG_SENT == msgDirect) {
 		status = isds_get_list_of_sent_messages(isdsSessions.
 		    session(accountInfo.userName()),
 		    NULL, NULL, NULL,
@@ -431,7 +432,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
 		    MESSAGESTATE_ANY,
 		    0, NULL, &messageList);
-	} else if (messageType == "received") {
+	} else if (MSG_RECEIVED == msgDirect) {
 		status = isds_get_list_of_received_messages(isdsSessions.
 		    session(accountInfo.userName()),
 		    NULL, NULL, NULL,
@@ -492,18 +493,17 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
-			storeEnvelope(messageType, messageDb, item->envelope);
+			storeEnvelope(msgDirect, messageDb, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
 				downloadMessage(acntTopIdx, item->envelope->dmID,
-				    true, "received" == messageType, messageDb,
-				    "", 0, 0);
+				    true, msgDirect, messageDb, "", 0, 0);
 			}
 			newcnt++;
 
 		/* message is in db (dmDbMsgStatus <> -1) */
 		} else {
-			if (messageType == "sent") {
+			if (MSG_SENT == msgDirect) {
 				int dmNewMsgStatus = convertHexToDecIndex(
 				     *item->envelope->dmMessageStatus);
 
@@ -532,7 +532,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (0 != pBar) { pBar->setValue(100); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 100); }
 
-	if (messageType == "received") {
+	if (MSG_RECEIVED == msgDirect) {
 		qDebug() << "#Received total:" << allcnt;
 		qDebug() << "#Received new:" << newcnt;
 	} else {
@@ -704,7 +704,8 @@ bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
 /*
  * Store message into database.
  */
-qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
+qdatovka_error Worker::storeMessage(bool signedMsg,
+    enum MessageDirection msgDirect,
     MessageDb &messageDb, const struct isds_message *msg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker)
 /* ========================================================================= */
@@ -831,7 +832,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
 	    convertHexToDecIndex(*envel->dmMessageStatus),
 	    (int) *envel->dmAttachmentSize,
 	    envel->dmType,
-	    (incoming) ? "received" : "sent"))
+	    msgDirect))
 	    ? qDebug() << "Message envelope was updated..."
 	    : qDebug() << "ERROR: Message envelope update!";
 
@@ -908,8 +909,9 @@ qdatovka_error Worker::storeMessage(bool signedMsg, bool incoming,
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
-    const QString &dmId, bool signedMsg, bool incoming, MessageDb &messageDb,
-    const QString &progressLabel, QProgressBar *pBar, Worker *worker)
+    const QString &dmId, bool signedMsg, enum MessageDirection msgDirect,
+    MessageDb &messageDb, const QString &progressLabel, QProgressBar *pBar,
+    Worker *worker)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -933,7 +935,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	/* download signed message? */
 	if (signedMsg) {
 		/* sent or received message? */
-		if (incoming) {
+		if (MSG_RECEIVED == msgDirect) {
 			status = isds_get_signed_received_message(
 			    isdsSessions.session(accountInfo.userName()),
 			    dmId.toStdString().c_str(),
@@ -965,7 +967,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	}
 
 	/* Download and store the message. */
-	storeMessage(signedMsg, incoming, messageDb, message,
+	storeMessage(signedMsg, msgDirect, messageDb, message,
 	    progressLabel, pBar, worker);
 
 	if (0 != pBar) { pBar->setValue(90); }
@@ -979,7 +981,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 
 	getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
 
-	if (incoming) {
+	if (MSG_RECEIVED == msgDirect) {
 		/*  Mark this message as downloaded in ISDS */
 		(markMessageAsDownloaded(acntTopIdx, message->envelope->dmID))
 		? qDebug() << "Message was marked as downloaded..."
