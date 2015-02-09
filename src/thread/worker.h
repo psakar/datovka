@@ -68,7 +68,10 @@ public:
 		QModelIndex acntTopIdx;
 		MessageDb *msgDb;
 		enum MessageDirection msgDirect;
-		QString msgId;
+		QString msgId; /*!<
+		                * If set, then only a single message is going
+		                * to be downloaded.
+		                */
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -105,8 +108,22 @@ public:
 
 	/*!
 	 * @brief Constructor for job list usage.
+	 *
+	 * @param[in] accountDb  Account database.
 	 */
-	explicit Worker(AccountDb &accountDb, QObject *parent);
+	explicit Worker(AccountDb &accountDb, QObject *parent = 0);
+
+	/*!
+	 * @brief Constructor for single job usage.
+	 *
+	 * @param[in] job        Worker job.
+	 * @param[in] accountDb  Account database.
+	 *
+	 * @note Consider using the job queue rather than a single job as
+	 *     the queue is the preferred version.
+	 */
+	explicit Worker(const Job &job, AccountDb &accountDb,
+	    QObject *parent = 0);
 
 	/*!
 	 * @brief Requests the process to start
@@ -164,7 +181,7 @@ public:
 private:
 
 	AccountDb &m_accountDb; /*!< Account database. */
-	bool m_useJobList; /* Whether to process data from the job list. */
+	const Job m_job; /*!< If invalid, then a job list is used. */
 
 	/*!
 	* @brief Get password expiration info for account index
@@ -239,9 +256,9 @@ signals:
 
 public slots:
 	/*!
-	 * @brief Run Message downloading in thread
+	 * @brief Run message downloading in thread.
 	 */
-	void syncOneAccount(void);
+	void doJob(void);
 };
 
 #endif /* _WORKER_H_ */

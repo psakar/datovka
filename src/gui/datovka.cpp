@@ -2190,7 +2190,7 @@ void MainWindow::processPendingWorkerJobs(void)
 	}
 
 	m_syncAcntThread = new QThread();
-	m_syncAcntWorker = new Worker(m_accountDb, 0);
+	m_syncAcntWorker = new Worker(m_accountDb);
 	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
 	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
@@ -2221,7 +2221,7 @@ void MainWindow::processPendingWorkerJobs(void)
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
 	connect(m_syncAcntThread, SIGNAL(started()),
-	    m_syncAcntWorker, SLOT(syncOneAccount()));
+	    m_syncAcntWorker, SLOT(doJob()));
 	connect(m_syncAcntWorker, SIGNAL(finished()),
 	    m_syncAcntThread, SLOT(quit()), Qt::DirectConnection);
 	connect(m_syncAcntThread, SIGNAL(finished()),

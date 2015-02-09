@@ -116,11 +116,23 @@ QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
  */
 Worker::Worker(AccountDb &accountDb, QObject *parent)
 /* ========================================================================= */
-   : m_accountDb(accountDb),
-   m_useJobList(true)
+    : QObject(parent),
+    m_accountDb(accountDb),
+    m_job()
 {
-	/* unused */
-	(void) parent;
+}
+
+
+/* ========================================================================= */
+/*
+ * Constructor for single job usage.
+ */
+Worker::Worker(const Job &job, AccountDb &accountDb, QObject *parent)
+/* ========================================================================= */
+    : QObject(parent),
+    m_accountDb(accountDb),
+    m_job(job)
+{
 }
 
 
@@ -144,23 +156,22 @@ void Worker::requestWork(void)
 /*
 * Download MessageList for account
 */
-void Worker::syncOneAccount(void)
+void Worker::doJob(void)
 /* ========================================================================= */
 {
 	qDebug() << "Starting worker process in Thread "
 	    << thread()->currentThreadId();
 
-	Q_ASSERT(m_useJobList);
-	if (!m_useJobList) {
-		emit finished();
-		return;
+	Job job = m_job;
+
+	if (!job.isValid()) {
+		/* Use job queue. */
+		job = jobList.firstPop(true);
 	}
 
-	/* test account index valid */
-	Job job = jobList.firstPop(true);
+	/* Test whether job is valid. */
 	if (!job.isValid()) {
-		qDebug() <<
-		    "Invalid Account index! Downloading is cancelled.";
+		qDebug() << "Invalid worker job! Downloading is cancelled.";
 		downloadMessagesMutex.unlock();
 		emit finished();
 		return;
