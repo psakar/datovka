@@ -94,13 +94,6 @@ public:
 	QMutex downloadMessagesMutex;
 
 	/*!
-	 * @brief Constructor for multiple accounts.
-	 */
-	explicit Worker(QList<QModelIndex> acntTopIdxs,
-	    QList<MessageDb *> messageDbList, AccountDb &accountDb,
-	    QObject *parent);
-
-	/*!
 	 * @brief Constructor for download complete message.
 	 */
 	explicit Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
@@ -249,7 +242,6 @@ public slots:
 	/*!
 	 * @brief Run Message downloading in thread
 	 */
-	void syncAllAccounts(void);
 	void syncOneAccount(void);
 	void downloadCompleteMessage(void);
 };

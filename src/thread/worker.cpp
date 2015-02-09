@@ -99,26 +99,6 @@ QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 
 /* ========================================================================= */
 /*
- * Constructor for multiple accounts.
- */
-Worker::Worker(QList<QModelIndex> acntTopIdxs,
-    QList<MessageDb *> messageDbList, AccountDb &accountDb,
-    QObject *parent)
-/* ========================================================================= */
-    : m_acntTopIdxs(acntTopIdxs),
-    m_messageDbList(messageDbList),
-    m_accountDb(accountDb),
-    m_dmId(),
-    m_msgDirection(MSG_SENT), /* Any value will do. */
-    m_useJobList(false)
-{
-	/* unused */
-	(void) parent;
-}
-
-
-/* ========================================================================= */
-/*
  * Constructor for download complete message.
  */
 Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
@@ -171,102 +151,6 @@ void Worker::requestWork(void)
 	    thread()->currentThreadId();
 
 	emit workRequested();
-}
-
-
-/* ========================================================================= */
-/*
-* Start background sync of all accounts
-*/
-void Worker::syncAllAccounts(void)
-/* ========================================================================= */
-{
-	qDebug() << "Starting worker process in Thread "
-	   << thread()->currentThreadId();
-
-	bool success = true;
-	MessageDb *messageDb;
-
-	/* Messages counters
-	 * rt = receivedTotal, rn = receivedNews,
-	 * st = sentTotal, sn = sentNews,
-	 * rcvTtl, rcvNews, sntTtl, sntNews are send to mainwindow and
-	 * shown in info-statusbar.
-	 */
-	int rt = 0;
-	int rn = 0;
-	int st = 0;
-	int sn = 0;
-	int rcvTtl = 0;
-	int rcvNews = 0;
-	int sntTtl = 0;
-	int sntNews = 0;
-
-	for (int i = 0; i < m_acntTopIdxs.size(); i++) {
-//	foreach (QModelIndex index, m_acntTopIdxs)
-
-		QModelIndex index = m_acntTopIdxs[i];
-		const AccountModel::SettingsMap accountInfo =
-		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-		// if the account is not included to sync all, skip it.
-		if (!accountInfo.syncWithAll()) {
-			continue;
-		}
-
-		messageDb = m_messageDbList.at(i);
-
-		emit changeStatusBarInfo(false, index.data().toString(),
-		    0, 0 ,0, 0);
-
-		qDebug() << "-----------------------------------------------";
-		qDebug() << "Downloading message list for account"
-		    << index.data().toString();
-		qDebug() << "-----------------------------------------------";
-
-		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(index,"received", *messageDb,
-		    "GetListOfReceivedMessages", 0, this, rt, rn)) {
-			success = false;
-			continue;
-		}
-
-		rcvTtl += rt;
-		rcvNews += rn;
-
-		emit refreshAccountList(index);
-
-		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(index,"sent", *messageDb,
-		    "GetListOfSentMessages", 0, this, st, sn)) {
-			success = false;
-			continue;
-		}
-
-		sntTtl += st;
-		sntNews += sn;
-
-		emit refreshAccountList(index);
-
-		if (!getPasswordInfo(index)) {
-			success = false;
-		}
-	}
-
-	emit valueChanged("Idle", 0);
-
-	qDebug() << "-----------------------------------------------";
-	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
-
-	qDebug() << "Worker process finished in Thread " <<
-	    thread()->currentThreadId();
-
-	emit changeStatusBarInfo(true, QString(), rcvTtl, rcvNews,
-	    sntTtl, sntNews);
-
-	downloadMessagesMutex.unlock();
-
-	emit finished();
 }
 
 

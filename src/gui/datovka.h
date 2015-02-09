@@ -435,11 +435,6 @@ private slots:
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.
 	 */
-	void deleteThreadSyncAll(void);
-
-	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
 	void deleteThreadDownMsgComplete(void);
 
 	/*!
@@ -493,8 +488,8 @@ private slots:
 
 private:
 
-	QThread *threadSyncAll, *threadDownMsgComplete;
-	Worker *workerSyncAll, *workerDownMsgComplete;
+	QThread *threadDownMsgComplete;
+	Worker *workerDownMsgComplete;
 	QThread *m_syncAcntThread;
 	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
