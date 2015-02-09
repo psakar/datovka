@@ -24,6 +24,8 @@
 
 #include <QMessageBox>
 #include <QPushButton>
+#include <QPrinter>
+#include <QTextDocument>
 
 #include "dlg_correspondence_overview.h"
 
@@ -66,11 +68,35 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(
 	connect(this->toCalendarWidget, SIGNAL(clicked(QDate)), this,
 	SLOT(dateCalendarsChange(QDate)));
 
+	connect(this->sentCheckBox, SIGNAL(stateChanged(int)), this,
+	SLOT(msgStateChanged(int)));
+
+	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)), this,
+	SLOT(msgStateChanged(int)));
+
 	getMsgListFromDates(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
 
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(exportData(void)));
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: fires when message type checkboxes change state.
+ */
+void DlgCorrespondenceOverview::msgStateChanged(int state)
+/* ========================================================================= */
+{
+	(void) state; /* Unused. */
+
+	if ((!this->sentCheckBox->isChecked()) &&
+	    (!this->receivedCheckBox->isChecked())) {
+		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	} else {
+		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	}
 }
 
 
@@ -117,6 +143,8 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(ok);
 
+	msgStateChanged(0);
+
 	QString sentInfo = "(" + tr("messages: ") +
 	    QString::number(sentCnt) + ")";
 	QString receivedInfo = "(" + tr("messages: ") +
@@ -129,10 +157,10 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 
 /* ========================================================================= */
 /*
- * Export message into ZFO file.
+ * Export into ZFO file.
  */
 bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
-    const QString &fileName) const
+    const QString &fileName, bool deliveryInfo) const
 /* ========================================================================= */
 {
 	Q_ASSERT(dmId >= 0);
@@ -145,7 +173,14 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
 		return false;
 	}
 
-	QByteArray base64 = m_messDb.msgsMessageBase64(dmId);
+	QByteArray base64;
+
+	if (deliveryInfo) {
+		base64 = m_messDb.msgsGetDeliveryInfoBase64(dmId);
+	} else {
+		base64 = m_messDb.msgsMessageBase64(dmId);
+	}
+
 	if (base64.isEmpty()) {
 		return false;
 	}
@@ -153,6 +188,42 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
 	QByteArray data = QByteArray::fromBase64(base64);
 
 	return WF_SUCCESS == writeFile(fileName, data);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Export into pdf file.
+ */
+bool DlgCorrespondenceOverview::exportMessageAsPDF(int dmId,
+    const QString &fileName, bool deliveryInfo) const
+/* ========================================================================= */
+{
+	Q_ASSERT(dmId >= 0);
+	if (dmId < 0) {
+		return false;
+	}
+
+	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return false;
+	}
+
+	QTextDocument doc;
+
+	if (deliveryInfo) {
+		doc.setHtml(m_messDb.deliveryInfoHtmlToPdf(dmId));
+	} else {
+		doc.setHtml(m_messDb.envelopeInfoHtmlToPdf(dmId, ""));
+	}
+
+	QPrinter printer;
+	printer.setOutputFileName(fileName);
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	doc.print(&printer);
+
+	return true;
 }
 
 
@@ -374,61 +445,81 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString exportDir = QFileDialog::getExistingDirectory(this,
-	    tr("Select directory to save correspondence"),
-	    m_exportCorrespondDir,
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString overiviewFileName = m_exportCorrespondDir + QDir::separator() +
+	    tr("Overview") + "--" +
+	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
+	    "--" +
+	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
+	    (("HTML" == this->outputFormatComboBox->currentText()) ?
+	        ".html" : ".csv");
 
-	if (exportDir.isEmpty() || exportDir.isNull()) {
+	QString exportFileName = QFileDialog::getSaveFileName(this,
+	    tr("Select file to save correspondence overview to"),
+	    overiviewFileName, tr("Files") + "(*.html *.txt *.csv)");
+
+	if (exportFileName.isEmpty() || exportFileName.isNull()) {
 		return;
 	}
 
+	QString exportDir =
+	    QFileInfo(exportFileName).absoluteDir().absolutePath();
+
 	m_exportCorrespondDir = exportDir;
 
-	qDebug() << "Files are export to:" << exportDir;
+	qDebug() << "Correspondence file is exported to:" << exportDir;
 
 	if (this->outputFormatComboBox->currentText() == "HTML") {
-		QString overiviewFileName = exportDir + QDir::separator() +
-		    tr("Overview-") +
-		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-		    ".html";
-
 		if (!exportMessagesToHtml(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
 			        "Correspondence overview export error."),
 			    tr("Correspondence overview file '%1' could not "
 			        "be written.").arg(overiviewFileName),
 			    QMessageBox::Ok);
+			return;
 		}
 	} else {
-		QString overiviewFileName = exportDir + QDir::separator() +
-		    tr("Overview-") +
-		    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-		    ".txt";
-
 		if (!exportMessagesToCsv(overiviewFileName)) {
 			QMessageBox::warning(this, QObject::tr(
 			        "Correspondence overview export error"),
 			    tr("Correspondence overview file '%1' could not "
 			        "be written.").arg(overiviewFileName),
 			    QMessageBox::Ok);
+			return;
 		}
 	}
+
+
+	if (this->exportZfoCheckBox->isChecked() ||
+	    this->exportDeliveryZfoCheckBox->isChecked() ||
+	    this->exportMessageEnvelopePDFCheckBox->isChecked() ||
+	    this->exportDeliveryPDFCheckBox->isChecked()) {
+		exportDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select directory to save ZFO files"),
+		    m_exportCorrespondDir,
+		    QFileDialog::ShowDirsOnly |
+		        QFileDialog::DontResolveSymlinks); 
+
+		if (exportDir.isEmpty() || exportDir.isNull()) {
+			return;
+		} 
+		m_exportCorrespondDir = exportDir; 
+		qDebug() << "Files will be exported to:" << exportDir;
+	} 
 
 	QList<int> errorDmId;
 	errorDmId.clear();
 	int successCnt = 0;
 
+	/* export message ZFO */
 	if (this->exportZfoCheckBox->isChecked()) {
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-
 			foreach (int dmId, m_messages.sentdmIDs) {
 				QString fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName)) {
+				if (!exportMessageAsZFO(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
@@ -441,14 +532,125 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-
 			foreach (int dmId, m_messages.receivedmIDs) {
 				QString fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName)) {
+				if (!exportMessageAsZFO(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+	}
+
+	/* export delivery info ZFO */
+	if (this->exportDeliveryZfoCheckBox->isChecked()) {
+
+		/* sent ZFO */
+		if (this->sentCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.sentdmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DDZ_" + QString::number(dmId) + "_info.zfo";
+				if (!exportMessageAsZFO(dmId, fileName, true)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DDZ" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+
+		/* received ZFO */
+		if (this->receivedCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.receivedmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DDZ_" + QString::number(dmId) + "_info.zfo";
+				if (!exportMessageAsZFO(dmId, fileName, true)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DDZ" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+	}
+
+	/* export envelope to PDF */
+	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
+		/* sent ZFO */
+		if (this->sentCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.sentdmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "OZ_" + QString::number(dmId) + ".pdf";
+				if (!exportMessageAsPDF(dmId, fileName, false)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "OZ" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+
+		/* received ZFO */
+		if (this->receivedCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.receivedmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "OZ_" + QString::number(dmId) + ".pdf";
+				if (!exportMessageAsPDF(dmId, fileName, false)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "OZ" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+	}
+
+	/* export delivery info to PDF */
+	if (this->exportDeliveryPDFCheckBox->isChecked()) {
+		/* sent ZFO */
+		if (this->sentCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.sentdmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DD_" + QString::number(dmId) + ".pdf";
+				if (!exportMessageAsPDF(dmId, fileName, true)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DD" << dmId
+					    << "export error";
+					errorDmId.append(dmId);
+				} else {
+					successCnt++;
+				}
+			}
+		}
+
+		/* received ZFO */
+		if (this->receivedCheckBox->isChecked()) {
+			foreach (int dmId, m_messages.receivedmIDs) {
+				QString fileName =
+				    exportDir + QDir::separator() +
+				    "DD_" + QString::number(dmId) + ".pdf";
+				if (!exportMessageAsPDF(dmId, fileName, true)) {
+					/* TODO - add dialog describes error */
+					qDebug() << "DD" << dmId
 					    << "export error";
 					errorDmId.append(dmId);
 				} else {
