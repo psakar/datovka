@@ -328,7 +328,9 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	if (dialog.exec()) {
 		fileNames = dialog.selectedFiles();
-		m_lastAttAddPath = dialog.directory().absolutePath();
+		if (!globPref.use_global_paths) {
+			m_lastAttAddPath = dialog.directory().absolutePath();
+		}
 	}
 
 	for (int i = 0; i < fileNames.count(); ++i) {
