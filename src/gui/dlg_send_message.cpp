@@ -45,8 +45,8 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     QWidget *parent,
     const QString &reSubject, const QString &senderId, const QString &sender,
     const QString &senderAddress, const QString &dmType,
-    const QString &dmSenderRefNumber
-    )
+    const QString &dmSenderRefNumber, const QString &dmSenderIdent,
+    const QString &dmRecipientRefNumber, const QString &dmRecipientIdent)
     : QDialog(parent),
     m_accountList(accountList),
     m_messageList(messageList),
@@ -63,6 +63,9 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_senderAddress(senderAddress),
     m_dmType(dmType),
     m_dmSenderRefNumber(dmSenderRefNumber),
+    m_dmSenderIdent(dmSenderIdent),
+    m_dmRecipientRefNumber(dmRecipientRefNumber),
+    m_dmRecipientIdent(dmRecipientIdent),
     m_userName(""),
     m_messDb(db)
 {
@@ -140,12 +143,32 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->payReply, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalFormAndSet(int)));
 
+	this->OptionalWidget->setHidden(true);
+
 	if (ACT_REPLY == m_action) {
 		this->subjectText->setText("Re: " + m_reSubject);
-		this->dmRecipientRefNumber->setText(m_dmSenderRefNumber);
+		bool hideOptionalWidget = true;
+		if (!m_dmSenderRefNumber.isEmpty()) {
+			this->dmRecipientRefNumber->setText(m_dmSenderRefNumber);
+			hideOptionalWidget = false;
+		}
+		if (!m_dmSenderIdent.isEmpty()) {
+			this->dmRecipientIdent->setText(m_dmSenderIdent);
+			hideOptionalWidget = false;
+		}
+		if (!m_dmRecipientRefNumber.isEmpty()) {
+			this->dmSenderRefNumber->setText(m_dmRecipientRefNumber);
+			hideOptionalWidget = false;
+		}
+		if (!m_dmRecipientIdent.isEmpty()) {
+			this->dmSenderIdent->setText(m_dmRecipientIdent);
+			hideOptionalWidget = false;
+		}
+
+		this->OptionalWidget->setHidden(hideOptionalWidget);
+
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
-
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->setChecked(false);
 		this->payRecipient->hide();
@@ -203,7 +226,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 		this->payRecipient->hide();
 	}
 
-	this->OptionalWidget->setHidden(true);
 	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalForm(int)));
 
@@ -429,14 +451,13 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 
 	if (Qt::Unchecked == state) {
 		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: black }");
-		this->labeldmSenderRefNumber->setText(tr("Your reference number:"));
+		this->labeldmSenderRefNumber->setText(tr("Our reference number:"));
 		disconnect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		this, SLOT(checkInputFields()));
 	} else {
 		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: red }");
 		this->labeldmSenderRefNumber->setText(tr("Enter reference number:"));
 		this->dmSenderRefNumber->setFocus();
-
 		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		this, SLOT(checkInputFields()));
 	}

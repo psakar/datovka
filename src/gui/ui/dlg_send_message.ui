@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>553</width>
-    <height>725</height>
+    <height>727</height>
    </rect>
   </property>
   <property name="font">
@@ -252,14 +252,11 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labeldmRecipientRefNumber">
+       <widget class="QLabel" name="labeldmSenderRefNumber">
         <property name="text">
          <string>Our reference number:</string>
         </property>
        </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="dmRecipientRefNumber"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_7">
@@ -268,18 +265,12 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="dmRecipientIdent"/>
-      </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labeldmSenderRefNumber">
+       <widget class="QLabel" name="labeldmRecipientRefNumber">
         <property name="text">
          <string>Your reference number:</string>
         </property>
        </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="dmSenderRefNumber"/>
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_9">
@@ -288,32 +279,41 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="dmSenderIdent"/>
-      </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="label_10">
         <property name="text">
          <string>Personal delivery:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="QCheckBox" name="dmPersonalDelivery">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="label_11">
         <property name="text">
          <string>To hands:</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <widget class="QLineEdit" name="dmToHands"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="dmSenderIdent"/>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="dmRecipientIdent"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="dmSenderRefNumber"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="dmRecipientRefNumber"/>
       </item>
      </layout>
     </widget>
@@ -824,6 +824,35 @@ of postal data messages active.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>subjectText</tabstop>
+  <tabstop>dmSenderRefNumber</tabstop>
+  <tabstop>dmSenderIdent</tabstop>
+  <tabstop>dmRecipientRefNumber</tabstop>
+  <tabstop>dmRecipientIdent</tabstop>
+  <tabstop>dmPersonalDelivery</tabstop>
+  <tabstop>dmToHands</tabstop>
+  <tabstop>dmLegalTitleLaw</tabstop>
+  <tabstop>dmLegalTitleYear</tabstop>
+  <tabstop>dmLegalTitleSect</tabstop>
+  <tabstop>dmLegalTitlePar</tabstop>
+  <tabstop>dmLegalTitlePoint</tabstop>
+  <tabstop>addRecipient</tabstop>
+  <tabstop>addAttachment</tabstop>
+  <tabstop>sendButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>dmPublishOwnID</tabstop>
+  <tabstop>payRecipient</tabstop>
+  <tabstop>payReply</tabstop>
+  <tabstop>dmAllowSubstDelivery</tabstop>
+  <tabstop>optionalFieldCheckBox</tabstop>
+  <tabstop>removeRecipient</tabstop>
+  <tabstop>findRecipient</tabstop>
+  <tabstop>removeAttachment</tabstop>
+  <tabstop>openAttachment</tabstop>
+  <tabstop>recipientTableWidget</tabstop>
+  <tabstop>attachmentTableWidget</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

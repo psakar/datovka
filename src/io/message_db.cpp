@@ -1448,14 +1448,14 @@ fail:
 QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 /* ========================================================================= */
 {
-	QVector<QString> reply(6);
+	QVector<QString> reply(9);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "SELECT "
 	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress, _dmType, "
-	    "dmSenderRefNumber FROM messages WHERE "
-	    "dmID = :dmId";
+	    "dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber, "
+	    "dmRecipientIdent FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
@@ -1470,7 +1470,9 @@ QVector<QString> MessageDb::msgsReplyDataTo(int dmId) const
 		reply[3] = query.value(3).toString();
 		reply[4] = query.value(4).toString();
 		reply[5] = query.value(5).toString();
-
+		reply[6] = query.value(6).toString();
+		reply[7] = query.value(7).toString();
+		reply[8] = query.value(8).toString();
 		return reply;
 	} else {
 		logError(

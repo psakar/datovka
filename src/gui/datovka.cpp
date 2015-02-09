@@ -3706,7 +3706,7 @@ void MainWindow::createAndSendMessageReply(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
-	QVector<QString> replyTo = messageDb->msgsReplyDataTo(
+	QVector<QString> replyData = messageDb->msgsReplyDataTo(
 	    tableModel->itemData(index).first().toInt());
 
 	/* TODO */
@@ -3744,11 +3744,13 @@ void MainWindow::createAndSendMessageReply(void)
 	} else {
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    lastAttachAddPath, this, replyTo[0], replyTo[1], replyTo[2],
-	    replyTo[3], replyTo[4], replyTo[5]);
+	    lastAttachAddPath, this, replyData[0], replyData[1], replyData[2],
+	    replyData[3], replyData[4], replyData[5], replyData[6],
+	    replyData[7], replyData[8]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));

@@ -66,7 +66,10 @@ public:
 	    const QString &sender = QString(),
 	    const QString &senderAddress = QString(),
 	    const QString &dmType = QString(),
-	    const QString &dmSenderRefNumber = QString()
+	    const QString &dmSenderRefNumber = QString(),
+	    const QString &dmSenderIdent = QString(),
+	    const QString &dmRecipientRefNumber = QString(),
+	    const QString &dmRecipientIdent = QString()
 	    );
 
 private slots:
@@ -104,6 +107,9 @@ private:
 	QString m_senderAddress;
 	const QString m_dmType;
 	QString m_dmSenderRefNumber;
+	QString m_dmSenderIdent;
+	QString m_dmRecipientRefNumber;
+	QString m_dmRecipientIdent;
 	QString m_userName;
 	MessageDb &m_messDb;
 	int m_attachSize;
