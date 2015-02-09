@@ -159,7 +159,10 @@ void DlgPreferences::setSavePath(void)
 	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select directory"), this->savePath->text(),
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	this->savePath->setText(newDir);
+
+	if (!newDir.isEmpty()) {
+		this->savePath->setText(newDir);
+	}
 }
 
 
@@ -168,7 +171,9 @@ void DlgPreferences::setAddFilePath(void)
 	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select directory"), this->addFilePath->text(),
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	this->addFilePath->setText(newDir);
+	if (!newDir.isEmpty()) {
+		this->addFilePath->setText(newDir);
+	}
 }
 
 
