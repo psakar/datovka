@@ -90,6 +90,8 @@ MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
     m_statusProgressBar(NULL),
+    m_syncAcntThread(0),
+    m_syncAcntWorker(0),
     m_accountModel(this),
     m_accountDb("accountDb"),
     m_messageDbs(),
@@ -1657,8 +1659,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	}
 
 	threadDownMsgComplete = new QThread();
-	workerDownMsgComplete = new Worker(accountIndex, m_accountDb,
-	    messageDb, dmIDs, incoming ? MSG_RECEIVED : MSG_SENT, 0);
+	workerDownMsgComplete = new Worker(accountIndex, messageDb,
+	    m_accountDb, dmIDs, incoming ? MSG_RECEIVED : MSG_SENT, 0);
 
 	workerDownMsgComplete->moveToThread(threadDownMsgComplete);
 
@@ -2086,8 +2088,8 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionGet_messages->setEnabled(false);
 
 	threadSyncAll = new QThread();
-	workerSyncAll = new Worker(accountIndexes, m_accountDb,
-	    messageDbList, 0);
+	workerSyncAll = new Worker(accountIndexes, messageDbList, m_accountDb,
+	    0);
 	workerSyncAll->moveToThread(threadSyncAll);
 
 	connect(workerSyncAll, SIGNAL(valueChanged(QString, int)),
@@ -2160,44 +2162,100 @@ void MainWindow::synchroniseSelectedAccount(void)
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-
 	MessageDb *messageDb = accountMessageDb(accountItem);
 
+	Worker::jobList.append(Worker::Job(index, messageDb));
+
+	processPendingWorkerJobs();
+}
+
+
+/* ========================================================================= */
+/*
+ * Process pending worker jobs.
+ */
+void MainWindow::processPendingWorkerJobs(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* Only if no other worker is present. */
+	if ((0 != m_syncAcntThread) || (0 != m_syncAcntWorker)) {
+		qDebug() << "Worker already doing something.";
+		return;
+	}
+
+	/* Only if no other worker is present. */
+
+	Worker::Job job = Worker::jobList.firstPop(false);
+	if (!job.isValid()) {
+		return;
+	}
+
 	const AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    job.acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	showStatusTextPermanently(
 	    tr("Synchronise account \"%1\" with ISDS server.")
 	        .arg(accountInfo.accountName()));
 
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(job.acntTopIdx, true)) {
 			return;
 		}
 	}
 
-	threadSyncOne = new QThread();
-	workerSyncOne = new Worker(index, m_accountDb, messageDb, 0);
-	workerSyncOne->moveToThread(threadSyncOne);
+	m_syncAcntThread = new QThread();
+	m_syncAcntWorker = new Worker(m_accountDb, 0);
+	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
-	connect(workerSyncOne, SIGNAL(valueChanged(QString, int)),
+	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
-	connect(workerSyncOne,
+	connect(m_syncAcntWorker,
 	    SIGNAL(changeStatusBarInfo(bool, QString, int, int, int, int)),
 	    this,
 	    SLOT(dataFromWorkerToStatusBarInfo(bool, QString, int, int, int, int)));
-	connect(workerSyncOne, SIGNAL(refreshAccountList(const QModelIndex)),
+	connect(m_syncAcntWorker, SIGNAL(refreshAccountList(const QModelIndex)),
 	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
-	connect(workerSyncOne, SIGNAL(workRequested()),
-	    threadSyncOne, SLOT(start()));
-	connect(threadSyncOne, SIGNAL(started()),
-	    workerSyncOne, SLOT(syncOneAccount()));
-	connect(workerSyncOne, SIGNAL(finished()),
-	    threadSyncOne, SLOT(quit()), Qt::DirectConnection);
-	connect(threadSyncOne, SIGNAL(finished()),
-	    this, SLOT(deleteThreadSyncOne()));
+	connect(m_syncAcntWorker, SIGNAL(workRequested()),
+	    m_syncAcntThread, SLOT(start()));
+	connect(m_syncAcntThread, SIGNAL(started()),
+	    m_syncAcntWorker, SLOT(syncOneAccount()));
+	connect(m_syncAcntWorker, SIGNAL(finished()),
+	    m_syncAcntThread, SLOT(quit()), Qt::DirectConnection);
+	connect(m_syncAcntThread, SIGNAL(finished()),
+	    this, SLOT(endCurrentWorkerJob()));
 
-	workerSyncOne->requestWork();
+	m_syncAcntWorker->requestWork();
+}
+
+
+/* ========================================================================= */
+/*
+ * End current worker job.
+ */
+void MainWindow::endCurrentWorkerJob(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	qDebug() << "Deleting Worker and Thread objects.";
+
+	delete m_syncAcntThread; m_syncAcntThread = NULL;
+	delete m_syncAcntWorker; m_syncAcntWorker = NULL;
+
+	if (Worker::jobList.firstPop(false).isValid()) {
+		/* Queue still contains pending jobs. */
+		processPendingWorkerJobs();
+	} else {
+		int accountCount = ui->accountList->model()->rowCount();
+		if (accountCount > 0) {
+			ui->actionSync_all_accounts->setEnabled(true);
+			ui->actionReceived_all->setEnabled(true);
+			ui->actionDownload_messages->setEnabled(true);
+			ui->actionGet_messages->setEnabled(true);
+		}
+	}
 }
 
 
@@ -4138,30 +4196,6 @@ void MainWindow::deleteThreadSyncAll(void)
 	if (globPref.download_on_background) {
 		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 	}
-
-	qDebug() << "Delete Worker and Thread objects";
-}
-
-
-/* ========================================================================= */
-/*
-* Delete worker and thread objects, enable buttons
-*/
-void MainWindow::deleteThreadSyncOne(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	int accountCount = ui->accountList->model()->rowCount();
-	if (accountCount > 0) {
-		ui->actionSync_all_accounts->setEnabled(true);
-		ui->actionReceived_all->setEnabled(true);
-		ui->actionDownload_messages->setEnabled(true);
-		ui->actionGet_messages->setEnabled(true);
-	}
-
-	delete workerSyncOne;
-	delete threadSyncOne;
 
 	qDebug() << "Delete Worker and Thread objects";
 }

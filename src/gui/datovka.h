@@ -87,6 +87,7 @@ protected:
 	 */
 	void closeEvent(QCloseEvent *event);
 
+
 private slots:
 
 	/*!
@@ -205,6 +206,16 @@ private slots:
 	 * @brief Downloads new messages from server for selected account.
 	 */
 	void synchroniseSelectedAccount(void);
+
+	/*!
+	 * @brief Process pending worker jobs.
+	 */
+	void processPendingWorkerJobs(void);
+
+	/*!
+	 * @brief End current worker job.
+	 */
+	void endCurrentWorkerJob(void);
 
 	/*!
 	 * @brief Creates and sends new message.
@@ -429,11 +440,6 @@ private slots:
 	/*!
 	 * @brief Delete worker and thread objects, enable sync buttons.
 	 */
-	void deleteThreadSyncOne(void);
-
-	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
 	void deleteThreadDownMsgComplete(void);
 
 	/*!
@@ -487,8 +493,10 @@ private slots:
 
 private:
 
-	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
-	Worker *workerSyncAll, *workerSyncOne, *workerDownMsgComplete;
+	QThread *threadSyncAll, *threadDownMsgComplete;
+	Worker *workerSyncAll, *workerDownMsgComplete;
+	QThread *m_syncAcntThread;
+	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 

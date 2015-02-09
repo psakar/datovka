@@ -38,9 +38,53 @@
 
 
 class Worker : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
+
+	class Job {
+	public:
+		Job(void)
+		    : acntTopIdx(QModelIndex()),
+		    messageDb(0)
+		{
+		}
+		Job(const QModelIndex &idx, MessageDb *mDb)
+		    : acntTopIdx(idx),
+		    messageDb(mDb)
+		{
+		}
+
+		bool isValid(void) {
+			return acntTopIdx.isValid() && (0 != messageDb);
+		}
+
+		QModelIndex acntTopIdx;
+		MessageDb *messageDb;
+	};
+
+	class JobList : private QList<Job>, private QMutex {
+	public:
+		JobList(void);
+		~JobList(void);
+
+		/*!
+		 * @brief Atomic append.
+		 *
+		 * @param[in] value  Worker job.
+		 */
+		void append(const Job &value);
+		/*!
+		 * @brief Atomic get first and pop.
+		 *
+		 * param[in] pop  Whether to also pop the first value.
+		 * @return Worker job. Empty list returns invalid worker job.
+		 */
+		Job firstPop(bool pop);
+	};
+
+	static
+	JobList jobList;
 
 	static
 	QMutex downloadMessagesMutex;
@@ -48,21 +92,27 @@ public:
 	/*!
 	 * @brief Constructor for multiple accounts.
 	 */
-	explicit Worker(QList<QModelIndex> acntTopIdxs, AccountDb &accountDb,
-	    QList<MessageDb *> messageDbList, QObject *parent);
+	explicit Worker(QList<QModelIndex> acntTopIdxs,
+	    QList<MessageDb *> messageDbList, AccountDb &accountDb,
+	    QObject *parent);
 
 	/*!
 	 * @brief Constructor for single account.
 	 */
-	explicit Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
-	    MessageDb *messageDb, QObject *parent);
+	explicit Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
+	    AccountDb &accountDb, QObject *parent);
 
 	/*!
 	 * @brief Constructor for download complete message.
 	 */
-	explicit Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
-	    MessageDb *messageDb, QString dmId,
+	explicit Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
+	    AccountDb &accountDb, QString dmId,
 	    enum MessageDirection msgDirection, QObject *parent);
+
+	/*!
+	 * @brief Constructor for job list usage.
+	 */
+	explicit Worker(AccountDb &accountDb, QObject *parent);
 
 	/*!
 	 * @brief Requests the process to start
@@ -120,10 +170,11 @@ public:
 private:
 
 	QList<QModelIndex> m_acntTopIdxs; /*< List of account top indexes. */
-	AccountDb &m_accountDb; /*!< Account database. */
 	QList<MessageDb *> m_messageDbList; /*!< Corresponding databases.*/
+	AccountDb &m_accountDb; /*!< Account database. */
 	QString m_dmId; /*!< Message id if downloading single message. */
 	enum MessageDirection m_msgDirection; /*!< Sent or received. */
+	bool m_useJobList; /* Whether to process data from the job list. */
 
 	/*!
 	* @brief Get password expiration info for account index

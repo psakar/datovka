@@ -36,6 +36,64 @@
 #include "src/io/isds_sessions.h"
 
 
+/* ========================================================================= */
+/*
+ * Job list constructor.
+ */
+Worker::JobList::JobList(void)
+/* ========================================================================= */
+    : QList<Job>(),
+    QMutex(QMutex::NonRecursive)
+{
+}
+
+
+/* ========================================================================= */
+/*
+ * Job list destructor.
+ */
+Worker::JobList::~JobList(void)
+/* ========================================================================= */
+{
+}
+
+
+/* ========================================================================= */
+/*
+ * Atomic append.
+ */
+void Worker::JobList::append(const Worker::Job &value)
+/* ========================================================================= */
+{
+	QMutex::lock();
+	QList<Job>::append(value);
+	QMutex::unlock();
+}
+
+
+/* ========================================================================= */
+/*
+ * Atomic get first and pop.
+ */
+Worker::Job Worker::JobList::firstPop(bool pop)
+/* ========================================================================= */
+{
+	Job value;
+
+	QMutex::lock();
+	if (!isEmpty()) {
+		value = QList<Job>::first();
+		if (pop) {
+			QList<Job>::removeFirst();
+		}
+	}
+	QMutex::unlock();
+
+	return value;
+}
+
+
+Worker::JobList Worker::jobList;
 QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 
 
@@ -43,14 +101,16 @@ QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 /*
  * Constructor for multiple accounts.
  */
-Worker::Worker(QList<QModelIndex> acntTopIdxs, AccountDb &accountDb,
-    QList<MessageDb *> messageDbList, QObject *parent)
+Worker::Worker(QList<QModelIndex> acntTopIdxs,
+    QList<MessageDb *> messageDbList, AccountDb &accountDb,
+    QObject *parent)
 /* ========================================================================= */
-: m_acntTopIdxs(acntTopIdxs),
-    m_accountDb(accountDb),
+    : m_acntTopIdxs(acntTopIdxs),
     m_messageDbList(messageDbList),
+    m_accountDb(accountDb),
     m_dmId(),
-    m_msgDirection(MSG_SENT) /* Any value will do. */
+    m_msgDirection(MSG_SENT), /* Any value will do. */
+    m_useJobList(false)
 {
 	/* unused */
 	(void) parent;
@@ -61,14 +121,15 @@ Worker::Worker(QList<QModelIndex> acntTopIdxs, AccountDb &accountDb,
 /*
  * Constructor for single account.
  */
-Worker::Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
-    MessageDb *messageDb, QObject *parent)
+Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
+    AccountDb &accountDb, QObject *parent)
 /* ========================================================================= */
     : m_acntTopIdxs(),
-    m_accountDb(accountDb),
     m_messageDbList(),
+    m_accountDb(accountDb),
     m_dmId(),
-    m_msgDirection(MSG_SENT) /* Any value will do. */
+    m_msgDirection(MSG_SENT), /* Any value will do. */
+    m_useJobList(false)
 {
 	/* unused */
 	(void) parent;
@@ -82,21 +143,40 @@ Worker::Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
 /*
  * Constructor for download complete message.
  */
-Worker::Worker(QModelIndex acntTopIdx, AccountDb &accountDb,
-    MessageDb *messageDb, QString dmId,
+Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
+    AccountDb &accountDb, QString dmId,
     enum MessageDirection msgDirection, QObject *parent)
 /* ========================================================================= */
     : m_acntTopIdxs(),
-    m_accountDb(accountDb),
     m_messageDbList(),
+    m_accountDb(accountDb),
     m_dmId(dmId),
-    m_msgDirection(msgDirection)
+    m_msgDirection(msgDirection),
+    m_useJobList(false)
 {
 	/* unused */
 	(void) parent;
 
 	m_acntTopIdxs.append(acntTopIdx);
 	m_messageDbList.append(messageDb);
+}
+
+
+/* ========================================================================= */
+/*
+ * Constructor for job list usage.
+ */
+Worker::Worker(AccountDb &accountDb, QObject *parent)
+/* ========================================================================= */
+   : m_acntTopIdxs(),
+   m_messageDbList(),
+   m_accountDb(accountDb),
+   m_dmId(),
+   m_msgDirection(MSG_SENT), /* Any value will do. */
+   m_useJobList(true)
+{
+	/* unused */
+	(void) parent;
 }
 
 
@@ -222,12 +302,33 @@ void Worker::syncOneAccount(void)
 	qDebug() << "Starting worker process in Thread "
 	    << thread()->currentThreadId();
 
+	QModelIndex acntTopIdx;
+	MessageDb *msgDb;
+
 	/* test account index valid */
-	if (!m_acntTopIdxs[0].isValid()) {
-		qDebug() << "Invalid Account index! Downloading is canceled.";
-		downloadMessagesMutex.unlock();
-		emit finished();
-		return;
+	if (m_useJobList) {
+		Job job = jobList.firstPop(true);
+		if (job.isValid()) {
+			acntTopIdx = job.acntTopIdx;
+			msgDb = job.messageDb;
+		} else {
+			qDebug() <<
+			    "Invalid Account index! Downloading is cancelled.";
+			downloadMessagesMutex.unlock();
+			emit finished();
+			return;
+		}
+	} else {
+		if (m_acntTopIdxs[0].isValid()) {
+			acntTopIdx = m_acntTopIdxs[0];
+			msgDb = m_messageDbList[0];
+		} else {
+			qDebug() <<
+			    "Invalid Account index! Downloading is cancelled.";
+			downloadMessagesMutex.unlock();
+			emit finished();
+			return;
+		} 
 	}
 
 	bool success = true;
@@ -244,26 +345,26 @@ void Worker::syncOneAccount(void)
 
 	qDebug() << "-----------------------------------------------";
 	qDebug() << "Downloading message list for account"
-	    << m_acntTopIdxs[0].data().toString();
+	    << acntTopIdx.data().toString();
 	qDebug() << "-----------------------------------------------";
 
 	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(m_acntTopIdxs[0],"received", *m_messageDbList[0],
-	    "GetListOfReceivedMessages", 0, this, rt, rn)) {
+	    downloadMessageList(acntTopIdx, "received", *msgDb,
+	        "GetListOfReceivedMessages", 0, this, rt, rn)) {
 		success = false;
 	}
 
-	emit refreshAccountList(m_acntTopIdxs[0]);
+	emit refreshAccountList(acntTopIdx);
 
 	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(m_acntTopIdxs[0],"sent", *m_messageDbList[0],
-	    "GetListOfSentMessages", 0, this, st, sn)) {
+	    downloadMessageList(acntTopIdx, "sent", *msgDb,
+	        "GetListOfSentMessages", 0, this, st, sn)) {
 		success = false;
 	}
 
-	emit refreshAccountList(m_acntTopIdxs[0]);
+	emit refreshAccountList(acntTopIdx);
 
-	if (!getPasswordInfo(m_acntTopIdxs[0])) {
+	if (!getPasswordInfo(acntTopIdx)) {
 		success = false;
 	}
 
@@ -275,7 +376,7 @@ void Worker::syncOneAccount(void)
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
 
-	emit changeStatusBarInfo(true, m_acntTopIdxs[0].data().toString(),
+	emit changeStatusBarInfo(true, acntTopIdx.data().toString(),
 	    rt, rn , st, sn);
 
 	downloadMessagesMutex.unlock();
@@ -296,7 +397,7 @@ void Worker::downloadCompleteMessage(void)
 
 	/* test message ID valid */
 	if (m_dmId.isNull() || m_dmId.isEmpty()) {
-		qDebug() << "Invalid message ID! Downloading is canceled.";
+		qDebug() << "Invalid message ID! Downloading is cancelled.";
 		downloadMessagesMutex.unlock();
 		emit finished();
 		return;
