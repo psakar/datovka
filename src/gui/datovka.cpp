@@ -2164,7 +2164,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 	MessageDb *messageDb = accountMessageDb(accountItem);
 
-	Worker::jobList.append(Worker::Job(index, messageDb));
+	Worker::jobList.append(Worker::Job(index, messageDb, MSG_RECEIVED));
+	Worker::jobList.append(Worker::Job(index, messageDb, MSG_SENT));
 
 	processPendingWorkerJobs();
 }

@@ -46,12 +46,15 @@ public:
 	public:
 		Job(void)
 		    : acntTopIdx(QModelIndex()),
-		    messageDb(0)
+		    messageDb(0),
+		    msgDirection(MSG_RECEIVED)
 		{
 		}
-		Job(const QModelIndex &idx, MessageDb *mDb)
+		Job(const QModelIndex &idx, MessageDb *mDb,
+		    enum MessageDirection direc)
 		    : acntTopIdx(idx),
-		    messageDb(mDb)
+		    messageDb(mDb),
+		    msgDirection(direc)
 		{
 		}
 
@@ -61,6 +64,7 @@ public:
 
 		QModelIndex acntTopIdx;
 		MessageDb *messageDb;
+		enum MessageDirection msgDirection;
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -95,12 +99,6 @@ public:
 	explicit Worker(QList<QModelIndex> acntTopIdxs,
 	    QList<MessageDb *> messageDbList, AccountDb &accountDb,
 	    QObject *parent);
-
-	/*!
-	 * @brief Constructor for single account.
-	 */
-	explicit Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
-	    AccountDb &accountDb, QObject *parent);
 
 	/*!
 	 * @brief Constructor for download complete message.

@@ -119,28 +119,6 @@ Worker::Worker(QList<QModelIndex> acntTopIdxs,
 
 /* ========================================================================= */
 /*
- * Constructor for single account.
- */
-Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
-    AccountDb &accountDb, QObject *parent)
-/* ========================================================================= */
-    : m_acntTopIdxs(),
-    m_messageDbList(),
-    m_accountDb(accountDb),
-    m_dmId(),
-    m_msgDirection(MSG_SENT), /* Any value will do. */
-    m_useJobList(false)
-{
-	/* unused */
-	(void) parent;
-
-	m_acntTopIdxs.append(acntTopIdx);
-	m_messageDbList.append(messageDb);
-}
-
-
-/* ========================================================================= */
-/*
  * Constructor for download complete message.
  */
 Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
@@ -304,31 +282,25 @@ void Worker::syncOneAccount(void)
 
 	QModelIndex acntTopIdx;
 	MessageDb *msgDb;
+	enum MessageDirection msgDirect;
+
+	Q_ASSERT(m_useJobList);
+	if (!m_useJobList) {
+		return;
+	}
 
 	/* test account index valid */
-	if (m_useJobList) {
-		Job job = jobList.firstPop(true);
-		if (job.isValid()) {
-			acntTopIdx = job.acntTopIdx;
-			msgDb = job.messageDb;
-		} else {
-			qDebug() <<
-			    "Invalid Account index! Downloading is cancelled.";
-			downloadMessagesMutex.unlock();
-			emit finished();
-			return;
-		}
+	Job job = jobList.firstPop(true);
+	if (job.isValid()) {
+		acntTopIdx = job.acntTopIdx;
+		msgDb = job.messageDb;
+		msgDirect = job.msgDirection;
 	} else {
-		if (m_acntTopIdxs[0].isValid()) {
-			acntTopIdx = m_acntTopIdxs[0];
-			msgDb = m_messageDbList[0];
-		} else {
-			qDebug() <<
-			    "Invalid Account index! Downloading is cancelled.";
-			downloadMessagesMutex.unlock();
-			emit finished();
-			return;
-		} 
+		qDebug() <<
+		    "Invalid Account index! Downloading is cancelled.";
+		downloadMessagesMutex.unlock();
+		emit finished();
+		return;
 	}
 
 	bool success = true;
@@ -348,21 +320,25 @@ void Worker::syncOneAccount(void)
 	    << acntTopIdx.data().toString();
 	qDebug() << "-----------------------------------------------";
 
-	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(acntTopIdx, "received", *msgDb,
-	        "GetListOfReceivedMessages", 0, this, rt, rn)) {
-		success = false;
+	if (MSG_RECEIVED == msgDirect) {
+		if (Q_CONNECT_ERROR ==
+		    downloadMessageList(acntTopIdx, "received", *msgDb,
+		        "GetListOfReceivedMessages", 0, this, rt, rn)) {
+			success = false;
+		}
+
+		emit refreshAccountList(acntTopIdx);
 	}
 
-	emit refreshAccountList(acntTopIdx);
+	if (MSG_SENT == msgDirect) {
+		if (Q_CONNECT_ERROR ==
+		    downloadMessageList(acntTopIdx, "sent", *msgDb,
+		        "GetListOfSentMessages", 0, this, st, sn)) {
+			success = false;
+		}
 
-	if (Q_CONNECT_ERROR ==
-	    downloadMessageList(acntTopIdx, "sent", *msgDb,
-	        "GetListOfSentMessages", 0, this, st, sn)) {
-		success = false;
+		emit refreshAccountList(acntTopIdx);
 	}
-
-	emit refreshAccountList(acntTopIdx);
 
 	if (!getPasswordInfo(acntTopIdx)) {
 		success = false;
