@@ -46,25 +46,29 @@ public:
 	public:
 		Job(void)
 		    : acntTopIdx(QModelIndex()),
-		    messageDb(0),
-		    msgDirection(MSG_RECEIVED)
+		    msgDb(0),
+		    msgDirect(MSG_RECEIVED),
+		    msgId()
 		{
 		}
 		Job(const QModelIndex &idx, MessageDb *mDb,
-		    enum MessageDirection direc)
+		    enum MessageDirection direc,
+		    const QString &dmId = QString())
 		    : acntTopIdx(idx),
-		    messageDb(mDb),
-		    msgDirection(direc)
+		    msgDb(mDb),
+		    msgDirect(direc),
+		    msgId(dmId)
 		{
 		}
 
 		bool isValid(void) {
-			return acntTopIdx.isValid() && (0 != messageDb);
+			return acntTopIdx.isValid() && (0 != msgDb);
 		}
 
 		QModelIndex acntTopIdx;
-		MessageDb *messageDb;
-		enum MessageDirection msgDirection;
+		MessageDb *msgDb;
+		enum MessageDirection msgDirect;
+		QString msgId;
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -73,7 +77,7 @@ public:
 		~JobList(void);
 
 		/*!
-		 * @brief Atomic append.
+		 * @brief Atomic prepend.
 		 *
 		 * @param[in] value  Worker job.
 		 */
@@ -85,6 +89,12 @@ public:
 		 * @return Worker job. Empty list returns invalid worker job.
 		 */
 		Job firstPop(bool pop);
+		/*!
+		 * @brief Atomic prepend.
+		 *
+		 * @param[in] value  Worker job.
+		 */
+		void prepend(const Job &value);
 	};
 
 	static
@@ -92,13 +102,6 @@ public:
 
 	static
 	QMutex downloadMessagesMutex;
-
-	/*!
-	 * @brief Constructor for download complete message.
-	 */
-	explicit Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
-	    AccountDb &accountDb, QString dmId,
-	    enum MessageDirection msgDirection, QObject *parent);
 
 	/*!
 	 * @brief Constructor for job list usage.
@@ -160,11 +163,7 @@ public:
 
 private:
 
-	QList<QModelIndex> m_acntTopIdxs; /*< List of account top indexes. */
-	QList<MessageDb *> m_messageDbList; /*!< Corresponding databases.*/
 	AccountDb &m_accountDb; /*!< Account database. */
-	QString m_dmId; /*!< Message id if downloading single message. */
-	enum MessageDirection m_msgDirection; /*!< Sent or received. */
 	bool m_useJobList; /* Whether to process data from the job list. */
 
 	/*!
@@ -243,7 +242,6 @@ public slots:
 	 * @brief Run Message downloading in thread
 	 */
 	void syncOneAccount(void);
-	void downloadCompleteMessage(void);
 };
 
 #endif /* _WORKER_H_ */

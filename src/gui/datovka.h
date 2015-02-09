@@ -183,11 +183,6 @@ private slots:
 	void openSelectedAttachment(void);
 
 	/*!
-	 * @brief Downloads the attachments for the selected message.
-	 */
-	void downloadSelectedMessageAttachments(void);
-
-	/*!
 	 * @brief Mark all messages as read in selected account item.
 	 */
 	void accountItemMarkAllRead(void);
@@ -206,6 +201,11 @@ private slots:
 	 * @brief Downloads new messages from server for selected account.
 	 */
 	void synchroniseSelectedAccount(void);
+
+	/*!
+	 * @brief Downloads the attachments for the selected message.
+	 */
+	void downloadSelectedMessageAttachments(void);
 
 	/*!
 	 * @brief Process pending worker jobs.
@@ -433,11 +433,6 @@ private slots:
 	void onTableColumnHeaderSectionClicked(int column);
 
 	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
-	void deleteThreadDownMsgComplete(void);
-
-	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
 	void setProgressBarFromWorker(QString label, int value);
@@ -488,8 +483,6 @@ private slots:
 
 private:
 
-	QThread *threadDownMsgComplete;
-	Worker *workerDownMsgComplete;
 	QThread *m_syncAcntThread;
 	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;

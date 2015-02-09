@@ -93,31 +93,21 @@ Worker::Job Worker::JobList::firstPop(bool pop)
 }
 
 
-Worker::JobList Worker::jobList;
-QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
-
-
 /* ========================================================================= */
 /*
- * Constructor for download complete message.
+ * Atomic prepend.
  */
-Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
-    AccountDb &accountDb, QString dmId,
-    enum MessageDirection msgDirection, QObject *parent)
+void Worker::JobList::prepend(const Worker::Job &value)
 /* ========================================================================= */
-    : m_acntTopIdxs(),
-    m_messageDbList(),
-    m_accountDb(accountDb),
-    m_dmId(dmId),
-    m_msgDirection(msgDirection),
-    m_useJobList(false)
 {
-	/* unused */
-	(void) parent;
-
-	m_acntTopIdxs.append(acntTopIdx);
-	m_messageDbList.append(messageDb);
+	QMutex::lock();
+	QList<Job>::prepend(value);
+	QMutex::unlock();
 }
+
+
+Worker::JobList Worker::jobList;
+QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 
 
 /* ========================================================================= */
@@ -126,11 +116,7 @@ Worker::Worker(QModelIndex acntTopIdx, MessageDb *messageDb,
  */
 Worker::Worker(AccountDb &accountDb, QObject *parent)
 /* ========================================================================= */
-   : m_acntTopIdxs(),
-   m_messageDbList(),
-   m_accountDb(accountDb),
-   m_dmId(),
-   m_msgDirection(MSG_SENT), /* Any value will do. */
+   : m_accountDb(accountDb),
    m_useJobList(true)
 {
 	/* unused */
@@ -164,22 +150,15 @@ void Worker::syncOneAccount(void)
 	qDebug() << "Starting worker process in Thread "
 	    << thread()->currentThreadId();
 
-	QModelIndex acntTopIdx;
-	MessageDb *msgDb;
-	enum MessageDirection msgDirect;
-
 	Q_ASSERT(m_useJobList);
 	if (!m_useJobList) {
+		emit finished();
 		return;
 	}
 
 	/* test account index valid */
 	Job job = jobList.firstPop(true);
-	if (job.isValid()) {
-		acntTopIdx = job.acntTopIdx;
-		msgDb = job.messageDb;
-		msgDirect = job.msgDirection;
-	} else {
+	if (!job.isValid()) {
 		qDebug() <<
 		    "Invalid Account index! Downloading is cancelled.";
 		downloadMessagesMutex.unlock();
@@ -199,45 +178,77 @@ void Worker::syncOneAccount(void)
 	int st = 0;
 	int sn = 0;
 
-	qDebug() << "-----------------------------------------------";
-	qDebug() << "Downloading message list for account"
-	    << acntTopIdx.data().toString();
-	qDebug() << "-----------------------------------------------";
+	if (!job.msgId.isEmpty()) {
 
-	if (MSG_RECEIVED == msgDirect) {
+		if (Q_SUCCESS == downloadMessage(job.acntTopIdx, job.msgId,
+		        true, MSG_RECEIVED == job.msgDirect, *job.msgDb,
+		        "DownloadMessage", 0, this)) {
+			/* Only on successful download. */
+			emit refreshAttachmentList(job.acntTopIdx, job.msgId);
+		} else {
+			emit clearStatusBarAndShowDialog(job.msgId);
+		}
+
+	} else if (MSG_RECEIVED == job.msgDirect) {
+
+		qDebug() << "-----------------------------------------------";
+		qDebug() << "Downloading received message list for account"
+		    << job.acntTopIdx.data().toString();
+		qDebug() << "-----------------------------------------------";
 		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(acntTopIdx, "received", *msgDb,
+		    downloadMessageList(job.acntTopIdx, "received", *job.msgDb,
 		        "GetListOfReceivedMessages", 0, this, rt, rn)) {
 			success = false;
 		}
+		emit refreshAccountList(job.acntTopIdx);
 
-		emit refreshAccountList(acntTopIdx);
-	}
-
-	if (MSG_SENT == msgDirect) {
-		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(acntTopIdx, "sent", *msgDb,
-		        "GetListOfSentMessages", 0, this, st, sn)) {
+		if (!getPasswordInfo(job.acntTopIdx)) {
 			success = false;
 		}
 
-		emit refreshAccountList(acntTopIdx);
-	}
+		emit changeStatusBarInfo(true,
+		    job.acntTopIdx.data().toString(), rt, rn , st, sn);
 
-	if (!getPasswordInfo(acntTopIdx)) {
-		success = false;
+		qDebug() << "-----------------------------------------------";
+		if (success) {
+			qDebug() << "All DONE!";
+		} else {
+			qDebug() << "An error occurred!";
+		}
+
+	} else if (MSG_SENT == job.msgDirect) {
+
+		qDebug() << "-----------------------------------------------";
+		qDebug() << "Downloading sent message list for account"
+		    << job.acntTopIdx.data().toString();
+		qDebug() << "-----------------------------------------------";
+		if (Q_CONNECT_ERROR ==
+		    downloadMessageList(job.acntTopIdx, "sent", *job.msgDb,
+		        "GetListOfSentMessages", 0, this, st, sn)) {
+			success = false;
+		}
+		emit refreshAccountList(job.acntTopIdx);
+
+		if (!getPasswordInfo(job.acntTopIdx)) {
+			success = false;
+		}
+
+		emit changeStatusBarInfo(true,
+		    job.acntTopIdx.data().toString(), rt, rn , st, sn);
+
+		qDebug() << "-----------------------------------------------";
+		if (success) {
+			qDebug() << "All DONE!";
+		} else {
+			qDebug() << "An error occurred!";
+		}
+
 	}
 
 	emit valueChanged("Idle", 0);
 
-	qDebug() << "-----------------------------------------------";
-	success ? qDebug() << "All DONE!" : qDebug() << "An error occurred!";
-
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
-
-	emit changeStatusBarInfo(true, acntTopIdx.data().toString(),
-	    rt, rn , st, sn);
 
 	downloadMessagesMutex.unlock();
 
@@ -247,49 +258,7 @@ void Worker::syncOneAccount(void)
 
 /* ========================================================================= */
 /*
-* Download complete message in separated thread
-*/
-void Worker::downloadCompleteMessage(void)
-/* ========================================================================= */
-{
-	qDebug() << "Starting worker process in Thread "
-	    << thread()->currentThreadId();
-
-	/* test message ID valid */
-	if (m_dmId.isNull() || m_dmId.isEmpty()) {
-		qDebug() << "Invalid message ID! Downloading is cancelled.";
-		downloadMessagesMutex.unlock();
-		emit finished();
-		return;
-	}
-
-	MessageDb *messageDb;
-	messageDb = m_messageDbList.at(0);
-
-	/* sent message */
-	if (Q_SUCCESS == downloadMessage(m_acntTopIdxs[0], m_dmId, true,
-	        MSG_RECEIVED == m_msgDirection, *messageDb,
-	        "DownloadMessage", 0, this)) {
-		/* Only on successful download. */
-		emit refreshAttachmentList(m_acntTopIdxs[0], m_dmId);
-	} else {
-		emit clearStatusBarAndShowDialog(m_dmId);
-	}
-
-	emit valueChanged("Idle", 0);
-
-	qDebug() << "Worker process finished in Thread " <<
-	    thread()->currentThreadId();
-
-	downloadMessagesMutex.unlock();
-
-	emit finished();
-}
-
-
-/* ========================================================================= */
-/*!
- * @brief Store envelope into database.
+ * Store envelope into database.
  */
 qdatovka_error Worker::storeEnvelope(const QString &messageType,
     MessageDb &messageDb, const struct isds_envelope *envel)

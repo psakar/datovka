@@ -1607,88 +1607,6 @@ void MainWindow::openSelectedAttachment(void)
 
 /* ========================================================================= */
 /*
- * Downloads the attachments for the selected message.
- */
-void MainWindow::downloadSelectedMessageAttachments(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	bool incoming = true;
-
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
-	Q_ASSERT(messageIndex.isValid());
-
-	QString dmIDs = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toString();
-
-	showStatusTextPermanently(tr("Download complete message \"%1\" "
-	    "from ISDS server.").arg(dmIDs));
-
-	QModelIndex accountIndex = ui->accountList->currentIndex();
-	Q_ASSERT(accountIndex.isValid());
-	accountIndex = AccountModel::indexTop(accountIndex);
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
-
-	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
-	switch (AccountModel::nodeType(index)) {
-	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeReceived:
-	case AccountModel::nodeReceivedYear:
-		incoming = true;
-		break;
-	case AccountModel::nodeRecentSent:
-	case AccountModel::nodeSent:
-	case AccountModel::nodeSentYear:
-		incoming = false;
-		break;
-	default:
-		break;
-	}
-
-	MessageDb *messageDb = accountMessageDb(accountItem);
-
-	const AccountModel::SettingsMap accountInfo =
-	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(accountIndex, true)) {
-			return;
-		}
-	}
-
-	threadDownMsgComplete = new QThread();
-	workerDownMsgComplete = new Worker(accountIndex, messageDb,
-	    m_accountDb, dmIDs, incoming ? MSG_RECEIVED : MSG_SENT, 0);
-
-	workerDownMsgComplete->moveToThread(threadDownMsgComplete);
-
-	connect(workerDownMsgComplete, SIGNAL(valueChanged(QString, int)),
-	    this, SLOT(setProgressBarFromWorker(QString, int)));
-
-	connect(workerDownMsgComplete,
-	    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
-	    this, SLOT(postDownloadSelectedMessageAttachments(
-		const QModelIndex, QString)));
-	connect(workerDownMsgComplete,
-	    SIGNAL(clearStatusBarAndShowDialog(QString)),this,
-	    SLOT(clearInfoInStatusBarAndShowDialog(QString)));
-	connect(workerDownMsgComplete, SIGNAL(workRequested()),
-	    threadDownMsgComplete, SLOT(start()));
-	connect(threadDownMsgComplete, SIGNAL(started()),
-	    workerDownMsgComplete, SLOT(downloadCompleteMessage()));
-	connect(workerDownMsgComplete, SIGNAL(finished()),
-	    threadDownMsgComplete, SLOT(quit()), Qt::DirectConnection);
-	connect(threadDownMsgComplete, SIGNAL(finished()),
-	    this, SLOT(deleteThreadDownMsgComplete()));
-
-	workerDownMsgComplete->requestWork();
-}
-
-
-/* ========================================================================= */
-/*
  * Clear status bar if download of complete message fails.
  */
 void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
@@ -2093,12 +2011,11 @@ void MainWindow::synchroniseAllAccounts(void)
 	for (int i = 0; i < accountCount; ++i) {
 
 		QModelIndex index = m_accountModel.index(i, 0);
-		const AccountModel::SettingsMap accountInfo =
-		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
 		bool isConnectActive = true;
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
+		const AccountModel::SettingsMap accountInfo =
+		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			isConnectActive = connectToIsds(index, true);
 		}
@@ -2172,6 +2089,72 @@ void MainWindow::synchroniseSelectedAccount(void)
 
 /* ========================================================================= */
 /*
+ * Downloads the attachments for the selected message.
+ */
+void MainWindow::downloadSelectedMessageAttachments(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	enum MessageDirection msgDirection = MSG_RECEIVED;
+
+	QModelIndex messageIndex =
+	    ui->messageList->selectionModel()->currentIndex();
+	Q_ASSERT(messageIndex.isValid());
+
+	QString dmIDs = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toString();
+
+	showStatusTextPermanently(tr("Download complete message \"%1\" "
+	    "from ISDS server.").arg(dmIDs));
+
+	QModelIndex accountIndex = ui->accountList->currentIndex();
+	Q_ASSERT(accountIndex.isValid());
+	accountIndex = AccountModel::indexTop(accountIndex);
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
+
+	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
+	switch (AccountModel::nodeType(index)) {
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeReceivedYear:
+		msgDirection = MSG_RECEIVED;
+		break;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeSentYear:
+		msgDirection = MSG_SENT;
+		break;
+	default:
+		break;
+	}
+
+	MessageDb *messageDb = accountMessageDb(accountItem);
+
+	/* Try connecting to ISDS, just to generate log-in dialogue. */
+	const AccountModel::SettingsMap accountInfo =
+	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+		if (!connectToIsds(accountIndex, true)) {
+			return;
+		}
+	}
+
+	/* Using prepend() just to outrun other jobs. */
+	Worker::jobList.append(
+	    Worker::Job(accountIndex, messageDb, msgDirection, dmIDs));
+
+	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionReceived_all->setEnabled(false);
+	ui->actionDownload_messages->setEnabled(false);
+	ui->actionGet_messages->setEnabled(false);
+
+	processPendingWorkerJobs();
+}
+
+
+/* ========================================================================= */
+/*
  * Process pending worker jobs.
  */
 void MainWindow::processPendingWorkerJobs(void)
@@ -2212,12 +2195,29 @@ void MainWindow::processPendingWorkerJobs(void)
 
 	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
 	    this, SLOT(setProgressBarFromWorker(QString, int)));
-	connect(m_syncAcntWorker,
-	    SIGNAL(changeStatusBarInfo(bool, QString, int, int, int, int)),
-	    this,
-	    SLOT(dataFromWorkerToStatusBarInfo(bool, QString, int, int, int, int)));
-	connect(m_syncAcntWorker, SIGNAL(refreshAccountList(const QModelIndex)),
-	    this, SLOT(refreshAccountListFromWorker(const QModelIndex)));
+	{
+		/* Downloading message list. */
+		connect(m_syncAcntWorker,
+		    SIGNAL(changeStatusBarInfo(bool, QString,
+		        int, int, int, int)),
+		    this,
+		    SLOT(dataFromWorkerToStatusBarInfo(bool, QString,
+		        int, int, int, int)));
+		connect(m_syncAcntWorker,
+		    SIGNAL(refreshAccountList(const QModelIndex)),
+		    this,
+		    SLOT(refreshAccountListFromWorker(const QModelIndex)));
+	}
+	{
+		/* Downloading attachment. */
+		connect(m_syncAcntWorker,
+		    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
+		    this, SLOT(postDownloadSelectedMessageAttachments(
+		        const QModelIndex, QString)));
+		connect(m_syncAcntWorker,
+		    SIGNAL(clearStatusBarAndShowDialog(QString)),
+		    this, SLOT(clearInfoInStatusBarAndShowDialog(QString)));
+	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
 	connect(m_syncAcntThread, SIGNAL(started()),
@@ -4171,30 +4171,6 @@ void MainWindow::setProgressBarFromWorker(QString label, int value)
 	m_statusProgressBar->setFormat(label);
 	m_statusProgressBar->setValue(value);
 	m_statusProgressBar->repaint();
-}
-
-
-/* ========================================================================= */
-/*
-* Delete worker and thread objects, enable buttons
-*/
-void MainWindow::deleteThreadDownMsgComplete(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	int accountCount = ui->accountList->model()->rowCount();
-	if (accountCount > 0) {
-		ui->actionSync_all_accounts->setEnabled(true);
-		ui->actionReceived_all->setEnabled(true);
-		ui->actionDownload_messages->setEnabled(true);
-		ui->actionGet_messages->setEnabled(true);
-	}
-
-	delete workerDownMsgComplete;
-	delete threadDownMsgComplete;
-
-	qDebug() << "Delete Worker and Thread objects";
 }
 
 
