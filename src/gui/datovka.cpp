@@ -2485,45 +2485,107 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	if (itemSettings.isTestAccount()) {
 		flags |= DBC_FLG_TESTING;
 	}
-	/* TODO -- Check database structure on account creation. */
+	if (itemSettings._createdFromScratch()) {
+		/* Check database structure on account creation. */
+		flags |= DBC_FLG_CHECK_QUICK;
+	}
 	dbPresenceCode =
 	    DbContainer::checkExistingDbFile(userName, dbDir, flags);
 
 	switch (dbPresenceCode) {
 	case DBC_ERR_OK:
 		{
-			/* TODO -- Notify the user on account creation. */
+			if (itemSettings._createdFromScratch()) {
+				/* Notify the user on account creation. */
+				QString dbFilePath =
+				    DbContainer::constructDbFileName(userName,
+				        dbDir, itemSettings.isTestAccount());
+				QMessageBox::information(this,
+				    tr("Datovka: Database file present"),
+				    tr("Database file for account '%1' "
+				        "already exists.").arg(userName) +
+				    "\n\n" +
+				    tr("The existing database file '%1' is "
+				        "going to be used.").arg(dbFilePath) +
+				    "\n\n" +
+				    tr("If you want to use a new blank file "
+				        "then delete, rename or move the "
+				        "existing file so that the "
+				        "application can create a new empty "
+				        "file."),
+				    QMessageBox::Ok);
+				/* Notify only once. */
+				const QModelIndex index =
+				    ui->accountList->currentIndex();
+				QStandardItem *item =
+				    m_accountModel.itemFromIndex(index);
+				item = AccountModel::itemTop(item);
+				AccountModel::SettingsMap itemSett =
+				    item->data(ROLE_ACNT_CONF_SETTINGS
+				        ).toMap();
+				itemSett._setCreatedFromScratch(false);
+				item->setData(itemSett,
+				    ROLE_ACNT_CONF_SETTINGS);
+			}
 			db = m_messageDbs.accessMessageDb(userName, dbDir,
 			    itemSettings.isTestAccount(), false);
 		}
 		break;
 	case DBC_ERR_MISSFILE:
 		{
-			/* TODO -- Disable this notification on account creation. */
-			QString dbFilePath = DbContainer::constructDbFileName(userName,
-			    dbDir, itemSettings.isTestAccount());
-			QMessageBox::warning(this,
-			    tr("Datovka: Loading database problem"),
-			    tr("Could not load data from the database "
-			        "for account '%1'").arg(userName) +
-			    "\n\n" +
-			    tr("Database file '%1' is missing or "
-			        "corrupted.").arg(dbFilePath) +
-			    "\n\n" +
-			    tr("I'll try to create an empty one."),
-			    QMessageBox::Ok);
+			if (!itemSettings._createdFromScratch()) {
+				/* Not on account creation. */
+				QString dbFilePath =
+				    DbContainer::constructDbFileName(userName,
+				        dbDir, itemSettings.isTestAccount());
+				QMessageBox::warning(this,
+				    tr("Datovka: Problem loading database"),
+				    tr("Could not load data from the database "
+				        "for account '%1'").arg(userName) +
+				    "\n\n" +
+				    tr("Database file '%1' is missing.").arg(
+				        dbFilePath) +
+				    "\n\n" +
+				    tr("I'll try to create an empty one."),
+				    QMessageBox::Ok);
+			}
 			db = m_messageDbs.accessMessageDb(userName, dbDir,
 			    itemSettings.isTestAccount(), true);
 		}
 		break;
 	case DBC_ERR_NOTAFILE:
 		{
-			/* TODO -- Notify the user that the location is not a file. */
+			/* Notify the user that the location is not a file. */
+			QString dbFilePath =
+			    DbContainer::constructDbFileName(userName,
+			        dbDir, itemSettings.isTestAccount());
+			QMessageBox::warning(this,
+			    tr("Datovka: Problem loading database"),
+			    tr("Could not load data from the database "
+			        "for account '%1'").arg(userName) +
+			    "\n\n" +
+			    tr("Database location '%1' is not a file.").arg(
+			        dbFilePath),
+			    QMessageBox::Ok);
 		}
 		break;
 	case DBC_ERR_ACCESS:
 		{
-			/* TODO -- Notify the user that he does not have enough rights. */
+			/* Notify that the user does not have enough rights. */
+			QString dbFilePath =
+			    DbContainer::constructDbFileName(userName,
+			        dbDir, itemSettings.isTestAccount());
+			QMessageBox::warning(this,
+			    tr("Datovka: Problem loading database"),
+			    tr("Could not load data from the database "
+			        "for account '%1'").arg(userName) +
+			    "\n\n" +
+			    tr("Database file '%1' cannot be accessed.").arg(
+			        dbFilePath) +
+			    "\n\n" +
+			    tr("You don't have enough access rights to use "
+			        "the file."),
+			    QMessageBox::Ok);
 		}
 		break;
 	case DBC_ERR_CREATE:
@@ -2533,7 +2595,24 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		break;
 	case DBC_ERR_DATA:
 		{
-			/* TODO -- The database file is not a database file. */
+			/*
+			 * Database file is not a database file or is
+			 * corrupted.
+			 */
+			QString dbFilePath =
+			    DbContainer::constructDbFileName(userName,
+			        dbDir, itemSettings.isTestAccount());
+			QMessageBox::warning(this,
+			    tr("Datovka: Problem loading database"),
+			    tr("Could not load data from the database "
+			        "for account '%1'").arg(userName) +
+			    "\n\n" +
+			    tr("Database file '%1' cannot used.").arg(
+			        dbFilePath) +
+			    "\n\n" +
+			    tr("The file either does not contain an sqlite "
+			        "database or the file is corrupted."),
+			    QMessageBox::Ok);
 		}
 		break;
 	default:
@@ -2541,8 +2620,12 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		break;
 	}
 
-	/* TODO - removed assert */
-//	Q_ASSERT(NULL != db);
+	/*
+	 * TODO -- Give the user some recovery options such as
+	 * move/rename/remove the corrupted file or remove/ignore the affected
+	 * account.
+	 */
+
 	if (NULL == db) {
 		/*
 		 * TODO -- generate notification dialogue and give the user

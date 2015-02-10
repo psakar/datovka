@@ -49,6 +49,9 @@
 #define LAST_CORRESPOND "last_export_corresp_path"
 #define LAST_ZFO "last_export_zfo_path"
 
+/* Only set on new accounts. */
+#define _CREATED_FROM_SCRATCH "_created_from_cratch"
+
 
 /* Login method descriptors. */
 #define LIM_USERNAME "username"
@@ -202,6 +205,16 @@ public:
 		inline void setLastZFOExportPath(const QString &path)
 		{
 			QMap<QString, QVariant>::operator[](LAST_ZFO) = path;
+		}
+		inline bool _createdFromScratch(void) const
+		{
+			return QMap<QString, QVariant>::value(
+			    _CREATED_FROM_SCRATCH, false).toBool();
+		}
+		inline void _setCreatedFromScratch(bool fromScratch)
+		{
+			QMap<QString, QVariant>::insert(_CREATED_FROM_SCRATCH,
+			    fromScratch);
 		}
 	};
 
