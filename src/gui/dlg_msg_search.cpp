@@ -200,12 +200,14 @@ finish:
 	} else {
 		if (messageType) {
 			int fields = howManyFieldsAreFill();
-			if ((fields > 1) && (fields < 4)) {
+			qDebug() << fields;
+			if ((fields > 0) && (fields < 4)) {
 				this->searchPushButton->setEnabled(true);
-				this->tooMuchFields->hide();
 			} else {
 				this->searchPushButton->setEnabled(false);
-				this->tooMuchFields->show();
+				if (fields != 0) {
+					this->tooMuchFields->show();
+				}
 			}
 		} else {
 			this->searchPushButton->setEnabled(false);
