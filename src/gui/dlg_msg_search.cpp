@@ -283,6 +283,17 @@ void DlgMsgSearch::searchMessage(void)
 {
 	qDebug() << "searchMessage";
 
+	int msgType = 0;
+
+	if (this->searchReceivedMsgCheckBox->isChecked() &&
+	    this->searchSentMsgCheckBox->isChecked()) {
+		msgType = 3;
+	} else if (this->searchReceivedMsgCheckBox->isChecked()) {
+		msgType = 1;
+	} else if (this->searchSentMsgCheckBox->isChecked()) {
+		msgType = 2;
+	}
+
 	QStringList dmIDList;
 	dmIDList = m_messageDbList.at(0)->msgsAdvanceSearchMessageEnvelope(
 	    this->messageIdLineEdit->text(),
@@ -298,7 +309,7 @@ void DlgMsgSearch::searchMessage(void)
 	    this->recipientRefNumLineEdit->text(),
 	    this->recipientFileMarkLineEdit->text(),
 	    this->toHandsLineEdit->text(),
-	    QString(), QString(), QString());
+	    QString(), QString(), msgType);
 
 	for (int i = 0; i < dmIDList.size(); i++) {
 		qDebug() << dmIDList.at(i);
