@@ -42,6 +42,12 @@ copy "AUTHORS" %DATOVKAPATH%
 copy "COPYING" %DATOVKAPATH%
 copy "Changelog" %DATOVKAPATH%
 xcopy "dlls\*" %DATOVKAPATH% /E
+@echo.
+@echo Copy the content of package to NSIS for creation of install package
+IF EXIST nsis\app (
+  rmdir /S /Q nsis\app
+)
+xcopy %DATOVKAPATH%\* "nsis\app\" /E
 @echo Normal package ... Done.
 
 
