@@ -6,8 +6,8 @@ SetCompressor /solid /final lzma
 !include MUI2.nsh
 !include "FileFunc.nsh"
 
-!define VERSION "4.0.3"
-!define QUADVERSION "4.0.3.0"
+!define VERSION "VERSIONXXX"
+!define QUADVERSION "${VERSION}.0"
 !define guid '{C1B3CE89-4773-4FF3-BFF7-12144DEF2F15}'
 !define PROGRAM_NAME "Datovka"
 

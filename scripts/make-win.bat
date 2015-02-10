@@ -3,6 +3,7 @@
 cd ..
 
 findstr /C:"VERSION =" datovka.pro > version.txt
+
 set "string=var1;var2;var3;"
 for /f "tokens=1,2,3 delims= " %%i in (version.txt) do set "variable1=%%i" &set "variable2=%%j" &set "VERSION=%%k"
 endlocal
@@ -48,6 +49,19 @@ IF EXIST nsis\app (
   rmdir /S /Q nsis\app
 )
 xcopy %DATOVKAPATH%\* "nsis\app\" /E
+
+copy nsis\datovka-install\datovka-install.template nsis\datovka-install\datovka-install.nsi
+setlocal ENABLEDELAYEDEXPANSION
+set SEARCHTEXT="VERSIONXXX"
+set file="nsis\datovka-install\datovka-install.nsi"
+for /f "tokens=1,* delims=]" %%A in ('"type %file% |find /n /v """') do (
+  set "line=%%B"
+  if defined line (
+    call echo %%line:%SEARCHTEXT%=%VERSION%%%>> %file%_new
+  )
+)
+@echo Change %SEARCHTEXT% on %VERSION%
+move /Y %file%_new %file% > nul
 @echo Normal package ... Done.
 
 
