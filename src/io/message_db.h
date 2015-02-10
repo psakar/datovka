@@ -789,8 +789,10 @@ private:
 
 	/*!
 	 * @brief Create empty tables if tables do not already exist.
+	 *
+	 * @return True on success.
 	 */
-	void createEmptyMissingTables(void);
+	bool createEmptyMissingTables(void);
 
 	/*!
 	 * @brief Returns verification date (in local time).
