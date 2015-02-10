@@ -2542,12 +2542,25 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	}
 
 	/* TODO - removed assert */
-	Q_ASSERT(NULL != db);
+//	Q_ASSERT(NULL != db);
 	if (NULL == db) {
 		/*
 		 * TODO -- generate notification dialogue and give the user
 		 * a choice between aborting program and skipping account?
 		 */
+		QString dbFilePath = DbContainer::constructDbFileName(userName,
+		    dbDir, itemSettings.isTestAccount());
+		QMessageBox::critical(this,
+		    tr("Datovka: Database opening error"),
+		    tr("Could not load data from the database "
+		        "for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Database file '%1' cannot be created or is "
+		        "corrupted.").arg(dbFilePath) +
+		    "\n\n" +
+		    tr("Datovka is going to be exited."),
+		    QMessageBox::Ok);
+		QCoreApplication::quit();
 	}
 
 	return db;
