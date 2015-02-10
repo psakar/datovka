@@ -366,7 +366,7 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
 		itemTop->setText(this->accountLineEdit->text());
-		itemTop->setData(itemSettings);
+		itemTop->setData(itemSettings, ROLE_ACNT_CONF_SETTINGS);
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
