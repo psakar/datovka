@@ -2525,7 +2525,8 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
     bool dmPersonalDelivery, bool dmAllowSubstDelivery,
     const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType, const QString &messtype)
+    int dmAttachmentSize, const QString &_dmType,
+    enum MessageDirection msgDirect)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -2610,7 +2611,7 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (messtype == "received") {
+	if (MSG_RECEIVED == msgDirect) {
 		query.bindValue(":message_type", 1);
 	} else {
 		query.bindValue(":message_type", 2);
@@ -2655,7 +2656,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
     const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
     const QString &dmAcceptanceTime, int dmMessageStatus,
     int dmAttachmentSize, const QString &_dmType,
-    const QString &messtype)
+    enum MessageDirection msgDirect)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -2745,7 +2746,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	if (messtype == "received") {
+	if (MSG_RECEIVED == msgDirect) {
 		query.bindValue(":message_type", 1);
 	} else {
 		query.bindValue(":message_type", 2);

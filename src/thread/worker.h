@@ -38,20 +38,92 @@
 
 
 class Worker : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
+
+	class Job {
+	public:
+		Job(void)
+		    : acntTopIdx(QModelIndex()),
+		    msgDb(0),
+		    msgDirect(MSG_RECEIVED),
+		    msgId()
+		{
+		}
+		Job(const QModelIndex &idx, MessageDb *mDb,
+		    enum MessageDirection direc,
+		    const QString &dmId = QString())
+		    : acntTopIdx(idx),
+		    msgDb(mDb),
+		    msgDirect(direc),
+		    msgId(dmId)
+		{
+		}
+
+		bool isValid(void) {
+			return acntTopIdx.isValid() && (0 != msgDb);
+		}
+
+		QModelIndex acntTopIdx;
+		MessageDb *msgDb;
+		enum MessageDirection msgDirect;
+		QString msgId; /*!<
+		                * If set, then only a single message is going
+		                * to be downloaded.
+		                */
+	};
+
+	class JobList : private QList<Job>, private QMutex {
+	public:
+		JobList(void);
+		~JobList(void);
+
+		/*!
+		 * @brief Atomic prepend.
+		 *
+		 * @param[in] value  Worker job.
+		 */
+		void append(const Job &value);
+		/*!
+		 * @brief Atomic get first and pop.
+		 *
+		 * param[in] pop  Whether to also pop the first value.
+		 * @return Worker job. Empty list returns invalid worker job.
+		 */
+		Job firstPop(bool pop);
+		/*!
+		 * @brief Atomic prepend.
+		 *
+		 * @param[in] value  Worker job.
+		 */
+		void prepend(const Job &value);
+	};
+
+	static
+	JobList jobList;
 
 	static
 	QMutex downloadMessagesMutex;
 
 	/*!
-	 * @brief Constructor.
+	 * @brief Constructor for job list usage.
+	 *
+	 * @param[in] accountDb  Account database.
 	 */
-	explicit Worker(QModelIndex acntTopIdx, QString dmId,
-	    AccountDb &accountDb, AccountModel &accountModel,
-	    int count, QList<MessageDb*> messageDbList,
-	    QList<bool> downloadThisAccounts, QObject *parent);
+	explicit Worker(AccountDb &accountDb, QObject *parent = 0);
+
+	/*!
+	 * @brief Constructor for single job usage.
+	 *
+	 * @param[in] job        Worker job.
+	 * @param[in] accountDb  Account database.
+	 *
+	 * @note Consider using the job queue rather than a single job as
+	 *     the queue is the preferred version.
+	 */
+	explicit Worker(const Job &job, AccountDb &accountDb,
+	    QObject *parent = 0);
 
 	/*!
 	 * @brief Requests the process to start
@@ -62,7 +134,8 @@ public:
 	 * @brief Store message into database.
 	 */
 	static
-	qdatovka_error storeMessage(bool signedMsg, bool incoming,
+	qdatovka_error storeMessage(bool signedMsg,
+	    enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_message *msg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
@@ -85,15 +158,15 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QString &dmId, bool signedMsg, bool incoming,
-	    MessageDb &messageDb,
+	    const QString &dmId, bool signedMsg,
+	    enum MessageDirection msgDirect, MessageDb &messageDb,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
 	/*!
 	 * @brief Store envelope into database.
 	 */
 	static
-	qdatovka_error storeEnvelope(const QString &messageType,
+	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 	/*!
@@ -102,19 +175,14 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    const QString &messageType, MessageDb &messageDb,
+	    enum MessageDirection msgDirect, MessageDb &messageDb,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
 	    int &total, int &news);
 
 private:
 
-	QModelIndex m_acntTopIdx;
-	QString m_dmId;
-	AccountDb &m_accountDb;
-	AccountModel &m_accountModel;
-	int m_count;
-	QList<MessageDb*> m_messageDbList;
-	QList<bool> m_downloadThisAccounts;
+	AccountDb &m_accountDb; /*!< Account database. */
+	const Job m_job; /*!< If invalid, then a job list is used. */
 
 	/*!
 	* @brief Get password expiration info for account index
@@ -172,7 +240,7 @@ signals:
 	void refreshAttachmentList(const QModelIndex, QString);
 
 	/*!
-	 * @brief This signal is emitted when accout is proccessed
+	 * @brief This signal is emitted when account is processed
 	 */
 	void changeStatusBarInfo(bool, QString, int, int, int, int);
 
@@ -189,11 +257,9 @@ signals:
 
 public slots:
 	/*!
-	 * @brief Run Message downloading in thread
+	 * @brief Run message downloading in thread.
 	 */
-	void syncAllAccounts(void);
-	void syncOneAccount(void);
-	void downloadCompleteMessage(void);
+	void doJob(void);
 };
 
 #endif /* _WORKER_H_ */

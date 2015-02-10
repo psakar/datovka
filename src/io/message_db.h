@@ -487,7 +487,7 @@ public:
 	    const QByteArray &dmQTimestampBase64,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
-	    const QString &messtype);
+	    enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Update message envelope into messages table.
@@ -512,7 +512,7 @@ public:
 	    const QByteArray &dmQTimestampBase64,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
-	    const QString &messtype);
+	    enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Update message envelope delivery information.

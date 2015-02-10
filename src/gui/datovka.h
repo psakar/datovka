@@ -87,6 +87,7 @@ protected:
 	 */
 	void closeEvent(QCloseEvent *event);
 
+
 private slots:
 
 	/*!
@@ -182,11 +183,6 @@ private slots:
 	void openSelectedAttachment(void);
 
 	/*!
-	 * @brief Downloads the attachments for the selected message.
-	 */
-	void downloadSelectedMessageAttachments(void);
-
-	/*!
 	 * @brief Mark all messages as read in selected account item.
 	 */
 	void accountItemMarkAllRead(void);
@@ -205,6 +201,21 @@ private slots:
 	 * @brief Downloads new messages from server for selected account.
 	 */
 	void synchroniseSelectedAccount(void);
+
+	/*!
+	 * @brief Downloads the attachments for the selected message.
+	 */
+	void downloadSelectedMessageAttachments(void);
+
+	/*!
+	 * @brief Process pending worker jobs.
+	 */
+	void processPendingWorkerJobs(void);
+
+	/*!
+	 * @brief End current worker job.
+	 */
+	void endCurrentWorkerJob(void);
 
 	/*!
 	 * @brief Creates and sends new message.
@@ -422,21 +433,6 @@ private slots:
 	void onTableColumnHeaderSectionClicked(int column);
 
 	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
-	void deleteThreadSyncAll(void);
-
-	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
-	void deleteThreadSyncOne(void);
-
-	/*!
-	 * @brief Delete worker and thread objects, enable sync buttons.
-	 */
-	void deleteThreadDownMsgComplete(void);
-
-	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
 	void setProgressBarFromWorker(QString label, int value);
@@ -487,8 +483,8 @@ private slots:
 
 private:
 
-	QThread *threadSyncAll, *threadSyncOne, *threadDownMsgComplete;
-	Worker *workerSyncAll, *workerSyncOne, *workerDownMsgComplete;
+	QThread *m_syncAcntThread;
+	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 

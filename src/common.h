@@ -82,6 +82,12 @@ typedef enum {
 	Q_NOTEQUAL
 } qdatovka_error;
 
+/* Message direction. */
+enum MessageDirection {
+	MSG_SENT = 0,
+	MSG_RECEIVED = 1
+};
+
 
 /*
  * Defined roles across the application.
