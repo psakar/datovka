@@ -156,10 +156,11 @@ public:
 	/*!
 	 * @brief Open database file.
 	 *
-	 * @param[in] fileName  File name.
+	 * @param[in] fileName       File name.
+	 * @param[in] createMissing  Whether to create missing tables.
 	 * @return True on success.
 	 */
-	bool openDb(const QString &fileName);
+	bool openDb(const QString &fileName, bool createMissing = true);
 
 	/*!
 	 * @brief Get file name.
@@ -758,6 +759,13 @@ protected:
 	bool reopenDb(const QString &newFileName);
 
 	/*!
+	 * @brief Perform a db integrity check.
+	 *
+	 * @return False if check fails.
+	 */
+	bool checkDb(bool quick);
+
+	/*!
 	 * @brief Add/update message certificate in database.
 	 *
 	 * @brief[in] dmId       Message identifier.
@@ -813,9 +821,27 @@ private:
 	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
 
-	friend class dbContainer;
+	friend class DbContainer;
 };
 
+
+/*
+ * Flags used when creating new database file.
+ */
+#define DBC_FLG_TESTING         0x01 /*!< Create a testing database. */
+#define DBC_FLG_CREATE_FILE     0x02 /*!< Create file if does not exist. */
+#define DBC_FLG_CHECK_QUICK     0x04 /*!< Perform a quick database check. */
+#define DBC_FLG_CHECK_INTEGRITY 0x08 /*!< Perform a full integrity check. */
+
+/*
+ * Error codes returned when accessing/creating new database file.
+ */
+#define DBC_ERR_OK       0 /*!< No error. */
+#define DBC_ERR_MISSFILE 1 /*!< Database file does not exist. */
+#define DBC_ERR_NOTAFILE 2 /*!< Database file is not a file. */
+#define DBC_ERR_ACCESS   3 /*!< Error reading/writing database file. */
+#define DBC_ERR_CREATE   4 /*!< Error creating database file. */
+#define DBC_ERR_DATA     5 /*!< Data corrupted or not a database file. */
 
 /*!
  * @brief Database container.
@@ -823,11 +849,11 @@ private:
  * TODO -- Should there be a single globally accessible instance?
  *     (Actually no singleton.)
  */
-class dbContainer : public QMap<QString, MessageDb *> {
+class DbContainer : public QMap<QString, MessageDb *> {
 
 public:
-	dbContainer(void);
-	~dbContainer(void);
+	DbContainer(void);
+	~DbContainer(void);
 
 	/*!
 	 * @brief Access/create+open message database related to item.
@@ -876,17 +902,6 @@ public:
 	bool deleteMessageDb(MessageDb *db);
 
 	/*!
-	 * @brief Creates the database name from supplied information.
-	 *
-	 * @param[in] key     ISDS user name.
-	 * @param[in] locDir  Directory where to store the file.
-	 * @param[in] testing Whether it is a testing account.
-	 * @return Path to database file.
-	 */
-	QString constructDbFileName(const QString &key, const QString &locDir,
-	    bool testing);
-
-	/*!
 	 * @brief Database driver name.
 	 */
 	static
@@ -898,7 +913,31 @@ public:
 	 * @return True if database driver is present.
 	 */
 	static
-	bool dbDriverSupport(void);	
+	bool dbDriverSupport(void);
+
+	/*!
+	 * @brief Check existing database file for basic faults.
+	 *
+	 * @param[in] key     ISDS user name.
+	 * @param[in] locDir  Directory where to store the file.
+	 * @param[in] flags   Flags to be passed.
+	 * @return Error code.
+	 */
+	static
+	int checkExistingDbFile(const QString &key, const QString &locDir,
+	    int flags);
+
+	/*!
+	 * @brief Creates the database name from supplied information.
+	 *
+	 * @param[in] key     ISDS user name.
+	 * @param[in] locDir  Directory where to store the file.
+	 * @param[in] testing Whether it is a testing account.
+	 * @return Path to database file.
+	 */
+	static
+	QString constructDbFileName(const QString &key, const QString &locDir,
+	    bool testing);
 };
 
 

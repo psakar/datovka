@@ -198,9 +198,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!dbContainer::dbDriverSupport()) {
+	if (!DbContainer::dbDriverSupport()) {
 		logError("Cannot load database driver '%s'.\n",
-		    dbContainer::dbDriverType.toStdString().c_str());
+		    DbContainer::dbDriverType.toStdString().c_str());
 		/* TODO -- throw a dialog notifying the user. */
 		return EXIT_FAILURE;
 	}

@@ -2458,7 +2458,8 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 /* ========================================================================= */
 {
 	const QStandardItem *accountItemTop;
-	MessageDb *db;
+	MessageDb *db = NULL;
+	int flags, dbPresenceCode;
 
 	if (0 == accountItem) {
 		accountItem = m_accountModel.itemFromIndex(
@@ -2469,7 +2470,7 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	Q_ASSERT(0 != accountItemTop);
 
 	/* Get user name and db location. */
-	const AccountModel::SettingsMap &itemSettings =
+	const AccountModel::SettingsMap itemSettings =
 	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	const QString userName = itemSettings.userName();
 	Q_ASSERT(!userName.isEmpty());
@@ -2479,28 +2480,75 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		/* Set default directory name. */
 		dbDir = globPref.confDir();
 	}
-	db = m_messageDbs.accessMessageDb(userName, dbDir,
-	    itemSettings.isTestAccount(), false);
 
-	if (NULL == db) {
-		QString dbFilePath = m_messageDbs.constructDbFileName(userName,
-		    dbDir, itemSettings.isTestAccount());
-		QMessageBox::warning(this,
-		    tr("Datovka: Loading database problem"),
-		    tr("Could not load data from the database "
-		        "for account '%1'").arg(userName) +
-		    "\n\n" +
-		    tr("Database file '%1' is missing or "
-		        "corrupted.").arg(dbFilePath) +
-		    "\n\n" +
-		    tr("I'll try to create an empty one."),
-		    QMessageBox::Ok);
-		db = m_messageDbs.accessMessageDb(userName, dbDir,
-		    itemSettings.isTestAccount(), true);
+	flags = 0;
+	if (itemSettings.isTestAccount()) {
+		flags |= DBC_FLG_TESTING;
+	}
+	/* TODO -- Check database structure on account creation. */
+	dbPresenceCode =
+	    DbContainer::checkExistingDbFile(userName, dbDir, flags);
+
+	switch (dbPresenceCode) {
+	case DBC_ERR_OK:
+		{
+			/* TODO -- Notify the user on account creation. */
+			db = m_messageDbs.accessMessageDb(userName, dbDir,
+			    itemSettings.isTestAccount(), false);
+		}
+		break;
+	case DBC_ERR_MISSFILE:
+		{
+			/* TODO -- Disable this notification on account creation. */
+			QString dbFilePath = DbContainer::constructDbFileName(userName,
+			    dbDir, itemSettings.isTestAccount());
+			QMessageBox::warning(this,
+			    tr("Datovka: Loading database problem"),
+			    tr("Could not load data from the database "
+			        "for account '%1'").arg(userName) +
+			    "\n\n" +
+			    tr("Database file '%1' is missing or "
+			        "corrupted.").arg(dbFilePath) +
+			    "\n\n" +
+			    tr("I'll try to create an empty one."),
+			    QMessageBox::Ok);
+			db = m_messageDbs.accessMessageDb(userName, dbDir,
+			    itemSettings.isTestAccount(), true);
+		}
+		break;
+	case DBC_ERR_NOTAFILE:
+		{
+			/* TODO -- Notify the user that the location is not a file. */
+		}
+		break;
+	case DBC_ERR_ACCESS:
+		{
+			/* TODO -- Notify the user that he does not have enough rights. */
+		}
+		break;
+	case DBC_ERR_CREATE:
+		{
+			/* This error should not be returned. */
+		}
+		break;
+	case DBC_ERR_DATA:
+		{
+			/* TODO -- The database file is not a database file. */
+		}
+		break;
+	default:
+		/* The code should not end here. */
+		break;
 	}
 
 	/* TODO - removed assert */
 	Q_ASSERT(NULL != db);
+	if (NULL == db) {
+		/*
+		 * TODO -- generate notification dialogue and give the user
+		 * a choice between aborting program and skipping account?
+		 */
+	}
 
 	return db;
 }

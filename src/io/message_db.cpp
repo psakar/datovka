@@ -477,7 +477,7 @@ MessageDb::MessageDb(const QString &connectionName, QObject *parent)
     m_sqlMsgsModel(),
     m_sqlFilesModel()
 {
-	m_db = QSqlDatabase::addDatabase(dbContainer::dbDriverType,
+	m_db = QSqlDatabase::addDatabase(DbContainer::dbDriverType,
 	    connectionName);
 }
 
@@ -494,7 +494,7 @@ MessageDb::~MessageDb(void)
 /*
  * Open database file.
  */
-bool MessageDb::openDb(const QString &fileName)
+bool MessageDb::openDb(const QString &fileName, bool createMissing)
 /* ========================================================================= */
 {
 	bool ret;
@@ -507,7 +507,7 @@ bool MessageDb::openDb(const QString &fileName)
 
 	ret = m_db.open();
 
-	if (ret) {
+	if (createMissing && ret) {
 		/* Ensure database contains all tables. */
 		createEmptyMissingTables();
 	}
@@ -4076,6 +4076,47 @@ bool MessageDb::reopenDb(const QString &newFileName)
 
 /* ========================================================================= */
 /*
+ * Perform a db integrity check.
+ */
+bool MessageDb::checkDb(bool quick)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	bool ret = false;
+
+	QString queryStr;
+	if (quick) {
+		queryStr = "PRAGMA quick_check";
+	} else {
+		queryStr = "PRAGMAintegrity_check";
+	}
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			ret = query.value(0).toBool();
+		} else {
+			ret = false;
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return ret;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Add/update message certificate in database.
  */
 bool MessageDb::msgsInsertUpdateMessageCertBase64(int dmId,
@@ -4381,7 +4422,7 @@ bool MessageDb::msgCertValidAtDate(int dmId, const QDateTime &dateTime,
 
 
 /* ========================================================================= */
-dbContainer::dbContainer(void)
+DbContainer::DbContainer(void)
 /* ========================================================================= */
     : QMap<QString, MessageDb *>()
 {
@@ -4389,7 +4430,7 @@ dbContainer::dbContainer(void)
 
 
 /* ========================================================================= */
-dbContainer::~dbContainer(void)
+DbContainer::~DbContainer(void)
 /* ========================================================================= */
 {
 	QMap<QString, MessageDb *>::iterator i;
@@ -4404,7 +4445,7 @@ dbContainer::~dbContainer(void)
 /*
  * Access/create+open message database related to item.
  */
-MessageDb * dbContainer::accessMessageDb(const QString &key,
+MessageDb * DbContainer::accessMessageDb(const QString &key,
     const QString &locDir, bool testing, bool create)
 /* ========================================================================= */
 {
@@ -4447,7 +4488,6 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
 	}
 
 	open_ret = db->openDb(dbFileName);
-	Q_ASSERT(open_ret);
 	if (!open_ret) {
 		delete db;
 		return NULL;
@@ -4463,7 +4503,7 @@ MessageDb * dbContainer::accessMessageDb(const QString &key,
  * Creates a copy of the current data base into a given new
  *     directory.
  */
-bool dbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
+bool DbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -4497,7 +4537,7 @@ bool dbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 /*
  * Move message database into a new directory.
  */
-bool dbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
+bool DbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -4532,7 +4572,7 @@ bool dbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
  * Re-open a new empty database file. The old file is left
  *     untouched.
  */
-bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
+bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -4566,7 +4606,7 @@ bool dbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /*
  * Delete message db.
  */
-bool dbContainer::deleteMessageDb(MessageDb *db)
+bool DbContainer::deleteMessageDb(MessageDb *db)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != db);
@@ -4608,14 +4648,14 @@ bool dbContainer::deleteMessageDb(MessageDb *db)
 }
 
 
-const QString dbContainer::dbDriverType("QSQLITE");
+const QString DbContainer::dbDriverType("QSQLITE");
 
 
 /* ========================================================================= */
 /*
  * Check whether required SQL driver is present.
  */
-bool dbContainer::dbDriverSupport(void)
+bool DbContainer::dbDriverSupport(void)
 /* ========================================================================= */
 {
 	QStringList driversList = QSqlDatabase::drivers();
@@ -4626,9 +4666,74 @@ bool dbContainer::dbDriverSupport(void)
 
 /* ========================================================================= */
 /*
+ * Check existing database file for basic faults.
+ */
+int DbContainer::checkExistingDbFile(const QString &key, const QString &locDir,
+    int flags)
+/* ========================================================================= */
+{
+	bool testing = flags & DBC_FLG_TESTING;
+	bool checkQuick = flags & DBC_FLG_CHECK_QUICK;
+	bool checkIntegity = flags & DBC_FLG_CHECK_INTEGRITY;
+	int ret = DBC_ERR_OK;
+
+	if (checkIntegity) {
+		checkQuick = false;
+	}
+
+	QString dbFileName(constructDbFileName(key, locDir, testing));
+	QFileInfo dbFileInfo(dbFileName);
+	QDir dbDir(dbFileInfo.absoluteDir().absolutePath());
+	QFileInfo dbDirInfo(dbDir.absolutePath());
+
+	if (dbFileInfo.exists() && !dbFileInfo.isFile()) {
+		ret = DBC_ERR_NOTAFILE;
+	}
+
+	if (DBC_ERR_OK != ret) {
+		return ret;
+	}
+
+	if (!dbFileInfo.exists()) {
+		if (!dbDirInfo.isReadable() || !dbDirInfo.isWritable()) {
+			ret = DBC_ERR_ACCESS;
+		} else {
+			ret = DBC_ERR_MISSFILE;
+		}
+	} else {
+		if (!dbFileInfo.isReadable() || !dbFileInfo.isWritable()) {
+			ret = DBC_ERR_ACCESS;
+		}
+	}
+
+	if (DBC_ERR_OK != ret) {
+		return ret;
+	}
+
+	if (checkIntegity || checkQuick) {
+		MessageDb db("someKey");
+		if (!db.openDb(dbFileName, false)) {
+			ret = DBC_ERR_DATA;
+		}
+
+		if (DBC_ERR_OK != ret) {
+			return ret;
+		}
+
+		if (!db.checkDb(checkQuick)) {
+			ret = DBC_ERR_DATA;
+		}
+	}
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
  * Creates the database name from supplied information.
  */
-QString dbContainer::constructDbFileName(const QString &key,
+QString DbContainer::constructDbFileName(const QString &key,
     const QString &locDir, bool testing)
 /* ========================================================================= */
 {

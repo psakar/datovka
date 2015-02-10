@@ -770,7 +770,7 @@ private:
 	                              * configuration file.
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
-	dbContainer m_messageDbs; /*!< Map of message databases. */
+	DbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_searchLine; /*!< Search-line object. */
 	QPushButton *m_pushButton;
 	SortFilterProxyModel m_messageListProxyModel; /*!<
