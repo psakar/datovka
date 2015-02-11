@@ -3558,7 +3558,7 @@ void MainWindow::deleteSelectedAccount(void)
 			    "together with message database file.").arg(accountName));
 		} else {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
-			    "but its message database file .").arg(accountName));
+			    "but its message database was not deleted.").arg(accountName));
 		}
 		saveSettings();
 		break;
