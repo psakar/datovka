@@ -22,7 +22,7 @@
  */
 
 
-#include <cmath> /* ceil(3) */
+#include <cstdlib> /* exit(3) */
 #include <QCloseEvent>
 #include <QDesktopServices>
 #include <QDir>
@@ -2643,7 +2643,14 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		    "\n\n" +
 		    tr("Datovka is going to be exited."),
 		    QMessageBox::Ok);
-		QCoreApplication::quit();
+		/*
+		 * The program has to be aborted right now. The method
+		 * QCoreApplication::exit(EXIT_FAILURE) uses the event loop
+		 * whereas some event may be already planned and will crash
+		 * because of the returnning NULL pointer.
+		 * Therefore we use exit().
+		 */
+		exit(EXIT_FAILURE);
 	}
 
 	return db;
