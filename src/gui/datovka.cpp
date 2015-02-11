@@ -524,6 +524,64 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	    m_accountModel.itemFromIndex(current);
 	QString userName = accountUserName(accountItem);
 	MessageDb *messageDb = accountMessageDb(accountItem);
+	if (0 == messageDb) {
+		/* May occur on deleting last account. */
+		setMessageActionVisibility(false);
+
+		ui->messageList->selectionModel()->disconnect(
+		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
+		    SLOT(messageItemSelectionChanged(QModelIndex,
+		        QModelIndex)));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutAboutToBeChanged()), this,
+		    SLOT(messageItemStoreSelectionOnModelChange()));
+		ui->messageList->model()->disconnect(
+		    SIGNAL(layoutChanged()), this,
+		    SLOT(messageItemRestoreSelection()));
+
+		/* Get user name and db location. */
+		const QStandardItem *accountItemTop =
+		    AccountModel::itemTop(accountItem);
+		const AccountModel::SettingsMap itemSettings =
+		    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		const QString userName = itemSettings.userName();
+		Q_ASSERT(!userName.isEmpty());
+
+		QString dbDir = itemSettings.dbDir();
+		if (dbDir.isEmpty()) {
+			/* Set default directory name. */
+			dbDir = globPref.confDir();
+		}
+
+		QString dbFilePath =
+		    DbContainer::constructDbFileName(userName,
+		        dbDir, itemSettings.isTestAccount());
+
+		/* Decouple model and show banner page. */
+		ui->messageList->setModel(0);
+		ui->messageStackedWidget->setCurrentIndex(0);
+		QString htmlMessage = "<div style=\"margin-left: 12px;\">"
+		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
+		htmlMessage += "<div>";
+		htmlMessage += tr("Database file '%1' cannot be accessed."
+		    ).arg(dbFilePath);
+		htmlMessage += "<br/>";
+		htmlMessage += tr("The file cannot be accessed or is "
+		    "corrupted. Please fix the access rights issue or "
+		    "remove or rename the file.");
+		htmlMessage += "<br/><br/>";
+		htmlMessage += tr("Create a backup copy of the affected file "
+		    "just in case that a data recovery might be possible.");
+		htmlMessage += "<br/><br/>";
+		htmlMessage += tr("In general, it is recommended to create "
+		    "backup copies of the database files to prevent data "
+		    "loss.");
+		htmlMessage += "</div>";
+		htmlMessage += "</div>";
+		ui->accountTextInfo->setHtml(htmlMessage);
+		ui->accountTextInfo->setReadOnly(true);
+		return;
+	}
 
 	setAccountStoragePaths(accountItem);
 
@@ -2373,6 +2431,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	}
 	html.append(strongAccountInfoLine(tr("Database file location"),
 	    dbFilePath));
+
 	html.append("</div>");
 
 	return html;
@@ -2660,18 +2719,15 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 		        "for account '%1'").arg(userName) +
 		    "\n\n" +
 		    tr("Database file '%1' cannot be created or is "
-		        "corrupted.").arg(dbFilePath) +
-		    "\n\n" +
-		    tr("Datovka is going to be exited."),
+		        "corrupted.").arg(dbFilePath),
 		    QMessageBox::Ok);
 		/*
 		 * The program has to be aborted right now. The method
 		 * QCoreApplication::exit(EXIT_FAILURE) uses the event loop
 		 * whereas some event may be already planned and will crash
 		 * because of the returnning NULL pointer.
-		 * Therefore we use exit().
+		 * Therefore exit() should be used.
 		 */
-		exit(EXIT_FAILURE);
 	}
 
 	return db;
