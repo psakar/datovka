@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Delete action</string>
+   <string notr="true">Delete action</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -43,14 +43,14 @@
        <item>
         <widget class="QLabel" name="labelQuestion">
          <property name="text">
-          <string>Question?</string>
+          <string notr="true">Question?</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="advanceDeleteCheckBox">
          <property name="text">
-          <string>CheckBox</string>
+          <string notr="true">CheckBox</string>
          </property>
         </widget>
        </item>
@@ -66,7 +66,7 @@
           </font>
          </property>
          <property name="text">
-          <string/>
+          <string notr="true"/>
          </property>
          <property name="scaledContents">
           <bool>false</bool>
