@@ -567,11 +567,12 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    ).arg(dbFilePath);
 		htmlMessage += "<br/>";
 		htmlMessage += tr("The file cannot be accessed or is "
-		    "corrupted. Please fix the access rights issue or "
-		    "remove or rename the file.");
+		    "corrupted. Please fix the access privileges or "
+		    "remove or rename the file so that the application can "
+		    "create a new empty file.");
 		htmlMessage += "<br/><br/>";
-		htmlMessage += tr("Create a backup copy of the affected file "
-		    "just in case that a data recovery might be possible.");
+		htmlMessage += tr("Create a backup copy of the affected file. "
+		    "This will help when trying to perform data recovery.");
 		htmlMessage += "<br/><br/>";
 		htmlMessage += tr("In general, it is recommended to create "
 		    "backup copies of the database files to prevent data "
@@ -2429,7 +2430,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 		dbFilePath = tr("Database is stored in memory. "
 		    "Data will be lost on application exit.");
 	}
-	html.append(strongAccountInfoLine(tr("Database file location"),
+	html.append(strongAccountInfoLine(tr("Local database file location"),
 	    dbFilePath));
 
 	html.append("</div>");
