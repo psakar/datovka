@@ -496,9 +496,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	/* Disable the menu, re-enable only on received messages. */
 	ui->messageStateCombo->setEnabled(false);
 
-//	Q_ASSERT(current.isValid());
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
+		setMessageActionVisibility(false);
+
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(messageItemSelectionChanged(QModelIndex,
@@ -512,6 +513,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
+		ui->messageStackedWidget->setCurrentIndex(0);
 		ui->accountTextInfo->setHtml(createDatovkaBanner(
 		    QCoreApplication::applicationVersion()));
 		ui->accountTextInfo->setReadOnly(true);
@@ -1689,6 +1691,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	MessageDb *messageDb = accountMessageDb(accountItem);
+	Q_ASSERT(0 != messageDb);
 
 	int msgId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toInt();
@@ -1874,6 +1877,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	if (!delFromIsds) {
@@ -2024,6 +2028,9 @@ void MainWindow::synchroniseAllAccounts(void)
 			const QStandardItem *accountItem =
 			    m_accountModel.itemFromIndex(index);
 			MessageDb *messageDb = accountMessageDb(accountItem);
+			if (0 == messageDb) {
+				continue;
+			}
 
 			Worker::jobList.append(Worker::Job(index, messageDb,
 			    MSG_RECEIVED));
@@ -2065,6 +2072,9 @@ void MainWindow::synchroniseSelectedAccount(void)
 	index = AccountModel::indexTop(index);
 	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 	MessageDb *messageDb = accountMessageDb(accountItem);
+	if (0 == messageDb) {
+		return;
+	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	const AccountModel::SettingsMap accountInfo =
@@ -2130,6 +2140,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	}
 
 	MessageDb *messageDb = accountMessageDb(accountItem);
+	Q_ASSERT(0 != messageDb);
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	const AccountModel::SettingsMap accountInfo =
@@ -3315,7 +3326,12 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		const QString userName = itemSettings.userName();
 		Q_ASSERT(!userName.isEmpty());
 		db = accountMessageDb(itemTop);
-		Q_ASSERT(0 != db);
+		if (0 == db) {
+			/*
+			 * Skip creation of leaves when no database is present.
+			 */
+			continue;
+		}
 		QString dbId = m_accountDb.dbId(userName + "___True");
 
 		/* Received. */
@@ -4374,6 +4390,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 
 	memset(hashLocal, 0, sizeof(struct isds_hash));
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
@@ -5140,6 +5157,7 @@ QList<MainWindow::accountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
 		MessageDb *messageDb = accountMessageDb(accountItem);
+		Q_ASSERT(0 != messageDb);
 		userName = accountInfo.userName();
 		accountData.acntIndex = index;
 		accountData.username = userName;
@@ -5808,6 +5826,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
@@ -5951,6 +5970,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
@@ -6042,6 +6062,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
@@ -6130,6 +6151,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
@@ -6224,6 +6246,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	}
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
@@ -6282,6 +6305,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 
 	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
 	int dmID = atoi(dmId.toStdString().c_str());
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
@@ -7141,6 +7165,7 @@ void MainWindow::msgSetSelectedMessageRead(void)
 	    m_accountModel.itemFromIndex(current);
 	QString userName = accountUserName(accountItem);
 	MessageDb *messageDb = accountMessageDb(accountItem);
+	Q_ASSERT(0 != messageDb);
 
 	messageDb->smsgdtSetLocallyRead(m_lastSelectedMessageId);
 	/*
