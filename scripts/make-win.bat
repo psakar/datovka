@@ -1,5 +1,7 @@
 @echo OFF
 
+set NSISPATH="C:\Program Files (x86)\NSIS\makensis.exe"
+
 cd ..
 
 findstr /C:"VERSION =" datovka.pro > version.txt
@@ -8,6 +10,8 @@ set "string=var1;var2;var3;"
 for /f "tokens=1,2,3 delims= " %%i in (version.txt) do set "variable1=%%i" &set "variable2=%%j" &set "VERSION=%%k"
 endlocal
 
+set VERSIONNSIS="%VERSION%"
+
 del version.txt
 
 IF EXIST packages (
@@ -15,15 +19,19 @@ IF EXIST packages (
 )
 
 @echo.
-@echo This batch creates Datovka packages in two steps:
-@echo 1) build Datovka with QT build tools
-@echo 2) create packages to "packages" folder
-@echo Current version: %VERSION%
+@echo -----------------------------------------------------------------
+@echo This batch creates Datovka packages for Windows in several steps:
+@echo 1) build Datovka (datovka.exe) with QT build tools (requires Qt5.4)
+@echo 2) create application packages to "packages" folder
+@echo 3) create installation package to "packages" 
+@echo    folder from NSIS script (requires NSIS)
+@echo Current path to NSIS:  %NSISPATH%
 @echo Warning: Build requires dependency libraries in the folder "dlls"!
+@echo ------------------------------------------------------------------
+@echo Current Datovka version: %VERSION%
+@echo ------------------------------------------------------------------
 @echo.
 pause
-
-
 @echo. 
 @echo =================================
 @echo Build Datovka normal (v%VERSION%)  
@@ -44,26 +52,23 @@ copy "COPYING" %DATOVKAPATH%
 copy "Changelog" %DATOVKAPATH%
 xcopy "dlls\*" %DATOVKAPATH% /E
 @echo.
-@echo Copy the content of package to NSIS for creation of install package
-IF EXIST nsis\app (
-  rmdir /S /Q nsis\app
-)
-xcopy %DATOVKAPATH%\* "nsis\app\" /E
-
-copy nsis\datovka-install\datovka-install.template nsis\datovka-install\datovka-install.nsi
-setlocal ENABLEDELAYEDEXPANSION
 set SEARCHTEXT="VERSIONXXX"
 set file="nsis\datovka-install\datovka-install.nsi"
-for /f "tokens=1,* delims=]" %%A in ('"type %file% |find /n /v """') do (
-  set "line=%%B"
-  if defined line (
-    call echo %%line:%SEARCHTEXT%=%VERSION%%%>> %file%_new
-  )
+copy nsis\datovka-install\datovka-install.template %file%
+SETLOCAL ENABLEEXTENSIONS
+SETLOCAL DISABLEDELAYEDEXPANSION
+if "%SEARCHTEXT%"=="" findstr "^::" "%~f0"&GOTO:EOF
+for /f "tokens=1,* delims=]" %%A in ('"type %file%|find /n /v """') do (
+    set "line=%%B"
+    if defined line (
+        call set "line=echo.%%line:%SEARCHTEXT%=%VERSIONNSIS%%%"
+        for /f "delims=" %%X in ('"echo."%%line%%""') do %%~X >> %file%_new
+    ) ELSE echo. >> %file%_new  
 )
-@echo Change %SEARCHTEXT% on %VERSION%
 move /Y %file%_new %file% > nul
+@echo Change %SEARCHTEXT% on %VERSIONNSIS%  
 @echo Normal package ... Done.
-
+start "Build Datovka installer" %NSISPATH% %file%
 
 @echo.
 @echo ===================================
@@ -91,4 +96,3 @@ rmdir /S /Q release
 rmdir /S /Q debug
 
 cd scripts
-
