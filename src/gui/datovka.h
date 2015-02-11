@@ -633,7 +633,7 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &topItem) const;
+	QString createAccountInfo(const QStandardItem &topItem);
 
 	/*!
 	 * @brief Generate overall account information.

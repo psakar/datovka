@@ -490,6 +490,9 @@ MessageDb::~MessageDb(void)
 }
 
 
+const QString MessageDb::memoryLocation(":memory:");
+
+
 /* ========================================================================= */
 /*
  * Open database file.
@@ -502,7 +505,7 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 	if (globPref.store_messages_on_disk) {
 		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
 	} else {
-		m_db.setDatabaseName(":memory:");
+		m_db.setDatabaseName(memoryLocation);
 	}
 
 	ret = m_db.open();

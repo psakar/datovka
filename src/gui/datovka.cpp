@@ -2275,7 +2275,7 @@ void MainWindow::endCurrentWorkerJob(void)
 /*
  * Generate account info HTML message.
  */
-QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
+QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap &itemSettings =
@@ -2294,7 +2294,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 
 	html.append(strongAccountInfoLine(tr("Account name"),
 	    itemSettings.accountName()));
-	html.append("<br>");
+	html.append("<br/>");
 	html.append(strongAccountInfoLine(tr("User name"),
 	    itemSettings.userName()));
 
@@ -2353,7 +2353,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 		}
 	}
 
-	html.append("<br>");
+	html.append("<br/>");
 	QString key = itemSettings.userName() + "___True";
 	QString info = m_accountDb.getPwdExpirFromDb(key);
 	if (info.isEmpty()) {
@@ -2363,6 +2363,16 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem) const
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    info));
 
+	html.append("<br/>");
+	MessageDb *db = accountMessageDb(&topItem);
+	Q_ASSERT(0 != db);
+	QString dbFilePath = db->fileName();
+	if (MessageDb::memoryLocation == dbFilePath) {
+		dbFilePath = tr("Database is stored in memory. "
+		    "Data will be lost on application exit.");
+	}
+	html.append(strongAccountInfoLine(tr("Database file location"),
+	    dbFilePath));
 	html.append("</div>");
 
 	return html;

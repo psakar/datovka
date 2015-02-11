@@ -162,6 +162,9 @@ public:
 	 */
 	bool openDb(const QString &fileName, bool createMissing = true);
 
+	static
+	const QString memoryLocation;
+
 	/*!
 	 * @brief Get file name.
 	 *
