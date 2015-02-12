@@ -691,7 +691,6 @@ download date in the Datovka database.</string>
            <widget class="QLabel" name="label_3">
             <property name="font">
              <font>
-              <pointsize>9</pointsize>
               <weight>50</weight>
               <italic>true</italic>
               <bold>false</bold>
