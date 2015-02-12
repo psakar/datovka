@@ -1,3 +1,37 @@
+4.1.1 /
+ * Default time out can be set by user in the settings dialogue.
+ * The account information page displays information about database file
+   location.
+ * The user received more verbose notifications about database access failures.
+ * Added script for automated package and installer builds for Windows.
+ * Improvements in worker code. The Received and sent messages are downloaded
+   in two separate steps. In this way at least the messages lists are
+   downloaded.
+ * Fixed bug in storing reference numbers into database.
+ * Delivery information can be exported in correspondence overview.
+ * Added optional fixed global path settings.
+ * Remembering of attachment source directory.
+ * Two delete message operations have been merged into one. The user is then
+   asked whether to also delete message from server.
+ * The user is asked whether to also delete message database on account
+   removal.
+ * Fixed account order restoring when having more than 9 accounts.
+ * Modifications in account model code, functionality remains the same.
+ * Application does not check attachment types. The decision is left to the
+   server.
+ * Database import operation has been renamed to create account from database.
+ * Datovka does no longer crash with corrupted databases on start-up.
+ * Fixed in cursor positioning when changing accounts.
+ * Automatic downloads on background are disabled by default.
+ * Fixes desktop file and added additional package deployment files for
+   Fedora.
+ * ISDS time out has been set to 5 minutes.
+ * Added script creating source archive. Source archive now contains root
+   directory with the package name and version.
+ * Quick search searches in message subject and sender/recipient columns.
+ * Fixed exporting overview into CSV. Strings containing commas such as
+   addresses caused troubles.
+
 4.1.0 / 2015-01-28
  * Message read status can be toggled when clicking on the green/grey ball.
  * Messages are being marked as read only when they are being selected at
