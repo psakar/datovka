@@ -6610,7 +6610,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 	    accountInfo.userName(), pwd, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
-	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+	    globPref.download_timeout); /* Set longer time-out. */
 
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
@@ -6658,7 +6658,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	    certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
-	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+	    globPref.download_timeout); /* Set longer time-out. */
 
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
@@ -6716,7 +6716,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
-	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+	    globPref.download_timeout); /* Set longer time-out. */
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -6762,7 +6762,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	    idBox, certPath, accountInfo.isTestAccount());
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
-	    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+	    globPref.download_timeout); /* Set longer time-out. */
 
 	QString isdsMsg =
 	    isds_long_message(isdsSessions.session(accountInfo.userName()));
@@ -6850,7 +6850,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		    QString(), otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
-		    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+		    globPref.download_timeout); /* Set longer time-out. */
 
 		/* if SMS was not send */
 		if (otpres != OTP_RESOLUTION_TOTP_SENT) {
@@ -6917,7 +6917,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		    otpcode, otpres);
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
-		    ISDS_DOWNLOAD_TIMEOUT_MS); /* Set longer time-out. */
+		    globPref.download_timeout); /* Set longer time-out. */
 
 		/* OTP login notification */
 		if (status == IE_NOT_LOGGED_IN) {

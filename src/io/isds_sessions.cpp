@@ -110,7 +110,7 @@ bool GlobIsdsSessions::isConnectedToIsds(const QString &userName)
 
 	setSessionTimeout(userName, ISDS_PING_TIMEOUT_MS);
 	ping_status = isds_ping(session(userName));
-	setSessionTimeout(userName, ISDS_DOWNLOAD_TIMEOUT_MS);
+	setSessionTimeout(userName, globPref.download_timeout);
 
 	if (IE_SUCCESS == ping_status) {
 		return true;

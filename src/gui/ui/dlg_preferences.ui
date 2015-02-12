@@ -278,6 +278,11 @@ The data is used solely for statistical purposes.</string>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <italic>true</italic>
+          </font>
+         </property>
          <property name="text">
           <string>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky.
 
@@ -545,6 +550,97 @@ download date in the Datovka database.</string>
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_7">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="title">
+          <string>Connection settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_15">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Timeout for message downloading is set on</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="timeoutSpinBox">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="maximum">
+               <number>15</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>minutes</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <italic>true</italic>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Note: If you have a slow connection to ISDS or you can not download complete messages, you can increase connection timeout. Default value is 5 minutes. Use 0 to disable timeout limits (not recommended).</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -589,7 +685,7 @@ download date in the Datovka database.</string>
            <widget class="QLabel" name="label_3">
             <property name="font">
              <font>
-              <pointsize>8</pointsize>
+              <pointsize>9</pointsize>
               <weight>50</weight>
               <italic>true</italic>
               <bold>false</bold>
@@ -797,7 +893,7 @@ download date in the Datovka database.</string>
              </font>
             </property>
             <property name="text">
-             <string>NOTE: language setting will not apllied until you restart the application.</string>
+             <string>Note: language setting will not apllied until you restart the application.</string>
             </property>
            </widget>
           </item>

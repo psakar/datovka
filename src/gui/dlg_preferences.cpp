@@ -41,6 +41,7 @@ void DlgPreferences::initPrefDialog(void)
 	this->download_on_background->
 	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
+	this->timeoutSpinBox->setValue(globPref.download_timeout/60000);
 	this->check_new_versions->setChecked(globPref.check_new_versions);
 	this->store_messages_on_disk->
 	    setChecked(globPref.store_messages_on_disk);
@@ -198,6 +199,7 @@ void DlgPreferences::saveChanges(void) const
 	globPref.send_stats_with_version_checks =
 	    this->send_stats_with_version_checks->isChecked();
 	globPref.timer_value = this->timerSpinBox->value();
+	globPref.download_timeout = (this->timeoutSpinBox->value() * 60000);
 	globPref.language =
 	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {

@@ -85,7 +85,8 @@ GlobPreferences::GlobPreferences(void)
     message_mark_as_read_timeout(5000),
     use_global_paths(false),
     save_attachments_path(QDir::homePath()),
-    add_file_to_attachments_path(QDir::homePath())
+    add_file_to_attachments_path(QDir::homePath()),
+    download_timeout(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
 
@@ -132,6 +133,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
+
+	download_timeout = settings.value(
+	    "preferences/download_timeout",
+	    dlftlGlobPref.download_timeout).toInt();
 
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
@@ -289,6 +294,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.timer_value != timer_value) {
 		settings.setValue("timer_value", timer_value);
+	}
+
+	if (dlftlGlobPref.download_timeout != download_timeout) {
+		settings.setValue("download_timeout", download_timeout);
 	}
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {
