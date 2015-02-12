@@ -3589,25 +3589,21 @@ QList<int> MessageDb::msgsDateInterval(const QDate &fromDate,
 	QString queryStr;
 	QList<int> dmIDs;
 
-	if (MSG_RECEIVED == msgDirect) {
-		queryStr = "SELECT dmID "
-		    "FROM messages AS m LEFT JOIN supplementary_message_data "
-		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 1 AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
-	} else {
-		queryStr = "SELECT dmID "
-		    "FROM messages AS m LEFT JOIN supplementary_message_data "
-		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 2 AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
-		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
-	}
+	queryStr = "SELECT dmID "
+	    "FROM messages AS m LEFT JOIN supplementary_message_data "
+	    "AS s ON (m.dmID = s.message_id) WHERE "
+	    "message_type = :message_type AND "
+	    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
+	    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
+	}
+	if (MSG_RECEIVED == msgDirect) {
+		query.bindValue(":message_type", 1);
+	} else {
+		query.bindValue(":message_type", 2);
 	}
 	query.bindValue(":fromDate", fromDate);
 	query.bindValue(":toDate", toDate);
