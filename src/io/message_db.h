@@ -44,7 +44,7 @@
 #include "src/common.h"
 
 
-enum sorting {
+enum Sorting {
 	UNSORTED = 0,
 	ASCENDING,
 	DESCENDING
@@ -251,7 +251,7 @@ public:
 	 * @return List of years.
 	 */
 	QStringList msgsRcvdYears(const QString &recipDbId,
-	    enum sorting sorting) const;
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
@@ -261,7 +261,7 @@ public:
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    const QString &recipDbId, enum sorting sorting) const;
+	    const QString &recipDbId, enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages received within past 90
@@ -322,7 +322,7 @@ public:
 	 * @return List of years.
 	 */
 	QStringList msgsSntYears(const QString &sendDbId,
-	    enum sorting sorting) const;
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
@@ -332,7 +332,7 @@ public:
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    const QString &sendDbId, enum sorting sorting) const;
+	    const QString &sendDbId, enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages sent within past 90

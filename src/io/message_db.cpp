@@ -908,7 +908,7 @@ fail:
  * Return list of years (strings) in database.
  */
 QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
-     enum sorting sorting) const
+     enum Sorting sorting) const
 /* ========================================================================= */
 {
 	QStringList yearList;
@@ -953,7 +953,7 @@ fail:
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
-    const QString &recipDbId, enum sorting sorting) const
+    const QString &recipDbId, enum Sorting sorting) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
@@ -1279,7 +1279,7 @@ fail:
  * Return list of years (strings) in database.
  */
 QStringList MessageDb::msgsSntYears(const QString &sendDbId,
-    enum sorting sorting) const
+    enum Sorting sorting) const
 /* ========================================================================= */
 {
 	QStringList yearList;
@@ -1324,7 +1324,7 @@ fail:
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
-    const QString &sendDbId, enum sorting sorting) const
+    const QString &sendDbId, enum Sorting sorting) const
 /* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
