@@ -45,7 +45,7 @@ void DlgPreferences::initPrefDialog(void)
 	    globPref.isds_download_timeout_ms / 60000);
 	this->labelTimeoutNote->setText(
 	    tr("Note: If you have a slow network connection or you cannot "
-	    "download a complete messages, here you can increase "
+	    "download complete messages, here you can increase "
 	    "the connection timeout. Default value is %1 minutes. "
 	    "Use 0 to disable timeout limit (not recommended).").arg(
 	        ISDS_DOWNLOAD_TIMEOUT_MS / 60000));

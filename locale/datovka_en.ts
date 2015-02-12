@@ -813,8 +813,13 @@ The current search settings will thus probably yield no result.</source>
 <context>
     <name>DlgPreferences</name>
     <message>
-        <location filename="../src/gui/dlg_preferences.cpp" line="161"/>
-        <location filename="../src/gui/dlg_preferences.cpp" line="173"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="47"/>
+        <source>Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_preferences.cpp" line="169"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="181"/>
         <source>Select directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2082,88 +2087,88 @@ Please download complete message from ISDS and try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="6543"/>
         <location filename="../src/gui/datovka.cpp" line="6602"/>
-        <location filename="../src/gui/datovka.cpp" line="6649"/>
-        <location filename="../src/gui/datovka.cpp" line="6702"/>
-        <location filename="../src/gui/datovka.cpp" line="6754"/>
-        <location filename="../src/gui/datovka.cpp" line="6802"/>
-        <location filename="../src/gui/datovka.cpp" line="6839"/>
-        <location filename="../src/gui/datovka.cpp" line="6872"/>
-        <location filename="../src/gui/datovka.cpp" line="6904"/>
+        <location filename="../src/gui/datovka.cpp" line="6650"/>
+        <location filename="../src/gui/datovka.cpp" line="6703"/>
+        <location filename="../src/gui/datovka.cpp" line="6755"/>
+        <location filename="../src/gui/datovka.cpp" line="6803"/>
+        <location filename="../src/gui/datovka.cpp" line="6840"/>
+        <location filename="../src/gui/datovka.cpp" line="6873"/>
+        <location filename="../src/gui/datovka.cpp" line="6905"/>
         <source>It was not possible to connect to your databox from account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6828"/>
+        <location filename="../src/gui/datovka.cpp" line="6829"/>
         <source>SMS code for account </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6861"/>
+        <location filename="../src/gui/datovka.cpp" line="6862"/>
         <source>Error of sending SMS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6862"/>
+        <location filename="../src/gui/datovka.cpp" line="6863"/>
         <source>It was not possible sent SMS with OTP security code for account &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6866"/>
+        <location filename="../src/gui/datovka.cpp" line="6867"/>
         <source>Please try again later or you have to use the official web interface of Datové schránky for access to your databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6926"/>
+        <location filename="../src/gui/datovka.cpp" line="6927"/>
         <source>Enter security code again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6927"/>
+        <location filename="../src/gui/datovka.cpp" line="6928"/>
         <source>The security code for this account was not accepted!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6930"/>
+        <location filename="../src/gui/datovka.cpp" line="6931"/>
         <source>Account: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6934"/>
+        <location filename="../src/gui/datovka.cpp" line="6935"/>
         <source>Enter the correct security code again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6936"/>
+        <location filename="../src/gui/datovka.cpp" line="6937"/>
         <source>OTP: Zkontrolujte přihlašovací údaje a zadejte znova bezpečnostní kód.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6945"/>
+        <location filename="../src/gui/datovka.cpp" line="6946"/>
         <source>OTP: Váš přístup byl na 60 minut zablokován. Důvodem může být opakované neúspěšné přihlášení.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6951"/>
+        <location filename="../src/gui/datovka.cpp" line="6952"/>
         <source>OTP: Platnost Vašeho hesla nebo bezpečnostního kódu skončila.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6956"/>
+        <location filename="../src/gui/datovka.cpp" line="6957"/>
         <source>OTP: Pro přístup na požadovanou stránku nemá Váš účet potřebné oprávnění.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7126"/>
+        <location filename="../src/gui/datovka.cpp" line="7127"/>
         <source>New account error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7141"/>
+        <location filename="../src/gui/datovka.cpp" line="7142"/>
         <source>Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7144"/>
+        <location filename="../src/gui/datovka.cpp" line="7145"/>
         <source>was not created!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2411,62 +2416,62 @@ Please download complete message from ISDS and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6829"/>
+        <location filename="../src/gui/datovka.cpp" line="6830"/>
         <source>Account &quot;%1&quot; requires authentication via security code for connection to databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6832"/>
+        <location filename="../src/gui/datovka.cpp" line="6833"/>
         <source>Security code will be sent you via Premium SMS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6834"/>
+        <location filename="../src/gui/datovka.cpp" line="6835"/>
         <source>Do you want to send Premium SMS with security code into your mobile phone?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6878"/>
+        <location filename="../src/gui/datovka.cpp" line="6879"/>
         <source>Enter SMS security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6879"/>
+        <location filename="../src/gui/datovka.cpp" line="6880"/>
         <source>SMS security code for account &quot;%1&quot;&lt;br/&gt;has been sent on your mobile phone...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6883"/>
+        <location filename="../src/gui/datovka.cpp" line="6884"/>
         <source>Enter SMS security code for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6812"/>
+        <location filename="../src/gui/datovka.cpp" line="6813"/>
         <source>Enter OTP security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6813"/>
+        <location filename="../src/gui/datovka.cpp" line="6814"/>
         <source>Account &quot;%1&quot; requires authentication via OTP &lt;br/&gt; security code for connection to databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6816"/>
+        <location filename="../src/gui/datovka.cpp" line="6817"/>
         <source>Enter OTP security code for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7129"/>
+        <location filename="../src/gui/datovka.cpp" line="7130"/>
         <source>It was not possible to get user info and databox info from ISDS server for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7133"/>
+        <location filename="../src/gui/datovka.cpp" line="7134"/>
         <source>Connection to ISDS or user authentication failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7135"/>
+        <location filename="../src/gui/datovka.cpp" line="7136"/>
         <source>Please check your internet connection and try again or it is possible that your password (certificate) has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2492,22 +2497,22 @@ Please download complete message from ISDS and try again.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="21"/>
-        <location filename="../src/gui/datovka.cpp" line="7086"/>
+        <location filename="../src/gui/datovka.cpp" line="7087"/>
         <source>Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7094"/>
+        <location filename="../src/gui/datovka.cpp" line="7095"/>
         <source>Do you want to close application Datovka?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7105"/>
+        <location filename="../src/gui/datovka.cpp" line="7106"/>
         <source>Datovka cannot be closed now because downloading of messages on the background is running...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7107"/>
+        <location filename="../src/gui/datovka.cpp" line="7108"/>
         <source>Wait until the action will finished and try again.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3276,60 +3281,60 @@ sent reply on this message</source>
 <context>
     <name>Preferences</name>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="43"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="49"/>
         <source>Downloading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="67"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="73"/>
         <source>Messages downloading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="90"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="96"/>
         <source>Automatically download new messages on background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="105"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="111"/>
         <source> Check new messages every</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="137"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="604"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="143"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="610"/>
         <source>minutes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="172"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="178"/>
         <source>Automatically download whole messages (may be slow)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="189"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="195"/>
         <source>Automatically synchronize all accounts on startup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="205"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="211"/>
         <source>New versions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="14"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="20"/>
         <source>Datovka - Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="85"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="91"/>
         <source>When allowed, Datovka will automatically download messages 
 on the background of application without blocking of user interface.
 Download period you can set bellow.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="165"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="171"/>
         <source>When accessing your Databox, only envelopes of messages are downloaded at first. 
 You can then download the whole message, including any attachments, manually. 
 When this option is turned on, Datovka will perform the download of complete 
@@ -3338,24 +3343,24 @@ slower internet connections.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="185"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="191"/>
         <source>When allowed, Datovka will automatically synchronise accounts 
 and also download new messages on background at startup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="217"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="223"/>
         <source>When this option is active, Datovka will automatically
 check for new Datovka versions on startup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="221"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="227"/>
         <source>Check for new Datovka versions on startup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="240"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="246"/>
         <source>When this option is active, Datovka will send information about your 
 Datovka version and related data as part of the request for new versions. 
 This data contains the version of Datovka, version of libraries, operating 
@@ -3366,17 +3371,17 @@ The data is used solely for statistical purposes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="249"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="255"/>
         <source>Send version info alongside the request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="276"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="282"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="287"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="293"/>
         <source>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky.
 
 Using the checkboxes below, you can influence which data Datovka stores on the disk.
@@ -3385,12 +3390,12 @@ Note: Password storage can be adjusted on per-account basis in the credentials d
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="307"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="313"/>
         <source>Storage options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="319"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="325"/>
         <source>When allowed, messages are stored in a database in your home directory. 
 Such storage might be compromised by an attacker and the content of 
 messages might be modified. When turned off, messages are freshly 
@@ -3399,12 +3404,12 @@ than 90 day may not be available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="326"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="332"/>
         <source>Allow message storage</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="342"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="348"/>
         <source>Datovka stores some additional data outside the message database. 
 These are data about the databox which allow for example warning 
 about an expiring password. These data might be also changed by 
@@ -3412,77 +3417,77 @@ an attacker, but their nature makes it a relatively harmless possibility.</sourc
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="348"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="354"/>
         <source>Allow storage of additional data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="375"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="381"/>
         <source>Navigation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="387"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="393"/>
         <source>When account is opened, select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="399"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="405"/>
         <source>After an account is opened,
 the newest message will be activated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="403"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="409"/>
         <source>Newest message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="419"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="425"/>
         <source>When account is opened, the last message
 displayed in this account will be selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="423"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="429"/>
         <source>Last displayed message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="436"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="442"/>
         <source>When account is opened, random message
 displayed in this account will be selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="440"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="446"/>
         <source>Nothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="467"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="473"/>
         <source>Advanced</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="479"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="485"/>
         <source>Signing certificate validity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="491"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="497"/>
         <source>Validity of the signing certificate will be checked against
 the current date. This gives the highest protection against
 compromised certificate exploit.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="496"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="502"/>
         <source>Check against current date (safer)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="512"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="518"/>
         <source>The validity of signing certificate is checked against a
 stored download date. This allows long-term storage 
 of messages without false alarms about invalid signature. 
@@ -3491,93 +3496,88 @@ download date in the Datovka database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="519"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="525"/>
         <source>Check against the date of download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="539"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="545"/>
         <source>Check certificate revocation list (CRL).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="542"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="548"/>
         <source>Check certificate revocation list (CRL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="561"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="567"/>
         <source>Connection settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="575"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="581"/>
         <source>Timeout for message downloading is set on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="633"/>
-        <source>Note: If you have a slow connection to ISDS or you can not download complete messages, you can increase connection timeout. Default value is 5 minutes. Use 0 to disable timeout limits (not recommended).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="660"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="666"/>
         <source>Directories</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="675"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="681"/>
         <source>Use global path settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="695"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="701"/>
         <source>Note: When allowed, Datovka will use the following directories as paths for loading and saving files in all accounts. Per-account path remembering will be disabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="721"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="727"/>
         <source>Path for saving of attachments is currently set on:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="750"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="807"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="756"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="813"/>
         <source>Change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="778"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="784"/>
         <source>Path for adding of file to attachments is currently set on:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="846"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="852"/>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="858"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="864"/>
         <source>Application language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="871"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="877"/>
         <source>Use system language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="876"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="882"/>
         <source>Czech</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="881"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="887"/>
         <source>English</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="896"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="902"/>
         <source>Note: language setting will not apllied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3660,132 +3660,132 @@ download date in the Datovka database.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/common.cpp" line="565"/>
+        <location filename="../src/common.cpp" line="567"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="568"/>
+        <location filename="../src/common.cpp" line="570"/>
         <source>Initializing postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="571"/>
+        <location filename="../src/common.cpp" line="573"/>
         <source>Reply postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="574"/>
+        <location filename="../src/common.cpp" line="576"/>
         <source>Initializing postal data message - expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="578"/>
+        <location filename="../src/common.cpp" line="580"/>
         <source>Initializing postal data message - used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="596"/>
+        <location filename="../src/common.cpp" line="598"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="599"/>
+        <location filename="../src/common.cpp" line="601"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="602"/>
+        <location filename="../src/common.cpp" line="604"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="605"/>
+        <location filename="../src/common.cpp" line="607"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="608"/>
+        <location filename="../src/common.cpp" line="610"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="625"/>
+        <location filename="../src/common.cpp" line="627"/>
         <source>Message bas submitted (originates at ISDS )</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="632"/>
+        <location filename="../src/common.cpp" line="634"/>
         <source>Data message and papers signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="640"/>
+        <location filename="../src/common.cpp" line="642"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="645"/>
+        <location filename="../src/common.cpp" line="647"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="669"/>
+        <location filename="../src/common.cpp" line="671"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="654"/>
+        <location filename="../src/common.cpp" line="656"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="664"/>
+        <location filename="../src/common.cpp" line="666"/>
         <source>A person authorised to read this message has logged-in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="677"/>
+        <location filename="../src/common.cpp" line="679"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="685"/>
+        <location filename="../src/common.cpp" line="687"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="690"/>
+        <location filename="../src/common.cpp" line="692"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="926"/>
+        <location filename="../src/common.cpp" line="928"/>
         <source>DS je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="929"/>
+        <location filename="../src/common.cpp" line="931"/>
         <source>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="932"/>
+        <location filename="../src/common.cpp" line="934"/>
         <source>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="936"/>
+        <location filename="../src/common.cpp" line="938"/>
         <source>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="939"/>
+        <location filename="../src/common.cpp" line="941"/>
         <source>DS je smazána (přesto existuje v ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="940"/>
+        <location filename="../src/common.cpp" line="942"/>
         <source>Došlo k chybě při zjišťování stavu</source>
         <translation type="unfinished"></translation>
     </message>
