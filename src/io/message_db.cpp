@@ -3580,7 +3580,7 @@ fail:
  *     interval.
  */
 QList<int> MessageDb::msgsDateInterval(const QDate &fromDate,
-    const QDate &toDate, bool sent) const
+    const QDate &toDate, enum MessageDirection msgDirect) const
 /* ========================================================================= */
 {
 	/* TODO -- Check whether time is interpreted in correct time zone! */
@@ -3589,18 +3589,18 @@ QList<int> MessageDb::msgsDateInterval(const QDate &fromDate,
 	QString queryStr;
 	QList<int> dmIDs;
 
-	if (sent) {
+	if (MSG_RECEIVED == msgDirect) {
 		queryStr = "SELECT dmID "
 		    "FROM messages AS m LEFT JOIN supplementary_message_data "
 		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 2 AND "
+		    "message_type = 1 AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	} else {
 		queryStr = "SELECT dmID "
 		    "FROM messages AS m LEFT JOIN supplementary_message_data "
 		    "AS s ON (m.dmID = s.message_id) WHERE "
-		    "message_type = 1 AND "
+		    "message_type = 2 AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
 		    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	}

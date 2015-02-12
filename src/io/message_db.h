@@ -656,7 +656,7 @@ public:
 	 * @return List of message ids. Empty list on error.
 	 */
 	QList<int> msgsDateInterval(const QDate &fromDate, const QDate &toDate,
-	    bool sent) const;
+	    enum MessageDirection msgDirect) const;
 
 	/*!
 	 * @brief Return some message items in order to export correspondence

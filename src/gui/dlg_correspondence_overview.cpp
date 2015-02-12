@@ -130,11 +130,11 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 	int receivedCnt = 0;
 
 	m_messages.sentdmIDs = m_messDb.msgsDateInterval(fromDate,
-	    toDate, true);
+	    toDate, MSG_SENT);
 	sentCnt = m_messages.sentdmIDs.count();
 
 	m_messages.receivedmIDs = m_messDb.msgsDateInterval(fromDate,
-	    toDate, false);
+	    toDate, MSG_RECEIVED);
 	receivedCnt = m_messages.receivedmIDs.count();
 
 	if (sentCnt > 0 || receivedCnt > 0) {
