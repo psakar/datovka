@@ -240,9 +240,10 @@ signals:
 	void refreshAttachmentList(const QModelIndex, QString);
 
 	/*!
-	 * @brief This signal is emitted when account is processed
+	 * @brief This signal is emitted when account is processed.
+	 *     It sends the number of processed messages.
 	 */
-	void changeStatusBarInfo(bool, QString, int, int, int, int);
+	void changeStatusBarInfo(bool, int, int, int, int);
 
 	/*!
 	 * @brief This signal is emitted when download of message fails =

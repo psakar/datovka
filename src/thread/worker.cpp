@@ -218,8 +218,7 @@ void Worker::doJob(void)
 			success = false;
 		}
 
-		emit changeStatusBarInfo(true,
-		    job.acntTopIdx.data().toString(), rt, rn , st, sn);
+		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		qDebug() << "-----------------------------------------------";
 		if (success) {
@@ -245,8 +244,7 @@ void Worker::doJob(void)
 			success = false;
 		}
 
-		emit changeStatusBarInfo(true,
-		    job.acntTopIdx.data().toString(), rt, rn , st, sn);
+		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		qDebug() << "-----------------------------------------------";
 		if (success) {

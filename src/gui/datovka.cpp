@@ -2018,31 +2018,29 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 /*
 * Set info status bar from worker.
 */
-void MainWindow::dataFromWorkerToStatusBarInfo(bool completed,
-    QString accoutName, int rt, int rn, int st, int sn)
+void MainWindow::dataFromWorkerToStatusBarInfo(bool add,
+    int rt, int rn, int st, int sn)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	if (completed) {
-		if (accoutName.isNull()) {
-			showStatusTextWithTimeout(tr("Messages on the server")
-			    + ": " +
-			    QString::number(rt) + " " + tr("received") +
-			    " (" + QString::number(rn) + " " + tr("new")
-			    + "); "+ QString::number(st) + " " + tr("sent") +
-			    " (" + QString::number(sn) + " " + tr("new") + ")");
-		} else {
-			showStatusTextWithTimeout(accoutName + ": "+
-			    tr("Messages on the server") + ": " +
-			    QString::number(rt) + " " + tr("received") +
-			    " (" + QString::number(rn) + " " + tr("new")
-			    + "); "+ QString::number(st) + " " + tr("sent") +
-			    " (" + QString::number(sn) + " " + tr("new") + ")");
-		}
+	static int s_rt = 0, s_rn = 0, s_st = 0, s_sn = 0;
+
+	if (add) {
+		s_rt += rt;
+		s_rn += rn;
+		s_st += st;
+		s_sn += sn;
+		showStatusTextWithTimeout(tr("Messages on the server") + ": " +
+		    QString::number(s_rt) + " " + tr("received") +
+		    " (" + QString::number(s_rn) + " " + tr("new") + "); " +
+		    QString::number(s_st) + " " + tr("sent") +
+		    " (" + QString::number(s_sn) + " " + tr("new") + ")");
 	} else {
-		showStatusTextPermanently(tr("Synchronise accounts \"%1\" with "
-		    "ISDS server.").arg(accoutName));
+		s_rt = rt;
+		s_rn = rn;
+		s_st = st;
+		s_sn = sn;
 	}
 }
 
@@ -2268,10 +2266,10 @@ void MainWindow::processPendingWorkerJobs(void)
 	{
 		/* Downloading message list. */
 		connect(m_syncAcntWorker,
-		    SIGNAL(changeStatusBarInfo(bool, QString,
+		    SIGNAL(changeStatusBarInfo(bool,
 		        int, int, int, int)),
 		    this,
-		    SLOT(dataFromWorkerToStatusBarInfo(bool, QString,
+		    SLOT(dataFromWorkerToStatusBarInfo(bool,
 		        int, int, int, int)));
 		connect(m_syncAcntWorker,
 		    SIGNAL(refreshAccountList(const QModelIndex)),
@@ -2326,6 +2324,8 @@ void MainWindow::endCurrentWorkerJob(void)
 			ui->actionDownload_messages->setEnabled(true);
 			ui->actionGet_messages->setEnabled(true);
 		}
+		/* Prepare cunters for next action. */
+		dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
 	}
 }
 

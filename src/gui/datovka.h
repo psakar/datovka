@@ -468,7 +468,7 @@ private slots:
 	/*!
 	 * @brief Set info status bar from worker.
 	 */
-	void dataFromWorkerToStatusBarInfo(bool completed, QString accoutName,
+	void dataFromWorkerToStatusBarInfo(bool add,
 	    int rt, int rn, int st, int sn);
 
 	/*!
