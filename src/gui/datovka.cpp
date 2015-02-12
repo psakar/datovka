@@ -2595,18 +2595,6 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 				        "application can create a new empty "
 				        "file."),
 				    QMessageBox::Ok);
-				/* Notify only once. */
-				const QModelIndex index =
-				    ui->accountList->currentIndex();
-				QStandardItem *item =
-				    m_accountModel.itemFromIndex(index);
-				item = AccountModel::itemTop(item);
-				AccountModel::SettingsMap itemSett =
-				    item->data(ROLE_ACNT_CONF_SETTINGS
-				        ).toMap();
-				itemSett._setCreatedFromScratch(false);
-				item->setData(itemSett,
-				    ROLE_ACNT_CONF_SETTINGS);
 			}
 			db = m_messageDbs.accessMessageDb(userName, dbDir,
 			    itemSettings.isTestAccount(), false);
@@ -2699,6 +2687,17 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	default:
 		/* The code should not end here. */
 		break;
+	}
+
+	if (itemSettings._createdFromScratch()) {
+		/* Notify only once. */
+		const QModelIndex index = ui->accountList->currentIndex();
+		QStandardItem *item = m_accountModel.itemFromIndex(index);
+		item = AccountModel::itemTop(item);
+		AccountModel::SettingsMap itemSett =
+		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSett._setCreatedFromScratch(false);
+		item->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
 	}
 
 	/*

@@ -3085,6 +3085,10 @@ bool MessageDb::msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":data", raw.toBase64());
+	/*
+	 * The 'message_type' entry in 'raw_message_data' seems not to be used
+	 * anywhere.
+	 */
 	query.bindValue(":message_type", messageType);
 	if (-1 != dbId) {
 		query.bindValue(":dbId", dbId);
