@@ -86,7 +86,7 @@ GlobPreferences::GlobPreferences(void)
     use_global_paths(false),
     save_attachments_path(QDir::homePath()),
     add_file_to_attachments_path(QDir::homePath()),
-    download_timeout(ISDS_DOWNLOAD_TIMEOUT_MS)
+    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
 
@@ -134,9 +134,9 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
 
-	download_timeout = settings.value(
-	    "preferences/download_timeout",
-	    dlftlGlobPref.download_timeout).toInt();
+	isds_download_timeout_ms = settings.value(
+	    "preferences/isds_download_timeout_ms",
+	    dlftlGlobPref.isds_download_timeout_ms).toInt();
 
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
@@ -296,8 +296,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 		settings.setValue("timer_value", timer_value);
 	}
 
-	if (dlftlGlobPref.download_timeout != download_timeout) {
-		settings.setValue("download_timeout", download_timeout);
+	if (dlftlGlobPref.isds_download_timeout_ms !=
+	    isds_download_timeout_ms) {
+		settings.setValue("isds_download_timeout_ms",
+		    isds_download_timeout_ms);
 	}
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {

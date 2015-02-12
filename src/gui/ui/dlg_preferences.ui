@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>546</width>
-    <height>347</height>
+    <width>560</width>
+    <height>360</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>560</width>
+    <height>360</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Datovka - Preferences</string>
@@ -577,7 +583,7 @@ download date in the Datovka database.</string>
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="timeoutSpinBox">
+             <widget class="QSpinBox" name="timeoutMinSpinBox">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -621,7 +627,7 @@ download date in the Datovka database.</string>
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="labelTimeoutNote">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -630,7 +636,7 @@ download date in the Datovka database.</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: If you have a slow connection to ISDS or you can not download complete messages, you can increase connection timeout. Default value is 5 minutes. Use 0 to disable timeout limits (not recommended).</string>
+             <string notr="true"/>
             </property>
             <property name="wordWrap">
              <bool>true</bool>

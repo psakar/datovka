@@ -187,7 +187,7 @@ public:
 	bool use_global_paths;
 	QString save_attachments_path;
 	QString add_file_to_attachments_path;
-	int download_timeout;
+	int isds_download_timeout_ms;
 
 	/*!
 	 * @brief Load data from supplied settings.

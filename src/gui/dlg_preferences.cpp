@@ -41,7 +41,15 @@ void DlgPreferences::initPrefDialog(void)
 	this->download_on_background->
 	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
-	this->timeoutSpinBox->setValue(globPref.download_timeout/60000);
+	this->timeoutMinSpinBox->setValue(
+	    globPref.isds_download_timeout_ms / 60000);
+	this->labelTimeoutNote->setText(
+	    tr("Note: If you have a slow network connection or you cannot "
+	    "download a complete messages, here you can increase "
+	    "the connection timeout. Default value is %1 minutes. "
+	    "Use 0 to disable timeout limit (not recommended).").arg(
+	        ISDS_DOWNLOAD_TIMEOUT_MS / 60000));
+
 	this->check_new_versions->setChecked(globPref.check_new_versions);
 	this->store_messages_on_disk->
 	    setChecked(globPref.store_messages_on_disk);
@@ -199,7 +207,8 @@ void DlgPreferences::saveChanges(void) const
 	globPref.send_stats_with_version_checks =
 	    this->send_stats_with_version_checks->isChecked();
 	globPref.timer_value = this->timerSpinBox->value();
-	globPref.download_timeout = (this->timeoutSpinBox->value() * 60000);
+	globPref.isds_download_timeout_ms =
+	    this->timeoutMinSpinBox->value() * 60000;
 	globPref.language =
 	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {
