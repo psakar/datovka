@@ -4,9 +4,26 @@ SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+
+SDK_VER="$1"
+if [ "x${SDK_VER}" = "x" ]; then
+	echo "No sdk version supplied. Run '$0 SDK_VER' again." >&2
+	exit 1
+fi
+
+SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+ISYSROOT="${SDKROOT}/MacOSX${SDK_VER}.sdk"
+
+if [ ! -d "${ISYSROOT}" ]; then
+	echo "Directory '${ISYSROOT}' does not exist." >&2
+	echo "Cannot find SDK root for version '${SDK_VER}'." >&2
+	exit 1
+fi
+
+
 SRCDIR="${SCRIPT_LOCATION}/srcs"
 WORKDIR="${SCRIPT_LOCATION}/work"
-BUILTDIR="${SCRIPT_LOCATION}/built"
+BUILTDIR="${SCRIPT_LOCATION}/built_osx${SDK_VER}"
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
@@ -19,9 +36,6 @@ fi
 if [ ! -d "${BUILTDIR}" ]; then
 	mkdir "${BUILTDIR}"
 fi
-
-SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
-ISYSROOT="${SDKROOT}/MacOSX10.7.sdk"
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
 EXPAT_ARCHIVE="${_EXPAT_ARCHIVE}"
