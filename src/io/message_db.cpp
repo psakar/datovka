@@ -2330,6 +2330,9 @@ QString MessageDb::deliveryInfoHtmlToPdf(int dmId) const
 		/* Attachments info */
 		html += messageTableSectionPdf(QObject::tr("Events"));
 		html += messageTableInfoStartPdf();
+		if (!query.isValid()) {
+			goto fail;
+		}
 		while (query.isValid()) {
 			tmp = dateTimeStrFromDbFormat(
 			    query.value(0).toString(),

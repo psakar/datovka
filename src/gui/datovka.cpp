@@ -1685,6 +1685,8 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
 	    "message \"%1\" from server Datové schránky.").arg(msgID));
 	msgBox.setInformativeText(tr("It is likely that the message has been "
 	    "deleted from the server."));
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
 	msgBox.exec();
 }
 

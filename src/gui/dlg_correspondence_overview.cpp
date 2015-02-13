@@ -218,6 +218,10 @@ bool DlgCorrespondenceOverview::exportMessageAsPDF(int dmId,
 		doc.setHtml(m_messDb.envelopeInfoHtmlToPdf(dmId, ""));
 	}
 
+	if (doc.isEmpty()) {
+		return false;
+	}
+
 	QPrinter printer;
 	printer.setOutputFileName(fileName);
 	printer.setOutputFormat(QPrinter::PdfFormat);
@@ -445,7 +449,10 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString overiviewFileName = m_exportCorrespondDir + QDir::separator() +
+	QString tmpMsg = "";
+	QString exportDir;
+
+	QString overviewFileName = m_exportCorrespondDir + QDir::separator() +
 	    tr("Overview") + "--" +
 	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
 	    "--" +
@@ -454,61 +461,81 @@ void DlgCorrespondenceOverview::exportData(void)
 	        ".html" : ".csv");
 
 	QString exportFileName = QFileDialog::getSaveFileName(this,
-	    tr("Select file to save correspondence overview to"),
-	    overiviewFileName, tr("Files") + "(*.html *.txt *.csv)");
+	    tr("Select file to save correspondence overview"),
+	    overviewFileName, tr("Files") + "(*.html *.txt *.csv)");
 
-	if (exportFileName.isEmpty() || exportFileName.isNull()) {
-		return;
-	}
+	if (!exportFileName.isEmpty()) {
+		exportDir =
+		    QFileInfo(exportFileName).absoluteDir().absolutePath();
+		m_exportCorrespondDir = exportDir;
+		qDebug() << "Correspondence file is exported to:" << exportDir;
 
-	QString exportDir =
-	    QFileInfo(exportFileName).absoluteDir().absolutePath();
-
-	m_exportCorrespondDir = exportDir;
-
-	qDebug() << "Correspondence file is exported to:" << exportDir;
-
-	if (this->outputFormatComboBox->currentText() == "HTML") {
-		if (!exportMessagesToHtml(overiviewFileName)) {
-			QMessageBox::warning(this, QObject::tr(
-			        "Correspondence overview export error."),
-			    tr("Correspondence overview file '%1' could not "
-			        "be written.").arg(overiviewFileName),
-			    QMessageBox::Ok);
-			return;
+		if (this->outputFormatComboBox->currentText() == "HTML") {
+			if (!exportMessagesToHtml(overviewFileName)) {
+				QMessageBox::warning(this, QObject::tr(
+					"Correspondence overview export error."),
+				    tr("Correspondence overview file '%1' could"
+				    " not be written.").arg(overviewFileName),
+				    QMessageBox::Ok);
+				tmpMsg += "<b>0</b> " + tr("correspondence "
+				"overview file was exported to HTML.") +"<br/>";
+			} else {
+				tmpMsg += "<b>1</b> " + tr("correspondence "
+				"overview file was exported to HTML.") +"<br/>";
+			}
+		} else {
+			if (!exportMessagesToCsv(overviewFileName)) {
+				QMessageBox::warning(this, QObject::tr(
+					"Correspondence overview export error"),
+				    tr("Correspondence overview file '%1' could"
+				    " not be written.").arg(overviewFileName),
+				    QMessageBox::Ok);
+				tmpMsg += "<b>0</b> " + tr("correspondence "
+				"overview file was exported to CVS.") +"<br/>";
+			} else {
+				tmpMsg += "<b>1</b> " + tr("correspondence "
+				"overview file was exported to CVS.") +"<br/>";
+			}
 		}
 	} else {
-		if (!exportMessagesToCsv(overiviewFileName)) {
-			QMessageBox::warning(this, QObject::tr(
-			        "Correspondence overview export error"),
-			    tr("Correspondence overview file '%1' could not "
-			        "be written.").arg(overiviewFileName),
-			    QMessageBox::Ok);
-			return;
-		}
+		tmpMsg += "<b>0</b> " + tr("correspondence overview "
+		    "file was exported.") + "<br/>";
 	}
 
+	QString fileName;
+	QString errorText;
+	QStringList errorList;
+	errorList.clear();
+	int successMsgZFOCnt = 0;
+	int successDelInfoZFOCnt = 0;
+	int successEnvelopePdfCnt = 0;
+	int successDelInfoPdfCnt = 0;
+	QMessageBox msgBoxPoc(this);
 
 	if (this->exportZfoCheckBox->isChecked() ||
 	    this->exportDeliveryZfoCheckBox->isChecked() ||
 	    this->exportMessageEnvelopePDFCheckBox->isChecked() ||
 	    this->exportDeliveryPDFCheckBox->isChecked()) {
 		exportDir = QFileDialog::getExistingDirectory(this,
-		    tr("Select directory to save ZFO files"),
+		    tr("Select directory for export of ZFO/PDF file(s)"),
 		    m_exportCorrespondDir,
 		    QFileDialog::ShowDirsOnly |
 		        QFileDialog::DontResolveSymlinks); 
 
-		if (exportDir.isEmpty() || exportDir.isNull()) {
-			return;
+		if (exportDir.isEmpty()) {
+			tmpMsg += "<b>0</b> " + tr("messages were successfully "
+			    "exported to ZFO/PDF.") + "<br/>";
+			goto finish;
 		} 
 		m_exportCorrespondDir = exportDir; 
 		qDebug() << "Files will be exported to:" << exportDir;
 	} 
 
-	QList<int> errorDmId;
-	errorDmId.clear();
-	int successCnt = 0;
+	/* TODO - add prograss bar intead of this */
+	msgBoxPoc.setIcon(QMessageBox::Information);
+	msgBoxPoc.setWindowTitle(tr("Export proccessing..."));
+	msgBoxPoc.setText(tr("Export of files is proccessing... Please wait."));
+	msgBoxPoc.show();
 
 	/* export message ZFO */
 	if (this->exportZfoCheckBox->isChecked()) {
@@ -516,16 +543,20 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.sentdmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain data necessary for ZFO "
+					    "export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successMsgZFOCnt++;
 				}
 			}
 		}
@@ -533,19 +564,26 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.receivedmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain data necessary for ZFO "
+					    "export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successMsgZFOCnt++;
 				}
 			}
 		}
+		tmpMsg += "<b>" + QString::number(successMsgZFOCnt) +
+		"</b> " + tr("messages were successfully exported to ZFO.") +
+		"<br/>";
 	}
 
 	/* export delivery info ZFO */
@@ -554,16 +592,20 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.sentdmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain deivery info data "
+					    "necessary for ZFO export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successDelInfoZFOCnt++;
 				}
 			}
 		}
@@ -571,113 +613,148 @@ void DlgCorrespondenceOverview::exportData(void)
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.receivedmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain deivery info data "
+					    "necessary for ZFO export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successDelInfoZFOCnt++;
 				}
 			}
 		}
+		tmpMsg += "<b>" + QString::number(successDelInfoZFOCnt) +
+		"</b> " + tr("delivery infos were successfully "
+		"exported to ZFO.") + "<br/>";
 	}
 
 	/* export envelope to PDF */
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
-		/* sent ZFO */
+		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.sentdmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
-					qDebug() << "OZ" << dmId
-					    << "export error";
-					errorDmId.append(dmId);
+					qDebug() << "OZ" << dmId;
+					errorText = tr("Message '%1' does not "
+					    "contain message envelope data "
+					    "necessary for PDF export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successEnvelopePdfCnt++;
 				}
 			}
 		}
 
-		/* received ZFO */
+		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.receivedmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "OZ" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain message envelope data "
+					    "necessary for PDF export.").
+					    arg(QString::number(dmId));
 				} else {
-					successCnt++;
+					successEnvelopePdfCnt++;
 				}
 			}
 		}
+		tmpMsg += "<b>" + QString::number(successEnvelopePdfCnt) +
+		    "</b> " + tr("message envelopes were successfully "
+		    "exported to PDF.") + "<br/>";
 	}
 
 	/* export delivery info to PDF */
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
-		/* sent ZFO */
+		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.sentdmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DD" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain deivery info data "
+					    "necessary for PDF export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successDelInfoPdfCnt++;
 				}
 			}
 		}
 
-		/* received ZFO */
+		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (int dmId, m_messages.receivedmIDs) {
-				QString fileName =
+				fileName =
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {
 					/* TODO - add dialog describes error */
 					qDebug() << "DD" << dmId
 					    << "export error";
-					errorDmId.append(dmId);
+					errorText = tr("Message '%1' does not "
+					    "contain deivery info data "
+					    "necessary for PDF export.").
+					    arg(QString::number(dmId));
+					errorList.append(errorText);
 				} else {
-					successCnt++;
+					successDelInfoPdfCnt++;
 				}
 			}
 		}
+		tmpMsg += "<b>" + QString::number(successDelInfoPdfCnt) +
+		    "</b> " + tr("delivery infos were successfully "
+		    "exported to PDF.")  + "<br/>";
 	}
 
-	if (!errorDmId.isEmpty()) {
-		QString msg = tr("There were some errors during saving of "
-		    "the overview:") + "\n\n";
+	msgBoxPoc.close();
 
-		for (int i = 0; i < errorDmId.count(); ++i) {
-			msg += tr("Message") + " " +
-			   QString::number(errorDmId.at(i)) + " " +
-			   tr("does not contain data necessary for ZFO export") + ".\n";
-			if (i > 10) {
-				msg += tr("And many more") + "...\n";
-				break;
-			}
+finish:
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowTitle(tr("Export results"));
+	msgBox.setText(tr("Export of correspondence overview finished "
+	    "with these results:"));
+
+	if (!errorList.isEmpty()) {
+		tmpMsg += "<br/><b>" + tr("Some errors occurred "
+		    "during export.")  + "</b><br/>" +
+		    tr("See detail for more info...") + "<br/><br/>";
+	}
+	msgBox.setInformativeText(tmpMsg);
+
+	QString msg = "";
+	if (!errorList.isEmpty()) {
+		for (int i = 0; i < errorList.count(); ++i) {
+			msg += errorList.at(i) + "\n";
 		}
-
-		msg += "\n" + QString::number(successCnt) + " " +
-		    tr("messages were successfully exported to ZFO") + ".\n";
-
-		QMessageBox::warning(this,
-		    QObject::tr("Correspondence export error"), msg, QMessageBox::Ok);
+		msgBox.setDetailedText(msg);
 	}
+
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.exec();
 }
