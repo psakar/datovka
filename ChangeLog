@@ -1,4 +1,4 @@
-4.1.1 /
+4.1.1 / 2015-02-16
  * Default time out can be set by user in the settings dialogue.
  * The account information page displays information about database file
    location.
@@ -39,8 +39,8 @@
  * Fixed check box selection in the contacts by space bar.
  * The user can decide whether to delete a message from the local database only
    or whether it should be also deleted from ISDS.
- * Messages and delivery information from ZFO can be imported into the databases
-   provided corresponding account exist.
+ * Messages and delivery information from ZFO can be imported into the
+   databases provided corresponding account exist.
  * Added missing error messages to database code.
  * Fixed bug causing new messages to be marked as being already read when
    downloading whole new messages when synchronising accounts.
@@ -49,7 +49,8 @@
  * Added code support for OpenSSL internal locking.
  * Fixed searching for contacts in message database.
  * Enhancements in scripts for building library dependencies.
- * Data box identifier is being shown in exported PDF file and message identification.
+ * Data box identifier is being shown in exported PDF file and message
+   identification.
  * OTP security code is not shown as password.
  * Sending of messages to multiple recipients is performed by sending a bunch
    of individual messages. Multi-messages were causing troubles when combining
