@@ -510,7 +510,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	int successDelInfoZFOCnt = 0;
 	int successEnvelopePdfCnt = 0;
 	int successDelInfoPdfCnt = 0;
-	QMessageBox msgBoxPoc(this);
+	//QMessageBox msgBoxProc(this);
 
 	if (this->exportZfoCheckBox->isChecked() ||
 	    this->exportDeliveryZfoCheckBox->isChecked() ||
@@ -532,10 +532,12 @@ void DlgCorrespondenceOverview::exportData(void)
 	} 
 
 	/* TODO - add prograss bar intead of this */
-	msgBoxPoc.setIcon(QMessageBox::Information);
-	msgBoxPoc.setWindowTitle(tr("Export proccessing..."));
-	msgBoxPoc.setText(tr("Export of files is proccessing... Please wait."));
-	msgBoxPoc.show();
+
+	//msgBoxProc.setIcon(QMessageBox::Information);
+	//msgBoxProc.setWindowTitle(tr("Export proccessing... Please wait."));
+	//msgBoxProc.setText(tr("Export of files is proccessing... Please wait."));
+	//msgBoxProc.setWindowModality(Qt::NonModal);
+	//msgBoxProc.show();
 
 	/* export message ZFO */
 	if (this->exportZfoCheckBox->isChecked()) {
@@ -729,7 +731,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		    "exported to PDF.")  + "<br/>";
 	}
 
-	msgBoxPoc.close();
+	//msgBoxProc.close();
 
 finish:
 
