@@ -460,13 +460,13 @@ void DlgCorrespondenceOverview::exportData(void)
 	    (("HTML" == this->outputFormatComboBox->currentText()) ?
 	        ".html" : ".csv");
 
-	QString exportFileName = QFileDialog::getSaveFileName(this,
+	overviewFileName = QFileDialog::getSaveFileName(this,
 	    tr("Select file to save correspondence overview"),
 	    overviewFileName, tr("Files") + "(*.html *.txt *.csv)");
 
-	if (!exportFileName.isEmpty()) {
+	if (!overviewFileName.isEmpty()) {
 		exportDir =
-		    QFileInfo(exportFileName).absoluteDir().absolutePath();
+		    QFileInfo(overviewFileName).absoluteDir().absolutePath();
 		m_exportCorrespondDir = exportDir;
 		qDebug() << "Correspondence file is exported to:" << exportDir;
 
@@ -475,7 +475,9 @@ void DlgCorrespondenceOverview::exportData(void)
 				QMessageBox::warning(this, QObject::tr(
 					"Correspondence overview export error."),
 				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(overviewFileName),
+				    " not be written.").arg(
+				        QDir::toNativeSeparators(
+				            overviewFileName)),
 				    QMessageBox::Ok);
 				tmpMsg += "<b>0</b> " + tr("correspondence "
 				"overview file was exported to HTML.") +"<br/>";
@@ -488,7 +490,9 @@ void DlgCorrespondenceOverview::exportData(void)
 				QMessageBox::warning(this, QObject::tr(
 					"Correspondence overview export error"),
 				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(overviewFileName),
+				    " not be written.").arg(
+				        QDir::toNativeSeparators(
+				            overviewFileName)),
 				    QMessageBox::Ok);
 				tmpMsg += "<b>0</b> " + tr("correspondence "
 				"overview file was exported to CVS.") +"<br/>";
@@ -549,7 +553,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -570,7 +573,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -598,7 +600,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -619,7 +620,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DDZ" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -646,7 +646,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "OZ" << dmId;
 					errorText = tr("Message '%1' does not "
 					    "contain message envelope data "
@@ -666,7 +665,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "OZ" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -692,7 +690,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DD" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
@@ -713,7 +710,6 @@ void DlgCorrespondenceOverview::exportData(void)
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {
-					/* TODO - add dialog describes error */
 					qDebug() << "DD" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
