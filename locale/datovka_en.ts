@@ -1802,6 +1802,16 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="1684"/>
+        <source>It was not possible to download a complete message &quot;%1&quot; from server Datové schránky.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="1686"/>
+        <source>A connection error occured or the message has already been deleted from the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/datovka.cpp" line="2657"/>
         <source>You don&apos;t have enough access rights to use the file.</source>
         <translation type="unfinished"></translation>
@@ -2580,16 +2590,6 @@ Please download complete message from ISDS and try again.</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1683"/>
         <source>Download message error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="1684"/>
-        <source>It was not possible download complete message &quot;%1&quot; from server Datové schránky.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="1686"/>
-        <source>It is likely that the message has been deleted from the server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

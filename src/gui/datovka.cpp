@@ -1681,10 +1681,10 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setWindowTitle(tr("Download message error"));
-	msgBox.setText(tr("It was not possible download complete "
+	msgBox.setText(tr("It was not possible to download a complete "
 	    "message \"%1\" from server Datové schránky.").arg(msgID));
-	msgBox.setInformativeText(tr("It is likely that the message has been "
-	    "deleted from the server."));
+	msgBox.setInformativeText(tr("A connection error occured or "
+	    "the message has already been deleted from the server."));
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setDefaultButton(QMessageBox::Ok);
 	msgBox.exec();

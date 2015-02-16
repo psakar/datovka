@@ -2284,6 +2284,16 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
         <translation>Chyba při otevírání přílohy.</translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="1684"/>
+        <source>It was not possible to download a complete message &quot;%1&quot; from server Datové schránky.</source>
+        <translation>Nebylo možné stáhnout kompletní zprávu &quot;%1&quot; ze serveru Datové schránky.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="1686"/>
+        <source>A connection error occured or the message has already been deleted from the server.</source>
+        <translation>Pravděpodobně selhalo spojení se serverem nebo zpráva již byla ze serveru odstraněna.</translation>
+    </message>
+    <message>
         <location filename="../src/gui/datovka.cpp" line="1866"/>
         <source>Delete message %1</source>
         <translation>Mazání zprávy %1</translation>
@@ -2339,14 +2349,12 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
         <translation>Chyba stahování zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1684"/>
         <source>It was not possible download complete message &quot;%1&quot; from server Datové schránky.</source>
-        <translation>Nebylo možné stáhnout celou zprávu &quot;%1&quot; ze serveru Datové schránky.</translation>
+        <translation type="vanished">Nebylo možné stáhnout celou zprávu &quot;%1&quot; ze serveru Datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1686"/>
         <source>It is likely that the message has been deleted from the server.</source>
-        <translation>Je pravděpodobné, že zpráva byla smazána ze serveru.</translation>
+        <translation type="vanished">Je pravděpodobné, že zpráva byla smazána ze serveru.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1721"/>
