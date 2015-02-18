@@ -97,7 +97,7 @@ void DlgMsgSearch::initSearchWindow(void)
 void DlgMsgSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-	qDebug() << "checkInputFields";
+	//qDebug() << "checkInputFields";
 
 	bool messageType = true;
 
@@ -200,7 +200,6 @@ finish:
 	} else {
 		if (messageType) {
 			int fields = howManyFieldsAreFill();
-			qDebug() << fields;
 			if ((fields > 0) && (fields < 4)) {
 				this->searchPushButton->setEnabled(true);
 			} else {
