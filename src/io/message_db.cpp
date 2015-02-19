@@ -3074,7 +3074,7 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
     const QString &dmRecipientIdent,
     const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    const int msgType)
+    enum MessageDirection msgType)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -3099,16 +3099,6 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 	} else {
 		/* wrong input vaules from search dialog */
 		return QStringList();
-	} else if (msgType == 1 || (msgType == 2)) {
-		/* means select only received (1) or sent (2) messages */
-		isMultiSelect = true;
-		queryStr = "SELECT m.dmID, s.message_type FROM messages AS m "
-		    "LEFT JOIN supplementary_message_data AS s "
-		    "ON (m.dmID = s.message_id) "
-		    "WHERE ";
-	} else {
-		/* select from all messages */
-		queryStr = "SELECT m.dmID FROM messages AS m WHERE ";
 	}
 
 	QStringList dmIdList;

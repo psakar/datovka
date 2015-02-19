@@ -588,7 +588,7 @@ public:
 	    const QString &dmRecipientIdent,
 	    const QString &dmToHands,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    const int msgType);
+	    enum MessageDirection msgType);
 
 	/*!
 	 * @brief Update message envelope delivery information.

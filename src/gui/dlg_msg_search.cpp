@@ -282,15 +282,15 @@ void DlgMsgSearch::searchMessage(void)
 {
 	qDebug() << "searchMessage";
 
-	int msgType = 0;
+	int msgType = msgType = -1; // search abort
 
 	if (this->searchReceivedMsgCheckBox->isChecked() &&
 	    this->searchSentMsgCheckBox->isChecked()) {
-		msgType = 3;
+		msgType = MSG_ALL;
 	} else if (this->searchReceivedMsgCheckBox->isChecked()) {
-		msgType = 1;
+		msgType = MSG_RECEIVED;
 	} else if (this->searchSentMsgCheckBox->isChecked()) {
-		msgType = 2;
+		msgType = MSG_SENT;
 	}
 
 	QStringList dmIDList;
