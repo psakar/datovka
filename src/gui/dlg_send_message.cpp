@@ -37,8 +37,8 @@
 #include "src/io/dbs.h"
 
 
-DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
-    QTreeView &accountList, QTableView &messageList,
+DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, QString &senderName,
+    Action action, QTreeView &accountList, QTableView &messageList,
     const AccountModel::SettingsMap &accountInfo,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QString &lastAttAddPath,
@@ -51,6 +51,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, Action action,
     m_accountList(accountList),
     m_messageList(messageList),
     m_dbId(dbId),
+    m_senderName(senderName),
     m_action(action),
     m_accountInfo(accountInfo),
     m_dbType(dbType),
@@ -999,6 +1000,14 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {
+			int dmId = atoi(sent_message->envelope->dmID);
+			m_messDb.msgsInsertNewlySentMessageEnvelope(dmId,
+			    m_dbId,
+			    m_senderName,
+			    this->recipientTableWidget->item(i,1)->text(),
+			    this->recipientTableWidget->item(i,0)->text(),
+			    this->subjectText->text());
+
 			successSendCnt++;
 		}
 	}
@@ -1063,7 +1072,7 @@ void DlgSendMessage::sendMessage(void)
 			isds_list_free(&documents);
 			isds_envelope_free(&sent_envelope);
 			isds_message_free(&sent_message);
-			this->accept(); /* Set return code to accepted. */
+			this->close(); /* Set return code to closed. */
 			return;
 		} else {
 			isds_document_free(&document);
@@ -1099,7 +1108,7 @@ finish:
 		isds_list_free(&documents);
 		isds_envelope_free(&sent_envelope);
 		isds_message_free(&sent_message);
-		this->close(); /* Set return code to accepted. */
+		this->close(); /* Set return code to closed. */
 		return;
 	}
 

@@ -55,8 +55,8 @@ public:
 		QString errInfo;
 	};
 
-	DlgSendMessage(MessageDb &db, QString &dbId, Action action,
-	    QTreeView &accountList, QTableView &messageList,
+	DlgSendMessage(MessageDb &db, QString &dbId, QString &senderName,
+	    Action action, QTreeView &accountList, QTableView &messageList,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QString &lastAttAddPath,
@@ -95,6 +95,7 @@ private:
 	QTreeView &m_accountList;
 	QTableView &m_messageList;
 	const QString m_dbId;
+	const QString m_senderName;
 	const Action m_action;
 	AccountModel::SettingsMap m_accountInfo;
 	QString m_dbType;

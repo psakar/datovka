@@ -3503,6 +3503,7 @@ void MainWindow::createAndSendMessage(void)
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
+	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
@@ -3516,8 +3517,6 @@ void MainWindow::createAndSendMessage(void)
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
-			/* TODO - dialog to inform user about error */
-
 			return;
 		}
 	}
@@ -3532,24 +3531,24 @@ void MainWindow::createAndSendMessage(void)
 	} else {
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId, senderName,
 	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this);
 
 	if (newMessageDialog->exec() == QDialog::Accepted) {
-		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-			if (!connectToIsds(index, true)) {
-				/* TODO */
-				//return Q_CONNECT_ERROR;
-			}
-		}
 
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
+		//if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+		//	if (!connectToIsds(index, true)) {
+		//		/* TODO */
+		//		//return Q_CONNECT_ERROR;
+		//	}
+		//}
 		/* Messages counters total/news are returned from worker */
-		int total = 0, news = 0;
+		//  int total = 0, news = 0;
 		/*
 		 * Cannot download full message list as it causes all messages
 		 * to be marked as accepted on server.
@@ -3997,6 +3996,9 @@ void MainWindow::createAndSendMessageReply(void)
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
+
+
+	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
@@ -4025,24 +4027,25 @@ void MainWindow::createAndSendMessageReply(void)
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
 
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId, senderName,
 	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this, replyData[0], replyData[1], replyData[2],
 	    replyData[3], replyData[4], replyData[5], replyData[6],
 	    replyData[7], replyData[8]);
 	if (newMessageDialog->exec() == QDialog::Accepted) {
+
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
-		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-			if (!connectToIsds(index, true)) {
-				/* TODO */
-				//return Q_CONNECT_ERROR;
-			}
-		}
 
+		//if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+		//	if (!connectToIsds(index, true)) {
+		//		/* TODO */
+		//		//return Q_CONNECT_ERROR;
+		//	}
+		//}
 		/* Messages counters total/news are returned from worker */
-		int total = 0, news = 0;
+		//int total = 0, news = 0;
 		/*
 		 * Cannot download full message list as it causes all messages
 		 * to be marked as accepted on server.

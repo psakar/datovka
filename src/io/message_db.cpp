@@ -2514,6 +2514,74 @@ fail:
 }
 
 
+
+/* ========================================================================= */
+/*
+ * Insert newly sent message into messages table.
+ */
+bool MessageDb::msgsInsertNewlySentMessageEnvelope(int dmId,
+    const QString &dbIDSender, const QString &dmSender,
+    const QString &dbIDRecipient, const QString &dmRecipient,
+    const QString &dmAnnotation)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "INSERT INTO messages ("
+	    "dmID, dbIDSender, dmSender, "
+	    "dmRecipient, dbIDRecipient, dmAnnotation, "
+	    "dmPersonalDelivery, dmMessageStatus "
+	    ") VALUES (:dmId, :dbIDSender, :dmSender, "
+	    ":dmRecipient, :dbIDRecipient, :dmAnnotation, "
+	    ":dmPersonalDelivery, :dmMessageStatus)";
+
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":dbIDSender", dbIDSender);
+	query.bindValue(":dmSender", dmSender);
+	query.bindValue(":dmRecipient", dmRecipient);
+	query.bindValue(":dbIDRecipient", dbIDRecipient);
+	query.bindValue(":dmAnnotation", dmAnnotation);
+	query.bindValue(":dmPersonalDelivery", 0);
+	query.bindValue(":dmMessageStatus", 1);
+
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	queryStr = "INSERT INTO supplementary_message_data ("
+	    "message_id, message_type, read_locally, download_date, "
+	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
+	    ":download_date, :custom_data)";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":dmId", dmId);
+	query.bindValue(":message_type", 2);
+	query.bindValue(":read_locally", true);
+	query.bindValue(":download_date",
+	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
+	query.bindValue(":custom_data", "null");
+
+	if (!query.exec()) {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return msgSetProcessState(dmId, UNSETTLED, true);
+}
+
+
 /* ========================================================================= */
 /*
  * Insert message envelope into messages table.

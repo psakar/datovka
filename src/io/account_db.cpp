@@ -196,7 +196,7 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
  * Return data box identifier.
  */
 const QString AccountDb::dbId(const QString &key,
-    const QString defaultValue) const
+    const QString &defaultValue) const
 /* ========================================================================= */
 {
 	if (!m_db.isOpen()) {
@@ -212,6 +212,59 @@ const QString AccountDb::dbId(const QString &key,
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() && query.first()) {
 		return query.value(0).toString();
+	} else {
+		return defaultValue;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Return sender name guess.
+ */
+const QString AccountDb::senderNameGuess(const QString &key,
+    const QString &defaultValue) const
+/* ========================================================================= */
+{
+	if (!m_db.isOpen()) {
+		return defaultValue;
+	}
+
+	QSqlQuery query(m_db);
+	QString queryStr = "";
+	QString name = "";
+
+	queryStr = "SELECT firmName FROM account_info WHERE key = :key";
+
+	if (!query.prepare(queryStr)) {
+		return defaultValue;
+	}
+
+	query.bindValue(":key", key);
+
+	if (query.exec() && query.isActive() && query.first()) {
+		name = query.value(0).toString();
+		if (!(name.isNull() || name.isEmpty())) {
+			return name;
+		}
+	}
+
+	queryStr = "SELECT pnFirstName, pnMiddleName, pnLastName "
+	    "FROM account_info WHERE key = :key";
+
+	if (!query.prepare(queryStr)) {
+		return defaultValue;
+	}
+
+	query.bindValue(":key", key);
+
+	if (query.exec() && query.isActive() && query.first()) {
+		QString name = query.value(0).toString();
+		if (!query.value(1).toString().isEmpty()) {
+			name += " " + query.value(1).toString();
+		}
+		name += " " + query.value(2).toString();
+		return name;
 	} else {
 		return defaultValue;
 	}

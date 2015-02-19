@@ -99,7 +99,14 @@ public:
 	 * @brief Return data box identifier.
 	 */
 	const QString dbId(const QString &key,
-	    const QString defaultValue = QString()) const;
+	    const QString &defaultValue = QString()) const;
+
+	/*!
+	 * @brief Return sender name guess.
+	 */
+	const QString senderNameGuess(const QString &key,
+	    const QString &defaultValue = QString()) const;
+
 
 	/*!
 	 * @brief Return pwd expiration info from db.

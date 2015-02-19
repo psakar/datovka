@@ -469,6 +469,16 @@ public:
 	bool isDeliveryInfoRawDb(int dmId) const;
 
 	/*!
+	 * @brief Insert newly sent message into messages table.
+	 *
+	 * @return True on success.
+	 */
+	bool msgsInsertNewlySentMessageEnvelope(int dmId,
+	    const QString &dbIDSender, const QString &dmSender,
+	    const QString &dbIDRecipient, const QString &dmRecipient,
+	    const QString &dmAnnotation);
+
+	/*!
 	 * @brief Insert message envelope into messages table.
 	 *
 	 * @return True on success.
