@@ -3552,7 +3552,7 @@ void MainWindow::createAndSendMessage(void)
 		int total = 0, news = 0;
 		/*
 		 * Cannot download full message list as it causes all messages
-		 * to be marged as accpted on server.
+		 * to be marked as accepted on server.
 		 */
 		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
 		//    QString(), m_statusProgressBar, NULL, total, news);
@@ -4045,7 +4045,7 @@ void MainWindow::createAndSendMessageReply(void)
 		int total = 0, news = 0;
 		/*
 		 * Cannot download full message list as it causes all messages
-		 * to be marged as accpted on server.
+		 * to be marked as accepted on server.
 		 */
 		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
 		//    QString(), m_statusProgressBar, NULL, total, news);
