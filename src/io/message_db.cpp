@@ -1089,18 +1089,23 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
 		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded";
-	queryStr += " FROM messages "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
-	    "WHERE dbIDSender = :sendDbId";
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "WHERE "
+//	    "m.dbIDSender = :sendDbId"
+	    "s.message_type = :message_type";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
 		logError("Cannot execute SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
@@ -1152,21 +1157,26 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
 		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded";
-	queryStr += " FROM messages "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
 	    "WHERE "
-	    "(dbIDSender = :sendDbId)"
+//	    "(m.dbIDSender = :sendDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
-	    "(dmDeliveryTime >= date('now','-90 day'))";
+	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+	    " (m.dmDeliveryTime IS NULL))";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
 		logError("Cannot execute SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
@@ -1219,21 +1229,25 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
 		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded";
-	queryStr += " FROM messages "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
 	    "WHERE "
-	    "(dbIDSender = :sendDbId)"
+//	    "(m.dbIDSender = :sendDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = :year)";
+	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	query.bindValue(":year", year);
 	if (!query.exec()) {
 		logError("Cannot execute SQL query: %s.\n",
@@ -1284,15 +1298,21 @@ QStringList MessageDb::msgsSntYears(const QString &sendDbId,
 {
 	QStringList yearList;
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
-	    "FROM messages WHERE "
-	    "dbIDSender = :sendDbId";
+	QString queryStr = "SELECT DISTINCT strftime('%Y', m.dmDeliveryTime) "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE "
+//	    "(m.dbIDSender = :sendDbId)"
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "(m.dmDeliveryTime IS NOT NULL)";
 	switch (sorting) {
 	case ASCENDING:
-		queryStr += " ORDER BY dmDeliveryTime ASC";
+		queryStr += " ORDER BY m.dmDeliveryTime ASC";
 		break;
 	case DESCENDING:
-		queryStr += " ORDER BY dmDeliveryTime DESC";
+		queryStr += " ORDER BY m.dmDeliveryTime DESC";
 		break;
 	default:
 		break;
@@ -1302,7 +1322,8 @@ QStringList MessageDb::msgsSntYears(const QString &sendDbId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -1333,16 +1354,22 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 	QString queryStr;
 
 	for (int i = 0; i < yearList.size(); ++i) {
-		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
-		    "(dbIDSender = :sendDbId)"
+		queryStr = "SELECT COUNT(*) AS nrRecords "
+		    "FROM messages AS m"
+		    "LEFT JOIN supplementary_message_data AS s "
+		    "ON (m.dmID = s.message_id) "
+		    "WHERE "
+//		    "(m.dbIDSender = :sendDbId)"
+		    "(s.message_type = :message_type)"
 		    " and "
-		    "(strftime('%Y', dmDeliveryTime) = :year)";
+		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 		if (!query.prepare(queryStr)) {
 			logError("Cannot prepare SQL query: %s.\n",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		query.bindValue(":sendDbId", sendDbId);
+//		query.bindValue(":sendDbId", sendDbId);
+		query.bindValue(":message_type", TYPE_SENT);
 		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
@@ -1377,20 +1404,23 @@ int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
 	QString queryStr;
 
 	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-	    "(dbIDSender = :sendDbId)"
+//	    "(m.dbIDSender = :sendDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
-	    "(dmDeliveryTime >= date('now','-90 day'))"
+	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
-	    "(read_locally = 0)";
+	    "(s.read_locally = 0)";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
@@ -1418,20 +1448,23 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 	QString queryStr;
 
 	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-	    "(dbIDSender = :sendDbId)"
+//	    "(m.dbIDSender = :sendDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = :year)"
+	    "(strftime('%Y', m.dmDeliveryTime) = :year)"
 	    " and "
-	    "(read_locally = 0)";
+	    "(s.read_locally = 0)";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":sendDbId", sendDbId);
+//	query.bindValue(":sendDbId", sendDbId);
+	query.bindValue(":message_type", TYPE_SENT);
 	query.bindValue(":year", year);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -2566,7 +2599,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(int dmId,
 		return false;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":message_type", 2);
+	query.bindValue(":message_type", TYPE_SENT);
 	query.bindValue(":read_locally", true);
 	query.bindValue(":download_date",
 	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
@@ -2690,9 +2723,9 @@ bool MessageDb::msgsInsertMessageEnvelope(int dmId,
 	}
 	query.bindValue(":dmId", dmId);
 	if (MSG_RECEIVED == msgDirect) {
-		query.bindValue(":message_type", 1);
+		query.bindValue(":message_type", TYPE_RECEIVED);
 	} else {
-		query.bindValue(":message_type", 2);
+		query.bindValue(":message_type", TYPE_SENT);
 	}
 	query.bindValue(":read_locally", false);
 	query.bindValue(":download_date",
@@ -2825,9 +2858,9 @@ bool MessageDb::msgsUpdateMessageEnvelope(int dmId,
 	}
 	query.bindValue(":dmId", dmId);
 	if (MSG_RECEIVED == msgDirect) {
-		query.bindValue(":message_type", 1);
+		query.bindValue(":message_type", TYPE_RECEIVED);
 	} else {
-		query.bindValue(":message_type", 2);
+		query.bindValue(":message_type", TYPE_SENT);
 	}
 
 	if (query.exec()) {
@@ -3676,9 +3709,9 @@ QList<int> MessageDb::msgsDateInterval(const QDate &fromDate,
 		goto fail;
 	}
 	if (MSG_RECEIVED == msgDirect) {
-		query.bindValue(":message_type", 1);
+		query.bindValue(":message_type", TYPE_RECEIVED);
 	} else {
-		query.bindValue(":message_type", 2);
+		query.bindValue(":message_type", TYPE_SENT);
 	}
 	query.bindValue(":fromDate", fromDate);
 	query.bindValue(":toDate", toDate);

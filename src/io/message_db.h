@@ -150,6 +150,17 @@ public:
 class MessageDb : public QObject {
 
 public:
+	/*!
+	 * @brief Used to distinguish between sent and received messages in db.
+	 *
+	 * @note This value cannot be changed without breaking backward
+	 *     compatibility.
+	 */
+	enum MessageType {
+		TYPE_RECEIVED = 1, /*!< One is received. */
+		TYPE_SENT = 2 /*!< Two is sent. */
+	};
+
 	MessageDb(const QString &connectionName, QObject *parent = 0);
 	virtual ~MessageDb(void);
 
