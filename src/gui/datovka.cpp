@@ -3550,8 +3550,13 @@ void MainWindow::createAndSendMessage(void)
 
 		/* Messages counters total/news are returned from worker */
 		int total = 0, news = 0;
-		Worker::downloadMessageList(index, MSG_SENT, *messageDb,
-		    QString(), m_statusProgressBar, NULL, total, news);
+		/*
+		 * Cannot download full message list as it causes all messages
+		 * to be marged as accpted on server.
+		 */
+		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
+		//    QString(), m_statusProgressBar, NULL, total, news);
+		/* TODO -- Insert the sent message into db. */
 	}
 
 	if (!globPref.use_global_paths) {
@@ -4038,8 +4043,13 @@ void MainWindow::createAndSendMessageReply(void)
 
 		/* Messages counters total/news are returned from worker */
 		int total = 0, news = 0;
-		Worker::downloadMessageList(index, MSG_SENT, *messageDb,
-		    QString(), m_statusProgressBar, NULL, total, news);
+		/*
+		 * Cannot download full message list as it causes all messages
+		 * to be marged as accpted on server.
+		 */
+		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
+		//    QString(), m_statusProgressBar, NULL, total, news);
+		/* TODO -- Insert the sent message into db. */
 	}
 
 	if (!globPref.use_global_paths) {

@@ -514,6 +514,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 					}
 					getMessageState(acntTopIdx,
 					    dmId, true, messageDb);
+//					updateMessageState(true, messageDb,
+//					    item->envelope);
 				}
 			}
 		}
@@ -551,16 +553,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
  * Store sent message delivery information into database.
  */
 qdatovka_error Worker::updateMessageState(bool signedMsg,
-    MessageDb &messageDb, const struct isds_message *msg)
+    MessageDb &messageDb, const struct isds_envelope *envel)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != msg);
-	if (NULL == msg) {
-		return Q_GLOBAL_ERROR;
-	}
-
-	const struct isds_envelope *envel = msg->envelope;
-
 	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
 		return Q_GLOBAL_ERROR;
@@ -644,7 +639,12 @@ bool Worker::getMessageState(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	updateMessageState(signedMsg, messageDb, message);
+	Q_ASSERT(NULL != message);
+	if (NULL == message) {
+		return false;
+	}
+
+	updateMessageState(signedMsg, messageDb, message->envelope);
 
 	isds_list_free(&message->envelope->events);
 	isds_message_free(&message);
