@@ -2878,6 +2878,38 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Get message state.
+ */
+int MessageDb::messageState(int dmId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "SELECT dmMessageStatus "
+	    "FROM messages WHERE dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
  * Update message envelope delivery information.
  */
 bool MessageDb::msgsUpdateMessageState(int dmId,

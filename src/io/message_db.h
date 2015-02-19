@@ -540,6 +540,14 @@ public:
 	    enum MessageDirection msgDirect);
 
 	/*!
+	 * @brief Get message state.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message state number or -1 on error.
+	 */
+	int messageState(int dmId);
+
+	/*!
 	 * @brief Update message envelope delivery information.
 	 *
 	 * @param[in] dmId              Message identifier.
