@@ -282,7 +282,7 @@ void DlgMsgSearch::searchMessage(void)
 {
 	qDebug() << "searchMessage";
 
-	int msgType = msgType = -1; // search abort
+	int msgType = -1; // search abort
 
 	if (this->searchReceivedMsgCheckBox->isChecked() &&
 	    this->searchSentMsgCheckBox->isChecked()) {
