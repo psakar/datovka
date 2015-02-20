@@ -150,8 +150,9 @@ public:
 	 * @brief Store sent message delivery information into database.
 	 */
 	static
-	qdatovka_error updateMessageState(bool signedMsg,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
+	qdatovka_error updateMessageState(enum MessageDirection msgDirect,
+	    bool signedMsg, MessageDb &messageDb,
+	    const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Download attachments, envelope and raw for message.
@@ -194,8 +195,9 @@ private:
 	* message
 	*/
 	static
-	bool getMessageState(const QModelIndex &acntTopIdx,
-	    int msgIdx, bool signedMsg, MessageDb &messageDb);
+	bool getMessageState(enum MessageDirection msgDirect,
+	    const QModelIndex &acntTopIdx, int msgIdx, bool signedMsg,
+	    MessageDb &messageDb);
 
 	/*!
 	 * @brief Download delivery info for message.
@@ -217,6 +219,13 @@ private:
 	static
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	    const QString &dmId);
+
+	/*!
+	 * @brief Update message envelope.
+	 */
+	static
+	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
+	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 signals:
 	/*!
