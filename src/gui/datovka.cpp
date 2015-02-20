@@ -639,6 +639,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
+		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -646,6 +647,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
+		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
@@ -659,6 +661,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -666,6 +669,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
@@ -673,6 +677,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -682,6 +687,7 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
+		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -766,7 +772,7 @@ setmodel:
 		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
 			messageItemRestoreSelection();
-			ui->actionReply_to_the_sender->setEnabled(true);
+			//ui->actionReply_to_the_sender->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->menuMessage->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
