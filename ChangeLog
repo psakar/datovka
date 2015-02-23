@@ -1,3 +1,14 @@
+4.1.2 / 2015-02-23
+ * The database query which generates contact lists when sending a message
+   has been modified. This should reduce the number of duplicated entries.
+ * Fixed bug causing an information dialogue to pop up after the account
+   properties have been changed.
+ * The message reply button is disabled when browsing sent messages because you
+   cannot send a message to yourself.
+ * Fixed bug when sending messages. Sending a message caused all messages to be
+   marked as delivered on the ISDS server. This was caused because the sent
+   message was immediately downloaded.
+
 4.1.1 / 2015-02-16
  * Default time out can be set by user in the settings dialogue.
  * The account information page displays information about database file
