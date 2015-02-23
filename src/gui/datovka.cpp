@@ -1904,7 +1904,8 @@ void MainWindow::deleteMessage(void)
 		    msgIdxList.at(i).row(), 0).data().toString();
 
 		/* Save current account index */
-		QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+		QModelIndex selectedAcntIndex =
+		    ui->accountList->currentIndex();
 
 		switch (eraseMessage(acntTopIdx, dmId, delMsgIsds)) {
 		case Q_SUCCESS:
@@ -3501,8 +3502,8 @@ void MainWindow::createAndSendMessage(void)
 	 * TODO -- This method copies createAndSendMessageReply().
 	 * Delete one of them.
 	 */
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -3522,7 +3523,7 @@ void MainWindow::createAndSendMessage(void)
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(acntTopIndex, true)) {
 			return;
 		}
 	}
@@ -3530,7 +3531,7 @@ void MainWindow::createAndSendMessage(void)
 	showStatusTextWithTimeout(tr("Create and send a new message."));
 
 	AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	QString lastAttachAddPath;
 	if (globPref.use_global_paths) {
 		lastAttachAddPath = globPref.add_file_to_attachments_path;
@@ -3547,21 +3548,25 @@ void MainWindow::createAndSendMessage(void)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		//if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		//	if (!connectToIsds(index, true)) {
-		//		/* TODO */
-		//		//return Q_CONNECT_ERROR;
-		//	}
-		//}
-		/* Messages counters total/news are returned from worker */
-		//  int total = 0, news = 0;
 		/*
-		 * Cannot download full message list as it causes all messages
-		 * to be marked as accepted on server.
+		 * Message model must be regenerated to show the sent if
+		 * residing on sent messages.
+		 *
+		 * TODO -- Regenerating year list (as this could add entries).
 		 */
-		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
-		//    QString(), m_statusProgressBar, NULL, total, news);
-		/* TODO -- Insert the sent message into db. */
+		if (selectedAcntIndex.isValid()) {
+			switch (AccountModel::nodeType(selectedAcntIndex)) {
+			case AccountModel::nodeRecentSent:
+			case AccountModel::nodeAll:
+			case AccountModel::nodeSent:
+			case AccountModel::nodeSentYear:
+				accountItemSelectionChanged(selectedAcntIndex);
+				break;
+			default:
+				/* Do nothing. */
+				break;
+			}
+		}
 	}
 
 	if (!globPref.use_global_paths) {
@@ -4044,21 +4049,13 @@ void MainWindow::createAndSendMessageReply(void)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		//if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		//	if (!connectToIsds(index, true)) {
-		//		/* TODO */
-		//		//return Q_CONNECT_ERROR;
-		//	}
-		//}
-		/* Messages counters total/news are returned from worker */
-		//int total = 0, news = 0;
 		/*
-		 * Cannot download full message list as it causes all messages
-		 * to be marked as accepted on server.
+		 * Message model must not be regenerated because when
+		 * generating a message reply the user must be on received
+		 * messages.
+		 *
+		 * TODO -- Regenerate year list (as this could add entries).
 		 */
-		//Worker::downloadMessageList(index, MSG_SENT, *messageDb,
-		//    QString(), m_statusProgressBar, NULL, total, news);
-		/* TODO -- Insert the sent message into db. */
 	}
 
 	if (!globPref.use_global_paths) {
