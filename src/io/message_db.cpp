@@ -1355,7 +1355,7 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 
 	for (int i = 0; i < yearList.size(); ++i) {
 		queryStr = "SELECT COUNT(*) AS nrRecords "
-		    "FROM messages AS m"
+		    "FROM messages AS m "
 		    "LEFT JOIN supplementary_message_data AS s "
 		    "ON (m.dmID = s.message_id) "
 		    "WHERE "
