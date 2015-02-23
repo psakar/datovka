@@ -1,4 +1,7 @@
-4.1.2 / 2015-02-23
+4.1.2 / 2015-02-24
+ * Fixed issue when sent messages weren't directly shown in sent messages
+   when the user was already displaying those lists.
+ * Datovka Windows installer installs short-cuts for all users.
  * The database query which generates contact lists when sending a message
    has been modified. This should reduce the number of duplicated entries.
  * Fixed bug causing an information dialogue to pop up after the account
