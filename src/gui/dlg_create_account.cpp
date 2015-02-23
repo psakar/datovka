@@ -358,7 +358,8 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(0);
 	}
 
-	itemSettings._setCreatedFromScratch(true);
+	/* Only for newly created account. */
+	itemSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
 
 	/* create new account / save current account */
 	switch (m_action) {
