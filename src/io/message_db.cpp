@@ -1668,34 +1668,73 @@ fail:
 QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 /* ========================================================================= */
 {
-	QList< QVector<QString> > list_contacts;
+	class ContactEntry {
+	public:
+		QString boxId;
+		QString name;
+		QString address;
+	};
+
+	QMap<QString, ContactEntry> mapOfBoxes;
+	QMap<QString, ContactEntry>::iterator it;
+	QList< QVector<QString> > contactList;
 	QSqlQuery query(m_db);
 
-	QString queryStr = "SELECT DISTINCT "
-	    "dbIDRecipient, dmRecipient, dmRecipientAddress "
-	    "FROM messages GROUP BY dbIDRecipient "
-	    "UNION SELECT DISTINCT "
-	    "dbIDSender, dmSender, dmSenderAddress "
-	    "FROM messages GROUP BY dbIDSender";
+	QString queryStr = "SELECT m.dmID AS id, m.dbIDRecipient, "
+	    "m.dmRecipient, m.dmRecipientAddress "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type_sent)"
+	    " and "
+	    "(m.dmRecipientAddress IS NOT NULL)"
+	    " UNION "
+	    "SELECT m.dmID AS id, m.dbIDSender, m.dmSender, "
+	    "m.dmSenderAddress "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type_received)"
+	    " and "
+	    "(m.dmSenderAddress IS NOT NULL)"
+	    " ORDER BY m.dmID DESC";
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	if (query.exec()) {
+	query.bindValue(":message_type_sent", TYPE_SENT);
+	query.bindValue(":message_type_received", TYPE_RECEIVED);
+	if (query.exec() && query.isActive()) {
 		query.first();
+		ContactEntry entry;
 		while (query.isValid()) {
-			QVector<QString> contact;
-			contact.append(query.value(0).toString());
-			contact.append(query.value(1).toString());
-			contact.append(query.value(2).toString());
-			list_contacts.append(contact);
+			entry.boxId = query.value(1).toString();
+			entry.name = query.value(2).toString();
+			entry.address = query.value(3).toString();
+			if (mapOfBoxes.end() == mapOfBoxes.find(entry.boxId)) {
+				mapOfBoxes.insert(entry.boxId, entry);
+			}
 			query.next();
 		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	for (it = mapOfBoxes.begin(); it != mapOfBoxes.end(); ++it) {
+		QVector<QString> contact;
+		contact.append(it.value().boxId);
+		contact.append(it.value().name);
+		contact.append(it.value().address);
+		contactList.append(contact);
 	}
 
 fail:
-	return list_contacts;
+	return contactList;
 }
 
 
@@ -1714,7 +1753,8 @@ QString MessageDb::descriptionHtml(int dmId, QAbstractButton *verifySignature,
 	html += indentDivStart;
 	html += "<h3>" + QObject::tr("Identification") + "</h3>";
 	if (showId) {
-		html += strongAccountInfoLine(QObject::tr("Message ID"), QString::number(dmId));
+		html += strongAccountInfoLine(QObject::tr("Message ID"),
+		    QString::number(dmId));
 	}
 
 	queryStr = "SELECT "
