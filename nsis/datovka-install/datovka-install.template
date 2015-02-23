@@ -19,6 +19,7 @@ Name "${PROGRAM_NAME} ${VERSION}"
 installDir "$PROGRAMFILES\CZ.NIC\${PROGRAM_NAME}"
 installDirRegKey HKLM "Software\${PROGRAM_NAME}" "InstallLocation"
 RequestExecutionLevel admin
+
 #give credits to Nullsoft: BrandingText ""
 VIAddVersionKey "ProductName" "${PROGRAM_NAME} ${VERSION}"
 VIAddVersionKey "CompanyName" "CZ.NIC, z. s. p. o."
@@ -68,6 +69,9 @@ Var StartMenuFolder
 !insertmacro MUI_LANGUAGE "Czech"
 
 section "-hidden.postinstall"
+
+SetShellVarContext all
+
 	# copy files
 	setOutPath $INSTDIR
   File /r ".\..\..\packages\datovka-${VERSION}\*"  
@@ -111,6 +115,9 @@ sectionEnd
 
 # uninstaller section
 section "un.Unbound"
+
+SetShellVarContext all
+
   	# deregister uninstall
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}"
 	RMDir /r "$INSTDIR\*" 
