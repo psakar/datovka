@@ -3074,7 +3074,7 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
     const QString &dmRecipientIdent,
     const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgType)
+    enum MessageDirection msgDirect)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -3086,10 +3086,10 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 	QString queryStr = "";
 	QString andToken = " AND ";
 
-	if (msgType == MSG_ALL) {
+	if (MSG_ALL == msgDirect) {
 		/* select from all messages */
 		queryStr = "SELECT m.dmID FROM messages AS m WHERE ";
-	} else if (msgType == MSG_RECEIVED  || (msgType == MSG_SENT)) {
+	} else if ((MSG_RECEIVED == msgDirect) || (MSG_SENT == msgDirect)) {
 		/* means select only received (1) or sent (2) messages */
 		isMultiSelect = true;
 		queryStr = "SELECT m.dmID, s.message_type FROM messages AS m "
@@ -3233,7 +3233,11 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 		query.bindValue(":dmAnnotation", dmAnnotation);
 
 		if (isMultiSelect) {
-			query.bindValue(":message_type", msgType);
+			if (MSG_RECEIVED == msgDirect) {
+				query.bindValue(":message_type", TYPE_RECEIVED);
+			} else {
+				query.bindValue(":message_type", TYPE_SENT);
+			}
 		}
 
 	} else {
@@ -3253,7 +3257,11 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 		query.bindValue(":dmId", dmId.toInt());
 
 		if (isMultiSelect) {
-			query.bindValue(":message_type", msgType);
+			if (MSG_RECEIVED == msgDirect) {
+				query.bindValue(":message_type", TYPE_RECEIVED);
+			} else {
+				query.bindValue(":message_type", TYPE_SENT);
+			}
 		}
 	}
 
