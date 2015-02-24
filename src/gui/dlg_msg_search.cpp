@@ -294,21 +294,45 @@ void DlgMsgSearch::searchMessage(void)
 	}
 
 	QStringList dmIDList;
-	dmIDList = m_messageDbList.at(0)->msgsAdvanceSearchMessageEnvelope(
-	    this->messageIdLineEdit->text(),
-	    this->subjectLineEdit->text(),
-	    this->senderDbIdLineEdit->text(),
-	    this->senderNameLineEdit->text(),
-	    this->addressLineEdit->text(),
-	    this->recipientDbIdLineEdit->text(),
-	    this->recipientNameLineEdit->text(),
-	    this->addressLineEdit->text(),
-	    this->senderRefNumLineEdit->text(),
-	    this->senderFileMarkLineEdit->text(),
-	    this->recipientRefNumLineEdit->text(),
-	    this->recipientFileMarkLineEdit->text(),
-	    this->toHandsLineEdit->text(),
-	    QString(), QString(), msgType);
+	if (!this->searchAllAcntCheckBox->isChecked()) {
+		dmIDList = m_messageDbList.at(0)->
+		    msgsAdvanceSearchMessageEnvelope(
+		    this->messageIdLineEdit->text(),
+		    this->subjectLineEdit->text(),
+		    this->senderDbIdLineEdit->text(),
+		    this->senderNameLineEdit->text(),
+		    this->addressLineEdit->text(),
+		    this->recipientDbIdLineEdit->text(),
+		    this->recipientNameLineEdit->text(),
+		    this->addressLineEdit->text(),
+		    this->senderRefNumLineEdit->text(),
+		    this->senderFileMarkLineEdit->text(),
+		    this->recipientRefNumLineEdit->text(),
+		    this->recipientFileMarkLineEdit->text(),
+		    this->toHandsLineEdit->text(),
+		    QString(), QString(), msgType);
+	} else {
+		for (int i = 0; i < m_messageDbList.count(); ++i) {
+			QStringList tmpDmIDList;
+			tmpDmIDList = m_messageDbList.at(i)->
+			    msgsAdvanceSearchMessageEnvelope(
+			    this->messageIdLineEdit->text(),
+			    this->subjectLineEdit->text(),
+			    this->senderDbIdLineEdit->text(),
+			    this->senderNameLineEdit->text(),
+			    this->addressLineEdit->text(),
+			    this->recipientDbIdLineEdit->text(),
+			    this->recipientNameLineEdit->text(),
+			    this->addressLineEdit->text(),
+			    this->senderRefNumLineEdit->text(),
+			    this->senderFileMarkLineEdit->text(),
+			    this->recipientRefNumLineEdit->text(),
+			    this->recipientFileMarkLineEdit->text(),
+			    this->toHandsLineEdit->text(),
+			    QString(), QString(), msgType);
+			dmIDList.append(tmpDmIDList);
+		}
+	}
 
 	for (int i = 0; i < dmIDList.size(); i++) {
 		qDebug() << dmIDList.at(i);

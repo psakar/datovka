@@ -7667,13 +7667,14 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 	QList<MessageDb*> messageDbList;
 	messageDbList.clear();
 
+	/* get pointer to database for current accounts */
 	QModelIndex currIndex = ui->accountList->currentIndex();
 	currIndex = AccountModel::indexTop(currIndex);
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 	messageDbList.append(messageDb);
 
-	/* get pointer to database for all accounts */
+	/* get pointer to database for other accounts */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
 		if (currIndex != index) {
