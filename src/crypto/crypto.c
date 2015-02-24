@@ -32,6 +32,7 @@
 #include <openssl/ts.h>
 #include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
+#include <openssl/pkcs12.h>
 #include <string.h>
 
 #include "src/compat/compat_win.h"
@@ -2120,6 +2121,75 @@ int cert_force_success(int ok, X509_STORE_CTX *ctx)
 
 	return 1;
 }
+
+
+/* ========================================================================= */
+/*
+ * Convert p12 file to pem
+ */
+static
+int convert_p12_to_pem(char * p12File, char * pwd)
+/* ========================================================================= */
+{
+	FILE *p12_file;
+	PKCS12 *p12_cert = NULL;
+	EVP_PKEY *pkey;
+	X509 *x509_cert;
+	STACK_OF(X509) *additional_certs = NULL;
+
+	OpenSSL_add_all_algorithms();
+	ERR_load_crypto_strings();
+
+	if (!(p12_file = fopen(p12File, "rb"))) {
+		fprintf(stderr, "Error opening file %s\n", p12File);
+		goto fail;
+	}
+
+	d2i_PKCS12_fp(p12_file, &p12_cert);
+	fclose(p12_file);
+
+	if (!p12_cert) {
+		fprintf(stderr, "Error reading PKCS#12 file\n");
+		ERR_print_errors_fp(stderr);
+		goto fail;
+	}
+
+	if (!PKCS12_parse(p12_cert, pwd, &pkey, &x509_cert, &additional_certs)) {
+		fprintf(stderr, "Error parsing PKCS#12 file\n");
+		ERR_print_errors_fp(stderr);
+		goto fail;
+	}
+/*
+	if (pkey) {
+		fprintf(x509_cert, "***Private Key***\n");
+		PEM_write_PrivateKey(p12_file, pkey, NULL, NULL, 0, NULL, NULL);
+	}
+
+	if (x509_cert) {
+		fprintf(x509_cert, "***User Certificate***\n");
+		PEM_write_X509_AUX(p12_file, x509_cert);
+	}
+
+	if (additional_certs && sk_X509_num(additional_certs)) {
+		fprintf(x509_cert, "***Other Certificates***\n");
+		for (i = 0; i < sk_X509_num(additional_certs); i++)
+		PEM_write_X509_AUX(x509_cert, sk_X509_value(additional_certs, i));
+	}
+	sk_X509_pop_free(additional_certs, X509_free);
+*/
+fail:
+	if (NULL != p12_cert) {
+		PKCS12_free(p12_cert);
+	}
+	if (NULL != pkey) {
+		EVP_PKEY_free(pkey);
+	}
+	if (NULL != x509_cert) {
+		X509_free(x509_cert);
+	}
+	return 0;
+}
+
 
 
 const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
