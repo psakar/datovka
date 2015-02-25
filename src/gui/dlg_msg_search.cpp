@@ -85,8 +85,38 @@ void DlgMsgSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchMessage()));
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemSelectionChanged()), this,
+	    SLOT(setFirtsColumnActive()));
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
+	connect(this->resultsTableWidget,
+	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
+	    SLOT(enableOkButton()));
+	this->resultsTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->resultsTableWidget->setColumnWidth(0,20);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Enable ok (add) button if some message was selected
+ */
+void DlgMsgSearch::enableOkButton(void)
+/* ========================================================================= */
+{
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
+		if (this->resultsTableWidget->item(i,0)->checkState()) {
+			this->buttonBox->button(QDialogButtonBox::Ok)->
+			    setEnabled(true);
+		}
+	}
 }
 
 
@@ -273,6 +303,20 @@ int DlgMsgSearch::howManyFieldsAreFill(void)
 	return cnt;
 }
 
+
+/* ========================================================================= */
+/*
+ * Set first column with checkbox active if item was changed
+ */
+void DlgMsgSearch::setFirtsColumnActive(void)
+/* ========================================================================= */
+{
+	this->resultsTableWidget->selectColumn(0);
+	this->resultsTableWidget->selectRow(
+	    this->resultsTableWidget->currentRow());
+}
+
+
 /* ========================================================================= */
 /*
  * Search message
@@ -281,6 +325,9 @@ void DlgMsgSearch::searchMessage(void)
 /* ========================================================================= */
 {
 	qDebug() << "searchMessage";
+
+	this->resultsTableWidget->setRowCount(0);
+	this->resultsTableWidget->setEnabled(false);
 
 	enum MessageDirection msgType = MSG_ALL;
 
@@ -293,9 +340,11 @@ void DlgMsgSearch::searchMessage(void)
 		msgType = MSG_SENT;
 	}
 
-	QStringList dmIDList;
+	QList <QStringList> msgList;
+	msgList.clear();
+
 	if (!this->searchAllAcntCheckBox->isChecked()) {
-		dmIDList = m_messageDbList.at(0)->
+		msgList = m_messageDbList.at(0)->
 		    msgsAdvanceSearchMessageEnvelope(
 		    this->messageIdLineEdit->text(),
 		    this->subjectLineEdit->text(),
@@ -313,8 +362,8 @@ void DlgMsgSearch::searchMessage(void)
 		    QString(), QString(), msgType);
 	} else {
 		for (int i = 0; i < m_messageDbList.count(); ++i) {
-			QStringList tmpDmIDList;
-			tmpDmIDList = m_messageDbList.at(i)->
+			QList <QStringList> tmpMsgList;
+			tmpMsgList = m_messageDbList.at(i)->
 			    msgsAdvanceSearchMessageEnvelope(
 			    this->messageIdLineEdit->text(),
 			    this->subjectLineEdit->text(),
@@ -330,11 +379,37 @@ void DlgMsgSearch::searchMessage(void)
 			    this->recipientFileMarkLineEdit->text(),
 			    this->toHandsLineEdit->text(),
 			    QString(), QString(), msgType);
-			dmIDList.append(tmpDmIDList);
+			msgList.append(tmpMsgList);
 		}
 	}
 
-	for (int i = 0; i < dmIDList.size(); i++) {
-		qDebug() << dmIDList.at(i);
+	if (msgList.isEmpty()) {
+		return;
 	}
+
+	this->resultsTableWidget->setEnabled(true);
+
+	for (int j = 0; j < msgList.count(); ++j) {
+		int row = this->resultsTableWidget->rowCount();
+		this->resultsTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setCheckState(Qt::Unchecked);
+		this->resultsTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText(msgList.at(j).at(0));
+		this->resultsTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText(msgList.at(j).at(1));
+		this->resultsTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+		item->setText(msgList.at(j).at(2));
+		this->resultsTableWidget->setItem(row,3,item);
+		item = new QTableWidgetItem;
+		item->setText(msgList.at(j).at(3));
+		this->resultsTableWidget->setItem(row,4,item);
+		//QColor color( Qt::red );
+		//this->resultsTableWidget->item(0,0)->setBackgroundColor(color);
+	}
+
+	this->resultsTableWidget->resizeColumnsToContents();
 }

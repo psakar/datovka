@@ -3062,7 +3062,8 @@ fail:
 /*
  * Advance message envelope search.
  */
-QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
+QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
+    const QString &dmId,
     const QString &dmAnnotation,
     const QString &dbIDSender, const QString &dmSender,
     const QString &dmSenderAddress,
@@ -3086,23 +3087,28 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 	QString queryStr = "";
 	QString andToken = " AND ";
 
+	QList <QStringList> msgList;
+	msgList.clear();
+
 	if (MSG_ALL == msgDirect) {
 		/* select from all messages */
-		queryStr = "SELECT m.dmID FROM messages AS m WHERE ";
+		queryStr = "SELECT "
+		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient "
+		"FROM messages AS m WHERE ";
 	} else if ((MSG_RECEIVED == msgDirect) || (MSG_SENT == msgDirect)) {
 		/* means select only received (1) or sent (2) messages */
 		isMultiSelect = true;
-		queryStr = "SELECT m.dmID, s.message_type FROM messages AS m "
+		queryStr = "SELECT "
+		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient "
+		    "s.message_type "
+		    "FROM messages AS m "
 		    "LEFT JOIN supplementary_message_data AS s "
 		    "ON (m.dmID = s.message_id) "
 		    "WHERE ";
 	} else {
 		/* wrong input vaules from search dialog */
-		return QStringList();
+		return msgList;
 	}
-
-	QStringList dmIdList;
-	dmIdList.clear();
 
 	if (dmId.isNull() || dmId.isEmpty()) {
 
@@ -3216,7 +3222,7 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 		if (!query.prepare(queryStr)) {
 			logError("Cannot prepare SQL query: %s.\n",
 			    query.lastError().text().toUtf8().constData());
-			return QStringList();
+			return msgList;
 		}
 
 		query.bindValue(":dbIDSender", dbIDSender);
@@ -3251,7 +3257,7 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 		if (!query.prepare(queryStr)) {
 			logError("Cannot prepare SQL query: %s.\n",
 			query.lastError().text().toUtf8().constData());
-			return QStringList();
+			return msgList;
 		}
 
 		query.bindValue(":dmId", dmId.toInt());
@@ -3267,19 +3273,26 @@ QStringList MessageDb::msgsAdvanceSearchMessageEnvelope(const QString &dmId,
 
 	//qDebug() << queryStr;
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		while (query.isValid()) {
-			dmIdList.append(query.value(0).toString());
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+	    	while (query.isValid()) {
+			QStringList msgItemsList;
+			msgItemsList.clear();
+			int count = query.record().count();
+			Q_ASSERT(4 == count);
+			for (int i = 0; i < count; ++i) {
+				msgItemsList.append(query.value(i).toString());
+			}
+			msgList.append(msgItemsList);
 			query.next();
 		}
 	} else {
 		logError("Cannot execute SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
-		return QStringList();
+		return msgList;
 	}
 
-	return dmIdList;
+	return msgList;
 }
 
 
@@ -4186,6 +4199,7 @@ fail:
 }
 
 
+
 /* ========================================================================= */
 /*
  * Return some message items for export correspondence to csv.
@@ -4224,6 +4238,48 @@ QStringList MessageDb::getMsgForCsvExport(qint64 dmId) const
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return messageItems;
+
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return some message items for search result.
+ * NOTE: This function is not currently used.
+ */
+QStringList MessageDb::getSearchMsgDataFromID(int dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QStringList messageItems;
+
+	queryStr = "SELECT dmAnnotation, dmSender, dmRecipient "
+	    "FROM messages WHERE dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		int count = query.record().count();
+		Q_ASSERT(3 == count);
+		for (int i = 0; i < count; ++i) {
+			QString element = query.value(i).toString();
+			messageItems.append(element);
+		}
+	} else {
+		logError(
+		    "Cannot execute SQL query and/or read SQL data: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}

@@ -571,12 +571,13 @@ public:
 	 */
 	int messageState(qint64 dmId) const;
 
-	/*
+	/*!
 	 * @brief Advance message envelope search.
 	 *
-	 * @return dmID messages pass to search query.
+	 * @return message item list pass to search query.
 	 */
-	QStringList msgsAdvanceSearchMessageEnvelope(const QString &dmId,
+	QList <QStringList> msgsAdvanceSearchMessageEnvelope(
+	    const QString &dmId,
 	    const QString &dmAnnotation,
 	    const QString &dbIDSender, const QString &dmSender,
 	    const QString &dmSenderAddress,
@@ -750,6 +751,16 @@ public:
 	 *    Empty list is returned on error.
 	 */
 	QStringList getMsgForCsvExport(qint64 dmId) const;
+
+	/*!
+	 * @brief Return some message items for search result.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return String containing subject, sender, recipient
+	 *    Empty list is returned on error.
+	 * NOTE: This function is not currently used.
+	 */
+	QStringList getSearchMsgDataFromID(int dmId) const;
 
 	/*!
 	 * @brief Set the verification result.

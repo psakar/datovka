@@ -43,6 +43,8 @@ public:
 private slots:
 	void checkInputFields(void);
 	void searchMessage(void);
+	void enableOkButton(void);
+	void setFirtsColumnActive(void);
 
 private:
 	const QList<MessageDb*> m_messageDbList;
@@ -50,7 +52,6 @@ private:
 
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);
-
 };
 
 #endif // DLG_MSG_SEARCH_H
