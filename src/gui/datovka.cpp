@@ -1450,6 +1450,73 @@ void MainWindow::messageItemRestoreSelection(void)
 
 /* ========================================================================= */
 /*
+ * Select account via userName and focus on message ID from search selection.
+ */
+void MainWindow::messageItemFromSearchSelection(QString userName, int msgID)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	//qDebug() << "messageItemFromSearchSelection" << userName << msgID;
+
+	int topItemCount = m_accountModel.rowCount();
+	for (int i = 0; i < topItemCount; i++) {
+		const QStandardItem *item = m_accountModel.item(i,0);
+		const AccountModel::SettingsMap &itemSettings =
+		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		QString user = itemSettings.userName();
+		if (user == userName) {
+			QModelIndex index = m_accountModel.
+			    indexFromItem(item);
+			ui->accountList->
+			    setCurrentIndex(index.child(0,0));
+			accountItemSelectionChanged(index.child(0,0));
+			break;
+		}
+	}
+
+	QModelIndex msgIdx;
+
+	const QAbstractItemModel *model = ui->messageList->model();
+	Q_ASSERT(0 != model);
+
+	int rowCount = model->rowCount();
+	int row = 0;
+
+	if (0 == rowCount) {
+		/* Do nothing on empty model. */
+		return;
+	}
+
+	/* If the ID does not exist then don't search for it. */
+	if (-1 == msgID) {
+		row = rowCount;
+	}
+
+	/* Find and select the message with the ID. */
+	for (; row < rowCount; ++row) {
+		/*
+		 * TODO -- Search in a more resource-saving way.
+		 * Eliminate index copying, use smarter search.
+		 */
+		msgIdx = model->index(row, 0);
+		if (msgIdx.data().toInt() == msgID) {
+			break;
+		}
+	}
+
+	if (row < rowCount) {
+		/* Message found. */
+		ui->messageList->setCurrentIndex(msgIdx);
+		if (msgIdx.isValid()) {
+			ui->messageList->scrollTo(msgIdx);
+		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Redraws widgets according to selected attachment item.
  */
 void MainWindow::attachmentItemCurrentChanged(const QModelIndex &current,
@@ -7664,15 +7731,20 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 		return;
 	}
 
-	QList<MessageDb*> messageDbList;
+	QPair <QString,MessageDb*> userNameAndMsgDb;
+	QList< QPair <QString,MessageDb*> > messageDbList;
 	messageDbList.clear();
 
 	/* get pointer to database for current accounts */
 	QModelIndex currIndex = ui->accountList->currentIndex();
 	currIndex = AccountModel::indexTop(currIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	messageDbList.append(messageDb);
+	userNameAndMsgDb.first = accountInfo.userName();
+	userNameAndMsgDb.second = messageDb;
+	messageDbList.append(userNameAndMsgDb);
 
 	/* get pointer to database for other accounts */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
@@ -7680,12 +7752,18 @@ void MainWindow::showMsgAdvanceSearchDlg(void)
 		if (currIndex != index) {
 			QStandardItem *accountItem = m_accountModel.
 			    itemFromIndex(index);
+			const AccountModel::SettingsMap accountInfo =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 			MessageDb *messageDb = accountMessageDb(accountItem);
-			messageDbList.append(messageDb);
+			userNameAndMsgDb.first = accountInfo.userName();
+			userNameAndMsgDb.second = messageDb;
+			messageDbList.append(userNameAndMsgDb);
 		}
 	}
 
 	QDialog *msgSearch = new DlgMsgSearch(messageDbList,
 	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
+	connect(msgSearch, SIGNAL(focusSelectedMsg(QString, int)),
+	    this, SLOT(messageItemFromSearchSelection(QString, int)));
 	msgSearch->show();
 }

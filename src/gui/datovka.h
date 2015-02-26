@@ -152,6 +152,12 @@ private slots:
 	void messageItemRestoreSelection(void);
 
 	/*!
+	 * @brief Select account via userName and focus on
+	 *        message ID from search selection
+	 */
+	void messageItemFromSearchSelection(QString userName, int msgID);
+
+	/*!
 	 * @brief Redraws widgets according to selected attachment item.
 	 */
 	void attachmentItemCurrentChanged(const QModelIndex &current,

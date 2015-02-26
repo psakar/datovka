@@ -24,7 +24,8 @@
 
 #include "dlg_msg_search.h"
 
-DlgMsgSearch::DlgMsgSearch(const QList<MessageDb*> messageDbList,
+DlgMsgSearch::DlgMsgSearch(
+    const QList< QPair <QString,MessageDb*> > messageDbList,
     const AccountModel::SettingsMap &accountInfo, QWidget *parent)
     : QDialog(parent),
     m_messageDbList(messageDbList),
@@ -55,6 +56,9 @@ void DlgMsgSearch::initSearchWindow(void)
 		this->searchAllAcntCheckBox->setEnabled(false);
 	}
 
+	/* hide first column of resultWidget (userName string) */
+	//this->resultsTableWidget->setColumnHidden(0,true);
+
 	connect(this->searchReceivedMsgCheckBox, SIGNAL(clicked()),
 	    this, SLOT(checkInputFields()));
 	connect(this->searchSentMsgCheckBox, SIGNAL(clicked()),
@@ -84,20 +88,16 @@ void DlgMsgSearch::initSearchWindow(void)
 	connect(this->recipientFileMarkLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchMessage()));
+	    SLOT(searchMessages()));
 	connect(this->resultsTableWidget,
 	    SIGNAL(itemSelectionChanged()), this,
 	    SLOT(setFirtsColumnActive()));
 	connect(this->resultsTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
-	connect(this->resultsTableWidget,
-	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
+	    SIGNAL(cellDoubleClicked(int,int)), this,
+	    SLOT(getSelectedMsg(int, int)));
+
 	this->resultsTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	this->resultsTableWidget->setColumnWidth(0,20);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
@@ -321,15 +321,16 @@ void DlgMsgSearch::setFirtsColumnActive(void)
 /*
  * Search message
  */
-void DlgMsgSearch::searchMessage(void)
+void DlgMsgSearch::searchMessages(void)
 /* ========================================================================= */
 {
 	qDebug() << "searchMessage";
 
+	enum MessageDirection msgType = MSG_ALL;
+	QList <QStringList> msgList;
+
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
-
-	enum MessageDirection msgType = MSG_ALL;
 
 	if (this->searchReceivedMsgCheckBox->isChecked() &&
 	    this->searchSentMsgCheckBox->isChecked()) {
@@ -340,11 +341,9 @@ void DlgMsgSearch::searchMessage(void)
 		msgType = MSG_SENT;
 	}
 
-	QList <QStringList> msgList;
-	msgList.clear();
-
 	if (!this->searchAllAcntCheckBox->isChecked()) {
-		msgList = m_messageDbList.at(0)->
+		msgList.clear();
+		msgList = m_messageDbList.at(0).second->
 		    msgsAdvanceSearchMessageEnvelope(
 		    this->messageIdLineEdit->text(),
 		    this->subjectLineEdit->text(),
@@ -360,10 +359,13 @@ void DlgMsgSearch::searchMessage(void)
 		    this->recipientFileMarkLineEdit->text(),
 		    this->toHandsLineEdit->text(),
 		    QString(), QString(), msgType);
+		if (!msgList.isEmpty()) {
+			appendMsgsToTable(m_messageDbList.at(0), msgList);
+		}
 	} else {
 		for (int i = 0; i < m_messageDbList.count(); ++i) {
-			QList <QStringList> tmpMsgList;
-			tmpMsgList = m_messageDbList.at(i)->
+			msgList.clear();
+			msgList = m_messageDbList.at(i).second->
 			    msgsAdvanceSearchMessageEnvelope(
 			    this->messageIdLineEdit->text(),
 			    this->subjectLineEdit->text(),
@@ -379,24 +381,38 @@ void DlgMsgSearch::searchMessage(void)
 			    this->recipientFileMarkLineEdit->text(),
 			    this->toHandsLineEdit->text(),
 			    QString(), QString(), msgType);
-			msgList.append(tmpMsgList);
+			if (!msgList.isEmpty()) {
+				appendMsgsToTable(m_messageDbList.at(i),
+				    msgList);
+			}
 		}
 	}
+}
 
-	if (msgList.isEmpty()) {
-		return;
-	}
 
+/* ========================================================================= */
+/*
+ * Append message list to result tablewidget
+ */
+void DlgMsgSearch::appendMsgsToTable(
+    QPair <QString,MessageDb*> usrNmAndMsgDb,
+    QList <QStringList> msgList)
+/* ========================================================================= */
+{
 	this->resultsTableWidget->setEnabled(true);
 
 	for (int j = 0; j < msgList.count(); ++j) {
 		int row = this->resultsTableWidget->rowCount();
 		this->resultsTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
+		item->setText(usrNmAndMsgDb.first);
 		this->resultsTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
 		item->setText(msgList.at(j).at(0));
+		if (ENABLE_TOOLTIP) {
+			item->setToolTip(usrNmAndMsgDb.second->descriptionHtml(
+			    msgList.at(j).at(0).toInt(), 0));
+		}
 		this->resultsTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
 		item->setText(msgList.at(j).at(1));
@@ -407,9 +423,23 @@ void DlgMsgSearch::searchMessage(void)
 		item = new QTableWidgetItem;
 		item->setText(msgList.at(j).at(3));
 		this->resultsTableWidget->setItem(row,4,item);
-		//QColor color( Qt::red );
-		//this->resultsTableWidget->item(0,0)->setBackgroundColor(color);
 	}
 
 	this->resultsTableWidget->resizeColumnsToContents();
+	this->resultsTableWidget->
+	    horizontalHeader()->setStretchLastSection(true);
+}
+
+
+/* ========================================================================= */
+/*
+ * Get ID of selected message and set focus in MessageList Tableview
+ */
+void DlgMsgSearch::getSelectedMsg(int row, int column)
+/* ========================================================================= */
+{
+	(void) column;
+	emit focusSelectedMsg(this->resultsTableWidget->item(row, 0)->text(),
+	    this->resultsTableWidget->item(row, 1)->text().toInt());
+	//this->close();
 }

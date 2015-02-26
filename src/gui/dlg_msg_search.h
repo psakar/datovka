@@ -32,26 +32,34 @@
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
+/* tooltip is generated for every item in the search result table */
+#define ENABLE_TOOLTIP 1
 
 class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
 	Q_OBJECT
 
 public:
-	DlgMsgSearch(const QList<MessageDb*> messageDbList,
+	DlgMsgSearch(const QList< QPair <QString,MessageDb*> > messageDbList,
 	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
 
 private slots:
 	void checkInputFields(void);
-	void searchMessage(void);
+	void searchMessages(void);
 	void enableOkButton(void);
 	void setFirtsColumnActive(void);
+	void getSelectedMsg(int row, int column);
+
+signals:
+	void focusSelectedMsg(QString, int);
 
 private:
-	const QList<MessageDb*> m_messageDbList;
+	const QList< QPair <QString,MessageDb*> > m_messageDbList;
 	const AccountModel::SettingsMap m_accountInfo;
 
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);
+	void appendMsgsToTable(QPair <QString,MessageDb*> usrNmAndMsgDb,
+	    QList <QStringList> msgList);
 };
 
 #endif // DLG_MSG_SEARCH_H
