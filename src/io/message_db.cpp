@@ -3099,7 +3099,7 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 		/* means select only received (1) or sent (2) messages */
 		isMultiSelect = true;
 		queryStr = "SELECT "
-		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient "
+		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient, "
 		    "s.message_type "
 		    "FROM messages AS m "
 		    "LEFT JOIN supplementary_message_data AS s "
@@ -3219,6 +3219,8 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 			queryStr += "m.dmToHands LIKE '%'||:dmToHands||'%'";
 		}
 
+		//qDebug() << queryStr;
+
 		if (!query.prepare(queryStr)) {
 			logError("Cannot prepare SQL query: %s.\n",
 			    query.lastError().text().toUtf8().constData());
@@ -3253,6 +3255,9 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 		}
 
 		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
+
+
+		//qDebug() << queryStr;
 
 		if (!query.prepare(queryStr)) {
 			logError("Cannot prepare SQL query: %s.\n",
