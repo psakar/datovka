@@ -45,7 +45,6 @@ public:
 private slots:
 	void checkInputFields(void);
 	void searchMessages(void);
-	void enableOkButton(void);
 	void setFirtsColumnActive(void);
 	void getSelectedMsg(int row, int column);
 

@@ -43,6 +43,14 @@ DlgMsgSearch::DlgMsgSearch(
 void DlgMsgSearch::initSearchWindow(void)
 /* ========================================================================= */
 {
+	this->infoTextLabel->setText(
+	   tr("Here it is possible to search for messages according to "
+	   "supplied criteria. You can search for messages in selected "
+	   "account or in all accounts. Double clicking on a found message "
+	   "will change focus to the selected message in the application "
+	   "window. Note: You can view additional information when hovering "
+	   "your mouse cursor over the message ID."));
+
 	/* set account name and user name to label */
 	QString accountName = m_accountInfo.accountName()
 	+ " ("+ m_accountInfo.userName() + ")";
@@ -98,25 +106,6 @@ void DlgMsgSearch::initSearchWindow(void)
 
 	this->resultsTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-}
-
-
-/* ========================================================================= */
-/*
- * Enable ok (add) button if some message was selected
- */
-void DlgMsgSearch::enableOkButton(void)
-/* ========================================================================= */
-{
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-		if (this->resultsTableWidget->item(i,0)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
-		}
-	}
 }
 
 

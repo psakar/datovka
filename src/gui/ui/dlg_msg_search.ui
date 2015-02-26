@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
+    <width>609</width>
     <height>615</height>
    </rect>
   </property>
@@ -14,6 +14,26 @@
    <string>Advance message search</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="infoTextLabel">
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <layout class="QHBoxLayout" name="h0">
      <item>
@@ -61,7 +81,7 @@
    <item>
     <widget class="QCheckBox" name="searchAllAcntCheckBox">
      <property name="text">
-      <string>Search in other accounts (it can be slow)</string>
+      <string>Search in the other accounts (it can be slow)</string>
      </property>
     </widget>
    </item>
@@ -381,7 +401,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Close</set>
      </property>
     </widget>
    </item>

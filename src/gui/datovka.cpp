@@ -1459,6 +1459,10 @@ void MainWindow::messageItemFromSearchSelection(QString userName, int msgID)
 
 	//qDebug() << "messageItemFromSearchSelection" << userName << msgID;
 
+	QModelIndex acntIdxTop;
+	QModelIndex msgIdx;
+
+	/* first step: search correspond account index from username */
 	int topItemCount = m_accountModel.rowCount();
 	for (int i = 0; i < topItemCount; i++) {
 		const QStandardItem *item = m_accountModel.item(i,0);
@@ -1466,51 +1470,61 @@ void MainWindow::messageItemFromSearchSelection(QString userName, int msgID)
 		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		QString user = itemSettings.userName();
 		if (user == userName) {
-			QModelIndex index = m_accountModel.
-			    indexFromItem(item);
-			ui->accountList->
-			    setCurrentIndex(index.child(0,0));
-			accountItemSelectionChanged(index.child(0,0));
+			acntIdxTop = m_accountModel.indexFromItem(item);
 			break;
 		}
 	}
 
-	QModelIndex msgIdx;
-
-	const QAbstractItemModel *model = ui->messageList->model();
-	Q_ASSERT(0 != model);
-
-	int rowCount = model->rowCount();
-	int row = 0;
-
-	if (0 == rowCount) {
-		/* Do nothing on empty model. */
+	if (!acntIdxTop.isValid()) {
 		return;
 	}
 
-	/* If the ID does not exist then don't search for it. */
-	if (-1 == msgID) {
-		row = rowCount;
-	}
+	/* second step: find and select message by msgID */
+	/* first - allReceived */
+	QModelIndex tmpIdx = acntIdxTop.child(2,0).child(0,0);
+	for (int c = 0; c < 2; ++c) {
+		ui->accountList->setCurrentIndex(tmpIdx);
+		accountItemSelectionChanged(tmpIdx);
 
-	/* Find and select the message with the ID. */
-	for (; row < rowCount; ++row) {
-		/*
-		 * TODO -- Search in a more resource-saving way.
-		 * Eliminate index copying, use smarter search.
-		 */
-		msgIdx = model->index(row, 0);
-		if (msgIdx.data().toInt() == msgID) {
-			break;
-		}
-	}
 
-	if (row < rowCount) {
-		/* Message found. */
-		ui->messageList->setCurrentIndex(msgIdx);
-		if (msgIdx.isValid()) {
-			ui->messageList->scrollTo(msgIdx);
+		const QAbstractItemModel *model = ui->messageList->model();
+		Q_ASSERT(0 != model);
+
+		int rowCount = model->rowCount();
+		int row = 0;
+
+		if (0 == rowCount) {
+			/* Do nothing on empty model. */
+			return;
 		}
+
+		/* If the ID does not exist then don't search for it. */
+		if (-1 == msgID) {
+			row = rowCount;
+		}
+
+		/* Find and select the message with the ID. */
+		for (; row < rowCount; ++row) {
+			/*
+			 * TODO -- Search in a more resource-saving way.
+			 * Eliminate index copying, use smarter search.
+			 */
+			msgIdx = model->index(row, 0);
+			if (msgIdx.data().toInt() == msgID) {
+				break;
+			}
+		}
+
+		if (row < rowCount) {
+			/* Message found. */
+			ui->messageList->setCurrentIndex(msgIdx);
+			if (msgIdx.isValid()) {
+				ui->messageList->scrollTo(msgIdx);
+				break;
+			}
+		}
+		/* next allSent */
+		tmpIdx = acntIdxTop.child(2,0).child(1,0);
 	}
 }
 
