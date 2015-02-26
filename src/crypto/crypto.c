@@ -135,6 +135,17 @@ X509 * x509_load_der(const void *raw, size_t raw_len);
 
 
 /*!
+ * @brief Converts X509 certificate to DER.
+ *
+ * @param[in]  x509    Certificate.
+ * @param[out] der     Pointer to allocated buffer. Use free() to free memory.
+ * @param[out] der_len Size of the allocate buffer.
+ */
+static
+int x509_store_der(X509 *x509, void **der, size_t *der_len);
+
+
+/*!
  * @brief Load X509 from buffer.
  *
  * @return NULL on failure.
@@ -144,12 +155,45 @@ X509 * x509_load_pem(const char *pem_str);
 
 
 /*!
+ * @brief Converts X509 certificate to PEM.
+ *
+ * @param[in]  x509     Certificate.
+ * @param[out] pem      Pointer to allocated buffer. Use free() to free memory.
+ * @param[out] pem_len  Size of the allocated buffer.
+ */
+static
+int x509_store_pem(X509 *x509, void **pem, size_t *pem_len);
+
+
+/*!
+ * @brief Converts the private key to PEM.
+ *
+ * @param[in]  pkey     Private key.
+ * @param[out] pem      Pointer to allocated buffer. Use free() to free memory.
+ * @param[out] pem_len  Size of the allocated buffer.
+ * @param[in]  pwd      Password to encrypt the private key in PEM format.
+ */
+static
+int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
+    const char *pwd);
+
+
+/*!
  * @brief Load X509_CRL from buffer.
  *
  * @return NULL on failure.
  */
 static
 X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len);
+
+
+/*!
+ * @brief Load PKCS12 from buffer.
+ *
+ * @return NULL on failure.
+ */
+static
+PKCS12 * pkcs12_load_p12(const void *raw, size_t raw_len);
 
 
 /*!
@@ -223,17 +267,6 @@ static
 time_t timegm_utc(struct tm *tm);
 
 
-/*!
- * @brief Converts X509 certificate to DER.
- *
- * @param[in]  x509    Certificate.
- * @param[out] der     Pointer to allocated buffer. Use free() top free memory.
- * @param[out] der_len Size of the allocate buffer.
- */
-static
-int x509_get_der(X509 *x509, void **der, size_t *der_len);
-
-
 //#define PRINT_CERTS 1
 //#define CUSTOM_VERIFY_CB 1
 
@@ -282,7 +315,8 @@ int crypto_init(void)
 
 	debug_func_call();
 
-	OpenSSL_add_all_algorithms(); /* Needed for CMS validation. */
+	/* Needed for CMS validation and PKCS #12. */
+	OpenSSL_add_all_algorithms();
 
 	ERR_load_crypto_strings();
 	ERR_load_CMS_strings();
@@ -759,7 +793,7 @@ int x509_crt_to_der(struct x509_crt *x509_crt, void **der_out,
 {
 	debug_func_call();
 
-	return x509_get_der((X509 *) x509_crt, der_out, out_size);
+	return x509_store_der((X509 *) x509_crt, der_out, out_size);
 }
 
 
@@ -1198,6 +1232,107 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Converts certificate file from PKCS #12 to PEM format.
+ */
+int p12_to_pem(const void *p12, size_t p12_size, const char *pwd,
+    void **pem_out, size_t *out_size)
+/* ========================================================================= */
+{
+	PKCS12 *pkcs12 = NULL;
+	unsigned long err;
+	X509 *cert = NULL;
+	EVP_PKEY *pkey = NULL;
+	void *cert_pem = NULL;
+	size_t cert_pem_len;
+	void *pkey_pem = NULL;
+	size_t pkey_pem_len;
+
+	pkcs12 = pkcs12_load_p12(p12, p12_size);
+	if (NULL == pkcs12) {
+		goto fail;
+	}
+
+	if (0 == PKCS12_verify_mac(pkcs12, pwd, -1)) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	/*
+	 * In openssl pkcs12 application they've created dump_certs_keys_p12.
+	 * This should apparently be a workaround around the bug in
+	 * PKCS12_parse() whose main disadvantage is that it returns only one
+	 * private key and certificate. Hope that PKCS12_parse() will suffice
+	 * because I don't wan to program the whole stuff.
+	 */
+
+	int ret = PKCS12_parse(pkcs12, pwd, &pkey, &cert, NULL);
+	if (0 == ret) {
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+	PKCS12_free(pkcs12); pkcs12 = NULL;
+
+	if (0 != x509_store_pem(cert, &cert_pem, &cert_pem_len)) {
+		goto fail;
+	}
+	X509_free(cert); cert = NULL;
+
+	if (0 != evp_pkey_store_pem(pkey, &pkey_pem, &pkey_pem_len, pwd)) {
+		goto fail;
+	}
+	EVP_PKEY_free(pkey); pkey = NULL;
+
+	/* A trailing zero will be added to the sting. */
+
+	if (NULL != pem_out) {
+		*pem_out = malloc(cert_pem_len + pkey_pem_len + 1);
+		if (NULL == *pem_out) {
+			goto fail;
+		}
+
+		memcpy(*pem_out, cert_pem, cert_pem_len);
+		memcpy(*pem_out + cert_pem_len, pkey_pem, pkey_pem_len);
+		((char *) *pem_out)[cert_pem_len + pkey_pem_len] = '\0';
+	}
+
+	if (NULL != out_size) {
+		*out_size = cert_pem_len + pkey_pem_len;
+	}
+
+	free(cert_pem); cert_pem = NULL;
+	memset(pkey_pem, 0, pkey_pem_len);
+	free(pkey_pem); pkey_pem = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != pkcs12) {
+		PKCS12_free(pkcs12);
+	}
+	if (NULL != cert) {
+		X509_free(cert);
+	}
+	if (NULL != pkey) {
+		EVP_PKEY_free(pkey);
+	}
+	if (NULL != cert_pem) {
+		free(cert_pem);
+	}
+	if (NULL != pkey_pem) {
+		free(pkey_pem);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
  * Read certificate from PEM string.
  */
 static
@@ -1459,6 +1594,63 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Converts X509 certificate to DER.
+ */
+static
+int x509_store_der(X509 *x509, void **der, size_t *der_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	BUF_MEM *bptr = NULL;
+
+	assert(NULL != x509);
+	if (NULL == x509) {
+		goto fail;
+	}
+	assert(NULL != der);
+	if (NULL == der) {
+		goto fail;
+	}
+	assert(NULL != der_len);
+	if (NULL == der_len) {
+		goto fail;
+	}
+
+	bio = BIO_new(BIO_s_mem());
+
+	if (!i2d_X509_bio(bio, x509)) {
+		log_error("%s\n", "Could not write X509 to bio.");
+		goto fail;
+	}
+
+	BIO_get_mem_ptr(bio, &bptr);
+	if (!BIO_set_close(bio, BIO_NOCLOSE)) {
+		goto fail;
+	}
+	BIO_free(bio); bio = NULL;
+
+	/* Extract DER from buffer. */
+	*der = bptr->data; bptr->data = NULL;
+	*der_len = bptr->length; bptr->length = 0;
+	bptr->max = 0;
+
+	BUF_MEM_free(bptr); bptr = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	if (NULL != bptr) {
+		BUF_MEM_free(bptr);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
  * Load X509 from buffer.
  */
 static
@@ -1503,6 +1695,123 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Converts X509 certificate to PEM.
+ */
+static
+int x509_store_pem(X509 *x509, void **pem, size_t *pem_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	BUF_MEM *bptr = NULL;
+
+	assert(NULL != x509);
+	if (NULL == x509) {
+		goto fail;
+	}
+	assert(NULL != pem);
+	if (NULL == pem) {
+		goto fail;
+	}
+	assert(NULL != pem_len);
+	if (NULL == pem_len) {
+		goto fail;
+	}
+
+	bio = BIO_new(BIO_s_mem());
+
+	if (!PEM_write_bio_X509(bio, x509)) {
+		log_error("%s\n", "Could not write X509 to bio.");
+		goto fail;
+	}
+
+	BIO_get_mem_ptr(bio, &bptr);
+	if (!BIO_set_close(bio, BIO_NOCLOSE)) {
+		goto fail;
+	}
+	BIO_free(bio); bio = NULL;
+
+	/* Extract DER from buffer. */
+	*pem = bptr->data; bptr->data = NULL;
+	*pem_len = bptr->length; bptr->length = 0;
+	bptr->max = 0;
+
+	BUF_MEM_free(bptr); bptr = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	if (NULL != bptr) {
+		BUF_MEM_free(bptr);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts the private key to PEM.
+ */
+static
+int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
+    const char *pwd)
+/* ========================================================================= */
+{
+	const EVP_CIPHER *enc = EVP_des_ede3_cbc();
+	BIO *bio = NULL;
+	BUF_MEM *bptr = NULL;
+
+	assert(NULL != pkey);
+	if (NULL == pkey) {
+		goto fail;
+	}
+	assert(NULL != pem);
+	if (NULL == pem) {
+		goto fail;
+	}
+	assert(NULL != pem_len);
+	if (NULL == pem_len) {
+		goto fail;
+	}
+
+	bio = BIO_new(BIO_s_mem());
+
+	if (!PEM_write_bio_PrivateKey(bio, pkey, enc, NULL, 0, NULL,
+	        (char *) pwd)) {
+		log_error("%s\n", "Could not write X509 to bio.");
+		goto fail;
+	}
+
+	BIO_get_mem_ptr(bio, &bptr);
+	if (!BIO_set_close(bio, BIO_NOCLOSE)) {
+		goto fail;
+	}
+	BIO_free(bio); bio = NULL;
+
+	/* Extract DER from buffer. */
+	*pem = bptr->data; bptr->data = NULL;
+	*pem_len = bptr->length; bptr->length = 0;
+	bptr->max = 0;
+
+	BUF_MEM_free(bptr); bptr = NULL;
+
+	return 0;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	if (NULL != bptr) {
+		BUF_MEM_free(bptr);
+	}
+	return -1;
+}
+
+
+/* ========================================================================= */
+/*
  * Load X509_CRL from buffer.
  */
 static
@@ -1538,6 +1847,52 @@ X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len)
 	BIO_free(bio); bio = NULL;
 
 	return x509_crl;
+
+fail:
+	if (NULL != bio) {
+		BIO_free(bio);
+	}
+	return NULL;
+}
+
+
+/* ========================================================================= */
+/*
+ * Load PKCS12 from buffer.
+ */
+static
+PKCS12 * pkcs12_load_p12(const void *raw, size_t raw_len)
+/* ========================================================================= */
+{
+	BIO *bio = NULL;
+	PKCS12 *pkcs12 = NULL;
+	unsigned long err;
+
+	debug_func_call();
+
+	bio = BIO_new_mem_buf((void *) raw, raw_len);
+	if (NULL == bio) {
+		log_error("%s\n", "Cannot create memory BIO.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	pkcs12 = d2i_PKCS12_bio(bio, NULL);
+	if (NULL == pkcs12) {
+		log_error("%s\n", "Cannot parse PKCS12.");
+		while (0 != (err = ERR_get_error())) {
+			log_error("openssl error: %s\n",
+			    ERR_error_string(err, NULL));
+		}
+		goto fail;
+	}
+
+	BIO_free(bio); bio = NULL;
+
+	return pkcs12;
 
 fail:
 	if (NULL != bio) {
@@ -1947,63 +2302,6 @@ time_t timegm_utc(struct tm *tm)
 }
 
 
-/* ========================================================================= */
-/*
- * Converts X509 certificate to DER.
- */
-static
-int x509_get_der(X509 *x509, void **der, size_t *der_len)
-/* ========================================================================= */
-{
-	BIO *bio = NULL;
-	BUF_MEM *bptr = NULL;
-
-	assert(NULL != x509);
-	if (NULL == x509) {
-		goto fail;
-	}
-	assert(NULL != der);
-	if (NULL == der) {
-		goto fail;
-	}
-	assert(NULL != der_len);
-	if (NULL == der_len) {
-		goto fail;
-	}
-
-	bio = BIO_new(BIO_s_mem());
-
-	if (!i2d_X509_bio(bio, x509)) {
-		log_error("%s\n", "Could not write X509 to bio.");
-		goto fail;
-	}
-
-	BIO_get_mem_ptr(bio, &bptr);
-	if (!BIO_set_close(bio, BIO_NOCLOSE)) {
-		goto fail;
-	}
-	BIO_free(bio); bio = NULL;
-
-	/* Extract DER from buffer. */
-	*der = bptr->data; bptr->data = NULL;
-	*der_len = bptr->length; bptr->length = 0;
-	bptr->max = 0;
-
-	BUF_MEM_free(bptr); bptr = NULL;
-
-	return 0;
-
-fail:
-	if (NULL != bio) {
-		BIO_free(bio);
-	}
-	if (NULL != bptr) {
-		BUF_MEM_free(bptr);
-	}
-	return -1;
-}
-
-
 #if defined PRINT_CERTS
 /* ========================================================================= */
 /*
@@ -2121,75 +2419,6 @@ int cert_force_success(int ok, X509_STORE_CTX *ctx)
 
 	return 1;
 }
-
-
-/* ========================================================================= */
-/*
- * Convert p12 file to pem
- */
-static
-int convert_p12_to_pem(char * p12File, char * pwd)
-/* ========================================================================= */
-{
-	FILE *p12_file;
-	PKCS12 *p12_cert = NULL;
-	EVP_PKEY *pkey;
-	X509 *x509_cert;
-	STACK_OF(X509) *additional_certs = NULL;
-
-	OpenSSL_add_all_algorithms();
-	ERR_load_crypto_strings();
-
-	if (!(p12_file = fopen(p12File, "rb"))) {
-		fprintf(stderr, "Error opening file %s\n", p12File);
-		goto fail;
-	}
-
-	d2i_PKCS12_fp(p12_file, &p12_cert);
-	fclose(p12_file);
-
-	if (!p12_cert) {
-		fprintf(stderr, "Error reading PKCS#12 file\n");
-		ERR_print_errors_fp(stderr);
-		goto fail;
-	}
-
-	if (!PKCS12_parse(p12_cert, pwd, &pkey, &x509_cert, &additional_certs)) {
-		fprintf(stderr, "Error parsing PKCS#12 file\n");
-		ERR_print_errors_fp(stderr);
-		goto fail;
-	}
-/*
-	if (pkey) {
-		fprintf(x509_cert, "***Private Key***\n");
-		PEM_write_PrivateKey(p12_file, pkey, NULL, NULL, 0, NULL, NULL);
-	}
-
-	if (x509_cert) {
-		fprintf(x509_cert, "***User Certificate***\n");
-		PEM_write_X509_AUX(p12_file, x509_cert);
-	}
-
-	if (additional_certs && sk_X509_num(additional_certs)) {
-		fprintf(x509_cert, "***Other Certificates***\n");
-		for (i = 0; i < sk_X509_num(additional_certs); i++)
-		PEM_write_X509_AUX(x509_cert, sk_X509_value(additional_certs, i));
-	}
-	sk_X509_pop_free(additional_certs, X509_free);
-*/
-fail:
-	if (NULL != p12_cert) {
-		PKCS12_free(p12_cert);
-	}
-	if (NULL != pkey) {
-		EVP_PKEY_free(pkey);
-	}
-	if (NULL != x509_cert) {
-		X509_free(x509_cert);
-	}
-	return 0;
-}
-
 
 
 const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
