@@ -1297,7 +1297,8 @@ int p12_to_pem(const void *p12, size_t p12_size, const char *pwd,
 		}
 
 		memcpy(*pem_out, cert_pem, cert_pem_len);
-		memcpy(*pem_out + cert_pem_len, pkey_pem, pkey_pem_len);
+		memcpy((char *) *pem_out + cert_pem_len, pkey_pem,
+		    pkey_pem_len);
 		((char *) *pem_out)[cert_pem_len + pkey_pem_len] = '\0';
 	}
 
@@ -1777,6 +1778,12 @@ int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
 	}
 
 	bio = BIO_new(BIO_s_mem());
+
+	if ((NULL == pwd) || ('\0' == pwd[0])) {
+		/* Don't encrypt when having empty password. */
+		pwd = NULL;
+		enc = NULL;
+	}
 
 	if (!PEM_write_bio_PrivateKey(bio, pkey, enc, NULL, 0, NULL,
 	        (char *) pwd)) {
