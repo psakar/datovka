@@ -104,7 +104,7 @@ isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
  * @brief Log in using system certificate.
  */
 isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
-    const QString &certPath, bool testingSession);
+    const QString &certPath, const QString &passphrase, bool testingSession);
 
 
 /*!
@@ -112,7 +112,8 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
  * NOTE: It need ID of Databox instead username
  */
 isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
-    const QString &idBox, const QString &certPath, bool testingSession);
+    const QString &idBox, const QString &certPath, const QString &passphrase,
+    bool testingSession);
 
 
 /*!
@@ -120,7 +121,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession);
+    const QString &passphrase, bool testingSession);
 
 
 /*!
