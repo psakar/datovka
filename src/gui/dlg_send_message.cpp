@@ -514,6 +514,14 @@ void DlgSendMessage::addAttachmentFile(void)
 		QString filename = "";
 		QFile attFile(fileNames[i]);
 		size = attFile.size();
+		if (size > MAX_ATTACHMENT_SIZE) {
+			QMessageBox::warning(this, tr("Wrong file size"),
+			    tr("File '%1' cannot add to attachment "
+			    "because its size is bigger than 10MB.").
+			    arg(fileNames[i]),
+			    QMessageBox::Ok);
+			continue;
+		}
 		m_attachSize += size;
 		QFileInfo fileInfo(attFile.fileName());
 		filename = fileInfo.fileName();
