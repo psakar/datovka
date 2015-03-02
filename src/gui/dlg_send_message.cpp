@@ -375,6 +375,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		this->recipientTableWidget->setItem(row,3,item);
 	}
 
+	/* fill attachments from template message */
 	QList<QStringList> msgFileList;
 	msgFileList = m_messDb.getFilesFromMessage(m_msgID);
 
@@ -388,14 +389,14 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		item->setText("");
 		this->attachmentTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText("");
+		item->setText(tr("unknown"));
 		this->attachmentTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(
 		    getFileSizeFromBase64(msgFileList.at(i).at(1))));
 		this->attachmentTableWidget->setItem(row,3,item);
 		item = new QTableWidgetItem;
-		item->setText(tr("Local database"));
+		item->setText(tr("local database"));
 		this->attachmentTableWidget->setItem(row,4,item);
 		item = new QTableWidgetItem;
 		item->setText(msgFileList.at(i).at(1));
@@ -529,6 +530,20 @@ void DlgSendMessage::addAttachmentFile(void)
 		QMimeType type = db.mimeTypeForFile(attFile);
 
 		int row = this->attachmentTableWidget->rowCount();
+		bool isInTable = false;
+
+		for (int j = 0; j < row; ++j) {
+			if (this->attachmentTableWidget->item(j,0)->text() ==
+			    filename) {
+				isInTable = true;
+				break;
+			}
+		}
+
+		if (isInTable) {
+			continue;
+		}
+
 		this->attachmentTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(filename);
