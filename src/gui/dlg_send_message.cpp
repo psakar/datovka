@@ -760,7 +760,8 @@ void DlgSendMessage::findAndAddRecipient(void)
 void DlgSendMessage::openAttachmentFile(void)
 /* ========================================================================= */
 {
-	QModelIndex selectedIndex = this->attachmentTableWidget->currentIndex();
+	QModelIndex selectedIndex =
+	    this->attachmentTableWidget->currentIndex();
 
 	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
@@ -768,18 +769,39 @@ void DlgSendMessage::openAttachmentFile(void)
 	}
 
 	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 4);
+	    selectedIndex.sibling(selectedIndex.row(), 0);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		return;
 	}
-	QString fileName = fileNameIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
-
-	if (fileName.isEmpty()) {
+	QString attachName = fileNameIndex.data().toString();
+	Q_ASSERT(!attachName.isEmpty());
+	if (attachName.isEmpty()) {
 		return;
 	}
-	QDesktopServices::openUrl(QUrl("file:///" + fileName));
+	/* TODO -- Add message id into file name? */
+	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
+
+	/* Get data from base64. */
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 5);
+	Q_ASSERT(dataIndex.isValid());
+	if (!dataIndex.isValid()) {
+		return;
+	}
+
+	QByteArray data =
+	    QByteArray::fromBase64(dataIndex.data().toByteArray());
+
+	fileName = writeTemporaryFile(fileName, data);
+	if (!fileName.isEmpty()) {
+		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		/* TODO -- Handle openUrl() return value. */
+	} else {
+		QMessageBox::warning(this,
+		    tr("Error opening attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
+	}
 }
 
 
