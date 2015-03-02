@@ -37,19 +37,14 @@
 #include "src/io/dbs.h"
 
 
-DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, QString &senderName,
-    Action action, QTreeView &accountList, QTableView &messageList,
+DlgSendMessage::DlgSendMessage(MessageDb &messDb, QString &dbId,
+    QString &senderName, Action action, int msgID,
     const AccountModel::SettingsMap &accountInfo,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QString &lastAttAddPath,
-    QWidget *parent,
-    const QString &reSubject, const QString &senderId, const QString &sender,
-    const QString &senderAddress, const QString &dmType,
-    const QString &dmSenderRefNumber, const QString &dmSenderIdent,
-    const QString &dmRecipientRefNumber, const QString &dmRecipientIdent)
+    QWidget *parent)
     : QDialog(parent),
-    m_accountList(accountList),
-    m_messageList(messageList),
+    m_msgID(msgID),
     m_dbId(dbId),
     m_senderName(senderName),
     m_action(action),
@@ -58,17 +53,9 @@ DlgSendMessage::DlgSendMessage(MessageDb &db, QString &dbId, QString &senderName
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
     m_lastAttAddPath(lastAttAddPath),
-    m_reSubject(reSubject),
-    m_senderId(senderId),
-    m_sender(sender),
-    m_senderAddress(senderAddress),
-    m_dmType(dmType),
-    m_dmSenderRefNumber(dmSenderRefNumber),
-    m_dmSenderIdent(dmSenderIdent),
-    m_dmRecipientRefNumber(dmRecipientRefNumber),
-    m_dmRecipientIdent(dmRecipientIdent),
-    m_userName(""),
-    m_messDb(db)
+    m_messDb(messDb),
+    m_dmType(""),
+    m_dmSenderRefNumber("")
 {
 	m_attachSize = 0;
 	setupUi(this);
@@ -90,9 +77,6 @@ void DlgSendMessage::on_cancelButton_clicked(void)
 void DlgSendMessage::initNewMessageDialog(void)
 /* ========================================================================= */
 {
-	QModelIndex index;
-	const QStandardItem *item;
-
 	this->recipientTableWidget->setColumnWidth(0,70);
 	this->recipientTableWidget->setColumnWidth(1,180);
 	this->recipientTableWidget->setColumnWidth(2,240);
@@ -100,17 +84,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableWidget->setColumnWidth(0,150);
 	this->attachmentTableWidget->setColumnWidth(1,40);
 	this->attachmentTableWidget->setColumnWidth(2,120);
-
-	AccountModel *accountModel = dynamic_cast<AccountModel *>(
-	    m_accountList.model());
-	index = m_accountList.currentIndex();
-	Q_ASSERT(index.isValid()); /* TODO -- Deal with invalid. */
-
-	item = accountModel->itemFromIndex(index);
-	Q_ASSERT(0 != item);
-	const QStandardItem *accountItemTop = AccountModel::itemTop(item);
-	const AccountModel::SettingsMap &itemSettings =
-	    accountItemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);
@@ -127,12 +100,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 		}
 	}
 
-	this->fromUser->setText("<strong>" + accountItemTop->text() +
-	    "</strong>" + " (" + itemSettings.userName() + ") - "
+	this->fromUser->setText("<strong>" + m_accountInfo.accountName() +
+	    "</strong>" + " (" + m_accountInfo.userName() + ") - "
 	    + m_dbType + dbOpenAddressing);
-
-	index = m_messageList.currentIndex();
-	m_userName = itemSettings.userName();
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
@@ -147,74 +117,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->OptionalWidget->setHidden(true);
 
 	if (ACT_REPLY == m_action) {
-		this->subjectText->setText("Re: " + m_reSubject);
-		bool hideOptionalWidget = true;
-		if (!m_dmSenderRefNumber.isEmpty()) {
-			this->dmRecipientRefNumber->setText(m_dmSenderRefNumber);
-			hideOptionalWidget = false;
-		}
-		if (!m_dmSenderIdent.isEmpty()) {
-			this->dmRecipientIdent->setText(m_dmSenderIdent);
-			hideOptionalWidget = false;
-		}
-		if (!m_dmRecipientRefNumber.isEmpty()) {
-			this->dmSenderRefNumber->setText(m_dmRecipientRefNumber);
-			hideOptionalWidget = false;
-		}
-		if (!m_dmRecipientIdent.isEmpty()) {
-			this->dmSenderIdent->setText(m_dmRecipientIdent);
-			hideOptionalWidget = false;
-		}
-
-		this->OptionalWidget->setHidden(hideOptionalWidget);
-
-		int row = this->recipientTableWidget->rowCount();
-		this->recipientTableWidget->insertRow(row);
-		this->payRecipient->setEnabled(false);
-		this->payRecipient->setChecked(false);
-		this->payRecipient->hide();
-
-		QString pdz;
-		if (!m_dbEffectiveOVM) {
-			pdz = getUserInfoFormIsds(m_senderId);
-			this->payReply->show();
-			this->payReply->setEnabled(true);
-		} else {
-			this->payReply->setEnabled(false);
-			this->payReply->hide();
-			pdz = tr("no");
-		}
-
-		if (m_dmType == "I") {
-			this->addRecipient->setEnabled(false);
-			this->removeRecipient->setEnabled(false);
-			this->findRecipient->setEnabled(false);
-			this->replyLabel->show();
-			this->replyLabel->setEnabled(true);
-			this->payReply->hide();
-			this->payReply->setEnabled(false);
-			this->payRecipient->setEnabled(true);
-			this->payRecipient->setChecked(true);
-			this->payRecipient->show();
-			pdz = tr("yes");
-		}
-
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(m_senderId);
-		this->recipientTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(m_sender);
-		this->recipientTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(m_senderAddress);
-		this->recipientTableWidget->setItem(row,2,item);
-		item = new QTableWidgetItem;
-		item->setText(pdz);
-
-		item->setTextAlignment(Qt::AlignCenter);
-		this->recipientTableWidget->setItem(row,3,item);
+		fillDlgAsReply();
 	} else {
-
 		if (m_dbOpenAddressing) {
 			this->payReply->setEnabled(true);
 			this->payReply->show();
@@ -225,6 +129,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->hide();
+		if (ACT_NEW_FROM_TMP == m_action) {
+			fillDlgFromTmpMsg();
+		}
 	}
 
 	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
@@ -288,6 +195,190 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 /* ========================================================================= */
 /*
+ * fill Send Message Dialog as reply
+ */
+void DlgSendMessage::fillDlgAsReply(void)
+/* ========================================================================= */
+{
+	QVector<QString> msgData;
+	bool hideOptionalWidget = true;
+	msgData = m_messDb.msgsGetReplyMsgData(m_msgID);
+	m_dmType = msgData[20];
+	m_dmSenderRefNumber = msgData[10];
+
+	this->subjectText->setText("Re: " + msgData[7]);
+
+	if (!msgData[8].isEmpty()) {
+		this->dmRecipientRefNumber->setText(msgData[8]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[9].isEmpty()) {
+		this->dmRecipientIdent->setText(msgData[9]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[10].isEmpty()) {
+		this->dmSenderRefNumber->setText(msgData[10]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[11].isEmpty()) {
+		this->dmSenderIdent->setText(msgData[11]);
+		hideOptionalWidget = false;
+	}
+
+	this->OptionalWidget->setHidden(hideOptionalWidget);
+	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+	this->payRecipient->setEnabled(false);
+	this->payRecipient->setChecked(false);
+	this->payRecipient->hide();
+
+	QString pdz;
+	if (!m_dbEffectiveOVM) {
+		pdz = getUserInfoFormIsds(msgData[0]);
+		this->payReply->show();
+		this->payReply->setEnabled(true);
+	} else {
+		this->payReply->setEnabled(false);
+		this->payReply->hide();
+		pdz = tr("no");
+	}
+
+	if (m_dmType == "I") {
+		this->addRecipient->setEnabled(false);
+		this->removeRecipient->setEnabled(false);
+		this->findRecipient->setEnabled(false);
+		this->replyLabel->show();
+		this->replyLabel->setEnabled(true);
+		this->payReply->hide();
+		this->payReply->setEnabled(false);
+		this->payRecipient->setEnabled(true);
+		this->payRecipient->setChecked(true);
+		this->payRecipient->show();
+		pdz = tr("yes");
+	}
+
+	int row = this->recipientTableWidget->rowCount();
+	this->recipientTableWidget->insertRow(row);
+	QTableWidgetItem *item = new QTableWidgetItem;
+	item->setText(msgData[0]);
+	this->recipientTableWidget->setItem(row,0,item);
+	item = new QTableWidgetItem;
+	item->setText(msgData[1]);
+	this->recipientTableWidget->setItem(row,1,item);
+	item = new QTableWidgetItem;
+	item->setText(msgData[2]);
+	this->recipientTableWidget->setItem(row,2,item);
+	item = new QTableWidgetItem;
+	item->setText(pdz);
+	item->setTextAlignment(Qt::AlignCenter);
+	this->recipientTableWidget->setItem(row,3,item);
+}
+
+
+/* ========================================================================= */
+/*
+ * fill Send Message Dialog from template message
+ */
+void DlgSendMessage::fillDlgFromTmpMsg(void)
+/* ========================================================================= */
+{
+	QVector<QString> msgData;
+	bool hideOptionalWidget = true;
+
+	msgData = m_messDb.msgsGetReplyMsgData(m_msgID);
+	m_dmType = msgData[20];
+	m_dmSenderRefNumber = msgData[10];
+
+	this->subjectText->setText(msgData[7]);
+
+	/* fill optional fileds  */
+	if (!msgData[8].isEmpty()) {
+		this->dmSenderRefNumber->setText(msgData[8]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[9].isEmpty()) {
+		this->dmSenderIdent->setText(msgData[9]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[10].isEmpty()) {
+		this->dmRecipientRefNumber->setText(msgData[10]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[11].isEmpty()) {
+		this->dmRecipientIdent->setText(msgData[11]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[12].isEmpty()) {
+		this->dmToHands->setText(msgData[12]);
+		hideOptionalWidget = false;
+	}
+	/* set checkboxes */
+	if (msgData[13] == "1") {
+		this->dmPersonalDelivery->setChecked(true);
+	}
+	if (msgData[14] == "1") {
+		this->dmAllowSubstDelivery->setChecked(true);
+	}
+	/* fill optional LegalTitle - Law, year, ... */
+	if (!msgData[15].isEmpty()) {
+		this->dmLegalTitleLaw->setText(msgData[15]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[16].isEmpty()) {
+		this->dmLegalTitleYear->setText(msgData[16]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[17].isEmpty()) {
+		this->dmLegalTitleSect->setText(msgData[17]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[18].isEmpty()) {
+		this->dmLegalTitlePar->setText(msgData[18]);
+		hideOptionalWidget = false;
+	}
+	if (!msgData[19].isEmpty()) {
+		this->dmLegalTitlePoint->setText(msgData[19]);
+		hideOptionalWidget = false;
+	}
+
+	this->OptionalWidget->setHidden(hideOptionalWidget);
+	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+
+	QString pdz;
+	if (!m_dbEffectiveOVM) {
+		pdz = getUserInfoFormIsds(msgData[0]);
+		this->payReply->show();
+		this->payReply->setEnabled(true);
+	} else {
+		this->payReply->setEnabled(false);
+		this->payReply->hide();
+		pdz = tr("no");
+	}
+
+	/* message is received -> recipient == sender */
+	if (m_dbId != msgData[4]) {
+		int row = this->recipientTableWidget->rowCount();
+		this->recipientTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(msgData[4]);
+		this->recipientTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText(msgData[5]);
+		this->recipientTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText(msgData[6]);
+		this->recipientTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+		item->setText(pdz);
+		item->setTextAlignment(Qt::AlignCenter);
+		this->recipientTableWidget->setItem(row,3,item);
+	}
+
+	/* TODO - fill attachment table */
+}
+
+
+/* ========================================================================= */
+/*
  * return dbEffectiveOVM for recipient
  */
 QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
@@ -305,7 +396,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 		return str;
 	}
 
-	isdsSearch(&box, m_userName, doi);
+	isdsSearch(&box, m_accountInfo.userName(), doi);
 	isds_DbOwnerInfo_free(&doi);
 
 	if (NULL != box) {
@@ -475,7 +566,7 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 {
 	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
 	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_userName);
+	    m_dbOpenAddressing, this, m_accountInfo.userName());
 	dlg_cont->show();
 }
 
@@ -566,7 +657,7 @@ void DlgSendMessage::findAndAddRecipient(void)
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
 	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_userName);
+	    m_dbOpenAddressing, this, m_accountInfo.userName());
 	dsSearch->show();
 }
 
@@ -983,8 +1074,8 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
-		qDebug() << "sending message from user name" << m_userName;
-		status = isds_send_message(isdsSessions.session(m_userName),
+		qDebug() << "sending message from user name" << m_accountInfo.userName();
+		status = isds_send_message(isdsSessions.session(m_accountInfo.userName()),
 		    sent_message);
 
 		sendMsgResultStruct sendMsgResults;
@@ -996,7 +1087,7 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResults.isPDZ = (this->recipientTableWidget->
 		    item(i, 3)->text() == tr("yes")) ? true : false;
 		sendMsgResults.status = (int) status;
-		sendMsgResults.errInfo = isds_long_message(isdsSessions.session(m_userName));
+		sendMsgResults.errInfo = isds_long_message(isdsSessions.session(m_accountInfo.userName()));
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {

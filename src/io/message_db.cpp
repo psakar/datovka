@@ -1496,37 +1496,66 @@ fail:
 
 /* ========================================================================= */
 /*
- * Generate information for reply dialog.
+ * Get message information for reply/template send message dialog.
  */
-QVector<QString> MessageDb::msgsReplyDataTo(qint64 dmId) const
+QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
 /* ========================================================================= */
 {
-	QVector<QString> reply(9);
+	QVector<QString> msgData(21);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "SELECT "
-	    "dmAnnotation, dbIDSender, dmSender, dmSenderAddress, _dmType, "
-	    "dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber, "
-	    "dmRecipientIdent FROM messages WHERE dmID = :dmId";
+	    "dbIDSender, dmSender, dmSenderAddress, dmSenderType, "
+	    "dbIDRecipient, dmRecipient, dmRecipientAddress, "
+	    "dmAnnotation, "
+	    "dmSenderRefNumber, dmSenderIdent, "
+	    "dmRecipientRefNumber, dmRecipientIdent, "
+	    "dmToHands, dmPersonalDelivery, dmAllowSubstDelivery, "
+	    "dmLegalTitleLaw, dmLegalTitleYear, dmLegalTitleSect, "
+	    "dmLegalTitlePar, dmLegalTitlePoint, "
+	    "_dmType "
+	    "FROM messages WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		reply[0] = query.value(0).toString();
-		reply[1] = query.value(1).toString();
-		reply[2] = query.value(2).toString();
-		reply[3] = query.value(3).toString();
-		reply[4] = query.value(4).toString();
-		reply[5] = query.value(5).toString();
-		reply[6] = query.value(6).toString();
-		reply[7] = query.value(7).toString();
-		reply[8] = query.value(8).toString();
-		return reply;
+		msgData[0] = query.value(0).toString();
+		msgData[1] = query.value(1).toString();
+		msgData[2] = query.value(2).toString();
+		msgData[3] = query.value(3).toString();
+		msgData[4] = query.value(4).toString();
+		msgData[5] = query.value(5).toString();
+		msgData[6] = query.value(6).toString();
+		msgData[7] = query.value(7).toString();
+		msgData[8] = query.value(8).toString();
+		msgData[9] = query.value(9).toString();
+		msgData[10] = query.value(10).toString();
+		msgData[11] = query.value(11).toString();
+		msgData[12] = query.value(12).toString();
+		if (query.value(13).toBool()) {
+			msgData[13] = "1";
+		} else {
+			msgData[13] = "0";
+		}
+		if (query.value(14).toBool()) {
+			msgData[14] = "1";
+		} else {
+			msgData[14] = "0";
+		}
+		msgData[15] = query.value(15).toString();
+		msgData[16] = query.value(16).toString();
+		msgData[17] = query.value(17).toString();
+		msgData[18] = query.value(18).toString();
+		msgData[19] = query.value(19).toString();
+		msgData[20] = query.value(20).toString();
+		return msgData;
 	} else {
 		logError(
 		    "Cannot execute SQL query and/or read SQL data: %s.\n",

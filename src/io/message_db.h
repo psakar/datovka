@@ -379,7 +379,7 @@ public:
 	 *     mesageType, senderRefNumber.
 	 *     Returns empty vector in failure.
 	 */
-	QVector<QString> msgsReplyDataTo(qint64 dmId) const;
+	QVector<QString> msgsReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns true if verification attempt was performed.

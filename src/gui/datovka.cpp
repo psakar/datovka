@@ -637,12 +637,15 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
+	ui->actionCreate_message_from_template->setEnabled(true);
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
+		ui->actionCreate_message_from_template->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
@@ -664,6 +667,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
+		ui->actionCreate_message_from_template->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
@@ -779,6 +783,7 @@ setmodel:
 			messageItemRestoreSelection();
 			ui->menuMessage->setEnabled(true);
 			//ui->actionReply_to_the_sender->setEnabled(true);
+			//ui->actionCreate_message_from_template->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
@@ -787,6 +792,7 @@ setmodel:
 			ui->menuMessage->setEnabled(false);
 			ui->actionReply->setEnabled(false);
 			ui->actionReply_to_the_sender->setEnabled(false);
+			ui->actionCreate_message_from_template->setEnabled(false);
 			ui->actionVerify_a_message->setEnabled(false);
 			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
@@ -1155,6 +1161,10 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    tr("Reply to message"), this,
 		    SLOT(createAndSendMessageReply()))->
 		    setEnabled(ui->actionReply->isEnabled());
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message.png"),
+		    tr("Create message from template"), this,
+		    SLOT(createAndSendMessageFromTmpl()));
 	}
 	menu->addSeparator();
 	if (singleSelected) {
@@ -3304,6 +3314,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionReply_to_the_sender, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
+	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessageFromTmpl()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
@@ -3364,6 +3376,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionCreate_message->setEnabled(false);
 	ui->actionReply_to_the_sender->setEnabled(false);
+	ui->actionCreate_message_from_template->setEnabled(false);
 	ui->actionVerify_a_message->setEnabled(false);
 	ui->actionAccount_props->setEnabled(false);
 	ui->actionChange_pwd->setEnabled(false);
@@ -3387,6 +3400,7 @@ void MainWindow::setMessageActionVisibility(bool action) const
 	ui->menuMessage->setEnabled(action);
 	ui->actionReply->setEnabled(action); /* Has key short cut. */
 	ui->actionReply_to_the_sender->setEnabled(action);
+	ui->actionCreate_message_from_template->setEnabled(action);
 	ui->actionVerify_a_message->setEnabled(action);
 }
 
@@ -3791,19 +3805,62 @@ void MainWindow::saveSettings(void) const
 
 /* ========================================================================= */
 /*
- * Creates and sends new message.
+ * Create new message from selected account.
  */
 void MainWindow::createAndSendMessage(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
+	openSendMessageDialog(DlgSendMessage::ACT_NEW);
+}
 
-	/*
-	 * TODO -- This method copies createAndSendMessageReply().
-	 * Delete one of them.
-	 */
+
+/* ========================================================================= */
+/*
+ * Create reply from selected message.
+ */
+void MainWindow::createAndSendMessageReply(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+	openSendMessageDialog(DlgSendMessage::ACT_REPLY);
+}
+
+
+/* ========================================================================= */
+/*
+ * Create message from template (selected message).
+ */
+void MainWindow::createAndSendMessageFromTmpl(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+	openSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
+}
+
+/* ========================================================================= */
+/*
+ * Open send message dialog and send message.
+ */
+void MainWindow::openSendMessageDialog(int action)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+
+	int msgID = 0;
+
+	/* if is reply or template, ID of selected message is required */
+	if (DlgSendMessage::ACT_REPLY == action ||
+	    DlgSendMessage::ACT_NEW_FROM_TMP == action) {
+		const QAbstractItemModel *tableModel = ui->messageList->model();
+		Q_ASSERT(0 != tableModel);
+		QModelIndex index = tableModel->index(
+		    ui->messageList->currentIndex().row(), 0);
+		msgID = tableModel->itemData(index).first().toInt();
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -3828,7 +3885,7 @@ void MainWindow::createAndSendMessage(void)
 		}
 	}
 
-	showStatusTextWithTimeout(tr("Create and send a new message."));
+	showStatusTextWithTimeout(tr("Create and send a message."));
 
 	AccountModel::SettingsMap accountInfo =
 	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -3838,8 +3895,9 @@ void MainWindow::createAndSendMessage(void)
 	} else {
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId, senderName,
-	    DlgSendMessage::ACT_NEW, *(ui->accountList), *(ui->messageList),
+
+	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
+	    senderName, (DlgSendMessage::Action) action, msgID,
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this);
 
@@ -4272,99 +4330,6 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Creates and sends a message reply for selected account.
- */
-void MainWindow::createAndSendMessageReply(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	/*
-	 * TODO -- This method copies createAndSendMessage().
-	 * Delete one of them.
-	 */
-
-	/* First column. */
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QVector<QString> replyData = messageDb->msgsReplyDataTo(
-	    firstMsgColumnIdxs.first().data().toLongLong());
-
-	/* TODO */
-	QModelIndex acntTopIndex =
-	    AccountModel::indexTop(ui->accountList->currentIndex());
-	Q_ASSERT(acntTopIndex.isValid());
-
-	QString userName = accountUserName();
-	QString dbId = m_accountDb.dbId(userName + "___True");
-
-
-	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
-	QList<QString> accountData =
-	    m_accountDb.getUserDataboxInfo(userName + "___True");
-
-	if (accountData.isEmpty()) {
-		return;
-	}
-
-	QString dbType = accountData.at(0);
-	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIndex, true)) {
-			return;
-		}
-	}
-
-	showStatusTextWithTimeout(tr("Create and send reply on the message."));
-
-	AccountModel::SettingsMap accountInfo =
-	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString lastAttachAddPath;
-	if (globPref.use_global_paths) {
-		lastAttachAddPath = globPref.add_file_to_attachments_path;
-	} else {
-		lastAttachAddPath = accountInfo.lastAttachAddPath();
-	}
-
-	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId, senderName,
-	    DlgSendMessage::ACT_REPLY, *(ui->accountList), *(ui->messageList),
-	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    lastAttachAddPath, this, replyData[0], replyData[1], replyData[2],
-	    replyData[3], replyData[4], replyData[5], replyData[6],
-	    replyData[7], replyData[8]);
-	if (newMessageDialog->exec() == QDialog::Accepted) {
-
-		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
-		    "send.").arg(accountInfo.accountName()));
-
-		/*
-		 * Message model must not be regenerated because when
-		 * generating a message reply the user must be on received
-		 * messages.
-		 *
-		 * TODO -- Regenerate year list (as this could add entries).
-		 */
-	}
-
-	if (!globPref.use_global_paths) {
-		m_add_attach_dir = lastAttachAddPath;
-		storeExportPath();
-	}
-
-	setDefaultProgressStatus();
-}
 
 /* ========================================================================= */
 /*
