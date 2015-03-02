@@ -194,6 +194,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		QString("key_16.png")));
 		m_certPath = QDir::toNativeSeparators(itemSettings.p12File());
 	}
+
+	checkInputFields();
 }
 
 
