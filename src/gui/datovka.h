@@ -25,6 +25,7 @@
 #define _DATOVKA_H_
 
 
+#include <QItemSelection>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
@@ -109,7 +110,7 @@ private slots:
 	/*!
 	 * @brief Redraws widgets according to selected account item.
 	 */
-	void accountItemSelectionChanged(const QModelIndex &current,
+	void accountItemCurrentChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
@@ -119,10 +120,10 @@ private slots:
 	void accountItemRightClicked(const QPoint &point);
 
 	/*!
-	 * @brief Sets content of widgets according to selected message.
+	 * @brief Sets contents of widgets according to selected messages.
 	 */
-	void messageItemSelectionChanged(const QModelIndex &current,
-	    const QModelIndex &previous = QModelIndex());
+	void messageItemsSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected = QItemSelection());
 
 	/*!
 	 * @brief Used for toggling the message read state.
@@ -153,7 +154,7 @@ private slots:
 	/*!
 	 * @brief Redraws widgets according to selected attachment item.
 	 */
-	void attachmentItemSelectionChanged(const QModelIndex &current,
+	void attachmentItemCurrentChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
@@ -771,15 +772,15 @@ private:
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
 	DbContainer m_messageDbs; /*!< Map of message databases. */
-	QLineEdit *m_searchLine; /*!< Search-line object. */
-	QPushButton *m_pushButton;
+	QLineEdit *m_filterLine; /*!< Search filter line object. */
+	QPushButton *m_clearFilterLineButton; /*!< Button object. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting and
 	                                                * filtering.
 	                                                */
 
-	QTimer m_messageMarker; /*!< Used for marging messages as read. */
+	QTimer m_messageMarker; /*!< Used for marking messages as read. */
 	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	long m_lastStoredMessageId; /*!< Last stored message selection. */
 

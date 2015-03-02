@@ -35,6 +35,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
+#include <QSet>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
@@ -95,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_accountModel(this),
     m_accountDb("accountDb"),
     m_messageDbs(),
-    m_searchLine(NULL),
+    m_filterLine(NULL),
     m_messageListProxyModel(this),
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
@@ -135,18 +136,19 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->toolBar->addWidget(searchLabel);
 
 	/* Message filter field. */
-	m_searchLine = new QLineEdit(this);
-	connect(m_searchLine, SIGNAL(textChanged(QString)),
+	m_filterLine = new QLineEdit(this);
+	connect(m_filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterMessages(QString)));
-	m_searchLine->setFixedWidth(200);
-	m_searchLine->setToolTip(tr("Enter search word"));
-	ui->toolBar->addWidget(m_searchLine);
+	m_filterLine->setFixedWidth(200);
+	m_filterLine->setToolTip(tr("Enter sought expression"));
+	ui->toolBar->addWidget(m_filterLine);
 	/* Clear message filter button. */
-	m_pushButton = new QPushButton(this);
-	m_pushButton->setIcon(QIcon(ICON_3PARTY_PATH "delete_16.png"));
-	m_pushButton->setToolTip(tr("Clear search field"));
-	ui->toolBar->addWidget(m_pushButton);
-	connect(m_pushButton, SIGNAL(clicked()), this,
+	m_clearFilterLineButton = new QPushButton(this);
+	m_clearFilterLineButton->setIcon(
+	    QIcon(ICON_3PARTY_PATH "delete_16.png"));
+	m_clearFilterLineButton->setToolTip(tr("Clear search field"));
+	ui->toolBar->addWidget(m_clearFilterLineButton);
+	connect(m_clearFilterLineButton, SIGNAL(clicked()), this,
 	    SLOT(clearFilterField()));
 
 	/* Create info status bar */
@@ -189,8 +191,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(messageItemRightClicked(QPoint)));
-//	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	ui->messageList->setSelectionMode(QAbstractItemView::SingleSelection);
+	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+//	ui->messageList->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
 	/* TODO -- Use a delegate? */
@@ -224,7 +226,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Account list must already be set in order to connect this signal. */
 	connect(ui->accountList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(accountItemSelectionChanged(QModelIndex, QModelIndex)));
+	    SLOT(accountItemCurrentChanged(QModelIndex, QModelIndex)));
 
 	/* Enable sorting of message table items. */
 	ui->messageList->setSortingEnabled(true);
@@ -238,8 +240,8 @@ MainWindow::MainWindow(QWidget *parent)
 		/* Selection model may not be set. */
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemSelectionChanged(QModelIndex,
-			QModelIndex)));
+		    SLOT(attachmentItemCurrentChanged(QModelIndex,
+		        QModelIndex)));
 	}
 	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->messageAttachmentList,
@@ -482,7 +484,7 @@ void MainWindow::proxySettings(void)
 /*
  * Redraws widgets according to selected account item.
  */
-void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
+void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
@@ -501,9 +503,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		setMessageActionVisibility(false);
 
 		ui->messageList->selectionModel()->disconnect(
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(messageItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(messageItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -529,9 +532,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 		setMessageActionVisibility(false);
 
 		ui->messageList->selectionModel()->disconnect(
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(messageItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(messageItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -701,9 +705,10 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 	if (0 != ui->messageList->selectionModel()) {
 		/* New model hasn't been set yet. */
 		ui->messageList->selectionModel()->disconnect(
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(messageItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(messageItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -751,12 +756,13 @@ void MainWindow::accountItemSelectionChanged(const QModelIndex &current,
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		/* Apply message filter. */
-		filterMessages(m_searchLine->text());
+		filterMessages(m_filterLine->text());
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(messageItemSelectionChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(messageItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 		connect(ui->messageList->model(),
 		    SIGNAL(layoutAboutToBeChanged()), this,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
@@ -766,7 +772,7 @@ setmodel:
 		/* Clear message info. */
 		ui->messageInfo->clear();
 		/* Clear attachment list. */
-		messageItemSelectionChanged(QModelIndex());
+		messageItemsSelectionChanged(QItemSelection());
 		/* Select last message in list if there are some messages. */
 		itemModel = ui->messageList->model();
 		/* enable/disable buttons */
@@ -862,19 +868,16 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 /* ========================================================================= */
 /*
- * Sets content of widgets according to selected message.
+ * Sets contents of widgets according to selected messages.
  */
-void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
-    const QModelIndex &previous)
+void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
+    const QItemSelection &deselected)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	/* If the row has not been changed then do nothing. */
-	if (current.isValid() && previous.isValid() &&
-	    (current.row() == previous.row())) {
-		return;
-	}
+	(void) selected; /* Unused. */
+	(void) deselected; /* Unused. */
 
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
@@ -884,7 +887,7 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		/* New model hasn't been set yet. */
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		    SLOT(attachmentItemCurrentChanged(QModelIndex,
 		        QModelIndex)));
 	}
 
@@ -902,26 +905,22 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 	/* Disable model for attachment list. */
 	ui->messageAttachmentList->setModel(0);
 
-	if (!current.isValid()) {
+	QModelIndexList firstColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	if (firstColumnIdxs.isEmpty()) {
 		/* Invalid message selected. */
 		messageItemStoreSelection(-1);
 		/* End if invalid item is selected. */
 		return;
 	}
 
-	const QAbstractItemModel *msgTblMdl = current.model();
-
-	/* Enable message/attachment related buttons. */
-	ui->downloadComplete->setEnabled(true);
-//	ui->messageStateCombo->setEnabled(true);
-
-	if (0 != msgTblMdl) {
-		QModelIndex index = msgTblMdl->index(
-		    current.row(), 0); /* First column. */
+	if (1 == firstColumnIdxs.size()) {
+		const QModelIndex &index = firstColumnIdxs.first();
 
 		MessageDb *messageDb = accountMessageDb(0);
 		Q_ASSERT(0 != messageDb);
-		int msgId = msgTblMdl->itemData(index).first().toInt();
+		int msgId = index.data().toInt();
 		/* Remember last selected message. */
 		messageItemStoreSelection(msgId);
 
@@ -980,15 +979,14 @@ void MainWindow::messageItemSelectionChanged(const QModelIndex &current,
 		/* Connect new slot. */
 		connect(ui->messageAttachmentList->selectionModel(),
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		    SLOT(attachmentItemCurrentChanged(QModelIndex,
 		        QModelIndex)));
 	} else {
 		ui->messageInfo->setHtml("");
 		ui->messageInfo->setReadOnly(true);
 		ui->saveAttachments->setEnabled(false);
+		/* TODO */
 	}
-
-	/* TODO */
 }
 
 
@@ -1340,7 +1338,7 @@ void MainWindow::messageItemRestoreSelection(void)
 /*
  * Redraws widgets according to selected attachment item.
  */
-void MainWindow::attachmentItemSelectionChanged(const QModelIndex &current,
+void MainWindow::attachmentItemCurrentChanged(const QModelIndex &current,
     const QModelIndex &previous)
 /* ========================================================================= */
 {
@@ -1380,7 +1378,7 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (index.isValid()) {
-		//attachmentItemSelectionChanged(index);
+		//attachmentItemCurrentChanged(index);
 
 		/* TODO */
 		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
@@ -1753,7 +1751,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		/* New model hasn't been set yet. */
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemSelectionChanged(QModelIndex,
+		    SLOT(attachmentItemCurrentChanged(QModelIndex,
 			 QModelIndex)));
 	}
 
@@ -1790,7 +1788,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(attachmentItemSelectionChanged(QModelIndex,
+	    SLOT(attachmentItemCurrentChanged(QModelIndex,
 		QModelIndex)));
 }
 
@@ -1830,7 +1828,7 @@ void MainWindow::accountItemMarkAllRead(void)
 	if (selectedAcntIndex.isValid()) {
 		ui->accountList->selectionModel()->setCurrentIndex(
 		    selectedAcntIndex, QItemSelectionModel::ClearAndSelect);
-		accountItemSelectionChanged(selectedAcntIndex);
+		accountItemCurrentChanged(selectedAcntIndex);
 		/*
 		 * TODO -- When using on year account item then the first
 		 * switching on a parent item (Received) does not redraw the
@@ -1916,7 +1914,7 @@ void MainWindow::deleteMessage(void)
 			 * regenerated.
 			 */
 			if (selectedAcntIndex.isValid()) {
-				accountItemSelectionChanged(selectedAcntIndex);
+				accountItemCurrentChanged(selectedAcntIndex);
 			}
 			/*
 			 * TODO -- Remove the year on account list if last
@@ -2863,7 +2861,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				    indexFromItem(item);
 				ui->accountList->
 				    setCurrentIndex(index.child(0,0));
-				accountItemSelectionChanged(index.child(0,0));
+				accountItemCurrentChanged(index.child(0,0));
 				ui->menuDatabox->setEnabled(true);
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);
@@ -3560,7 +3558,7 @@ void MainWindow::createAndSendMessage(void)
 			case AccountModel::nodeAll:
 			case AccountModel::nodeSent:
 			case AccountModel::nodeSentYear:
-				accountItemSelectionChanged(selectedAcntIndex);
+				accountItemCurrentChanged(selectedAcntIndex);
 				break;
 			default:
 				/* Do nothing. */
@@ -4119,7 +4117,7 @@ void MainWindow::clearFilterField(void)
 {
 	debugSlotCall();
 
-	m_searchLine->clear();
+	m_filterLine->clear();
 }
 
 
@@ -4406,7 +4404,7 @@ void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
 	 * TODO -- A better solution?
 	 */
 	ui->accountList->repaint();
-	accountItemSelectionChanged(ui->accountList->currentIndex());
+	accountItemCurrentChanged(ui->accountList->currentIndex());
 }
 
 
