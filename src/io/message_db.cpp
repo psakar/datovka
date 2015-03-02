@@ -2500,6 +2500,48 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Return fileList related to given message.
+ */
+QList<QStringList> MessageDb::getFilesFromMessage(int msgId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QList<QStringList> retList;
+
+	QString queryStr = "SELECT _dmFileDescr, "
+	    "dmEncodedContent FROM files WHERE message_id = :msgId";
+
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":msgId", msgId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			QStringList fileItem;
+			fileItem.append(query.value(0).toString());
+			fileItem.append(query.value(1).toString());
+			retList.append(fileItem);
+			query.next();
+		}
+	} else {
+		logError("Cannot execute SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return retList;
+fail:
+	return QList<QStringList>();
+}
+
+
+/* ========================================================================= */
+/*
  * Return files related to given message.
  */
 QAbstractTableModel * MessageDb::flsModel(qint64 msgId)

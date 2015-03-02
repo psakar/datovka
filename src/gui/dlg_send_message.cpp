@@ -85,6 +85,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableWidget->setColumnWidth(1,40);
 	this->attachmentTableWidget->setColumnWidth(2,120);
 
+	this->attachmentTableWidget->setColumnHidden(5, true);
+
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);
 
@@ -373,7 +375,22 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		this->recipientTableWidget->setItem(row,3,item);
 	}
 
-	/* TODO - fill attachment table */
+	QList<QStringList> msgFileList;
+	msgFileList = m_messDb.getFilesFromMessage(m_msgID);
+
+	for (int i = 0; i < msgFileList.size(); ++i) {
+		int row = this->attachmentTableWidget->rowCount();
+		this->attachmentTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(msgFileList.at(i).at(0));
+		this->attachmentTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText(tr("Local database"));
+		this->attachmentTableWidget->setItem(row,4,item);
+		item = new QTableWidgetItem;
+		item->setText(msgFileList.at(i).at(1));
+		this->attachmentTableWidget->setItem(row,5,item);
+	}
 }
 
 
@@ -429,6 +446,26 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
+ * Return file content as Base64 string
+ */
+QString DlgSendMessage::getFileBase64(QString filePath)
+/* ========================================================================= */
+ {
+	QFile file(filePath);
+	if (file.exists()) {
+		if (!file.open(QIODevice::ReadOnly)) {
+			qDebug() << "Couldn't open the file" << filePath;
+			goto fail;
+		}
+		return file.readAll().toBase64();
+	}
+fail:
+	return QString();
+}
+
+
+/* ========================================================================= */
+/*
  * Add file to attachment table widget
  */
 void DlgSendMessage::addAttachmentFile(void)
@@ -476,6 +513,9 @@ void DlgSendMessage::addAttachmentFile(void)
 		item = new QTableWidgetItem;
 		item->setText(fileNames[i]);
 		this->attachmentTableWidget->setItem(row,4,item);
+		item = new QTableWidgetItem;
+		item->setText(getFileBase64(fileNames[i]));
+		this->attachmentTableWidget->setItem(row,5,item);
 	}
 }
 
@@ -847,26 +887,16 @@ void DlgSendMessage::sendMessage(void)
 			goto finish;
 		}
 
-		QString filePath =
-		    this->attachmentTableWidget->item(i, 4)->text();
-		QFile file(filePath);
-		if (file.exists()) {
-			if (!file.open(QIODevice::ReadOnly)) {
-				qDebug("Couldn't open the file");
-				errorMsg = "Couldn't open file '" +
-				    filePath + "'.";
-				goto finish;
-			}
-			QByteArray bytes = file.readAll();
-			document->data_length = bytes.size();
-			document->data = malloc(bytes.size());
+		QByteArray bytes;
+		bytes.append(this->attachmentTableWidget->item(i, 5)->text());
+		bytes = QByteArray::fromBase64(bytes);
+		document->data_length = bytes.size();
+		document->data = malloc(bytes.size());
 			if (NULL == document->data) {
 				errorMsg = "Out of memory.";
 				goto finish;
 			}
-			memcpy(document->data, bytes.data(),
-			    document->data_length);
-		}
+		memcpy(document->data, bytes.data(), document->data_length);
 
 		/* Add document on the list of document. */
 		struct isds_list *newListItem = (struct isds_list *) malloc(

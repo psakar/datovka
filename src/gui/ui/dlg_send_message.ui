@@ -771,6 +771,11 @@ of postal data messages active.</string>
        <string>Absolute path of file</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string notr="true">Base64</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

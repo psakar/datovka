@@ -468,6 +468,14 @@ public:
 	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
 
 	/*!
+	 * @brief Return fileList related to given message.
+	 *
+	 * @param[in] msgId  Message identifier.
+	 * @return List of files and their attributes.
+	 */
+	QList<QStringList> getFilesFromMessage(int msgId);
+
+	/*!
 	 * @brief Return files related to given message.
 	 *
 	 * @param[in] msgId  Message identifier.
