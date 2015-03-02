@@ -385,6 +385,16 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		item->setText(msgFileList.at(i).at(0));
 		this->attachmentTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
+		item->setText("");
+		this->attachmentTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText("");
+		this->attachmentTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+		item->setText(QString::number(
+		    getFileSizeFromBase64(msgFileList.at(i).at(1))));
+		this->attachmentTableWidget->setItem(row,3,item);
+		item = new QTableWidgetItem;
 		item->setText(tr("Local database"));
 		this->attachmentTableWidget->setItem(row,4,item);
 		item = new QTableWidgetItem;
@@ -461,6 +471,20 @@ QString DlgSendMessage::getFileBase64(QString filePath)
 	}
 fail:
 	return QString();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return QByteArray file size from Base64.
+ */
+int DlgSendMessage::getFileSizeFromBase64(QString fileBase64)
+/* ========================================================================= */
+ {
+		QByteArray bytes;
+		bytes.append(fileBase64);
+		bytes = QByteArray::fromBase64(bytes);
+		return bytes.size();
 }
 
 
@@ -582,13 +606,17 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 	checkInputFields();
 
 	if (Qt::Unchecked == state) {
-		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: black }");
-		this->labeldmSenderRefNumber->setText(tr("Our reference number:"));
-		disconnect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
+		this->labeldmSenderRefNumber->setStyleSheet(
+		    "QLabel { color: black }");
+		this->labeldmSenderRefNumber->setText(
+		     tr("Our reference number:"));
+		disconnect(this->dmSenderRefNumber,SIGNAL(textChanged(QString)),
 		this, SLOT(checkInputFields()));
 	} else {
-		this->labeldmSenderRefNumber->setStyleSheet("QLabel { color: red }");
-		this->labeldmSenderRefNumber->setText(tr("Enter reference number:"));
+		this->labeldmSenderRefNumber->setStyleSheet(
+		    "QLabel { color: red }");
+		this->labeldmSenderRefNumber->setText(
+		    tr("Enter reference number:"));
 		this->dmSenderRefNumber->setFocus();
 		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		this, SLOT(checkInputFields()));
@@ -629,7 +657,7 @@ void DlgSendMessage::deleteAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Get attachment size when anz item was removed from tablewidget
+ * Get attachment size when any item was removed from tablewidget
  */
 int DlgSendMessage::cmptAttachmentSize(void)
 /* ========================================================================= */

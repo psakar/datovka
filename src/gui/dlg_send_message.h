@@ -103,6 +103,7 @@ private:
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
 	QString getFileBase64(QString filePath);
+	int getFileSizeFromBase64(QString fileBase64);
 	QString getUserInfoFormIsds(QString idDbox);
 };
 
