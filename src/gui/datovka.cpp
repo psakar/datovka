@@ -1707,45 +1707,62 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
  * Set tablewidget when message download worker is done.
  */
 void MainWindow::postDownloadSelectedMessageAttachments(
-    const QModelIndex acntTopIdx, QString dmId)
+    const QModelIndex &acntTopIdx, const QString &dmId)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
-	Q_ASSERT(messageIndex.isValid());
-	QModelIndex accountIndex = ui->accountList->currentIndex();
-	Q_ASSERT(accountIndex.isValid());
-	accountIndex = AccountModel::indexTop(accountIndex);
-	QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(accountIndex);
+	showStatusTextWithTimeout(tr("Message \"%1\" "
+	    " was downloaded from ISDS server.").arg(dmId));
 
-	QString msgIds = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toString();
+	QModelIndex accountTopIndex =
+	    AccountModel::indexTop(ui->accountList->currentIndex());
+	Q_ASSERT(accountTopIndex.isValid());
 
-	/* Test if account index or message index were changed */
-	if (!(accountIndex == acntTopIdx && msgIds == dmId)) {
+	/* Do nothing if account index was changed. */
+	if (accountTopIndex != acntTopIdx) {
 		return;
 	}
 
-	showStatusTextWithTimeout(tr("Message \"%1\" "
-	    " was downloaded from ISDS server.").arg(msgIds));
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+	QModelIndex msgIdIdx;
+	/* Find corresponding message in model. */
+	for (int row = 0; row < messageModel->rowCount(); ++row) {
+		QModelIndex index = messageModel->index(row, 0);
+		if (index.data().toString() == dmId) {
+			msgIdIdx = index;
+			break;
+		}
+	}
+
+	if (!msgIdIdx.isValid()) {
+		return;
+	}
+
+	qint64 msgId = dmId.toLongLong();
 
 	/*
 	 * Mark message as having attachment downloaded without reloading
 	 * the whole model.
 	 */
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
-	Q_ASSERT(0 != messageModel);
-	messageModel->overrideDownloaded(
-	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(), true);
+	messageModel->overrideDownloaded(msgId, true);
+	QItemSelection storedSelection =
+	    ui->messageList->selectionModel()->selection();
 	/* Inform the view that the model has changed. */
 	emit messageModel->dataChanged(
-	    messageIndex.sibling(messageIndex.row(), 0),
-	    messageIndex.sibling(messageIndex.row(),
-	        messageModel->columnCount() - 1));
+	    msgIdIdx.sibling(msgIdIdx.row(), 0),
+	    msgIdIdx.sibling(msgIdIdx.row(), messageModel->columnCount() - 1));
+	ui->messageList->selectionModel()->select(storedSelection,
+	    QItemSelectionModel::Select);
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
 
 	/*
 	 * TODO -- Create a separate function for reloading attachment
@@ -1759,14 +1776,13 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemCurrentChanged(QModelIndex,
-			 QModelIndex)));
+		        QModelIndex)));
 	}
 
-	MessageDb *messageDb = accountMessageDb(accountItem);
+	QStandardItem *accountTopItem =
+	    m_accountModel.itemFromIndex(accountTopIndex);
+	MessageDb *messageDb = accountMessageDb(accountTopItem);
 	Q_ASSERT(0 != messageDb);
-
-	int msgId = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toInt();
 
 	/* Generate and show message information. */
 	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
@@ -1775,7 +1791,6 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
 	Q_ASSERT(0 != fileTblMdl);
-	//qDebug() << "Setting files";
 	ui->messageAttachmentList->setModel(fileTblMdl);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(0, true);
@@ -1795,8 +1810,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(attachmentItemCurrentChanged(QModelIndex,
-		QModelIndex)));
+	    SLOT(attachmentItemCurrentChanged(QModelIndex, QModelIndex)));
 }
 
 
@@ -2178,53 +2192,64 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	debugSlotCall();
 
 	enum MessageDirection msgDirection = MSG_RECEIVED;
+	QModelIndex accountTopIndex;
+	MessageDb *messageDb = 0;
 
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
-	Q_ASSERT(messageIndex.isValid());
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
 
-	QString dmIDs = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toString();
-
-	showStatusTextPermanently(tr("Download complete message \"%1\" "
-	    "from ISDS server.").arg(dmIDs));
-
-	QModelIndex accountIndex = ui->accountList->currentIndex();
-	Q_ASSERT(accountIndex.isValid());
-	accountIndex = AccountModel::indexTop(accountIndex);
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(accountIndex);
-
-	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
-	switch (AccountModel::nodeType(index)) {
-	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeReceived:
-	case AccountModel::nodeReceivedYear:
-		msgDirection = MSG_RECEIVED;
-		break;
-	case AccountModel::nodeRecentSent:
-	case AccountModel::nodeSent:
-	case AccountModel::nodeSentYear:
-		msgDirection = MSG_SENT;
-		break;
-	default:
-		break;
+	if (firstMsgColumnIdxs.isEmpty()) {
+		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(accountItem);
-	Q_ASSERT(0 != messageDb);
+	QStringList dmIdStrs;
+	foreach (QModelIndex index, firstMsgColumnIdxs) {
+		dmIdStrs.append(index.data().toString());
+	}
+
+	{
+		QModelIndex accountIndex =
+		    ui->accountList->selectionModel()->currentIndex();
+		Q_ASSERT(accountIndex.isValid());
+
+		switch (AccountModel::nodeType(accountIndex)) {
+		case AccountModel::nodeRecentReceived:
+		case AccountModel::nodeReceived:
+		case AccountModel::nodeReceivedYear:
+			msgDirection = MSG_RECEIVED;
+			break;
+		case AccountModel::nodeRecentSent:
+		case AccountModel::nodeSent:
+		case AccountModel::nodeSentYear:
+			msgDirection = MSG_SENT;
+			break;
+		default:
+			break;
+		}
+
+		accountTopIndex = AccountModel::indexTop(accountIndex);
+		QStandardItem *accountTopItem =
+		     m_accountModel.itemFromIndex(accountTopIndex);
+
+		messageDb = accountMessageDb(accountTopItem);
+		Q_ASSERT(0 != messageDb);
+	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	const AccountModel::SettingsMap accountInfo =
-	    accountIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    accountTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(accountIndex, true)) {
+		if (!connectToIsds(accountTopIndex, true)) {
 			return;
 		}
 	}
 
-	/* Using prepend() just to outrun other jobs. */
-	Worker::jobList.append(
-	    Worker::Job(accountIndex, messageDb, msgDirection, dmIDs));
+	foreach (QString dmIdStr, dmIdStrs) {
+		/* Using prepend() just to outrun other jobs. */
+		Worker::jobList.append(
+		    Worker::Job(accountTopIndex, messageDb, msgDirection,
+		        dmIdStr));
+	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);

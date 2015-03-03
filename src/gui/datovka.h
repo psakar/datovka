@@ -464,7 +464,7 @@ private slots:
 	 * @brief Set tablewidget when message download worker is done.
 	 */
 	void postDownloadSelectedMessageAttachments(
-	    const QModelIndex acntTopIdx, QString dmId);
+	    const QModelIndex &acntTopIdx, const QString &dmId);
 
 	/*!
 	 * @brief Set info status bar from worker.
