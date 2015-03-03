@@ -169,7 +169,6 @@ public:
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
 	bool auto_download_whole_messages;
-	bool auto_download_whole_messages_sent;
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
 	bool store_messages_on_disk;

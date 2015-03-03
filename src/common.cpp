@@ -68,7 +68,6 @@ GlobPreferences::GlobPreferences(void)
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     auto_download_whole_messages(false),
-    auto_download_whole_messages_sent(false),
     default_download_signed(true),
     //store_passwords_on_disk(false),
     store_messages_on_disk(true),
@@ -111,10 +110,6 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	auto_download_whole_messages = settings.value(
 	    "preferences/auto_download_whole_messages",
 	    dlftlGlobPref.auto_download_whole_messages).toBool();
-
-	auto_download_whole_messages_sent = settings.value(
-	    "preferences/auto_download_whole_messages_sent",
-	    dlftlGlobPref.auto_download_whole_messages_sent).toBool();
 
 	default_download_signed = settings.value(
 	    "preferences/default_download_signed",
@@ -247,12 +242,6 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    auto_download_whole_messages) {
 		settings.setValue("auto_download_whole_messages",
 		    auto_download_whole_messages);
-	}
-
-	if (dlftlGlobPref.auto_download_whole_messages_sent !=
-	    auto_download_whole_messages_sent) {
-		settings.setValue("auto_download_whole_messages_sent",
-		    auto_download_whole_messages_sent);
 	}
 
 	if (dlftlGlobPref.default_download_signed != default_download_signed) {

@@ -508,8 +508,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 				/* Sent messages will be whole downloaded only
 				 * if there are in message state 1 or 2.
 				*/
-				if (dmDbMsgStatus <= MESSAGESTATE_SENT) {
-					if (globPref.auto_download_whole_messages_sent) {
+				if (dmDbMsgStatus <= 2) {
+					if (globPref.auto_download_whole_messages) {
 						downloadMessage(acntTopIdx, item->envelope->dmID,
 						    true, msgDirect, messageDb, "", 0, 0);
 					}
