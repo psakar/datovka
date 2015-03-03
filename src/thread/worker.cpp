@@ -505,17 +505,19 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 				int dmNewMsgStatus = convertHexToDecIndex(
 				     *item->envelope->dmMessageStatus);
 
-				if (dmDbMsgStatus != dmNewMsgStatus) {
-
-					QString dmAcceptanceTime = "";
-					if (0 != item->envelope->dmAcceptanceTime) {
-						dmAcceptanceTime = timevalToDbFormat(
-						item->envelope->dmAcceptanceTime);
+				/* Sent messages will be whole downloaded only
+				 * if there are in message state 1 or 2.
+				*/
+				if (dmDbMsgStatus <= MESSAGESTATE_SENT) {
+					if (globPref.auto_download_whole_messages_sent) {
+						downloadMessage(acntTopIdx, item->envelope->dmID,
+						    true, msgDirect, messageDb, "", 0, 0);
 					}
+				}
+
+				if (dmDbMsgStatus != dmNewMsgStatus) {
 					getMessageState(msgDirect, acntTopIdx,
 					    dmId, true, messageDb);
-//					updateMessageState(msgDirect, true,
-//					    messageDb, item->envelope);
 				}
 			}
 		}

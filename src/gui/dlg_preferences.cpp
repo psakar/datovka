@@ -38,6 +38,8 @@ void DlgPreferences::initPrefDialog(void)
 	this->download_at_start->setChecked(globPref.download_at_start);
 	this->auto_download_whole_messages->
 	    setChecked(globPref.auto_download_whole_messages);
+	this->auto_download_whole_messages_sent->
+	    setChecked(globPref.auto_download_whole_messages_sent);
 	this->download_on_background->
 	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
@@ -190,6 +192,8 @@ void DlgPreferences::saveChanges(void) const
 {
 	globPref.auto_download_whole_messages =
 	    this->auto_download_whole_messages->isChecked();
+	globPref.auto_download_whole_messages_sent =
+	    this->auto_download_whole_messages_sent->isChecked();
 	globPref.download_on_background =
 	    this->download_on_background->isChecked();
 	globPref.download_at_start =

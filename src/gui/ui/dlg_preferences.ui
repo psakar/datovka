@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>560</width>
+    <width>603</width>
     <height>380</height>
    </rect>
   </property>
@@ -79,6 +79,23 @@
           <bool>false</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="download_at_start">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>When allowed, Datovka will automatically synchronise accounts 
+and also download new messages on background at startup.</string>
+            </property>
+            <property name="text">
+             <string>Automatically synchronize all accounts on startup</string>
+            </property>
+           </widget>
+          </item>
           <item>
            <widget class="QCheckBox" name="download_on_background">
             <property name="font">
@@ -160,6 +177,13 @@ Download period you can set bellow.</string>
            </layout>
           </item>
           <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="auto_download_whole_messages">
             <property name="font">
              <font>
@@ -175,24 +199,20 @@ message for you. The only downside to this approach is longer waiting time on
 slower internet connections.</string>
             </property>
             <property name="text">
-             <string>Automatically download whole messages (may be slow)</string>
+             <string>Automatically download whole received messages (may be slow)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="download_at_start">
+           <widget class="QCheckBox" name="auto_download_whole_messages_sent">
             <property name="font">
              <font>
               <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
-            <property name="toolTip">
-             <string>When allowed, Datovka will automatically synchronise accounts 
-and also download new messages on background at startup.</string>
-            </property>
             <property name="text">
-             <string>Automatically synchronize all accounts on startup</string>
+             <string>Automatically download whole sent messages (may cause delivery to your mailbox)</string>
             </property>
            </widget>
           </item>
