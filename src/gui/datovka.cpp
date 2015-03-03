@@ -908,12 +908,19 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	QModelIndexList firstColumnIdxs =
 	    ui->messageList->selectionModel()->selectedRows(0);
 
+	/* Stop the timer. */
+	m_messageMarker.stop();
+
 	if (firstColumnIdxs.isEmpty()) {
 		/* Invalid message selected. */
 		messageItemStoreSelection(-1);
 		/* End if invalid item is selected. */
 		return;
 	}
+
+	/* Enable message/attachment related buttons. */
+	ui->downloadComplete->setEnabled(true);
+//	ui->messageStateCombo->setEnabled(true);
 
 	if (1 == firstColumnIdxs.size()) {
 		const QModelIndex &index = firstColumnIdxs.first();
