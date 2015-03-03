@@ -1965,7 +1965,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	if (!delFromIsds) {
 		if (messageDb->msgsDeleteMessageData(dmID)) {
@@ -4017,26 +4017,29 @@ void MainWindow::createAndSendMessageReply(void)
 	 * Delete one of them.
 	 */
 
+	/* First column. */
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
 	const QAbstractItemModel *tableModel = ui->messageList->model();
 	Q_ASSERT(0 != tableModel);
-	QModelIndex index = tableModel->index(
-	    ui->messageList->currentIndex().row(), 0); /* First column. */
-	/* TODO -- Reimplement this construction. */
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QVector<QString> replyData = messageDb->msgsReplyDataTo(
-	    tableModel->itemData(index).first().toInt());
+	    firstMsgColumnIdxs.first().data().toLongLong());
 
 	/* TODO */
-	index = ui->accountList->currentIndex();
-	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
+	QModelIndex acntTopIndex =
+	    AccountModel::indexTop(ui->accountList->currentIndex());
+	Q_ASSERT(acntTopIndex.isValid());
 
 	QString userName = accountUserName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
-
 
 
 	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
@@ -4052,7 +4055,7 @@ void MainWindow::createAndSendMessageReply(void)
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(acntTopIndex, true)) {
 			return;
 		}
 	}
@@ -4060,7 +4063,7 @@ void MainWindow::createAndSendMessageReply(void)
 	showStatusTextWithTimeout(tr("Create and send reply on the message."));
 
 	AccountModel::SettingsMap accountInfo =
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	QString lastAttachAddPath;
 	if (globPref.use_global_paths) {
 		lastAttachAddPath = globPref.add_file_to_attachments_path;
@@ -4505,7 +4508,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	memset(hashLocal, 0, sizeof(struct isds_hash));
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
 
@@ -4992,8 +4995,15 @@ void MainWindow::verifyMessage(void)
 {
 	debugSlotCall();
 
+	/* First column. */
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
 	switch (verifySelectedMessage(acntTopIdx, msgIdx)) {
@@ -5941,7 +5951,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6085,7 +6095,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6177,7 +6187,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6266,7 +6276,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6351,8 +6361,15 @@ void MainWindow::openSelectedMessageExternally(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	/* First column. */
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
+	QString dmId = msgIdx.data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6361,7 +6378,7 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6410,8 +6427,15 @@ void MainWindow::openDeliveryInfoExternally(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	/* First column. */
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
+	QString dmId = msgIdx.data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6420,7 +6444,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
 	if (base64.isEmpty()) {
@@ -6470,8 +6494,15 @@ void MainWindow::showSignatureDetails(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	/* First column. */
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
+	QString dmId = msgIdx.data().toString();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6483,7 +6514,7 @@ void MainWindow::showSignatureDetails(void)
 	if (0 == messageDb) {
 		return;
 	}
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	QDialog *signature_detail = new DlgSignatureDetail(*messageDb, dmID,
 	    this);
