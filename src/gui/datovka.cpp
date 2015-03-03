@@ -1868,6 +1868,13 @@ void MainWindow::deleteMessage(void)
 {
 	debugSlotCall();
 
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	if (firstMsgColumnIdxs.isEmpty()) {
+		return;
+	}
+
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
 
@@ -1875,19 +1882,11 @@ void MainWindow::deleteMessage(void)
 		return;
 	}
 
-	QModelIndexList msgIdxList =
-	    ui->messageList->selectionModel()->selectedRows();
+	QString dlgTitleText, questionText, checkBoxText, detailText;
 
-	if (msgIdxList.isEmpty()) {
-		return;
-	}
-
-	QString dlgTitleText, questionText, checkBoxText, detailText, dmId;
-
-	int msgIdxCnt = msgIdxList.size();
-	if (msgIdxCnt == 1) {
-		dmId = msgIdxList.at(0).sibling(
-		    msgIdxList.at(0).row(), 0).data().toString();
+	int msgIdxCnt = firstMsgColumnIdxs.size();
+	if (1 == msgIdxCnt) {
+		QString dmId = firstMsgColumnIdxs.first().data().toString();
 		dlgTitleText = tr("Delete message %1").arg(dmId);
 		questionText = tr("Do you want to delete "
 		    "message '%1'?").arg(dmId);
@@ -1897,9 +1896,10 @@ void MainWindow::deleteMessage(void)
 	} else {
 		dlgTitleText = tr("Delete messages");
 		questionText = tr("Do you want to delete selected messages?");
-		checkBoxText =tr("Delete these messages also from server ISDS");
-		detailText = tr("Warning: If you delete selected messages from "
-		"ISDS then these message will be lost forever.");
+		checkBoxText =
+		    tr("Delete these messages also from server ISDS");
+		detailText = tr("Warning: If you delete selected messages "
+		    "from ISDS then these message will be lost forever.");
 	}
 
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
@@ -1918,15 +1918,16 @@ void MainWindow::deleteMessage(void)
 		return;
 	}
 
-	for (int i = 0; i < msgIdxCnt; i++) {
-		dmId = msgIdxList.at(i).sibling(
-		    msgIdxList.at(i).row(), 0).data().toString();
+	QList<QString> dmIdList;
+	for (int i = 0; i < msgIdxCnt; ++i) {
+		dmIdList.append(firstMsgColumnIdxs.at(i).data().toString());
+	}
 
-		/* Save current account index */
-		QModelIndex selectedAcntIndex =
-		    ui->accountList->currentIndex();
+	/* Save current account index */
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 
-		switch (eraseMessage(acntTopIdx, dmId, delMsgIsds)) {
+	for (int i = 0; i < msgIdxCnt; ++i) {
+		switch (eraseMessage(acntTopIdx, dmIdList.at(i), delMsgIsds)) {
 		case Q_SUCCESS:
 			/*
 			 * Hiding selected line in the message model actually
@@ -2003,9 +2004,9 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 			break;
 		}
 		/* first delete message on ISDS */
-		status = isds_delete_message_from_storage(isdsSessions.session(
-		    accountInfo.userName()), dmId.toStdString().c_str(),
-		    incoming);
+		status = isds_delete_message_from_storage(
+		    isdsSessions.session(accountInfo.userName()),
+		    dmId.toStdString().c_str(), incoming);
 
 		if (IE_SUCCESS == status) {
 			if (messageDb->msgsDeleteMessageData(dmID)) {
@@ -4473,7 +4474,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 		return Q_GLOBAL_ERROR;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -4497,8 +4498,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	}
 
 	struct isds_hash *hashLocal = NULL;
-	hashLocal = (struct isds_hash *)
-	    malloc(sizeof(struct isds_hash));
+	hashLocal = (struct isds_hash *) malloc(sizeof(struct isds_hash));
 
 	if (hashLocal == NULL) {
 		free(hashLocal);
@@ -5938,7 +5938,13 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -5947,7 +5953,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		return;
 	}
 
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -6082,7 +6088,13 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6091,7 +6103,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		return;
 	}
 
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.data().toString();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -6175,7 +6187,13 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6184,7 +6202,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 		return;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 	qint64 dmID = dmId.toLongLong();
@@ -6264,7 +6282,13 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndex msgIdx = ui->messageList->selectionModel()->currentIndex();
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (1 != firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6273,7 +6297,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 		return;
 	}
 
-	QString dmId =  msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	QString dmId = msgIdx.data().toString();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 	qint64 dmID = dmId.toLongLong();
