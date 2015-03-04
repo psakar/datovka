@@ -451,6 +451,19 @@ bool DbMsgsTblModel::overrideProcessing(int dmId,
 
 /* ========================================================================= */
 /*
+ * Clear all overriding data.
+ */
+void DbMsgsTblModel::clearOverridingData(void)
+/* ========================================================================= */
+{
+	m_overriddenRL.clear();
+	m_overriddenAD.clear();
+	m_overriddenPS.clear();
+}
+
+
+/* ========================================================================= */
+/*
  * Compute viewed data in file size column.
  */
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
@@ -675,6 +688,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -763,6 +777,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -853,6 +868,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < receivedItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -1112,6 +1128,7 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -1183,6 +1200,7 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -1255,6 +1273,7 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 		goto fail;
 	}
 
+	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	for (int i = 0; i < sentItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */

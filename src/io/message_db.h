@@ -110,6 +110,12 @@ public:
 	 */
 	virtual bool overrideProcessing(int dmId,
 	    MessageProcessState forceState);
+
+	/*!
+	 * @brief Clear all overriding data.
+	 */
+	virtual void clearOverridingData(void);
+
 	/*
 	 * The view's proxy model cannot be accessed, so the message must be
 	 * addressed via its id rather than using the index.
