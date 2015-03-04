@@ -1623,7 +1623,7 @@ fail:
 /*
  * Returns whether message was read locally.
  */
-bool MessageDb::smsgdtLocallyRead(int dmId) const
+bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1657,7 +1657,7 @@ fail:
 /*
  * Set message read locally status.
  */
-bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
+bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);

@@ -139,7 +139,7 @@ private slots:
 	/*!
 	 * @brief Saves message selection.
 	 */
-	void messageItemStoreSelection(long msgId);
+	void messageItemStoreSelection(qint64 msgId);
 
 	/*!
 	 * @brief Saves message selection when model changes.
@@ -187,6 +187,16 @@ private slots:
 	 * @brief Mark all messages as read in selected account item.
 	 */
 	void accountItemMarkAllRead(void);
+
+	/*!
+	 * @brief Mark selected messages as read.
+	 */
+	void messageItemsSelectedMarkRead(void);
+
+	/*!
+	 * @brief Mark selected messages as unread.
+	 */
+	void messageItemsSelectedMarkUnread(void);
 
 	/*!
 	 * @brief Delete selected message(s) from local database and ISDS.
@@ -476,11 +486,6 @@ private slots:
 	 * @brief set message process state into db
 	 */
 	void msgSetSelectedMessageProcessState(int state);
-
-	/*!
-	 * @brief Mark selected message as read.
-	 */
-	void msgSetSelectedMessageRead(void);
 
 private:
 
@@ -781,8 +786,8 @@ private:
 	                                                */
 
 	QTimer m_messageMarker; /*!< Used for marking messages as read. */
-	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
-	long m_lastStoredMessageId; /*!< Last stored message selection. */
+	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */
+	qint64 m_lastStoredMessageId; /*!< Last stored message selection. */
 
 	int m_received_1;
 	int m_received_2;

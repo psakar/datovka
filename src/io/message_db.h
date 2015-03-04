@@ -404,7 +404,7 @@ public:
 	 * @param[in] dmId  Message id.
 	 * @retunrn False if not read or on failure.
 	 */
-	bool smsgdtLocallyRead(int dmId) const;
+	bool smsgdtLocallyRead(qint64 dmId) const;
 
 	/*!
 	 * @brief Set message read locally status.
@@ -413,7 +413,7 @@ public:
 	 * @param[in] read  New read status.
 	 * @return True on success.
 	 */
-	bool smsgdtSetLocallyRead(int dmId, bool read = true);
+	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
 
 	/*!
 	 * @brief Return contacts from message db.
