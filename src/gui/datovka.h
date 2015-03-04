@@ -189,6 +189,11 @@ private slots:
 	void accountItemMarkAllRead(void);
 
 	/*!
+	 * @brief Mark all messages as unread in selected account item.
+	 */
+	void accountItemMarkAllUnread(void);
+
+	/*!
 	 * @brief Mark selected messages as read.
 	 */
 	void messageItemsSelectedMarkRead(void);
@@ -767,6 +772,12 @@ private:
 	 * without worker and thread.
 	 */
 	bool downloadCompleteMessage(QString dmId);
+
+	/*!
+	 * @brief Set read status to messages with given indexes.
+	 */
+	void messageItemsSetReadStatus(
+	    const QModelIndexList &firstMsgColumnIdxs, bool read);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

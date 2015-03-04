@@ -812,11 +812,14 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 	QModelIndex index = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
+	QMenu *submenu = 0;
 #ifdef PORTABLE_APPLICATION
 	QAction *action;
 #endif /* PORTABLE_APPLICATION */
 
 	if (index.isValid()) {
+		bool received = AccountModel::nodeTypeIsReceived(index);
+
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-account-sync.png"),
 		    tr("Get messages"),
@@ -824,10 +827,16 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create message"),
 		    this, SLOT(createAndSendMessage()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "tick_16.png"),
-		    tr("Mark all as read"),
-		    this, SLOT(accountItemMarkAllRead()));
 		menu->addSeparator();
+		if (received) {
+			submenu = menu->addMenu(tr("Mark"));
+			menu->addSeparator();
+
+			submenu->addAction(tr("All as Read"),
+			    this, SLOT(accountItemMarkAllRead()));
+			submenu->addAction(tr("All as Unread"),
+			    this, SLOT(accountItemMarkAllUnread()));
+		}
 		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
 		    tr("Change password"),
 		    this, SLOT(changeAccountPassword()));
@@ -1063,6 +1072,10 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		return;
 	}
 
+	bool singleSelected = true;
+	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
+	    selectionModel()->currentIndex());
+
 	QMenu *menu = new QMenu;
 	QMenu *submenu = 0;
 
@@ -1076,6 +1089,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		QModelIndexList firstMsgColumnIdxs =
 		    ui->messageList->selectionModel()->selectedRows(0);
 
+		singleSelected = (1 == firstMsgColumnIdxs.size());
+
 		if (!firstMsgColumnIdxs.isEmpty()) {
 			messageItemStoreSelection(firstMsgColumnIdxs
 			    .first().data().toLongLong());
@@ -1088,58 +1103,64 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 	    tr("Download message signed"), this,
 	    SLOT(downloadSelectedMessageAttachments()));
-	menu->addAction(
-	    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
-	    tr("Reply to message"), this,
-	    SLOT(createAndSendMessageReply()));
+	if (singleSelected) {
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
+		    tr("Reply to message"), this,
+		    SLOT(createAndSendMessageReply()));
+	}
 	menu->addSeparator();
-	menu->addAction(
-	    QIcon(ICON_3PARTY_PATH "label_16.png"),
-	    tr("Signature details"), this,
-	    SLOT(showSignatureDetails()));
-	menu->addAction(
-	    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
-	    tr("Authenticate message"), this,
-	    SLOT(verifyMessage()));
-	menu->addSeparator();
-	menu->addAction(
-	    tr("Open message externally"), this,
-	    SLOT(openSelectedMessageExternally()))->
-	    setEnabled(ui->actionOpen_message_externally->isEnabled());
-	menu->addAction(
-	    tr("Open delivery info externally"), this,
-	    SLOT(openDeliveryInfoExternally()))->
-	    setEnabled(ui->actionOpen_delivery_info_externally->isEnabled());
-	menu->addSeparator();
-	menu->addAction(
-	    tr("Export message as ZFO"), this,
-	    SLOT(exportSelectedMessageAsZFO()))->
-	    setEnabled(ui->actionExport_as_ZFO->isEnabled());
-	menu->addAction(
-	    tr("Export delivery info as ZFO"), this,
-	    SLOT(exportDeliveryInfoAsZFO()))->
-	    setEnabled(ui->actionExport_delivery_info_as_ZFO->isEnabled());
-	menu->addAction(
-	    tr("Export delivery info as PDF"), this,
-	    SLOT(exportDeliveryInfoAsPDF()))->
-	    setEnabled(ui->actionExport_delivery_info_as_PDF->isEnabled());
-	menu->addAction(
-	    tr("Export message envelope as PDF"), this,
-	    SLOT(exportMessageEnvelopeAsPDF()))->
-	    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
-	menu->addSeparator();
-	submenu = menu->addMenu(tr("Mark"));
-	menu->addSeparator();
+	if (singleSelected) {
+		menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "label_16.png"),
+		    tr("Signature details"), this,
+		    SLOT(showSignatureDetails()));
+		menu->addAction(
+		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
+		    tr("Authenticate message"), this,
+		    SLOT(verifyMessage()));
+		menu->addSeparator();
+		menu->addAction(
+		    tr("Open message externally"), this,
+		    SLOT(openSelectedMessageExternally()))->
+		    setEnabled(ui->actionOpen_message_externally->isEnabled());
+		menu->addAction(
+		    tr("Open delivery info externally"), this,
+		    SLOT(openDeliveryInfoExternally()))->
+		    setEnabled(ui->actionOpen_delivery_info_externally->isEnabled());
+		menu->addSeparator();
+		menu->addAction(
+		    tr("Export message as ZFO"), this,
+		    SLOT(exportSelectedMessageAsZFO()))->
+		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
+		menu->addAction(
+		    tr("Export delivery info as ZFO"), this,
+		    SLOT(exportDeliveryInfoAsZFO()))->
+		    setEnabled(ui->actionExport_delivery_info_as_ZFO->isEnabled());
+		menu->addAction(
+		    tr("Export delivery info as PDF"), this,
+		    SLOT(exportDeliveryInfoAsPDF()))->
+		    setEnabled(ui->actionExport_delivery_info_as_PDF->isEnabled());
+		menu->addAction(
+		    tr("Export message envelope as PDF"), this,
+		    SLOT(exportMessageEnvelopeAsPDF()))->
+		    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
+		menu->addSeparator();
+	}
+	if (received) {
+		submenu = menu->addMenu(tr("Mark"));
+		menu->addSeparator();
+
+		submenu->addAction(tr("As Read"), this,
+		    SLOT(messageItemsSelectedMarkRead()));
+		submenu->addAction(tr("As Unread"), this,
+		    SLOT(messageItemsSelectedMarkUnread()));
+	}
 	menu->addAction(
 	    QIcon(ICON_3PARTY_PATH "delete_16.png"),
 	    tr("Delete message"), this,
 	    SLOT(deleteMessage()))->
 	    setEnabled(ui->actionDelete_message_from_db->isEnabled());
-
-	submenu->addAction(tr("As Read"), this,
-	    SLOT(messageItemsSelectedMarkRead()));
-	submenu->addAction(tr("As Unread"), this,
-	    SLOT(messageItemsSelectedMarkUnread()));
 
 	menu->exec(QCursor::pos());
 }
@@ -1846,49 +1867,38 @@ void MainWindow::accountItemMarkAllRead(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
 
-	QItemSelection storedMsgSelection =
-	    ui->messageList->selectionModel()->selection();
+	QModelIndexList firstMsgColumnIdxs;
+	for (int i = 0; i < messageModel->rowCount(); ++i) {
+		firstMsgColumnIdxs.append(messageModel->index(i, 0));
+	}
+
+	messageItemsSetReadStatus(firstMsgColumnIdxs, true);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages as unread in selected account item.
+ */
+void MainWindow::accountItemMarkAllUnread(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
 
 	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
 	    m_messageListProxyModel.sourceModel();
 	Q_ASSERT(0 != messageModel);
 
-	int count = messageModel->rowCount();
-
-	for (int i = 0; i < count; ++i) {
-		QModelIndex index = messageModel->index(i, 0);
-		qint64 dmId = index.data().toLongLong();
-
-		messageDb->smsgdtSetLocallyRead(dmId, true);
-
-		/*
-		 * Mark message as read without reloading
-		 * the whole model.
-		 */
-		messageModel->overrideRead(dmId, true);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    index.sibling(index.row(), 0),
-		    index.sibling(index.row(),
-		        messageModel->columnCount() - 1));
+	QModelIndexList firstMsgColumnIdxs;
+	for (int i = 0; i < messageModel->rowCount(); ++i) {
+		firstMsgColumnIdxs.append(messageModel->index(i, 0));
 	}
 
-	ui->messageList->selectionModel()->select(storedMsgSelection,
-	    QItemSelectionModel::ClearAndSelect);
-
-	showStatusTextWithTimeout(tr("All messages were "
-	    "marked as locally read."));
-
-	/*
-	 * Reload/update account model only for
-	 * affected account.
-	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
-
+	messageItemsSetReadStatus(firstMsgColumnIdxs, false);
 }
 
 
@@ -1904,43 +1914,7 @@ void MainWindow::messageItemsSelectedMarkRead(void)
 	QModelIndexList firstMsgColumnIdxs =
 	    ui->messageList->selectionModel()->selectedRows(0);
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QItemSelection storedMsgSelection =
-	    ui->messageList->selectionModel()->selection();
-
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
-	Q_ASSERT(0 != messageModel);
-
-	for (QModelIndexList::iterator it = firstMsgColumnIdxs.begin();
-	     it != firstMsgColumnIdxs.end(); ++it) {
-		qint64 dmId = it->data().toLongLong();
-
-		messageDb->smsgdtSetLocallyRead(dmId, true);
-
-		/*
-		 * Mark message as read without reloading
-		 * the whole model.
-		 */
-		messageModel->overrideRead(dmId, true);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
-	}
-
-	ui->messageList->selectionModel()->select(storedMsgSelection,
-	    QItemSelectionModel::ClearAndSelect);
-
-	/*
-	 * Reload/update account model only for
-	 * affected account.
-	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
+	messageItemsSetReadStatus(firstMsgColumnIdxs, true);
 }
 
 
@@ -1956,43 +1930,7 @@ void MainWindow::messageItemsSelectedMarkUnread(void)
 	QModelIndexList firstMsgColumnIdxs =
 	    ui->messageList->selectionModel()->selectedRows(0);
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QItemSelection storedMsgSelection =
-	    ui->messageList->selectionModel()->selection();
-
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
-	Q_ASSERT(0 != messageModel);
-
-	for (QModelIndexList::iterator it = firstMsgColumnIdxs.begin();
-	     it != firstMsgColumnIdxs.end(); ++it) {
-		qint64 dmId = it->data().toLongLong();
-
-		messageDb->smsgdtSetLocallyRead(dmId, false);
-
-		/*
-		 * Mark message as read without reloading
-		 * the whole model.
-		 */
-		messageModel->overrideRead(dmId, false);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
-	}
-
-	ui->messageList->selectionModel()->select(storedMsgSelection,
-	    QItemSelectionModel::ClearAndSelect);
-
-	/*
-	 * Reload/update account model only for
-	 * affected account.
-	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
+	messageItemsSetReadStatus(firstMsgColumnIdxs, false);
 }
 
 
@@ -2123,10 +2061,10 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		}
 
 		bool incoming = true;
-		QModelIndex index = ui->accountList->
+		QModelIndex acntIdx = ui->accountList->
 		    selectionModel()->currentIndex();
 
-		switch (AccountModel::nodeType(index)) {
+		switch (AccountModel::nodeType(acntIdx)) {
 		case AccountModel::nodeRecentReceived:
 		case AccountModel::nodeReceived:
 		case AccountModel::nodeReceivedYear:
@@ -7452,4 +7390,61 @@ void MainWindow::msgSetSelectedMessageProcessState(int state)
 	    messageIndex.sibling(messageIndex.row(), 0),
 	    messageIndex.sibling(messageIndex.row(),
 	    messageModel->columnCount() - 1));
+}
+
+
+/* ========================================================================= */
+/*
+ * Set read status to messages with given indexes.
+ */
+void MainWindow::messageItemsSetReadStatus(
+    const QModelIndexList &firstMsgColumnIdxs, bool read)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	/* Works only for received messages. */
+	if (!AccountModel::nodeTypeIsReceived(ui->accountList->
+	        selectionModel()->currentIndex())) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QItemSelection storedMsgSelection =
+	    ui->messageList->selectionModel()->selection();
+
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
+	     it != firstMsgColumnIdxs.end(); ++it) {
+		qint64 dmId = it->data().toLongLong();
+
+		qDebug() << "A001" << dmId << read;
+		messageDb->smsgdtSetLocallyRead(dmId, read);
+
+		/*
+		 * Mark message as read without reloading
+		 * the whole model.
+		 */
+		messageModel->overrideRead(dmId, read);
+		/* Inform the view that the model has changed. */
+		emit messageModel->dataChanged(
+		    it->sibling(it->row(), 0),
+		    it->sibling(it->row(), messageModel->columnCount() - 1));
+
+	}
+
+	ui->messageList->selectionModel()->select(storedMsgSelection,
+	    QItemSelectionModel::ClearAndSelect);
+
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
 }
