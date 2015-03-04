@@ -1860,6 +1860,34 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 /* ========================================================================= */
 /*
+ * Mark all messages in the current working account.
+ */
+void MainWindow::accountMarkAllRead(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QModelIndex acntIdx =
+	    ui->accountList->selectionModel()->currentIndex();
+
+	messageDb->smsgdtSetAllLocallyRead(true);
+
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(acntIdx);
+
+	/* Regenerate the model. */
+	accountItemCurrentChanged(acntIdx);
+}
+
+
+/* ========================================================================= */
+/*
  * Mark all messages as read in selected account item.
  */
 void MainWindow::accountItemMarkAllRead(void)
@@ -3024,7 +3052,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionSend_message, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
-	    SLOT(accountItemMarkAllRead()));
+	    SLOT(accountMarkAllRead()));
 	connect(ui->actionChange_password, SIGNAL(triggered()), this,
 	    SLOT(changeAccountPassword()));
 	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
@@ -7423,7 +7451,6 @@ void MainWindow::messageItemsSetReadStatus(
 	     it != firstMsgColumnIdxs.end(); ++it) {
 		qint64 dmId = it->data().toLongLong();
 
-		qDebug() << "A001" << dmId << read;
 		messageDb->smsgdtSetLocallyRead(dmId, read);
 
 		/*

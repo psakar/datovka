@@ -416,6 +416,14 @@ public:
 	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
 
 	/*!
+	 * @brief Set message read locally for all messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetAllLocallyRead(bool read = true);
+
+	/*!
 	 * @brief Return contacts from message db.
 	 *
 	 * @return List of vectors containing recipientId, recipientName,

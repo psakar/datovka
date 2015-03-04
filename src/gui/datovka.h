@@ -184,6 +184,11 @@ private slots:
 	void openSelectedAttachment(void);
 
 	/*!
+	 * @brief Mark all messages in the current working account.
+	 */
+	void accountMarkAllRead(void);
+
+	/*!
 	 * @brief Mark all messages as read in selected account item.
 	 */
 	void accountItemMarkAllRead(void);

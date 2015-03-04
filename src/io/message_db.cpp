@@ -1682,6 +1682,31 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Set message read locally for all messages.
+ */
+bool MessageDb::smsgdtSetAllLocallyRead(bool read)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "UPDATE supplementary_message_data "
+	    "SET read_locally = :read";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":read", read);
+	return query.exec();
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Return contact list from message db.
  */
 QList< QVector<QString> > MessageDb::uniqueContacts(void) const

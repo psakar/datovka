@@ -462,6 +462,7 @@ sent reply on this message</string>
     </property>
     <addaction name="actionGet_messages"/>
     <addaction name="actionSend_message"/>
+    <addaction name="separator"/>
     <addaction name="actionMark_all_as_read"/>
     <addaction name="separator"/>
     <addaction name="actionChange_password"/>
