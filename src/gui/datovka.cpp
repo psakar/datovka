@@ -200,6 +200,15 @@ MainWindow::MainWindow(QWidget *parent)
 //	    "QTableView::item:focus { border-color:green; "
 //	    "border-style:outset; border-width:2px; color:black; }");
 
+	/* Message state combo box. */
+	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
+	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "red.png"),
+	    tr("Unsettled"));
+	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "yellow.png"),
+	    tr("In Progress"));
+	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "grey.png"),
+	    tr("Settled"));
+
 	qDebug() << "Load" << globPref.loadConfPath();
 	qDebug() << "Save" << globPref.saveConfPath();
 
@@ -836,6 +845,15 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 			    this, SLOT(accountItemMarkAllRead()));
 			submenu->addAction(tr("All as Unread"),
 			    this, SLOT(accountItemMarkAllUnread()));
+
+			submenu->addSeparator();
+			submenu->addAction(tr("All as Unsettled"),
+			    this, SLOT(accountItemMarkAllUnsettled()));
+			submenu->addAction(tr("All as in Progress"),
+			    this, SLOT(accountItemMarkAllInProgress()));
+			submenu->addAction(tr("All as Settled"),
+			    this, SLOT(accountItemMarkAllSettled()));
+
 		}
 		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
 		    tr("Change password"),
@@ -1155,6 +1173,14 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(messageItemsSelectedMarkRead()));
 		submenu->addAction(tr("As Unread"), this,
 		    SLOT(messageItemsSelectedMarkUnread()));
+
+		submenu->addSeparator();
+		submenu->addAction(tr("AS Unsettled"), this,
+		    SLOT(messageItemsSelectedMarkUnsettled()));
+		submenu->addAction(tr("AS in Progress"), this,
+		    SLOT(messageItemsSelectedMarkInProgress()));
+		submenu->addAction(tr("AS Settled"), this,
+		    SLOT(messageItemsSelectedMarkSettled()));
 	}
 	menu->addAction(
 	    QIcon(ICON_3PARTY_PATH "delete_16.png"),
@@ -1959,6 +1985,120 @@ void MainWindow::messageItemsSelectedMarkUnread(void)
 	    ui->messageList->selectionModel()->selectedRows(0);
 
 	messageItemsSetReadStatus(firstMsgColumnIdxs, false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages as unsettled in selected account item.
+ */
+void MainWindow::accountItemMarkAllUnsettled(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	QModelIndexList firstMsgColumnIdxs;
+	for (int i = 0; i < messageModel->rowCount(); ++i) {
+		firstMsgColumnIdxs.append(messageModel->index(i, 0));
+	}
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, UNSETTLED);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages as in progress in selected account item.
+ */
+void MainWindow::accountItemMarkAllInProgress(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	QModelIndexList firstMsgColumnIdxs;
+	for (int i = 0; i < messageModel->rowCount(); ++i) {
+		firstMsgColumnIdxs.append(messageModel->index(i, 0));
+	}
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, IN_PROGRESS);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages as settled in selected account item.
+ */
+void MainWindow::accountItemMarkAllSettled(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	QModelIndexList firstMsgColumnIdxs;
+	for (int i = 0; i < messageModel->rowCount(); ++i) {
+		firstMsgColumnIdxs.append(messageModel->index(i, 0));
+	}
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, SETTLED);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark selected messages as unsettled.
+ */
+void MainWindow::messageItemsSelectedMarkUnsettled(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, UNSETTLED);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark selected messages as in progress.
+ */
+void MainWindow::messageItemsSelectedMarkInProgress(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, IN_PROGRESS);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark selected messages as settled.
+ */
+void MainWindow::messageItemsSelectedMarkSettled(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, SETTLED);
 }
 
 
@@ -7374,13 +7514,13 @@ void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo
 /*
  * Set message process state into db
  */
-void MainWindow::msgSetSelectedMessageProcessState(int state)
+void MainWindow::msgSetSelectedMessageProcessState(int stateIndex)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	MessageProcessState procSt;
-	switch (state) {
+	enum MessageProcessState procSt;
+	switch (stateIndex) {
 	case UNSETTLED:
 		procSt = UNSETTLED;
 		break;
@@ -7396,28 +7536,10 @@ void MainWindow::msgSetSelectedMessageProcessState(int state)
 		break;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
 
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
-
-	int msgId = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toInt();
-
-	messageDb->msgSetProcessState(msgId, state, false);
-
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
-	Q_ASSERT(0 != messageModel);
-	messageModel->overrideProcessing(
-	    messageIndex.sibling(messageIndex.row(), 0).data().toInt(),
-	    procSt);
-	/* Inform the view that the model has changed. */
-	emit messageModel->dataChanged(
-	    messageIndex.sibling(messageIndex.row(), 0),
-	    messageIndex.sibling(messageIndex.row(),
-	    messageModel->columnCount() - 1));
+	messageItemsSetProcessStatus(firstMsgColumnIdxs, procSt);
 }
 
 
@@ -7458,6 +7580,63 @@ void MainWindow::messageItemsSetReadStatus(
 		 * the whole model.
 		 */
 		messageModel->overrideRead(dmId, read);
+		/* Inform the view that the model has changed. */
+		emit messageModel->dataChanged(
+		    it->sibling(it->row(), 0),
+		    it->sibling(it->row(), messageModel->columnCount() - 1));
+
+	}
+
+	ui->messageList->selectionModel()->select(storedMsgSelection,
+	    QItemSelectionModel::ClearAndSelect);
+
+	/*
+	 * Reload/update account model only for
+	 * affected account.
+	 */
+	updateExistingAccountModelUnread(ui->accountList->
+	    selectionModel()->currentIndex());
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process status to messages with given indexes.
+ */
+void MainWindow::messageItemsSetProcessStatus(
+    const QModelIndexList &firstMsgColumnIdxs,
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	/* Works only for received messages. */
+	if (!AccountModel::nodeTypeIsReceived(ui->accountList->
+	        selectionModel()->currentIndex())) {
+		return;
+	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QItemSelection storedMsgSelection =
+	    ui->messageList->selectionModel()->selection();
+
+	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
+	    m_messageListProxyModel.sourceModel();
+	Q_ASSERT(0 != messageModel);
+
+	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
+	     it != firstMsgColumnIdxs.end(); ++it) {
+		qint64 dmId = it->data().toLongLong();
+
+		messageDb->msgSetProcessState(dmId, state, false);
+
+		/*
+		 * Mark message as read without reloading
+		 * the whole model.
+		 */
+		messageModel->overrideProcessing(dmId, state);
 		/* Inform the view that the model has changed. */
 		emit messageModel->dataChanged(
 		    it->sibling(it->row(), 0),

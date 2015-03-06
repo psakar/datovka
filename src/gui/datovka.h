@@ -209,6 +209,36 @@ private slots:
 	void messageItemsSelectedMarkUnread(void);
 
 	/*!
+	 * @brief Mark all messages as unsettled in selected account item.
+	 */
+	void accountItemMarkAllUnsettled(void);
+
+	/*!
+	 * @brief Mark all messages as in progress in selected account item.
+	 */
+	void accountItemMarkAllInProgress(void);
+
+	/*!
+	 * @brief Mark all messages as settled in selected account item.
+	 */
+	void accountItemMarkAllSettled(void);
+
+	/*!
+	 * @brief Mark selected messages as unsettled.
+	 */
+	void messageItemsSelectedMarkUnsettled(void);
+
+	/*!
+	 * @brief Mark selected messages as in progress.
+	 */
+	void messageItemsSelectedMarkInProgress(void);
+
+	/*!
+	 * @brief Mark selected messages as settled.
+	 */
+	void messageItemsSelectedMarkSettled(void);
+
+	/*!
 	 * @brief Delete selected message(s) from local database and ISDS.
 	 */
 	void deleteMessage(void);
@@ -495,7 +525,7 @@ private slots:
 	/*!
 	 * @brief set message process state into db
 	 */
-	void msgSetSelectedMessageProcessState(int state);
+	void msgSetSelectedMessageProcessState(int stateIndex);
 
 private:
 
@@ -783,6 +813,13 @@ private:
 	 */
 	void messageItemsSetReadStatus(
 	    const QModelIndexList &firstMsgColumnIdxs, bool read);
+
+	/*!
+	 * @brief Set process status to messages with given indexes.
+	 */
+	void messageItemsSetProcessStatus(
+	    const QModelIndexList &firstMsgColumnIdxs,
+	    enum MessageProcessState state);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

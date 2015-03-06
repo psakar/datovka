@@ -343,33 +343,6 @@ if the message is not processed, if the
 message is in progress or if was already 
 sent reply on this message</string>
                   </property>
-                  <item>
-                   <property name="text">
-                    <string>Unsettled</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="../../../res/resources.qrc">
-                     <normaloff>:/icons/16x16/red.png</normaloff>:/icons/16x16/red.png</iconset>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>In progress</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="../../../res/resources.qrc">
-                     <normaloff>:/icons/16x16/yellow.png</normaloff>:/icons/16x16/yellow.png</iconset>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Settled</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="../../../res/resources.qrc">
-                     <normaloff>:/icons/16x16/grey.png</normaloff>:/icons/16x16/grey.png</iconset>
-                   </property>
-                  </item>
                  </widget>
                 </item>
                 <item>

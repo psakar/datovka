@@ -108,8 +108,8 @@ public:
 	 * @param[in] dmId       Message id.
 	 * @param[in] forceState Set forced value.
 	 */
-	virtual bool overrideProcessing(int dmId,
-	    MessageProcessState forceState);
+	virtual bool overrideProcessing(qint64 dmId,
+	    enum MessageProcessState forceState);
 
 	/*!
 	 * @brief Clear all overriding data.
@@ -738,7 +738,8 @@ public:
 	 * @param[in] insert  Whether to insert or update an information.
 	 * @return True if update/insert was successful.
 	 */
-	bool msgSetProcessState(int dmId, int state, bool insert);
+	bool msgSetProcessState(qint64 dmId, enum MessageProcessState state,
+	    bool insert);
 
 	/*!
 	 * @brief Get process state of received message.

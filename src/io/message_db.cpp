@@ -433,8 +433,8 @@ bool DbMsgsTblModel::overrideDownloaded(int dmId, bool forceDownloaded)
 /*
  * Override message processing state.
  */
-bool DbMsgsTblModel::overrideProcessing(int dmId,
-    MessageProcessState forceState)
+bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
+    enum MessageProcessState forceState)
 /* ========================================================================= */
 {
 	m_overriddenPS[dmId] = forceState;
@@ -3985,7 +3985,8 @@ fail:
 /*
  * Set process state of received message
  */
-bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
+bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
+    bool insert)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -4006,7 +4007,7 @@ bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":state", state);
+	query.bindValue(":state", (int) state);
 
 	if (query.exec()) {
 		return true;
