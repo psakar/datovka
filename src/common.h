@@ -62,11 +62,11 @@ typedef enum {
 } LoginMethodsIndex;
 
 /* return values of Datovka message state */
-typedef enum {
+enum MessageProcessState {
 	UNSETTLED = 0,
 	IN_PROGRESS = 1,
 	SETTLED = 2
-} MessageProcessState;
+};
 
 /* return values of Datovka functions */
 typedef enum {

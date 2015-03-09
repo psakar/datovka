@@ -440,6 +440,45 @@ AccountModel::NodeType AccountModel::nodeType(const QModelIndex &index)
 
 /* ========================================================================= */
 /*
+ * Returns true when node type is received.
+ */
+bool AccountModel::nodeTypeIsReceived(const QModelIndex &index)
+/* ========================================================================= */
+{
+	switch (nodeType(index)) {
+	case nodeRecentReceived:
+	case nodeReceived:
+	case nodeReceivedYear:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+/* ========================================================================= */
+/*
+ * Returns true when node type is sent.
+ */
+bool AccountModel::nodeTypeIsSent(const QModelIndex &index)
+/* ========================================================================= */
+{
+	switch (nodeType(index)) {
+	case nodeRecentSent:
+	case nodeSent:
+	case nodeSentYear:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Returns pointer to related top-most item.
  */
 const QStandardItem * AccountModel::itemTop(const QStandardItem *item)

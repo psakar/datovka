@@ -296,6 +296,18 @@ public:
 	NodeType nodeType(const QModelIndex &index);
 
 	/*!
+	 * @brief Returns true when node type is received.
+	 */
+	static
+	bool nodeTypeIsReceived(const QModelIndex &index);
+
+	/*!
+	 * @brief Returns true when node type is sent.
+	 */
+	static
+	bool nodeTypeIsSent(const QModelIndex &index);
+
+	/*!
 	 * @brief Returns pointer to related top-most item.
 	 */
 	static

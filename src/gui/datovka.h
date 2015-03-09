@@ -25,6 +25,7 @@
 #define _DATOVKA_H_
 
 
+#include <QItemSelection>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
@@ -109,7 +110,7 @@ private slots:
 	/*!
 	 * @brief Redraws widgets according to selected account item.
 	 */
-	void accountItemSelectionChanged(const QModelIndex &current,
+	void accountItemCurrentChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
@@ -119,10 +120,10 @@ private slots:
 	void accountItemRightClicked(const QPoint &point);
 
 	/*!
-	 * @brief Sets content of widgets according to selected message.
+	 * @brief Sets contents of widgets according to selected messages.
 	 */
-	void messageItemSelectionChanged(const QModelIndex &current,
-	    const QModelIndex &previous = QModelIndex());
+	void messageItemsSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected = QItemSelection());
 
 	/*!
 	 * @brief Used for toggling the message read state.
@@ -138,7 +139,7 @@ private slots:
 	/*!
 	 * @brief Saves message selection.
 	 */
-	void messageItemStoreSelection(long msgId);
+	void messageItemStoreSelection(qint64 msgId);
 
 	/*!
 	 * @brief Saves message selection when model changes.
@@ -153,7 +154,7 @@ private slots:
 	/*!
 	 * @brief Redraws widgets according to selected attachment item.
 	 */
-	void attachmentItemSelectionChanged(const QModelIndex &current,
+	void attachmentItemCurrentChanged(const QModelIndex &current,
 	    const QModelIndex &previous = QModelIndex());
 
 	/*!
@@ -183,9 +184,59 @@ private slots:
 	void openSelectedAttachment(void);
 
 	/*!
+	 * @brief Mark all messages in the current working account.
+	 */
+	void accountMarkAllRead(void);
+
+	/*!
 	 * @brief Mark all messages as read in selected account item.
 	 */
 	void accountItemMarkAllRead(void);
+
+	/*!
+	 * @brief Mark all messages as unread in selected account item.
+	 */
+	void accountItemMarkAllUnread(void);
+
+	/*!
+	 * @brief Mark selected messages as read.
+	 */
+	void messageItemsSelectedMarkRead(void);
+
+	/*!
+	 * @brief Mark selected messages as unread.
+	 */
+	void messageItemsSelectedMarkUnread(void);
+
+	/*!
+	 * @brief Mark all messages as unsettled in selected account item.
+	 */
+	void accountItemMarkAllUnsettled(void);
+
+	/*!
+	 * @brief Mark all messages as in progress in selected account item.
+	 */
+	void accountItemMarkAllInProgress(void);
+
+	/*!
+	 * @brief Mark all messages as settled in selected account item.
+	 */
+	void accountItemMarkAllSettled(void);
+
+	/*!
+	 * @brief Mark selected messages as unsettled.
+	 */
+	void messageItemsSelectedMarkUnsettled(void);
+
+	/*!
+	 * @brief Mark selected messages as in progress.
+	 */
+	void messageItemsSelectedMarkInProgress(void);
+
+	/*!
+	 * @brief Mark selected messages as settled.
+	 */
+	void messageItemsSelectedMarkSettled(void);
 
 	/*!
 	 * @brief Delete selected message(s) from local database and ISDS.
@@ -463,7 +514,7 @@ private slots:
 	 * @brief Set tablewidget when message download worker is done.
 	 */
 	void postDownloadSelectedMessageAttachments(
-	    const QModelIndex acntTopIdx, QString dmId);
+	    const QModelIndex &acntTopIdx, const QString &dmId);
 
 	/*!
 	 * @brief Set info status bar from worker.
@@ -474,12 +525,7 @@ private slots:
 	/*!
 	 * @brief set message process state into db
 	 */
-	void msgSetSelectedMessageProcessState(int state);
-
-	/*!
-	 * @brief Mark selected message as read.
-	 */
-	void msgSetSelectedMessageRead(void);
+	void msgSetSelectedMessageProcessState(int stateIndex);
 
 private:
 
@@ -762,6 +808,19 @@ private:
 	 */
 	bool downloadCompleteMessage(QString dmId);
 
+	/*!
+	 * @brief Set read status to messages with given indexes.
+	 */
+	void messageItemsSetReadStatus(
+	    const QModelIndexList &firstMsgColumnIdxs, bool read);
+
+	/*!
+	 * @brief Set process status to messages with given indexes.
+	 */
+	void messageItemsSetProcessStatus(
+	    const QModelIndexList &firstMsgColumnIdxs,
+	    enum MessageProcessState state);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 
@@ -771,17 +830,17 @@ private:
 	                              */
 	AccountDb m_accountDb; /*!< Account information database. */
 	DbContainer m_messageDbs; /*!< Map of message databases. */
-	QLineEdit *m_searchLine; /*!< Search-line object. */
-	QPushButton *m_pushButton;
+	QLineEdit *m_filterLine; /*!< Search filter line object. */
+	QPushButton *m_clearFilterLineButton; /*!< Button object. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting and
 	                                                * filtering.
 	                                                */
 
-	QTimer m_messageMarker; /*!< Used for marging messages as read. */
-	long m_lastSelectedMessageId; /*!< Id of the last selected message. */
-	long m_lastStoredMessageId; /*!< Last stored message selection. */
+	QTimer m_messageMarker; /*!< Used for marking messages as read. */
+	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */
+	qint64 m_lastStoredMessageId; /*!< Last stored message selection. */
 
 	int m_received_1;
 	int m_received_2;

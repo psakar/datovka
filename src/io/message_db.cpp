@@ -433,8 +433,8 @@ bool DbMsgsTblModel::overrideDownloaded(int dmId, bool forceDownloaded)
 /*
  * Override message processing state.
  */
-bool DbMsgsTblModel::overrideProcessing(int dmId,
-    MessageProcessState forceState)
+bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
+    enum MessageProcessState forceState)
 /* ========================================================================= */
 {
 	m_overriddenPS[dmId] = forceState;
@@ -1623,7 +1623,7 @@ fail:
 /*
  * Returns whether message was read locally.
  */
-bool MessageDb::smsgdtLocallyRead(int dmId) const
+bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1657,7 +1657,7 @@ fail:
 /*
  * Set message read locally status.
  */
-bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
+bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -1673,6 +1673,31 @@ bool MessageDb::smsgdtSetLocallyRead(int dmId, bool read)
 	}
 	query.bindValue(":read", read);
 	query.bindValue(":dmId", dmId);
+	return query.exec();
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set message read locally for all messages.
+ */
+bool MessageDb::smsgdtSetAllLocallyRead(bool read)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "UPDATE supplementary_message_data "
+	    "SET read_locally = :read";
+	if (!query.prepare(queryStr)) {
+		logError("Cannot prepare SQL query: %s.\n",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":read", read);
 	return query.exec();
 
 fail:
@@ -3960,7 +3985,8 @@ fail:
 /*
  * Set process state of received message
  */
-bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
+bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
+    bool insert)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -3972,8 +3998,12 @@ bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
 		queryStr = "INSERT INTO process_state ("
 		    "message_id, state) VALUES (:dmId, :state)";
 	} else {
+		/*
 		queryStr = "UPDATE process_state SET state = :state WHERE "
 		    "message_id = :dmId";
+		*/
+		queryStr = "INSERT OR REPLACE INTO process_state ("
+		    "message_id, state) VALUES (:dmId, :state)";
 	}
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
@@ -3981,7 +4011,7 @@ bool MessageDb::msgSetProcessState(int dmId, int state, bool insert)
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":state", state);
+	query.bindValue(":state", (int) state);
 
 	if (query.exec()) {
 		return true;
