@@ -918,8 +918,9 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->openAttachment->setEnabled(false);
 	ui->verifySignature->setEnabled(false);
 	ui->signatureDetails->setEnabled(false);
-	ui->actionSave_attachment->setEnabled(false);
+	ui->actionSave_all_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
+	ui->actionSave_attachment->setEnabled(false);
 	ui->messageStateCombo->setEnabled(false);
 
 	/* Disable model for attachment list. */
@@ -1021,9 +1022,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		if (ui->messageAttachmentList->model()->rowCount() > 0) {
 			ui->saveAttachments->setEnabled(true);
 			ui->actionSave_all_attachments->setEnabled(true);
-		} else {
-			ui->saveAttachments->setEnabled(false);
-			ui->actionSave_all_attachments->setEnabled(false);
 		}
 
 		ui->messageAttachmentList->resizeColumnToContents(3);
