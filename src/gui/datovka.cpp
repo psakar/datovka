@@ -958,7 +958,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		 * Enabled all actions that can only be performed when
 		 * single message selected.
 		 */
-		ui->actionReply->setEnabled(true);
+		//ui->actionReply->setEnabled(received);
 		ui->actionSignature_detail->setEnabled(true);
 		ui->actionAuthenticate_message->setEnabled(true);
 		ui->actionOpen_message_externally->setEnabled(true);
@@ -4296,9 +4296,6 @@ void MainWindow::createAndSendMessageReply(void)
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
 	}
-
-	const QAbstractItemModel *tableModel = ui->messageList->model();
-	Q_ASSERT(0 != tableModel);
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
