@@ -1047,6 +1047,9 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		ui->actionExport_delivery_info_as_ZFO->setEnabled(false);
 		ui->actionExport_delivery_info_as_PDF->setEnabled(false);
 		ui->actionExport_message_envelope_as_PDF->setEnabled(false);
+
+		ui->actionReply_to_the_sender->setEnabled(false);
+		ui->actionVerify_a_message->setEnabled(false);
 	}
 }
 
