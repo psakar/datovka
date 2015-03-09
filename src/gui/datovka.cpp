@@ -957,6 +957,20 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->actionReply_to_the_sender->setEnabled(received);
 
 	if (1 == firstColumnIdxs.size()) {
+		/*
+		 * Enabled all actions that can only be performed when
+		 * single message selected.
+		 */
+		ui->actionReply->setEnabled(true);
+		ui->actionSignature_detail->setEnabled(true);
+		ui->actionAuthenticate_message->setEnabled(true);
+		ui->actionOpen_message_externally->setEnabled(true);
+		ui->actionOpen_delivery_info_externally->setEnabled(true);
+		ui->actionExport_as_ZFO->setEnabled(true);
+		ui->actionExport_delivery_info_as_ZFO->setEnabled(true);
+		ui->actionExport_delivery_info_as_PDF->setEnabled(true);
+		ui->actionExport_message_envelope_as_PDF->setEnabled(true);
+
 		const QModelIndex &index = firstColumnIdxs.first();
 
 		MessageDb *messageDb = accountMessageDb(0);
@@ -1024,9 +1038,18 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		        QModelIndex)));
 	} else {
 		/*
-		 * TODO -- Disable all actions that cannot be performed when
+		 * Disable all actions that cannot be performed when
 		 * multiple messages selected.
 		 */
+		ui->actionReply->setEnabled(false);
+		ui->actionSignature_detail->setEnabled(false);
+		ui->actionAuthenticate_message->setEnabled(false);
+		ui->actionOpen_message_externally->setEnabled(false);
+		ui->actionOpen_delivery_info_externally->setEnabled(false);
+		ui->actionExport_as_ZFO->setEnabled(false);
+		ui->actionExport_delivery_info_as_ZFO->setEnabled(false);
+		ui->actionExport_delivery_info_as_PDF->setEnabled(false);
+		ui->actionExport_message_envelope_as_PDF->setEnabled(false);
 	}
 }
 
