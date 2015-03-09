@@ -504,9 +504,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	QString html;
 	DbMsgsTblModel *msgTblMdl = 0;
 
-	/* Disable the menu, re-enable only on received messages. */
-	ui->messageStateCombo->setEnabled(false);
-
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
 		setMessageActionVisibility(false);
@@ -739,7 +736,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
-		ui->messageStateCombo->setEnabled(true);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		received = true;
@@ -924,7 +920,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->signatureDetails->setEnabled(false);
 	ui->actionSave_attachment->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
-//	ui->messageStateCombo->setEnabled(false);
+	ui->messageStateCombo->setEnabled(false);
 
 	/* Disable model for attachment list. */
 	ui->messageAttachmentList->setModel(0);
@@ -949,12 +945,13 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	setMessageActionVisibility(true);
 
 	ui->downloadComplete->setEnabled(true);
-//	ui->messageStateCombo->setEnabled(true);
 
 	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
 	    selectionModel()->currentIndex());
 	ui->actionReply->setEnabled(received);
 	ui->actionReply_to_the_sender->setEnabled(received);
+
+	ui->messageStateCombo->setEnabled(received);
 
 	if (1 == firstColumnIdxs.size()) {
 		/*
