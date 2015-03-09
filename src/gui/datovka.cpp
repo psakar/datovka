@@ -1132,7 +1132,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
 		    tr("Reply to message"), this,
-		    SLOT(createAndSendMessageReply()));
+		    SLOT(createAndSendMessageReply()))->
+		    setEnabled(ui->actionReply->isEnabled());
 	}
 	menu->addSeparator();
 	if (singleSelected) {
