@@ -3998,8 +3998,12 @@ bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
 		queryStr = "INSERT INTO process_state ("
 		    "message_id, state) VALUES (:dmId, :state)";
 	} else {
+		/*
 		queryStr = "UPDATE process_state SET state = :state WHERE "
 		    "message_id = :dmId";
+		*/
+		queryStr = "INSERT OR REPLACE INTO process_state ("
+		    "message_id, state) VALUES (:dmId, :state)";
 	}
 	if (!query.prepare(queryStr)) {
 		logError("Cannot prepare SQL query: %s.\n",
