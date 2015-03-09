@@ -652,7 +652,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
-		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -660,7 +659,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
-		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
@@ -674,7 +672,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
-		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -682,7 +679,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
-		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
@@ -690,7 +686,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
-		ui->actionReply_to_the_sender->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -700,7 +695,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		ui->actionDelete_message_from_server->setEnabled(true);
-		ui->actionReply_to_the_sender->setEnabled(false);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -787,16 +781,17 @@ setmodel:
 		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
 			messageItemRestoreSelection();
+			ui->menuMessage->setEnabled(true);
 			//ui->actionReply_to_the_sender->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
-			ui->menuMessage->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
 		} else {
+			ui->menuMessage->setEnabled(false);
+			ui->actionReply->setEnabled(false);
 			ui->actionReply_to_the_sender->setEnabled(false);
 			ui->actionVerify_a_message->setEnabled(false);
-			ui->menuMessage->setEnabled(false);
 			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
 		break;
@@ -919,6 +914,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Disable message/attachment related buttons. */
+	setMessageActionVisibility(false);
+
 	ui->downloadComplete->setEnabled(false);
 	ui->saveAttachments->setEnabled(false);
 	ui->saveAttachment->setEnabled(false);
@@ -949,8 +946,15 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Enable message/attachment related buttons. */
+	setMessageActionVisibility(true);
+
 	ui->downloadComplete->setEnabled(true);
 //	ui->messageStateCombo->setEnabled(true);
+
+	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
+	    selectionModel()->currentIndex());
+	ui->actionReply->setEnabled(received);
+	ui->actionReply_to_the_sender->setEnabled(received);
 
 	if (1 == firstColumnIdxs.size()) {
 		const QModelIndex &index = firstColumnIdxs.first();
@@ -1018,6 +1022,11 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemCurrentChanged(QModelIndex,
 		        QModelIndex)));
+	} else {
+		/*
+		 * TODO -- Disable all actions that cannot be performed when
+		 * multiple messages selected.
+		 */
 	}
 }
 
@@ -3358,6 +3367,7 @@ void MainWindow::setMessageActionVisibility(bool action) const
 /* ========================================================================= */
 {
 	ui->menuMessage->setEnabled(action);
+	ui->actionReply->setEnabled(action); /* Has key short cut. */
 	ui->actionReply_to_the_sender->setEnabled(action);
 	ui->actionVerify_a_message->setEnabled(action);
 }
