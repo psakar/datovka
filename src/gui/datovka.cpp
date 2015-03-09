@@ -1203,11 +1203,11 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(messageItemsSelectedMarkUnread()));
 
 		submenu->addSeparator();
-		submenu->addAction(tr("AS Unsettled"), this,
+		submenu->addAction(tr("As Unsettled"), this,
 		    SLOT(messageItemsSelectedMarkUnsettled()));
-		submenu->addAction(tr("AS in Progress"), this,
+		submenu->addAction(tr("As in Progress"), this,
 		    SLOT(messageItemsSelectedMarkInProgress()));
-		submenu->addAction(tr("AS Settled"), this,
+		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
 	menu->addAction(
