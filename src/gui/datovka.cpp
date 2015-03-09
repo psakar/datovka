@@ -931,6 +931,9 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 	/* Disable model for attachment list. */
 	ui->messageAttachmentList->setModel(0);
+	/* Clear message information. */
+	ui->messageInfo->setHtml("");
+	ui->messageInfo->setReadOnly(true);
 
 	QModelIndexList firstColumnIdxs =
 	    ui->messageList->selectionModel()->selectedRows(0);
@@ -1015,11 +1018,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 		    SLOT(attachmentItemCurrentChanged(QModelIndex,
 		        QModelIndex)));
-	} else {
-		ui->messageInfo->setHtml("");
-		ui->messageInfo->setReadOnly(true);
-		ui->saveAttachments->setEnabled(false);
-		/* TODO */
 	}
 }
 
