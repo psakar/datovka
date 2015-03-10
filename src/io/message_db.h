@@ -91,7 +91,7 @@ public:
 	 * @param[in] dmId      Message id.
 	 * @param[in] forceRead Set whether to force read state.
 	 */
-	virtual bool overrideRead(int dmId, bool forceRead = true);
+	virtual bool overrideRead(qint64 dmId, bool forceRead = true);
 
 	/*!
 	 * @brief Override message as having its attachments having downloaded.
@@ -100,7 +100,8 @@ public:
 	 * @param[in] forceDownloaded Set whether to force attachments
 	 *                            downloaded state.
 	 */
-	virtual bool overrideDownloaded(int dmId, bool forceDownloaded = true);
+	virtual bool overrideDownloaded(qint64 dmId,
+	    bool forceDownloaded = true);
 
 	/*!
 	 * @brief Override message processing state.
@@ -121,18 +122,18 @@ public:
 	 * addressed via its id rather than using the index.
 	 */
 private:
-	QMap<int, bool> m_overriddenRL; /*!<
-	                                 * Holds overriding information for
-	                                 * read locally.
-	                                 */
-	QMap<int, bool> m_overriddenAD; /*!<
-	                                 * Holds overriding information for
-	                                 * downloaded attachments.
-	                                 */
-	QMap<int, int> m_overriddenPS; /*!<
-	                                * Holds overriding information for
-	                                * message processing state.
-	                                */
+	QMap<qint64, bool> m_overriddenRL; /*!<
+	                                    * Holds overriding information for
+	                                    * read locally.
+	                                    */
+	QMap<qint64, bool> m_overriddenAD; /*!<
+	                                    * Holds overriding information for
+	                                    * downloaded attachments.
+	                                    */
+	QMap<qint64, int> m_overriddenPS; /*!<
+	                                   * Holds overriding information for
+	                                   * message processing state.
+	                                   */
 };
 
 
@@ -378,7 +379,7 @@ public:
 	 *     mesageType, senderRefNumber.
 	 *     Returns empty vector in failure.
 	 */
-	QVector<QString> msgsReplyDataTo(int dmId) const;
+	QVector<QString> msgsReplyDataTo(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns true if verification attempt was performed.
@@ -387,7 +388,7 @@ public:
 	 * @return True is message has been verified. False may be returned
 	 *     also on error.
 	 */
-	bool msgsVerificationAttempted(int dmId) const;
+	bool msgsVerificationAttempted(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns whether message is verified.
@@ -396,7 +397,7 @@ public:
 	 * @return True if message was verified successfully. False may be
 	 *     returned also on error.
 	 */
-	bool msgsVerified(int dmId) const;
+	bool msgsVerified(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns whether message was read locally.
@@ -442,7 +443,7 @@ public:
 	 * @return HTML formatted string containing message information.
 	 *     Empty string is returned on error.
 	 */
-	QString descriptionHtml(int dmId, QAbstractButton *verifySignature,
+	QString descriptionHtml(qint64 dmId, QAbstractButton *verifySignature,
 	    bool showId = true, bool warnOld = true) const;
 
 	/*!
@@ -453,7 +454,8 @@ public:
 	 * @return HTML formatted string generated from message envelope.
 	 *     Empty string is returned on error.
 	 */
-	QString envelopeInfoHtmlToPdf(int dmId, const QString &dbType) const;
+	QString envelopeInfoHtmlToPdf(qint64 dmId,
+	    const QString &dbType) const;
 
 	/*!
 	 * @brief Return message delivery info HTML to be used to generate
@@ -463,7 +465,7 @@ public:
 	 * @return HTML formatted string generated from message delivery
 	 *     information. Empty string is returned on error.
 	 */
-	QString deliveryInfoHtmlToPdf(int dmId) const;
+	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
 
 	/*!
 	 * @brief Return files related to given message.
@@ -473,7 +475,7 @@ public:
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * flsModel(int msgId);
+	QAbstractTableModel * flsModel(qint64 msgId);
 
 	/*!
 	 * @brief Check if any message with given id exists in database.
@@ -482,7 +484,7 @@ public:
 	 * @return Message status if message exists, on error or if message
 	 *     does not exist in database.
 	 */
-	int msgsStatusIfExists(int dmId) const;
+	int msgsStatusIfExists(qint64 dmId) const;
 
 	/*!
 	 * @brief Check if delivery info exists in the table.
@@ -491,14 +493,14 @@ public:
 	 * @return True if delivery information exist in database.
 	 *     Fail is also returned on error.
 	 */
-	bool isDeliveryInfoRawDb(int dmId) const;
+	bool isDeliveryInfoRawDb(qint64 dmId) const;
 
 	/*!
 	 * @brief Insert newly sent message into messages table.
 	 *
 	 * @return True on success.
 	 */
-	bool msgsInsertNewlySentMessageEnvelope(int dmId,
+	bool msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	    const QString &dbIDSender, const QString &dmSender,
 	    const QString &dbIDRecipient, const QString &dmRecipient,
 	    const QString &dmAnnotation);
@@ -508,7 +510,7 @@ public:
 	 *
 	 * @return True on success.
 	 */
-	bool msgsInsertMessageEnvelope(int dmId,
+	bool msgsInsertMessageEnvelope(qint64 dmId,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,
@@ -533,7 +535,7 @@ public:
 	 *
 	 * @return True on success.
 	 */
-	bool msgsUpdateMessageEnvelope(int dmId,
+	bool msgsUpdateMessageEnvelope(qint64 dmId,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,
@@ -559,7 +561,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message state number or -1 on error.
 	 */
-	int messageState(int dmId);
+	int messageState(qint64 dmId) const;
 
 	/*!
 	 * @brief Update message envelope delivery information.
@@ -569,7 +571,7 @@ public:
 	 * @param[in] dmAcceptanceTime  Acceptance time in database format.
 	 * @return True on success.
 	 */
-	bool msgsUpdateMessageState(int dmId,
+	bool msgsUpdateMessageState(qint64 dmId,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    int dmMessageStatus);
 
@@ -585,7 +587,7 @@ public:
 	 * @param[in] dmEncodedContentBase64  Base64-encoded file content.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageFile(int dmId,
+	bool msgsInsertUpdateMessageFile(qint64 dmId,
 	    const QString &dmFileDescr, const QString &dmUpFileGuid,
 	    const QString &dmFileGuid, const QString &dmMimeType,
 	    const QString &dmFormat, const QString &dmFileMetaType,
@@ -595,11 +597,11 @@ public:
 	 * @brief Insert/update message hash into hashes table.
 	 *
 	 * @param[in] dmId         Message identifier.
-	 * @param[in] valueBase64  Base64-encoded has value.
+	 * @param[in] valueBase64  Base64-encoded hash value.
 	 * @param[in] algorithm    Algorithm identifier.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageHash(int dmId,
+	bool msgsInsertUpdateMessageHash(qint64 dmId,
 	    const QByteArray &valueBase64, const QString &algorithm);
 
 	/*!
@@ -611,8 +613,9 @@ public:
 	 * @param[in] dmEventDescr  Event description.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageEvent(int dmId, const QString &dmEventTime,
-	    const QString &dmEventType, const QString &dmEventDescr);
+	bool msgsInsertUpdateMessageEvent(qint64 dmId,
+	    const QString &dmEventTime, const QString &dmEventType,
+	    const QString &dmEventDescr);
 
 	/*!
 	 * @brief Insert/update raw (DER) message data into raw_message_data
@@ -623,7 +626,7 @@ public:
 	 * @param[in] messageType  Message type.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageRaw(int dmId, const QByteArray &raw,
+	bool msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 	    int messageType);
 
 	/*!
@@ -632,7 +635,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsMessageBase64(int dmId) const;
+	QByteArray msgsMessageBase64(qint64 dmId) const;
 
 	/*!
 	 * @brief Get message data in DER (raw) format.
@@ -640,7 +643,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsMessageRaw(int dmId) const;
+	QByteArray msgsMessageRaw(qint64 dmId) const;
 
 	/*!
 	 * @brief Get base64-encoded delivery info from
@@ -649,7 +652,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsGetDeliveryInfoBase64(int dmId) const;
+	QByteArray msgsGetDeliveryInfoBase64(qint64 dmId) const;
 
 	/*!
 	 * @brief Insert/update raw (DER) delivery info into
@@ -659,7 +662,8 @@ public:
 	 * @param[in] raw   Raw (in DER format) delivery information.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateDeliveryInfoRaw(int dmId, const QByteArray &raw);
+	bool msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
+	    const QByteArray &raw);
 
 	/*!
 	 * @brief Update information about author (sender).
@@ -669,7 +673,7 @@ public:
 	 * @param[in] senderName  Name of sender.
 	 * @return True on success.
 	 */
-	bool updateMessageAuthorInfo(int dmId, const QString &senderType,
+	bool updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
 	    const QString &senderName);
 
 	/*!
@@ -679,7 +683,7 @@ public:
 	 * @return List of string containing base64-encoded hash value and
 	 *     algorithm identifier. Empty list is returned on error.
 	 */
-	QStringList msgsGetHashFromDb(int dmId) const;
+	QStringList msgsGetHashFromDb(qint64 dmId) const;
 
 	/*!
 	 * @brief Delete all message records from db.
@@ -687,7 +691,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return True on success.
 	 */
-	bool msgsDeleteMessageData(int dmId) const;
+	bool msgsDeleteMessageData(qint64 dmId) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -698,8 +702,8 @@ public:
 	 * @param[in] sent      True for sent messages, false for received.
 	 * @return List of message ids. Empty list on error.
 	 */
-	QList<int> msgsDateInterval(const QDate &fromDate, const QDate &toDate,
-	    enum MessageDirection msgDirect) const;
+	QList<qint64> msgsDateInterval(const QDate &fromDate,
+	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 	/*!
 	 * @brief Return some message items in order to export correspondence
@@ -709,7 +713,7 @@ public:
 	 * @return String list containing sender, recipient, annotation, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMsgForHtmlExport(int dmId) const;
+	QStringList getMsgForHtmlExport(qint64 dmId) const;
 
 	/*!
 	 * @brief Return some message items for export correspondence to csv.
@@ -718,7 +722,7 @@ public:
 	 * @return String containing message status, message type, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMsgForCsvExport(int dmId) const;
+	QStringList getMsgForCsvExport(qint64 dmId) const;
 
 	/*!
 	 * @brief Set the verification result.
@@ -728,7 +732,7 @@ public:
 	 *                     False if verification failed.
 	 * @return True if update was successful.
 	 */
-	bool msgsSetVerified(int dmId, bool verified);
+	bool msgsSetVerified(qint64 dmId, bool verified);
 
 	/*!
 	 * @brief Set process state of received message.
@@ -747,7 +751,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message processing state, -1 on error.
 	 */
-	int msgGetProcessState(int dmId) const;
+	int msgGetProcessState(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.
@@ -756,7 +760,7 @@ public:
 	 * @return Qualified time stamp in DER format.
 	 *     Empty byte array on error.
 	 */
-	QByteArray msgsTimestampRaw(int dmId) const;
+	QByteArray msgsTimestampRaw(qint64 dmId) const;
 
 	static
 	const QVector<QString> receivedItemIds;
@@ -819,7 +823,7 @@ protected:
 	 * @brief[in] crtBase64  Base64-encoded certificate.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageCertBase64(int dmId,
+	bool msgsInsertUpdateMessageCertBase64(qint64 dmId,
 	    const QByteArray &crtBase64);
 
 private:
@@ -848,7 +852,7 @@ private:
 	 * @return Message verification date. Invalid value is returned on
 	 *     error.
 	 */
-	QDateTime msgsVerificationDate(int dmId) const;
+	QDateTime msgsVerificationDate(qint64 dmId) const;
 
 	/*!
 	 * @brief Read data from supplementary message data table.
@@ -856,7 +860,7 @@ private:
 	 * @brief msgId  Message identifier.
 	 * @return Stored json document data. Returns empty document on error.
 	 */
-	QJsonDocument smsgdCustomData(int msgId) const;
+	QJsonDocument smsgdCustomData(qint64 msgId) const;
 
 	/*!
 	 * @brief Check whether message signature was valid at given date
@@ -867,7 +871,7 @@ private:
 	 * @param[in] ignoreMissingCrlCheck Ignore CRL check if set to true.
 	 * @return True if date check succeeds.
 	 */
-	bool msgCertValidAtDate(int dmId, const QDateTime &dateTime,
+	bool msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
 
 	friend class DbContainer;

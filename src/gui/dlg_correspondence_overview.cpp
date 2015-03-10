@@ -159,7 +159,7 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 /*
  * Export into ZFO file.
  */
-bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
+bool DlgCorrespondenceOverview::exportMessageAsZFO(qint64 dmId,
     const QString &fileName, bool deliveryInfo) const
 /* ========================================================================= */
 {
@@ -196,7 +196,7 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(int dmId,
 /*
  * Export into pdf file.
  */
-bool DlgCorrespondenceOverview::exportMessageAsPDF(int dmId,
+bool DlgCorrespondenceOverview::exportMessageAsPDF(qint64 dmId,
     const QString &fileName, bool deliveryInfo) const
 /* ========================================================================= */
 {
@@ -235,7 +235,7 @@ bool DlgCorrespondenceOverview::exportMessageAsPDF(int dmId,
 /*
  * Add message to HTML.
  */
-QString DlgCorrespondenceOverview::msgInHtml(int dmId) const
+QString DlgCorrespondenceOverview::msgInHtml(qint64 dmId) const
 /* ========================================================================= */
 {
 	Q_ASSERT(dmId >= 0);
@@ -278,7 +278,7 @@ QString DlgCorrespondenceOverview::msgInHtml(int dmId) const
 /*
  * Add message to CSV.
  */
-QString DlgCorrespondenceOverview::msgInCsv(int dmId) const
+QString DlgCorrespondenceOverview::msgInCsv(qint64 dmId) const
 /* ========================================================================= */
 {
 	Q_ASSERT(dmId >= 0);
@@ -363,7 +363,7 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Sent") << "</h2>\n";
 
-		foreach (int dmId, m_messages.sentdmIDs) {
+		foreach (qint64 dmId, m_messages.sentdmIDs) {
 			f << msgInHtml(dmId);
 		}
 	}
@@ -373,7 +373,7 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Received") << "</h2>\n";
 
-		foreach (int dmId, m_messages.receivedmIDs) {
+		foreach (qint64 dmId, m_messages.receivedmIDs) {
 			f << msgInHtml(dmId);
 		}
 	}
@@ -421,14 +421,14 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 
 	/* sent messages */
 	if (this->sentCheckBox->isChecked()) {
-		foreach (int dmId, m_messages.sentdmIDs) {
+		foreach (qint64 dmId, m_messages.sentdmIDs) {
 			f << msgInCsv(dmId) + "\n";
 		}
 	}
 
 	/* received messages */
 	if (this->receivedCheckBox->isChecked()) {
-		foreach (int dmId, m_messages.receivedmIDs) {
+		foreach (qint64 dmId, m_messages.receivedmIDs) {
 			f << msgInCsv(dmId) + "\n";
 		}
 	}
@@ -548,7 +548,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.sentdmIDs) {
+			foreach (qint64 dmId, m_messages.sentdmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
@@ -568,7 +568,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.receivedmIDs) {
+			foreach (qint64 dmId, m_messages.receivedmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + ".zfo";
@@ -595,7 +595,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.sentdmIDs) {
+			foreach (qint64 dmId, m_messages.sentdmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
@@ -615,7 +615,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.receivedmIDs) {
+			foreach (qint64 dmId, m_messages.receivedmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DDZ_" + QString::number(dmId) + "_info.zfo";
@@ -641,7 +641,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.sentdmIDs) {
+			foreach (qint64 dmId, m_messages.sentdmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
@@ -660,7 +660,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.receivedmIDs) {
+			foreach (qint64 dmId, m_messages.receivedmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "OZ_" + QString::number(dmId) + ".pdf";
@@ -685,7 +685,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.sentdmIDs) {
+			foreach (qint64 dmId, m_messages.sentdmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";
@@ -705,7 +705,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (int dmId, m_messages.receivedmIDs) {
+			foreach (qint64 dmId, m_messages.receivedmIDs) {
 				fileName =
 				    exportDir + QDir::separator() +
 				    "DD_" + QString::number(dmId) + ".pdf";

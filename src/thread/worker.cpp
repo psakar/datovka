@@ -281,7 +281,7 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 
-	int dmId = atoi(envel->dmID);
+	qint64 dmId = QString(envel->dmID).toLongLong();
 
 	QString dmAmbiguousRecipient;
 	if (0 == envel->dmAmbiguousRecipient) {
@@ -485,7 +485,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			return Q_ISDS_ERROR;
 		}
 
-		int dmId = atoi(item->envelope->dmID);
+		qint64 dmId = QString(item->envelope->dmID).toLongLong();
 
 		int dmDbMsgStatus = messageDb.msgsStatusIfExists(dmId);
 
@@ -567,8 +567,7 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 		/* TODO - if signedMsg then decode signed message (raw ) */
 	}
 
-	int dmID = atoi(envel->dmID);
-
+	qint64 dmID = QString(envel->dmID).toLongLong();
 
 	QString dmDeliveryTime = "";
 	if (0 != envel->dmDeliveryTime) {
@@ -741,7 +740,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		return Q_GLOBAL_ERROR;
 	}
 
-	int dmID = atoi(envel->dmID);
+	qint64 dmID = QString(envel->dmID).toLongLong();
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
@@ -944,7 +943,7 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 		return Q_GLOBAL_ERROR;
 	}
 
-	int dmID = atoi(envel->dmID);
+	qint64 dmID = QString(envel->dmID).toLongLong();
 
 	/* get signed raw data from message */
 	if (signedMsg) {
@@ -1042,7 +1041,7 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	int dmID = atoi(dmId.toStdString().c_str());
+	qint64 dmID = dmId.toLongLong();
 
 	if (messageDb.updateMessageAuthorInfo(dmID,
 	        convertSenderTypeToString((int) *sender_type), sender_name)) {
@@ -1095,8 +1094,7 @@ qdatovka_error Worker::updateEnvelope(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 
-	int dmID = atoi(envel->dmID);
-
+	qint64 dmID = QString(envel->dmID).toLongLong();
 
 	QString dmAmbiguousRecipient;
 	if (0 == envel->dmAmbiguousRecipient) {

@@ -37,7 +37,7 @@
 /*
  * Constructor.
  */
-DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, int dmId,
+DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, qint64 dmId,
     QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),

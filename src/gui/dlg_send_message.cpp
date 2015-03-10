@@ -1000,7 +1000,8 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {
-			int dmId = atoi(sent_message->envelope->dmID);
+			qint64 dmId =
+			    QString(sent_message->envelope->dmID).toLongLong();
 			m_messDb.msgsInsertNewlySentMessageEnvelope(dmId,
 			    m_dbId,
 			    m_senderName,

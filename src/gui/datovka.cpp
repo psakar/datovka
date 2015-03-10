@@ -4853,7 +4853,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	int ic = 0;
 	if (NULL != db_owner_info->ic) {
-		ic = atoi(db_owner_info->ic);
+		ic = QString(db_owner_info->ic).toInt();
 	}
 
 	m_accountDb.insertAccountIntoDb(
@@ -5780,7 +5780,7 @@ void MainWindow::importDeliveryInfoZFO(
 		int resISDS = 0;
 		bool imported = false;
 		bool exists = false;
-		int dmId = atoi(message->envelope->dmID);
+		qint64 dmId = QString(message->envelope->dmID).toLongLong();
 
 		for (int j = 0; j < accountList.size(); j++) {
 			/* check if message envelope is in database */
@@ -5934,7 +5934,7 @@ void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
 		/* save database username where message will be inserted */
 		QString isSent;
 		QString isReceived;
-		int dmId = atoi(message->envelope->dmID);
+		qint64 dmId = QString(message->envelope->dmID).toLongLong();
 		int resISDS = 0;
 		bool import = false;
 		bool exists = false;

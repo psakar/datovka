@@ -43,8 +43,8 @@ class DlgCorrespondenceOverview : public QDialog,
 public:
 	class ExportedMessageList {
 	public:
-		QList<int> sentdmIDs;
-		QList<int> receivedmIDs;
+		QList<qint64> sentdmIDs;
+		QList<qint64> receivedmIDs;
 	};
 
 	DlgCorrespondenceOverview(const MessageDb &db, const QString &dbId,
@@ -64,11 +64,11 @@ private:
 	QString &m_exportCorrespondDir;
 
 	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
-	QString msgInCsv(int dmId) const;
-	QString msgInHtml(int dmId) const;
-	bool exportMessageAsZFO(int dmId, const QString &fileName,
+	QString msgInCsv(qint64 dmId) const;
+	QString msgInHtml(qint64 dmId) const;
+	bool exportMessageAsZFO(qint64 dmId, const QString &fileName,
 	    bool deliveryInfo) const;
-	bool exportMessageAsPDF(int dmId, const QString &fileName,
+	bool exportMessageAsPDF(qint64 dmId, const QString &fileName,
 	    bool deliveryInfo) const;
 	bool exportMessagesToCsv(const QString &fileName) const;
 	bool exportMessagesToHtml(const QString &fileName) const;
