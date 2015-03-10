@@ -721,7 +721,7 @@ private:
 	 * local database - based on delFromIsds parameter.
 	 */
 	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx,
-	    const QString &dmId, bool delFromIsds);
+	    qint64 dmId, bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
@@ -742,14 +742,14 @@ private:
 	/*!
 	 * @brief Show message info for user if connection to ISDS fails.
 	 */
-	void showConnectionErrorMessageBox(int status, QString accountName,
-	    QString isdsMsg);
+	void showConnectionErrorMessageBox(int status,
+	    const QString &accountName, QString isdsMsg);
 
 	/*!
 	 * @brief Check if connection to ISDS fails.
 	 */
-	bool checkConnectionError(int status, QString accountName,
-	    bool showDialog, QString isdsMsg);
+	bool checkConnectionError(int status, const QString &accountName,
+	    bool showDialog, const QString &isdsMsg);
 
 	/*!
 	 * @brief connect to ISDS databox from exist account
@@ -800,7 +800,8 @@ private:
 	/*!
 	 * @brief Sent and check a new version of Datovka.
 	 */
-	void createAccountFromDatabaseFileList(QStringList filePathList);
+	void createAccountFromDatabaseFileList(
+	    const QStringList &filePathList);
 
 	/*!
 	 * @brief Download complete message synchronously

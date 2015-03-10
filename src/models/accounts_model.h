@@ -157,15 +157,15 @@ public:
 		{
 			QMap<QString, QVariant>::operator[](P12FILE) = p12;
 		}
-		inline QString lastMsg(void) const
+		inline qint64 lastMsg(void) const
 		{
-			return QMap<QString, QVariant>::operator[](
-			    LAST_MSG_ID).toString();
+			return QMap<QString, QVariant>::value(
+			    LAST_MSG_ID, -1).toLongLong();
 		}
-		inline void setLastMsg(const QString &dmId)
+		inline void setLastMsg(qint64 dmId)
 		{
-			QMap<QString, QVariant>::operator[](
-			    LAST_MSG_ID) = dmId;
+			QMap<QString, QVariant>::insert(
+			    LAST_MSG_ID, dmId);
 		}
 		inline QString lastAttachSavePath(void) const
 		{

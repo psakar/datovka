@@ -1250,7 +1250,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 		acntIdx = AccountModel::indexTop(acntIdx);
 		AccountModel::SettingsMap accountInfo =
 		    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		accountInfo.setLastMsg(QString::number(msgId, 10));
+		accountInfo.setLastMsg(msgId);
 		ui->accountList->model()->setData(acntIdx, accountInfo,
 		    ROLE_ACNT_CONF_SETTINGS);
 	}
@@ -1386,9 +1386,8 @@ void MainWindow::messageItemRestoreSelection(void)
 				const AccountModel::SettingsMap accountInfo =
 				    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).
 					toMap();
-				QString msgLastId = accountInfo.lastMsg();
-				if (!msgLastId.isEmpty()) {
-					qint64 msgId = msgLastId.toLongLong();
+				qint64 msgLastId = accountInfo.lastMsg();
+				if (0 <= msgLastId) {
 
 					/*
 					 * Find and select the message with the
@@ -1403,7 +1402,7 @@ void MainWindow::messageItemRestoreSelection(void)
 						 */
 						index = model->index(row, 0);
 						if (index.data().toLongLong()
-						    == msgId) {
+						    == msgLastId) {
 							break;
 						}
 					}
@@ -1539,8 +1538,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
-	QString dmId = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toString();
+	qint64 dmId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toLongLong();
 
 	QModelIndex fileNameIndex =
 	    selectedIndex.sibling(selectedIndex.row(), 3);
@@ -1617,8 +1616,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
 
-	QString dmId = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toString();
+	qint64 dmId = messageIndex.sibling(
+	    messageIndex.row(), 0).data().toLongLong();
 
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
@@ -2188,16 +2187,16 @@ void MainWindow::deleteMessage(void)
 		return;
 	}
 
-	QList<QString> dmIdList;
+	QList<qint64> dmIds;
 	for (int i = 0; i < msgIdxCnt; ++i) {
-		dmIdList.append(firstMsgColumnIdxs.at(i).data().toString());
+		dmIds.append(firstMsgColumnIdxs.at(i).data().toLongLong());
 	}
 
 	/* Save current account index */
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 
 	for (int i = 0; i < msgIdxCnt; ++i) {
-		switch (eraseMessage(acntTopIdx, dmIdList.at(i), delMsgIsds)) {
+		switch (eraseMessage(acntTopIdx, dmIds.at(i), delMsgIsds)) {
 		case Q_SUCCESS:
 			/*
 			 * Hiding selected line in the message model actually
@@ -2226,7 +2225,7 @@ void MainWindow::deleteMessage(void)
  * local database - based on action parameter.
 */
 qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
-    const QString &dmId, bool delFromIsds)
+    qint64 dmId, bool delFromIsds)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -2236,14 +2235,13 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
 	if (!delFromIsds) {
-		if (messageDb->msgsDeleteMessageData(dmID)) {
-			qDebug() << "Message" << dmID <<
+		if (messageDb->msgsDeleteMessageData(dmId)) {
+			qDebug() << "Message" << dmId <<
 			    "was deleted from local database";
 			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from local database.").arg(dmID));
+			    "deleted from local database.").arg(dmId));
 			return Q_SUCCESS;
 		}
 	} else {
@@ -2276,39 +2274,39 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 		/* first delete message on ISDS */
 		status = isds_delete_message_from_storage(
 		    isdsSessions.session(accountInfo.userName()),
-		    dmId.toStdString().c_str(), incoming);
+		    QString::number(dmId).toUtf8().constData(), incoming);
 
 		if (IE_SUCCESS == status) {
-			if (messageDb->msgsDeleteMessageData(dmID)) {
-				qDebug() << "Message" << dmID <<
+			if (messageDb->msgsDeleteMessageData(dmId)) {
+				qDebug() << "Message" << dmId <<
 				    "was deleted from ISDS and local databse";
 				showStatusTextWithTimeout(tr("Message \"%1\" "
 				    "was deleted from ISDS and local database.")
-				    .arg(dmID));
+				    .arg(dmId));
 				return Q_SUCCESS;
 			} else {
-				qDebug() << "Message" << dmID <<
+				qDebug() << "Message" << dmId <<
 				    "was deleted only from ISDS.";
 				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted only from ISDS.").arg(dmID));
+				    "was deleted only from ISDS.").arg(dmId));
 				return Q_SQL_ERROR;
 			}
 		} else if (IE_INVAL == status) {
 			qDebug() << "Error: "<< status << isds_strerror(status);
-			if (messageDb->msgsDeleteMessageData(dmID)) {
-				qDebug() << "Message" << dmID <<
+			if (messageDb->msgsDeleteMessageData(dmId)) {
+				qDebug() << "Message" << dmId <<
 				    "was deleted only from local database.";
 				showStatusTextWithTimeout(tr("Message \"%1\" "
 				    "was deleted only from local database.")
-				    .arg(dmID));
+				    .arg(dmId));
 				return Q_ISDS_ERROR;
 			}
 		}
 	}
 
-	qDebug() << "Message" << dmID << "was not deleted.";
+	qDebug() << "Message" << dmId << "was not deleted.";
 	showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
-	    .arg(dmID));
+	    .arg(dmId));
 	return Q_ISDS_ERROR;
 }
 
@@ -4742,7 +4740,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 		return Q_GLOBAL_ERROR;
 	}
 
-	QString dmId = msgIdx.sibling(msgIdx.row(), 0).data().toString();
+	qint64 dmId = msgIdx.sibling(msgIdx.row(), 0).data().toLongLong();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -4758,7 +4756,8 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	struct isds_hash *hashIsds = NULL;
 
 	status = isds_download_message_hash(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str(), &hashIsds);
+	    accountInfo.userName()),
+	    QString::number(dmId).toUtf8().constData(), &hashIsds);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -4776,9 +4775,8 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	memset(hashLocal, 0, sizeof(struct isds_hash));
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmID);
+	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmId);
 
 	/* TODO - check if hash info is in db */
 	if (hashLocaldata.isEmpty()) {
@@ -5029,7 +5027,8 @@ void MainWindow::prepareCreateAccountFromDatabaseFile(bool fromDirectory)
 /*
  * Create accounts from list of database directory to application
  */
-void MainWindow::createAccountFromDatabaseFileList(QStringList filePathList)
+void MainWindow::createAccountFromDatabaseFileList(
+    const QStringList &filePathList)
 /* ========================================================================= */
 {
 
@@ -6659,7 +6658,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	}
 
 	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6668,9 +6667,8 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
@@ -6682,7 +6680,8 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QString fileName = TMP_ATTACHMENT_PREFIX "DDZ_" + dmId + ".zfo";
+	QString fileName =
+	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1.zfo").arg(dmId);
 	Q_ASSERT(!fileName.isEmpty());
 
 	if (fileName.isEmpty()) {
@@ -6725,7 +6724,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 
 	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6734,9 +6733,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
@@ -6748,7 +6746,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QString fileName = TMP_ATTACHMENT_PREFIX "DDZ_" + dmId + "_info.zfo";
+	QString fileName =
+	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1_info.zfo").arg(dmId);
 	Q_ASSERT(!fileName.isEmpty());
 
 	if (fileName.isEmpty()) {
@@ -6792,7 +6791,7 @@ void MainWindow::showSignatureDetails(void)
 	}
 
 	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 
 	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
@@ -6804,9 +6803,8 @@ void MainWindow::showSignatureDetails(void)
 	if (0 == messageDb) {
 		return;
 	}
-	qint64 dmID = dmId.toLongLong();
 
-	QDialog *signature_detail = new DlgSignatureDetail(*messageDb, dmID,
+	QDialog *signature_detail = new DlgSignatureDetail(*messageDb, dmId,
 	    this);
 	signature_detail->exec();
 }
@@ -6816,14 +6814,14 @@ void MainWindow::showSignatureDetails(void)
 /*
 * This is call if connection to ISDS fails. Message info for user is generated.
 */
-void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
-   QString isdsMsg)
+void MainWindow::showConnectionErrorMessageBox(int status,
+    const QString &accountName, QString isdsMsg)
 /* ========================================================================= */
 {
-	QString msgBoxTitle = "";
-	QString msgBoxContent = "";
+	QString msgBoxTitle;
+	QString msgBoxContent;
 
-	if (isdsMsg.isNull() || isdsMsg.isEmpty()) {
+	if (isdsMsg.isEmpty()) {
 		isdsMsg = isds_strerror((isds_error)status);
 	}
 
@@ -6919,8 +6917,8 @@ void MainWindow::showConnectionErrorMessageBox(int status, QString accountName,
 /*
 * Check if connection to ISDS fails.
 */
-bool MainWindow::checkConnectionError(int status, QString accountName,
-    bool showDialog, QString isdsMsg)
+bool MainWindow::checkConnectionError(int status, const QString &accountName,
+    bool showDialog, const QString &isdsMsg)
 /* ========================================================================= */
 {
 	switch (status) {

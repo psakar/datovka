@@ -243,7 +243,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 		        "").toString());
 		itemSettings.setLastMsg(
 		    settings.value(group + "/" + LAST_MSG_ID,
-		        "").toString());
+		        "").toLongLong());
 		itemSettings.setLastAttachSavePath(
 		    settings.value(group + "/" + LAST_SAVE_ATTACH,
 		        "").toString());
@@ -303,7 +303,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 
 		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
 
-		if (!itemSettings.lastMsg().isEmpty()) {
+		if (0 <= itemSettings.lastMsg()) {
 			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
 		}
 
