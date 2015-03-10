@@ -1780,19 +1780,19 @@ void MainWindow::openSelectedAttachment(void)
 /*
  * Clear status bar if download of complete message fails.
  */
-void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
+void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
 	showStatusTextWithTimeout(tr("It was not possible download complete "
-	    "message \"%1\" from ISDS server.").arg(msgID));
+	    "message \"%1\" from ISDS server.").arg(msgId));
 
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setWindowTitle(tr("Download message error"));
 	msgBox.setText(tr("It was not possible to download a complete "
-	    "message \"%1\" from server Datové schránky.").arg(msgID));
+	    "message \"%1\" from server Datové schránky.").arg(msgId));
 	msgBox.setInformativeText(tr("A connection error occured or "
 	    "the message has already been deleted from the server."));
 	msgBox.setStandardButtons(QMessageBox::Ok);
@@ -1806,7 +1806,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(QString msgID)
  * Set tablewidget when message download worker is done.
  */
 void MainWindow::postDownloadSelectedMessageAttachments(
-    const QModelIndex &acntTopIdx, const QString &dmId)
+    const QModelIndex &acntTopIdx, qint64 dmId)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -1830,7 +1830,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	/* Find corresponding message in model. */
 	for (int row = 0; row < messageModel->rowCount(); ++row) {
 		QModelIndex index = messageModel->index(row, 0);
-		if (index.data().toString() == dmId) {
+		if (index.data().toLongLong() == dmId) {
 			msgIdIdx = index;
 			break;
 		}
@@ -1840,13 +1840,11 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
-	qint64 msgId = dmId.toLongLong();
-
 	/*
 	 * Mark message as having attachment downloaded without reloading
 	 * the whole model.
 	 */
-	messageModel->overrideDownloaded(msgId, true);
+	messageModel->overrideDownloaded(dmId, true);
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 	/* Inform the view that the model has changed. */
@@ -1884,11 +1882,11 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	Q_ASSERT(0 != messageDb);
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId,
 	    ui->verifySignature));
 	ui->messageInfo->setReadOnly(true);
 
-	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
+	QAbstractTableModel *fileTblMdl = messageDb->flsModel(dmId);
 	Q_ASSERT(0 != fileTblMdl);
 	ui->messageAttachmentList->setModel(fileTblMdl);
 	/* First three columns contain hidden data. */
@@ -2158,7 +2156,7 @@ void MainWindow::deleteMessage(void)
 
 	int msgIdxCnt = firstMsgColumnIdxs.size();
 	if (1 == msgIdxCnt) {
-		QString dmId = firstMsgColumnIdxs.first().data().toString();
+		qint64 dmId = firstMsgColumnIdxs.first().data().toLongLong();
 		dlgTitleText = tr("Delete message %1").arg(dmId);
 		questionText = tr("Do you want to delete "
 		    "message '%1'?").arg(dmId);
@@ -2475,9 +2473,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	QStringList dmIdStrs;
+	QList<qint64> dmIds;
 	foreach (QModelIndex index, firstMsgColumnIdxs) {
-		dmIdStrs.append(index.data().toString());
+		dmIds.append(index.data().toLongLong());
 	}
 
 	{
@@ -2517,11 +2515,11 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		}
 	}
 
-	foreach (QString dmIdStr, dmIdStrs) {
+	foreach (qint64 dmId, dmIds) {
 		/* Using prepend() just to outrun other jobs. */
 		Worker::jobList.append(
 		    Worker::Job(accountTopIndex, messageDb, msgDirection,
-		        dmIdStr));
+		        dmId));
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -2591,12 +2589,12 @@ void MainWindow::processPendingWorkerJobs(void)
 	{
 		/* Downloading attachment. */
 		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAttachmentList(const QModelIndex, QString)),
+		    SIGNAL(refreshAttachmentList(const QModelIndex, qint64)),
 		    this, SLOT(postDownloadSelectedMessageAttachments(
-		        const QModelIndex, QString)));
+		        const QModelIndex, qint64)));
 		connect(m_syncAcntWorker,
-		    SIGNAL(clearStatusBarAndShowDialog(QString)),
-		    this, SLOT(clearInfoInStatusBarAndShowDialog(QString)));
+		    SIGNAL(clearStatusBarAndShowDialog(qint64)),
+		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64)));
 	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
@@ -5569,7 +5567,7 @@ QList<MainWindow::accountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 /*
  * Get message type of import ZFO file (message/delivery/unknown).
  */
-int MainWindow::getMessageTypeFromZFO(QString file)
+int MainWindow::getMessageTypeFromZFO(const QString &file)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -6223,19 +6221,18 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		return;
 	}
 
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Cannot export complete message")
-		    + " " + dmId + ".");
+		msgBox.setText(tr("Cannot export complete message '%1'.").
+		    arg(dmId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download the whole message before "
@@ -6250,7 +6247,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 				.arg(dmId));
 				return;
 			} else {
-				base64 = messageDb->msgsMessageBase64(dmID);
+				base64 = messageDb->msgsMessageBase64(dmId);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -6260,7 +6257,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    "DDZ_" + dmId + ".zfo";
+	    QString("DDZ_%1.zfo").arg(dmId);
 
 	Q_ASSERT(!fileName.isEmpty());
 
@@ -6299,7 +6296,7 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 /*
  * Download complete message synchronously without worker and thread
  */
-bool MainWindow::downloadCompleteMessage(QString dmId)
+bool MainWindow::downloadCompleteMessage(qint64 dmId)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -6373,19 +6370,19 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		return;
 	}
 
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Cannot export delivery info for message")
-		    + " " + dmId + ".");
+		msgBox.setText(
+		    tr("Cannot export delivery info for message '%1'.").
+		    arg(dmId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download message before export.") +
@@ -6401,7 +6398,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 				return;
 			} else {
 				base64 =
-				    messageDb->msgsGetDeliveryInfoBase64(dmID);
+				    messageDb->msgsGetDeliveryInfoBase64(dmId);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "
@@ -6411,7 +6408,7 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    "DDZ_" + dmId + "_info.zfo";
+	    QString("DDZ_%1_info.zfo").arg(dmId);
 
 	Q_ASSERT(!fileName.isEmpty());
 
@@ -6472,18 +6469,18 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 		return;
 	}
 
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmID);
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(tr("Cannot export delivery info for message")
-		    + " " + dmId + ".");
+		msgBox.setText(
+		    tr("Cannot export delivery info for message '%1'.").
+		        arg(dmId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download message before export.") +
@@ -6499,7 +6496,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 				return;
 			} else {
 				base64 =
-				    messageDb->msgsGetDeliveryInfoBase64(dmID);
+				    messageDb->msgsGetDeliveryInfoBase64(dmId);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message delivery "
@@ -6509,7 +6506,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    "DD_" + dmId + ".pdf";
+	    QString("DD_%1.pdf").arg(dmId);
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save delivery info as PDF file"), fileName,
@@ -6528,7 +6525,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 	storeExportPath();
 
 	QTextDocument doc;
-	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmID));
+	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmId));
 
 	showStatusTextPermanently(tr("Printing of delivery info \"%1\" to "
 	    "PDF. Please wait...").arg(dmId));
@@ -6567,18 +6564,17 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 		return;
 	}
 
-	QString dmId = msgIdx.data().toString();
+	qint64 dmId = msgIdx.data().toLongLong();
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
-	qint64 dmID = dmId.toLongLong();
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmID);
+	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Cannot export complete message")
-		    + " " + dmId + ".");
+		msgBox.setText(tr("Cannot export complete message '%1'.").
+		    arg(dmId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		    tr("First you must download the whole message before "
@@ -6593,7 +6589,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 				.arg(dmId));
 				return;
 			} else {
-				base64 = messageDb->msgsMessageBase64(dmID);
+				base64 = messageDb->msgsMessageBase64(dmId);
 			}
 		} else {
 			showStatusTextWithTimeout(tr("Export of message "
@@ -6603,7 +6599,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	}
 
 	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    "OZ_" + dmId + ".pdf";
+	    QString("OZ_%1.pdf").arg(dmId);
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save message envelope as PDF file"), fileName,
@@ -6631,7 +6627,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 	}
 
 	QTextDocument doc;
-	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmID, accountData.at(0)));
+	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(dmId, accountData.at(0)));
 
 	showStatusTextPermanently(tr("Printing of message envelope \"%1\" to "
 	    "PDF. Please wait...").arg(dmId));

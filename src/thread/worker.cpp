@@ -189,7 +189,8 @@ void Worker::doJob(void)
 	int st = 0;
 	int sn = 0;
 
-	if (!job.msgId.isEmpty()) {
+	/* != -1 -- specifice message required. */
+	if (0 <= job.msgId) {
 
 		if (Q_SUCCESS == downloadMessage(job.acntTopIdx, job.msgId,
 		        true, job.msgDirect, *job.msgDb,
@@ -448,7 +449,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		return Q_ISDS_ERROR;
 	}
 
-	struct isds_list *box;
+	const struct isds_list *box;
 	box = messageList;
 	float delta = 0.0;
 	float diff = 0.0;
@@ -478,7 +479,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 		    (int) (20 + diff)); }
 
 
-		isds_message *item = (isds_message *) box->data;
+		const isds_message *item = (isds_message *) box->data;
 
 		if (NULL == item->envelope) {
 			/* TODO - free allocated stuff */
@@ -494,7 +495,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			storeEnvelope(msgDirect, messageDb, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
-				downloadMessage(acntTopIdx, item->envelope->dmID,
+				downloadMessage(acntTopIdx, dmId,
 				    true, msgDirect, messageDb, "", 0, 0);
 			}
 			newcnt++;
@@ -510,7 +511,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 				*/
 				if (dmDbMsgStatus <= 2) {
 					if (globPref.auto_download_whole_messages) {
-						downloadMessage(acntTopIdx, item->envelope->dmID,
+						downloadMessage(acntTopIdx, dmId,
 						    true, msgDirect, messageDb, "", 0, 0);
 					}
 				}
@@ -617,13 +618,12 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 * Download sent message delivery info and get list of events message
 */
 bool Worker::getMessageState(enum MessageDirection msgDirect,
-    const QModelIndex &acntTopIdx, int msgIdx, bool signedMsg,
+    const QModelIndex &acntTopIdx, qint64 dmId, bool signedMsg,
     MessageDb &messageDb)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QString dmId = QString::number(msgIdx);
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
@@ -634,14 +634,16 @@ bool Worker::getMessageState(enum MessageDirection msgDirect,
 
 	if (signedMsg) {
 		status = isds_get_signed_delivery_info(isdsSessions.session(
-		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
 		return false;
 		/*
 		status = isds_get_delivery_info(isdsSessions.session(
-		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 		*/
 	}
@@ -832,7 +834,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
-    const QString &dmId, bool signedMsg, enum MessageDirection msgDirect,
+    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
     MessageDb &messageDb, const QString &progressLabel, QProgressBar *pBar,
     Worker *worker)
 /* ========================================================================= */
@@ -861,12 +863,12 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		if (MSG_RECEIVED == msgDirect) {
 			status = isds_get_signed_received_message(
 			    isdsSessions.session(accountInfo.userName()),
-			    dmId.toStdString().c_str(),
+			    QString::number(dmId).toUtf8().constData(),
 			    &message);
 		} else {
 			status = isds_get_signed_sent_message(
 			    isdsSessions.session(accountInfo.userName()),
-			    dmId.toStdString().c_str(),
+			    QString::number(dmId).toUtf8().constData(),
 			    &message);
 		}
 	} else {
@@ -875,7 +877,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 		/*
 		status = isds_get_received_message(isdsSessions.session(
 		    accountInfo.userName()),
-		    dmId.toStdString().c_str(),
+		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 		*/
 	}
@@ -896,19 +898,24 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	if (0 != pBar) { pBar->setValue(90); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 90); }
 
-	/* Download and save delivery info and message events */
-	(getDeliveryInfo(acntTopIdx, message->envelope->dmID,
-	    signedMsg, messageDb))
-	? qDebug() << "Delivery info of message was processed..."
-	: qDebug() << "ERROR: Delivery info of message not found!";
+	Q_ASSERT(dmId == QString(message->envelope->dmID).toLongLong());
 
-	getMessageAuthor(acntTopIdx, message->envelope->dmID, messageDb);
+	/* Download and save delivery info and message events */
+	if (getDeliveryInfo(acntTopIdx, dmId, signedMsg, messageDb)) {
+		qDebug() << "Delivery info of message was processed...";
+	} else {
+		qDebug() << "ERROR: Delivery info of message not found!";
+	}
+
+	getMessageAuthor(acntTopIdx, dmId, messageDb);
 
 	if (MSG_RECEIVED == msgDirect) {
 		/*  Mark this message as downloaded in ISDS */
-		(markMessageAsDownloaded(acntTopIdx, message->envelope->dmID))
-		? qDebug() << "Message was marked as downloaded..."
-		: qDebug() << "ERROR: Message was not marked as downloaded!";
+		if (markMessageAsDownloaded(acntTopIdx, dmId)) {
+			qDebug() << "Message was marked as downloaded...";
+		} else {
+			qDebug() << "ERROR: Message was not marked as downloaded!";
+		}
 	}
 
 	if (0 != pBar) { pBar->setValue(100); }
@@ -974,7 +981,7 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 * Download message delivery info, raw and get list of events message
 */
 bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
-    const QString &dmId, bool signedMsg, MessageDb &messageDb)
+    qint64 dmId, bool signedMsg, MessageDb &messageDb)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -988,14 +995,16 @@ bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
 
 	if (signedMsg) {
 		status = isds_get_signed_delivery_info(isdsSessions.session(
-		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 	} else {
 		assert(0); /* Only signed messages can be downloaded. */
 		return false;
 		/*
 		status = isds_get_delivery_info(isdsSessions.session(
-		    accountInfo.userName()), dmId.toStdString().c_str(),
+		    accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 		*/
 	}
@@ -1020,7 +1029,7 @@ bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
 * Get additional info about author (sender)
 */
 bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
-    const QString &dmId, MessageDb &messageDb)
+    qint64 dmId, MessageDb &messageDb)
 /* ========================================================================= */
 {
 	const AccountModel::SettingsMap accountInfo =
@@ -1033,7 +1042,8 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 	char * sender_name = NULL;
 
 	status = isds_get_message_sender(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str(),
+	    accountInfo.userName()),
+	    QString::number(dmId).toUtf8().constData(),
 	    &sender_type, &raw_sender_type, &sender_name);
 
 	if (IE_SUCCESS != status) {
@@ -1041,9 +1051,7 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	qint64 dmID = dmId.toLongLong();
-
-	if (messageDb.updateMessageAuthorInfo(dmID,
+	if (messageDb.updateMessageAuthorInfo(dmId,
 	        convertSenderTypeToString((int) *sender_type), sender_name)) {
 		qDebug() << "Author info of message was added...";
 	} else {
@@ -1059,7 +1067,7 @@ bool Worker::getMessageAuthor(const QModelIndex &acntTopIdx,
 * Set message as downloaded from ISDS.
 */
 bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-    const QString &dmId)
+    qint64 dmId)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -1070,7 +1078,8 @@ bool Worker::markMessageAsDownloaded(const QModelIndex &acntTopIdx,
 	isds_error status;
 
 	status = isds_mark_message_read(isdsSessions.session(
-	    accountInfo.userName()), dmId.toStdString().c_str());
+	    accountInfo.userName()),
+	    QString::number(dmId).toUtf8().constData());
 
 	if (IE_SUCCESS != status) {
 		return false;

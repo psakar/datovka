@@ -48,12 +48,11 @@ public:
 		    : acntTopIdx(QModelIndex()),
 		    msgDb(0),
 		    msgDirect(MSG_RECEIVED),
-		    msgId()
+		    msgId(-1)
 		{
 		}
 		Job(const QModelIndex &idx, MessageDb *mDb,
-		    enum MessageDirection direc,
-		    const QString &dmId = QString())
+		    enum MessageDirection direc, qint64 dmId = -1)
 		    : acntTopIdx(idx),
 		    msgDb(mDb),
 		    msgDirect(direc),
@@ -68,10 +67,10 @@ public:
 		QModelIndex acntTopIdx;
 		MessageDb *msgDb;
 		enum MessageDirection msgDirect;
-		QString msgId; /*!<
-		                * If set, then only a single message is going
-		                * to be downloaded.
-		                */
+		qint64 msgId; /*!<
+		               * If != -1, then only a single message is going
+		               * to be downloaded.
+		               */
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -159,9 +158,9 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
-	    const QString &dmId, bool signedMsg,
-	    enum MessageDirection msgDirect, MessageDb &messageDb,
-	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
+	    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
+	    MessageDb &messageDb, const QString &progressLabel,
+	    QProgressBar *pBar, Worker *worker);
 
 	/*!
 	 * @brief Store envelope into database.
@@ -196,7 +195,7 @@ private:
 	*/
 	static
 	bool getMessageState(enum MessageDirection msgDirect,
-	    const QModelIndex &acntTopIdx, int msgIdx, bool signedMsg,
+	    const QModelIndex &acntTopIdx, qint64 dmId, bool signedMsg,
 	    MessageDb &messageDb);
 
 	/*!
@@ -204,21 +203,21 @@ private:
 	 */
 	static
 	bool getDeliveryInfo(const QModelIndex &acntTopIdx,
-	    const QString &dmId, bool signedMsg, MessageDb &messageDb);
+	    qint64 dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!
 	 * @brief Get additional info about author (sender)
 	 */
 	static
 	bool getMessageAuthor(const QModelIndex &acntTopIdx,
-	    const QString &dmId, MessageDb &messageDb);
+	    qint64 dmId, MessageDb &messageDb);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.
 	 */
 	static
 	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-	    const QString &dmId);
+	    qint64 dmId);
 
 	/*!
 	 * @brief Update message envelope.
@@ -246,7 +245,7 @@ signals:
 	/*!
 	 * @brief This signal is emitted when message downloading is finished
 	 */
-	void refreshAttachmentList(const QModelIndex, QString);
+	void refreshAttachmentList(const QModelIndex, qint64);
 
 	/*!
 	 * @brief This signal is emitted when account is processed.
@@ -258,7 +257,7 @@ signals:
 	 * @brief This signal is emitted when download of message fails =
 	 * clear info in status bar.
 	 */
-	void clearStatusBarAndShowDialog(QString);
+	void clearStatusBarAndShowDialog(qint64);
 
 	/*!
 	 * @brief This signal is emitted when process is finished

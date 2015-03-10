@@ -94,7 +94,7 @@ private slots:
 	/*!
 	 * @brief Clear info status bar if download of complete message fails.
 	 */
-	void clearInfoInStatusBarAndShowDialog(QString msgID);
+	void clearInfoInStatusBarAndShowDialog(qint64 msgId);
 
 	/*!
 	 * @brief Version response slot.
@@ -407,12 +407,12 @@ private slots:
 	 * @brief Get message type of import ZFO file (message/delivery/unknown).
 	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
 	 */
-	int getMessageTypeFromZFO(QString file);
+	int getMessageTypeFromZFO(const QString &file);
 
 	/*!
 	 * @brief Create account info for ZFO file(s) import into database.
 	 */
-	 QList<accountDataStruct> createAccountInfoForZFOImport(void);
+	QList<accountDataStruct> createAccountInfoForZFOImport(void);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
@@ -514,7 +514,7 @@ private slots:
 	 * @brief Set tablewidget when message download worker is done.
 	 */
 	void postDownloadSelectedMessageAttachments(
-	    const QModelIndex &acntTopIdx, const QString &dmId);
+	    const QModelIndex &acntTopIdx, qint64 dmId);
 
 	/*!
 	 * @brief Set info status bar from worker.
@@ -806,7 +806,7 @@ private:
 	 * @brief Download complete message synchronously
 	 * without worker and thread.
 	 */
-	bool downloadCompleteMessage(QString dmId);
+	bool downloadCompleteMessage(qint64 dmId);
 
 	/*!
 	 * @brief Set read status to messages with given indexes.
