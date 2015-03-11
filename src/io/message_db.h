@@ -473,7 +473,7 @@ public:
 	 * @param[in] msgId  Message identifier.
 	 * @return List of files and their attributes.
 	 */
-	QList<QStringList> getFilesFromMessage(int msgId);
+	QList<QStringList> getFilesFromMessage(qint64 msgId) const;
 
 	/*!
 	 * @brief Return files related to given message.

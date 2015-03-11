@@ -2502,7 +2502,7 @@ fail:
 /*
  * Return fileList related to given message.
  */
-QList<QStringList> MessageDb::getFilesFromMessage(int msgId)
+QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
