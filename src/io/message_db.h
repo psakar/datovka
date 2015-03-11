@@ -379,7 +379,7 @@ public:
 	 *     mesageType, senderRefNumber.
 	 *     Returns empty vector in failure.
 	 */
-	QVector<QString> msgsReplyDataTo(qint64 dmId) const;
+	QVector<QString> msgsReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns true if verification attempt was performed.
@@ -466,6 +466,14 @@ public:
 	 *     information. Empty string is returned on error.
 	 */
 	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
+
+	/*!
+	 * @brief Return fileList related to given message.
+	 *
+	 * @param[in] msgId  Message identifier.
+	 * @return List of files and their attributes.
+	 */
+	QList<QStringList> getFilesFromMessage(qint64 msgId) const;
 
 	/*!
 	 * @brief Return files related to given message.

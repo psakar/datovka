@@ -42,7 +42,8 @@ class DlgSendMessage : public QDialog, public Ui::SendMessage {
 public:
 	enum Action {
 		ACT_NEW,
-		ACT_REPLY
+		ACT_REPLY,
+		ACT_NEW_FROM_TMP
 	};
 
 	class sendMsgResultStruct {
@@ -55,21 +56,12 @@ public:
 		QString errInfo;
 	};
 
-	DlgSendMessage(MessageDb &db, QString &dbId, QString &senderName,
-	    Action action, QTreeView &accountList, QTableView &messageList,
+	DlgSendMessage(MessageDb &messDb, QString &dbId, QString &senderName,
+	    Action action, qint64 msgId,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QString &lastAttAddPath,
-	    QWidget *parent = 0,
-	    const QString &reSubject = QString(),
-	    const QString &senderId = QString(),
-	    const QString &sender = QString(),
-	    const QString &senderAddress = QString(),
-	    const QString &dmType = QString(),
-	    const QString &dmSenderRefNumber = QString(),
-	    const QString &dmSenderIdent = QString(),
-	    const QString &dmRecipientRefNumber = QString(),
-	    const QString &dmRecipientIdent = QString()
+	    QWidget *parent = 0
 	    );
 
 private slots:
@@ -92,8 +84,7 @@ private slots:
 private:
 	QTimer *pingTimer;
 	void initNewMessageDialog(void);
-	QTreeView &m_accountList;
-	QTableView &m_messageList;
+	qint64 m_msgID;
 	const QString m_dbId;
 	const QString m_senderName;
 	const Action m_action;
@@ -102,21 +93,17 @@ private:
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
 	QString &m_lastAttAddPath;
-	QString m_reSubject;
-	QString m_senderId;
-	QString m_sender;
-	QString m_senderAddress;
-	const QString m_dmType;
-	QString m_dmSenderRefNumber;
-	QString m_dmSenderIdent;
-	QString m_dmRecipientRefNumber;
-	QString m_dmRecipientIdent;
-	QString m_userName;
 	MessageDb &m_messDb;
 	int m_attachSize;
+	QString m_dmType;
+	QString m_dmSenderRefNumber;
 
 	int cmptAttachmentSize(void);
+	void fillDlgAsReply(void);
+	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
+	QString getFileBase64(QString filePath);
+	int getFileSizeFromBase64(QString fileBase64);
 	QString getUserInfoFormIsds(QString idDbox);
 };
 

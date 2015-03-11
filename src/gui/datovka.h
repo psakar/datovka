@@ -269,14 +269,19 @@ private slots:
 	void endCurrentWorkerJob(void);
 
 	/*!
-	 * @brief Creates and sends new message.
+	 * @brief Create and send a new message form selected account.
 	 */
 	void createAndSendMessage(void);
 
 	/*!
-	 * @brief Creates and sends a message reply for selected account.
+	 * @brief Create reply from the selected message.
 	 */
 	void createAndSendMessageReply(void);
+
+	/*!
+	 * @brief Create message from the template (selected message).
+	 */
+	void createAndSendMessageFromTmpl(void);
 
 	/*!
 	 * @brief Verifies selected message and creates response dialog.
@@ -558,6 +563,11 @@ private:
 	 * @brief Set message action/button to visible.
 	 */
 	void setMessageActionVisibility(bool action) const;
+
+	/*!
+	 * @brief Open send message dialog and send message.
+	 */
+	void openSendMessageDialog(int action);
 
 	/*!
 	 * @brief Active/Inactive account menu and buttons in the mainwindow.
