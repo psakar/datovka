@@ -517,7 +517,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		size = attFile.size();
 		if (size > MAX_ATTACHMENT_SIZE) {
 			QMessageBox::warning(this, tr("Wrong file size"),
-			    tr("File '%1' cannot add to attachment "
+			    tr("File '%1' could not be added into attachment "
 			    "because its size is bigger than 10MB.").
 			    arg(fileNames[i]),
 			    QMessageBox::Ok);

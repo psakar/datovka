@@ -1152,7 +1152,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    setEnabled(ui->actionReply->isEnabled());
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message.png"),
-		    tr("Create message from template"), this,
+		    tr("Use message as template"), this,
 		    SLOT(createAndSendMessageFromTmpl()))->
 		    setEnabled(
 		        ui->actionCreate_message_from_template->isEnabled());
