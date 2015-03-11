@@ -49,7 +49,7 @@ private slots:
 	void getSelectedMsg(int row, int column);
 
 signals:
-	void focusSelectedMsg(QString, int);
+	void focusSelectedMsg(QString, qint64);
 
 private:
 	const QList< QPair <QString,MessageDb*> > m_messageDbList;

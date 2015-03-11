@@ -333,8 +333,9 @@ void DlgMsgSearch::searchMessages(void)
 	if (!this->searchAllAcntCheckBox->isChecked()) {
 		msgList.clear();
 		msgList = m_messageDbList.at(0).second->
-		    msgsAdvanceSearchMessageEnvelope(
-		    this->messageIdLineEdit->text(),
+		    msgsAdvancedSearchMessageEnvelope(
+		    this->messageIdLineEdit->text().isEmpty() ? -1 :
+		        this->messageIdLineEdit->text().toLongLong(),
 		    this->subjectLineEdit->text(),
 		    this->senderDbIdLineEdit->text(),
 		    this->senderNameLineEdit->text(),
@@ -355,8 +356,9 @@ void DlgMsgSearch::searchMessages(void)
 		for (int i = 0; i < m_messageDbList.count(); ++i) {
 			msgList.clear();
 			msgList = m_messageDbList.at(i).second->
-			    msgsAdvanceSearchMessageEnvelope(
-			    this->messageIdLineEdit->text(),
+			    msgsAdvancedSearchMessageEnvelope(
+			    this->messageIdLineEdit->text().isEmpty() ? -1 :
+			        this->messageIdLineEdit->text().toLongLong(),
 			    this->subjectLineEdit->text(),
 			    this->senderDbIdLineEdit->text(),
 			    this->senderNameLineEdit->text(),
@@ -429,6 +431,6 @@ void DlgMsgSearch::getSelectedMsg(int row, int column)
 {
 	(void) column;
 	emit focusSelectedMsg(this->resultsTableWidget->item(row, 0)->text(),
-	    this->resultsTableWidget->item(row, 1)->text().toInt());
+	    this->resultsTableWidget->item(row, 1)->text().toLongLong());
 	//this->close();
 }

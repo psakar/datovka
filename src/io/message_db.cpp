@@ -3062,8 +3062,8 @@ fail:
 /*
  * Advance message envelope search.
  */
-QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
-    const QString &dmId,
+QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
+    qint64 dmId,
     const QString &dmAnnotation,
     const QString &dbIDSender, const QString &dmSender,
     const QString &dmSenderAddress,
@@ -3110,10 +3110,9 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 		return msgList;
 	}
 
-	if (dmId.isNull() || dmId.isEmpty()) {
+	if (dmId < 0) {
 
 		bool isNotFirst = false;
-
 
 		if (isMultiSelect) {
 			queryStr += "s.message_type = :message_type";
@@ -3265,7 +3264,7 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 			return msgList;
 		}
 
-		query.bindValue(":dmId", dmId.toInt());
+		query.bindValue(":dmId", dmId);
 
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {
@@ -3280,7 +3279,7 @@ QList <QStringList> MessageDb::msgsAdvanceSearchMessageEnvelope(
 
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-	    	while (query.isValid()) {
+		while (query.isValid()) {
 			QStringList msgItemsList;
 			msgItemsList.clear();
 			int count = query.record().count();
@@ -4204,7 +4203,6 @@ fail:
 }
 
 
-
 /* ========================================================================= */
 /*
  * Return some message items for export correspondence to csv.
@@ -4243,48 +4241,6 @@ QStringList MessageDb::getMsgForCsvExport(qint64 dmId) const
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return messageItems;
-
-fail:
-	return QStringList();
-}
-
-
-/* ========================================================================= */
-/*
- * Return some message items for search result.
- * NOTE: This function is not currently used.
- */
-QStringList MessageDb::getSearchMsgDataFromID(int dmId) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QStringList messageItems;
-
-	queryStr = "SELECT dmAnnotation, dmSender, dmRecipient "
-	    "FROM messages WHERE dmID = :dmId";
-	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		int count = query.record().count();
-		Q_ASSERT(3 == count);
-		for (int i = 0; i < count; ++i) {
-			QString element = query.value(i).toString();
-			messageItems.append(element);
-		}
-	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}

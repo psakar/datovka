@@ -155,7 +155,8 @@ private slots:
 	 * @brief Select account via userName and focus on
 	 *        message ID from search selection
 	 */
-	void messageItemFromSearchSelection(QString userName, int msgID);
+	void messageItemFromSearchSelection(const QString &userName,
+	    qint64 msgId);
 
 	/*!
 	 * @brief Redraws widgets according to selected attachment item.
@@ -539,9 +540,9 @@ private slots:
 	void msgSetSelectedMessageProcessState(int stateIndex);
 
 	/*!
-	 * @brief Show message advance search dialogue.
+	 * @brief Show advanced message search dialogue.
 	 */
-	void showMsgAdvanceSearchDlg(void);
+	void showMsgAdvancedSearchDlg(void);
 
 private:
 
