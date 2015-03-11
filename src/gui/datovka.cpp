@@ -642,20 +642,17 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
 		ui->actionDelete_message_from_db->setEnabled(false);
-		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
-		ui->actionDelete_message_from_server->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
 		msgTblMdl = messageDb->msgsSntWithin90DaysModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(false);
-		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
 		setMessageActionVisibility(false);
@@ -663,26 +660,22 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    messageDb->msgsRcvdYearlyCounts(dbId, DESCENDING),
 		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
 		ui->actionDelete_message_from_db->setEnabled(false);
-		ui->actionDelete_message_from_server->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
-		ui->actionDelete_message_from_server->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSent:
 		msgTblMdl = messageDb->msgsSntModel(dbId);
 		ui->actionDelete_message_from_db->setEnabled(true);
-		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = messageDb->msgsRcvdInYearModel(dbId,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
-		ui->actionDelete_message_from_server->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
@@ -691,7 +684,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		msgTblMdl = messageDb->msgsSntInYearModel(dbId,
 		    accountItem->text());
 		ui->actionDelete_message_from_db->setEnabled(true);
-		ui->actionDelete_message_from_server->setEnabled(true);
 		break;
 	default:
 		Q_ASSERT(0);

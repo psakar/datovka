@@ -1067,15 +1067,6 @@ sent reply on this message</string>
     <string>Import ZFO file(s) into database</string>
    </property>
   </action>
-  <action name="actionDelete_message_from_server">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete message from server and local database</string>
-   </property>
-  </action>
   <action name="actionCreate_message_from_template">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
