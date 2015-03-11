@@ -57,7 +57,7 @@ public:
 	};
 
 	DlgSendMessage(MessageDb &messDb, QString &dbId, QString &senderName,
-	    Action action, int msgID,
+	    Action action, qint64 msgId,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QString &lastAttAddPath,
@@ -84,7 +84,7 @@ private slots:
 private:
 	QTimer *pingTimer;
 	void initNewMessageDialog(void);
-	int m_msgID;
+	qint64 m_msgID;
 	const QString m_dbId;
 	const QString m_senderName;
 	const Action m_action;

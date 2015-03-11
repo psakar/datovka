@@ -38,13 +38,13 @@
 
 
 DlgSendMessage::DlgSendMessage(MessageDb &messDb, QString &dbId,
-    QString &senderName, Action action, int msgID,
+    QString &senderName, Action action, qint64 msgId,
     const AccountModel::SettingsMap &accountInfo,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QString &lastAttAddPath,
     QWidget *parent)
     : QDialog(parent),
-    m_msgID(msgID),
+    m_msgID(msgId),
     m_dbId(dbId),
     m_senderName(senderName),
     m_action(action),
@@ -204,7 +204,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 {
 	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
-	msgData = m_messDb.msgsGetReplyMsgData(m_msgID);
+	msgData = m_messDb.msgsReplyData(m_msgID);
 	m_dmType = msgData[20];
 	m_dmSenderRefNumber = msgData[10];
 
@@ -286,7 +286,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
 
-	msgData = m_messDb.msgsGetReplyMsgData(m_msgID);
+	msgData = m_messDb.msgsReplyData(m_msgID);
 	m_dmType = msgData[20];
 	m_dmSenderRefNumber = msgData[10];
 

@@ -1082,7 +1082,7 @@ sent reply on this message</string>
      <normaloff>:/icons/16x16/datovka-message.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
    </property>
    <property name="text">
-    <string>Create message from template</string>
+    <string>Use message as template</string>
    </property>
   </action>
  </widget>

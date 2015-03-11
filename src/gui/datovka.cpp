@@ -637,15 +637,12 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
-	ui->actionCreate_message_from_template->setEnabled(true);
-
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(false);
 		html = createAccountInfo(*accountItem);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
-		ui->actionCreate_message_from_template->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
 		msgTblMdl = messageDb->msgsRcvdWithin90DaysModel(dbId);
@@ -667,7 +664,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    messageDb->msgsSntYearlyCounts(dbId, DESCENDING));
 		ui->actionDelete_message_from_db->setEnabled(false);
 		ui->actionDelete_message_from_server->setEnabled(false);
-		ui->actionCreate_message_from_template->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
 		msgTblMdl = messageDb->msgsRcvdModel(dbId);
@@ -783,7 +779,6 @@ setmodel:
 			messageItemRestoreSelection();
 			ui->menuMessage->setEnabled(true);
 			//ui->actionReply_to_the_sender->setEnabled(true);
-			//ui->actionCreate_message_from_template->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
@@ -791,8 +786,8 @@ setmodel:
 		} else {
 			ui->menuMessage->setEnabled(false);
 			ui->actionReply->setEnabled(false);
-			ui->actionReply_to_the_sender->setEnabled(false);
 			ui->actionCreate_message_from_template->setEnabled(false);
+			ui->actionReply_to_the_sender->setEnabled(false);
 			ui->actionVerify_a_message->setEnabled(false);
 			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
@@ -966,6 +961,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		 * single message selected.
 		 */
 		//ui->actionReply->setEnabled(received);
+		ui->actionCreate_message_from_template->setEnabled(true);
 		ui->actionSignature_detail->setEnabled(true);
 		ui->actionAuthenticate_message->setEnabled(true);
 		ui->actionOpen_message_externally->setEnabled(true);
@@ -1043,6 +1039,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		 * multiple messages selected.
 		 */
 		ui->actionReply->setEnabled(false);
+		ui->actionCreate_message_from_template->setEnabled(false);
 		ui->actionSignature_detail->setEnabled(false);
 		ui->actionAuthenticate_message->setEnabled(false);
 		ui->actionOpen_message_externally->setEnabled(false);
@@ -1164,7 +1161,9 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message.png"),
 		    tr("Create message from template"), this,
-		    SLOT(createAndSendMessageFromTmpl()));
+		    SLOT(createAndSendMessageFromTmpl()))->
+		    setEnabled(
+		        ui->actionCreate_message_from_template->isEnabled());
 	}
 	menu->addSeparator();
 	if (singleSelected) {
@@ -3247,6 +3246,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
+	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()), this,
+	    SLOT(createAndSendMessageFromTmpl()));
 	connect(ui->actionSignature_detail, SIGNAL(triggered()), this,
 	    SLOT(showSignatureDetails()));
 	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
@@ -3314,8 +3315,6 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessage()));
 	connect(ui->actionReply_to_the_sender, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
-	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessageFromTmpl()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
@@ -3376,7 +3375,6 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionCreate_message->setEnabled(false);
 	ui->actionReply_to_the_sender->setEnabled(false);
-	ui->actionCreate_message_from_template->setEnabled(false);
 	ui->actionVerify_a_message->setEnabled(false);
 	ui->actionAccount_props->setEnabled(false);
 	ui->actionChange_pwd->setEnabled(false);
@@ -3397,10 +3395,12 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 void MainWindow::setMessageActionVisibility(bool action) const
 /* ========================================================================= */
 {
+	/* Top menu + menu items. */
 	ui->menuMessage->setEnabled(action);
 	ui->actionReply->setEnabled(action); /* Has key short cut. */
+
+	/* Top tool bar. */
 	ui->actionReply_to_the_sender->setEnabled(action);
-	ui->actionCreate_message_from_template->setEnabled(action);
 	ui->actionVerify_a_message->setEnabled(action);
 }
 
@@ -3850,7 +3850,7 @@ void MainWindow::openSendMessageDialog(int action)
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 
-	int msgID = 0;
+	qint64 msgId = -1;
 
 	/* if is reply or template, ID of selected message is required */
 	if (DlgSendMessage::ACT_REPLY == action ||
@@ -3859,7 +3859,7 @@ void MainWindow::openSendMessageDialog(int action)
 		Q_ASSERT(0 != tableModel);
 		QModelIndex index = tableModel->index(
 		    ui->messageList->currentIndex().row(), 0);
-		msgID = tableModel->itemData(index).first().toInt();
+		msgId = tableModel->itemData(index).first().toLongLong();
 	}
 
 	MessageDb *messageDb = accountMessageDb(0);
@@ -3897,7 +3897,7 @@ void MainWindow::openSendMessageDialog(int action)
 	}
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
-	    senderName, (DlgSendMessage::Action) action, msgID,
+	    senderName, (DlgSendMessage::Action) action, msgId,
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, this);
 
