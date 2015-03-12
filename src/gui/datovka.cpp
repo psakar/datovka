@@ -7742,7 +7742,11 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	static QDialog *dlgMsgSearch = 0;
 
 	if (m_searchDlgActive) {
-		dlgMsgSearch->show();
+		if (!dlgMsgSearch->isMinimized()) {
+			dlgMsgSearch->show();
+		} else {
+			dlgMsgSearch->showNormal();
+		}
 		dlgMsgSearch->raise();
 		dlgMsgSearch->activateWindow();
 		return;
