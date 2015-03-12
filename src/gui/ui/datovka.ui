@@ -1092,7 +1092,7 @@ sent reply on this message</string>
     <string>Advance search in the message envelope</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+F</string>
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
  </widget>
