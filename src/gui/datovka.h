@@ -544,6 +544,11 @@ private slots:
 	 */
 	void showMsgAdvancedSearchDlg(void);
 
+	/*!
+	 * @brief On message dialogue exit.
+	 */
+	void msgAdvancedDlgFinished(int result);
+
 private:
 
 	QThread *m_syncAcntThread;
@@ -864,6 +869,8 @@ private:
 	QTimer m_messageMarker; /*!< Used for marking messages as read. */
 	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	qint64 m_lastStoredMessageId; /*!< Last stored message selection. */
+
+	bool m_searchDlgActive; /*!< True if search dialogue is active. */
 
 	int m_received_1;
 	int m_received_2;

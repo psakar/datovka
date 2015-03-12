@@ -102,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
+    m_searchDlgActive(false),
     m_received_1(200),
     m_received_2(200),
     m_sent_1(200),
@@ -7738,6 +7739,15 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 {
 	debugSlotCall();
 
+	static QDialog *dlgMsgSearch = 0;
+
+	if (m_searchDlgActive) {
+		dlgMsgSearch->raise();
+		return;
+	} else {
+		dlgMsgSearch = 0;
+	}
+
 	if (ui->accountList->model()->rowCount() == 0) {
 		return;
 	}
@@ -7771,9 +7781,27 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 		}
 	}
 
-	QDialog *msgSearch = new DlgMsgSearch(messageDbList,
-	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this);
-	connect(msgSearch, SIGNAL(focusSelectedMsg(QString, qint64)),
+	dlgMsgSearch = new DlgMsgSearch(messageDbList,
+	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this, Qt::Window);
+	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64)),
 	    this, SLOT(messageItemFromSearchSelection(QString, qint64)));
-	msgSearch->show();
+	connect(dlgMsgSearch, SIGNAL(finished(int)),
+	    this, SLOT(msgAdvancedDlgFinished(int)));
+	dlgMsgSearch->show();
+	m_searchDlgActive = true;
+}
+
+
+/* ========================================================================= */
+/*
+ * On message dialogue exit.
+ */
+void MainWindow::msgAdvancedDlgFinished(int result)
+/* ========================================================================= */
+{
+	(void) result;
+
+	debugSlotCall();
+
+	m_searchDlgActive = false;
 }

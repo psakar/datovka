@@ -29,8 +29,9 @@
 
 DlgMsgSearch::DlgMsgSearch(
     const QList< QPair <QString,MessageDb*> > messageDbList,
-    const AccountModel::SettingsMap &accountInfo, QWidget *parent)
-    : QDialog(parent),
+    const AccountModel::SettingsMap &accountInfo,
+    QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f),
     m_messageDbList(messageDbList),
     m_accountInfo(accountInfo)
 {
