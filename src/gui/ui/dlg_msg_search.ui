@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Advance message search</string>
+   <string>Advanced message search</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -81,7 +81,7 @@
    <item>
     <widget class="QCheckBox" name="searchAllAcntCheckBox">
      <property name="text">
-      <string>Search in the other accounts (it can be slow)</string>
+      <string>Search also in other accounts (can be slow).</string>
      </property>
     </widget>
    </item>
@@ -117,7 +117,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Fill fields which you want to search</string>
+      <string>Fill in data according to which you want to search:</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>

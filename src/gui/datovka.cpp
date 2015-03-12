@@ -1458,8 +1458,6 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 {
 	debugSlotCall();
 
-	//qDebug() << "messageItemFromSearchSelection" << userName << msgId;
-
 	QModelIndex acntIdxTop;
 	QModelIndex msgIdx;
 
@@ -3259,7 +3257,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionChange_pwd->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
-				ui->actionMsgAdvanceSearch->setEnabled(true);
+				ui->actionMsgAdvancedSearch->setEnabled(true);
 				ui->actionImport_ZFO_file_into_database->
 				    setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
@@ -3400,7 +3398,7 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
-	connect(ui->actionMsgAdvanceSearch, SIGNAL(triggered()), this,
+	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()), this,
 	    SLOT(showMsgAdvancedSearchDlg()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
@@ -3469,7 +3467,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
-	ui->actionMsgAdvanceSearch->setEnabled(false);
+	ui->actionMsgAdvancedSearch->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
 }
@@ -3508,7 +3506,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
-	ui->actionMsgAdvanceSearch->setEnabled(action);
+	ui->actionMsgAdvancedSearch->setEnabled(action);
 	ui->actionImport_ZFO_file_into_database->setEnabled(action);
 }
 

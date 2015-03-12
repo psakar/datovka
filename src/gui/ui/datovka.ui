@@ -486,7 +486,7 @@ sent reply on this message</string>
     <addaction name="actionExport_correspondence_overview"/>
     <addaction name="actionImport_ZFO_file_into_database"/>
     <addaction name="separator"/>
-    <addaction name="actionMsgAdvanceSearch"/>
+    <addaction name="actionMsgAdvancedSearch"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -529,7 +529,7 @@ sent reply on this message</string>
    <addaction name="separator"/>
    <addaction name="actionVerify_a_message"/>
    <addaction name="separator"/>
-   <addaction name="actionMsgAdvanceSearch"/>
+   <addaction name="actionMsgAdvancedSearch"/>
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
    <addaction name="actionChange_pwd"/>
@@ -1080,16 +1080,16 @@ sent reply on this message</string>
     <string>Use message as template</string>
    </property>
   </action>
-  <action name="actionMsgAdvanceSearch">
+  <action name="actionMsgAdvancedSearch">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
    </property>
    <property name="text">
-    <string>Search message in local database</string>
+    <string>Search for messages in local database.</string>
    </property>
    <property name="toolTip">
-    <string>Advance search in the message envelope</string>
+    <string>Advanced searching in message envelopes.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>

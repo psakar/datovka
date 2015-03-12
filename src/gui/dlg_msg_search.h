@@ -22,15 +22,16 @@
  */
 
 
-#ifndef DLG_MSG_SEARCH_H
-#define DLG_MSG_SEARCH_H
+#ifndef _DLG_MSG_SEARCH_H_
+#define _DLG_MSG_SEARCH_H_
+
 
 #include <QDialog>
 
-#include "src/common.h"
-#include "ui_dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
+#include "ui_dlg_msg_search.h"
+
 
 /* tooltip is generated for every item in the search result table */
 #define ENABLE_TOOLTIP 1
@@ -61,4 +62,4 @@ private:
 	    QList <QStringList> msgList);
 };
 
-#endif // DLG_MSG_SEARCH_H
+#endif /* _DLG_MSG_SEARCH_H_ */

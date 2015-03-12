@@ -23,6 +23,9 @@
 
 
 #include "dlg_msg_search.h"
+#include "src/common.h"
+#include "src/log/log.h"
+
 
 DlgMsgSearch::DlgMsgSearch(
     const QList< QPair <QString,MessageDb*> > messageDbList,
@@ -116,7 +119,7 @@ void DlgMsgSearch::initSearchWindow(void)
 void DlgMsgSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-	//qDebug() << "checkInputFields";
+	debugSlotCall();
 
 	bool messageType = true;
 
@@ -313,7 +316,7 @@ void DlgMsgSearch::setFirtsColumnActive(void)
 void DlgMsgSearch::searchMessages(void)
 /* ========================================================================= */
 {
-	qDebug() << "searchMessage";
+	debugSlotCall();
 
 	enum MessageDirection msgType = MSG_ALL;
 	QList <QStringList> msgList;
