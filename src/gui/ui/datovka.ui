@@ -485,6 +485,8 @@ sent reply on this message</string>
     <addaction name="actionView_message_from_ZPO_file"/>
     <addaction name="actionExport_correspondence_overview"/>
     <addaction name="actionImport_ZFO_file_into_database"/>
+    <addaction name="separator"/>
+    <addaction name="actionMsgAdvancedSearch"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -526,6 +528,8 @@ sent reply on this message</string>
    <addaction name="actionReply_to_the_sender"/>
    <addaction name="separator"/>
    <addaction name="actionVerify_a_message"/>
+   <addaction name="separator"/>
+   <addaction name="actionMsgAdvancedSearch"/>
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
    <addaction name="actionChange_pwd"/>
@@ -1074,6 +1078,21 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Use message as template</string>
+   </property>
+  </action>
+  <action name="actionMsgAdvancedSearch">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Search for messages in local database.</string>
+   </property>
+   <property name="toolTip">
+    <string>Advanced searching in message envelopes.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
  </widget>

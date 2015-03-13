@@ -84,8 +84,21 @@ typedef enum {
 
 /* Message direction. */
 enum MessageDirection {
-	MSG_SENT = 0,
-	MSG_RECEIVED = 1
+
+	/* Use only for advanced search. */
+	MSG_ALL = 0,
+
+	/* Received message type in table supplementary_message_data is set
+	 * to 1; message_type = 1.
+	 * Must always be set to 1 because of old Datovka compatibility.
+	 */
+	MSG_RECEIVED = 1,
+
+	/* Sent message type in table supplementary_message_data is set
+	 * to 2; message_type = 2.
+	 * Must always be set to 2 because of old Datovka compatibility.
+	 */
+	MSG_SENT = 2
 };
 
 

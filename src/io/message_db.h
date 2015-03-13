@@ -401,7 +401,7 @@ public:
 
 	/*!
 	 * @brief Returns whether message was read locally.
-	 * 
+	 *
 	 * @param[in] dmId  Message id.
 	 * @retunrn False if not read or on failure.
 	 */
@@ -570,6 +570,26 @@ public:
 	 * @return Message state number or -1 on error.
 	 */
 	int messageState(qint64 dmId) const;
+
+	/*!
+	 * @brief Advance message envelope search.
+	 *
+	 * @return message item list pass to search query.
+	 */
+	QList <QStringList> msgsAdvancedSearchMessageEnvelope(
+	    qint64 dmId,
+	    const QString &dmAnnotation,
+	    const QString &dbIDSender, const QString &dmSender,
+	    const QString &dmSenderAddress,
+	    const QString &dbIDRecipient, const QString &dmRecipient,
+	    const QString &dmRecipientAddress,
+	    const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent,
+	    const QString &dmRecipientRefNumber,
+	    const QString &dmRecipientIdent,
+	    const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Update message envelope delivery information.

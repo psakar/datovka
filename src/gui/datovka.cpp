@@ -52,6 +52,7 @@
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
@@ -101,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
+    m_searchDlgActive(false),
     m_received_1(200),
     m_received_2(200),
     m_sent_1(200),
@@ -1443,6 +1445,84 @@ void MainWindow::messageItemRestoreSelection(void)
 				ui->messageList->scrollTo(index);
 			}
 		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Select account via userName and focus on message ID from search selection.
+ */
+void MainWindow::messageItemFromSearchSelection(const QString &userName,
+    qint64 msgId)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndex acntIdxTop;
+	QModelIndex msgIdx;
+
+	/* first step: search correspond account index from username */
+	int topItemCount = m_accountModel.rowCount();
+	for (int i = 0; i < topItemCount; i++) {
+		const QStandardItem *item = m_accountModel.item(i,0);
+		const AccountModel::SettingsMap itemSettings =
+		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		if (itemSettings.userName() == userName) {
+			acntIdxTop = m_accountModel.indexFromItem(item);
+			break;
+		}
+	}
+
+	if (!acntIdxTop.isValid()) {
+		return;
+	}
+
+	/* second step: find and select message according to msgId */
+	/* first - allReceived */
+	QModelIndex tmpIdx = acntIdxTop.child(2,0).child(0,0);
+	for (int c = 0; c < 2; ++c) {
+		ui->accountList->setCurrentIndex(tmpIdx);
+		accountItemCurrentChanged(tmpIdx);
+
+		const QAbstractItemModel *model = ui->messageList->model();
+		Q_ASSERT(0 != model);
+
+		int rowCount = model->rowCount();
+		int row = 0;
+
+		if (0 == rowCount) {
+			/* Do nothing on empty model. */
+			return;
+		}
+
+		/* If the ID does not exist then don't search for it. */
+		if (-1 == msgId) {
+			row = rowCount;
+		}
+
+		/* Find and select the message with the ID. */
+		for (; row < rowCount; ++row) {
+			/*
+			 * TODO -- Search in a more resource-saving way.
+			 * Eliminate index copying, use smarter search.
+			 */
+			msgIdx = model->index(row, 0);
+			if (msgIdx.data().toLongLong() == msgId) {
+				break;
+			}
+		}
+
+		if (row < rowCount) {
+			/* Message found. */
+			ui->messageList->setCurrentIndex(msgIdx);
+			if (msgIdx.isValid()) {
+				ui->messageList->scrollTo(msgIdx);
+				break;
+			}
+		}
+		/* next allSent */
+		tmpIdx = acntIdxTop.child(2,0).child(1,0);
 	}
 }
 
@@ -3178,6 +3258,9 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionChange_pwd->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
+				ui->actionMsgAdvancedSearch->setEnabled(true);
+				ui->actionImport_ZFO_file_into_database->
+				    setEnabled(true);
 				ui->actionDownload_messages->setEnabled(true);
 				ui->actionReceived_all->setEnabled(true);
 				break;
@@ -3316,6 +3399,8 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
 	    SLOT(verifyMessage()));
+	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()), this,
+	    SLOT(showMsgAdvancedSearchDlg()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
 	connect(ui->actionChange_pwd, SIGNAL(triggered()), this,
@@ -3382,6 +3467,8 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionSync_all_accounts->setEnabled(false);
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
+	ui->actionImport_ZFO_file_into_database->setEnabled(false);
+	ui->actionMsgAdvancedSearch->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
 }
@@ -3420,6 +3507,8 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
+	ui->actionMsgAdvancedSearch->setEnabled(action);
+	ui->actionImport_ZFO_file_into_database->setEnabled(action);
 }
 
 
@@ -7638,4 +7727,87 @@ void MainWindow::messageItemsSetProcessStatus(
 	 */
 	updateExistingAccountModelUnread(ui->accountList->
 	    selectionModel()->currentIndex());
+}
+
+
+/* ========================================================================= */
+/*
+ * Show advanced message search dialogue.
+ */
+void MainWindow::showMsgAdvancedSearchDlg(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	static QDialog *dlgMsgSearch = 0;
+
+	if (m_searchDlgActive) {
+		if (!dlgMsgSearch->isMinimized()) {
+			dlgMsgSearch->show();
+		} else {
+			dlgMsgSearch->showNormal();
+		}
+		dlgMsgSearch->raise();
+		dlgMsgSearch->activateWindow();
+		return;
+	} else {
+		dlgMsgSearch = 0;
+	}
+
+	if (ui->accountList->model()->rowCount() == 0) {
+		return;
+	}
+
+	QPair <QString,MessageDb*> userNameAndMsgDb;
+	QList< QPair <QString,MessageDb*> > messageDbList;
+
+	/* get pointer to database for current accounts */
+	QModelIndex currIndex = ui->accountList->currentIndex();
+	currIndex = AccountModel::indexTop(currIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+	userNameAndMsgDb.first = accountInfo.userName();
+	userNameAndMsgDb.second = messageDb;
+	messageDbList.append(userNameAndMsgDb);
+
+	/* get pointer to database for other accounts */
+	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		if (currIndex != index) {
+			QStandardItem *accountItem = m_accountModel.
+			    itemFromIndex(index);
+			const AccountModel::SettingsMap accountInfo =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			MessageDb *messageDb = accountMessageDb(accountItem);
+			userNameAndMsgDb.first = accountInfo.userName();
+			userNameAndMsgDb.second = messageDb;
+			messageDbList.append(userNameAndMsgDb);
+		}
+	}
+
+	dlgMsgSearch = new DlgMsgSearch(messageDbList,
+	    currIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap(), this, Qt::Window);
+	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64)),
+	    this, SLOT(messageItemFromSearchSelection(QString, qint64)));
+	connect(dlgMsgSearch, SIGNAL(finished(int)),
+	    this, SLOT(msgAdvancedDlgFinished(int)));
+	dlgMsgSearch->show();
+	m_searchDlgActive = true;
+}
+
+
+/* ========================================================================= */
+/*
+ * On message dialogue exit.
+ */
+void MainWindow::msgAdvancedDlgFinished(int result)
+/* ========================================================================= */
+{
+	(void) result;
+
+	debugSlotCall();
+
+	m_searchDlgActive = false;
 }
