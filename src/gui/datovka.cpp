@@ -1774,11 +1774,11 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO();
+		exportSelectedMessageAsZFO(m_save_attach_dir);
 	}
 
 	if (globPref.all_attachments_save_zfo_delinfo) {
-		exportDeliveryInfoAsZFO();
+		exportDeliveryInfoAsZFO(m_save_attach_dir);
 	}
 
 	if (unspecifiedFailed) {
@@ -6261,7 +6261,7 @@ void MainWindow::showHelp(void)
 /*
  * Export message into as ZFO file dialogue.
  */
-void MainWindow::exportSelectedMessageAsZFO(void)
+void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6316,8 +6316,15 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    QString("DDZ_%1.zfo").arg(dmId);
+	QString fileName;
+
+	if (attachPath.isNull()) {
+		fileName = m_on_export_zfo_activate + QDir::separator() +
+		    QString("DDZ_%1.zfo").arg(dmId);
+	} else {
+		fileName = attachPath + QDir::separator() +
+		    QString("DDZ_%1.zfo").arg(dmId);
+	}
 
 	Q_ASSERT(!fileName.isEmpty());
 
@@ -6330,10 +6337,12 @@ void MainWindow::exportSelectedMessageAsZFO(void)
 		return;
 	}
 
-	/* remember path for settings */
-	m_on_export_zfo_activate =
-	    QFileInfo(fileName).absoluteDir().absolutePath();
-	storeExportPath();
+	/* remember path for settings if attachPath was not set */
+	if (attachPath.isNull()) {
+		m_on_export_zfo_activate =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
 
 	QByteArray data = QByteArray::fromBase64(base64);
 
@@ -6410,7 +6419,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 /*
  * Export delivery information as ZFO file dialog.
  */
-void MainWindow::exportDeliveryInfoAsZFO(void)
+void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6467,8 +6476,15 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    QString("DDZ_%1_info.zfo").arg(dmId);
+	QString fileName;
+
+	if (attachPath.isNull()) {
+		fileName = m_on_export_zfo_activate + QDir::separator() +
+		    QString("DDZ_%1_info.zfo").arg(dmId);
+	} else {
+		fileName = attachPath + QDir::separator() +
+		    QString("DDZ_%1_info.zfo").arg(dmId);
+	}
 
 	Q_ASSERT(!fileName.isEmpty());
 
@@ -6482,10 +6498,12 @@ void MainWindow::exportDeliveryInfoAsZFO(void)
 		return;
 	}
 
-	/* remember path for settings */
-	m_on_export_zfo_activate =
-	    QFileInfo(fileName).absoluteDir().absolutePath();
-	storeExportPath();
+	/* remember path for settings if attachPath was not set */
+	if (attachPath.isNull()) {
+		m_on_export_zfo_activate =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
 
 	QByteArray data = QByteArray::fromBase64(base64);
 

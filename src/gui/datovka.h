@@ -358,12 +358,12 @@ private slots:
 	/*!
 	 * @brief Export message into as ZFO file dialog.
 	 */
-	void exportSelectedMessageAsZFO(void);
+	void exportSelectedMessageAsZFO(const QString &attachPath = QString());
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
 	 */
-	void exportDeliveryInfoAsZFO(void);
+	void exportDeliveryInfoAsZFO(const QString &attachPath = QString());
 
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
