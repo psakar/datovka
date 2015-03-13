@@ -3221,7 +3221,7 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		//qDebug() << queryStr;
 
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			return msgList;
 		}
@@ -3259,7 +3259,7 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		//qDebug() << queryStr;
 
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			query.lastError().text().toUtf8().constData());
 			return msgList;
 		}
@@ -3291,7 +3291,7 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return msgList;
 	}
