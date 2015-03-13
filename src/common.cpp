@@ -86,6 +86,8 @@ GlobPreferences::GlobPreferences(void)
     use_global_paths(false),
     save_attachments_path(QDir::homePath()),
     add_file_to_attachments_path(QDir::homePath()),
+    all_attachments_save_zfo_delinfo(false),
+    all_attachments_save_zfo_msg(false),
     isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
@@ -224,6 +226,15 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 		add_file_to_attachments_path =
 		    dlftlGlobPref.add_file_to_attachments_path;
 	}
+
+	all_attachments_save_zfo_msg = settings.value(
+	    "preferences/all_attachments_save_zfo_msg",
+	    dlftlGlobPref.all_attachments_save_zfo_msg).toBool();
+
+	all_attachments_save_zfo_delinfo = settings.value(
+	    "preferences/all_attachments_save_zfo_delinfo",
+	    dlftlGlobPref.all_attachments_save_zfo_delinfo).toBool();
+
 }
 
 
@@ -323,6 +334,18 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    add_file_to_attachments_path) {
 		settings.setValue("add_file_to_attachments_path",
 		    add_file_to_attachments_path);
+	}
+
+	if (dlftlGlobPref.all_attachments_save_zfo_msg !=
+	    all_attachments_save_zfo_msg) {
+		settings.setValue("all_attachments_save_zfo_msg",
+		    all_attachments_save_zfo_msg);
+	}
+
+	if (dlftlGlobPref.all_attachments_save_zfo_delinfo !=
+	    all_attachments_save_zfo_delinfo) {
+		settings.setValue("all_attachments_save_zfo_delinfo",
+		    all_attachments_save_zfo_delinfo);
 	}
 
 	settings.endGroup();
