@@ -988,14 +988,21 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		    ui->verifySignature));
 		ui->messageInfo->setReadOnly(true);
 
-		int msgState = messageDb->msgGetProcessState(msgId);
+		if (received) {
+			int msgState = messageDb->msgGetProcessState(msgId);
 
-		/* msgState is -1 if message is not in database */
-		if (msgState >= 0) {
-			ui->messageStateCombo->setCurrentIndex(msgState);
+			/* msgState is -1 if message is not in database */
+			if (msgState >= 0) {
+				ui->messageStateCombo->setCurrentIndex(
+				    msgState);
+			} else {
+				/* insert message state into database */
+				messageDb->msgSetProcessState(msgId, UNSETTLED,
+				    true);
+				ui->messageStateCombo->setCurrentIndex(
+				    UNSETTLED);
+			}
 		} else {
-			/* insert message state into database */
-			messageDb->msgSetProcessState(msgId, UNSETTLED, true);
 			ui->messageStateCombo->setCurrentIndex(UNSETTLED);
 		}
 
