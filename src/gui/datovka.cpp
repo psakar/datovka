@@ -1773,6 +1773,14 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		}
 	}
 
+	if (globPref.all_attachments_save_zfo_msg) {
+		exportSelectedMessageAsZFO();
+	}
+
+	if (globPref.all_attachments_save_zfo_delinfo) {
+		exportDeliveryInfoAsZFO();
+	}
+
 	if (unspecifiedFailed) {
 		showStatusTextWithTimeout(tr("Some attachments of "
 		    "message \"%1\" were not saved to disk!").arg(dmId));

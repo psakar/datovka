@@ -66,6 +66,10 @@ void DlgPreferences::initPrefDialog(void)
 	this->enableGlobalPaths->setChecked(globPref.use_global_paths);
 	this->savePath->setText(globPref.save_attachments_path);
 	this->addFilePath->setText(globPref.add_file_to_attachments_path);
+	this->all_attachments_save_zfo_msg->
+	    setChecked(globPref.all_attachments_save_zfo_msg);
+	this->all_attachments_save_zfo_delinfo->
+	    setChecked(globPref.all_attachments_save_zfo_delinfo);
 
 	/* TODO - this choice must be disabled */
 //	this->send_stats_with_version_checks->
@@ -223,4 +227,8 @@ void DlgPreferences::saveChanges(void) const
 	globPref.use_global_paths = this->enableGlobalPaths->isChecked();
 	globPref.save_attachments_path = this->savePath->text();
 	globPref.add_file_to_attachments_path = this->addFilePath->text();
+	globPref.all_attachments_save_zfo_msg =
+	    this->all_attachments_save_zfo_msg->isChecked();
+	globPref.all_attachments_save_zfo_delinfo =
+	    this->all_attachments_save_zfo_delinfo->isChecked();
 }

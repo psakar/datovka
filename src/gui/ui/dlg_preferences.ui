@@ -663,7 +663,7 @@ download date in the Datovka database.</string>
      </widget>
      <widget class="QWidget" name="tab_5_directories">
       <attribute name="title">
-       <string>Directories</string>
+       <string>Saving</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
@@ -677,6 +677,11 @@ download date in the Datovka database.</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="toolTip">
+          <string>When allowed, Datovka will use the following directories
+as paths for loading and saving files in all accounts. 
+Per-account path remembering will be disabled.</string>
+         </property>
          <property name="title">
           <string>Use global path settings</string>
          </property>
@@ -687,33 +692,6 @@ download date in the Datovka database.</string>
           <bool>false</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_14">
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <italic>true</italic>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Note: When allowed, Datovka will use the following directories as paths for loading and saving files in all accounts. Per-account path remembering will be disabled.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="Line" name="line_2">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QLabel" name="savePathLabel">
             <property name="font">
@@ -827,6 +805,50 @@ download date in the Datovka database.</string>
              </spacer>
             </item>
            </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>These actions will be performed when saving all message attachments.</string>
+         </property>
+         <property name="title">
+          <string>When saving all attachments also:</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_16">
+          <item>
+           <widget class="QCheckBox" name="all_attachments_save_zfo_msg">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Save signed message to ZFO</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="all_attachments_save_zfo_delinfo">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Save signed delivery info to ZFO</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

@@ -200,6 +200,8 @@ public:
 	bool use_global_paths;
 	QString save_attachments_path;
 	QString add_file_to_attachments_path;
+	bool all_attachments_save_zfo_delinfo;
+	bool all_attachments_save_zfo_msg;
 	int isds_download_timeout_ms;
 
 	/*!
