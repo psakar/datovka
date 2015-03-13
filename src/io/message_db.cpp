@@ -671,13 +671,13 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
 	    "ON (messages.dmId = process_state.message_id) "
 	    "WHERE (dbIDRecipient = :recipDbId) ";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -760,13 +760,13 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -850,14 +850,14 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":year", year);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -937,7 +937,7 @@ QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
 		break;
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -949,7 +949,7 @@ QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 
@@ -977,7 +977,7 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -988,9 +988,9 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 			yearlyCounts.append(QPair<QString, int>(yearList[i],
 			    query.value(0).toInt()));
 		} else {
-			logError(
+			logErrorNL(
 			    "Cannot execute SQL query and/or read SQL data: "
-			    "%s.\n",
+			    "%s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -1025,7 +1025,7 @@ int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
 	    " and "
 	    "(read_locally = 0)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1034,8 +1034,8 @@ int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
 	    query.first() &&query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1066,7 +1066,7 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 	    " and "
 	    "(read_locally = 0)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1076,8 +1076,8 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1110,14 +1110,14 @@ DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
 //	    "m.dbIDSender = :sendDbId"
 	    "s.message_type = :message_type";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 //	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1182,14 +1182,14 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
 	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
 	    " (m.dmDeliveryTime IS NULL))";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 //	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1254,7 +1254,7 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	    " and "
 	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1262,7 +1262,7 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
 	query.bindValue(":message_type", TYPE_SENT);
 	query.bindValue(":year", year);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1331,7 +1331,7 @@ QStringList MessageDb::msgsSntYears(const QString &sendDbId,
 		break;
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1344,7 +1344,7 @@ QStringList MessageDb::msgsSntYears(const QString &sendDbId,
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 
@@ -1377,7 +1377,7 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 		    " and "
 		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -1389,9 +1389,9 @@ QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
 			yearlyCounts.append(QPair<QString, int>(
 			    yearList[i], query.value(0).toInt()));
 		} else {
-			logError(
+			logErrorNL(
 			    "Cannot execute SQL query and/or read SQL data: "
-			    "%s.\n",
+			    "%s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -1428,7 +1428,7 @@ int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
 	    " and "
 	    "(s.read_locally = 0)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1438,8 +1438,8 @@ int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1472,7 +1472,7 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 	    " and "
 	    "(s.read_locally = 0)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1483,8 +1483,8 @@ int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1518,7 +1518,7 @@ QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
 	    "FROM messages WHERE dmID = :dmId";
 
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1557,8 +1557,8 @@ QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
 		msgData[20] = query.value(20).toString();
 		return msgData;
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1585,7 +1585,7 @@ bool MessageDb::msgsVerificationAttempted(qint64 dmId) const
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1596,8 +1596,8 @@ bool MessageDb::msgsVerificationAttempted(qint64 dmId) const
 		bool ret = ! query.value(0).isNull();
 		return ret;
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1622,7 +1622,7 @@ bool MessageDb::msgsVerified(qint64 dmId) const
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1631,8 +1631,8 @@ bool MessageDb::msgsVerified(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1656,7 +1656,7 @@ bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 	    "WHERE "
 	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1665,8 +1665,8 @@ bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toBool();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1690,7 +1690,7 @@ bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 	    "SET read_locally = :read WHERE "
 	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1716,7 +1716,7 @@ bool MessageDb::smsgdtSetAllLocallyRead(bool read)
 	queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1768,7 +1768,7 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 	    "(m.dmSenderAddress IS NOT NULL)"
 	    " ORDER BY m.dmID DESC";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1787,7 +1787,7 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1830,7 +1830,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1883,8 +1883,8 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 		html += strongAccountInfoLine(QObject::tr("Recipient Address"),
 		    query.value(5).toString());
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1897,7 +1897,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1912,8 +1912,8 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 			}
 		}
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1928,7 +1928,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	queryStr += " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1948,8 +1948,8 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 		    QString::number(query.value(2).toInt()) + " -- " +
 		    msgStatusToText(query.value(2).toInt()));
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1960,7 +1960,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	    "message_id = :dmId"
 	    " ORDER BY dmEventTime ASC";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1982,7 +1982,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 			query.next();
 		} 
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -1991,7 +1991,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	    " FROM files WHERE "
 	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2008,7 +2008,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 		    " FROM messages WHERE "
 		    "dmID = :dmId";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -2027,7 +2027,7 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 				    QObject::tr("(not available)"));
 			}
 		} else {
-			logError("Cannot execute SQL query: %s.\n",
+			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -2147,7 +2147,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
 	    "FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2259,15 +2259,15 @@ QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
 
 		html += messageTableInfoEndPdf();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 
 	queryStr = "SELECT _dmFileDescr FROM files WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2287,7 +2287,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
 		}
 		html += messageTableInfoEndPdf();
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2336,7 +2336,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 	    "dmID = :dmId";
 
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2452,8 +2452,8 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 		        dateTimeDisplayFormat));
 		html += messageTableInfoEndPdf();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2461,7 +2461,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 	queryStr = "SELECT dmEventTime, dmEventDescr "
 	    "FROM events WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2484,7 +2484,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 		}
 		html += messageTableInfoEndPdf();
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2512,7 +2512,7 @@ QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
 	    "dmEncodedContent FROM files WHERE message_id = :msgId";
 
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2529,7 +2529,7 @@ QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2557,13 +2557,13 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	queryStr += " FROM files WHERE "
 	    "message_id = :msgId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":msgId", msgId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2607,7 +2607,7 @@ int MessageDb::msgsStatusIfExists(qint64 dmId) const
 	queryStr = "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
 
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2622,7 +2622,7 @@ int MessageDb::msgsStatusIfExists(qint64 dmId) const
 			goto fail;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2631,7 +2631,7 @@ int MessageDb::msgsStatusIfExists(qint64 dmId) const
 	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
 	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2641,8 +2641,8 @@ int MessageDb::msgsStatusIfExists(qint64 dmId) const
 		Q_ASSERT(query.value(0).toInt() < 2);
 		inSupplementary = (1 == query.value(0).toInt());
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2676,7 +2676,7 @@ bool MessageDb::isDeliveryInfoRawDb(qint64 dmId) const
 	queryStr = "SELECT count(*) FROM raw_delivery_info_data "
 	    "WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2686,8 +2686,8 @@ bool MessageDb::isDeliveryInfoRawDb(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return 0 < query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2719,7 +2719,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	    ":dmPersonalDelivery, :dmMessageStatus)";
 
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
@@ -2734,7 +2734,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	query.bindValue(":dmMessageStatus", 1);
 
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
@@ -2744,7 +2744,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
 	    ":download_date, :custom_data)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
@@ -2756,7 +2756,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	query.bindValue(":custom_data", "null");
 
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
@@ -2818,7 +2818,7 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 	    ":dmAttachmentSize, :_dmType"
 	    ")";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2857,7 +2857,7 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2867,7 +2867,7 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
 	    ":download_date, :custom_data)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2883,7 +2883,7 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 	query.bindValue(":custom_data", "null");
 
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2954,7 +2954,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 	    "dmAttachmentSize = :dmAttachmentSize, "
 	    "_dmType = :_dmType WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -2993,7 +2993,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 	query.bindValue(":_dmType", _dmType);
 
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3002,7 +3002,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 	    "message_type = :message_type "
 	    "WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3016,7 +3016,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3038,7 +3038,7 @@ int MessageDb::messageState(qint64 dmId) const
 	QString queryStr = "SELECT dmMessageStatus "
 	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3047,8 +3047,8 @@ int MessageDb::messageState(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3075,7 +3075,7 @@ bool MessageDb::msgsUpdateMessageState(qint64 dmId,
 	    "dmMessageStatus = :dmMessageStatus "
 	    "WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3087,7 +3087,7 @@ bool MessageDb::msgsUpdateMessageState(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3115,7 +3115,7 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr "
 	    "AND _dmMimeType = :dmMimeType";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3130,7 +3130,7 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 			dbId = -1;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3154,7 +3154,7 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 		    ":dmEncodedContent)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3173,7 +3173,7 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3197,7 +3197,7 @@ bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,
 	QString queryStr = "SELECT id FROM hashes WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3211,7 +3211,7 @@ bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,
 			dbId = -1;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3225,7 +3225,7 @@ bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,
 		    " VALUES (:dmId, :value, :algorithm)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3239,7 +3239,7 @@ bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3264,7 +3264,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(qint64 dmId,
 	QString queryStr = "SELECT id FROM events WHERE "
 	    "message_id = :message_id AND dmEventTime = :dmEventTime";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3279,7 +3279,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(qint64 dmId,
 			dbId = -1;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3294,7 +3294,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(qint64 dmId,
 		    ":dmEventDescr)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3308,7 +3308,7 @@ bool MessageDb::msgsInsertUpdateMessageEvent(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3336,7 +3336,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 	QString queryStr = "SELECT message_id FROM raw_message_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3350,7 +3350,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 			dbId = -1;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3365,7 +3365,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 		"VALUES (:dmId, :message_type, :data)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3380,7 +3380,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 		query.bindValue(":dbId", dbId);
 	}
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3427,7 +3427,7 @@ QByteArray MessageDb::msgsMessageBase64(qint64 dmId) const
 	queryStr =
 	    "SELECT data FROM raw_message_data WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3437,8 +3437,8 @@ QByteArray MessageDb::msgsMessageBase64(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toByteArray();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3477,7 +3477,7 @@ QByteArray MessageDb::msgsGetDeliveryInfoBase64(qint64 dmId) const
 	queryStr =
 	    "SELECT data FROM raw_delivery_info_data WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3487,8 +3487,8 @@ QByteArray MessageDb::msgsGetDeliveryInfoBase64(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toByteArray();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3512,7 +3512,7 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 	QString queryStr = "SELECT message_id FROM raw_delivery_info_data "
 	    "WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3526,7 +3526,7 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 			dbId = -1;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3539,7 +3539,7 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 		    "(message_id, data) VALUES (:dmId, :data)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3552,7 +3552,7 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3587,7 +3587,7 @@ bool MessageDb::updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
 	QString queryStr = "UPDATE supplementary_message_data SET "
 	    "custom_data = :custom_data WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3597,7 +3597,7 @@ bool MessageDb::updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3621,7 +3621,7 @@ QStringList MessageDb::msgsGetHashFromDb(qint64 dmId) const
 	queryStr = "SELECT value, _algorithm FROM hashes WHERE "
 	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3635,7 +3635,7 @@ QStringList MessageDb::msgsGetHashFromDb(qint64 dmId) const
 			return retitem;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3663,13 +3663,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	/* Delete hash from hashes table. */
 	queryStr = "DELETE FROM hashes WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3677,13 +3677,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	/* Delete file(s) from files table. */
 	queryStr = "DELETE FROM files WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3691,13 +3691,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	/* Delete event(s) from events table. */
 	queryStr = "DELETE FROM events WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3706,13 +3706,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr=
 	    "DELETE FROM raw_message_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3721,13 +3721,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "DELETE FROM raw_delivery_info_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3736,13 +3736,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "DELETE FROM supplementary_message_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3751,7 +3751,7 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "SELECT certificate_id FROM message_certificate_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3762,7 +3762,7 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 			certificateId = query.value(0).toInt();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3773,13 +3773,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "DELETE FROM message_certificate_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3788,7 +3788,7 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "SELECT count(*) FROM message_certificate_data WHERE "
 	    "certificate_id = :certificate_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3804,7 +3804,7 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 			}
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3816,13 +3816,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 		queryStr = "DELETE FROM certificate_data WHERE "
 		    "id = :certificate_id";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
 		query.bindValue(":certificate_id", certificateId);
 		if (!query.exec()) {
-			logError("Cannot execute SQL query: %s.\n",
+			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3832,13 +3832,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	queryStr = "DELETE FROM process_state WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3846,13 +3846,13 @@ bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
 	/* Delete message from messages table. */
 	queryStr = "DELETE FROM messages WHERE dmID = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3886,7 +3886,7 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 	    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
 	    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3904,7 +3904,7 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 			query.next();
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3932,7 +3932,7 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 	    "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
 	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3948,8 +3948,8 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 		messageItems.append(dateTime.toString("dd.MM.yyyy"));
 		messageItems.append(dateTime.toString("hh:mm:ss"));
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3978,7 +3978,7 @@ QStringList MessageDb::getMsgForCsvExport(qint64 dmId) const
 	    "dmSenderOrgUnitNum, dmRecipientOrgUnit, dmRecipientOrgUnitNum "
 	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3997,8 +3997,8 @@ QStringList MessageDb::getMsgForCsvExport(qint64 dmId) const
 			messageItems.append(element);
 		}
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4026,7 +4026,7 @@ bool MessageDb::msgsSetVerified(qint64 dmId, bool verified)
 	    "SET is_verified = :verified WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4036,7 +4036,7 @@ bool MessageDb::msgsSetVerified(qint64 dmId, bool verified)
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4071,7 +4071,7 @@ bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
 		    "message_id, state) VALUES (:dmId, :state)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4081,7 +4081,7 @@ bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
 	if (query.exec()) {
 		return true;
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4105,7 +4105,7 @@ int MessageDb::msgGetProcessState(qint64 dmId) const
 
 	queryStr = "SELECT state FROM process_state WHERE message_id = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4115,8 +4115,8 @@ int MessageDb::msgGetProcessState(qint64 dmId) const
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4141,7 +4141,7 @@ QByteArray MessageDb::msgsTimestampRaw(qint64 dmId) const
 	    " FROM messages WHERE "
 	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4156,8 +4156,8 @@ QByteArray MessageDb::msgsTimestampRaw(qint64 dmId) const
 
 		return QByteArray::fromBase64(byteArray);
 	} else {
-		logError(
-		    "Cannot execute SQL query and/or read SQL data: %s.\n",
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4186,7 +4186,7 @@ bool MessageDb::addDmtypeColumn(void)
 
 	queryStr = "SELECT _dmType FROM messages LIMIT 1";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4194,14 +4194,14 @@ bool MessageDb::addDmtypeColumn(void)
 		query.clear();
 		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
 		if (query.exec()) {
 			return true;
 		} else {
-			logError("Cannot execute SQL query: %s.\n",
+			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4262,7 +4262,7 @@ bool MessageDb::copyDb(const QString &newFileName)
 	open_ret = openDb(copy_ret ? newFileName : oldFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
-		logError("File '%s' could not be opened.\n",
+		logErrorNL("File '%s' could not be opened.",
 		    copy_ret ?
 		        newFileName.toUtf8().constData() :
 		        oldFileName.toUtf8().constData());
@@ -4311,7 +4311,7 @@ bool MessageDb::moveDb(const QString &newFileName)
 	open_ret = openDb(move_ret ? newFileName : oldFileName);
 	Q_ASSERT(open_ret);
 	if (!open_ret) {
-		logError("File '%s' could not be opened.\n",
+		logErrorNL("File '%s' could not be opened.",
 		    move_ret ?
 		        newFileName.toUtf8().constData() :
 		        oldFileName.toUtf8().constData());
@@ -4360,7 +4360,7 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	if (!reopen_ret) {
 		open_ret = openDb(oldFileName);
 		if (!open_ret) {
-			logError("File '%s' could not be opened.\n",
+			logErrorNL("File '%s' could not be opened.",
 			    oldFileName.toUtf8().constData());
 			/* TODO -- qFatal() ? */
 			return false;
@@ -4388,7 +4388,7 @@ bool MessageDb::checkDb(bool quick)
 		queryStr = "PRAGMAintegrity_check";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4400,7 +4400,7 @@ bool MessageDb::checkDb(bool quick)
 			ret = false;
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4428,7 +4428,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 	QString queryStr = "SELECT id FROM certificate_data WHERE "
 	    "der_data = :der_data";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4441,7 +4441,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 			certId = -1; /* Not found. */
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4451,7 +4451,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 		/* Create unique certificate identifier. */
 		queryStr = "SELECT max(id) FROM certificate_data";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4463,7 +4463,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 				certId = -1;
 			}
 		} else {
-			logError("Cannot execute SQL query: %s.\n",
+			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4478,14 +4478,14 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 		queryStr = "INSERT INTO certificate_data "
 		    "(id, der_data) VALUES (:id, :der_data)";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
 		query.bindValue(":id", certId);
 		query.bindValue(":der_data", crtBase64);
 		if (!query.exec()) {
-			logError("Cannot execute SQL query: %s.\n",
+			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4505,7 +4505,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 	queryStr = "SELECT * FROM message_certificate_data WHERE"
 	    " message_id = :message_id";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4514,7 +4514,7 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 		query.first();
 		certEntryFound = query.isValid();
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4533,14 +4533,14 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 		    "(:message_id, :certificate_id)";
 	}
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
 	query.bindValue(":certificate_id", certId);
 	if (!query.exec()) {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4647,7 +4647,7 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 		    " FROM supplementary_message_data WHERE "
 		    "message_id = :dmId";
 		if (!query.prepare(queryStr)) {
-			logError("Cannot prepare SQL query: %s.\n",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4661,9 +4661,9 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 				return dateTime;
 			}
 		} else {
-			logError(
+			logErrorNL(
 			    "Cannot execute SQL query and/or read SQL data: "
-			    "%s.\n",
+			    "%s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -4692,7 +4692,7 @@ QJsonDocument MessageDb::smsgdCustomData(qint64 msgId) const
 	    " FROM supplementary_message_data WHERE "
 	    "message_id = :msgId";
 	if (!query.prepare(queryStr)) {
-		logError("Cannot prepare SQL query: %s.\n",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4704,7 +4704,7 @@ QJsonDocument MessageDb::smsgdCustomData(qint64 msgId) const
 			    query.value(0).toByteArray());
 		}
 	} else {
-		logError("Cannot execute SQL query: %s.\n",
+		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -4960,7 +4960,7 @@ bool DbContainer::deleteMessageDb(MessageDb *db)
 	    fileName.toUtf8().constData());
 
 	if (!QFile::remove(fileName)) {
-		logError("Failed deleting database file '%s'.\n",
+		logErrorNL("Failed deleting database file '%s'.",
 		    fileName.toUtf8().constData());
 		return false;
 	}

@@ -418,6 +418,23 @@ extern GlobLog globLog; /*!< Global log facility. */
 
 
 /*!
+ * @brief Logs error message. Automatic newline is added.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logErrorNL(format, ...) \
+	if (globLog.logVerbosity() > 0) { \
+		globLog.log(LOGSRC_DEF, LOG_ERR, \
+		    format " (%s:%d, %s())\n", \
+		    __VA_ARGS__, __FILE__, __LINE__, __func__); \
+	} else { \
+		globLog.log(LOGSRC_DEF, LOG_ERR, \
+		    format "\n", __VA_ARGS__); \
+	} \
+
+
+/*!
  * @brief Logs multi-line error message.
  *
  * @param[in] format Format of the message, follows printf syntax.
