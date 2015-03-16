@@ -74,7 +74,11 @@ GlobPreferences::GlobPreferences(void)
     store_additional_data_on_disk(true),
     certificate_validation_date(DOWNLOAD_DATE),
     check_crl(true),
+#ifdef DISABLE_VERSION_CHECK_BY_DEFAULT
+    check_new_versions(false),
+#else /* !DISABLE_VERSION_CHECK_BY_DEFAULT */
     check_new_versions(true),
+#endif /* DISABLE_VERSION_CHECK_BY_DEFAULT */
     send_stats_with_version_checks(false),
     download_on_background(false),
     timer_value(10),

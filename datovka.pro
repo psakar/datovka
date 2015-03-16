@@ -152,6 +152,11 @@ isEqual(STATIC, 1) {
 	TARGET = $${APP_NAME}-portable
 }
 
+!isEmpty(DISABLE_VERSION_CHECK_BY_DEFAULT) {
+	warning(Disabling version check by default.)
+	DEFINES += DISABLE_VERSION_CHECK_BY_DEFAULT=1
+}
+
 macx {
 	ICON = res/datovka.icns
 
