@@ -63,9 +63,6 @@ unix:!macx {
 	TEXT_FILES_INST_DIR = "$${DATADIR}/doc/$${APP_NAME}"
 	LOCALE_INST_DIR = "$${DATADIR}/$${APP_NAME}/localisations"
 
-	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
-		PKGDATADIR=\\\"$$PKGDATADIR\\\"
-
 	application.target = $${APP_NAME}
 	application.path = "$${BINDIR}"
 	application.files = $${APP_NAME}
