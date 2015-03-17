@@ -3656,6 +3656,42 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Check whether whole message is stored in database.
+ */
+bool MessageDb::msgsStoredWhole(qint64 dmId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr =
+	    "SELECT count(*) FROM raw_message_data WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt() != 0;
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Get raw message data from raw_message_data table.
  */
 QByteArray MessageDb::msgsMessageBase64(qint64 dmId) const

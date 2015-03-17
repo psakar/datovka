@@ -500,26 +500,34 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			}
 			newcnt++;
 
-		/* message is in db (dmDbMsgStatus <> -1) */
+		/* Message is in db (dmDbMsgStatus <> -1). */
 		} else {
 			if (MSG_SENT == msgDirect) {
 				int dmNewMsgStatus = convertHexToDecIndex(
 				     *item->envelope->dmMessageStatus);
 
-				/* Sent messages will be whole downloaded only
-				 * if there are in message state 1 or 2.
-				*/
-				if (dmDbMsgStatus <= 2) {
-					if (globPref.auto_download_whole_messages) {
-						downloadMessage(acntTopIdx, dmId,
-						    true, msgDirect, messageDb, "", 0, 0);
-					}
+				/*
+				 * Sent messages content will be downloaded
+				 * only if those message state is 1 or 2.
+				 */
+				if (globPref.auto_download_whole_messages &&
+				    (dmDbMsgStatus <= 2)) {
+					downloadMessage(acntTopIdx, dmId,
+					    true, msgDirect, messageDb,
+					    "", 0, 0);
 				}
 
 				if (dmDbMsgStatus != dmNewMsgStatus) {
 					getMessageState(msgDirect, acntTopIdx,
 					    dmId, true, messageDb);
 				}
+			}
+
+			/* Message is in db, but the content is missing. */
+			if (globPref.auto_download_whole_messages &&
+			    !messageDb.msgsStoredWhole(dmId)) {
+				downloadMessage(acntTopIdx, dmId,
+				    true, msgDirect, messageDb, "", 0, 0);
 			}
 		}
 
@@ -803,25 +811,26 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
 
 	/* Insert/update all attachment files */
-	struct isds_list *file;
-	file = msg->documents;
+	const struct isds_list *file = msg->documents;
 	while (0 != file) {
-		isds_document *item = (isds_document *) file->data;
+		const isds_document *item = (isds_document *) file->data;
 
 		QByteArray dmEncodedContentBase64 =
 		    QByteArray((char *)item->data,
 		        item->data_length).toBase64();
 
 		/* Insert/update file to db */
-		(messageDb.msgsInsertUpdateMessageFile(dmID,
+		if (messageDb.msgsInsertUpdateMessageFile(dmID,
 		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
 		   item->dmMimeType, item->dmFormat,
 		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContentBase64))
-		? qDebug() << "Message file" << item->dmFileDescr <<
-		    "was stored into db..."
-		: qDebug() << "ERROR: Message file" << item->dmFileDescr <<
-		    "insert!";
+		   dmEncodedContentBase64)) {
+			qDebug() << "Message file" << item->dmFileDescr
+			    << "was stored into db...";
+		} else {
+			qDebug() << "ERROR: Message file" << item->dmFileDescr
+			    << "insert!";
+		}
 		file = file->next;
 	}
 
