@@ -167,11 +167,11 @@ public:
 		//DATE_FORMAT_CUSTOM = 4
 	} DateFmt;
 
-	typedef enum {
+	enum SelectType {
 		SELECT_NEWEST = 1,
 		SELECT_LAST_VISITED = 2,
 		SELECT_NOTHING = 3
-	} SelectType;
+	};
 
 
 	GlobPreferences(void);
@@ -195,7 +195,7 @@ public:
 	bool download_at_start;
 	DateFmt date_format;
 	QString language;
-	SelectType after_start_select;
+	enum SelectType after_start_select;
 	const int message_mark_as_read_timeout;
 	bool use_global_paths;
 	QString save_attachments_path;

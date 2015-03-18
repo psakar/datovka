@@ -102,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
+    m_lastSelectedAccountNodeType(AccountModel::nodeUnknown),
+    m_lastStoredAccountNodeType(AccountModel::nodeUnknown),
     m_searchDlgActive(false),
     m_received_1(200),
     m_received_2(200),
@@ -520,7 +522,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutChanged()), this,
-		    SLOT(messageItemRestoreSelection()));
+		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
@@ -549,7 +551,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutChanged()), this,
-		    SLOT(messageItemRestoreSelection()));
+		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
 		const QStandardItem *accountItemTop =
@@ -708,7 +710,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemStoreSelectionOnModelChange()));
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutChanged()), this,
-		    SLOT(messageItemRestoreSelection()));
+		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 	}
 
 	/* Depending on which item was clicked show/hide elements. */
@@ -761,7 +763,7 @@ setmodel:
 		    SLOT(messageItemStoreSelectionOnModelChange()));
 		connect(ui->messageList->model(),
 		    SIGNAL(layoutChanged()), this,
-		    SLOT(messageItemRestoreSelection()));
+		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 		/* Clear message info. */
 		ui->messageInfo->clear();
 		/* Clear attachment list. */
@@ -770,7 +772,7 @@ setmodel:
 		itemModel = ui->messageList->model();
 		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
-			messageItemRestoreSelection();
+			messageItemRestoreSelectionOnModelChange();
 			ui->menuMessage->setEnabled(true);
 			//ui->actionReply_to_the_sender->setEnabled(true);
 			ui->actionVerify_a_message->setEnabled(true);
@@ -1146,8 +1148,6 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 			    .first().data().toLongLong());
 		}
 	}
-	//messageItemStoreSelection(
-	//    index.sibling(index.row(), 0).data().toLongLong());
 
 	menu->addAction(
 	    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
@@ -1243,6 +1243,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 	m_lastSelectedMessageId = msgId;
 	qDebug() << "Last selected" << m_lastSelectedMessageId;
 	if (-1 == msgId) {
+		m_lastSelectedAccountNodeType = AccountModel::nodeUnknown;
 		return;
 	}
 
@@ -1251,8 +1252,9 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 	 * selection to the model.
 	 */
 	QModelIndex acntIdx = ui->accountList->currentIndex();
+	m_lastSelectedAccountNodeType = AccountModel::nodeType(acntIdx);
 	if (AccountModel::nodeRecentReceived ==
-	    AccountModel::nodeType(acntIdx)) {
+	    m_lastSelectedAccountNodeType) {
 
 		qDebug() << "Storing recent received selection into the model"
 		    << msgId;
@@ -1302,6 +1304,7 @@ void MainWindow::messageItemStoreSelectionOnModelChange(void)
 	debugSlotCall();
 
 	m_lastStoredMessageId = m_lastSelectedMessageId;
+	m_lastStoredAccountNodeType = m_lastSelectedAccountNodeType;
 	qDebug() << "Last stored position" << m_lastStoredMessageId;
 }
 
@@ -1310,12 +1313,138 @@ void MainWindow::messageItemStoreSelectionOnModelChange(void)
 /*
  * Restores message selection.
  */
-void MainWindow::messageItemRestoreSelection(void)
+void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex index;
+	QModelIndex msgIndex;
+
+	const QAbstractItemModel *model = ui->messageList->model();
+	Q_ASSERT(0 != model);
+
+	int rowCount = model->rowCount();
+	int row = 0;
+
+	QModelIndex acntIdx = ui->accountList->currentIndex();
+	AccountModel::NodeType acntNodeType = AccountModel::nodeType(acntIdx);
+
+	if (0 == rowCount) {
+		/* Do nothing on empty model. */
+		return;
+	}
+
+	/* Search for existing ID if account position did not change. */
+	if ((-1 != m_lastStoredMessageId) &&
+	    (m_lastStoredAccountNodeType == acntNodeType)) {
+
+		/* Find and select the message with the ID. */
+		for (row = 0; row < rowCount; ++row) {
+			/*
+			 * TODO -- Search in a more resource-saving way.
+			 * Eliminate index copying, use smarter search.
+			 */
+			if (model->index(row, 0).data().toLongLong() ==
+			    m_lastStoredMessageId) {
+				msgIndex = model->index(row, 0);
+				break;
+			}
+		}
+
+		if (msgIndex.isValid()) { /*(row < rowCount)*/
+			/* Message found. */
+			ui->messageList->setCurrentIndex(msgIndex);
+			ui->messageList->scrollTo(msgIndex);
+			return;
+		}
+	}
+
+	/*
+	 * If we selected a message from last received then restore the
+	 * selection according to the model.
+	 */
+	switch (globPref.after_start_select) {
+	case GlobPreferences::SELECT_NEWEST:
+		/* Search for the message with the largest id. */
+		{
+			msgIndex = model->index(0, 0);
+			qint64 largestSoFar = msgIndex.data().toLongLong();
+			for (row = 1; row < rowCount; ++row) {
+				/*
+				 * TODO -- Search in a more resource-saving
+				 * way. Eliminate index copying, use smarter
+				 * search.
+				 */
+				if (largestSoFar < model->index(row, 0).data()
+				        .toLongLong()) {
+					msgIndex = model->index(row, 0);
+					largestSoFar =
+					    msgIndex.data().toLongLong();
+				}
+			}
+			if (msgIndex.isValid()) {
+				ui->messageList->setCurrentIndex(msgIndex);
+				ui->messageList->scrollTo(msgIndex);
+			}
+		}
+		break;
+	case GlobPreferences::SELECT_LAST_VISITED:
+		{
+			qint64 msgLastId = -1;
+			if (AccountModel::nodeRecentReceived == acntNodeType) {
+				acntIdx = AccountModel::indexTop(acntIdx);
+				const AccountModel::SettingsMap accountInfo =
+				    acntIdx.data(ROLE_ACNT_CONF_SETTINGS)
+				        .toMap();
+				msgLastId = accountInfo.lastMsg();
+			} else {
+				msgLastId = m_lastStoredMessageId;
+			}
+			if (0 <= msgLastId) {
+				/* Find and select the message with the ID. */
+				for (row = 0; row < rowCount; ++row) {
+					/*
+					 * TODO -- Search in a more
+					 * resource-saving way.
+					 * Eliminate index copying, use
+					 * smarter search.
+					 */
+					if (model->index(row, 0)
+					        .data().toLongLong()
+					    == msgLastId) {
+						msgIndex =
+						    model->index(row, 0);
+						break;
+					}
+				}
+				if (msgIndex.isValid()) { /*(row < rowCount)*/
+					ui->messageList->setCurrentIndex(
+					    msgIndex);
+					ui->messageList->scrollTo(msgIndex);
+				}
+			}
+		}
+		break;
+	case GlobPreferences::SELECT_NOTHING:
+		/* Don't select anything. */
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Restores message selection.
+ */
+void MainWindow::messageItemRestoreSelectionAfterLayoutChange(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndex msgIndex;
 
 	const QAbstractItemModel *model = ui->messageList->model();
 	Q_ASSERT(0 != model);
@@ -1329,7 +1458,7 @@ void MainWindow::messageItemRestoreSelection(void)
 	}
 
 	/* If the ID does not exist then don't search for it. */
-	if (-1 == m_lastStoredMessageId) {
+	if (-1 == m_lastSelectedMessageId) {
 		row = rowCount;
 	}
 
@@ -1339,112 +1468,17 @@ void MainWindow::messageItemRestoreSelection(void)
 		 * TODO -- Search in a more resource-saving way.
 		 * Eliminate index copying, use smarter search.
 		 */
-		index = model->index(row, 0);
-		if (index.data().toLongLong() == m_lastStoredMessageId) {
+		if (model->index(row, 0).data().toLongLong() ==
+		    m_lastSelectedMessageId) {
+			msgIndex = model->index(row, 0);
 			break;
 		}
 	}
 
-	if (row < rowCount) {
+	if (msgIndex.isValid()) { /*(row < rowCount)*/
 		/* Message found. */
-		ui->messageList->setCurrentIndex(index);
-		if (index.isValid()) {
-			ui->messageList->scrollTo(index);
-		}
-	} else {
-		/*
-		 * If we selected a message from last received then restore the
-		 * selection according to the model.
-		 */
-		QModelIndex acntIdx = ui->accountList->currentIndex();
-		if (AccountModel::nodeRecentReceived ==
-		    AccountModel::nodeType(acntIdx)) {
-			if (GlobPreferences::SELECT_NEWEST ==
-			    globPref.after_start_select) {
-				/*
-				 * Search for the message with the largest id.
-				 */
-				index = model->index(0, 0);
-				QModelIndex newIndex = index;
-				qint64 largestSoFar =
-				    index.data().toLongLong();
-				for (row = 1; row < rowCount; ++row) {
-					/*
-					 * TODO -- Search in a more
-					 * resource-saving way.
-					 * Eliminate index copying, use
-					 * smarter search.
-					 */
-					index = model->index(row, 0);
-					if (largestSoFar < model->
-					        index(row, 0).data()
-					            .toLongLong()) {
-						index = model->index(row, 0);
-						largestSoFar =
-						    index.data().toLongLong();
-						newIndex = index;
-					}
-				}
-				if (newIndex.isValid()) {
-					ui->messageList->setCurrentIndex(newIndex);
-					ui->messageList->scrollTo(newIndex);
-				}
-
-			} else if (GlobPreferences::SELECT_LAST_VISITED ==
-			    globPref.after_start_select) {
-				acntIdx = AccountModel::indexTop(acntIdx);
-				const AccountModel::SettingsMap accountInfo =
-				    acntIdx.data(ROLE_ACNT_CONF_SETTINGS).
-					toMap();
-				qint64 msgLastId = accountInfo.lastMsg();
-				if (0 <= msgLastId) {
-
-					/*
-					 * Find and select the message with the
-					 * ID.
-					 */
-					for (row = 0; row < rowCount; ++row) {
-						/*
-						 * TODO -- Search in a more
-						 * resource-saving way.
-						 * Eliminate index copying, use
-						 * smarter search.
-						 */
-						index = model->index(row, 0);
-						if (index.data().toLongLong()
-						    == msgLastId) {
-							break;
-						}
-					}
-					if (row < rowCount) {
-						/* Set selection if found. */
-						ui->messageList->
-						    setCurrentIndex(index);
-						if (index.isValid()) {
-							ui->messageList->scrollTo(index);
-						}
-					}
-				}
-			} else if (GlobPreferences::SELECT_NOTHING ==
-				    globPref.after_start_select) {
-					/* Select last row. */
-					index = model->index(rowCount - 1, 0);
-					ui->messageList->
-					    setCurrentIndex(index);
-					if (index.isValid()) {
-						ui->messageList->scrollTo(index);
-					}
-			} else {
-				Q_ASSERT(0);
-			}
-		} else {
-			/* Select last row. */
-			index = model->index(rowCount - 1, 0);
-			ui->messageList->setCurrentIndex(index);
-			if (index.isValid()) {
-				ui->messageList->scrollTo(index);
-			}
-		}
+		ui->messageList->setCurrentIndex(msgIndex);
+		ui->messageList->scrollTo(msgIndex);
 	}
 }
 

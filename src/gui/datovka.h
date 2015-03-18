@@ -149,7 +149,12 @@ private slots:
 	/*!
 	 * @brief Restores message selection.
 	 */
-	void messageItemRestoreSelection(void);
+	void messageItemRestoreSelectionOnModelChange(void);
+
+	/*!
+	 * @brief Restores message selection.
+	 */
+	void messageItemRestoreSelectionAfterLayoutChange(void);
 
 	/*!
 	 * @brief Select account via userName and focus on
@@ -869,6 +874,10 @@ private:
 	QTimer m_messageMarker; /*!< Used for marking messages as read. */
 	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */
 	qint64 m_lastStoredMessageId; /*!< Last stored message selection. */
+	enum AccountModel::NodeType
+	    m_lastSelectedAccountNodeType; /*!< Last selected position. */
+	enum AccountModel::NodeType
+	    m_lastStoredAccountNodeType; /*!< Last stored account position. */
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
 
