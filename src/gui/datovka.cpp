@@ -1494,7 +1494,11 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 	debugSlotCall();
 
 	QModelIndex acntIdxTop;
-	QModelIndex msgIdx;
+
+	/* If the ID does not exist then don't search for it. */
+	if (-1 == msgId) {
+		return;
+	}
 
 	/* first step: search correspond account index from username */
 	int topItemCount = m_accountModel.rowCount();
@@ -1516,6 +1520,7 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 	/* first - allReceived */
 	QModelIndex tmpIdx = acntIdxTop.child(2,0).child(0,0);
 	for (int c = 0; c < 2; ++c) {
+		QModelIndex msgIdx;
 		ui->accountList->setCurrentIndex(tmpIdx);
 		accountItemCurrentChanged(tmpIdx);
 
@@ -1523,37 +1528,30 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 		Q_ASSERT(0 != model);
 
 		int rowCount = model->rowCount();
-		int row = 0;
 
 		if (0 == rowCount) {
 			/* Do nothing on empty model. */
 			return;
 		}
 
-		/* If the ID does not exist then don't search for it. */
-		if (-1 == msgId) {
-			row = rowCount;
-		}
-
 		/* Find and select the message with the ID. */
-		for (; row < rowCount; ++row) {
+		for (int row = 0; row < rowCount; ++row) {
 			/*
 			 * TODO -- Search in a more resource-saving way.
 			 * Eliminate index copying, use smarter search.
 			 */
-			msgIdx = model->index(row, 0);
-			if (msgIdx.data().toLongLong() == msgId) {
+			if (model->index(row, 0).data().toLongLong() ==
+			    msgId) {
+				msgIdx = model->index(row, 0);
 				break;
 			}
 		}
 
-		if (row < rowCount) {
+		if (msgIdx.isValid()) { /*(row < rowCount)*/
 			/* Message found. */
 			ui->messageList->setCurrentIndex(msgIdx);
-			if (msgIdx.isValid()) {
-				ui->messageList->scrollTo(msgIdx);
-				break;
-			}
+			ui->messageList->scrollTo(msgIdx);
+			break;
 		}
 		/* next allSent */
 		tmpIdx = acntIdxTop.child(2,0).child(1,0);
