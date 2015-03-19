@@ -186,13 +186,13 @@ void DlgChangePwd::changePassword(void)
 		}
 
 		otp->otp_code = !this->secCodeLineEdit->text().isEmpty() ?
-		    strdup(this->secCodeLineEdit->text().toStdString().c_str())
+		    strdup(this->secCodeLineEdit->text().toUtf8().constData())
 		    : NULL;
 
 		status = isds_change_password(
 		    isdsSessions.session(m_accountInfo.userName()),
-		    this->currentPwdLineEdit->text().toStdString().c_str(),
-		    this->newPwdLineEdit->text().toStdString().c_str(),
+		    this->currentPwdLineEdit->text().toUtf8().constData(),
+		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    otp, &refnumber);
 
 		free(otp->otp_code);
@@ -200,8 +200,8 @@ void DlgChangePwd::changePassword(void)
 	} else {
 		status = isds_change_password(
 		    isdsSessions.session(m_accountInfo.userName()),
-		    this->currentPwdLineEdit->text().toStdString().c_str(),
-		    this->newPwdLineEdit->text().toStdString().c_str(),
+		    this->currentPwdLineEdit->text().toUtf8().constData(),
+		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    NULL, &refnumber);
 	}
 

@@ -96,7 +96,7 @@ void qDebugCall(const char *fmt, ...)
 	QString outStr;
 	outStr.vsprintf(fmt, argp);
 
-	qDebug("%s", outStr.toStdString().c_str());
+	qDebug("%s", outStr.toUtf8().constData());
 
 	va_end(argp);
 }
@@ -112,7 +112,7 @@ void qDebugCallV(const char *fmt, va_list ap)
 	QString outStr;
 	outStr.vsprintf(fmt, ap);
 
-	qDebug("%s", outStr.toStdString().c_str());
+	qDebug("%s", outStr.toUtf8().constData());
 }
 
 
@@ -269,7 +269,7 @@ int GlobLog::openFile(const QString &fName, LogMode mode)
 		break;
 	}
 
-	of = fopen(fName.toStdString().c_str(), openMode);
+	of = fopen(fName.toUtf8().constData(), openMode);
 	if (of == NULL) {
 		goto fail;
 	}
@@ -605,7 +605,7 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 	/* Syslog. */
 	if (facilityLevels(LF_SYSLOG, source) & logMask) {
 		/* TODO -- Write to syslog. */
-//		syslog(level, "%s", msg.toStdString().c_str());
+//		syslog(level, "%s", msg.toUtf8().constData());
 	}
 
 	/* Log files. */
@@ -623,7 +623,7 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 			}
 
 			Q_ASSERT(of != NULL);
-			fputs(msg.toStdString().c_str(), of);
+			fputs(msg.toUtf8().constData(), of);
 			/*
 			 * Windows buffers stderr, explicit flush is needed.
 			 */
@@ -678,7 +678,7 @@ void GlobLog::logPrefixVlogMl(int source, uint8_t level,
 		/* Syslog. */
 		if (facilityLevels(LF_SYSLOG, source) & logMask) {
 			/* TODO -- Write to syslog. */
-//			syslog(level, "%s", msg.toStdString().c_str());
+//			syslog(level, "%s", msg.toUtf8().constData());
 		}
 
 		/* Log files. */
@@ -696,7 +696,7 @@ void GlobLog::logPrefixVlogMl(int source, uint8_t level,
 				}
 
 				Q_ASSERT(of != NULL);
-				fputs(msg.toStdString().c_str(), of);
+				fputs(msg.toUtf8().constData(), of);
 				fputc('\n', of);
 				/*
 				 * Windows buffers stderr, explicit flush is

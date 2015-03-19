@@ -5628,14 +5628,14 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 /*
  * Create account info for ZFO file(s) import into database.
  */
-QList<MainWindow::accountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
+QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
 	QString userName;
-	accountDataStruct accountData;
-	QList<accountDataStruct> accountList;
+	AccountDataStruct accountData;
+	QList<AccountDataStruct> accountList;
 	accountList.clear();
 
 	/* get username, accountName, ID of databox and pointer to database
@@ -5723,7 +5723,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	QList<accountDataStruct> const accountList =
+	QList<AccountDataStruct> const accountList =
 	    createAccountInfoForZFOImport();
 
 	if (accountList.isEmpty()) {
@@ -5826,7 +5826,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
  * Execute the import of delivery info ZFO file(s) into database.
  */
 void MainWindow::importDeliveryInfoZFO(
-    const QList<accountDataStruct> &accountList, const QStringList &files,
+    const QList<AccountDataStruct> &accountList, const QStringList &files,
     QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
     QList<QPair<QString,QString>> &errorFilesList)
@@ -5978,7 +5978,7 @@ void MainWindow::importDeliveryInfoZFO(
 /*
  * Execute the import of message ZFO file(s) into database.
  */
-void  MainWindow::importMessageZFO(const QList<accountDataStruct> &accountList,
+void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
     const QStringList &files, QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
     QList<QPair<QString,QString>> &errorFilesList)

@@ -193,7 +193,7 @@ void Tbl::reloadLocalisedDescription(void)
 	class AttrProp prop;
 	for (; it != attrPropsSources.end(); ++it) {
 		prop.type = it.value().type;
-		prop.desc = QObject::tr(it.value().desc.toStdString().c_str());
+		prop.desc = QObject::tr(it.value().desc.toUtf8().constData());
 		attrProps.insert(it.key(), prop);
 	}
 }

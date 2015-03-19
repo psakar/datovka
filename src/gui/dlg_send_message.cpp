@@ -935,7 +935,7 @@ void DlgSendMessage::sendMessage(void)
 		 // TODO - document is binary document only -> is_xml = false;
 		document->is_xml = false;
 		document->dmFileDescr = strdup(this->attachmentTableWidget->
-		    item(i, 0)->text().toStdString().c_str());
+		    item(i, 0)->text().toUtf8().constData());
 		if (NULL == document->dmFileDescr) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -953,8 +953,8 @@ void DlgSendMessage::sendMessage(void)
 		*/
 		QString mimeType = "";
 		//document->dmMimeType = strdup(this->attachmentTableWidget->
-		//    item(i, 2)->text().toStdString().c_str());
-		document->dmMimeType = strdup(mimeType.toStdString().c_str());
+		//    item(i, 2)->text().toUtf8().constData());
+		document->dmMimeType = strdup(mimeType.toUtf8().constData());
 		if (NULL == document->dmMimeType) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -992,7 +992,7 @@ void DlgSendMessage::sendMessage(void)
 	/* Set mandatory fields of envelope. */
 	sent_envelope->dmID = NULL;
 	sent_envelope->dmAnnotation =
-	    strdup(this->subjectText->text().toStdString().c_str());
+	    strdup(this->subjectText->text().toUtf8().constData());
 	if (NULL == sent_envelope->dmAnnotation) {
 		errorMsg = "Out of memory.";
 		goto finish;
@@ -1001,7 +1001,7 @@ void DlgSendMessage::sendMessage(void)
 	/* Set optional fields. */
 	if (!this->dmSenderIdent->text().isEmpty()) {
 		sent_envelope->dmSenderIdent =
-		    strdup(this->dmSenderIdent->text().toStdString().c_str());
+		    strdup(this->dmSenderIdent->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmSenderIdent) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1009,7 +1009,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!this->dmRecipientIdent->text().isEmpty()) {
 		sent_envelope->dmRecipientIdent =
-		    strdup(this->dmRecipientIdent->text().toStdString().c_str());
+		    strdup(this->dmRecipientIdent->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmRecipientIdent) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1017,7 +1017,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!this->dmSenderRefNumber->text().isEmpty()) {
 		sent_envelope->dmSenderRefNumber =
-		    strdup(this->dmSenderRefNumber->text().toStdString().c_str());
+		    strdup(this->dmSenderRefNumber->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmSenderRefNumber) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1025,7 +1025,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!this->dmRecipientRefNumber->text().isEmpty()) {
 		sent_envelope->dmRecipientRefNumber =
-		    strdup(this->dmRecipientRefNumber->text().toStdString().c_str());
+		    strdup(this->dmRecipientRefNumber->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmRecipientRefNumber) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1058,7 +1058,7 @@ void DlgSendMessage::sendMessage(void)
 
 	if (!this->dmLegalTitleSect->text().isEmpty()) {
 		sent_envelope->dmLegalTitleSect =
-		    strdup(this->dmLegalTitleSect->text().toStdString().c_str());
+		    strdup(this->dmLegalTitleSect->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmLegalTitleSect) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1066,7 +1066,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!this->dmLegalTitlePar->text().isEmpty()) {
 		sent_envelope->dmLegalTitlePar =
-		    strdup(this->dmLegalTitlePar->text().toStdString().c_str());
+		    strdup(this->dmLegalTitlePar->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmLegalTitlePar) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1074,7 +1074,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!this->dmLegalTitlePoint->text().isEmpty()) {
 		sent_envelope->dmLegalTitlePoint =
-		    strdup(this->dmLegalTitlePoint->text().toStdString().c_str());
+		    strdup(this->dmLegalTitlePoint->text().toUtf8().constData());
 		if (NULL == sent_envelope->dmLegalTitlePoint) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1108,7 +1108,7 @@ void DlgSendMessage::sendMessage(void)
 		}
 		if (!m_dmSenderRefNumber.isEmpty()) {
 			sent_envelope->dmRecipientRefNumber =
-			    strdup(m_dmSenderRefNumber.toStdString().c_str());
+			    strdup(m_dmSenderRefNumber.toUtf8().constData());
 			if (NULL == sent_envelope->dmRecipientRefNumber) {
 				errorMsg = "Out of memory.";
 				goto finish;
@@ -1121,7 +1121,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	if (!dmType.isEmpty()) {
-		sent_envelope->dmType = strdup(dmType.toStdString().c_str());
+		sent_envelope->dmType = strdup(dmType.toUtf8().constData());
 		if (NULL == sent_envelope->dmType) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1158,7 +1158,7 @@ void DlgSendMessage::sendMessage(void)
 		}
 		sent_message->envelope->dbIDRecipient =
 		    strdup(this->recipientTableWidget->item(i,0)->
-		    text().toStdString().c_str());
+		    text().toUtf8().constData());
 		if (NULL == sent_message->envelope->dbIDRecipient) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -1170,7 +1170,7 @@ void DlgSendMessage::sendMessage(void)
 		}
 		if (!this->dmToHands->text().isEmpty()) {
 			sent_message->envelope->dmToHands =
-			    strdup(this->dmToHands->text().toStdString().c_str());
+			    strdup(this->dmToHands->text().toUtf8().constData());
 			if (NULL == sent_message->envelope->dmToHands) {
 				errorMsg = "Out of memory.";
 				goto finish;

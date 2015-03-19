@@ -215,8 +215,8 @@ isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
 
 	return isds_login(isdsSession,
 	    testingSession ? isds_testing_locator : isds_locator,
-	    userName.toStdString().c_str(),
-	    pwd.toStdString().c_str(),
+	    userName.toUtf8().constData(),
+	    pwd.toUtf8().constData(),
 	    NULL, NULL);
 }
 
@@ -250,9 +250,9 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
 	/* TODO - set correct cert format and certificate/key */
 	pki_credentials->engine = NULL;
 	pki_credentials->certificate_format = PKI_FORMAT_DER;
-	pki_credentials->certificate = strdup(certPath.toStdString().c_str());
+	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
 	pki_credentials->key_format = PKI_FORMAT_DER;
-	pki_credentials->key = strdup(certPath.toStdString().c_str());
+	pki_credentials->key = strdup(certPath.toUtf8().constData());
 	pki_credentials->passphrase = NULL;
 
 	status = isds_login(isdsSession,
@@ -300,14 +300,14 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
 	/* TODO - set correct cert format and certificate/key */
 	pki_credentials->engine = NULL;
 	pki_credentials->certificate_format = PKI_FORMAT_DER;
-	pki_credentials->certificate = strdup(certPath.toStdString().c_str());
+	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
 	pki_credentials->key_format = PKI_FORMAT_DER;
-	pki_credentials->key = strdup(certPath.toStdString().c_str());
+	pki_credentials->key = strdup(certPath.toUtf8().constData());
 	pki_credentials->passphrase = NULL;
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    idBox.toStdString().c_str(), NULL, pki_credentials, NULL);
+	    idBox.toUtf8().constData(), NULL, pki_credentials, NULL);
 
 	isds_pki_credentials_free(&pki_credentials);
 
@@ -352,14 +352,14 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	/* TODO - set correct cert format and certificate/key */
 	pki_credentials->engine = NULL;
 	pki_credentials->certificate_format = PKI_FORMAT_DER;
-	pki_credentials->certificate = strdup(certPath.toStdString().c_str());
+	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
 	pki_credentials->key_format = PKI_FORMAT_DER;
-	pki_credentials->key = strdup(certPath.toStdString().c_str());
+	pki_credentials->key = strdup(certPath.toUtf8().constData());
 	pki_credentials->passphrase = NULL;
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    userName.toStdString().c_str(), password.toStdString().c_str(),
+	    userName.toUtf8().constData(), password.toUtf8().constData(),
 	    pki_credentials, NULL);
 
 	isds_pki_credentials_free(&pki_credentials);
@@ -415,7 +415,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
-	    userName.toStdString().c_str(), pwd.toStdString().c_str(),
+	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
 	    NULL, otp);
 
 	res = otp->resolution;
@@ -445,21 +445,21 @@ struct isds_PersonName * isds_PersonName_create(const QString &pnFirstName,
 	memset(pn, 0, sizeof(*pn));
 
 	if (!pnFirstName.isEmpty()) {
-		pn->pnFirstName = strdup(pnFirstName.toStdString().c_str());
+		pn->pnFirstName = strdup(pnFirstName.toUtf8().constData());
 		if (NULL == pn->pnFirstName) {
 			goto fail;
 		}
 	}
 
 	if (!pnMiddleName.isEmpty()) {
-		pn->pnMiddleName = strdup(pnMiddleName.toStdString().c_str());
+		pn->pnMiddleName = strdup(pnMiddleName.toUtf8().constData());
 		if (NULL == pn->pnMiddleName) {
 			goto fail;
 		}
 	}
 
 	if (!pnLastName.isEmpty()) {
-		pn->pnLastName = strdup(pnLastName.toStdString().c_str());
+		pn->pnLastName = strdup(pnLastName.toUtf8().constData());
 		if (NULL == pn->pnLastName) {
 			goto fail;
 		}
@@ -467,7 +467,7 @@ struct isds_PersonName * isds_PersonName_create(const QString &pnFirstName,
 
 	if (!pnLastNameAtBirth.isEmpty()) {
 		pn->pnLastNameAtBirth =
-		    strdup(pnLastNameAtBirth.toStdString().c_str());
+		    strdup(pnLastNameAtBirth.toUtf8().constData());
 		if (NULL == pn->pnLastNameAtBirth) {
 			goto fail;
 		}
@@ -499,21 +499,21 @@ struct isds_BirthInfo * isds_BirthInfo_createConsume(struct tm *biDate,
 //	bi->biDate
 
 	if (!biCity.isEmpty()) {
-		bi->biCity = strdup(biCity.toStdString().c_str());
+		bi->biCity = strdup(biCity.toUtf8().constData());
 		if (NULL == bi->biCity) {
 			goto fail;
 		}
 	}
 
 	if (!biCountry.isEmpty()) {
-		bi->biCounty = strdup(biCountry.toStdString().c_str());
+		bi->biCounty = strdup(biCountry.toUtf8().constData());
 		if (NULL == bi->biCounty) {
 			goto fail;
 		}
 	}
 
 	if (!biState.isEmpty()) {
-		bi->biState = strdup(biState.toStdString().c_str());
+		bi->biState = strdup(biState.toUtf8().constData());
 		if (NULL == bi->biState) {
 			goto fail;
 		}
@@ -549,14 +549,14 @@ struct isds_Address * isds_Address_create(const QString &adCity,
 	memset(addr, 0, sizeof(*addr));
 
 	if (!adCity.isEmpty()) {
-		addr->adCity = strdup(adCity.toStdString().c_str());
+		addr->adCity = strdup(adCity.toUtf8().constData());
 		if (NULL == addr->adCity) {
 			goto fail;
 		}
 	}
 
 	if (!adStreet.isEmpty()) {
-		addr->adStreet = strdup(adStreet.toStdString().c_str());
+		addr->adStreet = strdup(adStreet.toUtf8().constData());
 		if (NULL == addr->adStreet) {
 			goto fail;
 		}
@@ -564,7 +564,7 @@ struct isds_Address * isds_Address_create(const QString &adCity,
 
 	if (!adNumberInStreet.isEmpty()) {
 		addr->adNumberInStreet =
-		    strdup(adNumberInStreet.toStdString().c_str());
+		    strdup(adNumberInStreet.toUtf8().constData());
 		if (NULL == addr->adNumberInStreet) {
 			goto fail;
 		}
@@ -572,21 +572,21 @@ struct isds_Address * isds_Address_create(const QString &adCity,
 
 	if (!adNumberInMunicipality.isEmpty()) {
 		addr->adNumberInMunicipality =
-		    strdup(adNumberInMunicipality.toStdString().c_str());
+		    strdup(adNumberInMunicipality.toUtf8().constData());
 		if (NULL == addr->adNumberInMunicipality) {
 			goto fail;
 		}
 	}
 
 	if (!adZipCode.isEmpty()) {
-		addr->adZipCode = strdup(adZipCode.toStdString().c_str());
+		addr->adZipCode = strdup(adZipCode.toUtf8().constData());
 		if (NULL == addr->adZipCode) {
 			goto fail;
 		}
 	}
 
 	if (!adState.isEmpty()) {
-		addr->adState = strdup(adState.toStdString().c_str());
+		addr->adState = strdup(adState.toUtf8().constData());
 		if (NULL == addr->adState) {
 			goto fail;
 		}
@@ -623,7 +623,7 @@ struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
 	memset(doi, 0, sizeof(*doi));
 
 	if (!dbID.isEmpty()) {
-		doi->dbID = strdup(dbID.toStdString().c_str());
+		doi->dbID = strdup(dbID.toUtf8().constData());
 		if (NULL == doi->dbID) {
 			goto fail;
 		}
@@ -634,14 +634,14 @@ struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
 	}
 	*doi->dbType = dbType;
 	if (!ic.isEmpty()) {
-		doi->ic = strdup(ic.toStdString().c_str());
+		doi->ic = strdup(ic.toUtf8().constData());
 		if (NULL == doi->ic) {
 			goto fail;
 		}
 	}
 //	doi->personName
 	if (!firmName.isEmpty()) {
-		doi->firmName = strdup(firmName.toStdString().c_str());
+		doi->firmName = strdup(firmName.toUtf8().constData());
 		if (NULL == doi->firmName) {
 			goto fail;
 		}
@@ -649,31 +649,31 @@ struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
 //	doi->birthInfo
 //	doi->address
 	if (!nationality.isEmpty()) {
-		doi->nationality = strdup(nationality.toStdString().c_str());
+		doi->nationality = strdup(nationality.toUtf8().constData());
 		if (NULL == doi->nationality) {
 			goto fail;
 		}
 	}
 	if (!email.isEmpty()) {
-		doi->email = strdup(email.toStdString().c_str());
+		doi->email = strdup(email.toUtf8().constData());
 		if (NULL == doi->email) {
 			goto fail;
 		}
 	}
 	if (!telNumber.isEmpty()) {
-		doi->telNumber = strdup(telNumber.toStdString().c_str());
+		doi->telNumber = strdup(telNumber.toUtf8().constData());
 		if (NULL == doi->telNumber) {
 			goto fail;
 		}
 	}
 	if (!identifier.isEmpty()) {
-		doi->identifier = strdup(identifier.toStdString().c_str());
+		doi->identifier = strdup(identifier.toUtf8().constData());
 		if (NULL == doi->identifier) {
 			goto fail;
 		}
 	}
 	if (!registryCode.isEmpty()) {
-		doi->registryCode = strdup(registryCode.toStdString().c_str());
+		doi->registryCode = strdup(registryCode.toUtf8().constData());
 		if (NULL == doi->registryCode) {
 			goto fail;
 		}
@@ -748,7 +748,7 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
 	memset(dui, 0, sizeof(*dui));
 
 	if (!userID.isEmpty()) {
-		dui->userID = strdup(userID.toStdString().c_str());
+		dui->userID = strdup(userID.toUtf8().constData());
 		if (NULL == dui->userID) {
 			goto fail;
 		}
@@ -773,42 +773,42 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
 //	bui->biDate = NULL;
 
 	if (!ic.isEmpty()) {
-		dui->ic = strdup(ic.toStdString().c_str());
+		dui->ic = strdup(ic.toUtf8().constData());
 		if (NULL == dui->ic) {
 			goto fail;
 		}
 	}
 
 	if (!firmName.isEmpty()) {
-		dui->firmName = strdup(firmName.toStdString().c_str());
+		dui->firmName = strdup(firmName.toUtf8().constData());
 		if (NULL == dui->firmName) {
 			goto fail;
 		}
 	}
 
 	if (!caStreet.isEmpty()) {
-		dui->caStreet = strdup(caStreet.toStdString().c_str());
+		dui->caStreet = strdup(caStreet.toUtf8().constData());
 		if (NULL == dui->caStreet) {
 			goto fail;
 		}
 	}
 
 	if (!caCity.isEmpty()) {
-		dui->caCity = strdup(caCity.toStdString().c_str());
+		dui->caCity = strdup(caCity.toUtf8().constData());
 		if (NULL == dui->caCity) {
 			goto fail;
 		}
 	}
 
 	if (!caZipCode.isEmpty()) {
-		dui->caZipCode = strdup(caZipCode.toStdString().c_str());
+		dui->caZipCode = strdup(caZipCode.toUtf8().constData());
 		if (NULL == dui->caZipCode) {
 			goto fail;
 		}
 	}
 
 	if (!caState.isEmpty()) {
-		dui->caState = strdup(caState.toStdString().c_str());
+		dui->caState = strdup(caState.toUtf8().constData());
 		if (NULL == dui->caState) {
 			goto fail;
 		}

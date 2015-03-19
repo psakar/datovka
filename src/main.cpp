@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
 	if (!DbContainer::dbDriverSupport()) {
 		logError("Cannot load database driver '%s'.\n",
-		    DbContainer::dbDriverType.toStdString().c_str());
+		    DbContainer::dbDriverType.toUtf8().constData());
 		/* TODO -- throw a dialog notifying the user. */
 		return EXIT_FAILURE;
 	}
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 		localisationDir = appLocalisationDir();
 
 		logInfo("Loading application localisation from path '%s'.\n",
-		    localisationDir.toStdString().c_str());
+		    localisationDir.toUtf8().constData());
 
 		localisationFile = "datovka_";
 
@@ -244,8 +244,8 @@ int main(int argc, char *argv[])
 		if (!appTranslator.load(localisationFile, localisationDir)) {
 			logWarning("Could not load localisation file '%s' "
 			    "from directory '%s'.\n",
-			    localisationFile.toStdString().c_str(),
-			    localisationDir.toStdString().c_str());
+			    localisationFile.toUtf8().constData(),
+			    localisationDir.toUtf8().constData());
 		}
 
 		app.installTranslator(&appTranslator);
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
 		localisationDir = qtLocalisationDir();
 
 		logInfo("Loading Qt localisation from path '%s'.\n",
-		    localisationDir.toStdString().c_str());
+		    localisationDir.toUtf8().constData());
 
 		localisationFile = "qtbase_";
 
@@ -271,8 +271,8 @@ int main(int argc, char *argv[])
 		    !qtTranslator.load(localisationFile, localisationDir)) {
 			logWarning("Could not load localisation file '%s' "
 			    "from directory '%s'.\n",
-			    localisationFile.toStdString().c_str(),
-			    localisationDir.toStdString().c_str());
+			    localisationFile.toUtf8().constData(),
+			    localisationDir.toUtf8().constData());
 		}
 
 		app.installTranslator(&qtTranslator);

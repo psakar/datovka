@@ -146,12 +146,12 @@ bool FileDownloader::setUpHttpProxyAccordingToGlobals(
 
 		logDebugLv0NL("Using proxy host='%s' port='%d' "
 		    "user='%s' password='%s'",
-		    proxy.hostName().toStdString().c_str(),
+		    proxy.hostName().toUtf8().constData(),
 		    proxy.port(),
 		    proxy.user().isEmpty() ? "" :
-		        proxy.user().toStdString().c_str(),
+		        proxy.user().toUtf8().constData(),
 		    proxy.password().isEmpty() ? "" :
-		        proxy.password().toStdString().c_str());
+		        proxy.password().toUtf8().constData());
 
 		return true;
 	}

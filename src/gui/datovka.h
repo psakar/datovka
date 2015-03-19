@@ -65,7 +65,7 @@ public:
 	QStatusBar *statusBar;
 
 	/* tmp account info struct for ZFO import */
-	class accountDataStruct {
+	class AccountDataStruct {
 	public:
 		QString databoxID;
 		QString accountName;
@@ -431,7 +431,7 @@ private slots:
 	/*!
 	 * @brief Create account info for ZFO file(s) import into database.
 	 */
-	QList<accountDataStruct> createAccountInfoForZFOImport(void);
+	QList<AccountDataStruct> createAccountInfoForZFOImport(void);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
@@ -443,7 +443,7 @@ private slots:
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
 	void importDeliveryInfoZFO(
-	    const QList<accountDataStruct> &accountList,
+	    const QList<AccountDataStruct> &accountList,
 	    const QStringList &files,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,
@@ -453,7 +453,7 @@ private slots:
 	 * @brief Import only message ZFO file(s) into database.
 	 */
 	void importMessageZFO(
-	    const QList<accountDataStruct> &accountList,
+	    const QList<AccountDataStruct> &accountList,
 	    const QStringList &files,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,
