@@ -7224,21 +7224,36 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		}
 	}
 
-	/* Read PKCS #12 file and convert to PEM. */
-	QString createdPemPath;
-	if (!p12CertificateToPem(certPath, passphrase, createdPemPath,
-	        accountInfo.userName())) {
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
 		QMessageBox::critical(this,
-		    tr("Cannot decode certificate."),
-		    tr("The certificate file '%1' cannot be decoded by "
-		        "using the supplied password.").arg(certPath),
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
 		    QMessageBox::Ok);
 		return false;
 	}
 
 	status = isdsLoginSystemCert(
 	    isdsSessions.session(accountInfo.userName()),
-	    createdPemPath, passphrase, accountInfo.isTestAccount());
+	    certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
@@ -7328,21 +7343,36 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		}
 	}
 
-	/* Read PKCS #12 file and convert to PEM. */
-	QString createdPemPath;
-	if (!p12CertificateToPem(certPath, passphrase, createdPemPath,
-	        accountInfo.userName())) {
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
 		QMessageBox::critical(this,
-		    tr("Cannot decode certificate."),
-		    tr("The certificate file '%1' cannot be decoded by "
-		        "using the supplied password.").arg(certPath),
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
 		    QMessageBox::Ok);
 		return false;
 	}
 
 	status = isdsLoginUserCertPwd(
 	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, createdPemPath, passphrase,
+	    accountInfo.userName(), pwd, certPath, passphrase,
 	    accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
@@ -7431,21 +7461,36 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		}
 	}
 
-	/* Read PKCS #12 file and convert to PEM. */
-	QString createdPemPath;
-	if (!p12CertificateToPem(certPath, passphrase, createdPemPath,
-	        accountInfo.userName())) {
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
 		QMessageBox::critical(this,
-		    tr("Cannot decode certificate."),
-		    tr("The certificate file '%1' cannot be decoded by "
-		        "using the supplied password.").arg(certPath),
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
 		    QMessageBox::Ok);
 		return false;
 	}
 
 	status = isdsLoginUserCert(isdsSessions.session(
 	    accountInfo.userName()),
-	    idBox, createdPemPath, passphrase, accountInfo.isTestAccount());
+	    idBox, certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
