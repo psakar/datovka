@@ -36,7 +36,7 @@
 
 #include "src/compat/compat_win.h"
 #include "src/crypto/crypto.h"
-#include "src/crypto/crypto_nonthreadsafe.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/log/log_c.h"
 
 

@@ -233,7 +233,6 @@ win32 {
 SOURCES += src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
-    src/crypto/crypto_threadsafe.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_change_pwd.cpp \
     src/gui/dlg_contacts.cpp \
@@ -268,8 +267,7 @@ SOURCES += src/common.cpp \
 HEADERS += src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_threads.h \
-    src/crypto/crypto_nonthreadsafe.h \
-    src/crypto/crypto_threadsafe.h \
+    src/crypto/crypto_funcs.h \
     src/gui/datovka.h \
     src/gui/dlg_change_pwd.h \
     src/gui/dlg_contacts.h \

@@ -50,7 +50,7 @@
 
 #include "message_db.h"
 #include "src/common.h"
-#include "src/crypto/crypto_threadsafe.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
@@ -2083,8 +2083,8 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 			timeStampStr = QObject::tr("Not present");
 		} else {
 			time_t utc_time = 0;
-			int ret = rawTstVerify(tstData.data(), tstData.size(),
-			    &utc_time);
+			int ret = raw_tst_verify(tstData.data(),
+			    tstData.size(), &utc_time);
 
 			if (-1 != ret) {
 				tst = QDateTime::fromTime_t(utc_time);
@@ -3628,13 +3628,13 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 	}
 
 	/* Get certificate data. */
-	crt = rawCmsSigningCert(raw.data(), raw.size());
+	crt = raw_cms_signing_cert(raw.data(), raw.size());
 	if (NULL != crt) {
 		QByteArray crtDer;
 
 		void *der = NULL;
 		size_t derSize = 0;
-		if (0 == x509CrtToDer(crt, &der, &derSize)) {
+		if (0 == x509_crt_to_der(crt, &der, &derSize)) {
 			/* Method setRawData() does not copy the data! */
 			crtDer.setRawData((char *) der, derSize);
 
@@ -3644,7 +3644,7 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 			free(der); der = NULL; derSize = 0;
 		}
 
-		x509CrtDestroy(crt); crt = NULL;
+		x509_crt_destroy(crt); crt = NULL;
 	}
 
 	return true;
@@ -5014,7 +5014,7 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	}
 	time_t utcTime = dateTime.toTime_t();
 
-	return 1 == rawMsgVerifySignatureDate(
+	return 1 == raw_msg_verify_signature_date(
 	    rawBytes.data(), rawBytes.size(), utcTime,
 	    ignoreMissingCrlCheck ? 0 : 1);
 }

@@ -28,7 +28,7 @@
 
 #include "worker.h"
 #include "src/common.h"
-#include "src/crypto/crypto_threadsafe.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
@@ -774,7 +774,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 
 	if (signedMsg) {
 		/* Verify message signature. */
-		int ret = rawMsgVerifySignature(msg->raw,
+		int ret = raw_msg_verify_signature(msg->raw,
 		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
 		qDebug() << "Verification ret" << ret;
 		if (1 == ret) {

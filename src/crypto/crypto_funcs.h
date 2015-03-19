@@ -22,8 +22,8 @@
  */
 
 
-#ifndef _CRYPTO_NONTHREADSAFE_H_
-#define _CRYPTO_NONTHREADSAFE_H_
+#ifndef _CRYPTO_FUNCS_H_
+#define _CRYPTO_FUNCS_H_
 
 
 #ifdef __cplusplus
@@ -242,4 +242,4 @@ int x509_crt_track_verification(struct x509_crt *x509_crt,
 #endif
 
 
-#endif /* _CRYPTO_NONTHREADSAFE_H_ */
+#endif /* _CRYPTO_FUNCS_H_ */

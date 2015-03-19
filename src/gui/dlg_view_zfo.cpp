@@ -35,7 +35,7 @@
 #include <QUrl>
 
 #include "src/common.h"
-#include "src/crypto/crypto_threadsafe.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
@@ -542,7 +542,7 @@ QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
 	html += "<h3>" + tr("Signature") + "</h3>";
 
 	QString resultStr;
-	if (1 == rawMsgVerifySignature(msgDER, msgSize, 0, 0)) {
+	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0, 0)) {
 		resultStr = QObject::tr("Valid");
 	} else {
 		resultStr = QObject::tr("Invalid")  + " -- " +
@@ -550,7 +550,7 @@ QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
 		        "correspond!");
 	}
 	html += strongAccountInfoLine(tr("Message signature"), resultStr);
-	if (1 == rawMsgVerifySignatureDate(msgDER, msgSize,
+	if (1 == raw_msg_verify_signature_date(msgDER, msgSize,
 	        QDateTime::currentDateTime().toTime_t(), 0)) {
 		resultStr = QObject::tr("Valid");
 	} else {
@@ -564,7 +564,7 @@ QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
 	html += strongAccountInfoLine(tr("Signing certificate"), resultStr);
 	time_t utc_time = 0;
 	QDateTime tst;
-	int ret = rawTstVerify(tstDER, tstSize, &utc_time);
+	int ret = raw_tst_verify(tstDER, tstSize, &utc_time);
 	if (-1 != ret) {
 		tst = QDateTime::fromTime_t(utc_time);
 	}
@@ -656,7 +656,7 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 	html += "<h3>" + tr("Signature") + "</h3>";
 
 	QString resultStr;
-	if (1 == rawMsgVerifySignature(msgDER, msgSize, 0, 0)) {
+	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0, 0)) {
 		resultStr = QObject::tr("Valid");
 	} else {
 		resultStr = QObject::tr("Invalid")  + " -- " +
@@ -664,7 +664,7 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 		        "correspond!");
 	}
 	html += strongAccountInfoLine(tr("Message signature"), resultStr);
-	if (1 == rawMsgVerifySignatureDate(msgDER, msgSize,
+	if (1 == raw_msg_verify_signature_date(msgDER, msgSize,
 	        QDateTime::currentDateTime().toTime_t(), 0)) {
 		resultStr = QObject::tr("Valid");
 	} else {
@@ -678,7 +678,7 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 	html += strongAccountInfoLine(tr("Signing certificate"), resultStr);
 	time_t utc_time = 0;
 	QDateTime tst;
-	int ret = rawTstVerify(tstDER, tstSize, &utc_time);
+	int ret = raw_tst_verify(tstDER, tstSize, &utc_time);
 	if (-1 != ret) {
 		tst = QDateTime::fromTime_t(utc_time);
 	}
