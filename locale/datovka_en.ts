@@ -1444,425 +1444,425 @@ contain all otherwise matching databoxes.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="137"/>
+        <location filename="../src/gui/datovka.cpp" line="139"/>
         <source>Search: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="151"/>
+        <location filename="../src/gui/datovka.cpp" line="153"/>
         <source>Clear search field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="171"/>
+        <location filename="../src/gui/datovka.cpp" line="173"/>
         <source>Mode: offline</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="304"/>
-        <location filename="../src/gui/datovka.cpp" line="305"/>
+        <location filename="../src/gui/datovka.cpp" line="306"/>
+        <location filename="../src/gui/datovka.cpp" line="307"/>
         <source>disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="308"/>
-        <location filename="../src/gui/datovka.cpp" line="312"/>
+        <location filename="../src/gui/datovka.cpp" line="310"/>
+        <location filename="../src/gui/datovka.cpp" line="314"/>
         <source>memory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="315"/>
+        <location filename="../src/gui/datovka.cpp" line="317"/>
         <source>Storage:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="386"/>
+        <location filename="../src/gui/datovka.cpp" line="388"/>
         <source>New version of Datovka is available:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="390"/>
-        <location filename="../src/gui/datovka.cpp" line="406"/>
+        <location filename="../src/gui/datovka.cpp" line="392"/>
+        <location filename="../src/gui/datovka.cpp" line="408"/>
         <source>New version of Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="391"/>
-        <location filename="../src/gui/datovka.cpp" line="407"/>
+        <location filename="../src/gui/datovka.cpp" line="393"/>
+        <location filename="../src/gui/datovka.cpp" line="409"/>
         <source>New version of Datovka is available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="392"/>
+        <location filename="../src/gui/datovka.cpp" line="394"/>
         <source>Current version is %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="395"/>
+        <location filename="../src/gui/datovka.cpp" line="397"/>
         <source>New version is %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="397"/>
+        <location filename="../src/gui/datovka.cpp" line="399"/>
         <source>Do you want to download new version?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="408"/>
+        <location filename="../src/gui/datovka.cpp" line="410"/>
         <source>Current version is &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="411"/>
+        <location filename="../src/gui/datovka.cpp" line="413"/>
         <source>New version is &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="413"/>
+        <location filename="../src/gui/datovka.cpp" line="415"/>
         <source>Update your application...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="661"/>
+        <location filename="../src/gui/datovka.cpp" line="663"/>
         <source>All messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="852"/>
+        <location filename="../src/gui/datovka.cpp" line="854"/>
         <source>Remove Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="874"/>
+        <location filename="../src/gui/datovka.cpp" line="876"/>
         <source>Add new account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1622"/>
+        <location filename="../src/gui/datovka.cpp" line="1654"/>
         <source>Saving attachment of message to files was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1636"/>
-        <location filename="../src/gui/datovka.cpp" line="1670"/>
+        <location filename="../src/gui/datovka.cpp" line="1668"/>
+        <location filename="../src/gui/datovka.cpp" line="1702"/>
         <source>Saving attachment of message &quot;%1&quot; to files was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1683"/>
+        <location filename="../src/gui/datovka.cpp" line="1715"/>
         <source>Saving attachment of message &quot;%1&quot; to file was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1680"/>
+        <location filename="../src/gui/datovka.cpp" line="1712"/>
         <source>Saving attachment of message &quot;%1&quot; to file was successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1718"/>
+        <location filename="../src/gui/datovka.cpp" line="1750"/>
         <source>Save attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1809"/>
+        <location filename="../src/gui/datovka.cpp" line="1841"/>
         <source>All attachments of message &quot;%1&quot; were saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1785"/>
-        <location filename="../src/gui/datovka.cpp" line="1793"/>
+        <location filename="../src/gui/datovka.cpp" line="1817"/>
+        <location filename="../src/gui/datovka.cpp" line="1825"/>
         <source>Some attachments of message &quot;%1&quot; were not saved to disk!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1686"/>
+        <location filename="../src/gui/datovka.cpp" line="1718"/>
         <source>Error saving attachment of message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1687"/>
-        <location filename="../src/gui/datovka.cpp" line="1868"/>
-        <location filename="../src/gui/datovka.cpp" line="6358"/>
-        <location filename="../src/gui/datovka.cpp" line="6520"/>
-        <location filename="../src/gui/datovka.cpp" line="6783"/>
-        <location filename="../src/gui/datovka.cpp" line="6850"/>
+        <location filename="../src/gui/datovka.cpp" line="1719"/>
+        <location filename="../src/gui/datovka.cpp" line="1900"/>
+        <location filename="../src/gui/datovka.cpp" line="6390"/>
+        <location filename="../src/gui/datovka.cpp" line="6552"/>
+        <location filename="../src/gui/datovka.cpp" line="6815"/>
+        <location filename="../src/gui/datovka.cpp" line="6882"/>
         <source>Cannot write file &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1788"/>
-        <location filename="../src/gui/datovka.cpp" line="1806"/>
+        <location filename="../src/gui/datovka.cpp" line="1820"/>
+        <location filename="../src/gui/datovka.cpp" line="1838"/>
         <source>Error saving attachments of message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1789"/>
+        <location filename="../src/gui/datovka.cpp" line="1821"/>
         <source>Could not save all attachments of message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1796"/>
+        <location filename="../src/gui/datovka.cpp" line="1828"/>
         <source>In total %1 attachment files could not be written.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1799"/>
+        <location filename="../src/gui/datovka.cpp" line="1831"/>
         <source>These are:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1859"/>
+        <location filename="../src/gui/datovka.cpp" line="1891"/>
         <source>Attachment &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1864"/>
+        <location filename="../src/gui/datovka.cpp" line="1896"/>
         <source>Attachment &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1867"/>
+        <location filename="../src/gui/datovka.cpp" line="1899"/>
         <source>Error opening attachment.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1909"/>
+        <location filename="../src/gui/datovka.cpp" line="1941"/>
         <source>Message &quot;%1&quot;  was downloaded from ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2456"/>
+        <location filename="../src/gui/datovka.cpp" line="2488"/>
         <source>Synchronise all accounts with ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2427"/>
+        <location filename="../src/gui/datovka.cpp" line="2459"/>
         <source>Messages on the server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2255"/>
+        <location filename="../src/gui/datovka.cpp" line="2287"/>
         <source>Delete message %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2256"/>
+        <location filename="../src/gui/datovka.cpp" line="2288"/>
         <source>Do you want to delete message &apos;%1&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2258"/>
+        <location filename="../src/gui/datovka.cpp" line="2290"/>
         <source>Delete this message also from server ISDS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2259"/>
+        <location filename="../src/gui/datovka.cpp" line="2291"/>
         <source>Warning: If you delete the message from ISDS then this message will be lost forever.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2262"/>
+        <location filename="../src/gui/datovka.cpp" line="2294"/>
         <source>Delete messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2263"/>
+        <location filename="../src/gui/datovka.cpp" line="2295"/>
         <source>Do you want to delete selected messages?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2265"/>
+        <location filename="../src/gui/datovka.cpp" line="2297"/>
         <source>Delete these messages also from server ISDS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2266"/>
+        <location filename="../src/gui/datovka.cpp" line="2298"/>
         <source>Warning: If you delete selected messages from ISDS then these message will be lost forever.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2428"/>
+        <location filename="../src/gui/datovka.cpp" line="2460"/>
         <source>received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2429"/>
-        <location filename="../src/gui/datovka.cpp" line="2431"/>
+        <location filename="../src/gui/datovka.cpp" line="2461"/>
+        <location filename="../src/gui/datovka.cpp" line="2463"/>
         <source>new</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2430"/>
+        <location filename="../src/gui/datovka.cpp" line="2462"/>
         <source>sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2655"/>
+        <location filename="../src/gui/datovka.cpp" line="2687"/>
         <source>Synchronise account &quot;%1&quot; with ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2752"/>
+        <location filename="../src/gui/datovka.cpp" line="2784"/>
         <source>Test account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2754"/>
+        <location filename="../src/gui/datovka.cpp" line="2786"/>
         <source>Standard account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2758"/>
+        <location filename="../src/gui/datovka.cpp" line="2790"/>
         <source>Account name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2761"/>
+        <location filename="../src/gui/datovka.cpp" line="2793"/>
         <source>User name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2796"/>
+        <location filename="../src/gui/datovka.cpp" line="2828"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2796"/>
+        <location filename="../src/gui/datovka.cpp" line="2828"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2823"/>
+        <location filename="../src/gui/datovka.cpp" line="2855"/>
         <source>unknown or without expiration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2826"/>
+        <location filename="../src/gui/datovka.cpp" line="2858"/>
         <source>Password expiration date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2858"/>
+        <location filename="../src/gui/datovka.cpp" line="2890"/>
         <source>Received messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2861"/>
-        <location filename="../src/gui/datovka.cpp" line="2875"/>
+        <location filename="../src/gui/datovka.cpp" line="2893"/>
+        <location filename="../src/gui/datovka.cpp" line="2907"/>
         <source>none</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2872"/>
+        <location filename="../src/gui/datovka.cpp" line="2904"/>
         <source>Sent messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2902"/>
+        <location filename="../src/gui/datovka.cpp" line="2934"/>
         <source>Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2905"/>
+        <location filename="../src/gui/datovka.cpp" line="2937"/>
         <source>Powered by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2989"/>
+        <location filename="../src/gui/datovka.cpp" line="3021"/>
         <source>Datovka: Database file present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2990"/>
+        <location filename="../src/gui/datovka.cpp" line="3022"/>
         <source>Database file for account &apos;%1&apos; already exists.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2993"/>
+        <location filename="../src/gui/datovka.cpp" line="3025"/>
         <source>The existing database file &apos;%1&apos; is going to be used.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2996"/>
+        <location filename="../src/gui/datovka.cpp" line="3028"/>
         <source>If you want to use a new blank file then delete, rename or move the existing file so that the application can create a new empty file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3015"/>
-        <location filename="../src/gui/datovka.cpp" line="3036"/>
-        <location filename="../src/gui/datovka.cpp" line="3052"/>
-        <location filename="../src/gui/datovka.cpp" line="3079"/>
+        <location filename="../src/gui/datovka.cpp" line="3047"/>
+        <location filename="../src/gui/datovka.cpp" line="3068"/>
+        <location filename="../src/gui/datovka.cpp" line="3084"/>
+        <location filename="../src/gui/datovka.cpp" line="3111"/>
         <source>Datovka: Problem loading database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3016"/>
-        <location filename="../src/gui/datovka.cpp" line="3037"/>
-        <location filename="../src/gui/datovka.cpp" line="3053"/>
-        <location filename="../src/gui/datovka.cpp" line="3080"/>
-        <location filename="../src/gui/datovka.cpp" line="3122"/>
+        <location filename="../src/gui/datovka.cpp" line="3048"/>
+        <location filename="../src/gui/datovka.cpp" line="3069"/>
+        <location filename="../src/gui/datovka.cpp" line="3085"/>
+        <location filename="../src/gui/datovka.cpp" line="3112"/>
+        <location filename="../src/gui/datovka.cpp" line="3154"/>
         <source>Could not load data from the database for account &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3019"/>
+        <location filename="../src/gui/datovka.cpp" line="3051"/>
         <source>Database file &apos;%1&apos; is missing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3022"/>
+        <location filename="../src/gui/datovka.cpp" line="3054"/>
         <source>I&apos;ll try to create an empty one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3040"/>
+        <location filename="../src/gui/datovka.cpp" line="3072"/>
         <source>Database location &apos;%1&apos; is not a file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="578"/>
-        <location filename="../src/gui/datovka.cpp" line="3056"/>
+        <location filename="../src/gui/datovka.cpp" line="580"/>
+        <location filename="../src/gui/datovka.cpp" line="3088"/>
         <source>Database file &apos;%1&apos; cannot be accessed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="145"/>
+        <location filename="../src/gui/datovka.cpp" line="147"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="210"/>
+        <location filename="../src/gui/datovka.cpp" line="212"/>
         <source>In Progress</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="827"/>
+        <location filename="../src/gui/datovka.cpp" line="829"/>
         <location filename="../src/gui/datovka.cpp" line="1208"/>
         <source>Mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="830"/>
+        <location filename="../src/gui/datovka.cpp" line="832"/>
         <source>All as Read</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="832"/>
+        <location filename="../src/gui/datovka.cpp" line="834"/>
         <source>All as Unread</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="836"/>
+        <location filename="../src/gui/datovka.cpp" line="838"/>
         <source>All as Unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="838"/>
+        <location filename="../src/gui/datovka.cpp" line="840"/>
         <source>All as in Progress</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="840"/>
+        <location filename="../src/gui/datovka.cpp" line="842"/>
         <source>All as Settled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1877,447 +1877,447 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1889"/>
+        <location filename="../src/gui/datovka.cpp" line="1921"/>
         <source>It was not possible to download a complete message &quot;%1&quot; from server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1891"/>
+        <location filename="../src/gui/datovka.cpp" line="1923"/>
         <source>A connection error occured or the message has already been deleted from the server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3059"/>
+        <location filename="../src/gui/datovka.cpp" line="3091"/>
         <source>You don&apos;t have enough access rights to use the file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3083"/>
+        <location filename="../src/gui/datovka.cpp" line="3115"/>
         <source>Database file &apos;%1&apos; cannot used.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3086"/>
+        <location filename="../src/gui/datovka.cpp" line="3118"/>
         <source>The file either does not contain an sqlite database or the file is corrupted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3121"/>
+        <location filename="../src/gui/datovka.cpp" line="3153"/>
         <source>Datovka: Database opening error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3125"/>
+        <location filename="../src/gui/datovka.cpp" line="3157"/>
         <source>Database file &apos;%1&apos; cannot be created or is corrupted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4002"/>
+        <location filename="../src/gui/datovka.cpp" line="4034"/>
         <source>Message from account &quot;%1&quot; was send.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4051"/>
+        <location filename="../src/gui/datovka.cpp" line="4083"/>
         <source>Create a new account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4088"/>
+        <location filename="../src/gui/datovka.cpp" line="4120"/>
         <source>Remove account </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4089"/>
+        <location filename="../src/gui/datovka.cpp" line="4121"/>
         <source>Do you want to remove account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4113"/>
+        <location filename="../src/gui/datovka.cpp" line="4145"/>
         <source>Account &apos;%1&apos; was deleted but its message database was not deleted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5044"/>
-        <location filename="../src/gui/datovka.cpp" line="5526"/>
+        <location filename="../src/gui/datovka.cpp" line="5076"/>
+        <location filename="../src/gui/datovka.cpp" line="5558"/>
         <source>Select directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5059"/>
+        <location filename="../src/gui/datovka.cpp" line="5091"/>
         <source>Database file(s) not found in selected directory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5069"/>
+        <location filename="../src/gui/datovka.cpp" line="5101"/>
         <source>Select db file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5070"/>
+        <location filename="../src/gui/datovka.cpp" line="5102"/>
         <source>Database file (*.db)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5075"/>
+        <location filename="../src/gui/datovka.cpp" line="5107"/>
         <source>Database file(s) not selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5150"/>
-        <location filename="../src/gui/datovka.cpp" line="5176"/>
+        <location filename="../src/gui/datovka.cpp" line="5182"/>
+        <location filename="../src/gui/datovka.cpp" line="5208"/>
         <source>This file does not contain a valid message database or file name has wrong format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5233"/>
+        <location filename="../src/gui/datovka.cpp" line="5265"/>
         <source>Verifying the ZFO file &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5269"/>
+        <location filename="../src/gui/datovka.cpp" line="5301"/>
         <source>Server Datové schránky confirms that the message is authentic.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5272"/>
-        <location filename="../src/gui/datovka.cpp" line="5342"/>
+        <location filename="../src/gui/datovka.cpp" line="5304"/>
+        <location filename="../src/gui/datovka.cpp" line="5374"/>
         <source>Message was &lt;b&gt;successfully verified&lt;/b&gt; against data on the server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5275"/>
-        <location filename="../src/gui/datovka.cpp" line="5345"/>
+        <location filename="../src/gui/datovka.cpp" line="5307"/>
+        <location filename="../src/gui/datovka.cpp" line="5377"/>
         <source>This message has passed through the system of Datové schránky and has not been tampered with since.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5280"/>
+        <location filename="../src/gui/datovka.cpp" line="5312"/>
         <source>Server Datové schránky confirms that the message is not authentic.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5283"/>
-        <location filename="../src/gui/datovka.cpp" line="5353"/>
+        <location filename="../src/gui/datovka.cpp" line="5315"/>
+        <location filename="../src/gui/datovka.cpp" line="5385"/>
         <source>Message was &lt;b&gt;not&lt;/b&gt; authenticated as processed by the system Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5285"/>
-        <location filename="../src/gui/datovka.cpp" line="5355"/>
+        <location filename="../src/gui/datovka.cpp" line="5317"/>
+        <location filename="../src/gui/datovka.cpp" line="5387"/>
         <source>It is either not a valid ZFO file or it was modified since it was downloaded from Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5292"/>
-        <location filename="../src/gui/datovka.cpp" line="5300"/>
-        <location filename="../src/gui/datovka.cpp" line="5309"/>
+        <location filename="../src/gui/datovka.cpp" line="5324"/>
+        <location filename="../src/gui/datovka.cpp" line="5332"/>
+        <location filename="../src/gui/datovka.cpp" line="5341"/>
         <source>Message authentication failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5293"/>
-        <location filename="../src/gui/datovka.cpp" line="5362"/>
+        <location filename="../src/gui/datovka.cpp" line="5325"/>
+        <location filename="../src/gui/datovka.cpp" line="5394"/>
         <source>Authentication of message has been stopped because the connection to server Datové schránky failed!
 Check your internet connection.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5339"/>
+        <location filename="../src/gui/datovka.cpp" line="5371"/>
         <source>Server Datové schránky confirms that the message is valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5350"/>
+        <location filename="../src/gui/datovka.cpp" line="5382"/>
         <source>Server Datové schránky confirms that the message is not valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5352"/>
+        <location filename="../src/gui/datovka.cpp" line="5384"/>
         <source>Message is not valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5360"/>
-        <location filename="../src/gui/datovka.cpp" line="5368"/>
-        <location filename="../src/gui/datovka.cpp" line="5375"/>
-        <location filename="../src/gui/datovka.cpp" line="5382"/>
+        <location filename="../src/gui/datovka.cpp" line="5392"/>
+        <location filename="../src/gui/datovka.cpp" line="5400"/>
+        <location filename="../src/gui/datovka.cpp" line="5407"/>
+        <location filename="../src/gui/datovka.cpp" line="5414"/>
         <source>Message verification failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5361"/>
+        <location filename="../src/gui/datovka.cpp" line="5393"/>
         <source>Verification failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5369"/>
-        <location filename="../src/gui/datovka.cpp" line="5376"/>
-        <location filename="../src/gui/datovka.cpp" line="5383"/>
+        <location filename="../src/gui/datovka.cpp" line="5401"/>
+        <location filename="../src/gui/datovka.cpp" line="5408"/>
+        <location filename="../src/gui/datovka.cpp" line="5415"/>
         <source>Verification error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5370"/>
+        <location filename="../src/gui/datovka.cpp" line="5402"/>
         <source>The message hash is not in local database.
 Please download complete message from ISDS and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5554"/>
-        <location filename="../src/gui/datovka.cpp" line="5558"/>
+        <location filename="../src/gui/datovka.cpp" line="5586"/>
+        <location filename="../src/gui/datovka.cpp" line="5590"/>
         <source>ZFO file(s) not found in selected directory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5557"/>
-        <location filename="../src/gui/datovka.cpp" line="5735"/>
-        <location filename="../src/gui/datovka.cpp" line="5752"/>
-        <location filename="../src/gui/datovka.cpp" line="5765"/>
+        <location filename="../src/gui/datovka.cpp" line="5589"/>
+        <location filename="../src/gui/datovka.cpp" line="5767"/>
+        <location filename="../src/gui/datovka.cpp" line="5784"/>
+        <location filename="../src/gui/datovka.cpp" line="5797"/>
         <source>No ZFO file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5567"/>
+        <location filename="../src/gui/datovka.cpp" line="5599"/>
         <source>Select ZFO file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5573"/>
+        <location filename="../src/gui/datovka.cpp" line="5605"/>
         <source>ZFO file(s) not selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5820"/>
-        <location filename="../src/gui/datovka.cpp" line="5972"/>
+        <location filename="../src/gui/datovka.cpp" line="5852"/>
+        <location filename="../src/gui/datovka.cpp" line="6004"/>
         <source>Import of ZFO file(s) failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5881"/>
-        <location filename="../src/gui/datovka.cpp" line="6048"/>
-        <location filename="../src/gui/datovka.cpp" line="6120"/>
+        <location filename="../src/gui/datovka.cpp" line="5913"/>
+        <location filename="../src/gui/datovka.cpp" line="6080"/>
+        <location filename="../src/gui/datovka.cpp" line="6152"/>
         <source>ZFO import problem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5882"/>
-        <location filename="../src/gui/datovka.cpp" line="6049"/>
-        <location filename="../src/gui/datovka.cpp" line="6121"/>
+        <location filename="../src/gui/datovka.cpp" line="5914"/>
+        <location filename="../src/gui/datovka.cpp" line="6081"/>
+        <location filename="../src/gui/datovka.cpp" line="6153"/>
         <source>Do you want to continue with import?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5886"/>
-        <location filename="../src/gui/datovka.cpp" line="5899"/>
-        <location filename="../src/gui/datovka.cpp" line="6053"/>
-        <location filename="../src/gui/datovka.cpp" line="6066"/>
-        <location filename="../src/gui/datovka.cpp" line="6125"/>
-        <location filename="../src/gui/datovka.cpp" line="6138"/>
+        <location filename="../src/gui/datovka.cpp" line="5918"/>
+        <location filename="../src/gui/datovka.cpp" line="5931"/>
+        <location filename="../src/gui/datovka.cpp" line="6085"/>
+        <location filename="../src/gui/datovka.cpp" line="6098"/>
+        <location filename="../src/gui/datovka.cpp" line="6157"/>
+        <location filename="../src/gui/datovka.cpp" line="6170"/>
         <source>It is not possible to connect to server Datové schránky and verify validity of this ZFO file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5890"/>
-        <location filename="../src/gui/datovka.cpp" line="6057"/>
-        <location filename="../src/gui/datovka.cpp" line="6129"/>
+        <location filename="../src/gui/datovka.cpp" line="5922"/>
+        <location filename="../src/gui/datovka.cpp" line="6089"/>
+        <location filename="../src/gui/datovka.cpp" line="6161"/>
         <source>Action was canceled by user...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5896"/>
-        <location filename="../src/gui/datovka.cpp" line="6063"/>
-        <location filename="../src/gui/datovka.cpp" line="6135"/>
+        <location filename="../src/gui/datovka.cpp" line="5928"/>
+        <location filename="../src/gui/datovka.cpp" line="6095"/>
+        <location filename="../src/gui/datovka.cpp" line="6167"/>
         <source>Import of ZFO file(s) was canceled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6351"/>
+        <location filename="../src/gui/datovka.cpp" line="6383"/>
         <source>Export of message &quot;%1&quot; to ZFO was successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6354"/>
+        <location filename="../src/gui/datovka.cpp" line="6386"/>
         <source>Export of message &quot;%1&quot; to ZFO was not successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6357"/>
+        <location filename="../src/gui/datovka.cpp" line="6389"/>
         <source>Error exporting message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6518"/>
+        <location filename="../src/gui/datovka.cpp" line="6550"/>
         <source>Error exporting message delivery info &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6608"/>
+        <location filename="../src/gui/datovka.cpp" line="6640"/>
         <source>Printing of delivery info &quot;%1&quot; to PDF. Please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6710"/>
+        <location filename="../src/gui/datovka.cpp" line="6742"/>
         <source>Printing of message envelope &quot;%1&quot; to PDF. Please wait...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6774"/>
+        <location filename="../src/gui/datovka.cpp" line="6806"/>
         <source>Message &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6779"/>
+        <location filename="../src/gui/datovka.cpp" line="6811"/>
         <source>Message &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6782"/>
-        <location filename="../src/gui/datovka.cpp" line="6849"/>
+        <location filename="../src/gui/datovka.cpp" line="6814"/>
+        <location filename="../src/gui/datovka.cpp" line="6881"/>
         <source>Error opening message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6840"/>
+        <location filename="../src/gui/datovka.cpp" line="6872"/>
         <source>Message delivery information &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6846"/>
+        <location filename="../src/gui/datovka.cpp" line="6878"/>
         <source>Message delivery information &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6911"/>
+        <location filename="../src/gui/datovka.cpp" line="6943"/>
         <source>It was not possible to connect to your Databox from account &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6916"/>
+        <location filename="../src/gui/datovka.cpp" line="6948"/>
         <source>Please check your credentials including the test-environment setting and login method.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6966"/>
-        <location filename="../src/gui/datovka.cpp" line="6978"/>
+        <location filename="../src/gui/datovka.cpp" line="6998"/>
+        <location filename="../src/gui/datovka.cpp" line="7010"/>
         <source>ISDS error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6988"/>
-        <location filename="../src/gui/datovka.cpp" line="7047"/>
-        <location filename="../src/gui/datovka.cpp" line="7095"/>
-        <location filename="../src/gui/datovka.cpp" line="7148"/>
-        <location filename="../src/gui/datovka.cpp" line="7200"/>
-        <location filename="../src/gui/datovka.cpp" line="7248"/>
-        <location filename="../src/gui/datovka.cpp" line="7285"/>
-        <location filename="../src/gui/datovka.cpp" line="7318"/>
+        <location filename="../src/gui/datovka.cpp" line="7020"/>
+        <location filename="../src/gui/datovka.cpp" line="7079"/>
+        <location filename="../src/gui/datovka.cpp" line="7127"/>
+        <location filename="../src/gui/datovka.cpp" line="7180"/>
+        <location filename="../src/gui/datovka.cpp" line="7232"/>
+        <location filename="../src/gui/datovka.cpp" line="7280"/>
+        <location filename="../src/gui/datovka.cpp" line="7317"/>
         <location filename="../src/gui/datovka.cpp" line="7350"/>
+        <location filename="../src/gui/datovka.cpp" line="7382"/>
         <source>It was not possible to connect to your databox from account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7274"/>
+        <location filename="../src/gui/datovka.cpp" line="7306"/>
         <source>SMS code for account </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7307"/>
+        <location filename="../src/gui/datovka.cpp" line="7339"/>
         <source>Error of sending SMS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7308"/>
+        <location filename="../src/gui/datovka.cpp" line="7340"/>
         <source>It was not possible sent SMS with OTP security code for account &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7312"/>
+        <location filename="../src/gui/datovka.cpp" line="7344"/>
         <source>Please try again later or you have to use the official web interface of Datové schránky for access to your databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7372"/>
+        <location filename="../src/gui/datovka.cpp" line="7404"/>
         <source>Enter security code again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7373"/>
+        <location filename="../src/gui/datovka.cpp" line="7405"/>
         <source>The security code for this account was not accepted!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7376"/>
+        <location filename="../src/gui/datovka.cpp" line="7408"/>
         <source>Account: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7380"/>
+        <location filename="../src/gui/datovka.cpp" line="7412"/>
         <source>Enter the correct security code again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7382"/>
+        <location filename="../src/gui/datovka.cpp" line="7414"/>
         <source>OTP: Zkontrolujte přihlašovací údaje a zadejte znova bezpečnostní kód.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7391"/>
+        <location filename="../src/gui/datovka.cpp" line="7423"/>
         <source>OTP: Váš přístup byl na 60 minut zablokován. Důvodem může být opakované neúspěšné přihlášení.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7397"/>
+        <location filename="../src/gui/datovka.cpp" line="7429"/>
         <source>OTP: Platnost Vašeho hesla nebo bezpečnostního kódu skončila.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7402"/>
+        <location filename="../src/gui/datovka.cpp" line="7434"/>
         <source>OTP: Pro přístup na požadovanou stránku nemá Váš účet potřebné oprávnění.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7572"/>
+        <location filename="../src/gui/datovka.cpp" line="7604"/>
         <source>New account error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7587"/>
+        <location filename="../src/gui/datovka.cpp" line="7619"/>
         <source>Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7590"/>
+        <location filename="../src/gui/datovka.cpp" line="7622"/>
         <source>was not created!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4164"/>
+        <location filename="../src/gui/datovka.cpp" line="4196"/>
         <source>Change password of account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="127"/>
-        <location filename="../src/gui/datovka.cpp" line="2900"/>
+        <location filename="../src/gui/datovka.cpp" line="129"/>
+        <location filename="../src/gui/datovka.cpp" line="2932"/>
         <source>Portable version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="576"/>
+        <location filename="../src/gui/datovka.cpp" line="578"/>
         <source>Database access error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="581"/>
+        <location filename="../src/gui/datovka.cpp" line="583"/>
         <source>The file cannot be accessed or is corrupted. Please fix the access privileges or remove or rename the file so that the application can create a new empty file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="586"/>
+        <location filename="../src/gui/datovka.cpp" line="588"/>
         <source>Create a backup copy of the affected file. This will help when trying to perform data recovery.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="589"/>
+        <location filename="../src/gui/datovka.cpp" line="591"/>
         <source>In general, it is recommended to create backup copies of the database files to prevent data loss.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2337,694 +2337,694 @@ Please download complete message from ISDS and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2834"/>
+        <location filename="../src/gui/datovka.cpp" line="2866"/>
         <source>Database is stored in memory. Data will be lost on application exit.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2837"/>
+        <location filename="../src/gui/datovka.cpp" line="2869"/>
         <source>Local database file location</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4194"/>
+        <location filename="../src/gui/datovka.cpp" line="4226"/>
         <source>Change properties of account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4202"/>
+        <location filename="../src/gui/datovka.cpp" line="4234"/>
         <source>Account &quot;%1&quot; was updated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4236"/>
+        <location filename="../src/gui/datovka.cpp" line="4268"/>
         <source>Account was moved up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4268"/>
+        <location filename="../src/gui/datovka.cpp" line="4300"/>
         <source>Account was moved down.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4294"/>
+        <location filename="../src/gui/datovka.cpp" line="4326"/>
         <source>Change data dierctory of account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4350"/>
-        <location filename="../src/gui/datovka.cpp" line="4360"/>
-        <location filename="../src/gui/datovka.cpp" line="4379"/>
-        <location filename="../src/gui/datovka.cpp" line="4389"/>
-        <location filename="../src/gui/datovka.cpp" line="4408"/>
-        <location filename="../src/gui/datovka.cpp" line="4418"/>
+        <location filename="../src/gui/datovka.cpp" line="4382"/>
+        <location filename="../src/gui/datovka.cpp" line="4392"/>
+        <location filename="../src/gui/datovka.cpp" line="4411"/>
+        <location filename="../src/gui/datovka.cpp" line="4421"/>
+        <location filename="../src/gui/datovka.cpp" line="4440"/>
+        <location filename="../src/gui/datovka.cpp" line="4450"/>
         <source>Change data directory for current account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4351"/>
-        <location filename="../src/gui/datovka.cpp" line="4361"/>
-        <location filename="../src/gui/datovka.cpp" line="4380"/>
-        <location filename="../src/gui/datovka.cpp" line="4390"/>
+        <location filename="../src/gui/datovka.cpp" line="4383"/>
+        <location filename="../src/gui/datovka.cpp" line="4393"/>
+        <location filename="../src/gui/datovka.cpp" line="4412"/>
+        <location filename="../src/gui/datovka.cpp" line="4422"/>
         <source>Database file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4352"/>
+        <location filename="../src/gui/datovka.cpp" line="4384"/>
         <source>was successfully moved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4362"/>
+        <location filename="../src/gui/datovka.cpp" line="4394"/>
         <source>was NOT successfully moved to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4381"/>
+        <location filename="../src/gui/datovka.cpp" line="4413"/>
         <source>was successfully copied to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4391"/>
+        <location filename="../src/gui/datovka.cpp" line="4423"/>
         <source>was NOT successfully copied to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4409"/>
-        <location filename="../src/gui/datovka.cpp" line="4419"/>
+        <location filename="../src/gui/datovka.cpp" line="4441"/>
+        <location filename="../src/gui/datovka.cpp" line="4451"/>
         <source>New database file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4410"/>
+        <location filename="../src/gui/datovka.cpp" line="4442"/>
         <source>was successfully created to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4420"/>
+        <location filename="../src/gui/datovka.cpp" line="4452"/>
         <source>was NOT successfully created to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4465"/>
+        <location filename="../src/gui/datovka.cpp" line="4497"/>
         <source>Find databoxes from account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5685"/>
+        <location filename="../src/gui/datovka.cpp" line="5717"/>
         <source>No ZFO file(s) for import.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5694"/>
+        <location filename="../src/gui/datovka.cpp" line="5726"/>
         <source>There is no account for import of ZFO file(s).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5717"/>
-        <location filename="../src/gui/datovka.cpp" line="5830"/>
+        <location filename="../src/gui/datovka.cpp" line="5749"/>
+        <location filename="../src/gui/datovka.cpp" line="5862"/>
         <source>Wrong ZFO format. This file does not contain correct data for import.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5726"/>
+        <location filename="../src/gui/datovka.cpp" line="5758"/>
         <source>Error during file parsing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5736"/>
+        <location filename="../src/gui/datovka.cpp" line="5768"/>
         <source>The selection does not contain any valid ZFO files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5753"/>
+        <location filename="../src/gui/datovka.cpp" line="5785"/>
         <source>The selection does not contain any valid ZFO messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5766"/>
+        <location filename="../src/gui/datovka.cpp" line="5798"/>
         <source>The selection does not contain any valid ZFO delivery infos.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5780"/>
+        <location filename="../src/gui/datovka.cpp" line="5812"/>
         <source>Import of ZFO file(s) ... Completed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5811"/>
+        <location filename="../src/gui/datovka.cpp" line="5843"/>
         <source>Processing of delivery info ZFO: %1 ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5855"/>
+        <location filename="../src/gui/datovka.cpp" line="5887"/>
         <source>Imported as delivery info for message &quot;%1&quot;, account &quot;%2&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5863"/>
-        <location filename="../src/gui/datovka.cpp" line="6023"/>
-        <location filename="../src/gui/datovka.cpp" line="6095"/>
+        <location filename="../src/gui/datovka.cpp" line="5895"/>
+        <location filename="../src/gui/datovka.cpp" line="6055"/>
+        <location filename="../src/gui/datovka.cpp" line="6127"/>
         <source>File has not been imported because an error was detected during insertion process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5871"/>
-        <location filename="../src/gui/datovka.cpp" line="6038"/>
-        <location filename="../src/gui/datovka.cpp" line="6110"/>
+        <location filename="../src/gui/datovka.cpp" line="5903"/>
+        <location filename="../src/gui/datovka.cpp" line="6070"/>
+        <location filename="../src/gui/datovka.cpp" line="6142"/>
         <source>Message &quot;%1&quot; does not exists on the server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5875"/>
-        <location filename="../src/gui/datovka.cpp" line="6042"/>
-        <location filename="../src/gui/datovka.cpp" line="6114"/>
+        <location filename="../src/gui/datovka.cpp" line="5907"/>
+        <location filename="../src/gui/datovka.cpp" line="6074"/>
+        <location filename="../src/gui/datovka.cpp" line="6146"/>
         <source>Couldn&apos;t open this file for authentication on the server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5907"/>
+        <location filename="../src/gui/datovka.cpp" line="5939"/>
         <source>Delivery info for message &quot;%1&quot; already exists in the local database, account &quot;%2&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5913"/>
+        <location filename="../src/gui/datovka.cpp" line="5945"/>
         <source>This file (delivery info) has not been inserted into database because there isn&apos;t any related message (%1) in the databases.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5963"/>
+        <location filename="../src/gui/datovka.cpp" line="5995"/>
         <source>Processing of message ZFO: %1 ...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5982"/>
+        <location filename="../src/gui/datovka.cpp" line="6014"/>
         <source>Wrong ZFO format. File does not contain correct data for import.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6017"/>
+        <location filename="../src/gui/datovka.cpp" line="6049"/>
         <source>Imported as sent message &quot;%1&quot; into account &quot;%2&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6032"/>
-        <location filename="../src/gui/datovka.cpp" line="6104"/>
+        <location filename="../src/gui/datovka.cpp" line="6064"/>
+        <location filename="../src/gui/datovka.cpp" line="6136"/>
         <source>Message &quot;%1&quot; already exists in the local database, account &quot;%2&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6089"/>
+        <location filename="../src/gui/datovka.cpp" line="6121"/>
         <source>Imported as received message &quot;%1&quot; into account &quot;%2&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6150"/>
+        <location filename="../src/gui/datovka.cpp" line="6182"/>
         <source>For this file does not exist correct databox or relevant account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7275"/>
+        <location filename="../src/gui/datovka.cpp" line="7307"/>
         <source>Account &quot;%1&quot; requires authentication via security code for connection to databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7278"/>
+        <location filename="../src/gui/datovka.cpp" line="7310"/>
         <source>Security code will be sent you via Premium SMS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7280"/>
+        <location filename="../src/gui/datovka.cpp" line="7312"/>
         <source>Do you want to send Premium SMS with security code into your mobile phone?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7324"/>
+        <location filename="../src/gui/datovka.cpp" line="7356"/>
         <source>Enter SMS security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7325"/>
+        <location filename="../src/gui/datovka.cpp" line="7357"/>
         <source>SMS security code for account &quot;%1&quot;&lt;br/&gt;has been sent on your mobile phone...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7329"/>
+        <location filename="../src/gui/datovka.cpp" line="7361"/>
         <source>Enter SMS security code for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7258"/>
+        <location filename="../src/gui/datovka.cpp" line="7290"/>
         <source>Enter OTP security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7259"/>
+        <location filename="../src/gui/datovka.cpp" line="7291"/>
         <source>Account &quot;%1&quot; requires authentication via OTP &lt;br/&gt; security code for connection to databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7262"/>
+        <location filename="../src/gui/datovka.cpp" line="7294"/>
         <source>Enter OTP security code for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7575"/>
+        <location filename="../src/gui/datovka.cpp" line="7607"/>
         <source>It was not possible to get user info and databox info from ISDS server for account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7579"/>
+        <location filename="../src/gui/datovka.cpp" line="7611"/>
         <source>Connection to ISDS or user authentication failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7581"/>
+        <location filename="../src/gui/datovka.cpp" line="7613"/>
         <source>Please check your internet connection and try again or it is possible that your password (certificate) has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5210"/>
-        <location filename="../src/gui/datovka.cpp" line="5406"/>
+        <location filename="../src/gui/datovka.cpp" line="5242"/>
+        <location filename="../src/gui/datovka.cpp" line="5438"/>
         <source>Add ZFO file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5210"/>
-        <location filename="../src/gui/datovka.cpp" line="5407"/>
-        <location filename="../src/gui/datovka.cpp" line="5568"/>
-        <location filename="../src/gui/datovka.cpp" line="6332"/>
-        <location filename="../src/gui/datovka.cpp" line="6493"/>
+        <location filename="../src/gui/datovka.cpp" line="5242"/>
+        <location filename="../src/gui/datovka.cpp" line="5439"/>
+        <location filename="../src/gui/datovka.cpp" line="5600"/>
+        <location filename="../src/gui/datovka.cpp" line="6364"/>
+        <location filename="../src/gui/datovka.cpp" line="6525"/>
         <source>ZFO file (*.zfo)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5271"/>
+        <location filename="../src/gui/datovka.cpp" line="5303"/>
         <source>Message is authentic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="21"/>
-        <location filename="../src/gui/datovka.cpp" line="7532"/>
+        <location filename="../src/gui/datovka.cpp" line="7564"/>
         <source>Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7540"/>
+        <location filename="../src/gui/datovka.cpp" line="7572"/>
         <source>Do you want to close application Datovka?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7551"/>
+        <location filename="../src/gui/datovka.cpp" line="7583"/>
         <source>Datovka cannot be closed now because downloading of messages on the background is running...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7553"/>
+        <location filename="../src/gui/datovka.cpp" line="7585"/>
         <source>Wait until the action will finished and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5282"/>
+        <location filename="../src/gui/datovka.cpp" line="5314"/>
         <source>Message is not authentic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1883"/>
+        <location filename="../src/gui/datovka.cpp" line="1915"/>
         <source>It was not possible download complete message &quot;%1&quot; from ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1888"/>
+        <location filename="../src/gui/datovka.cpp" line="1920"/>
         <source>Download message error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2339"/>
+        <location filename="../src/gui/datovka.cpp" line="2371"/>
         <source>Message &quot;%1&quot; was deleted from local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2379"/>
+        <location filename="../src/gui/datovka.cpp" line="2411"/>
         <source>Message &quot;%1&quot; was deleted from ISDS and local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2386"/>
+        <location filename="../src/gui/datovka.cpp" line="2418"/>
         <source>Message &quot;%1&quot; was deleted only from ISDS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2395"/>
+        <location filename="../src/gui/datovka.cpp" line="2427"/>
         <source>Message &quot;%1&quot; was deleted only from local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2404"/>
+        <location filename="../src/gui/datovka.cpp" line="2436"/>
         <source>Message &quot;%1&quot; was not deleted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="3984"/>
+        <location filename="../src/gui/datovka.cpp" line="4016"/>
         <source>Create and send a message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4091"/>
+        <location filename="../src/gui/datovka.cpp" line="4123"/>
         <source>Delete also message database from storage</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4092"/>
+        <location filename="../src/gui/datovka.cpp" line="4124"/>
         <source>Warning: If you delete the message database then all locally accessible messages that are not stored on the ISDS server will be lost.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4110"/>
+        <location filename="../src/gui/datovka.cpp" line="4142"/>
         <source>Account &apos;%1&apos; was deleted together with message database file.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="4125"/>
+        <location filename="../src/gui/datovka.cpp" line="4157"/>
         <source>Account &apos;%1&apos; was deleted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5137"/>
+        <location filename="../src/gui/datovka.cpp" line="5169"/>
         <source>Account with username &apos;%1&apos; and its message database already exist. New account was not created and selected database file was not associated with this account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5165"/>
+        <location filename="../src/gui/datovka.cpp" line="5197"/>
         <source>Account with name &apos;%1&apos; has been created (username &apos;%1&apos;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5168"/>
+        <location filename="../src/gui/datovka.cpp" line="5200"/>
         <source>This database file has been set as actual message database for this account. Maybe you have to change account properties for correct login to the server Datové schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5182"/>
+        <location filename="../src/gui/datovka.cpp" line="5214"/>
         <source>Create account: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5291"/>
-        <location filename="../src/gui/datovka.cpp" line="5299"/>
-        <location filename="../src/gui/datovka.cpp" line="5308"/>
+        <location filename="../src/gui/datovka.cpp" line="5323"/>
+        <location filename="../src/gui/datovka.cpp" line="5331"/>
+        <location filename="../src/gui/datovka.cpp" line="5340"/>
         <source>Message authentication failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5301"/>
+        <location filename="../src/gui/datovka.cpp" line="5333"/>
         <source>Authentication of message has been stopped because the message file has wrong format!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5310"/>
-        <location filename="../src/gui/datovka.cpp" line="5384"/>
+        <location filename="../src/gui/datovka.cpp" line="5342"/>
+        <location filename="../src/gui/datovka.cpp" line="5416"/>
         <source>An undefined error occurred!
 Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5341"/>
+        <location filename="../src/gui/datovka.cpp" line="5373"/>
         <source>Message is valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5377"/>
+        <location filename="../src/gui/datovka.cpp" line="5409"/>
         <source>The message hash cannot be verified because an internal error occurred!
 Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5431"/>
+        <location filename="../src/gui/datovka.cpp" line="5463"/>
         <source>Content parsing error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="5432"/>
+        <location filename="../src/gui/datovka.cpp" line="5464"/>
         <source>Cannot parse the content of </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6279"/>
+        <location filename="../src/gui/datovka.cpp" line="6311"/>
         <source>Export of message to ZFO was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6293"/>
-        <location filename="../src/gui/datovka.cpp" line="6653"/>
+        <location filename="../src/gui/datovka.cpp" line="6325"/>
+        <location filename="../src/gui/datovka.cpp" line="6685"/>
         <source>Message export error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6294"/>
-        <location filename="../src/gui/datovka.cpp" line="6654"/>
+        <location filename="../src/gui/datovka.cpp" line="6326"/>
+        <location filename="../src/gui/datovka.cpp" line="6686"/>
         <source>Cannot export complete message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6300"/>
-        <location filename="../src/gui/datovka.cpp" line="6459"/>
-        <location filename="../src/gui/datovka.cpp" line="6566"/>
-        <location filename="../src/gui/datovka.cpp" line="6660"/>
+        <location filename="../src/gui/datovka.cpp" line="6332"/>
+        <location filename="../src/gui/datovka.cpp" line="6491"/>
+        <location filename="../src/gui/datovka.cpp" line="6598"/>
+        <location filename="../src/gui/datovka.cpp" line="6692"/>
         <source>Do you want to download complete message now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6305"/>
-        <location filename="../src/gui/datovka.cpp" line="6313"/>
-        <location filename="../src/gui/datovka.cpp" line="6335"/>
+        <location filename="../src/gui/datovka.cpp" line="6337"/>
+        <location filename="../src/gui/datovka.cpp" line="6345"/>
+        <location filename="../src/gui/datovka.cpp" line="6367"/>
         <source>Export of message &quot;%1&quot; to ZFO was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6437"/>
+        <location filename="../src/gui/datovka.cpp" line="6469"/>
         <source>Export of message delivery info to ZFO was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6451"/>
-        <location filename="../src/gui/datovka.cpp" line="6558"/>
+        <location filename="../src/gui/datovka.cpp" line="6483"/>
+        <location filename="../src/gui/datovka.cpp" line="6590"/>
         <source>Delivery info export error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6453"/>
-        <location filename="../src/gui/datovka.cpp" line="6560"/>
+        <location filename="../src/gui/datovka.cpp" line="6485"/>
+        <location filename="../src/gui/datovka.cpp" line="6592"/>
         <source>Cannot export delivery info for message &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6464"/>
-        <location filename="../src/gui/datovka.cpp" line="6473"/>
         <location filename="../src/gui/datovka.cpp" line="6496"/>
-        <location filename="../src/gui/datovka.cpp" line="6515"/>
+        <location filename="../src/gui/datovka.cpp" line="6505"/>
+        <location filename="../src/gui/datovka.cpp" line="6528"/>
+        <location filename="../src/gui/datovka.cpp" line="6547"/>
         <source>Export of message delivery info &quot;%1&quot; to ZFO was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6512"/>
+        <location filename="../src/gui/datovka.cpp" line="6544"/>
         <source>Export of message delivery info &quot;%1&quot; to ZFO was successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6640"/>
+        <location filename="../src/gui/datovka.cpp" line="6672"/>
         <source>Export of message envelope to PDF was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6665"/>
-        <location filename="../src/gui/datovka.cpp" line="6673"/>
-        <location filename="../src/gui/datovka.cpp" line="6687"/>
-        <location filename="../src/gui/datovka.cpp" line="6702"/>
+        <location filename="../src/gui/datovka.cpp" line="6697"/>
+        <location filename="../src/gui/datovka.cpp" line="6705"/>
+        <location filename="../src/gui/datovka.cpp" line="6719"/>
+        <location filename="../src/gui/datovka.cpp" line="6734"/>
         <source>Export of message envelope &quot;%1&quot; to PDF was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6718"/>
+        <location filename="../src/gui/datovka.cpp" line="6750"/>
         <source>Export of message envelope &quot;%1&quot; to PDF was successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6753"/>
-        <location filename="../src/gui/datovka.cpp" line="6819"/>
+        <location filename="../src/gui/datovka.cpp" line="6785"/>
+        <location filename="../src/gui/datovka.cpp" line="6851"/>
         <source>Datovka - Export error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6962"/>
-        <location filename="../src/gui/datovka.cpp" line="6967"/>
+        <location filename="../src/gui/datovka.cpp" line="6994"/>
+        <location filename="../src/gui/datovka.cpp" line="6999"/>
         <source>Datovka internal error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6332"/>
+        <location filename="../src/gui/datovka.cpp" line="6364"/>
         <source>Save message as ZFO file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="160"/>
+        <location filename="../src/gui/datovka.cpp" line="162"/>
         <source>Welcome...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="164"/>
+        <location filename="../src/gui/datovka.cpp" line="166"/>
         <source>Storage: disk | disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6298"/>
-        <location filename="../src/gui/datovka.cpp" line="6658"/>
+        <location filename="../src/gui/datovka.cpp" line="6330"/>
+        <location filename="../src/gui/datovka.cpp" line="6690"/>
         <source>First you must download the whole message before exporting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6457"/>
-        <location filename="../src/gui/datovka.cpp" line="6564"/>
+        <location filename="../src/gui/datovka.cpp" line="6489"/>
+        <location filename="../src/gui/datovka.cpp" line="6596"/>
         <source>First you must download message before export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6492"/>
+        <location filename="../src/gui/datovka.cpp" line="6524"/>
         <source>Save delivery info as ZFO file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6545"/>
+        <location filename="../src/gui/datovka.cpp" line="6577"/>
         <source>Export of message delivery info to PDF was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6590"/>
+        <location filename="../src/gui/datovka.cpp" line="6622"/>
         <source>Save delivery info as PDF file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6591"/>
-        <location filename="../src/gui/datovka.cpp" line="6684"/>
+        <location filename="../src/gui/datovka.cpp" line="6623"/>
+        <location filename="../src/gui/datovka.cpp" line="6716"/>
         <source>PDF file (*.pdf)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6571"/>
-        <location filename="../src/gui/datovka.cpp" line="6580"/>
-        <location filename="../src/gui/datovka.cpp" line="6595"/>
+        <location filename="../src/gui/datovka.cpp" line="6603"/>
+        <location filename="../src/gui/datovka.cpp" line="6612"/>
+        <location filename="../src/gui/datovka.cpp" line="6627"/>
         <source>Export of message delivery info &quot;%1&quot; to PDF was not successful!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6616"/>
+        <location filename="../src/gui/datovka.cpp" line="6648"/>
         <source>Export of message delivery info &quot;%1&quot; to PDF was successful.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6683"/>
+        <location filename="../src/gui/datovka.cpp" line="6715"/>
         <source>Save message envelope as PDF file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6754"/>
-        <location filename="../src/gui/datovka.cpp" line="6820"/>
+        <location filename="../src/gui/datovka.cpp" line="6786"/>
+        <location filename="../src/gui/datovka.cpp" line="6852"/>
         <source>Cannot export the message </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6757"/>
-        <location filename="../src/gui/datovka.cpp" line="6823"/>
+        <location filename="../src/gui/datovka.cpp" line="6789"/>
+        <location filename="../src/gui/datovka.cpp" line="6855"/>
         <source>First you must download message before its export...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6909"/>
+        <location filename="../src/gui/datovka.cpp" line="6941"/>
         <source>Authentication error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6927"/>
+        <location filename="../src/gui/datovka.cpp" line="6959"/>
         <source>It was not possible to connect to your Databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6931"/>
+        <location filename="../src/gui/datovka.cpp" line="6963"/>
         <source>Please check your credentials including the test-environment setting.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6918"/>
+        <location filename="../src/gui/datovka.cpp" line="6950"/>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6925"/>
+        <location filename="../src/gui/datovka.cpp" line="6957"/>
         <source>OTP authentication error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6933"/>
+        <location filename="../src/gui/datovka.cpp" line="6965"/>
         <source>It is aslo possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6940"/>
-        <location filename="../src/gui/datovka.cpp" line="6973"/>
+        <location filename="../src/gui/datovka.cpp" line="6972"/>
+        <location filename="../src/gui/datovka.cpp" line="7005"/>
         <source>Connection to ISDS error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6942"/>
+        <location filename="../src/gui/datovka.cpp" line="6974"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6946"/>
+        <location filename="../src/gui/datovka.cpp" line="6978"/>
         <source>This is either caused by an extremely slow and/or unstable connection or by an improper setup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6948"/>
-        <location filename="../src/gui/datovka.cpp" line="6968"/>
-        <location filename="../src/gui/datovka.cpp" line="6981"/>
+        <location filename="../src/gui/datovka.cpp" line="6980"/>
+        <location filename="../src/gui/datovka.cpp" line="7000"/>
+        <location filename="../src/gui/datovka.cpp" line="7013"/>
         <source>Please check your internet connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6949"/>
-        <location filename="../src/gui/datovka.cpp" line="6982"/>
+        <location filename="../src/gui/datovka.cpp" line="6981"/>
+        <location filename="../src/gui/datovka.cpp" line="7014"/>
         <source>It might be necessary to use a proxy to connect to the server. If yes, please set it up in the File/Proxy settings menu.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6964"/>
+        <location filename="../src/gui/datovka.cpp" line="6996"/>
         <source>It was not possible to establish a connection to server Datové Schránky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6975"/>
+        <location filename="../src/gui/datovka.cpp" line="7007"/>
         <source>It was not possible a connection between your computer and the server of Datove schranky.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6977"/>
+        <location filename="../src/gui/datovka.cpp" line="7009"/>
         <source>Connection to ISDS failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6979"/>
+        <location filename="../src/gui/datovka.cpp" line="7011"/>
         <source>This is usually caused by either lack of internet connection or by a firewall on the way.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7005"/>
+        <location filename="../src/gui/datovka.cpp" line="7037"/>
         <source>Mode: online</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="441"/>
-        <location filename="../src/gui/datovka.cpp" line="5183"/>
+        <location filename="../src/gui/datovka.cpp" line="5215"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3064,8 +3064,8 @@ Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="124"/>
-        <location filename="../src/gui/datovka.cpp" line="2898"/>
+        <location filename="../src/gui/datovka.cpp" line="126"/>
+        <location filename="../src/gui/datovka.cpp" line="2930"/>
         <source>Datovka - Free interface for Datové schránky</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3115,12 +3115,12 @@ sent reply on this message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="208"/>
+        <location filename="../src/gui/datovka.cpp" line="210"/>
         <source>Unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="212"/>
+        <location filename="../src/gui/datovka.cpp" line="214"/>
         <source>Settled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3152,7 +3152,7 @@ sent reply on this message</source>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="675"/>
-        <location filename="../src/gui/datovka.cpp" line="820"/>
+        <location filename="../src/gui/datovka.cpp" line="822"/>
         <source>Get messages</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3164,7 +3164,7 @@ sent reply on this message</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="690"/>
         <location filename="../src/gui/ui/datovka.ui" line="909"/>
-        <location filename="../src/gui/datovka.cpp" line="823"/>
+        <location filename="../src/gui/datovka.cpp" line="825"/>
         <source>Create message</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3181,32 +3181,32 @@ sent reply on this message</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="717"/>
         <location filename="../src/gui/ui/datovka.ui" line="729"/>
-        <location filename="../src/gui/datovka.cpp" line="845"/>
+        <location filename="../src/gui/datovka.cpp" line="847"/>
         <source>Change password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="738"/>
         <location filename="../src/gui/ui/datovka.ui" line="747"/>
-        <location filename="../src/gui/datovka.cpp" line="849"/>
+        <location filename="../src/gui/datovka.cpp" line="851"/>
         <source>Account properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="759"/>
-        <location filename="../src/gui/datovka.cpp" line="856"/>
+        <location filename="../src/gui/datovka.cpp" line="858"/>
         <source>Move account up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="771"/>
-        <location filename="../src/gui/datovka.cpp" line="859"/>
+        <location filename="../src/gui/datovka.cpp" line="861"/>
         <source>Move account down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="783"/>
-        <location filename="../src/gui/datovka.cpp" line="867"/>
+        <location filename="../src/gui/datovka.cpp" line="869"/>
         <source>Change data directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3383,14 +3383,14 @@ sent reply on this message</source>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1062"/>
-        <location filename="../src/gui/datovka.cpp" line="1578"/>
+        <location filename="../src/gui/datovka.cpp" line="1610"/>
         <source>Open attachment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1074"/>
-        <location filename="../src/gui/datovka.cpp" line="1581"/>
-        <location filename="../src/gui/datovka.cpp" line="1653"/>
+        <location filename="../src/gui/datovka.cpp" line="1613"/>
+        <location filename="../src/gui/datovka.cpp" line="1685"/>
         <source>Save attachment</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3817,132 +3817,132 @@ Per-account path remembering will be disabled.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/common.cpp" line="590"/>
+        <location filename="../src/common.cpp" line="594"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="593"/>
+        <location filename="../src/common.cpp" line="597"/>
         <source>Initializing postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="596"/>
+        <location filename="../src/common.cpp" line="600"/>
         <source>Reply postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="599"/>
+        <location filename="../src/common.cpp" line="603"/>
         <source>Initializing postal data message - expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="603"/>
+        <location filename="../src/common.cpp" line="607"/>
         <source>Initializing postal data message - used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="621"/>
+        <location filename="../src/common.cpp" line="625"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="624"/>
+        <location filename="../src/common.cpp" line="628"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="627"/>
+        <location filename="../src/common.cpp" line="631"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="630"/>
+        <location filename="../src/common.cpp" line="634"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="633"/>
+        <location filename="../src/common.cpp" line="637"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="650"/>
+        <location filename="../src/common.cpp" line="654"/>
         <source>Message bas submitted (originates at ISDS )</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="657"/>
+        <location filename="../src/common.cpp" line="661"/>
         <source>Data message and papers signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="665"/>
+        <location filename="../src/common.cpp" line="669"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="670"/>
+        <location filename="../src/common.cpp" line="674"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="694"/>
+        <location filename="../src/common.cpp" line="698"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="679"/>
+        <location filename="../src/common.cpp" line="683"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commertial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="689"/>
+        <location filename="../src/common.cpp" line="693"/>
         <source>A person authorised to read this message has logged-in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="702"/>
+        <location filename="../src/common.cpp" line="706"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="710"/>
+        <location filename="../src/common.cpp" line="714"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="715"/>
+        <location filename="../src/common.cpp" line="719"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="951"/>
+        <location filename="../src/common.cpp" line="955"/>
         <source>DS je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="954"/>
+        <location filename="../src/common.cpp" line="958"/>
         <source>DS je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="957"/>
+        <location filename="../src/common.cpp" line="961"/>
         <source>DS je dosud neaktivní, dosud se do ní nikdo nepřihlásil z Portálu a nelze ji zpřístupnit pouze na základě doručení přístupových údajů</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="961"/>
+        <location filename="../src/common.cpp" line="965"/>
         <source>DS je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="964"/>
+        <location filename="../src/common.cpp" line="968"/>
         <source>DS je smazána (přesto existuje v ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/common.cpp" line="965"/>
+        <location filename="../src/common.cpp" line="969"/>
         <source>Došlo k chybě při zjišťování stavu</source>
         <translation type="unfinished"></translation>
     </message>
