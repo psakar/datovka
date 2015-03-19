@@ -32,8 +32,8 @@ void ImportZFODialog::ChangeRadioBox(void)
 
 void ImportZFODialog::ImportFiles(void)
 {
-	int zfoType = IMPORT_MESSAGE_ZFO;
-	int zfoAaction = IMPORT_FROM_DIR;
+	enum ZFOtype zfoType = IMPORT_MESSAGE_ZFO;
+	enum ZFOaction zfoAaction = IMPORT_FROM_DIR;
 
 	if (this->messageZFO->isChecked()) {
 		zfoType = IMPORT_MESSAGE_ZFO;

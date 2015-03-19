@@ -39,6 +39,7 @@
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
+#include "src/gui/dlg_import_zfo.h"
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "thread/worker.h"
@@ -418,7 +419,8 @@ private slots:
 	/*!
 	 * @brief Create ZFO file(s) list for import into database.
 	 */
-	void createZFOListForImport(int zfoType, int importType);
+	void createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
+	    enum ImportZFODialog::ZFOaction importType);
 
 	/*!
 	 * @brief Get message type of import ZFO file (message/delivery/unknown).
@@ -434,7 +436,8 @@ private slots:
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
 	 */
-	void prepareZFOImportIntoDatabase(const QStringList &files, int zfoType);
+	void prepareZFOImportIntoDatabase(const QStringList &files,
+	    enum ImportZFODialog::ZFOtype zfoType);
 
 	/*!
 	 * @brief Import only delivery info ZFO file(s) into database.

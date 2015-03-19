@@ -5527,8 +5527,12 @@ void MainWindow::showImportZFOActionDialog(void)
 	debugSlotCall();
 
 	QDialog *importZfo = new ImportZFODialog(this);
-	connect(importZfo, SIGNAL(returnZFOAction(int, int)),
-	    this, SLOT(createZFOListForImport(int, int)));
+	connect(importZfo,
+	    SIGNAL(returnZFOAction(enum ImportZFODialog::ZFOtype,
+	        enum ImportZFODialog::ZFOaction)),
+	    this,
+	    SLOT(createZFOListForImport(enum ImportZFODialog::ZFOtype,
+	        enum ImportZFODialog::ZFOaction)));
 	importZfo->exec();
 }
 
@@ -5537,7 +5541,8 @@ void MainWindow::showImportZFOActionDialog(void)
 /*
  * Create ZFO file(s) list for import into database.
  */
-void MainWindow::createZFOListForImport(int zfoType, int importType)
+void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
+    enum ImportZFODialog::ZFOaction importType)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -5703,7 +5708,7 @@ int MainWindow::getMessageTypeFromZFO(const QString &file)
  * Prepare import ZFO file(s) into database by ZFO type.
  */
 void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
-    int zfoType)
+    enum ImportZFODialog::ZFOtype zfoType)
 /* ========================================================================= */
 {
 	debugFuncCall();

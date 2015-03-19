@@ -22,11 +22,12 @@ public:
 		IMPORT_DELIVERY_ZFO
 	};
 
-
 public:
 	ImportZFODialog(QWidget *parent = 0);
+
 signals:
-	void returnZFOAction(int, int);
+	void returnZFOAction(enum ImportZFODialog::ZFOtype,
+	    enum ImportZFODialog::ZFOaction);
 
 private slots:
 	void ImportFiles(void);
