@@ -44,7 +44,7 @@
 
 #include "datovka.h"
 #include "src/common.h"
-#include "src/crypto/crypto_threadsafe.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -7130,7 +7130,7 @@ bool MainWindow::p12CertificateToPem(const QString &p12Path,
 
 	void *pem = NULL;
 	size_t pem_size;
-	if (0 != p12ToPem((void *) p12Data.constData(), p12Data.size(),
+	if (0 != p12_to_pem((void *) p12Data.constData(), p12Data.size(),
 	        certPwd.toUtf8().constData(), &pem, &pem_size)) {
 		return false;
 	}
