@@ -209,17 +209,11 @@ void DlgCreateAccount::addCertificateFromFile(void)
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "",
 	    tr("Certificate Files (*.p12 *.pem)"));
-	if (certFileName != NULL) {
+	if (!certFileName.isEmpty()) {
 		this->addCertificateButton->setText(certFileName);
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
 		m_certPath = certFileName;
-		checkInputFields();
-	} else {
-		this->addCertificateButton->setText(tr("Add"));
-		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
-		QString("plus_16.png")));
-		m_certPath = "";
 		checkInputFields();
 	}
 }
