@@ -44,6 +44,7 @@
 
 #include "datovka.h"
 #include "src/common.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -7105,6 +7106,66 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 
 /* ========================================================================= */
 /*
+ * Converts PKCS #12 certificate into PEM format.
+ */
+bool MainWindow::p12CertificateToPem(const QString &p12Path,
+    const QString &certPwd, QString &pemPath, const QString &userName)
+/* ========================================================================= */
+{
+	QByteArray p12Data;
+	QByteArray pemData;
+
+	pemPath = QString();
+
+	{
+		/* Read the data. */
+		QFile p12File(p12Path);
+		if (!p12File.open(QIODevice::ReadOnly)) {
+			return false;
+		}
+
+		p12Data = p12File.readAll();
+		p12File.close();
+	}
+
+	void *pem = NULL;
+	size_t pem_size;
+	if (0 != p12_to_pem((void *) p12Data.constData(), p12Data.size(),
+	        certPwd.toUtf8().constData(), &pem, &pem_size)) {
+		return false;
+	}
+
+	QFileInfo fileInfo(p12Path);
+	QString pemTmpPath = globPref.confDir() + QDir::separator() +
+	    userName + "_" + fileInfo.fileName() + "_.pem";
+
+	QFile pemFile(pemTmpPath);
+	if (!pemFile.open(QIODevice::WriteOnly)) {
+		free(pem); pem = NULL;
+		return false;
+	}
+
+	if ((long) pem_size != pemFile.write((char *) pem, pem_size)) {
+		free(pem); pem = NULL;
+		return false;
+	}
+
+	free(pem); pem = NULL;
+
+	if (!pemFile.flush()) {
+		return false;
+	}
+
+	pemFile.close();
+
+	pemPath = pemTmpPath;
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
 * Login to ISDS server by user certificate only.
 */
 bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
@@ -7119,7 +7180,8 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 	}
 
 	QString certPath = accountInfo.p12File();
-	if (certPath.isNull() || certPath.isEmpty()) {
+
+	if (certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
 		    *(ui->accountList), m_accountDb, acntTopIdx,
 		    DlgCreateAccount::ACT_CERT, this);
@@ -7136,9 +7198,77 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		}
 	}
 
+	QString passphrase = accountInfo._passphrase();
+	/*
+	 * Don't test for isEmpty()!
+	 * See difference between isNull() and isEmpty().
+	 */
+	if (passphrase.isNull()) {
+		/* Ask the user for password. */
+		bool ok;
+		QString enteredText = QInputDialog::getText(
+		    this, tr("Password required"),
+		    tr("Account: %1\n"
+		        "User name: %2\n"
+		        "Certificate file: %3\n"
+		        "Enter password to unlock certificate file:")
+		        .arg(accountInfo.accountName())
+		        .arg(accountInfo.userName())
+		        .arg(certPath),
+		    QLineEdit::Password, QString(), &ok);
+		if (ok) {
+			passphrase = enteredText;
+		} else {
+			/* Aborted. */
+			return false;
+		}
+	}
+
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
+		QMessageBox::critical(this,
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
+		    QMessageBox::Ok);
+		return false;
+	}
+
 	status = isdsLoginSystemCert(
 	    isdsSessions.session(accountInfo.userName()),
-	    certPath, accountInfo.isTestAccount());
+	    certPath, passphrase, accountInfo.isTestAccount());
+
+	if (IE_SUCCESS == status) {
+		/* Store the certificate password. */
+		QStandardItem *topItem =
+		    m_accountModel.itemFromIndex(acntTopIdx);
+		AccountModel::SettingsMap itemSett =
+		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSett._setPassphrase(passphrase);
+		topItem->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+
+		/*
+		 * TODO -- Notify the user that he should protect his
+		 * certificates with a password?
+		 */
+	}
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
@@ -7169,9 +7299,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 	QString certPath = accountInfo.p12File();
 	QString pwd = accountInfo.password();
 
-	if (pwd.isNull() || pwd.isEmpty() ||
-	    certPath.isNull() || certPath.isEmpty()) {
-
+	if (pwd.isEmpty() || certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
 		    *(ui->accountList), m_accountDb, acntTopIdx,
 		    DlgCreateAccount::ACT_CERTPWD, this);
@@ -7189,17 +7317,84 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		}
 	}
 
+	QString passphrase = accountInfo._passphrase();
+	/*
+	 * Don't test for isEmpty()!
+	 * See difference between isNull() and isEmpty().
+	 */
+	if (passphrase.isNull()) {
+		/* Ask the user for password. */
+		bool ok;
+		QString enteredText = QInputDialog::getText(
+		    this, tr("Password required"),
+		    tr("Account: %1\n"
+		        "User name: %2\n"
+		        "Certificate file: %3\n"
+		        "Enter password to unlock certificate file:")
+		        .arg(accountInfo.accountName())
+		        .arg(accountInfo.userName())
+		        .arg(certPath),
+		    QLineEdit::Password, QString(), &ok);
+		if (ok) {
+			passphrase = enteredText;
+		} else {
+			/* Aborted. */
+			return false;
+		}
+	}
+
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
+		QMessageBox::critical(this,
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
+		    QMessageBox::Ok);
+		return false;
+	}
+
 	status = isdsLoginUserCertPwd(
 	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, certPath,
+	    accountInfo.userName(), pwd, certPath, passphrase,
 	    accountInfo.isTestAccount());
 
+	if (IE_SUCCESS == status) {
+		/* Store the certificate password. */
+		QStandardItem *topItem =
+		    m_accountModel.itemFromIndex(acntTopIdx);
+		AccountModel::SettingsMap itemSett =
+		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSett._setPassphrase(passphrase);
+		topItem->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
 
-	QString isdsMsg =
-	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+		/*
+		 * TODO -- Notify the user that he should protect his
+		 * certificates with a password?
+		 */
+	}
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
+
+	QString isdsMsg =
+	    isds_long_message(isdsSessions.session(accountInfo.userName()));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -7240,9 +7435,77 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		return false;
 	}
 
+	QString passphrase = accountInfo._passphrase();
+	/*
+	 * Don't test for isEmpty()!
+	 * See difference between isNull() and isEmpty().
+	 */
+	if (passphrase.isNull()) {
+		/* Ask the user for password. */
+		bool ok;
+		QString enteredText = QInputDialog::getText(
+		    this, tr("Password required"),
+		    tr("Account: %1\n"
+		        "User name: %2\n"
+		        "Certificate file: %3\n"
+		        "Enter password to unlock certificate file:")
+		        .arg(accountInfo.accountName())
+		        .arg(accountInfo.userName())
+		        .arg(certPath),
+		    QLineEdit::Password, QString(), &ok);
+		if (ok) {
+			passphrase = enteredText;
+		} else {
+			/* Aborted. */
+			return false;
+		}
+	}
+
+	QString ext = QFileInfo(certPath).suffix().toUpper();
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        accountInfo.userName())) {
+			certPath = createdPemPath;
+		} else {
+			QMessageBox::critical(this,
+			    tr("Cannot decode certificate."),
+			    tr("The certificate file '%1' cannot be decoded by "
+			        "using the supplied password.").arg(certPath),
+			    QMessageBox::Ok);
+			return false;
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the passphrase. */
+	} else {
+		QMessageBox::critical(this,
+		    tr("Certificate format not supported"),
+		    tr("The certificate file '%1' suffix does not match "
+		        "one of the supported file formats. Supported "
+		        "suffixes are:").arg(certPath) + " p12, pem",
+		    QMessageBox::Ok);
+		return false;
+	}
+
 	status = isdsLoginUserCert(isdsSessions.session(
 	    accountInfo.userName()),
-	    idBox, certPath, accountInfo.isTestAccount());
+	    idBox, certPath, passphrase, accountInfo.isTestAccount());
+
+	if (IE_SUCCESS == status) {
+		/* Store the certificate password. */
+		QStandardItem *topItem =
+		    m_accountModel.itemFromIndex(acntTopIdx);
+		AccountModel::SettingsMap itemSett =
+		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSett._setPassphrase(passphrase);
+		topItem->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+
+		/*
+		 * TODO -- Notify the user that he should protect his
+		 * certificates with a password?
+		 */
+	}
 
 	isdsSessions.setSessionTimeout(accountInfo.userName(),
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */

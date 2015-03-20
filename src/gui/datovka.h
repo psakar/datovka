@@ -810,6 +810,24 @@ private:
 	    const AccountModel::SettingsMap accountInfo, bool showDialog);
 
 	/*!
+	 * @brief Converts PKCS #12 certificate into PEM format.
+	 *
+	 * @note The function creates a new PEM file stored in
+	 *     the configuration directory. The path is returned via
+	 *     the second parameter.
+	 *
+	 * @param[in]  p12Path   Path to PKCS #12 certificate file.
+	 * @param[in]  certPwd   Password protecting the certificate.
+	 * @param[out] pemPath   Returned path to created PEM file.
+	 * @param[in]  userName  Account user name, user to name PEM file.
+	 * @return True on success, false on error
+	 *     (e.g. file does not exist, password error, ...)
+	 */
+	static
+	bool p12CertificateToPem(const QString &p12Path,
+	    const QString &certPwd, QString &pemPath, const QString &userName);
+
+	/*!
 	 * @brief Login to ISDS server by certificate only.
 	 */
 	bool loginMethodCertificateOnly(const QModelIndex acntTopIdx,

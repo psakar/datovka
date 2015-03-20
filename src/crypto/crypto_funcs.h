@@ -237,6 +237,23 @@ int x509_crt_track_verification(struct x509_crt *x509_crt,
     struct crt_verif_outcome *cvo);
 
 
+/*!
+ * @brief Converts certificate file from PKCS #12 to PEM format.
+ *
+ * @note If the PKCS #12 was protected by password, then the generated
+ *     PEM file will also be encrypted used the same password.
+ *
+ * @param[in]  p12       PKCS #12 data containing certificate and private key.
+ * @param[in]  p12_size  Size of input data portion.
+ * @param[in]  pwd       Password protecting the PKCS #12 data.
+ * @param[out] pem_out   Newly generated data in PEM format.
+ * @param[out] out_size  Size of the PEM data.
+ * @return -1 on error.
+ */
+int p12_to_pem(const void *p12, size_t p12_size, const char *pwd,
+    void **pem_out, size_t *out_size);
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

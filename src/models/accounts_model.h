@@ -49,8 +49,10 @@
 #define LAST_CORRESPOND "last_export_corresp_path"
 #define LAST_ZFO "last_export_zfo_path"
 
+/* The following are not stored into the configuration file. */
 /* Only set on new accounts. */
 #define _CREATED_FROM_SCRATCH "_created_from_cratch"
+#define _PKEY_PASSPHRASE "_pkey_passphrase"
 
 
 /* Login method descriptors. */
@@ -215,6 +217,16 @@ public:
 		{
 			QMap<QString, QVariant>::insert(_CREATED_FROM_SCRATCH,
 			    fromScratch);
+		}
+		inline QString _passphrase(void) const
+		{
+			return QMap<QString, QVariant>::value(
+			    _PKEY_PASSPHRASE, QString()).toString();
+		}
+		inline void _setPassphrase(const QString &passphrase)
+		{
+			QMap<QString, QVariant>::insert(_PKEY_PASSPHRASE,
+			    passphrase);
 		}
 	};
 

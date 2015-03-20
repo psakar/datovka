@@ -226,7 +226,7 @@ isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
  * Log in using system certificate.
  */
 isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
-    const QString &certPath, bool testingSession)
+    const QString &certPath, const QString &passphrase, bool testingSession)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -247,13 +247,26 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
-	/* TODO - set correct cert format and certificate/key */
+	QFileInfo certFile(certPath);
+	QString ext = certFile.suffix();
+	ext = ext.toUpper();
+
+	if (ext == "PEM") {
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	} else if (ext == "DER") {
+		pki_credentials->certificate_format = PKI_FORMAT_DER;
+		pki_credentials->key_format = PKI_FORMAT_DER;
+	} else if (ext == "P12") {
+		/* TODO - convert p12 to pem */
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	}
+
 	pki_credentials->engine = NULL;
-	pki_credentials->certificate_format = PKI_FORMAT_DER;
 	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key_format = PKI_FORMAT_DER;
 	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = NULL;
+	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
@@ -271,7 +284,8 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
  * Log in using user certificate without password. Username = IDdatabox
  */
 isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
-    const QString &idBox, const QString &certPath, bool testingSession)
+    const QString &idBox, const QString &certPath, const QString &passphrase,
+    bool testingSession)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -297,13 +311,26 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
-	/* TODO - set correct cert format and certificate/key */
+	QFileInfo certFile(certPath);
+	QString ext = certFile.suffix();
+	ext = ext.toUpper();
+
+	if (ext == "PEM") {
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	} else if (ext == "DER") {
+		pki_credentials->certificate_format = PKI_FORMAT_DER;
+		pki_credentials->key_format = PKI_FORMAT_DER;
+	} else if (ext == "P12") {
+		/* TODO - convert p12 to pem */
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	}
+
 	pki_credentials->engine = NULL;
-	pki_credentials->certificate_format = PKI_FORMAT_DER;
 	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key_format = PKI_FORMAT_DER;
 	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = NULL;
+	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
@@ -321,7 +348,7 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
-    bool testingSession)
+    const QString &passphrase, bool testingSession)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -349,13 +376,26 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
 	}
 	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
 
-	/* TODO - set correct cert format and certificate/key */
+	QFileInfo certFile(certPath);
+	QString ext = certFile.suffix();
+	ext = ext.toUpper();
+
+	if (ext == "PEM") {
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	} else if (ext == "DER") {
+		pki_credentials->certificate_format = PKI_FORMAT_DER;
+		pki_credentials->key_format = PKI_FORMAT_DER;
+	} else if (ext == "P12") {
+		/* TODO - convert p12 to pem */
+		pki_credentials->certificate_format = PKI_FORMAT_PEM;
+		pki_credentials->key_format = PKI_FORMAT_PEM;
+	}
+
 	pki_credentials->engine = NULL;
-	pki_credentials->certificate_format = PKI_FORMAT_DER;
 	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key_format = PKI_FORMAT_DER;
 	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = NULL;
+	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
 
 	status = isds_login(isdsSession,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
