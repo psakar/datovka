@@ -208,7 +208,7 @@ void DlgCreateAccount::addCertificateFromFile(void)
 {
 	QString certFileName = QFileDialog::getOpenFileName(this,
 	    tr("Open Certificate"), "",
-	    tr("Certificate Files (*.p12 *.pem *.der)"));
+	    tr("Certificate Files (*.p12 *.pem)"));
 	if (certFileName != NULL) {
 		this->addCertificateButton->setText(certFileName);
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
