@@ -631,7 +631,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		dbId = m_accountDb.dbId(userName + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
-
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
@@ -7738,6 +7737,30 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	if (accountInfo._pwdExpirationDialog()) {
+		/* Notify only once. */
+		const QModelIndex index = ui->accountList->currentIndex();
+		QStandardItem *item = m_accountModel.itemFromIndex(index);
+		item = AccountModel::itemTop(item);
+		AccountModel::SettingsMap itemSett =
+		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		QString dbDateTimeString = m_accountDb.getPwdExpirFromDb(
+		    accountInfo.userName() + "___True");
+		const QDateTime dbDateTime = QDateTime::fromString(
+		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
+		const QDate dbDate = dbDateTime.date();
+		if ((!dbDate.isNull()) || dbDate.isValid()) {
+			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
+			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
+				showDialogAboutPwdExpir(accountInfo.userName(),
+				    daysTo,
+				    dbDateTime.toString("dd.MM.yyyy hh:mm:ss"));
+			}
+		}
+		itemSett._setPwdExpirationDialog(false);
+		item->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+	}
+
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		return loginMethodUserNamePwd(acntTopIdx, accountInfo,
@@ -8137,3 +8160,32 @@ void MainWindow::msgAdvancedDlgFinished(int result)
 
 	m_searchDlgActive = false;
 }
+
+
+/* ========================================================================= */
+/*
+ * Show dialog which notify the user about expiring password.
+ */
+void MainWindow::showDialogAboutPwdExpir(QString userName, qint64 days,
+    QString expitDate)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QMessageBox msgBox(this);
+	msgBox.setWindowTitle(tr("Password expiration"));
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setText(tr("According to the last available information, "
+	    "your password for login '%1' will expire in %2 days (%3).").
+	    arg(userName).arg(days).arg(expitDate));
+	msgBox.setInformativeText(tr("You can change your password now, "
+	    "or later using the 'Databox/Change password' command. "
+	    "Your new password will be valid for 90 days.\n\n"
+	    "Change password now?"));
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::Yes == msgBox.exec()) {
+		changeAccountPassword();
+	}
+}
+

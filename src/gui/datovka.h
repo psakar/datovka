@@ -875,6 +875,13 @@ private:
 	    const QModelIndexList &firstMsgColumnIdxs,
 	    enum MessageProcessState state);
 
+
+	/*!
+	 * @brief Show dialog which notify the user about expiring password.
+	 */
+	void showDialogAboutPwdExpir(QString userName, qint64 days,
+	    QString expitDate);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 
