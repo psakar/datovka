@@ -2793,9 +2793,15 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	html.append(strongAccountInfoLine(tr("User name"),
 	    itemSettings.userName()));
 
-	AccountEntry accountEntry;
-	accountEntry = m_accountDb.accountEntry(
-	    itemSettings.userName() + "___True");
+	QString acndDbKey = itemSettings.userName() + "___True";
+
+	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
+
+	if (m_accountDb.dbId(acndDbKey).isEmpty()) {
+		html.append(QString("<div><strong>") +
+		    tr("Account information could not be acquired.") +
+		    QString("</strong></div>"));
+	}
 
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
@@ -2849,8 +2855,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	}
 
 	html.append("<br/>");
-	QString key = itemSettings.userName() + "___True";
-	QString info = m_accountDb.getPwdExpirFromDb(key);
+	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
 	}
