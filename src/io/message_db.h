@@ -232,144 +232,124 @@ public:
 	/*!
 	 * @brief Return all received messages model.
 	 *
-	 * @param[in] recipDbId  Recipient data box identifier.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdModel(const QString &recipDbId);
+	DbMsgsTblModel * msgsRcvdModel(void);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
 	 *
-	 * @param[in] recipDbId  Recipient data box identifier.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(const QString &recipDbId);
+	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return received messages within given year.
 	 *
-	 * @param[in] recipDbId  Recipient data box identifier.
-	 * @param[in] year       Year number.
+	 * @param[in] year  Year number.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdInYearModel(const QString &recipDbId,
-	    const QString &year);
+	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param[in] recipDbId  Recipient data box identifier.
-	 * @param[in] sorting    Sorting.
+	 * @param[in] sorting  Sorting.
 	 * @return List of years.
 	 */
-	QStringList msgsRcvdYears(const QString &recipDbId,
-	    enum Sorting sorting) const;
+	QStringList msgsRcvdYears(enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param[in] recipDbId  Recipient identifier.
-	 * @param[in] sorting    Sorting.
+	 * @param[in] sorting  Sorting.
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    const QString &recipDbId, enum Sorting sorting) const;
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages received within past 90
 	 *     days.
 	 *
-	 * @param[in] recipDbId  Recipient identifier.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadWithin90Days(const QString &recipDbId) const;
+	int msgsRcvdUnreadWithin90Days(void) const;
 
 	/*!
 	 * @brief Return number of unread received messages in year.
 	 *
-	 * @param[in] recipDbId  Recipient identifier.
-	 * @param[in] year       Year number.
+	 * @param[in] year  Year number.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadInYear(const QString &recipDbId,
-	    const QString &year) const;
+	int msgsRcvdUnreadInYear(const QString &year) const;
 
 	/*!
 	 * @brief Return all sent messages model.
 	 *
-	 * @param[in] sendDbId  Sender data box identifier.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntModel(const QString &sendDbId);
+	DbMsgsTblModel * msgsSntModel(void);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
 	 *
-	 * @param[in] sendDbId  Sender data box identifier.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(const QString &sendDbId);
+	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return sent messages within given year.
 	 *
-	 * @param[in] sendDbId  Sender data box identifier.
-	 * @param[in] year      Year number.
+	 * @param[in] year  Year number.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntInYearModel(const QString &sendDbId,
-	    const QString &year);
+	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param[in] sendDbId  Sender identifier.
-	 * @param[in] sorting   Sorting.
+	 * @param[in] sorting  Sorting.
 	 * @return List of years.
 	 */
-	QStringList msgsSntYears(const QString &sendDbId,
-	    enum Sorting sorting) const;
+	QStringList msgsSntYears(enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param[in] sendDbId  Sender identifier.
-	 * @param[in] sorting   Sorting.
+	 * @param[in] sorting  Sorting.
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    const QString &sendDbId, enum Sorting sorting) const;
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages sent within past 90
 	 *     days.
 	 *
-	 * @param sendDbId  Sender identifier.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsSntUnreadWithin90Days(const QString &sendDbId) const;
+	int msgsSntUnreadWithin90Days(void) const;
 
 	/*!
 	 * @brief Return number of unread sent messages in year.
 	 *
-	 * @param sendDbId  Sender identifier.
-	 * @param year      Year number.
+	 * @param year  Year number.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsSntUnreadInYear(const QString &sendDbId,
-	    const QString &year) const;
+	int msgsSntUnreadInYear(const QString &year) const;
 
 	/*!
 	 * @brief Generate information for reply dialogue.
