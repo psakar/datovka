@@ -4225,7 +4225,6 @@ void MainWindow::manageAccountProperties(void)
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
 	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
-	//editAccountDialog->exec();
 
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
@@ -5498,12 +5497,8 @@ void MainWindow::exportCorrespondenceOverview(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
-	QString userName = accountUserName();
-	QString dbId = m_accountDb.dbId(userName + "___True");
-
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
-	    *messageDb, dbId,
-	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
+	    *messageDb, index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
 	    m_export_correspond_dir,
 	    this);
 
