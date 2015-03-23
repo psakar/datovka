@@ -601,39 +601,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	setAccountStoragePaths(accountItem);
 
-#if 1
-	/*
-	 * TODO -- This code must be retained until it is found out what user
-	 * data must be really obtained.
-	 */
-	/*
-	 * TODO -- Is '___True' somehow related to the testing state
-	 * of an account?
-	 */
-	QString dbId = m_accountDb.dbId(userName + "___True");
-	//qDebug() << "Selected data box ID" << dbId;
-	if (dbId.isEmpty()) {
-		/* Get user information. */
-		qWarning() << "Missing user entry of" << userName
-		    << "in account db.";
-
-		if (!isMainWindow) {
-			/* eliminate several problems as:
-			 * password dialog is shown before gui is loaded
-			 * database was not still open
-			*/
-			return;
-		}
-
-		if (!getOwnerInfoFromLogin(AccountModel::indexTop(current))) {
-		/* TODO -- What to do when no ISDS connection is present? */
-			return;
-		}
-		dbId = m_accountDb.dbId(userName + "___True");
-	}
-	Q_ASSERT(!dbId.isEmpty());
-#endif
-
 	/*
 	 * Disconnect message clicked. This slot will be enabled only for
 	 * received messages.
@@ -4918,11 +4885,13 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	isds_error status;
 
+	/*
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
 	}
+	*/
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
@@ -7725,6 +7694,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 /* ========================================================================= */
 {
+	bool loginRet = false;
+
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
 		return false;
@@ -7775,18 +7746,18 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		return loginMethodUserNamePwd(acntTopIdx, accountInfo,
+		loginRet = loginMethodUserNamePwd(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		return loginMethodCertificateOnly(acntTopIdx, accountInfo,
+		loginRet = loginMethodCertificateOnly(acntTopIdx, accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		return loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
+		loginRet = loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
 		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
@@ -7803,9 +7774,35 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 
 	/* Login method based username, password and OTP */
 	} else {
-		return loginMethodUserNamePwdOtp(acntTopIdx, accountInfo,
+		loginRet = loginMethodUserNamePwdOtp(acntTopIdx, accountInfo,
 		    showDialog);
 	}
+
+	if (!loginRet) {
+		/* Break on error. */
+		return loginRet;
+	}
+
+	/* Get account information if possible. */
+	/*
+	 * TODO -- Is '___True' somehow related to the testing state
+	 * of an account?
+	 */
+	QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+	if (dbId.isEmpty()) {
+		/* Get user information. */
+		qWarning() << "Missing user entry for" << userName
+		    << "in account db.";
+
+		if (!getOwnerInfoFromLogin(acntTopIdx)) {
+			return false;
+		}
+		dbId = m_accountDb.dbId(userName + "___True");
+	}
+	Q_ASSERT(!dbId.isEmpty());
+
+	return loginRet;
 }
 
 
