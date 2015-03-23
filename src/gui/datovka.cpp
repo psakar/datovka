@@ -4147,19 +4147,19 @@ void MainWindow::changeAccountPassword(void)
 {
 	debugSlotCall();
 
+	QModelIndex index = ui->accountList->currentIndex();
+	Q_ASSERT(index.isValid());
+	index = AccountModel::indexTop(index);
+
 	QString userName = accountUserName();
 
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(index, true)) {
 			return;
 		}
 	}
 
 	QString dbId = m_accountDb.dbId(userName + "___True");
-
-	QModelIndex index = ui->accountList->currentIndex();
-	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
 
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
