@@ -3963,6 +3963,13 @@ void MainWindow::openSendMessageDialog(int action)
 	Q_ASSERT(0 != messageDb);
 
 	QString userName = accountUserName();
+
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		if (!connectToIsds(acntTopIndex, true)) {
+			return;
+		}
+	}
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
 	QList<QString> accountData =
@@ -3975,12 +3982,6 @@ void MainWindow::openSendMessageDialog(int action)
 	QString dbType = accountData.at(0);
 	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIndex, true)) {
-			return;
-		}
-	}
 
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
@@ -4147,6 +4148,13 @@ void MainWindow::changeAccountPassword(void)
 	debugSlotCall();
 
 	QString userName = accountUserName();
+
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+		if (!connectToIsds(index, true)) {
+			return;
+		}
+	}
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QModelIndex index = ui->accountList->currentIndex();
@@ -4155,12 +4163,6 @@ void MainWindow::changeAccountPassword(void)
 
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(index, true)) {
-			return;
-		}
-	}
 
 	showStatusTextWithTimeout(tr("Change password of account "
 	    "\"%1\".").arg(accountInfo.accountName()));
@@ -4886,6 +4888,9 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	isds_error status;
 
 	/*
+	 * The method is called from only one place immediately after
+	 * a successful login.
+	 *
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
