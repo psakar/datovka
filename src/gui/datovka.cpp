@@ -2667,7 +2667,7 @@ void MainWindow::processPendingWorkerJobs(void)
 	}
 
 	m_syncAcntThread = new QThread();
-	m_syncAcntWorker = new Worker(m_accountDb);
+	m_syncAcntWorker = new Worker();
 	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
 	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
@@ -4895,7 +4895,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -4976,6 +4976,49 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	    *db_owner_info->dbOpenAddressing);
 
 	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get information about password expiration date.
+ */
+bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	isds_error status;
+	struct timeval *expiration = NULL;
+	QString expirDate;
+	bool retval;
+
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	QString key = accountInfo.userName() + "___True";
+
+	if (accountInfo.loginMethod() != LIM_USERNAME &&
+	    accountInfo.loginMethod() != LIM_USER_CERT) {
+		expirDate = "";
+		m_accountDb.setPwdExpirIntoDb(key, expirDate);
+		return true;
+	} else {
+		retval = false;
+		status = isds_get_password_expiration(
+		    isdsSessions.session(accountInfo.userName()), &expiration);
+
+		if ((IE_SUCCESS == status) && (NULL != expiration)) {
+			expirDate = timevalToDbFormat(expiration);
+			m_accountDb.setPwdExpirIntoDb(key, expirDate);
+			retval = true;
+		}
+		if (NULL != expiration) {
+			free(expiration);
+		}
+		return retval;
+	}
+	return false;
 }
 
 
@@ -7802,12 +7845,25 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 		return loginRet;
 	}
 
+	const QString userName = accountInfo.userName();
+
+	/* Update password expiration information. */
+	if (!getPasswordInfoFromLogin(acntTopIdx)) {
+		logWarning("Password information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    userName.toUtf8().constData());
+	}
+
 	/* Get account information if possible. */
 	/*
 	 * TODO -- Is '___True' somehow related to the testing state
 	 * of an account?
 	 */
-	QString userName = accountInfo.userName();
+	/*
+	 * TODO -- The account information should be updated periodically.
+	 * Currently they are only acquired when they are missing.
+	 */
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	if (dbId.isEmpty()) {
 		/* Acquire user information. */
@@ -7817,6 +7873,7 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 		if (!getOwnerInfoFromLogin(acntTopIdx)) {
 			return false;
 		}
+
 		dbId = m_accountDb.dbId(userName + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
@@ -8192,7 +8249,7 @@ void MainWindow::msgAdvancedDlgFinished(int result)
 
 /* ========================================================================= */
 /*
- * Show dialog which notify the user about expiring password.
+ * Show dialogue that notifies the user about expiring password.
  */
 int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
     const QString &userName, qint64 days, const QDateTime &dateTime)

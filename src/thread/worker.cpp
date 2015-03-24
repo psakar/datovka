@@ -114,10 +114,9 @@ QMutex Worker::downloadMessagesMutex(QMutex::NonRecursive);
 /*
  * Constructor for job list usage.
  */
-Worker::Worker(AccountDb &accountDb, QObject *parent)
+Worker::Worker(QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
-    m_accountDb(accountDb),
     m_job()
 {
 }
@@ -127,10 +126,9 @@ Worker::Worker(AccountDb &accountDb, QObject *parent)
 /*
  * Constructor for single job usage.
  */
-Worker::Worker(const Job &job, AccountDb &accountDb, QObject *parent)
+Worker::Worker(const Job &job, QObject *parent)
 /* ========================================================================= */
     : QObject(parent),
-    m_accountDb(accountDb),
     m_job(job)
 {
 }
@@ -215,10 +213,6 @@ void Worker::doJob(void)
 		}
 		emit refreshAccountList(job.acntTopIdx);
 
-		if (!getPasswordInfo(job.acntTopIdx)) {
-			success = false;
-		}
-
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		qDebug() << "-----------------------------------------------";
@@ -240,10 +234,6 @@ void Worker::doJob(void)
 			success = false;
 		}
 		emit refreshAccountList(job.acntTopIdx);
-
-		if (!getPasswordInfo(job.acntTopIdx)) {
-			success = false;
-		}
 
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -673,51 +663,6 @@ bool Worker::getMessageState(enum MessageDirection msgDirect,
 	isds_message_free(&message);
 
 	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Get password expiration info for account index
- */
-bool Worker::getPasswordInfo(const QModelIndex &acntTopIdx)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	isds_error status;
-	struct timeval *expiration = NULL;
-	QString expirDate;
-	bool retval;
-
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-
-	QString key = accountInfo.userName() + "___True";
-
-	if (accountInfo.loginMethod() != LIM_USERNAME &&
-	    accountInfo.loginMethod() != LIM_USER_CERT) {
-		expirDate = "";
-		m_accountDb.setPwdExpirIntoDb(key, expirDate);
-		return true;
-	} else {
-		retval = false;
-		status = isds_get_password_expiration(
-		    isdsSessions.session(accountInfo.userName()), &expiration);
-
-		if (IE_SUCCESS == status) {
-			if (NULL != expiration) {
-				expirDate = timevalToDbFormat(expiration);
-				m_accountDb.setPwdExpirIntoDb(key, expirDate);
-				retval = true;
-			}
-		}
-		if (NULL != expiration) {
-			free(expiration);
-		}
-		return retval;
-	}
-	return false;
 }
 
 

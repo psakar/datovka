@@ -526,11 +526,6 @@ private slots:
 	    QString action);
 
 	/*!
-	 * @brief Get data about logged in user and his box.
-	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
-
-	/*!
 	 * @brief Set tablewidget when message download worker is done.
 	 */
 	void postDownloadSelectedMessageAttachments(
@@ -876,10 +871,20 @@ private:
 	    enum MessageProcessState state);
 
 	/*!
-	 * @brief Show dialog which notify the user about expiring password.
+	 * @brief Show dialogue that notifies the user about expiring password.
 	 */
 	int showDialogueAboutPwdExpir(const QString &accountName,
 	    const QString &userName, qint64 days, const QDateTime &dateTime);
+
+	/*
+	 * @brief Get data about logged in user and his box.
+	 */
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
+
+	/*!
+	 * @brief Get information about password expiration date.
+	 */
+	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
