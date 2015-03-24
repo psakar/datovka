@@ -231,8 +231,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Open accounts database. */
 	if (!m_accountDb.openDb(globPref.accountDbPath())) {
-		qWarning() << "Error opening account db"
-		    << globPref.accountDbPath();
+		logErrorNL("Error opening account db '%s'.",
+		    globPref.accountDbPath().toUtf8().constData());
 	}
 
 	/* Load configuration file. */
