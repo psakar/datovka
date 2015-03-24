@@ -4044,7 +4044,7 @@ void MainWindow::addNewAccount(void)
 	debugSlotCall();
 
 	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
+	   QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
 
 	connect(newAccountDialog,
 	    SIGNAL(getAccountUserDataboxInfo(AccountModel::SettingsMap)),
@@ -4198,7 +4198,7 @@ void MainWindow::manageAccountProperties(void)
 	    "\"%1\".").arg(accountInfo.accountName()));
 
 	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	   m_accountDb, QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
+	    QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
 
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
@@ -7044,8 +7044,8 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
 
 	if (pwd.isNull() || pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), m_accountDb, acntTopIdx,
-		    DlgCreateAccount::ACT_PWD, this);
+		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_PWD,
+		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -7153,8 +7153,8 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 
 	if (certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), m_accountDb, acntTopIdx,
-		    DlgCreateAccount::ACT_CERT, this);
+		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_CERT,
+		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -7271,7 +7271,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 
 	if (pwd.isEmpty() || certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), m_accountDb, acntTopIdx,
+		    *(ui->accountList), acntTopIdx,
 		    DlgCreateAccount::ACT_CERTPWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
@@ -7390,8 +7390,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 	QString idBox;
 
 	QDialog *editAccountDialog = new DlgCreateAccount(
-	    *(ui->accountList), m_accountDb, acntTopIdx,
-	    DlgCreateAccount::ACT_IDBOX, this);
+	    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_IDBOX, this);
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		const AccountModel::SettingsMap accountInfoNew =
 		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -7507,8 +7506,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	if (pwd.isNull() ||
 	    pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), m_accountDb, acntTopIdx,
-		    DlgCreateAccount::ACT_PWD, this);
+		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_PWD,
+		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			const AccountModel::SettingsMap accountInfoNew =
 			    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
