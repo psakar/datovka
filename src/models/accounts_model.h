@@ -53,7 +53,7 @@
 /* Only set on new accounts. */
 #define _CREATED_FROM_SCRATCH "_created_from_cratch"
 #define _PKEY_PASSPHRASE "_pkey_passphrase"
-
+#define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
 
 /* Login method descriptors. */
 #define LIM_USERNAME "username"
@@ -227,6 +227,16 @@ public:
 		{
 			QMap<QString, QVariant>::insert(_PKEY_PASSPHRASE,
 			    passphrase);
+		}
+		inline bool _pwdExpirDlgShown(void) const
+		{
+			return QMap<QString, QVariant>::value(
+			    _PWD_EXPIR_DLG_SHOWN, false).toBool();
+		}
+		inline void _setPwdExpirDlgShown(bool pwdExpirDlgShown)
+		{
+			QMap<QString, QVariant>::insert(_PWD_EXPIR_DLG_SHOWN,
+			    pwdExpirDlgShown);
 		}
 	};
 

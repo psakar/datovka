@@ -631,7 +631,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		dbId = m_accountDb.dbId(userName + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
-
 	//qDebug() << "Clicked row" << current.row();
 	//qDebug() << "Clicked type" << AccountModel::nodeType(current);
 
@@ -7729,7 +7728,6 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 /* ========================================================================= */
 {
-
 	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
 		return false;
@@ -7737,6 +7735,46 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+	if (!accountInfo._pwdExpirDlgShown()) {
+		/* Notify only once. */
+		QStandardItem *topItem =
+		    m_accountModel.itemFromIndex(acntTopIdx);
+		AccountModel::SettingsMap itemSettings =
+		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSettings._setPwdExpirDlgShown(true);
+		topItem->setData(itemSettings, ROLE_ACNT_CONF_SETTINGS);
+
+		QString dbDateTimeString = m_accountDb.getPwdExpirFromDb(
+		    accountInfo.userName() + "___True");
+		const QDateTime dbDateTime = QDateTime::fromString(
+		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
+		const QDate dbDate = dbDateTime.date();
+
+		if (dbDate.isValid()) {
+			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
+			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
+				if (QMessageBox::Yes ==
+				    showDialogueAboutPwdExpir(topItem->text(),
+				        accountInfo.userName(), daysTo,
+				        dbDateTime)) {
+					showStatusTextWithTimeout(
+					    tr("Change password of account "
+					        "\"%1\".")
+					    .arg(accountInfo.accountName()));
+					QString dbId = m_accountDb.dbId(
+					    accountInfo.userName() +
+					    "___True");
+					QDialog *changePwd = new DlgChangePwd(
+					    dbId, *(ui->accountList),
+					    acntTopIdx.data(
+					        ROLE_ACNT_CONF_SETTINGS)
+					    .toMap(), this);
+					changePwd->exec();
+				}
+			}
+		}
+	}
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
@@ -8137,3 +8175,32 @@ void MainWindow::msgAdvancedDlgFinished(int result)
 
 	m_searchDlgActive = false;
 }
+
+
+/* ========================================================================= */
+/*
+ * Show dialog which notify the user about expiring password.
+ */
+int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
+    const QString &userName, qint64 days, const QDateTime &dateTime)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QMessageBox msgBox(this);
+	msgBox.setWindowTitle(tr("Password expiration"));
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setText(tr("According to the last available information, "
+	    "your password for account '%1' (login '%2') "
+	    "will expire in %3 days (%4).")
+	    .arg(accountName).arg(userName).arg(days)
+	    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+	msgBox.setInformativeText(tr("You can change your password now, "
+	    "or later using the 'Databox/Change password' command. "
+	    "Your new password will be valid for 90 days.\n\n"
+	    "Change password now?"));
+	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+	msgBox.setDefaultButton(QMessageBox::No);
+	return msgBox.exec();
+}
+

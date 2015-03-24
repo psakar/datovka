@@ -51,6 +51,7 @@
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
+#define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
 /* return values of Datovka login methods */
 typedef enum {
