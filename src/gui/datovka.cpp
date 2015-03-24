@@ -2466,9 +2466,15 @@ void MainWindow::synchroniseAllAccounts(void)
 		QModelIndex index = m_accountModel.index(i, 0);
 		bool isConnectActive = true;
 
-		/* Try connecting to ISDS, just to generate log-in dialogue. */
 		const AccountModel::SettingsMap accountInfo =
 		    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+
+		/* Skip those that should omitted. */
+		if (!accountInfo.syncWithAll()) {
+			continue;
+		}
+
+		/* Try connecting to ISDS, just to generate log-in dialogue. */
 		if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 			isConnectActive = connectToIsds(index, true);
 		}
