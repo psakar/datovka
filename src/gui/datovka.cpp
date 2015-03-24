@@ -7738,13 +7738,12 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 
 	if (accountInfo._pwdExpirationDialog()) {
 		/* Notify only once. */
-		const QModelIndex index = ui->accountList->currentIndex();
-		QStandardItem *item = m_accountModel.itemFromIndex(index);
-		item = AccountModel::itemTop(item);
-		AccountModel::SettingsMap itemSett =
-		    item->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		itemSett._setPwdExpirationDialog(false);
-		item->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+		QStandardItem *topItem =
+		    m_accountModel.itemFromIndex(acntTopIdx);
+		AccountModel::SettingsMap itemSettings =
+		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		itemSettings._setPwdExpirationDialog(false);
+		topItem->setData(itemSettings, ROLE_ACNT_CONF_SETTINGS);
 
 		QString dbDateTimeString = m_accountDb.getPwdExpirFromDb(
 		    accountInfo.userName() + "___True");
@@ -7752,7 +7751,7 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
 		const QDate dbDate = dbDateTime.date();
 
-		if ((!dbDate.isNull()) || dbDate.isValid()) {
+		if (dbDate.isValid()) {
 			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
 			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
 				if (QMessageBox::Yes == showDialogAboutPwdExpir(
