@@ -879,7 +879,7 @@ private:
 	/*!
 	 * @brief Show dialog which notify the user about expiring password.
 	 */
-	void showDialogAboutPwdExpir(QString userName, qint64 days,
+	int showDialogAboutPwdExpir(QString userName, qint64 days,
 	    QString expitDate);
 
 	QString m_confDirName; /*!< Configuration directory location. */
