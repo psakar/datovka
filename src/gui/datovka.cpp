@@ -8266,7 +8266,7 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 	    .arg(accountName).arg(userName).arg(days)
 	    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
 	msgBox.setInformativeText(tr("You can change your password now, "
-	    "or later using the 'Databox/Change password' command. "
+	    "or later using the 'Change password' command. "
 	    "Your new password will be valid for 90 days.\n\n"
 	    "Change password now?"));
 	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
