@@ -3092,11 +3092,6 @@ Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="461"/>
-        <source>Databox</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/datovka.ui" line="482"/>
         <source>Message</source>
         <translation type="unfinished"></translation>
@@ -3401,6 +3396,11 @@ sent reply on this message</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="196"/>
         <source>Verify signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/datovka.ui" line="461"/>
+        <source>Data box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

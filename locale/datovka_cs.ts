@@ -3937,9 +3937,8 @@ Zkuste to znova.</translation>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="461"/>
         <source>Databox</source>
-        <translation>Databox</translation>
+        <translation type="vanished">Databox</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="482"/>
@@ -4007,6 +4006,11 @@ Zkuste to znova.</translation>
         <location filename="../src/gui/datovka.cpp" line="1140"/>
         <source>Signature details</source>
         <translation>Detail podpisu</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/datovka.ui" line="461"/>
+        <source>Data box</source>
+        <translation>Schránka</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="600"/>

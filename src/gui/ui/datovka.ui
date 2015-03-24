@@ -458,7 +458,7 @@ sent reply on this message</string>
      <bool>false</bool>
     </property>
     <property name="title">
-     <string>Databox</string>
+     <string>Data box</string>
     </property>
     <addaction name="actionGet_messages"/>
     <addaction name="actionSend_message"/>
