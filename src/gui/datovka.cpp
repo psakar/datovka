@@ -2760,15 +2760,19 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	html.append(strongAccountInfoLine(tr("User name"),
 	    itemSettings.userName()));
 
-	QString acndDbKey = itemSettings.userName() + "___True";
-
-	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
+	const QString acndDbKey = itemSettings.userName() + "___True";
 
 	if (m_accountDb.dbId(acndDbKey).isEmpty()) {
+		/*
+		 * Generate this message if no account information can
+		 * be obtained.
+		 */
 		html.append(QString("<div><strong>") +
 		    tr("Account information could not be acquired.") +
 		    QString("</strong></div>"));
 	}
+
+	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
 
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
@@ -3952,7 +3956,8 @@ void MainWindow::openSendMessageDialog(int action)
 	/* if is reply or template, ID of selected message is required */
 	if (DlgSendMessage::ACT_REPLY == action ||
 	    DlgSendMessage::ACT_NEW_FROM_TMP == action) {
-		const QAbstractItemModel *tableModel = ui->messageList->model();
+		const QAbstractItemModel *tableModel =
+		    ui->messageList->model();
 		Q_ASSERT(0 != tableModel);
 		QModelIndex index = tableModel->index(
 		    ui->messageList->currentIndex().row(), 0);
@@ -3962,7 +3967,9 @@ void MainWindow::openSendMessageDialog(int action)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
-	QString userName = accountUserName();
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(acntTopIndex, true)) {
@@ -3970,7 +3977,9 @@ void MainWindow::openSendMessageDialog(int action)
 		}
 	}
 
+	/* Method connectToIsds() acquires account information. */
 	QString dbId = m_accountDb.dbId(userName + "___True");
+	Q_ASSERT(!dbId.isEmpty());
 	QString senderName = m_accountDb.senderNameGuess(userName + "___True");
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
@@ -3985,8 +3994,6 @@ void MainWindow::openSendMessageDialog(int action)
 
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
-	AccountModel::SettingsMap accountInfo =
-	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 	QString lastAttachAddPath;
 	if (globPref.use_global_paths) {
 		lastAttachAddPath = globPref.add_file_to_attachments_path;
@@ -4079,13 +4086,13 @@ void MainWindow::deleteSelectedAccount(void)
 		return;
 	}
 
-	QString userName = accountUserName();
 	MessageDb *db = accountMessageDb(itemTop);
 	Q_ASSERT(0 != db);
 
-	const AccountModel::SettingsMap &itemSettings =
+	const AccountModel::SettingsMap itemSettings =
 	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QString accountName = itemSettings.accountName();
+	const QString userName = itemSettings.userName();
+	const QString accountName = itemSettings.accountName();
 
 	QString dlgTitleText = tr("Remove account ") + itemTop->text();
 	QString questionText = tr("Do you want to remove account") + " '" +
@@ -4159,7 +4166,9 @@ void MainWindow::changeAccountPassword(void)
 		}
 	}
 
-	QString dbId = m_accountDb.dbId(userName + "___True");
+	/* Method connectToIsds() acquires account information. */
+	const QString dbId = m_accountDb.dbId(userName + "___True");
+	Q_ASSERT(!dbId.isEmpty());
 
 	const AccountModel::SettingsMap accountInfo =
 	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
@@ -4451,9 +4460,9 @@ void MainWindow::findDatabox(void)
 		}
 	}
 
-	QString userName = accountUserName();
-	QString dbId = m_accountDb.dbId(userName + "___True");
-	QList<QString> accountData =
+	const QString userName = accountInfo.userName();
+	/* Method connectToIsds() acquires account information. */
+	const QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
 	if (accountData.isEmpty()) {
@@ -4908,7 +4917,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 		return false;
 	}
 
-	QString username = accountInfo.userName() + "___True";
+	const QString userName = accountInfo.userName() + "___True";
 	QString birthDate;
 	if ((NULL != db_owner_info->birthInfo) &&
 	    (NULL != db_owner_info->birthInfo->biDate)) {
@@ -4921,7 +4930,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	}
 
 	m_accountDb.insertAccountIntoDb(
-	    username,
+	    userName,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
 	    ic,
@@ -7795,7 +7804,7 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 	QString userName = accountInfo.userName();
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	if (dbId.isEmpty()) {
-		/* Get user information. */
+		/* Acquire user information. */
 		qWarning() << "Missing user entry for" << userName
 		    << "in account db.";
 
