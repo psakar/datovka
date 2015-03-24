@@ -651,31 +651,36 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 /*
  * Return all received messages model.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdModel(const QString &recipDbId)
+DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded" ", ";
 	queryStr += "ifnull(process_state.state, 0) AS process_status";
-	queryStr += " FROM messages "
-	    "LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
 	    "LEFT JOIN process_state "
-	    "ON (messages.dmId = process_state.message_id) "
-	    "WHERE (dbIDRecipient = :recipDbId) ";
+	    "ON (m.dmId = process_state.message_id) "
+	    "WHERE "
+//	    "m.dbIDRecipient = :recipDbId"
+	    "s.message_type = :message_type";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -737,26 +742,29 @@ fail:
 /*
  * Return received messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
+DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded" ", ";
 	queryStr += "ifnull(process_state.state, 0) AS process_status";
-	queryStr += " FROM messages "
-	    "LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
 	    "LEFT JOIN process_state "
-	    "ON (messages.dmId = process_state.message_id) "
+	    "ON (m.dmId = process_state.message_id) "
 	    "WHERE "
-	    "(dbIDRecipient = :recipDbId)"
+//	    "(m.dbIDRecipient = :recipDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))";
 	if (!query.prepare(queryStr)) {
@@ -764,7 +772,8 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(const QString &recipDbId)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -826,27 +835,29 @@ fail:
 /*
  * Return received messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
-    const QString &year)
+DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(raw_message_data.message_id, 0) != 0) "
+	queryStr += "(ifnull(r.message_id, 0) != 0) "
 	    "AS is_downloaded" ", ";
 	queryStr += "ifnull(process_state.state, 0) AS process_status";
-	queryStr += " FROM messages "
-	    "LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
-	    "LEFT JOIN raw_message_data "
-	    "ON (messages.dmId = raw_message_data.message_id) "
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
 	    "LEFT JOIN process_state "
-	    "ON (messages.dmId = process_state.message_id) "
+	    "ON (m.dmId = process_state.message_id) "
 	    "WHERE "
-	    "(dbIDRecipient = :recipDbId)"
+//	    "(m.dbIDRecipient = :recipDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)";
 	if (!query.prepare(queryStr)) {
@@ -854,7 +865,8 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &recipDbId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	query.bindValue(":year", year);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -917,15 +929,20 @@ fail:
 /*
  * Return list of years (strings) in database.
  */
-QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
-     enum Sorting sorting) const
+QStringList MessageDb::msgsRcvdYears(enum Sorting sorting) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
-	    "FROM messages WHERE "
-	    "dbIDRecipient = :recipDbId";
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE "
+//	    "m.dbIDRecipient = :recipDbId"
+	    "s.message_type = :message_type";
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
@@ -941,7 +958,8 @@ QStringList MessageDb::msgsRcvdYears(const QString &recipDbId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -963,17 +981,24 @@ fail:
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
-    const QString &recipDbId, enum Sorting sorting) const
+    enum Sorting sorting) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsRcvdYears(recipDbId, sorting);
+	QList<QString> yearList = msgsRcvdYears(sorting);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	for (int i = 0; i < yearList.size(); ++i) {
-		queryStr = "SELECT COUNT(*) AS nrRecords FROM messages WHERE "
-		    "(dbIDRecipient = :recipDbId)"
+		queryStr = "SELECT COUNT(*) AS nrRecords "
+		    "FROM messages AS m "
+		    "LEFT JOIN supplementary_message_data AS s "
+		    "ON (m.dmID = s.message_id) "
+		    "WHERE "
+//		    "(m.dbIDRecipient = :recipDbId)"
+		    "(s.message_type = :message_type)"
 		    " and "
 		    "(strftime('%Y', dmDeliveryTime) = :year)";
 		if (!query.prepare(queryStr)) {
@@ -981,7 +1006,8 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		query.bindValue(":recipDbId", recipDbId);
+//		query.bindValue(":recipDbId", recipDbId);
+		query.bindValue(":message_type", TYPE_RECEIVED);
 		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
@@ -1009,17 +1035,21 @@ fail:
  * Return number of unread messages received within past 90
  *     days.
  */
-int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
+int MessageDb::msgsRcvdUnreadWithin90Days(void) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-	    "(dbIDRecipient = :recipDbId)"
+//	    "(m.dbIDRecipient = :recipDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
@@ -1029,7 +1059,8 @@ int MessageDb::msgsRcvdUnreadWithin90Days(const QString &recipDbId) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (query.exec() && query.isActive() &&
 	    query.first() &&query.isValid()) {
 		return query.value(0).toInt();
@@ -1049,18 +1080,21 @@ fail:
 /*
  * Return number of unread received messages in year.
  */
-int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
-    const QString &year) const
+int MessageDb::msgsRcvdUnreadInYear(const QString &year) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &recipDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages LEFT JOIN supplementary_message_data "
-	    "ON (messages.dmID = supplementary_message_data.message_id) "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-	    "(dbIDRecipient = :recipDbId)"
+//	    "(m.dbIDRecipient = :recipDbId)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(strftime('%Y', dmDeliveryTime) = :year)"
 	    " and "
@@ -1070,7 +1104,8 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &recipDbId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":recipDbId", recipDbId);
+//	query.bindValue(":recipDbId", recipDbId);
+	query.bindValue(":message_type", TYPE_RECEIVED);
 	query.bindValue(":year", year);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -1091,9 +1126,11 @@ fail:
 /*
  * Return all sent messages model.
  */
-DbMsgsTblModel * MessageDb::msgsSntModel(const QString &sendDbId)
+DbMsgsTblModel * MessageDb::msgsSntModel(void)
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
@@ -1160,9 +1197,11 @@ fail:
 /*
  * Return sent messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(const QString &sendDbId)
+DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
@@ -1232,10 +1271,11 @@ fail:
 /*
  * Return sent messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &sendDbId,
-    const QString &year)
+DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
@@ -1305,10 +1345,11 @@ fail:
 /*
  * Return list of years (strings) in database.
  */
-QStringList MessageDb::msgsSntYears(const QString &sendDbId,
-    enum Sorting sorting) const
+QStringList MessageDb::msgsSntYears(enum Sorting sorting) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', m.dmDeliveryTime) "
@@ -1358,11 +1399,13 @@ fail:
  * Return list of years and number of messages in database.
  */
 QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
-    const QString &sendDbId, enum Sorting sorting) const
+    enum Sorting sorting) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsSntYears(sendDbId, sorting);
+	QList<QString> yearList = msgsSntYears(sorting);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -1410,9 +1453,11 @@ fail:
  * Return number of unread messages sent within past 90
  *     days.
  */
-int MessageDb::msgsSntUnreadWithin90Days(const QString &sendDbId) const
+int MessageDb::msgsSntUnreadWithin90Days(void) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -1453,10 +1498,11 @@ fail:
 /*
  * Return number of unread sent messages in year.
  */
-int MessageDb::msgsSntUnreadInYear(const QString &sendDbId,
-    const QString &year) const
+int MessageDb::msgsSntUnreadInYear(const QString &year) const
 /* ========================================================================= */
 {
+//	Former argument: const QString &sendDbId
+
 	QSqlQuery query(m_db);
 	QString queryStr;
 

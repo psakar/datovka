@@ -31,11 +31,10 @@
 
 
 DlgCreateAccount::DlgCreateAccount(QTreeView &accountList,
-    AccountDb &m_accountDb, QModelIndex acntTopIdx, Action action,
+    QModelIndex acntTopIdx, Action action,
     QWidget *parent)
     : QDialog(parent),
     m_accountList(accountList),
-    m_accountDb(m_accountDb),
     m_acntTopIdx(acntTopIdx),
     m_action(action),
     m_loginmethod(0),

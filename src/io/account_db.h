@@ -116,8 +116,7 @@ public:
  	/*!
 	 * @brief Set pwd expiration to password_expiration_date table
 	 */
-	bool setPwdExpirIntoDb(const QString &key, QString &date)
-	    const;
+	bool setPwdExpirIntoDb(const QString &key, const QString &date);
 
 	/*!
 	 * @brief Insert account info into db
@@ -126,22 +125,40 @@ public:
 	    const QString &dbType, int ic, const QString &pnFirstName,
 	    const QString &pnMiddleName, const QString &pnLastName,
 	    const QString &pnLastNameAtBirth, const QString &firmName,
-	    const QString &biDate, const QString &biCity, const QString &biCounty,
-	    const QString &biState, const QString &adCity, const QString &adStreet,
-	    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
-	    const QString &adZipCode,const QString &adState,const QString &nationality,
+	    const QString &biDate, const QString &biCity,
+	    const QString &biCounty, const QString &biState,
+	    const QString &adCity, const QString &adStreet,
+	    const QString &adNumberInStreet,
+	    const QString &adNumberInMunicipality, const QString &adZipCode,
+	    const QString &adState, const QString &nationality,
 	    const QString &identifier, const QString &registryCode,
-	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing) const;
+	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing);
 
 	/*!
 	 * @brief delete account info from db
 	 */
-	bool deleteAccountInfo(QString key) const;
+	bool deleteAccountInfo(const QString &key);
 
-	QList<QString> getUserDataboxInfo(QString key) const;
+	QList<QString> getUserDataboxInfo(const QString &key) const;
+
+	static
+	const QString memoryLocation;
+
+	/*!
+	 * @brief Database driver name.
+	 */
+	static
+	const QString dbDriverType;
 
 private:
 	QSqlDatabase m_db; /*!< Account database. */
+
+	/*!
+	 * @brief Create empty tables if tables do not already exist.
+	 *
+	 * @return True on success.
+	 */
+	bool createEmptyMissingTables(void);
 };
 
 

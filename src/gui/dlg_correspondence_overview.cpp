@@ -35,12 +35,11 @@
  * Constructor.
  */
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(
-    const MessageDb &db, const QString &dbId,
+    const MessageDb &db,
     const AccountModel::SettingsMap &accountInfo,
     QString &exportCorrespondDir, QWidget *parent) :
     QDialog(parent),
     m_messDb(db),
-    m_dbId(dbId),
     m_accountInfo(accountInfo),
     m_exportCorrespondDir(exportCorrespondDir)
 /* ========================================================================= */

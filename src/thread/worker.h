@@ -107,22 +107,18 @@ public:
 
 	/*!
 	 * @brief Constructor for job list usage.
-	 *
-	 * @param[in] accountDb  Account database.
 	 */
-	explicit Worker(AccountDb &accountDb, QObject *parent = 0);
+	explicit Worker(QObject *parent = 0);
 
 	/*!
 	 * @brief Constructor for single job usage.
 	 *
 	 * @param[in] job        Worker job.
-	 * @param[in] accountDb  Account database.
 	 *
 	 * @note Consider using the job queue rather than a single job as
 	 *     the queue is the preferred version.
 	 */
-	explicit Worker(const Job &job, AccountDb &accountDb,
-	    QObject *parent = 0);
+	explicit Worker(const Job &job, QObject *parent = 0);
 
 	/*!
 	 * @brief Requests the process to start
@@ -181,13 +177,7 @@ public:
 
 private:
 
-	AccountDb &m_accountDb; /*!< Account database. */
 	const Job m_job; /*!< If invalid, then a job list is used. */
-
-	/*!
-	* @brief Get password expiration info for account index
-	*/
-	bool getPasswordInfo(const QModelIndex &acntTopIdx);
 
 	/*!
 	* @brief Download sent message delivery info and get list of events
