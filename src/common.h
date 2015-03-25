@@ -47,10 +47,10 @@
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 #define MAX_ATTACHMENT_SIZE 10000000 // 10MB
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
-#define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/page/2425/"
+#define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/cs/datovka.html"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
-#define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/page/2425/"
+#define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
 /* return values of Datovka login methods */
