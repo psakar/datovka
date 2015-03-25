@@ -86,7 +86,7 @@ GlobPreferences::GlobPreferences(void)
     date_format(DATE_FORMAT_DEFAULT),
     language("system"), /* Use local settings. */
     after_start_select(SELECT_NOTHING),
-    message_mark_as_read_timeout(5000),
+    message_mark_as_read_timeout(TIMER_MARK_MSG_READ_MS),
     use_global_paths(false),
     save_attachments_path(QDir::homePath()),
     add_file_to_attachments_path(QDir::homePath()),

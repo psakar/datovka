@@ -47,6 +47,7 @@
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
 #define MAX_ATTACHMENT_SIZE 10000000 // 10MB
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
+#define TIMER_MARK_MSG_READ_MS 5000 /* Mark message as read after 5 seconds. */
 #define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/cs/datovka.html"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
