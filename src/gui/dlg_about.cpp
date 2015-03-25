@@ -59,8 +59,16 @@ void aboutDialog::initAboutDialog(void)
 #endif /* PORTABLE_APPLICATION */
 	this->labelVersionNum->setText(VERSION);
 
-	QString url = "<a href=\"" + QString(DATOVKA_ONLINE_HELP_URL) + "\">" +
-	    QString(DATOVKA_ONLINE_HELP_URL) + "</a>";
+	QString copyright =
+	    "Copyright © 2014–2015 CZ.NIC, z. s. p. o. "
+	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;";
+	this->labelCopy->setText(copyright);
+	this->labelCopy->setTextFormat(Qt::RichText);
+	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	this->labelCopy->setOpenExternalLinks(true);
+
+	QString url = "&lt;<a href=\"" DATOVKA_ONLINE_HELP_URL "\">"
+	    DATOVKA_ONLINE_HELP_URL "</a>&gt;";
 	this->labelUrl->setText(url);
 	this->labelUrl->setTextFormat(Qt::RichText);
 	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
