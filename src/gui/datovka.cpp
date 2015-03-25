@@ -5160,17 +5160,11 @@ void MainWindow::createAccountFromDatabaseFileList(
 
 	debugFuncCall();
 
-	int dbCnt = filePathList.size();
+	const int dbFilesCnt = filePathList.size();
 
-	if (dbCnt == 0) {
+	if (0== dbFilesCnt) {
 		return;
 	}
-
-	QPair<QString,QString> importDBinfo;
-	QStringList fileNameParts;
-	QString accountName;
-
-	AccountModel::SettingsMap itemSettings;
 
 	QStringList currentAccountList;
 	int accountCount = ui->accountList->model()->rowCount();
@@ -5181,70 +5175,114 @@ void MainWindow::createAccountFromDatabaseFileList(
 		currentAccountList.append(accountInfo.userName());
 	}
 
-	for (int i = 0; i < filePathList.size(); ++i) {
+	for (int i = 0; i < dbFilesCnt; ++i) {
+		QPair<QString, QString> importDBinfo; /* filePath, message */
 		importDBinfo.first = filePathList.at(i);
-		QString file = QFileInfo(filePathList.at(i)).fileName();
-		if (file.contains("___")) {
-			fileNameParts = file.split("___");
-			accountName = fileNameParts[0];
+		const QString fileName(
+		    QFileInfo(importDBinfo.first).fileName());
+		QString userName;
+		QString testingFlag;
+		QString suffix;
+		/* Split the database file name. */
+		if (fileName.contains("___")) {
+			QStringList fileNameParts = fileName.split("___");
+			userName = fileNameParts[0];
 			fileNameParts = fileNameParts[1].split(".");
+			qDebug() << "A000" << userName << "=============";
+			testingFlag = fileNameParts[0];
+			suffix = fileNameParts[1];
+			qDebug() << "A001" << fileNameParts << "=============";
 
+			if (userName.isEmpty() || testingFlag.isEmpty() ||
+			    suffix.isEmpty()) {
+				importDBinfo.second = tr(
+				    "This file does not contain a valid "
+				    "message database or file name has wrong "
+				    "format.");
+				/* Skip further tests. */
+				userName.clear();
+				testingFlag.clear();
+				suffix.clear();
+			}
+		} else {
+			importDBinfo.second = tr("This file does not contain a"
+			    " valid message database or file name has wrong "
+			    "format.");
+			/* Skip further tests. */
+			userName.clear();
+			testingFlag.clear();
+			suffix.clear();
+		}
+
+		/* Check whether account already exists. */
+		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
+		    !suffix.isEmpty()) {
 			bool exists = false;
 			for (int j = 0; j < accountCount; ++j) {
-				if (currentAccountList.at(j) == accountName) {
+				if (currentAccountList.at(j) == userName) {
 					exists = true;
 					break;
 				}
 			}
 
 			if (exists) {
-				importDBinfo.second =
-				    tr("Account with username '%1' and "
+				importDBinfo.second = tr(
+				    "Account with user name '%1' and "
 				    "its message database already exist. "
 				    "New account was not created and "
 				    "selected database file was not "
 				    "associated with this account.").
-				    arg(accountName);
-			} else {
-				if (fileNameParts[0] == "1") {
-					itemSettings.setTestAccount(true);
-				} else if (fileNameParts[0] == "0") {
-					itemSettings.setTestAccount(false);
-				} else {
-					importDBinfo.second =
-					    tr("This file does not contain a "
-					    "valid message database or file "
-					    "name has wrong format.");
-				}
-				itemSettings.setAccountName(accountName);
-				itemSettings.setUserName(accountName);
-				itemSettings.setLoginMethod(LIM_USERNAME);
-				itemSettings.setPassword("");
-				itemSettings.setRememberPwd(false);
-				itemSettings.setSyncWithAll(false);
-				itemSettings.setDbDir(
-				    m_on_import_database_dir_activate);
-				m_accountModel.addAccount(accountName,
-				    itemSettings);
-				importDBinfo.second =
-				    tr("Account with name '%1' has been "
-				    "created (username '%1').").arg(accountName)
-				    + " " +
-				    tr("This database file has been set as "
-				    "actual message database for this account. "
-				    "Maybe you have to change account "
-				    "properties for correct login to the "
-				    "server Datové schránky.");
+				    arg(userName);
+				/* Skip further tests. */
+				userName.clear();
+				testingFlag.clear();
+				suffix.clear();
 			}
-		} else {
-			importDBinfo.first = filePathList.at(i);
-			importDBinfo.second = tr("This file does not contain a"
-			    " valid message database or file name has wrong "
-			    "format.");
+		}
+
+		/* Check whether testing flag has proper value. */
+		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
+		    !suffix.isEmpty()) {
+			if (("0" != testingFlag) && ("1" != testingFlag)) {
+				importDBinfo.second = tr(
+				    "This file does not contain a "
+				    "valid message database or file "
+				    "name has wrong format.");
+				/* Skip further tests. */
+				userName.clear();
+				testingFlag.clear();
+				suffix.clear();
+			}
+		}
+
+		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
+		    !suffix.isEmpty()) {
+			AccountModel::SettingsMap itemSettings;
+
+			itemSettings.setTestAccount("1" == testingFlag);
+			itemSettings.setAccountName(userName);
+			itemSettings.setUserName(userName);
+			itemSettings.setLoginMethod(LIM_USERNAME);
+			itemSettings.setPassword("");
+			itemSettings.setRememberPwd(false);
+			itemSettings.setSyncWithAll(false);
+			itemSettings.setDbDir(
+			    m_on_import_database_dir_activate);
+			m_accountModel.addAccount(userName,
+			    itemSettings);
+			importDBinfo.second =
+			    tr("Account with name '%1' has been "
+			    "created (user name '%1').").arg(userName)
+			    + " " +
+			    tr("This database file has been set as "
+			    "actual message database for this account. "
+			    "Maybe you have to change account "
+			    "properties for correct login to the "
+			    "server Datové schránky.");
 		}
 
 		QMessageBox::information(this,
-		    tr("Create account: %1").arg(accountName),
+		    tr("Create account: %1").arg(userName),
 		    tr("File") + ": " + importDBinfo.first +
 		    "\n\n" + importDBinfo.second,
 		    QMessageBox::Ok);
