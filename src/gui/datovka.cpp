@@ -3194,17 +3194,23 @@ void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
 /*
  * Create configuration file if not present.
  */
-void MainWindow::ensureConfPresence(void) const
+bool MainWindow::ensureConfPresence(void) const
 /* ========================================================================= */
 {
 	if (!QDir(globPref.confDir()).exists()) {
-		QDir(globPref.confDir()).mkpath(".");
+		if (!QDir(globPref.confDir()).mkpath(".")) {
+			return false;
+		}
 	}
 	if (!QFile(globPref.loadConfPath()).exists()) {
 		QFile file(globPref.loadConfPath());
-		file.open(QIODevice::ReadWrite);
+		if (!file.open(QIODevice::ReadWrite)) {
+			return false;
+		}
 		file.close();
 	}
+
+	return true;
 }
 
 

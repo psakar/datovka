@@ -597,7 +597,7 @@ private:
 	/*!
 	 * @brief Create configuration file if not present.
 	 */
-	void ensureConfPresence(void) const;
+	bool ensureConfPresence(void) const;
 
 	/*!
 	 * @brief Load and apply setting from configuration file.
