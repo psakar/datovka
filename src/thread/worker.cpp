@@ -266,15 +266,15 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 {
 	debugFuncCall();
 
-	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
 	qint64 dmId = QString(envel->dmID).toLongLong();
 
 	QString dmAmbiguousRecipient;
-	if (0 == envel->dmAmbiguousRecipient) {
+	if (NULL == envel->dmAmbiguousRecipient) {
 		dmAmbiguousRecipient = "0";
 	} else {
 		dmAmbiguousRecipient = QString::number(
@@ -282,50 +282,38 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 	}
 
 	QString dmLegalTitleYear;
-	if (0 == envel->dmLegalTitleYear) {
-		dmLegalTitleYear = "";
-	} else {
+	if (NULL != envel->dmLegalTitleYear) {
 		dmLegalTitleYear = QString::number(
 		    *envel->dmLegalTitleYear);
 	}
 
 	QString dmLegalTitleLaw;
-	if (0 == envel->dmLegalTitleLaw) {
-		dmLegalTitleLaw = "";
-	} else {
+	if (NULL != envel->dmLegalTitleLaw) {
 		dmLegalTitleLaw = QString::number(
 		    *envel->dmLegalTitleLaw);
 	}
 
 	QString dmSenderOrgUnitNum;
-	if (0 == envel->dmSenderOrgUnitNum) {
-		dmSenderOrgUnitNum = "";
-	} else {
-		dmSenderOrgUnitNum =
-		    *envel->dmSenderOrgUnitNum != 0 ?
-		    QString::number(*envel->
-		    dmSenderOrgUnitNum) : "";
+	if ((NULL != envel->dmSenderOrgUnitNum) &&
+	    (0 != *envel->dmSenderOrgUnitNum)) {
+		dmSenderOrgUnitNum = QString::number(
+		    *envel->dmSenderOrgUnitNum);
 	}
 
 	QString dmRecipientOrgUnitNum;
-	if (0 == envel->dmRecipientOrgUnitNum) {
-		dmRecipientOrgUnitNum = "";
-	} else {
-		dmRecipientOrgUnitNum =
-		    *envel->dmRecipientOrgUnitNum != 0
-		    ? QString::number(*envel->
-		    dmRecipientOrgUnitNum) : "";
+	if ((NULL != envel->dmRecipientOrgUnitNum) &&
+	    (0 != *envel->dmRecipientOrgUnitNum)) {
+		dmRecipientOrgUnitNum = QString::number(
+		    *envel->dmRecipientOrgUnitNum);
 	}
 
-	QString dmDeliveryTime = "";
-	if (0 != envel->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(
-		    envel->dmDeliveryTime);
+	QString dmDeliveryTime;
+	if (NULL != envel->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
 	}
-	QString dmAcceptanceTime = "";
-	if (0 != envel->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(
-		    envel->dmAcceptanceTime);
+	QString dmAcceptanceTime;
+	if (NULL != envel->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
 	}
 
 	/* insert message envelope in db */
