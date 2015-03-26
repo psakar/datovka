@@ -6982,8 +6982,8 @@ void MainWindow::showSignatureDetails(void)
 	}
 
 	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
 	if (0 == messageDb) {
+		Q_ASSERT(0);
 		return;
 	}
 
@@ -7796,8 +7796,8 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 {
 	bool loginRet = false;
 
-	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
+		Q_ASSERT(0);
 		return false;
 	}
 

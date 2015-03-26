@@ -47,8 +47,8 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 
 	/* Initialise libisds. */
 	status = isds_init();
-	Q_ASSERT(IE_SUCCESS == status);
 	if (IE_SUCCESS != status) {
+		Q_ASSERT(0);
 		qWarning() << "Unsuccessful ISDS initialisation.";
 		/* TODO -- What to do on failure? */
 	}
@@ -171,10 +171,9 @@ bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
 	struct isds_ctx *isds_session;
 	isds_error status;
 
-	Q_ASSERT(NULL != m_sessions.value(userName, NULL));
-
 	isds_session = m_sessions.value(userName, NULL);
 	if (NULL == isds_session) {
+		Q_ASSERT(0);
 		return false;
 	}
 

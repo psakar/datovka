@@ -580,8 +580,8 @@ bool MessageDb::commitTransaction(void)
 bool MessageDb::savePoint(const QString &savePointName)
 /* ========================================================================= */
 {
-	Q_ASSERT(!savePointName.isEmpty());
 	if (savePointName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -602,8 +602,8 @@ bool MessageDb::savePoint(const QString &savePointName)
 bool MessageDb::releaseSavePoint(const QString &savePointName)
 /* ========================================================================= */
 {
-	Q_ASSERT(!savePointName.isEmpty());
 	if (savePointName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -4584,8 +4584,8 @@ bool MessageDb::copyDb(const QString &newFileName)
 
 	/* Open database. */
 	open_ret = openDb(copy_ret ? newFileName : oldFileName);
-	Q_ASSERT(open_ret);
 	if (!open_ret) {
+		Q_ASSERT(0);
 		logErrorNL("File '%s' could not be opened.",
 		    copy_ret ?
 		        newFileName.toUtf8().constData() :
@@ -4633,8 +4633,8 @@ bool MessageDb::moveDb(const QString &newFileName)
 
 	/* Open database. */
 	open_ret = openDb(move_ret ? newFileName : oldFileName);
-	Q_ASSERT(open_ret);
 	if (!open_ret) {
+		Q_ASSERT(0);
 		logErrorNL("File '%s' could not be opened.",
 		    move_ret ?
 		        newFileName.toUtf8().constData() :
@@ -5103,8 +5103,8 @@ MessageDb * DbContainer::accessMessageDb(const QString &key,
 	}
 
 	db = new(std::nothrow) MessageDb(key);
-	Q_ASSERT(NULL != db);
 	if (NULL == db) {
+		Q_ASSERT(0);
 		return NULL;
 	}
 
@@ -5151,8 +5151,8 @@ MessageDb * DbContainer::accessMessageDb(const QString &key,
 bool DbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != db);
 	if (0 == db) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5162,8 +5162,8 @@ bool DbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 		++it;
 	}
 	/* Must exist. */
-	Q_ASSERT(this->end() != it);
 	if (this->end() == it) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5185,8 +5185,8 @@ bool DbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
 bool DbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != db);
 	if (0 == db) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5196,8 +5196,8 @@ bool DbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 		++it;
 	}
 	/* Must exist. */
-	Q_ASSERT(this->end() != it);
 	if (this->end() == it) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5220,8 +5220,8 @@ bool DbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
 bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != db);
 	if (0 == db) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5231,8 +5231,8 @@ bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 		++it;
 	}
 	/* Must exist. */
-	Q_ASSERT(this->end() != it);
 	if (this->end() == it) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5254,8 +5254,8 @@ bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 bool DbContainer::deleteMessageDb(MessageDb *db)
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != db);
 	if (0 == db) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -5265,8 +5265,8 @@ bool DbContainer::deleteMessageDb(MessageDb *db)
 		++it;
 	}
 	/* Must exist. */
-	Q_ASSERT(this->end() != it);
 	if (this->end() == it) {
+		Q_ASSERT(0);
 		return false;
 	}
 

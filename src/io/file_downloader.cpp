@@ -169,8 +169,8 @@ void FileDownloader::fileDownloaded(QNetworkReply *reply)
 {
 	debugFuncCall();
 
-	Q_ASSERT(0 != reply);
 	if (0 == reply) {
+		Q_ASSERT(0);
 		return;
 	}
 

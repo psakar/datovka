@@ -164,14 +164,14 @@ bool AttachmentModel::setModelData(const isds_message *message)
 {
 	const struct isds_list *docListItem;
 
-	Q_ASSERT(NULL != message);
 	if (NULL == message) {
+		Q_ASSERT(0);
 		return false;
 	}
 
 	docListItem = message->documents;
-	Q_ASSERT(NULL != docListItem);
 	if (NULL == docListItem) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -322,14 +322,14 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 {
 	QModelIndex selectedIndex = selectedAttachmentIndex();
 
-	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 
 	QString fileName = selectedIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
 	/* TODO -- Remember directory? */
@@ -361,8 +361,8 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 {
 	QModelIndexList selectedIndexes = selectedAttachmentIndexes();
 
-	Q_ASSERT(!selectedIndexes.isEmpty());
 	if (selectedIndexes.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
 
@@ -379,15 +379,15 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	QList<QString> unsuccessfullFiles;
 
 	foreach (QModelIndex idx, selectedIndexes) {
-		Q_ASSERT(idx.isValid());
 		if (!idx.isValid()) {
+			Q_ASSERT(0);
 			unspecifiedFailed = true;
 			continue;
 		}
 
 		QString fileName = idx.data().toString();
-		Q_ASSERT(!fileName.isEmpty());
 		if (fileName.isEmpty()) {
+			Q_ASSERT(0);
 			unspecifiedFailed = true;
 			continue;
 		}
@@ -433,14 +433,14 @@ void DlgViewZfo::openSelectedAttachment(void)
 {
 	QModelIndex selectedIndex = selectedAttachmentIndex();
 
-	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 
 	QString attachName = selectedIndex.data().toString();
-	Q_ASSERT(!attachName.isEmpty());
 	if (attachName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
 	/* TODO -- Add message id into file name? */
@@ -699,16 +699,16 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != attachmentTable->selectionModel());
 	if (0 == attachmentTable->selectionModel()) {
+		Q_ASSERT(0);
 		return QModelIndex();
 	}
 
 	QModelIndex selectedIndex =
 	    attachmentTable->selectionModel()->currentIndex();
 
-	Q_ASSERT(selectedIndex.isValid());
 	if (!selectedIndex.isValid()) {
+		Q_ASSERT(0);
 		return QModelIndex();
 	}
 
@@ -723,8 +723,8 @@ QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
 QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
 /* ========================================================================= */
 {
-	Q_ASSERT(0 != attachmentTable->selectionModel());
 	if (0 == attachmentTable->selectionModel()) {
+		Q_ASSERT(0);
 		return QModelIndexList();
 	}
 

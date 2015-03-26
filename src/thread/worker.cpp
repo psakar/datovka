@@ -381,8 +381,8 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	int newcnt = 0;
 	int allcnt = 0;
 
-	Q_ASSERT(acntTopIdx.isValid());
 	if (!acntTopIdx.isValid()) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 

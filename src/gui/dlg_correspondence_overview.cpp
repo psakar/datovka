@@ -162,13 +162,13 @@ bool DlgCorrespondenceOverview::exportMessageAsZFO(qint64 dmId,
     const QString &fileName, bool deliveryInfo) const
 /* ========================================================================= */
 {
-	Q_ASSERT(dmId >= 0);
 	if (dmId < 0) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -199,13 +199,13 @@ bool DlgCorrespondenceOverview::exportMessageAsPDF(qint64 dmId,
     const QString &fileName, bool deliveryInfo) const
 /* ========================================================================= */
 {
-	Q_ASSERT(dmId >= 0);
 	if (dmId < 0) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -237,8 +237,8 @@ bool DlgCorrespondenceOverview::exportMessageAsPDF(qint64 dmId,
 QString DlgCorrespondenceOverview::msgInHtml(qint64 dmId) const
 /* ========================================================================= */
 {
-	Q_ASSERT(dmId >= 0);
 	if (dmId < 0) {
+		Q_ASSERT(0);
 		return QString();
 	}
 
@@ -280,8 +280,8 @@ QString DlgCorrespondenceOverview::msgInHtml(qint64 dmId) const
 QString DlgCorrespondenceOverview::msgInCsv(qint64 dmId) const
 /* ========================================================================= */
 {
-	Q_ASSERT(dmId >= 0);
 	if (dmId < 0) {
+		Q_ASSERT(0);
 		return QString();
 	}
 
@@ -310,8 +310,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 {
 	qDebug() << "Files are export to HTML format";
 
-	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -398,8 +398,8 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 {
 	qDebug() << "Files are export to CSV format";
 
-	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return false;
 	}
 

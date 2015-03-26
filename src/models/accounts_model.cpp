@@ -575,8 +575,8 @@ bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
 	/* Find account top. */
 	item = itemTop(item);
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -591,8 +591,8 @@ bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
 		return false;
 	}
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -617,8 +617,8 @@ bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
 	/* Find account top. */
 	item = itemTop(item);
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -633,8 +633,8 @@ bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
 		return false;
 	}
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -675,8 +675,8 @@ bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
 	/* Find account top. */
 	item = itemTop(item);
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -691,8 +691,8 @@ bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
 		return false;
 	}
 
-	Q_ASSERT(0 != item);
 	if (0 == item) {
+		Q_ASSERT(0);
 		return false;
 	}
 
@@ -724,8 +724,8 @@ void AccountModel::removeYearNodes(const QModelIndex &topIndex)
 	QStandardItem *topItem;
 	QStandardItem *item;
 
-	Q_ASSERT(topIndex.isValid());
 	if (!topIndex.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 	Q_ASSERT(topIndex == indexTop(topIndex));
