@@ -430,8 +430,8 @@ int crypto_add_crl(const void *der, size_t der_size)
 #endif /* USE_VERIFY_PARAM */
 	X509_CRL *x509_crl = NULL;
 
-	assert(NULL != ca_certs);
 	if (NULL == ca_certs) {
+		assert(0);
 		log_error("%s\n",
 		    "Cryptographic context has not been initialised.");
 		goto fail;
@@ -677,8 +677,8 @@ int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
 	x509 = NULL;
 	sk_X509_free(signers); signers = NULL;
 
-	assert(NULL != utc_time);
 	if (NULL == utc_time) {
+		assert(0);
 		goto fail;
 	}
 
@@ -818,8 +818,8 @@ struct x509_crt * x509_crt_from_der(const void *der, size_t der_size)
 void crt_issuer_info_init(struct crt_issuer_info *cii)
 /* ========================================================================= */
 {
-	assert(NULL != cii);
 	if (NULL == cii) {
+		assert(0);
 		return;
 	}
 
@@ -834,8 +834,8 @@ void crt_issuer_info_init(struct crt_issuer_info *cii)
 void crt_issuer_info_clear(struct crt_issuer_info *cii)
 /* ========================================================================= */
 {
-	assert(NULL != cii);
 	if (NULL == cii) {
+		assert(0);
 		return;
 	}
 
@@ -873,12 +873,12 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 
 	debug_func_call();
 
-	assert(NULL != x509_crt);
 	if (NULL == x509_crt) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != cii);
 	if (NULL == cii) {
+		assert(0);
 		goto fail;
 	}
 
@@ -954,8 +954,8 @@ int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
 
 	debug_func_call();
 
-	assert(NULL != x509_crt);
 	if (NULL == x509_crt) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1017,26 +1017,26 @@ int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
 
 	debug_func_call();
 
-	assert(NULL != x509_crt);
 	if (NULL == x509_crt) {
+		assert(0);
 		goto fail;
 	}
 	cinf = ((X509 *) x509_crt)->cert_info;
 
-	assert(NULL != cinf);
 	if (NULL == cinf) {
+		assert(0);
 		goto fail;
 	}
 	val = cinf->validity;
 
 	notBefore = val->notBefore;
-	assert(NULL != notBefore);
 	if (NULL == notBefore) {
+		assert(0);
 		goto fail;
 	}
 	notAfter = val->notAfter;
-	assert(NULL != notAfter);
 	if (NULL == notAfter) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1069,8 +1069,8 @@ int x509_crt_verify(struct x509_crt *x509_crt)
 
 	debug_func_call();
 
-	assert(NULL != ca_certs);
 	if (NULL == ca_certs) {
+		assert(0);
 		log_error("%s\n",
 		    "Cryptographic context has not been initialised.");
 		goto fail;
@@ -1156,8 +1156,8 @@ int x509_crt_track_verification(struct x509_crt *x509_crt,
 	glob_cvo.crt_revoked = 0;
 	glob_cvo.crt_signature_invalid = 0;
 
-	assert(NULL != ca_certs);
 	if (NULL == ca_certs) {
+		assert(0);
 		log_error("%s\n",
 		    "Cryptographic context has not been initialised.");
 		goto fail;
@@ -1347,12 +1347,12 @@ int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
 
 	debug_func_call();
 
-	assert(NULL != store);
 	if (NULL == store) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != pem_str);
 	if (NULL == pem_str) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1413,12 +1413,12 @@ int x509_store_add_cert_file(X509_STORE *store, const char *fname,
 
 	/* TODO -- Does it store all certificates from a single file? */
 
-	assert(NULL != store);
 	if (NULL == store) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != fname);
 	if (NULL == fname) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1604,16 +1604,16 @@ int x509_store_der(X509 *x509, void **der, size_t *der_len)
 	BIO *bio = NULL;
 	BUF_MEM *bptr = NULL;
 
-	assert(NULL != x509);
 	if (NULL == x509) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != der);
 	if (NULL == der) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != der_len);
 	if (NULL == der_len) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1705,16 +1705,16 @@ int x509_store_pem(X509 *x509, void **pem, size_t *pem_len)
 	BIO *bio = NULL;
 	BUF_MEM *bptr = NULL;
 
-	assert(NULL != x509);
 	if (NULL == x509) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != pem);
 	if (NULL == pem) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != pem_len);
 	if (NULL == pem_len) {
+		assert(0);
 		goto fail;
 	}
 
@@ -1764,16 +1764,16 @@ int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
 	BIO *bio = NULL;
 	BUF_MEM *bptr = NULL;
 
-	assert(NULL != pkey);
 	if (NULL == pkey) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != pem);
 	if (NULL == pem) {
+		assert(0);
 		goto fail;
 	}
-	assert(NULL != pem_len);
 	if (NULL == pem_len) {
+		assert(0);
 		goto fail;
 	}
 
@@ -2033,8 +2033,9 @@ int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time)
 	debug_func_call();
 
 	assert(NULL != cms);
-	assert(NULL != utc_time);
+
 	if (NULL == utc_time) {
+		assert(0);
 		goto fail;
 	}
 
@@ -2118,26 +2119,26 @@ int x509_check_date(const X509 *x509, time_t utc_time)
 
 	debug_func_call();
 
-	assert(NULL != x509);
 	if (NULL == x509) {
+		assert(0);
 		goto fail;
 	}
 	cinf = x509->cert_info;
 
-	assert(NULL != cinf);
 	if (NULL == cinf) {
+		assert(0);
 		goto fail;
 	}
 	val = cinf->validity;
 
 	notBefore = val->notBefore;
-	assert(NULL != notBefore);
 	if (NULL == notBefore) {
+		assert(0);
 		goto fail;
 	}
 	notAfter = val->notAfter;
-	assert(NULL != notAfter);
 	if (NULL == notAfter) {
+		assert(0);
 		goto fail;
 	}
 	asn1_time_to_utc_time(notBefore, &tNotBef);
@@ -2242,8 +2243,8 @@ int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
 
 	/* Adjust the time based on time-zone information. */
 
-	assert(('+' == adjust_op) || ('-' == adjust_op));
 	if (('+' != adjust_op) && ('-' != adjust_op)) {
+		assert(0);
 		return -1;
 	}
 
@@ -2251,8 +2252,8 @@ int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
 	adj_hour += (str[i++] - '0');
 
 	colon = str[i++];
-	assert(':' == colon);
 	if (':' != colon) {
+		assert(0);
 		return -1;
 	}
 
