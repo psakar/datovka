@@ -420,17 +420,16 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(!pwd.isEmpty());
 
+	struct isds_otp *otp = NULL;
 	isds_error status = IE_ERROR;
 
-	if (userName.isNull() || userName.isEmpty()) {
-		return status;
+	if (userName.isEmpty()) {
+		goto fail;
 	}
-
-	struct isds_otp *otp = NULL;
 
 	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 	if (otp == NULL) {
-		return status;
+		goto fail;
 	}
 	memset(otp, 0, sizeof(struct isds_otp));
 
@@ -440,16 +439,18 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 		otp->method = OTP_TIME;
 	}
 
-	if (otpCode.isNull() || otpCode.isEmpty()) {
+	if (otpCode.isEmpty()) {
 		otp->otp_code = NULL;
 	} else {
-		char *new_str;
 		QByteArray optCodeBytes = otpCode.toLocal8Bit();
-		const char *old_str = optCodeBytes.data();
+		const char *old_str =
+		    optCodeBytes.data(); /* '\0' terminated */
 		size_t len = strlen(old_str) + 1;
-		new_str = (char *) malloc(len);
-		memcpy(new_str, old_str, len);
-		otp->otp_code = new_str;
+		otp->otp_code = (char *) malloc(len);
+		if (NULL == otp->otp_code) {
+			goto fail;
+		}
+		memcpy(otp->otp_code, old_str, len);
 	}
 
 	status = isds_login(isdsSession,
@@ -459,9 +460,13 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 
 	res = otp->resolution;
 
-	free(otp->otp_code);
-	free(otp);
-
+fail:
+	if (NULL != otp) {
+		if (NULL != otp->otp_code) {
+			free(otp->otp_code);
+		}
+		free(otp);
+	}
 	return status;
 }
 

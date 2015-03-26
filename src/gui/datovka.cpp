@@ -7654,7 +7654,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 
 		if (reply == QMessageBox::No) {
 			showStatusTextWithTimeout(tr("It was not possible to "
-			    "connect to your databox from account \"%1\".")
+			    "connect to your data box from account \"%1\".")
 			    .arg(accountInfo.accountName()));
 			return false;
 		}
@@ -7669,6 +7669,18 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
+		if (IE_ERROR == status) {
+			/* There were other errors. */
+
+			msgBody = tr("An error occurred while preparing "
+			    "request for SMS with OTP security code.") +
+			    "<br/><br/>" +
+			    tr("Please try again later or you have to use the "
+			    "official web interface of Datové schránky for "
+			    "access to your data box.");
+			return false;
+		}
+
 		/* if SMS was not send */
 		if (otpres != OTP_RESOLUTION_TOTP_SENT) {
 
@@ -7678,16 +7690,16 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			msgTitle = tr("Error of sending SMS");
 			msgBody = tr("It was not possible sent SMS with OTP "
 			    "security code for account \"%1\"")
-			    .arg(accountInfo.accountName()) + "<br><br>" +
-			    "<b>" + isdsMsg + "</b>" + "<br><br>" +
+			    .arg(accountInfo.accountName()) + "<br/><br/>" +
+			    "<b>" + isdsMsg + "</b>" + "<br/><br/>" +
 			    tr("Please try again later or you have to use the "
 			    "official web interface of Datové schránky for "
-			    "access to your databox.");
+			    "access to your data box.");
 			QMessageBox::critical(this, msgTitle, msgBody,
 			    QMessageBox::Ok);
 
 			showStatusTextWithTimeout(tr("It was not possible to "
-			    "connect to your databox from account \"%1\".")
+			    "connect to your data box from account \"%1\".")
 			    .arg(accountInfo.accountName()));
 			return false;
 
@@ -7711,7 +7723,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	int count = 0;
 	do {
 		count++;
-		otpcode = "";
+		otpcode.clear();
 		while (otpcode.isEmpty()) {
 			otpcode = QInputDialog::getText(this, msgTitle,
 			    msgBody, QLineEdit::Normal, "", &ok,
