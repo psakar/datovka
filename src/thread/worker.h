@@ -146,8 +146,7 @@ public:
 	 */
 	static
 	qdatovka_error updateMessageState(enum MessageDirection msgDirect,
-	    bool signedMsg, MessageDb &messageDb,
-	    const struct isds_envelope *envel);
+	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Download attachments, envelope and raw for message.

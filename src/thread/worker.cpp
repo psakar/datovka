@@ -22,7 +22,6 @@
  */
 
 
-#include <cassert>
 #include <QDebug>
 #include <QThread>
 
@@ -554,26 +553,22 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
  * Store sent message delivery information into database.
  */
 qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
-    bool signedMsg, MessageDb &messageDb, const struct isds_envelope *envel)
+    MessageDb &messageDb, const struct isds_envelope *envel)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
-	}
-
-	if (signedMsg) {
-		/* TODO - if signedMsg then decode signed message (raw ) */
 	}
 
 	qint64 dmID = QString(envel->dmID).toLongLong();
 
-	QString dmDeliveryTime = "";
-	if (0 != envel->dmDeliveryTime) {
+	QString dmDeliveryTime;
+	if (NULL != envel->dmDeliveryTime) {
 		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
 	}
-	QString dmAcceptanceTime = "";
-	if (0 != envel->dmAcceptanceTime) {
+	QString dmAcceptanceTime;
+	if (NULL != envel->dmAcceptanceTime) {
 		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
 	}
 
@@ -627,42 +622,44 @@ bool Worker::getMessageState(enum MessageDirection msgDirect,
 
 	isds_error status = IE_ERROR;
 
-	// message and envelope structures
 	struct isds_message *message = NULL;
 
 	if (signedMsg) {
-		status = isds_get_signed_delivery_info(isdsSessions.session(
-		    accountInfo.userName()),
-		    QString::number(dmId).toUtf8().constData(),
-		    &message);
+		status = isds_get_signed_delivery_info(
+		    isdsSessions.session(accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(), &message);
 	} else {
-		assert(0); /* Only signed messages can be downloaded. */
-		return false;
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
+		goto fail;
 		/*
-		status = isds_get_delivery_info(isdsSessions.session(
-		    accountInfo.userName()),
-		    QString::number(dmId).toUtf8().constData(),
-		    &message);
+		status = isds_get_delivery_info(
+		    isdsSessions.session(accountInfo.userName()),
+		    QString::number(dmId).toUtf8().constData(), &message);
 		*/
 	}
 
 	if (IE_SUCCESS != status) {
-		isds_message_free(&message);
 		qDebug() << status << isds_strerror(status);
-		return false;
+		goto fail;
 	}
 
 	Q_ASSERT(NULL != message);
-	if (NULL == message) {
-		return false;
+
+	if (Q_SUCCESS !=
+	    updateMessageState(msgDirect, messageDb, message->envelope)) {
+		goto fail;
 	}
 
-	updateMessageState(msgDirect, signedMsg, messageDb, message->envelope);
-
-	isds_list_free(&message->envelope->events);
 	isds_message_free(&message);
 
 	return true;
+
+fail:
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+
+	return false;
 }
 
 
@@ -679,19 +676,19 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	debugFuncCall();
 
 	if (!signedMsg) {
-		assert(0); /* Only signed messages can be downloaded. */
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		return Q_GLOBAL_ERROR;
 	}
 
-	Q_ASSERT(NULL != msg);
 	if (NULL == msg) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
 	const struct isds_envelope *envel = msg->envelope;
 
-	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
@@ -826,7 +823,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 			    &message);
 		}
 	} else {
-		assert(0); /* Only signed messages can be downloaded. */
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		return Q_GLOBAL_ERROR;
 		/*
 		status = isds_get_received_message(isdsSessions.session(
@@ -892,15 +889,15 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
     MessageDb &messageDb, const struct isds_message *msg)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != msg);
 	if (NULL == msg) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
 	const struct isds_envelope *envel = msg->envelope;
 
-	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
@@ -908,10 +905,12 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		(messageDb.msgsInsertUpdateDeliveryInfoRaw(dmID,
-		    QByteArray((char*)msg->raw, msg->raw_length)))
-		? qDebug() << "Message raw delivery info was updated..."
-		: qDebug() << "ERROR: Message raw delivery info update!";
+		if (messageDb.msgsInsertUpdateDeliveryInfoRaw(dmID,
+		    QByteArray((char*)msg->raw, msg->raw_length))) {
+			qDebug() << "Message raw delivery info was updated...";
+		} else {
+			qDebug() << "ERROR: Message raw delivery info update!";
+		}
 	}
 
 	const struct isds_list *event;
@@ -953,8 +952,8 @@ bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
 		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 	} else {
-		assert(0); /* Only signed messages can be downloaded. */
-		return false;
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
+		goto fail;
 		/*
 		status = isds_get_delivery_info(isdsSessions.session(
 		    accountInfo.userName()),
@@ -965,16 +964,25 @@ bool Worker::getDeliveryInfo(const QModelIndex &acntTopIdx,
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
-		isds_message_free(&message);
-		return false;
+		goto fail;
 	}
 
-	storeDeliveryInfo(signedMsg, messageDb, message);
+	Q_ASSERT(NULL != message);
 
-	isds_list_free(&message->envelope->events);
+	if (Q_SUCCESS != storeDeliveryInfo(signedMsg, messageDb, message)) {
+		goto fail;
+	}
+
 	isds_message_free(&message);
 
 	return true;
+
+fail:
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+
+	return false;
 }
 
 
@@ -1052,61 +1060,45 @@ qdatovka_error Worker::updateEnvelope(enum MessageDirection msgDirect,
 {
 	debugFuncCall();
 
-	Q_ASSERT(NULL != envel);
 	if (NULL == envel) {
+		Q_ASSERT(0);
 		return Q_GLOBAL_ERROR;
 	}
 
 	qint64 dmID = QString(envel->dmID).toLongLong();
 
 	QString dmAmbiguousRecipient;
-	if (0 == envel->dmAmbiguousRecipient) {
-		dmAmbiguousRecipient = "0";
-	} else {
+	if (NULL != envel->dmAmbiguousRecipient) {
 		dmAmbiguousRecipient = QString::number(
 		    *envel->dmAmbiguousRecipient);
 	}
 	QString dmLegalTitleYear;
-	if (0 == envel->dmLegalTitleYear) {
-		dmLegalTitleYear = "";
-	} else {
-		dmLegalTitleYear = QString::number(
-		    *envel->dmLegalTitleYear);
+	if (NULL != envel->dmLegalTitleYear) {
+		dmLegalTitleYear = QString::number(*envel->dmLegalTitleYear);
 	}
 	QString dmLegalTitleLaw;
-	if (0 == envel->dmLegalTitleLaw) {
-		dmLegalTitleLaw = "";
-	} else {
-		dmLegalTitleLaw = QString::number(
-		    *envel->dmLegalTitleLaw);
+	if (NULL != envel->dmLegalTitleLaw) {
+		dmLegalTitleLaw = QString::number(*envel->dmLegalTitleLaw);
 	}
 	QString dmSenderOrgUnitNum;
-	if (0 == envel->dmSenderOrgUnitNum) {
-		dmSenderOrgUnitNum = "";
-	} else {
-		dmSenderOrgUnitNum =
-		    *envel->dmSenderOrgUnitNum != 0
-		    ? QString::number(*envel->
-		    dmSenderOrgUnitNum) : "";
+	if ((NULL != envel->dmSenderOrgUnitNum) &&
+	    (0 != *envel->dmSenderOrgUnitNum)) {
+		dmSenderOrgUnitNum = QString::number(
+		    *envel->dmSenderOrgUnitNum);
 	}
 	QString dmRecipientOrgUnitNum;
-	if (0 == envel->dmRecipientOrgUnitNum) {
-		dmRecipientOrgUnitNum = "";
-	} else {
-		dmRecipientOrgUnitNum =
-		  *envel->dmRecipientOrgUnitNum != 0
-		    ? QString::number(*envel->
-		    dmRecipientOrgUnitNum) : "";
+	if ((NULL != envel->dmRecipientOrgUnitNum) &&
+	    (0 != *envel->dmRecipientOrgUnitNum)) {
+		dmRecipientOrgUnitNum = QString::number(
+		    *envel->dmRecipientOrgUnitNum);
 	}
-	QString dmDeliveryTime = "";
-	if (0 != envel->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(
-		    envel->dmDeliveryTime);
+	QString dmDeliveryTime;
+	if (NULL != envel->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
 	}
-	QString dmAcceptanceTime = "";
-	if (0 != envel->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(
-		    envel->dmAcceptanceTime);
+	QString dmAcceptanceTime;
+	if (NULL != envel->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
 	}
 
 	/* Update message envelope in db. */
