@@ -2284,13 +2284,15 @@ time_t timegm_utc(struct tm *tm)
 {
 #ifndef WIN32
 	/* Code taken from man timegm(3). */
+	/* Modified so that Coverity won't complain about tainted strings. */
 
-	time_t ret;
-	char *tz;
+	time_t ret = 0;
+	char *tz = NULL;
+	const char *tmp;
 
-	tz = getenv("TZ");
-	if (NULL != tz) {
-		tz = strdup(tz);
+	tmp = getenv("TZ");
+	if (NULL != tmp) {
+		tz = strdup(tmp);
 	}
 	setenv("TZ", "", 1);
 	tzset();
