@@ -766,7 +766,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 //	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(dmDeliveryTime >= date('now','-90 day'))";
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -859,7 +859,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 //	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = :year)";
+	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -1000,7 +1000,7 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 //		    "(m.dbIDRecipient = :recipDbId)"
 		    "(s.message_type = :message_type)"
 		    " and "
-		    "(strftime('%Y', dmDeliveryTime) = :year)";
+		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -1051,7 +1051,7 @@ int MessageDb::msgsRcvdUnreadWithin90Days(void) const
 //	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(dmDeliveryTime >= date('now','-90 day'))"
+	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " and "
 	    "(read_locally = 0)";
 	if (!query.prepare(queryStr)) {
@@ -1096,7 +1096,7 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &year) const
 //	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', dmDeliveryTime) = :year)"
+	    "(strftime('%Y', m.dmDeliveryTime) = :year)"
 	    " and "
 	    "(read_locally = 0)";
 	if (!query.prepare(queryStr)) {
@@ -4299,8 +4299,8 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 	    "FROM messages AS m LEFT JOIN supplementary_message_data "
 	    "AS s ON (m.dmID = s.message_id) WHERE "
 	    "message_type = :message_type AND "
-	    "(strftime('%Y-%m-%d', dmDeliveryTime) >= :fromDate) AND "
-	    "(strftime('%Y-%m-%d', dmDeliveryTime) <= :toDate)";
+	    "(strftime('%Y-%m-%d', m.dmDeliveryTime) >= :fromDate) AND "
+	    "(strftime('%Y-%m-%d', m.dmDeliveryTime) <= :toDate)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
