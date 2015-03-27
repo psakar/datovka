@@ -197,19 +197,89 @@ private slots:
 	void openSelectedAttachment(void);
 
 	/*!
-	 * @brief Mark all messages in the current working account.
+	 * @brief Mark all received messages in the current working account.
 	 */
-	void accountMarkAllRead(void);
+	void accountMarkReceivedRead(void);
 
 	/*!
-	 * @brief Mark all messages as read in selected account item.
+	 * @brief Mark all received messages in the current working account.
 	 */
-	void accountItemMarkAllRead(void);
+	void accountMarkReceivedUnread(void);
 
 	/*!
-	 * @brief Mark all messages as unread in selected account item.
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
 	 */
-	void accountItemMarkAllUnread(void);
+	void accountMarkReceivedYearRead(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearUnread(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedRead(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedUnread(void);
+
+	/*!
+	 * @brief Mark all received messages in the current working account.
+	 */
+	void accountMarkReceivedUnsettled(void);
+
+	/*!
+	 * @brief Mark all received messages in the current working account.
+	 */
+	void accountMarkReceivedInProgress(void);
+
+	/*!
+	 * @brief Mark all received messages in the current working account.
+	 */
+	void accountMarkReceivedSettled(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearUnsettled(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearInProgress(void);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearSettled(void);
+
+	/*!
+	 * @brief Mark recently received messages in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedUnsettled(void);
+
+	/*!
+	 * @brief Mark recently received messages in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedInProgress(void);
+
+	/*!
+	 * @brief Mark recently received messages in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedSettled(void);
 
 	/*!
 	 * @brief Mark selected messages as read.
@@ -220,21 +290,6 @@ private slots:
 	 * @brief Mark selected messages as unread.
 	 */
 	void messageItemsSelectedMarkUnread(void);
-
-	/*!
-	 * @brief Mark all messages as unsettled in selected account item.
-	 */
-	void accountItemMarkAllUnsettled(void);
-
-	/*!
-	 * @brief Mark all messages as in progress in selected account item.
-	 */
-	void accountItemMarkAllInProgress(void);
-
-	/*!
-	 * @brief Mark all messages as settled in selected account item.
-	 */
-	void accountItemMarkAllSettled(void);
 
 	/*!
 	 * @brief Mark selected messages as unsettled.

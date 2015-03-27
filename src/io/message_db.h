@@ -397,12 +397,30 @@ public:
 	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
 
 	/*!
-	 * @brief Set message read locally for all messages.
+	 * @brief Set message read locally for all received messages.
 	 *
 	 * @param[in] read  New read status.
 	 * @return True on success.
 	 */
-	bool smsgdtSetAllLocallyRead(bool read = true);
+	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set message read locally for received messages in given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
+	    bool read = true);
+
+	/*!
+	 * @brief Set message read locally for recently received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
 
 	/*!
 	 * @brief Return contacts from message db.
@@ -768,6 +786,33 @@ public:
 	 * @return Message processing state, -1 on error.
 	 */
 	int msgGetProcessState(qint64 dmId) const;
+
+	/*!
+	 * @brief Set process state of received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of received messages in given year.
+	 *
+	 * @param[in] year   Year.
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetReceivedYearProcessState(const QString &year,
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of recently received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetWithin90DaysReceivedProcessState(
+	    enum MessageProcessState state);
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.

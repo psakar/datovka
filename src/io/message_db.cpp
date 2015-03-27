@@ -1742,7 +1742,13 @@ bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 	}
 	query.bindValue(":read", read);
 	query.bindValue(":dmId", dmId);
-	return query.exec();
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 fail:
 	return false;
@@ -1753,21 +1759,107 @@ fail:
 /*
  * Set message read locally for all messages.
  */
-bool MessageDb::smsgdtSetAllLocallyRead(bool read)
+bool MessageDb::smsgdtSetAllReceivedLocallyRead(bool read)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
 
 	queryStr = "UPDATE supplementary_message_data "
-	    "SET read_locally = :read";
+	    "SET read_locally = :read WHERE "
+	    "message_type = :message_type";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":read", read);
-	return query.exec();
+	query.bindValue(":message_type", TYPE_RECEIVED);
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set message read locally for received messages in given year.
+ */
+bool MessageDb::smsgdtSetReceivedYearLocallyRead(const QString &year,
+    bool read)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT OR REPLACE INTO supplementary_message_data ("
+	    "message_id, message_type, read_locally, custom_data)"
+	    " SELECT s.message_id, s.message_type, :read, s.custom_data "
+	    "FROM supplementary_message_data AS s "
+	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
+	    "WHERE (strftime('%Y', m.dmDeliveryTime) = :year) and "
+	    "(s.message_type = :message_type)";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":read", read);
+	query.bindValue(":year", year);
+	query.bindValue(":message_type", TYPE_RECEIVED);
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set message read locally for recently received messages.
+ */
+bool MessageDb::smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT OR REPLACE INTO supplementary_message_data ("
+	    "message_id, message_type, read_locally, custom_data)"
+	    " SELECT s.message_id, s.message_type, :read, s.custom_data "
+	    "FROM supplementary_message_data AS s "
+	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
+	    "WHERE (m.dmDeliveryTime >= date('now','-90 day')) and "
+	    "(s.message_type = :message_type)";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":read", read);
+	query.bindValue(":message_type", TYPE_RECEIVED);
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
 
 fail:
 	return false;
@@ -4447,6 +4539,124 @@ int MessageDb::msgGetProcessState(qint64 dmId) const
 
 fail:
 	return -1;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process state of received messages.
+ */
+bool MessageDb::msgSetAllReceivedProcessState(enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
+	    " SELECT s.message_id, :state "
+	    "FROM supplementary_message_data AS s "
+	    "WHERE s.message_type = :message_type";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":state", (int) state);
+	query.bindValue(":message_type", TYPE_RECEIVED);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process state of received messages in given year.
+ */
+bool MessageDb::smsgdtSetReceivedYearProcessState(const QString &year,
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
+	    " SELECT s.message_id, :state "
+	    "FROM supplementary_message_data AS s "
+	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
+	    "WHERE (strftime('%Y', m.dmDeliveryTime) = :year) and "
+	    "(s.message_type = :message_type)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":state", (int) state);
+	query.bindValue(":year", year);
+	query.bindValue(":message_type", TYPE_RECEIVED);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Set process state of recently received messages.
+ */
+bool MessageDb::smsgdtSetWithin90DaysReceivedProcessState(
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
+	    " SELECT s.message_id, :state "
+	    "FROM supplementary_message_data AS s "
+	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
+	    "WHERE (m.dmDeliveryTime >= date('now','-90 day')) and "
+	    "(s.message_type = :message_type)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":state", (int) state);
+	query.bindValue(":message_type", TYPE_RECEIVED);
+
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
 }
 
 
