@@ -4260,7 +4260,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <location filename="../src/gui/ui/datovka.ui" line="1107"/>
         <location filename="../src/gui/datovka.cpp" line="1165"/>
         <source>Use message as template</source>
-        <translation>Použij zprávu jako šablonu</translation>
+        <translation>Použít zprávu jako šablonu</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1116"/>
