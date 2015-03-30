@@ -406,7 +406,8 @@ void DlgMsgSearch::appendMsgsToTable(
 		item->setText(msgList.at(j).at(0));
 		if (ENABLE_TOOLTIP) {
 			item->setToolTip(usrNmAndMsgDb.second->descriptionHtml(
-			    msgList.at(j).at(0).toInt(), 0));
+			    msgList.at(j).at(0).toInt(), 0,
+			    true, false, true));
 		}
 		this->resultsTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;

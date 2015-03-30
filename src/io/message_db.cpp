@@ -1947,8 +1947,8 @@ fail:
 /*
  * Return HTML formatted message description.
  */
-QString MessageDb::descriptionHtml(qint64 dmId,
-    QAbstractButton *verifySignature, bool showId, bool warnOld) const
+QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
+    bool showId, bool verSignature, bool warnOld) const
 /* ========================================================================= */
 {
 	QString html;
@@ -2175,70 +2175,80 @@ QString MessageDb::descriptionHtml(qint64 dmId,
 	}
 
 	/* Disable verify signature button. It is re-enabled when needed. */
-	if (0 != verifySignature) {
-		verifySignature->setEnabled(false);
+	if (0 != verSigButton) {
+		verSigButton->setEnabled(false);
 	}
 
-	html += "<h3>" + QObject::tr("Signature") + "</h3>";
-	/* Signature. */
-	if (!msgsVerificationAttempted(dmId)) {
-		/* Verification no attempted. */
-		html += strongAccountInfoLine(QObject::tr("Message signature"),
-		    QObject::tr("Not present"));
-		/* Enable verification button. */
-		if (0 != verifySignature) {
-			verifySignature->setEnabled(true);
-		}
-	} else if (!msgsVerified(dmId)) {
-		html += strongAccountInfoLine(QObject::tr("Message signature"),
-		    QObject::tr("Invalid")  + " -- " +
-		    QObject::tr(
-		        "Message signature and content do not correspond!"));
-	} else {
-		html += strongAccountInfoLine(QObject::tr("Message signature"),
-		    QObject::tr("Valid"));
-		/* Check signing certificate. */
-		bool verified = msgCertValidAtDate(dmId,
-		    msgsVerificationDate(dmId), !globPref.check_crl);
-		QString verifiedText = verified ? QObject::tr("Valid") :
-		    QObject::tr("Invalid");
-		if (!globPref.check_crl) {
-			verifiedText += " (" +
-			    QObject::tr(
-			        "Certificate revocation check is turned off!") +
-			    ")";
-		}
-		html += strongAccountInfoLine(
-		    QObject::tr("Signing certificate"), verifiedText);
-	}
+	if (verSignature) {
 
-	{
-		/* Time-stamp. */
-		QDateTime tst;
-		QByteArray tstData = msgsTimestampRaw(dmId);
-		QString timeStampStr;
-		if (tstData.isEmpty()) {
-			timeStampStr = QObject::tr("Not present");
+		html += "<h3>" + QObject::tr("Signature") + "</h3>";
+		/* Signature. */
+		if (!msgsVerificationAttempted(dmId)) {
+			/* Verification no attempted. */
+			html += strongAccountInfoLine(
+			    QObject::tr("Message signature"),
+			    QObject::tr("Not present"));
+			/* Enable verification button. */
+			if (0 != verSigButton) {
+				verSigButton->setEnabled(true);
+			}
+		} else if (!msgsVerified(dmId)) {
+			html += strongAccountInfoLine(
+			    QObject::tr("Message signature"),
+			    QObject::tr("Invalid")  + " -- " +
+			    QObject::tr("Message signature and content "
+			        "do not correspond!"));
 		} else {
-			time_t utc_time = 0;
-			int ret = raw_tst_verify(tstData.data(),
-			    tstData.size(), &utc_time);
-
-			if (-1 != ret) {
-				tst = QDateTime::fromTime_t(utc_time);
+			html += strongAccountInfoLine(
+			    QObject::tr("Message signature"),
+			    QObject::tr("Valid"));
+			/* Check signing certificate. */
+			bool verified = msgCertValidAtDate(dmId,
+			    msgsVerificationDate(dmId), !globPref.check_crl);
+			QString verifiedText = verified ?
+			    QObject::tr("Valid") : QObject::tr("Invalid");
+			if (!globPref.check_crl) {
+				verifiedText += " (" +
+				    QObject::tr("Certificate revocation "
+				        "check is turned off!") +
+				    ")";
 			}
-
-			timeStampStr = (1 == ret) ? QObject::tr("Valid") :
-			    QObject::tr("Invalid");
-			if (-1 != ret) {
-				timeStampStr +=
-				    " (" +
-				    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
-				    tst.timeZone().abbreviation(tst) + ")";
-			}
+			html += strongAccountInfoLine(
+			    QObject::tr("Signing certificate"), verifiedText);
 		}
-		html += strongAccountInfoLine(QObject::tr("Time stamp"),
-		    timeStampStr);
+
+		{
+			/* Time-stamp. */
+			QDateTime tst;
+			QByteArray tstData = msgsTimestampRaw(dmId);
+			QString timeStampStr;
+			if (tstData.isEmpty()) {
+				timeStampStr = QObject::tr("Not present");
+			} else {
+				time_t utc_time = 0;
+				int ret = raw_tst_verify(tstData.data(),
+				    tstData.size(), &utc_time);
+
+				if (-1 != ret) {
+					tst = QDateTime::fromTime_t(utc_time);
+				}
+
+				timeStampStr = (1 == ret) ?
+				    QObject::tr("Valid") :
+				    QObject::tr("Invalid");
+				if (-1 != ret) {
+					timeStampStr +=
+					    " (" +
+					    tst.toString("dd.MM.yyyy hh:mm:ss")
+					    + " " +
+					    tst.timeZone().abbreviation(tst) +
+					    ")";
+				}
+			}
+			html += strongAccountInfoLine(
+			    QObject::tr("Time stamp"), timeStampStr);
+		}
+
 	}
 
 	html += divEnd;
