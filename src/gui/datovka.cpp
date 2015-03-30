@@ -8664,7 +8664,7 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 		msgBox.setText(tr("According to the last available information, "
 		    "your password for account '%1' (login '%2') "
 		    "expired %3 days ago (%4).")
-		    .arg(accountName).arg(userName).arg(days)
+		    .arg(accountName).arg(userName).arg(days*(-1))
 		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
 	} else {
 		msgBox.setText(tr("According to the last available information, "
