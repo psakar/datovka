@@ -8660,11 +8660,19 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 	QMessageBox msgBox(this);
 	msgBox.setWindowTitle(tr("Password expiration"));
 	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setText(tr("According to the last available information, "
-	    "your password for account '%1' (login '%2') "
-	    "will expire in %3 days (%4).")
-	    .arg(accountName).arg(userName).arg(days)
-	    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+	if (days < 0) {
+		msgBox.setText(tr("According to the last available information, "
+		    "your password for account '%1' (login '%2') "
+		    "expired %3 days ago (%4).")
+		    .arg(accountName).arg(userName).arg(days)
+		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+	} else {
+		msgBox.setText(tr("According to the last available information, "
+		    "your password for account '%1' (login '%2') "
+		    "will expire in %3 days (%4).")
+		    .arg(accountName).arg(userName).arg(days)
+		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+	}
 	msgBox.setInformativeText(tr("You can change your password now, "
 	    "or later using the 'Change password' command. "
 	    "Your new password will be valid for 90 days.\n\n"
