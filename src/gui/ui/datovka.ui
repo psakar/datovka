@@ -1113,10 +1113,10 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
    </property>
    <property name="text">
-    <string>Search for messages in local database.</string>
+    <string>Search for messages in local database</string>
    </property>
    <property name="toolTip">
-    <string>Advanced searching in message envelopes.</string>
+    <string>Advanced searching in message envelopes</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
