@@ -285,12 +285,15 @@ void AccountModel::saveToSettings(QSettings &settings) const
 		settings.setValue(ACCOUNT_NAME, itemSettings.accountName());
 		settings.setValue(USER, itemSettings.userName());
 		settings.setValue(LOGIN, itemSettings.loginMethod());
-		if (!itemSettings.password().isEmpty()) {
-			settings.setValue(PWD,
-			    toBase64(itemSettings.password()));
-		}
 		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
 		settings.setValue(REMEMBER_PWD, itemSettings.rememberPwd());
+		if (itemSettings.rememberPwd()) {
+			if (!itemSettings.password().isEmpty()) {
+				settings.setValue(PWD,
+				    toBase64(itemSettings.password()));
+			}
+		}
+
 		if (!itemSettings.dbDir().isEmpty()) {
 			if (itemSettings.dbDir() != globPref.confDir()) {
 				settings.setValue(DB_DIR,
