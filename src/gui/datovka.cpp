@@ -2395,7 +2395,7 @@ void MainWindow::accountMarkReceivedYearSettled(void)
 	 * TODO -- Parameter check.
 	 */
 	messageDb->smsgdtSetReceivedYearProcessState(accountItem->text(),
-	    IN_PROGRESS);
+	    SETTLED);
 
 	/*
 	 * No need to reload account model.
