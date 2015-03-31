@@ -1,4 +1,4 @@
-4.2.0 / 31-03-2015
+4.2.0 / 2015-03-31
  * Fixed bug. Account password was saved to the configuration regardless on
    the 'Don't save password' option.
  * Updated reference to new Datovka 4 web page.
