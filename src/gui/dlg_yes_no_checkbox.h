@@ -22,8 +22,9 @@
  */
 
 
-#ifndef DLG_YES_NO_CHECKBOX_H
-#define DLG_YES_NO_CHECKBOX_H
+#ifndef _DLG_YES_NO_CHECKBOX_H_
+#define _DLG_YES_NO_CHECKBOX_H_
+
 
 #include <QDialog>
 #include "ui_dlg_yes_no_checkbox.h"
@@ -56,4 +57,4 @@ private:
 	QString m_detailText;
 };
 
-#endif // DLG_YES_NO_CHECKBOX_H
+#endif /* _DLG_YES_NO_CHECKBOX_H_ */

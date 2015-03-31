@@ -22,8 +22,8 @@
  */
 
 
-#ifndef DLG_DB_IMPORT_H
-#define DLG_DB_IMPORT_H
+#ifndef _DLG_ACCOUNT_FROM_DB_H_
+#define _DLG_ACCOUNT_FROM_DB_H_
 
 #include <QDialog>
 #include "src/common.h"
@@ -42,4 +42,4 @@ private slots:
 	void CreateAccountFromDbDialogAction(void);
 };
 
-#endif // DLG_DB_IMPORT_H
+#endif /* _DLG_ACCOUNT_FROM_DB_H_ */
