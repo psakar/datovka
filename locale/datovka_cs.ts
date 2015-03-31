@@ -4929,6 +4929,11 @@ k ukládání a otevírání zpráv pro všechny účty.
 Pamatování cest pro jednotlivé účty bude vypnuto.</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="824"/>
+        <source>When saving all attachments also</source>
+        <translation>Při ukládání všech příloh také proveď</translation>
+    </message>
+    <message>
         <source>Note: If you have a slow connection to ISDS or you can not download complete messages, you can increase connection timeout. Default value is 5 minutes. Use 0 to disable timeout limits (not recommended).</source>
         <translation type="vanished">Poznámka: Jestli-že máte pomalé připojení k ISDS nebo se Vám nedaří stáhnout kompletní zprávy, můžete navýšit časový limit. Výchozí hodnota je 5 minut. Nulová hodnota znamená, že je limit vypnutý (nedoporučuje se).</translation>
     </message>
@@ -4967,9 +4972,8 @@ Pamatování cest pro jednotlivé účty bude vypnuto.</translation>
         <translation>Tyto akce budou prováděny současně s ukládáním všech příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="824"/>
         <source>When saving all attachments also:</source>
-        <translation>Při ukládání všech příloh také proveď:</translation>
+        <translation type="vanished">Při ukládání všech příloh také proveď:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="836"/>
@@ -6555,7 +6559,7 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_msg_search.ui" line="84"/>
         <source>Search also in other accounts (can be slow).</source>
-        <translation>Prohledávej také ostatní účty (může být pomalé).</translation>
+        <translation>Vyhledávat také v ostatních účtech (může být pomalé).</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_msg_search.ui" line="91"/>

@@ -3764,7 +3764,7 @@ Per-account path remembering will be disabled.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="824"/>
-        <source>When saving all attachments also:</source>
+        <source>When saving all attachments also</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

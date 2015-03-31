@@ -821,7 +821,7 @@ Per-account path remembering will be disabled.</string>
           <string>These actions will be performed when saving all message attachments.</string>
          </property>
          <property name="title">
-          <string>When saving all attachments also:</string>
+          <string>When saving all attachments also</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_16">
           <item>
