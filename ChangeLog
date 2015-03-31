@@ -1,4 +1,6 @@
-4.2.0 /
+4.2.0 / 31-03-2015
+ * Fixed bug. Account password was saved to the configuration regardless on
+   the 'Don't save password' option.
  * Updated reference to new Datovka 4 web page.
  * The application can to a reduced extent use a no longer active account.
    Messages stored in a no longer working account can still be accessed from
@@ -16,7 +18,7 @@
  * Package maintainers can use the DISABLE_VERSION_CHECK_BY_DEFAULT
    configuration options. This will toggle automatic version check to off. It
    can be re-enabled by the user.
- * Save all attachments button can be configured (in options) so tha it also
+ * Save all attachments button can be configured (in options) so that it also
    saves the whole signed message and delivery info.
  * Implemented a search message dialogue.
  * Generated error messages (generated into console) can also display a hint
@@ -25,8 +27,8 @@
  * Application uses qint64 for message identifiers.
  * Multiple messages can be selected at once (e.g. to change message status
    for the whole selection).
- * Fixed bug in message list model. Changed message status wasn't forgotten on
-   model change.
+ * Fixed bug in message list model. Stored message status changes weren't
+   properly erased on model change.
  * Fixed bug in account properties dialogue. The OK button was not always
    enabled.
 
