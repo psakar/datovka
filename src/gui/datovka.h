@@ -615,6 +615,42 @@ private:
 	int m_timeoutSyncAccounts;
 
 	/*!
+	 * @brief Mark all received messages in the current working account.
+	 */
+	void accountMarkReceivedLocallyRead(bool read);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearLocallyRead(bool read);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedLocallyRead(bool read);
+
+	/*!
+	 * @brief Mark all received messages in the current working account.
+	 */
+	void accountMarkReceivedProcessState(enum MessageProcessState state);
+
+	/*!
+	 * @brief Mark all received messages in given year in the current
+	 *     working account.
+	 */
+	void accountMarkReceivedYearProcessState(
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Mark recently received messages in the current
+	 *     working account.
+	 */
+	void accountMarkRecentReceivedProcessState(
+	    enum MessageProcessState state);
+
+	/*!
 	 * @brief Connects top menu-bar buttons to appropriate actions.
 	 */
 	void connectTopMenuBarSlots(void);

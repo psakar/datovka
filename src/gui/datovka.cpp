@@ -2041,12 +2041,12 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 /* ========================================================================= */
 /*
- * Mark all messages in the current working account.
+ * Mark all received messages in the current working account.
  */
-void MainWindow::accountMarkReceivedRead(void)
+void MainWindow::accountMarkReceivedLocallyRead(bool read)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -2054,7 +2054,7 @@ void MainWindow::accountMarkReceivedRead(void)
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
 
-	messageDb->smsgdtSetAllReceivedLocallyRead(true);
+	messageDb->smsgdtSetAllReceivedLocallyRead(read);
 
 	/*
 	 * Reload/update account model only for
@@ -2064,6 +2064,19 @@ void MainWindow::accountMarkReceivedRead(void)
 
 	/* Regenerate the model. */
 	accountItemCurrentChanged(acntIdx);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all messages in the current working account.
+ */
+void MainWindow::accountMarkReceivedRead(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	accountMarkReceivedLocallyRead(true);
 }
 
 
@@ -2077,13 +2090,34 @@ void MainWindow::accountMarkReceivedUnread(void)
 {
 	debugSlotCall();
 
+	accountMarkReceivedLocallyRead(false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all received messages in given year in the current
+ *     working account.
+ */
+void MainWindow::accountMarkReceivedYearLocallyRead(bool read)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->smsgdtSetAllReceivedLocallyRead(false);
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(acntIdx);
+	/*
+	 * Data cannot be read directly from index because to the overloaded
+	 * model functions.
+	 * TODO -- Parameter check.
+	 */
+	messageDb->smsgdtSetReceivedYearLocallyRead(accountItem->text(),
+	    read);
 
 	/*
 	 * Reload/update account model only for
@@ -2106,29 +2140,7 @@ void MainWindow::accountMarkReceivedYearRead(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
-	/*
-	 * Data cannot be read directly from index because to the overloaded
-	 * model functions.
-	 * TODO -- Parameter check.
-	 */
-	messageDb->smsgdtSetReceivedYearLocallyRead(accountItem->text(),
-	    true);
-
-	/*
-	 * Reload/update account model only for
-	 * affected account.
-	 */
-	updateExistingAccountModelUnread(acntIdx);
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkReceivedYearLocallyRead(true);
 }
 
 
@@ -2142,20 +2154,27 @@ void MainWindow::accountMarkReceivedYearUnread(void)
 {
 	debugSlotCall();
 
+	accountMarkReceivedYearLocallyRead(false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all received messages in given year in the current
+ *     working account.
+ */
+void MainWindow::accountMarkRecentReceivedLocallyRead(bool read)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
-	/*
-	 * Data cannot be read directly from index because to the overloaded
-	 * model functions.
-	 * TODO -- Parameter check.
-	 */
-	messageDb->smsgdtSetReceivedYearLocallyRead(accountItem->text(),
-	    false);
+
+	messageDb->smsgdtSetWithin90DaysReceivedLocallyRead(read);
 
 	/*
 	 * Reload/update account model only for
@@ -2178,22 +2197,7 @@ void MainWindow::accountMarkRecentReceivedRead(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->smsgdtSetWithin90DaysReceivedLocallyRead(true);
-
-	/*
-	 * Reload/update account model only for
-	 * affected account.
-	 */
-	updateExistingAccountModelUnread(acntIdx);
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkRecentReceivedLocallyRead(true);
 }
 
 
@@ -2207,19 +2211,31 @@ void MainWindow::accountMarkRecentReceivedUnread(void)
 {
 	debugSlotCall();
 
+	accountMarkRecentReceivedLocallyRead(false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all received messages in the current working account.
+ */
+void MainWindow::accountMarkReceivedProcessState(
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
 
-	messageDb->smsgdtSetWithin90DaysReceivedLocallyRead(false);
+	messageDb->msgSetAllReceivedProcessState(state);
 
 	/*
-	 * Reload/update account model only for
-	 * affected account.
+	 * No need to reload account model.
 	 */
-	updateExistingAccountModelUnread(acntIdx);
 
 	/* Regenerate the model. */
 	accountItemCurrentChanged(acntIdx);
@@ -2235,20 +2251,7 @@ void MainWindow::accountMarkReceivedUnsettled(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->msgSetAllReceivedProcessState(UNSETTLED);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkReceivedProcessState(UNSETTLED);
 }
 
 
@@ -2261,20 +2264,7 @@ void MainWindow::accountMarkReceivedInProgress(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->msgSetAllReceivedProcessState(IN_PROGRESS);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkReceivedProcessState(IN_PROGRESS);
 }
 
 
@@ -2287,13 +2277,35 @@ void MainWindow::accountMarkReceivedSettled(void)
 {
 	debugSlotCall();
 
+	accountMarkReceivedProcessState(SETTLED);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark all received messages in given year in the current
+ *     working account.
+ */
+void MainWindow::accountMarkReceivedYearProcessState(
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->msgSetAllReceivedProcessState(SETTLED);
+	const QStandardItem *accountItem =
+	    m_accountModel.itemFromIndex(acntIdx);
+	/*
+	 * Data cannot be read directly from index because to the overloaded
+	 * model functions.
+	 * TODO -- Parameter check.
+	 */
+	messageDb->smsgdtSetReceivedYearProcessState(accountItem->text(),
+	    state);
 
 	/*
 	 * No need to reload account model.
@@ -2314,27 +2326,7 @@ void MainWindow::accountMarkReceivedYearUnsettled(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
-	/*
-	 * Data cannot be read directly from index because to the overloaded
-	 * model functions.
-	 * TODO -- Parameter check.
-	 */
-	messageDb->smsgdtSetReceivedYearProcessState(accountItem->text(),
-	    UNSETTLED);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkReceivedYearProcessState(UNSETTLED);
 }
 
 
@@ -2348,27 +2340,7 @@ void MainWindow::accountMarkReceivedYearInProgress(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
-	/*
-	 * Data cannot be read directly from index because to the overloaded
-	 * model functions.
-	 * TODO -- Parameter check.
-	 */
-	messageDb->smsgdtSetReceivedYearProcessState(accountItem->text(),
-	    IN_PROGRESS);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkReceivedYearProcessState(IN_PROGRESS);
 }
 
 
@@ -2382,20 +2354,28 @@ void MainWindow::accountMarkReceivedYearSettled(void)
 {
 	debugSlotCall();
 
+	accountMarkReceivedYearProcessState(SETTLED);
+}
+
+
+/* ========================================================================= */
+/*
+ * Mark recently received messages in the current
+ *     working account.
+ */
+void MainWindow::accountMarkRecentReceivedProcessState(
+    enum MessageProcessState state)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
 	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
-	/*
-	 * Data cannot be read directly from index because to the overloaded
-	 * model functions.
-	 * TODO -- Parameter check.
-	 */
-	messageDb->smsgdtSetReceivedYearProcessState(accountItem->text(),
-	    SETTLED);
+
+	messageDb->smsgdtSetWithin90DaysReceivedProcessState(state);
 
 	/*
 	 * No need to reload account model.
@@ -2416,20 +2396,7 @@ void MainWindow::accountMarkRecentReceivedUnsettled(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->smsgdtSetWithin90DaysReceivedProcessState(UNSETTLED);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkRecentReceivedProcessState(UNSETTLED);
 }
 
 
@@ -2443,20 +2410,7 @@ void MainWindow::accountMarkRecentReceivedInProgress(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->smsgdtSetWithin90DaysReceivedProcessState(IN_PROGRESS);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkRecentReceivedProcessState(IN_PROGRESS);
 }
 
 
@@ -2470,20 +2424,7 @@ void MainWindow::accountMarkRecentReceivedSettled(void)
 {
 	debugSlotCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-
-	messageDb->smsgdtSetWithin90DaysReceivedProcessState(SETTLED);
-
-	/*
-	 * No need to reload account model.
-	 */
-
-	/* Regenerate the model. */
-	accountItemCurrentChanged(acntIdx);
+	accountMarkRecentReceivedProcessState(SETTLED);
 }
 
 
