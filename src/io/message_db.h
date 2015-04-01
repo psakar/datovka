@@ -909,6 +909,18 @@ private:
 	bool createEmptyMissingTables(void);
 
 	/*!
+	 * @brief This method ensures that the process_state table
+	 *     contains a PRIMARY KEY. This table might be created without any
+	 *     primary key reference due to a bug in a previous version.
+	 *
+	 * @return True on success.
+	 *
+	 * TODO -- This method may be removed in some future version
+	 *     of the programme.
+	 */
+	bool ensurePrimaryKeyInProcessStateTable(void);
+
+	/*!
 	 * @brief Returns verification date (in local time).
 	 *
 	 * @param[in] dmId  Message identifier.

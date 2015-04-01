@@ -522,6 +522,10 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 		ret = createEmptyMissingTables();
 	}
 
+	if (ret) {
+		ret = ensurePrimaryKeyInProcessStateTable();
+	}
+
 	if (!ret) {
 		m_db.close();
 	}
@@ -4503,7 +4507,6 @@ bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":state", (int) state);
-
 	if (query.exec()) {
 		return true;
 	} else {
@@ -5164,6 +5167,107 @@ bool MessageDb::createEmptyMissingTables(void)
 		if (!ret) {
 			goto fail; /* TODO -- Proper recovery? */
 		}
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * This method ensures that the process_state table
+ *     contains a PRIMARY KEY. This table might be created without any
+ *     primary key reference due to a bug in a previous version.
+ */
+bool MessageDb::ensurePrimaryKeyInProcessStateTable(void)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QString createTableSql;
+
+	queryStr = "SELECT sql FROM sqlite_master "
+	    "WHERE (type = :type) and (name = :name)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":type", QString("table"));
+	query.bindValue(":name", QString("process_state"));
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		createTableSql = query.value(0).toString();
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (createTableSql.isEmpty()) {
+		goto fail;
+	}
+
+
+	if (createTableSql.contains("PRIMARY", Qt::CaseSensitive)) {
+		return true;
+	}
+
+	/* Table does not contain primary key. */
+
+	/* Rename existing table. */
+	queryStr = "ALTER TABLE process_state RENAME TO _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (!prcstTbl.createEmpty(m_db)) {
+		goto fail;
+	}
+
+	/* Copy table content. */
+	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state) "
+	    "SELECT message_id, state FROM _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete old table. */
+	queryStr = "DROP TABLE _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	return true;

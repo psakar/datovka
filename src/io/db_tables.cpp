@@ -691,14 +691,17 @@ namespace PrcstTbl {
 	const QString tabName("process_state");
 
 	const QVector< QPair<QString, EntryType> > knownAttrs = {
-	{"message_id", DB_INTEGER},
+	{"message_id", DB_INTEGER}, /* NOT NULL */
 	{"state",      DB_INTEGER}
 	/*
-	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID"),
+	 * PRIMARY KEY (message_id),
+	 * FOREIGN KEY(message_id) REFERENCES messages ("dmID")
 	 */
 	};
 
-	const QMap<QString, QString> colConstraints; /* Empty. */
+	const QMap<QString, QString> colConstraints {
+	    {"message_id", "NOT NULL"}
+	};
 
 	const QString &tblConstraint(
 	    ",\n"
