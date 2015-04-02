@@ -1,3 +1,7 @@
+4.2.1 / 2015-04-02
+ * Fixed a bug. Datovka adds a primary key entry into process_state table if
+   this entry is missing.
+
 4.2.0 / 2015-03-31
  * Fixed bug. Account password was saved to the configuration regardless on
    the 'Don't save password' option.
