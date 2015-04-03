@@ -353,6 +353,12 @@ void DlgDsSearch::searchDataBox(void)
 		    QMessageBox::Ok);
 		goto fail;
 		break;
+	case IE_2BIG:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("Too many results were found.<br><br>"
+		         "Not all matches are going to be displayed."),
+		    QMessageBox::Ok);
+		break;
 	default:
 		QMessageBox::critical(this, tr("Search error"),
 		    tr("It is not possible find databox, because error..."),
