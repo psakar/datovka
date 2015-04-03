@@ -206,6 +206,8 @@ public:
 	QString add_file_to_attachments_path;
 	bool all_attachments_save_zfo_delinfo;
 	bool all_attachments_save_zfo_msg;
+	bool all_attachments_save_pdf_msgenvel;
+	bool all_attachments_save_pdf_delinfo;
 	int isds_download_timeout_ms;
 
 	/*!

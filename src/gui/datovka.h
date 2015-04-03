@@ -429,12 +429,12 @@ private slots:
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
 	 */
-	void exportDeliveryInfoAsPDF(void);
+	void exportDeliveryInfoAsPDF(const QString &attachPath = QString());
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialog.
 	 */
-	void exportMessageEnvelopeAsPDF(void);
+	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString());
 
 	/*!
 	 * @brief Open selected message in external application.

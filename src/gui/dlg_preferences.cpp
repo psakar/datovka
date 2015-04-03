@@ -70,6 +70,10 @@ void DlgPreferences::initPrefDialog(void)
 	    setChecked(globPref.all_attachments_save_zfo_msg);
 	this->all_attachments_save_zfo_delinfo->
 	    setChecked(globPref.all_attachments_save_zfo_delinfo);
+	this->all_attachments_save_pdf_msgenvel->
+	    setChecked(globPref.all_attachments_save_pdf_msgenvel);
+	this->all_attachments_save_pdf_delinfo->
+	    setChecked(globPref.all_attachments_save_pdf_delinfo);
 
 	/* TODO - this choice must be disabled */
 //	this->send_stats_with_version_checks->
@@ -231,4 +235,8 @@ void DlgPreferences::saveChanges(void) const
 	    this->all_attachments_save_zfo_msg->isChecked();
 	globPref.all_attachments_save_zfo_delinfo =
 	    this->all_attachments_save_zfo_delinfo->isChecked();
+	globPref.all_attachments_save_pdf_msgenvel =
+	    this->all_attachments_save_pdf_msgenvel->isChecked();
+	globPref.all_attachments_save_pdf_delinfo =
+	    this->all_attachments_save_pdf_delinfo->isChecked();
 }

@@ -1814,6 +1814,14 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		exportDeliveryInfoAsZFO(m_save_attach_dir);
 	}
 
+	if (globPref.all_attachments_save_pdf_msgenvel) {
+		exportMessageEnvelopeAsPDF(m_save_attach_dir);
+	}
+
+	if (globPref.all_attachments_save_pdf_delinfo) {
+		exportDeliveryInfoAsPDF(m_save_attach_dir);
+	}
+
 	if (unspecifiedFailed) {
 		showStatusTextWithTimeout(tr("Some attachments of "
 		    "message \"%1\" were not saved to disk!").arg(dmId));
@@ -6922,7 +6930,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 /*
  * Export delivery information as PDF file dialogue.
  */
-void MainWindow::exportDeliveryInfoAsPDF(void)
+void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6978,8 +6986,15 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    QString("DD_%1.pdf").arg(dmId);
+	QString fileName;
+
+	if (attachPath.isNull()) {
+		fileName = m_on_export_zfo_activate + QDir::separator() +
+		    QString("DD_%1.pdf").arg(dmId);
+	} else {
+		fileName = attachPath + QDir::separator() +
+		    QString("DD_%1.pdf").arg(dmId);
+	}
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save delivery info as PDF file"), fileName,
@@ -6992,10 +7007,12 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 		return;
 	}
 
-	/* remember path for settings */
-	m_on_export_zfo_activate =
-	    QFileInfo(fileName).absoluteDir().absolutePath();
-	storeExportPath();
+	/* remember path for settings if attachPath was not set */
+	if (attachPath.isNull()) {
+		m_on_export_zfo_activate =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
 
 	QTextDocument doc;
 	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(dmId));
@@ -7017,7 +7034,7 @@ void MainWindow::exportDeliveryInfoAsPDF(void)
 /*
  * Export selected message envelope as PDF file dialog.
  */
-void MainWindow::exportMessageEnvelopeAsPDF(void)
+void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7071,8 +7088,15 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 		}
 	}
 
-	QString fileName = m_on_export_zfo_activate + QDir::separator() +
-	    QString("OZ_%1.pdf").arg(dmId);
+	QString fileName;
+
+	if (attachPath.isNull()) {
+		fileName = m_on_export_zfo_activate + QDir::separator() +
+		    QString("OZ_%1.pdf").arg(dmId);
+	} else {
+		fileName = attachPath + QDir::separator() +
+		    QString("OZ_%1.pdf").arg(dmId);
+	}
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save message envelope as PDF file"), fileName,
@@ -7084,10 +7108,12 @@ void MainWindow::exportMessageEnvelopeAsPDF(void)
 		return;
 	}
 
-	/* remember path for settings */
-	m_on_export_zfo_activate =
-	    QFileInfo(fileName).absoluteDir().absolutePath();
-	storeExportPath();
+	/* remember path for settings if attachPath was not set */
+	if (attachPath.isNull()) {
+		m_on_export_zfo_activate =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
 
 	QString userName = accountUserName();
 	QList<QString> accountData =

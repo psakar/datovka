@@ -850,6 +850,32 @@ Per-account path remembering will be disabled.</string>
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="all_attachments_save_pdf_delinfo">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Save delivery info to PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="all_attachments_save_pdf_msgenvel">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Save message envelope to PDF</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
