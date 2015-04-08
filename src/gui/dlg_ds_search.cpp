@@ -355,8 +355,10 @@ void DlgDsSearch::searchDataBox(void)
 		break;
 	case IE_2BIG:
 		QMessageBox::information(this, tr("Search result"),
-		    tr("Too many results were found.<br><br>"
-		         "Not all matches are going to be displayed."),
+		    tr("Too many matching results were found. "
+		        "Some found results cannot be displayed.<br><br>"
+		        "Specify the criteria more clearly in order to "
+		        "narrow the selection."),
 		    QMessageBox::Ok);
 		break;
 	default:
