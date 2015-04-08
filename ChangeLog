@@ -1,3 +1,11 @@
+4.2.2 / 2015-04-08
+ * The user is notified after his password expired and that he must change it
+   in the ISDS web interface.
+ * Fixed error. An error dialogue was generated when searching for data boxes.
+   A notification about too many results was added.
+ * Save all attachments button can be configured (in options) so that it also
+   saves message envelope and delivery info in PDF.
+
 4.2.1 / 2015-04-02
  * Fixed a bug. Datovka adds a primary key entry into process_state table if
    this entry is missing.
