@@ -8633,19 +8633,25 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 		    "expired %3 days ago (%4).")
 		    .arg(accountName).arg(userName).arg(days*(-1))
 		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+		msgBox.setInformativeText(tr("You have to change your password "
+		    "from the ISDS web interface. "
+		    "Your new password will be valid for 90 days."));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
 	} else {
 		msgBox.setText(tr("According to the last available information, "
 		    "your password for account '%1' (login '%2') "
 		    "will expire in %3 days (%4).")
 		    .arg(accountName).arg(userName).arg(days)
 		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
+		msgBox.setInformativeText(tr("You can change your password now, "
+		    "or later using the 'Change password' command. "
+		    "Your new password will be valid for 90 days.\n\n"
+		    "Change password now?"));
+		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+		msgBox.setDefaultButton(QMessageBox::No);
 	}
-	msgBox.setInformativeText(tr("You can change your password now, "
-	    "or later using the 'Change password' command. "
-	    "Your new password will be valid for 90 days.\n\n"
-	    "Change password now?"));
-	msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-	msgBox.setDefaultButton(QMessageBox::No);
+
 	return msgBox.exec();
 }
 

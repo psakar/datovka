@@ -3025,12 +3025,12 @@ Zadejte heslo pro odemčení souboru certifikátu:</translation>
         <translation>Podle nejnovějších dostupných informací Vaše heslo pro účet &apos;%1&apos; (přihlašovací jméno &apos;%2&apos;) vypršelo před %3 dnem/dny (%4).</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8637"/>
+        <location filename="../src/gui/datovka.cpp" line="8642"/>
         <source>According to the last available information, your password for account &apos;%1&apos; (login &apos;%2&apos;) will expire in %3 days (%4).</source>
         <translation>Podle nejnovějších dostupných informací Vaše heslo pro účet &apos;%1&apos; (přihlašovací jméno &apos;%2&apos;) vyprší za %3 dny/dnů (%4).</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8643"/>
+        <location filename="../src/gui/datovka.cpp" line="8647"/>
         <source>You can change your password now, or later using the &apos;Change password&apos; command. Your new password will be valid for 90 days.
 
 Change password now?</source>
@@ -3483,6 +3483,11 @@ Zkuste to znova.</translation>
         <location filename="../src/gui/datovka.cpp" line="7065"/>
         <source>Message export error!</source>
         <translation>Chyba exportu zprávy!</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="8636"/>
+        <source>You have to change your password from the ISDS web interface. Your new password will be valid for 90 days.</source>
+        <translation>Heslo si změňte ve webovém rozhraní ISDS. Vaše nové heslo bude platné 90 dnů.</translation>
     </message>
     <message>
         <source>Can not export complete message.</source>
