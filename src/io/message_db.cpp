@@ -2857,17 +2857,17 @@ fail:
 bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
     const QString &dbIDSender, const QString &dmSender,
     const QString &dbIDRecipient, const QString &dmRecipient,
-    const QString &dmAnnotation)
+    const QString &dmRecipientAddress, const QString &dmAnnotation)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT INTO messages ("
 	    "dmID, dbIDSender, dmSender, "
-	    "dmRecipient, dbIDRecipient, dmAnnotation, "
+	    "dmRecipient, dbIDRecipient, dmRecipientAddress, dmAnnotation, "
 	    "dmPersonalDelivery, dmMessageStatus "
 	    ") VALUES (:dmId, :dbIDSender, :dmSender, "
-	    ":dmRecipient, :dbIDRecipient, :dmAnnotation, "
+	    ":dmRecipient, :dbIDRecipient, :dmRecipientAddress, :dmAnnotation, "
 	    ":dmPersonalDelivery, :dmMessageStatus)";
 
 	if (!query.prepare(queryStr)) {
@@ -2880,6 +2880,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	query.bindValue(":dbIDSender", dbIDSender);
 	query.bindValue(":dmSender", dmSender);
 	query.bindValue(":dmRecipient", dmRecipient);
+	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
 	query.bindValue(":dbIDRecipient", dbIDRecipient);
 	query.bindValue(":dmAnnotation", dmAnnotation);
 	query.bindValue(":dmPersonalDelivery", 0);
