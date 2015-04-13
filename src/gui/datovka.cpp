@@ -7949,6 +7949,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 	isds_otp_resolution otpres = OTP_RESOLUTION_SUCCESS;
 
 	/* SMS TOTP */
+	/* First phase - send SMS request */
 	if (accountInfo.loginMethod() == LIM_TOTP) {
 
 		/* show Premium SMS request dialog */
@@ -7970,51 +7971,19 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			return false;
 		}
 
-		/* First phase - send SMS request */
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
 		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    QString(), otpres);
 
+		isdsMsg = isds_long_message(
+		    isdsSessions.session(accountInfo.userName()));
+
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
-		if (IE_ERROR == status) {
-			/* There were other errors. */
-
-			msgBody = tr("An error occurred while preparing "
-			    "request for SMS with OTP security code.") +
-			    "<br/><br/>" +
-			    tr("Please try again later or you have to use the "
-			    "official web interface of Datové schránky for "
-			    "access to your data box.");
-			return false;
-		}
-
-		/* if SMS was not send */
-		if (otpres != OTP_RESOLUTION_TOTP_SENT) {
-
-			isdsMsg = isds_long_message(
-			isdsSessions.session(accountInfo.userName()));
-
-			msgTitle = tr("Error of sending SMS");
-			msgBody = tr("It was not possible sent SMS with OTP "
-			    "security code for account \"%1\"")
-			    .arg(accountInfo.accountName()) + "<br/><br/>" +
-			    "<b>" + isdsMsg + "</b>" + "<br/><br/>" +
-			    tr("Please try again later or you have to use the "
-			    "official web interface of Datové schránky for "
-			    "access to your data box.");
-			QMessageBox::critical(this, msgTitle, msgBody,
-			    QMessageBox::Ok);
-
-			showStatusTextWithTimeout(tr("It was not possible to "
-			    "connect to your data box from account \"%1\".")
-			    .arg(accountInfo.accountName()));
-			return false;
-
-		} else {
+		if (IE_PARTIAL_SUCCESS == status) {
 			msgTitle = tr("Enter SMS security code");
 			msgBody = tr("SMS security code for account \"%1\"<br/>"
 			    "has been sent on your mobile phone...")
@@ -8024,6 +7993,36 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			    + "<br/><b>"
 			    + accountInfo.accountName()
 			    + " </b>(" + accountInfo.userName() + ").";
+		} else if (IE_NOT_LOGGED_IN == status) {
+			msgTitle = tr("Authentication by SMS failed");
+			msgBody = tr("It was not possible sent SMS with OTP "
+			    "security code for account \"%1\"")
+			    .arg(accountInfo.accountName()) + "<br/><br/>" +
+			    "<b>" + isdsMsg + "</b>" + "<br/><br/>" +
+			    tr("Please try again later or you have to use the "
+			    "official web interface of Datové schránky for "
+			    "access to your data box.");
+			QMessageBox::critical(this, msgTitle, msgBody,
+			    QMessageBox::Ok);
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your data box from account \"%1\".")
+			    .arg(accountInfo.accountName()));
+			return false;
+		} else {
+			/* There were other errors. */
+			msgTitle = tr("Login error");
+			msgBody = tr("An error occurred while preparing "
+			    "request for SMS with OTP security code.") +
+			    "<br/><br/>" +
+			    tr("Please try again later or you have to use the "
+			    "official web interface of Datové schránky for "
+			    "access to your data box.");
+			QMessageBox::critical(this, msgTitle, msgBody,
+			    QMessageBox::Ok);
+			showStatusTextWithTimeout(tr("It was not possible to "
+			    "connect to your data box from account \"%1\".")
+			    .arg(accountInfo.accountName()));
+			return false;
 		}
 	}
 
@@ -8049,12 +8048,15 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 			}
 		}
 
-		/* sent security code */
+		/* sent security code to ISDS */
 		status = isdsLoginUserOtp(
 		    isdsSessions.session(accountInfo.userName()),
 		    accountInfo.userName(), pwd,
 		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    otpcode, otpres);
+
+		isdsMsg = isds_long_message(
+		    isdsSessions.session(accountInfo.userName()));
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
@@ -8073,39 +8075,19 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 				    + "<br/><br/>" +
 				    tr("Enter the correct security code again.");
 				if (count > 1) {
-					isdsMsg = tr("OTP: Zkontrolujte "
-					"přihlašovací údaje a zadejte znova "
-					"bezpečnostní kód.");
 					repeat = false;
 				} else {
 					repeat = true;
 				}
 				break;
 			case OTP_RESOLUTION_ACCESS_BLOCKED:
-				isdsMsg = tr("OTP: Váš přístup byl na 60 minut"
-				" zablokován. Důvodem může být opakované "
-				"neúspěšné přihlášení.");
-				repeat = false;
-				break;
 			case OTP_RESOLUTION_PASSWORD_EXPIRED:
-				isdsMsg = tr("OTP: Platnost Vašeho hesla nebo "
-				"bezpečnostního kódu skončila.");
-				repeat = false;
-				break;
 			case OTP_RESOLUTION_UNAUTHORIZED:
-				isdsMsg = tr("OTP: Pro přístup na požadovanou "
-				"stránku nemá Váš účet potřebné oprávnění.");
-				repeat = false;
-				break;
 			default:
-				isdsMsg = isds_long_message(
-				    isdsSessions.session(accountInfo.userName()));
-				    repeat = false;
+				repeat = false;
 				break;
 			}
 		} else {
-			isdsMsg = isds_long_message(
-			    isdsSessions.session(accountInfo.userName()));
 			repeat = false;
 		}
 
