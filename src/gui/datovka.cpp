@@ -5299,7 +5299,7 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	if (accountInfo.loginMethod() != LIM_USERNAME &&
 	    accountInfo.loginMethod() != LIM_USER_CERT) {
-		expirDate = "";
+		expirDate.clear();
 		m_accountDb.setPwdExpirIntoDb(key, expirDate);
 		return true;
 	} else {
@@ -5307,8 +5307,13 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 		status = isds_get_password_expiration(
 		    isdsSessions.session(accountInfo.userName()), &expiration);
 
-		if ((IE_SUCCESS == status) && (NULL != expiration)) {
-			expirDate = timevalToDbFormat(expiration);
+		if (IE_SUCCESS == status) {
+			if (NULL != expiration) {
+				expirDate = timevalToDbFormat(expiration);
+			} else {
+				/* Password without expiration. */
+				expirDate.clear();
+			}
 			m_accountDb.setPwdExpirIntoDb(key, expirDate);
 			retval = true;
 		}
