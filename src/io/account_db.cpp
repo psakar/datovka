@@ -315,14 +315,16 @@ const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 		goto fail;
 	}
 	query.bindValue(":key", key);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		if (!query.value(0).toString().isEmpty()) {
+	if (query.exec() && query.isActive()) {
+		if (query.first() && query.isValid() &&
+		    !query.value(0).toString().isEmpty()) {
 			return query.value(0).toString();
+		} else {
+			return QString();
 		}
 	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 
