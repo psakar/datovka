@@ -106,7 +106,8 @@ private slots:
 	 * @brief Verify if is a connection to ISDS and databox
 	 * exists for a new account.
 	 */
-	void getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo);
+	void getAccountUserDataboxInfo(
+	    const AccountModel::SettingsMap &accountInfo);
 
 	/*!
 	 * @brief Redraws widgets according to selected account item.
@@ -875,25 +876,25 @@ private:
 	/*!
 	 * @brief connect to ISDS databox from exist account
 	 */
-	bool connectToIsds(const QModelIndex acntTopIdx, bool showDialog);
+	bool connectToIsds(const QModelIndex &acntTopIdx, bool showDialog);
 
 	/*!
 	 * @brief connect to ISDS databox from new account
 	 */
-	bool firstConnectToIsds(AccountModel::SettingsMap accountInfo,
+	bool firstConnectToIsds(const AccountModel::SettingsMap &accountInfo,
 	    bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username and password only.
 	 */
-	bool loginMethodUserNamePwd(const QModelIndex acntTopIdx,
-	   const AccountModel::SettingsMap accountInfo, bool showDialog);
+	bool loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
+	   const AccountModel::SettingsMap &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username, password and OTP code.
 	 */
-	bool loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo, bool showDialog);
+	bool loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
+	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Converts PKCS #12 certificate into PEM format.
@@ -916,20 +917,20 @@ private:
 	/*!
 	 * @brief Login to ISDS server by certificate only.
 	 */
-	bool loginMethodCertificateOnly(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo, bool showDialog);
+	bool loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
+	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by certificate, username and password.
 	 */
-	bool loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo, bool showDialog);
+	bool loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
+	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by certificate and databox ID.
 	 */
-	bool loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
-	    const AccountModel::SettingsMap accountInfo, bool showDialog);
+	bool loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
+	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.

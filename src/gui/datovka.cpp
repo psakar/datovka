@@ -7447,8 +7447,8 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 /*
 * Login to ISDS server by username and password only.
 */
-bool MainWindow::loginMethodUserNamePwd(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo, bool showDialog)
+bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -7556,8 +7556,8 @@ bool MainWindow::p12CertificateToPem(const QString &p12Path,
 /*
 * Login to ISDS server by user certificate only.
 */
-bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -7679,8 +7679,8 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 /*
 * Login to ISDS server by user certificate, username and password.
 */
-bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -7805,8 +7805,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 /*
 * Login to ISDS server by user certificate and databox ID.
 */
-bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -7927,8 +7927,8 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 /*
 * Login to ISDS server by username, password and OTP code.
 */
-bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
-    const AccountModel::SettingsMap accountInfo, bool showDialog)
+bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -8125,7 +8125,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex acntTopIdx,
 /*
  * Connect to databox from exist account
  */
-bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
+bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 /* ========================================================================= */
 {
 	bool loginRet = false;
@@ -8258,8 +8258,8 @@ bool MainWindow::connectToIsds(const QModelIndex acntTopIdx, bool showDialog)
 /*
  * First connect to databox from new account
  */
-bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap accountInfo,
-    bool showDialog)
+bool MainWindow::firstConnectToIsds(
+    const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	/* Login method based on username and password */
@@ -8342,7 +8342,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 /*
  * Verify if is a connection to ISDS and databox exists for a new account
  */
-void MainWindow::getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo)
+void MainWindow::getAccountUserDataboxInfo(
+    const AccountModel::SettingsMap &accountInfo)
 /* ========================================================================= */
 {
 	debugSlotCall();
