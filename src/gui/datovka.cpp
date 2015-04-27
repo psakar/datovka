@@ -7648,6 +7648,10 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex acntTopIdx,
 		QStandardItem *topItem =
 		    m_accountModel.itemFromIndex(acntTopIdx);
 		if (0 != topItem) {
+			/*
+			 * TODO -- There must be a better way how to store
+			 * the password into the model.
+			 */
 			AccountModel::SettingsMap itemSett =
 			    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 			itemSett._setPassphrase(passphrase);
@@ -7770,6 +7774,10 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex acntTopIdx,
 		QStandardItem *topItem =
 		    m_accountModel.itemFromIndex(acntTopIdx);
 		if (0 != topItem) {
+			/*
+			 * TODO -- There must be a better way how to store
+			 * the password into the model.
+			 */
 			AccountModel::SettingsMap itemSett =
 			    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
 			itemSett._setPassphrase(passphrase);
@@ -7887,10 +7895,16 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex acntTopIdx,
 		/* Store the certificate password. */
 		QStandardItem *topItem =
 		    m_accountModel.itemFromIndex(acntTopIdx);
-		AccountModel::SettingsMap itemSett =
-		    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		itemSett._setPassphrase(passphrase);
-		topItem->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+		if (0 != topItem) {
+			/*
+			 * TODO -- There must be a better way how to store
+			 * the password into the model.
+			 */
+			AccountModel::SettingsMap itemSett =
+			    topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			itemSett._setPassphrase(passphrase);
+			topItem->setData(itemSett, ROLE_ACNT_CONF_SETTINGS);
+		}
 
 		/*
 		 * TODO -- Notify the user that he should protect his
