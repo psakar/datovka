@@ -2785,6 +2785,10 @@ void MainWindow::synchroniseAllAccounts(void)
 	}
 
 	if (!appended) {
+		showStatusTextWithTimeout(tr("No account synchronised."));
+		if (globPref.download_on_background) {
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+		}
 		return;
 	}
 
