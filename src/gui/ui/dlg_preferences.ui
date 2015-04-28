@@ -93,7 +93,7 @@ on the background of application without blocking of user interface.
 Download period you can set bellow.</string>
             </property>
             <property name="text">
-             <string>Automatically download new messages on background</string>
+             <string>Automatically synchronise all in background</string>
             </property>
            </widget>
           </item>
@@ -108,7 +108,7 @@ Download period you can set bellow.</string>
                </font>
               </property>
               <property name="text">
-               <string> Check new messages every</string>
+               <string> Check every</string>
               </property>
              </widget>
             </item>

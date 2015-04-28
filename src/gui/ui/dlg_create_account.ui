@@ -212,7 +212,7 @@ your account security.</string>
    <item>
     <widget class="QCheckBox" name="synchroCheckBox">
      <property name="text">
-      <string>Synchronize account when &quot;Synchronize all&quot; is activated</string>
+      <string>Synchronise account when &quot;Synchronise all&quot; is activated</string>
      </property>
      <property name="checked">
       <bool>true</bool>
