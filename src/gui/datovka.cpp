@@ -290,15 +290,12 @@ MainWindow::MainWindow(QWidget *parent)
 	if (globPref.download_on_background) {
 		if (globPref.timer_value > 4) {
 			m_timeoutSyncAccounts = globPref.timer_value * 60000;
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-			qDebug() << "Timer set on" << globPref.timer_value <<
-			    "minutes";
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-			qDebug() << "Timer set on" <<
-			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
 		}
+		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+		qDebug() << "Timer set to" << m_timeoutSyncAccounts / 60000
+		    << "minutes";
 	}
 
 	QTimer::singleShot(RUN_FIRST_ACTION_MS, this,
@@ -462,15 +459,12 @@ void MainWindow::applicationPreferences(void)
 	if (globPref.download_on_background) {
 		if (globPref.timer_value > 4) {
 			m_timeoutSyncAccounts = globPref.timer_value * 60000;
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-			qDebug() << "Timer set on" << globPref.timer_value <<
-			    "minutes";
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-			qDebug() << "Timer set on" <<
-			    TIMER_DEFAULT_TIMEOUT_MS/60000 << "minutes";
 		}
+		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+		qDebug() << "Timer set on" << m_timeoutSyncAccounts / 60000
+		    << "minutes";
 	} else {
 		m_timerSyncAccounts.stop();
 	}
@@ -3028,6 +3022,10 @@ void MainWindow::endCurrentWorkerJob(void)
 		}
 		/* Prepare cunters for next action. */
 		dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
+
+		if (globPref.download_on_background) {
+			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+		}
 	}
 }
 
