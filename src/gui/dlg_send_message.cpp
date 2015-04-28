@@ -1201,6 +1201,7 @@ void DlgSendMessage::sendMessage(void)
 			    m_senderName,
 			    this->recipientTableWidget->item(i,0)->text(),
 			    this->recipientTableWidget->item(i,1)->text(),
+			    this->recipientTableWidget->item(i,2)->text(),
 			    this->subjectText->text());
 
 			successSendCnt++;

@@ -511,7 +511,7 @@ public:
 	bool msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	    const QString &dbIDSender, const QString &dmSender,
 	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmAnnotation);
+	    const QString &dmRecipientAddress, const QString &dmAnnotation);
 
 	/*!
 	 * @brief Insert message envelope into messages table.

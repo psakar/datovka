@@ -334,36 +334,23 @@ void DlgDsSearch::searchDataBox(void)
 	}
 
 	isds_error status;
-
 	status = isdsSearch(&boxes, m_userName, ownerInfo);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
 	switch (status) {
 	case IE_SUCCESS:
 		break;
+	case IE_2BIG:
 	case IE_NOEXIST:
 		QMessageBox::information(this, tr("Search result"),
-		    tr("Sorry, item(s) not found.<br><br>Try again..."),
+		isds_long_message(isdsSessions.session(m_userName)),
 		    QMessageBox::Ok);
 		goto fail;
-		break;
-	case IE_ISDS:
-		QMessageBox::information(this, tr("Search result"),
-		    tr("Ambiguous lookup values.<br><br>Try again..."),
-		    QMessageBox::Ok);
-		goto fail;
-		break;
-	case IE_2BIG:
-		QMessageBox::information(this, tr("Search result"),
-		    tr("Too many matching results were found. "
-		        "Some found results cannot be displayed.<br><br>"
-		        "Specify the criteria more clearly in order to "
-		        "narrow the selection."),
-		    QMessageBox::Ok);
 		break;
 	default:
 		QMessageBox::critical(this, tr("Search error"),
-		    tr("It is not possible find databox, because error..."),
+		    tr("It is not possible find databox because "
+		         "error occurred during search process!"),
 		    QMessageBox::Ok);
 		goto fail;
 		break;

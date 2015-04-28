@@ -1801,19 +1801,19 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO(m_save_attach_dir);
+		exportSelectedMessageAsZFO(newDir);
 	}
 
 	if (globPref.all_attachments_save_zfo_delinfo) {
-		exportDeliveryInfoAsZFO(m_save_attach_dir);
+		exportDeliveryInfoAsZFO(newDir);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(m_save_attach_dir);
+		exportMessageEnvelopeAsPDF(newDir);
 	}
 
 	if (globPref.all_attachments_save_pdf_delinfo) {
-		exportDeliveryInfoAsPDF(m_save_attach_dir);
+		exportDeliveryInfoAsPDF(newDir);
 	}
 
 	if (unspecifiedFailed) {
