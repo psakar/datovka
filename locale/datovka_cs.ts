@@ -403,7 +403,7 @@ svého uživatelského účtu.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_create_account.ui" line="215"/>
         <source>Synchronise account when &quot;Synchronise all&quot; is activated</source>
-        <translation>Synchronizuj účet při aktivaci hromadné synchronizace</translation>
+        <translation>Synchronizovat účet při aktivaci hromadné synchronizace</translation>
     </message>
     <message>
         <source>Synchronize account when &quot;Synchronize all&quot; is activated</source>
