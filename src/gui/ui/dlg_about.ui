@@ -104,7 +104,7 @@
    <item>
     <widget class="QLabel" name="labelInfo">
      <property name="text">
-      <string>Free graphical interface for 'Datové schránky'.</string>
+      <string>Free client for Datové schránky.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

@@ -125,7 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Window title. */
 	setWindowTitle(tr(
-	    "Datovka - Free interface for Datov\303\251 schr\303\241nky"));
+	    "Datovka - Free client for Datov\303\251 schr\303\241nky"));
 #ifdef PORTABLE_APPLICATION
 	setWindowTitle(windowTitle() + " - " + tr("Portable version"));
 #endif /* PORTABLE_APPLICATION */
@@ -3204,7 +3204,7 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 {
 	QString html = "<br><center>";
 	html += "<h2>" +
-	    tr("Datovka - Free interface for Datové schránky") + "</h2>";
+	    tr("Datovka - Free client for Datové schránky") + "</h2>";
 #ifdef PORTABLE_APPLICATION
 	html += "<h3>" + tr("Portable version") + "</h3>";
 #endif /* PORTABLE_APPLICATION */
