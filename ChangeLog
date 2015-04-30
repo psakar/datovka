@@ -1,3 +1,17 @@
+4.2.3 / 2015-04-30
+ * Improved notifications when searching for data boxes.
+ * Fixed bug. The displayed attachment size occasionally differed by 2 bytes
+   from real size.
+ * Fixed some issues when searching for data boxes.
+ * Fixed some issues with path remembering.
+ * Fixed a bug causing the application to display 'Synchronising accounts' in
+   status bar although there was no account to synchronise.
+ * Fixed bug causing the synchronisation timer to stop after a manual account
+   synchronisation.
+ * Fixed application crash when creating a new certificate+password account.
+ * Removed warning when using password without expiration.
+ * Fixed SMS authentication failure.
+
 4.2.2 / 2015-04-08
  * The user is notified after his password expired and that he must change it
    in the ISDS web interface.
