@@ -5292,39 +5292,32 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
-	bool retval;
+	bool retval = false;
 
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	QString key = accountInfo.userName() + "___True";
 
-	if (accountInfo.loginMethod() != LIM_USERNAME &&
-	    accountInfo.loginMethod() != LIM_USER_CERT) {
-		expirDate.clear();
-		m_accountDb.setPwdExpirIntoDb(key, expirDate);
-		return true;
-	} else {
-		retval = false;
-		status = isds_get_password_expiration(
-		    isdsSessions.session(accountInfo.userName()), &expiration);
+	status = isds_get_password_expiration(
+	    isdsSessions.session(accountInfo.userName()), &expiration);
 
-		if (IE_SUCCESS == status) {
-			if (NULL != expiration) {
-				expirDate = timevalToDbFormat(expiration);
-			} else {
-				/* Password without expiration. */
-				expirDate.clear();
-			}
-			m_accountDb.setPwdExpirIntoDb(key, expirDate);
-			retval = true;
-		}
+	if (IE_SUCCESS == status) {
 		if (NULL != expiration) {
-			free(expiration);
+			expirDate = timevalToDbFormat(expiration);
+		} else {
+			/* Password without expiration. */
+			expirDate.clear();
 		}
-		return retval;
+		retval = true;
+	} else {
+		expirDate.clear();
 	}
-	return false;
+	m_accountDb.setPwdExpirIntoDb(key, expirDate);
+	if (NULL != expiration) {
+		free(expiration);
+	}
+	return retval;
 }
 
 
