@@ -1,4 +1,6 @@
 4.2.3 / 2015-04-30
+ * Disabled OpenSSL lock de-initialisation as it may cause the application to
+   crash on exit.
  * Application always downloads password expiration information regardless on
    the login method type.
  * Improved notifications when searching for data boxes.

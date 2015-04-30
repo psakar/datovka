@@ -303,7 +303,13 @@ int main(int argc, char *argv[])
 	logInfo("Stopping at %lld.%03lld; ran for %lld.%03lld seconds.\n",
 	    stop / 1000, stop % 1000, diff / 1000, diff % 1000);
 
-	crypto_cleanup_threads();
+	/*
+	 * TODO -- The following clean-up function causes troubles.
+	 * on OS X libcurl occasionally seems to operate while the lock
+	 * de-initialisation is performed causing the application to crash
+	 * on exit.
+	 */
+	//crypto_cleanup_threads();
 
 	return ret;
 }
