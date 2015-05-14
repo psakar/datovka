@@ -978,6 +978,11 @@ private:
 	 */
 	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx);
 
+	/*!
+	 * @brief Get information about remaining PDZ credit.
+	 */
+	QString getPDZCreditFromISDS(void);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

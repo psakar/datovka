@@ -60,7 +60,7 @@ public:
 	    Action action, qint64 msgId,
 	    const AccountModel::SettingsMap &accountInfo,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QString &lastAttAddPath,
+	    QString &lastAttAddPath, QString &pdzCredit,
 	    QWidget *parent = 0
 	    );
 
@@ -93,6 +93,7 @@ private:
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
 	QString &m_lastAttAddPath;
+	QString &m_pdzCredit;
 	MessageDb &m_messDb;
 	int m_attachSize;
 	QString m_dmType;

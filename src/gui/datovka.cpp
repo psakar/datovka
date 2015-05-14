@@ -3126,6 +3126,12 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 		}
 	}
 
+	QString credit = getPDZCreditFromISDS();
+	if (credit != "0") {
+		html.append(strongAccountInfoLine(tr("Remaining credit"),
+		    credit + " Kč"));
+	}
+
 	html.append("<br/>");
 	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
 	if (info.isEmpty()) {
@@ -4308,10 +4314,15 @@ void MainWindow::openSendMessageDialog(int action)
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
 
+	QString pdzCredit = "0";
+	if (dbOpenAddressing) {
+		pdzCredit = getPDZCreditFromISDS();
+	}
+
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    senderName, (DlgSendMessage::Action) action, msgId,
 	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    lastAttachAddPath, this);
+	    lastAttachAddPath, pdzCredit, this);
 
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 
@@ -8656,3 +8667,51 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 	return msgBox.exec();
 }
 
+
+/* ========================================================================= */
+/*
+ * Show remaining PDZ credit.
+ */
+QString MainWindow::getPDZCreditFromISDS(void)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QString str = "0";
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString dbId = m_accountDb.dbId(accountInfo.userName() + "___True");
+
+	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+		if (!connectToIsds(acntTopIdx, true)) {
+			return str;
+		}
+	}
+
+	isds_error status;
+	long int credit;
+	char *email = NULL;
+	struct isds_list *history = NULL;
+
+	status = isds_get_commercial_credit(
+	    isdsSessions.session(accountInfo.userName()),
+	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
+
+	isds_list_free(&history);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isds_long_message(
+		    isdsSessions.session(accountInfo.userName()));
+		return str;
+	}
+
+	str = QString::number(credit);
+	if (str.length() > 2) {
+		str.insert(str.length()-2, QString("."));
+	}
+
+	return str;
+}
