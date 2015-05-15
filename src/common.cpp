@@ -600,6 +600,8 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 const QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
 const QString dateDisplayFormat("dd.MM.yyyy");
 
+QLocale programLocale;
+
 
 /* ========================================================================= */
 /*

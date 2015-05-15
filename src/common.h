@@ -26,6 +26,7 @@
 #define _COMMON_H_
 
 
+#include <QLocale>
 #include <QSettings>
 #include <QString>
 #include <QDebug>
@@ -306,6 +307,9 @@ const QString dateTimeDisplayFormat;
 extern
 const QString dateDisplayFormat;
 
+/* Global locale instance. */
+extern
+QLocale programLocale;
 
 /*!
  * @brief Translates message type to text.

@@ -3126,11 +3126,17 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 		}
 	}
 
+	/*
+	 * Credit information displayed here cause the application
+	 * to connect to ISDS. Credit information must be shown after
+	 * an explicit user request.
+	 *
 	QString credit = getPDZCreditFromISDS();
 	if (credit != "0") {
 		html.append(strongAccountInfoLine(tr("Remaining credit"),
 		    credit + " Kč"));
 	}
+	*/
 
 	html.append("<br/>");
 	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
@@ -4314,7 +4320,7 @@ void MainWindow::openSendMessageDialog(int action)
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
 
-	QString pdzCredit = "0";
+	QString pdzCredit("0");
 	if (dbOpenAddressing) {
 		pdzCredit = getPDZCreditFromISDS();
 	}
@@ -8677,7 +8683,7 @@ QString MainWindow::getPDZCreditFromISDS(void)
 {
 	debugFuncCall();
 
-	QString str = "0";
+	QString str("0");
 
 	QModelIndex acntTopIdx = ui->accountList->currentIndex();
 	acntTopIdx = AccountModel::indexTop(acntTopIdx);
@@ -8708,9 +8714,8 @@ QString MainWindow::getPDZCreditFromISDS(void)
 		return str;
 	}
 
-	str = QString::number(credit);
-	if (str.length() > 2) {
-		str.insert(str.length()-2, QString("."));
+	if (credit > 0) {
+		str = programLocale.toString((float)credit / 100, 'f', 2);
 	}
 
 	return str;
