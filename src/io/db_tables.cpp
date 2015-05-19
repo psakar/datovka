@@ -280,6 +280,69 @@ Tbl accntinfTbl(AccntinfTbl::tabName, AccntinfTbl::knownAttrs,
     AccntinfTbl::tblConstraint);
 
 
+namespace UserinfTbl {
+	const QString tabName("user_info");
+
+	const QVector< QPair<QString, EntryType> > knownAttrs = {
+	{"key", DB_TEXT}, /* NOT NULL */
+	{"userType", DB_TEXT},
+	{"userPrivils", DB_INTEGER},
+	{"pnFirstName", DB_TEXT},
+	{"pnMiddleName", DB_TEXT},
+	{"pnLastName", DB_TEXT},
+	{"pnLastNameAtBirth", DB_TEXT},
+	{"adCity", DB_TEXT},
+	{"adStreet", DB_TEXT},
+	{"adNumberInStreet", DB_TEXT},
+	{"adNumberInMunicipality", DB_TEXT},
+	{"adZipCode", DB_TEXT},
+	{"adState", DB_TEXT},
+	{"biDate", DB_DATE},
+	{"ic", DB_INTEGER},
+	{"firmName", DB_TEXT},
+	{"caStreet", DB_TEXT},
+	{"caCity", DB_TEXT},
+	{"caZipCode", DB_TEXT},
+	{"caState", DB_TEXT},
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"key", "NOT NULL"}
+	};
+
+	const QString tblConstraint = {
+	    ",\n"
+	    "        PRIMARY KEY (key)"
+	};
+
+	QMap<QString, AttrProp> attrProps = {
+	{"key",                    {DB_TEXT, QObject::tr("Username")}},
+	{"userType",               {DB_TEXT, QObject::tr("User type")}},
+	{"userPrivils",            {DB_INTEGER, QObject::tr("Permissions")}},
+	{"pnFirstName",            {DB_TEXT, QObject::tr("Given name")}},
+	{"pnMiddleName",           {DB_TEXT, QObject::tr("Middle name")}},
+	{"pnLastName",             {DB_TEXT, QObject::tr("Surname")}},
+	{"pnLastNameAtBirth",      {DB_TEXT, QObject::tr("Surname at birth")}},
+	{"adCity",                 {DB_TEXT, QObject::tr("City of person")}},
+	{"adStreet",               {DB_TEXT, QObject::tr("Street of person")}},
+	{"adNumberInStreet",       {DB_TEXT, QObject::tr("Number in street")}},
+	{"adNumberInMunicipality", {DB_TEXT, QObject::tr("Number in municipality")}},
+	{"adZipCode",              {DB_TEXT, QObject::tr("Zip code")}},
+	{"adState",                {DB_TEXT, QObject::tr("State of person")}},
+	{"biDate",                 {DB_DATE, QObject::tr("Date of birth")}},
+	{"ic",                     {DB_INTEGER, QObject::tr("IČ")}},
+	{"firmName",               {DB_TEXT, QObject::tr("Firm name")}},
+	{"caStreet",               {DB_TEXT, QObject::tr("Street of residence")}},
+	{"caCity",                 {DB_TEXT, QObject::tr("City of residence")}},
+	{"caZipCode",              {DB_TEXT, QObject::tr("Zip code")}},
+	{"caState",                {DB_INTEGER, QObject::tr("State of residence")}}
+	};
+} /* namespace UserinfTbl */
+Tbl userinfTbl(UserinfTbl::tabName, UserinfTbl::knownAttrs,
+    UserinfTbl::attrProps, UserinfTbl::colConstraints,
+    UserinfTbl::tblConstraint);
+
+
 namespace PwdexpdtTbl {
 	const QString tabName("password_expiration_date");
 

@@ -372,6 +372,11 @@ QString convertSenderTypeToString(int value);
 QString convertDbTypeToString(int value);
 
 /*!
+ * Convert type of user to string
+ */
+QString convertUserTypeToString(int value);
+
+/*!
  * @brief Convert type of databox to int
  */
 int convertDbTypeToInt(QString value);

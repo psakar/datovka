@@ -135,6 +135,22 @@ public:
 	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing);
 
 	/*!
+	 * @brief Insert user info into db
+	 */
+	bool insertUserIntoDb(const QString &key,
+	    const QString &userType, int userPrivils,
+	    const QString &pnFirstName, const QString &pnMiddleName,
+	    const QString &pnLastName, const QString &pnLastNameAtBirth,
+	    const QString &adCity, const QString &adStreet,
+	    const QString &adNumberInStreet,
+	    const QString &adNumberInMunicipality, const QString &adZipCode,
+	    const QString &adState,
+	    const QString &biDate,
+	    int ic, const QString &firmName, const QString &caStreet,
+	    const QString &caCity, const QString &caZipCode,
+	    const QString &caState);
+
+	/*!
 	 * @brief delete account info from db
 	 */
 	bool deleteAccountInfo(const QString &key);

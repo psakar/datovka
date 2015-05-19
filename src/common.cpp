@@ -928,6 +928,23 @@ QString convertDbTypeToString(int value)
 
 /* ========================================================================= */
 /*
+ * Convert type of user to string
+ */
+QString convertUserTypeToString(int value)
+/* ========================================================================= */
+{
+	if (value == USERTYPE_PRIMARY) return "PRIMARY_USER";
+	else if (value == USERTYPE_ENTRUSTED) return "ENTRUSTED_USER";
+	else if (value == USERTYPE_ADMINISTRATOR) return "ADMINISTRATOR";
+	else if (value == USERTYPE_LIQUIDATOR) return "LIQUIDATOR";
+	else if (value == USERTYPE_OFFICIAL) return "OFFICIAL_USER";
+	else if (value == USERTYPE_OFFICIAL_CERT) return "OFFICIAL_CERT_USER";
+	else return "";
+}
+
+
+/* ========================================================================= */
+/*
  * Convert type of databox to int
  */
 int convertDbTypeToInt(QString value)

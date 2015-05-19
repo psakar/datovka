@@ -5218,8 +5218,6 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	isds_error status;
-
 	/*
 	 * The method is called from only one place immediately after
 	 * a successful login.
@@ -5233,11 +5231,12 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
-	status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
+	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
 	    accountInfo.userName()), &db_owner_info);
 
-	if (IE_SUCCESS != status) {
+	if (IE_SUCCESS != status) {	
 		qDebug() << status << isds_strerror(status);
+		isds_DbOwnerInfo_free(&db_owner_info);
 		return false;
 	}
 
@@ -5292,6 +5291,8 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	    (int)*db_owner_info->dbState,
 	    *db_owner_info->dbEffectiveOVM,
 	    *db_owner_info->dbOpenAddressing);
+
+	isds_DbOwnerInfo_free(&db_owner_info);
 
 	return true;
 }
@@ -5350,26 +5351,65 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	const AccountModel::SettingsMap accountInfo =
 	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
-	isds_error status;
-
+	/*
+	 * The method is called from only one place immediately after
+	 * a successful login.
+	 *
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!connectToIsds(acntTopIdx, true)) {
 			return false;
 		}
 	}
+	*/
 
 	struct isds_DbUserInfo *db_user_info = NULL;
 
-
-	status = isds_GetUserInfoFromLogin(isdsSessions.session(
+	isds_error status = isds_GetUserInfoFromLogin(isdsSessions.session(
 	    accountInfo.userName()), &db_user_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
+		isds_DbUserInfo_free(&db_user_info);
 		return false;
 	}
 
-	/* TODO - insert data into db */
+	const QString userName = accountInfo.userName() + "___True";
+
+	m_accountDb.insertUserIntoDb(
+	    userName,
+	    convertUserTypeToString(*db_user_info->userType),
+	    (int)*db_user_info->userPrivils,
+	    db_user_info->personName ?
+		db_user_info->personName->pnFirstName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnMiddleName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnLastName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnLastNameAtBirth : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adCity : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adStreet : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adNumberInStreet : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adNumberInMunicipality : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adZipCode : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adState : NULL,
+	    db_user_info->biDate ?
+		tmBirthToDbFormat(db_user_info->biDate) : NULL,
+	    db_user_info->ic ? QString(db_user_info->ic).toInt() : 0,
+	    db_user_info->firmName,
+	    db_user_info->caStreet,
+	    db_user_info->caCity,
+	    db_user_info->caZipCode,
+	    db_user_info->caState
+	    );
+
+	isds_DbUserInfo_free(&db_user_info);
 
 	return true;
 }
@@ -5503,12 +5543,9 @@ void MainWindow::createAccountFromDatabaseFileList(
 		if (fileName.contains("___")) {
 			QStringList fileNameParts = fileName.split("___");
 			userName = fileNameParts[0];
-			fileNameParts = fileNameParts[1].split(".");
-			qDebug() << "A000" << userName << "=============";
+			fileNameParts = fileNameParts[1].split(".");			
 			testingFlag = fileNameParts[0];
 			suffix = fileNameParts[1];
-			qDebug() << "A001" << fileNameParts << "=============";
-
 			if (userName.isEmpty() || testingFlag.isEmpty() ||
 			    suffix.isEmpty()) {
 				importDBinfo.second = tr(

@@ -283,6 +283,7 @@ int main(int argc, char *argv[])
 
 	/* Localise description in tables. */
 	accntinfTbl.reloadLocalisedDescription();
+	userinfTbl.reloadLocalisedDescription();
 	pwdexpdtTbl.reloadLocalisedDescription();
 	msgsTbl.reloadLocalisedDescription();
 	flsTbl.reloadLocalisedDescription();

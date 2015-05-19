@@ -483,6 +483,81 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Insert user info into db
+ */
+bool AccountDb::insertUserIntoDb(const QString &key,
+    const QString &userType, int userPrivils,
+    const QString &pnFirstName, const QString &pnMiddleName,
+    const QString &pnLastName, const QString &pnLastNameAtBirth,
+    const QString &adCity, const QString &adStreet,
+    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
+    const QString &adZipCode,const QString &adState,
+    const QString &biDate,
+    int ic, const QString &firmName, const QString &caStreet,
+    const QString &caCity, const QString &caZipCode, const QString &caState)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	if (!m_db.isOpen()) {
+		logErrorNL("%s", "Account database seems not to be open.");
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO user_info ("
+	    "key, userType, userPrivils, pnFirstName, pnMiddleName, "
+	    "pnLastName, pnLastNameAtBirth, adCity, adStreet, "
+	    "adNumberInStreet, adNumberInMunicipality, adZipCode, adState, "
+	    "biDate, ic, firmName, caStreet, caCity, caZipCode, caState"
+	    ") VALUES ("
+	    ":key, :userType, :userPrivils, :pnFirstName, :pnMiddleName, "
+	    ":pnLastName, :pnLastNameAtBirth, :adCity, :adStreet, "
+	    ":adNumberInStreet, :adNumberInMunicipality, :adZipCode, :adState, "
+	    ":biDate, :ic, :firmName, :caStreet, :caCity,  :caZipCode, :caState"
+	    ")";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":key", key);
+	query.bindValue(":userType", userType);
+	query.bindValue(":userPrivils", userPrivils);
+	query.bindValue(":ic", ic);
+	query.bindValue(":pnFirstName", pnFirstName);
+	query.bindValue(":pnMiddleName", pnMiddleName);
+	query.bindValue(":pnLastName", pnLastName);
+	query.bindValue(":pnLastNameAtBirth", pnLastNameAtBirth);
+	query.bindValue(":firmName", firmName);
+	query.bindValue(":biDate", biDate);
+	query.bindValue(":adCity", adCity);
+	query.bindValue(":adStreet", adStreet);
+	query.bindValue(":adNumberInStreet", adNumberInStreet);
+	query.bindValue(":adNumberInMunicipality", adNumberInMunicipality);
+	query.bindValue(":adZipCode", adZipCode);
+	query.bindValue(":adState", adState);
+	query.bindValue(":caStreet", caStreet);
+	query.bindValue(":caCity", caCity);
+	query.bindValue(":caZipCode", caZipCode);
+	query.bindValue(":caState", caState);
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Delete account records from db
  */
 bool AccountDb::deleteAccountInfo(const QString &key)
@@ -594,6 +669,12 @@ bool AccountDb::createEmptyMissingTables(void)
 
 	if (!accntinfTbl.existsInDb(m_db)) {
 		ret = accntinfTbl.createEmpty(m_db);
+		if (!ret) {
+			goto fail; /* TODO -- Proper recovery? */
+		}
+	}
+	if (!userinfTbl.existsInDb(m_db)) {
+		ret = userinfTbl.createEmpty(m_db);
 		if (!ret) {
 			goto fail; /* TODO -- Proper recovery? */
 		}
