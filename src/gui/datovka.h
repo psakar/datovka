@@ -852,11 +852,6 @@ private:
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Get data about logged in user.
-	 */
-	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx);
-
-	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
@@ -971,7 +966,7 @@ private:
 	/*
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, const QString userName);
 
 	/*!
 	 * @brief Get information about password expiration date.
@@ -982,6 +977,11 @@ private:
 	 * @brief Get information about remaining PDZ credit.
 	 */
 	QString getPDZCreditFromISDS(void);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx, const QString userName);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

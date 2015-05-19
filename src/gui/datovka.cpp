@@ -5258,14 +5258,20 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 /*
  * Get data about logged in user and his box.
  */
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
+	QString username = userName;
+
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
+	}
 	/*
 	 * The method is called from only one place immediately after
 	 * a successful login.
@@ -5280,7 +5286,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
 	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
-	    accountInfo.userName()), &db_owner_info);
+	    username), &db_owner_info);
 
 	if (IE_SUCCESS != status) {	
 		qDebug() << status << isds_strerror(status);
@@ -5288,7 +5294,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 		return false;
 	}
 
-	const QString userName = accountInfo.userName() + "___True";
+	username = username + "___True";
 	QString birthDate;
 	if ((NULL != db_owner_info->birthInfo) &&
 	    (NULL != db_owner_info->birthInfo->biDate)) {
@@ -5301,7 +5307,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	}
 
 	m_accountDb.insertAccountIntoDb(
-	    userName,
+	    username,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
 	    ic,
@@ -5391,14 +5397,19 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 /*
 * Get data about logged in user.
 */
-bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString username = userName;
 
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
+	}
 	/*
 	 * The method is called from only one place immediately after
 	 * a successful login.
@@ -5413,7 +5424,7 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 	struct isds_DbUserInfo *db_user_info = NULL;
 
 	isds_error status = isds_GetUserInfoFromLogin(isdsSessions.session(
-	    accountInfo.userName()), &db_user_info);
+	    username), &db_user_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -5421,10 +5432,10 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
 		return false;
 	}
 
-	const QString userName = accountInfo.userName() + "___True";
+	username = username + "___True";
 
 	m_accountDb.insertUserIntoDb(
-	    userName,
+	    username,
 	    convertUserTypeToString(*db_user_info->userType),
 	    (int)*db_user_info->userPrivils,
 	    db_user_info->personName ?
@@ -8339,11 +8350,11 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		qWarning() << "Missing user entry for" << userName
 		    << "in account db.";
 
-		if (!getOwnerInfoFromLogin(acntTopIdx)) {
+		if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
 			return false;
 		}
 
-		if (!getUserInfoFromLogin(acntTopIdx)) {
+		if (!getUserInfoFromLogin(acntTopIdx, QString())) {
 			return false;
 		}
 
@@ -8363,20 +8374,24 @@ bool MainWindow::firstConnectToIsds(
     const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
+	bool ret = false;
+
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		return loginMethodUserNamePwd(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		return loginMethodCertificateOnly(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateOnly(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		return loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8393,9 +8408,22 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based username, password and OTP */
 	} else {
-		return loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
 		    showDialog);
 	}
+
+	if (ret) {
+		if (!getOwnerInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}
+		if (!getUserInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}
+	}
+
+	return ret;
 }
 
 
