@@ -75,6 +75,48 @@ private:
 
 
 /*!
+ * @brief User information.
+ */
+class UserEntry : private QMap<QString, QVariant> {
+
+public:
+	UserEntry(void);
+	~UserEntry(void);
+
+	/*!
+	 * @brief Set value.
+	 *
+	 * @param[in] key   Key string.
+	 * @param[in] value Value to be stored.
+	 */
+	bool setValue(const QString &key, const QVariant &value);
+
+	/*!
+	 * @brief Check whether value is stored.
+	 *
+	 * @param[in] key Key string.
+	 * @return True if key found, False else.
+	 */
+	bool hasValue(const QString &key) const;
+
+	/*!
+	 * @brief Return stored value.
+	 *
+	 * @param[in] key          Key string.
+	 * @param[in] defaultValue Value to be returned if key not found.
+	 * @return Found value associated to key or defaultValue if such entry
+	 *     found.
+	 */
+	const QVariant value(const QString &key,
+	    const QVariant &defaultValue = QVariant()) const;
+
+private:
+	typedef QMap<QString, QVariant> m_parentType;
+};
+
+
+
+/*!
  * @brief Encapsulates account database.
  */
 class AccountDb : public QObject {
@@ -94,6 +136,13 @@ public:
 	 * @note Key is in format 'login___True'.
 	 */
 	AccountEntry accountEntry(const QString &key) const;
+
+	/*!
+	 * @brief Return user entry.
+	 *
+	 * @note Key is in format 'login___True'.
+	 */
+	UserEntry userEntry(const QString &key) const;
 
 	/*!
 	 * @brief Return data box identifier.

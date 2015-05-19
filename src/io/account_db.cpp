@@ -95,6 +95,69 @@ const QVariant AccountEntry::value(const QString &key,
 }
 
 
+
+
+
+
+
+/* ========================================================================= */
+UserEntry::UserEntry(void)
+/* ========================================================================= */
+    : QMap<QString, QVariant>()
+{
+}
+
+
+/* ========================================================================= */
+UserEntry::~UserEntry(void)
+/* ========================================================================= */
+{
+}
+
+
+/* ========================================================================= */
+/*
+ * Set value.
+ */
+bool UserEntry::setValue(const QString &key, const QVariant &value)
+/* ========================================================================= */
+{
+	/* Don't insert if key is not known. */
+	if (userinfTbl.attrProps.find(key) ==
+	    userinfTbl.attrProps.end()) {
+		return false;
+	}
+
+	this->insert(key, value);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check whether value is stored.
+ */
+bool UserEntry::hasValue(const QString &key) const
+/* ========================================================================= */
+{
+	return this->find(key) != this->end();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return stored value.
+ */
+const QVariant UserEntry::value(const QString &key,
+    const QVariant &defaultValue) const
+/* ========================================================================= */
+{
+	return m_parentType::value(key, defaultValue);
+}
+
+
+
 /* ========================================================================= */
 AccountDb::AccountDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
@@ -190,6 +253,55 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 fail:
 	return AccountEntry();
 }
+
+
+/* ========================================================================= */
+UserEntry AccountDb::userEntry(const QString &key) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	UserEntry entry;
+
+	if (!m_db.isOpen()) {
+		logErrorNL("%s", "Account database seems not to be open.");
+		goto fail;
+	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (userinfTbl.knownAttrs.size() - 1); ++i) {
+		queryStr += userinfTbl.knownAttrs[i].first + ", ";
+	}
+	queryStr += userinfTbl.knownAttrs.last().first + " ";
+	queryStr += "FROM user_info WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive() && query.first()) {
+		QSqlRecord rec = query.record();
+		for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
+			QVariant value = query.value(rec.indexOf(
+			    userinfTbl.knownAttrs[i].first));
+			if (!value.isNull() && value.isValid()) {
+				entry.setValue(userinfTbl.knownAttrs[i].first,
+				    value);
+			}
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query and/or read SQL data: "
+		    "%s.", query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return entry;
+
+fail:
+	return UserEntry();
+}
+
 
 
 /* ========================================================================= */

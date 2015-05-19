@@ -3046,7 +3046,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 
 	QString html;
 
-	html.append("<div style=\"margin-left: 12px;\">");
+	html.append("<div style=\"margin-left: 12px; \">");
 	html.append("<h3>");
 	if (itemSettings.isTestAccount()) {
 		html.append(tr("Test account"));
@@ -3057,7 +3057,6 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 
 	html.append(strongAccountInfoLine(tr("Account name"),
 	    itemSettings.accountName()));
-	html.append("<br/>");
 	html.append(strongAccountInfoLine(tr("User name"),
 	    itemSettings.userName()));
 
@@ -3071,6 +3070,11 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 		html.append(QString("<div><strong>") +
 		    tr("Account information could not be acquired.") +
 		    QString("</strong></div>"));
+	} else {
+		html.append("<br/>");
+		html.append(QString("<div><strong><i>") +
+		    tr("Databox information") +
+		    QString("</i></strong></div>"));
 	}
 
 	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
@@ -3117,6 +3121,43 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 				    accntinfTbl.attrProps[key].desc,
 				    dateStrFromDbFormat(
 				        accountEntry.value(key).toString(),
+				        dateDisplayFormat)));
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+		}
+	}
+//+++++++
+	UserEntry userEntry = m_accountDb.userEntry(acndDbKey);
+
+	html.append("<br/>");
+
+	html.append(strongAccountInfoLine(tr("User name"),
+	    itemSettings.userName()));
+	/* Print non-empty entries. */
+	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
+		const QString &key = userinfTbl.knownAttrs[i].first;
+		if (userEntry.hasValue(key) &&
+		    !userinfTbl.attrProps[key].desc.isEmpty()) {
+			switch (userinfTbl.knownAttrs[i].second) {
+			case DB_INTEGER:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    QString::number(userEntry.
+				        value(key).toInt())));
+				break;
+			case DB_TEXT:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    userEntry.value(key).toString()));
+				break;
+			case DB_DATE:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    dateStrFromDbFormat(
+				        userEntry.value(key).toString(),
 				        dateDisplayFormat)));
 				break;
 			default:
@@ -8292,6 +8333,10 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		    << "in account db.";
 
 		if (!getOwnerInfoFromLogin(acntTopIdx)) {
+			return false;
+		}
+
+		if (!getUserInfoFromLogin(acntTopIdx)) {
 			return false;
 		}
 

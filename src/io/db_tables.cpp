@@ -316,26 +316,26 @@ namespace UserinfTbl {
 	};
 
 	QMap<QString, AttrProp> attrProps = {
-	{"key",                    {DB_TEXT, QObject::tr("Username")}},
+	{"key",                    {DB_TEXT, ""}},
 	{"userType",               {DB_TEXT, QObject::tr("User type")}},
 	{"userPrivils",            {DB_INTEGER, QObject::tr("Permissions")}},
 	{"pnFirstName",            {DB_TEXT, QObject::tr("Given name")}},
 	{"pnMiddleName",           {DB_TEXT, QObject::tr("Middle name")}},
 	{"pnLastName",             {DB_TEXT, QObject::tr("Surname")}},
 	{"pnLastNameAtBirth",      {DB_TEXT, QObject::tr("Surname at birth")}},
-	{"adCity",                 {DB_TEXT, QObject::tr("City of person")}},
-	{"adStreet",               {DB_TEXT, QObject::tr("Street of person")}},
+	{"adCity",                 {DB_TEXT, QObject::tr("City")}},
+	{"adStreet",               {DB_TEXT, QObject::tr("Street")}},
 	{"adNumberInStreet",       {DB_TEXT, QObject::tr("Number in street")}},
 	{"adNumberInMunicipality", {DB_TEXT, QObject::tr("Number in municipality")}},
 	{"adZipCode",              {DB_TEXT, QObject::tr("Zip code")}},
-	{"adState",                {DB_TEXT, QObject::tr("State of person")}},
+	{"adState",                {DB_TEXT, QObject::tr("State")}},
 	{"biDate",                 {DB_DATE, QObject::tr("Date of birth")}},
 	{"ic",                     {DB_INTEGER, QObject::tr("IČ")}},
 	{"firmName",               {DB_TEXT, QObject::tr("Firm name")}},
 	{"caStreet",               {DB_TEXT, QObject::tr("Street of residence")}},
 	{"caCity",                 {DB_TEXT, QObject::tr("City of residence")}},
 	{"caZipCode",              {DB_TEXT, QObject::tr("Zip code")}},
-	{"caState",                {DB_INTEGER, QObject::tr("State of residence")}}
+	{"caState",                {DB_TEXT, QObject::tr("State of residence")}}
 	};
 } /* namespace UserinfTbl */
 Tbl userinfTbl(UserinfTbl::tabName, UserinfTbl::knownAttrs,
