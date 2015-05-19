@@ -3045,8 +3045,10 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	    topItem.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	QString html;
+	UserEntry userEntry;
+	AccountEntry accountEntry;
 
-	html.append("<div style=\"margin-left: 12px; \">");
+	html.append(indentDivStart);
 	html.append("<h3>");
 	if (itemSettings.isTestAccount()) {
 		html.append(tr("Test account"));
@@ -3057,28 +3059,73 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 
 	html.append(strongAccountInfoLine(tr("Account name"),
 	    itemSettings.accountName()));
-	html.append(strongAccountInfoLine(tr("User name"),
-	    itemSettings.userName()));
 
 	const QString acndDbKey = itemSettings.userName() + "___True";
-
 	if (m_accountDb.dbId(acndDbKey).isEmpty()) {
 		/*
 		 * Generate this message if no account information can
 		 * be obtained.
 		 */
 		html.append(QString("<div><strong>") +
-		    tr("Account information could not be acquired.") +
+		    tr("Account and user information could not be acquired.") +
 		    QString("</strong></div>"));
-	} else {
-		html.append("<br/>");
-		html.append(QString("<div><strong><i>") +
-		    tr("Databox information") +
-		    QString("</i></strong></div>"));
+		goto lastPart;
 	}
 
-	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
+	html.append("<table cellpadding=\"5\"><tr><td>");
+	html.append(QString("<div><strong>") + tr("User information") +
+	    QString("</strong></div>"));
+	html.append("</td><td width=\"100\"></td><td>");
+	html.append(QString("<div><strong>") + tr("Databox information") +
+	    QString("</strong></div>"));
+	html.append("</td></tr><tr><td>");
 
+	userEntry = m_accountDb.userEntry(acndDbKey);
+	html.append(strongAccountInfoLine(tr("User name"),
+	    itemSettings.userName()));
+	/* Print non-empty entries. */
+	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
+		const QString &key = userinfTbl.knownAttrs[i].first;
+		if (userEntry.hasValue(key) &&
+		    !userinfTbl.attrProps[key].desc.isEmpty()) {
+			switch (userinfTbl.knownAttrs[i].second) {
+			case DB_INTEGER:
+				if (key == "ic") {
+					if (userEntry.value(key).toInt() > 0) {
+						html.append(strongAccountInfoLine(
+						    userinfTbl.attrProps[key].desc,
+						    QString::number(userEntry.
+						    value(key).toInt())));
+					}
+				} else {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    QString::number(userEntry.
+					        value(key).toInt())));
+				}
+				break;
+			case DB_TEXT:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    userEntry.value(key).toString()));
+				break;
+			case DB_DATE:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    dateStrFromDbFormat(
+				        userEntry.value(key).toString(),
+				        dateDisplayFormat)));
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+		}
+	}
+
+	html.append("</td><td></td><td>");
+
+	accountEntry = m_accountDb.accountEntry(acndDbKey);
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
 		const QString &key = accntinfTbl.knownAttrs[i].first;
@@ -3091,6 +3138,13 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 					    accntinfTbl.attrProps[key].desc,
 					    getdbStateText(
 					    accountEntry.value(key).toInt())));
+				} else if (key == "ic") {
+					if (accountEntry.value(key).toInt() > 0) {
+						html.append(strongAccountInfoLine(
+						    accntinfTbl.attrProps[key].desc,
+						   QString::number(accountEntry.
+						   value(key).toInt())));
+					}
 				} else {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
@@ -3129,57 +3183,11 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 			}
 		}
 	}
-//+++++++
-	UserEntry userEntry = m_accountDb.userEntry(acndDbKey);
 
-	html.append("<br/>");
+	html.append("</td></tr></table>");
 
-	html.append(strongAccountInfoLine(tr("User name"),
-	    itemSettings.userName()));
-	/* Print non-empty entries. */
-	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
-		const QString &key = userinfTbl.knownAttrs[i].first;
-		if (userEntry.hasValue(key) &&
-		    !userinfTbl.attrProps[key].desc.isEmpty()) {
-			switch (userinfTbl.knownAttrs[i].second) {
-			case DB_INTEGER:
-				html.append(strongAccountInfoLine(
-				    userinfTbl.attrProps[key].desc,
-				    QString::number(userEntry.
-				        value(key).toInt())));
-				break;
-			case DB_TEXT:
-				html.append(strongAccountInfoLine(
-				    userinfTbl.attrProps[key].desc,
-				    userEntry.value(key).toString()));
-				break;
-			case DB_DATE:
-				html.append(strongAccountInfoLine(
-				    userinfTbl.attrProps[key].desc,
-				    dateStrFromDbFormat(
-				        userEntry.value(key).toString(),
-				        dateDisplayFormat)));
-				break;
-			default:
-				Q_ASSERT(0);
-				break;
-			}
-		}
-	}
+lastPart:
 
-	/*
-	 * Credit information displayed here cause the application
-	 * to connect to ISDS. Credit information must be shown after
-	 * an explicit user request.
-	 *
-	QString credit = getPDZCreditFromISDS();
-	if (credit != "0") {
-		html.append(strongAccountInfoLine(tr("Remaining credit"),
-		    credit + " Kč"));
-	}
-	*/
-
-	html.append("<br/>");
 	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
@@ -3188,7 +3196,6 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    info));
 
-	html.append("<br/>");
 	MessageDb *db = accountMessageDb(&topItem);
 	Q_ASSERT(0 != db);
 	QString dbFilePath = db->fileName();
@@ -3199,7 +3206,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	html.append(strongAccountInfoLine(tr("Local database file location"),
 	    dbFilePath));
 
-	html.append("</div>");
+	html.append(divEnd);
 
 	return html;
 }
