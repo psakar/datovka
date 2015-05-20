@@ -761,42 +761,45 @@ QString convertUserPrivilsToString(int userPrivils)
 	const QString separ = "<li>- ";
 
 	if (userPrivils == 255) {
-		return QObject::tr("All");
+		return QObject::tr("Full");
 	} else {
 		privStr = QObject::tr("Restricted");
 	}
 
 	if (userPrivils & PRIVIL_READ_NON_PERSONAL) {
 		// "stahovat a číst došlé DZ"
-		privStr += separ + QObject::tr("stahovat a číst došlé DZ");
+		privStr += separ + QObject::tr("download and read incoming DM");
 	}
 	if (userPrivils & PRIVIL_READ_ALL) {
 		// "stahovat a číst DZ určené do vlastních rukou"
-		privStr += separ + QObject::tr("stahovat a číst DZ určené do vlastních rukou");
+		privStr += separ + QObject::tr("download and read DZ "
+		    "designed into their own hands");
 	}
 	if (userPrivils & PRIVIL_CREATE_DM) {
 		// "vytvářet a odesílat DZ, stahovat odeslané DZ"
-		privStr += separ + QObject::tr("vytvářet a odesílat DZ, stahovat odeslané DZ");
+		privStr += separ + QObject::tr("create and send DM, "
+		    "download sent DM");
 	}
 	if (userPrivils & PRIVIL_VIEW_INFO) {
 		// "načítat seznamy DZ, Dodejky a Doručenky"
-		privStr += separ + QObject::tr("načítat seznamy DZ, Dodejky a Doručenky");
+		privStr += separ + QObject::tr("retrieve DM lists, Delivery "
+		    "and Acceptance reports");
 	}
 	if (userPrivils & PRIVIL_SEARCH_DB) {
 		// "vyhledávat DS"
-		privStr += separ + QObject::tr("vyhledávat DS");
+		privStr += separ + QObject::tr("search for DataBox");
 	}
 	if (userPrivils & PRIVIL_OWNER_ADM) {
 		// "spravovat DS"
-		privStr += separ + QObject::tr("spravovat DS");
+		privStr += separ + QObject::tr("manage DS");
 	}
 	if (userPrivils & PRIVIL_READ_VAULT) {
 		// "číst zprávy v DT"
-		privStr += separ + QObject::tr("číst zprávy v DT");
+		privStr += separ + QObject::tr("read the message at DT");
 	}
 	if (userPrivils & PRIVIL_ERASE_VAULT) {
 		// "mazat zprávy v DT"
-		privStr += separ + QObject::tr("mazat zprávy v DT");
+		privStr += separ + QObject::tr("delete messages in DT");
 	}
 	return privStr;
 }
