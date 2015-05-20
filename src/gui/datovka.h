@@ -966,12 +966,14 @@ private:
 	/*
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx, const QString userName);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	/*!
 	 * @brief Get information about password expiration date.
 	 */
-	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx);
+	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	/*!
 	 * @brief Get information about remaining PDZ credit.
@@ -981,7 +983,8 @@ private:
 	/*!
 	 * @brief Get data about logged in user.
 	 */
-	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx, const QString userName);
+	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

@@ -5271,11 +5271,10 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
  * Get data about logged in user and his box.
  */
 bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
-    const QString userName)
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
-
 
 	QString username = userName;
 
@@ -5284,16 +5283,6 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		    username = accountInfo.userName();
 	}
-	/*
-	 * The method is called from only one place immediately after
-	 * a successful login.
-	 *
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return false;
-		}
-	}
-	*/
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
@@ -5368,23 +5357,28 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 /*
  * Get information about password expiration date.
  */
-bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
+	QString username = userName;
 	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
 	bool retval = false;
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
+	}
 
-	QString key = accountInfo.userName() + "___True";
+	QString key = username + "___True";
 
 	status = isds_get_password_expiration(
-	    isdsSessions.session(accountInfo.userName()), &expiration);
+	    isdsSessions.session(username), &expiration);
 
 	if (IE_SUCCESS == status) {
 		if (NULL != expiration) {
@@ -5397,7 +5391,9 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 	} else {
 		expirDate.clear();
 	}
+
 	m_accountDb.setPwdExpirIntoDb(key, expirDate);
+
 	if (NULL != expiration) {
 		free(expiration);
 	}
@@ -5410,7 +5406,7 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 * Get data about logged in user.
 */
 bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
-    const QString userName)
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -5422,16 +5418,6 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
 		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 		    username = accountInfo.userName();
 	}
-	/*
-	 * The method is called from only one place immediately after
-	 * a successful login.
-	 *
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return false;
-		}
-	}
-	*/
 
 	struct isds_DbUserInfo *db_user_info = NULL;
 
@@ -8335,30 +8321,29 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 	if (!loginRet) {
 		/* Break on error. */
 		return loginRet;
-	}
-
-	const QString userName = accountInfo.userName();
-
-	/* Update password expiration information. */
-	if (!getPasswordInfoFromLogin(acntTopIdx)) {
-		logWarning("Password information for account '%s' (login %s) "
-		    "could not be acquired.\n",
-		    acntTopIdx.data().toString().toUtf8().constData(),
-		    userName.toUtf8().constData());
+	} else {
+		if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
+			//TODO: return false;
+		}
+		if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+			//TODO: return false;
+		}
+		if (!getPasswordInfoFromLogin(acntTopIdx, QString())) {
+			//TODO: return false;
+		}
 	}
 
 	/* Get account information if possible. */
 	/*
 	 * TODO -- Is '___True' somehow related to the testing state
 	 * of an account?
-	 */
-	/*
+	 *
 	 * TODO -- The account information should be updated periodically.
 	 * Currently they are only acquired when they are missing.
-	 */
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	if (dbId.isEmpty()) {
-		/* Acquire user information. */
+		// Acquire user information.
 		qWarning() << "Missing user entry for" << userName
 		    << "in account db.";
 
@@ -8370,9 +8355,10 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 			return false;
 		}
 
-		dbId = m_accountDb.dbId(userName + "___True");
+		dbId = m_accountDb.dbId(accountInfo.userName() + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
+	 */
 
 	return loginRet;
 }
@@ -8430,6 +8416,10 @@ bool MainWindow::firstConnectToIsds(
 			//TODO: return false;
 		}
 		if (!getUserInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}	
+		if (!getPasswordInfoFromLogin(QModelIndex(),
 		    accountInfo.userName())) {
 			//TODO: return false;
 		}
