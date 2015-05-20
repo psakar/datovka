@@ -421,7 +421,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (status != IE_SUCCESS) {
-		qDebug() << status << isds_strerror(status);
+		qDebug() << status << isds_strerror(status) <<
+		    isds_long_message(isdsSessions.session(
+		         accountInfo.userName()));
 		isds_list_free(&messageList);
 		return Q_ISDS_ERROR;
 	}

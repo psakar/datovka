@@ -3097,6 +3097,11 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 						    QString::number(userEntry.
 						    value(key).toInt())));
 					}
+				} else if (key == "userPrivils") {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    convertUserPrivilsToString(userEntry.
+					    value(key).toInt())));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
@@ -3105,9 +3110,16 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 				}
 				break;
 			case DB_TEXT:
-				html.append(strongAccountInfoLine(
-				    userinfTbl.attrProps[key].desc,
-				    userEntry.value(key).toString()));
+				if (key == "userType") {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    authorTypeToText(
+					    userEntry.value(key).toString())));
+				} else {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    userEntry.value(key).toString()));
+				}
 				break;
 			case DB_DATE:
 				html.append(strongAccountInfoLine(

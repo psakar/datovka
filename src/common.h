@@ -387,6 +387,11 @@ int convertDbTypeToInt(QString value);
 QString convertEventTypeToString(int value);
 
 /*!
+ * @brief Return privilegs as html string from number representation.
+ */
+QString convertUserPrivilsToString(int userPrivils);
+
+/*!
  * @brief Convert state box to text
  */
 QString getdbStateText(int value);
