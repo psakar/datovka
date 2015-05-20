@@ -95,7 +95,8 @@ private slots:
 	/*!
 	 * @brief Clear info status bar if download of complete message fails.
 	 */
-	void clearInfoInStatusBarAndShowDialog(qint64 msgId);
+	void clearInfoInStatusBarAndShowDialog(qint64 msgId,
+	    const QString errMsg);
 
 	/*!
 	 * @brief Version response slot.

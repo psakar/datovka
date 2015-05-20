@@ -174,8 +174,6 @@ void Worker::doJob(void)
 		return;
 	}
 
-	bool success = true;
-
 	/* Messages counters
 	 * rt = receivedTotal, rn = receivedNews,
 	 * st = sentTotal, sn = sentNews.
@@ -185,17 +183,24 @@ void Worker::doJob(void)
 	int rn = 0;
 	int st = 0;
 	int sn = 0;
+	QString errMsg;
+	qdatovka_error res = Q_SUCCESS;
 
 	/* != -1 -- specifice message required. */
 	if (0 <= job.msgId) {
 
+		qDebug() << "-----------------------------------------------";
+		qDebug() << "Downloading message" << job.msgId << "for account"
+		    << job.acntTopIdx.data().toString();
+		qDebug() << "-----------------------------------------------";
+
 		if (Q_SUCCESS == downloadMessage(job.acntTopIdx, job.msgId,
-		        true, job.msgDirect, *job.msgDb,
+		        true, job.msgDirect, *job.msgDb, errMsg,
 		        "DownloadMessage", 0, this)) {
 			/* Only on successful download. */
 			emit refreshAttachmentList(job.acntTopIdx, job.msgId);
 		} else {
-			emit clearStatusBarAndShowDialog(job.msgId);
+			emit clearStatusBarAndShowDialog(job.msgId, errMsg);
 		}
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
@@ -204,21 +209,18 @@ void Worker::doJob(void)
 		qDebug() << "Downloading received message list for account"
 		    << job.acntTopIdx.data().toString();
 		qDebug() << "-----------------------------------------------";
-		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(job.acntTopIdx, MSG_RECEIVED,
-		        *job.msgDb,
-		        "GetListOfReceivedMessages", 0, this, rt, rn)) {
-			success = false;
-		}
+		res = downloadMessageList(job.acntTopIdx, MSG_RECEIVED,
+		        *job.msgDb, errMsg, "GetListOfReceivedMessages",
+		        0, this, rt, rn);
 		emit refreshAccountList(job.acntTopIdx);
-
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
-		qDebug() << "-----------------------------------------------";
-		if (success) {
+		if (Q_SUCCESS == res) {
 			qDebug() << "All DONE!";
 		} else {
 			qDebug() << "An error occurred!";
+			// -1 means list of received messages
+			emit clearStatusBarAndShowDialog(-1, errMsg);
 		}
 
 	} else if (MSG_SENT == job.msgDirect) {
@@ -227,25 +229,23 @@ void Worker::doJob(void)
 		qDebug() << "Downloading sent message list for account"
 		    << job.acntTopIdx.data().toString();
 		qDebug() << "-----------------------------------------------";
-		if (Q_CONNECT_ERROR ==
-		    downloadMessageList(job.acntTopIdx, MSG_SENT, *job.msgDb,
-		        "GetListOfSentMessages", 0, this, st, sn)) {
-			success = false;
-		}
+		res = downloadMessageList(job.acntTopIdx, MSG_SENT, *job.msgDb,
+		        errMsg, "GetListOfSentMessages", 0, this, st, sn);
 		emit refreshAccountList(job.acntTopIdx);
-
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
-		qDebug() << "-----------------------------------------------";
-		if (success) {
+		if (Q_SUCCESS == res) {
 			qDebug() << "All DONE!";
 		} else {
 			qDebug() << "An error occurred!";
+			// -2 means list of sent messages
+			emit clearStatusBarAndShowDialog(-2, errMsg);
 		}
-
 	}
 
 	emit valueChanged("Idle", 0);
+
+	qDebug() << "-----------------------------------------------";
 
 	qDebug() << "Worker process finished in Thread " <<
 	    thread()->currentThreadId();
@@ -370,7 +370,7 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
  * Download sent/received message list from ISDS for current account index
  */
 qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
-    enum MessageDirection msgDirect, MessageDb &messageDb,
+    enum MessageDirection msgDirect, MessageDb &messageDb, QString &errMsg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
     int &total, int &news)
 /* ========================================================================= */
@@ -421,9 +421,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (status != IE_SUCCESS) {
-		qDebug() << status << isds_strerror(status) <<
-		    isds_long_message(isdsSessions.session(
-		         accountInfo.userName()));
+		errMsg = isds_long_message(isdsSessions.session(
+		    accountInfo.userName()));
+		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_list_free(&messageList);
 		return Q_ISDS_ERROR;
 	}
@@ -474,8 +474,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			storeEnvelope(msgDirect, messageDb, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
+				QString errMsg;
 				downloadMessage(acntTopIdx, dmId,
-				    true, msgDirect, messageDb, "", 0, 0);
+				    true, msgDirect, messageDb, errMsg, "", 0, 0);
 			}
 			newcnt++;
 
@@ -491,8 +492,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 				 */
 				if (globPref.auto_download_whole_messages &&
 				    (dmDbMsgStatus <= 2)) {
+					QString errMsg;
 					downloadMessage(acntTopIdx, dmId,
-					    true, msgDirect, messageDb,
+					    true, msgDirect, messageDb, errMsg,
 					    "", 0, 0);
 				}
 
@@ -505,8 +507,9 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 			/* Message is in db, but the content is missing. */
 			if (globPref.auto_download_whole_messages &&
 			    !messageDb.msgsStoredWhole(dmId)) {
+				QString errMsg;
 				downloadMessage(acntTopIdx, dmId,
-				    true, msgDirect, messageDb, "", 0, 0);
+				    true, msgDirect, messageDb, errMsg, "", 0, 0);
 			}
 		}
 
@@ -776,7 +779,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
  */
 qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
     qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
-    MessageDb &messageDb, const QString &progressLabel, QProgressBar *pBar,
+    MessageDb &messageDb, QString &errMsg, const QString &progressLabel, QProgressBar *pBar,
     Worker *worker)
 /* ========================================================================= */
 {
@@ -827,7 +830,9 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
+		errMsg = isds_long_message(
+		    isdsSessions.session(accountInfo.userName()));
+		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_message_free(&message);
 		return Q_ISDS_ERROR;
 	}

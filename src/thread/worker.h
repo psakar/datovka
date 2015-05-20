@@ -154,7 +154,7 @@ public:
 	static
 	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
 	    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const QString &progressLabel,
+	    MessageDb &messageDb, QString &errMsg, const QString &progressLabel,
 	    QProgressBar *pBar, Worker *worker);
 
 	/*!
@@ -170,7 +170,7 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
-	    enum MessageDirection msgDirect, MessageDb &messageDb,
+	    enum MessageDirection msgDirect, MessageDb &messageDb, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
 	    int &total, int &news);
 
@@ -246,7 +246,7 @@ signals:
 	 * @brief This signal is emitted when download of message fails =
 	 * clear info in status bar.
 	 */
-	void clearStatusBarAndShowDialog(qint64);
+	void clearStatusBarAndShowDialog(qint64, QString);
 
 	/*!
 	 * @brief This signal is emitted when process is finished

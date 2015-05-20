@@ -1910,21 +1910,55 @@ void MainWindow::openSelectedAttachment(void)
 /*
  * Clear status bar if download of complete message fails.
  */
-void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId)
+void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
+    const QString errMsg)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	showStatusTextWithTimeout(tr("It was not possible download complete "
-	    "message \"%1\" from ISDS server.").arg(msgId));
-
 	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setWindowTitle(tr("Download message error"));
-	msgBox.setText(tr("It was not possible to download a complete "
-	    "message \"%1\" from server Datové schránky.").arg(msgId));
-	msgBox.setInformativeText(tr("A connection error occured or "
-	    "the message has already been deleted from the server."));
+
+	if (msgId == -1) {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "received message list from ISDS server."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(tr("It was not possible download "
+		    "received message list from ISDS server."));
+		if (!errMsg.isNull()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured."));
+		}
+	} else if (msgId == -2) {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "sent message list from ISDS server."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(tr("It was not possible download "
+		    "sent message list from ISDS server."));
+		if (!errMsg.isNull()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured."));
+		}
+	} else {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "complete message \"%1\" from ISDS server.").arg(msgId));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message error"));
+		msgBox.setText(tr("It was not possible to download a complete "
+		    "message \"%1\" from server Datové schránky.").arg(msgId));
+		if (!errMsg.isNull()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured or the message has already been deleted "
+			    "from the server."));
+		}
+	}
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setDefaultButton(QMessageBox::Ok);
 	msgBox.exec();
@@ -2983,8 +3017,9 @@ void MainWindow::processPendingWorkerJobs(void)
 		    this, SLOT(postDownloadSelectedMessageAttachments(
 		        const QModelIndex, qint64)));
 		connect(m_syncAcntWorker,
-		    SIGNAL(clearStatusBarAndShowDialog(qint64)),
-		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64)));
+		    SIGNAL(clearStatusBarAndShowDialog(qint64, QString)),
+		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64,
+		    QString)));
 	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
@@ -6918,8 +6953,9 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 		}
 	}
 
+	QString errMsg;
 	if (Q_SUCCESS == Worker::downloadMessage(accountIndex, dmId, true,
-	        msgDirect, *messageDb, QString(), 0, 0)) {
+	        msgDirect, *messageDb, errMsg, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(accountIndex, dmId);
 		return true;
