@@ -825,56 +825,63 @@ Per-account path remembering will be disabled.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_16">
           <item>
-           <widget class="QCheckBox" name="all_attachments_save_zfo_msg">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
+           <layout class="QFormLayout" name="formLayout_2">
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
-            <property name="text">
-             <string>Save signed message to ZFO</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="all_attachments_save_zfo_delinfo">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Save signed delivery info to ZFO</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="all_attachments_save_pdf_delinfo">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Save delivery info to PDF</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="all_attachments_save_pdf_msgenvel">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Save message envelope to PDF</string>
-            </property>
-           </widget>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="all_attachments_save_zfo_msg">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Save signed message to ZFO</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="all_attachments_save_pdf_msgenvel">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Save message envelope to PDF</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="all_attachments_save_zfo_delinfo">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Save signed delivery info to ZFO</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="all_attachments_save_pdf_delinfo">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Save delivery info to PDF</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
