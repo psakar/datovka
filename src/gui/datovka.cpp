@@ -3238,6 +3238,8 @@ lastPart:
 	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
+	} else {
+		info = info.split(".")[0];
 	}
 
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
