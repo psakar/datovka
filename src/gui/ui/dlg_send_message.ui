@@ -408,6 +408,27 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="enterDbIdpushButton">
+       <property name="toolTip">
+        <string>Allows to enter address of Databox manually</string>
+       </property>
+       <property name="text">
+        <string>Enter DB ID</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../res/resources.qrc">
+         <normaloff>:/icons/3party/pencil_16.png</normaloff>:/icons/3party/pencil_16.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="recipienthorizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

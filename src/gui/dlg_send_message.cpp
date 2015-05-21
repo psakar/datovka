@@ -23,6 +23,7 @@
 
 
 #include <QDesktopServices>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
 #include <QMimeDatabase>
@@ -162,6 +163,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->attachmentTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
 	    SLOT(attItemSelect()));
+
+	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
+	    SLOT(addDbIdToRecipientList()));
 
 	connect(this->subjectText, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -858,7 +862,6 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 }
 
 
-
 /* ========================================================================= */
 /*
  * Send message/multiple message
@@ -1317,4 +1320,49 @@ finish:
 	isds_list_free(&documents);
 	isds_envelope_free(&sent_envelope);
 	isds_message_free(&sent_message);
+}
+
+
+/* ========================================================================= */
+/*
+ * Enter DB ID manually
+ */
+void DlgSendMessage::addDbIdToRecipientList(void)
+/* ========================================================================= */
+{
+	bool ok = false;
+
+	QString dbID = QInputDialog::getText(this, tr("Databox ID"),
+	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
+	    NULL, &ok, Qt::WindowStaysOnTopHint);
+
+	if (ok) {
+		if (dbID.isEmpty() || dbID.length() != 7) {
+			return;
+		}
+
+		int row = this->recipientTableWidget->rowCount();
+
+		/* exists dbID in the recipientTableWidget? */
+		for (int i = 0; i < row; ++i) {
+			if (this->recipientTableWidget->item(i,0)->text() ==
+			    dbID) {
+				return;
+			}
+		}
+
+		this->recipientTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(dbID);
+		this->recipientTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText("Unknown");
+		this->recipientTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText("Unknown");
+		this->recipientTableWidget->setItem(row,2,item);
+		item = new QTableWidgetItem;
+		item->setText("n/a");
+		this->recipientTableWidget->setItem(row,3,item);
+	}
 }
