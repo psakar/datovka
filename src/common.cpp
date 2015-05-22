@@ -94,6 +94,9 @@ GlobPreferences::GlobPreferences(void)
     all_attachments_save_zfo_msg(false),
     all_attachments_save_pdf_msgenvel(false),
     all_attachments_save_pdf_delinfo(false),
+    message_filename_format(QString()),
+    delivery_filename_format(QString()),
+    attachment_filename_format(QString()),
     isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
@@ -249,6 +252,18 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	    "preferences/all_attachments_save_pdf_delinfo",
 	    dlftlGlobPref.all_attachments_save_pdf_delinfo).toBool();
 
+	message_filename_format = settings.value(
+	    "preferences/message_filename_format",
+	    dlftlGlobPref.message_filename_format).toString();
+
+	delivery_filename_format = settings.value(
+	    "preferences/delivery_filename_format",
+	    dlftlGlobPref.delivery_filename_format).toString();
+
+	attachment_filename_format = settings.value(
+	    "preferences/attachment_filename_format",
+	    dlftlGlobPref.attachment_filename_format).toString();
+
 }
 
 
@@ -373,6 +388,25 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    all_attachments_save_pdf_delinfo) {
 		settings.setValue("all_attachments_save_pdf_delinfo",
 		    all_attachments_save_pdf_delinfo);
+	}
+
+	if (dlftlGlobPref.message_filename_format !=
+	    message_filename_format) {
+		settings.setValue("message_filename_format",
+		    message_filename_format);
+	}
+
+
+	if (dlftlGlobPref.delivery_filename_format !=
+	    delivery_filename_format) {
+		settings.setValue("delivery_filename_format",
+		    delivery_filename_format);
+	}
+
+	if (dlftlGlobPref.attachment_filename_format !=
+	    attachment_filename_format) {
+		settings.setValue("attachment_filename_format",
+		    attachment_filename_format);
 	}
 
 	settings.endGroup();

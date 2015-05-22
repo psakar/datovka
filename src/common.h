@@ -209,6 +209,9 @@ public:
 	bool all_attachments_save_zfo_msg;
 	bool all_attachments_save_pdf_msgenvel;
 	bool all_attachments_save_pdf_delinfo;
+	QString message_filename_format;
+	QString delivery_filename_format;
+	QString attachment_filename_format;
 	int isds_download_timeout_ms;
 
 	/*!

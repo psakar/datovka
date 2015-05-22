@@ -75,6 +75,14 @@ void DlgPreferences::initPrefDialog(void)
 	this->all_attachments_save_pdf_delinfo->
 	    setChecked(globPref.all_attachments_save_pdf_delinfo);
 
+	this->message_filename_format->setText(
+	    globPref.message_filename_format);
+	this->delivery_filename_format->setText(
+	    globPref.delivery_filename_format);
+	this->attachment_filename_format->setText(
+	    globPref.attachment_filename_format);
+
+
 	/* TODO - this choice must be disabled */
 //	this->send_stats_with_version_checks->
 //	    setChecked(globPref.send_stats_with_version_checks);
@@ -239,4 +247,11 @@ void DlgPreferences::saveChanges(void) const
 	    this->all_attachments_save_pdf_msgenvel->isChecked();
 	globPref.all_attachments_save_pdf_delinfo =
 	    this->all_attachments_save_pdf_delinfo->isChecked();
+
+	globPref.message_filename_format =
+	    this->message_filename_format->text();
+	globPref.delivery_filename_format =
+	    this->delivery_filename_format->text();
+	globPref.attachment_filename_format =
+	    this->attachment_filename_format->text();
 }
