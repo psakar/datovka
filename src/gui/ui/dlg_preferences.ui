@@ -1286,7 +1286,7 @@ Per-account path remembering will be disabled.</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>attachment filename (without suffix)</string>
+                 <string>attachment filename (with suffix)</string>
                 </property>
                </widget>
               </item>

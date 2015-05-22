@@ -1675,6 +1675,21 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 		saveAttachPath = m_save_attach_dir;
 	}
 
+	MessageDb *messageDb = accountMessageDb(0);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	fileName = createFilenameFromFormatString(
+	    globPref.attachment_filename_format,
+	    pair.first, pair.second, QString::number(dmId), dbId,
+	    userName, fileName);
+
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"),
 	    saveAttachPath + QDir::separator() + fileName);
@@ -1756,6 +1771,16 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	bool unspecifiedFailed = false;
 	QList<QString> unsuccessfullFiles;
 
+	MessageDb *messageDb = accountMessageDb(0);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	for (int i = 0; i < attachments; ++i) {
 
 		QModelIndex index = ui->messageAttachmentList->model()
@@ -1780,6 +1805,11 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			unspecifiedFailed = true;
 			continue;
 		}
+
+		fileName = createFilenameFromFormatString(
+		    globPref.attachment_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, fileName);
 
 		fileName = newDir + QDir::separator() + fileName;
 
@@ -8891,8 +8921,8 @@ QString MainWindow::getPDZCreditFromISDS(void)
 /*
  * Create filename based on format string.
  */
-QString MainWindow::parseFilename(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnontation, QString dmID,
+QString MainWindow::createFilenameFromFormatString(QString pattern,
+    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
     QString dbID, QString usename, QString attachFilename)
 /* ========================================================================= */
 {
@@ -8904,14 +8934,14 @@ QString MainWindow::parseFilename(QString pattern,
 	if (pattern.isEmpty() || pattern.isNull()) {
 		pattern = DEFAULT_TMP_FORMAT;
 	}
-
+/*
 	if (attachFilename.isEmpty() || attachFilename.isNull()) {
 		attachFilename = tr("filename");
 	} else {
 		QFileInfo filename(attachFilename);
 		attachFilename = filename.completeBaseName();
 	}
-
+*/
 	if (!dmAcceptanceTime.isValid()) {
 		dmAcceptanceTime.currentDateTime();
 	}
@@ -8938,7 +8968,7 @@ QString MainWindow::parseFilename(QString pattern,
 	pair.second = dmID;
 	knowAtrrList.append(pair);
 	pair.first = "%s";
-	pair.second = dmAnontation.replace(" ","-");
+	pair.second = dmAnnotation.replace(" ","-");
 	knowAtrrList.append(pair);
 	pair.first = "%d";
 	pair.second = dbID;

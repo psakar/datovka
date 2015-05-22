@@ -5410,6 +5410,43 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Returns message acceptance date (in local time) and annotation.
+ */
+QPair<QDateTime, QString> MessageDb::msgsAcceptTimeAnnotation(qint64 dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QPair<QDateTime, QString> pair;
+
+	queryStr = "SELECT dmAcceptanceTime, dmAnnotation "
+	    "FROM messages WHERE dmId = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		pair.first =  dateTimeFromDbFormat(query.value(0).toString());
+		pair.second = query.value(1).toString();
+		return pair;
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QPair<QDateTime, QString>();
+}
+
+
+/* ========================================================================= */
+/*
  * Read data from supplementary message data table.
  */
 QJsonDocument MessageDb::smsgdCustomData(qint64 msgId) const

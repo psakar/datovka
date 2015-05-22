@@ -824,6 +824,15 @@ public:
 	 */
 	QByteArray msgsTimestampRaw(qint64 dmId) const;
 
+	/*!
+	 * @brief Returns message acceptance date (in local time)
+	 * and annotation.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message acceptance date and annotation.
+	 */
+	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
+
 	static
 	const QVector<QString> receivedItemIds;
 	static

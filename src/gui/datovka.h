@@ -990,8 +990,8 @@ private:
 	/*!
 	 * @brief Create filename based on format string.
 	 */
-	QString parseFilename(QString pattern,
-	    QDateTime dmAcceptanceTime, QString dmAnontation, QString dmID,
+	QString createFilenameFromFormatString(QString pattern,
+	    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
 	    QString dbID, QString usename, QString attachFilename);
 
 	QString m_confDirName; /*!< Configuration directory location. */
