@@ -57,6 +57,12 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
+/* Define default filename of saved/exported files */
+#define DEFAULT_TMP_FORMAT "%Y-%M-%D_%i_tmp"
+#define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
+#define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
+#define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
+
 /* return values of Datovka login methods */
 typedef enum {
 	USER_NAME = 0,

@@ -893,7 +893,7 @@ Per-account path remembering will be disabled.</string>
           </font>
          </property>
          <property name="title">
-          <string>Filename format of save/exported files</string>
+          <string>Filename format of saved/exported files</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_17">
           <item>

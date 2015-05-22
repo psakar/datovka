@@ -94,9 +94,9 @@ GlobPreferences::GlobPreferences(void)
     all_attachments_save_zfo_msg(false),
     all_attachments_save_pdf_msgenvel(false),
     all_attachments_save_pdf_delinfo(false),
-    message_filename_format(QString()),
-    delivery_filename_format(QString()),
-    attachment_filename_format(QString()),
+    message_filename_format(DEFAULT_MESSAGE_FILENAME_FORMAT),
+    delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
+    attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
     isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
