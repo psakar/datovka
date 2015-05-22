@@ -6866,6 +6866,15 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
@@ -6896,14 +6905,16 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.message_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DDZ_%1.zfo").arg(dmId);
+		    fileName + ".zfo";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DDZ_%1.zfo").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".zfo";
 	}
 
 	Q_ASSERT(!fileName.isEmpty());
@@ -7025,6 +7036,15 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
@@ -7057,14 +7077,16 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.delivery_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DDZ_%1_info.zfo").arg(dmId);
+		    fileName + ".zfo";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DDZ_%1_info.zfo").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".zfo";
 	}
 
 	Q_ASSERT(!fileName.isEmpty());
@@ -7132,6 +7154,15 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
@@ -7164,14 +7195,16 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.delivery_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DD_%1.pdf").arg(dmId);
+		    fileName + ".pdf";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DD_%1.pdf").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
 	fileName = QFileDialog::getSaveFileName(this,
@@ -7236,6 +7269,15 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
@@ -7266,14 +7308,16 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.message_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("OZ_%1.pdf").arg(dmId);
+		    fileName + ".pdf";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("OZ_%1.pdf").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
 	fileName = QFileDialog::getSaveFileName(this,
@@ -7293,7 +7337,6 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		storeExportPath();
 	}
 
-	QString userName = accountUserName();
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
