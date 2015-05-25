@@ -987,13 +987,6 @@ private:
 	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx,
 	    const QString &userName);
 
-	/*!
-	 * @brief Create filename based on format string.
-	 */
-	QString createFilenameFromFormatString(QString pattern,
-	    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
-	    QString dbID, QString usename, QString attachFilename);
-
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

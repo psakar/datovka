@@ -6048,16 +6048,17 @@ void MainWindow::exportCorrespondenceOverview(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString dbId = m_accountDb.dbId(accountInfo.userName() +
+	    "___True");
+
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
-	    *messageDb, index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
-	    m_export_correspond_dir,
-	    this);
+	    *messageDb, accountInfo, m_export_correspond_dir, dbId, this);
 
 	correspondence_overview->exec();
 	storeExportPath();
 }
-
-
 
 
 /* ========================================================================= */
@@ -8957,75 +8958,4 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	}
 
 	return str;
-}
-
-
-/* ========================================================================= */
-/*
- * Create filename based on format string.
- */
-QString MainWindow::createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
-    QString dbID, QString usename, QString attachFilename)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	// known atrributes
-	// {"%Y","%M","%D","%h","%m","%i","%s","%d","%u","%f"};
-
-	if (pattern.isEmpty() || pattern.isNull()) {
-		pattern = DEFAULT_TMP_FORMAT;
-	}
-/*
-	if (attachFilename.isEmpty() || attachFilename.isNull()) {
-		attachFilename = tr("filename");
-	} else {
-		QFileInfo filename(attachFilename);
-		attachFilename = filename.completeBaseName();
-	}
-*/
-	if (!dmAcceptanceTime.isValid()) {
-		dmAcceptanceTime.currentDateTime();
-	}
-
-	QPair<QString, QString> pair;
-	QList<QPair<QString, QString>> knowAtrrList;
-
-	pair.first = "%Y";
-	pair.second = dmAcceptanceTime.date().toString("yyyy");
-	knowAtrrList.append(pair);
-	pair.first = "%M";
-	pair.second = dmAcceptanceTime.date().toString("MM");
-	knowAtrrList.append(pair);
-	pair.first = "%D";
-	pair.second = dmAcceptanceTime.date().toString("dd");
-	knowAtrrList.append(pair);
-	pair.first = "%h";
-	pair.second = dmAcceptanceTime.time().toString("hh");
-	knowAtrrList.append(pair);
-	pair.first = "%m";
-	pair.second = dmAcceptanceTime.time().toString("mm");
-	knowAtrrList.append(pair);
-	pair.first = "%i";
-	pair.second = dmID;
-	knowAtrrList.append(pair);
-	pair.first = "%s";
-	pair.second = dmAnnotation.replace(" ","-");
-	knowAtrrList.append(pair);
-	pair.first = "%d";
-	pair.second = dbID;
-	knowAtrrList.append(pair);
-	pair.first = "%u";
-	pair.second = usename;
-	knowAtrrList.append(pair);
-	pair.first = "%f";
-	pair.second = attachFilename;
-	knowAtrrList.append(pair);
-
-	for (int i = 0; i < knowAtrrList.length(); ++i) {
-		pattern.replace(knowAtrrList[i].first, knowAtrrList[i].second);
-	}
-
-	return pattern;
 }
