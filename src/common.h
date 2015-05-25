@@ -62,6 +62,7 @@
 #define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
 #define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
 #define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
+#define DEFAULT_DELIVERY_ATTACH_FORMAT "DD-%i-%f"
 
 /* return values of Datovka login methods */
 typedef enum {
@@ -218,6 +219,8 @@ public:
 	QString message_filename_format;
 	QString delivery_filename_format;
 	QString attachment_filename_format;
+	QString delivery_filename_format_all_attach;
+	bool delivery_info_for_every_file;
 	int isds_download_timeout_ms;
 
 	/*!

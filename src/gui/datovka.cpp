@@ -1800,6 +1800,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		}
 
 		QString fileName = fileNameIndex.data().toString();
+		QString attFileName = fileName;
 		Q_ASSERT(!fileName.isEmpty());
 		if (fileName.isEmpty()) {
 			unspecifiedFailed = true;
@@ -1827,22 +1828,36 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			unsuccessfullFiles.append(fileName);
 			continue;
 		}
+
+		if (globPref.delivery_info_for_every_file) {
+			if (globPref.all_attachments_save_zfo_delinfo) {
+				exportDeliveryInfoAsZFO(newDir, attFileName,
+				  globPref.delivery_filename_format_all_attach);
+			}
+			if (globPref.all_attachments_save_pdf_delinfo) {
+				exportDeliveryInfoAsPDF(newDir, attFileName,
+				  globPref.delivery_filename_format_all_attach);
+			}
+		}
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
 		exportSelectedMessageAsZFO(newDir);
 	}
 
-	if (globPref.all_attachments_save_zfo_delinfo) {
-		exportDeliveryInfoAsZFO(newDir);
-	}
-
 	if (globPref.all_attachments_save_pdf_msgenvel) {
 		exportMessageEnvelopeAsPDF(newDir);
 	}
 
-	if (globPref.all_attachments_save_pdf_delinfo) {
-		exportDeliveryInfoAsPDF(newDir);
+	if (!globPref.delivery_info_for_every_file) {
+		if (globPref.all_attachments_save_zfo_delinfo) {
+			exportDeliveryInfoAsZFO(newDir, "",
+			    globPref.delivery_filename_format);
+		}
+		if (globPref.all_attachments_save_pdf_delinfo) {
+			exportDeliveryInfoAsPDF(newDir, "",
+			    globPref.delivery_filename_format);
+		}
 	}
 
 	if (unspecifiedFailed) {
@@ -7012,7 +7027,8 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 /*
  * Export delivery information as ZFO file dialog.
  */
-void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
+void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
+ attachFileName, QString formatString)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7079,9 +7095,9 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 	}
 
 	QString fileName = createFilenameFromFormatString(
-		    globPref.delivery_filename_format,
+		    formatString,
 		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, "");
+		    userName, attachFileName);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7131,7 +7147,8 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 /*
  * Export delivery information as PDF file dialogue.
  */
-void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
+void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
+    QString attachFileName, QString formatString)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7197,9 +7214,9 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 	}
 
 	QString fileName = createFilenameFromFormatString(
-		    globPref.delivery_filename_format,
+		    formatString,
 		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, "");
+		    userName, attachFileName);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +

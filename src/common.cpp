@@ -97,6 +97,8 @@ GlobPreferences::GlobPreferences(void)
     message_filename_format(DEFAULT_MESSAGE_FILENAME_FORMAT),
     delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
     attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
+    delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
+    delivery_info_for_every_file(false),
     isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
 {
 }
@@ -174,6 +176,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 
 	check_new_versions = settings.value("preferences/check_new_versions",
 	    dlftlGlobPref.check_new_versions).toBool();
+
+	delivery_info_for_every_file = settings.value(
+	    "preferences/delivery_info_for_every_file",
+	    dlftlGlobPref.delivery_info_for_every_file).toBool();
 
 	send_stats_with_version_checks = settings.value(
 	    "preferences/send_stats_with_version_checks",
@@ -263,6 +269,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	attachment_filename_format = settings.value(
 	    "preferences/attachment_filename_format",
 	    dlftlGlobPref.attachment_filename_format).toString();
+
+	delivery_filename_format_all_attach = settings.value(
+	    "preferences/delivery_filename_format_all_attach",
+	    dlftlGlobPref.delivery_filename_format_all_attach).toString();
 
 }
 
@@ -396,7 +406,6 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 		    message_filename_format);
 	}
 
-
 	if (dlftlGlobPref.delivery_filename_format !=
 	    delivery_filename_format) {
 		settings.setValue("delivery_filename_format",
@@ -407,6 +416,18 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    attachment_filename_format) {
 		settings.setValue("attachment_filename_format",
 		    attachment_filename_format);
+	}
+
+	if (dlftlGlobPref.delivery_filename_format_all_attach !=
+	    delivery_filename_format_all_attach) {
+		settings.setValue("delivery_filename_format_all_attach",
+		    delivery_filename_format_all_attach);
+	}
+
+	if (dlftlGlobPref.delivery_info_for_every_file !=
+	    delivery_info_for_every_file) {
+		settings.setValue("delivery_info_for_every_file",
+		    delivery_info_for_every_file);
 	}
 
 	settings.endGroup();
