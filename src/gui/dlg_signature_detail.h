@@ -78,6 +78,19 @@ public:
 	    QDateTime &incTime, QDateTime &expTime);
 
 	/*!
+	 * @brief Check whether certificate expires before specified limit.
+	 *
+	 * @param[in] DER   Raw message or time stamp data.
+	 * @param[in] days  Number of days preceding the deadline.
+	 * @param[in] dDate Deadline date.
+	 * @return True if certificate expires before specified number of days
+	 *     before specified deadline.
+	 */
+	static
+	bool signingCertExpiresBefore(const QByteArray &DER,
+	    int days, QDateTime dDate = QDateTime());
+
+	/*!
 	 * @brief Signing certificate issuer information.
 	 *
 	 * @param[in]  DER   Raw message or time stamp data.

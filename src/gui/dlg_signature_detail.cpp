@@ -222,6 +222,35 @@ bool DlgSignatureDetail::signingCertTimes(const QByteArray &DER,
 
 /* ========================================================================= */
 /*
+ * Check whether certificate expires before specified limit.
+ */
+bool DlgSignatureDetail::signingCertExpiresBefore(const QByteArray &DER,
+    int days, QDateTime dDate)
+/* ========================================================================= */
+{
+	QDateTime expir;
+	QDateTime now;
+	{
+		QDateTime incep;
+		if (!signingCertTimes(DER, incep, expir)) {
+			return false;
+		}
+	}
+
+	if (dDate.isValid()) {
+		now = dDate;
+	} else {
+		now = QDateTime::currentDateTime();
+	}
+
+	int difference = now.daysTo(expir);
+
+	return difference > days;
+}
+
+
+/* ========================================================================= */
+/*
  * Signing certificate issuer information.
  */
 bool DlgSignatureDetail::signingCertIssuerInfo(const QByteArray &DER,
