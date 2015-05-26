@@ -6862,7 +6862,8 @@ void MainWindow::showHelp(void)
 /*
  * Export message into as ZFO file dialogue.
  */
-void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
+void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
+    qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6881,8 +6882,13 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 		    "ZFO was not successful!"));
 		return;
 	}
+	qint64 dmId;
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -6940,8 +6946,11 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message as ZFO file"), fileName, tr("ZFO file (*.zfo)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save message as ZFO file"), fileName,
+		    tr("ZFO file (*.zfo)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
@@ -9067,6 +9076,23 @@ void MainWindow::checkMessageTimestampExpiration(void)
 	}
 
 	if (QMessageBox::Yes == msgBox.exec()) {
+		exportExpirMessagesToZFO(expirMsg);
+	}
+}
 
+
+/* ========================================================================= */
+/*
+ * Export message with expirated timestamp to ZFO.
+ */
+void MainWindow::exportExpirMessagesToZFO(QStringList expirMsg)
+/* ========================================================================= */
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Export ZFO"), m_on_export_zfo_activate,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	for (int i = 0; i < expirMsg.count(); ++i) {
+		exportSelectedMessageAsZFO(newDir, expirMsg.at(i).toLongLong());
 	}
 }

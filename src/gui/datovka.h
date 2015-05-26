@@ -421,7 +421,8 @@ private slots:
 	/*!
 	 * @brief Export message into as ZFO file dialog.
 	 */
-	void exportSelectedMessageAsZFO(const QString &attachPath = QString());
+	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
+		qint64 dmID = -1);
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
@@ -995,6 +996,11 @@ private:
 	 */
 	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx,
 	    const QString &userName);
+
+	/*!
+	 * @brief Export message with expirated timestamp to ZFO.
+	 */
+	void exportExpirMessagesToZFO(QStringList expirMsg);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
