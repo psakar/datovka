@@ -43,6 +43,66 @@ public:
 	DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
 
+	/*!
+	 * @brief Return whether signing certificate is valid.
+	 *
+	 * @param[in] DER Raw message or time stamp data.
+	 * @return True is signing certificate was verified successfully.
+	 */
+	static
+	bool signingCertValid(const QByteArray &DER,
+	    struct crt_verif_outcome &cvo);
+
+	/*!
+	 * @brief Returns signing certificate of message.
+	 *
+	 * @param[in]  DER    Raw message or time stamp data.
+	 * @param[out] saId   Signature algorithm identifier.
+	 * @param[out] saName Signature algorithm name.
+	 * @return Null certificate on failure.
+	 */
+	static
+	QSslCertificate signingCert(const QByteArray &DER,
+	     QString &saId, QString &saName);
+
+	/*!
+	 * @brief Returns signing certificate inception and expiration date.
+	 *
+	 * @param[in]  DER     Raw message or time stamp data.
+	 * @param[out] incTime Inception time.
+	 * @param[out] expTime Expiration time.
+	 * @return True on success.
+	 */
+	static
+	bool signingCertTimes(const QByteArray &DER,
+	    QDateTime &incTime, QDateTime &expTime);
+
+	/*!
+	 * @brief Check whether certificate expires before specified limit.
+	 *
+	 * @param[in] DER   Raw message or time stamp data.
+	 * @param[in] days  Number of days preceding the deadline.
+	 * @param[in] dDate Deadline date.
+	 * @return True if certificate expires before specified number of days
+	 *     before specified deadline.
+	 */
+	static
+	bool signingCertExpiresBefore(const QByteArray &DER,
+	    int days, QDateTime dDate = QDateTime());
+
+	/*!
+	 * @brief Signing certificate issuer information.
+	 *
+	 * @param[in]  DER   Raw message or time stamp data.
+	 * @param[out] oStr  Organisation name.
+	 * @param[out] ouStr Organisation unit name.
+	 * @param[out] nStr  Common name.
+	 * @param[out] cStr  Country name.
+	 * @return False on failure.
+	 */
+	bool signingCertIssuerInfo(const QByteArray &DER,
+	    QString &oStr, QString &ouStr, QString &nStr, QString &cStr);
+
 private slots:
 	void showCertificateDetail(int);
 	void showVerificationDetail(int);
@@ -67,44 +127,6 @@ private:
 	 * @brief Check time stamp signature, show detail in dialog.
 	 */
 	void validateMessageTimestamp(void);
-
-	/*!
-	 * @brief Return whether signing certificate is valid.
-	 *
-	 * @param[in] dmId Message identifier.
-	 * @return True if signing certificate was verified successfully.
-	 */
-	bool msgSigningCertValid(struct crt_verif_outcome &cvo) const;
-
-	/*!
-	 * @brief Returns signing certificate of message.
-	 *
-	 * @param[out] saId   Signature algorithm identifier.
-	 * @param[out] saName Signature algorithm name.
-	 * @return Null certificate on failure.
-	 */
-	QSslCertificate msgSigningCert(QString &saId, QString &saName) const;
-
-	/*!
-	 * @brief Returns signing certificate inception and expiration date.
-	 *
-	 * @param[out] incTime Inception time.
-	 * @param[out] expTime Expiration time.
-	 * @return True on success.
-	 */
-	bool msgSigningCertTimes(QDateTime &incTime, QDateTime &expTime) const;
-
-	/*!
-	 * @brief Time stamp certificate information.
-	 *
-	 * @param[out] oStr  Organisation name.
-	 * @param[out] ouStr Organisation unit name.
-	 * @param[out] nStr  Common name.
-	 * @param[out] cStr  Country name.
-	 * @return False on failure.
-	 */
-	bool tstInfo(QString &oStr, QString &ouStr, QString &nStr,
-	    QString &cStr) const;
 
 	QSize dSize;
 };
