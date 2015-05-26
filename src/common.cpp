@@ -99,7 +99,8 @@ GlobPreferences::GlobPreferences(void)
     attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
     delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
     delivery_info_for_every_file(false),
-    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
+    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS),
+    timestamp_expir_before_days(TIMESTAMP_EXPIR_BEFORE_DAYS)
 {
 }
 
@@ -150,6 +151,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	isds_download_timeout_ms = settings.value(
 	    "preferences/isds_download_timeout_ms",
 	    dlftlGlobPref.isds_download_timeout_ms).toInt();
+
+	timestamp_expir_before_days = settings.value(
+	    "preferences/timestamp_expir_before_days",
+	    dlftlGlobPref.timestamp_expir_before_days).toInt();
 
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
@@ -350,6 +355,12 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    isds_download_timeout_ms) {
 		settings.setValue("isds_download_timeout_ms",
 		    isds_download_timeout_ms);
+	}
+
+	if (dlftlGlobPref.timestamp_expir_before_days !=
+	    timestamp_expir_before_days) {
+		settings.setValue("timestamp_expir_before_days",
+		    timestamp_expir_before_days);
 	}
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {

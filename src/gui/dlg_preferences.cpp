@@ -41,6 +41,8 @@ void DlgPreferences::initPrefDialog(void)
 	this->download_on_background->
 	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
+	this->timestampExpirSpinBox->setValue(
+	    globPref.timestamp_expir_before_days);
 	this->timeoutMinSpinBox->setValue(
 	    globPref.isds_download_timeout_ms / 60000);
 	this->labelTimeoutNote->setText(
@@ -230,6 +232,8 @@ void DlgPreferences::saveChanges(void) const
 	globPref.timer_value = this->timerSpinBox->value();
 	globPref.isds_download_timeout_ms =
 	    this->timeoutMinSpinBox->value() * 60000;
+	globPref.timestamp_expir_before_days =
+	    this->timestampExpirSpinBox->value();
 	globPref.language =
 	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {

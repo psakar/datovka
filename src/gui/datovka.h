@@ -613,6 +613,11 @@ private slots:
 	 */
 	void msgAdvancedDlgFinished(int result);
 
+	/*!
+	 * @brief Check message timestamp expiration.
+	 */
+	void checkMessageTimestampExpiration(void);
+
 private:
 
 	QThread *m_syncAcntThread;

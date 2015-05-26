@@ -4014,6 +4014,36 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Return all message ID from database.
+ */
+QStringList MessageDb::getAllMessageIDsFromDB(void) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT dmID FROM messages";
+	QStringList msgIsList;
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIsList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+	return msgIsList;
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
  * Insert raw (DER) delivery info into raw_delivery_info_data table.
  */
 bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,

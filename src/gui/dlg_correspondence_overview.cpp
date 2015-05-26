@@ -731,7 +731,7 @@ void DlgCorrespondenceOverview::exportData(void)
 					qDebug() << "DD" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
+					    "contain delivery info data "
 					    "necessary for PDF export.").
 					    arg(QString::number(dmId));
 					errorList.append(errorText);
@@ -756,7 +756,7 @@ void DlgCorrespondenceOverview::exportData(void)
 					qDebug() << "DD" << dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
+					    "contain delivery info data "
 					    "necessary for PDF export.").
 					    arg(QString::number(dmId));
 					errorList.append(errorText);

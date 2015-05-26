@@ -740,6 +740,8 @@ setmodel:
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
+			ui->actionCheck_message_timestamp_expiration->
+			    setEnabled(true);
 		} else {
 			ui->menuMessage->setEnabled(false);
 			ui->actionReply->setEnabled(false);
@@ -3842,6 +3844,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(exportCorrespondenceOverview()));
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
 	    SLOT(showImportZFOActionDialog()));
+	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
+	    SLOT(checkMessageTimestampExpiration()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -3947,6 +3951,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionMsgAdvancedSearch->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
+	ui->actionCheck_message_timestamp_expiration->setEnabled(false);
 }
 
 
@@ -8975,4 +8980,93 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	}
 
 	return str;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check message timestamp expiration.
+ */
+void MainWindow::checkMessageTimestampExpiration(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QByteArray data;
+	QStringList expirMsg;
+	QStringList errorMsg;
+	expirMsg.clear();
+	errorMsg.clear();
+
+	MessageDb *messageDb = accountMessageDb(0);
+	Q_ASSERT(0 != messageDb);
+
+	QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
+	int msgCnt = msgIdList.count();
+
+	for (int i = 0; i < msgCnt; ++i) {
+		data = messageDb->msgsMessageBase64(msgIdList.at(i).toLongLong());
+		if (data.isEmpty()) {
+			errorMsg.append(msgIdList.at(i));
+			continue;
+		}
+		data = QByteArray::fromBase64(data);
+		if (DlgSignatureDetail::signingCertExpiresBefore(data,
+		    globPref.timestamp_expir_before_days)) {
+			expirMsg.append(msgIdList.at(i));
+		}
+	}
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowTitle(tr("Timestamp expiration results"));
+
+	QString infoText = tr("Checking of timestamp's expiration "
+	    "finished with this result:")
+	    + "<br/><br/>" +
+	    tr("Number of messages in the database: %1").arg(msgCnt)
+	    + "<br/><b>" +
+	    tr("Number of expired messages: %1").arg(expirMsg.count())
+	    + "</b><br/>" +
+	    tr("Number of incomplete messages: %1").arg(errorMsg.count());
+	msgBox.setText(infoText);
+
+	if (!expirMsg.isEmpty() || !errorMsg.isEmpty()) {
+		infoText = tr("See detail for more info...") + "<br/><br/>";
+		if (!expirMsg.isEmpty()) {
+			infoText += "<b>" +
+			    tr("Do you want to export expired messages to ZFO?")
+			    + "</b><br/><br/>";
+		}
+		msgBox.setInformativeText(infoText);
+
+		infoText = "";
+		for (int i = 0; i < expirMsg.count(); ++i) {
+			infoText +=  tr("Message %1 expires timestamp for "
+			   "several days.").arg(expirMsg.at(i))
+			    + "\n";
+		}
+		for (int i = 0; i < errorMsg.count(); ++i) {
+			infoText += tr("Message %1 does not contain timestamp "
+			    "information.").arg(errorMsg.at(i))
+			    + "\n";
+		}
+		msgBox.setDetailedText(infoText);
+
+		if (!expirMsg.isEmpty()) {
+			msgBox.setStandardButtons(QMessageBox::Yes
+			    | QMessageBox::No);
+			msgBox.setDefaultButton(QMessageBox::No);
+		} else {
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+		}
+	} else {
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+	}
+
+	if (QMessageBox::Yes == msgBox.exec()) {
+
+	}
 }
