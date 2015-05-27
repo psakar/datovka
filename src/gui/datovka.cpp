@@ -1911,7 +1911,7 @@ void MainWindow::openSelectedAttachment(void)
  * Clear status bar if download of complete message fails.
  */
 void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
-    const QString errMsg)
+    const QString &errMsg)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -1925,7 +1925,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
 		msgBox.setWindowTitle(tr("Download message list error"));
 		msgBox.setText(tr("It was not possible download "
 		    "received message list from ISDS server."));
-		if (!errMsg.isNull()) {
+		if (!errMsg.isEmpty()) {
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
@@ -1938,7 +1938,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
 		msgBox.setWindowTitle(tr("Download message list error"));
 		msgBox.setText(tr("It was not possible download "
 		    "sent message list from ISDS server."));
-		if (!errMsg.isNull()) {
+		if (!errMsg.isEmpty()) {
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
@@ -1951,7 +1951,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
 		msgBox.setWindowTitle(tr("Download message error"));
 		msgBox.setText(tr("It was not possible to download a complete "
 		    "message \"%1\" from server Datové schránky.").arg(msgId));
-		if (!errMsg.isNull()) {
+		if (!errMsg.isEmpty()) {
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
@@ -5326,7 +5326,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
 	    username), &db_owner_info);
 
-	if (IE_SUCCESS != status) {	
+	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
 		isds_DbOwnerInfo_free(&db_owner_info);
 		return false;
@@ -5637,7 +5637,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 		if (fileName.contains("___")) {
 			QStringList fileNameParts = fileName.split("___");
 			userName = fileNameParts[0];
-			fileNameParts = fileNameParts[1].split(".");			
+			fileNameParts = fileNameParts[1].split(".");
 			testingFlag = fileNameParts[0];
 			suffix = fileNameParts[1];
 			if (userName.isEmpty() || testingFlag.isEmpty() ||
@@ -8359,16 +8359,25 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 	if (!loginRet) {
 		/* Break on error. */
 		return loginRet;
-	} else {
-		if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
-			//TODO: return false;
-		}
-		if (!getUserInfoFromLogin(acntTopIdx, QString())) {
-			//TODO: return false;
-		}
-		if (!getPasswordInfoFromLogin(acntTopIdx, QString())) {
-			//TODO: return false;
-		}
+	}
+
+	if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
+		logWarning("Owner information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.userName().toUtf8().constData());
+	}
+	if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+		logWarning("User information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.userName().toUtf8().constData());
+	}
+	if (!getPasswordInfoFromLogin(acntTopIdx, QString())) {
+		logWarning("Password information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.userName().toUtf8().constData());
 	}
 
 	/* Get account information if possible. */
@@ -8456,7 +8465,7 @@ bool MainWindow::firstConnectToIsds(
 		if (!getUserInfoFromLogin(QModelIndex(),
 		    accountInfo.userName())) {
 			//TODO: return false;
-		}	
+		}
 		if (!getPasswordInfoFromLogin(QModelIndex(),
 		    accountInfo.userName())) {
 			//TODO: return false;

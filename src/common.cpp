@@ -758,48 +758,57 @@ QString convertUserPrivilsToString(int userPrivils)
 /* ========================================================================= */
 {
 	QString privStr;
-	const QString separ = "<li>- ";
+	const QString sepPref("<li>- "), sepSuff("</li>");
 
 	if (userPrivils == 255) {
-		return QObject::tr("Full");
+		return QObject::tr("Full control");
 	} else {
-		privStr = QObject::tr("Restricted");
+		privStr = QObject::tr("Restricted control");
 	}
 
 	if (userPrivils & PRIVIL_READ_NON_PERSONAL) {
 		// "stahovat a číst došlé DZ"
-		privStr += separ + QObject::tr("download and read incoming DM");
+		privStr += sepPref +
+		    QObject::tr("download and read incoming DM") + sepSuff;
 	}
 	if (userPrivils & PRIVIL_READ_ALL) {
 		// "stahovat a číst DZ určené do vlastních rukou"
-		privStr += separ + QObject::tr("download and read DZ "
-		    "designed into their own hands");
+		privStr += sepPref +
+		    QObject::tr("download and read DM sent into own hands") +
+		    sepSuff;
 	}
 	if (userPrivils & PRIVIL_CREATE_DM) {
 		// "vytvářet a odesílat DZ, stahovat odeslané DZ"
-		privStr += separ + QObject::tr("create and send DM, "
-		    "download sent DM");
+		privStr += sepPref +
+		    QObject::tr("create and send DM, download sent DM") +
+		    sepSuff;
 	}
 	if (userPrivils & PRIVIL_VIEW_INFO) {
 		// "načítat seznamy DZ, Dodejky a Doručenky"
-		privStr += separ + QObject::tr("retrieve DM lists, Delivery "
-		    "and Acceptance reports");
+		privStr += sepPref +
+		    QObject::tr(
+		        "retrieve DM lists, delivery and acceptance reports") +
+		    sepSuff;
 	}
 	if (userPrivils & PRIVIL_SEARCH_DB) {
 		// "vyhledávat DS"
-		privStr += separ + QObject::tr("search for DataBox");
+		privStr += sepPref +
+		    QObject::tr("search for data boxes") + sepSuff;
 	}
 	if (userPrivils & PRIVIL_OWNER_ADM) {
 		// "spravovat DS"
-		privStr += separ + QObject::tr("manage DS");
+		privStr += sepPref + QObject::tr("manage the data box") +
+		    sepSuff;
 	}
 	if (userPrivils & PRIVIL_READ_VAULT) {
 		// "číst zprávy v DT"
-		privStr += separ + QObject::tr("read the message at DT");
+		privStr += sepPref +
+		    QObject::tr("read message in data vault") + sepSuff;
 	}
 	if (userPrivils & PRIVIL_ERASE_VAULT) {
 		// "mazat zprávy v DT"
-		privStr += separ + QObject::tr("delete messages in DT");
+		privStr += sepPref +
+		    QObject::tr("erase messages from data vault") + sepSuff;
 	}
 	return privStr;
 }
@@ -985,16 +994,23 @@ QString convertDbTypeToString(int value)
 /*
  * Convert type of user to string
  */
-QString convertUserTypeToString(int value)
+const QString & convertUserTypeToString(int value)
 /* ========================================================================= */
 {
-	if (value == USERTYPE_PRIMARY) return "PRIMARY_USER";
-	else if (value == USERTYPE_ENTRUSTED) return "ENTRUSTED_USER";
-	else if (value == USERTYPE_ADMINISTRATOR) return "ADMINISTRATOR";
-	else if (value == USERTYPE_LIQUIDATOR) return "LIQUIDATOR";
-	else if (value == USERTYPE_OFFICIAL) return "OFFICIAL_USER";
-	else if (value == USERTYPE_OFFICIAL_CERT) return "OFFICIAL_CERT_USER";
-	else return "";
+	static const QString pu("PRIMARY_USER"), eu("ENTRUSTED_USER"),
+	    a("ADMINISTRATOR"), l("LIQUIDATOR"), ou("OFFICIAL_USER"),
+	    ocu("OFFICIAL_CERT_USER");
+	static const QString empty;
+
+	switch (value) {
+	case USERTYPE_PRIMARY: return pu;
+	case USERTYPE_ENTRUSTED: return eu;
+	case USERTYPE_ADMINISTRATOR: return a;
+	case USERTYPE_LIQUIDATOR: return l;
+	case USERTYPE_OFFICIAL: return ou;
+	case USERTYPE_OFFICIAL_CERT: return ocu;
+	default: return empty;
+	}
 }
 
 
