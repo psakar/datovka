@@ -95,7 +95,8 @@ private slots:
 	/*!
 	 * @brief Clear info status bar if download of complete message fails.
 	 */
-	void clearInfoInStatusBarAndShowDialog(qint64 msgId);
+	void clearInfoInStatusBarAndShowDialog(qint64 msgId,
+	    const QString &errMsg);
 
 	/*!
 	 * @brief Version response slot.
@@ -852,11 +853,6 @@ private:
 	    const QModelIndex &msgIdx);
 
 	/*!
-	 * @brief Get data about logged in user.
-	 */
-	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx);
-
-	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
@@ -971,17 +967,25 @@ private:
 	/*
 	 * @brief Get data about logged in user and his box.
 	 */
-	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx);
+	bool getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	/*!
 	 * @brief Get information about password expiration date.
 	 */
-	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx);
+	bool getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	/*!
 	 * @brief Get information about remaining PDZ credit.
 	 */
 	QString getPDZCreditFromISDS(void);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx,
+	    const QString &userName);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

@@ -95,6 +95,69 @@ const QVariant AccountEntry::value(const QString &key,
 }
 
 
+
+
+
+
+
+/* ========================================================================= */
+UserEntry::UserEntry(void)
+/* ========================================================================= */
+    : QMap<QString, QVariant>()
+{
+}
+
+
+/* ========================================================================= */
+UserEntry::~UserEntry(void)
+/* ========================================================================= */
+{
+}
+
+
+/* ========================================================================= */
+/*
+ * Set value.
+ */
+bool UserEntry::setValue(const QString &key, const QVariant &value)
+/* ========================================================================= */
+{
+	/* Don't insert if key is not known. */
+	if (userinfTbl.attrProps.find(key) ==
+	    userinfTbl.attrProps.end()) {
+		return false;
+	}
+
+	this->insert(key, value);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Check whether value is stored.
+ */
+bool UserEntry::hasValue(const QString &key) const
+/* ========================================================================= */
+{
+	return this->find(key) != this->end();
+}
+
+
+/* ========================================================================= */
+/*
+ * Return stored value.
+ */
+const QVariant UserEntry::value(const QString &key,
+    const QVariant &defaultValue) const
+/* ========================================================================= */
+{
+	return m_parentType::value(key, defaultValue);
+}
+
+
+
 /* ========================================================================= */
 AccountDb::AccountDb(const QString &connectionName, QObject *parent)
 /* ========================================================================= */
@@ -190,6 +253,55 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 fail:
 	return AccountEntry();
 }
+
+
+/* ========================================================================= */
+UserEntry AccountDb::userEntry(const QString &key) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	UserEntry entry;
+
+	if (!m_db.isOpen()) {
+		logErrorNL("%s", "Account database seems not to be open.");
+		goto fail;
+	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (userinfTbl.knownAttrs.size() - 1); ++i) {
+		queryStr += userinfTbl.knownAttrs[i].first + ", ";
+	}
+	queryStr += userinfTbl.knownAttrs.last().first + " ";
+	queryStr += "FROM user_info WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive() && query.first()) {
+		QSqlRecord rec = query.record();
+		for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
+			QVariant value = query.value(rec.indexOf(
+			    userinfTbl.knownAttrs[i].first));
+			if (!value.isNull() && value.isValid()) {
+				entry.setValue(userinfTbl.knownAttrs[i].first,
+				    value);
+			}
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query and/or read SQL data: "
+		    "%s.", query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return entry;
+
+fail:
+	return UserEntry();
+}
+
 
 
 /* ========================================================================= */
@@ -417,27 +529,71 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
+	bool update = true;
 
 	if (!m_db.isOpen()) {
 		logErrorNL("%s", "Account database seems not to be open.");
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO account_info ("
-	    "key, dbID, dbType, ic, pnFirstName, pnMiddleName, "
-	    "pnLastName, pnLastNameAtBirth, firmName, biDate, biCity, "
-	    "biCounty, biState, adCity, adStreet, adNumberInStreet, "
-	    "adNumberInMunicipality, adZipCode, adState, nationality, "
-	    "identifier, registryCode, dbState, dbEffectiveOVM, "
-	    "dbOpenAddressing"
-	    ") VALUES ("
-	    ":key, :dbID, :dbType, :ic, :pnFirstName, :pnMiddleName, "
-	    ":pnLastName, :pnLastNameAtBirth, :firmName, :biDate, :biCity, "
-	    ":biCounty, :biState, :adCity, :adStreet, :adNumberInStreet, "
-	    ":adNumberInMunicipality, :adZipCode, :adState, :nationality, "
-	    ":identifier, :registryCode, :dbState, :dbEffectiveOVM, "
-	    ":dbOpenAddressing"
-	    ")";
+	queryStr = "SELECT count(*) "
+	    "FROM account_info WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() != 0) {
+				update = true;
+			} else {
+				update = false;
+			}
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (update) {
+		queryStr = "UPDATE account_info "
+		    "SET dbID = :dbID, dbType = :dbType, ic = :ic, "
+		    "pnFirstName = :pnFirstName, pnMiddleName = :pnMiddleName, "
+		    "pnLastName = :pnLastName, "
+		    "pnLastNameAtBirth = :pnLastNameAtBirth, "
+		    "firmName = :firmName, biDate = :biDate, "
+		    "biCity = :biCity, biCounty = :biCounty, "
+		    "biState = :biState, "
+		    "adCity = :adCity, adStreet = :adStreet, "
+		    "adNumberInStreet = :adNumberInStreet, "
+		    "adNumberInMunicipality = :adNumberInMunicipality, "
+		    "adZipCode = :adZipCode, "
+		    "adState = :adState, nationality = :nationality, "
+		    "identifier = :identifier, registryCode = :registryCode, "
+		    "dbState = :dbState, dbEffectiveOVM = :dbEffectiveOVM, "
+		    "dbOpenAddressing = :dbOpenAddressing WHERE key = :key";
+	} else {
+		queryStr = "INSERT INTO account_info ("
+		    "key, dbID, dbType, ic, pnFirstName, pnMiddleName, "
+		    "pnLastName, pnLastNameAtBirth, firmName, biDate, biCity, "
+		    "biCounty, biState, adCity, adStreet, adNumberInStreet, "
+		    "adNumberInMunicipality, adZipCode, adState, nationality, "
+		    "identifier, registryCode, dbState, dbEffectiveOVM, "
+		    "dbOpenAddressing"
+		    ") VALUES ("
+		    ":key, :dbID, :dbType, :ic, :pnFirstName, :pnMiddleName, "
+		    ":pnLastName, :pnLastNameAtBirth, :firmName, :biDate, :biCity, "
+		    ":biCounty, :biState, :adCity, :adStreet, :adNumberInStreet, "
+		    ":adNumberInMunicipality, :adZipCode, :adState, :nationality, "
+		    ":identifier, :registryCode, :dbState, :dbEffectiveOVM, "
+		    ":dbOpenAddressing"
+		    ")";
+	}
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -468,6 +624,122 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 	query.bindValue(":dbState", dbState);
 	query.bindValue(":dbEffectiveOVM", dbEffectiveOVM);
 	query.bindValue(":dbOpenAddressing", dbOpenAddressing);
+	if (query.exec()) {
+		return true;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert user info into db
+ */
+bool AccountDb::insertUserIntoDb(const QString &key,
+    const QString &userType, int userPrivils,
+    const QString &pnFirstName, const QString &pnMiddleName,
+    const QString &pnLastName, const QString &pnLastNameAtBirth,
+    const QString &adCity, const QString &adStreet,
+    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
+    const QString &adZipCode,const QString &adState,
+    const QString &biDate,
+    int ic, const QString &firmName, const QString &caStreet,
+    const QString &caCity, const QString &caZipCode, const QString &caState)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	bool update = true;
+
+	if (!m_db.isOpen()) {
+		logErrorNL("%s", "Account database seems not to be open.");
+		goto fail;
+	}
+
+	queryStr = "SELECT count(*) "
+	    "FROM user_info WHERE key = :key";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":key", key);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			if (query.value(0).toInt() != 0) {
+				update = true;
+			} else {
+				update = false;
+			}
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (update) {
+		queryStr = "UPDATE user_info "
+		    "SET userType = :userType, userPrivils = :userPrivils, "
+		    "pnFirstName = :pnFirstName, pnMiddleName = :pnMiddleName, "
+		    "pnLastName = :pnLastName, "
+		    "pnLastNameAtBirth = :pnLastNameAtBirth, "
+		    "adCity = :adCity, adStreet = :adStreet, "
+		    "adNumberInStreet = :adNumberInStreet, "
+		    "adNumberInMunicipality = :adNumberInMunicipality, "
+		    "adZipCode = :adZipCode, adState = :adState, "
+		    "biDate = :biDate, ic = :ic, "
+		    "firmName = :firmName, caStreet = :caStreet, "
+		    "caCity = :caCity, caZipCode = :caZipCode, "
+		    "caState = :caState WHERE key = :key";
+	} else {
+		queryStr = "INSERT INTO user_info ("
+		    "key, userType, userPrivils, pnFirstName, pnMiddleName, "
+		    "pnLastName, pnLastNameAtBirth, adCity, adStreet, "
+		    "adNumberInStreet, adNumberInMunicipality, adZipCode, "
+		    "adState, biDate, ic, firmName, caStreet, caCity, "
+		    "caZipCode, caState"
+		    ") VALUES ("
+		    ":key, :userType, :userPrivils, :pnFirstName, "
+		    ":pnMiddleName, :pnLastName, :pnLastNameAtBirth, :adCity, "
+		    ":adStreet, :adNumberInStreet, :adNumberInMunicipality, "
+		    ":adZipCode, :adState, :biDate, :ic, :firmName, :caStreet, "
+		    ":caCity, :caZipCode, :caState)";
+	}
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":key", key);
+	query.bindValue(":userType", userType);
+	query.bindValue(":userPrivils", userPrivils);
+	query.bindValue(":ic", ic);
+	query.bindValue(":pnFirstName", pnFirstName);
+	query.bindValue(":pnMiddleName", pnMiddleName);
+	query.bindValue(":pnLastName", pnLastName);
+	query.bindValue(":pnLastNameAtBirth", pnLastNameAtBirth);
+	query.bindValue(":firmName", firmName);
+	query.bindValue(":biDate", biDate);
+	query.bindValue(":adCity", adCity);
+	query.bindValue(":adStreet", adStreet);
+	query.bindValue(":adNumberInStreet", adNumberInStreet);
+	query.bindValue(":adNumberInMunicipality", adNumberInMunicipality);
+	query.bindValue(":adZipCode", adZipCode);
+	query.bindValue(":adState", adState);
+	query.bindValue(":caStreet", caStreet);
+	query.bindValue(":caCity", caCity);
+	query.bindValue(":caZipCode", caZipCode);
+	query.bindValue(":caState", caState);
 	if (query.exec()) {
 		return true;
 	} else {
@@ -594,6 +866,12 @@ bool AccountDb::createEmptyMissingTables(void)
 
 	if (!accntinfTbl.existsInDb(m_db)) {
 		ret = accntinfTbl.createEmpty(m_db);
+		if (!ret) {
+			goto fail; /* TODO -- Proper recovery? */
+		}
+	}
+	if (!userinfTbl.existsInDb(m_db)) {
+		ret = userinfTbl.createEmpty(m_db);
 		if (!ret) {
 			goto fail; /* TODO -- Proper recovery? */
 		}

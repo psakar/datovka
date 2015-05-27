@@ -80,6 +80,7 @@ private slots:
 	void tableItemInsRem(void);
 	void sendMessage(void);
 	void pingIsdsServer(void);
+	void addDbIdToRecipientList(void);
 
 private:
 	QTimer *pingTimer;

@@ -752,6 +752,70 @@ const QString msgStatusToText(int status)
 
 /* ========================================================================= */
 /*
+ * Return privilegs as html string from number representation.
+ */
+QString convertUserPrivilsToString(int userPrivils)
+/* ========================================================================= */
+{
+	QString privStr;
+	const QString sepPref("<li>- "), sepSuff("</li>");
+
+	if (userPrivils == 255) {
+		return QObject::tr("Full control");
+	} else {
+		privStr = QObject::tr("Restricted control");
+	}
+
+	if (userPrivils & PRIVIL_READ_NON_PERSONAL) {
+		// "stahovat a číst došlé DZ"
+		privStr += sepPref +
+		    QObject::tr("download and read incoming DM") + sepSuff;
+	}
+	if (userPrivils & PRIVIL_READ_ALL) {
+		// "stahovat a číst DZ určené do vlastních rukou"
+		privStr += sepPref +
+		    QObject::tr("download and read DM sent into own hands") +
+		    sepSuff;
+	}
+	if (userPrivils & PRIVIL_CREATE_DM) {
+		// "vytvářet a odesílat DZ, stahovat odeslané DZ"
+		privStr += sepPref +
+		    QObject::tr("create and send DM, download sent DM") +
+		    sepSuff;
+	}
+	if (userPrivils & PRIVIL_VIEW_INFO) {
+		// "načítat seznamy DZ, Dodejky a Doručenky"
+		privStr += sepPref +
+		    QObject::tr(
+		        "retrieve DM lists, delivery and acceptance reports") +
+		    sepSuff;
+	}
+	if (userPrivils & PRIVIL_SEARCH_DB) {
+		// "vyhledávat DS"
+		privStr += sepPref +
+		    QObject::tr("search for data boxes") + sepSuff;
+	}
+	if (userPrivils & PRIVIL_OWNER_ADM) {
+		// "spravovat DS"
+		privStr += sepPref + QObject::tr("manage the data box") +
+		    sepSuff;
+	}
+	if (userPrivils & PRIVIL_READ_VAULT) {
+		// "číst zprávy v DT"
+		privStr += sepPref +
+		    QObject::tr("read message in data vault") + sepSuff;
+	}
+	if (userPrivils & PRIVIL_ERASE_VAULT) {
+		// "mazat zprávy v DT"
+		privStr += sepPref +
+		    QObject::tr("erase messages from data vault") + sepSuff;
+	}
+	return privStr;
+}
+
+
+/* ========================================================================= */
+/*
  * Changes all occurrences of '\' to '/' in given file.
  */
 void fixBackSlashesInFile(const QString &fileName)
@@ -923,6 +987,30 @@ QString convertDbTypeToString(int value)
 	else if (value == DBTYPE_PFO_INSSPR) return "PFO_INSSPR";
 	else if (value == DBTYPE_FO) return "FO";
 	else return "";
+}
+
+
+/* ========================================================================= */
+/*
+ * Convert type of user to string
+ */
+const QString & convertUserTypeToString(int value)
+/* ========================================================================= */
+{
+	static const QString pu("PRIMARY_USER"), eu("ENTRUSTED_USER"),
+	    a("ADMINISTRATOR"), l("LIQUIDATOR"), ou("OFFICIAL_USER"),
+	    ocu("OFFICIAL_CERT_USER");
+	static const QString empty;
+
+	switch (value) {
+	case USERTYPE_PRIMARY: return pu;
+	case USERTYPE_ENTRUSTED: return eu;
+	case USERTYPE_ADMINISTRATOR: return a;
+	case USERTYPE_LIQUIDATOR: return l;
+	case USERTYPE_OFFICIAL: return ou;
+	case USERTYPE_OFFICIAL_CERT: return ocu;
+	default: return empty;
+	}
 }
 
 

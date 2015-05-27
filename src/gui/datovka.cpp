@@ -1910,21 +1910,55 @@ void MainWindow::openSelectedAttachment(void)
 /*
  * Clear status bar if download of complete message fails.
  */
-void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId)
+void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
+    const QString &errMsg)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	showStatusTextWithTimeout(tr("It was not possible download complete "
-	    "message \"%1\" from ISDS server.").arg(msgId));
-
 	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setWindowTitle(tr("Download message error"));
-	msgBox.setText(tr("It was not possible to download a complete "
-	    "message \"%1\" from server Datové schránky.").arg(msgId));
-	msgBox.setInformativeText(tr("A connection error occured or "
-	    "the message has already been deleted from the server."));
+
+	if (msgId == -1) {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "received message list from ISDS server."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(tr("It was not possible download "
+		    "received message list from ISDS server."));
+		if (!errMsg.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured."));
+		}
+	} else if (msgId == -2) {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "sent message list from ISDS server."));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(tr("It was not possible download "
+		    "sent message list from ISDS server."));
+		if (!errMsg.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured."));
+		}
+	} else {
+		showStatusTextWithTimeout(tr("It was not possible download "
+		    "complete message \"%1\" from ISDS server.").arg(msgId));
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message error"));
+		msgBox.setText(tr("It was not possible to download a complete "
+		    "message \"%1\" from server Datové schránky.").arg(msgId));
+		if (!errMsg.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		} else {
+			msgBox.setInformativeText(tr("A connection error "
+			    "occured or the message has already been deleted "
+			    "from the server."));
+		}
+	}
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.setDefaultButton(QMessageBox::Ok);
 	msgBox.exec();
@@ -2983,8 +3017,9 @@ void MainWindow::processPendingWorkerJobs(void)
 		    this, SLOT(postDownloadSelectedMessageAttachments(
 		        const QModelIndex, qint64)));
 		connect(m_syncAcntWorker,
-		    SIGNAL(clearStatusBarAndShowDialog(qint64)),
-		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64)));
+		    SIGNAL(clearStatusBarAndShowDialog(qint64, QString)),
+		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64,
+		    QString)));
 	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
@@ -3045,8 +3080,10 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	    topItem.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 
 	QString html;
+	UserEntry userEntry;
+	AccountEntry accountEntry;
 
-	html.append("<div style=\"margin-left: 12px;\">");
+	html.append(indentDivStart);
 	html.append("<h3>");
 	if (itemSettings.isTestAccount()) {
 		html.append(tr("Test account"));
@@ -3057,24 +3094,85 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 
 	html.append(strongAccountInfoLine(tr("Account name"),
 	    itemSettings.accountName()));
-	html.append("<br/>");
-	html.append(strongAccountInfoLine(tr("User name"),
-	    itemSettings.userName()));
 
 	const QString acndDbKey = itemSettings.userName() + "___True";
-
 	if (m_accountDb.dbId(acndDbKey).isEmpty()) {
 		/*
 		 * Generate this message if no account information can
 		 * be obtained.
 		 */
 		html.append(QString("<div><strong>") +
-		    tr("Account information could not be acquired.") +
+		    tr("Account and user information could not be acquired.") +
 		    QString("</strong></div>"));
+		goto lastPart;
 	}
 
-	AccountEntry accountEntry = m_accountDb.accountEntry(acndDbKey);
+	html.append("<table cellpadding=\"5\"><tr><td>");
+	html.append(QString("<div><strong>") + tr("User information") +
+	    QString("</strong></div>"));
+	html.append("</td><td width=\"100\"></td><td>");
+	html.append(QString("<div><strong>") + tr("Databox information") +
+	    QString("</strong></div>"));
+	html.append("</td></tr><tr><td>");
 
+	userEntry = m_accountDb.userEntry(acndDbKey);
+	html.append(strongAccountInfoLine(tr("User name"),
+	    itemSettings.userName()));
+	/* Print non-empty entries. */
+	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
+		const QString &key = userinfTbl.knownAttrs[i].first;
+		if (userEntry.hasValue(key) &&
+		    !userinfTbl.attrProps[key].desc.isEmpty()) {
+			switch (userinfTbl.knownAttrs[i].second) {
+			case DB_INTEGER:
+				if (key == "ic") {
+					if (userEntry.value(key).toInt() > 0) {
+						html.append(strongAccountInfoLine(
+						    userinfTbl.attrProps[key].desc,
+						    QString::number(userEntry.
+						    value(key).toInt())));
+					}
+				} else if (key == "userPrivils") {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    convertUserPrivilsToString(userEntry.
+					    value(key).toInt())));
+				} else {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    QString::number(userEntry.
+					        value(key).toInt())));
+				}
+				break;
+			case DB_TEXT:
+				if (key == "userType") {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    authorTypeToText(
+					    userEntry.value(key).toString())));
+				} else {
+					html.append(strongAccountInfoLine(
+					    userinfTbl.attrProps[key].desc,
+					    userEntry.value(key).toString()));
+				}
+				break;
+			case DB_DATE:
+				html.append(strongAccountInfoLine(
+				    userinfTbl.attrProps[key].desc,
+				    dateStrFromDbFormat(
+				        userEntry.value(key).toString(),
+				        dateDisplayFormat)));
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+		}
+	}
+
+	html.append("</td><td></td><td>");
+
+	accountEntry = m_accountDb.accountEntry(acndDbKey);
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
 		const QString &key = accntinfTbl.knownAttrs[i].first;
@@ -3087,6 +3185,13 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 					    accntinfTbl.attrProps[key].desc,
 					    getdbStateText(
 					    accountEntry.value(key).toInt())));
+				} else if (key == "ic") {
+					if (accountEntry.value(key).toInt() > 0) {
+						html.append(strongAccountInfoLine(
+						    accntinfTbl.attrProps[key].desc,
+						   QString::number(accountEntry.
+						   value(key).toInt())));
+					}
 				} else {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
@@ -3126,28 +3231,20 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 		}
 	}
 
-	/*
-	 * Credit information displayed here cause the application
-	 * to connect to ISDS. Credit information must be shown after
-	 * an explicit user request.
-	 *
-	QString credit = getPDZCreditFromISDS();
-	if (credit != "0") {
-		html.append(strongAccountInfoLine(tr("Remaining credit"),
-		    credit + " Kč"));
-	}
-	*/
+	html.append("</td></tr></table>");
 
-	html.append("<br/>");
+lastPart:
+
 	QString info = m_accountDb.getPwdExpirFromDb(acndDbKey);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
+	} else {
+		info = info.split(".")[0];
 	}
 
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    info));
 
-	html.append("<br/>");
 	MessageDb *db = accountMessageDb(&topItem);
 	Q_ASSERT(0 != db);
 	QString dbFilePath = db->fileName();
@@ -3158,7 +3255,7 @@ QString MainWindow::createAccountInfo(const QStandardItem &topItem)
 	html.append(strongAccountInfoLine(tr("Local database file location"),
 	    dbFilePath));
 
-	html.append("</div>");
+	html.append(divEnd);
 
 	return html;
 }
@@ -5210,38 +5307,32 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 /*
  * Get data about logged in user and his box.
  */
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString username = userName;
 
-	isds_error status;
-
-	/*
-	 * The method is called from only one place immediately after
-	 * a successful login.
-	 *
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return false;
-		}
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
 	}
-	*/
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
-	status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
-	    accountInfo.userName()), &db_owner_info);
+	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
+	    username), &db_owner_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
+		isds_DbOwnerInfo_free(&db_owner_info);
 		return false;
 	}
 
-	const QString userName = accountInfo.userName() + "___True";
+	username = username + "___True";
 	QString birthDate;
 	if ((NULL != db_owner_info->birthInfo) &&
 	    (NULL != db_owner_info->birthInfo->biDate)) {
@@ -5254,7 +5345,7 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	}
 
 	m_accountDb.insertAccountIntoDb(
-	    userName,
+	    username,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
 	    ic,
@@ -5293,6 +5384,8 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 	    *db_owner_info->dbEffectiveOVM,
 	    *db_owner_info->dbOpenAddressing);
 
+	isds_DbOwnerInfo_free(&db_owner_info);
+
 	return true;
 }
 
@@ -5301,23 +5394,28 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx)
 /*
  * Get information about password expiration date.
  */
-bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
+	QString username = userName;
 	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
 	bool retval = false;
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
+	}
 
-	QString key = accountInfo.userName() + "___True";
+	QString key = username + "___True";
 
 	status = isds_get_password_expiration(
-	    isdsSessions.session(accountInfo.userName()), &expiration);
+	    isdsSessions.session(username), &expiration);
 
 	if (IE_SUCCESS == status) {
 		if (NULL != expiration) {
@@ -5330,7 +5428,9 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 	} else {
 		expirDate.clear();
 	}
+
 	m_accountDb.setPwdExpirIntoDb(key, expirDate);
+
 	if (NULL != expiration) {
 		free(expiration);
 	}
@@ -5342,34 +5442,68 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx)
 /*
 * Get data about logged in user.
 */
-bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx)
+bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QString username = userName;
 
-	isds_error status;
-
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!connectToIsds(acntTopIdx, true)) {
-			return false;
-		}
+	if (acntTopIdx.isValid()) {
+		const AccountModel::SettingsMap accountInfo =
+		    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		    username = accountInfo.userName();
 	}
 
 	struct isds_DbUserInfo *db_user_info = NULL;
 
-
-	status = isds_GetUserInfoFromLogin(isdsSessions.session(
-	    accountInfo.userName()), &db_user_info);
+	isds_error status = isds_GetUserInfoFromLogin(isdsSessions.session(
+	    username), &db_user_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
+		isds_DbUserInfo_free(&db_user_info);
 		return false;
 	}
 
-	/* TODO - insert data into db */
+	username = username + "___True";
+
+	m_accountDb.insertUserIntoDb(
+	    username,
+	    convertUserTypeToString(*db_user_info->userType),
+	    (int)*db_user_info->userPrivils,
+	    db_user_info->personName ?
+		db_user_info->personName->pnFirstName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnMiddleName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnLastName : NULL,
+	    db_user_info->personName ?
+		db_user_info->personName->pnLastNameAtBirth : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adCity : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adStreet : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adNumberInStreet : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adNumberInMunicipality : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adZipCode : NULL,
+	    db_user_info->address ?
+		db_user_info->address->adState : NULL,
+	    db_user_info->biDate ?
+		tmBirthToDbFormat(db_user_info->biDate) : NULL,
+	    db_user_info->ic ? QString(db_user_info->ic).toInt() : 0,
+	    db_user_info->firmName,
+	    db_user_info->caStreet,
+	    db_user_info->caCity,
+	    db_user_info->caZipCode,
+	    db_user_info->caState
+	    );
+
+	isds_DbUserInfo_free(&db_user_info);
 
 	return true;
 }
@@ -5504,11 +5638,8 @@ void MainWindow::createAccountFromDatabaseFileList(
 			QStringList fileNameParts = fileName.split("___");
 			userName = fileNameParts[0];
 			fileNameParts = fileNameParts[1].split(".");
-			qDebug() << "A000" << userName << "=============";
 			testingFlag = fileNameParts[0];
 			suffix = fileNameParts[1];
-			qDebug() << "A001" << fileNameParts << "=============";
-
 			if (userName.isEmpty() || testingFlag.isEmpty() ||
 			    suffix.isEmpty()) {
 				importDBinfo.second = tr(
@@ -6824,8 +6955,9 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 		}
 	}
 
+	QString errMsg;
 	if (Q_SUCCESS == Worker::downloadMessage(accountIndex, dmId, true,
-	        msgDirect, *messageDb, QString(), 0, 0)) {
+	        msgDirect, *messageDb, errMsg, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(accountIndex, dmId);
 		return true;
@@ -8229,38 +8361,51 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		return loginRet;
 	}
 
-	const QString userName = accountInfo.userName();
-
-	/* Update password expiration information. */
-	if (!getPasswordInfoFromLogin(acntTopIdx)) {
+	if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
+		logWarning("Owner information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.userName().toUtf8().constData());
+	}
+	if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+		logWarning("User information for account '%s' (login %s) "
+		    "could not be acquired.\n",
+		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.userName().toUtf8().constData());
+	}
+	if (!getPasswordInfoFromLogin(acntTopIdx, QString())) {
 		logWarning("Password information for account '%s' (login %s) "
 		    "could not be acquired.\n",
 		    acntTopIdx.data().toString().toUtf8().constData(),
-		    userName.toUtf8().constData());
+		    accountInfo.userName().toUtf8().constData());
 	}
 
 	/* Get account information if possible. */
 	/*
 	 * TODO -- Is '___True' somehow related to the testing state
 	 * of an account?
-	 */
-	/*
+	 *
 	 * TODO -- The account information should be updated periodically.
 	 * Currently they are only acquired when they are missing.
-	 */
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 	if (dbId.isEmpty()) {
-		/* Acquire user information. */
+		// Acquire user information.
 		qWarning() << "Missing user entry for" << userName
 		    << "in account db.";
 
-		if (!getOwnerInfoFromLogin(acntTopIdx)) {
+		if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
 			return false;
 		}
 
-		dbId = m_accountDb.dbId(userName + "___True");
+		if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+			return false;
+		}
+
+		dbId = m_accountDb.dbId(accountInfo.userName() + "___True");
 	}
 	Q_ASSERT(!dbId.isEmpty());
+	 */
 
 	return loginRet;
 }
@@ -8274,20 +8419,24 @@ bool MainWindow::firstConnectToIsds(
     const AccountModel::SettingsMap &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
+	bool ret = false;
+
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		return loginMethodUserNamePwd(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		return loginMethodCertificateOnly(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateOnly(QModelIndex(), accountInfo,
 		    showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		return loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
 		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8304,9 +8453,26 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based username, password and OTP */
 	} else {
-		return loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
 		    showDialog);
 	}
+
+	if (ret) {
+		if (!getOwnerInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}
+		if (!getUserInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}
+		if (!getPasswordInfoFromLogin(QModelIndex(),
+		    accountInfo.userName())) {
+			//TODO: return false;
+		}
+	}
+
+	return ret;
 }
 
 

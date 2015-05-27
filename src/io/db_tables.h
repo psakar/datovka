@@ -125,6 +125,7 @@ private:
  * Account database.
  */
 extern Tbl accntinfTbl; /*!< Table 'account_info'. */
+extern Tbl userinfTbl; /*!< Table 'user_info'. */
 extern Tbl pwdexpdtTbl; /*!< Table 'password_expiration_date'. */
 
 

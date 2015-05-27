@@ -372,6 +372,11 @@ QString convertSenderTypeToString(int value);
 QString convertDbTypeToString(int value);
 
 /*!
+ * Convert type of user to string
+ */
+const QString & convertUserTypeToString(int value);
+
+/*!
  * @brief Convert type of databox to int
  */
 int convertDbTypeToInt(QString value);
@@ -380,6 +385,11 @@ int convertDbTypeToInt(QString value);
  * @brief Convert event type to string
  */
 QString convertEventTypeToString(int value);
+
+/*!
+ * @brief Return privilegs as html string from number representation.
+ */
+QString convertUserPrivilsToString(int userPrivils);
 
 /*!
  * @brief Convert state box to text
