@@ -1117,7 +1117,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%m</string>
+                 <string notr="true">%m</string>
                 </property>
                </widget>
               </item>
@@ -1131,7 +1131,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%D</string>
+                 <string notr="true">%D</string>
                 </property>
                </widget>
               </item>
@@ -1145,7 +1145,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%M</string>
+                 <string notr="true">%M</string>
                 </property>
                </widget>
               </item>
@@ -1159,7 +1159,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%Y</string>
+                 <string notr="true">%Y</string>
                 </property>
                </widget>
               </item>
@@ -1243,7 +1243,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%h</string>
+                 <string notr="true">%h</string>
                 </property>
                </widget>
               </item>
@@ -1261,7 +1261,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%d</string>
+                 <string notr="true">%d</string>
                 </property>
                </widget>
               </item>
@@ -1275,7 +1275,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%s</string>
+                 <string notr="true">%s</string>
                 </property>
                </widget>
               </item>
@@ -1289,7 +1289,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%i</string>
+                 <string notr="true">%i</string>
                 </property>
                </widget>
               </item>
@@ -1345,7 +1345,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%f</string>
+                 <string notr="true">%f</string>
                 </property>
                </widget>
               </item>
@@ -1373,7 +1373,7 @@ name will be same as original file name with suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>%u</string>
+                 <string notr="true">%u</string>
                 </property>
                </widget>
               </item>
@@ -1421,7 +1421,7 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>[%Y.%M.%D]-D-%i-%d</string>
+               <string notr="true">[%Y.%M.%D]-D-%i-%d</string>
               </property>
              </widget>
             </item>
@@ -1449,7 +1449,7 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>[2015.05.25]-D-123456789-abcdefg.zfo</string>
+               <string notr="true">[2015.05.25]-D-123456789-abcdefg.zfo</string>
               </property>
              </widget>
             </item>
