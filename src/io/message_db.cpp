@@ -3229,9 +3229,8 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
     qint64 dmId,
     const QString &dmAnnotation,
     const QString &dbIDSender, const QString &dmSender,
-    const QString &dmSenderAddress,
+    const QString &dmAddress,
     const QString &dbIDRecipient, const QString &dmRecipient,
-    const QString &dmRecipientAddress,
     const QString &dmSenderRefNumber,
     const QString &dmSenderIdent,
     const QString &dmRecipientRefNumber,
@@ -3246,10 +3245,22 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	(void) dmDeliveryTime; /* TODO - not used */
 	(void) dmAcceptanceTime; /* TODO - not used */
 
+	int i = 0;
 	bool isMultiSelect = false;
 	QString queryStr = "";
 	QString andToken = " AND ";
+	QString separ = " ";
 
+	QStringList dmAnnotationList =
+	    dmAnnotation.split(separ, QString::SkipEmptyParts);
+	QStringList dmSenderList =
+	    dmSender.split(separ, QString::SkipEmptyParts);
+	QStringList dmAddressList =
+	    dmAddress.split(separ, QString::SkipEmptyParts);
+	QStringList dmRecipientList =
+	    dmRecipient.split(separ, QString::SkipEmptyParts);
+	QStringList dmToHandsList =
+	    dmToHands.split(separ, QString::SkipEmptyParts);
 	QList <QStringList> msgList;
 	msgList.clear();
 
@@ -3288,14 +3299,18 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDSender = :dbIDSender";
-			//exprCnt++;
-		} else if (!dmSender.isEmpty()) {
+		} else if (!dmSenderList.isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
 			isNotFirst = true;
-			queryStr += "m.dmSender LIKE '%'||:dmSender||'%'";
-			//exprCnt++;
+			queryStr += "m.dmSender LIKE "
+			    "'%'||:dmSender0||'%'";
+			for (i = 1; i < dmSenderList.count(); i++) {
+				queryStr += " AND m.dmSender LIKE "
+				    "'%'||:dmSender" + QString::number(i) +
+				    "||'%'";
+			}
 		}
 
 		if (!dbIDRecipient.isEmpty()) {
@@ -3304,12 +3319,18 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDRecipient = :dbIDRecipient";
-		} else if (!dmRecipient.isEmpty()) {
+		} else if (!dmRecipientList.isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
 			isNotFirst = true;
-			queryStr += "m.dmRecipient LIKE '%'||:dmRecipient||'%'";
+			queryStr += "m.dmRecipient LIKE "
+			    "'%'||:dmRecipient0||'%'";
+			for (i = 1; i < dmRecipientList.count(); i++) {
+				queryStr += " AND m.dmRecipient LIKE "
+				    "'%'||:dmRecipient" + QString::number(i) +
+				    "||'%'";
+			}
 		}
 
 		if (!dmSenderRefNumber.isEmpty()) {
@@ -3348,59 +3369,113 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			    "'%'||:dmRecipientIdent||'%'";
 		}
 
-		if (!dmSenderAddress.isEmpty()) {
+		if (!dmAddressList.isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
 			isNotFirst = true;
-			queryStr += "m.dmSenderAddress LIKE "
-			    "'%'||:dmSenderAddress||'%'";
-		} else if (!dmRecipientAddress.isEmpty()) {
-		    if (isNotFirst) {
-				queryStr += andToken;
+			queryStr += "(m.dmSenderAddress LIKE "
+			    "'%'||:dmSenderAddress0||'%' OR "
+			    "m.dmRecipientAddress LIKE "
+			    "'%'||:dmRecipientAddress0||'%')";
+			for (i = 1; i < dmAddressList.count(); i++) {
+				queryStr += " AND (m.dmSenderAddress LIKE "
+				    "'%'||:dmSenderAddress" +
+				    QString::number(i) +
+				    "||'%' OR m.dmRecipientAddress LIKE "
+				    "'%'||:dmRecipientAddress" +
+				    QString::number(i) + "||'%')";
 			}
-			isNotFirst = true;
-			queryStr += "m.dmRecipientAddress LIKE "
-			    "'%'||:dmRecipientAddress||'%'";
 		}
 
-		if (!dmAnnotation.isEmpty()) {
+		if (!dmAnnotationList.isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmAnnotation LIKE "
-			    "'%'||:dmAnnotation||'%'";
+			    "'%'||:dmAnnotation0||'%'";
+			for (i = 1; i < dmAnnotationList.count(); i++) {
+				queryStr += " AND m.dmAnnotation LIKE "
+				    "'%'||:dmAnnotation" + QString::number(i) +
+				    "||'%'";
+			}
 		}
 
-		if (!dmToHands.isEmpty()) {
+		if (!dmToHandsList.isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
 			isNotFirst = true;
-			queryStr += "m.dmToHands LIKE '%'||:dmToHands||'%'";
+			queryStr += "m.dmToHands LIKE "
+			    "'%'||:dmToHands0||'%'";
+			for (i = 1; i < dmToHandsList.count(); i++) {
+				queryStr += " AND m.dmToHands LIKE "
+				    "'%'||:dmToHands" + QString::number(i) +
+				    "||'%'";
+			}
 		}
 
 		//qDebug() << queryStr;
-
+		/* prepare query string */
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			return msgList;
 		}
 
+		/* query string binding */
 		query.bindValue(":dbIDSender", dbIDSender);
-		query.bindValue(":dmSender", dmSender);
-		query.bindValue(":dmSenderAddress", dmSenderAddress);
 		query.bindValue(":dbIDRecipient", dbIDRecipient);
-		query.bindValue(":dmRecipient", dmRecipient);
-		query.bindValue(":dmRecipientAddress", dmRecipientAddress);
 		query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
 		query.bindValue(":dmSenderIdent", dmSenderIdent);
 		query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
 		query.bindValue(":dmRecipientIdent", dmRecipientIdent);
-		query.bindValue(":dmToHands", dmToHands);
-		query.bindValue(":dmAnnotation", dmAnnotation);
+
+		if (!dmAddressList.isEmpty()) {
+			for (i = 0; i < dmAddressList.count(); i++) {
+				query.bindValue(":dmSenderAddress" +
+				    QString::number(i),
+				    dmAddressList[i]);
+			}
+			for (i = 0; i < dmAddressList.count(); i++) {
+				query.bindValue(":dmRecipientAddress" +
+				    QString::number(i),
+				    dmAddressList[i]);
+			}
+		}
+
+		if (!dmSenderList.isEmpty()) {
+			for (i = 0; i < dmSenderList.count(); i++) {
+				query.bindValue(":dmSender" +
+				    QString::number(i),
+				    dmSenderList[i]);
+			}
+		}
+
+		if (!dmRecipientList.isEmpty()) {
+			for (i = 0; i < dmRecipientList.count(); i++) {
+				query.bindValue(":dmRecipient" +
+				    QString::number(i),
+				    dmRecipientList[i]);
+			}
+		}
+
+		if (!dmToHandsList.isEmpty()) {
+			for (i = 0; i < dmToHandsList.count(); i++) {
+				query.bindValue(":dmToHands" +
+				    QString::number(i),
+				    dmToHandsList[i]);
+			}
+		}
+
+		if (!dmAnnotationList.isEmpty()) {
+			for (i = 0; i < dmAnnotationList.count(); i++) {
+				query.bindValue(":dmAnnotation" +
+				    QString::number(i),
+				    dmAnnotationList[i]);
+			}
+		}
 
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {
@@ -3409,7 +3484,6 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 				query.bindValue(":message_type", TYPE_SENT);
 			}
 		}
-
 	} else {
 		if (isMultiSelect) {
 			queryStr += "s.message_type = :message_type";
@@ -3418,9 +3492,8 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
 
-
 		//qDebug() << queryStr;
-
+		/* prepare query string */
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			query.lastError().text().toUtf8().constData());
@@ -3447,7 +3520,7 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			msgItemsList.clear();
 			int count = query.record().count();
 			Q_ASSERT(4 == count);
-			for (int i = 0; i < count; ++i) {
+			for (i = 0; i < count; ++i) {
 				msgItemsList.append(query.value(i).toString());
 			}
 			msgList.append(msgItemsList);
