@@ -41,7 +41,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &messDb, QString &dbId,
     QString &senderName, Action action, qint64 msgId,
     const AccountModel::SettingsMap &accountInfo,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QString &lastAttAddPath,
+    QString &lastAttAddPath, QString &pdzCredit,
     QWidget *parent)
     : QDialog(parent),
     m_msgID(msgId),
@@ -53,6 +53,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &messDb, QString &dbId,
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
     m_lastAttAddPath(lastAttAddPath),
+    m_pdzCredit(pdzCredit),
     m_messDb(messDb),
     m_dmType(""),
     m_dmSenderRefNumber("")
@@ -95,7 +96,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	if (!m_dbEffectiveOVM) {
 		if (m_dbOpenAddressing) {
 			dbOpenAddressing =
-			    " - " + tr("sending of PDZ: enabled");
+			    " - " + tr("sending of PDZ: enabled") + "; " +
+			    tr("remaining credit: ") + m_pdzCredit + " Kč";
 		} else {
 			dbOpenAddressing =
 			    " - " + tr("sending of PDZ: disabled");
@@ -843,6 +845,8 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 		info += "\n\n";
 		info += tr("Do you want to send message?");
 	}
+
+	info += "\n\n" + tr("Your remaining credit is ") + m_pdzCredit + " Kč";
 
 	QMessageBox msgBox;
 	msgBox.setIcon(QMessageBox::Information);

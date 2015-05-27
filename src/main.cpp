@@ -234,11 +234,14 @@ int main(int argc, char *argv[])
 
 		if (language == "cs") {
 			localisationFile += "cs";
+			programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
 		} else if (language == "en") {
 			localisationFile += "en";
+			programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
 		} else {
 			/* Use system locale. */
 			localisationFile += QLocale::system().name();
+			programLocale = QLocale::system();
 		}
 
 		if (!appTranslator.load(localisationFile, localisationDir)) {
