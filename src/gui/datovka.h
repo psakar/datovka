@@ -429,19 +429,22 @@ private slots:
 	 */
 	void exportDeliveryInfoAsZFO(const QString &attachPath = QString(),
 	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format);
+	    QString formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
 	 */
 	void exportDeliveryInfoAsPDF(const QString &attachPath = QString(),
 	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format);
+	    QString formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialog.
 	 */
-	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString());
+	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Open selected message in external application.

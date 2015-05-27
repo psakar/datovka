@@ -1834,31 +1834,35 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		if (globPref.delivery_info_for_every_file) {
 			if (globPref.all_attachments_save_zfo_delinfo) {
 				exportDeliveryInfoAsZFO(newDir, attFileName,
-				  globPref.delivery_filename_format_all_attach);
+				  globPref.delivery_filename_format_all_attach,
+				  dmId);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
 				exportDeliveryInfoAsPDF(newDir, attFileName,
-				  globPref.delivery_filename_format_all_attach);
+				  globPref.delivery_filename_format_all_attach,
+				  dmId);
 			}
 		}
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO(newDir);
+		exportSelectedMessageAsZFO(newDir, dmId);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(newDir);
+		exportMessageEnvelopeAsPDF(newDir, dmId);
 	}
 
 	if (!globPref.delivery_info_for_every_file) {
 		if (globPref.all_attachments_save_zfo_delinfo) {
 			exportDeliveryInfoAsZFO(newDir, "",
-			    globPref.delivery_filename_format);
+			    globPref.delivery_filename_format,
+			    dmId);
 		}
 		if (globPref.all_attachments_save_pdf_delinfo) {
 			exportDeliveryInfoAsPDF(newDir, "",
-			    globPref.delivery_filename_format);
+			    globPref.delivery_filename_format,
+			    dmId);
 		}
 	}
 
@@ -7042,7 +7046,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
  * Export delivery information as ZFO file dialog.
  */
 void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
- attachFileName, QString formatString)
+ attachFileName, QString formatString, qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7062,7 +7066,13 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
@@ -7122,9 +7132,11 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as ZFO file"), fileName,
-	    tr("ZFO file (*.zfo)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save delivery info as ZFO file"), fileName,
+		    tr("ZFO file (*.zfo)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
@@ -7162,7 +7174,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
  * Export delivery information as PDF file dialogue.
  */
 void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
-    QString attachFileName, QString formatString)
+    QString attachFileName, QString formatString, qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7182,7 +7194,14 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
@@ -7239,10 +7258,12 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as PDF file"), fileName,
-	    tr("PDF file (*.pdf)"));
-	//, QString(), 0, QFileDialog::DontUseNativeDialog);
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save delivery info as PDF file"), fileName,
+		    tr("PDF file (*.pdf)"));
+		//, QString(), 0, QFileDialog::DontUseNativeDialog);
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
@@ -7277,7 +7298,8 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 /*
  * Export selected message envelope as PDF file dialog.
  */
-void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
+void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
+    qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7297,7 +7319,14 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
@@ -7352,9 +7381,11 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message envelope as PDF file"), fileName,
-	    tr("PDF file (*.pdf)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save message envelope as PDF file"), fileName,
+		    tr("PDF file (*.pdf)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message "
