@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>519</height>
+    <height>495</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -540,6 +540,10 @@ download date in the Datovka database.</string>
            <bold>true</bold>
           </font>
          </property>
+         <property name="toolTip">
+          <string>Here you can set the number of days when the message
+will be included to the notification about timestamp expiration.</string>
+         </property>
          <property name="title">
           <string>Message timestamp expiration</string>
          </property>
@@ -553,7 +557,7 @@ download date in the Datovka database.</string>
              </font>
             </property>
             <property name="text">
-             <string>Message timestamp expiration before</string>
+             <string>Notify message timestamp expiration before</string>
             </property>
            </widget>
           </item>
