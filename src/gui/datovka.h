@@ -422,7 +422,7 @@ private slots:
 	 * @brief Export message into as ZFO file dialog.
 	 */
 	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
-		qint64 dmID = -1);
+	    qint64 dmID = -1, const QStandardItem *accountItem = NULL);
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
@@ -618,9 +618,9 @@ private slots:
 	void msgAdvancedDlgFinished(int result);
 
 	/*!
-	 * @brief Check message timestamp expiration.
+	 * @brief Show message timestamp expiration dialog.
 	 */
-	void checkMessageTimestampExpiration(void);
+	void showMsgTmstmpExpirDialog(void);
 
 private:
 
@@ -628,6 +628,12 @@ private:
 	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
+
+	/*!
+	 * @brief Check message timestamp expiration for account.
+	 */
+	void checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
+	    const QString &userName);
 
 	/*!
 	 * @brief Mark all received messages in the current working account.
@@ -1003,7 +1009,8 @@ private:
 	/*!
 	 * @brief Export message with expirated timestamp to ZFO.
 	 */
-	void exportExpirMessagesToZFO(QStringList expirMsg);
+	void exportExpirMessagesToZFO(QStringList expirMsg,
+	    const QStandardItem *accountItem);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

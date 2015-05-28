@@ -3849,7 +3849,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
 	    SLOT(showImportZFOActionDialog()));
 	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
-	    SLOT(checkMessageTimestampExpiration()));
+	    SLOT(showMsgTmstmpExpirDialog()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -6867,7 +6867,7 @@ void MainWindow::showHelp(void)
  * Export message into as ZFO file dialogue.
  */
 void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
-    qint64 dmID)
+    qint64 dmID, const QStandardItem *accountItem)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6894,7 +6894,12 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 		dmId = dmID;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb;
+	if (accountItem) {
+		messageDb = accountMessageDb(accountItem);
+	} else {
+		messageDb = accountMessageDb(0);
+	}
 	Q_ASSERT(0 != messageDb);
 
 	QPair<QDateTime, QString> pair =
@@ -9025,12 +9030,70 @@ QString MainWindow::getPDZCreditFromISDS(void)
 
 /* ========================================================================= */
 /*
- * Check message timestamp expiration.
+ * Show message timestamp expiration dialog.
  */
-void MainWindow::checkMessageTimestampExpiration(void)
+void MainWindow::showMsgTmstmpExpirDialog(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(acntTopIdx);
+
+	QString dlgTitleText, questionText, checkBoxText, detailText;
+
+	dlgTitleText = tr("Timestamp expiration checking");
+	questionText = tr("Do you want to check messages expiration "
+	    "for username '%1'?").arg(accountInfo.userName());
+	checkBoxText = tr("Check messages expiration also in other accounts");
+	detailText = tr("Note: The checking process through all "
+	    "accounts can be slow and it cannot be aborted.");
+
+	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	    questionText, checkBoxText, detailText, this);
+	int retVal = yesNoCheckDlg->exec();
+
+	if (retVal == YesNoCheckboxDialog::YesChecked) {
+		showStatusTextPermanently(tr("Checking of messages timestamp "
+		    "is processing for username \"%1\"...").
+		    arg(accountInfo.accountName()));
+		checkMsgsTmstmpExpiration(accountItem, accountInfo.userName());
+		for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+			QModelIndex index = m_accountModel.index(i, 0);
+			if (index == acntTopIdx) {
+				continue;
+			}
+			accountItem = m_accountModel.itemFromIndex(index);
+			const AccountModel::SettingsMap accountInfo =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			showStatusTextPermanently(tr("Checking of messages "
+			    "timestamp is processing for username \"%1\"...").
+			    arg(accountInfo.accountName()));
+			checkMsgsTmstmpExpiration(accountItem,
+			    accountInfo.userName());
+		}
+	} else if (retVal == YesNoCheckboxDialog::YesUnchecked) {
+		showStatusTextPermanently(tr("Checking of messages timestamp "
+		    "is processing for username \"%1\"...").
+		    arg(accountInfo.accountName()));
+		checkMsgsTmstmpExpiration(accountItem, accountInfo.userName());
+	}
+	statusBar->clearMessage();
+}
+
+
+/* ========================================================================= */
+/*
+ * Check messages timestamp expiration for account.
+ */
+void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
+	const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
 
 	QByteArray data;
 	QStringList expirMsg;
@@ -9038,7 +9101,7 @@ void MainWindow::checkMessageTimestampExpiration(void)
 	expirMsg.clear();
 	errorMsg.clear();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountItem);
 	Q_ASSERT(0 != messageDb);
 
 	QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
@@ -9062,7 +9125,7 @@ void MainWindow::checkMessageTimestampExpiration(void)
 	msgBox.setWindowTitle(tr("Timestamp expiration results"));
 
 	QString infoText = tr("Checking of timestamp's expiration "
-	    "finished with this result:")
+	    "for account '%1' finished with this result:").arg(userName)
 	    + "<br/><br/>" +
 	    tr("Number of messages in the database: %1").arg(msgCnt)
 	    + "<br/><b>" +
@@ -9107,23 +9170,29 @@ void MainWindow::checkMessageTimestampExpiration(void)
 	}
 
 	if (QMessageBox::Yes == msgBox.exec()) {
-		exportExpirMessagesToZFO(expirMsg);
+		exportExpirMessagesToZFO(expirMsg, accountItem);
 	}
 }
 
 
 /* ========================================================================= */
 /*
- * Export message with expirated timestamp to ZFO.
+ * Export messages with expirated timestamp to ZFO.
  */
-void MainWindow::exportExpirMessagesToZFO(QStringList expirMsg)
+void MainWindow::exportExpirMessagesToZFO(QStringList expirMsg,
+    const QStandardItem *accountItem)
 /* ========================================================================= */
 {
 	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Export ZFO"), m_on_export_zfo_activate,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
+	if (newDir.isEmpty()) {
+		return;
+	}
+
 	for (int i = 0; i < expirMsg.count(); ++i) {
-		exportSelectedMessageAsZFO(newDir, expirMsg.at(i).toLongLong());
+		exportSelectedMessageAsZFO(newDir, expirMsg.at(i).toLongLong(),
+		    accountItem);
 	}
 }
