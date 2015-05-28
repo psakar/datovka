@@ -9095,7 +9095,6 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 {
 	debugFuncCall();
 
-	QByteArray data;
 	QStringList expirMsg;
 	QStringList errorMsg;
 	expirMsg.clear();
@@ -9108,13 +9107,13 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 	int msgCnt = msgIdList.count();
 
 	for (int i = 0; i < msgCnt; ++i) {
-		data = messageDb->msgsMessageBase64(msgIdList.at(i).toLongLong());
-		if (data.isEmpty()) {
+		QByteArray tstData =
+		    messageDb->msgsTimestampRaw(msgIdList.at(i).toLongLong());
+		if (tstData.isEmpty()) {
 			errorMsg.append(msgIdList.at(i));
 			continue;
 		}
-		data = QByteArray::fromBase64(data);
-		if (DlgSignatureDetail::signingCertExpiresBefore(data,
+		if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
 		    globPref.timestamp_expir_before_days)) {
 			expirMsg.append(msgIdList.at(i));
 		}
