@@ -630,10 +630,10 @@ private:
 	int m_timeoutSyncAccounts;
 
 	/*!
-	 * @brief Check message timestamp expiration for account.
+	 * @brief Check message time stamp expiration for account.
 	 */
 	void checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
-	    const QString &userName);
+	    const QString &accountName);
 
 	/*!
 	 * @brief Mark all received messages in the current working account.
@@ -1007,9 +1007,9 @@ private:
 	    const QString &userName);
 
 	/*!
-	 * @brief Export message with expirated timestamp to ZFO.
+	 * @brief Export message with expired time stamp to ZFO.
 	 */
-	void exportExpirMessagesToZFO(QStringList expirMsg,
+	void exportExpirMessagesToZFO(const QStringList &expirMsg,
 	    const QStandardItem *accountItem);
 
 	QString m_confDirName; /*!< Configuration directory location. */

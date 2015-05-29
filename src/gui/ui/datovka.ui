@@ -1129,7 +1129,7 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/shield_16.png</normaloff>:/icons/3party/shield_16.png</iconset>
    </property>
    <property name="text">
-    <string>Check message timestamp expiration</string>
+    <string>Time stamp expiration check</string>
    </property>
   </action>
  </widget>

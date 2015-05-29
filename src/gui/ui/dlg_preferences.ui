@@ -541,11 +541,11 @@ download date in the Datovka database.</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>Here you can set the number of days when the message
-will be included to the notification about timestamp expiration.</string>
+          <string>Message time stamps expiring within the selected numer
+of days will be included into the expiration notification summary.</string>
          </property>
          <property name="title">
-          <string>Message timestamp expiration</string>
+          <string>Message time stamp expiration</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_12">
           <item>
@@ -557,7 +557,7 @@ will be included to the notification about timestamp expiration.</string>
              </font>
             </property>
             <property name="text">
-             <string>Notify message timestamp expiration before</string>
+             <string>Check for time stamps expiring within</string>
             </property>
            </widget>
           </item>
