@@ -973,13 +973,13 @@ Per-account path remembering will be disabled.</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>You can define file name format for attachment files
-and exported files in this section. Default value for 
-saving of attachment files is %f (it means, that file 
-name will be same as original file name with suffix).</string>
+          <string>Specifies file name format for attachment files and other
+exported files. Default value when saving attachment
+files is %f (i.e. saved file name will match the original
+file name including its suffix).</string>
          </property>
          <property name="title">
-          <string>Filename format of saved/exported files</string>
+          <string>File name format of saved/exported files</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_17">
           <item>
@@ -996,7 +996,7 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Message filename:</string>
+               <string>Message file name:</string>
               </property>
              </widget>
             </item>
@@ -1036,7 +1036,7 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Delivery info filename:</string>
+               <string>Delivery info file name:</string>
               </property>
              </widget>
             </item>
@@ -1049,7 +1049,7 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Attachment filename:</string>
+               <string>Attachment file name:</string>
               </property>
              </widget>
             </item>
@@ -1486,9 +1486,9 @@ name will be same as original file name with suffix).</string>
                </font>
               </property>
               <property name="toolTip">
-               <string>Delivery info will be saved for every file in the attachments
-separately. Filename of delivery info have to contain file name
-in the attachment (parameter %f is required).</string>
+               <string>Saves delivery info for every attachment file separately.
+The delivery info file name has to contain the original
+attachment file name (parameter %f is required).</string>
               </property>
               <property name="text">
                <string>Save delivery info for every attachment file. Format:</string>

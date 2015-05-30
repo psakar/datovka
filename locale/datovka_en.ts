@@ -3803,6 +3803,41 @@ displayed in this account will be selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="976"/>
+        <source>Specifies file name format for attachment files and other
+exported files. Default value when saving attachment
+files is %f (i.e. saved file name will match the original
+file name including its suffix).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="982"/>
+        <source>File name format of saved/exported files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="999"/>
+        <source>Message file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
+        <source>Delivery info file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1052"/>
+        <source>Attachment file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1489"/>
+        <source>Saves delivery info for every attachment file separately.
+The delivery info file name has to contain the original
+attachment file name (parameter %f is required).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="462"/>
         <source>Signing certificate validity</source>
         <translation type="unfinished"></translation>
@@ -3938,34 +3973,6 @@ of days will be included into the expiration notification summary.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="976"/>
-        <source>You can define file name format for attachment files
-and exported files in this section. Default value for 
-saving of attachment files is %f (it means, that file 
-name will be same as original file name with suffix).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="982"/>
-        <source>Filename format of saved/exported files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="999"/>
-        <source>Message filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
-        <source>Delivery info filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1052"/>
-        <source>Attachment filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1176"/>
         <source>delivery year (YYYY)</source>
         <translation type="unfinished"></translation>
@@ -4023,13 +4030,6 @@ name will be same as original file name with suffix).</source>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1438"/>
         <source>means</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1489"/>
-        <source>Delivery info will be saved for every file in the attachments
-separately. Filename of delivery info have to contain file name
-in the attachment (parameter %f is required).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

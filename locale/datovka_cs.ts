@@ -4989,7 +4989,7 @@ Poznámka: Ukládání hesla můžete nastavit pro každý účet zvlášť v di
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="398"/>
         <source>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky. Using the checkboxes below, you can influence which data Datovka stores on the disk. Note: Password storage can be adjusted on per-account basis in the credentials dialog.</source>
-        <translation>Osoby, které mají přístup do Vašeho domovského adresáře, mohou zlomyslně modifikovat data v databázi, nebo scizit přihlašovací údaje k datovým schránkám. Pomocí následujících voleb můžete zvolit, jaká data se budou ukládat na disk. Poznámka: Ukládání hesla se dá nastavit pro jednotlivé účty v nastavení účtu.</translation>
+        <translation>Osoby, které mají přístup do Vašeho domovského adresáře, mohou zlomyslně modifikovat data v databázi, nebo odcizit přihlašovací údaje k datovým schránkám. Pomocí následujících voleb můžete zvolit, jaká data se budou ukládat na disk. Poznámka: Ukládání hesla se dá nastavit pro jednotlivé účty v nastavení účtu.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="414"/>
@@ -5074,6 +5074,46 @@ displayed in this account will be selected.</source>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="697"/>
         <source>Nothing</source>
         <translation>Nic</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="976"/>
+        <source>Specifies file name format for attachment files and other
+exported files. Default value when saving attachment
+files is %f (i.e. saved file name will match the original
+file name including its suffix).</source>
+        <translation>Určuje formát názvu souboru pro přílohy a jiné exportované soubory.
+Výchozí nastavení pro ukládání souborů příloh je %f (tzn.
+jméno ukládáného souboru bude odpovídat původnímu jmému
+přílohy).</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="982"/>
+        <source>File name format of saved/exported files</source>
+        <translation>Formát jména ukládaných/exportovaných souborů</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="999"/>
+        <source>Message file name:</source>
+        <translation>Jméno souboru zprávy:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
+        <source>Delivery info file name:</source>
+        <translation>Jméno souboru doručenky:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1052"/>
+        <source>Attachment file name:</source>
+        <translation>Jméno souboru přílohy:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1489"/>
+        <source>Saves delivery info for every attachment file separately.
+The delivery info file name has to contain the original
+attachment file name (parameter %f is required).</source>
+        <translation>Uloží zvláštní doručenku pro každý soubor přílohy.
+Název souboru doručenky musí obsahovat původní
+název přílohy (je vyžadován parametr %f).</translation>
     </message>
     <message>
         <source>Advanced</source>
@@ -5235,104 +5275,69 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>Zjišťovat časová razítka expirující do</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="976"/>
-        <source>You can define file name format for attachment files
-and exported files in this section. Default value for 
-saving of attachment files is %f (it means, that file 
-name will be same as original file name with suffix).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="982"/>
-        <source>Filename format of saved/exported files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="999"/>
-        <source>Message filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
-        <source>Delivery info filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1052"/>
-        <source>Attachment filename:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1176"/>
         <source>delivery year (YYYY)</source>
-        <translation type="unfinished"></translation>
+        <translation>rok doručení (YYYY)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1190"/>
         <source>delivery month (MM)</source>
-        <translation type="unfinished"></translation>
+        <translation>měsíc doručení (MM)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1204"/>
         <source>delivery day (DD)</source>
-        <translation type="unfinished"></translation>
+        <translation>den doručení (DD)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1218"/>
         <source>delivery minute (mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>minuta doručení (mm)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1232"/>
         <source>delivery hour (hh)</source>
-        <translation type="unfinished"></translation>
+        <translation>hodina doručení (hh)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1306"/>
         <source>message ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID zprávy</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1320"/>
         <source>message subject (separated by &quot;-&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>předmět zprávy (oddělen pomocí &quot;-&quot;)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1334"/>
         <source>databox ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID schránky</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1362"/>
         <source>attachment filename (with suffix)</source>
-        <translation type="unfinished"></translation>
+        <translation>jméno souboru přílohy (s příponou)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1390"/>
         <source>user ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID uživatele</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1410"/>
         <source>Example:</source>
-        <translation type="unfinished"></translation>
+        <translation>Příklad:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1438"/>
         <source>means</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1489"/>
-        <source>Delivery info will be saved for every file in the attachments
-separately. Filename of delivery info have to contain file name
-in the attachment (parameter %f is required).</source>
-        <translation type="unfinished"></translation>
+        <translation>znamená</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1494"/>
         <source>Save delivery info for every attachment file. Format:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukládat doručenku pro každou přílohu. Formát:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1533"/>
