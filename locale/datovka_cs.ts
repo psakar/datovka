@@ -5111,7 +5111,7 @@ přílohy).</translation>
         <source>Saves delivery info for every attachment file separately.
 The delivery info file name has to contain the original
 attachment file name (parameter %f is required).</source>
-        <translation>Uloží zvláštní doručenku pro každý soubor přílohy.
+        <translation>Uloží zvlášť doručenku pro každý soubor přílohy.
 Název souboru doručenky musí obsahovat původní
 název přílohy (je vyžadován parametr %f).</translation>
     </message>
@@ -5337,7 +5337,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1494"/>
         <source>Save delivery info for every attachment file. Format:</source>
-        <translation>Ukládat doručenku pro každou přílohu. Formát:</translation>
+        <translation>Uložit doručenku pro každý soubor přílohy. Formát:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1533"/>
