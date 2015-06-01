@@ -3610,56 +3610,56 @@ Zkuste to znova.</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="9052"/>
         <source>Note: Checking in all accounts can be slow. The action cannot be aborted.</source>
-        <translation>Poznámka: Vyhledávání ve všech účtech může být pomalé. Akce nelze být přerušena.</translation>
+        <translation>Poznámka: Vyhledávání ve všech účtech může být pomalé. Akci nebude možné přerušit.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9060"/>
-        <location filename="../src/gui/datovka.cpp" line="9075"/>
+        <location filename="../src/gui/datovka.cpp" line="9061"/>
+        <location filename="../src/gui/datovka.cpp" line="9076"/>
         <source>Checking time stamps in account &apos;%1&apos;...</source>
         <translation>Kontrola časových razítek v účtu &apos;%1&apos;...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9119"/>
+        <location filename="../src/gui/datovka.cpp" line="9120"/>
         <source>Time stamp expiration check results</source>
         <translation>Výsledky kontroly expirace časových razítek</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9121"/>
+        <location filename="../src/gui/datovka.cpp" line="9122"/>
         <source>Time stamp expiration check in account &apos;%1&apos; finished with result:</source>
         <translation>Kontrola časových razítek v účtu &apos;%1&apos; skončila s výsledkem:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9124"/>
+        <location filename="../src/gui/datovka.cpp" line="9125"/>
         <source>Total of messages in database: %1</source>
         <translation>Celkem zpráv v databázi: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9126"/>
+        <location filename="../src/gui/datovka.cpp" line="9127"/>
         <source>Messages with time stamp expiring within %1 days: %2</source>
         <translation>Zpráv s časovým razítkem expirujícím do %1 dnů: %2</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9130"/>
+        <location filename="../src/gui/datovka.cpp" line="9131"/>
         <source>Unchecked messages: %1</source>
         <translation>Nekontrolovaných zpráv: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9134"/>
+        <location filename="../src/gui/datovka.cpp" line="9135"/>
         <source>See details for more info...</source>
-        <translation>Pro více informací viz detaily...</translation>
+        <translation>Více informací naleznete v podrobnostech...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9137"/>
+        <location filename="../src/gui/datovka.cpp" line="9138"/>
         <source>Do you want to export the expiring messages to ZFO?</source>
         <translation>Chcete exportovat expirující zprávy do ZFO?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9144"/>
+        <location filename="../src/gui/datovka.cpp" line="9145"/>
         <source>Time stamp of message %1 expires within specified interval.</source>
         <translation>Časové razítko zprávy %1 expiruje do určeného limitu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9152"/>
+        <location filename="../src/gui/datovka.cpp" line="9153"/>
         <source>Time stamp of message %1 is not present.</source>
         <translation>Časové razítko zprávy %1 není k dispozici.</translation>
     </message>
@@ -3672,7 +3672,7 @@ Zkuste to znova.</translation>
         <translation type="obsolete">Více informací v podrobnostech...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9188"/>
+        <location filename="../src/gui/datovka.cpp" line="9189"/>
         <source>Export ZFO</source>
         <translation>Exportovat ZFO</translation>
     </message>
@@ -4471,7 +4471,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1132"/>
         <source>Time stamp expiration check</source>
-        <translation>Kontrola expirace časových razítek</translation>
+        <translation>Zkontrolovat expirace časových razítek</translation>
     </message>
     <message>
         <source>Search for messages in local database.</source>

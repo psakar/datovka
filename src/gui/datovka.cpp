@@ -9056,12 +9056,13 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
 	    questionText, checkBoxText, detailText, this);
 	int retVal = yesNoCheckDlg->exec();
 
-	/* Process the selected account. */
-	showStatusTextPermanently(tr("Checking time stamps in account '%1'...")
-	    .arg(accountInfo.accountName()));
-	checkMsgsTmstmpExpiration(accountItem, accountInfo.accountName());
-
-	if (retVal == YesNoCheckboxDialog::YesChecked) {
+	if (retVal == YesNoCheckboxDialog::YesUnchecked) {
+		/* Process the selected account. */
+		showStatusTextPermanently(tr("Checking time stamps in "
+		    "account '%1'...").arg(accountInfo.accountName()));
+		checkMsgsTmstmpExpiration(accountItem,
+		    accountInfo.accountName());
+	} else if (retVal == YesNoCheckboxDialog::YesChecked) {
 		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
 			const QModelIndex index(m_accountModel.index(i, 0));
 			if (index == acntTopIdx) {
