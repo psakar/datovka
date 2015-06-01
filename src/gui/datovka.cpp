@@ -59,6 +59,7 @@
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/gui/dlg_timestamp_expir.h"
 #include "src/gui/dlg_import_zfo_result.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/log/log.h"
@@ -9037,48 +9038,111 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
 {
 	debugSlotCall();
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-	const AccountModel::SettingsMap accountInfo =
-	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(acntTopIdx);
+	/* Generate dialog showing message content. */
+	QDialog *timestampExpirDialog = new TimestampExpirDialog(this);
+	connect(timestampExpirDialog,
+	    SIGNAL(returnAction(enum TimestampExpirDialog::TSaction)),
+	    this,
+	    SLOT(prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction)));
+	timestampExpirDialog->exec();
+}
 
-	QString dlgTitleText(tr("Time stamp expiration checking"));
-	QString questionText(tr("Do you want to check for messages "
-	    "with expiring time stamps in account '%1' (user name '%2')?")
-	        .arg(accountInfo.accountName()).arg(accountInfo.userName()));
-	QString checkBoxText(
-	    tr("Check for expiring time stamps also in remaining accounts."));
-	QString detailText(tr("Note: Checking in all accounts can be slow. "
-	        "The action cannot be aborted."));
 
-	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
-	    questionText, checkBoxText, detailText, this);
-	int retVal = yesNoCheckDlg->exec();
+/* ========================================================================= */
+/*
+ * Prepare message timestamp expiration based on action.
+ */
+void MainWindow::prepareMsgTmstmpExpir(
+    enum TimestampExpirDialog::TSaction action)
+/* ========================================================================= */
+{
+	debugSlotCall();
 
-	if (retVal == YesNoCheckboxDialog::YesUnchecked) {
+	QModelIndex index;
+	AccountModel::SettingsMap accountInfo;
+	QStandardItem *accountItem;
+	bool includeSubdir = false;
+	QString importDir;
+	QStringList fileList, filePathList;
+	QStringList nameFilter("*.zfo");
+	QDir directory(QDir::home());
+	fileList.clear();
+	filePathList.clear();
+
+	switch (action) {
+	case TimestampExpirDialog::CHECK_TIMESTAMP_CURRENT:
 		/* Process the selected account. */
+		index = ui->accountList->currentIndex();
+		index = AccountModel::indexTop(index);
+		accountInfo = index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		accountItem = m_accountModel.itemFromIndex(index);
 		showStatusTextPermanently(tr("Checking time stamps in "
 		    "account '%1'...").arg(accountInfo.accountName()));
 		checkMsgsTmstmpExpiration(accountItem,
-		    accountInfo.accountName());
-	} else if (retVal == YesNoCheckboxDialog::YesChecked) {
+		    accountInfo.accountName(), QStringList());
+		break;
+
+	case TimestampExpirDialog::CHECK_TIMESTAMP_ALL:
 		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
-			const QModelIndex index(m_accountModel.index(i, 0));
-			if (index == acntTopIdx) {
-				/* Skip the selected account. */
-				continue;
-			}
+			index = m_accountModel.index(i, 0);
 			accountItem = m_accountModel.itemFromIndex(index);
-			const AccountModel::SettingsMap accountInfo =
-			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			accountInfo = index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...")
 			        .arg(accountInfo.accountName()));
 			checkMsgsTmstmpExpiration(accountItem,
-			    accountInfo.accountName());
+			    accountInfo.accountName(), QStringList());
 		}
+		break;
+
+	case TimestampExpirDialog::CHECK_TIMESTAMP_ZFO_SUB:
+		includeSubdir = true;
+	case TimestampExpirDialog::CHECK_TIMESTAMP_ZFO:
+		importDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select directory"), m_import_zfo_path,
+		    QFileDialog::ShowDirsOnly |
+		    QFileDialog::DontResolveSymlinks);
+
+		if (importDir.isEmpty()) {
+			return;
+		}
+
+		m_import_zfo_path = importDir;
+
+		if (includeSubdir) {
+			QDirIterator it(importDir, nameFilter, QDir::Files,
+			    QDirIterator::Subdirectories);
+			while (it.hasNext()) {
+				filePathList.append(it.next());
+			}
+		} else {
+			directory.setPath(importDir);
+			fileList = directory.entryList(nameFilter);
+			for (int i = 0; i < fileList.size(); ++i) {
+				filePathList.append(
+				    importDir + "/" + fileList.at(i));
+			}
+		}
+
+		if (filePathList.isEmpty()) {
+			qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the "
+			    "selected directory";
+			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
+			    "selected directory."));
+			QMessageBox::warning(this,
+			    tr("No ZFO file(s)"),
+			    tr("ZFO file(s) not found in selected directory."),
+			    QMessageBox::Ok);
+			return;
+		}
+
+		checkMsgsTmstmpExpiration(NULL, NULL, filePathList);
+
+		break;
+	default:
+		break;
 	}
+
 	statusBar->clearMessage();
 }
 
@@ -9088,55 +9152,120 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
  * Check messages time stamp expiration for account.
  */
 void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
-	const QString &accountName)
+	const QString &accountName, QStringList filePathList)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
 	QStringList expirMsg;
 	QStringList errorMsg;
+	QByteArray tstData;
+	int msgCnt = 0;
+	QString infoText;
+	bool showExportOption = true;
 
-	MessageDb *messageDb = accountMessageDb(accountItem);
-	Q_ASSERT(0 != messageDb);
+	if (accountName.isEmpty() || accountItem == NULL) {
 
-	QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
-	int msgCnt = msgIdList.count();
+		msgCnt = filePathList.count();
 
-	for (int i = 0; i < msgCnt; ++i) {
-		QByteArray tstData =
-		    messageDb->msgsTimestampRaw(msgIdList.at(i).toLongLong());
-		if (tstData.isEmpty()) {
-			errorMsg.append(msgIdList.at(i));
-			continue;
+		struct isds_message *message = NULL;
+		struct isds_ctx *dummy_session = NULL;
+
+		dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			qDebug() << "Cannot create dummy ISDS session.";
+			showStatusTextWithTimeout(tr("Loading of ZFO file(s) "
+			    "failed!"));
+			/* TODO */
+			return;
 		}
-		if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
-		    globPref.timestamp_expir_before_days)) {
-			expirMsg.append(msgIdList.at(i));
+
+		for (int i = 0; i < msgCnt; ++i) {
+
+			message = loadZfoFile(dummy_session, filePathList.at(i),
+			    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+			if (NULL == message || message->envelope == NULL) {
+				errorMsg.append(filePathList.at(i));
+				continue;
+			}
+
+			if (NULL == message->envelope->timestamp) {
+				errorMsg.append(filePathList.at(i));
+				continue;
+			}
+
+			tstData = (char *) message->envelope->timestamp;
+
+			if (tstData.isEmpty()) {
+				errorMsg.append(filePathList.at(i));
+				continue;
+			}
+
+			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
+			    globPref.timestamp_expir_before_days)) {
+				expirMsg.append(filePathList.at(i));
+			}
 		}
+
+		isds_message_free(&message);
+		isds_ctx_free(&dummy_session);
+
+		infoText = tr("Time stamp expiration check of ZFO files "
+		    "finished with result:")
+		    + "<br/><br/>" +
+		    tr("Total of ZFO files: %1").arg(msgCnt)
+		    + "<br/><b>" +
+		    tr("ZFO files with time stamp expiring within %1 days: %2")
+			.arg(globPref.timestamp_expir_before_days)
+			.arg(expirMsg.count())
+		    + "</b><br/>" +
+		    tr("Unchecked ZFO files: %1").arg(errorMsg.count());
+
+		showExportOption = false;
+
+	} else {
+		MessageDb *messageDb = accountMessageDb(accountItem);
+		Q_ASSERT(0 != messageDb);
+
+		QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
+		msgCnt = msgIdList.count();
+
+		for (int i = 0; i < msgCnt; ++i) {
+			tstData = messageDb->msgsTimestampRaw(
+			    msgIdList.at(i).toLongLong());
+			if (tstData.isEmpty()) {
+				errorMsg.append(msgIdList.at(i));
+				continue;
+			}
+			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
+			    globPref.timestamp_expir_before_days)) {
+				expirMsg.append(msgIdList.at(i));
+			}
+		}
+
+		infoText = tr("Time stamp expiration check "
+		    "in account '%1' finished with result:").arg(accountName)
+		    + "<br/><br/>" +
+		    tr("Total of messages in database: %1").arg(msgCnt)
+		    + "<br/><b>" +
+		    tr("Messages with time stamp expiring within %1 days: %2")
+			.arg(globPref.timestamp_expir_before_days)
+			.arg(expirMsg.count())
+		    + "</b><br/>" +
+		    tr("Unchecked messages: %1").arg(errorMsg.count());
 	}
 
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.setWindowTitle(tr("Time stamp expiration check results"));
-
-	QString infoText = tr("Time stamp expiration check "
-	    "in account '%1' finished with result:").arg(accountName)
-	    + "<br/><br/>" +
-	    tr("Total of messages in database: %1").arg(msgCnt)
-	    + "<br/><b>" +
-	    tr("Messages with time stamp expiring within %1 days: %2")
-	        .arg(globPref.timestamp_expir_before_days)
-	        .arg(expirMsg.count())
-	    + "</b><br/>" +
-	    tr("Unchecked messages: %1").arg(errorMsg.count());
 	msgBox.setText(infoText);
 
 	if (!expirMsg.isEmpty() || !errorMsg.isEmpty()) {
 		infoText = tr("See details for more info...") + "<br/><br/>";
-		if (!expirMsg.isEmpty()) {
+		if (!expirMsg.isEmpty() && showExportOption) {
 			infoText += "<b>" +
-			    tr("Do you want to export the expiring messages to ZFO?")
-			    + "</b><br/><br/>";
+			    tr("Do you want to export the expiring "
+			    "messages to ZFO?") + "</b><br/><br/>";
 		}
 		msgBox.setInformativeText(infoText);
 
@@ -9158,7 +9287,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 		}
 		msgBox.setDetailedText(infoText);
 
-		if (!expirMsg.isEmpty()) {
+		if (!expirMsg.isEmpty() && showExportOption) {
 			msgBox.setStandardButtons(QMessageBox::Yes
 			    | QMessageBox::No);
 			msgBox.setDefaultButton(QMessageBox::No);

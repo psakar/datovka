@@ -40,6 +40,7 @@
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "thread/worker.h"
@@ -622,6 +623,11 @@ private slots:
 	 */
 	void showMsgTmstmpExpirDialog(void);
 
+	/*!
+	 * @brief Prepare message timestamp expiration based on action.
+	 */
+	void prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction action);
+
 private:
 
 	QThread *m_syncAcntThread;
@@ -633,7 +639,7 @@ private:
 	 * @brief Check message time stamp expiration for account.
 	 */
 	void checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
-	    const QString &accountName);
+	    const QString &accountName, QStringList filePathList);
 
 	/*!
 	 * @brief Mark all received messages in the current working account.
