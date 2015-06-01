@@ -4014,6 +4014,36 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Return all message ID from database.
+ */
+QStringList MessageDb::getAllMessageIDsFromDB(void) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT dmID FROM messages";
+	QStringList msgIsList;
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIsList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+	return msgIsList;
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
  * Insert raw (DER) delivery info into raw_delivery_info_data table.
  */
 bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
@@ -5405,6 +5435,43 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 
 fail:
 	return QDateTime();
+}
+
+
+/* ========================================================================= */
+/*
+ * Returns message acceptance date (in local time) and annotation.
+ */
+QPair<QDateTime, QString> MessageDb::msgsAcceptTimeAnnotation(qint64 dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+	QPair<QDateTime, QString> pair;
+
+	queryStr = "SELECT dmAcceptanceTime, dmAnnotation "
+	    "FROM messages WHERE dmId = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		pair.first =  dateTimeFromDbFormat(query.value(0).toString());
+		pair.second = query.value(1).toString();
+		return pair;
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return QPair<QDateTime, QString>();
 }
 
 

@@ -41,6 +41,8 @@ void DlgPreferences::initPrefDialog(void)
 	this->download_on_background->
 	    setChecked(globPref.download_on_background);
 	this->timerSpinBox->setValue(globPref.timer_value);
+	this->timestampExpirSpinBox->setValue(
+	    globPref.timestamp_expir_before_days);
 	this->timeoutMinSpinBox->setValue(
 	    globPref.isds_download_timeout_ms / 60000);
 	this->labelTimeoutNote->setText(
@@ -74,6 +76,19 @@ void DlgPreferences::initPrefDialog(void)
 	    setChecked(globPref.all_attachments_save_pdf_msgenvel);
 	this->all_attachments_save_pdf_delinfo->
 	    setChecked(globPref.all_attachments_save_pdf_delinfo);
+	this->delivery_info_for_every_file->
+	    setChecked(globPref.delivery_info_for_every_file);
+
+	this->message_filename_format->setText(
+	    globPref.message_filename_format);
+	this->delivery_filename_format->setText(
+	    globPref.delivery_filename_format);
+	this->attachment_filename_format->setText(
+	    globPref.attachment_filename_format);
+
+	this->delivery_filename_format_all_attach->setText(
+	    globPref.delivery_filename_format_all_attach);
+
 
 	/* TODO - this choice must be disabled */
 //	this->send_stats_with_version_checks->
@@ -217,6 +232,8 @@ void DlgPreferences::saveChanges(void) const
 	globPref.timer_value = this->timerSpinBox->value();
 	globPref.isds_download_timeout_ms =
 	    this->timeoutMinSpinBox->value() * 60000;
+	globPref.timestamp_expir_before_days =
+	    this->timestampExpirSpinBox->value();
 	globPref.language =
 	    getIndexFromLanguge(this->language->currentIndex());
 	if (this->after_start_select_1->isChecked()) {
@@ -239,4 +256,15 @@ void DlgPreferences::saveChanges(void) const
 	    this->all_attachments_save_pdf_msgenvel->isChecked();
 	globPref.all_attachments_save_pdf_delinfo =
 	    this->all_attachments_save_pdf_delinfo->isChecked();
+	globPref.delivery_info_for_every_file =
+	    this->delivery_info_for_every_file->isChecked();
+
+	globPref.message_filename_format =
+	    this->message_filename_format->text();
+	globPref.delivery_filename_format =
+	    this->delivery_filename_format->text();
+	globPref.attachment_filename_format =
+	    this->attachment_filename_format->text();
+	globPref.delivery_filename_format_all_attach =
+	    this->delivery_filename_format_all_attach->text();
 }

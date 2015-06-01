@@ -94,7 +94,13 @@ GlobPreferences::GlobPreferences(void)
     all_attachments_save_zfo_msg(false),
     all_attachments_save_pdf_msgenvel(false),
     all_attachments_save_pdf_delinfo(false),
-    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS)
+    message_filename_format(DEFAULT_MESSAGE_FILENAME_FORMAT),
+    delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
+    attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
+    delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
+    delivery_info_for_every_file(false),
+    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS),
+    timestamp_expir_before_days(TIMESTAMP_EXPIR_BEFORE_DAYS)
 {
 }
 
@@ -146,6 +152,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	    "preferences/isds_download_timeout_ms",
 	    dlftlGlobPref.isds_download_timeout_ms).toInt();
 
+	timestamp_expir_before_days = settings.value(
+	    "preferences/timestamp_expir_before_days",
+	    dlftlGlobPref.timestamp_expir_before_days).toInt();
+
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
 	    dlftlGlobPref.use_global_paths).toBool();
@@ -171,6 +181,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 
 	check_new_versions = settings.value("preferences/check_new_versions",
 	    dlftlGlobPref.check_new_versions).toBool();
+
+	delivery_info_for_every_file = settings.value(
+	    "preferences/delivery_info_for_every_file",
+	    dlftlGlobPref.delivery_info_for_every_file).toBool();
 
 	send_stats_with_version_checks = settings.value(
 	    "preferences/send_stats_with_version_checks",
@@ -248,6 +262,22 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	all_attachments_save_pdf_delinfo = settings.value(
 	    "preferences/all_attachments_save_pdf_delinfo",
 	    dlftlGlobPref.all_attachments_save_pdf_delinfo).toBool();
+
+	message_filename_format = settings.value(
+	    "preferences/message_filename_format",
+	    dlftlGlobPref.message_filename_format).toString();
+
+	delivery_filename_format = settings.value(
+	    "preferences/delivery_filename_format",
+	    dlftlGlobPref.delivery_filename_format).toString();
+
+	attachment_filename_format = settings.value(
+	    "preferences/attachment_filename_format",
+	    dlftlGlobPref.attachment_filename_format).toString();
+
+	delivery_filename_format_all_attach = settings.value(
+	    "preferences/delivery_filename_format_all_attach",
+	    dlftlGlobPref.delivery_filename_format_all_attach).toString();
 
 }
 
@@ -327,6 +357,12 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 		    isds_download_timeout_ms);
 	}
 
+	if (dlftlGlobPref.timestamp_expir_before_days !=
+	    timestamp_expir_before_days) {
+		settings.setValue("timestamp_expir_before_days",
+		    timestamp_expir_before_days);
+	}
+
 	if (dlftlGlobPref.download_on_background != download_on_background) {
 		settings.setValue("download_on_background",
 		    download_on_background);
@@ -373,6 +409,36 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    all_attachments_save_pdf_delinfo) {
 		settings.setValue("all_attachments_save_pdf_delinfo",
 		    all_attachments_save_pdf_delinfo);
+	}
+
+	if (dlftlGlobPref.message_filename_format !=
+	    message_filename_format) {
+		settings.setValue("message_filename_format",
+		    message_filename_format);
+	}
+
+	if (dlftlGlobPref.delivery_filename_format !=
+	    delivery_filename_format) {
+		settings.setValue("delivery_filename_format",
+		    delivery_filename_format);
+	}
+
+	if (dlftlGlobPref.attachment_filename_format !=
+	    attachment_filename_format) {
+		settings.setValue("attachment_filename_format",
+		    attachment_filename_format);
+	}
+
+	if (dlftlGlobPref.delivery_filename_format_all_attach !=
+	    delivery_filename_format_all_attach) {
+		settings.setValue("delivery_filename_format_all_attach",
+		    delivery_filename_format_all_attach);
+	}
+
+	if (dlftlGlobPref.delivery_info_for_every_file !=
+	    delivery_info_for_every_file) {
+		settings.setValue("delivery_info_for_every_file",
+		    delivery_info_for_every_file);
 	}
 
 	settings.endGroup();
@@ -1364,4 +1430,75 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 	}
 
 	return fullName;
+}
+
+
+/* ========================================================================= */
+/*
+ * Create filename based on format string.
+ */
+QString createFilenameFromFormatString(QString pattern,
+    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
+    QString dbID, QString usename, QString attachFilename)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	// known atrributes
+	// {"%Y","%M","%D","%h","%m","%i","%s","%d","%u","%f"};
+
+	if (pattern.isEmpty() || pattern.isNull()) {
+		pattern = DEFAULT_TMP_FORMAT;
+	}
+/*
+	if (attachFilename.isEmpty() || attachFilename.isNull()) {
+		attachFilename = tr("filename");
+	} else {
+		QFileInfo filename(attachFilename);
+		attachFilename = filename.completeBaseName();
+	}
+*/
+	if (!dmAcceptanceTime.isValid()) {
+		dmAcceptanceTime.currentDateTime();
+	}
+
+	QPair<QString, QString> pair;
+	QList<QPair<QString, QString>> knowAtrrList;
+
+	pair.first = "%Y";
+	pair.second = dmAcceptanceTime.date().toString("yyyy");
+	knowAtrrList.append(pair);
+	pair.first = "%M";
+	pair.second = dmAcceptanceTime.date().toString("MM");
+	knowAtrrList.append(pair);
+	pair.first = "%D";
+	pair.second = dmAcceptanceTime.date().toString("dd");
+	knowAtrrList.append(pair);
+	pair.first = "%h";
+	pair.second = dmAcceptanceTime.time().toString("hh");
+	knowAtrrList.append(pair);
+	pair.first = "%m";
+	pair.second = dmAcceptanceTime.time().toString("mm");
+	knowAtrrList.append(pair);
+	pair.first = "%i";
+	pair.second = dmID;
+	knowAtrrList.append(pair);
+	pair.first = "%s";
+	pair.second = dmAnnotation.replace(" ","-");
+	knowAtrrList.append(pair);
+	pair.first = "%d";
+	pair.second = dbID;
+	knowAtrrList.append(pair);
+	pair.first = "%u";
+	pair.second = usename;
+	knowAtrrList.append(pair);
+	pair.first = "%f";
+	pair.second = attachFilename;
+	knowAtrrList.append(pair);
+
+	for (int i = 0; i < knowAtrrList.length(); ++i) {
+		pattern.replace(knowAtrrList[i].first, knowAtrrList[i].second);
+	}
+
+	return pattern;
 }

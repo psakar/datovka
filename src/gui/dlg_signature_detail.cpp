@@ -245,7 +245,7 @@ bool DlgSignatureDetail::signingCertExpiresBefore(const QByteArray &DER,
 
 	int difference = now.daysTo(expir);
 
-	return difference > days;
+	return difference < days;
 }
 
 

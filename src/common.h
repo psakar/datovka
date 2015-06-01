@@ -43,6 +43,7 @@
 #define ISDS_PING_TIMEOUT_MS 10000
 #define ISDS_CONNECT_TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define ISDS_DOWNLOAD_TIMEOUT_MS 300000
+#define TIMESTAMP_EXPIR_BEFORE_DAYS 15	/* Show timestamp expiration before days*/
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
@@ -56,6 +57,13 @@
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
+
+/* Define default filename of saved/exported files */
+#define DEFAULT_TMP_FORMAT "%Y-%M-%D_%i_tmp"
+#define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
+#define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
+#define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
+#define DEFAULT_DELIVERY_ATTACH_FORMAT "DD-%i-%f"
 
 /* return values of Datovka login methods */
 typedef enum {
@@ -209,7 +217,13 @@ public:
 	bool all_attachments_save_zfo_msg;
 	bool all_attachments_save_pdf_msgenvel;
 	bool all_attachments_save_pdf_delinfo;
+	QString message_filename_format;
+	QString delivery_filename_format;
+	QString attachment_filename_format;
+	QString delivery_filename_format_all_attach;
+	bool delivery_info_for_every_file;
 	int isds_download_timeout_ms;
+	int timestamp_expir_before_days;
 
 	/*!
 	 * @brief Load data from supplied settings.
@@ -466,5 +480,12 @@ enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
 QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
     bool deleteOnError = false);
 
+
+/*!
+ * @brief Create filename based on format string.
+ */
+QString createFilenameFromFormatString(QString pattern,
+    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
+    QString dbID, QString usename, QString attachFilename);
 
 #endif /* _COMMON_H_ */

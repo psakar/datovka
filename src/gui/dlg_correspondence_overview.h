@@ -49,7 +49,8 @@ public:
 
 	DlgCorrespondenceOverview(const MessageDb &db,
 	    const AccountModel::SettingsMap &accountInfo,
-	    QString &exportCorrespondDir, QWidget *parent = 0);
+	    QString &exportCorrespondDir, const QString &dbId,
+	    QWidget *parent = 0);
 
 private slots:
 	void dateCalendarsChange(const QDate &date);
@@ -61,6 +62,7 @@ private:
 	const AccountModel::SettingsMap m_accountInfo;
 	ExportedMessageList m_messages;
 	QString &m_exportCorrespondDir;
+	const QString &m_dbId;
 
 	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
 	QString msgInCsv(qint64 dmId) const;

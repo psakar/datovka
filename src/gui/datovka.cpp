@@ -740,6 +740,8 @@ setmodel:
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
+			ui->actionCheck_message_timestamp_expiration->
+			    setEnabled(true);
 		} else {
 			ui->menuMessage->setEnabled(false);
 			ui->actionReply->setEnabled(false);
@@ -1668,13 +1670,27 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	Q_ASSERT(!fileName.isEmpty());
 	/* TODO -- Remember directory? */
 
-
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
 		saveAttachPath = globPref.save_attachments_path;
 	} else {
 		saveAttachPath = m_save_attach_dir;
 	}
+
+	MessageDb *messageDb = accountMessageDb(0);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
+	fileName = createFilenameFromFormatString(
+	    globPref.attachment_filename_format,
+	    pair.first, pair.second, QString::number(dmId), dbId,
+	    userName, fileName);
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"),
@@ -1757,6 +1773,16 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	bool unspecifiedFailed = false;
 	QList<QString> unsuccessfullFiles;
 
+	MessageDb *messageDb = accountMessageDb(0);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
+
 	for (int i = 0; i < attachments; ++i) {
 
 		QModelIndex index = ui->messageAttachmentList->model()
@@ -1776,11 +1802,17 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		}
 
 		QString fileName = fileNameIndex.data().toString();
+		QString attFileName = fileName;
 		Q_ASSERT(!fileName.isEmpty());
 		if (fileName.isEmpty()) {
 			unspecifiedFailed = true;
 			continue;
 		}
+
+		fileName = createFilenameFromFormatString(
+		    globPref.attachment_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, fileName);
 
 		fileName = newDir + QDir::separator() + fileName;
 
@@ -1798,22 +1830,40 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			unsuccessfullFiles.append(fileName);
 			continue;
 		}
+
+		if (globPref.delivery_info_for_every_file) {
+			if (globPref.all_attachments_save_zfo_delinfo) {
+				exportDeliveryInfoAsZFO(newDir, attFileName,
+				  globPref.delivery_filename_format_all_attach,
+				  dmId);
+			}
+			if (globPref.all_attachments_save_pdf_delinfo) {
+				exportDeliveryInfoAsPDF(newDir, attFileName,
+				  globPref.delivery_filename_format_all_attach,
+				  dmId);
+			}
+		}
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO(newDir);
-	}
-
-	if (globPref.all_attachments_save_zfo_delinfo) {
-		exportDeliveryInfoAsZFO(newDir);
+		exportSelectedMessageAsZFO(newDir, dmId);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(newDir);
+		exportMessageEnvelopeAsPDF(newDir, dmId);
 	}
 
-	if (globPref.all_attachments_save_pdf_delinfo) {
-		exportDeliveryInfoAsPDF(newDir);
+	if (!globPref.delivery_info_for_every_file) {
+		if (globPref.all_attachments_save_zfo_delinfo) {
+			exportDeliveryInfoAsZFO(newDir, "",
+			    globPref.delivery_filename_format,
+			    dmId);
+		}
+		if (globPref.all_attachments_save_pdf_delinfo) {
+			exportDeliveryInfoAsPDF(newDir, "",
+			    globPref.delivery_filename_format,
+			    dmId);
+		}
 	}
 
 	if (unspecifiedFailed) {
@@ -3798,6 +3848,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(exportCorrespondenceOverview()));
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
 	    SLOT(showImportZFOActionDialog()));
+	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
+	    SLOT(showMsgTmstmpExpirDialog()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -3903,6 +3955,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionMsgAdvancedSearch->setEnabled(false);
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
+	ui->actionCheck_message_timestamp_expiration->setEnabled(false);
 }
 
 
@@ -6019,16 +6072,17 @@ void MainWindow::exportCorrespondenceOverview(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
+	const AccountModel::SettingsMap accountInfo =
+	    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString dbId = m_accountDb.dbId(accountInfo.userName() +
+	    "___True");
+
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
-	    *messageDb, index.data(ROLE_ACNT_CONF_SETTINGS).toMap(),
-	    m_export_correspond_dir,
-	    this);
+	    *messageDb, accountInfo, m_export_correspond_dir, dbId, this);
 
 	correspondence_overview->exec();
 	storeExportPath();
 }
-
-
 
 
 /* ========================================================================= */
@@ -6812,7 +6866,8 @@ void MainWindow::showHelp(void)
 /*
  * Export message into as ZFO file dialogue.
  */
-void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
+void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
+    qint64 dmID, const QStandardItem *accountItem)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6831,11 +6886,30 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 		    "ZFO was not successful!"));
 		return;
 	}
+	qint64 dmId;
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb;
+	if (accountItem) {
+		messageDb = accountMessageDb(accountItem);
+	} else {
+		messageDb = accountMessageDb(0);
+	}
 	Q_ASSERT(0 != messageDb);
+
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
@@ -6867,20 +6941,25 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.message_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DDZ_%1.zfo").arg(dmId);
+		    fileName + ".zfo";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DDZ_%1.zfo").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".zfo";
 	}
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message as ZFO file"), fileName, tr("ZFO file (*.zfo)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save message as ZFO file"), fileName,
+		    tr("ZFO file (*.zfo)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message \"%1\" to "
@@ -6971,7 +7050,8 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 /*
  * Export delivery information as ZFO file dialog.
  */
-void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
+void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
+ attachFileName, QString formatString, qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6991,10 +7071,25 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
 
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
+
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
@@ -7028,21 +7123,25 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    formatString,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, attachFileName);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DDZ_%1_info.zfo").arg(dmId);
+		    fileName + ".zfo";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DDZ_%1_info.zfo").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".zfo";
 	}
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as ZFO file"), fileName,
-	    tr("ZFO file (*.zfo)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save delivery info as ZFO file"), fileName,
+		    tr("ZFO file (*.zfo)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
@@ -7079,7 +7178,8 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath)
 /*
  * Export delivery information as PDF file dialogue.
  */
-void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
+void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
+    QString attachFileName, QString formatString, qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7099,9 +7199,25 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
+
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
@@ -7135,20 +7251,24 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    formatString,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, attachFileName);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("DD_%1.pdf").arg(dmId);
+		    fileName + ".pdf";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("DD_%1.pdf").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save delivery info as PDF file"), fileName,
-	    tr("PDF file (*.pdf)"));
-	//, QString(), 0, QFileDialog::DontUseNativeDialog);
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save delivery info as PDF file"), fileName,
+		    tr("PDF file (*.pdf)"));
+		//, QString(), 0, QFileDialog::DontUseNativeDialog);
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message delivery "
@@ -7183,7 +7303,8 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath)
 /*
  * Export selected message envelope as PDF file dialog.
  */
-void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
+void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
+    qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7203,9 +7324,25 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		return;
 	}
 
-	qint64 dmId = msgIdx.data().toLongLong();
+	qint64 dmId;
+
+	if (dmID == -1) {
+		dmId = msgIdx.data().toLongLong();
+	} else {
+		dmId = dmID;
+	}
+
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
+
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIndex.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = accountInfo.userName();
+	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
@@ -7237,19 +7374,23 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		}
 	}
 
-	QString fileName;
+	QString fileName = createFilenameFromFormatString(
+		    globPref.message_filename_format,
+		    pair.first, pair.second, QString::number(dmId), dbId,
+		    userName, "");
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    QString("OZ_%1.pdf").arg(dmId);
+		    fileName + ".pdf";
 	} else {
-		fileName = attachPath + QDir::separator() +
-		    QString("OZ_%1.pdf").arg(dmId);
+		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save message envelope as PDF file"), fileName,
-	    tr("PDF file (*.pdf)"));
+	if (dmID == -1) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save message envelope as PDF file"), fileName,
+		    tr("PDF file (*.pdf)"));
+	}
 
 	if (fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Export of message "
@@ -7264,7 +7405,6 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath)
 		storeExportPath();
 	}
 
-	QString userName = accountUserName();
 	QList<QString> accountData =
 	    m_accountDb.getUserDataboxInfo(userName + "___True");
 
@@ -8885,4 +9025,175 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	}
 
 	return str;
+}
+
+
+/* ========================================================================= */
+/*
+ * Show message time stamp expiration dialogue.
+ */
+void MainWindow::showMsgTmstmpExpirDialog(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QModelIndex acntTopIdx = ui->accountList->currentIndex();
+	acntTopIdx = AccountModel::indexTop(acntTopIdx);
+	const AccountModel::SettingsMap accountInfo =
+	    acntTopIdx.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	QStandardItem *accountItem = m_accountModel.itemFromIndex(acntTopIdx);
+
+	QString dlgTitleText(tr("Time stamp expiration checking"));
+	QString questionText(tr("Do you want to check for messages "
+	    "with expiring time stamps in account '%1' (user name '%2')?")
+	        .arg(accountInfo.accountName()).arg(accountInfo.userName()));
+	QString checkBoxText(
+	    tr("Check for expiring time stamps also in remaining accounts."));
+	QString detailText(tr("Note: Checking in all accounts can be slow. "
+	        "The action cannot be aborted."));
+
+	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	    questionText, checkBoxText, detailText, this);
+	int retVal = yesNoCheckDlg->exec();
+
+	/* Process the selected account. */
+	showStatusTextPermanently(tr("Checking time stamps in account '%1'...")
+	    .arg(accountInfo.accountName()));
+	checkMsgsTmstmpExpiration(accountItem, accountInfo.accountName());
+
+	if (retVal == YesNoCheckboxDialog::YesChecked) {
+		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
+			const QModelIndex index(m_accountModel.index(i, 0));
+			if (index == acntTopIdx) {
+				/* Skip the selected account. */
+				continue;
+			}
+			accountItem = m_accountModel.itemFromIndex(index);
+			const AccountModel::SettingsMap accountInfo =
+			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			showStatusTextPermanently(
+			    tr("Checking time stamps in account '%1'...")
+			        .arg(accountInfo.accountName()));
+			checkMsgsTmstmpExpiration(accountItem,
+			    accountInfo.accountName());
+		}
+	}
+	statusBar->clearMessage();
+}
+
+
+/* ========================================================================= */
+/*
+ * Check messages time stamp expiration for account.
+ */
+void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
+	const QString &accountName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QStringList expirMsg;
+	QStringList errorMsg;
+
+	MessageDb *messageDb = accountMessageDb(accountItem);
+	Q_ASSERT(0 != messageDb);
+
+	QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
+	int msgCnt = msgIdList.count();
+
+	for (int i = 0; i < msgCnt; ++i) {
+		QByteArray tstData =
+		    messageDb->msgsTimestampRaw(msgIdList.at(i).toLongLong());
+		if (tstData.isEmpty()) {
+			errorMsg.append(msgIdList.at(i));
+			continue;
+		}
+		if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
+		    globPref.timestamp_expir_before_days)) {
+			expirMsg.append(msgIdList.at(i));
+		}
+	}
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowTitle(tr("Time stamp expiration check results"));
+
+	QString infoText = tr("Time stamp expiration check "
+	    "in account '%1' finished with result:").arg(accountName)
+	    + "<br/><br/>" +
+	    tr("Total of messages in database: %1").arg(msgCnt)
+	    + "<br/><b>" +
+	    tr("Messages with time stamp expiring within %1 days: %2")
+	        .arg(globPref.timestamp_expir_before_days)
+	        .arg(expirMsg.count())
+	    + "</b><br/>" +
+	    tr("Unchecked messages: %1").arg(errorMsg.count());
+	msgBox.setText(infoText);
+
+	if (!expirMsg.isEmpty() || !errorMsg.isEmpty()) {
+		infoText = tr("See details for more info...") + "<br/><br/>";
+		if (!expirMsg.isEmpty()) {
+			infoText += "<b>" +
+			    tr("Do you want to export the expiring messages to ZFO?")
+			    + "</b><br/><br/>";
+		}
+		msgBox.setInformativeText(infoText);
+
+		infoText.clear();
+		for (int i = 0; i < expirMsg.count(); ++i) {
+			infoText += tr("Time stamp of message %1 expires "
+			    "within specified interval.").arg(expirMsg.at(i));
+			if (((expirMsg.count() - 1) != i) ||
+			    errorMsg.count()) {
+				infoText += "\n";
+			}
+		}
+		for (int i = 0; i < errorMsg.count(); ++i) {
+			infoText += tr("Time stamp of message %1 "
+			    "is not present.").arg(errorMsg.at(i));
+			if ((expirMsg.count() - 1) != i) {
+				infoText += "\n";
+			}
+		}
+		msgBox.setDetailedText(infoText);
+
+		if (!expirMsg.isEmpty()) {
+			msgBox.setStandardButtons(QMessageBox::Yes
+			    | QMessageBox::No);
+			msgBox.setDefaultButton(QMessageBox::No);
+		} else {
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+		}
+	} else {
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+	}
+
+	if (QMessageBox::Yes == msgBox.exec()) {
+		exportExpirMessagesToZFO(expirMsg, accountItem);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Export messages with expired time stamp to ZFO.
+ */
+void MainWindow::exportExpirMessagesToZFO(const QStringList &expirMsg,
+    const QStandardItem *accountItem)
+/* ========================================================================= */
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Export ZFO"), m_on_export_zfo_activate,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (newDir.isEmpty()) {
+		return;
+	}
+
+	for (int i = 0; i < expirMsg.count(); ++i) {
+		exportSelectedMessageAsZFO(newDir, expirMsg.at(i).toLongLong(),
+		    accountItem);
+	}
 }

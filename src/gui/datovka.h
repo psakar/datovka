@@ -421,22 +421,30 @@ private slots:
 	/*!
 	 * @brief Export message into as ZFO file dialog.
 	 */
-	void exportSelectedMessageAsZFO(const QString &attachPath = QString());
+	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
+	    qint64 dmID = -1, const QStandardItem *accountItem = NULL);
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
 	 */
-	void exportDeliveryInfoAsZFO(const QString &attachPath = QString());
+	void exportDeliveryInfoAsZFO(const QString &attachPath = QString(),
+	    QString attachFileName = QString(),
+	    QString formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
 	 */
-	void exportDeliveryInfoAsPDF(const QString &attachPath = QString());
+	void exportDeliveryInfoAsPDF(const QString &attachPath = QString(),
+	    QString attachFileName = QString(),
+	    QString formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialog.
 	 */
-	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString());
+	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
+	    qint64 dmID = -1);
 
 	/*!
 	 * @brief Open selected message in external application.
@@ -609,12 +617,23 @@ private slots:
 	 */
 	void msgAdvancedDlgFinished(int result);
 
+	/*!
+	 * @brief Show message timestamp expiration dialog.
+	 */
+	void showMsgTmstmpExpirDialog(void);
+
 private:
 
 	QThread *m_syncAcntThread;
 	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
+
+	/*!
+	 * @brief Check message time stamp expiration for account.
+	 */
+	void checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
+	    const QString &accountName);
 
 	/*!
 	 * @brief Mark all received messages in the current working account.
@@ -986,6 +1005,12 @@ private:
 	 */
 	bool getUserInfoFromLogin(const QModelIndex &acntTopIdx,
 	    const QString &userName);
+
+	/*!
+	 * @brief Export message with expired time stamp to ZFO.
+	 */
+	void exportExpirMessagesToZFO(const QStringList &expirMsg,
+	    const QStandardItem *accountItem);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

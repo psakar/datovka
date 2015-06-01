@@ -657,6 +657,13 @@ public:
 	    int messageType);
 
 	/*!
+	 * @brief Return all message ID from database.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsFromDB(void) const;
+
+	/*!
 	 * @brief Check whether whole message is stored in database.
 	 *
 	 * @param[in] dmId  Message identifier.
@@ -823,6 +830,15 @@ public:
 	 *     Empty byte array on error.
 	 */
 	QByteArray msgsTimestampRaw(qint64 dmId) const;
+
+	/*!
+	 * @brief Returns message acceptance date (in local time)
+	 * and annotation.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Message acceptance date and annotation.
+	 */
+	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
 
 	static
 	const QVector<QString> receivedItemIds;
