@@ -603,57 +603,51 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		} else {
 			iconPath = ICON_16x16_PATH "datovka-ok.png";
 			resStr += YES;
-
-			detailStr = "<b>" + QObject::tr("Time") + ": </b> " +
-			    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
-			    tst.timeZone().abbreviation(tst) + "<br/>";
-
-			QString o, ou, n, c;
-			signingCertIssuerInfo(m_tstDER, o, ou, n, c);
-
-			detailStr += "<b>" + QObject::tr("Issuer") +
-			    ": </b><br/>";
-			if (!o.isEmpty()) {
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Organisation") + ": " + o +
-				    "<br/>";
-			}
-			if (!ou.isEmpty()) {
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Organisational unit") + ": " +
-				     ou + "<br/>";
-			}
-			if (!n.isEmpty()) {
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Name") + ": " + n + "<br/>";
-			}
-			if (!c.isEmpty()) {
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Country") + ": " + c + "<br/>";
-			}
-
-			QDateTime incept, expir;
-			if (signingCertTimes(m_tstDER, incept, expir)) {
-				detailStr += "<b>" + QObject::tr("Validity") +
-				    ": </b><br/>";
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Valid from") + ": " +
-				    incept.toString("dd.MM.yyyy hh:mm:ss") +
-				    " " +
-				    incept.timeZone().abbreviation(incept) +
-				    "<br/>";
-				detailStr += "&nbsp;&nbsp;" +
-				    QObject::tr("Valid to") + ": " +
-				    expir.toString("dd.MM.yyyy hh:mm:ss") +
-				    " " +
-				    expir.timeZone().abbreviation(expir) +
-				    "<br/>";
-			}
-
-			this->tDetail->setAlignment(Qt::AlignLeft);
-			this->tDetail->setTextFormat(Qt::RichText);
-			this->tDetail->setText(detailStr);
 		}
+
+		detailStr = "<b>" + QObject::tr("Time") + ": </b> " +
+		    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
+		    tst.timeZone().abbreviation(tst) + "<br/>";
+
+		QString o, ou, n, c;
+		signingCertIssuerInfo(m_tstDER, o, ou, n, c);
+
+		detailStr += "<b>" + QObject::tr("Issuer") + ": </b><br/>";
+		if (!o.isEmpty()) {
+			detailStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Organisation") + ": " + o + "<br/>";
+		}
+		if (!ou.isEmpty()) {
+			detailStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Organisational unit") + ": " + ou +
+			    "<br/>";
+		}
+		if (!n.isEmpty()) {
+			detailStr += "&nbsp;&nbsp;" + QObject::tr("Name") +
+			    ": " + n + "<br/>";
+		}
+		if (!c.isEmpty()) {
+			detailStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Country") + ": " + c + "<br/>";
+		}
+
+		QDateTime incept, expir;
+		if (signingCertTimes(m_tstDER, incept, expir)) {
+			detailStr += "<b>" + QObject::tr("Validity") +
+			    ": </b><br/>";
+			detailStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Valid from") + ": " +
+			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    incept.timeZone().abbreviation(incept) + "<br/>";
+			detailStr += "&nbsp;&nbsp;" +
+			    QObject::tr("Valid to") + ": " +
+			    expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    expir.timeZone().abbreviation(expir) + "<br/>";
+		}
+
+		this->tDetail->setAlignment(Qt::AlignLeft);
+		this->tDetail->setTextFormat(Qt::RichText);
+		this->tDetail->setText(detailStr);
 	}
 
 	this->tImage->setIcon(QIcon(iconPath));
