@@ -54,6 +54,7 @@ IF EXIST packages (
 @echo =================================
 @echo Build Datovka normal (v%VERSION%)  
 @echo =================================  
+mingw32-make.exe clean
 qmake.exe datovka.pro -r -spec win32-g++
 mingw32-make.exe -j 2
 mingw32-make.exe clean
@@ -99,6 +100,7 @@ del %file%
 @echo ===================================
 @echo Build Datovka portable (v%VERSION%) 
 @echo ===================================  
+mingw32-make.exe clean
 qmake.exe datovka.pro -r -spec win32-g++ PORTABLE_APPLICATION=1 
 mingw32-make.exe -j 2
 mingw32-make.exe clean
