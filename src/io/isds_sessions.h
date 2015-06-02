@@ -219,7 +219,16 @@ struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
 inline
 QString isdsLongMessage(const struct isds_ctx *context)
 {
+#ifdef WIN32
+	/* The function returns strings in local encoding. */
+	return QString::fromLocal8Bit(isds_long_message(context));
+	/*
+	 * TODO -- Is there a mechanism how to force the local encoding
+	 * into libisds to be UTF-8?
+	 */
+#else /* !WIN32 */
 	return QString::fromUtf8(isds_long_message(context));
+#endif /* WIN32 */
 }
 
 #endif /* _ISDS_SESSIONS_H_ */
