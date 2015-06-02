@@ -1197,7 +1197,7 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResults.isPDZ = (this->recipientTableWidget->
 		    item(i, 3)->text() == tr("yes")) ? true : false;
 		sendMsgResults.status = (int) status;
-		sendMsgResults.errInfo = isds_long_message(isdsSessions.session(m_accountInfo.userName()));
+		sendMsgResults.errInfo = isdsLongMessage(isdsSessions.session(m_accountInfo.userName()));
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {

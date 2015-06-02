@@ -345,7 +345,7 @@ void DlgDsSearch::searchDataBox(void)
 	case IE_INVAL:
 	case IE_INVALID_CONTEXT:
 		QMessageBox::information(this, tr("Search result"),
-		    isds_long_message(isdsSessions.session(m_userName)),
+		    isdsLongMessage(isdsSessions.session(m_userName)),
 		    QMessageBox::Ok);
 		goto fail;
 		break;
@@ -359,7 +359,7 @@ void DlgDsSearch::searchDataBox(void)
 	case IE_XML:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It is not possible find databox because") + ":\n\n" +
-		    isds_long_message(isdsSessions.session(m_userName)),
+		    isdsLongMessage(isdsSessions.session(m_userName)),
 		    QMessageBox::Ok);
 		goto fail;
 		break;
