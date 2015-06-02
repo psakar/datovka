@@ -421,7 +421,7 @@ qdatovka_error Worker::downloadMessageList(const QModelIndex &acntTopIdx,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (status != IE_SUCCESS) {
-		errMsg = isds_long_message(isdsSessions.session(
+		errMsg = isdsLongMessage(isdsSessions.session(
 		    accountInfo.userName()));
 		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_list_free(&messageList);
@@ -830,7 +830,7 @@ qdatovka_error Worker::downloadMessage(const QModelIndex &acntTopIdx,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (IE_SUCCESS != status) {
-		errMsg = isds_long_message(
+		errMsg = isdsLongMessage(
 		    isdsSessions.session(accountInfo.userName()));
 		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_message_free(&message);

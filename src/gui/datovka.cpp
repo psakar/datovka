@@ -7770,7 +7770,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	QString isdsMsg =
-	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -7953,7 +7953,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	QString isdsMsg =
-	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8079,7 +8079,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	QString isdsMsg =
-	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8201,7 +8201,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	QString isdsMsg =
-	    isds_long_message(isdsSessions.session(accountInfo.userName()));
+	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8285,7 +8285,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
 		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    QString(), otpres);
 
-		isdsMsg = isds_long_message(
+		isdsMsg = isdsLongMessage(
 		    isdsSessions.session(accountInfo.userName()));
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
@@ -8363,7 +8363,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
 		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
 		    otpcode, otpres);
 
-		isdsMsg = isds_long_message(
+		isdsMsg = isdsLongMessage(
 		    isdsSessions.session(accountInfo.userName()));
 
 		isdsSessions.setSessionTimeout(accountInfo.userName(),
@@ -9016,7 +9016,7 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	isds_list_free(&history);
 
 	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_long_message(
+		qDebug() << status << isdsLongMessage(
 		    isdsSessions.session(accountInfo.userName()));
 		return str;
 	}

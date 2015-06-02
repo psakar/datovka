@@ -212,4 +212,14 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
 struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
     const QString &fName, int zfoType);
 
+
+/*!
+ * @brief Wraps the isds_long_message().
+ */
+inline
+QString isdsLongMessage(const struct isds_ctx *context)
+{
+	return QString::fromUtf8(isds_long_message(context));
+}
+
 #endif /* _ISDS_SESSIONS_H_ */
