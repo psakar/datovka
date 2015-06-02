@@ -1,3 +1,23 @@
+4.3.0 / 2015-06-02
+ * Added missing license statement into the NSIS installer script.
+ * Code restructuring in the signature details dialogue.
+ * The remaining credit is shown when sending a commercial message.
+ * Changes in the message search dialogue. The searching is performed
+   according to separate words rather than whole strings (e.g. when searching
+   according to message subjects).
+ * The application can now deal with accounts with restricted privileges.
+   Accounts having only read/write access can be created and used.
+ * The default name of the exported/saved files can be configured in the
+   settings dialogue.
+ * The user can search for messages with expiring/expired time stamps. The
+   interval can be set in the preferences dialogue.
+ * The preferences dialogue has been re-designed to accommodate the newly
+   introduced settings.
+ * Time stamp information are shown in the signature details dialogue even if
+   the expiration fails.
+ * Fixed bug. On Windows, the error messages obtained from libisds were
+   interpreted in wrong encoding causing garbage characters to show up.
+
 4.2.3 / 2015-04-30
  * Disabled OpenSSL lock de-initialisation as it may cause the application to
    crash on exit.
