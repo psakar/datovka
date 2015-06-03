@@ -7524,7 +7524,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	MessageDb *messageDb = accountMessageDb(0);
 	Q_ASSERT(0 != messageDb);
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
