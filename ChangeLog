@@ -1,4 +1,4 @@
-4.3.0 / 2015-06-02
+4.3.0 / 2015-06-03
  * Added missing license statement into the NSIS installer script.
  * Code restructuring in the signature details dialogue.
  * The remaining credit is shown when sending a commercial message.
@@ -17,6 +17,8 @@
    the expiration fails.
  * Fixed bug. On Windows, the error messages obtained from libisds were
    interpreted in wrong encoding causing garbage characters to show up.
+ * Fixed bug. Libisds didn't return any error description strings when locale
+   wasn't set properly. Default locale is being set when missing.
 
 4.2.3 / 2015-04-30
  * Disabled OpenSSL lock de-initialisation as it may cause the application to

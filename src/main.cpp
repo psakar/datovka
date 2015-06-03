@@ -22,6 +22,9 @@
  */
 
 
+#ifndef WIN32
+#include <clocale>
+#endif /* !WIN32 */
 #include <cstdlib>
 #include <QApplication>
 #include <QCommandLineParser>
@@ -52,6 +55,25 @@ int main(int argc, char *argv[])
 	/* Log warnings. */
 	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
+
+#ifndef WIN32
+	{
+		QProcessEnvironment env =
+		    QProcessEnvironment::systemEnvironment();
+		QString lang = env.value("LANG");
+		if (lang.isEmpty() || ("c" == lang.toLower())) {
+#define LANG_DEF "en_GB.UTF-8"
+			logWarning("The LANG environment variable "
+			    "is missing or unset. Setting to '%s'.\n",
+			    LANG_DEF);
+			if (NULL == setlocale(LC_ALL, LANG_DEF)) {
+				logError("Setting locale to '%s' failed.\n",
+				    LANG_DEF);
+			}
+#undef LANG_DEF
+		}
+	}
+#endif /* !WIN32 */
 
 	/* TODO -- Make the following assignments configurable. */
 	QCoreApplication::setApplicationName("Datovka");
