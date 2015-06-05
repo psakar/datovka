@@ -67,8 +67,14 @@ if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/zlib*
 
-	./configure --prefix=${BUILTDIR} --static --archs="-arch i386"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --static"
+
+	./configure ${CONFOPTS} --archs="-arch i386"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -84,8 +90,14 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/expat*
 
-	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+
+	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -101,8 +113,14 @@ if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libtool*
 
-	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+
+	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -118,8 +136,14 @@ if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libiconv*
 
-	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+
+	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -135,8 +159,16 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libxml2*
 
-	./configure --without-python --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386" --with-iconv="${BUILTDIR}"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --without-python"
+	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
+
+	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -152,8 +184,18 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/gettext*
 
-	./configure --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386" CXXFLAGS="-arch i386" --with-libxml2-prefix="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include" LDFLAGS="-L${BUILTDIR}/lib"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
+	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386" \
+	    CPPFLAGS="-I${BUILTDIR}/include" \
+	    LDFLAGS="-L${BUILTDIR}/lib"
 	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -169,9 +211,21 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
 
-	# --disable-shared
-	./configure --enable-ipv6 --with-darwinssl --without-axtls --disable-ldap --prefix="${BUILTDIR}" CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" LDFLAGS="-arch i386 -isysroot ${ISYSROOT}"
-	#make ##&& make install || exit 1
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-ipv6"
+	CONFOPTS="${CONFOPTS} --with-darwinssl"
+	CONFOPTS="${CONFOPTS} --without-axtls"
+	CONFOPTS="${CONFOPTS} --disable-ldap"
+
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT}"
+	make && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -210,8 +264,24 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libisds*
 
-	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-debug"
+	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
+	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
+	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
 	make && make install || exit 1
+
+	unset CONFOPTS
 
 	if [ -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
 		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
@@ -226,9 +296,25 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 		git checkout "${LIBISDS_BRANCH}"
 	fi
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-debug"
+	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
+	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
-	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --disable-shared CFLAGS="-arch i386 -isysroot ${ISYSROOT}" CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
+	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
 	make && make install || exit 1
+
+	unset CONFOPTS
 
 	if [ -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
 		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
