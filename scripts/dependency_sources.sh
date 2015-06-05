@@ -7,7 +7,7 @@ _LIBICONV_ARCHIVE="libiconv-1.14.tar.gz"
 _LIBXML2_ARCHIVE="libxml2-2.9.2.tar.gz"
 _GETTEXT_ARCHIVE="gettext-0.19.4.tar.xz"
 
-_LIBCURL_ARCHIVE="curl-7.41.0.tar.gz"
+_LIBCURL_ARCHIVE="curl-7.42.1.tar.gz"
 _OPENSSL_ARCHIVE="openssl-1.0.1m.tar.gz"
 
 _LIBISDS_ARCHIVE="libisds-0.10.tar.xz"
