@@ -36,6 +36,7 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/gui/datovka.h"
+#include "src/gui/dlg_view_zfo.h"
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
 #include "src/io/message_db.h"
@@ -44,6 +45,24 @@
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
 #define SAVE_CONF_OPT "save-conf"
+
+
+/* ========================================================================= */
+static
+int showZfo(const QString &fileName)
+/* ========================================================================= */
+{
+	if (fileName.isEmpty()) {
+		return -1;
+	}
+
+	QDialog *viewDialog = new DlgViewZfo(fileName, 0);
+	viewDialog->exec();
+
+	delete viewDialog;
+
+	return 0;
+}
 
 
 /* ========================================================================= */

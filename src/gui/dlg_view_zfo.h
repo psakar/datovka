@@ -107,8 +107,12 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	DlgViewZfo(const isds_message *isdsMsg, int zfoType,
-	    QWidget *parent = 0);
+	DlgViewZfo(const QString &zfoFileName, QWidget *parent = 0);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgViewZfo(void);
 
 	/*
 	 * TODO -- Signature checking.
@@ -147,6 +151,11 @@ private slots:
 
 private:
 	/*!
+	 * @brief Loads ZFO file.
+	 */
+	void parseZfoFile(const QString &zfoFileName);
+
+	/*!
 	 * @brief Returns selected attachment index.
 	 */
 	QModelIndex selectedAttachmentIndex(void) const;
@@ -171,7 +180,7 @@ private:
 	    const void *tstDER, size_t tstSize);
 
 
-	const isds_message *m_message; /*!< ISDS message pointer copy. */
+	isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
 	 * (char *) m_message->raw
 	 *     m_message->raw_length
