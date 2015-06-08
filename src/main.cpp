@@ -179,6 +179,7 @@ int main(int argc, char *argv[])
 		logInfo("Setting logging verbosity to value '%d'.\n", value);
 		globLog.setLogVerbosity(value);
 	}
+	QStringList cmdLineFileNames = parser.positionalArguments();
 
 	qint64 start, stop, diff;
 	start = QDateTime::currentMSecsSinceEpoch();
@@ -246,11 +247,12 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	qDebug() << "GUI main thread: " << QThread::currentThreadId();
+	logDebugLv0NL("GUI main thread: %p.", QThread::currentThreadId());
 
 	QTranslator qtTranslator, appTranslator;
 
-	qDebug() << "App path : " << app.applicationDirPath();
+	logDebugLv0NL("App path: '%s'.",
+	    app.applicationDirPath().toUtf8().constData());
 
 	/* Load localisation. */
 	{
@@ -337,11 +339,19 @@ int main(int argc, char *argv[])
 	crtdtTbl.reloadLocalisedDescription();
 	msgcrtdtTbl.reloadLocalisedDescription();
 
-	MainWindow mainwin;
-	mainwin.show();
-
-	int ret;
-	ret = app.exec();
+	int ret = 0;
+	if (cmdLineFileNames.isEmpty()) {
+		MainWindow mainwin;
+		mainwin.show();
+		ret = app.exec();
+	} else {
+		foreach (const QString &fileName, cmdLineFileNames) {
+			ret = showZfo(fileName);
+			if (0 != ret) {
+				break;
+			}
+		}
+	}
 
 	stop = QDateTime::currentMSecsSinceEpoch();
 	diff = stop - start;
@@ -356,5 +366,5 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	return ret;
+	return (0 == ret) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
