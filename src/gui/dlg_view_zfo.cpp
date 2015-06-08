@@ -39,6 +39,7 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
+#include "src/log/log.h"
 #include "src/gui/dlg_import_zfo.h"
 
 #define COL_NUM 2
@@ -211,21 +212,32 @@ QByteArray AttachmentModel::attachmentData(int indexRow) const
 /*
  * Constructor.
  */
-DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, int zfoType,
-    QWidget *parent)
+DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
-    m_message(isdsMsg),
-    m_zfoType(zfoType),
+    m_message(NULL),
     m_attachmentModel(0)
 {
 	setupUi(this);
 
-	Q_ASSERT(NULL != m_message);
+	/* TODO -- Load message ZFO. */
+	parseZfoFile(zfoFileName);
+
+	if(NULL == m_message) {
+		/* Just show error message. */
+		this->attachmentTable->hide();
+		envelopeTextEdit->setHtml(
+		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
+		    tr("Cannot parse the content of file '%1'.")
+		        .arg(zfoFileName));
+		envelopeTextEdit->setReadOnly(true);
+		signaturePushButton->setEnabled(false);
+		return;
+	}
 
 	/* TODO -- Adjust splitter sizes. */
 
-	if (m_zfoType == ImportZFODialog::IMPORT_DELIVERY_ZFO) {
+	if (ImportZFODialog::IMPORT_DELIVERY_ZFO == m_zfoType) {
 		this->attachmentTable->hide();
 		envelopeTextEdit->setHtml(
 		    deliveryDescriptionHtml(
@@ -237,7 +249,7 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, int zfoType,
 	} else {
 		this->attachmentTable->setEnabled(true);
 		this->attachmentTable->show();
-		m_attachmentModel.setModelData(isdsMsg);
+		m_attachmentModel.setModelData(m_message);
 		envelopeTextEdit->setHtml(
 		    messageDescriptionHtml(m_attachmentModel.rowCount(),
 		        m_message->raw, m_message->raw_length,
@@ -260,6 +272,19 @@ DlgViewZfo::DlgViewZfo(const isds_message *isdsMsg, int zfoType,
 	/* Signature details. */
 	connect(signaturePushButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
+}
+
+
+/* ========================================================================= */
+/*
+ * Destructor.
+ */
+DlgViewZfo::~DlgViewZfo(void)
+/* ========================================================================= */
+{
+	if (NULL != m_message) {
+		isds_message_free(&m_message);
+	}
 }
 
 
@@ -310,6 +335,39 @@ void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
 	//qDebug() << "Attachment double clicked.";
 
 	openSelectedAttachment();
+}
+
+
+/* ========================================================================= */
+/*
+ * Loads ZFO file.
+ */
+void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
+/* ========================================================================= */
+{
+	/* Logging purposes. */
+	struct isds_ctx *dummy_session = isds_ctx_create();
+	if (NULL == dummy_session) {
+		logError("%s\n", "Cannot create dummy ISDS session.");
+		goto fail;
+	}
+
+	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
+	if (NULL == m_message) {
+		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
+		if (NULL == m_message) {
+			logError("Cannot parse file '%s'.\n",
+			    zfoFileName.toUtf8().constData());
+			goto fail;
+		}
+	}
+
+fail:
+	if (NULL != dummy_session) {
+		isds_ctx_free(&dummy_session);
+	}
 }
 
 

@@ -6001,60 +6001,20 @@ void MainWindow::viewMessageFromZFO(void)
 {
 	debugSlotCall();
 
-	struct isds_ctx *dummy_session = NULL; /* Logging purposes. */
-	struct isds_message *message = NULL;
-	int zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
-	QDialog *viewDialog;
-
 	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), m_on_export_zfo_activate,
 	    tr("ZFO file (*.zfo)"));
 
 	if (fileName.isEmpty()) {
-		goto fail;
+		return;
 	}
 
 	m_on_export_zfo_activate =
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 
-	dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		qDebug() << "Cannot create dummy ISDS session.";
-
-	}
-
-	message = loadZfoFile(dummy_session, fileName,
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-	if (NULL == message) {
-		message = loadZfoFile(dummy_session, fileName,
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
-		    zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
-		if (NULL == message) {
-			qDebug() << "Cannot parse file" << fileName;
-			QMessageBox::warning(this,
-			    tr("Content parsing error"),
-			    tr("Cannot parse the content of ") + fileName + ".",
-			    QMessageBox::Ok);
-			goto fail;
-		}
-	}
-
 	/* Generate dialog showing message content. */
-	viewDialog = new DlgViewZfo(message, zfoType, this);
+	QDialog *viewDialog = new DlgViewZfo(fileName, this);
 	viewDialog->exec();
-
-	isds_message_free(&message);
-	isds_ctx_free(&dummy_session);
-
-	return;
-
-fail:
-	if (NULL != message) {
-		isds_message_free(&message);
-	}
-	if (NULL != dummy_session) {
-		isds_ctx_free(&dummy_session);
-	}
 }
 
 
