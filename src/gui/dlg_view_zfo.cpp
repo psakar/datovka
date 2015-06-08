@@ -224,7 +224,14 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 	parseZfoFile(zfoFileName);
 
 	if(NULL == m_message) {
-		/* Nothing to do. */
+		/* Just show error message. */
+		this->attachmentTable->hide();
+		envelopeTextEdit->setHtml(
+		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
+		    tr("Cannot parse the content of file '%1'.")
+		        .arg(zfoFileName));
+		envelopeTextEdit->setReadOnly(true);
+		signaturePushButton->setEnabled(false);
 		return;
 	}
 
@@ -353,10 +360,6 @@ void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
 		if (NULL == m_message) {
 			logError("Cannot parse file '%s'.\n",
 			    zfoFileName.toUtf8().constData());
-			QMessageBox::warning(this,
-			    tr("Content parsing error"),
-			    tr("Cannot parse the content of ") + zfoFileName +
-			    ".", QMessageBox::Ok);
 			goto fail;
 		}
 	}
