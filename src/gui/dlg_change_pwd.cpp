@@ -47,6 +47,7 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 void DlgChangePwd::initPwdChangeDialog(void)
 /* ========================================================================= */
 {
+	this->userNameLneEdit->setText(m_accountInfo.userName());
 	this->accountLineEdit->setText(m_boxId);
 	connect(this->generateButton, SIGNAL(clicked()), this,
 	    SLOT(generatePassword()));
@@ -173,7 +174,6 @@ void DlgChangePwd::changePassword(void)
 
 	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
 	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
-
 		struct isds_otp *otp = NULL;
 		otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 		memset(otp, 0, sizeof(struct isds_otp));
@@ -203,20 +203,24 @@ void DlgChangePwd::changePassword(void)
 		    NULL, &refnumber);
 	}
 
-	QString result(refnumber);
+	free(refnumber);
 
 	if (status == IE_SUCCESS) {
 		QMessageBox::information(this, tr("Password has been changed"),
-		    tr("Password has been changed successfully...") + "\n" +
-		    tr("Reference number: ") + result,
+		    tr("Password has been changed successfully.")
+		    + "\n\n" +
+		    tr("Please, set your new password in your account "
+		        "settings and restarts the application."),
 		    QMessageBox::Ok);
 
 		AccountModel::globAccounts[m_userName].setPassword(
 		    this->newPwdLineEdit->text());
 	} else {
 		QMessageBox::warning(this, tr("Password error"),
-		    tr("An error occurred while password was changed")
-		    + "\n" + tr("ErrorType: ") + isds_strerror(status),
+		    tr("An error occurred while password was changed.")
+		    + "\n" + tr("ISDS returns: ")
+		    + isds_long_message(
+		        isdsSessions.session(m_accountInfo.userName())),
 		    QMessageBox::Ok);
 	}
 }
