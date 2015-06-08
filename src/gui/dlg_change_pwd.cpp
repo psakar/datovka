@@ -120,7 +120,8 @@ QString DlgChangePwd::generateRandomString(void)
 		QChar nextChar = possibleCharacters.at(index);
 		randomString.append(nextChar);
 	}
-	return randomString;
+	/* set one digit as last char */
+	return randomString + "0";
 }
 
 
@@ -207,10 +208,12 @@ void DlgChangePwd::changePassword(void)
 
 	if (status == IE_SUCCESS) {
 		QMessageBox::information(this, tr("Password has been changed"),
-		    tr("Password has been changed successfully.")
+		    tr("Password has been changed "
+		        "successfully on the server ISDS.")
 		    + "\n\n" +
-		    tr("Please, set your new password in your account "
-		        "settings and restarts the application."),
+		    tr("Please, set your new password in the account "
+		        "settings and restarts the application. "
+		        "Otherwise you can not connect to your databox."),
 		    QMessageBox::Ok);
 
 		AccountModel::globAccounts[m_userName].setPassword(
@@ -218,9 +221,11 @@ void DlgChangePwd::changePassword(void)
 	} else {
 		QMessageBox::warning(this, tr("Password error"),
 		    tr("An error occurred while password was changed.")
-		    + "\n" + tr("ISDS returns: ")
+		    + "\n\n" + tr("ISDS returns: ")
 		    + isds_long_message(
-		        isdsSessions.session(m_accountInfo.userName())),
+		        isdsSessions.session(m_accountInfo.userName()))
+		    + "\n\n" +
+		    tr("You have to fix the problem and try to again."),
 		    QMessageBox::Ok);
 	}
 }
@@ -228,9 +233,12 @@ void DlgChangePwd::changePassword(void)
 
 /* ========================================================================= */
 /*
- * Set of possilbe char to generation fo passsword
+ * Set of possilbe chars for generation of new passsword
  */
 const QString DlgChangePwd::possibleCharacters(
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-const int DlgChangePwd::randomStringLength = 10;
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "abcdefghijklmnopqrstuvwxyz"
+    "0123456789"
+    "!#$%&()*+,-.:=?@[]_{|}~");
+const int DlgChangePwd::randomStringLength = 9;
 /* ========================================================================= */
