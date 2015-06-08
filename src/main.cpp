@@ -139,6 +139,8 @@ int main(int argc, char *argv[])
 	    QObject::tr("level"));
 	parser.addOption(debugVerb);
 #endif /* DEBUG */
+	parser.addPositionalArgument("[zfo-file]",
+	    QObject::tr("ZFO file to be viewed."));
 	/* Process command-line arguments. */
 	parser.process(app);
 
