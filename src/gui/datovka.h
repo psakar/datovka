@@ -842,13 +842,6 @@ private:
 	QString createDatovkaBanner(const QString &version) const;
 
 	/*!
-	 * @brief Returns user name related to given account item.
-	 * TODO - If accountItem is 0 then currently selected account is
-	 *     processed.
-	 */
-	QString accountUserName(const QStandardItem *accountItem = 0) const;
-
-	/*!
 	 * @brief Get message db to selected account item.
 	 *
 	 * @note If accountItem is 0 then currently selected account is

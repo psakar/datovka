@@ -531,7 +531,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	const QStandardItem *accountItem =
 	    m_accountModel.itemFromIndex(current);
-	QString userName = accountUserName(accountItem);
 	MessageDb *messageDb = accountMessageDb(accountItem);
 	if (0 == messageDb) {
 		/* May occur on deleting last account. */
@@ -3381,31 +3380,6 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 	html += QString("<br><img src=") + ICON_128x128_PATH + "cznic.png />";
 	html += "</center>";
 	return html;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns user name related to given account item.
- */
-QString MainWindow::accountUserName(const QStandardItem *accountItem) const
-/* ========================================================================= */
-{
-	const QStandardItem *accountItemTop;
-
-	if (0 == accountItem) {
-		accountItem = m_accountModel.itemFromIndex(
-		    ui->accountList->selectionModel()->currentIndex());
-	}
-
-	accountItemTop = AccountModel::itemTop(accountItem);
-	Q_ASSERT(0 != accountItemTop);
-
-	const QString userName =
-	    accountItemTop->data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-
-	return userName;
 }
 
 
