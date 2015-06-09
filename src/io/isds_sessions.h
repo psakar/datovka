@@ -64,7 +64,7 @@ public:
 	/*!
 	 * @brief Returns associated session.
 	 */
-	struct isds_ctx * session(const QString &userName) const;
+	struct isds_ctx *session(const QString &userName) const;
 
 	/*!
 	 * @brief Ping of ISDS. Test if connection is active.

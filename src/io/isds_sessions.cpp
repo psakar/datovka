@@ -49,7 +49,7 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 	status = isds_init();
 	if (IE_SUCCESS != status) {
 		Q_ASSERT(0);
-		qWarning() << "Unsuccessful ISDS initialisation.";
+		logError("%s\n", "Unsuccessful ISDS initialisation.");
 		/* TODO -- What to do on failure? */
 	}
 
@@ -71,18 +71,18 @@ GlobIsdsSessions::~GlobIsdsSessions(void)
 
 		status = isds_logout(isdsSession);
 		if (IE_SUCCESS != status) {
-			qWarning() << "Error in ISDS logout procedure.";
+			logWarning("%s\n", "Error in ISDS logout procedure.");
 		}
 
 		status = isds_ctx_free(&isdsSession);
 		if (IE_SUCCESS != status) {
-			qDebug() << "Error freeing ISDS session.";
+			logWarning("%s\n", "Error freeing ISDS session.");
 		}
 	}
 
 	status = isds_cleanup();
 	if (IE_SUCCESS != status) {
-		qDebug() << "Unsuccessful ISDS clean-up.";
+		logWarning("%s\n", "Unsuccessful ISDS clean-up.");
 	}
 }
 
@@ -135,13 +135,15 @@ struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
 
 	isds_session = isds_ctx_create();
 	if (NULL == isds_session) {
-		qDebug() << "Error creating ISDS session.";
+		logError("Error creating ISDS session for user '%s'.\n",
+		    userName.toUtf8().constData());
 		goto fail;
 	}
 
 	status = isds_set_timeout(isds_session, connectionTimeoutMs);
 	if (IE_SUCCESS != status) {
-		qDebug() << "Error setting time-out.";
+		logError("Error setting time-out for user '%s'.\n",
+		    userName.toUtf8().constData());
 		goto fail;
 	}
 
@@ -152,7 +154,9 @@ fail:
 	if (NULL != isds_session) {
 		status = isds_ctx_free(&isds_session);
 		if (IE_SUCCESS != status) {
-			qDebug() << "Error freeing ISDS session.";
+			logWarning(
+			    "Error freeing ISDS session for user '%s'.\n",
+			    userName.toUtf8().constData());
 		}
 	}
 	return 0;
@@ -179,7 +183,8 @@ bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
 
 	status = isds_set_timeout(isds_session, timeoutMs);
 	if (IE_SUCCESS != status) {
-		logError("%s\n", "Error setting time-out.");
+		logError("Error setting time-out for user '%s'.\n",
+		    userName.toUtf8().constData());
 		return false;
 	}
 
@@ -232,7 +237,6 @@ isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
 	Q_ASSERT(!certPath.isEmpty());
 
 	isds_error status = IE_ERROR;
-
 
 	if (certPath.isNull() || certPath.isEmpty()) {
 		return status;
