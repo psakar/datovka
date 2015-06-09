@@ -53,6 +53,7 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	    SLOT(generatePassword()));
 	connect(this->showHideButton, SIGNAL(clicked()), this,
 	    SLOT(showHidePasswordLine()));
+
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	connect(this->newPwdLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -60,16 +61,28 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->NewPwdLineEdit2, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+	connect(this->secCodeLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(changePassword(void)));
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
-	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
+	this->secCodeLineEdit->setEnabled(false);
+	this->otpLabel->setEnabled(false);
+	this->smsPushButton->setEnabled(false);
+
+	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP) {
 		this->secCodeLineEdit->setEnabled(true);
-		this->label_7->setEnabled(true);
-	} else {
-		this->secCodeLineEdit->setEnabled(false);
-		this->label_7->setEnabled(false);
+		this->otpLabel->setText(tr("Enter security code:"));
+		this->otpLabel->setEnabled(true);
+	}
+
+	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
+		this->secCodeLineEdit->setEnabled(true);
+		this->smsPushButton->setEnabled(true);
+		this->otpLabel->setText(tr("Enter SMS code:"));
+		this->otpLabel->setEnabled(true);
+		connect(this->smsPushButton, SIGNAL(clicked()), this,
+		    SLOT(sendSmsCode()));
 	}
 
 	pingTimer = new QTimer(this);
@@ -134,10 +147,17 @@ void DlgChangePwd::checkInputFields(void)
 {
 	bool buttonEnabled = !this->currentPwdLineEdit->text().isEmpty() &&
 	    !this->newPwdLineEdit->text().isEmpty() &&
-	    this->newPwdLineEdit->text().length() > 7 &&
+	    this->newPwdLineEdit->text().length() >= PWD_MIN_LENGTH &&
 	    !this->NewPwdLineEdit2->text().isEmpty() &&
-	    this->NewPwdLineEdit2->text().length() > 7 &&
+	    this->NewPwdLineEdit2->text().length() >= PWD_MIN_LENGTH &&
 	    this->NewPwdLineEdit2->text() == this->newPwdLineEdit->text();
+
+	if (m_accountInfo.loginMethod() == LIM_HOTP ||
+	    m_accountInfo.loginMethod() == LIM_TOTP) {
+		buttonEnabled = buttonEnabled &&
+		    !this->secCodeLineEdit->text().isEmpty();
+	}
+
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
 	    buttonEnabled);
 }
@@ -159,6 +179,72 @@ void DlgChangePwd::showHidePasswordLine(void)
 		this->newPwdLineEdit->setEchoMode(QLineEdit::Password);
 		this->NewPwdLineEdit2->setEchoMode(QLineEdit::Password);
 		this->showHideButton->setText(tr("Show"));
+	}
+}
+
+/* ========================================================================= */
+/*
+ * Send SMS code request into ISDS
+ */
+void DlgChangePwd::sendSmsCode(void)
+/* ========================================================================= */
+{
+	/* show Premium SMS request dialog */
+	QMessageBox::StandardButton reply = QMessageBox::question(this,
+	    tr("SMS code for account ") + m_accountInfo.accountName(),
+	    tr("Account \"%1\" requires authentication via security code "
+	    "for connection to databox.").arg(m_accountInfo.accountName())
+	    + "<br/>" +
+	    tr("Security code will be sent you via Premium SMS.") +
+	    "<br/><br/>" +
+	    tr("Do you want to send Premium SMS with "
+	    "security code into your mobile phone?"),
+	    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+	if (reply == QMessageBox::No) {
+		return;
+	}
+
+	isds_error status;
+	char * refnumber = NULL;
+	struct isds_otp *otp = NULL;
+	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
+	memset(otp, 0, sizeof(struct isds_otp));
+	otp->method = OTP_TIME;
+	otp->otp_code = NULL;
+
+	status = isds_change_password(
+	    isdsSessions.session(m_accountInfo.userName()),
+	    this->currentPwdLineEdit->text().toUtf8().constData(),
+	    this->newPwdLineEdit->text().toUtf8().constData(),
+	    otp, &refnumber);
+
+	free(refnumber);
+	free(otp->otp_code);
+	free(otp);
+
+	if (IE_PARTIAL_SUCCESS == status) {
+		QMessageBox::information(this, tr("Enter SMS security code"),
+		    tr("SMS security code for account \"%1\"<br/>"
+		    "has been sent on your mobile phone...")
+		    .arg(m_accountInfo.accountName())
+		     + "<br/><br/>" +
+		    tr("Enter SMS security code for account")
+		    + "<br/><b>"
+		    + m_accountInfo.accountName()
+		    + " </b>(" + m_accountInfo.userName() + ").",
+		    QMessageBox::Ok);
+		this->otpLabel->setText(tr("Enter SMS code:"));
+		this->smsPushButton->setEnabled(false);
+	} else {
+		QMessageBox::critical(this, tr("Login error"),
+		    tr("An error occurred while preparing "
+		    "request for SMS with OTP security code.") +
+		    "<br/><br/>" +
+		    tr("Please try again later or you have to use the "
+		    "official web interface of Datové schránky for "
+		    "access to your data box."),
+		    QMessageBox::Ok);
 	}
 }
 
@@ -218,13 +304,22 @@ void DlgChangePwd::changePassword(void)
 
 		AccountModel::globAccounts[m_userName].setPassword(
 		    this->newPwdLineEdit->text());
+
+		/* TODO - delete and create new
+		 * isds context with new settings
+		 */
 	} else {
+
+		QString error = tr("Error: ") + isds_strerror(status);
+		QString isdslog = isds_long_message(
+			isdsSessions.session(m_accountInfo.userName()));
+		if (!isdslog.isEmpty()) {
+			error = tr("ISDS returns: ") + isdslog;
+		}
+
 		QMessageBox::warning(this, tr("Password error"),
 		    tr("An error occurred while password was changed.")
-		    + "\n\n" + tr("ISDS returns: ")
-		    + isds_long_message(
-		        isdsSessions.session(m_accountInfo.userName()))
-		    + "\n\n" +
+		    + "\n\n" + error + "\n\n" +
 		    tr("You have to fix the problem and try to again."),
 		    QMessageBox::Ok);
 	}
@@ -240,5 +335,5 @@ const QString DlgChangePwd::possibleCharacters(
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789"
     "!#$%&()*+,-.:=?@[]_{|}~");
-const int DlgChangePwd::randomStringLength = 9;
+const int DlgChangePwd::randomStringLength = PWD_MIN_LENGTH;
 /* ========================================================================= */

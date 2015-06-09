@@ -25,6 +25,7 @@
 #ifndef _DLG_CHANGE_PWD_H_
 #define _DLG_CHANGE_PWD_H_
 
+#define PWD_MIN_LENGTH 8 // min length of pwd is 8 chars
 
 #include <QDialog>
 #include <QTimer>
@@ -48,6 +49,7 @@ private slots:
 	void changePassword(void);
 	void checkInputFields(void);
 	void pingIsdsServer(void);
+	void sendSmsCode(void);
 
 private:
 	QTimer *pingTimer;
