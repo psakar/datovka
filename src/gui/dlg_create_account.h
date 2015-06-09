@@ -50,8 +50,8 @@ public:
 	};
 
 	/* TODO -- What is the purpose of @acntTopIdx ? */
-	DlgCreateAccount(QTreeView &accountList, QModelIndex acntTopIdx,
-	    Action action, QWidget *parent = 0);
+	DlgCreateAccount(const QString &userName, Action action,
+	    QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -60,14 +60,14 @@ private slots:
 	void checkInputFields(void);
 
 signals:
+	void changedAccountProperties(QString);
 	void getAccountUserDataboxInfo(AccountModel::SettingsMap);
 
 private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);
 
-	QTreeView &m_accountList;
-	QModelIndex m_acntTopIdx;
+	const QString m_userName;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;

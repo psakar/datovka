@@ -4498,8 +4498,8 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *newAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	   QModelIndex(), DlgCreateAccount::ACT_ADDNEW, this);
+	QDialog *newAccountDialog = new DlgCreateAccount(QString(),
+	   DlgCreateAccount::ACT_ADDNEW, this);
 
 	connect(newAccountDialog,
 	    SIGNAL(getAccountUserDataboxInfo(AccountModel::SettingsMap)),
@@ -4648,8 +4648,8 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *editAccountDialog = new DlgCreateAccount(*(ui->accountList),
-	    QModelIndex(), DlgCreateAccount::ACT_EDIT, this);
+	QDialog *editAccountDialog = new DlgCreateAccount(userName,
+	    DlgCreateAccount::ACT_EDIT, this);
 
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
@@ -7676,7 +7676,7 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
 
 	if (pwd.isNull() || pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_PWD,
+		    accountInfo.userName(), DlgCreateAccount::ACT_PWD,
 		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			pwd = AccountModel::globAccounts[
@@ -7784,7 +7784,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 
 	if (certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_CERT,
+		    accountInfo.userName(), DlgCreateAccount::ACT_CERT,
 		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			certPath = AccountModel::globAccounts[
@@ -7901,8 +7901,8 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 
 	if (pwd.isEmpty() || certPath.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), acntTopIdx,
-		    DlgCreateAccount::ACT_CERTPWD, this);
+		    accountInfo.userName(), DlgCreateAccount::ACT_CERTPWD,
+		    this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			certPath = AccountModel::globAccounts[
 			    accountInfo.userName()].p12File();
@@ -8020,7 +8020,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 	QString idBox;
 
 	QDialog *editAccountDialog = new DlgCreateAccount(
-	    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_IDBOX, this);
+	    accountInfo.userName(), DlgCreateAccount::ACT_IDBOX, this);
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		certPath = AccountModel::globAccounts[accountInfo.userName()]
 		    .p12File();
@@ -8136,8 +8136,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
 	if (pwd.isNull() ||
 	    pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    *(ui->accountList), acntTopIdx, DlgCreateAccount::ACT_PWD,
-		    this);
+		    accountInfo.userName(), DlgCreateAccount::ACT_PWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
 			pwd = AccountModel::globAccounts[
 			    accountInfo.userName()].password();
@@ -8336,8 +8335,6 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
-		QStandardItem *topItem =
-		    m_accountModel.itemFromIndex(acntTopIdx);
 		AccountModel::globAccounts[userName]._setPwdExpirDlgShown(true);
 
 		QString dbDateTimeString = m_accountDb.getPwdExpirFromDb(
@@ -8350,7 +8347,8 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
 			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
 				if (QMessageBox::Yes ==
-				    showDialogueAboutPwdExpir(topItem->text(),
+				    showDialogueAboutPwdExpir(
+				        accountInfo.accountName(),
 				        userName, daysTo,
 				        dbDateTime)) {
 					showStatusTextWithTimeout(
