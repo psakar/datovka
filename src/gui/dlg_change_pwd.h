@@ -39,8 +39,8 @@ class DlgChangePwd : public QDialog, public Ui::ChangePwd {
 	Q_OBJECT
 
 public:
-	DlgChangePwd(const QString &boxId, QTreeView &accountList,
-	    const AccountModel::SettingsMap &accountInfo, QWidget *parent = 0);
+	DlgChangePwd(const QString &boxId, const QString &userName,
+	    QWidget *parent = 0);
 
 private slots:
 	void generatePassword(void);
@@ -61,9 +61,8 @@ private:
 	static
 	const int randomStringLength;
 
-	QTreeView &m_accountList;
-	const AccountModel::SettingsMap &m_accountInfo;
 	const QString m_boxId;
+	const QString m_userName;
 };
 
 

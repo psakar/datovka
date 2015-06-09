@@ -118,10 +118,9 @@ enum MessageDirection {
 /*
  * Defined roles across the application.
  */
-#define ROLE_ACNT_CONF_SETTINGS (Qt::UserRole + 1) /*
-                                                    * Used to access
-                                                    * configuration data.
-                                                    */
+#define ROLE_ACNT_USER_NAME (Qt::UserRole + 1) /*
+                                                * Used to access the user name.
+                                                */
 #define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 2) /*
                                                   * Used to store number of
                                                   * unread messages.

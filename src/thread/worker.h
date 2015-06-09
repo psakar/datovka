@@ -152,7 +152,7 @@ public:
 	 * @brief Download attachments, envelope and raw for message.
 	 */
 	static
-	qdatovka_error downloadMessage(const QModelIndex &acntTopIdx,
+	qdatovka_error downloadMessage(const QString &userName,
 	    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
 	    MessageDb &messageDb, QString &errMsg, const QString &progressLabel,
 	    QProgressBar *pBar, Worker *worker);
@@ -169,7 +169,7 @@ public:
 	 *     account index.
 	 */
 	static
-	qdatovka_error downloadMessageList(const QModelIndex &acntTopIdx,
+	qdatovka_error downloadMessageList(const QString &userName,
 	    enum MessageDirection msgDirect, MessageDb &messageDb, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
 	    int &total, int &news);
@@ -184,29 +184,28 @@ private:
 	*/
 	static
 	bool getMessageState(enum MessageDirection msgDirect,
-	    const QModelIndex &acntTopIdx, qint64 dmId, bool signedMsg,
+	    const QString &userName, qint64 dmId, bool signedMsg,
 	    MessageDb &messageDb);
 
 	/*!
 	 * @brief Download delivery info for message.
 	 */
 	static
-	bool getDeliveryInfo(const QModelIndex &acntTopIdx,
+	bool getDeliveryInfo(const QString &userName,
 	    qint64 dmId, bool signedMsg, MessageDb &messageDb);
 
 	/*!
 	 * @brief Get additional info about author (sender)
 	 */
 	static
-	bool getMessageAuthor(const QModelIndex &acntTopIdx,
+	bool getMessageAuthor(const QString &userName,
 	    qint64 dmId, MessageDb &messageDb);
 
 	/*!
 	 * @brief Set message as downloaded from ISDS.
 	 */
 	static
-	bool markMessageAsDownloaded(const QModelIndex &acntTopIdx,
-	    qint64 dmId);
+	bool markMessageAsDownloaded(const QString &userName, qint64 dmId);
 
 	/*!
 	 * @brief Update message envelope.

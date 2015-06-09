@@ -101,15 +101,17 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	const QStandardItem *item = model->itemFromIndex(index);
 	const QStandardItem *itemTop = AccountModel::itemTop(item);
 
+	const QString userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    AccountModel::globAccounts[userName];
 
 	switch (m_action) {
 	case ACT_EDIT:
 		this->setWindowTitle(tr("Update account") + " "
 		    + itemTop->text());
 		this->accountLineEdit->setText(itemTop->text());
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(userName);
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_PWD:
@@ -119,7 +121,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
@@ -131,7 +133,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -143,7 +145,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		break;
@@ -154,7 +156,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -293,6 +295,7 @@ void DlgCreateAccount::saveAccount(void)
 	    m_accountList.model());
 	QModelIndex index;
 	QStandardItem *itemTop;
+	QString userName;
 	AccountModel::SettingsMap itemSettings;
 
 	/* set account index, itemTop and map itemSettings for account */
@@ -305,7 +308,9 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(index.isValid());
 		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
 		Q_ASSERT(0 != itemTop);
-		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
+		Q_ASSERT(!userName.isEmpty());
+		itemSettings = AccountModel::globAccounts[userName];
 		break;
 	case ACT_PWD:
 	case ACT_CERT:
@@ -315,7 +320,9 @@ void DlgCreateAccount::saveAccount(void)
 		Q_ASSERT(index.isValid());
 		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
 		Q_ASSERT(0 != itemTop);
-		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
+		Q_ASSERT(!userName.isEmpty());
+		itemSettings = AccountModel::globAccounts[userName];
 		break;
 	default:
 		itemTop = NULL;
@@ -365,7 +372,8 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
 		itemTop->setText(this->accountLineEdit->text());
-		itemTop->setData(itemSettings, ROLE_ACNT_CONF_SETTINGS);
+		itemTop->setData(userName, ROLE_ACNT_USER_NAME);
+		AccountModel::globAccounts[userName] = itemSettings;
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
