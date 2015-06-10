@@ -66,12 +66,6 @@ struct sendMsgStruct {
 	QStringList dmAttachment;
 };
 
-
-int runSendMsgService(const QString &service, const QString &paramString);
-
-int checkAndSetValues(const QString &service, const QString &label,
-    const QString &value);
-
 int runService(const QString &service, const QString &paramString);
 
 #endif // CLI_H

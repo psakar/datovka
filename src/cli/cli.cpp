@@ -165,13 +165,12 @@ int runServiceTest(const QString &service, const QString &paramString)
 }
 
 /* ========================================================================= */
-QStringList parseAttachment(const QString &files)
+const QStringList parseAttachment(const QString &files)
 /* ========================================================================= */
 {
 	if (files.isEmpty()) {
 		return QStringList();
 	}
-
 	return files.split(";");
 }
 
