@@ -904,16 +904,15 @@ private:
 	    bool showDialog);
 
 	/*!
-	 * @brief Login to ISDS server by username and password only.
+	 * @brief Login to ISDS server by user name and password only.
 	 */
-	bool loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
-	   const AccountModel::SettingsMap &accountInfo, bool showDialog);
+	bool loginMethodUserNamePwd(const QString &userName, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by username, password and OTP code.
 	 */
-	bool loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
-	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
+	bool loginMethodUserNamePwdOtp(const QString &userName,
+	    bool showDialog);
 
 	/*!
 	 * @brief Converts PKCS #12 certificate into PEM format.

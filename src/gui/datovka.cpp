@@ -7663,14 +7663,22 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 /*
 * Login to ISDS server by username and password only.
 */
-bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::loginMethodUserNamePwd(const QString &userName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName(),
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[userName];
+
+	if (!isdsSessions.holdsSession(userName)) {
+		isdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -7678,11 +7686,10 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
 
 	if (pwd.isNull() || pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
-		    accountInfo.userName(), DlgCreateAccount::ACT_PWD,
-		    this);
+		    userName, DlgCreateAccount::ACT_PWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
-			pwd = AccountModel::globAccounts[
-			    accountInfo.userName()].password();
+//			pwd = AccountModel::globAccounts[userName].password();
+			pwd = accountInfo.password();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -7692,15 +7699,13 @@ bool MainWindow::loginMethodUserNamePwd(const QModelIndex &acntTopIdx,
 		}
 	}
 
-	status = isdsLoginUserName(
-	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, accountInfo.isTestAccount());
+	status = isdsLoginUserName(isdsSessions.session(userName),
+	    userName, pwd, accountInfo.isTestAccount());
 
-	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-	QString isdsMsg =
-	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
+	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8123,11 +8128,19 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 /*
 * Login to ISDS server by username, password and OTP code.
 */
-bool MainWindow::loginMethodUserNamePwdOtp(const QModelIndex &acntTopIdx,
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
+
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(accountInfo.userName())) {
 		isdsSessions.createCleanSession(accountInfo.userName(),
@@ -8369,8 +8382,7 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		loginRet = loginMethodUserNamePwd(acntTopIdx, accountInfo,
-		    showDialog);
+		loginRet = loginMethodUserNamePwd(userName, showDialog);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
@@ -8397,8 +8409,7 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 
 	/* Login method based username, password and OTP */
 	} else {
-		loginRet = loginMethodUserNamePwdOtp(acntTopIdx, accountInfo,
-		    showDialog);
+		loginRet = loginMethodUserNamePwdOtp(userName, showDialog);
 	}
 
 	if (!loginRet) {
@@ -8470,7 +8481,7 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		ret = loginMethodUserNamePwd(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwd(accountInfo.userName(),
 		    showDialog);
 
 	/* Login method based on certificate only */
@@ -8498,7 +8509,7 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based username, password and OTP */
 	} else {
-		ret = loginMethodUserNamePwdOtp(QModelIndex(), accountInfo,
+		ret = loginMethodUserNamePwdOtp(accountInfo.userName(),
 		    showDialog);
 	}
 
