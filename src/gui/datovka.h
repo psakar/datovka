@@ -105,6 +105,11 @@ private slots:
 	void datovkaVersionResponce(QNetworkReply* reply);
 
 	/*!
+	 * @brief Updates the account model according to the change properties.
+	 */
+	void updateAccountListEntry(const QString &userName);
+
+	/*!
 	 * @brief Verify if is a connection to ISDS and databox
 	 * exists for a new account.
 	 */

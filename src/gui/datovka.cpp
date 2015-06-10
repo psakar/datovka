@@ -4651,6 +4651,9 @@ void MainWindow::manageAccountProperties(void)
 	QDialog *editAccountDialog = new DlgCreateAccount(userName,
 	    DlgCreateAccount::ACT_EDIT, this);
 
+	connect(editAccountDialog, SIGNAL(changedAccountProperties(QString)),
+	    this, SLOT(updateAccountListEntry(QString)));
+
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
@@ -8555,6 +8558,29 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		    "finished and try again."));
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.exec();
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Updates the account model according to the change properties.
+ */
+void MainWindow::updateAccountListEntry(const QString &userName)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	int row = ui->accountList->model()->rowCount();
+	QModelIndex index;
+	for (int i = 0; i < row; i++) {
+		index = ui->accountList->model()->index(i,0);
+		if (userName == index.data(ROLE_ACNT_USER_NAME).toString()) {
+			QStandardItem *accountItem =
+			    m_accountModel.itemFromIndex(index);
+			accountItem->setText(
+			    AccountModel::globAccounts[userName].accountName());
+		}
 	}
 }
 
