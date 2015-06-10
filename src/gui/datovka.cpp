@@ -5332,23 +5332,20 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 /*
  * Get data about logged in user and his box.
  */
-bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
-    const QString &userName)
+bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QString username = userName;
-
-	if (acntTopIdx.isValid()) {
-		username = acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!username.isEmpty());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
 	}
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
 	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
-	    username), &db_owner_info);
+	    userName), &db_owner_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -5356,7 +5353,6 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	username = username + "___True";
 	QString birthDate;
 	if ((NULL != db_owner_info->birthInfo) &&
 	    (NULL != db_owner_info->birthInfo->biDate)) {
@@ -5368,8 +5364,10 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 		ic = QString(db_owner_info->ic).toInt();
 	}
 
+	QString key = userName + "___True";
+
 	m_accountDb.insertAccountIntoDb(
-	    username,
+	    key,
 	    db_owner_info->dbID,
 	    convertDbTypeToString(*db_owner_info->dbType),
 	    ic,
@@ -5418,27 +5416,23 @@ bool MainWindow::getOwnerInfoFromLogin(const QModelIndex &acntTopIdx,
 /*
  * Get information about password expiration date.
  */
-bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
-    const QString &userName)
+bool MainWindow::getPasswordInfoFromLogin(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QString username = userName;
 	isds_error status;
 	struct timeval *expiration = NULL;
 	QString expirDate;
 	bool retval = false;
 
-	if (acntTopIdx.isValid()) {
-		username = acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!username.isEmpty());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
 	}
 
-	QString key = username + "___True";
-
-	status = isds_get_password_expiration(
-	    isdsSessions.session(username), &expiration);
+	status = isds_get_password_expiration(isdsSessions.session(userName),
+	    &expiration);
 
 	if (IE_SUCCESS == status) {
 		if (NULL != expiration) {
@@ -5451,6 +5445,8 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
 	} else {
 		expirDate.clear();
 	}
+
+	QString key = userName + "___True";
 
 	m_accountDb.setPwdExpirIntoDb(key, expirDate);
 
@@ -5465,23 +5461,20 @@ bool MainWindow::getPasswordInfoFromLogin(const QModelIndex &acntTopIdx,
 /*
 * Get data about logged in user.
 */
-bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
-    const QString &userName)
+bool MainWindow::getUserInfoFromLogin(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QString username = userName;
-
-	if (acntTopIdx.isValid()) {
-		username = acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!username.isEmpty());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
 	}
 
 	struct isds_DbUserInfo *db_user_info = NULL;
 
 	isds_error status = isds_GetUserInfoFromLogin(isdsSessions.session(
-	    username), &db_user_info);
+	    userName), &db_user_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -5489,10 +5482,10 @@ bool MainWindow::getUserInfoFromLogin(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	username = username + "___True";
+	QString key = userName + "___True";
 
 	m_accountDb.insertUserIntoDb(
-	    username,
+	    key,
 	    convertUserTypeToString(*db_user_info->userType),
 	    (int)*db_user_info->userPrivils,
 	    db_user_info->personName ?
@@ -8412,22 +8405,22 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		return loginRet;
 	}
 
-	if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
+	if (!getOwnerInfoFromLogin(userName)) {
 		logWarning("Owner information for account '%s' (login %s) "
 		    "could not be acquired.\n",
-		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+	if (!getUserInfoFromLogin(userName)) {
 		logWarning("User information for account '%s' (login %s) "
 		    "could not be acquired.\n",
-		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getPasswordInfoFromLogin(acntTopIdx, QString())) {
+	if (!getPasswordInfoFromLogin(userName)) {
 		logWarning("Password information for account '%s' (login %s) "
 		    "could not be acquired.\n",
-		    acntTopIdx.data().toString().toUtf8().constData(),
+		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
 
@@ -8445,11 +8438,11 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		qWarning() << "Missing user entry for" << userName
 		    << "in account db.";
 
-		if (!getOwnerInfoFromLogin(acntTopIdx, QString())) {
+		if (!getOwnerInfoFromLogin(userName)) {
 			return false;
 		}
 
-		if (!getUserInfoFromLogin(acntTopIdx, QString())) {
+		if (!getUserInfoFromLogin(userName)) {
 			return false;
 		}
 
@@ -8508,16 +8501,13 @@ bool MainWindow::firstConnectToIsds(
 	}
 
 	if (ret) {
-		if (!getOwnerInfoFromLogin(QModelIndex(),
-		    accountInfo.userName())) {
+		if (!getOwnerInfoFromLogin(accountInfo.userName())) {
 			//TODO: return false;
 		}
-		if (!getUserInfoFromLogin(QModelIndex(),
-		    accountInfo.userName())) {
+		if (!getUserInfoFromLogin(accountInfo.userName())) {
 			//TODO: return false;
 		}
-		if (!getPasswordInfoFromLogin(QModelIndex(),
-		    accountInfo.userName())) {
+		if (!getPasswordInfoFromLogin(accountInfo.userName())) {
 			//TODO: return false;
 		}
 	}
