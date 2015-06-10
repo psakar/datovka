@@ -1438,8 +1438,9 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
  * Create filename based on format string.
  */
 QString createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
-    QString dbID, QString usename, QString attachFilename)
+    QDateTime dmAcceptanceTime, QString dmAnnotation, const QString &dmID,
+    const QString &dbID, const QString &userName,
+    const QString &attachFilename)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -1447,19 +1448,12 @@ QString createFilenameFromFormatString(QString pattern,
 	// known atrributes
 	// {"%Y","%M","%D","%h","%m","%i","%s","%d","%u","%f"};
 
-	if (pattern.isEmpty() || pattern.isNull()) {
+	if (pattern.isEmpty()) {
 		pattern = DEFAULT_TMP_FORMAT;
 	}
-/*
-	if (attachFilename.isEmpty() || attachFilename.isNull()) {
-		attachFilename = tr("filename");
-	} else {
-		QFileInfo filename(attachFilename);
-		attachFilename = filename.completeBaseName();
-	}
-*/
+
 	if (!dmAcceptanceTime.isValid()) {
-		dmAcceptanceTime.currentDateTime();
+		dmAcceptanceTime = QDateTime::currentDateTime();
 	}
 
 	QPair<QString, QString> pair;
@@ -1490,7 +1484,7 @@ QString createFilenameFromFormatString(QString pattern,
 	pair.second = dbID;
 	knowAtrrList.append(pair);
 	pair.first = "%u";
-	pair.second = usename;
+	pair.second = userName;
 	knowAtrrList.append(pair);
 	pair.first = "%f";
 	pair.second = attachFilename;

@@ -484,7 +484,8 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
  * @brief Create filename based on format string.
  */
 QString createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmID,
-    QString dbID, QString usename, QString attachFilename);
+    QDateTime dmAcceptanceTime, QString dmAnnotation, const QString &dmID,
+    const QString &dbID, const QString &userName,
+    const QString &attachFilename);
 
 #endif /* _COMMON_H_ */
