@@ -47,7 +47,7 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 void DlgChangePwd::initPwdChangeDialog(void)
 /* ========================================================================= */
 {
-	this->userNameLneEdit->setText(m_accountInfo.userName());
+	this->userNameLneEdit->setText(m_userName);
 	this->accountLineEdit->setText(m_boxId);
 	connect(this->generateButton, SIGNAL(clicked()), this,
 	    SLOT(generatePassword()));
@@ -152,8 +152,10 @@ void DlgChangePwd::checkInputFields(void)
 	    this->NewPwdLineEdit2->text().length() >= PWD_MIN_LENGTH &&
 	    this->NewPwdLineEdit2->text() == this->newPwdLineEdit->text();
 
-	if (m_accountInfo.loginMethod() == LIM_HOTP ||
-	    m_accountInfo.loginMethod() == LIM_TOTP) {
+	Q_ASSERT(!m_userName.isEmpty());
+
+	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
+	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
 		buttonEnabled = buttonEnabled &&
 		    !this->secCodeLineEdit->text().isEmpty();
 	}
@@ -189,11 +191,15 @@ void DlgChangePwd::showHidePasswordLine(void)
 void DlgChangePwd::sendSmsCode(void)
 /* ========================================================================= */
 {
+	Q_ASSERT(!m_userName.isEmpty());
+
 	/* show Premium SMS request dialog */
 	QMessageBox::StandardButton reply = QMessageBox::question(this,
-	    tr("SMS code for account ") + m_accountInfo.accountName(),
+	    tr("SMS code for account ") +
+	    AccountModel::globAccounts[m_userName].accountName(),
 	    tr("Account \"%1\" requires authentication via security code "
-	    "for connection to databox.").arg(m_accountInfo.accountName())
+	    "for connection to databox.")
+	        .arg(AccountModel::globAccounts[m_userName].accountName())
 	    + "<br/>" +
 	    tr("Security code will be sent you via Premium SMS.") +
 	    "<br/><br/>" +
@@ -213,8 +219,7 @@ void DlgChangePwd::sendSmsCode(void)
 	otp->method = OTP_TIME;
 	otp->otp_code = NULL;
 
-	status = isds_change_password(
-	    isdsSessions.session(m_accountInfo.userName()),
+	status = isds_change_password(isdsSessions.session(m_userName),
 	    this->currentPwdLineEdit->text().toUtf8().constData(),
 	    this->newPwdLineEdit->text().toUtf8().constData(),
 	    otp, &refnumber);
@@ -227,12 +232,12 @@ void DlgChangePwd::sendSmsCode(void)
 		QMessageBox::information(this, tr("Enter SMS security code"),
 		    tr("SMS security code for account \"%1\"<br/>"
 		    "has been sent on your mobile phone...")
-		    .arg(m_accountInfo.accountName())
+		    .arg(AccountModel::globAccounts[m_userName].accountName())
 		     + "<br/><br/>" +
 		    tr("Enter SMS security code for account")
 		    + "<br/><b>"
-		    + m_accountInfo.accountName()
-		    + " </b>(" + m_accountInfo.userName() + ").",
+		    + AccountModel::globAccounts[m_userName].accountName()
+		    + " </b>(" + m_userName + ").",
 		    QMessageBox::Ok);
 		this->otpLabel->setText(tr("Enter SMS code:"));
 		this->smsPushButton->setEnabled(false);
@@ -309,10 +314,10 @@ void DlgChangePwd::changePassword(void)
 		 * isds context with new settings
 		 */
 	} else {
-
+		Q_ASSERT(!m_userName.isEmpty());
 		QString error = tr("Error: ") + isds_strerror(status);
 		QString isdslog = isds_long_message(
-			isdsSessions.session(m_accountInfo.userName()));
+			isdsSessions.session(m_userName));
 		if (!isdslog.isEmpty()) {
 			error = tr("ISDS returns: ") + isdslog;
 		}
