@@ -105,6 +105,11 @@ private slots:
 	void datovkaVersionResponce(QNetworkReply* reply);
 
 	/*!
+	 * @brief Updates the account model according to the change properties.
+	 */
+	void updateAccountListEntry(const QString &userName);
+
+	/*!
 	 * @brief Verify if is a connection to ISDS and databox
 	 * exists for a new account.
 	 */
@@ -840,13 +845,6 @@ private:
 	 * @brief Generate banner.
 	 */
 	QString createDatovkaBanner(const QString &version) const;
-
-	/*!
-	 * @brief Returns user name related to given account item.
-	 * TODO - If accountItem is 0 then currently selected account is
-	 *     processed.
-	 */
-	QString accountUserName(const QStandardItem *accountItem = 0) const;
 
 	/*!
 	 * @brief Get message db to selected account item.

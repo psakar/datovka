@@ -60,6 +60,9 @@ void AccountModel::SettingsMap::setDbDir(const QString &path)
 }
 
 
+QMap<QString, AccountModel::SettingsMap> AccountModel::globAccounts;
+
+
 /* ========================================================================= */
 /*
  * Empty account model constructor.
@@ -98,10 +101,10 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 #if 0
 	case Qt::DecorationRole:
 		if (nodeAccountTop == nodeType(index)) {
-			SettingsMap settingsMap =
-			    index.data(ROLE_ACNT_CONF_SETTINGS).toMap();
+			const QString userName =
+			    index.data(ROLE_ACNT_USER_NAME).toString();
 			qDebug() << "A001" << globPref.confDir();
-			if (!settingsMap.dbDir().isEmpty()) {
+			if (!globAccounts[userName].dbDir().isEmpty()) {
 				return QIcon(ICON_16x16_PATH "grey.png");
 			}
 		}
@@ -273,8 +276,9 @@ void AccountModel::saveToSettings(QSettings &settings) const
 	QString groupName;
 
 	for (int i = 0; i < this->rowCount(); ++i) {
-		const SettingsMap &itemSettings =
-		    this->item(i)->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		const QString userName =
+		    this->item(i)->data(ROLE_ACNT_USER_NAME).toString();
+		const SettingsMap &itemSettings = globAccounts[userName];
 
 		groupName = CREDENTIALS;
 		if (i > 0) {
@@ -343,7 +347,8 @@ void AccountModel::saveToSettings(QSettings &settings) const
 /*
  * Add account.
  */
-QModelIndex AccountModel::addAccount(const QString &name, const QVariant &data)
+QModelIndex AccountModel::addAccount(const QString &name,
+    const AccountModel::SettingsMap &settings)
 /* ========================================================================= */
 {
 	/* Defining a couple of items. */
@@ -361,7 +366,9 @@ QModelIndex AccountModel::addAccount(const QString &name, const QVariant &data)
 	QStandardItem *allSent = new QStandardItem(QObject::tr("Sent"));
 	allSent->setFlags(allSent->flags() & ~Qt::ItemIsEditable);
 
-	account->setData(data, ROLE_ACNT_CONF_SETTINGS);
+	Q_ASSERT(!settings.userName().isEmpty());
+	account->setData(settings.userName(), ROLE_ACNT_USER_NAME);
+	globAccounts[settings.userName()] = settings;
 
 	/* Account node is drawn bold in the data() method. */
 	account->setIcon(QIcon(ICON_3PARTY_PATH + QString("letter_16.png")));
@@ -547,7 +554,10 @@ AccountModel::SettingsMap AccountModel::settingsMap(QStandardItem *item)
 	QStandardItem *topItem = itemTop(item);
 
 	Q_ASSERT(0 != topItem);
-	return topItem->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	const QString userName = topItem->data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(userName == globAccounts[userName].userName());
+	return globAccounts[userName];
 }
 
 
@@ -563,7 +573,9 @@ void AccountModel::setSettingsMap(QStandardItem *item,
 	QStandardItem *topItem = itemTop(item);
 
 	Q_ASSERT(0 != topItem);
-	topItem->setData(map, ROLE_ACNT_CONF_SETTINGS);
+	Q_ASSERT(!map.userName().isEmpty());
+	globAccounts[map.userName()] = map;
+	topItem->setData(map.userName(), ROLE_ACNT_USER_NAME);
 }
 
 

@@ -29,12 +29,11 @@
 #include "src/models/accounts_model.h"
 
 
-DlgChangePwd::DlgChangePwd(const QString &boxId, QTreeView &accountList,
-    const AccountModel::SettingsMap &accountInfo, QWidget *parent)
+DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
+    QWidget *parent)
     : QDialog(parent),
-    m_accountList(accountList),
-    m_accountInfo(accountInfo),
-    m_boxId(boxId)
+    m_boxId(boxId),
+    m_userName(userName)
 {
 	setupUi(this);
 	initPwdChangeDialog();
@@ -63,8 +62,8 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(changePassword(void)));
 
-	if (m_accountInfo.loginMethod() == LIM_HOTP ||
-	    m_accountInfo.loginMethod() == "topt") {
+	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
+	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
 		this->secCodeLineEdit->setEnabled(true);
 		this->label_7->setEnabled(true);
 	} else {
@@ -87,7 +86,7 @@ void DlgChangePwd::initPwdChangeDialog(void)
 void DlgChangePwd::pingIsdsServer(void)
 /* ========================================================================= */
 {
-	if (isdsSessions.isConnectedToIsds(m_accountInfo.userName())) {
+	if (isdsSessions.isConnectedToIsds(m_userName)) {
 		qDebug() << "Connection to ISDS is alive :)";
 	} else {
 		qDebug() << "Connection to ISDS is dead :(";
@@ -172,14 +171,15 @@ void DlgChangePwd::changePassword(void)
 	isds_error status;
 	char * refnumber = NULL;
 
-	if (m_accountInfo.loginMethod() == LIM_HOTP ||
-	    m_accountInfo.loginMethod() == "topt") {
+	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
+	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
 
 		struct isds_otp *otp = NULL;
 		otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
 		memset(otp, 0, sizeof(struct isds_otp));
 
-		if (m_accountInfo.loginMethod() == LIM_HOTP) {
+		if (AccountModel::globAccounts[m_userName].loginMethod() ==
+		    LIM_HOTP) {
 			otp->method = OTP_HMAC;
 		} else {
 			otp->method = OTP_TIME;
@@ -189,8 +189,7 @@ void DlgChangePwd::changePassword(void)
 		    strdup(this->secCodeLineEdit->text().toUtf8().constData())
 		    : NULL;
 
-		status = isds_change_password(
-		    isdsSessions.session(m_accountInfo.userName()),
+		status = isds_change_password(isdsSessions.session(m_userName),
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    otp, &refnumber);
@@ -198,8 +197,7 @@ void DlgChangePwd::changePassword(void)
 		free(otp->otp_code);
 		free(otp);
 	} else {
-		status = isds_change_password(
-		    isdsSessions.session(m_accountInfo.userName()),
+		status = isds_change_password(isdsSessions.session(m_userName),
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    NULL, &refnumber);
@@ -213,14 +211,8 @@ void DlgChangePwd::changePassword(void)
 		    tr("Reference number: ") + result,
 		    QMessageBox::Ok);
 
-		AccountModel *model = dynamic_cast<AccountModel*>(
-		    m_accountList.model());
-		QModelIndex index = m_accountList.currentIndex();
-		QStandardItem *item = model->itemFromIndex(index);
-		QStandardItem *itemTop = AccountModel::itemTop(item);
-		AccountModel::SettingsMap itemSettings =
-		    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
-		itemSettings.setPassword(this->newPwdLineEdit->text());
+		AccountModel::globAccounts[m_userName].setPassword(
+		    this->newPwdLineEdit->text());
 	} else {
 		QMessageBox::warning(this, tr("Password error"),
 		    tr("An error occurred while password was changed")

@@ -30,12 +30,10 @@
 #include "src/models/accounts_model.h"
 
 
-DlgCreateAccount::DlgCreateAccount(QTreeView &accountList,
-    QModelIndex acntTopIdx, Action action,
+DlgCreateAccount::DlgCreateAccount(const QString &userName, Action action,
     QWidget *parent)
     : QDialog(parent),
-    m_accountList(accountList),
-    m_acntTopIdx(acntTopIdx),
+    m_userName(userName),
     m_action(action),
     m_loginmethod(0),
     m_certPath("")
@@ -89,72 +87,62 @@ void DlgCreateAccount::setCurrentAccountData(void)
 /* ========================================================================= */
 {
 	int itemindex;
-	QModelIndex index;
-	AccountModel *model = dynamic_cast<AccountModel *>(m_accountList.model());
 
-	if (ACT_EDIT == m_action) {
-		index = m_accountList.currentIndex();
-	} else  {
-		index = m_acntTopIdx;
-	}
-
-	const QStandardItem *item = model->itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-
+	Q_ASSERT(!m_userName.isEmpty());
 	const AccountModel::SettingsMap &itemSettings =
-	    itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+	    AccountModel::globAccounts[m_userName];
 
 	switch (m_action) {
 	case ACT_EDIT:
 		this->setWindowTitle(tr("Update account") + " "
-		    + itemTop->text());
-		this->accountLineEdit->setText(itemTop->text());
-		this->usernameLineEdit->setText(itemSettings.userName());
+		    + itemSettings.accountName());
+		this->accountLineEdit->setText(itemSettings.accountName());
+		this->usernameLineEdit->setText(m_userName);
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_PWD:
 		this->setWindowTitle(tr("Enter password for account") + " "
-		    + itemTop->text());
-		this->accountLineEdit->setText(itemTop->text());
+		    + itemSettings.accountName());
+		this->accountLineEdit->setText(itemSettings.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(m_userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
 		this->setWindowTitle(tr("Set certificate for account") + " "
-		    + itemTop->text());
-		this->accountLineEdit->setText(itemTop->text());
+		    + itemSettings.accountName());
+		this->accountLineEdit->setText(itemSettings.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(m_userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		this->setWindowTitle(tr("Enter password/certificate for account")
-		    + " " + itemTop->text());
-		this->accountLineEdit->setText(itemTop->text());
+		    + " " + itemSettings.accountName());
+		this->accountLineEdit->setText(itemSettings.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(m_userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_IDBOX:
 		this->setWindowTitle(tr("Enter ID of your databox for account")
-		    + " " + itemTop->text());
-		this->accountLineEdit->setText(itemTop->text());
+		    + " " + itemSettings.accountName());
+		this->accountLineEdit->setText(itemSettings.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(itemSettings.userName());
+		this->usernameLineEdit->setText(m_userName);
 		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -288,37 +276,26 @@ void DlgCreateAccount::saveAccount(void)
 {
 	debugSlotCall();
 
-	/* get current account model */
-	AccountModel *model = dynamic_cast<AccountModel*>(
-	    m_accountList.model());
-	QModelIndex index;
-	QStandardItem *itemTop;
 	AccountModel::SettingsMap itemSettings;
 
 	/* set account index, itemTop and map itemSettings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
-		itemTop = NULL;
 		break;
 	case ACT_EDIT:
-		index = m_accountList.currentIndex();
-		Q_ASSERT(index.isValid());
-		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
-		Q_ASSERT(0 != itemTop);
-		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		Q_ASSERT(!m_userName.isEmpty());
+		Q_ASSERT(m_userName == this->usernameLineEdit->text());
+		itemSettings = AccountModel::globAccounts[m_userName];
 		break;
 	case ACT_PWD:
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		index = m_acntTopIdx;
-		Q_ASSERT(index.isValid());
-		itemTop = AccountModel::itemTop(model->itemFromIndex(index));
-		Q_ASSERT(0 != itemTop);
-		itemSettings = itemTop->data(ROLE_ACNT_CONF_SETTINGS).toMap();
+		Q_ASSERT(!m_userName.isEmpty());
+		Q_ASSERT(m_userName == this->usernameLineEdit->text());
+		itemSettings = AccountModel::globAccounts[m_userName];
 		break;
 	default:
-		itemTop = NULL;
 		Q_ASSERT(0);
 		break;
 	}
@@ -364,8 +341,15 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		itemTop->setText(this->accountLineEdit->text());
-		itemTop->setData(itemSettings, ROLE_ACNT_CONF_SETTINGS);
+		/* TODO -- Update account model according to settings. */
+//		itemTop->setText(this->accountLineEdit->text());
+//		itemTop->setData(userName, ROLE_ACNT_USER_NAME);
+		AccountModel::globAccounts[m_userName] = itemSettings;
+		/*
+		 * Catching the following signal is required only when
+		 * ACT_EDIT was enabled.
+		 */
+		emit changedAccountProperties(m_userName);
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:

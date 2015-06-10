@@ -240,6 +240,15 @@ public:
 		}
 	};
 
+	/*!
+	 * @brief Holds account data related to account.
+	 *
+	 * @note The key is the userName. The user name is held by
+	 *     the top node.
+	 */
+	static
+	QMap<QString, SettingsMap> globAccounts;
+
 	/*
 	 * |
 	 * +- nodeAccountTop (account X)
@@ -309,7 +318,7 @@ public:
 	 * @brief Add account.
 	 */
 	QModelIndex addAccount(const QString &name,
-	    const QVariant &data = QVariant());
+	    const SettingsMap &settings);
 
 	/*!
 	 * @brief Returns node type.
