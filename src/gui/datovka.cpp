@@ -2718,7 +2718,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 
 		isds_error status;
 		if (!isdsSessions.isConnectedToIsds(userName)) {
-			if (!connectToIsds(acntTopIdx, true)) {
+			if (!connectToIsds(userName, true)) {
 				return Q_CONNECT_ERROR;
 			}
 		}
@@ -2852,7 +2852,7 @@ void MainWindow::synchroniseAllAccounts(void)
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
 		if (!isdsSessions.isConnectedToIsds(userName)) {
-			isConnectActive = connectToIsds(index, true);
+			isConnectActive = connectToIsds(userName, true);
 		}
 
 		if (isConnectActive) {
@@ -2915,7 +2915,7 @@ void MainWindow::synchroniseSelectedAccount(void)
 	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -2990,7 +2990,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	    accountTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(accountTopIndex, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -3043,7 +3043,7 @@ void MainWindow::processPendingWorkerJobs(void)
 	        .arg(AccountModel::globAccounts[userName].accountName()));
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(job.acntTopIdx, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -4415,7 +4415,7 @@ void MainWindow::openSendMessageDialog(int action)
 	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIndex, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -4610,7 +4610,7 @@ void MainWindow::changeAccountPassword(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -4902,7 +4902,7 @@ void MainWindow::findDatabox(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(index, true)) {
+		if (!connectToIsds(userName, true)) {
 			return;
 		}
 	}
@@ -5267,7 +5267,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	isds_error status;
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIdx, true)) {
+		if (!connectToIsds(userName, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -5801,7 +5801,7 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	    .arg(attachFileName));
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIdx, true)) {
+		if (!connectToIsds(userName, true)) {
 			return Q_CONNECT_ERROR;
 		}
 	}
@@ -6730,7 +6730,7 @@ int MainWindow::isImportMsgInISDS(const QString &zfoFile,
 	    accountIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(accountIndex, true)) {
+		if (!connectToIsds(userName, true)) {
 			return MSG_ISDS_ERROR;
 		}
 	}
@@ -6954,7 +6954,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 	    accountIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(accountIndex, true)) {
+		if (!connectToIsds(userName, true)) {
 			return false;
 		}
 	}
@@ -8322,19 +8322,16 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 /*
  * Connect to databox from exist account
  */
-bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
+bool MainWindow::connectToIsds(const QString &userName, bool showDialog)
 /* ========================================================================= */
 {
 	bool loginRet = false;
 
-	if (!acntTopIdx.isValid()) {
+	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	const QString userName =
-	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 	const AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
 
@@ -8924,7 +8921,7 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(acntTopIdx, true)) {
+		if (!connectToIsds(userName, true)) {
 			return str;
 		}
 	}

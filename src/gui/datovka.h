@@ -895,7 +895,7 @@ private:
 	/*!
 	 * @brief connect to ISDS databox from exist account
 	 */
-	bool connectToIsds(const QModelIndex &acntTopIdx, bool showDialog);
+	bool connectToIsds(const QString &userName, bool showDialog);
 
 	/*!
 	 * @brief connect to ISDS databox from new account
