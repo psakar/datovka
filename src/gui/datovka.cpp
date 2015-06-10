@@ -7677,7 +7677,7 @@ bool MainWindow::loginMethodUserNamePwd(const QString &userName,
 
 	QString pwd = accountInfo.password();
 
-	if (pwd.isNull() || pwd.isEmpty()) {
+	if (pwd.isEmpty()) {
 		QDialog *editAccountDialog = new DlgCreateAccount(
 		    userName, DlgCreateAccount::ACT_PWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
@@ -8165,12 +8165,10 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 	/* HOTP - dialog info */
 	QString msgTitle = tr("Enter OTP security code");
 	QString msgBody = tr("Account \"%1\" requires authentication via OTP "
-		    "<br/> security code for connection to databox.")
-		    .arg(accountInfo.accountName()) + "<br/><br/>" +
-		    tr("Enter OTP security code for account")
-		    + "<br/><b>"
-		    + accountInfo.accountName()
-		    + " </b>(" + userName + ").";
+	    "<br/>security code for connection to databox.")
+	    .arg(accountInfo.accountName()) + "<br/><br/>" +
+	    tr("Enter OTP security code for account") + "<br/><b>"
+	    + accountInfo.accountName() + " </b>(" + userName + ").";
 
 	isds_otp_resolution otpres = OTP_RESOLUTION_SUCCESS;
 
