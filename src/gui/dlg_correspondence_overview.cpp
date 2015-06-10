@@ -34,13 +34,12 @@
 /*
  * Constructor.
  */
-DlgCorrespondenceOverview::DlgCorrespondenceOverview(
-    const MessageDb &db,
-    const AccountModel::SettingsMap &accountInfo,
-    QString &exportCorrespondDir, const QString &dbId,  QWidget *parent) :
+DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDb &db,
+    const QString &userName, QString &exportCorrespondDir, const QString &dbId,
+    QWidget *parent) :
     QDialog(parent),
     m_messDb(db),
-    m_accountInfo(accountInfo),
+    m_userName(userName),
     m_exportCorrespondDir(exportCorrespondDir),
     m_dbId(dbId)
 /* ========================================================================= */
@@ -49,8 +48,11 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-	QString accountName = m_accountInfo.accountName()
-	    + " ("+ m_accountInfo.userName() + ")";
+	Q_ASSERT(!m_userName.isEmpty());
+
+	QString accountName =
+	    AccountModel::globAccounts[userName].accountName() + " (" +
+	    m_userName + ")";
 	this->accountName->setText(accountName);
 
 	this->toCalendarWidget->setMinimumDate(this->fromCalendarWidget->selectedDate());
@@ -556,8 +558,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
@@ -581,8 +583,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, false)) {
@@ -613,8 +615,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
@@ -638,8 +640,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(dmId, fileName, true)) {
@@ -669,8 +671,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
@@ -693,8 +695,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, false)) {
@@ -723,8 +725,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {
@@ -748,8 +750,8 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId,
-				    m_accountInfo.userName(), "");
+				    QString::number(dmId), m_dbId, m_userName,
+				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(dmId, fileName, true)) {

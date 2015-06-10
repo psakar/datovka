@@ -56,13 +56,12 @@ public:
 		QString errInfo;
 	};
 
-	DlgSendMessage(MessageDb &messDb, QString &dbId, QString &senderName,
-	    Action action, qint64 msgId,
-	    const AccountModel::SettingsMap &accountInfo,
-	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QString &lastAttAddPath, QString &pdzCredit,
-	    QWidget *parent = 0
-	    );
+	DlgSendMessage(MessageDb &messDb, const QString &dbId,
+	    const QString &senderName, Action action, qint64 msgId,
+	    const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QString &lastAttAddPath, const QString &pdzCredit,
+	    QWidget *parent = 0);
 
 private slots:
 	void on_cancelButton_clicked(void);
@@ -89,12 +88,12 @@ private:
 	const QString m_dbId;
 	const QString m_senderName;
 	const Action m_action;
-	AccountModel::SettingsMap m_accountInfo;
-	QString m_dbType;
+	const QString m_userName;
+	const QString m_dbType;
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
 	QString &m_lastAttAddPath;
-	QString &m_pdzCredit;
+	const QString m_pdzCredit;
 	MessageDb &m_messDb;
 	int m_attachSize;
 	QString m_dmType;

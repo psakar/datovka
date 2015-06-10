@@ -4451,7 +4451,7 @@ void MainWindow::openSendMessageDialog(int action)
 
 	QDialog *newMessageDialog = new DlgSendMessage(*messageDb, dbId,
 	    senderName, (DlgSendMessage::Action) action, msgId,
-	    accountInfo, dbType, dbEffectiveOVM, dbOpenAddressing,
+	    userName, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    lastAttachAddPath, pdzCredit, this);
 
 	if (newMessageDialog->exec() == QDialog::Accepted) {
@@ -6008,8 +6008,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 	const QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
-	    *messageDb, AccountModel::globAccounts[userName],
-	    m_export_correspond_dir, dbId, this);
+	    *messageDb, userName, m_export_correspond_dir, dbId, this);
 
 	correspondence_overview->exec();
 	storeExportPath();
@@ -8843,8 +8842,8 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 		}
 	}
 
-	dlgMsgSearch = new DlgMsgSearch(messageDbList,
-	    AccountModel::globAccounts[userName], this, Qt::Window);
+	dlgMsgSearch = new DlgMsgSearch(messageDbList, userName, this,
+	    Qt::Window);
 	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64)),
 	    this, SLOT(messageItemFromSearchSelection(QString, qint64)));
 	connect(dlgMsgSearch, SIGNAL(finished(int)),

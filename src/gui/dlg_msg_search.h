@@ -41,8 +41,8 @@ class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
 
 public:
 	DlgMsgSearch(const QList< QPair <QString,MessageDb*> > messageDbList,
-	    const AccountModel::SettingsMap &accountInfo,
-	    QWidget *parent = 0, Qt::WindowFlags f = 0);
+	    const QString &userName, QWidget *parent = 0,
+	    Qt::WindowFlags f = 0);
 
 private slots:
 	void checkInputFields(void);
@@ -55,7 +55,7 @@ signals:
 
 private:
 	const QList< QPair <QString,MessageDb*> > m_messageDbList;
-	const AccountModel::SettingsMap m_accountInfo;
+	const QString m_userName;
 
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);

@@ -29,11 +29,11 @@
 
 DlgMsgSearch::DlgMsgSearch(
     const QList< QPair <QString,MessageDb*> > messageDbList,
-    const AccountModel::SettingsMap &accountInfo,
+    const QString &userName,
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
     m_messageDbList(messageDbList),
-    m_accountInfo(accountInfo)
+    m_userName(userName)
 {
 	setupUi(this);
 	initSearchWindow();
@@ -55,9 +55,12 @@ void DlgMsgSearch::initSearchWindow(void)
 	   "window. Note: You can view additional information when hovering "
 	   "your mouse cursor over the message ID."));
 
+	Q_ASSERT(!m_userName.isEmpty());
+
 	/* set account name and user name to label */
-	QString accountName = m_accountInfo.accountName()
-	+ " ("+ m_accountInfo.userName() + ")";
+	QString accountName =
+	    AccountModel::globAccounts[m_userName].accountName() + " (" +
+	    m_userName + ")";
 	this->currentAccountName->setText(accountName);
 
 	this->tooMuchFields->setStyleSheet("QLabel { color: red }");

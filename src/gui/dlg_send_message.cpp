@@ -38,18 +38,17 @@
 #include "src/io/dbs.h"
 
 
-DlgSendMessage::DlgSendMessage(MessageDb &messDb, QString &dbId,
-    QString &senderName, Action action, qint64 msgId,
-    const AccountModel::SettingsMap &accountInfo,
-    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QString &lastAttAddPath, QString &pdzCredit,
-    QWidget *parent)
+DlgSendMessage::DlgSendMessage(MessageDb &messDb, const QString &dbId,
+    const QString &senderName, Action action, qint64 msgId,
+    const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing,
+    QString &lastAttAddPath, const QString &pdzCredit, QWidget *parent)
     : QDialog(parent),
     m_msgID(msgId),
     m_dbId(dbId),
     m_senderName(senderName),
     m_action(action),
-    m_accountInfo(accountInfo),
+    m_userName(userName),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
@@ -105,9 +104,12 @@ void DlgSendMessage::initNewMessageDialog(void)
 		}
 	}
 
-	this->fromUser->setText("<strong>" + m_accountInfo.accountName() +
-	    "</strong>" + " (" + m_accountInfo.userName() + ") - "
-	    + m_dbType + dbOpenAddressing);
+	Q_ASSERT(!m_userName.isEmpty());
+
+	this->fromUser->setText("<strong>" +
+	    AccountModel::globAccounts[m_userName].accountName() +
+	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
+	    dbOpenAddressing);
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
@@ -430,7 +432,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 		return str;
 	}
 
-	isdsSearch(&box, m_accountInfo.userName(), doi);
+	isdsSearch(&box, m_userName, doi);
 	isds_DbOwnerInfo_free(&doi);
 
 	if (NULL != box) {
@@ -453,7 +455,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
 {
-	if (isdsSessions.isConnectedToIsds(m_accountInfo.userName())) {
+	if (isdsSessions.isConnectedToIsds(m_userName)) {
 		qDebug() << "Connection to ISDS is alive :)";
 	} else {
 		qDebug() << "Connection to ISDS is dead :(";
@@ -663,7 +665,7 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 {
 	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
 	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_accountInfo.userName());
+	    m_dbOpenAddressing, this, m_userName);
 	dlg_cont->show();
 }
 
@@ -754,7 +756,7 @@ void DlgSendMessage::findAndAddRecipient(void)
 {
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
 	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_accountInfo.userName());
+	    m_dbOpenAddressing, this, m_userName);
 	dsSearch->show();
 }
 
@@ -1153,7 +1155,7 @@ void DlgSendMessage::sendMessage(void)
 	sent_message->documents = documents; documents = NULL;
 	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
-	if (!isdsSessions.isConnectedToIsds(m_accountInfo.userName())) {
+	if (!isdsSessions.isConnectedToIsds(m_userName)) {
 		goto finish;
 	}
 
@@ -1184,8 +1186,8 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
-		qDebug() << "sending message from user name" << m_accountInfo.userName();
-		status = isds_send_message(isdsSessions.session(m_accountInfo.userName()),
+		qDebug() << "sending message from user name" << m_userName;
+		status = isds_send_message(isdsSessions.session(m_userName),
 		    sent_message);
 
 		sendMsgResultStruct sendMsgResults;
@@ -1197,7 +1199,8 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResults.isPDZ = (this->recipientTableWidget->
 		    item(i, 3)->text() == tr("yes")) ? true : false;
 		sendMsgResults.status = (int) status;
-		sendMsgResults.errInfo = isdsLongMessage(isdsSessions.session(m_accountInfo.userName()));
+		sendMsgResults.errInfo =
+		    isdsLongMessage(isdsSessions.session(m_userName));
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {

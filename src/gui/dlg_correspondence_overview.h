@@ -47,8 +47,7 @@ public:
 		QList<qint64> receivedmIDs;
 	};
 
-	DlgCorrespondenceOverview(const MessageDb &db,
-	    const AccountModel::SettingsMap &accountInfo,
+	DlgCorrespondenceOverview(const MessageDb &db, const QString &userName,
 	    QString &exportCorrespondDir, const QString &dbId,
 	    QWidget *parent = 0);
 
@@ -59,7 +58,7 @@ private slots:
 
 private:
 	const MessageDb &m_messDb;
-	const AccountModel::SettingsMap m_accountInfo;
+	const QString m_userName;
 	ExportedMessageList m_messages;
 	QString &m_exportCorrespondDir;
 	const QString &m_dbId;
