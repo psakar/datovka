@@ -909,7 +909,7 @@ private:
 	bool loginMethodUserNamePwd(const QString &userName, bool showDialog);
 
 	/*!
-	 * @brief Login to ISDS server by username, password and OTP code.
+	 * @brief Login to ISDS server by user name, password and OTP code.
 	 */
 	bool loginMethodUserNamePwdOtp(const QString &userName,
 	    bool showDialog);
@@ -935,20 +935,20 @@ private:
 	/*!
 	 * @brief Login to ISDS server by certificate only.
 	 */
-	bool loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
-	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
+	bool loginMethodCertificateOnly(const QString &userName,
+	    bool showDialog);
 
 	/*!
-	 * @brief Login to ISDS server by certificate, username and password.
+	 * @brief Login to ISDS server by certificate, user name and password.
 	 */
-	bool loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
-	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
+	bool loginMethodCertificateUserPwd(const QString &userName,
+	    bool showDialog);
 
 	/*!
-	 * @brief Login to ISDS server by certificate and databox ID.
+	 * @brief Login to ISDS server by certificate and data box ID.
 	 */
-	bool loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
-	    const AccountModel::SettingsMap &accountInfo, bool showDialog);
+	bool loginMethodCertificateIdBox(const QString &userName,
+	    bool showDialog);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.

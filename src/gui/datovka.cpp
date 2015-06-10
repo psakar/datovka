@@ -7776,26 +7776,34 @@ bool MainWindow::p12CertificateToPem(const QString &p12Path,
 /*
 * Login to ISDS server by user certificate only.
 */
-bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateOnly(const QString &userName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName(),
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[userName];
+
+	if (!isdsSessions.holdsSession(userName)) {
+		isdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString certPath = accountInfo.p12File();
 
 	if (certPath.isEmpty()) {
-		QDialog *editAccountDialog = new DlgCreateAccount(
-		    accountInfo.userName(), DlgCreateAccount::ACT_CERT,
-		    this);
+		QDialog *editAccountDialog = new DlgCreateAccount(userName,
+		    DlgCreateAccount::ACT_CERT, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
-			certPath = AccountModel::globAccounts[
-			    accountInfo.userName()].p12File();
+//			certPath =
+//			    AccountModel::globAccounts[userName].p12File();
+			certPath = accountInfo.p12File();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -7819,8 +7827,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 		        "User name: %2\n"
 		        "Certificate file: %3\n"
 		        "Enter password to unlock certificate file:")
-		        .arg(accountInfo.accountName())
-		        .arg(accountInfo.userName())
+		        .arg(accountInfo.accountName()).arg(userName)
 		        .arg(certPath),
 		    QLineEdit::Password, QString(), &ok);
 		if (ok) {
@@ -7836,7 +7843,7 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 		/* Read PKCS #12 file and convert to PEM. */
 		QString createdPemPath;
 		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
-		        accountInfo.userName())) {
+		        userName)) {
 			certPath = createdPemPath;
 		} else {
 			QMessageBox::critical(this,
@@ -7858,18 +7865,13 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	status = isdsLoginSystemCert(
-	    isdsSessions.session(accountInfo.userName()),
+	status = isdsLoginSystemCert(isdsSessions.session(userName),
 	    certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		QStandardItem *topItem =
-		    m_accountModel.itemFromIndex(acntTopIdx);
-		if (0 != topItem) {
-			AccountModel::globAccounts[accountInfo.userName()]
-			    ._setPassphrase(passphrase);
-		}
+		AccountModel::globAccounts[userName]
+		    ._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -7877,11 +7879,10 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 		 */
 	}
 
-	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-	QString isdsMsg =
-	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
+	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -7892,14 +7893,22 @@ bool MainWindow::loginMethodCertificateOnly(const QModelIndex &acntTopIdx,
 /*
 * Login to ISDS server by user certificate, username and password.
 */
-bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateUserPwd(const QString &userName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName(),
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[userName];
+
+	if (!isdsSessions.holdsSession(userName)) {
+		isdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -7907,14 +7916,15 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 	QString pwd = accountInfo.password();
 
 	if (pwd.isEmpty() || certPath.isEmpty()) {
-		QDialog *editAccountDialog = new DlgCreateAccount(
-		    accountInfo.userName(), DlgCreateAccount::ACT_CERTPWD,
-		    this);
+		QDialog *editAccountDialog = new DlgCreateAccount(userName,
+		    DlgCreateAccount::ACT_CERTPWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
-			certPath = AccountModel::globAccounts[
-			    accountInfo.userName()].p12File();
-			pwd = AccountModel::globAccounts[
-			    accountInfo.userName()].password();
+//			certPath = AccountModel::globAccounts[
+//			    userName].p12File();
+			certPath = accountInfo.p12File();
+//			pwd = AccountModel::globAccounts[
+//			    userName].password();
+			pwd = accountInfo.password();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -7938,8 +7948,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 		        "User name: %2\n"
 		        "Certificate file: %3\n"
 		        "Enter password to unlock certificate file:")
-		        .arg(accountInfo.accountName())
-		        .arg(accountInfo.userName())
+		        .arg(accountInfo.accountName()).arg(userName)
 		        .arg(certPath),
 		    QLineEdit::Password, QString(), &ok);
 		if (ok) {
@@ -7955,7 +7964,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 		/* Read PKCS #12 file and convert to PEM. */
 		QString createdPemPath;
 		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
-		        accountInfo.userName())) {
+		        userName)) {
 			certPath = createdPemPath;
 		} else {
 			QMessageBox::critical(this,
@@ -7977,19 +7986,13 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	status = isdsLoginUserCertPwd(
-	    isdsSessions.session(accountInfo.userName()),
-	    accountInfo.userName(), pwd, certPath, passphrase,
-	    accountInfo.isTestAccount());
+	status = isdsLoginUserCertPwd(isdsSessions.session(userName),
+	    userName, pwd, certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		QStandardItem *topItem =
-		    m_accountModel.itemFromIndex(acntTopIdx);
-		if (0 != topItem) {
-			AccountModel::globAccounts[accountInfo.userName()]
-			    ._setPassphrase(passphrase);
-		}
+		AccountModel::globAccounts[userName]
+		    ._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -7997,11 +8000,10 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 		 */
 	}
 
-	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-	QString isdsMsg =
-	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
+	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8012,27 +8014,35 @@ bool MainWindow::loginMethodCertificateUserPwd(const QModelIndex &acntTopIdx,
 /*
 * Login to ISDS server by user certificate and databox ID.
 */
-bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
+    bool showDialog)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName(),
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[userName];
+
+	if (!isdsSessions.holdsSession(userName)) {
+		isdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString certPath = accountInfo.p12File();
 	QString idBox;
 
-	QDialog *editAccountDialog = new DlgCreateAccount(
-	    accountInfo.userName(), DlgCreateAccount::ACT_IDBOX, this);
+	QDialog *editAccountDialog = new DlgCreateAccount(userName,
+	    DlgCreateAccount::ACT_IDBOX, this);
 	if (QDialog::Accepted == editAccountDialog->exec()) {
-		certPath = AccountModel::globAccounts[accountInfo.userName()]
-		    .p12File();
-		idBox = AccountModel::globAccounts[accountInfo.userName()]
-		    .userName();
+//		certPath = AccountModel::globAccounts[userName].p12File();
+		certPath = accountInfo.p12File();
+//		idBox = AccountModel::globAccounts[userName].userName();
+		idBox = accountInfo.userName();
 		saveSettings();
 	} else {
 		showStatusTextWithTimeout(tr("It was not possible to "
@@ -8055,8 +8065,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 		        "User name: %2\n"
 		        "Certificate file: %3\n"
 		        "Enter password to unlock certificate file:")
-		        .arg(accountInfo.accountName())
-		        .arg(accountInfo.userName())
+		        .arg(accountInfo.accountName()).arg(userName)
 		        .arg(certPath),
 		    QLineEdit::Password, QString(), &ok);
 		if (ok) {
@@ -8072,7 +8081,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 		/* Read PKCS #12 file and convert to PEM. */
 		QString createdPemPath;
 		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
-		        accountInfo.userName())) {
+		        userName)) {
 			certPath = createdPemPath;
 		} else {
 			QMessageBox::critical(this,
@@ -8094,18 +8103,13 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 		return false;
 	}
 
-	status = isdsLoginUserCert(isdsSessions.session(
-	    accountInfo.userName()),
+	status = isdsLoginUserCert(isdsSessions.session(userName),
 	    idBox, certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		QStandardItem *topItem =
-		    m_accountModel.itemFromIndex(acntTopIdx);
-		if (0 != topItem) {
-			AccountModel::globAccounts[accountInfo.userName()]
-			    ._setPassphrase(passphrase);
-		}
+		AccountModel::globAccounts[userName]
+		    ._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -8113,11 +8117,10 @@ bool MainWindow::loginMethodCertificateIdBox(const QModelIndex &acntTopIdx,
 		 */
 	}
 
-	isdsSessions.setSessionTimeout(accountInfo.userName(),
+	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-	QString isdsMsg =
-	    isdsLongMessage(isdsSessions.session(accountInfo.userName()));
+	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8142,19 +8145,19 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 	const AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
 
-	if (!isdsSessions.holdsSession(accountInfo.userName())) {
-		isdsSessions.createCleanSession(accountInfo.userName(),
+	if (!isdsSessions.holdsSession(userName)) {
+		isdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
 	QString pwd = accountInfo.password();
 	if (pwd.isNull() ||
 	    pwd.isEmpty()) {
-		QDialog *editAccountDialog = new DlgCreateAccount(
-		    accountInfo.userName(), DlgCreateAccount::ACT_PWD, this);
+		QDialog *editAccountDialog = new DlgCreateAccount(userName,
+		    DlgCreateAccount::ACT_PWD, this);
 		if (QDialog::Accepted == editAccountDialog->exec()) {
-			pwd = AccountModel::globAccounts[
-			    accountInfo.userName()].password();
+//			pwd = AccountModel::globAccounts[userName].password();
+			pwd = accountInfo.password();
 			saveSettings();
 		} else {
 			showStatusTextWithTimeout(tr("It was not possible to "
@@ -8174,7 +8177,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 		    tr("Enter OTP security code for account")
 		    + "<br/><b>"
 		    + accountInfo.accountName()
-		    + " </b>(" + accountInfo.userName() + ").";
+		    + " </b>(" + userName + ").";
 
 	isds_otp_resolution otpres = OTP_RESOLUTION_SUCCESS;
 
@@ -8201,16 +8204,13 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 			return false;
 		}
 
-		status = isdsLoginUserOtp(
-		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), pwd,
-		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
-		    QString(), otpres);
+		status = isdsLoginUserOtp(isdsSessions.session(userName),
+		    userName, pwd, accountInfo.isTestAccount(),
+		    accountInfo.loginMethod(), QString(), otpres);
 
-		isdsMsg = isdsLongMessage(
-		    isdsSessions.session(accountInfo.userName()));
+		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
-		isdsSessions.setSessionTimeout(accountInfo.userName(),
+		isdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
 		if (IE_PARTIAL_SUCCESS == status) {
@@ -8222,7 +8222,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 			    tr("Enter SMS security code for account")
 			    + "<br/><b>"
 			    + accountInfo.accountName()
-			    + " </b>(" + accountInfo.userName() + ").";
+			    + " </b>(" + userName + ").";
 		} else if (IE_NOT_LOGGED_IN == status) {
 			msgTitle = tr("Authentication by SMS failed");
 			msgBody = tr("It was not possible sent SMS with OTP "
@@ -8279,16 +8279,13 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 		}
 
 		/* sent security code to ISDS */
-		status = isdsLoginUserOtp(
-		    isdsSessions.session(accountInfo.userName()),
-		    accountInfo.userName(), pwd,
-		    accountInfo.isTestAccount(), accountInfo.loginMethod(),
-		    otpcode, otpres);
+		status = isdsLoginUserOtp(isdsSessions.session(userName),
+		    userName, pwd, accountInfo.isTestAccount(),
+		    accountInfo.loginMethod(), otpcode, otpres);
 
-		isdsMsg = isdsLongMessage(
-		    isdsSessions.session(accountInfo.userName()));
+		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
-		isdsSessions.setSessionTimeout(accountInfo.userName(),
+		isdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
 		/* OTP login notification */
@@ -8301,7 +8298,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 				    + "<br/><br/>" +
 				    tr("Account: ") + "<b>"
 				    + accountInfo.accountName()
-				    + " </b>(" + accountInfo.userName() + ")"
+				    + " </b>(" + userName + ")"
 				    + "<br/><br/>" +
 				    tr("Enter the correct security code again.");
 				if (count > 1) {
@@ -8386,13 +8383,12 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		loginRet = loginMethodCertificateOnly(acntTopIdx, accountInfo,
-		    showDialog);
+		loginRet = loginMethodCertificateOnly(userName, showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		loginRet = loginMethodCertificateUserPwd(acntTopIdx, accountInfo,
+		loginRet = loginMethodCertificateUserPwd(userName,
 		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8400,10 +8396,9 @@ bool MainWindow::connectToIsds(const QModelIndex &acntTopIdx, bool showDialog)
 		 * This is used for hosted services. It is not dokumented and
 		 * we not support this method now.
 
-		if (accountInfo.password().isNull() ||
-		    accountInfo.password().isEmpty()) {
-			return loginMethodCertificateIdBox(acntTopIdx,
-			    accountInfo, showDialog);
+		if (accountInfo.password().isEmpty()) {
+			return loginMethodCertificateIdBox(userName,
+			    showDialog);
 		}
 		*/
 
@@ -8486,13 +8481,13 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		ret = loginMethodCertificateOnly(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateOnly(accountInfo.userName(),
 		    showDialog);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		ret = loginMethodCertificateUserPwd(QModelIndex(), accountInfo,
+		ret = loginMethodCertificateUserPwd(accountInfo.userName(),
 		    showDialog);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8500,10 +8495,9 @@ bool MainWindow::firstConnectToIsds(
 		 * This is used for hosted services. It is not dokumented and
 		 * we not support this method now.
 
-		if (accountInfo.password().isNull() ||
-		    accountInfo.password().isEmpty()) {
-			return loginMethodCertificateIdBox(QModelIndex(),
-			    accountInfo, showDialog);
+		if (accountInfo.password().isEmpty()) {
+			return loginMethodCertificateIdBox(
+			    accountInfo.userName(), showDialog);
 		}
 		*/
 
