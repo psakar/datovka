@@ -31,6 +31,7 @@
 #include <QDir>
 #include <QtWidgets>
 
+#include "src/cli/cli.h"
 #include "src/common.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_threads.h"
@@ -151,8 +152,30 @@ int main(int argc, char *argv[])
 	    QObject::tr("level"));
 	parser.addOption(debugVerb);
 #endif /* DEBUG */
+
+	/* Options with values. */
+	if (!parser.addOption(QCommandLineOption(SER_CONNECT,
+	        QObject::tr(
+	            "Connect to isds. Input = <string-of-parameters>."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
+	        QObject::tr(
+	            "Use <string-of-parameters> for download of message list from ISDS."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
+	        QObject::tr(
+	            "Use <string-of-parameters> for send of message."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+
 	parser.addPositionalArgument("[zfo-file]",
 	    QObject::tr("ZFO file to be viewed."));
+
 	/* Process command-line arguments. */
 	parser.process(app);
 
@@ -208,6 +231,7 @@ int main(int argc, char *argv[])
 		logInfo("Setting logging verbosity to value '%d'.\n", value);
 		globLog.setLogVerbosity(value);
 	}
+
 	QStringList cmdLineFileNames = parser.positionalArguments();
 
 	qint64 start, stop, diff;
@@ -405,7 +429,10 @@ int main(int argc, char *argv[])
 	}
 
 	int ret = 0;
-	if (cmdLineFileNames.isEmpty()) {
+
+	if (parser.isSet(SER_SEND_MSG)) {
+		parseService2(SER_SEND_MSG, parser.value(SER_SEND_MSG));
+	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
 		mainwin.show();
 		ret = app.exec();
