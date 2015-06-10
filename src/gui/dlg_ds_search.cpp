@@ -30,8 +30,8 @@
 
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QWidget *parent, QString userName)
+    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
+    QWidget *parent, const QString &userName)
     : QDialog(parent),
     m_action(action),
     m_recipientTableWidget(recipientTableWidget),

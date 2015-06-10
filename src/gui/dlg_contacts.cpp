@@ -29,7 +29,7 @@
 DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
     QTableWidget &recipientTableWidget,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QWidget *parent, QString userName)
+    QWidget *parent, const QString &userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
     m_messDb(db),

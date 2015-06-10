@@ -42,7 +42,7 @@ public:
 	DlgContacts(const MessageDb &db, const QString &dbId,
 	    QTableWidget &recipientTableWidget,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QWidget *parent = 0, QString useName = "");
+	    QWidget *parent = 0, const QString &userName = QString());
 
 private slots:
 	void filterContact(const QString &text);
