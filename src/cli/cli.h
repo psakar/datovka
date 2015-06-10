@@ -28,11 +28,20 @@
 #include <QApplication>
 #include <QDebug>
 
+#define PARSER_PREFIX "Parser error: "
+#define SERVICE_LABEL "service"
+#define ATTACH_LABEL "dmAttachment"
+
+// Define services names
 #define SER_CONNECT "connect"
 #define SER_GET_MSG_LIST "get-msg-list"
 #define SER_SEND_MSG "send-msg"
+#define SER_DWNLD_MSG "download-msg"
+#define SER_DWNLD_DEL_INFO "download-delivery-info"
+#define SER_GET_USER_INFO "get-user-info"
+#define SER_GET_OWNER_INFO "get-owner-info"
 
-
+// input structures definition
 struct sendMsgStruct {
 	QString username;	//Username. Length is 6 characters. [Mandatory]
 	QString dbIDSender;	//Box ID of sender. Length is 7 characters. [Mandatory]
@@ -57,11 +66,11 @@ struct sendMsgStruct {
 };
 
 
-int parseService2(const QString &service, const QString &paramString);
+int runSendMsgService(const QString &service, const QString &paramString);
 
 int checkAndSetValues(const QString &service, const QString &label,
     const QString &value);
 
-int parseService(const QString &service, const QString &paramString);
+int runService(const QString &service, const QString &paramString);
 
 #endif // CLI_H

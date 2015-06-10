@@ -162,7 +162,8 @@ int main(int argc, char *argv[])
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
 	        QObject::tr(
-	            "Use <string-of-parameters> for download of message list from ISDS."),
+	            "Use <string-of-parameters> for download of message "
+	            "list from ISDS."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
@@ -172,6 +173,34 @@ int main(int argc, char *argv[])
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
+	if (!parser.addOption(QCommandLineOption(SER_DWNLD_MSG,
+	        QObject::tr(
+	            "Use <string-of-parameters> for downloading of "
+	            "complete message."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_DWNLD_DEL_INFO,
+	        QObject::tr(
+	            "Use <string-of-parameters> for downloading of message "
+	            "delivy info."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
+	        QObject::tr(
+	            "Use <string-of-parameters> for information about user."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
+	        QObject::tr(
+	            "Use <string-of-parameters> for information about owner "
+	            "and his databox."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+
 
 	parser.addPositionalArgument("[zfo-file]",
 	    QObject::tr("ZFO file to be viewed."));
@@ -430,8 +459,28 @@ int main(int argc, char *argv[])
 
 	int ret = 0;
 
-	if (parser.isSet(SER_SEND_MSG)) {
-		parseService2(SER_SEND_MSG, parser.value(SER_SEND_MSG));
+	if (parser.isSet(SER_CONNECT)) {
+		ret = runService(SER_CONNECT,
+		    parser.value(SER_CONNECT));
+	} else if (parser.isSet(SER_GET_MSG_LIST)) {
+		ret = runService(SER_GET_MSG_LIST,
+		    parser.value(SER_GET_MSG_LIST));
+	} else if (parser.isSet(SER_SEND_MSG)) {
+		ret = runService(SER_SEND_MSG,
+		    parser.value(SER_SEND_MSG));
+	} else if (parser.isSet(SER_DWNLD_MSG)) {
+		ret = runService(SER_DWNLD_MSG,
+		    parser.value(SER_DWNLD_MSG));
+	} else if (parser.isSet(SER_DWNLD_DEL_INFO)) {
+		ret = runService(SER_DWNLD_DEL_INFO,
+		    parser.value(SER_DWNLD_DEL_INFO));
+	} else if (parser.isSet(SER_GET_USER_INFO)) {
+		ret = runService(SER_GET_USER_INFO,
+		    parser.value(SER_GET_USER_INFO));
+	} else if (parser.isSet(SER_GET_OWNER_INFO)) {
+		ret = runService(SER_GET_OWNER_INFO,
+		    parser.value(SER_GET_OWNER_INFO));
+
 	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
 		mainwin.show();

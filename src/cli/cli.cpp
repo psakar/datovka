@@ -24,8 +24,47 @@
 
 #include "src/cli/cli.h"
 
+// Known attributes definition
+const QStringList connectAttrs = QStringList() << "method" << "username"
+    << "password" << "certificate" << "otpcode";
+const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
+   << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime" << "dmToTime";
+const QStringList sendMsgAttrs = QStringList() << "username" << "dbIDSender"
+    << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
+    << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
+    << "dmSenderIdent" << "dmLegalTitleLaw" << "dmLegalTitleYear"
+    << "dmLegalTitleSect" << "dmLegalTitlePar" << "dmLegalTitlePoint"
+    << "dmPersonalDelivery" << "dmAllowSubstDelivery" << "dmType" << "dmOVM"
+    << "dmPublishOwnID" << ATTACH_LABEL;
+const QStringList dwnldMsgAttrs = QStringList() << "username" << "dmID";
+const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
+const QString databoxInfoAttrs = "username";
+
+
 /* ========================================================================= */
-int parseService(const QString &service, const QString &paramString)
+bool checkAttributeIfExists(const QString &service, const QString &attribute)
+/* ========================================================================= */
+{
+	if (service == SER_CONNECT) {
+		return connectAttrs.contains(attribute);
+	} else if (service == SER_GET_MSG_LIST) {
+		return getMsgListAttrs.contains(attribute);
+	} else if (service == SER_SEND_MSG) {
+		return sendMsgAttrs.contains(attribute);
+	} else if (service == SER_DWNLD_MSG) {
+		return dwnldMsgAttrs.contains(attribute);
+	} else if (service == SER_DWNLD_DEL_INFO) {
+		return dwnldDelInfoAttrs.contains(attribute);
+	} else if (service == SER_GET_USER_INFO ||
+	    service == SER_GET_OWNER_INFO) {
+		return (attribute == databoxInfoAttrs);
+	}
+	return false;
+}
+
+
+/* ========================================================================= */
+int runServiceTest(const QString &service, const QString &paramString)
 /* ========================================================================= */
 {
 	qDebug() << service << ":" << paramString;
@@ -33,7 +72,7 @@ int parseService(const QString &service, const QString &paramString)
 	struct sendMsgStruct sendMsg;
 	QString errmsg;
 	QStringList itemList;
-	QString label;
+	QString attribute;
 	QString value;
 
 	QStringList paramList = paramString.split(",");
@@ -53,8 +92,8 @@ int parseService(const QString &service, const QString &paramString)
 			return -1;
 		}
 
-		label = itemList.at(0);
-		if (label.isEmpty()) {
+		attribute = itemList.at(0);
+		if (attribute.isEmpty()) {
 			errmsg = QString("Parameter name missing in "
 			    "the couple [%1].").arg(i);
 			qDebug() << errmsg;
@@ -90,7 +129,7 @@ int parseService(const QString &service, const QString &paramString)
 
 		if (itemList.at(1).isEmpty()) {
 			errmsg = QString("Value of parameter '%1' missing in the "
-			    "couple [%2].").arg(label).arg(i);
+			    "couple [%2].").arg(attribute).arg(i);
 			qDebug() << errmsg;
 			return -1;
 		}
@@ -104,7 +143,7 @@ int parseService(const QString &service, const QString &paramString)
 
 		value = itemList.at(1);
 
-		qDebug() << "Label: " << label;
+		qDebug() << "attribute: " << attribute;
 		qDebug() << "Value: " << value;
 
 
@@ -115,9 +154,9 @@ int parseService(const QString &service, const QString &paramString)
 			return -1;
 		}
 
-		if ("username" == label) {
+		if ("username" == attribute) {
 			sendMsg.username = value;
-		} else if ("dbIDSender" == label) {
+		} else if ("dbIDSender" == attribute) {
 			sendMsg.dbIDSender = value;
 		}
 	}
@@ -126,42 +165,81 @@ int parseService(const QString &service, const QString &paramString)
 }
 
 /* ========================================================================= */
-int checkAndSetValues(const QString &service, const QString &label,
-    const QString &value)
+QStringList parseAttachment(const QString &files)
 /* ========================================================================= */
 {
-	qDebug() << label  << value;
-	return 0;
+	if (files.isEmpty()) {
+		return QStringList();
+	}
+
+	return files.split(";");
 }
 
+
 /* ========================================================================= */
-int parseService2(const QString &service, const QString &paramString)
+int runService(const QString &service, const QString &paramString)
 /* ========================================================================= */
 {
 	qDebug() << service << ":" << paramString;
 
-	QString label = "";
+	QMap <QString, QVariant> map;
+
+	QString attribute = "";
 	QString value = "";
-	bool newLabel = true;
+	QString errmsg;
+	bool newAttribute = true;
 	bool newValue = false;
 	bool special = false;
+	int attrPosition = 0;
 
 	for (int i = 0; i < paramString.length(); ++i) {
 		if (paramString.at(i) == ',') {
 			if (newValue) {
 				value = value + paramString.at(i);
 			} else {
-				checkAndSetValues(service, label, value);
-				label.clear();
+				attrPosition++;
+				//qDebug() << attribute << value;
+				if (attribute.isEmpty()) {
+					errmsg = PARSER_PREFIX +
+					    QString("empty attribute "
+					    "name on position '%1'").
+					    arg(attrPosition);
+					qDebug() << errmsg;
+					return -1;
+				}
+				if (value.isEmpty()) {
+					errmsg = PARSER_PREFIX +
+					    QString("empty attribute "
+					    "value on position '%1'").
+					    arg(attrPosition);
+					qDebug() << errmsg;
+					return -1;
+				}
+
+				if (checkAttributeIfExists(service,attribute)) {
+					if (attribute == ATTACH_LABEL) {
+						map[attribute] =
+						    parseAttachment(value);
+					} else {
+						map[attribute] = value;
+					}
+				} else {
+					errmsg = PARSER_PREFIX +
+					    QString("unknown attribute "
+					    "name '%1'").arg(attribute);
+					qDebug() << errmsg;
+					return -1;
+				}
+				attribute.clear();
 				value.clear();
-				newLabel = true;
+				newAttribute = true;
 				newValue = false;
 			}
 		} else if (paramString.at(i) == '=') {
 			if (newValue) {
 				value = value + paramString.at(i);
 			} else {
-				newLabel = false;
+				newAttribute = false;
 			}
 		} else if (paramString.at(i) == '\'') {
 			if (special) {
@@ -178,8 +256,8 @@ int parseService2(const QString &service, const QString &paramString)
 				special = true;
 			}
 		} else {
-			if (newLabel) {
-				label = label + paramString.at(i);
+			if (newAttribute) {
+				attribute = attribute + paramString.at(i);
 			}
 			if (newValue) {
 				value = value + paramString.at(i);
@@ -187,7 +265,40 @@ int parseService2(const QString &service, const QString &paramString)
 		}
 	}
 
-	checkAndSetValues(service, label, value);
+	attrPosition++;
+	if (attribute.isEmpty()) {
+		errmsg = PARSER_PREFIX +
+		    QString("empty attribute "
+		    "name on position '%1'").arg(attrPosition);
+		qDebug() << errmsg;
+		return -1;
+	}
+	if (value.isEmpty()) {
+		errmsg = PARSER_PREFIX +
+		    QString("empty attribute "
+		    "value on position '%1'").arg(attrPosition);
+		qDebug() << errmsg;
+		return -1;
+	}
+	if (checkAttributeIfExists(service,attribute)) {
+		if (attribute == ATTACH_LABEL) {
+			map[attribute] = parseAttachment(value);
+		} else {
+			map[attribute] = value;
+		}
+	} else {
+		errmsg = PARSER_PREFIX +
+		    QString("unknown attribute "
+		    "name '%1'").arg(attribute);
+		qDebug() << errmsg;
+		return -1;
+	}
+
+	map[SERVICE_LABEL] = service;
+
+	qDebug() << map;
+
+	/* TODO call libisds and delivery map */
 
 	return 0;
 }
