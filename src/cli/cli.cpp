@@ -180,7 +180,7 @@ QStringList parseAttachment(const QString &files)
 int runService(const QString &service, const QString &paramString)
 /* ========================================================================= */
 {
-	qDebug() << service << ":" << paramString;
+	qDebug() <<  CLI_PREFIX << "input: " << service << ":" << paramString;
 
 	QMap <QString, QVariant> map;
 
@@ -192,6 +192,8 @@ int runService(const QString &service, const QString &paramString)
 	bool special = false;
 	int attrPosition = 0;
 
+	qDebug() << CLI_PREFIX << "parsing string with parameters";
+
 	for (int i = 0; i < paramString.length(); ++i) {
 		if (paramString.at(i) == ',') {
 			if (newValue) {
@@ -200,7 +202,8 @@ int runService(const QString &service, const QString &paramString)
 				attrPosition++;
 				//qDebug() << attribute << value;
 				if (attribute.isEmpty()) {
-					errmsg = PARSER_PREFIX +
+					errmsg = QString(CLI_PREFIX) +
+					    QString(PARSER_PREFIX) +
 					    QString("empty attribute "
 					    "name on position '%1'").
 					    arg(attrPosition);
@@ -208,7 +211,8 @@ int runService(const QString &service, const QString &paramString)
 					return -1;
 				}
 				if (value.isEmpty()) {
-					errmsg = PARSER_PREFIX +
+					errmsg = QString(CLI_PREFIX) +
+					    QString(PARSER_PREFIX) +
 					    QString("empty attribute "
 					    "value on position '%1'").
 					    arg(attrPosition);
@@ -224,7 +228,8 @@ int runService(const QString &service, const QString &paramString)
 						map[attribute] = value;
 					}
 				} else {
-					errmsg = PARSER_PREFIX +
+					errmsg = QString(CLI_PREFIX) +
+					    QString(PARSER_PREFIX) +
 					    QString("unknown attribute "
 					    "name '%1'").arg(attribute);
 					qDebug() << errmsg;
@@ -265,16 +270,17 @@ int runService(const QString &service, const QString &paramString)
 		}
 	}
 
+	// parse last token
 	attrPosition++;
 	if (attribute.isEmpty()) {
-		errmsg = PARSER_PREFIX +
+		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
 		    QString("empty attribute "
 		    "name on position '%1'").arg(attrPosition);
 		qDebug() << errmsg;
 		return -1;
 	}
 	if (value.isEmpty()) {
-		errmsg = PARSER_PREFIX +
+		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
 		    QString("empty attribute "
 		    "value on position '%1'").arg(attrPosition);
 		qDebug() << errmsg;
@@ -287,16 +293,18 @@ int runService(const QString &service, const QString &paramString)
 			map[attribute] = value;
 		}
 	} else {
-		errmsg = PARSER_PREFIX +
+		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
 		    QString("unknown attribute "
 		    "name '%1'").arg(attribute);
 		qDebug() << errmsg;
 		return -1;
 	}
 
+	// add service name to map
 	map[SERVICE_LABEL] = service;
 
-	qDebug() << map;
+	qDebug() << CLI_PREFIX << "Map:\n";
+	qDebug() << map << "\n\n";
 
 	/* TODO call libisds and delivery map */
 

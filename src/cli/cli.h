@@ -28,6 +28,7 @@
 #include <QApplication>
 #include <QDebug>
 
+#define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
 #define SERVICE_LABEL "service"
 #define ATTACH_LABEL "dmAttachment"
