@@ -28,10 +28,17 @@
 #include <QApplication>
 #include <QDebug>
 
+#define CLI_RET_ERROR_CODE -1
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
 #define SERVICE_LABEL "service"
 #define ATTACH_LABEL "dmAttachment"
+
+// Login method
+#define L_USER "user" //username
+#define L_CERT "cert" //certificate
+#define L_HOTP "hotp" //secutiry code
+#define L_TOTP "totp" //sms code
 
 // Define services names
 #define SER_CONNECT "connect"
@@ -41,30 +48,6 @@
 #define SER_DWNLD_DEL_INFO "download-delivery-info"
 #define SER_GET_USER_INFO "get-user-info"
 #define SER_GET_OWNER_INFO "get-owner-info"
-
-// input structures definition
-struct sendMsgStruct {
-	QString username;	//Username. Length is 6 characters. [Mandatory]
-	QString dbIDSender;	//Box ID of sender. Length is 7 characters. [Mandatory]
-	QString dbIDRecipient;	//Box ID of recipient. Length is 7 characters. [Mandatory]
-	QString dmAnnotation;	//Subject (title) of the message. Maximal length is 255 characters. [Mandatory]
-	QString dmToHands;	//Person in recipient organisation. Maximal length is 50 characters. [Optional]
-	QString dmRecipientRefNumber; //Czech: číslo jednací příjemce. Maximal length is 50 characters. [Optional]
-	QString dmSenderRefNumber; //Czech: číslo jednací odesílatele. Maximal length is 50 characters. [Optional]
-	QString dmRecipientIdent; //Czech: spisová značka příjemce. Maximal length is 50 characters. [Optional]
-	QString dmSenderIdent; //Czech: spisová značka odesílatele. Maximal length is 50 characters. [Optional]
-	QString dmLegalTitleLaw; //Number of act mandating authority. Maximal length is 4 characters. [Optional]
-	QString dmLegalTitleYear; //Year of act issue mandating authority. Maximal length is 4 characters. [Optional]
-	QString dmLegalTitleSect; //Section of act mandating authority (paragraf). Maximal length is 10 characters. [Optional]
-	QString dmLegalTitlePar; //Paragraph of act mandating authority (odstavec). Maximal length is 10 characters. [Optional]
-	QString dmLegalTitlePoint; //Point of act mandating authority (písmeno). Maximal length is 1 characters. [Optional]
-	bool dmPersonalDelivery;//If true, only person with higher privileges can read this message. Values: {0,1}, default is 1.
-	bool dmAllowSubstDelivery; //Allow delivery through fiction. Values: {0,1}, default is 1.
-	QChar dmType; //Message type (commercial subtypes or government message). Maximal length is 1 character. Values: {I,K,O,V} [Optional]
-	bool dmOVM; //OVM sending mode. Values: {0,1}, default is 1.
-	bool dmPublishOwnID; //Allow sender to express his name shall be available to recipient. Values: {0,1}, default is 0.
-	QStringList dmAttachment;
-};
 
 int runService(const QString &service, const QString &paramString);
 

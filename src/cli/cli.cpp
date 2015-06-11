@@ -41,6 +41,15 @@ const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
 const QString databoxInfoAttrs = "username";
 
 
+
+/* ========================================================================= */
+const QString createErrorMsg(const QString &msg)
+/* ========================================================================= */
+{
+	return QString(CLI_PREFIX) + QString(PARSER_PREFIX) + msg;
+}
+
+
 /* ========================================================================= */
 bool checkAttributeIfExists(const QString &service, const QString &attribute)
 /* ========================================================================= */
@@ -64,107 +73,6 @@ bool checkAttributeIfExists(const QString &service, const QString &attribute)
 
 
 /* ========================================================================= */
-int runServiceTest(const QString &service, const QString &paramString)
-/* ========================================================================= */
-{
-	qDebug() << service << ":" << paramString;
-
-	struct sendMsgStruct sendMsg;
-	QString errmsg;
-	QStringList itemList;
-	QString attribute;
-	QString value;
-
-	QStringList paramList = paramString.split(",");
-	if (paramList.isEmpty()) {
-		errmsg = "Parameter list missing or its format is wrong.";
-		return -1;
-	}
-
-	for (int i = 0; i < paramList.count(); ++i) {
-
-		itemList = paramList.at(i).split("=");
-
-		if (itemList.count() != 2) {
-			errmsg = QString("Couple [%1] of parameter string has "
-			    "wrong format or more tokens.").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		attribute = itemList.at(0);
-		if (attribute.isEmpty()) {
-			errmsg = QString("Parameter name missing in "
-			    "the couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		value = itemList.at(1);
-		if (value.isEmpty()) {
-			errmsg = QString("Value string missing in "
-			    "the couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		itemList.clear();
-		itemList = value.split("'");
-
-		int cnt = itemList.count();
-
-		if (cnt != 3) {
-			errmsg = QString("Value string has a wrong format in "
-			    "the couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		if (!itemList.at(0).isEmpty()) {
-			errmsg = QString("Wrong symbol(s) before value in the "
-			    "couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		if (itemList.at(1).isEmpty()) {
-			errmsg = QString("Value of parameter '%1' missing in the "
-			    "couple [%2].").arg(attribute).arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		if (!itemList.at(2).isEmpty()) {
-			errmsg = QString("Wrong symbol(s) after value in the "
-			    "couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		value = itemList.at(1);
-
-		qDebug() << "attribute: " << attribute;
-		qDebug() << "Value: " << value;
-
-
-		if (itemList.isEmpty()) {
-			errmsg = QString("Value string missing in the "
-			    "couple [%1].").arg(i);
-			qDebug() << errmsg;
-			return -1;
-		}
-
-		if ("username" == attribute) {
-			sendMsg.username = value;
-		} else if ("dbIDSender" == attribute) {
-			sendMsg.dbIDSender = value;
-		}
-	}
-
-	return 0;
-}
-
-/* ========================================================================= */
 const QStringList parseAttachment(const QString &files)
 /* ========================================================================= */
 {
@@ -176,10 +84,122 @@ const QStringList parseAttachment(const QString &files)
 
 
 /* ========================================================================= */
+int checkConnectMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory connect parameters...";
+
+	if (!map.contains("method") ||
+	    map.value("method").toString().isEmpty()) {
+		errmsg = createErrorMsg("method attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+	if (!map.contains("password") ||
+	    map.value("password").toString().isEmpty()) {
+		errmsg = createErrorMsg("password attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	QString method = map.value("method").toString();
+
+	if (method == L_HOTP || method == L_HOTP) {
+		if (!map.contains("otpcode") ||
+		    map.value("otpcode").toString().isEmpty()) {
+			errmsg = createErrorMsg("otpcode attribute missing or "
+			    "contains empty security code.");
+			qDebug() << errmsg;
+			return ret;
+		}
+	} else if (method == L_CERT) {
+		if (!map.contains("certificate") ||
+		    map.value("certificate").toString().isEmpty()) {
+			errmsg = createErrorMsg("certificate attribute missing"
+			    " or contains empty certificate path.");
+			qDebug() << errmsg;
+			return ret;
+		}
+	} else if (method == L_USER) {
+
+	} else {
+		return ret;
+	}
+
+	/* CALL LIBISDS LOGIN METHOD */
+	ret = 0;
+
+	return ret;
+
+}
+
+
+/* ========================================================================= */
+int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory send msg parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+	if (!map.contains("dbIDRecipient") ||
+	    map.value("dbIDRecipient").toString().isEmpty() ||
+	    map.value("dbIDRecipient").toString().length() != 7) {
+		errmsg = createErrorMsg("databox ID attribute of recipient "
+		    "missing or contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+	if (!map.contains("dmAnnotation") ||
+	    map.value("dmAnnotation").toString().isEmpty()) {
+		errmsg = createErrorMsg("subject attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+	if (!map.contains("dmAttachment") ||
+	    map.value("dmAttachment").toStringList().isEmpty()) {
+		errmsg = createErrorMsg("attachment attribute missing or "
+		    "contains empty file path list.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS LOGIN METHOD */
+	ret = 0;
+
+	return ret;
+
+}
+
+
+/* ========================================================================= */
 int runService(const QString &service, const QString &paramString)
 /* ========================================================================= */
 {
-	qDebug() <<  CLI_PREFIX << "input: " << service << ":" << paramString;
+	qDebug() <<  CLI_PREFIX << "input:" << service << ":" << paramString;
 
 	QMap <QString, QVariant> map;
 
@@ -190,8 +210,9 @@ int runService(const QString &service, const QString &paramString)
 	bool newValue = false;
 	bool special = false;
 	int attrPosition = 0;
+	int ret = CLI_RET_ERROR_CODE;
 
-	qDebug() << CLI_PREFIX << "parsing string with parameters";
+	qDebug() << CLI_PREFIX << "parsing input string with parameters...";
 
 	for (int i = 0; i < paramString.length(); ++i) {
 		if (paramString.at(i) == ',') {
@@ -201,22 +222,20 @@ int runService(const QString &service, const QString &paramString)
 				attrPosition++;
 				//qDebug() << attribute << value;
 				if (attribute.isEmpty()) {
-					errmsg = QString(CLI_PREFIX) +
-					    QString(PARSER_PREFIX) +
+					errmsg = createErrorMsg(
 					    QString("empty attribute "
 					    "name on position '%1'").
-					    arg(attrPosition);
+					    arg(attrPosition));
 					qDebug() << errmsg;
-					return -1;
+					return ret;
 				}
 				if (value.isEmpty()) {
-					errmsg = QString(CLI_PREFIX) +
-					    QString(PARSER_PREFIX) +
+					errmsg = createErrorMsg(
 					    QString("empty attribute "
 					    "value on position '%1'").
-					    arg(attrPosition);
+					    arg(attrPosition));
 					qDebug() << errmsg;
-					return -1;
+					return ret;
 				}
 
 				if (checkAttributeIfExists(service,attribute)) {
@@ -227,12 +246,11 @@ int runService(const QString &service, const QString &paramString)
 						map[attribute] = value;
 					}
 				} else {
-					errmsg = QString(CLI_PREFIX) +
-					    QString(PARSER_PREFIX) +
+					errmsg = createErrorMsg(
 					    QString("unknown attribute "
-					    "name '%1'").arg(attribute);
+					    "name '%1'").arg(attribute));
 					qDebug() << errmsg;
-					return -1;
+					return ret;
 				}
 				attribute.clear();
 				value.clear();
@@ -272,40 +290,50 @@ int runService(const QString &service, const QString &paramString)
 	// parse last token
 	attrPosition++;
 	if (attribute.isEmpty()) {
-		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
-		    QString("empty attribute "
-		    "name on position '%1'").arg(attrPosition);
+		errmsg = createErrorMsg(QString("empty attribute "
+		    "name on position '%1'").arg(attrPosition));
 		qDebug() << errmsg;
-		return -1;
+		return ret;
 	}
 	if (value.isEmpty()) {
-		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
-		    QString("empty attribute "
-		    "value on position '%1'").arg(attrPosition);
+		errmsg = createErrorMsg(QString("empty attribute "
+		    "value on position '%1'").arg(attrPosition));
 		qDebug() << errmsg;
-		return -1;
+		return ret;
 	}
-	if (checkAttributeIfExists(service,attribute)) {
+	if (checkAttributeIfExists(service, attribute)) {
 		if (attribute == ATTACH_LABEL) {
 			map[attribute] = parseAttachment(value);
 		} else {
 			map[attribute] = value;
 		}
 	} else {
-		errmsg = QString(CLI_PREFIX) + QString(PARSER_PREFIX) +
-		    QString("unknown attribute "
-		    "name '%1'").arg(attribute);
+		errmsg = createErrorMsg(QString("unknown attribute "
+		    "name '%1'").arg(attribute));
 		qDebug() << errmsg;
-		return -1;
+		return ret;
 	}
 
 	// add service name to map
 	map[SERVICE_LABEL] = service;
 
-	qDebug() << CLI_PREFIX << "Map:\n";
-	qDebug() << map << "\n\n";
+	if (service == SER_CONNECT) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else if (service == SER_GET_MSG_LIST) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else if (service == SER_SEND_MSG) {
+		ret = checkSendMsgMandatoryAttributes(map);
+	} else if (service == SER_DWNLD_MSG) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else if (service == SER_DWNLD_DEL_INFO) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else if (service == SER_GET_USER_INFO) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else if (service == SER_GET_OWNER_INFO) {
+		ret = checkConnectMandatoryAttributes(map);
+	} else {
+		return ret;
+	}
 
-	/* TODO call libisds and delivery map */
-
-	return 0;
+	return ret;
 }
