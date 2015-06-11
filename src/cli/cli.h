@@ -40,6 +40,11 @@
 #define L_HOTP "hotp" //secutiry code
 #define L_TOTP "totp" //sms code
 
+// Message type
+#define MT_SENT "sent"
+#define MT_RECEIVED "received"
+#define MT_SENT_RECEIVED "all"
+
 // Define services names
 #define SER_CONNECT "connect"
 #define SER_GET_MSG_LIST "get-msg-list"

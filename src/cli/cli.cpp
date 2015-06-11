@@ -90,7 +90,8 @@ int checkConnectMandatoryAttributes(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	int ret = CLI_RET_ERROR_CODE;
 
-	qDebug() << CLI_PREFIX << "checking of mandatory connect parameters...";
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "connect parameters...";
 
 	if (!map.contains("method") ||
 	    map.value("method").toString().isEmpty()) {
@@ -154,7 +155,8 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	int ret = CLI_RET_ERROR_CODE;
 
-	qDebug() << CLI_PREFIX << "checking of mandatory send msg parameters...";
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "send msg parameters...";
 
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
@@ -187,11 +189,174 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		return ret;
 	}
 
-	/* CALL LIBISDS LOGIN METHOD */
+	/* CALL LIBISDS SEND MSG METHOD */
 	ret = 0;
 
 	return ret;
+}
 
+
+/* ========================================================================= */
+int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "get message list parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	if (!map.contains("dmType") ||
+	    map.value("dmType").toString().isEmpty()) {
+		errmsg = createErrorMsg("message type attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	QString dmType = map.value("dmType").toString();
+
+	if (!(dmType == MT_SENT) || !(dmType == MT_RECEIVED) ||
+	    !(dmType == MT_SENT_RECEIVED)) {
+		errmsg = createErrorMsg("message type attribute "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS GET MSG LIST METHOD */
+	ret = 0;
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "download message parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	if (!map.contains("dmID") ||
+	    map.value("dmID").toString().isEmpty()) {
+		errmsg = createErrorMsg("message ID attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS DOWNLOAD MSG METHOD */
+	ret = 0;
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+int checkDownloadDeliveryMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "download delivery info parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	if (!map.contains("dmID") ||
+	    map.value("dmID").toString().isEmpty()) {
+		errmsg = createErrorMsg("message ID attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS DOWNLOAD DELIVERY INFO METHOD */
+	ret = 0;
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+int checkGetUserInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "get user info parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS GET USER INFO METHOD */
+	ret = 0;
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+int checkGetOwnerInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "get owner info parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
+	/* CALL LIBISDS GET OWNER INFO METHOD */
+	ret = 0;
+
+	return ret;
 }
 
 
@@ -320,17 +485,17 @@ int runService(const QString &service, const QString &paramString)
 	if (service == SER_CONNECT) {
 		ret = checkConnectMandatoryAttributes(map);
 	} else if (service == SER_GET_MSG_LIST) {
-		ret = checkConnectMandatoryAttributes(map);
+		ret = checkGetMsgListMandatoryAttributes(map);
 	} else if (service == SER_SEND_MSG) {
 		ret = checkSendMsgMandatoryAttributes(map);
 	} else if (service == SER_DWNLD_MSG) {
-		ret = checkConnectMandatoryAttributes(map);
+		ret = checkDownloadMsgMandatoryAttributes(map);
 	} else if (service == SER_DWNLD_DEL_INFO) {
-		ret = checkConnectMandatoryAttributes(map);
+		ret = checkDownloadDeliveryMandatoryAttributes(map);
 	} else if (service == SER_GET_USER_INFO) {
-		ret = checkConnectMandatoryAttributes(map);
+		ret = checkGetUserInfoMandatoryAttributes(map);
 	} else if (service == SER_GET_OWNER_INFO) {
-		ret = checkConnectMandatoryAttributes(map);
+		ret = checkGetOwnerInfoMandatoryAttributes(map);
 	} else {
 		return ret;
 	}
