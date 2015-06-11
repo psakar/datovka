@@ -9121,7 +9121,9 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				continue;
 			}
 
-			tstData = (char *) message->envelope->timestamp;
+			tstData = QByteArray(
+			    (char *) message->envelope->timestamp,
+			    (int) message->envelope->timestamp_length);
 
 			if (tstData.isEmpty()) {
 				errorMsg.append(filePathList.at(i));
