@@ -1855,7 +1855,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO(newDir, dmId);
+		exportSelectedMessageAsZFO(newDir, userName, dmId);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
@@ -6799,37 +6799,40 @@ void MainWindow::showHelp(void)
  * Export message into as ZFO file dialogue.
  */
 void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
-    qint64 dmID, const QStandardItem *accountItem)
+    QString userName, qint64 dmID)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message to "
-		    "ZFO was not successful!"));
-		return;
-	}
 	qint64 dmId;
 
 	if (dmID == -1) {
+		QModelIndexList firstMsgColumnIdxs =
+		    ui->messageList->selectionModel()->selectedRows(0);
+		if (1 != firstMsgColumnIdxs.size()) {
+			return;
+		}
+
+		const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
+
+		Q_ASSERT(msgIdx.isValid());
+		if (!msgIdx.isValid()) {
+			showStatusTextWithTimeout(tr("Export of message to "
+			    "ZFO was not successful!"));
+			return;
+		}
+
 		dmId = msgIdx.data().toLongLong();
 	} else {
 		dmId = dmID;
 	}
+	Q_ASSERT(dmId >= 0);
 
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
+	if (userName.isEmpty()) {
+		QModelIndex acntIndex = ui->accountList->currentIndex();
+		acntIndex = AccountModel::indexTop(acntIndex);
+		userName = acntIndex.data(ROLE_ACNT_USER_NAME).toString();
+	}
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDb *messageDb = accountMessageDb(userName);
@@ -8985,7 +8988,6 @@ void MainWindow::prepareMsgTmstmpExpir(
 	QModelIndex index;
 	QString userName;
 	AccountModel::SettingsMap accountInfo;
-	QStandardItem *accountItem;
 	bool includeSubdir = false;
 	QString importDir;
 	QStringList fileList, filePathList;
@@ -9002,25 +9004,21 @@ void MainWindow::prepareMsgTmstmpExpir(
 		userName = index.data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
 		accountInfo = AccountModel::globAccounts[userName];
-		accountItem = m_accountModel.itemFromIndex(index);
 		showStatusTextPermanently(tr("Checking time stamps in "
 		    "account '%1'...").arg(accountInfo.accountName()));
-		checkMsgsTmstmpExpiration(accountItem,
-		    accountInfo.accountName(), QStringList());
+		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
 	case TimestampExpirDialog::CHECK_TIMESTAMP_ALL:
 		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
 			index = m_accountModel.index(i, 0);
-			accountItem = m_accountModel.itemFromIndex(index);
 			userName = index.data(ROLE_ACNT_USER_NAME).toString();
 			Q_ASSERT(!userName.isEmpty());
 			accountInfo = AccountModel::globAccounts[userName];
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...")
 			        .arg(accountInfo.accountName()));
-			checkMsgsTmstmpExpiration(accountItem,
-			    accountInfo.accountName(), QStringList());
+			checkMsgsTmstmpExpiration(userName, QStringList());
 		}
 		break;
 
@@ -9065,7 +9063,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 			return;
 		}
 
-		checkMsgsTmstmpExpiration(NULL, NULL, filePathList);
+		checkMsgsTmstmpExpiration(QString(), filePathList);
 
 		break;
 	default:
@@ -9080,8 +9078,8 @@ void MainWindow::prepareMsgTmstmpExpir(
 /*
  * Check messages time stamp expiration for account.
  */
-void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
-	const QString &accountName, QStringList filePathList)
+void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
+    const QStringList &filePathList)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -9093,7 +9091,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 	QString infoText;
 	bool showExportOption = true;
 
-	if (accountName.isEmpty() || accountItem == NULL) {
+	if (userName.isEmpty()) {
 
 		msgCnt = filePathList.count();
 
@@ -9130,8 +9128,9 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 				continue;
 			}
 
-			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
-			    globPref.timestamp_expir_before_days)) {
+			if (DlgSignatureDetail::signingCertExpiresBefore(
+			        tstData,
+			        globPref.timestamp_expir_before_days)) {
 				expirMsg.append(filePathList.at(i));
 			}
 		}
@@ -9153,8 +9152,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 		showExportOption = false;
 
 	} else {
-		MessageDb *messageDb =
-		    accountMessageDb(accountUserName(accountItem));
+		MessageDb *messageDb = accountMessageDb(userName);
 		Q_ASSERT(0 != messageDb);
 
 		QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
@@ -9174,7 +9172,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 		}
 
 		infoText = tr("Time stamp expiration check "
-		    "in account '%1' finished with result:").arg(accountName)
+		    "in account '%1' finished with result:").arg(
+		        AccountModel::globAccounts[userName].accountName())
 		    + "<br/><br/>" +
 		    tr("Total of messages in database: %1").arg(msgCnt)
 		    + "<br/><b>" +
@@ -9231,7 +9230,9 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 	}
 
 	if (QMessageBox::Yes == msgBox.exec()) {
-		exportExpirMessagesToZFO(expirMsg, accountItem);
+		if (!userName.isEmpty()) {
+			exportExpirMessagesToZFO(userName, expirMsg);
+		}
 	}
 }
 
@@ -9240,8 +9241,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 /*
  * Export messages with expired time stamp to ZFO.
  */
-void MainWindow::exportExpirMessagesToZFO(const QStringList &expirMsg,
-    const QStandardItem *accountItem)
+void MainWindow::exportExpirMessagesToZFO(const QString &userName,
+    const QStringList &expirMsg)
 /* ========================================================================= */
 {
 	QString newDir = QFileDialog::getExistingDirectory(this,
@@ -9253,7 +9254,7 @@ void MainWindow::exportExpirMessagesToZFO(const QStringList &expirMsg,
 	}
 
 	for (int i = 0; i < expirMsg.count(); ++i) {
-		exportSelectedMessageAsZFO(newDir, expirMsg.at(i).toLongLong(),
-		    accountItem);
+		exportSelectedMessageAsZFO(newDir, userName,
+		    expirMsg.at(i).toLongLong());
 	}
 }
