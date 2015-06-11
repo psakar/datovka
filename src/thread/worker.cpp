@@ -186,23 +186,19 @@ void Worker::doJob(void)
 	QString errMsg;
 	qdatovka_error res = Q_SUCCESS;
 
-	const QString userName =
-	    job.acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-
 	/* != -1 -- specific message required. */
 	if (0 <= job.msgId) {
 
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading message" << job.msgId << "for account"
-		    << job.acntTopIdx.data().toString();
+		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 
-		if (Q_SUCCESS == downloadMessage(userName, job.msgId,
+		if (Q_SUCCESS == downloadMessage(job.userName, job.msgId,
 		        true, job.msgDirect, *job.msgDb, errMsg,
 		        "DownloadMessage", 0, this)) {
 			/* Only on successful download. */
-			emit refreshAttachmentList(job.acntTopIdx, job.msgId);
+			emit refreshAttachmentList(job.userName, job.msgId);
 		} else {
 			emit clearStatusBarAndShowDialog(job.msgId, errMsg);
 		}
@@ -211,12 +207,12 @@ void Worker::doJob(void)
 
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading received message list for account"
-		    << job.acntTopIdx.data().toString();
+		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
-		res = downloadMessageList(userName, MSG_RECEIVED,
+		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.msgDb, errMsg, "GetListOfReceivedMessages",
 		        0, this, rt, rn);
-		emit refreshAccountList(job.acntTopIdx);
+		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
@@ -231,11 +227,11 @@ void Worker::doJob(void)
 
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading sent message list for account"
-		    << job.acntTopIdx.data().toString();
+		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
-		res = downloadMessageList(userName, MSG_SENT, *job.msgDb,
+		res = downloadMessageList(job.userName, MSG_SENT, *job.msgDb,
 		        errMsg, "GetListOfSentMessages", 0, this, st, sn);
-		emit refreshAccountList(job.acntTopIdx);
+		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {

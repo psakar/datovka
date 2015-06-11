@@ -582,7 +582,7 @@ private slots:
 	/*!
 	 * @brief Refresh AccountList.
 	 */
-	void refreshAccountListFromWorker(const QModelIndex acntTopIdx);
+	void refreshAccountListFromWorker(const QString &userName);
 
 	/*!
 	 * @brief Set and run any actions after main window has been created.
@@ -599,8 +599,8 @@ private slots:
 	/*!
 	 * @brief Set tablewidget when message download worker is done.
 	 */
-	void postDownloadSelectedMessageAttachments(
-	    const QModelIndex &acntTopIdx, qint64 dmId);
+	void postDownloadSelectedMessageAttachments(const QString &userName,
+	    qint64 dmId);
 
 	/*!
 	 * @brief Set info status bar from worker.

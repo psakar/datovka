@@ -45,26 +45,27 @@ public:
 	class Job {
 	public:
 		Job(void)
-		    : acntTopIdx(QModelIndex()),
+		    : userName(QString()),
 		    msgDb(0),
 		    msgDirect(MSG_RECEIVED),
 		    msgId(-1)
 		{
 		}
-		Job(const QModelIndex &idx, MessageDb *mDb,
+		Job(const QString &uName, MessageDb *mDb,
 		    enum MessageDirection direc, qint64 dmId = -1)
-		    : acntTopIdx(idx),
+		    : userName(uName),
 		    msgDb(mDb),
 		    msgDirect(direc),
 		    msgId(dmId)
 		{
 		}
 
-		bool isValid(void) {
-			return acntTopIdx.isValid() && (0 != msgDb);
+		bool isValid(void) const
+		{
+			return (!userName.isEmpty()) && (0 != msgDb);
 		}
 
-		QModelIndex acntTopIdx;
+		QString userName;
 		MessageDb *msgDb;
 		enum MessageDirection msgDirect;
 		qint64 msgId; /*!<
@@ -228,12 +229,12 @@ signals:
 	/*!
 	 * @brief This signal is emitted when process is finished
 	 */
-	void refreshAccountList(const QModelIndex);
+	void refreshAccountList(const QString);
 
 	/*!
 	 * @brief This signal is emitted when message downloading is finished
 	 */
-	void refreshAttachmentList(const QModelIndex, qint64);
+	void refreshAttachmentList(const QString, qint64);
 
 	/*!
 	 * @brief This signal is emitted when account is processed.

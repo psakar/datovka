@@ -2021,7 +2021,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
  * Set tablewidget when message download worker is done.
  */
 void MainWindow::postDownloadSelectedMessageAttachments(
-    const QModelIndex &acntTopIdx, qint64 dmId)
+    const QString &userName, qint64 dmId)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -2029,9 +2029,19 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	showStatusTextWithTimeout(tr("Message \"%1\" "
 	    " was downloaded from ISDS server.").arg(dmId));
 
+	QModelIndex acntTopIdx =
+	    m_accountModel.indexFromItem(itemFromUserName(userName));
+	if (!acntTopIdx.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	QModelIndex accountTopIndex =
 	    AccountModel::indexTop(ui->accountList->currentIndex());
-	Q_ASSERT(accountTopIndex.isValid());
+	if (!accountTopIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Do nothing if account index was changed. */
 	if (accountTopIndex != acntTopIdx) {
@@ -2859,9 +2869,9 @@ void MainWindow::synchroniseAllAccounts(void)
 				continue;
 			}
 
-			Worker::jobList.append(Worker::Job(index, messageDb,
+			Worker::jobList.append(Worker::Job(userName, messageDb,
 			    MSG_RECEIVED));
-			Worker::jobList.append(Worker::Job(index, messageDb,
+			Worker::jobList.append(Worker::Job(userName, messageDb,
 			    MSG_SENT));
 
 			appended = true;
@@ -2915,8 +2925,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 		}
 	}
 
-	Worker::jobList.append(Worker::Job(index, messageDb, MSG_RECEIVED));
-	Worker::jobList.append(Worker::Job(index, messageDb, MSG_SENT));
+	Worker::jobList.append(Worker::Job(userName, messageDb, MSG_RECEIVED));
+	Worker::jobList.append(Worker::Job(userName, messageDb, MSG_SENT));
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
@@ -2991,8 +3001,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	foreach (qint64 dmId, dmIds) {
 		/* Using prepend() just to outrun other jobs. */
 		Worker::jobList.append(
-		    Worker::Job(accountTopIndex, messageDb, msgDirection,
-		        dmId));
+		    Worker::Job(userName, messageDb, msgDirection, dmId));
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -3027,16 +3036,12 @@ void MainWindow::processPendingWorkerJobs(void)
 		return;
 	}
 
-	const QString userName =
-	    job.acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-
 	showStatusTextPermanently(
 	    tr("Synchronise account \"%1\" with ISDS server.")
-	        .arg(AccountModel::globAccounts[userName].accountName()));
+	        .arg(AccountModel::globAccounts[job.userName].accountName()));
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, true)) {
+	if (!isdsSessions.isConnectedToIsds(job.userName)) {
+		if (!connectToIsds(job.userName, true)) {
 			return;
 		}
 	}
@@ -3056,16 +3061,16 @@ void MainWindow::processPendingWorkerJobs(void)
 		    SLOT(dataFromWorkerToStatusBarInfo(bool,
 		        int, int, int, int)));
 		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAccountList(const QModelIndex)),
+		    SIGNAL(refreshAccountList(const QString)),
 		    this,
-		    SLOT(refreshAccountListFromWorker(const QModelIndex)));
+		    SLOT(refreshAccountListFromWorker(const QString)));
 	}
 	{
 		/* Downloading attachment. */
 		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAttachmentList(const QModelIndex, qint64)),
+		    SIGNAL(refreshAttachmentList(const QString, qint64)),
 		    this, SLOT(postDownloadSelectedMessageAttachments(
-		        const QModelIndex, qint64)));
+		        const QString, qint64)));
 		connect(m_syncAcntWorker,
 		    SIGNAL(clearStatusBarAndShowDialog(qint64, QString)),
 		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64,
@@ -5233,10 +5238,18 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 /*
 * Refresh AccountList
 */
-void MainWindow::refreshAccountListFromWorker(const QModelIndex acntTopIdx)
+void MainWindow::refreshAccountListFromWorker(const QString &userName)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	QModelIndex acntTopIdx =
+	    m_accountModel.indexFromItem(itemFromUserName(userName));
+
+	if (!acntTopIdx.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
@@ -6943,10 +6956,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 {
 	debugFuncCall();
 
-	QModelIndex accountIndex = ui->accountList->currentIndex();
-	Q_ASSERT(accountIndex.isValid());
-	accountIndex = AccountModel::indexTop(accountIndex);
-	    /* selection().indexes() ? */
+	/* selection().indexes() ? */
 
 	enum MessageDirection msgDirect = MSG_RECEIVED;
 
@@ -6966,8 +6976,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 		break;
 	}
 
-	const QString userName =
-	    accountIndex.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName = userNameFromItem();
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, true)) {
@@ -6982,7 +6991,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 	if (Q_SUCCESS == Worker::downloadMessage(userName, dmId, true,
 	        msgDirect, *messageDb, errMsg, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
-		postDownloadSelectedMessageAttachments(accountIndex, dmId);
+		postDownloadSelectedMessageAttachments(userName, dmId);
 		return true;
 	}
 
