@@ -353,24 +353,6 @@ public:
 	QModelIndex indexTop(const QModelIndex &index);
 
 	/*!
-	 * @brief Return related settings map.
-	 *
-	 * @param[in] item Selected account item.
-	 */
-	static
-	SettingsMap settingsMap(QStandardItem *item);
-
-	/*!
-	 * @brief Set settings map to related account.
-	 *
-	 * @param[in] item Selected account item.
-	 * @param[in] map  Settings map to be assigned.
-	 * @retunr True if successful.
-	 */
-	static
-	void setSettingsMap(QStandardItem *item, const SettingsMap &map);
-
-	/*!
 	 * @brief Set number of unread messages in recent model nodes.
 	 *
 	 * @param[in] item       Some item identifying the processed account.

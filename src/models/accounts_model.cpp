@@ -545,42 +545,6 @@ QModelIndex AccountModel::indexTop(const QModelIndex &index)
 
 /* ========================================================================= */
 /*
- * Return related settings map.
- */
-AccountModel::SettingsMap AccountModel::settingsMap(QStandardItem *item)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != item);
-	QStandardItem *topItem = itemTop(item);
-
-	Q_ASSERT(0 != topItem);
-	const QString userName = topItem->data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(userName == globAccounts[userName].userName());
-	return globAccounts[userName];
-}
-
-
-/* ========================================================================= */
-/*
- * Set settings map to related account.
- */
-void AccountModel::setSettingsMap(QStandardItem *item,
-    const AccountModel::SettingsMap &map)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != item);
-	QStandardItem *topItem = itemTop(item);
-
-	Q_ASSERT(0 != topItem);
-	Q_ASSERT(!map.userName().isEmpty());
-	globAccounts[map.userName()] = map;
-	topItem->setData(map.userName(), ROLE_ACNT_USER_NAME);
-}
-
-
-/* ========================================================================= */
-/*
  * Set number of unread messages in recent model nodes.
  */
 bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
