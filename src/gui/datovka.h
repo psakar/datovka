@@ -362,7 +362,7 @@ private slots:
 	/*!
 	 * @brief Verifies selected message and creates response dialog.
 	 */
-	void verifyMessage(void);
+	void verifySelectedMessage(void);
 
 	/*!
 	 * @brief Shows account properties dialog.
@@ -832,7 +832,7 @@ private:
 	/*!
 	 * @brief Generate account info HTML message.
 	 */
-	QString createAccountInfo(const QStandardItem &topItem);
+	QString createAccountInfo(const QString &userName);
 
 	/*!
 	 * @brief Generate overall account information.
@@ -852,7 +852,15 @@ private:
 	 * @note If accountItem is 0 then currently selected account is
 	 *     processed.
 	 */
-	QString accountUserName(const QStandardItem *accountItem = 0) const;
+	QString userNameFromItem(const QStandardItem *accountItem = 0) const;
+
+	/*!
+	 * @brief Returns pointer to account item related to given user name.
+	 *
+	 * @param[in] userName User login name.
+	 * @return 0 when no such top item found.
+	 */
+	QStandardItem *itemFromUserName(const QString &userName) const;
 
 	/*!
 	 * @brief Get message db to given account.
@@ -862,20 +870,19 @@ private:
 	/*!
 	 * @brief Set export paths to selected account item.
 	 */
-	void setAccountStoragePaths(const QStandardItem *accountItemTop);
+	void setAccountStoragePaths(const QString &userName);
 
 	/*!
 	 * @brief Delete message from long term storage in ISDS and
 	 * local database - based on delFromIsds parameter.
 	 */
-	qdatovka_error eraseMessage(const QModelIndex &acntTopIdx,
-	    qint64 dmId, bool delFromIsds);
+	qdatovka_error eraseMessage(const QString &userName, qint64 dmId,
+	    bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	qdatovka_error verifySelectedMessage(const QModelIndex &acntTopIdx,
-	    const QModelIndex &msgIdx);
+	qdatovka_error verifyMessage(const QString &userName, qint64 dmId);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.
