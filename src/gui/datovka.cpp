@@ -531,7 +531,12 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	const QStandardItem *accountItem =
 	    m_accountModel.itemFromIndex(current);
-	MessageDb *messageDb = accountMessageDb(accountItem);
+	const QStandardItem *accountItemTop =
+	    AccountModel::itemTop(accountItem);
+	const QString userName =
+	    accountItemTop->data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
+	MessageDb *messageDb = accountMessageDb(userName);
 	if (0 == messageDb) {
 		/* May occur on deleting last account. */
 		setMessageActionVisibility(false);
@@ -549,11 +554,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
-		const QStandardItem *accountItemTop =
-		    AccountModel::itemTop(accountItem);
-		const QString userName =
-		    accountItemTop->data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!userName.isEmpty());
 		const AccountModel::SettingsMap &itemSettings =
 		    AccountModel::globAccounts[userName];
 
@@ -594,7 +594,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
-	setAccountStoragePaths(accountItem);
+	setAccountStoragePaths(accountItemTop);
 
 	/*
 	 * Disconnect message clicked. This slot will be enabled only for
@@ -967,7 +967,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 		const QModelIndex &index = firstColumnIdxs.first();
 
-		MessageDb *messageDb = accountMessageDb(0);
+		MessageDb *messageDb = accountMessageDb(accountUserName());
 		Q_ASSERT(0 != messageDb);
 		qint64 msgId = index.data().toLongLong();
 		/* Remember last selected message. */
@@ -1073,7 +1073,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	/* Stop the timer. */
 	m_messageMarker.stop();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	qint64 msgId = index.sibling(index.row(), 0).data().toLongLong();
@@ -1680,14 +1680,17 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 		saveAttachPath = m_save_attach_dir;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	fileName = createFilenameFromFormatString(
@@ -1776,14 +1779,17 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	bool unspecifiedFailed = false;
 	QList<QString> unsuccessfullFiles;
 
-	MessageDb *messageDb = accountMessageDb(0);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	for (int i = 0; i < attachments; ++i) {
@@ -2093,9 +2099,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		        QModelIndex)));
 	}
 
-	QStandardItem *accountTopItem =
-	    m_accountModel.itemFromIndex(accountTopIndex);
-	MessageDb *messageDb = accountMessageDb(accountTopItem);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	/* Generate and show message information. */
@@ -2137,7 +2141,7 @@ void MainWindow::accountMarkReceivedLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2193,7 +2197,7 @@ void MainWindow::accountMarkReceivedYearLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2257,7 +2261,7 @@ void MainWindow::accountMarkRecentReceivedLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2314,7 +2318,7 @@ void MainWindow::accountMarkReceivedProcessState(
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2381,7 +2385,7 @@ void MainWindow::accountMarkReceivedYearProcessState(
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2458,7 +2462,7 @@ void MainWindow::accountMarkRecentReceivedProcessState(
 {
 	debugFuncCall();
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QModelIndex acntIdx =
@@ -2703,7 +2707,7 @@ qdatovka_error MainWindow::eraseMessage(const QModelIndex &acntTopIdx,
 	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	if (!delFromIsds) {
@@ -2856,9 +2860,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		if (isConnectActive) {
-			const QStandardItem *accountItem =
-			    m_accountModel.itemFromIndex(index);
-			MessageDb *messageDb = accountMessageDb(accountItem);
+			MessageDb *messageDb = accountMessageDb(userName);
 			if (0 == messageDb) {
 				continue;
 			}
@@ -2905,15 +2907,14 @@ void MainWindow::synchroniseSelectedAccount(void)
 
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
-	QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-	MessageDb *messageDb = accountMessageDb(accountItem);
+	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
+	MessageDb *messageDb = accountMessageDb(userName);
 	if (0 == messageDb) {
 		return;
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, true)) {
 			return;
@@ -2943,7 +2944,6 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	enum MessageDirection msgDirection = MSG_RECEIVED;
 	QModelIndex accountTopIndex;
-	MessageDb *messageDb = 0;
 
 	QModelIndexList firstMsgColumnIdxs =
 	    ui->messageList->selectionModel()->selectedRows(0);
@@ -2978,17 +2978,16 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		}
 
 		accountTopIndex = AccountModel::indexTop(accountIndex);
-		QStandardItem *accountTopItem =
-		     m_accountModel.itemFromIndex(accountTopIndex);
-
-		messageDb = accountMessageDb(accountTopItem);
-		Q_ASSERT(0 != messageDb);
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	const QString userName =
 	    accountTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, true)) {
 			return;
@@ -3301,7 +3300,7 @@ lastPart:
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    info));
 
-	MessageDb *db = accountMessageDb(&topItem);
+	MessageDb *db = accountMessageDb(userName);
 	Q_ASSERT(0 != db);
 	QString dbFilePath = db->fileName();
 	if (MessageDb::memoryLocation == dbFilePath) {
@@ -3385,14 +3384,12 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 
 /* ========================================================================= */
 /*
- * Get message db to selected account item.
+ * Returns user name related to given account item.
  */
-MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
+QString MainWindow::accountUserName(const QStandardItem *accountItem) const
 /* ========================================================================= */
 {
 	const QStandardItem *accountItemTop;
-	MessageDb *db = NULL;
-	int flags, dbPresenceCode;
 
 	if (0 == accountItem) {
 		accountItem = m_accountModel.itemFromIndex(
@@ -3402,10 +3399,27 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 	accountItemTop = AccountModel::itemTop(accountItem);
 	Q_ASSERT(0 != accountItemTop);
 
-	/* Get user name and db location. */
 	const QString userName =
 	    accountItemTop->data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	return userName;
+}
+
+
+/* ========================================================================= */
+/*
+ * Get message db to given account.
+ */
+MessageDb * MainWindow::accountMessageDb(const QString &userName)
+/* ========================================================================= */
+{
+	MessageDb *db = NULL;
+	int flags, dbPresenceCode;
+
+	Q_ASSERT(!userName.isEmpty());
+
+	/* Get user name and db location. */
 	AccountModel::SettingsMap &itemSettings =
 	    AccountModel::globAccounts[userName];
 
@@ -3586,19 +3600,11 @@ MessageDb * MainWindow::accountMessageDb(const QStandardItem *accountItem)
 /*
  * Get storage paths to selected account item.
  */
-void MainWindow::setAccountStoragePaths(const QStandardItem *accountItem)
+void MainWindow::setAccountStoragePaths(const QStandardItem *accountItemTop)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const QStandardItem *accountItemTop;
-
-	if (0 == accountItem) {
-		accountItem = m_accountModel.itemFromIndex(
-		    ui->accountList->selectionModel()->currentIndex());
-	}
-
-	accountItemTop = AccountModel::itemTop(accountItem);
 	Q_ASSERT(0 != accountItemTop);
 
 	const QString userName =
@@ -4146,9 +4152,9 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	/* Get database id. */
 	topItem = m_accountModel.itemFromIndex(index);
 	Q_ASSERT(0 != topItem);
-	const QString userName = topItem->data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
-	db = accountMessageDb(topItem);
+	db = accountMessageDb(userName);
 	Q_ASSERT(0 != db);
 
 	/* Received. */
@@ -4201,9 +4207,9 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	/* Get database id. */
 	topItem = m_accountModel.itemFromIndex(index);
 	Q_ASSERT(0 != topItem);
-	const QString userName = topItem->data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
-	db = accountMessageDb(topItem);
+	db = accountMessageDb(userName);
 	Q_ASSERT(0 != db);
 
 	/* Received. */
@@ -4257,7 +4263,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		const QString userName =
 		    itemTop->data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
-		db = accountMessageDb(itemTop);
+		db = accountMessageDb(userName);
 		if (0 == db) {
 			/*
 			 * Skip creation of leaves when no database is present.
@@ -4405,14 +4411,14 @@ void MainWindow::openSendMessageDialog(int action)
 		msgId = tableModel->itemData(index).first().toLongLong();
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 	const AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, true)) {
@@ -4534,11 +4540,12 @@ void MainWindow::deleteSelectedAccount(void)
 		return;
 	}
 
-	MessageDb *db = accountMessageDb(itemTop);
-	Q_ASSERT(0 != db);
-
 	const QString userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *db = accountMessageDb(userName);
+	Q_ASSERT(0 != db);
+
 	const QString accountName =
 	    AccountModel::globAccounts[userName].accountName();
 
@@ -4774,21 +4781,25 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 
 	const QModelIndex index = ui->accountList->currentIndex();
 	QStandardItem *item = m_accountModel.itemFromIndex(index);
+	item = AccountModel::itemTop(item);
+
+	const QString userName = item->data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
 
 	/* Get current settings. */
-	AccountModel::SettingsMap itemSettings =
-	    m_accountModel.settingsMap(item);
+	AccountModel::SettingsMap &itemSettings =
+	    AccountModel::globAccounts[userName];
 
 	QString fileName;
 
 	/* 1 = is test account, 0 = is legal account */
 	if (itemSettings.isTestAccount()) {
-		fileName = itemSettings.userName() + "___1.db";
+		fileName = userName + "___1.db";
 	} else {
-		fileName = itemSettings.userName() + "___0.db";
+		fileName = userName + "___0.db";
 	}
 
-	MessageDb *messageDb = accountMessageDb(item);
+	MessageDb *messageDb = accountMessageDb(userName);
 	Q_ASSERT(0 != messageDb);
 
 	qDebug() << fileName << action;
@@ -4798,7 +4809,6 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.moveMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDbDir(newDir);
-			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
 			qDebug() << "Move" << fileName << "from"
@@ -4827,7 +4837,6 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.copyMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDbDir(newDir);
-			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
 			qDebug() << "Copy" << fileName << "from"
@@ -4856,7 +4865,6 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		if (m_messageDbs.reopenMessageDb(messageDb, newDir)) {
 
 			itemSettings.setDbDir(newDir);
-			m_accountModel.setSettingsMap(item, itemSettings);
 			saveSettings();
 
 			qDebug() << "Create new" << fileName << "in"
@@ -5291,7 +5299,7 @@ qdatovka_error MainWindow::verifySelectedMessage(const QModelIndex &acntTopIdx,
 	}
 
 	memset(hashLocal, 0, sizeof(struct isds_hash));
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(userName);
 	Q_ASSERT(0 != messageDb);
 
 	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmId);
@@ -5993,11 +6001,12 @@ void MainWindow::exportCorrespondenceOverview(void)
 	QModelIndex index = ui->accountList->currentIndex();
 	index = AccountModel::indexTop(index);
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
 	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+
 	const QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
@@ -6135,8 +6144,7 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 		const QString userName =
 		    index.data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
-		QStandardItem *accountItem = m_accountModel.itemFromIndex(index);
-		MessageDb *messageDb = accountMessageDb(accountItem);
+		MessageDb *messageDb = accountMessageDb(userName);
 		Q_ASSERT(0 != messageDb);
 		accountData.acntIndex = index;
 		accountData.username = userName;
@@ -6818,21 +6826,17 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 		dmId = dmID;
 	}
 
-	MessageDb *messageDb;
-	if (accountItem) {
-		messageDb = accountMessageDb(accountItem);
-	} else {
-		messageDb = accountMessageDb(0);
-	}
-	Q_ASSERT(0 != messageDb);
-
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
@@ -6929,9 +6933,6 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 	accountIndex = AccountModel::indexTop(accountIndex);
 	    /* selection().indexes() ? */
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
 	enum MessageDirection msgDirect = MSG_RECEIVED;
 
 	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
@@ -6958,6 +6959,9 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId)
 			return false;
 		}
 	}
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
 
 	QString errMsg;
 	if (Q_SUCCESS == Worker::downloadMessage(userName, dmId, true,
@@ -7004,16 +7008,17 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath, QString
 		dmId = dmID;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
@@ -7132,16 +7137,17 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		dmId = dmID;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
@@ -7257,16 +7263,17 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		dmId = dmID;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
-	Q_ASSERT(0 != messageDb);
-
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
 	const QString userName =
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb *messageDb = accountMessageDb(userName);
+	Q_ASSERT(0 != messageDb);
+	QPair<QDateTime, QString> pair =
+	    messageDb->msgsAcceptTimeAnnotation(dmId);
+
 	QString dbId = m_accountDb.dbId(userName + "___True");
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
@@ -7379,7 +7386,7 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
@@ -7445,7 +7452,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
@@ -7512,7 +7519,7 @@ void MainWindow::showSignatureDetails(void)
 		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
@@ -8676,7 +8683,7 @@ void MainWindow::messageItemsSetReadStatus(
 		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QItemSelection storedMsgSelection =
@@ -8733,7 +8740,7 @@ void MainWindow::messageItemsSetProcessStatus(
 		return;
 	}
 
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(accountUserName());
 	Q_ASSERT(0 != messageDb);
 
 	QItemSelection storedMsgSelection =
@@ -8810,7 +8817,7 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	const QString userName =
 	    currIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
-	MessageDb *messageDb = accountMessageDb(0);
+	MessageDb *messageDb = accountMessageDb(userName);
 	Q_ASSERT(0 != messageDb);
 	userNameAndMsgDb.first = userName;
 	userNameAndMsgDb.second = messageDb;
@@ -8820,12 +8827,10 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
 		if (currIndex != index) {
-			QStandardItem *accountItem = m_accountModel.
-			    itemFromIndex(index);
 			const QString userName =
 			    index.data(ROLE_ACNT_USER_NAME).toString();
 			Q_ASSERT(!userName.isEmpty());
-			MessageDb *messageDb = accountMessageDb(accountItem);
+			MessageDb *messageDb = accountMessageDb(userName);
 			userNameAndMsgDb.first = userName;
 			userNameAndMsgDb.second = messageDb;
 			messageDbList.append(userNameAndMsgDb);
@@ -9148,7 +9153,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QStandardItem *accountItem,
 		showExportOption = false;
 
 	} else {
-		MessageDb *messageDb = accountMessageDb(accountItem);
+		MessageDb *messageDb =
+		    accountMessageDb(accountUserName(accountItem));
 		Q_ASSERT(0 != messageDb);
 
 		QStringList msgIdList = messageDb->getAllMessageIDsFromDB();

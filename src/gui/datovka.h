@@ -847,20 +847,22 @@ private:
 	QString createDatovkaBanner(const QString &version) const;
 
 	/*!
-	 * @brief Get message db to selected account item.
+	 * @brief Returns user name related to given account item.
 	 *
 	 * @note If accountItem is 0 then currently selected account is
 	 *     processed.
 	 */
-	MessageDb * accountMessageDb(const QStandardItem *accountItem);
+	QString accountUserName(const QStandardItem *accountItem = 0) const;
+
+	/*!
+	 * @brief Get message db to given account.
+	 */
+	MessageDb * accountMessageDb(const QString &userName);
 
 	/*!
 	 * @brief Set export paths to selected account item.
-	 *
-	 * @note If accountItem is 0 then currently selected account is
-	 *     processed.
 	 */
-	void setAccountStoragePaths(const QStandardItem *accountItem);
+	void setAccountStoragePaths(const QStandardItem *accountItemTop);
 
 	/*!
 	 * @brief Delete message from long term storage in ISDS and
