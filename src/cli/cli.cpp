@@ -23,13 +23,14 @@
 
 
 #include "src/cli/cli.h"
+#include "src/io/isds_sessions.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList() << "method" << "username"
     << "password" << "certificate" << "otpcode";
 const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
    << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime" << "dmToTime";
-const QStringList sendMsgAttrs = QStringList() << "username" << "dbIDSender"
+const QStringList sendMsgAttrs = QStringList() << "username"
     << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
     << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
     << "dmSenderIdent" << "dmLegalTitleLaw" << "dmLegalTitleYear"
@@ -48,6 +49,327 @@ const QString createErrorMsg(const QString &msg)
 {
 	return QString(CLI_PREFIX) + QString(PARSER_PREFIX) + msg;
 }
+
+static
+void isds_document_free_void(void **document)
+/* ========================================================================= */
+{
+	isds_document_free((struct isds_document **) document);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Send message
+ */
+int createAndSendMsg(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	isds_error status = IE_ERROR;
+	QString errmsg;
+
+	qDebug() << map;
+
+	/* Sent message. */
+	struct isds_message *sent_message = NULL;
+	/* All remaining structures are created to be a part of the message. */
+	struct isds_document *document = NULL; /* Attachment. */
+	struct isds_list *documents = NULL; /* Attachment list. */
+	struct isds_envelope *sent_envelope = NULL; /* Message envelope. */
+	struct isds_list *last = NULL; /* No need to free it explicitly. */
+
+	sent_envelope = (struct isds_envelope *)
+	    malloc(sizeof(struct isds_envelope));
+	if (sent_envelope == NULL) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	memset(sent_envelope, 0, sizeof(struct isds_envelope));
+
+	sent_message = (struct isds_message *)
+	    malloc(sizeof(struct isds_message));
+	if (sent_message == NULL) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	memset(sent_message, 0, sizeof(struct isds_message));
+
+	/* Load attachments. */
+	for (int i = 0; i < map["dmAttachment"].toStringList().count(); ++i) {
+
+		document = (struct isds_document *)
+		    malloc(sizeof(struct isds_document));
+		if (NULL == document) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+		memset(document, 0, sizeof(struct isds_document));
+
+		 // TODO - document is binary document only -> is_xml = false;
+		document->is_xml = false;
+
+		QFileInfo fi(map["dmAttachment"].toStringList().at(i));
+		QString name = fi.fileName();
+		document->dmFileDescr = strdup(name.toUtf8().constData());
+		if (NULL == document->dmFileDescr) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+
+		if (0 == i) {
+			document->dmFileMetaType = FILEMETATYPE_MAIN;
+		} else {
+			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
+		}
+
+		QString mimeType = "";
+		document->dmMimeType = strdup(mimeType.toUtf8().constData());
+		if (NULL == document->dmMimeType) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+
+		QFile file(map["dmAttachment"].toStringList().at(i));
+		if (file.exists()) {
+			if (!file.open(QIODevice::ReadOnly)) {
+				errmsg = "Couldn't open the file \""
+				    + map["dmAttachment"].toStringList().at(i)
+				    + "\"";
+				goto finish;
+			}
+		}
+		QByteArray bytes = file.readAll();
+		document->data_length = bytes.size();
+		document->data = malloc(bytes.size());
+			if (NULL == document->data) {
+				errmsg = "Out of memory.";
+				goto finish;
+			}
+		memcpy(document->data, bytes.data(), document->data_length);
+
+		struct isds_list *newListItem = (struct isds_list *) malloc(
+		    sizeof(struct isds_list));
+		if (NULL == newListItem) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+
+		newListItem->data = document; document = NULL;
+		newListItem->next = NULL;
+		newListItem->destructor = isds_document_free_void;
+
+		if (last == NULL) {
+			documents = last = newListItem;
+		} else {
+			last->next = newListItem;
+			last = newListItem;
+		}
+	}
+
+	/* Set mandatory fields of envelope. */
+	sent_envelope->dmID = NULL;
+	sent_envelope->dmAnnotation =
+	    strdup(map["dmAnnotation"].toString().toUtf8().constData());
+	if (NULL == sent_envelope->dmAnnotation) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+
+	sent_envelope->dbIDRecipient =
+	    strdup(map["dbIDRecipient"].toString().toUtf8().constData());
+	if (NULL == sent_envelope->dbIDRecipient) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+
+	/* Set optional fields. */
+	if (map.contains("dmSenderIdent")) {
+		sent_envelope->dmSenderIdent =
+		    strdup(map["dmSenderIdent"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmSenderIdent) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmRecipientIdent")) {
+		sent_envelope->dmRecipientIdent =
+		    strdup(map["dmRecipientIdent"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmRecipientIdent) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmSenderRefNumber")) {
+		sent_envelope->dmSenderRefNumber =
+		    strdup(map["dmSenderRefNumber"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmSenderRefNumber) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmRecipientRefNumber")) {
+		sent_envelope->dmRecipientRefNumber =
+		    strdup(map["dmRecipientRefNumber"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmRecipientRefNumber) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmToHands")) {
+		sent_envelope->dmToHands =
+		    strdup(map["dmToHands"].toString().toUtf8().constData());
+		if (NULL == sent_envelope->dmToHands) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmLegalTitleLaw")) {
+		sent_envelope->dmLegalTitleLaw =
+		    (long int *) malloc(sizeof(long int));
+		if (NULL == sent_envelope->dmLegalTitleLaw) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+		*sent_envelope->dmLegalTitleLaw =
+		    map["dmLegalTitleLaw"].toLongLong();
+	} else {
+		sent_envelope->dmLegalTitleLaw = NULL;
+	}
+
+	if (map.contains("dmLegalTitleYear")) {
+		sent_envelope->dmLegalTitleYear =
+		    (long int *) malloc(sizeof(long int));
+		if (NULL == sent_envelope->dmLegalTitleYear) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+		*sent_envelope->dmLegalTitleYear =
+		    map["dmLegalTitleYear"].toLongLong();
+	} else {
+		sent_envelope->dmLegalTitleYear = NULL;
+	}
+
+	if (map.contains("dmLegalTitleSect")) {
+		sent_envelope->dmLegalTitleSect =
+		    strdup(map["dmLegalTitleSect"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmLegalTitleSect) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmLegalTitlePar")) {
+		sent_envelope->dmLegalTitlePar =
+		    strdup(map["dmLegalTitlePar"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmLegalTitlePar) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmLegalTitlePoint")) {
+		sent_envelope->dmLegalTitlePoint =
+		    strdup(map["dmLegalTitlePoint"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmLegalTitlePoint) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	if (map.contains("dmType")) {
+		sent_envelope->dmType =
+		    strdup(map["dmType"].toString().toUtf8()
+		    .constData());
+		if (NULL == sent_envelope->dmType) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
+	}
+
+	sent_envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmPersonalDelivery) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	if (map.contains("dmPersonalDelivery")) {
+		*sent_envelope->dmPersonalDelivery =
+		    map["dmPersonalDelivery"].toBool();
+	} else {
+		*sent_envelope->dmPersonalDelivery = true;
+	}
+
+	sent_envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmAllowSubstDelivery) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	if (map.contains("dmAllowSubstDelivery")) {
+		*sent_envelope->dmAllowSubstDelivery =
+		    map["dmAllowSubstDelivery"].toBool();
+	} else {
+		*sent_envelope->dmAllowSubstDelivery = true;
+	}
+
+	sent_envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmOVM) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	if (map.contains("dmOVM")) {
+		*sent_envelope->dmOVM =
+		    map["dmOVM"].toBool();
+	} else {
+		*sent_envelope->dmOVM = true;
+	}
+
+	sent_envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == sent_envelope->dmPublishOwnID) {
+		errmsg = "Out of memory.";
+		goto finish;
+	}
+	if (map.contains("dmPublishOwnID")) {
+		*sent_envelope->dmPublishOwnID =
+		    map["dmPublishOwnID"].toBool();
+	} else {
+		*sent_envelope->dmPublishOwnID = false;
+	}
+
+	sent_message->documents = documents; documents = NULL;
+	sent_message->envelope = sent_envelope; sent_envelope = NULL;
+
+//	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
+//		/* TODO - connectToIsds */
+//		goto finish;
+//	}
+
+	status = isds_send_message(
+	    isdsSessions.session(map["username"].toString()), sent_message);
+
+finish:
+
+	isds_document_free(&document);
+	isds_list_free(&documents);
+	isds_envelope_free(&sent_envelope);
+	isds_message_free(&sent_message);
+
+	qDebug() << status << errmsg;
+
+	return status;
+}
+
 
 
 /* ========================================================================= */
@@ -190,7 +512,7 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 	}
 
 	/* CALL LIBISDS SEND MSG METHOD */
-	ret = 0;
+	ret = createAndSendMsg(map);
 
 	return ret;
 }
