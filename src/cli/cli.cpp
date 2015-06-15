@@ -30,7 +30,8 @@
 const QStringList connectAttrs = QStringList() << "method" << "username"
     << "password" << "certificate" << "otpcode";
 const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
-   << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime" << "dmToTime";
+    << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime"
+    << "dmToTime";
 const QStringList sendMsgAttrs = QStringList() << "username"
     << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
     << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
@@ -43,7 +44,6 @@ const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
 const QString databoxInfoAttrs = "username";
 
 
-
 /* ========================================================================= */
 const QString createErrorMsg(const QString &msg)
 /* ========================================================================= */
@@ -51,6 +51,8 @@ const QString createErrorMsg(const QString &msg)
 	return QString(CLI_PREFIX) + QString(PARSER_PREFIX) + msg;
 }
 
+
+/* ========================================================================= */
 static
 void isds_document_free_void(void **document)
 /* ========================================================================= */
@@ -59,18 +61,14 @@ void isds_document_free_void(void **document)
 }
 
 
-
 /* ========================================================================= */
-/*
- * Send message
- */
 int createAndSendMsg(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 	QString errmsg;
 
-	//qDebug() << map;
+	qDebug() << CLI_PREFIX << "create a new message...";
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -351,9 +349,13 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	sent_message->documents = documents; documents = NULL;
 	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
+	qDebug() << CLI_PREFIX << "sending of a new message...";
+
 	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
 		/* TODO - connectToIsds */
 		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
+			errmsg = isds_long_message(
+			    isdsSessions.session(map["username"].toString()));
 			goto finish;
 		}
 	}
@@ -361,18 +363,26 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	status = isds_send_message(
 	    isdsSessions.session(map["username"].toString()), sent_message);
 
+	errmsg =
+	    isds_long_message(isdsSessions.session(map["username"].toString()));
+
 finish:
+
+	if (IE_SUCCESS == status) {
+		qDebug() << CLI_PREFIX << "message has been sent; "
+		    "dmID:" << sent_message->envelope->dmID;
+	} else {
+		qDebug() << CLI_PREFIX << "error while sending of message! "
+		    "Error code:" << status << errmsg;
+	}
 
 	isds_document_free(&document);
 	isds_list_free(&documents);
 	isds_envelope_free(&sent_envelope);
 	isds_message_free(&sent_message);
 
-	qDebug() << status << errmsg;
-
 	return status;
 }
-
 
 
 /* ========================================================================= */
@@ -514,10 +524,7 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		return ret;
 	}
 
-	/* CALL LIBISDS SEND MSG METHOD */
-	ret = createAndSendMsg(map);
-
-	return ret;
+	return createAndSendMsg(map);
 }
 
 
