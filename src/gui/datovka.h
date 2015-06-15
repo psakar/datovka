@@ -640,6 +640,10 @@ private:
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 
+	void showStatusTextWithTimeout(const QString &qStr);
+
+	void showStatusTextPermanently(const QString &qStr);
+
 	/*!
 	 * @brief Check message time stamp expiration for account.
 	 */
@@ -898,13 +902,21 @@ private:
 	/*!
 	 * @brief Check if connection to ISDS fails.
 	 */
+	static
 	bool checkConnectionError(int status, const QString &accountName,
-	    bool showDialog, const QString &isdsMsg);
+	    const QString &isdsMsg, MainWindow *mw);
 
 	/*!
 	 * @brief connect to ISDS databox from exist account
+	 *
+	 * @note If pointer to main windows is specified, then various
+	 *     dialogues may be shown.
+	 *
+	 * @param userName Account login.
+	 * @param mw       Pointer to main window.
 	 */
-	bool connectToIsds(const QString &userName, bool showDialog);
+	static
+	bool connectToIsds(const QString &userName, MainWindow *mw);
 
 	/*!
 	 * @brief connect to ISDS databox from new account
@@ -915,13 +927,15 @@ private:
 	/*!
 	 * @brief Login to ISDS server by user name and password only.
 	 */
-	bool loginMethodUserNamePwd(const QString &userName, bool showDialog);
+	static
+	bool loginMethodUserNamePwd(const QString &userName, MainWindow *mw);
 
 	/*!
 	 * @brief Login to ISDS server by user name, password and OTP code.
 	 */
+	static
 	bool loginMethodUserNamePwdOtp(const QString &userName,
-	    bool showDialog);
+	    MainWindow *mw, QString otpCode = QString());
 
 	/*!
 	 * @brief Converts PKCS #12 certificate into PEM format.
@@ -944,20 +958,23 @@ private:
 	/*!
 	 * @brief Login to ISDS server by certificate only.
 	 */
+	static
 	bool loginMethodCertificateOnly(const QString &userName,
-	    bool showDialog);
+	    MainWindow *mw);
 
 	/*!
 	 * @brief Login to ISDS server by certificate, user name and password.
 	 */
+	static
 	bool loginMethodCertificateUserPwd(const QString &userName,
-	    bool showDialog);
+	    MainWindow *mw);
 
 	/*!
 	 * @brief Login to ISDS server by certificate and data box ID.
 	 */
+	static
 	bool loginMethodCertificateIdBox(const QString &userName,
-	    bool showDialog);
+	    MainWindow *mw);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.
@@ -998,11 +1015,13 @@ private:
 	/*
 	 * @brief Get data about logged in user and his box.
 	 */
+	static
 	bool getOwnerInfoFromLogin(const QString &userName);
 
 	/*!
 	 * @brief Get information about password expiration date.
 	 */
+	static
 	bool getPasswordInfoFromLogin(const QString &userName);
 
 	/*!
@@ -1013,6 +1032,7 @@ private:
 	/*!
 	 * @brief Get data about logged in user.
 	 */
+	static
 	bool getUserInfoFromLogin(const QString &userName);
 
 	/*!
