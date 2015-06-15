@@ -82,6 +82,29 @@ public:
 		MSG_FILE_ERROR
 	};
 
+	/*!
+	 * @brief connect to ISDS databox from exist account
+	 *
+	 * @note If pointer to main windows is specified, then various
+	 *     dialogues may be shown.
+	 *
+	 * @param userName Account login.
+	 * @param mw       Pointer to main window.
+	 */
+	static
+	bool connectToIsds(const QString &userName, MainWindow *mw);
+
+	/*!
+	 * @brief Get message db to given account.
+	 *
+	 * @note If pointer to main window is not specified, then all dialogues
+	 *     will be suppressed.
+	 *
+	 * @param userName Account login.
+	 * @param mw       Pointer to main window.
+	 */
+	static
+	MessageDb * accountMessageDb(const QString &userName, MainWindow *mw);
 
 protected:
 	/*!
@@ -867,11 +890,6 @@ private:
 	QStandardItem *itemFromUserName(const QString &userName) const;
 
 	/*!
-	 * @brief Get message db to given account.
-	 */
-	MessageDb * accountMessageDb(const QString &userName);
-
-	/*!
 	 * @brief Set export paths to selected account item.
 	 */
 	void setAccountStoragePaths(const QString &userName);
@@ -905,18 +923,6 @@ private:
 	static
 	bool checkConnectionError(int status, const QString &accountName,
 	    const QString &isdsMsg, MainWindow *mw);
-
-	/*!
-	 * @brief connect to ISDS databox from exist account
-	 *
-	 * @note If pointer to main windows is specified, then various
-	 *     dialogues may be shown.
-	 *
-	 * @param userName Account login.
-	 * @param mw       Pointer to main window.
-	 */
-	static
-	bool connectToIsds(const QString &userName, MainWindow *mw);
 
 	/*!
 	 * @brief connect to ISDS databox from new account
