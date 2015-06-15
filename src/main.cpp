@@ -199,6 +199,18 @@ int main(int argc, char *argv[])
 	crypto_init_threads();
 
 	{
+		/* Stuff related to configuration file. */
+
+		logDebugLv0NL("Load: '%s'.",
+		    globPref.loadConfPath().toUtf8().constData());
+		logDebugLv0NL("Save: '%s'.",
+		    globPref.saveConfPath().toUtf8().constData());
+
+		/* Change "\" to "/" */
+		fixBackSlashesInFile(globPref.loadConfPath());
+	}
+
+	{
 		/* Obey proxy settings. */
 		{
 			QSettings settings(globPref.loadConfPath(),
@@ -340,6 +352,15 @@ int main(int argc, char *argv[])
 	smsgdtTbl.reloadLocalisedDescription();
 	crtdtTbl.reloadLocalisedDescription();
 	msgcrtdtTbl.reloadLocalisedDescription();
+
+	{
+		/* Open accounts database. */
+		if (!globAccountDb.openDb(globPref.accountDbPath())) {
+			logErrorNL("Error opening account db '%s'.",
+			    globPref.accountDbPath().toUtf8().constData());
+			return EXIT_FAILURE;
+		}
+	}
 
 	int ret = 0;
 	if (cmdLineFileNames.isEmpty()) {

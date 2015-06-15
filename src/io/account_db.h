@@ -227,4 +227,10 @@ private:
 };
 
 
+/*!
+ * @brief Global account database.
+ */
+extern AccountDb globAccountDb;
+
+
 #endif /* _ACCOUNT_DB_H_ */

@@ -5860,3 +5860,6 @@ QString DbContainer::constructDbFileName(const QString &key,
 	return locDir + QDir::separator() +
 	    key + "___" + (testing ? "1" : "0") + ".db";
 }
+
+
+DbContainer globMessageDbs;

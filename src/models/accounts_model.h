@@ -240,6 +240,14 @@ public:
 		}
 	};
 
+	class AccountsMap : public QMap<QString, SettingsMap> {
+	public:
+		/*!
+		 * @brief Load data from supplied settings.
+		 */
+		void loadFromSettings(const QSettings &settings);
+	};
+
 	/*!
 	 * @brief Holds account data related to account.
 	 *
@@ -247,7 +255,7 @@ public:
 	 *     the top node.
 	 */
 	static
-	QMap<QString, SettingsMap> globAccounts;
+	AccountsMap globAccounts;
 
 	/*
 	 * |

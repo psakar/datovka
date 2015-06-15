@@ -1084,4 +1084,10 @@ public:
 };
 
 
+/*!
+ * @brief Global database container.
+ */
+extern DbContainer globMessageDbs;
+
+
 #endif /* _MESSAGE_DB_H_ */

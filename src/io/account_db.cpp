@@ -888,3 +888,6 @@ bool AccountDb::createEmptyMissingTables(void)
 fail:
 	return false;
 }
+
+
+AccountDb globAccountDb("accountDb");

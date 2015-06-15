@@ -1028,8 +1028,6 @@ private:
 	                              * Account tree view model. Generated from
 	                              * configuration file.
 	                              */
-	AccountDb m_accountDb; /*!< Account information database. */
-	DbContainer m_messageDbs; /*!< Map of message databases. */
 	QLineEdit *m_filterLine; /*!< Search filter line object. */
 	QPushButton *m_clearFilterLineButton; /*!< Button object. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
