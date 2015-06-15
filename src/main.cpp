@@ -459,6 +459,15 @@ int main(int argc, char *argv[])
 
 	int ret = 0;
 
+	/* Parse account information. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globProxSet.loadFromSettings(settings);
+		AccountModel::globAccounts.loadFromSettings(settings);
+	}
+
 	if (parser.isSet(SER_CONNECT)) {
 		ret = runService(SER_CONNECT,
 		    parser.value(SER_CONNECT));

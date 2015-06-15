@@ -24,6 +24,7 @@
 
 #include "src/cli/cli.h"
 #include "src/io/isds_sessions.h"
+#include "src/gui/datovka.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList() << "method" << "username"
@@ -69,7 +70,7 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	isds_error status = IE_ERROR;
 	QString errmsg;
 
-	qDebug() << map;
+	//qDebug() << map;
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -350,10 +351,12 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	sent_message->documents = documents; documents = NULL;
 	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
-//	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
-//		/* TODO - connectToIsds */
-//		goto finish;
-//	}
+	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
+		/* TODO - connectToIsds */
+		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
+			goto finish;
+		}
+	}
 
 	status = isds_send_message(
 	    isdsSessions.session(map["username"].toString()), sent_message);
