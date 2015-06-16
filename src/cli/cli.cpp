@@ -316,12 +316,19 @@ int getUserInfo(const QMap <QString, QVariant> &map)
 	qDebug() << CLI_PREFIX << "downloading info about "
 	    " username" <<  username << "...";
 
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
+	if (!isdsSessions.isConnectedToIsds(username)) {
+		if (!MainWindow::connectToIsds(username, 0)) {
+			qDebug() << CLI_PREFIX << "connection error:"
+			  << isds_long_message(isdsSessions.session(username));
+			return CLI_RET_ERROR_CODE;
+		}
+	}
 
-	/* TODO */
+	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+		return CLI_RET_OK_CODE;
+	}
 
-	return CLI_RET_OK_CODE;
+	return CLI_RET_ERROR_CODE;
 }
 
 
@@ -334,12 +341,19 @@ int getOwnerInfo(const QMap <QString, QVariant> &map)
 	qDebug() << CLI_PREFIX << "downloading info about owner and its "
 	    "databox for username" <<  username << "...";
 
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
+	if (!isdsSessions.isConnectedToIsds(username)) {
+		if (!MainWindow::connectToIsds(username, 0)) {
+			qDebug() << CLI_PREFIX << "connection error:"
+			  << isds_long_message(isdsSessions.session(username));
+			return CLI_RET_ERROR_CODE;
+		}
+	}
 
-	/* TODO */
+	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+		return CLI_RET_OK_CODE;
+	}
 
-	return CLI_RET_OK_CODE;
+	return CLI_RET_ERROR_CODE;
 }
 
 

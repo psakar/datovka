@@ -117,6 +117,24 @@ public:
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
 
+	/*!
+	 * @brief Get data about logged in user and his box.
+	 */
+	static
+	bool getOwnerInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get information about password expiration date.
+	 */
+	static
+	bool getPasswordInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	static
+	bool getUserInfoFromLogin(const QString &userName);
+
 protected:
 	/*!
 	 * Check if some worker is working on the background and show
@@ -1055,28 +1073,10 @@ private:
 	int showDialogueAboutPwdExpir(const QString &accountName,
 	    const QString &userName, qint64 days, const QDateTime &dateTime);
 
-	/*
-	 * @brief Get data about logged in user and his box.
-	 */
-	static
-	bool getOwnerInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get information about password expiration date.
-	 */
-	static
-	bool getPasswordInfoFromLogin(const QString &userName);
-
 	/*!
 	 * @brief Get information about remaining PDZ credit.
 	 */
 	QString getPDZCreditFromISDS(void);
-
-	/*!
-	 * @brief Get data about logged in user.
-	 */
-	static
-	bool getUserInfoFromLogin(const QString &userName);
 
 	/*!
 	 * @brief Export message with expired time stamp to ZFO.
