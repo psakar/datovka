@@ -466,6 +466,20 @@ public:
 	    int messageType);
 
 	/*!
+	 * @brief Return all message ID from database.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsFromDB(void) const;
+
+	/*!
+	 * @brief Return all message ID from database without attachment.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsWithoutAttach(void) const;
+
+	/*!
 	 * @brief Check whether whole message is stored in database.
 	 *
 	 * @param[in] dmId  Message identifier.

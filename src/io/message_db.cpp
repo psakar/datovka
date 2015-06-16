@@ -3191,6 +3191,39 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Return all message ID from database without attachment.
+ */
+QStringList MessageDb::getAllMessageIDsWithoutAttach(void) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT dmID FROM messages AS m "
+	    "LEFT JOIN raw_message_data AS r ON (m.dmID = r.message_id) "
+	    "WHERE r.message_id IS null";
+
+	QStringList msgIsList;
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIsList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+	return msgIsList;
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
  * Return all message ID from database.
  */
 QList<MessageDb::MsgId> MessageDb::getAllMessageIDsFromDB(void) const

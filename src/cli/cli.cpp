@@ -44,7 +44,7 @@ const QStringList sendMsgAttrs = QStringList() << "username"
     << "dmPublishOwnID" << ATTACH_LABEL;
 const QStringList dwnldMsgAttrs = QStringList() << "username" << "dmID";
 const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
-const QString databoxInfoAttrs = "username";
+const QString attrUserName = "username";
 
 
 
@@ -301,7 +301,7 @@ int checkAttachment(const QMap <QString, QVariant> &map)
 	MessageDb *messageDb =
 	    MainWindow::accountMessageDb(username, 0);
 
-	/* TODO */
+	printDataToStdOut(messageDb->getAllMessageIDsWithoutAttach());
 
 	return CLI_RET_OK_CODE;
 }
@@ -700,9 +700,12 @@ bool checkAttributeIfExists(const QString &service, const QString &attribute)
 		return dwnldMsgAttrs.contains(attribute);
 	} else if (service == SER_DWNLD_DEL_INFO) {
 		return dwnldDelInfoAttrs.contains(attribute);
-	} else if (service == SER_GET_USER_INFO ||
-	    service == SER_GET_OWNER_INFO) {
-		return (attribute == databoxInfoAttrs);
+	} else if (service == SER_GET_USER_INFO) {
+		return (attribute == attrUserName);
+	} else if (service == SER_GET_OWNER_INFO) {
+		return (attribute == attrUserName);
+	} else if (service == SER_CHECK_ATTACHMENT) {
+		return (attribute == attrUserName);
 	}
 	return false;
 }
