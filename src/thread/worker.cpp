@@ -210,9 +210,10 @@ void Worker::doJob(void)
 		qDebug() << "Downloading received message list for account"
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
+		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
-		        0, this, rt, rn);
+		        0, this, rt, rn, newMsgIdList);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -230,8 +231,11 @@ void Worker::doJob(void)
 		qDebug() << "Downloading sent message list for account"
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
+
+		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
-		        errMsg, "GetListOfSentMessages", 0, this, st, sn);
+		        errMsg, "GetListOfSentMessages", 0, this, st, sn,
+		        newMsgIdList);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -377,7 +381,7 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 qdatovka_error Worker::downloadMessageList(const QString &userName,
     enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-    int &total, int &news)
+    int &total, int &news, QStringList &newMsgIdList)
 /* ========================================================================= */
 {
 #define USE_TRANSACTIONS 1
@@ -478,6 +482,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 			return Q_ISDS_ERROR;
 		}
 
+		QString dmID = QString(item->envelope->dmID);
 		qint64 dmId = QString(item->envelope->dmID).toLongLong();
 		/*
 		 * Time may be invalid (e.g. messages which failed during
@@ -512,6 +517,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 				    MessageDb::MsgId(dmId, deliveryTime),
 				    true, msgDirect, dbSet, errMsg, "", 0, 0);
 			}
+			newMsgIdList.append(dmID);
 			newcnt++;
 
 		/* Message is in db (dmDbMsgStatus <> -1). */

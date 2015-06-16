@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QTextStream>
 
 #include "src/cli/cli.h"
 #include "src/io/isds_sessions.h"
@@ -44,6 +45,23 @@ const QStringList sendMsgAttrs = QStringList() << "username"
 const QStringList dwnldMsgAttrs = QStringList() << "username" << "dmID";
 const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
 const QString databoxInfoAttrs = "username";
+
+
+
+/* ========================================================================= */
+void printDataToStdOut(const QStringList &data)
+/* ========================================================================= */
+{
+	QTextStream cout(stdout);
+
+	for (int i = 0; i < data.count(); ++i) {
+		if (i == (data.count() - 1)) {
+			cout << data.at(i) << endl;
+		} else {
+			cout << data.at(i) + ",";
+		}
+	}
+}
 
 
 /* ========================================================================= */
@@ -87,16 +105,19 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	qdatovka_error ret;
 
+	QStringList newMsgIdList;
+
 	if (map["dmType"].toString() == "received") {
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, errmsg, NULL, 0, 0, rt, rn);
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list "
 			    "has been downloaded for username" <<  username;
 			qDebug() << CLI_PREFIX << "#Received total:" << rt
-			<< "#Received new: "<< rn;
+			    << " #Received new:" << rn;
+			printDataToStdOut(newMsgIdList);
 			return 0;
 		} else {
 			qDebug() << CLI_PREFIX << "error while downloading "
@@ -108,13 +129,14 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	} else if (map["dmType"].toString() == "sent") {
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0, st, sn);
+		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
 			    "downloaded for username" <<  username;
 			qDebug() << CLI_PREFIX << "#Sent total:" << st
-			<< "#Sent new: "<< sn;
+			    << " #Sent new:" << sn;
+			printDataToStdOut(newMsgIdList);
 			return 0;
 		} else {
 			qDebug() << CLI_PREFIX << "error while downloading "
@@ -126,35 +148,36 @@ int getMsgList(const QMap <QString, QVariant> &map)
 
 		int ok = 0;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, errmsg, NULL, 0, 0, rt, rn);
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list has "
 			    "been downloaded for username" <<  username;
 			qDebug() << CLI_PREFIX << "#Received total:" << rt <<
-			"#Received new: "<< rn;
+			    " #Received new:" << rn;
 		}  else {
 			qDebug() << CLI_PREFIX << "error while downloading "
-			    "received message list! Error code:"
-			    << ret << errmsg;
+			    "received message list! Error code:" <<
+			    ret << errmsg;
 			ok = -1;
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0, st, sn);
+		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
 			    "downloaded for username" <<  username;
 			qDebug() << CLI_PREFIX << "#Sent total:" << st <<
-			"#Sent new: "<< sn;
+			    " #Sent new:" << sn;
 		}  else {
 			qDebug() << CLI_PREFIX << "error while downloading "
 			    "sent message list! Error code:" << ret << errmsg;
 			ok = -1;
 		}
+		printDataToStdOut(newMsgIdList);
 		return ok;
 
 	} else {
-		qDebug() << CLI_PREFIX << "wrong dmType value:"
-		    << map["dmType"].toString();
+		qDebug() << CLI_PREFIX << "wrong dmType value:" <<
+		    map["dmType"].toString();
 		return -1;
 	}
 

@@ -176,7 +176,7 @@ public:
 	qdatovka_error downloadMessageList(const QString &userName,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-	    int &total, int &news);
+	    int &total, int &news, QStringList &newMsgIdList);
 
 private:
 
