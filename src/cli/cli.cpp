@@ -25,10 +25,11 @@
 #include "src/cli/cli.h"
 #include "src/io/isds_sessions.h"
 #include "src/gui/datovka.h"
+#include "src/io/account_db.h"
 
 // Known attributes definition
-const QStringList connectAttrs = QStringList() << "method" << "username"
-    << "password" << "certificate" << "otpcode";
+const QStringList connectAttrs = QStringList() << "method" << "type"
+    << "username" << "password" << "certificate" << "otpcode";
 const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
     << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime"
     << "dmToTime";
@@ -58,6 +59,78 @@ void isds_document_free_void(void **document)
 /* ========================================================================= */
 {
 	isds_document_free((struct isds_document **) document);
+}
+
+
+/* ========================================================================= */
+int getMsgList(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	qDebug() << CLI_PREFIX << "create a get message list request...";
+
+	isds_error status = IE_ERROR;
+	QString errmsg;
+	struct isds_list *item = NULL;
+
+
+	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
+		/* TODO - connectToIsds */
+		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
+			errmsg = isds_long_message(
+			    isdsSessions.session(map["username"].toString()));
+			goto finish;
+		}
+	}
+
+	/* Download sent/received message list from ISDS for current account */
+	if (map["dmType"] == "received") {
+		status = isds_get_list_of_received_messages(isdsSessions.
+		    session(map["username"].toString()),
+		    NULL, NULL, NULL,
+		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
+		    MESSAGESTATE_ANY,
+		    0, NULL, &item);
+	} else if (map["dmType"] == "sent") {
+		status = isds_get_list_of_sent_messages(isdsSessions.
+		    session(map["username"].toString()),
+		    NULL, NULL, NULL,
+		    //MESSAGESTATE_SENT |  MESSAGESTATE_STAMPED |
+		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
+		    MESSAGESTATE_ANY,
+		    0, NULL, &item);
+	} else if (map["dmType"] == "all") {
+
+	} else {
+		/* TODO - error */
+		goto finish;
+	}
+
+	errmsg =
+	    isds_long_message(isdsSessions.session(map["username"].toString()));
+
+	while (0 != item) {
+		isds_message *msg = (isds_message *) item->data;
+		if (NULL == msg->envelope) {
+			goto finish;
+		}
+
+		//storeEnvelope(msgDirect, messageDb, msg->envelope);
+		isds_message_free(&msg);
+		item = item->next;
+	}
+
+finish:
+
+	if (IE_SUCCESS == status) {
+		qDebug() << CLI_PREFIX << "message list has been received";
+	} else {
+		qDebug() << CLI_PREFIX << "error while sending list of messages!"
+		    " Error code:" << status << errmsg;
+	}
+
+	isds_list_free(&item);
+
+	return status;
 }
 
 
@@ -369,6 +442,23 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 finish:
 
 	if (IE_SUCCESS == status) {
+		/* Added a new message into database */
+		qint64 dmId = QString(sent_message->envelope->dmID).toLongLong();
+		MessageDb *messageDb =
+		    MainWindow::accountMessageDb(map["username"].toString(), 0);
+		const QString dbIDSender =
+		    globAccountDb.dbId(map["username"].toString() + "___True");
+		const QString dmSender =
+		    globAccountDb.senderNameGuess(map["username"].toString()
+		    + "___True");
+		messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
+			    dbIDSender,
+			    dmSender,
+			    map["dbIDRecipient"].toString(),
+			    "Databox ID: " + map["dbIDRecipient"].toString(),
+			    "unknown",
+			    map["dmAnnotation"].toString());
+
 		qDebug() << CLI_PREFIX << "message has been sent; "
 		    "dmID:" << sent_message->envelope->dmID;
 	} else {
@@ -435,6 +525,15 @@ int checkConnectMandatoryAttributes(const QMap <QString, QVariant> &map)
 		qDebug() << errmsg;
 		return ret;
 	}
+
+	if (!map.contains("type") ||
+	    map.value("type").toString().isEmpty()) {
+		errmsg = createErrorMsg("type attribute missing or "
+		    "contains empty string.");
+		qDebug() << errmsg;
+		return ret;
+	}
+
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
 	    map.value("username").toString().length() != 6) {
@@ -491,7 +590,7 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "send msg parameters...";
+	    "send message parameters...";
 
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
@@ -556,8 +655,7 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 	}
 
 	QString dmType = map.value("dmType").toString();
-
-	if (!(dmType == MT_SENT) || !(dmType == MT_RECEIVED) ||
+	if (!(dmType == MT_SENT) && !(dmType == MT_RECEIVED) &&
 	    !(dmType == MT_SENT_RECEIVED)) {
 		errmsg = createErrorMsg("message type attribute "
 		    "contains wrong value.");
@@ -565,10 +663,7 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 		return ret;
 	}
 
-	/* CALL LIBISDS GET MSG LIST METHOD */
-	ret = 0;
-
-	return ret;
+	return getMsgList(map);
 }
 
 
