@@ -54,6 +54,8 @@
 #define SER_DWNLD_DEL_INFO "download-delivery-info"
 #define SER_GET_USER_INFO "get-user-info"
 #define SER_GET_OWNER_INFO "get-owner-info"
+#define SER_CHECK_ATTACHMENT "check-attachment"
+
 
 int runService(const QString &service, const QString &paramString);
 

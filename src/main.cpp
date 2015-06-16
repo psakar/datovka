@@ -200,7 +200,13 @@ int main(int argc, char *argv[])
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
-
+	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
+	        QObject::tr(
+	            "Use <string-of-parameters> for information about owner "
+	            "and his databox."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
 
 	parser.addPositionalArgument("[zfo-file]",
 	    QObject::tr("ZFO file to be viewed."));
@@ -489,6 +495,9 @@ int main(int argc, char *argv[])
 	} else if (parser.isSet(SER_GET_OWNER_INFO)) {
 		ret = runService(SER_GET_OWNER_INFO,
 		    parser.value(SER_GET_OWNER_INFO));
+	} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
+		ret = runService(SER_CHECK_ATTACHMENT,
+		    parser.value(SER_CHECK_ATTACHMENT));
 
 	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;

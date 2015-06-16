@@ -85,7 +85,10 @@ void isds_document_free_void(void **document)
 int getMsgList(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "downloading of message list...";
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "downloading of message list for "
+	    " username" <<  username << "...";
 
 	/* messages counters */
 	int st, sn, rt, rn;
@@ -93,7 +96,6 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	qdatovka_error ret;
 	QStringList newMsgIdList;
-	const QString username = map["username"].toString();
 
 	MessageDb *messageDb =
 	    MainWindow::accountMessageDb(username, 0);
@@ -282,6 +284,60 @@ int downloadDeliveryInfo(const QMap <QString, QVariant> &map)
 		    "delivery info! Error code:" << ret;
 		return CLI_RET_ERROR_CODE;
 	}
+
+	return CLI_RET_OK_CODE;
+}
+
+
+/* ========================================================================= */
+int checkAttachment(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "checking of missing messages attachment for"
+	    " username" <<  username << "...";
+
+	MessageDb *messageDb =
+	    MainWindow::accountMessageDb(username, 0);
+
+	/* TODO */
+
+	return CLI_RET_OK_CODE;
+}
+
+
+/* ========================================================================= */
+int getUserInfo(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "downloading info about "
+	    " username" <<  username << "...";
+
+	MessageDb *messageDb =
+	    MainWindow::accountMessageDb(username, 0);
+
+	/* TODO */
+
+	return CLI_RET_OK_CODE;
+}
+
+
+/* ========================================================================= */
+int getOwnerInfo(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "downloading info about owner and its "
+	    "databox for username" <<  username << "...";
+
+	MessageDb *messageDb =
+	    MainWindow::accountMessageDb(username, 0);
+
+	/* TODO */
 
 	return CLI_RET_OK_CODE;
 }
@@ -901,7 +957,6 @@ int checkGetUserInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
 	    "get user info parameters...";
@@ -912,14 +967,12 @@ int checkGetUserInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
-	/* CALL LIBISDS GET USER INFO METHOD */
-	ret = 0;
-
-	return ret;
+	return getUserInfo(map);
 }
+
 
 
 /* ========================================================================= */
@@ -927,10 +980,9 @@ int checkGetOwnerInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "get owner info parameters...";
+	    "get user info parameters...";
 
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
@@ -938,13 +990,33 @@ int checkGetOwnerInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
-	/* CALL LIBISDS GET OWNER INFO METHOD */
-	ret = 0;
+	return getOwnerInfo(map);
+}
 
-	return ret;
+
+
+/* ========================================================================= */
+int checkAttachmentMandatoryAttributes(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	QString errmsg;
+
+	qDebug() << CLI_PREFIX << "checking of mandatory "
+	    "check attachment parameters...";
+
+	if (!map.contains("username") ||
+	    map.value("username").toString().isEmpty() ||
+	    map.value("username").toString().length() != 6) {
+		errmsg = createErrorMsg("username attribute missing or "
+		    "contains wrong value.");
+		qDebug() << errmsg;
+		return CLI_RET_ERROR_CODE;
+	}
+
+	return checkAttachment(map);
 }
 
 
@@ -1084,6 +1156,8 @@ int runService(const QString &service, const QString &paramString)
 		ret = checkGetUserInfoMandatoryAttributes(map);
 	} else if (service == SER_GET_OWNER_INFO) {
 		ret = checkGetOwnerInfoMandatoryAttributes(map);
+	} else if (service == SER_CHECK_ATTACHMENT) {
+		ret = checkAttachmentMandatoryAttributes(map);
 	} else {
 		return ret;
 	}
