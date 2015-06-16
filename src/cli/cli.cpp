@@ -85,7 +85,7 @@ void isds_document_free_void(void **document)
 int getMsgList(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "download message list...";
+	qDebug() << CLI_PREFIX << "downloading of message list...";
 
 	/* messages counters */
 	int st, sn, rt, rn;
@@ -188,7 +188,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 int downloadMsg(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "download message" <<
+	qDebug() << CLI_PREFIX << "downloading of message" <<
 	    map["dmID"].toString() << "...";
 
 	QString errmsg;
@@ -250,13 +250,51 @@ int downloadMsg(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
+int downloadDeliveryInfo(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	qDebug() << CLI_PREFIX << "downloading of delivery info for message" <<
+	    map["dmID"].toString() << "...";
+
+	qdatovka_error ret;
+	const QString username = map["username"].toString();
+
+	MessageDb *messageDb =
+	    MainWindow::accountMessageDb(username, 0);
+
+	if (!isdsSessions.isConnectedToIsds(username)) {
+		if (!MainWindow::connectToIsds(username, 0)) {
+			qDebug() << CLI_PREFIX << "connection error:"
+			  << isds_long_message(isdsSessions.session(username));
+			return CLI_RET_ERROR_CODE;
+		}
+	}
+
+	ret = Worker::getDeliveryInfo(username,
+	    map["dmID"].toLongLong(), true, *messageDb);
+
+	if (Q_SUCCESS == ret) {
+		qDebug() << CLI_PREFIX << "delivery info of message" <<
+		    map["dmID"].toString() << "has been downloaded.";
+		return CLI_RET_OK_CODE;
+	} else {
+		qDebug() << CLI_PREFIX << "error while downloading "
+		    "delivery info! Error code:" << ret;
+		return CLI_RET_ERROR_CODE;
+	}
+
+	return CLI_RET_OK_CODE;
+}
+
+
+/* ========================================================================= */
 int createAndSendMsg(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 	QString errmsg;
 
-	qDebug() << CLI_PREFIX << "create a new message...";
+	qDebug() << CLI_PREFIX << "creating a new message...";
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -704,7 +742,6 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
 	    "send message parameters...";
@@ -715,7 +752,7 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 	if (!map.contains("dbIDRecipient") ||
 	    map.value("dbIDRecipient").toString().isEmpty() ||
@@ -723,21 +760,21 @@ int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("databox ID attribute of recipient "
 		    "missing or contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 	if (!map.contains("dmAnnotation") ||
 	    map.value("dmAnnotation").toString().isEmpty()) {
 		errmsg = createErrorMsg("subject attribute missing or "
 		    "contains empty string.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 	if (!map.contains("dmAttachment") ||
 	    map.value("dmAttachment").toStringList().isEmpty()) {
 		errmsg = createErrorMsg("attachment attribute missing or "
 		    "contains empty file path list.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	return createAndSendMsg(map);
@@ -749,7 +786,6 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
 	    "get message list parameters...";
@@ -760,7 +796,7 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	if (!map.contains("dmType") ||
@@ -768,7 +804,7 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("message type attribute missing or "
 		    "contains empty string.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	QString dmType = map.value("dmType").toString();
@@ -777,7 +813,7 @@ int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("message type attribute "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	return getMsgList(map);
@@ -789,7 +825,6 @@ int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
 	    "download message parameters...";
@@ -800,7 +835,7 @@ int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	if (!map.contains("dmID") ||
@@ -808,7 +843,7 @@ int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("message ID attribute missing or "
 		    "contains empty string.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	if (!map.contains("dmType") ||
@@ -816,7 +851,7 @@ int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("message type attribute missing or "
 		    "contains empty string.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	QString dmType = map.value("dmType").toString();
@@ -824,7 +859,7 @@ int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
 		errmsg = createErrorMsg("message type attribute "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	return downloadMsg(map);
@@ -836,7 +871,6 @@ int checkDownloadDeliveryMandatoryAttributes(const QMap <QString, QVariant> &map
 /* ========================================================================= */
 {
 	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
 
 	qDebug() << CLI_PREFIX << "checking of mandatory "
 	    "download delivery info parameters...";
@@ -847,7 +881,7 @@ int checkDownloadDeliveryMandatoryAttributes(const QMap <QString, QVariant> &map
 		errmsg = createErrorMsg("username attribute missing or "
 		    "contains wrong value.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
 	if (!map.contains("dmID") ||
@@ -855,13 +889,10 @@ int checkDownloadDeliveryMandatoryAttributes(const QMap <QString, QVariant> &map
 		errmsg = createErrorMsg("message ID attribute missing or "
 		    "contains empty string.");
 		qDebug() << errmsg;
-		return ret;
+		return CLI_RET_ERROR_CODE;
 	}
 
-	/* CALL LIBISDS DOWNLOAD DELIVERY INFO METHOD */
-	ret = 0;
-
-	return ret;
+	return downloadDeliveryInfo(map);
 }
 
 

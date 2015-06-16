@@ -146,6 +146,13 @@ public:
 	    MessageDbSet &dbSet, const struct isds_message *msg);
 
 	/*!
+	 * @brief Download delivery info for message.
+	 */
+	static
+	qdatovka_error getDeliveryInfo(const QString &userName,
+	    qint64 dmId, bool signedMsg, MessageDb &messageDb);
+
+	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static

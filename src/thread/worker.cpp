@@ -916,7 +916,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	Q_ASSERT(mId.dmId == QString(message->envelope->dmID).toLongLong());
 
 	/* Download and save delivery info and message events */
-	if (getDeliveryInfo(userName, mId.dmId, signedMsg, dbSet)) {
+	if (Q_SUCCESS == getDeliveryInfo(userName, mId.dmId, signedMsg, dbSet)) {
 		qDebug() << "Delivery info of message was processed...";
 	} else {
 		qDebug() << "ERROR: Delivery info of message not found!";
@@ -1005,8 +1005,13 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 /*
 * Download message delivery info, raw and get list of events message
 */
+<<<<<<< HEAD
 bool Worker::getDeliveryInfo(const QString &userName,
     qint64 dmId, bool signedMsg, MessageDbSet &dbSet)
+=======
+qdatovka_error Worker::getDeliveryInfo(const QString &userName,
+    qint64 dmId, bool signedMsg, MessageDb &messageDb)
+>>>>>>> cli: added download of delivery info
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -1044,14 +1049,14 @@ bool Worker::getDeliveryInfo(const QString &userName,
 
 	isds_message_free(&message);
 
-	return true;
+	return Q_SUCCESS;
 
 fail:
 	if (NULL != message) {
 		isds_message_free(&message);
 	}
 
-	return false;
+	return Q_ISDS_ERROR;
 }
 
 
