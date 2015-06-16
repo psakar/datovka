@@ -26,6 +26,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
+#include "src/thread/worker.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList() << "method" << "type"
@@ -66,71 +67,98 @@ void isds_document_free_void(void **document)
 int getMsgList(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "create a get message list request...";
+	qDebug() << CLI_PREFIX << "download message list...";
 
-	isds_error status = IE_ERROR;
+	const QString username = map["username"].toString();
+
+	MessageDb *messageDb =
+	    MainWindow::accountMessageDb(username, 0);
+
+	if (!isdsSessions.isConnectedToIsds(username)) {
+		if (!MainWindow::connectToIsds(username, 0)) {
+			qDebug() << CLI_PREFIX << "connection error:"
+			  << isds_long_message(isdsSessions.session(username));
+			return -1;
+		}
+	}
+
+	int st, sn, rt, rn;
+	st = sn = rt = rn = 0;
 	QString errmsg;
-	struct isds_list *item = NULL;
+	qdatovka_error ret;
 
+	if (map["dmType"].toString() == "received") {
 
-	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
-		/* TODO - connectToIsds */
-		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
-			errmsg = isds_long_message(
-			    isdsSessions.session(map["username"].toString()));
-			goto finish;
-		}
-	}
+		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn);
 
-	/* Download sent/received message list from ISDS for current account */
-	if (map["dmType"] == "received") {
-		status = isds_get_list_of_received_messages(isdsSessions.
-		    session(map["username"].toString()),
-		    NULL, NULL, NULL,
-		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &item);
-	} else if (map["dmType"] == "sent") {
-		status = isds_get_list_of_sent_messages(isdsSessions.
-		    session(map["username"].toString()),
-		    NULL, NULL, NULL,
-		    //MESSAGESTATE_SENT |  MESSAGESTATE_STAMPED |
-		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &item);
-	} else if (map["dmType"] == "all") {
-
-	} else {
-		/* TODO - error */
-		goto finish;
-	}
-
-	errmsg =
-	    isds_long_message(isdsSessions.session(map["username"].toString()));
-
-	while (0 != item) {
-		isds_message *msg = (isds_message *) item->data;
-		if (NULL == msg->envelope) {
-			goto finish;
+		if (Q_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "received message list "
+			    "has been downloaded for username" <<  username;
+			qDebug() << CLI_PREFIX << "#Received total:" << rt
+			<< "#Received new: "<< rn;
+			return 0;
+		} else {
+			qDebug() << CLI_PREFIX << "error while downloading "
+			    "received message list! Error code:"
+			    << ret << errmsg;
+			return -1;
 		}
 
-		//storeEnvelope(msgDirect, messageDb, msg->envelope);
-		isds_message_free(&msg);
-		item = item->next;
-	}
+	} else if (map["dmType"].toString() == "sent") {
 
-finish:
+		ret = Worker::downloadMessageList(username, MSG_SENT,
+		    *messageDb, errmsg, NULL, 0, 0, st, sn);
 
-	if (IE_SUCCESS == status) {
-		qDebug() << CLI_PREFIX << "message list has been received";
+		if (Q_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "sent message list has been "
+			    "downloaded for username" <<  username;
+			qDebug() << CLI_PREFIX << "#Sent total:" << st
+			<< "#Sent new: "<< sn;
+			return 0;
+		} else {
+			qDebug() << CLI_PREFIX << "error while downloading "
+			    "sent message list! Error code:" << ret << errmsg;
+			return -1;
+		}
+
+	} else if (map["dmType"].toString() == "all") {
+
+		int ok = 0;
+		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn);
+		if (Q_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "received message list has "
+			    "been downloaded for username" <<  username;
+			qDebug() << CLI_PREFIX << "#Received total:" << rt <<
+			"#Received new: "<< rn;
+		}  else {
+			qDebug() << CLI_PREFIX << "error while downloading "
+			    "received message list! Error code:"
+			    << ret << errmsg;
+			ok = -1;
+		}
+		ret = Worker::downloadMessageList(username, MSG_SENT,
+		    *messageDb, errmsg, NULL, 0, 0, st, sn);
+		if (Q_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "sent message list has been "
+			    "downloaded for username" <<  username;
+			qDebug() << CLI_PREFIX << "#Sent total:" << st <<
+			"#Sent new: "<< sn;
+		}  else {
+			qDebug() << CLI_PREFIX << "error while downloading "
+			    "sent message list! Error code:" << ret << errmsg;
+			ok = -1;
+		}
+		return ok;
+
 	} else {
-		qDebug() << CLI_PREFIX << "error while sending list of messages!"
-		    " Error code:" << status << errmsg;
+		qDebug() << CLI_PREFIX << "wrong dmType value:"
+		    << map["dmType"].toString();
+		return -1;
 	}
 
-	isds_list_free(&item);
-
-	return status;
+	return 0;
 }
 
 
@@ -425,7 +453,6 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	qDebug() << CLI_PREFIX << "sending of a new message...";
 
 	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
-		/* TODO - connectToIsds */
 		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
 			errmsg = isds_long_message(
 			    isdsSessions.session(map["username"].toString()));
