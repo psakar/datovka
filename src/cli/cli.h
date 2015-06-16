@@ -29,6 +29,7 @@
 #include <QDebug>
 
 #define CLI_RET_ERROR_CODE -1
+#define CLI_RET_OK_CODE 0
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
 #define SERVICE_LABEL "service"
