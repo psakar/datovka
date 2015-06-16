@@ -155,55 +155,48 @@ int main(int argc, char *argv[])
 
 	/* Options with values. */
 	if (!parser.addOption(QCommandLineOption(SER_CONNECT,
-	        QObject::tr(
-	            "Connect to isds. Input = <string-of-parameters>."),
+	        QObject::tr("Service: connect to isds and loggin into databox."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
-	        QObject::tr(
-	            "Use <string-of-parameters> for download of message "
-	            "list from ISDS."),
+	        QObject::tr("Service: download list of received/sent "
+	        "messages from ISDS."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
-	        QObject::tr(
-	            "Use <string-of-parameters> for send of message."),
+	        QObject::tr("Service: create and send a new message to ISDS."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_DWNLD_MSG,
-	        QObject::tr(
-	            "Use <string-of-parameters> for downloading of "
-	            "complete message."),
+	        QObject::tr("Service: download complete message with "
+	        "signature and time stamp of MV."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_DWNLD_DEL_INFO,
-	        QObject::tr(
-	            "Use <string-of-parameters> for downloading of message "
-	            "delivy info."),
+	        QObject::tr("Service: download delivery info of message "
+	        "with signature and time stamp of MV."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
-	        QObject::tr(
-	            "Use <string-of-parameters> for information about user."),
+	        QObject::tr("Service: get information about user "
+	        "(role, privileges, ...)."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
-	        QObject::tr(
-	            "Use <string-of-parameters> for information about owner "
-	            "and his databox."),
+	        QObject::tr("Service: get information about owner and "
+	        "its databox."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
-	        QObject::tr(
-	            "Use <string-of-parameters> for information about owner "
-	            "and his databox."),
+	        QObject::tr("Service: get list of messages where "
+	        "attachment missing (local database only)."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
