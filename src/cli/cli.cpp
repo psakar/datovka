@@ -33,8 +33,7 @@
 const QStringList connectAttrs = QStringList() << "method" << "type"
     << "username" << "password" << "certificate" << "otpcode";
 const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
-    << "dmStatusFilter" << "dmOffset" << "dmLimit" << "dmFromTime"
-    << "dmToTime";
+    << "dmStatusFilter" << "dmLimit" << "dmFromTime" << "dmToTime";
 const QStringList sendMsgAttrs = QStringList() << "username"
     << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
     << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
@@ -96,6 +95,41 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	qdatovka_error ret;
 	QStringList newMsgIdList;
+	ulong dmLimit = 0;
+	uint dmStatusFilter = MESSAGESTATE_ANY;
+	bool ok;
+
+	if (map.contains("dmStatusFilter")) {
+		uint number = map["dmStatusFilter"].toString().toUInt(&ok);
+		if (!ok) {
+			qDebug() << CLI_PREFIX << "wrong dmStatusFilter "
+			    "value:" << map["dmStatusFilter"].toString();
+			return CLI_RET_ERROR_CODE;
+		}
+		switch (number) {
+		case 1: dmStatusFilter = MESSAGESTATE_SENT; break;
+		case 2: dmStatusFilter = MESSAGESTATE_STAMPED; break;
+		case 3: dmStatusFilter = MESSAGESTATE_INFECTED; break;
+		case 4: dmStatusFilter = MESSAGESTATE_DELIVERED; break;
+		case 5: dmStatusFilter = MESSAGESTATE_SUBSTITUTED; break;
+		case 6: dmStatusFilter = MESSAGESTATE_RECEIVED; break;
+		case 7: dmStatusFilter = MESSAGESTATE_READ; break;
+		case 8: dmStatusFilter = MESSAGESTATE_UNDELIVERABLE; break;
+		case 9: dmStatusFilter = MESSAGESTATE_REMOVED; break;
+		case 10: dmStatusFilter = MESSAGESTATE_IN_SAFE; break;
+		default: dmStatusFilter = MESSAGESTATE_ANY; break;
+		}
+	}
+
+	if (map.contains("dmLimit")) {
+		bool ok;
+		dmLimit = map["dmLimit"].toString().toULong(&ok);
+		if (!ok) {
+			qDebug() << CLI_PREFIX << "wrong dmLimit "
+			    "value:" << map["dmLimit"].toString();
+			return CLI_RET_ERROR_CODE;
+		}
+	}
 
 	MessageDb *messageDb =
 	    MainWindow::accountMessageDb(username, 0);
@@ -108,10 +142,11 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		}
 	}
 
-	if (map["dmType"].toString() == "received") {
+	if (map["dmType"].toString() == MT_SENT) {
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList);
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
+		    &dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list "
@@ -127,10 +162,11 @@ int getMsgList(const QMap <QString, QVariant> &map)
 			return CLI_RET_ERROR_CODE;
 		}
 
-	} else if (map["dmType"].toString() == "sent") {
+	} else if (map["dmType"].toString() == MT_RECEIVED) {
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList);
+		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
+		    &dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
@@ -145,11 +181,12 @@ int getMsgList(const QMap <QString, QVariant> &map)
 			return CLI_RET_ERROR_CODE;
 		}
 
-	} else if (map["dmType"].toString() == "all") {
+	} else if (map["dmType"].toString() == MT_SENT_RECEIVED) {
 
 		int ok = CLI_RET_OK_CODE;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList);
+		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
+		    &dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list has "
 			    "been downloaded for username" <<  username;
@@ -162,7 +199,8 @@ int getMsgList(const QMap <QString, QVariant> &map)
 			ok = CLI_RET_ERROR_CODE;
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList);
+		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
+		    &dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
 			    "downloaded for username" <<  username;
@@ -354,6 +392,63 @@ int getOwnerInfo(const QMap <QString, QVariant> &map)
 	}
 
 	return CLI_RET_ERROR_CODE;
+}
+
+
+/* ========================================================================= */
+int createContextAmdLoginToIsds(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "creating a isds context and loggin to "
+	    "databox for username" <<  username << "...";
+
+	AccountModel::SettingsMap accountInfo;
+
+	/* set account items */
+	accountInfo.setAccountName("cli-");
+	accountInfo.setUserName(username);
+	accountInfo.setRememberPwd(false);
+	accountInfo.setPassword(map["password"].toString());
+	if (map["type"].toString() == "test") {
+		accountInfo.setTestAccount(true);
+	} else {
+		accountInfo.setTestAccount(false);
+	}
+	accountInfo.setSyncWithAll(false);
+
+	if (map["method"].toString() == L_USER) {
+		accountInfo.setLoginMethod(LIM_USERNAME);
+		accountInfo.setP12File("");
+	} else if (map["method"].toString() == L_CERT) {
+		accountInfo.setLoginMethod(LIM_USER_CERT);
+		accountInfo.setP12File(QDir::fromNativeSeparators(
+		    map["certificate"].toString()));
+	} else if (map["method"].toString() == L_HOTP) {
+		accountInfo.setLoginMethod(LIM_HOTP);
+		accountInfo.setP12File("");
+	} else if (map["method"].toString() == L_TOTP) {
+		accountInfo.setLoginMethod(LIM_TOTP);
+		accountInfo.setP12File("");
+	} else {
+		return CLI_RET_ERROR_CODE;
+	}
+
+	/*
+	* TODO - create isds session and login to databox
+	*        without account model.
+	*
+	* if (!isdsSessions.isConnectedToIsds(username)) {
+	*	if (!MainWindow::firstConnectToIsds(accountInfo, false)) {
+	*		qDebug() << CLI_PREFIX << "connection error:"
+	*		  << isds_long_message(isdsSessions.session(username));
+	*		return CLI_RET_ERROR_CODE;
+	*	}
+	* }
+	*/
+
+	return CLI_RET_OK_CODE;
 }
 
 
@@ -601,7 +696,8 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	}
 	if (map.contains("dmPersonalDelivery")) {
 		*sent_envelope->dmPersonalDelivery =
-		    map["dmPersonalDelivery"].toBool();
+		    (map["dmPersonalDelivery"].toString() == "0")
+		    ? false : true;
 	} else {
 		*sent_envelope->dmPersonalDelivery = true;
 	}
@@ -613,7 +709,8 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	}
 	if (map.contains("dmAllowSubstDelivery")) {
 		*sent_envelope->dmAllowSubstDelivery =
-		    map["dmAllowSubstDelivery"].toBool();
+		    (map["dmAllowSubstDelivery"].toString() == "0")
+		    ? false : true;
 	} else {
 		*sent_envelope->dmAllowSubstDelivery = true;
 	}
@@ -625,7 +722,7 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	}
 	if (map.contains("dmOVM")) {
 		*sent_envelope->dmOVM =
-		    map["dmOVM"].toBool();
+		    (map["dmOVM"].toString() == "0") ? false : true;
 	} else {
 		*sent_envelope->dmOVM = true;
 	}
@@ -637,7 +734,7 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 	}
 	if (map.contains("dmPublishOwnID")) {
 		*sent_envelope->dmPublishOwnID =
-		    map["dmPublishOwnID"].toBool();
+		    (map["dmPublishOwnID"].toString() == "0") ? false : true;
 	} else {
 		*sent_envelope->dmPublishOwnID = false;
 	}
@@ -796,17 +893,11 @@ int checkConnectMandatoryAttributes(const QMap <QString, QVariant> &map)
 			qDebug() << errmsg;
 			return ret;
 		}
-	} else if (method == L_USER) {
-
-	} else {
+	} else if (method != L_USER) {
 		return ret;
 	}
 
-	/* CALL LIBISDS LOGIN METHOD */
-	ret = 0;
-
-	return ret;
-
+	return createContextAmdLoginToIsds(map);
 }
 
 

@@ -206,6 +206,18 @@ void Worker::doJob(void)
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
 
+		/* dmStatusFilter
+		 *
+		 * MESSAGESTATE_SENT |
+		 * MESSAGESTATE_STAMPED |
+		 * MESSAGESTATE_DELIVERED |
+		 * MESSAGESTATE_RECEIVED |
+		 * MESSAGESTATE_READ |
+		 * MESSAGESTATE_REMOVED |
+		 * MESSAGESTATE_IN_SAFE |
+		 * MESSAGESTATE_ANY
+		 */
+
 		qDebug() << "-----------------------------------------------";
 		qDebug() << "Downloading received message list for account"
 		    << AccountModel::globAccounts[job.userName].accountName();
@@ -213,7 +225,7 @@ void Worker::doJob(void)
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
-		        0, this, rt, rn, newMsgIdList);
+		        0, this, rt, rn, newMsgIdList, NULL, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -235,7 +247,7 @@ void Worker::doJob(void)
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", 0, this, st, sn,
-		        newMsgIdList);
+		        newMsgIdList, NULL, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -381,7 +393,8 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 qdatovka_error Worker::downloadMessageList(const QString &userName,
     enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-    int &total, int &news, QStringList &newMsgIdList)
+    int &total, int &news, QStringList &newMsgIdList, ulong *dmLimit,
+    int dmStatusFilter)
 /* ========================================================================= */
 {
 #define USE_TRANSACTIONS 1
@@ -410,17 +423,14 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		status = isds_get_list_of_sent_messages(isdsSessions.
 		    session(userName),
 		    NULL, NULL, NULL,
-		    //MESSAGESTATE_SENT |  MESSAGESTATE_STAMPED |
-		    //MESSAGESTATE_INFECTED | MESSAGESTATE_DELIVERED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &messageList);
+		    dmStatusFilter,
+		    0, dmLimit, &messageList);
 	} else if (MSG_RECEIVED == msgDirect) {
 		status = isds_get_list_of_received_messages(isdsSessions.
 		    session(userName),
 		    NULL, NULL, NULL,
-		    //MESSAGESTATE_DELIVERED | MESSAGESTATE_SUBSTITUTED,
-		    MESSAGESTATE_ANY,
-		    0, NULL, &messageList);
+		    dmStatusFilter,
+		    0, dmLimit, &messageList);
 	}
 
 	if (0 != pBar) { pBar->setValue(20); }
@@ -1005,13 +1015,8 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 /*
 * Download message delivery info, raw and get list of events message
 */
-<<<<<<< HEAD
 bool Worker::getDeliveryInfo(const QString &userName,
     qint64 dmId, bool signedMsg, MessageDbSet &dbSet)
-=======
-qdatovka_error Worker::getDeliveryInfo(const QString &userName,
-    qint64 dmId, bool signedMsg, MessageDb &messageDb)
->>>>>>> cli: added download of delivery info
 /* ========================================================================= */
 {
 	debugFuncCall();

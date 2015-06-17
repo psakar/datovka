@@ -46,6 +46,11 @@
 #define MT_RECEIVED "received"
 #define MT_SENT_RECEIVED "all"
 
+
+// Message status
+#define MS_ONLY_NEW "new"
+
+
 // Define services names
 #define SER_CONNECT "connect"
 #define SER_GET_MSG_LIST "get-msg-list"

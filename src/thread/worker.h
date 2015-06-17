@@ -183,7 +183,8 @@ public:
 	qdatovka_error downloadMessageList(const QString &userName,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-	    int &total, int &news, QStringList &newMsgIdList);
+	    int &total, int &news, QStringList &newMsgIdList, ulong *dmLimit,
+	    int dmStatusFilter);
 
 private:
 
