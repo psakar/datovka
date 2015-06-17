@@ -128,8 +128,9 @@ QString DlgChangePwd::generateRandomString(void)
 /* ========================================================================= */
 {
 	QString randomString;
+
 	for(int i=0; i<randomStringLength; ++i) {
-		int index = rand() % possibleCharacters.length();
+		int index = qrand() % possibleCharacters.length();
 		QChar nextChar = possibleCharacters.at(index);
 		randomString.append(nextChar);
 	}

@@ -71,6 +71,9 @@ int main(int argc, char *argv[])
 /* ========================================================================= */
 /* ========================================================================= */
 {
+	/* Set random generator. */
+	qsrand(QDateTime::currentDateTime().toTime_t());
+
 	/* Log warnings. */
 	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
