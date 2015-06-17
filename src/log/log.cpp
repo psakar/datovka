@@ -248,6 +248,7 @@ int GlobLog::openFile(const QString &fName, LogMode mode)
 {
 	FILE *of;
 	const char *openMode;
+	int fidx = -1;
 
 	m_mutex.lock();
 
@@ -276,14 +277,16 @@ int GlobLog::openFile(const QString &fName, LogMode mode)
 
 	++openedFiles;
 
+	fidx = LF_FILE + openedFiles - 1;
+
 	for (int i = 0; i < MAX_SOURCES; ++i) {
-		facDescVect[LF_FILE + openedFiles - 1].levels[i] = 0;
+		facDescVect[fidx].levels[i] = 0;
 	}
-	facDescVect[LF_FILE + openedFiles - 1].fout = of;
+	facDescVect[fidx].fout = of;
 
 	m_mutex.unlock();
 
-	return 0;
+	return fidx;
 fail:
 	m_mutex.unlock();
 	return -1;
