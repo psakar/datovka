@@ -45,6 +45,7 @@
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
 #define SAVE_CONF_OPT "save-conf"
+#define LOG_FILE "log-file"
 
 
 /* ========================================================================= */
@@ -77,6 +78,8 @@ int main(int argc, char *argv[])
 	/* Log warnings. */
 	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
+
+	int logFileId = -1;
 
 #ifndef WIN32
 	{
@@ -126,6 +129,11 @@ int main(int argc, char *argv[])
 	        QObject::tr("conf")))) {
 		Q_ASSERT(0);
 	}
+	if (!parser.addOption(QCommandLineOption(LOG_FILE,
+	        QObject::tr("Log messages to <file>."),
+	        QObject::tr("file")))) {
+		Q_ASSERT(0);
+	}
 	QCommandLineOption logVerb(QStringList() << "L" << "log-verbosity",
 	    QObject::tr("Set verbosity of logged messages to <level>. "
 	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
@@ -156,14 +164,29 @@ int main(int argc, char *argv[])
 	if (parser.isSet(SAVE_CONF_OPT)) {
 		globPref.saveToConf = parser.value(SAVE_CONF_OPT);
 	}
+	if (parser.isSet(LOG_FILE)) {
+		QString logFileName = parser.value(LOG_FILE);
+		logFileId = globLog.openFile(logFileName.toUtf8().constData(),
+		    GlobLog::LM_APPEND);
+		if (-1 == logFileId) {
+			logError("Cannot open log file '%s'.\n",
+			    logFileName.toUtf8().constData());
+			exit(1);
+		}
+		/* Log warnings. */
+		globLog.setLogLevels(logFileId, LOGSRC_ANY,
+		    LOG_UPTO(LOG_WARNING));
+	}
 #ifdef DEBUG
-	if (parser.isSet(debugOpt)) {
+	if (parser.isSet(debugOpt) || parser.isSet(debugVerb)) {
 		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 		    LOG_UPTO(LOG_DEBUG));
+		if (-1 != logFileId) {
+			globLog.setLogLevels(logFileId, LOGSRC_ANY,
+			    LOG_UPTO(LOG_DEBUG));
+		}
 	}
 	if (parser.isSet(debugVerb)) {
-		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
-		    LOG_UPTO(LOG_DEBUG));
 		bool ok;
 		int value = parser.value(debugVerb).toInt(&ok, 10);
 		if (!ok) {
