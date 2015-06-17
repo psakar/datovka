@@ -86,7 +86,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 {
 	const QString username = map["username"].toString();
 
-	qDebug() << CLI_PREFIX << "downloading of message list for "
+	qDebug() << CLI_PREFIX << "downloading of message list for"
 	    " username" <<  username << "...";
 
 	/* messages counters */
@@ -95,7 +95,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	QString errmsg;
 	qdatovka_error ret;
 	QStringList newMsgIdList;
-	ulong dmLimit = 0;
+	ulong *dmLimit = NULL;
 	uint dmStatusFilter = MESSAGESTATE_ANY;
 	bool ok;
 
@@ -123,7 +123,8 @@ int getMsgList(const QMap <QString, QVariant> &map)
 
 	if (map.contains("dmLimit")) {
 		bool ok;
-		dmLimit = map["dmLimit"].toString().toULong(&ok);
+		dmLimit = (ulong *) malloc(sizeof(ulong));
+		*dmLimit = map["dmLimit"].toString().toULong(&ok);
 		if (!ok) {
 			qDebug() << CLI_PREFIX << "wrong dmLimit "
 			    "value:" << map["dmLimit"].toString();
@@ -146,7 +147,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
 		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
-		    &dmLimit, dmStatusFilter);
+		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list "
@@ -166,7 +167,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
 		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
-		    &dmLimit, dmStatusFilter);
+		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
@@ -186,7 +187,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		int ok = CLI_RET_OK_CODE;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
 		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
-		    &dmLimit, dmStatusFilter);
+		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "received message list has "
 			    "been downloaded for username" <<  username;
@@ -200,7 +201,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
 		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
-		    &dmLimit, dmStatusFilter);
+		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "sent message list has been "
 			    "downloaded for username" <<  username;
