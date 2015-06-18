@@ -86,13 +86,17 @@ public:
 	 * @brief connect to ISDS databox from exist account
 	 *
 	 * @note If pointer to main windows is specified, then various
-	 *     dialogues may be shown.
+	 *     dialogues may be shown. Passwords are used only when required
+	 *     (i.e. not found in configuration).
 	 *
 	 * @param userName Account login.
 	 * @param mw       Pointer to main window.
+	 * @param pwd      User password.
+	 * @param otpKey   One-time password or certificate key.
 	 */
 	static
-	bool connectToIsds(const QString &userName, MainWindow *mw);
+	bool connectToIsds(const QString &userName, MainWindow *mw,
+	    const QString &pwd = QString(), const QString &otpKey = QString());
 
 	/*!
 	 * @brief Get message db to given account.
@@ -934,14 +938,16 @@ private:
 	 * @brief Login to ISDS server by user name and password only.
 	 */
 	static
-	bool loginMethodUserNamePwd(const QString &userName, MainWindow *mw);
+	bool loginMethodUserNamePwd(const QString &userName, MainWindow *mw,
+	    const QString &pwd = QString());
 
 	/*!
 	 * @brief Login to ISDS server by user name, password and OTP code.
 	 */
 	static
 	bool loginMethodUserNamePwdOtp(const QString &userName,
-	    MainWindow *mw, QString otpCode = QString());
+	    MainWindow *mw, const QString &pwd = QString(),
+	    const QString &otp = QString());
 
 	/*!
 	 * @brief Converts PKCS #12 certificate into PEM format.
@@ -966,14 +972,15 @@ private:
 	 */
 	static
 	bool loginMethodCertificateOnly(const QString &userName,
-	    MainWindow *mw);
+	    MainWindow *mw, const QString &key = QString());
 
 	/*!
 	 * @brief Login to ISDS server by certificate, user name and password.
 	 */
 	static
 	bool loginMethodCertificateUserPwd(const QString &userName,
-	    MainWindow *mw);
+	    MainWindow *mw, const QString &pwd = QString(),
+	    const QString &key = QString());
 
 	/*!
 	 * @brief Login to ISDS server by certificate and data box ID.
