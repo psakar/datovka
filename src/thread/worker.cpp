@@ -581,11 +581,10 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 100); }
 
 	if (MSG_RECEIVED == msgDirect) {
-		qDebug() << "#Received total:" << allcnt;
-		qDebug() << "#Received new:" << newcnt;
+		qDebug() << "#Received total:" << allcnt
+		    << " #Received new:" << newcnt;
 	} else {
-		qDebug() << "#Sent total:" << allcnt;
-		qDebug() << "#Sent new:" << newcnt;
+		qDebug() << "#Sent total:" << allcnt << " #Sent new:" << newcnt;
 	}
 
 	total = allcnt;

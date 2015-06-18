@@ -30,21 +30,21 @@
 #include "src/thread/worker.h"
 
 // Known attributes definition
-const QStringList connectAttrs = QStringList() << "method" << "type"
+const QStringList connectAttrs = QStringList()
     << "username" << "password" << "certificate" << "otpcode";
-const QStringList getMsgListAttrs = QStringList() << "username" << "dmType"
-    << "dmStatusFilter" << "dmLimit" << "dmFromTime" << "dmToTime";
-const QStringList sendMsgAttrs = QStringList() << "username"
+const QStringList getMsgListAttrs = QStringList()
+    << "dmType" << "dmStatusFilter" << "dmLimit" << "dmFromTime" << "dmToTime";
+const QStringList sendMsgAttrs = QStringList()
     << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
     << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
     << "dmSenderIdent" << "dmLegalTitleLaw" << "dmLegalTitleYear"
     << "dmLegalTitleSect" << "dmLegalTitlePar" << "dmLegalTitlePoint"
     << "dmPersonalDelivery" << "dmAllowSubstDelivery" << "dmType" << "dmOVM"
-    << "dmPublishOwnID" << ATTACH_LABEL;
-const QStringList dwnldMsgAttrs = QStringList() << "username" << "dmID";
-const QStringList dwnldDelInfoAttrs = QStringList() << "username" << "dmID";
-const QString attrUserName = "username";
-
+    << "dmPublishOwnID" << "dmAttachment";
+const QStringList getMsgAttrs = QStringList()
+    << "dmID" << "dmType" << "zfoFile" << "download";
+const QStringList getDelInfoAttrs = QStringList()
+    << "dmID" << "zfoFile" << "download";
 
 
 /* ========================================================================= */
@@ -81,13 +81,13 @@ void isds_document_free_void(void **document)
 
 
 /* ========================================================================= */
-int getMsgList(const QMap <QString, QVariant> &map)
+int getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb)
 /* ========================================================================= */
 {
 	const QString username = map["username"].toString();
 
-	qDebug() << CLI_PREFIX << "downloading of message list for"
-	    " username" <<  username << "...";
+	qDebug() << CLI_PREFIX << "Downloading of message list for username"
+	    << username;
 
 	/* messages counters */
 	int st, sn, rt, rn;
@@ -102,7 +102,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 	if (map.contains("dmStatusFilter")) {
 		uint number = map["dmStatusFilter"].toString().toUInt(&ok);
 		if (!ok) {
-			qDebug() << CLI_PREFIX << "wrong dmStatusFilter "
+			qDebug() << CLI_PREFIX << "Wrong dmStatusFilter "
 			    "value:" << map["dmStatusFilter"].toString();
 			return CLI_RET_ERROR_CODE;
 		}
@@ -126,19 +126,8 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		dmLimit = (ulong *) malloc(sizeof(ulong));
 		*dmLimit = map["dmLimit"].toString().toULong(&ok);
 		if (!ok) {
-			qDebug() << CLI_PREFIX << "wrong dmLimit "
+			qDebug() << CLI_PREFIX << "Wrong dmLimit "
 			    "value:" << map["dmLimit"].toString();
-			return CLI_RET_ERROR_CODE;
-		}
-	}
-
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
-
-	if (!isdsSessions.isConnectedToIsds(username)) {
-		if (!MainWindow::connectToIsds(username, 0)) {
-			qDebug() << CLI_PREFIX << "connection error:"
-			  << isds_long_message(isdsSessions.session(username));
 			return CLI_RET_ERROR_CODE;
 		}
 	}
@@ -150,14 +139,12 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "received message list "
-			    "has been downloaded for username" <<  username;
-			qDebug() << CLI_PREFIX << "#Received total:" << rt
-			    << " #Received new:" << rn;
+			qDebug() << CLI_PREFIX << "Received message list "
+			    "has been downloaded.";
 			printDataToStdOut(newMsgIdList);
 			return CLI_RET_OK_CODE;
 		} else {
-			qDebug() << CLI_PREFIX << "error while downloading "
+			qDebug() << CLI_PREFIX << "Error while downloading "
 			    "received message list! Error code:"
 			    << ret << errmsg;
 			return CLI_RET_ERROR_CODE;
@@ -170,14 +157,12 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "sent message list has been "
-			    "downloaded for username" <<  username;
-			qDebug() << CLI_PREFIX << "#Sent total:" << st
-			    << " #Sent new:" << sn;
+			qDebug() << CLI_PREFIX << "Sent message list has been "
+			    "downloaded.";
 			printDataToStdOut(newMsgIdList);
 			return 0;
 		} else {
-			qDebug() << CLI_PREFIX << "error while downloading "
+			qDebug() << CLI_PREFIX << "Error while downloading "
 			    "sent message list! Error code:" << ret << errmsg;
 			return CLI_RET_ERROR_CODE;
 		}
@@ -189,12 +174,10 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "received message list has "
-			    "been downloaded for username" <<  username;
-			qDebug() << CLI_PREFIX << "#Received total:" << rt <<
-			    " #Received new:" << rn;
+			qDebug() << CLI_PREFIX << "Received message list has "
+			    "been downloaded.";
 		}  else {
-			qDebug() << CLI_PREFIX << "error while downloading "
+			qDebug() << CLI_PREFIX << "Error while downloading "
 			    "received message list! Error code:" <<
 			    ret << errmsg;
 			ok = CLI_RET_ERROR_CODE;
@@ -203,12 +186,10 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "sent message list has been "
-			    "downloaded for username" <<  username;
-			qDebug() << CLI_PREFIX << "#Sent total:" << st <<
-			    " #Sent new:" << sn;
+			qDebug() << CLI_PREFIX << "Sent message list has been "
+			    "downloaded.";
 		}  else {
-			qDebug() << CLI_PREFIX << "error while downloading "
+			qDebug() << CLI_PREFIX << "Error while downloading "
 			    "sent message list! Error code:" << ret << errmsg;
 			ok = CLI_RET_ERROR_CODE;
 		}
@@ -216,7 +197,7 @@ int getMsgList(const QMap <QString, QVariant> &map)
 		return ok;
 
 	} else {
-		qDebug() << CLI_PREFIX << "wrong dmType value:" <<
+		qDebug() << CLI_PREFIX << "Wrong dmType value:" <<
 		    map["dmType"].toString();
 		return CLI_RET_ERROR_CODE;
 	}
@@ -226,64 +207,89 @@ int getMsgList(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-int downloadMsg(const QMap <QString, QVariant> &map)
+int getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
+    bool needsISDS)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "downloading of message" <<
-	    map["dmID"].toString() << "...";
+	qDebug() << CLI_PREFIX << "Downloading of message" <<
+	    map["dmID"].toString();
 
 	QString errmsg;
 	qdatovka_error ret;
 	const QString username = map["username"].toString();
 
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
+	if (needsISDS) {
+		if (map["dmType"].toString() == "received") {
 
-	if (!isdsSessions.isConnectedToIsds(username)) {
-		if (!MainWindow::connectToIsds(username, 0)) {
-			qDebug() << CLI_PREFIX << "connection error:"
-			  << isds_long_message(isdsSessions.session(username));
+			ret = Worker::downloadMessage(username,
+			    map["dmID"].toLongLong(), true, MSG_RECEIVED,
+			    *messageDb, errmsg, NULL, 0, 0);
+
+			if (Q_SUCCESS == ret) {
+				qDebug() << CLI_PREFIX << "Received message" <<
+				    map["dmID"].toString() << "has been "
+				    "downloaded.";
+			} else {
+				qDebug() << CLI_PREFIX << "Error while "
+				    "downloading "
+				    "received message! Error code:"
+				    << ret << errmsg;
+				return CLI_RET_ERROR_CODE;
+			}
+
+		} else if (map["dmType"].toString() == "sent") {
+
+			ret = Worker::downloadMessage(username,
+			    map["dmID"].toLongLong(), true, MSG_SENT,
+			    *messageDb, errmsg, NULL, 0, 0);
+
+			if (Q_SUCCESS == ret) {
+				qDebug() << CLI_PREFIX << "Sent message" <<
+				    map["dmID"].toString() << "has been "
+				    "downloaded.";
+			} else {
+				qDebug() << CLI_PREFIX << "Error while "
+				    "downloading "
+				    "received message! Error code:"
+				    << ret << errmsg;
+				return CLI_RET_ERROR_CODE;
+			}
+		} else {
+			qDebug() << CLI_PREFIX << "Wrong dmType value:" <<
+			    map["dmType"].toString();
 			return CLI_RET_ERROR_CODE;
 		}
 	}
 
-	if (map["dmType"].toString() == "received") {
-
-		ret = Worker::downloadMessage(username,
-		    map["dmID"].toLongLong(), true, MSG_RECEIVED,
-		    *messageDb, errmsg, NULL, 0, 0);
-
-		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "received message" <<
-			    map["dmID"].toString() << "has been downloaded.";
-			return CLI_RET_OK_CODE;
-		} else {
-			qDebug() << CLI_PREFIX << "error while downloading "
-			    "received message! Error code:"
-			    << ret << errmsg;
+	if (map.contains("zfoFile") && !map["zfoFile"].toString().isEmpty()) {
+		const QFileInfo fi(map["zfoFile"].toString());
+		const QString path = fi.path();
+		if (!QDir(path).exists()) {
+			qDebug() << CLI_PREFIX << "Wrong path" <<
+			    path << "for file saving!";
 			return CLI_RET_ERROR_CODE;
 		}
 
-	} else if (map["dmType"].toString() == "sent") {
+		QByteArray base64 =
+		    messageDb->msgsMessageBase64(map["dmID"].toLongLong());
 
-		ret = Worker::downloadMessage(username,
-		    map["dmID"].toLongLong(), true, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0);
-
-		if (Q_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "sent message" <<
-			    map["dmID"].toString() << "has been downloaded.";
-			return CLI_RET_OK_CODE;
-		} else {
-			qDebug() << CLI_PREFIX << "error while downloading "
-			    "received message! Error code:"
-			    << ret << errmsg;
+		if (base64.isEmpty()) {
+			qDebug() << CLI_PREFIX <<
+			    "Cannot export complete message to ZFO!";
 			return CLI_RET_ERROR_CODE;
 		}
-	} else {
-		qDebug() << CLI_PREFIX << "wrong dmType value:" <<
-		    map["dmType"].toString();
-		return CLI_RET_ERROR_CODE;
+
+		QByteArray data = QByteArray::fromBase64(base64);
+		enum WriteFileState ret = writeFile(map["zfoFile"].toString(),
+		    data);
+		if (WF_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "Export of message" <<
+			map["dmID"].toString() <<  "to ZFO was successful.";
+		} else {
+			qDebug() << CLI_PREFIX << "Export of message" <<
+			map["dmID"].toString() <<  "to ZFO was NOT successful!";
+			return CLI_RET_ERROR_CODE;
+		}
 	}
 
 	return CLI_RET_OK_CODE;
@@ -291,37 +297,60 @@ int downloadMsg(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-int downloadDeliveryInfo(const QMap <QString, QVariant> &map)
+int getDeliveryInfo(const QMap<QString,QVariant> &map,
+    MessageDb *messageDb, bool needsISDS)
 /* ========================================================================= */
 {
-	qDebug() << CLI_PREFIX << "downloading of delivery info for message" <<
-	    map["dmID"].toString() << "...";
+	qDebug() << CLI_PREFIX << "Downloading of delivery info for message" <<
+	    map["dmID"].toString();
 
 	qdatovka_error ret;
 	const QString username = map["username"].toString();
 
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
+	if (needsISDS) {
+		ret = Worker::getDeliveryInfo(username,
+		    map["dmID"].toLongLong(), true, *messageDb);
 
-	if (!isdsSessions.isConnectedToIsds(username)) {
-		if (!MainWindow::connectToIsds(username, 0)) {
-			qDebug() << CLI_PREFIX << "connection error:"
-			  << isds_long_message(isdsSessions.session(username));
+		if (Q_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "Delivery info of message" <<
+			    map["dmID"].toString() << "has been downloaded.";
+		} else {
+			qDebug() << CLI_PREFIX << "Error while downloading "
+			    "delivery info! Error code:" << ret;
 			return CLI_RET_ERROR_CODE;
 		}
 	}
 
-	ret = Worker::getDeliveryInfo(username,
-	    map["dmID"].toLongLong(), true, *messageDb);
+	if (map.contains("zfoFile") && !map["zfoFile"].toString().isEmpty()) {
+		const QFileInfo fi(map["zfoFile"].toString());
+		const QString path = fi.path();
+		if (!QDir(path).exists()) {
+			qDebug() << CLI_PREFIX << "Wrong path" <<
+			    path << "for file saving!";
+			return CLI_RET_ERROR_CODE;
+		}
 
-	if (Q_SUCCESS == ret) {
-		qDebug() << CLI_PREFIX << "delivery info of message" <<
-		    map["dmID"].toString() << "has been downloaded.";
-		return CLI_RET_OK_CODE;
-	} else {
-		qDebug() << CLI_PREFIX << "error while downloading "
-		    "delivery info! Error code:" << ret;
-		return CLI_RET_ERROR_CODE;
+		QByteArray base64 =
+		    messageDb->msgsGetDeliveryInfoBase64(
+		         map["dmID"].toLongLong());
+
+		if (base64.isEmpty()) {
+			qDebug() << CLI_PREFIX <<
+			    "Cannot export delivery info to ZFO!";
+			return CLI_RET_ERROR_CODE;
+		}
+
+		QByteArray data = QByteArray::fromBase64(base64);
+		enum WriteFileState ret = writeFile(map["zfoFile"].toString(),
+		    data);
+		if (WF_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX << "Export of delivery info" <<
+			map["dmID"].toString() <<  "to ZFO was successful.";
+		} else {
+			qDebug() << CLI_PREFIX << "Export of delivery info" <<
+			map["dmID"].toString() <<  "to ZFO was NOT successful!";
+			return CLI_RET_ERROR_CODE;
+		}
 	}
 
 	return CLI_RET_OK_CODE;
@@ -329,16 +358,14 @@ int downloadDeliveryInfo(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-int checkAttachment(const QMap <QString, QVariant> &map)
+int checkAttachment(const QMap<QString,QVariant> &map,
+    MessageDb *messageDb)
 /* ========================================================================= */
 {
 	const QString username = map["username"].toString();
 
-	qDebug() << CLI_PREFIX << "checking of missing messages attachment for"
-	    " username" <<  username << "...";
-
-	MessageDb *messageDb =
-	    MainWindow::accountMessageDb(username, 0);
+	qDebug() << CLI_PREFIX << "Checking of missing messages attachment for"
+	    " username" <<  username;
 
 	printDataToStdOut(messageDb->getAllMessageIDsWithoutAttach());
 
@@ -347,21 +374,13 @@ int checkAttachment(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-int getUserInfo(const QMap <QString, QVariant> &map)
+int getUserInfo(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
 	const QString username = map["username"].toString();
 
-	qDebug() << CLI_PREFIX << "downloading info about "
-	    " username" <<  username << "...";
-
-	if (!isdsSessions.isConnectedToIsds(username)) {
-		if (!MainWindow::connectToIsds(username, 0)) {
-			qDebug() << CLI_PREFIX << "connection error:"
-			  << isds_long_message(isdsSessions.session(username));
-			return CLI_RET_ERROR_CODE;
-		}
-	}
+	qDebug() << CLI_PREFIX << "Downloading info about username"
+	    << username;
 
 	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
 		return CLI_RET_OK_CODE;
@@ -378,15 +397,7 @@ int getOwnerInfo(const QMap <QString, QVariant> &map)
 	const QString username = map["username"].toString();
 
 	qDebug() << CLI_PREFIX << "downloading info about owner and its "
-	    "databox for username" <<  username << "...";
-
-	if (!isdsSessions.isConnectedToIsds(username)) {
-		if (!MainWindow::connectToIsds(username, 0)) {
-			qDebug() << CLI_PREFIX << "connection error:"
-			  << isds_long_message(isdsSessions.session(username));
-			return CLI_RET_ERROR_CODE;
-		}
-	}
+	    "databox for username" <<  username;
 
 	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
 		return CLI_RET_OK_CODE;
@@ -397,13 +408,14 @@ int getOwnerInfo(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
+// NOTE: not used now.
 int createContextAmdLoginToIsds(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
 	const QString username = map["username"].toString();
 
 	qDebug() << CLI_PREFIX << "creating a isds context and loggin to "
-	    "databox for username" <<  username << "...";
+	    "databox for username" <<  username;
 
 	AccountModel::SettingsMap accountInfo;
 
@@ -454,13 +466,13 @@ int createContextAmdLoginToIsds(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-int createAndSendMsg(const QMap <QString, QVariant> &map)
+int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 	QString errmsg;
 
-	qDebug() << CLI_PREFIX << "creating a new message...";
+	qDebug() << CLI_PREFIX << "creating a new message.";
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -745,14 +757,6 @@ int createAndSendMsg(const QMap <QString, QVariant> &map)
 
 	qDebug() << CLI_PREFIX << "sending of a new message...";
 
-	if (!isdsSessions.isConnectedToIsds(map["username"].toString())) {
-		if (!MainWindow::connectToIsds(map["username"].toString(), 0)) {
-			errmsg = isds_long_message(
-			    isdsSessions.session(map["username"].toString()));
-			goto finish;
-		}
-	}
-
 	status = isds_send_message(
 	    isdsSessions.session(map["username"].toString()), sent_message);
 
@@ -766,8 +770,6 @@ finish:
 	if (IE_SUCCESS == status) {
 		/* Added a new message into database */
 		qint64 dmId = QString(sent_message->envelope->dmID).toLongLong();
-		MessageDb *messageDb =
-		    MainWindow::accountMessageDb(map["username"].toString(), 0);
 		const QString dbIDSender =
 		    globAccountDb.dbId(map["username"].toString() + "___True");
 		const QString dmSender =
@@ -802,22 +804,16 @@ finish:
 bool checkAttributeIfExists(const QString &service, const QString &attribute)
 /* ========================================================================= */
 {
-	if (service == SER_CONNECT) {
+	if (service == SER_LOGIN) {
 		return connectAttrs.contains(attribute);
 	} else if (service == SER_GET_MSG_LIST) {
 		return getMsgListAttrs.contains(attribute);
 	} else if (service == SER_SEND_MSG) {
 		return sendMsgAttrs.contains(attribute);
-	} else if (service == SER_DWNLD_MSG) {
-		return dwnldMsgAttrs.contains(attribute);
-	} else if (service == SER_DWNLD_DEL_INFO) {
-		return dwnldDelInfoAttrs.contains(attribute);
-	} else if (service == SER_GET_USER_INFO) {
-		return (attribute == attrUserName);
-	} else if (service == SER_GET_OWNER_INFO) {
-		return (attribute == attrUserName);
-	} else if (service == SER_CHECK_ATTACHMENT) {
-		return (attribute == attrUserName);
+	} else if (service == SER_GET_MSG) {
+		return getMsgAttrs.contains(attribute);
+	} else if (service == SER_GET_DEL_INFO) {
+		return getDelInfoAttrs.contains(attribute);
 	}
 	return false;
 }
@@ -835,308 +831,188 @@ const QStringList parseAttachment(const QString &files)
 
 
 /* ========================================================================= */
-int checkConnectMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkLoginMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
-	int ret = CLI_RET_ERROR_CODE;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "connect parameters...";
-
-	if (!map.contains("method") ||
-	    map.value("method").toString().isEmpty()) {
-		errmsg = createErrorMsg("method attribute missing or "
-		    "contains empty string.");
-		qDebug() << errmsg;
-		return ret;
-	}
-
-	if (!map.contains("type") ||
-	    map.value("type").toString().isEmpty()) {
-		errmsg = createErrorMsg("type attribute missing or "
-		    "contains empty string.");
-		qDebug() << errmsg;
-		return ret;
-	}
+	QString errmsg = "checking of mandatory parameters for login...";
+	//qDebug() << CLI_PREFIX << errmsg;
 
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
 	    map.value("username").toString().length() != 6) {
 		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
+		    "contains wrong value!");
 		qDebug() << errmsg;
-		return ret;
-	}
-	if (!map.contains("password") ||
-	    map.value("password").toString().isEmpty()) {
-		errmsg = createErrorMsg("password attribute missing or "
-		    "contains empty string.");
-		qDebug() << errmsg;
-		return ret;
+		return false;
 	}
 
-	QString method = map.value("method").toString();
-
-	if (method == L_HOTP || method == L_HOTP) {
-		if (!map.contains("otpcode") ||
-		    map.value("otpcode").toString().isEmpty()) {
-			errmsg = createErrorMsg("otpcode attribute missing or "
-			    "contains empty security code.");
-			qDebug() << errmsg;
-			return ret;
-		}
-	} else if (method == L_CERT) {
-		if (!map.contains("certificate") ||
-		    map.value("certificate").toString().isEmpty()) {
-			errmsg = createErrorMsg("certificate attribute missing"
-			    " or contains empty certificate path.");
-			qDebug() << errmsg;
-			return ret;
-		}
-	} else if (method != L_USER) {
-		return ret;
-	}
-
-	return createContextAmdLoginToIsds(map);
+	return true;
 }
 
 
 /* ========================================================================= */
-int checkSendMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkSendMsgMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
+	QString errmsg = "checking of mandatory parameters for send message...";
+	//qDebug() << CLI_PREFIX << errmsg;
 
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "send message parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
 	if (!map.contains("dbIDRecipient") ||
 	    map.value("dbIDRecipient").toString().isEmpty() ||
 	    map.value("dbIDRecipient").toString().length() != 7) {
-		errmsg = createErrorMsg("databox ID attribute of recipient "
-		    "missing or contains wrong value.");
+		errmsg = createErrorMsg("dbIDRecipient attribute "
+		    "missing or contains wrong value!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 	if (!map.contains("dmAnnotation") ||
 	    map.value("dmAnnotation").toString().isEmpty()) {
-		errmsg = createErrorMsg("subject attribute missing or "
-		    "contains empty string.");
+		errmsg = createErrorMsg("dmAnnotation attribute missing or "
+		    "contains empty string!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 	if (!map.contains("dmAttachment") ||
 	    map.value("dmAttachment").toStringList().isEmpty()) {
-		errmsg = createErrorMsg("attachment attribute missing or "
-		    "contains empty file path list.");
+		errmsg = createErrorMsg("dmAttachment attribute missing or "
+		    "contains empty file path list!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 
-	return createAndSendMsg(map);
+	return true;
 }
 
 
 /* ========================================================================= */
-int checkGetMsgListMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkGetMsgListMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "get message list parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
+	QString errmsg = "checking of mandatory parameters for "
+	    "get message list...";
+	//qDebug() << CLI_PREFIX << errmsg;
 
 	if (!map.contains("dmType") ||
 	    map.value("dmType").toString().isEmpty()) {
-		errmsg = createErrorMsg("message type attribute missing or "
-		    "contains empty string.");
+		errmsg = createErrorMsg("dmType attribute missing or "
+		    "contains empty string!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
-
 	QString dmType = map.value("dmType").toString();
 	if (!(dmType == MT_SENT) && !(dmType == MT_RECEIVED) &&
 	    !(dmType == MT_SENT_RECEIVED)) {
-		errmsg = createErrorMsg("message type attribute "
-		    "contains wrong value.");
+		errmsg = createErrorMsg("dmType attribute "
+		    "contains wrong value!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 
-	return getMsgList(map);
+	return true;
 }
 
 
 /* ========================================================================= */
-int checkDownloadMsgMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkGetMsgMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "download message parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
+	QString errmsg = "checking of mandatory parameters "
+	    "for download message...";
+	//qDebug() << CLI_PREFIX << errmsg;
 
 	if (!map.contains("dmID") ||
 	    map.value("dmID").toString().isEmpty()) {
-		errmsg = createErrorMsg("message ID attribute missing or "
-		    "contains empty string.");
+		errmsg = createErrorMsg("dmID attribute missing or "
+		    "contains empty string!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
-
 	if (!map.contains("dmType") ||
 	    map.value("dmType").toString().isEmpty()) {
-		errmsg = createErrorMsg("message type attribute missing or "
-		    "contains empty string.");
+		errmsg = createErrorMsg("dmType attribute missing or "
+		    "contains empty string!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
-
 	QString dmType = map.value("dmType").toString();
 	if (!(dmType == MT_SENT) && !(dmType == MT_RECEIVED)) {
-		errmsg = createErrorMsg("message type attribute "
-		    "contains wrong value.");
+		errmsg = createErrorMsg("dmType attribute "
+		    "contains wrong value!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 
-	return downloadMsg(map);
+	if (map.contains("download")) {
+		QString download = map.value("download").toString();
+		if (!(download == "no") && !(download == "yes")
+		    && !(download == "ondemand")) {
+			errmsg = createErrorMsg("download attribute has "
+			    "wrong value!");
+			qDebug() << errmsg;
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
 /* ========================================================================= */
-int checkDownloadDeliveryMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkDownloadDeliveryMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "download delivery info parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
+	QString errmsg = "checking of mandatory parameters "
+	    "for download delivery info...";
+	//qDebug() << CLI_PREFIX << errmsg;
 
 	if (!map.contains("dmID") ||
 	    map.value("dmID").toString().isEmpty()) {
-		errmsg = createErrorMsg("message ID attribute missing or "
-		    "contains empty string.");
+		errmsg = createErrorMsg("dmID attribute missing or "
+		    "contains empty string!");
 		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+		return false;
 	}
 
-	return downloadDeliveryInfo(map);
+	if (map.contains("download")) {
+		QString download = map.value("download").toString();
+		if (!(download == "no") && !(download == "yes")
+		    && !(download == "ondemand")) {
+			errmsg = createErrorMsg("download attribute has "
+			    "wrong value!");
+			qDebug() << errmsg;
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
 /* ========================================================================= */
-int checkGetUserInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
+bool checkMandatoryAttributes(const QString &service, QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "get user info parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
+	if (service == SER_LOGIN) {
+		return checkLoginMandatoryAttributes(map);
+	} else if (service == SER_GET_MSG_LIST) {
+		return checkGetMsgListMandatoryAttributes(map);
+	} else if (service == SER_SEND_MSG) {
+		return checkSendMsgMandatoryAttributes(map);
+	} else if (service == SER_GET_MSG) {
+		return checkGetMsgMandatoryAttributes(map);
+	} else if (service == SER_GET_DEL_INFO) {
+		return checkDownloadDeliveryMandatoryAttributes(map);
 	}
 
-	return getUserInfo(map);
-}
-
-
-
-/* ========================================================================= */
-int checkGetOwnerInfoMandatoryAttributes(const QMap <QString, QVariant> &map)
-/* ========================================================================= */
-{
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "get user info parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
-
-	return getOwnerInfo(map);
-}
-
-
-
-/* ========================================================================= */
-int checkAttachmentMandatoryAttributes(const QMap <QString, QVariant> &map)
-/* ========================================================================= */
-{
-	QString errmsg;
-
-	qDebug() << CLI_PREFIX << "checking of mandatory "
-	    "check attachment parameters...";
-
-	if (!map.contains("username") ||
-	    map.value("username").toString().isEmpty() ||
-	    map.value("username").toString().length() != 6) {
-		errmsg = createErrorMsg("username attribute missing or "
-		    "contains wrong value.");
-		qDebug() << errmsg;
-		return CLI_RET_ERROR_CODE;
-	}
-
-	return checkAttachment(map);
+	return false;
 }
 
 
 /* ========================================================================= */
-int runService(const QString &service, const QString &paramString)
+bool parsePamamString(const QString &service, const QString &paramString,
+    QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
-	qDebug() <<  CLI_PREFIX << "input:" << service << ":" << paramString;
-
-	QMap <QString, QVariant> map;
-
 	QString attribute = "";
 	QString value = "";
 	QString errmsg;
@@ -1144,9 +1020,6 @@ int runService(const QString &service, const QString &paramString)
 	bool newValue = false;
 	bool special = false;
 	int attrPosition = 0;
-	int ret = CLI_RET_ERROR_CODE;
-
-	qDebug() << CLI_PREFIX << "parsing input string with parameters...";
 
 	for (int i = 0; i < paramString.length(); ++i) {
 		if (paramString.at(i) == ',') {
@@ -1161,7 +1034,7 @@ int runService(const QString &service, const QString &paramString)
 					    "name on position '%1'").
 					    arg(attrPosition));
 					qDebug() << errmsg;
-					return ret;
+					return false;
 				}
 				if (value.isEmpty()) {
 					errmsg = createErrorMsg(
@@ -1169,11 +1042,11 @@ int runService(const QString &service, const QString &paramString)
 					    "value on position '%1'").
 					    arg(attrPosition));
 					qDebug() << errmsg;
-					return ret;
+					return false;
 				}
 
 				if (checkAttributeIfExists(service,attribute)) {
-					if (attribute == ATTACH_LABEL) {
+					if (attribute == "dmAttachment") {
 						map[attribute] =
 						    parseAttachment(value);
 					} else {
@@ -1184,7 +1057,7 @@ int runService(const QString &service, const QString &paramString)
 					    QString("unknown attribute "
 					    "name '%1'").arg(attribute));
 					qDebug() << errmsg;
-					return ret;
+					return false;
 				}
 				attribute.clear();
 				value.clear();
@@ -1227,16 +1100,16 @@ int runService(const QString &service, const QString &paramString)
 		errmsg = createErrorMsg(QString("empty attribute "
 		    "name on position '%1'").arg(attrPosition));
 		qDebug() << errmsg;
-		return ret;
+		return false;
 	}
 	if (value.isEmpty()) {
 		errmsg = createErrorMsg(QString("empty attribute "
 		    "value on position '%1'").arg(attrPosition));
 		qDebug() << errmsg;
-		return ret;
+		return false;
 	}
 	if (checkAttributeIfExists(service, attribute)) {
-		if (attribute == ATTACH_LABEL) {
+		if (attribute == "dmAttachment") {
 			map[attribute] = parseAttachment(value);
 		} else {
 			map[attribute] = value;
@@ -1245,31 +1118,149 @@ int runService(const QString &service, const QString &paramString)
 		errmsg = createErrorMsg(QString("unknown attribute "
 		    "name '%1'").arg(attribute));
 		qDebug() << errmsg;
-		return ret;
+		return false;
+	}
+
+	if (!checkMandatoryAttributes(service, map)) {
+		return false;
 	}
 
 	// add service name to map
-	map[SERVICE_LABEL] = service;
+	map["service"] = service;
 
-	if (service == SER_CONNECT) {
-		ret = checkConnectMandatoryAttributes(map);
-	} else if (service == SER_GET_MSG_LIST) {
-		ret = checkGetMsgListMandatoryAttributes(map);
+	return true;
+}
+
+
+/* ========================================================================= */
+int doService(const QString &service, const QMap<QString,QVariant> &map,
+    MessageDb *messageDb, bool needsISDS)
+/* ========================================================================= */
+{
+
+	if (service == SER_GET_MSG_LIST) {
+		return getMsgList(map, messageDb);
 	} else if (service == SER_SEND_MSG) {
-		ret = checkSendMsgMandatoryAttributes(map);
-	} else if (service == SER_DWNLD_MSG) {
-		ret = checkDownloadMsgMandatoryAttributes(map);
-	} else if (service == SER_DWNLD_DEL_INFO) {
-		ret = checkDownloadDeliveryMandatoryAttributes(map);
+		return createAndSendMsg(map, messageDb);
+	} else if (service == SER_GET_MSG) {
+		return getMsg(map, messageDb, needsISDS);
+	} else if (service == SER_GET_DEL_INFO) {
+		return getDeliveryInfo(map, messageDb, needsISDS);
 	} else if (service == SER_GET_USER_INFO) {
-		ret = checkGetUserInfoMandatoryAttributes(map);
+		return getUserInfo(map);
 	} else if (service == SER_GET_OWNER_INFO) {
-		ret = checkGetOwnerInfoMandatoryAttributes(map);
+		return getOwnerInfo(map);
 	} else if (service == SER_CHECK_ATTACHMENT) {
-		ret = checkAttachmentMandatoryAttributes(map);
-	} else {
-		return ret;
+		return checkAttachment(map, messageDb);
 	}
 
-	return ret;
+	return CLI_RET_ERROR_CODE;
+}
+
+
+/* ========================================================================= */
+int runService(const QString &lParam,
+    const QString &service, const QString &sParam)
+/* ========================================================================= */
+{
+	QMap<QString,QVariant> loginMap;
+	QMap <QString,QVariant> serviceMap;
+	bool needsISDS = true;
+
+	/* parse service parameter list */
+	if (!(service.isNull()) && !(sParam.isNull())) {
+		qDebug() << CLI_PREFIX << "Parsing of input string of service"
+		    << service << ":" << sParam;
+		if (!parsePamamString(service, sParam, serviceMap)) {
+			return CLI_RET_ERROR_CODE;
+		}
+		qDebug() << CLI_PREFIX << "...done.";
+	}
+
+	/* parse login parameter list */
+	qDebug() << CLI_PREFIX << "Parsing of input string of \"login\" :"
+	    << lParam;
+	if (!parsePamamString(SER_LOGIN, lParam, loginMap)) {
+		return CLI_RET_ERROR_CODE;
+	}
+	qDebug() << CLI_PREFIX << "...done.";
+
+	/* get username from login */
+	const QString username = loginMap["username"].toString();
+
+	/* get message database */
+	MessageDb *messageDb = MainWindow::accountMessageDb(username,0);
+	if (messageDb == NULL) {
+		qDebug() << CLI_PREFIX << "Database doesn't exists for user"
+		    << username;
+		return CLI_RET_ERROR_CODE;
+	}
+
+	if (service == SER_GET_MSG) {
+		if (serviceMap.contains("download")) {
+			QString download =
+			    serviceMap.value("download").toString();
+			if (download == "no") {
+				needsISDS = false;
+			} else if (download == "ondemand") {
+				needsISDS = messageDb->msgsMessageBase64(
+				    serviceMap["dmID"].toLongLong()).isNull();
+			}
+		} else {
+			needsISDS = messageDb->msgsMessageBase64(
+			    serviceMap["dmID"].toLongLong()).isNull();
+		}
+	}
+
+	if (service == SER_GET_DEL_INFO) {
+		if (serviceMap.contains("download")) {
+			QString download =
+			    serviceMap.value("download").toString();
+			if (download == "no") {
+				needsISDS = false;
+			} else if (download == "ondemand") {
+				needsISDS=messageDb->msgsGetDeliveryInfoBase64(
+				    serviceMap["dmID"].toLongLong()).isNull();
+			}
+		} else {
+			needsISDS = messageDb->msgsGetDeliveryInfoBase64(
+			    serviceMap["dmID"].toLongLong()).isNull();
+		}
+	}
+
+	if (service == SER_CHECK_ATTACHMENT) {
+		needsISDS = false;
+	}
+
+	/* connect to ISDS and login into databox */
+	if (needsISDS) {
+
+		QString pwd;
+		QString otp;
+
+		if (loginMap.contains("password")) {
+			pwd = loginMap["password"].toString();
+		}
+		if (loginMap.contains("otpcode")) {
+			otp = loginMap["otpcode"].toString();
+		}
+
+		if (!isdsSessions.isConnectedToIsds(username)) {
+			if (!MainWindow::connectToIsds(username,0)) {
+				qDebug() << isds_long_message(
+				    isdsSessions.session(username));
+				return CLI_RET_ERROR_CODE;
+			}
+		}
+		qDebug() << CLI_PREFIX << "User" << username
+		    << "has been logged into databox.";
+	}
+
+	/* do service */
+	if (!service.isNull()) {
+		serviceMap["username"] = username;
+		doService(service, serviceMap, messageDb, needsISDS);
+	}
+
+	return CLI_RET_OK_CODE;
 }

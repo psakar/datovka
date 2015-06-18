@@ -32,8 +32,6 @@
 #define CLI_RET_OK_CODE 0
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
-#define SERVICE_LABEL "service"
-#define ATTACH_LABEL "dmAttachment"
 
 // Login method
 #define L_USER "user" //username
@@ -46,22 +44,25 @@
 #define MT_RECEIVED "received"
 #define MT_SENT_RECEIVED "all"
 
-
-// Message status
-#define MS_ONLY_NEW "new"
-
-
 // Define services names
-#define SER_CONNECT "connect"
+#define SER_LOGIN "login"
 #define SER_GET_MSG_LIST "get-msg-list"
 #define SER_SEND_MSG "send-msg"
-#define SER_DWNLD_MSG "download-msg"
-#define SER_DWNLD_DEL_INFO "download-delivery-info"
+#define SER_GET_MSG "get-msg"
+#define SER_GET_DEL_INFO "get-delivery-info"
 #define SER_GET_USER_INFO "get-user-info"
 #define SER_GET_OWNER_INFO "get-owner-info"
 #define SER_CHECK_ATTACHMENT "check-attachment"
 
 
-int runService(const QString &service, const QString &paramString);
+/*
+ * Run login + service
+ * [in] lParam = login parameter string
+ * [in] service = name of service
+ * [in] sParam = service parameter string
+ * @retrun status code of operation
+*/
+int runService(const QString &lParam,
+    const QString &service, const QString &sParam);
 
 #endif // CLI_H

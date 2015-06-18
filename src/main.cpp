@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 #endif /* DEBUG */
 
 	/* Options with values. */
-	if (!parser.addOption(QCommandLineOption(SER_CONNECT,
+	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
 	        QObject::tr("Service: connect to isds and loggin into databox."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
@@ -170,13 +170,13 @@ int main(int argc, char *argv[])
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
-	if (!parser.addOption(QCommandLineOption(SER_DWNLD_MSG,
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
 	        QObject::tr("Service: download complete message with "
 	        "signature and time stamp of MV."),
 	        QObject::tr("string-of-parameters")))) {
 		Q_ASSERT(0);
 	}
-	if (!parser.addOption(QCommandLineOption(SER_DWNLD_DEL_INFO,
+	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
 	        QObject::tr("Service: download delivery info of message "
 	        "with signature and time stamp of MV."),
 	        QObject::tr("string-of-parameters")))) {
@@ -185,19 +185,19 @@ int main(int argc, char *argv[])
 	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
 	        QObject::tr("Service: get information about user "
 	        "(role, privileges, ...)."),
-	        QObject::tr("string-of-parameters")))) {
+	        NULL))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
 	        QObject::tr("Service: get information about owner and "
 	        "its databox."),
-	        QObject::tr("string-of-parameters")))) {
+	        NULL))) {
 		Q_ASSERT(0);
 	}
 	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
 	        QObject::tr("Service: get list of messages where "
 	        "attachment missing (local database only)."),
-	        QObject::tr("string-of-parameters")))) {
+	        NULL))) {
 		Q_ASSERT(0);
 	}
 
@@ -467,30 +467,32 @@ int main(int argc, char *argv[])
 		AccountModel::globAccounts.loadFromSettings(settings);
 	}
 
-	if (parser.isSet(SER_CONNECT)) {
-		ret = runService(SER_CONNECT,
-		    parser.value(SER_CONNECT));
-	} else if (parser.isSet(SER_GET_MSG_LIST)) {
-		ret = runService(SER_GET_MSG_LIST,
-		    parser.value(SER_GET_MSG_LIST));
-	} else if (parser.isSet(SER_SEND_MSG)) {
-		ret = runService(SER_SEND_MSG,
-		    parser.value(SER_SEND_MSG));
-	} else if (parser.isSet(SER_DWNLD_MSG)) {
-		ret = runService(SER_DWNLD_MSG,
-		    parser.value(SER_DWNLD_MSG));
-	} else if (parser.isSet(SER_DWNLD_DEL_INFO)) {
-		ret = runService(SER_DWNLD_DEL_INFO,
-		    parser.value(SER_DWNLD_DEL_INFO));
-	} else if (parser.isSet(SER_GET_USER_INFO)) {
-		ret = runService(SER_GET_USER_INFO,
-		    parser.value(SER_GET_USER_INFO));
-	} else if (parser.isSet(SER_GET_OWNER_INFO)) {
-		ret = runService(SER_GET_OWNER_INFO,
-		    parser.value(SER_GET_OWNER_INFO));
-	} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
-		ret = runService(SER_CHECK_ATTACHMENT,
-		    parser.value(SER_CHECK_ATTACHMENT));
+	if (parser.isSet(SER_LOGIN)) {
+		if (parser.isSet(SER_GET_MSG_LIST)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_MSG_LIST, parser.value(SER_GET_MSG_LIST));
+		} else if (parser.isSet(SER_SEND_MSG)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_SEND_MSG, parser.value(SER_SEND_MSG));
+		} else if (parser.isSet(SER_GET_MSG)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_MSG, parser.value(SER_GET_MSG));
+		} else if (parser.isSet(SER_GET_DEL_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_DEL_INFO, parser.value(SER_GET_DEL_INFO));
+		} else if (parser.isSet(SER_GET_USER_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_USER_INFO, parser.value(SER_GET_USER_INFO));
+		} else if (parser.isSet(SER_GET_OWNER_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_OWNER_INFO, parser.value(SER_GET_OWNER_INFO));
+		} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_CHECK_ATTACHMENT, parser.value(SER_CHECK_ATTACHMENT));
+		} else {
+			ret = runService(parser.value(SER_LOGIN),
+			    NULL, NULL);
+		}
 
 	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
