@@ -1246,7 +1246,7 @@ int runService(const QString &lParam,
 		}
 
 		if (!isdsSessions.isConnectedToIsds(username)) {
-			if (!MainWindow::connectToIsds(username,0)) {
+			if (!MainWindow::connectToIsds(username,0,pwd,otp)) {
 				qDebug() << isds_long_message(
 				    isdsSessions.session(username));
 				return CLI_RET_ERROR_CODE;
