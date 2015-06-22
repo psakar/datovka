@@ -533,7 +533,8 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 			goto finish;
 		}
 
-		QFile file(map["dmAttachment"].toStringList().at(i));
+		QFile file(QDir::fromNativeSeparators(
+		    map["dmAttachment"].toStringList().at(i)));
 		if (file.exists()) {
 			if (!file.open(QIODevice::ReadOnly)) {
 				errmsg = "Couldn't open the file \""
@@ -1049,6 +1050,8 @@ bool parsePamamString(const QString &service, const QString &paramString,
 					if (attribute == "dmAttachment") {
 						map[attribute] =
 						    parseAttachment(value);
+
+
 					} else {
 						map[attribute] = value;
 					}
@@ -1082,7 +1085,14 @@ bool parsePamamString(const QString &service, const QString &paramString,
 				value = value + paramString.at(i);
 				special = false;
 			} else {
-				special = true;
+				if (attribute == "dmAttachment" ||
+				    attribute == "zfoFile" ||
+				    attribute == "certificate") {
+					value = value + paramString.at(i);
+					special = false;
+				} else {
+					special = true;
+				}
 			}
 		} else {
 			if (newAttribute) {
