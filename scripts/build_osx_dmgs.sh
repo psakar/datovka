@@ -85,7 +85,7 @@ if [ "x${SDK_VER}" = "x" ]; then
 	exit 1
 fi
 
-QT_VER="5.4.1"
+QT_VER="5.4.2"
 PKG_VER=$(cat datovka.pro | grep '^VERSION\ =\ ' | sed -e 's/VERSION\ =\ //g')
 APP="datovka.app"
 
