@@ -213,6 +213,9 @@ int main(int argc, char *argv[])
 	start = QDateTime::currentMSecsSinceEpoch();
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 
+	/* Create configuration file is file is missing. */
+	MainWindow::ensureConfPresence();
+
 	if (0 != crypto_init()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
 		/* TODO -- throw a dialog notifying the user. */

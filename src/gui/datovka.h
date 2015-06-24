@@ -83,6 +83,12 @@ public:
 	};
 
 	/*!
+	 * @brief Create configuration file if not present.
+	 */
+	static
+	bool ensureConfPresence(void);
+
+	/*!
 	 * @brief connect to ISDS databox from exist account
 	 *
 	 * @note If pointer to main windows is specified, then various
@@ -747,11 +753,6 @@ private:
 	 * @brief Active/Inactive account menu and buttons in the mainwindow.
 	 */
 	void activeAccountMenuAndButtons(bool action) const;
-
-	/*!
-	 * @brief Create configuration file if not present.
-	 */
-	bool ensureConfPresence(void) const;
 
 	/*!
 	 * @brief Load and apply setting from configuration file.

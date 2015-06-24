@@ -207,9 +207,6 @@ MainWindow::MainWindow(QWidget *parent)
 	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 
-	/* Configuration directory and file must exist. */
-	ensureConfPresence();
-
 	/* Load configuration file. */
 	loadSettings();
 	/* Account list must already be set in order to connect this signal. */
@@ -3663,7 +3660,7 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 /*
  * Create configuration file if not present.
  */
-bool MainWindow::ensureConfPresence(void) const
+bool MainWindow::ensureConfPresence(void)
 /* ========================================================================= */
 {
 	if (!QDir(globPref.confDir()).exists()) {
