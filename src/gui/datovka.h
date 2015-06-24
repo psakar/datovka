@@ -143,11 +143,10 @@ private slots:
 	void updateAccountListEntry(const QString &userName);
 
 	/*!
-	 * @brief Verify if is a connection to ISDS and databox
-	 * exists for a new account.
+	 * @brief Verify whether a connection to ISDS can be establisehd
+	 *     and databox exists for the account.
 	 */
-	void getAccountUserDataboxInfo(
-	    const AccountModel::SettingsMap &accountInfo);
+	void getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo);
 
 	/*!
 	 * @brief Redraws widgets according to selected account item.
@@ -932,21 +931,23 @@ private:
 	/*!
 	 * @brief connect to ISDS databox from new account
 	 */
-	bool firstConnectToIsds(const AccountModel::SettingsMap &accountInfo,
+	bool firstConnectToIsds(AccountModel::SettingsMap &accountInfo,
 	    bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by user name and password only.
 	 */
 	static
-	bool loginMethodUserNamePwd(const QString &userName, MainWindow *mw,
-	    const QString &pwd = QString());
+	bool loginMethodUserNamePwd(
+	    const AccountModel::SettingsMap &accountInfo,
+	    MainWindow *mw, const QString &pwd = QString());
 
 	/*!
 	 * @brief Login to ISDS server by user name, password and OTP code.
 	 */
 	static
-	bool loginMethodUserNamePwdOtp(const QString &userName,
+	bool loginMethodUserNamePwdOtp(
+	    const AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &otp = QString());
 
@@ -972,14 +973,15 @@ private:
 	 * @brief Login to ISDS server by certificate only.
 	 */
 	static
-	bool loginMethodCertificateOnly(const QString &userName,
+	bool loginMethodCertificateOnly(AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &key = QString());
 
 	/*!
 	 * @brief Login to ISDS server by certificate, user name and password.
 	 */
 	static
-	bool loginMethodCertificateUserPwd(const QString &userName,
+	bool loginMethodCertificateUserPwd(
+	    AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &key = QString());
 
@@ -987,8 +989,8 @@ private:
 	 * @brief Login to ISDS server by certificate and data box ID.
 	 */
 	static
-	bool loginMethodCertificateIdBox(const QString &userName,
-	    MainWindow *mw);
+	bool loginMethodCertificateIdBox(
+	    AccountModel::SettingsMap &accountInfo, MainWindow *mw);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.

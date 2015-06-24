@@ -7703,19 +7703,19 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 /*
 * Login to ISDS server by username and password only.
 */
-bool MainWindow::loginMethodUserNamePwd(const QString &userName,
+bool MainWindow::loginMethodUserNamePwd(
+    const AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &pwd)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
+	const QString userName = accountInfo.userName();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
-
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(userName)) {
 		isdsSessions.createCleanSession(userName,
@@ -7729,7 +7729,6 @@ bool MainWindow::loginMethodUserNamePwd(const QString &userName,
 			QDialog *editAccountDialog = new DlgCreateAccount(
 			    userName, DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
-//				usedPwd = AccountModel::globAccounts[userName].password();
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
 			} else {
@@ -7825,19 +7824,19 @@ bool MainWindow::p12CertificateToPem(const QString &p12Path,
 /*
 * Login to ISDS server by user certificate only.
 */
-bool MainWindow::loginMethodCertificateOnly(const QString &userName,
+bool MainWindow::loginMethodCertificateOnly(
+    AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &key)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
+	const QString userName = accountInfo.userName();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
-
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(userName)) {
 		isdsSessions.createCleanSession(userName,
@@ -7851,8 +7850,6 @@ bool MainWindow::loginMethodCertificateOnly(const QString &userName,
 			QDialog *editAccountDialog = new DlgCreateAccount(userName,
 			    DlgCreateAccount::ACT_CERT, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
-//				certPath =
-//				    AccountModel::globAccounts[userName].p12File();
 				certPath = accountInfo.p12File();
 				mw->saveSettings();
 			} else {
@@ -7941,8 +7938,7 @@ bool MainWindow::loginMethodCertificateOnly(const QString &userName,
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		AccountModel::globAccounts[userName]
-		    ._setPassphrase(passphrase);
+		accountInfo._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -7964,19 +7960,19 @@ bool MainWindow::loginMethodCertificateOnly(const QString &userName,
 /*
 * Login to ISDS server by user certificate, username and password.
 */
-bool MainWindow::loginMethodCertificateUserPwd(const QString &userName,
+bool MainWindow::loginMethodCertificateUserPwd(
+    AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &pwd, const QString &key)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
+	const QString userName = accountInfo.userName();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
-
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(userName)) {
 		isdsSessions.createCleanSession(userName,
@@ -7991,11 +7987,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QString &userName,
 			QDialog *editAccountDialog = new DlgCreateAccount(userName,
 			    DlgCreateAccount::ACT_CERTPWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
-//				certPath = AccountModel::globAccounts[
-//				    userName].p12File();
 				certPath = accountInfo.p12File();
-//				usedPwd = AccountModel::globAccounts[
-//				    userName].password();
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
 			} else {
@@ -8087,8 +8079,7 @@ bool MainWindow::loginMethodCertificateUserPwd(const QString &userName,
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		AccountModel::globAccounts[userName]
-		    ._setPassphrase(passphrase);
+		accountInfo._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -8110,20 +8101,19 @@ bool MainWindow::loginMethodCertificateUserPwd(const QString &userName,
 /*
 * Login to ISDS server by user certificate and databox ID.
 */
-bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
-    MainWindow *mw)
+bool MainWindow::loginMethodCertificateIdBox(
+    AccountModel::SettingsMap &accountInfo, MainWindow *mw)
 /* ========================================================================= */
 {
 #if 0 /* This function is unused */
 	isds_error status = IE_ERROR;
 
+	const QString userName = accountInfo.userName();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
-
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(userName)) {
 		isdsSessions.createCleanSession(userName,
@@ -8136,9 +8126,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
 	QDialog *editAccountDialog = new DlgCreateAccount(userName,
 	    DlgCreateAccount::ACT_IDBOX, this);
 	if (QDialog::Accepted == editAccountDialog->exec()) {
-//		certPath = AccountModel::globAccounts[userName].p12File();
 		certPath = accountInfo.p12File();
-//		idBox = AccountModel::globAccounts[userName].userName();
 		idBox = accountInfo.userName();
 		saveSettings();
 	} else {
@@ -8205,8 +8193,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
-		AccountModel::globAccounts[userName]
-		    ._setPassphrase(passphrase);
+		accountInfo._setPassphrase(passphrase);
 
 		/*
 		 * TODO -- Notify the user that he should protect his
@@ -8222,7 +8209,7 @@ bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
 #else
-	(void) userName;
+	(void) accountInfo;
 	(void) mw;
 	return false;
 #endif
@@ -8233,19 +8220,19 @@ bool MainWindow::loginMethodCertificateIdBox(const QString &userName,
 /*
 * Login to ISDS server by username, password and OTP code.
 */
-bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
+bool MainWindow::loginMethodUserNamePwdOtp(
+    const AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &pwd, const QString &otp)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
 
+	const QString userName = accountInfo.userName();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return false;
 	}
-
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
 
 	if (!isdsSessions.holdsSession(userName)) {
 		isdsSessions.createCleanSession(userName,
@@ -8258,7 +8245,6 @@ bool MainWindow::loginMethodUserNamePwdOtp(const QString &userName,
 			QDialog *editAccountDialog = new DlgCreateAccount(userName,
 			    DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
-//				usedPwd = AccountModel::globAccounts[userName].password();
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
 			} else if (!pwd.isEmpty()) {
@@ -8458,11 +8444,11 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	}
 
 	/* Check password expiration. */
-	const AccountModel::SettingsMap &accountInfo =
+	AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
-		AccountModel::globAccounts[userName]._setPwdExpirDlgShown(true);
+		accountInfo._setPwdExpirDlgShown(true);
 
 		QString dbDateTimeString = globAccountDbPtr->getPwdExpirFromDb(
 		    userName + "___True");
@@ -8498,16 +8484,16 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		loginRet = loginMethodUserNamePwd(userName, mw, pwd);
+		loginRet = loginMethodUserNamePwd(accountInfo, mw, pwd);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		loginRet = loginMethodCertificateOnly(userName, mw, otpKey);
+		loginRet = loginMethodCertificateOnly(accountInfo, mw, otpKey);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		loginRet = loginMethodCertificateUserPwd(userName,
+		loginRet = loginMethodCertificateUserPwd(accountInfo,
 		    mw, pwd, otpKey);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8516,14 +8502,14 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		 * we not support this method now.
 
 		if (accountInfo.password().isEmpty()) {
-			return loginMethodCertificateIdBox(userName,
-			    mw);
+			return loginMethodCertificateIdBox(accountInfo, mw);
 		}
 		*/
 
 	/* Login method based username, password and OTP */
 	} else {
-		loginRet = loginMethodUserNamePwdOtp(userName, mw, pwd, otpKey);
+		loginRet = loginMethodUserNamePwdOtp(accountInfo,
+		    mw, pwd, otpKey);
 	}
 
 	if (!loginRet) {
@@ -8585,8 +8571,8 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 /*
  * First connect to databox from new account
  */
-bool MainWindow::firstConnectToIsds(
-    const AccountModel::SettingsMap &accountInfo, bool showDialog)
+bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap &accountInfo,
+    bool showDialog)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -8595,18 +8581,18 @@ bool MainWindow::firstConnectToIsds(
 
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
-		ret = loginMethodUserNamePwd(accountInfo.userName(),
+		ret = loginMethodUserNamePwd(accountInfo,
 		    showDialog ? this : 0);
 
 	/* Login method based on certificate only */
 	} else if (accountInfo.loginMethod() == LIM_CERT) {
-		ret = loginMethodCertificateOnly(accountInfo.userName(),
+		ret = loginMethodCertificateOnly(accountInfo,
 		    showDialog ? this : 0);
 
 	/* Login method based on certificate together with username */
 	} else if (accountInfo.loginMethod() == LIM_USER_CERT) {
 
-		ret = loginMethodCertificateUserPwd(accountInfo.userName(),
+		ret = loginMethodCertificateUserPwd(accountInfo,
 		    showDialog ? this : 0);
 
 		/* TODO - next method is situation when certificate will be used
@@ -8615,14 +8601,14 @@ bool MainWindow::firstConnectToIsds(
 		 * we not support this method now.
 
 		if (accountInfo.password().isEmpty()) {
-			return loginMethodCertificateIdBox(
-			    accountInfo.userName(), showDialog ? mw : 0);
+			return loginMethodCertificateIdBox(accountInfo,
+			    showDialog ? mw : 0);
 		}
 		*/
 
 	/* Login method based username, password and OTP */
 	} else {
-		ret = loginMethodUserNamePwdOtp(accountInfo.userName(),
+		ret = loginMethodUserNamePwdOtp(accountInfo,
 		    showDialog ? this : 0);
 	}
 
@@ -8710,7 +8696,7 @@ void MainWindow::updateAccountListEntry(const QString &userName)
  * Verify if is a connection to ISDS and databox exists for a new account
  */
 void MainWindow::getAccountUserDataboxInfo(
-    const AccountModel::SettingsMap &accountInfo)
+    AccountModel::SettingsMap accountInfo)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -9108,7 +9094,6 @@ void MainWindow::prepareMsgTmstmpExpir(
 
 	QModelIndex index;
 	QString userName;
-	AccountModel::SettingsMap accountInfo;
 	bool includeSubdir = false;
 	QString importDir;
 	QStringList fileList, filePathList;
@@ -9124,9 +9109,9 @@ void MainWindow::prepareMsgTmstmpExpir(
 		index = AccountModel::indexTop(index);
 		userName = index.data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
-		accountInfo = AccountModel::globAccounts[userName];
 		showStatusTextPermanently(tr("Checking time stamps in "
-		    "account '%1'...").arg(accountInfo.accountName()));
+		    "account '%1'...").arg(
+		        AccountModel::globAccounts[userName].accountName()));
 		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
@@ -9135,10 +9120,9 @@ void MainWindow::prepareMsgTmstmpExpir(
 			index = m_accountModel.index(i, 0);
 			userName = index.data(ROLE_ACNT_USER_NAME).toString();
 			Q_ASSERT(!userName.isEmpty());
-			accountInfo = AccountModel::globAccounts[userName];
 			showStatusTextPermanently(
-			    tr("Checking time stamps in account '%1'...")
-			        .arg(accountInfo.accountName()));
+			    tr("Checking time stamps in account '%1'...").arg(
+			        AccountModel::globAccounts[userName].accountName()));
 			checkMsgsTmstmpExpiration(userName, QStringList());
 		}
 		break;
