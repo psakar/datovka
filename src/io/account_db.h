@@ -230,7 +230,7 @@ private:
 /*!
  * @brief Global account database.
  */
-extern AccountDb globAccountDb;
+extern AccountDb *globAccountDbPtr;
 
 
 #endif /* _ACCOUNT_DB_H_ */

@@ -890,4 +890,4 @@ fail:
 }
 
 
-AccountDb globAccountDb("accountDb");
+AccountDb *globAccountDbPtr = 0;

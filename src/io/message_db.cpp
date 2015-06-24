@@ -5862,4 +5862,4 @@ QString DbContainer::constructDbFileName(const QString &key,
 }
 
 
-DbContainer globMessageDbs;
+DbContainer *globMessageDbsPtr;

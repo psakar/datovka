@@ -382,9 +382,21 @@ int main(int argc, char *argv[])
 	crtdtTbl.reloadLocalisedDescription();
 	msgcrtdtTbl.reloadLocalisedDescription();
 
+	/*
+	 * These objects cannot be globally accessible static objects.
+	 * The unpredictable order of constructing and destructing these
+	 * objects causes segmentation faults upon their destruction.
+	 *
+	 * TODO -- Solve the problem of this globally accessible structures.
+	 */
+	AccountDb globAccountDb("accountDb");
+	globAccountDbPtr = &globAccountDb;
+	DbContainer globMessageDbs;
+	globMessageDbsPtr = &globMessageDbs;
+
 	{
 		/* Open accounts database. */
-		if (!globAccountDb.openDb(globPref.accountDbPath())) {
+		if (!globAccountDbPtr->openDb(globPref.accountDbPath())) {
 			logErrorNL("Error opening account db '%s'.",
 			    globPref.accountDbPath().toUtf8().constData());
 			return EXIT_FAILURE;
