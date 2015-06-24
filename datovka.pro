@@ -201,7 +201,8 @@ macx {
 	additional.path = "Contents/Resources"
 	additional.files = \
 		AUTHORS \
-		COPYING
+		COPYING \
+		ChangeLog
 
 	QMAKE_BUNDLE_DATA +=\
 		localisation \
