@@ -8702,7 +8702,7 @@ void MainWindow::getAccountUserDataboxInfo(
 	debugSlotCall();
 
 	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
-		if (!firstConnectToIsds(accountInfo, false)) {
+		if (!firstConnectToIsds(accountInfo, true)) {
 			QString msgBoxTitle = tr("New account error") +
 			    ": " + accountInfo.accountName();
 			QString msgBoxContent =
