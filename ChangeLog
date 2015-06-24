@@ -1,4 +1,4 @@
-4.3.1 / 2015-06-23
+4.3.1 / 2015-06-24
  * Fixed 'Open delivery info externally' operation. It opened the whole
    message instead of the delivery information.
  * Application can open ZFO files directly from command line.
@@ -11,6 +11,9 @@
  * Fixed bug in logging facility preventing log files to be properly
    configured.
  * Added '--log-file <file>' command-line option.
+ * Account and message database objects are globally accessible via global
+   pointers. The actual object exist within the main() function. This is
+   because of some destructor calling issues.
 
 4.3.0 / 2015-06-03
  * Added missing license statement into the NSIS installer script.
