@@ -39,6 +39,80 @@ GlobIsdsSessions isdsSessions;
 
 
 /* ========================================================================= */
+/*!
+ * @brief Logging facility name.
+ */
+static
+const char * logFacilityName(isds_log_facility facility)
+/* ========================================================================= */
+{
+	const char *str = "libisds unknown";
+
+	switch (facility) {
+	case ILF_NONE:
+		str = "libisds none";
+		break;
+	case ILF_HTTP:
+		str = "libisds http";
+		break;
+	case ILF_SOAP:
+		str = "libisds soap";
+		break;
+	case ILF_ISDS:
+		str = "libisds isds";
+		break;
+	case ILF_FILE:
+		str = "libisds file";
+		break;
+	case ILF_SEC:
+		str = "libisds sec";
+		break;
+	case ILF_XML:
+		str = "libisds xml";
+		break;
+	default:
+		break;
+	}
+
+	return str;
+}
+
+
+/* ========================================================================= */
+/*!
+ * @brief Logging callback used in libisds.
+ */
+static
+void logCallback(isds_log_facility facility, isds_log_level level,
+    const char *message, int length, void *data)
+/* ========================================================================= */
+{
+	(void) data;
+	const char *logFac = logFacilityName(facility);
+
+	switch (level) {
+	case ILL_NONE:
+	case ILL_CRIT:
+	case ILL_ERR:
+		logErrorMl("%s: %s", logFac, message);
+		break;
+	case ILL_WARNING:
+		logWarningMl("%s: %s", logFac, message);
+		break;
+	case ILL_INFO:
+		logInfoMl("%s: %s", logFac, message);
+		break;
+	case ILL_DEBUG:
+		logDebugMlLv3("%s: %s", logFac, message);
+		break;
+	default:
+		logError("Unknown ISDS log level %d.\n", level);
+		break;
+	}
+}
+
+
+/* ========================================================================= */
 GlobIsdsSessions::GlobIsdsSessions(void)
 /* ========================================================================= */
     : m_sessions()
@@ -53,8 +127,10 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 		/* TODO -- What to do on failure? */
 	}
 
+	isds_set_log_callback(logCallback, NULL);
+
 	/* Logging. */
-	//isds_set_logging(ILF_ALL, ILL_ALL);
+	isds_set_logging(ILF_ALL, ILL_ALL);
 }
 
 
