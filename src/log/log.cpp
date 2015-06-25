@@ -656,9 +656,18 @@ void GlobLog::logPrefixVlogMl(int source, uint8_t level,
 	QStringList msgLines;
 	QString msg;
 
-	msgPrefix = dateTime + " " + globLog.m_hostName + " " +
-	    QCoreApplication::applicationName() + "[" +
-	    QString::number(QCoreApplication::applicationPid()) + "]: ";
+	if (m_logVerbosity > 1) {
+		msgPrefix = dateTime;
+	}
+	if (m_logVerbosity > 2) {
+		msgPrefix += " " + globLog.m_hostName + " " +
+		    QCoreApplication::applicationName() + "[" +
+		    QString::number(QCoreApplication::applicationPid()) +
+		    "]";
+	}
+	if (m_logVerbosity > 1) {
+		msgPrefix += ": ";
+	}
 
 	if (NULL != prefix) {
 		msgPrefix += prefix;
