@@ -382,6 +382,58 @@ extern GlobLog globLog; /*!< Global log facility. */
 
 
 /*!
+ * @brief Logs multi-line debugging message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugMl(verbThresh, format, ...) \
+	if (globLog.debugVerbosity() > verbThresh) { \
+		globLog.logMl(LOGSRC_DEF, LOG_DEBUG, format, __VA_ARGS__); \
+	}
+
+
+/*!
+ * @brief Logs the debugging information even if the threshold was not set.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugMlLv0(format, ...) \
+	logDebugMl(-1, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 0.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugMlLv1(format, ...) \
+	logDebugMl(0, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 1.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugMlLv2(format, ...) \
+	logDebugMl(1, format, __VA_ARGS__)
+
+
+/*!
+ * @brief Logs the debugging information only if the verbosity exceeds 2.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logDebugMlLv3(format, ...) \
+	logDebugMl(2, format, __VA_ARGS__)
+
+
+/*!
  * @brief Logs information message.
  *
  * @param[in] format Format of the message.
@@ -394,6 +446,18 @@ extern GlobLog globLog; /*!< Global log facility. */
 
 
 /*!
+ * @brief Logs multi-line information message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logInfoMl(format, ...) \
+	do { \
+		globLog.logMl(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
+	} while (0)
+
+
+/*!
  * @brief Logs warning message.
  *
  * @param[in] format Format of the message, follows printf syntax.
@@ -402,6 +466,17 @@ extern GlobLog globLog; /*!< Global log facility. */
 #define logWarning(format, ...) \
 	do { \
 		globLog.log(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
+	} while (0)
+
+/*!
+ * @brief Logs multi-line warning message.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logWarningMl(format, ...) \
+	do { \
+		globLog.logMl(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
 
 
