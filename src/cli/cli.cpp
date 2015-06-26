@@ -772,9 +772,10 @@ finish:
 		/* Added a new message into database */
 		qint64 dmId = QString(sent_message->envelope->dmID).toLongLong();
 		const QString dbIDSender =
-		    globAccountDb.dbId(map["username"].toString() + "___True");
+		    globAccountDbPtr->dbId(map["username"].toString() +
+		    "___True");
 		const QString dmSender =
-		    globAccountDb.senderNameGuess(map["username"].toString()
+		    globAccountDbPtr->senderNameGuess(map["username"].toString()
 		    + "___True");
 		messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
 			    dbIDSender,
