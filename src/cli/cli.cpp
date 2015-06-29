@@ -471,8 +471,12 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 {
 	isds_error status = IE_ERROR;
 	QString errmsg;
+	int ret = CLI_RET_ERROR_CODE;
+	QStringList dbIds = map.value("dbIDRecipient").toStringList();
+	QStringList sendID;
+	sendID.clear();
 
-	qDebug() << CLI_PREFIX << "creating a new message.";
+	qDebug() << CLI_PREFIX << "creating a new message...";
 
 	/* Sent message. */
 	struct isds_message *sent_message = NULL;
@@ -576,13 +580,6 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 	sent_envelope->dmAnnotation =
 	    strdup(map["dmAnnotation"].toString().toUtf8().constData());
 	if (NULL == sent_envelope->dmAnnotation) {
-		errmsg = "Out of memory.";
-		goto finish;
-	}
-
-	sent_envelope->dbIDRecipient =
-	    strdup(map["dbIDRecipient"].toString().toUtf8().constData());
-	if (NULL == sent_envelope->dbIDRecipient) {
 		errmsg = "Out of memory.";
 		goto finish;
 	}
@@ -756,43 +753,58 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 	sent_message->documents = documents; documents = NULL;
 	sent_message->envelope = sent_envelope; sent_envelope = NULL;
 
-	qDebug() << CLI_PREFIX << "sending of a new message...";
+	for (int i = 0; i < dbIds.count(); ++i) {
 
-	status = isds_send_message(
-	    isdsSessions.session(map["username"].toString()), sent_message);
+		qDebug() << CLI_PREFIX << "message sending..." << dbIds.at(i);
 
-	errmsg =
-	    isds_long_message(isdsSessions.session(map["username"].toString()));
+		if (NULL != sent_message->envelope->dbIDRecipient) {
+			free(sent_message->envelope->dbIDRecipient);
+			sent_message->envelope->dbIDRecipient = NULL;
+		}
 
-finish:
+		sent_message->envelope->dbIDRecipient =
+		    strdup(dbIds.at(i).toUtf8().constData());
+		if (NULL == sent_message->envelope->dbIDRecipient) {
+			errmsg = "Out of memory.";
+			goto finish;
+		}
 
-	int ret = CLI_RET_ERROR_CODE;
+		status = isds_send_message(isdsSessions.session(
+		    map["username"].toString()), sent_message);
 
-	if (IE_SUCCESS == status) {
-		/* Added a new message into database */
-		qint64 dmId = QString(sent_message->envelope->dmID).toLongLong();
-		const QString dbIDSender =
-		    globAccountDbPtr->dbId(map["username"].toString() +
-		    "___True");
-		const QString dmSender =
-		    globAccountDbPtr->senderNameGuess(map["username"].toString()
-		    + "___True");
-		messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
-			    dbIDSender,
-			    dmSender,
-			    map["dbIDRecipient"].toString(),
-			    "Databox ID: " + map["dbIDRecipient"].toString(),
-			    "unknown",
-			    map["dmAnnotation"].toString());
+		errmsg = isds_long_message(isdsSessions.session(
+		    map["username"].toString()));
 
-		qDebug() << CLI_PREFIX << "message has been sent; "
-		    "dmID:" << sent_message->envelope->dmID;
-		ret = CLI_RET_OK_CODE;
-	} else {
-		qDebug() << CLI_PREFIX << "error while sending of message! "
-		    "Error code:" << status << errmsg;
+		if (IE_SUCCESS == status) {
+			/* Added a new message into database */
+			qint64 dmId =
+			    QString(sent_message->envelope->dmID).toLongLong();
+			const QString dbIDSender = globAccountDbPtr->dbId(
+			    map["username"].toString() + "___True");
+			const QString dmSender = globAccountDbPtr->
+			    senderNameGuess(map["username"].toString() +
+			    "___True");
+			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
+				    dbIDSender,
+				    dmSender,
+				    dbIds.at(i),
+				    "Databox ID: " +
+				    dbIds.at(i),
+				    "unknown",
+				    map["dmAnnotation"].toString());
+			qDebug() << CLI_PREFIX << "message has been sent"
+			    << QString(sent_message->envelope->dmID);
+			sendID.append(sent_message->envelope->dmID);
+			ret = CLI_RET_OK_CODE;
+		} else {
+			qDebug() << CLI_PREFIX << "error while sending of "
+			"message! Error code:" << status << errmsg;
+		}
 	}
 
+	printDataToStdOut(sendID);
+
+finish:
 	isds_document_free(&document);
 	isds_list_free(&documents);
 	isds_envelope_free(&sent_envelope);
@@ -833,6 +845,17 @@ const QStringList parseAttachment(const QString &files)
 
 
 /* ========================================================================= */
+const QStringList parseDbIDRecipient(const QString &dbIDRecipient)
+/* ========================================================================= */
+{
+	if (dbIDRecipient.isEmpty()) {
+		return QStringList();
+	}
+	return dbIDRecipient.split(";");
+}
+
+
+/* ========================================================================= */
 bool checkLoginMandatoryAttributes(const QMap<QString,QVariant> &map)
 /* ========================================================================= */
 {
@@ -860,12 +883,21 @@ bool checkSendMsgMandatoryAttributes(const QMap<QString,QVariant> &map)
 	//qDebug() << CLI_PREFIX << errmsg;
 
 	if (!map.contains("dbIDRecipient") ||
-	    map.value("dbIDRecipient").toString().isEmpty() ||
-	    map.value("dbIDRecipient").toString().length() != 7) {
-		errmsg = createErrorMsg("dbIDRecipient attribute "
-		    "missing or contains wrong value!");
+	    map.value("dbIDRecipient").toStringList().isEmpty()) {
+		errmsg = createErrorMsg("dbIDRecipient attribute missing or "
+		    "contains empty databox id list!");
 		qDebug() << errmsg;
 		return false;
+	}
+	QStringList dbIds = map.value("dbIDRecipient").toStringList();
+	for (int i = 0; i < dbIds.count(); ++i) {
+		if (dbIds.at(i).length() != 7) {
+			errmsg = createErrorMsg(QString("dbIDRecipient "
+			    "attribute contains wrong value or length at "
+			    "position %1!").arg(i+1));
+			qDebug() << errmsg;
+			return false;
+		}
 	}
 	if (!map.contains("dmAnnotation") ||
 	    map.value("dmAnnotation").toString().isEmpty()) {
@@ -1051,8 +1083,10 @@ bool parsePamamString(const QString &service, const QString &paramString,
 					if (attribute == "dmAttachment") {
 						map[attribute] =
 						    parseAttachment(value);
-
-
+					} else
+					if (attribute == "dbIDRecipient") {
+						map[attribute] =
+						    parseDbIDRecipient(value);
 					} else {
 						map[attribute] = value;
 					}
@@ -1122,6 +1156,8 @@ bool parsePamamString(const QString &service, const QString &paramString,
 	if (checkAttributeIfExists(service, attribute)) {
 		if (attribute == "dmAttachment") {
 			map[attribute] = parseAttachment(value);
+		} else if (attribute == "dbIDRecipient") {
+			map[attribute] = parseDbIDRecipient(value);
 		} else {
 			map[attribute] = value;
 		}
