@@ -505,6 +505,20 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 	/* Load attachments. */
 	for (int i = 0; i < map["dmAttachment"].toStringList().count(); ++i) {
 
+		const QString filePath = map["dmAttachment"].
+		    toStringList().at(i);
+
+		if (filePath.isEmpty()) {
+			continue;
+		}
+
+		QFileInfo fi(filePath);
+		if (!fi.isReadable() || !fi.isFile()) {
+			errmsg = "wrong file name or file missing!";
+			qDebug() << CLI_PREFIX << filePath << errmsg;
+			goto finish;
+		}
+
 		document = (struct isds_document *)
 		    malloc(sizeof(struct isds_document));
 		if (NULL == document) {
@@ -516,7 +530,7 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 		 // TODO - document is binary document only -> is_xml = false;
 		document->is_xml = false;
 
-		QFileInfo fi(map["dmAttachment"].toStringList().at(i));
+
 		QString name = fi.fileName();
 		document->dmFileDescr = strdup(name.toUtf8().constData());
 		if (NULL == document->dmFileDescr) {
@@ -799,6 +813,7 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 		} else {
 			qDebug() << CLI_PREFIX << "error while sending of "
 			"message! Error code:" << status << errmsg;
+			ret = CLI_RET_ERROR_CODE;
 		}
 	}
 
@@ -1212,6 +1227,7 @@ int runService(const QString &lParam,
 {
 	QMap<QString,QVariant> loginMap;
 	QMap <QString,QVariant> serviceMap;
+	int ret = CLI_RET_ERROR_CODE;
 	bool needsISDS = true;
 
 	/* parse service parameter list */
@@ -1306,8 +1322,8 @@ int runService(const QString &lParam,
 	/* do service */
 	if (!service.isNull()) {
 		serviceMap["username"] = username;
-		doService(service, serviceMap, messageDb, needsISDS);
+		ret = doService(service, serviceMap, messageDb, needsISDS);
 	}
 
-	return CLI_RET_OK_CODE;
+	return ret;
 }
