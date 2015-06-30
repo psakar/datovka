@@ -42,7 +42,7 @@ const QStringList sendMsgAttrs = QStringList()
     << "dmPersonalDelivery" << "dmAllowSubstDelivery" << "dmType" << "dmOVM"
     << "dmPublishOwnID" << "dmAttachment";
 const QStringList getMsgAttrs = QStringList()
-    << "dmID" << "dmType" << "zfoFile" << "download";
+    << "dmID" << "dmType" << "zfoFile" << "download" << "markDownload";
 const QStringList getDelInfoAttrs = QStringList()
     << "dmID" << "zfoFile" << "download";
 
@@ -219,7 +219,7 @@ int getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 	const QString username = map["username"].toString();
 
 	if (needsISDS) {
-		if (map["dmType"].toString() == "received") {
+		if (map["dmType"].toString() == MT_RECEIVED) {
 
 			ret = Worker::downloadMessage(username,
 			    map["dmID"].toLongLong(), true, MSG_RECEIVED,
@@ -237,7 +237,7 @@ int getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 				return CLI_RET_ERROR_CODE;
 			}
 
-		} else if (map["dmType"].toString() == "sent") {
+		} else if (map["dmType"].toString() == MT_SENT) {
 
 			ret = Worker::downloadMessage(username,
 			    map["dmID"].toLongLong(), true, MSG_SENT,
@@ -289,6 +289,13 @@ int getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 			qDebug() << CLI_PREFIX << "Export of message" <<
 			map["dmID"].toString() <<  "to ZFO was NOT successful!";
 			return CLI_RET_ERROR_CODE;
+		}
+	}
+
+	if (map.contains("markDownload")) {
+		if (map.value("markDownload").toString() == "yes") {
+			messageDb->smsgdtSetLocallyRead(
+			    map["dmID"].toLongLong(), true);
 		}
 	}
 
