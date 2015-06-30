@@ -1317,6 +1317,7 @@ int runService(const QString &lParam,
 		}
 		qDebug() << CLI_PREFIX << "User" << username
 		    << "has been logged into databox.";
+		ret = CLI_RET_OK_CODE;
 	}
 
 	/* do service */
