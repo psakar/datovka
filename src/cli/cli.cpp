@@ -55,9 +55,9 @@ void printDataToStdOut(const QStringList &data)
 
 	for (int i = 0; i < data.count(); ++i) {
 		if (i == (data.count() - 1)) {
-			cout << data.at(i) << endl;
+			cout << data.at(i) << endl << endl;
 		} else {
-			cout << data.at(i) + ",";
+			cout << data.at(i) + " ";
 		}
 	}
 }
@@ -132,7 +132,7 @@ int getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb)
 		}
 	}
 
-	if (map["dmType"].toString() == MT_SENT) {
+	if (map["dmType"].toString() == MT_RECEIVED) {
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
 		    *messageDb, errmsg, NULL, 0, 0, rt, rn, newMsgIdList,
@@ -150,7 +150,7 @@ int getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb)
 			return CLI_RET_ERROR_CODE;
 		}
 
-	} else if (map["dmType"].toString() == MT_RECEIVED) {
+	} else if (map["dmType"].toString() == MT_SENT) {
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
 		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
