@@ -13,7 +13,7 @@ CMDARGS="${CMDARGS} --debug-verbosity 2"
 
 APP_BINARY_NAME="/../../datovka"
 ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
-ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp"
+ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
 . "${SCRIPTPATH}/../../untracked/logins.sh"
 
 rm -rf $ATTACH_SAVE_PATH
@@ -205,7 +205,7 @@ echo ""
 echo "***********************************************************************"
 echo "TEST 04a: Create and send a new message from account with"
 echo "          usename and password and download this message"
-echo "          by recipient and export to ZFO."
+echo "          by recipient, save attachment and export to ZFO."
 echo "***********************************************************************"
 echo "---Create and send a new message from user '$TEST_USER_SEND1'---"
 DTIME=$(date +"%Y-%m-%d %T")
@@ -248,7 +248,7 @@ echo ""
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID.zfo" \
+		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromDb '$dmID': $CERT_LOGIN - failed - it is OK"
@@ -263,7 +263,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID.zfo" \
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfo '$dmID': $CERT_LOGIN - failed - it is OK"
@@ -278,7 +278,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-isds.zfo" \
+		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromISDS '$dmID': $CERT_LOGIN - ERROR"
@@ -294,7 +294,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-isds.zfo" \
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfoFromISDS '$dmID': $CERT_LOGIN - ERROR"
@@ -306,11 +306,11 @@ for dmID in $RMSGIDS; do
 done
 
 #----Export complete messages from database again-----------------------
-#----must be success and save zfo file
+#----must be success and save zfo file and save attachment
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-db.zfo" \
+		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-db.zfo',attachmentDir='${ATTACH_SAVE_PATH}'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromDb '$dmID': $CERT_LOGIN - ERROR"
@@ -326,7 +326,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-db.zfo" \
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfoFromDb '$dmID': $CERT_LOGIN - ERROR"
@@ -366,7 +366,7 @@ echo "---Download new sent messages for user '$TEST_USER_SEND1'---"
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo" \
+		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - failed - it is OK"
@@ -381,7 +381,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo" \
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfo '$dmID': $TEST_USER_SEND1 - failed - it is OK"
@@ -396,7 +396,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo" \
+		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
@@ -412,7 +412,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo" \
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
@@ -428,7 +428,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo" \
+		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - ERROR"
@@ -444,7 +444,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo" \
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfoFromDb '$dmID': $TEST_USER_SEND1 - ERROR"
@@ -558,7 +558,7 @@ echo "***********************************************************************"
 for dmID in $MSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo" \
+		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
@@ -574,7 +574,7 @@ done
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo" \
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
 		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"

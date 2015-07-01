@@ -42,7 +42,8 @@ const QStringList sendMsgAttrs = QStringList()
     << "dmPersonalDelivery" << "dmAllowSubstDelivery" << "dmType" << "dmOVM"
     << "dmPublishOwnID" << "dmAttachment";
 const QStringList getMsgAttrs = QStringList()
-    << "dmID" << "dmType" << "zfoFile" << "download" << "markDownload";
+    << "dmID" << "dmType" << "zfoFile" << "download" << "markDownload"
+    << "attachmentDir";
 const QStringList getDelInfoAttrs = QStringList()
     << "dmID" << "zfoFile" << "download";
 
@@ -258,6 +259,63 @@ int getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 			qDebug() << CLI_PREFIX << "Wrong dmType value:" <<
 			    map["dmType"].toString();
 			return CLI_RET_ERROR_CODE;
+		}
+	}
+
+	if (map.contains("attachmentDir") &&
+	    !map["attachmentDir"].toString().isEmpty()) {
+		const QFileInfo fi(map["attachmentDir"].toString());
+		const QString path = fi.path();
+		if (!QDir(path).exists()) {
+			qDebug() << CLI_PREFIX << "Wrong path" <<
+			    path << "for file saving!";
+			return CLI_RET_ERROR_CODE;
+		}
+
+		QList<QStringList> files =
+		    messageDb->getFilesFromMessage(map["dmID"].toLongLong());
+
+		for (int i = 0; i < files.count(); ++i) {
+
+			QString fileName = files.at(i).at(0);
+			if (fileName.isEmpty()) {
+				qDebug() << CLI_PREFIX <<
+				    "Cannot save file because "
+				    "name of file missing!";
+				return CLI_RET_ERROR_CODE;
+			}
+
+			QByteArray base64(
+				files.at(i).at(1).toStdString().c_str(),
+				files.at(i).at(1).length()
+				);
+
+			if (base64.isEmpty()) {
+				qDebug() << CLI_PREFIX <<
+				    "Cannot save file" << fileName <<
+				    "because file content missing!";
+				return CLI_RET_ERROR_CODE;
+			}
+/*
+			QString fileName = createFilenameFromFormatString(
+			    globPref.attachment_filename_format,
+			    pair.first, pair.second, QString::number(dmId), dbId,
+			    userName, fileName);
+*/
+			fileName = path + QDir::separator() + fileName;
+
+			QByteArray data = QByteArray::fromBase64(base64);
+			enum WriteFileState ret = writeFile(fileName, data);
+			if (WF_SUCCESS == ret) {
+				qDebug() << CLI_PREFIX << "Save file" <<
+				    fileName << "of message" <<
+				    map["dmID"].toString();
+			} else {
+				qDebug() << CLI_PREFIX << "Error: saving of "
+				    "file" << fileName << "of message" <<
+				    map["dmID"].toString() << "failed!";
+				return CLI_RET_ERROR_CODE;
+			}
 		}
 	}
 
