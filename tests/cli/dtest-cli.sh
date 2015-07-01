@@ -77,10 +77,10 @@ echo "***********************************************************************"
 	--login "username='$INCOMP_LOGIN',password='$INCOMP_PWD'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "Login: '$CERT_LOGIN' - ERROR: account not exists or required data missing!"
+	echo "Login: '$INCOMP_LOGIN' - ERROR: account not exists or required data missing!"
 	exit
 else
-	echo "Login: $CERT_LOGIN - OK"
+	echo "Login: $INCOMP_LOGIN - OK: external password was used."
 fi
 
 echo ""
