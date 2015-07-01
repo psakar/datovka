@@ -790,11 +790,17 @@ int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 			goto finish;
 		}
 
-		status = isds_send_message(isdsSessions.session(
-		    map["username"].toString()), sent_message);
+		struct isds_ctx *session =
+		    isdsSessions.session(map["username"].toString());
+		if (NULL == session) {
+			Q_ASSERT(0);
+			ret = CLI_RET_ERROR_CODE;
+			goto finish;
+		}
 
-		errmsg = isds_long_message(isdsSessions.session(
-		    map["username"].toString()));
+		status = isds_send_message(session, sent_message);
+
+		errmsg = isds_long_message(session);
 
 		if (IE_SUCCESS == status) {
 			/* Added a new message into database */
@@ -1317,8 +1323,12 @@ int runService(const QString &lParam,
 
 		if (!isdsSessions.isConnectedToIsds(username)) {
 			if (!MainWindow::connectToIsds(username,0,pwd,otp)) {
-				qDebug() << isds_long_message(
-				    isdsSessions.session(username));
+				struct isds_ctx *session = isdsSessions.session(username);
+				if (NULL == session) {
+					qDebug() << "Missing session" << username;
+					return CLI_RET_ERROR_CODE;
+				}
+				qDebug() << isds_long_message(session);
 				return CLI_RET_ERROR_CODE;
 			}
 		}

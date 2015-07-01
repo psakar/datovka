@@ -416,18 +416,21 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	if (0 != pBar) { pBar->setValue(10); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 10); }
 
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
 	struct isds_list *messageList = NULL;
 
 	/* Download sent/received message list from ISDS for current account */
 	if (MSG_SENT == msgDirect) {
-		status = isds_get_list_of_sent_messages(isdsSessions.
-		    session(userName),
+		status = isds_get_list_of_sent_messages(session,
 		    NULL, NULL, NULL,
 		    dmStatusFilter,
 		    0, dmLimit, &messageList);
 	} else if (MSG_RECEIVED == msgDirect) {
-		status = isds_get_list_of_received_messages(isdsSessions.
-		    session(userName),
+		status = isds_get_list_of_received_messages(session,
 		    NULL, NULL, NULL,
 		    dmStatusFilter,
 		    0, dmLimit, &messageList);
@@ -437,7 +440,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (status != IE_SUCCESS) {
-		errMsg = isdsLongMessage(isdsSessions.session(userName));
+		errMsg = isdsLongMessage(session);
 		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_list_free(&messageList);
 		return Q_ISDS_ERROR;
@@ -670,18 +673,21 @@ bool Worker::getMessageState(enum MessageDirection msgDirect,
 
 	isds_error status = IE_ERROR;
 
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
 	struct isds_message *message = NULL;
 
 	if (signedMsg) {
-		status = isds_get_signed_delivery_info(
-		    isdsSessions.session(userName),
+		status = isds_get_signed_delivery_info(session,
 		    QString::number(dmId).toUtf8().constData(), &message);
 	} else {
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		goto fail;
 		/*
-		status = isds_get_delivery_info(
-		    isdsSessions.session(userName),
+		status = isds_get_delivery_info(session,
 		    QString::number(dmId).toUtf8().constData(), &message);
 		*/
 	}
@@ -849,6 +855,11 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 
 	isds_error status;
 
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
 	// message structures - all members
 	struct isds_message *message = NULL;
 
@@ -884,8 +895,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 20); }
 
 	if (IE_SUCCESS != status) {
-		errMsg = isdsLongMessage(
-		    isdsSessions.session(userName));
+		errMsg = isdsLongMessage(session);
 		qDebug() << status << isds_strerror(status) << errMsg;
 		isds_message_free(&message);
 		return Q_ISDS_ERROR;
@@ -1022,19 +1032,22 @@ bool Worker::getDeliveryInfo(const QString &userName,
 
 	isds_error status;
 
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
 	struct isds_message *message = NULL;
 
 	if (signedMsg) {
-		status = isds_get_signed_delivery_info(isdsSessions.session(
-		    userName),
+		status = isds_get_signed_delivery_info(session,
 		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 	} else {
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		goto fail;
 		/*
-		status = isds_get_delivery_info(isdsSessions.session(
-		    userName),
+		status = isds_get_delivery_info(session,
 		    QString::number(dmId).toUtf8().constData(),
 		    &message);
 		*/
@@ -1078,7 +1091,13 @@ bool Worker::getMessageAuthor(const QString &userName,
 	char * raw_sender_type = NULL;
 	char * sender_name = NULL;
 
-	status = isds_get_message_sender(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	status = isds_get_message_sender(session,
 	    QString::number(dmId).toUtf8().constData(),
 	    &sender_type, &raw_sender_type, &sender_name);
 
@@ -1107,9 +1126,15 @@ bool Worker::markMessageAsDownloaded(const QString &userName, qint64 dmId)
 {
 	debugFuncCall();
 
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	isds_error status;
 
-	status = isds_mark_message_read(isdsSessions.session(userName),
+	status = isds_mark_message_read(session,
 	    QString::number(dmId).toUtf8().constData());
 
 	if (IE_SUCCESS != status) {

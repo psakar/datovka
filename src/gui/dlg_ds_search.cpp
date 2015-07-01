@@ -289,6 +289,7 @@ void DlgDsSearch::searchDataBox(void)
 		return;
 	}
 
+	struct isds_ctx *session;
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_DbOwnerInfo *ownerInfo = NULL;
@@ -337,6 +338,12 @@ void DlgDsSearch::searchDataBox(void)
 	status = isdsSearch(&boxes, m_userName, ownerInfo);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
+	session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		goto fail;
+	}
+
 	switch (status) {
 	case IE_SUCCESS:
 		break;
@@ -345,8 +352,7 @@ void DlgDsSearch::searchDataBox(void)
 	case IE_INVAL:
 	case IE_INVALID_CONTEXT:
 		QMessageBox::information(this, tr("Search result"),
-		    isdsLongMessage(isdsSessions.session(m_userName)),
-		    QMessageBox::Ok);
+		    isdsLongMessage(session), QMessageBox::Ok);
 		goto fail;
 		break;
 	case IE_ISDS:
@@ -359,8 +365,7 @@ void DlgDsSearch::searchDataBox(void)
 	case IE_XML:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It is not possible find databox because") + ":\n\n" +
-		    isdsLongMessage(isdsSessions.session(m_userName)),
-		    QMessageBox::Ok);
+		    isdsLongMessage(session), QMessageBox::Ok);
 		goto fail;
 		break;
 	default:

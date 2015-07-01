@@ -77,6 +77,11 @@ public:
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
+		bool isValid(void) const
+		{
+			return !QMap<QString, QVariant>::isEmpty() &&
+			    !accountName().isEmpty() && !userName().isEmpty();
+		}
 		inline QString accountName(void) const
 		{
 			return QMap<QString, QVariant>::operator[](
