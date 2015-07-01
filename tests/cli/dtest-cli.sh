@@ -193,35 +193,34 @@ MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--get-msg-list "dmType='all'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "GetMsgList (received): $CERT_LOGIN - ERROR"
+	echo "GetMsgList (all): $CERT_LOGIN - ERROR"
 	exit
 else
-	echo "GetMsgList (received): $CERT_LOGIN - OK $MSGIDS"
+	echo "GetMsgList (all): $CERT_LOGIN - OK $MSGIDS"
 fi
 
 
 
 echo ""
 echo "***********************************************************************"
-echo "TEST 04: Create and send a new message and"
-echo "         download sent message, export to ZFO."
-echo "         1. From account with certifiace."
-echo "         2. From accounts with usename and password."
+echo "TEST 04a: Create and send a new message from account with"
+echo "          usename and password and download this message"
+echo "          by recipient and export to ZFO."
 echo "***********************************************************************"
-echo "---Create and send a new message from user '$TEST3_USER'---"
+echo "---Create and send a new message from user '$TEST_USER_SEND1'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka - test CLI - ${DTIME}"
 DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
 ${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
 MSGID=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
-	--send-msg "dbIDRecipient='$TEST3_RECIP',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
+	--login "username='$TEST_USER_SEND1'" \
+	--send-msg "dbIDRecipient='$TEST_RECIP_SEND1',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $TEST3_USER - ERROR"
+	echo "SendMsg: $TEST_USER_SEND1 - ERROR"
 	exit
 else
-	echo "SendMsg: $TEST3_USER, msgID: '$MSGID' - OK"
+	echo "SendMsg: $TEST_USER_SEND1, msgID: '$MSGID' - OK"
 fi
 
 echo ""
@@ -345,34 +344,34 @@ done
 #
 #
 echo ""
-echo "---Get sent message list for user '$TEST3_USER'---"
+echo "---Get sent message list for user '$TEST_USER_SEND1'---"
 SMSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 	--get-msg-list "dmType='sent'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "GetMsgList (sent): $TEST3_USER - ERROR"
+	echo "GetMsgList (sent): $TEST_USER_SEND1 - ERROR"
 	exit
 else
-	echo "GetMsgList (sent): $TEST3_USER - OK $SMSGIDS"
+	echo "GetMsgList (sent): $TEST_USER_SEND1 - OK $SMSGIDS"
 fi
 #--------------------------------------------------------------------------
 
 
 
 echo ""
-echo "---Download new sent messages for user '$TEST3_USER'---"
+echo "---Download new sent messages for user '$TEST_USER_SEND1'---"
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $TEST3_USER - failed - it is OK"
+		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - failed - it is OK"
 	else
-		echo "GetMsgFromDb '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	fi
 done
@@ -381,13 +380,13 @@ done
 #----must fails
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfo '$dmID': $TEST3_USER - failed - it is OK"
+		echo "GetMsgDelInfo '$dmID': $TEST_USER_SEND1 - failed - it is OK"
 	else
-		echo "GetMsgDelInfo '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgDelInfo '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	fi
 done
@@ -396,15 +395,15 @@ done
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	else
-		echo "GetMsgFromISDS '$dmID': $TEST3_USER - OK"
-		echo "ExportToZFO '$dmID': $TEST3_USER - OK"
+		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
 	fi
 done
 
@@ -412,15 +411,15 @@ done
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $TEST3_USER - OK"
-		echo "ExportToZFO '$dmID': $TEST3_USER - OK"
+		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
 	fi
 done
 
@@ -428,15 +427,15 @@ done
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	else
-		echo "GetMsgFromDb '$dmID': $TEST3_USER - OK"
-		echo "ExportToZFO '$dmID': $TEST3_USER - OK"
+		echo "GetMsgFromDb '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
 	fi
 done
 
@@ -444,54 +443,152 @@ done
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
 	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
+	--login "username='$TEST_USER_SEND1'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromDb '$dmID': $TEST3_USER - ERROR"
+		echo "GetMsgDelInfoFromDb '$dmID': $TEST_USER_SEND1 - ERROR"
 		exit
 	else
-		echo "GetMsgDelInfoFromDb '$dmID': $TEST3_USER - OK"
-		echo "ExportToZFO '$dmID': $TEST3_USER - OK"
+		echo "GetMsgDelInfoFromDb '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
 	fi
 done
 
-exit
 
-
+echo ""
+echo "***********************************************************************"
+echo "TEST 04b: Create and send a new message from account (OVM) with"
+echo "          certificate to multiple recipients (OVM, FO, PO)."
+echo "***********************************************************************"
+echo "---Create and send a new message from user '$CERT_LOGIN'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka - test CLI - ${DTIME}"
 DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
 ${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
 MSGID=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} -D \
 	--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
-	--send-msg "dbIDRecipient='$TEST3_RECIPS',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'"  \
+	--send-msg "dbIDRecipient='$TEST_RECIPS_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'"  \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $CERT_LOGIN- ERROR"
+	echo "SendMultiMsg: $CERT_LOGIN- ERROR"
+	exit
 else
-	echo "SendMsg: $CERT_LOGIN - OK - $MSGID"
+	echo "SendMultiMsg: $CERT_LOGIN - OK - $MSGID"
 fi
 
+echo ""
+echo "Waiting for the server DS - 10 seconds ..."
+sleep 10
+
+
+echo ""
+echo "***********************************************************************"
+echo "TEST 04c: Create and send a new message from account (PO) to (OVM)."
+echo "          All mandatory and optional attributes are filled."
+echo "***********************************************************************"
+echo "---Create and send a new message from user '$TEST_USER_SEND2'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka - test CLI - ${DTIME}"
 DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
 ${ATTACH_LOAD_PATH}/obrazek.png;;;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
 MSGID=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
-	--send-msg "dbIDRecipient='$TEST3_RECIP',dmAttachment='${DMATACHMENT}',dmAnnotation='${DMANNOTATION}',dmPersonalDelivery='1',dmAllowSubstDelivery='1',dmOVM='0',dmPublishOwnID='0',dmToHands='Jan Pokušitel Červeň',dmRecipientRefNumber='98765',dmSenderRefNumber='123456',dmRecipientIdent='CZ98765',dmSenderIdent='CZ123456',dmLegalTitleLaw='1',dmLegalTitleYear='2',dmLegalTitleSect='3',dmLegalTitlePar='4',dmLegalTitlePoint='5'" \
+	--login "username='$TEST_USER_SEND2'" \
+	--send-msg "dbIDRecipient='$TEST_RECIP_SEND2',dmAttachment='${DMATACHMENT}',dmAnnotation='${DMANNOTATION}',dmPersonalDelivery='1',dmAllowSubstDelivery='1',dmOVM='0',dmPublishOwnID='1',dmToHands='Jan Pokušitel Červeň',dmRecipientRefNumber='98765',dmSenderRefNumber='123456',dmRecipientIdent='CZ98765',dmSenderIdent='CZ123456',dmLegalTitleLaw='1',dmLegalTitleYear='2',dmLegalTitleSect='3',dmLegalTitlePar='4',dmLegalTitlePoint='5'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $TEST3_USER - ERROR"
+	echo "SendMsg: $TEST_USER_SEND2 - ERROR"
+	exit
 else
-	echo "SendMsg: $TEST3_USER - OK - $MSGID"
+	echo "SendMsg: $TEST_USER_SEND2 - OK - $MSGID"
 fi
 
-echo "***********************************************************************"
-echo "* TEST 04: Check messages where attachment missing (via all accounts)"
-echo "***********************************************************************"
+echo ""
+echo "Waiting for the server DS - 10 seconds ..."
+sleep 10
 
 
+echo ""
+echo "***********************************************************************"
+echo "TEST 05: Get received/sent message list for all accounts."
+echo "***********************************************************************"
+#---Get message list for account with username and pwd---
+for login in $USER_LOGINS; do
+	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$login'" \
+		--get-msg-list "dmType='received'" \
+		2>/dev/null`
+	if [ 0 != $? ]; then
+		echo "GetMsgList (received): $login - ERROR"
+		exit
+	else
+		echo "GetMsgList (received): $login - OK $MSGIDS"
+	fi
+
+	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$login'" \
+		--get-msg-list "dmType='sent'" \
+		2>/dev/null`
+	if [ 0 != $? ]; then
+		echo "GetMsgList (sent): $login - ERROR"
+		exit
+	else
+		echo "GetMsgList (sent): $login - OK $MSGID"
+	fi
+done
+#---Get message list for account with certificate---
+MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
+	--get-msg-list "dmType='received'" \
+	2>/dev/null`
+if [ 0 != $? ]; then
+	echo "GetMsgList (received): $CERT_LOGIN - ERROR"
+	exit
+else
+	echo "GetMsgList (received): $CERT_LOGIN - OK $MSGIDS"
+fi
+
+echo ""
+echo "***********************************************************************"
+echo "TEST 06: Download new message, set as locally read"
+echo "         and export to ZFO for username with certificate."
+echo "***********************************************************************"
+#-----Download complete new messages ISDS-------------------------------------
+#----must be success and save zfo file
+for dmID in $MSGIDS; do
+	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
+		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo" \
+		2>/dev/null`
+	if [ 0 != $? ]; then
+		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
+		exit
+	else
+		echo "GetMsgFromISDS '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
+	fi
+done
+
+#----Download delivery info of new messages from ISDS------------------------
+#----must be success and save zfo file
+for dmID in $RMSGIDS; do
+	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$CERT_LOGIN',otpcode='$CERT_PWD'" \
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo" \
+		2>/dev/null`
+	if [ 0 != $? ]; then
+		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - ERROR"
+		exit
+	else
+		echo "GetMsgDelInfoFromISDS '$dmID': $TEST_USER_SEND1 - OK"
+		echo "ExportToZFO '$dmID': $TEST_USER_SEND1 - OK"
+	fi
+done
+
+
+echo "***********************************************************************"
+echo "* TEST 07: Check messages where attachment missing (via all accounts)."
+echo "***********************************************************************"
 for login in $USER_LOGINS; do
 	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
@@ -499,45 +596,50 @@ for login in $USER_LOGINS; do
 		2>/dev/null
 	if [ 0 != $? ]; then
 		echo "CheckAttach: $login - ERROR"
+		echo ""
+		exit
 	else
 		echo "CheckAttach: $login - OK"
+		echo ""
 	fi
 done
 
-
-
 echo ""
 echo "***********************************************************************"
-echo "TEST 04: Create and send a new message"
+echo "TEST 08: Create and send a new message - wrong parametrs."
 echo "***********************************************************************"
-
 # this request must finish with error
 DMANNOTATION="Datovka - test CLI - Error"
 DMATACHMENT="${ATTACH_LOAD_PATH}/datova-zprava.zfo"
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
-	--send-msg "dbIDRecipient='$TEST3_WRONG_RECIP',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
+	--login "username='$TEST_USER_SEND1'" \
+	--send-msg "dbIDRecipient='$TEST_RECIP_WRONG',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "SendMsg: $TEST3_USER - OK - account '$TEST3_WRONG_RECIP' does not exist"
+	echo "SendMsg: $TEST_USER_SEND1 - OK: databox '$TEST_RECIP_WRONG' does not exist."
 else
-	echo "SendMsg: $TEST3_USER - ERROR: this message has wrong attachment path!"
+	echo "SendMsg: $TEST_USER_SEND1 - ERROR"
 	exit
 fi
 
 # this request must finish with error
-DTIME=$(date +"%Y-%m-%d %T")
-DMANNOTATION="Datovka - test CLI - ${DTIME}"
+DMANNOTATION="Datovka - test CLI - Error"
 DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
 ${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo;${ATTACH_LOAD_PATH}/xxxxxxxx.zfo"
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
-	--login "username='$TEST3_USER'" \
-	--send-msg "dbIDRecipient='$TEST3_RECIP',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
+	--login "username='$TEST_USER_SEND1'" \
+	--send-msg "dbIDRecipient='$TEST_RECIP_SEND1',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "SendMsg: $TEST3_USER - OK"
+	echo "SendMsg: $TEST_USER_SEND1 - OK: this message has wrong attachment path."
 else
-	echo "SendMsg: $TEST3_USER - ERROR: this message has wrong attachment path!"
+	echo "SendMsg: $TEST_USER_SEND1 - ERROR"
 	exit
 fi
 
+echo ""
+echo ""
+echo "-------------------------------------------------"
+echo "CONGRATULATION: All tests were done with success."
+echo "-------------------------------------------------"
+echo ""
