@@ -3563,7 +3563,10 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	    AccountModel::globAccounts[userName];
 
 	if (!itemSettings.isValid()) {
-		Q_ASSERT(0);
+		logWarning(
+		    "Attempting to accessing database for user name '%s'. "
+		    "The account seems not to exist.\n",
+		    userName.toUtf8().constData());
 		return 0;
 	}
 
