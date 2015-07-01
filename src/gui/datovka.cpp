@@ -3553,11 +3553,19 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	MessageDbSet *dbSet = NULL;
 	int flags, dbPresenceCode;
 
-	Q_ASSERT(!userName.isEmpty());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return 0;
+	}
 
 	/* Get user name and db location. */
 	AccountModel::SettingsMap &itemSettings =
 	    AccountModel::globAccounts[userName];
+
+	if (!itemSettings.isValid()) {
+		Q_ASSERT(0);
+		return 0;
+	}
 
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
@@ -8777,6 +8785,13 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	/* Check password expiration. */
 	AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
+
+	if (!accountInfo.isValid()) {
+		logWarning("Account for user name '%s' is invalid.\n",
+		    userName.toUtf8().constData());
+		return false;
+	}
+
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
 		accountInfo._setPwdExpirDlgShown(true);
