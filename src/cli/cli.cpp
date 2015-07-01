@@ -415,64 +415,6 @@ int getOwnerInfo(const QMap <QString, QVariant> &map)
 
 
 /* ========================================================================= */
-// NOTE: not used now.
-int createContextAmdLoginToIsds(const QMap <QString, QVariant> &map)
-/* ========================================================================= */
-{
-	const QString username = map["username"].toString();
-
-	qDebug() << CLI_PREFIX << "creating a isds context and loggin to "
-	    "databox for username" <<  username;
-
-	AccountModel::SettingsMap accountInfo;
-
-	/* set account items */
-	accountInfo.setAccountName("cli-");
-	accountInfo.setUserName(username);
-	accountInfo.setRememberPwd(false);
-	accountInfo.setPassword(map["password"].toString());
-	if (map["type"].toString() == "test") {
-		accountInfo.setTestAccount(true);
-	} else {
-		accountInfo.setTestAccount(false);
-	}
-	accountInfo.setSyncWithAll(false);
-
-	if (map["method"].toString() == L_USER) {
-		accountInfo.setLoginMethod(LIM_USERNAME);
-		accountInfo.setP12File("");
-	} else if (map["method"].toString() == L_CERT) {
-		accountInfo.setLoginMethod(LIM_USER_CERT);
-		accountInfo.setP12File(QDir::fromNativeSeparators(
-		    map["certificate"].toString()));
-	} else if (map["method"].toString() == L_HOTP) {
-		accountInfo.setLoginMethod(LIM_HOTP);
-		accountInfo.setP12File("");
-	} else if (map["method"].toString() == L_TOTP) {
-		accountInfo.setLoginMethod(LIM_TOTP);
-		accountInfo.setP12File("");
-	} else {
-		return CLI_RET_ERROR_CODE;
-	}
-
-	/*
-	* TODO - create isds session and login to databox
-	*        without account model.
-	*
-	* if (!isdsSessions.isConnectedToIsds(username)) {
-	*	if (!MainWindow::firstConnectToIsds(accountInfo, false)) {
-	*		qDebug() << CLI_PREFIX << "connection error:"
-	*		  << isds_long_message(isdsSessions.session(username));
-	*		return CLI_RET_ERROR_CODE;
-	*	}
-	* }
-	*/
-
-	return CLI_RET_OK_CODE;
-}
-
-
-/* ========================================================================= */
 int createAndSendMsg(const QMap <QString, QVariant> &map, MessageDb *messageDb)
 /* ========================================================================= */
 {
