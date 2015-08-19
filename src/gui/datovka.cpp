@@ -879,6 +879,12 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 #ifdef PORTABLE_APPLICATION
 		action->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
+
+		menu->addSeparator();
+		menu->addAction(QIcon(ICON_3PARTY_PATH "statistics_16.png"),
+		    tr("Split database by years"),
+		    this, SLOT(splitMsgDbByYearsSlot()));
+
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
@@ -9947,5 +9953,69 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		}
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.exec();
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Split message database slot.
+ */
+void MainWindow::splitMsgDbByYearsSlot(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+	splitMsgDbByYears(userNameFromItem());
+}
+
+
+/* ========================================================================= */
+/*
+ * Split message database into new databases contain messages for single years.
+ */
+void MainWindow::splitMsgDbByYears(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	/* Get user name and db location. */
+	AccountModel::SettingsMap &itemSettings =
+	    AccountModel::globAccounts[userName];
+
+	QString dbDir = itemSettings.dbDir();
+	if (dbDir.isEmpty()) {
+		/* Set default directory name. */
+		dbDir = globPref.confDir();
+	}
+
+	/* TODO - test account detection is not implemented now */
+	QString testacnt = "0";
+	//if (itemSettings.isTestAccount()) {
+	//	testacnt = "1";
+	//}
+
+	MessageDb *messageDb = accountMessageDb(userName, this);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	int cYear = QDate::currentDate().year();
+	qDebug() << "currentYear:" << cYear;
+	QString currentYear = QString::number(cYear);
+	QStringList yearList = messageDb->getAllUniqueYearsFormMsgs();
+	qDebug() << "yearList:" << yearList;
+
+	/* TODO - messages for current year are ingnored now */
+	for (int i = 0; i < yearList.count(); ++i) {
+		if (currentYear == yearList.at(i) ) {
+			continue;
+		}
+
+		/* TODO - test account detection is not implemented now */
+		QString newDbName = userName + "_" + yearList.at(i);
+		MessageDb *newMsgDb = accountMessageDb(newDbName, this);
+		messageDb->copyRelevantMsgsToNewDb(dbDir + "/" + newDbName
+		    + "___" + testacnt + ".db", yearList.at(i));
 	}
 }

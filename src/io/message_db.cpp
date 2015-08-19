@@ -3224,6 +3224,227 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Get all unique years from messages db.
+ */
+QStringList MessageDb::getAllUniqueYearsFormMsgs(void) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
+	    "FROM messages";
+	QStringList yearIsList;
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			if (!query.value(0).toString().isEmpty()) {
+				yearIsList.append(query.value(0).toString());
+			}
+			query.next();
+		}
+	}
+	return yearIsList;
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Get list of all messages ID correspond with year.
+ */
+QStringList MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QStringList msgList;
+
+	QString	queryStr = "SELECT dmID FROM messages WHERE "
+		   "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			if (!query.value(0).toString().isEmpty()) {
+				msgList.append(query.value(0).toString());
+			}
+			query.next();
+		}
+	}
+	return msgList;
+fail:
+	return QStringList();
+}
+
+
+/* ========================================================================= */
+/*
+ * Copy all messages correspond with year and their records
+ * from tables into new db.
+ */
+bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
+    const QString &year) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QStringList idList = getAllMsgsIDEqualWithYear(year);
+
+	// attach new database.
+	QString	queryStr = "ATTACH DATABASE \""+ newDbFileName+ "\" AS db2";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("1 Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (query.exec() && query.isActive()) {
+		/* TODO */
+	}
+
+	// copy message data from messages table into new db.
+	queryStr = "INSERT INTO db2.messages SELECT * FROM messages WHERE "
+		   "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("2 Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (query.exec() && query.isActive()) {
+		/* TODO */
+	}
+
+	// copy other message data from other tables into new db.
+	for (int i = 0; i < idList.count(); ++i) {
+
+		queryStr = "INSERT INTO db2.files SELECT * FROM files WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F1 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.hashes SELECT * FROM hashes WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F2 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.events SELECT * FROM events WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F3 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.raw_message_data SELECT * FROM raw_message_data WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F4 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.raw_delivery_info_data SELECT * FROM raw_delivery_info_data WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F5 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.supplementary_message_data SELECT * FROM supplementary_message_data WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F6 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.process_state SELECT * FROM process_state WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F7 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.certificate_data SELECT * FROM certificate_data";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F8 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+
+		queryStr = "INSERT INTO db2.message_certificate_data SELECT * FROM message_certificate_data WHERE "
+			   "message_id = '"+ idList.at(i) + "'";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("F9 Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec() && query.isActive()) {
+			/* TODO */
+		}
+	}
+
+	// detach new database.
+	queryStr = "DETACH DATABASE db2";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("3 Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (query.exec() && query.isActive()) {
+		/* TODO */
+	}
+
+	return true;
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Insert raw (DER) delivery info into raw_delivery_info_data table.
  */
 bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
