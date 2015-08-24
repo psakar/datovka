@@ -3324,6 +3324,12 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		/* TODO */
 	}
 
+	queryStr = "BEGIN DEFERRED TRANSACTION";
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.exec();
+
 	// copy other message data from other tables into new db.
 	for (int i = 0; i < idList.count(); ++i) {
 
@@ -3425,6 +3431,12 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 	}
+
+	queryStr = "COMMIT TRANSACTION";
+	if (!query.prepare(queryStr)) {
+		return false;
+	}
+	query.exec();
 
 	// detach new database.
 	queryStr = "DETACH DATABASE db2";
