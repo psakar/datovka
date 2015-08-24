@@ -3304,7 +3304,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	// attach new database.
 	QString	queryStr = "ATTACH DATABASE \""+ newDbFileName+ "\" AS db2";
 	if (!query.prepare(queryStr)) {
-		logErrorNL("1 Cannot prepare SQL query: %s.",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3316,7 +3316,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	queryStr = "INSERT INTO db2.messages SELECT * FROM messages WHERE "
 		   "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
 	if (!query.prepare(queryStr)) {
-		logErrorNL("2 Cannot prepare SQL query: %s.",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
@@ -3326,7 +3326,9 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 
 	queryStr = "BEGIN DEFERRED TRANSACTION";
 	if (!query.prepare(queryStr)) {
-		return false;
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.exec();
 
@@ -3336,7 +3338,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		queryStr = "INSERT INTO db2.files SELECT * FROM files WHERE "
 			   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F1 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3347,7 +3349,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		queryStr = "INSERT INTO db2.hashes SELECT * FROM hashes WHERE "
 			   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F2 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3358,7 +3360,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		queryStr = "INSERT INTO db2.events SELECT * FROM events WHERE "
 			   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F3 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3366,10 +3368,11 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.raw_message_data SELECT * FROM raw_message_data WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO db2.raw_message_data SELECT * "
+		    "FROM raw_message_data WHERE message_id = "
+		    "'"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F4 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3377,10 +3380,11 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.raw_delivery_info_data SELECT * FROM raw_delivery_info_data WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO db2.raw_delivery_info_data SELECT * "
+		    "FROM raw_delivery_info_data WHERE message_id = "
+		    "'"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F5 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3388,10 +3392,11 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.supplementary_message_data SELECT * FROM supplementary_message_data WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO db2.supplementary_message_data "
+		    "SELECT * FROM supplementary_message_data WHERE "
+		    "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F6 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3399,10 +3404,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.process_state SELECT * FROM process_state WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO db2.process_state SELECT * FROM "
+		    "process_state WHERE message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F7 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3410,9 +3415,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.certificate_data SELECT * FROM certificate_data";
+		queryStr = "INSERT INTO db2.certificate_data SELECT * FROM "
+		    "certificate_data";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F8 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3420,10 +3426,11 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.message_certificate_data SELECT * FROM message_certificate_data WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO db2.message_certificate_data SELECT * "
+		    "FROM message_certificate_data WHERE "
+		    "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("F9 Cannot prepare SQL query: %s.",
+			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
@@ -3434,14 +3441,16 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 
 	queryStr = "COMMIT TRANSACTION";
 	if (!query.prepare(queryStr)) {
-		return false;
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 	query.exec();
 
 	// detach new database.
 	queryStr = "DETACH DATABASE db2";
 	if (!query.prepare(queryStr)) {
-		logErrorNL("3 Cannot prepare SQL query: %s.",
+		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}

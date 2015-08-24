@@ -9978,6 +9978,8 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 {
 	debugFuncCall();
 
+	int flags = 0;
+
 	AccountModel::SettingsMap &itemSettings =
 	    AccountModel::globAccounts[userName];
 
@@ -9991,6 +9993,10 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 		testacnt = "1";
 	}
 
+	if (itemSettings.isTestAccount()) {
+		flags |= DBC_FLG_TESTING;
+	}
+
 	MessageDb *messageDb = accountMessageDb(userName, this);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
@@ -10002,6 +10008,14 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 
 	for (int i = 0; i < yearList.count(); ++i) {
 		QString newDbName = userName + "_" + yearList.at(i);
+		if (DBC_ERR_MISSFILE !=
+		    DbContainer::checkExistingDbFile(newDbName, dbDir, flags)) {
+			qDebug() << "Database for year" << yearList.at(i) <<
+			    "already exists";
+			continue;
+		}
+
+		qDebug() << "Create a new database for year" << yearList.at(i);
 		MessageDb *newMsgDb = globMessageDbsPtr->accessMessageDb(
 		    newDbName, dbDir, itemSettings.isTestAccount(), true);
 		messageDb->copyRelevantMsgsToNewDb(dbDir + "/" + newDbName
