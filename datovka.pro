@@ -248,6 +248,8 @@ SOURCES += src/common.cpp \
     src/io/file_downloader.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
+    src/io/message_db_set.cpp \
+    src/io/message_db_set_container.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -284,6 +286,8 @@ HEADERS += src/common.h \
     src/io/file_downloader.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
+    src/io/message_db_set.h \
+    src/io/message_db_set_container.h \
     src/log/log.h \
     src/log/log_c.h \
     src/log/log_common.h \

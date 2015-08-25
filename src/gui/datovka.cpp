@@ -66,6 +66,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/message_db_set_container.h"
 #include "ui_datovka.h"
 
 

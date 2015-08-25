@@ -40,6 +40,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
 #include "src/io/message_db.h"
+#include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
 
 #define CONF_SUBDIR_OPT "conf-subdir"
