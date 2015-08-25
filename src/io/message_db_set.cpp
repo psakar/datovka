@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
@@ -170,7 +171,15 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 	/* Remove all elements from this map. */
 	this->clear();
 
-	/* TODO -- Remove all possible database files from new location. */
+	/* Remove all possible database files from new location. */
+	QStringList impedingFiles = existingDbFilesInLocation(newLocDir,
+	    m_primaryKey, m_testing, DO_UNKNOWN);
+	foreach (const QString &fileName, impedingFiles) {
+		QFile::remove(newLocDir + QDir::separator() + fileName);
+	}
+
+	m_locDir = newLocDir;
+	m_organisation = organisation;
 
 	return true;
 }
@@ -310,6 +319,12 @@ QStringList MessageDbSet::existingDbFilesInLocation(const QString &locDir,
 
 		matches = false;
 		switch (organisation) {
+		case DO_UNKNOWN:
+			matches = matches || fileNameMatchesSingleFile(
+			    fileName, primaryKey, testing);
+			matches = matches || fileNameMatchesYearly(fileName,
+			    primaryKey, testing);
+			break;
 		case DO_SINGLE_FILE:
 			matches = fileNameMatchesSingleFile(fileName,
 			    primaryKey, testing);

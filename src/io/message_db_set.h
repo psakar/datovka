@@ -112,6 +112,9 @@ public:
 	/*!
 	 * Brief returns the database file names stored in the location.
 	 *
+	 * @note If DO_UNKNOWN is passed via `organisation` then all possible
+	 *     matching file names are returned.
+	 *
 	 * @param[in] locDir       Directory where the database should reside.
 	 * @param[in] primaryKey   Primary key.
 	 * @param[in] testing      True if a testing account.
