@@ -28,12 +28,13 @@
 #include <QList>
 #include <QPair>
 #include <QRegExp>
+#include <QSqlDatabase>
 
 #include "message_db_set.h"
 #include "src/log/log.h"
 
-MessageDbSet::MessageDbSet(const QString &primaryKey, const QString &locDir,
-    bool testing, bool create, Organisation organisation)
+MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
+    bool testing, Organisation organisation)
     : QMap<QString, MessageDb *>(),
     m_primaryKey(primaryKey),
     m_testing(testing),
@@ -172,7 +173,7 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 	this->clear();
 
 	/* Remove all possible database files from new location. */
-	QStringList impedingFiles = existingDbFilesInLocation(newLocDir,
+	QStringList impedingFiles = existingDbFileNamesInLocation(newLocDir,
 	    m_primaryKey, m_testing, DO_UNKNOWN);
 	foreach (const QString &fileName, impedingFiles) {
 		QFile::remove(newLocDir + QDir::separator() + fileName);
@@ -221,6 +222,124 @@ bool MessageDbSet::deleteLocation(void)
 }
 
 #define DB_SUFFIX ".db"
+#define PRIMARY_KEY_RE "[^_]+"
+#define SINGLE_FILE_SEC_KEY ""
+#define YEARLY_SEC_KEY_RE "[0-9][0-9][0-9][0-9]"
+
+/*!
+ * @brief Creates secondary key from given time.
+ *
+ * @param[in] time         Time.
+ * @return Secondary key or null string on error.
+ */
+static
+QString secondaryKeySingleFile(const QDateTime &time)
+{
+	(void) time; /* Unused parameter. */
+
+	return QString(SINGLE_FILE_SEC_KEY);
+}
+
+/*!
+ * @brief Creates secondary key from given time.
+ *
+ * @param[in] time         Time.
+ * @return Secondary key or null string on error.
+ */
+static
+QString secondaryKeyYearly(const QDateTime &time)
+{
+	return time.toString("yyyy");
+}
+
+QString MessageDbSet::secondaryKey(const QDateTime &time) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return secondaryKeySingleFile(time);
+		break;
+	case DO_YEARLY:
+		return secondaryKeyYearly(time);
+		break;
+	case DO_UNKNOWN:
+	default:
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	return QString();
+}
+
+MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
+    bool write)
+{
+	QString secondary = secondaryKey(deliveryTime);
+
+	if (secondary.isNull()) {
+		return 0;
+	}
+
+	return _accessMessageDb(secondary, write);
+}
+
+MessageDbSet *MessageDbSet::createNew(const QString &locDir,
+    const QString &primaryKey, bool testing, Organisation organisation,
+    bool mustExist)
+{
+	if (organisation == DO_UNKNOWN) {
+		return NULL;
+	}
+
+	MessageDbSet *dbSet = NULL;
+	QStringList matchingFiles;
+
+	if (mustExist) {
+		matchingFiles = existingDbFileNamesInLocation(locDir,
+		    primaryKey, testing, organisation);
+
+		if (matchingFiles.isEmpty()) {
+			return NULL;
+		}
+
+		/* Check primary keys. */
+		foreach (const QString &fileName, matchingFiles) {
+			QString secondaryKey = secondaryKeyFromFileName(
+			    fileName, organisation);
+
+			if (secondaryKey.isNull()) {
+				logErrorNL("Failed obtaining secondary key from file name '%s'.",
+				    fileName.toUtf8().constData());
+				return NULL;
+			}
+		}
+	}
+
+	/* Create database set. */
+	dbSet = new(std::nothrow) MessageDbSet(locDir, primaryKey, testing,
+	    organisation);
+	if (dbSet == NULL) {
+		Q_ASSERT(0);
+		return NULL;
+	}
+
+	MessageDb *db = NULL;
+	/* Load files that have been found. */
+	foreach (const QString &fileName, matchingFiles) {
+		QString secondaryKey = secondaryKeyFromFileName(fileName,
+		    organisation);
+		Q_ASSERT(!secondaryKey.isNull());
+
+		db = dbSet->_accessMessageDb(secondaryKey, false);
+		if (db == NULL) {
+			logErrorNL("Failed opening database file '%s'.",
+			    fileName.toUtf8().constData());
+			delete dbSet;
+			return NULL;
+		}
+	}
+
+	return dbSet;
+}
 
 /*!
  * @brief Returns true if file name matches single file naming conventions.
@@ -252,8 +371,8 @@ static
 bool fileNameMatchesYearly(const QString &fileName, const QString &primaryKey,
     bool testing)
 {
-	QRegExp re("^" + primaryKey + "_[0-9][0-9][0-9][0-9]"
-	    "___" + (testing ? "1" : "0") + DB_SUFFIX + "$");
+	QRegExp re("^" + primaryKey + "_" YEARLY_SEC_KEY_RE
+	    "___" + (testing ? "1" : "0") + DB_SUFFIX "$");
 
 	return re.indexIn(fileName) > -1;
 }
@@ -301,7 +420,63 @@ MessageDbSet::Organisation MessageDbSet::dbOrganisation(const QString &locDir,
 	return org;
 }
 
-QStringList MessageDbSet::existingDbFilesInLocation(const QString &locDir,
+/*!
+ * @brief Secondary key if file name matches single file naming conventions.
+ *
+ * @param[in] fileName   File name.
+ * @return Key if name matches the naming convention, null string on error.
+ */
+static
+QString fileNameSecondaryKeySingleFile(const QString &fileName)
+{
+	QRegExp re(QString("^") + PRIMARY_KEY_RE
+	    "___" "[01]" DB_SUFFIX "$");
+
+	return (re.indexIn(fileName) > -1) ? SINGLE_FILE_SEC_KEY : QString();
+}
+
+/*!
+ * @brief Secondary key if file name matches single file naming conventions.
+ *
+ * @param[in] fileName   File name.
+ * @return Key if name matches the naming convention, null string on error.
+ */
+static
+QString fileNameSecondaryKeyYearly(const QString &fileName)
+{
+	QRegExp re(QString("^") + PRIMARY_KEY_RE "_" YEARLY_SEC_KEY_RE
+	    "___" "[01]" DB_SUFFIX "$");
+
+	if (re.indexIn(fileName) < 0) {
+		return QString();
+	}
+
+	return fileName.section('_', 1, 1);
+}
+
+QString MessageDbSet::secondaryKeyFromFileName(const QString &fileName,
+    Organisation organisation)
+{
+	if (fileName.isEmpty() || (organisation == DO_UNKNOWN)) {
+		return QString();
+	}
+
+	switch (organisation) {
+	case DO_SINGLE_FILE:
+		return fileNameSecondaryKeySingleFile(fileName);
+		break;
+	case DO_YEARLY:
+		return fileNameSecondaryKeyYearly(fileName);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QString();
+}
+
+QStringList MessageDbSet::existingDbFileNamesInLocation(const QString &locDir,
     const QString &primaryKey, bool testing, Organisation organisation)
 {
 	QStringList matchingFiles;
@@ -343,4 +518,94 @@ QStringList MessageDbSet::existingDbFilesInLocation(const QString &locDir,
 	}
 
 	return matchingFiles;
+}
+
+QString MessageDbSet::constructKey(const QString &primaryKey,
+    const QString &secondaryKey, Organisation organisation)
+{
+	if (organisation == DO_UNKNOWN) {
+		return QString();
+	}
+
+	QString key = primaryKey;
+	if (organisation == DO_YEARLY) {
+		key += "_" + secondaryKey;
+	}
+	return key;
+}
+
+QString MessageDbSet::constructDbFileName(const QString &locDir,
+    const QString &primaryKey, const QString &secondaryKey,
+    bool testing, Organisation organisation)
+{
+	QString key = constructKey(primaryKey, secondaryKey, organisation);
+	if (key.isNull()) {
+		return QString();
+	}
+
+	return locDir + QDir::separator() +
+	    key + QString("___") + (testing ? "1" : "0") + DB_SUFFIX;
+}
+
+const QString MessageDbSet::dbDriverType("QSQLITE");
+
+bool MessageDbSet::dbDriverSupport(void)
+{
+	QStringList driversList = QSqlDatabase::drivers();
+
+	return driversList.contains(dbDriverType, Qt::CaseSensitive);
+}
+
+MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
+    bool create)
+{
+	MessageDb *db = NULL;
+	bool openRet;
+
+	/* Already opened. */
+	if (this->find(secondaryKey) != this->end()) {
+		return (*this)[secondaryKey];
+	}
+
+	QString key = constructKey(m_primaryKey, secondaryKey, m_organisation);
+
+	db = new(std::nothrow) MessageDb(dbDriverType, key);
+	if (NULL == db) {
+		Q_ASSERT(0);
+		return NULL;
+	}
+
+	/* TODO -- Handle file name deviations! */
+	/*
+	 * Test accounts have ___1 in their names, ___0 relates to standard
+	 * accounts.
+	 */
+	QString dbFileName = constructDbFileName(m_locDir, m_primaryKey,
+	    secondaryKey, m_testing, m_organisation);
+	QFileInfo fileInfo(dbFileName);
+
+	if (!create && !fileInfo.isFile()) {
+		delete db;
+		return NULL;
+	} else if (!fileInfo.isFile()) {
+		/* Create missing directory. */
+		QDir dir = fileInfo.absoluteDir().absolutePath();
+		if (!dir.exists()) {
+			/* Empty file will be created automatically. */
+			if (!dir.mkpath(dir.absolutePath())) {
+				/* Cannot create directory. */
+				delete db;
+				return NULL;
+			}
+		}
+	}
+
+	openRet = db->openDb(dbFileName);
+	if (!openRet) {
+		delete db;
+		return NULL;
+	}
+
+	this->insert(secondaryKey, db);
+	return db;
 }
