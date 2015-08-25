@@ -7965,7 +7965,8 @@ bool MainWindow::loginMethodUserNamePwd(
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
-
+	bool ret = false;
+	QString isdsMsg;
 	const QString userName = accountInfo.userName();
 
 	if (userName.isEmpty()) {
@@ -7980,13 +7981,14 @@ bool MainWindow::loginMethodUserNamePwd(
 
 	QString usedPwd = accountInfo.password();
 
-	if (usedPwd.isEmpty()) {
-		if (0 != mw) {
+	// is mainwindow, show dialogs
+	if (0 != mw) {
+		// when pwd is not stored in settings then open account dialog
+		if (usedPwd.isEmpty()) {
 			QDialog *editAccountDialog = new DlgCreateAccount(
 			    userName, DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
-				mw->saveSettings();
 			} else {
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
@@ -7994,25 +7996,56 @@ bool MainWindow::loginMethodUserNamePwd(
 				    .arg(accountInfo.accountName()));
 				return false;
 			}
-		} else if (!pwd.isEmpty()) {
+		}
+		// login to ISDS
+		status = isdsLoginUserName(isdsSessions.session(userName),
+		    userName, usedPwd, accountInfo.isTestAccount());
+		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+		ret = checkConnectionError(status, accountInfo.accountName(),
+		    isdsMsg, mw);
+
+		// if error, to show account dialog again
+		while (!ret) {
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    userName, DlgCreateAccount::ACT_PWD, mw);
+			if (QDialog::Accepted == editAccountDialog->exec()) {
+				usedPwd = accountInfo.password();
+				status = isdsLoginUserName(isdsSessions.session(userName),
+				    userName, usedPwd, accountInfo.isTestAccount());
+				isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+				ret = checkConnectionError(status,
+				    accountInfo.accountName(), isdsMsg, mw);
+			} else {
+				mw->showStatusTextWithTimeout(
+				    tr("It was not possible to connect to "
+				    "your databox from account \"%1\".")
+				    .arg(accountInfo.accountName()));
+				return false;
+			}
+		}
+		// save new pwd to settings
+		mw->saveSettings();
+		ret = true;
+
+	// is CLI, disable dialogs
+	} else {
+		if (!pwd.isEmpty()) {
 			usedPwd = pwd;
-		} else {
+		} else if (usedPwd.isEmpty()) {
 			logError("Unknown password for account '%s'.\n",
 			    accountInfo.accountName().toUtf8().constData());
 			return false;
 		}
+		status = isdsLoginUserName(isdsSessions.session(userName),
+		    userName, usedPwd, accountInfo.isTestAccount());
+		ret = (IE_SUCCESS == status);
 	}
 
-	status = isdsLoginUserName(isdsSessions.session(userName),
-	    userName, usedPwd, accountInfo.isTestAccount());
-
+	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
-	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
+	    globPref.isds_download_timeout_ms);
 
-	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
-
-	return checkConnectionError(status, accountInfo.accountName(),
-	    isdsMsg, mw);
+	return ret;
 }
 
 
