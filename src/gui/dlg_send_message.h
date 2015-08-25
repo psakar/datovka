@@ -82,6 +82,7 @@ private slots:
 	void sendMessage(void);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
+	void tableItemDoubleClicked(QTableWidgetItem *item);
 
 private:
 	QTimer *pingTimer;

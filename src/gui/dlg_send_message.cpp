@@ -165,6 +165,10 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(recItemSelect()));
 
 	connect(this->attachmentTableWidget,
+	    SIGNAL(itemDoubleClicked(QTableWidgetItem *)),
+	    this, SLOT(tableItemDoubleClicked(QTableWidgetItem *)));
+
+	connect(this->attachmentTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
 	    SLOT(attItemSelect()));
 
@@ -202,6 +206,19 @@ void DlgSendMessage::initNewMessageDialog(void)
 		this->dmAllowSubstDelivery->setEnabled(false);
 		this->dmAllowSubstDelivery->hide();
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot is fired when user double clicked on attachment item - open file
+ */
+void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
+/* ========================================================================= */
+{
+	qDebug() << "tableItemDoubleClicked(" << item << ")";
+
+	openAttachmentFile();
 }
 
 
