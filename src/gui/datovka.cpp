@@ -7960,7 +7960,7 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 * Login to ISDS server by username and password only.
 */
 bool MainWindow::loginMethodUserNamePwd(
-    const AccountModel::SettingsMap &accountInfo,
+    AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &pwd)
 /* ========================================================================= */
 {
@@ -7990,6 +7990,8 @@ bool MainWindow::loginMethodUserNamePwd(
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
 			} else {
+				accountInfo.setRememberPwd(false);
+				accountInfo.setPassword("");
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
 				    "your databox from account \"%1\".")
@@ -8016,6 +8018,8 @@ bool MainWindow::loginMethodUserNamePwd(
 				ret = checkConnectionError(status,
 				    accountInfo.accountName(), isdsMsg, mw);
 			} else {
+				accountInfo.setRememberPwd(false);
+				accountInfo.setPassword("");
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
 				    "your databox from account \"%1\".")
@@ -8119,7 +8123,7 @@ bool MainWindow::loginMethodCertificateOnly(
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
-
+	bool ret = false;
 	const QString userName = accountInfo.userName();
 
 	if (userName.isEmpty()) {
@@ -8233,15 +8237,18 @@ bool MainWindow::loginMethodCertificateOnly(
 		 * TODO -- Notify the user that he should protect his
 		 * certificates with a password?
 		 */
+	} else {
+		accountInfo.setRememberPwd(false);
+		accountInfo.setPassword("");
 	}
 
+	mw->saveSettings();
+
+	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
-	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
+	    globPref.isds_download_timeout_ms);
 
-	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
-
-	return checkConnectionError(status, accountInfo.accountName(),
-	    isdsMsg, mw);
+	return ret;
 }
 
 
@@ -8278,7 +8285,6 @@ bool MainWindow::loginMethodCertificateUserPwd(
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				certPath = accountInfo.p12File();
 				usedPwd = accountInfo.password();
-				mw->saveSettings();
 			} else {
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
@@ -8365,6 +8371,11 @@ bool MainWindow::loginMethodCertificateUserPwd(
 	status = isdsLoginUserCertPwd(isdsSessions.session(userName),
 	    userName, usedPwd, certPath, passphrase,
 	    accountInfo.isTestAccount());
+
+	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+
+	ret = checkConnectionError(status, accountInfo.accountName(),
+	    isdsMsg, mw);
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
@@ -8510,7 +8521,7 @@ bool MainWindow::loginMethodCertificateIdBox(
 * Login to ISDS server by username, password and OTP code.
 */
 bool MainWindow::loginMethodUserNamePwdOtp(
-    const AccountModel::SettingsMap &accountInfo,
+    AccountModel::SettingsMap &accountInfo,
     MainWindow *mw, const QString &pwd, const QString &otp)
 /* ========================================================================= */
 {

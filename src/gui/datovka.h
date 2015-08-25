@@ -955,7 +955,7 @@ private:
 	 */
 	static
 	bool loginMethodUserNamePwd(
-	    const AccountModel::SettingsMap &accountInfo,
+	    AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString());
 
 	/*!
@@ -963,7 +963,7 @@ private:
 	 */
 	static
 	bool loginMethodUserNamePwdOtp(
-	    const AccountModel::SettingsMap &accountInfo,
+	    AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &otp = QString());
 
