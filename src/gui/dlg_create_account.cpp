@@ -246,14 +246,22 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLabel->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		this->rememberPswcheckBox->setEnabled(false);
-		this->usernameLineEdit->setEnabled(false);
+		if (m_action != ACT_ADDNEW) {
+			this->usernameLineEdit->setEnabled(false);
+		} else {
+			this->usernameLineEdit->setEnabled(true);
+		}
 	} else if (itemindex == USER_CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(true);
 		this->passwordLineEdit->setEnabled(true);
 		this->rememberPswcheckBox->setEnabled(true);
-		this->usernameLineEdit->setEnabled(true);
+		if (m_action != ACT_ADDNEW) {
+			this->usernameLineEdit->setEnabled(false);
+		} else {
+			this->usernameLineEdit->setEnabled(true);
+		}
 	} else {
 		this->certificateLabel->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
