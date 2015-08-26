@@ -31,6 +31,25 @@
 
 #include "src/io/message_db.h"
 
+/*
+ * Flags used when creating new database file.
+ */
+#define MDS_FLG_TESTING         0x01 /*!< Create a testing database. */
+#define MDS_FLG_CREATE_FILE     0x02 /*!< Create file if does not exist. */
+#define MDS_FLG_CHECK_QUICK     0x04 /*!< Perform a quick database check. */
+#define MDS_FLG_CHECK_INTEGRITY 0x08 /*!< Perform a full integrity check. */
+
+/*
+ * Error codes returned when accessing/creating new database file.
+ */
+#define MDS_ERR_OK       0 /*!< No error. */
+#define MDS_ERR_MISSFILE 1 /*!< Database file does not exist. */
+#define MDS_ERR_NOTAFILE 2 /*!< Database file is not a file. */
+#define MDS_ERR_ACCESS   3 /*!< Error reading/writing database file. */
+#define MDS_ERR_CREATE   4 /*!< Error creating database file. */
+#define MDS_ERR_DATA     5 /*!< Data corrupted or not a database file. */
+#define MDS_ERR_MULTIPLE 6 /*!< Multiple differently organised databases reside in the same location. */
+
 /*!
  * Organises database files according to secondary keys.
  */
@@ -105,10 +124,11 @@ public:
 	/*!
 	 * @brief Creates a new object.
 	 *
-	 * @param[in] locDir        Directory that holds the database files.
-	 * @param[in] primaryKey    Primary key, usually the user name.
-	 * @param[in] testing       True if this is a testing account.
+	 * @param[in] locDir       Directory that holds the database files.
+	 * @param[in] primaryKey   Primary key, usually the user name.
+	 * @param[in] testing      True if this is a testing account.
 	 * @param[in] organisation How to organise the database files.
+	 * @return Pointer to new container or zero pointer on error.
 	 */
 	static
 	MessageDbSet *createNew(const QString &locDir,
@@ -147,12 +167,14 @@ public:
 	 * @param[in] locDir       Directory where the database should reside.
 	 * @param[in] primaryKey   Primary key.
 	 * @param[in] testing      True if a testing account.
-	 * @paran[on] organisation Organisation type.
+	 * @paran[in] organisation Organisation type.
+	 * @param[in] fileOnly     True if only files desired (ignores directories etc.).
 	 * @return List of database files in the location.
 	 */
 	static
 	QStringList existingDbFileNamesInLocation(const QString &locDir,
-	    const QString &primaryKey, bool testing, Organisation organisation);
+	    const QString &primaryKey, bool testing, Organisation organisation,
+	    bool filesOnly);
 
 	/*!
 	 * @brief Construct key from primary and secondary key.
@@ -165,6 +187,18 @@ public:
 	static
 	QString constructKey(const QString &primaryKey,
 	    const QString &secondaryKey, Organisation organisation);
+
+	/*!
+	 * @brief Check existing databases for basic faults.
+	 *
+	 * @param[in] primaryKey ISDS user name.
+	 * @param[in] locDir     Directory where to store the file.
+	 * @param[in] flags      Flags to be passed.
+	 * @return Error code.
+	 */
+	static
+	int checkExistingDbFile(const QString &locDir,
+	    const QString &primaryKey, int flags);
 
 	/*!
 	 * @brief Returns file name according to primary and secondary key.
@@ -215,6 +249,16 @@ private:
 	 * @return Message database or zero pointer on error.
 	 */
 	MessageDb *_accessMessageDb(const QString &secondaryKey, bool create);
+
+	/*!
+	 * @brief Test given file.
+	 *
+	 * @param[in] filePath Full file path.
+	 * @param[in] flags    Flags.
+	 * @return Error code.
+	 */
+	static
+	int checkGivenDbFile(const QString &filePath, int flags);
 
 	const QString m_primaryKey; /*!< Used for accessing the database. */
 	const bool m_testing; /*!< Whether those are a testing databases. */

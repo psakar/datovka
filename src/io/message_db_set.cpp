@@ -174,7 +174,7 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 
 	/* Remove all possible database files from new location. */
 	QStringList impedingFiles = existingDbFileNamesInLocation(newLocDir,
-	    m_primaryKey, m_testing, DO_UNKNOWN);
+	    m_primaryKey, m_testing, DO_UNKNOWN, false);
 	foreach (const QString &fileName, impedingFiles) {
 		QFile::remove(newLocDir + QDir::separator() + fileName);
 	}
@@ -295,7 +295,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 
 	if (mustExist) {
 		matchingFiles = existingDbFileNamesInLocation(locDir,
-		    primaryKey, testing, organisation);
+		    primaryKey, testing, organisation, true);
 
 		if (matchingFiles.isEmpty()) {
 			return NULL;
@@ -404,17 +404,10 @@ MessageDbSet::Organisation MessageDbSet::dbOrganisation(const QString &locDir,
 		}
 	}
 
-/* TODO -- Currently single file is preferred. */
-/*
 	if (!singleFile.isEmpty() && yearlyFiles.isEmpty()) {
 		org = DO_SINGLE_FILE;
 	} else if (singleFile.isEmpty() && !yearlyFiles.isEmpty()) {
 		org = DO_YEARLY;
-	}
-*/
-
-	if (!singleFile.isEmpty()) {
-		org = DO_SINGLE_FILE;
 	}
 
 	return org;
@@ -477,7 +470,8 @@ QString MessageDbSet::secondaryKeyFromFileName(const QString &fileName,
 }
 
 QStringList MessageDbSet::existingDbFileNamesInLocation(const QString &locDir,
-    const QString &primaryKey, bool testing, Organisation organisation)
+    const QString &primaryKey, bool testing, Organisation organisation,
+    bool filesOnly)
 {
 	QStringList matchingFiles;
 
@@ -486,7 +480,7 @@ QStringList MessageDbSet::existingDbFileNamesInLocation(const QString &locDir,
 
 	while (dirIt.hasNext()) {
 		dirIt.next();
-		if (!QFileInfo(dirIt.filePath()).isFile()) {
+		if (filesOnly && !QFileInfo(dirIt.filePath()).isFile()) {
 			continue;
 		}
 
@@ -534,6 +528,31 @@ QString MessageDbSet::constructKey(const QString &primaryKey,
 	return key;
 }
 
+int MessageDbSet::checkExistingDbFile(const QString &locDir,
+    const QString &primaryKey, int flags)
+{
+	bool testing = flags & MDS_FLG_TESTING;
+
+	QStringList fileNames(existingDbFileNamesInLocation(locDir,
+	    primaryKey, testing, DO_UNKNOWN, false));
+	Organisation organisation(dbOrganisation(locDir, primaryKey, testing));
+
+	if (!fileNames.isEmpty() && (organisation == DO_UNKNOWN)) {
+		return MDS_ERR_MULTIPLE;
+	}
+
+	foreach (const QString &fileName, fileNames) {
+		QString filePath(locDir + QDir::separator() + fileName);
+
+		int ret = checkGivenDbFile(filePath, flags);
+		if (ret != MDS_ERR_OK) {
+			return ret;
+		}
+	}
+
+	return MDS_ERR_OK;
+}
+
 QString MessageDbSet::constructDbFileName(const QString &locDir,
     const QString &primaryKey, const QString &secondaryKey,
     bool testing, Organisation organisation)
@@ -565,6 +584,24 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 	/* Already opened. */
 	if (this->find(secondaryKey) != this->end()) {
 		return (*this)[secondaryKey];
+	}
+
+	if (create && (m_organisation == DO_UNKNOWN)) {
+		/* Organisation structure must be set. */
+		return NULL;
+	}
+
+	if (!create && (m_organisation == DO_UNKNOWN)) {
+		/* Try to determine the structure of the present database. */
+		Organisation org = dbOrganisation(m_locDir, m_primaryKey,
+		    m_testing);
+		if (org == DO_UNKNOWN) {
+			logErrorNL("The organisation structure of the database '%s' in '%s' could not be determined.",
+			    m_primaryKey.toUtf8().constData(),
+			    m_locDir.toUtf8().constData());
+			return NULL;
+		}
+		m_organisation = org;
 	}
 
 	QString key = constructKey(m_primaryKey, secondaryKey, m_organisation);
@@ -608,4 +645,47 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 
 	this->insert(secondaryKey, db);
 	return db;
+}
+
+int MessageDbSet::checkGivenDbFile(const QString &filePath, int flags)
+{
+	bool checkQuick = flags & MDS_FLG_CHECK_QUICK;
+	bool checkIntegity = flags & MDS_FLG_CHECK_INTEGRITY;
+
+	if (checkIntegity) {
+		checkQuick = false;
+	}
+
+	QFileInfo dbFileInfo(filePath);
+	QDir dbDir(dbFileInfo.absoluteDir().absolutePath());
+	QFileInfo dbDirInfo(dbDir.absolutePath());
+
+	if (dbFileInfo.exists() && !dbFileInfo.isFile()) {
+		return MDS_ERR_NOTAFILE;
+	}
+
+	if (!dbFileInfo.exists()) {
+		if (!dbDirInfo.isReadable() || !dbDirInfo.isWritable()) {
+			return MDS_ERR_ACCESS;
+		} else {
+			return MDS_ERR_MISSFILE;
+		}
+	} else {
+		if (!dbFileInfo.isReadable() || !dbFileInfo.isWritable()) {
+			return MDS_ERR_ACCESS;
+		}
+	}
+
+	if (checkIntegity || checkQuick) {
+		MessageDb db(dbDriverType, "someKey");
+		if (!db.openDb(filePath, false)) {
+			return MDS_ERR_DATA;
+		}
+
+		if (!db.checkDb(checkQuick)) {
+			return MDS_ERR_DATA;
+		}
+	}
+
+	return MDS_ERR_OK;
 }
