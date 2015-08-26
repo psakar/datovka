@@ -535,18 +535,14 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 			dbDir = globPref.confDir();
 		}
 
-		QString dbFilePath =
-		    DbContainer::constructDbFileName(userName,
-		        dbDir, itemSettings.isTestAccount());
-
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
 		ui->messageStackedWidget->setCurrentIndex(0);
 		QString htmlMessage = "<div style=\"margin-left: 12px;\">"
 		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
 		htmlMessage += "<div>";
-		htmlMessage += tr("Database file '%1' cannot be accessed."
-		    ).arg(dbFilePath);
+		htmlMessage += tr("Database files fopr account '%1' cannot be accessed in location '%2'."
+		    ).arg(userName).arg(dbDir);
 		htmlMessage += "<br/>";
 		htmlMessage += tr("The file cannot be accessed or is "
 		    "corrupted. Please fix the access privileges or "
@@ -3427,35 +3423,43 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 
 	flags = 0;
 	if (itemSettings.isTestAccount()) {
-		flags |= DBC_FLG_TESTING;
+		flags |= MDS_FLG_TESTING;
 	}
 	if (itemSettings._createdFromScratch()) {
 		/* Check database structure on account creation. */
-		flags |= DBC_FLG_CHECK_QUICK;
+		flags |= MDS_FLG_CHECK_QUICK;
 	}
 	dbPresenceCode =
-	    DbContainer::checkExistingDbFile(userName, dbDir, flags);
+	    MessageDbSet::checkExistingDbFile(dbDir, userName, flags);
 
 	switch (dbPresenceCode) {
-	case DBC_ERR_OK:
+	case MDS_ERR_OK:
 		{
 			if (itemSettings._createdFromScratch()) {
 				/* Notify the user on account creation. */
-				QString dbFilePath =
-				    DbContainer::constructDbFileName(userName,
-				        dbDir, itemSettings.isTestAccount());
-				logInfo("Database file '%s' for user name "
-				    "'%s' already present.\n",
-				    dbFilePath.toUtf8().constData(),
-				    userName.toUtf8().constData());
+				QStringList dbFileNames(
+				    MessageDbSet::existingDbFileNamesInLocation(
+				        dbDir, userName,
+				        itemSettings.isTestAccount(),
+				        MessageDbSet::DO_UNKNOWN, true));
+				Q_ASSERT(!dbFileNames.isEmpty());
+				QString namesStr("'" + dbFileNames[0] + "'");
+				for (int i = 1; i < dbFileNames.size(); ++i) {
+					namesStr += ", '" + dbFileNames[i] + "'";
+				}
+				logInfo("Database files %s for user name "
+				    "'%s' already present in '%s'.\n",
+				    namesStr.toUtf8().constData(),
+				    userName.toUtf8().constData(),
+				    dbDir.toUtf8().constData());
 				if (0 != mw) {
 					QMessageBox::information(mw,
 					    tr("Datovka: Database file present"),
 					    tr("Database file for account '%1' "
 					        "already exists.").arg(userName) +
 					    "\n\n" +
-					    tr("The existing database file '%1' is "
-					        "going to be used.").arg(dbFilePath) +
+					    tr("The existing database files %1 in '%2' are "
+					        "going to be used.").arg(namesStr).arg(dbDir) +
 					    "\n\n" +
 					    tr("If you want to use a new blank file "
 					        "then delete, rename or move the "
@@ -3469,25 +3473,22 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 			    itemSettings.isTestAccount(), false);
 		}
 		break;
-	case DBC_ERR_MISSFILE:
+	case MDS_ERR_MISSFILE:
 		{
 			if (!itemSettings._createdFromScratch()) {
 				/* Not on account creation. */
-				QString dbFilePath =
-				    DbContainer::constructDbFileName(userName,
-				        dbDir, itemSettings.isTestAccount());
-				logWarning("Missing database file '%s' for "
-				    "user name '%s'.\n",
-				    dbFilePath.toUtf8().constData(),
-				    userName.toUtf8().constData());
+				logWarning("Missing database files for "
+				    "user name '%s' in '%s'.\n",
+				    userName.toUtf8().constData(),
+				    dbDir.toUtf8().constData());
 				if (0 != mw) {
 					QMessageBox::warning(mw,
 					    tr("Datovka: Problem loading database"),
 					    tr("Could not load data from the database "
 					        "for account '%1'").arg(userName) +
 					    "\n\n" +
-					    tr("Database file '%1' is missing.").arg(
-					        dbFilePath) +
+					    tr("Database files are missing in '%1'.").arg(
+					        dbDir) +
 					    "\n\n" +
 					    tr("I'll try to create an empty one."),
 					    QMessageBox::Ok);
@@ -3497,15 +3498,23 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 			    itemSettings.isTestAccount(), true);
 		}
 		break;
-	case DBC_ERR_NOTAFILE:
+	case MDS_ERR_NOTAFILE:
 		{
 			/* Notify the user that the location is not a file. */
-			QString dbFilePath =
-			    DbContainer::constructDbFileName(userName,
-			        dbDir, itemSettings.isTestAccount());
-			logWarning("Database location '%s' for "
-			    "user name '%s' is not a file.\n",
-			    dbFilePath.toUtf8().constData(),
+			QStringList dbFileNames(
+			    MessageDbSet::existingDbFileNamesInLocation(
+			        dbDir, userName,
+			        itemSettings.isTestAccount(),
+			        MessageDbSet::DO_UNKNOWN, true));
+			Q_ASSERT(!dbFileNames.isEmpty());
+			QString namesStr("'" + dbFileNames[0] + "'");
+			for (int i = 1; i < dbFileNames.size(); ++i) {
+				namesStr += ", '" + dbFileNames[i] + "'";
+			}
+			logWarning("Some databases of %s in '%s' related to "
+			    "user name '%s' are not a file.\n",
+			    namesStr.toUtf8().constData(),
+			    dbDir.toUtf8().constData(),
 			    userName.toUtf8().constData());
 			if (0 != mw) {
 				QMessageBox::warning(mw,
@@ -3513,21 +3522,29 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 				    tr("Could not load data from the database "
 				        "for account '%1'").arg(userName) +
 				    "\n\n" +
-				    tr("Database location '%1' is not a file.").arg(
-				        dbFilePath),
+				    tr("Some databases of %1 in '%2' are not a file."
+				        ).arg(namesStr).arg(dbDir),
 				    QMessageBox::Ok);
 			}
 		}
 		break;
-	case DBC_ERR_ACCESS:
+	case MDS_ERR_ACCESS:
 		{
 			/* Notify that the user does not have enough rights. */
-			QString dbFilePath =
-			    DbContainer::constructDbFileName(userName,
-			        dbDir, itemSettings.isTestAccount());
-			logWarning("Database file '%s' for "
+			QStringList dbFileNames(
+			    MessageDbSet::existingDbFileNamesInLocation(
+			        dbDir, userName,
+			        itemSettings.isTestAccount(),
+			        MessageDbSet::DO_UNKNOWN, true));
+			Q_ASSERT(!dbFileNames.isEmpty());
+			QString namesStr("'" + dbFileNames[0] + "'");
+			for (int i = 1; i < dbFileNames.size(); ++i) {
+				namesStr += ", '" + dbFileNames[i] + "'";
+			}
+			logWarning("Some databases of '%s' in '%s' related to "
 			    "user name '%s' cannot be accessed.\n",
-			    dbFilePath.toUtf8().constData(),
+			    namesStr.toUtf8().constData(),
+			    dbDir.toUtf8().constData(),
 			    userName.toUtf8().constData());
 			if (0 != mw) {
 				QMessageBox::warning(mw,
@@ -3535,8 +3552,8 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 				    tr("Could not load data from the database "
 				        "for account '%1'").arg(userName) +
 				    "\n\n" +
-				    tr("Database file '%1' cannot be accessed.").arg(
-				        dbFilePath) +
+				    tr("Some databases of '%1' in '%2' cannot be accessed."
+				        ).arg(namesStr).arg(dbDir) +
 				    "\n\n" +
 				    tr("You don't have enough access rights to use "
 				        "the file."),
@@ -3544,23 +3561,32 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 			}
 		}
 		break;
-	case DBC_ERR_CREATE:
+	case MDS_ERR_CREATE:
 		{
 			/* This error should not be returned. */
+			Q_ASSERT(0);
 		}
 		break;
-	case DBC_ERR_DATA:
+	case MDS_ERR_DATA:
 		{
 			/*
 			 * Database file is not a database file or is
 			 * corrupted.
 			 */
-			QString dbFilePath =
-			    DbContainer::constructDbFileName(userName,
-			        dbDir, itemSettings.isTestAccount());
-			logWarning("Database file '%s' for "
+			QStringList dbFileNames(
+			    MessageDbSet::existingDbFileNamesInLocation(
+			        dbDir, userName,
+			        itemSettings.isTestAccount(),
+			        MessageDbSet::DO_UNKNOWN, true));
+			Q_ASSERT(!dbFileNames.isEmpty());
+			QString namesStr("'" + dbFileNames[0] + "'");
+			for (int i = 1; i < dbFileNames.size(); ++i) {
+				namesStr += ", '" + dbFileNames[i] + "'";
+			}
+			logWarning("Some databases of %s in '%s' related to "
 			    "user name '%s' is probably corrupted.\n",
-			    dbFilePath.toUtf8().constData(),
+			    namesStr.toUtf8().constData(),
+			    dbDir.toUtf8().constData(),
 			    userName.toUtf8().constData());
 			if (0 != mw) {
 				QMessageBox::warning(mw,
@@ -3568,8 +3594,8 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 				    tr("Could not load data from the database "
 				        "for account '%1'").arg(userName) +
 				    "\n\n" +
-				    tr("Database file '%1' cannot be used.").arg(
-				        dbFilePath) +
+				    tr("Some databases of %1 in '%2' cannot be used."
+				        ).arg(namesStr).arg(dbDir) +
 				    "\n\n" +
 				    tr("The file either does not contain an sqlite "
 				        "database or the file is corrupted."),
@@ -3577,8 +3603,44 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 			}
 		}
 		break;
+	case MDS_ERR_MULTIPLE:
+		{
+			/*
+			 * Multiple atabase organisation types resite in the
+			 * same location.
+			 */
+			QStringList dbFileNames(
+			    MessageDbSet::existingDbFileNamesInLocation(
+			        dbDir, userName,
+			        itemSettings.isTestAccount(),
+			        MessageDbSet::DO_UNKNOWN, true));
+			Q_ASSERT(!dbFileNames.isEmpty());
+			QString namesStr("'" + dbFileNames[0] + "'");
+			for (int i = 1; i < dbFileNames.size(); ++i) {
+				namesStr += ", '" + dbFileNames[i] + "'";
+			}
+			logWarning("Multiple databases %s for '%s' have been "
+			    "encountered in the location '%s'.\n",
+			    namesStr.toUtf8().constData(),
+			    userName.toUtf8().constData(),
+			    dbDir.toUtf8().constData());
+			if (0 != mw) {
+				QMessageBox::warning(mw,
+				    tr("Datovka: Problem loading database"),
+				    tr("Could not load data from the database "
+				        "for account '%1'").arg(userName) +
+				    "\n\n" +
+				    tr("Conflicting databases %1 in '%2' cannot be used."
+				        ).arg(namesStr).arg(dbDir) +
+				    "\n\n" +
+				    tr("Please remove the conflicting files."),
+				    QMessageBox::Ok);
+			}
+		}
+		break;
 	default:
 		/* The code should not end here. */
+		Q_ASSERT(0);
 		break;
 	}
 
@@ -3598,20 +3660,18 @@ MessageDb * MainWindow::accountMessageDb(const QString &userName,
 		 * TODO -- generate notification dialogue and give the user
 		 * a choice between aborting program and skipping account?
 		 */
-		QString dbFilePath = DbContainer::constructDbFileName(userName,
-		    dbDir, itemSettings.isTestAccount());
-		logError("Database file '%s' for user name '%s' cannot be "
+		logError("Database files for user name '%s' in '%s' cannot be "
 		    "created or is probably corrupted.\n",
-		    dbFilePath.toUtf8().constData(),
-		    userName.toUtf8().constData());
+		    userName.toUtf8().constData(),
+		    dbDir.toUtf8().constData());
 		if (0 != mw) {
 			QMessageBox::critical(mw,
 			    tr("Datovka: Database opening error"),
 			    tr("Could not load data from the database "
 			        "for account '%1'").arg(userName) +
 			    "\n\n" +
-			    tr("Database file '%1' cannot be created or is "
-			        "corrupted.").arg(dbFilePath),
+			    tr("Database files in '%1' cannot be created or are "
+			        "corrupted.").arg(dbDir),
 			    QMessageBox::Ok);
 		}
 		/*

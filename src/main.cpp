@@ -284,9 +284,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!DbContainer::dbDriverSupport()) {
+	if (!MessageDbSet::dbDriverSupport()) {
 		logError("Cannot load database driver '%s'.\n",
-		    DbContainer::dbDriverType.toUtf8().constData());
+		    MessageDbSet::dbDriverType.toUtf8().constData());
 		/* TODO -- throw a dialog notifying the user. */
 		return EXIT_FAILURE;
 	}
