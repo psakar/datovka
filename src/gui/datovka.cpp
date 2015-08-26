@@ -846,6 +846,20 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	menu->exec(QCursor::pos());
 }
 
+/*!
+ * @brief Gets message time from selected index.
+ */
+static inline
+QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
+{
+	QModelIndex deliveryIdx(msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DELIVERY_COL));
+	Q_ASSERT(deliveryIdx.isValid());
+
+	QDateTime deliveryTime = dateTimeFromDbFormat(deliveryIdx.data(ROLE_PLAIN_DISPLAY).toString());
+	Q_ASSERT(deliveryTime.isValid());
+
+	return deliveryTime;
+}
 
 /* ========================================================================= */
 /*

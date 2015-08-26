@@ -223,6 +223,10 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QSqlQueryModel::data(index, role);
 		break;
 
+	case ROLE_PLAIN_DISPLAY:
+		return QSqlQueryModel::data(index, Qt::DisplayRole);
+		break;
+
 	case ROLE_MSGS_DB_PROXYSORT:
 		dataType = QSqlQueryModel::headerData(index.column(),
 		    Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt();

@@ -63,6 +63,10 @@ class DbMsgsTblModel : public QSqlQueryModel {
 
 public:
 	enum ColumnNumbers {
+		DMID_COL = 0, /* Message identifier. */
+		ANNOT_COL = 1, /* Annotation collumn. */
+		DELIVERY_COL = 3, /* Delivery time column. */
+		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
 		ATTDOWN_COL = 6, /* Attachment downloaded. */
 		PROCSNG_COL = 7  /* Processing state. */

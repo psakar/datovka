@@ -118,18 +118,19 @@ enum MessageDirection {
 /*
  * Defined roles across the application.
  */
-#define ROLE_ACNT_USER_NAME (Qt::UserRole + 1) /*
+#define ROLE_PLAIN_DISPLAY (Qt::UserRole + 1) /* Low level data. */
+#define ROLE_ACNT_USER_NAME (Qt::UserRole + 2) /*
                                                 * Used to access the user name.
                                                 */
-#define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 2) /*
+#define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 3) /*
                                                   * Used to store number of
                                                   * unread messages.
                                                   */
-#define ROLE_MSGS_DB_ENTRY_TYPE (Qt::UserRole + 3) /*
+#define ROLE_MSGS_DB_ENTRY_TYPE (Qt::UserRole + 4) /*
                                                     * Used to determine the db
                                                     * data type of the column.
                                                     */
-#define ROLE_MSGS_DB_PROXYSORT (Qt::UserRole + 4) /*
+#define ROLE_MSGS_DB_PROXYSORT (Qt::UserRole + 5) /*
                                                    * Used for sorting according
                                                    * to boolean values which
                                                    * are displayed as icons.
