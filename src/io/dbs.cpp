@@ -120,7 +120,7 @@ QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt)
 
 /* ========================================================================= */
 /*
- * Converts date to format to be stored in database.
+ * Converts time to format to be stored in database.
  */
 QString timevalToDbFormat(const struct timeval *tv)
 /* ========================================================================= */
@@ -137,6 +137,22 @@ QString timevalToDbFormat(const struct timeval *tv)
 	//qDebug() << "timeStamp" << ret;
 
 	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts time to QDateTime.
+ */
+QString timevalToDateTime(const struct timeval *tv)
+/* ========================================================================= */
+{
+	Q_ASSERT(NULL != tv);
+	QDateTime timeStamp;
+
+	timeStamp.setTime_t(tv->tv_sec);
+
+	return timeStamp;
 }
 
 

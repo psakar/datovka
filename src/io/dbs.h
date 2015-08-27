@@ -59,10 +59,14 @@ QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt);
 
 
 /*!
- * @brief Converts date to format to be stored in database.
+ * @brief Converts time to format to be stored in database.
  */
 QString timevalToDbFormat(const struct timeval *tv);
 
+/*!
+ * @brief Converts time to QDateTime.
+ */
+QDateTime timevalToDateTime(const struct timeval *tv);
 
 /*!
  * @brief Converts date format to be stored in database.
