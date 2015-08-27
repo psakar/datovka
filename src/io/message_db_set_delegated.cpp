@@ -443,3 +443,285 @@ int MessageDbSet::msgsSntUnreadInYear(const QString &year) const
 
 	return -1;
 }
+
+bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->smsgdtSetAllReceivedLocallyRead(read);
+}
+
+bool MessageDbSet::_yrly_smsgdtSetAllReceivedLocallyRead(bool read)
+{
+	(void) read;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::smsgdtSetAllReceivedLocallyRead(bool read)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_smsgdtSetAllReceivedLocallyRead(read);
+		break;
+	case DO_YEARLY:
+		return _yrly_smsgdtSetAllReceivedLocallyRead(read);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+bool MessageDbSet::_sf_smsgdtSetReceivedYearLocallyRead(const QString &year,
+    bool read)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->smsgdtSetReceivedYearLocallyRead(year, read);
+}
+
+bool MessageDbSet::_yrly_smsgdtSetReceivedYearLocallyRead(const QString &year,
+    bool read)
+{
+	(void) year; (void) read;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::smsgdtSetReceivedYearLocallyRead(const QString &year,
+    bool read)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_smsgdtSetReceivedYearLocallyRead(year, read);
+		break;
+	case DO_YEARLY:
+		return _yrly_smsgdtSetReceivedYearLocallyRead(year, read);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->smsgdtSetWithin90DaysReceivedLocallyRead(read);
+}
+
+bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
+{
+	(void) read;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_smsgdtSetWithin90DaysReceivedLocallyRead(read);
+		break;
+	case DO_YEARLY:
+		return _yrly_smsgdtSetWithin90DaysReceivedLocallyRead(read);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+bool MessageDbSet::_sf_msgSetAllReceivedProcessState(
+    enum MessageProcessState state)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->msgSetAllReceivedProcessState(state);
+}
+
+bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
+    enum MessageProcessState state)
+{
+	(void) state;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::msgSetAllReceivedProcessState(enum MessageProcessState state)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_msgSetAllReceivedProcessState(state);
+		break;
+	case DO_YEARLY:
+		return _yrly_msgSetAllReceivedProcessState(state);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+bool MessageDbSet::_sf_smsgdtSetReceivedYearProcessState(const QString &year,
+    enum MessageProcessState state)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->smsgdtSetReceivedYearProcessState(year, state);
+}
+
+bool MessageDbSet::_yrly_smsgdtSetReceivedYearProcessState(const QString &year,
+    enum MessageProcessState state)
+{
+	(void) year; (void) state;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::smsgdtSetReceivedYearProcessState(const QString &year,
+    enum MessageProcessState state)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_smsgdtSetReceivedYearProcessState(year, state);
+		break;
+	case DO_YEARLY:
+		return _yrly_smsgdtSetReceivedYearProcessState(year, state);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedProcessState(
+    enum MessageProcessState state)
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->smsgdtSetWithin90DaysReceivedProcessState(state);
+}
+
+bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
+    enum MessageProcessState state)
+{
+	(void) state;
+	Q_ASSERT(0);
+	return false;
+}
+
+bool MessageDbSet::smsgdtSetWithin90DaysReceivedProcessState(
+    enum MessageProcessState state)
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_smsgdtSetWithin90DaysReceivedProcessState(state);
+		break;
+	case DO_YEARLY:
+		return _yrly_smsgdtSetWithin90DaysReceivedProcessState(state);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
+}
+
+QList< QVector<QString> > MessageDbSet::_sf_uniqueContacts(void) const
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->uniqueContacts();
+}
+
+QList< QVector<QString> > MessageDbSet::_yrly_uniqueContacts(void) const
+{
+	Q_ASSERT(0);
+	return QList< QVector<QString> >();
+}
+
+QList< QVector<QString> > MessageDbSet::uniqueContacts(void) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_uniqueContacts();
+		break;
+	case DO_YEARLY:
+		return _yrly_uniqueContacts();
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QList< QVector<QString> >();
+}
+
+QStringList MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->getAllMessageIDsFromDB();
+}
+
+QStringList MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
+{
+	Q_ASSERT(0);
+	return QStringList();
+}
+
+QStringList MessageDbSet::getAllMessageIDsFromDB(void) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_getAllMessageIDsFromDB();
+		break;
+	case DO_YEARLY:
+		return _yrly_getAllMessageIDsFromDB();
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QStringList();
+}
+
+QList<qint64> MessageDbSet::_sf_msgsDateInterval(const QDate &fromDate,
+    const QDate &toDate, enum MessageDirection msgDirect) const
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
+}
+
+QList<qint64> MessageDbSet::_yrly_msgsDateInterval(const QDate &fromDate,
+    const QDate &toDate, enum MessageDirection msgDirect) const
+{
+	(void) fromDate; (void) toDate; (void) msgDirect;
+	Q_ASSERT(0);
+	return QList<qint64>();
+}
+
+QList<qint64> MessageDbSet::msgsDateInterval(const QDate &fromDate,
+    const QDate &toDate, enum MessageDirection msgDirect) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_msgsDateInterval(fromDate, toDate, msgDirect);
+		break;
+	case DO_YEARLY:
+		return _yrly_msgsDateInterval(fromDate, toDate, msgDirect);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QList<qint64>();
+}

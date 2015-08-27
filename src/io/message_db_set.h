@@ -388,6 +388,86 @@ public: /* Database function that have been delegate to the container. */
 	 */
 	int msgsSntUnreadInYear(const QString &year) const;
 
+	/*!
+	 * @brief Set message read locally for all received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set message read locally for received messages in given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
+	    bool read = true);
+
+	/*!
+	 * @brief Set message read locally for recently received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set process state of received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of received messages in given year.
+	 *
+	 * @param[in] year   Year.
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetReceivedYearProcessState(const QString &year,
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of recently received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetWithin90DaysReceivedProcessState(
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Return contacts from message db.
+	 *
+	 * @return List of vectors containing recipientId, recipientName,
+	 *     recipentAddress.
+	 */
+	QList< QVector<QString> > uniqueContacts(void) const;
+
+	/*!
+	 * @brief Return all message ID from database.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsFromDB(void) const;
+
+	/*!
+	 * @brief Return list of message ids corresponding to given date
+	 *     interval.
+	 *
+	 * @param[in] fromDate  Start date.
+	 * @param[in] toDate    Stop date.
+	 * @param[in] sent      True for sent messages, false for received.
+	 * @return List of message ids. Empty list on error.
+	 */
+	QList<qint64> msgsDateInterval(const QDate &fromDate,
+	    const QDate &toDate, enum MessageDirection msgDirect) const;
+
 private:
 	inline DbMsgsTblModel *_sf_msgsRcvdModel(void);
 	inline DbMsgsTblModel *_yrly_msgsRcvdModel(void);
@@ -430,6 +510,33 @@ private:
 
 	inline int _sf_msgsSntUnreadInYear(const QString &year) const;
 	inline int _yrly_msgsSntUnreadInYear(const QString &year) const;
+
+	inline bool _sf_smsgdtSetAllReceivedLocallyRead(bool read);
+	inline bool _yrly_smsgdtSetAllReceivedLocallyRead(bool read);
+
+	inline bool _sf_smsgdtSetReceivedYearLocallyRead(const QString &year, bool read);
+	inline bool _yrly_smsgdtSetReceivedYearLocallyRead(const QString &year, bool read);
+
+	inline bool _sf_smsgdtSetWithin90DaysReceivedLocallyRead(bool read);
+	inline bool _yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read);
+
+	inline bool _sf_msgSetAllReceivedProcessState(enum MessageProcessState state);
+	inline bool _yrly_msgSetAllReceivedProcessState(enum MessageProcessState state);
+
+	inline bool _sf_smsgdtSetReceivedYearProcessState(const QString &year, enum MessageProcessState state);
+	inline bool _yrly_smsgdtSetReceivedYearProcessState(const QString &year, enum MessageProcessState state);
+
+	inline bool _sf_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
+	inline bool _yrly_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
+
+	inline QList< QVector<QString> > _sf_uniqueContacts(void) const;
+	inline QList< QVector<QString> > _yrly_uniqueContacts(void) const;
+
+	inline QStringList _sf_getAllMessageIDsFromDB(void) const;
+	inline QStringList _yrly_getAllMessageIDsFromDB(void) const;
+
+	inline QList<qint64> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
+	inline QList<qint64> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 };
 
 #endif /* _MESSAGE_DB_SET_H_ */

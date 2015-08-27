@@ -280,40 +280,6 @@ public:
 	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
 
 	/*!
-	 * @brief Set message read locally for all received messages.
-	 *
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
-
-	/*!
-	 * @brief Set message read locally for received messages in given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
-	    bool read = true);
-
-	/*!
-	 * @brief Set message read locally for recently received messages.
-	 *
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
-
-	/*!
-	 * @brief Return contacts from message db.
-	 *
-	 * @return List of vectors containing recipientId, recipientName,
-	 *     recipentAddress.
-	 */
-	QList< QVector<QString> > uniqueContacts(void) const;
-
-	/*!
 	 * @brief Return HTML formatted message description.
 	 *
 	 * @param[in]     dmId          Message identifier.
@@ -540,13 +506,6 @@ public:
 	    int messageType);
 
 	/*!
-	 * @brief Return all message ID from database.
-	 *
-	 * @return message id list.
-	 */
-	QStringList getAllMessageIDsFromDB(void) const;
-
-	/*!
 	 * @brief Check whether whole message is stored in database.
 	 *
 	 * @param[in] dmId  Message identifier.
@@ -619,18 +578,6 @@ public:
 	bool msgsDeleteMessageData(qint64 dmId) const;
 
 	/*!
-	 * @brief Return list of message ids corresponding to given date
-	 *     interval.
-	 *
-	 * @param[in] fromDate  Start date.
-	 * @param[in] toDate    Stop date.
-	 * @param[in] sent      True for sent messages, false for received.
-	 * @return List of message ids. Empty list on error.
-	 */
-	QList<qint64> msgsDateInterval(const QDate &fromDate,
-	    const QDate &toDate, enum MessageDirection msgDirect) const;
-
-	/*!
 	 * @brief Return some message items in order to export correspondence
 	 *     to HTML.
 	 *
@@ -677,33 +624,6 @@ public:
 	 * @return Message processing state, -1 on error.
 	 */
 	int msgGetProcessState(qint64 dmId) const;
-
-	/*!
-	 * @brief Set process state of received messages.
-	 *
-	 * @param[in] state  Message state to be set.
-	 * @return True if operation successful.
-	 */
-	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
-
-	/*!
-	 * @brief Set process state of received messages in given year.
-	 *
-	 * @param[in] year   Year.
-	 * @param[in] state  Message state to be set.
-	 * @return True if operation successful.
-	 */
-	bool smsgdtSetReceivedYearProcessState(const QString &year,
-	    enum MessageProcessState state);
-
-	/*!
-	 * @brief Set process state of recently received messages.
-	 *
-	 * @param[in] state  Message state to be set.
-	 * @return True if operation successful.
-	 */
-	bool smsgdtSetWithin90DaysReceivedProcessState(
-	    enum MessageProcessState state);
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.
@@ -850,6 +770,86 @@ public: /* May become protected. */
 	 * @return Number of unread messages, -1 on error.
 	 */
 	int msgsSntUnreadInYear(const QString &year) const;
+
+	/*!
+	 * @brief Set message read locally for all received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set message read locally for received messages in given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
+	    bool read = true);
+
+	/*!
+	 * @brief Set message read locally for recently received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set process state of received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of received messages in given year.
+	 *
+	 * @param[in] year   Year.
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetReceivedYearProcessState(const QString &year,
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Set process state of recently received messages.
+	 *
+	 * @param[in] state  Message state to be set.
+	 * @return True if operation successful.
+	 */
+	bool smsgdtSetWithin90DaysReceivedProcessState(
+	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Return contacts from message db.
+	 *
+	 * @return List of vectors containing recipientId, recipientName,
+	 *     recipentAddress.
+	 */
+	QList< QVector<QString> > uniqueContacts(void) const;
+
+	/*!
+	 * @brief Return all message ID from database.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsFromDB(void) const;
+
+	/*!
+	 * @brief Return list of message ids corresponding to given date
+	 *     interval.
+	 *
+	 * @param[in] fromDate  Start date.
+	 * @param[in] toDate    Stop date.
+	 * @param[in] sent      True for sent messages, false for received.
+	 * @return List of message ids. Empty list on error.
+	 */
+	QList<qint64> msgsDateInterval(const QDate &fromDate,
+	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 protected: /* These function are used from within a database container. */
 	/*!
