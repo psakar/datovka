@@ -34,7 +34,7 @@
 #include "src/log/log.h"
 
 MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
-    bool testing, Organisation organisation)
+    bool testing, enum Organisation organisation)
     : QMap<QString, MessageDb *>(),
     m_primaryKey(primaryKey),
     m_testing(testing),
@@ -155,7 +155,7 @@ bool MessageDbSet::moveToLocation(const QString &newLocDir)
 }
 
 bool MessageDbSet::reopenLocation(const QString &newLocDir,
-    Organisation organisation)
+    enum Organisation organisation)
 {
 	if (m_organisation == DO_UNKNOWN) {
 		return false;
@@ -283,7 +283,7 @@ MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
 }
 
 MessageDbSet *MessageDbSet::createNew(const QString &locDir,
-    const QString &primaryKey, bool testing, Organisation organisation,
+    const QString &primaryKey, bool testing, enum Organisation organisation,
     bool mustExist)
 {
 	if (organisation == DO_UNKNOWN) {
@@ -377,10 +377,10 @@ bool fileNameMatchesYearly(const QString &fileName, const QString &primaryKey,
 	return re.indexIn(fileName) > -1;
 }
 
-MessageDbSet::Organisation MessageDbSet::dbOrganisation(const QString &locDir,
-    const QString &primaryKey, bool testing)
+enum MessageDbSet::Organisation MessageDbSet::dbOrganisation(
+    const QString &locDir, const QString &primaryKey, bool testing)
 {
-	Organisation org = DO_UNKNOWN;
+	enum Organisation org = DO_UNKNOWN;
 
 	QString singleFile;
 	QStringList yearlyFiles;
@@ -448,7 +448,7 @@ QString fileNameSecondaryKeyYearly(const QString &fileName)
 }
 
 QString MessageDbSet::secondaryKeyFromFileName(const QString &fileName,
-    Organisation organisation)
+    enum Organisation organisation)
 {
 	if (fileName.isEmpty() || (organisation == DO_UNKNOWN)) {
 		return QString();
@@ -470,7 +470,7 @@ QString MessageDbSet::secondaryKeyFromFileName(const QString &fileName,
 }
 
 QStringList MessageDbSet::existingDbFileNamesInLocation(const QString &locDir,
-    const QString &primaryKey, bool testing, Organisation organisation,
+    const QString &primaryKey, bool testing, enum Organisation organisation,
     bool filesOnly)
 {
 	QStringList matchingFiles;
@@ -515,7 +515,7 @@ QStringList MessageDbSet::existingDbFileNamesInLocation(const QString &locDir,
 }
 
 QString MessageDbSet::constructKey(const QString &primaryKey,
-    const QString &secondaryKey, Organisation organisation)
+    const QString &secondaryKey, enum Organisation organisation)
 {
 	if (organisation == DO_UNKNOWN) {
 		return QString();
@@ -535,7 +535,8 @@ int MessageDbSet::checkExistingDbFile(const QString &locDir,
 
 	QStringList fileNames(existingDbFileNamesInLocation(locDir,
 	    primaryKey, testing, DO_UNKNOWN, false));
-	Organisation organisation(dbOrganisation(locDir, primaryKey, testing));
+	enum Organisation organisation(dbOrganisation(locDir, primaryKey,
+	    testing));
 
 	if (!fileNames.isEmpty() && (organisation == DO_UNKNOWN)) {
 		return MDS_ERR_MULTIPLE;
@@ -555,7 +556,7 @@ int MessageDbSet::checkExistingDbFile(const QString &locDir,
 
 QString MessageDbSet::constructDbFileName(const QString &locDir,
     const QString &primaryKey, const QString &secondaryKey,
-    bool testing, Organisation organisation)
+    bool testing, enum Organisation organisation)
 {
 	QString key = constructKey(primaryKey, secondaryKey, organisation);
 	if (key.isNull()) {
@@ -593,7 +594,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 
 	if (!create && (m_organisation == DO_UNKNOWN)) {
 		/* Try to determine the structure of the present database. */
-		Organisation org = dbOrganisation(m_locDir, m_primaryKey,
+		enum Organisation org = dbOrganisation(m_locDir, m_primaryKey,
 		    m_testing);
 		if (org == DO_UNKNOWN) {
 			logErrorNL("The organisation structure of the database '%s' in '%s' could not be determined.",

@@ -250,6 +250,7 @@ SOURCES += src/common.cpp \
     src/io/message_db.cpp \
     src/io/message_db_set.cpp \
     src/io/message_db_set_container.cpp \
+    src/io/message_db_set_delegated.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \

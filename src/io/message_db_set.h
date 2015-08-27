@@ -98,7 +98,7 @@ public:
 	 * @return True if database was re-opened.
 	 */
 	bool reopenLocation(const QString &newLocDir,
-	    Organisation organisation);
+	    enum Organisation organisation);
 
 	/*!
 	 * @brief Delete associated message db files in location.
@@ -132,7 +132,7 @@ public:
 	 */
 	static
 	MessageDbSet *createNew(const QString &locDir,
-	    const QString &primaryKey, bool testing, Organisation organisation,
+	    const QString &primaryKey, bool testing, enum Organisation organisation,
 	    bool mustExist);
 
 	/*!
@@ -144,7 +144,7 @@ public:
 	 * @return    Organisation type.
 	 */
 	static
-	Organisation dbOrganisation(const QString &locDir,
+	enum Organisation dbOrganisation(const QString &locDir,
 	    const QString &primaryKey, bool testing);
 
 	/*!
@@ -156,7 +156,7 @@ public:
 	 */
 	static
 	QString secondaryKeyFromFileName(const QString &fileName,
-	    Organisation organisation);
+	    enum Organisation organisation);
 
 	/*!
 	 * @brief Returns the database file names stored in the location.
@@ -173,8 +173,8 @@ public:
 	 */
 	static
 	QStringList existingDbFileNamesInLocation(const QString &locDir,
-	    const QString &primaryKey, bool testing, Organisation organisation,
-	    bool filesOnly);
+	    const QString &primaryKey, bool testing,
+	    enum Organisation organisation, bool filesOnly);
 
 	/*!
 	 * @brief Construct key from primary and secondary key.
@@ -186,7 +186,7 @@ public:
 	 */
 	static
 	QString constructKey(const QString &primaryKey,
-	    const QString &secondaryKey, Organisation organisation);
+	    const QString &secondaryKey, enum Organisation organisation);
 
 	/*!
 	 * @brief Check existing databases for basic faults.
@@ -213,7 +213,7 @@ public:
 	static
 	QString constructDbFileName(const QString &locDir,
 	    const QString &primaryKey, const QString &secondaryKey,
-	    bool testing, Organisation organisation);
+	    bool testing, enum Organisation organisation);
 
 	/*!
 	 * @brief Database driver name.
@@ -239,7 +239,7 @@ private:
 	 * @param[in] organisation How to organise the database files.
 	 */
 	MessageDbSet(const QString &locDir, const QString &primaryKey,
-	    bool testing, Organisation organisation);
+	    bool testing, enum Organisation organisation);
 
 	/*!
 	 * @brief Accesses message database file matching the secondary key.
@@ -263,7 +263,173 @@ private:
 	const QString m_primaryKey; /*!< Used for accessing the database. */
 	const bool m_testing; /*!< Whether those are a testing databases. */
 	QString m_locDir; /*!< Directory where the files reside. */
-	Organisation m_organisation; /*!< How the database is organised. */
+	enum Organisation m_organisation; /*!< How the database is organised. */
+
+public: /* Database function that have been delegate to the container. */
+	/*!
+	 * @brief Return all received messages model.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsRcvdModel(void);
+
+	/*!
+	 * @brief Return received messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsRcvdWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return received messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsRcvdInYearModel(const QString &year);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years.
+	 */
+	QStringList msgsRcvdYears(enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years and counts.
+	 */
+	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return number of unread messages received within past 90
+	 *     days.
+	 *
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsRcvdUnreadWithin90Days(void) const;
+
+	/*!
+	 * @brief Return number of unread received messages in year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsRcvdUnreadInYear(const QString &year) const;
+
+	/*!
+	 * @brief Return all sent messages model.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsSntModel(void);
+
+	/*!
+	 * @brief Return sent messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsSntWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return sent messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel *msgsSntInYearModel(const QString &year);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years.
+	 */
+	QStringList msgsSntYears(enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years and counts.
+	 */
+	QList< QPair<QString, int> > msgsSntYearlyCounts(
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return number of unread messages sent within past 90
+	 *     days.
+	 *
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsSntUnreadWithin90Days(void) const;
+
+	/*!
+	 * @brief Return number of unread sent messages in year.
+	 *
+	 * @param year  Year number.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsSntUnreadInYear(const QString &year) const;
+
+private:
+	inline DbMsgsTblModel *_sf_msgsRcvdModel(void);
+	inline DbMsgsTblModel *_yrly_msgsRcvdModel(void);
+
+	inline DbMsgsTblModel *_sf_msgsRcvdWithin90DaysModel(void);
+	inline DbMsgsTblModel *_yrly_msgsRcvdWithin90DaysModel(void);
+
+	inline DbMsgsTblModel *_sf_msgsRcvdInYearModel(const QString &year);
+	inline DbMsgsTblModel *_yrly_msgsRcvdInYearModel(const QString &year);
+
+	inline QStringList _sf_msgsRcvdYears(enum Sorting sorting) const;
+	inline QStringList _yrly_msgsRcvdYears(enum Sorting sorting) const;
+
+	inline QList< QPair<QString, int> > _sf_msgsRcvdYearlyCounts(enum Sorting sorting) const;
+	inline QList< QPair<QString, int> > _yrly_msgsRcvdYearlyCounts(enum Sorting sorting) const;
+
+	inline int _sf_msgsRcvdUnreadWithin90Days(void) const;
+	inline int _yrly_msgsRcvdUnreadWithin90Days(void) const;
+
+	inline int _sf_msgsRcvdUnreadInYear(const QString &year) const;
+	inline int _yrly_msgsRcvdUnreadInYear(const QString &year) const;
+
+	inline DbMsgsTblModel *_sf_msgsSntModel(void);
+	inline DbMsgsTblModel *_yrly_msgsSntModel(void);
+
+	inline DbMsgsTblModel *_sf_msgsSntWithin90DaysModel(void);
+	inline DbMsgsTblModel *_yrly_msgsSntWithin90DaysModel(void);
+
+	inline DbMsgsTblModel *_sf_msgsSntInYearModel(const QString &year);
+	inline DbMsgsTblModel *_yrly_msgsSntInYearModel(const QString &year);
+
+	inline QStringList _sf_msgsSntYears(enum Sorting sorting) const;
+	inline QStringList _yrly_msgsSntYears(enum Sorting sorting) const;
+
+	inline QList< QPair<QString, int> > _sf_msgsSntYearlyCounts(enum Sorting sorting) const;
+	inline QList< QPair<QString, int> > _yrly_msgsSntYearlyCounts(enum Sorting sorting) const;
+
+	inline int _sf_msgsSntUnreadWithin90Days(void) const;
+	inline int _yrly_msgsSntUnreadWithin90Days(void) const;
+
+	inline int _sf_msgsSntUnreadInYear(const QString &year) const;
+	inline int _yrly_msgsSntUnreadInYear(const QString &year) const;
 };
 
 #endif /* _MESSAGE_DB_SET_H_ */

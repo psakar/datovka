@@ -235,128 +235,6 @@ public:
 	bool rollbackTransaction(const QString &savePointName = QString());
 
 	/*!
-	 * @brief Return all received messages model.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdModel(void);
-
-	/*!
-	 * @brief Return received messages within past 90 days.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
-
-	/*!
-	 * @brief Return received messages within given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsRcvdYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return number of unread messages received within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsRcvdUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread received messages in year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsRcvdUnreadInYear(const QString &year) const;
-
-	/*!
-	 * @brief Return all sent messages model.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntModel(void);
-
-	/*!
-	 * @brief Return sent messages within past 90 days.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
-
-	/*!
-	 * @brief Return sent messages within given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsSntYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return number of unread messages sent within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread sent messages in year.
-	 *
-	 * @param year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadInYear(const QString &year) const;
-
-	/*!
 	 * @brief Generate information for reply dialogue.
 	 *
 	 * @param[in] dmId  Message id.
@@ -850,18 +728,130 @@ public:
 	static
 	const QVector<QString> sentItemIds;
 
-
-protected:
+public: /* May become protected. */
 	/*!
-	 * @brief Adds _dmType column.
+	 * @brief Return all received messages model.
 	 *
-	 * @return True on success.
+	 * @return Pointer to model, 0 on failure.
 	 *
-	 * @note This code may be needed to update database between different
-	 * versions.
+	 * @note The model must not be freed.
 	 */
-	bool addDmtypeColumn(void);
+	DbMsgsTblModel * msgsRcvdModel(void);
 
+	/*!
+	 * @brief Return received messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return received messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years.
+	 */
+	QStringList msgsRcvdYears(enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years and counts.
+	 */
+	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return number of unread messages received within past 90
+	 *     days.
+	 *
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsRcvdUnreadWithin90Days(void) const;
+
+	/*!
+	 * @brief Return number of unread received messages in year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsRcvdUnreadInYear(const QString &year) const;
+
+	/*!
+	 * @brief Return all sent messages model.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntModel(void);
+
+	/*!
+	 * @brief Return sent messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return sent messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years.
+	 */
+	QStringList msgsSntYears(enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param[in] sorting  Sorting.
+	 * @return List of years and counts.
+	 */
+	QList< QPair<QString, int> > msgsSntYearlyCounts(
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return number of unread messages sent within past 90
+	 *     days.
+	 *
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsSntUnreadWithin90Days(void) const;
+
+	/*!
+	 * @brief Return number of unread sent messages in year.
+	 *
+	 * @param year  Year number.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsSntUnreadInYear(const QString &year) const;
+
+protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Close database file.
 	 */
@@ -899,16 +889,6 @@ protected:
 	 */
 	bool checkDb(bool quick);
 
-	/*!
-	 * @brief Add/update message certificate in database.
-	 *
-	 * @brief[in] dmId       Message identifier.
-	 * @brief[in] crtBase64  Base64-encoded certificate.
-	 * @return True on success.
-	 */
-	bool msgsInsertUpdateMessageCertBase64(qint64 dmId,
-	    const QByteArray &crtBase64);
-
 private:
 	static
 	const QVector<QString> msgPrintedAttribs;
@@ -920,6 +900,16 @@ private:
 	QSqlDatabase m_db; /*!< Message database. */
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
+
+	/*!
+	 * @brief Adds _dmType column.
+	 *
+	 * @return True on success.
+	 *
+	 * @note This code may be needed to update database between different
+	 * versions.
+	 */
+	bool addDmtypeColumn(void);
 
 	/*!
 	 * @brief Create empty tables if tables do not already exist.
@@ -968,6 +958,16 @@ private:
 	 */
 	bool msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
+
+	/*!
+	 * @brief Add/update message certificate in database.
+	 *
+	 * @brief[in] dmId       Message identifier.
+	 * @brief[in] crtBase64  Base64-encoded certificate.
+	 * @return True on success.
+	 */
+	bool msgsInsertUpdateMessageCertBase64(qint64 dmId,
+	    const QByteArray &crtBase64);
 
 	friend class MessageDbSet;
 	friend class DbContainer;
