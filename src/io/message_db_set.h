@@ -122,6 +122,15 @@ public:
 	MessageDb *accessMessageDb(const QDateTime &deliveryTime, bool write);
 
 	/*!
+	 * @brief Returns list of file paths where the database files reside.
+	 *
+	 * @note If the database is stored in memory, then a list containing
+	 * a single string indicating memory location is returned.
+	 * @return List of file location.
+	 */
+	QStringList fileNames(void) const;
+
+	/*!
 	 * @brief Creates a new object.
 	 *
 	 * @param[in] locDir       Directory that holds the database files.

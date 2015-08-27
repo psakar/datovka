@@ -282,6 +282,37 @@ MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
 	return _accessMessageDb(secondary, write);
 }
 
+QStringList MessageDbSet::fileNames(void) const
+{
+	QStringList fileList;
+
+	bool inFiles = false;
+	bool inMemory = false;
+
+	QMap<QString, MessageDb *>::const_iterator i;
+	for (i = this->begin(); i != this->end(); ++i) {
+		QString fileName = i.value()->fileName();
+		if (fileName == MessageDb::memoryLocation) {
+			inMemory = true;
+		} else {
+			inFiles = true;
+		}
+		fileList.append(fileName);
+	}
+
+	if (inMemory && inFiles) {
+		Q_ASSERT(0);
+	}
+
+	if (inFiles) {
+		fileList.sort();
+	} else if (inMemory) {
+		fileList = QStringList(MessageDb::memoryLocation);
+	}
+
+	return fileList;
+}
+
 MessageDbSet *MessageDbSet::createNew(const QString &locDir,
     const QString &primaryKey, bool testing, enum Organisation organisation,
     bool mustExist)
