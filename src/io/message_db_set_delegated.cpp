@@ -664,19 +664,19 @@ QList< QVector<QString> > MessageDbSet::uniqueContacts(void) const
 	return QList< QVector<QString> >();
 }
 
-QStringList MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
+QList<MessageDb::MsgId> MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
 {
 	Q_ASSERT(this->size() == 1);
 	return this->first()->getAllMessageIDsFromDB();
 }
 
-QStringList MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
+QList<MessageDb::MsgId> MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
 {
 	Q_ASSERT(0);
-	return QStringList();
+	return QList<MessageDb::MsgId>();
 }
 
-QStringList MessageDbSet::getAllMessageIDsFromDB(void) const
+QList<MessageDb::MsgId> MessageDbSet::getAllMessageIDsFromDB(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -690,25 +690,25 @@ QStringList MessageDbSet::getAllMessageIDsFromDB(void) const
 		break;
 	}
 
-	return QStringList();
+	return QList<MessageDb::MsgId>();
 }
 
-QList<qint64> MessageDbSet::_sf_msgsDateInterval(const QDate &fromDate,
+QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(const QDate &fromDate,
     const QDate &toDate, enum MessageDirection msgDirect) const
 {
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
 }
 
-QList<qint64> MessageDbSet::_yrly_msgsDateInterval(const QDate &fromDate,
+QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(const QDate &fromDate,
     const QDate &toDate, enum MessageDirection msgDirect) const
 {
 	(void) fromDate; (void) toDate; (void) msgDirect;
 	Q_ASSERT(0);
-	return QList<qint64>();
+	return QList<MessageDb::MsgId>();
 }
 
-QList<qint64> MessageDbSet::msgsDateInterval(const QDate &fromDate,
+QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
     const QDate &toDate, enum MessageDirection msgDirect) const
 {
 	switch (m_organisation) {
@@ -723,5 +723,5 @@ QList<qint64> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 		break;
 	}
 
-	return QList<qint64>();
+	return QList<MessageDb::MsgId>();
 }

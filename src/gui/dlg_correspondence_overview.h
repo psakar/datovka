@@ -43,8 +43,8 @@ class DlgCorrespondenceOverview : public QDialog,
 public:
 	class ExportedMessageList {
 	public:
-		QList<qint64> sentdmIDs;
-		QList<qint64> receivedmIDs;
+		QList<MessageDb::MsgId> sentdmIDs;
+		QList<MessageDb::MsgId> receivedmIDs;
 	};
 
 	DlgCorrespondenceOverview(const MessageDb &db, const QString &userName,

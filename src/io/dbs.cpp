@@ -144,7 +144,7 @@ QString timevalToDbFormat(const struct timeval *tv)
 /*
  * Converts time to QDateTime.
  */
-QString timevalToDateTime(const struct timeval *tv)
+QDateTime timevalToDateTime(const struct timeval *tv)
 /* ========================================================================= */
 {
 	Q_ASSERT(NULL != tv);

@@ -9350,19 +9350,19 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		MessageDb *messageDb = accountMessageDb(userName, this);
 		Q_ASSERT(0 != messageDb);
 
-		QStringList msgIdList = messageDb->getAllMessageIDsFromDB();
+		QList<MessageDb::MsgId> msgIdList = messageDb->getAllMessageIDsFromDB();
 		msgCnt = msgIdList.count();
 
 		for (int i = 0; i < msgCnt; ++i) {
 			tstData = messageDb->msgsTimestampRaw(
-			    msgIdList.at(i).toLongLong());
+			    msgIdList.at(i).dmId);
 			if (tstData.isEmpty()) {
-				errorMsg.append(msgIdList.at(i));
+				errorMsg.append(QString::number(msgIdList.at(i).dmId));
 				continue;
 			}
 			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
 			    globPref.timestamp_expir_before_days)) {
-				expirMsg.append(msgIdList.at(i));
+				expirMsg.append(QString::number(msgIdList.at(i).dmId));
 			}
 		}
 

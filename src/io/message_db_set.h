@@ -463,7 +463,7 @@ public: /* Database function that have been delegate to the container. */
 	 *
 	 * @return message id list.
 	 */
-	QStringList getAllMessageIDsFromDB(void) const;
+	QList<MessageDb::MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -474,7 +474,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @param[in] sent      True for sent messages, false for received.
 	 * @return List of message ids. Empty list on error.
 	 */
-	QList<qint64> msgsDateInterval(const QDate &fromDate,
+	QList<MessageDb::MsgId> msgsDateInterval(const QDate &fromDate,
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 private:
@@ -541,11 +541,11 @@ private:
 	inline QList< QVector<QString> > _sf_uniqueContacts(void) const;
 	inline QList< QVector<QString> > _yrly_uniqueContacts(void) const;
 
-	inline QStringList _sf_getAllMessageIDsFromDB(void) const;
-	inline QStringList _yrly_getAllMessageIDsFromDB(void) const;
+	inline QList<MessageDb::MsgId> _sf_getAllMessageIDsFromDB(void) const;
+	inline QList<MessageDb::MsgId> _yrly_getAllMessageIDsFromDB(void) const;
 
-	inline QList<qint64> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
-	inline QList<qint64> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
+	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
+	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 };
 
 #endif /* _MESSAGE_DB_SET_H_ */

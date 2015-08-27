@@ -28,6 +28,7 @@
 
 #include <QAbstractButton>
 #include <QAbstractTableModel>
+#include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
 #include <QMap>
@@ -170,6 +171,24 @@ public:
 	enum MessageType {
 		TYPE_RECEIVED = 1, /*!< One is received. */
 		TYPE_SENT = 2 /*!< Two is sent. */
+	};
+
+	/*!
+	 * @brief Message identifier.
+	 *
+	 * @note Messages are identified according to their id and delivery
+	 *     time.
+	 */
+	class MsgId {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QDateTime deliveryTime; /*!< Message delivery time. */
+
+		MsgId(void) : dmId(-1), deliveryTime() { }
+		MsgId(qint64 id, const QDateTime &dTime) : dmId(id), deliveryTime(dTime) { }
+		~MsgId(void) { }
+
+		bool isValid(void) const { return (dmId >= 0) && (deliveryTime.isValid()); }
 	};
 
 	MessageDb(const QString &dbDriverType, const QString &connectionName,
@@ -837,7 +856,7 @@ public: /* May become protected. */
 	 *
 	 * @return message id list.
 	 */
-	QStringList getAllMessageIDsFromDB(void) const;
+	QList<MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -848,7 +867,7 @@ public: /* May become protected. */
 	 * @param[in] sent      True for sent messages, false for received.
 	 * @return List of message ids. Empty list on error.
 	 */
-	QList<qint64> msgsDateInterval(const QDate &fromDate,
+	QList<MsgId> msgsDateInterval(const QDate &fromDate,
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 protected: /* These function are used from within a database container. */

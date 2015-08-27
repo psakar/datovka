@@ -365,8 +365,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Sent") << "</h2>\n";
 
-		foreach (qint64 dmId, m_messages.sentdmIDs) {
-			f << msgInHtml(dmId);
+		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			f << msgInHtml(mId.dmId);
 		}
 	}
 
@@ -375,8 +375,8 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Received") << "</h2>\n";
 
-		foreach (qint64 dmId, m_messages.receivedmIDs) {
-			f << msgInHtml(dmId);
+		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			f << msgInHtml(mId.dmId);
 		}
 	}
 
@@ -423,15 +423,15 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 
 	/* sent messages */
 	if (this->sentCheckBox->isChecked()) {
-		foreach (qint64 dmId, m_messages.sentdmIDs) {
-			f << msgInCsv(dmId) + "\n";
+		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			f << msgInCsv(mId.dmId) + "\n";
 		}
 	}
 
 	/* received messages */
 	if (this->receivedCheckBox->isChecked()) {
-		foreach (qint64 dmId, m_messages.receivedmIDs) {
-			f << msgInCsv(dmId) + "\n";
+		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			f << msgInCsv(mId.dmId) + "\n";
 		}
 	}
 
@@ -553,22 +553,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.sentdmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName, false)) {
-					qDebug() << "DDZ" << dmId
+				if (!exportMessageAsZFO(mId.dmId, fileName, false)) {
+					qDebug() << "DDZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain data necessary for ZFO "
 					    "export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successMsgZFOCnt++;
@@ -578,22 +578,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.receivedmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName, false)) {
-					qDebug() << "DDZ" << dmId
+				if (!exportMessageAsZFO(mId.dmId, fileName, false)) {
+					qDebug() << "DDZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain data necessary for ZFO "
 					    "export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successMsgZFOCnt++;
@@ -610,22 +610,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.sentdmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName, true)) {
-					qDebug() << "DDZ" << dmId
+				if (!exportMessageAsZFO(mId.dmId, fileName, true)) {
+					qDebug() << "DDZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain deivery info data "
 					    "necessary for ZFO export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successDelInfoZFOCnt++;
@@ -635,22 +635,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.receivedmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
-				if (!exportMessageAsZFO(dmId, fileName, true)) {
-					qDebug() << "DDZ" << dmId
+				if (!exportMessageAsZFO(mId.dmId, fileName, true)) {
+					qDebug() << "DDZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain deivery info data "
 					    "necessary for ZFO export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successDelInfoZFOCnt++;
@@ -666,21 +666,21 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.sentdmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
-				if (!exportMessageAsPDF(dmId, fileName, false)) {
-					qDebug() << "OZ" << dmId;
+				if (!exportMessageAsPDF(mId.dmId, fileName, false)) {
+					qDebug() << "OZ" << mId.dmId;
 					errorText = tr("Message '%1' does not "
 					    "contain message envelope data "
 					    "necessary for PDF export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successEnvelopePdfCnt++;
@@ -690,22 +690,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.receivedmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
-				if (!exportMessageAsPDF(dmId, fileName, false)) {
-					qDebug() << "OZ" << dmId
+				if (!exportMessageAsPDF(mId.dmId, fileName, false)) {
+					qDebug() << "OZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain message envelope data "
 					    "necessary for PDF export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 				} else {
 					successEnvelopePdfCnt++;
 				}
@@ -720,22 +720,22 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.sentdmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
-				if (!exportMessageAsPDF(dmId, fileName, true)) {
-					qDebug() << "DD" << dmId
+				if (!exportMessageAsPDF(mId.dmId, fileName, true)) {
+					qDebug() << "DD" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain delivery info data "
 					    "necessary for PDF export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successDelInfoPdfCnt++;
@@ -745,22 +745,22 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (qint64 dmId, m_messages.receivedmIDs) {
-				pair = m_messDb.msgsAcceptTimeAnnotation(dmId);
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+				pair = m_messDb.msgsAcceptTimeAnnotation(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
 				    pair.first, pair.second,
-				    QString::number(dmId), m_dbId, m_userName,
+				    QString::number(mId.dmId), m_dbId, m_userName,
 				    "");
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
-				if (!exportMessageAsPDF(dmId, fileName, true)) {
-					qDebug() << "DD" << dmId
+				if (!exportMessageAsPDF(mId.dmId, fileName, true)) {
+					qDebug() << "DD" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain delivery info data "
 					    "necessary for PDF export.").
-					    arg(QString::number(dmId));
+					    arg(QString::number(mId.dmId));
 					errorList.append(errorText);
 				} else {
 					successDelInfoPdfCnt++;

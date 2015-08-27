@@ -4024,12 +4024,12 @@ fail:
 /*
  * Return all message ID from database.
  */
-QStringList MessageDb::getAllMessageIDsFromDB(void) const
+QList<MessageDb::MsgId> MessageDb::getAllMessageIDsFromDB(void) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT dmID FROM messages";
-	QStringList msgIsList;
+	QString queryStr = "SELECT dmID, dmDeliveryTime FROM messages";
+	QList<MessageDb::MsgId> msgIdList;
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -4040,13 +4040,16 @@ QStringList MessageDb::getAllMessageIDsFromDB(void) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			msgIsList.append(query.value(0).toString());
+			msgIdList.append(MessageDb::MsgId(
+			    query.value(0).toLongLong(),
+			    dateTimeFromDbFormat(
+			        query.value(1).toString())));
 			query.next();
 		}
 	}
-	return msgIsList;
+	return msgIdList;
 fail:
-	return QStringList();
+	return QList<MessageDb::MsgId>();
 }
 
 
@@ -4421,7 +4424,7 @@ fail:
  * Return list of message ids corresponding to given date
  *     interval.
  */
-QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
+QList<MessageDb::MsgId> MessageDb::msgsDateInterval(const QDate &fromDate,
     const QDate &toDate, enum MessageDirection msgDirect) const
 /* ========================================================================= */
 {
@@ -4429,9 +4432,9 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 
 	QSqlQuery query(m_db);
 	QString queryStr;
-	QList<qint64> dmIDs;
+	QList<MessageDb::MsgId> dmIDs;
 
-	queryStr = "SELECT dmID "
+	queryStr = "SELECT dmID, dmDeliveryTime "
 	    "FROM messages AS m LEFT JOIN supplementary_message_data "
 	    "AS s ON (m.dmID = s.message_id) WHERE "
 	    "message_type = :message_type AND "
@@ -4452,7 +4455,10 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			dmIDs.append(query.value(0).toLongLong());
+			dmIDs.append(MessageDb::MsgId(
+			    query.value(0).toLongLong(),
+			    dateTimeFromDbFormat(
+			        query.value(1).toString())));
 			query.next();
 		}
 	} else {
@@ -4464,7 +4470,7 @@ QList<qint64> MessageDb::msgsDateInterval(const QDate &fromDate,
 	return dmIDs;
 
 fail:
-	return QList<qint64>();
+	return QList<MessageDb::MsgId>();
 }
 
 
