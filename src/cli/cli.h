@@ -28,8 +28,9 @@
 #include <QApplication>
 #include <QDebug>
 
-#define CLI_RET_ERROR_CODE -1
-#define CLI_RET_OK_CODE 0
+
+#define CLI_EXIT_ERROR 1
+#define CLI_EXIT_OK 0
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
 
@@ -54,6 +55,18 @@
 #define SER_GET_OWNER_INFO "get-owner-info"
 #define SER_CHECK_ATTACHMENT "check-attachment"
 
+// set of return error values
+enum cli_error {
+	CLI_SUCCESS = 0,
+	CLI_ERROR,
+	CLI_DB_ERR,
+	CLI_CONNECT_ERR,
+	CLI_UNKNOWN_SER,
+	CLI_UNKNOWN_ATR,
+	CLI_ATR_NAME_ERR,
+	CLI_ATR_VAL_ERR,
+	CLI_REQ_ATR_ERR
+};
 
 /*
  * Run login + service

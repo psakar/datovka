@@ -497,7 +497,7 @@ int main(int argc, char *argv[])
 	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
 		mainwin.show();
-		ret = app.exec();
+		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
 	} else {
 		foreach (const QString &fileName, cmdLineFileNames) {
 			ret = showZfo(fileName);
@@ -520,5 +520,5 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	return (0 == ret) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return ret;
 }
