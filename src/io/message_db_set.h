@@ -116,10 +116,10 @@ public:
 	 * @brief Accesses message database file matching the secondary key.
 	 *
 	 * @param secondaryKey Secondary key.
-	 * @param write        Whether the database should be written.
+	 * @param writeNew     Whether the database should be written if missing.
 	 * @return Message database or zero pointer on error.
 	 */
-	MessageDb *accessMessageDb(const QDateTime &deliveryTime, bool write);
+	MessageDb *accessMessageDb(const QDateTime &deliveryTime, bool writeNew);
 
 	/*!
 	 * @brief Returns list of file paths where the database files reside.

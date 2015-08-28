@@ -271,7 +271,7 @@ QString MessageDbSet::secondaryKey(const QDateTime &time) const
 }
 
 MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
-    bool write)
+    bool writeNew)
 {
 	QString secondary = secondaryKey(deliveryTime);
 
@@ -279,7 +279,7 @@ MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
 		return 0;
 	}
 
-	return _accessMessageDb(secondary, write);
+	return _accessMessageDb(secondary, writeNew);
 }
 
 QStringList MessageDbSet::fileNames(void) const
@@ -340,6 +340,16 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			if (secondaryKey.isNull()) {
 				logErrorNL("Failed obtaining secondary key from file name '%s'.",
 				    fileName.toUtf8().constData());
+				return NULL;
+			}
+		}
+	} else {
+		/* Create missing directory. */
+		QDir dir(locDir);
+		if (!dir.exists()) {
+			/* Empty file will be created automatically. */
+			if (!dir.mkpath(dir.absolutePath())) {
+				/* Cannot create directory. */
 				return NULL;
 			}
 		}
