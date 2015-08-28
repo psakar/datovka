@@ -113,5 +113,47 @@
         <file>icons/32x32/datovka-stock-keyring.png</file>
         <file>icons/48x48/datovka-question.png</file>
         <file>icons/128x128/logo.png</file>
+        <file>icons/3party/search_32.png</file>
+        <file>icons/3party/warning_32.png</file>
+        <file>icons/3party/wallet_32.png</file>
+        <file>icons/3party/user_32.png</file>
+        <file>icons/3party/up_32.png</file>
+        <file>icons/3party/trash_32.png</file>
+        <file>icons/3party/tick_32.png</file>
+        <file>icons/3party/stop_32.png</file>
+        <file>icons/3party/statistics_32.png</file>
+        <file>icons/3party/shield_32.png</file>
+        <file>icons/3party/save_32.png</file>
+        <file>icons/3party/right_32.png</file>
+        <file>icons/3party/print_32.png</file>
+        <file>icons/3party/present_32.png</file>
+        <file>icons/3party/plus_32.png</file>
+        <file>icons/3party/pencil_32.png</file>
+        <file>icons/3party/monitor_32.png</file>
+        <file>icons/3party/letter_32.png</file>
+        <file>icons/3party/left_32.png</file>
+        <file>icons/3party/label_32.png</file>
+        <file>icons/3party/key_32.png</file>
+        <file>icons/3party/info_32.png</file>
+        <file>icons/3party/home_32.png</file>
+        <file>icons/3party/help_32.png</file>
+        <file>icons/3party/heart_32.png</file>
+        <file>icons/3party/globe_32.png</file>
+        <file>icons/3party/gear_32.png</file>
+        <file>icons/3party/folder_32.png</file>
+        <file>icons/3party/flag_32.png</file>
+        <file>icons/3party/down_32.png</file>
+        <file>icons/3party/document_32.png</file>
+        <file>icons/3party/diagram_32.png</file>
+        <file>icons/3party/delete_32.png</file>
+        <file>icons/3party/clock_32.png</file>
+        <file>icons/3party/clipboard_32.png</file>
+        <file>icons/3party/calendar_32.png</file>
+        <file>icons/3party/buy_32.png</file>
+        <file>icons/3party/bubble_32.png</file>
+        <file>icons/3party/briefcase_32.png</file>
+        <file>icons/3party/bookmark_32.png</file>
+        <file>icons/3party/block_32.png</file>
+        <file>icons/3party/address_32.png</file>
     </qresource>
 </RCC>

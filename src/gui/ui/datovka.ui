@@ -195,6 +195,10 @@
                   <property name="text">
                    <string>Verify signature</string>
                   </property>
+                  <property name="icon">
+                   <iconset resource="../../../res/resources.qrc">
+                    <normaloff>:/icons/3party/pencil_32.png</normaloff>:/icons/3party/pencil_32.png</iconset>
+                  </property>
                   <property name="iconSize">
                    <size>
                     <width>24</width>
@@ -202,7 +206,10 @@
                    </size>
                   </property>
                   <property name="toolButtonStyle">
-                   <enum>Qt::ToolButtonTextOnly</enum>
+                   <enum>Qt::ToolButtonTextBesideIcon</enum>
+                  </property>
+                  <property name="autoRaise">
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -223,6 +230,10 @@
                   <property name="text">
                    <string>Signature details</string>
                   </property>
+                  <property name="icon">
+                   <iconset resource="../../../res/resources.qrc">
+                    <normaloff>:/icons/3party/label_32.png</normaloff>:/icons/3party/label_32.png</iconset>
+                  </property>
                   <property name="iconSize">
                    <size>
                     <width>24</width>
@@ -230,7 +241,7 @@
                    </size>
                   </property>
                   <property name="toolButtonStyle">
-                   <enum>Qt::ToolButtonTextOnly</enum>
+                   <enum>Qt::ToolButtonTextBesideIcon</enum>
                   </property>
                  </widget>
                 </item>
@@ -333,7 +344,7 @@ sent reply on this message</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+                    <normaloff>:/icons/3party/save_32.png</normaloff>:/icons/3party/save_32.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -359,7 +370,7 @@ sent reply on this message</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+                    <normaloff>:/icons/3party/folder_32.png</normaloff>:/icons/3party/folder_32.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -542,6 +553,9 @@ sent reply on this message</string>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -549,20 +563,15 @@ sent reply on this message</string>
     <bool>false</bool>
    </attribute>
    <addaction name="actionReceived_all"/>
-   <addaction name="separator"/>
    <addaction name="actionDownload_messages"/>
+   <addaction name="separator"/>
    <addaction name="actionCreate_message"/>
-   <addaction name="separator"/>
    <addaction name="actionReply_to_the_sender"/>
-   <addaction name="separator"/>
    <addaction name="actionVerify_a_message"/>
-   <addaction name="separator"/>
    <addaction name="actionMsgAdvancedSearch"/>
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
-   <addaction name="actionChange_pwd"/>
    <addaction name="actionPrefs"/>
-   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSync_all_accounts">
@@ -634,7 +643,7 @@ sent reply on this message</string>
   <action name="actionPrefs">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>
+     <normaloff>:/icons/3party/gear_32.png</normaloff>:/icons/3party/gear_32.png</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
@@ -722,6 +731,9 @@ sent reply on this message</string>
    </property>
   </action>
   <action name="actionChange_pwd">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
@@ -729,11 +741,14 @@ sent reply on this message</string>
    <property name="text">
     <string>Change password</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionAccount_props">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
+     <normaloff>:/icons/3party/letter_32.png</normaloff>:/icons/3party/letter_32.png</iconset>
    </property>
    <property name="text">
     <string>Account properties</string>
@@ -883,7 +898,7 @@ sent reply on this message</string>
      <normaloff>:/icons/24x24/datovka-all-accounts-sync.png</normaloff>:/icons/24x24/datovka-all-accounts-sync.png</iconset>
    </property>
    <property name="text">
-    <string>Received all</string>
+    <string>Sync all</string>
    </property>
    <property name="toolTip">
     <string>Received messages from all accounts at once</string>
@@ -895,7 +910,7 @@ sent reply on this message</string>
      <normaloff>:/icons/24x24/datovka-account-sync.png</normaloff>:/icons/24x24/datovka-account-sync.png</iconset>
    </property>
    <property name="text">
-    <string>Download messages</string>
+    <string>Sync account</string>
    </property>
    <property name="toolTip">
     <string>Download messages from the box</string>
@@ -922,7 +937,7 @@ sent reply on this message</string>
      <normaloff>:/icons/24x24/datovka-message-reply.png</normaloff>:/icons/24x24/datovka-message-reply.png</iconset>
    </property>
    <property name="text">
-    <string>Reply to the sender</string>
+    <string>Reply</string>
    </property>
    <property name="toolTip">
     <string>Reply to the sender</string>
@@ -934,7 +949,7 @@ sent reply on this message</string>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/datovka-message-verify.png</normaloff>:/icons/24x24/datovka-message-verify.png</iconset>
+     <normaloff>:/icons/32x32/datovka-message-verify.png</normaloff>:/icons/32x32/datovka-message-verify.png</iconset>
    </property>
    <property name="text">
     <string>Verify a message</string>
@@ -1111,10 +1126,10 @@ sent reply on this message</string>
   <action name="actionMsgAdvancedSearch">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+     <normaloff>:/icons/3party/search_32.png</normaloff>:/icons/3party/search_32.png</iconset>
    </property>
    <property name="text">
-    <string>Search for messages in local database</string>
+    <string>Search message</string>
    </property>
    <property name="toolTip">
     <string>Advanced searching in message envelopes</string>
