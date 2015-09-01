@@ -30,7 +30,7 @@
 #include <QSslCertificate>
 
 #include "src/common.h"
-#include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "ui_dlg_signature_detail.h"
 
 
@@ -38,8 +38,8 @@ class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
     Q_OBJECT
 
 public:
-	DlgSignatureDetail(const MessageDb &messageDb, qint64 dmId,
-	    QWidget *parent = 0);
+	DlgSignatureDetail(const MessageDbSet &dbSet, qint64 dmId,
+	    const QDateTime &deliveryTime, QWidget *parent = 0);
 	DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
 
@@ -108,10 +108,11 @@ private slots:
 	void showVerificationDetail(int);
 
 private:
-	const QByteArray m_msgDER; /*!< Message CMS. */
-	const QByteArray m_tstDER; /*!< Time stamp CMS. */
+	/* TODO -- Construct these members as constants. */
+	QByteArray m_msgDER; /*!< Message CMS. */
+	QByteArray m_tstDER; /*!< Time stamp CMS. */
 	const bool m_constructedFromDb; /*!< True if constructed from db. */
-	const bool m_dbIsVerified; /*!< Set if constructed from db. */
+	bool m_dbIsVerified; /*!< Set if constructed from db. */
 
 	/*!
 	 * @brief Check message signature, show result in dialog.

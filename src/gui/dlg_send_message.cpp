@@ -38,13 +38,15 @@
 #include "src/io/dbs.h"
 
 
-DlgSendMessage::DlgSendMessage(MessageDb &messDb, const QString &dbId,
+DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
     const QString &senderName, Action action, qint64 msgId,
+    const QDateTime &deliveryTime,
     const QString &userName, const QString &dbType,
     bool dbEffectiveOVM, bool dbOpenAddressing,
     QString &lastAttAddPath, const QString &pdzCredit, QWidget *parent)
     : QDialog(parent),
     m_msgID(msgId),
+    m_deliveryTime(deliveryTime),
     m_dbId(dbId),
     m_senderName(senderName),
     m_action(action),
@@ -54,7 +56,7 @@ DlgSendMessage::DlgSendMessage(MessageDb &messDb, const QString &dbId,
     m_dbOpenAddressing(dbOpenAddressing),
     m_lastAttAddPath(lastAttAddPath),
     m_pdzCredit(pdzCredit),
-    m_messDb(messDb),
+    m_dbSet(dbSet),
     m_dmType(""),
     m_dmSenderRefNumber("")
 {
@@ -212,7 +214,11 @@ void DlgSendMessage::fillDlgAsReply(void)
 {
 	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
-	msgData = m_messDb.msgsReplyData(m_msgID);
+
+	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
+	Q_ASSERT(0 != messageDb);
+
+	msgData = messageDb->msgsReplyData(m_msgID);
 	m_dmType = msgData[20];
 	m_dmSenderRefNumber = msgData[10];
 
@@ -294,7 +300,10 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
 
-	msgData = m_messDb.msgsReplyData(m_msgID);
+	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
+	Q_ASSERT(0 != messageDb);
+
+	msgData = messageDb->msgsReplyData(m_msgID);
 	m_dmType = msgData[20];
 	m_dmSenderRefNumber = msgData[10];
 
@@ -385,7 +394,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	/* fill attachments from template message */
 	QList<QStringList> msgFileList;
-	msgFileList = m_messDb.getFilesFromMessage(m_msgID);
+	msgFileList = messageDb->getFilesFromMessage(m_msgID);
 
 	for (int i = 0; i < msgFileList.size(); ++i) {
 		int row = this->attachmentTableWidget->rowCount();
@@ -663,7 +672,7 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
-	QDialog *dlg_cont = new DlgContacts(m_messDb, m_dbId,
+	QDialog *dlg_cont = new DlgContacts(m_dbSet, m_dbId,
 	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
 	dlg_cont->show();
@@ -1206,7 +1215,13 @@ void DlgSendMessage::sendMessage(void)
 		if (status == IE_SUCCESS) {
 			qint64 dmId =
 			    QString(sent_message->envelope->dmID).toLongLong();
-			m_messDb.msgsInsertNewlySentMessageEnvelope(dmId,
+			QDateTime deliveryTime = timevalToDateTime(sent_message->envelope->dmDeliveryTime);
+			Q_ASSERT(deliveryTime.isValid());
+
+			MessageDb *messageDb = m_dbSet.accessMessageDb(deliveryTime, true);
+			Q_ASSERT(0 != messageDb);
+
+			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
 			    m_dbId,
 			    m_senderName,
 			    this->recipientTableWidget->item(i,0)->text(),

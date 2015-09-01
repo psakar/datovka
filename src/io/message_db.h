@@ -689,7 +689,7 @@ public:
 	static
 	const QVector<QString> sentItemIds;
 
-public: /* May become protected. */
+protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.
 	 *
@@ -911,7 +911,6 @@ public: /* May become protected. */
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    enum MessageDirection msgDirect) const;
 
-protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Close database file.
 	 */
@@ -1030,7 +1029,6 @@ private:
 	    const QByteArray &crtBase64);
 
 	friend class MessageDbSet;
-	friend class DbContainer;
 };
 
 

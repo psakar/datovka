@@ -26,13 +26,13 @@
 #include "src/io/isds_sessions.h"
 
 
-DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
+DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
     QTableWidget &recipientTableWidget,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, const QString &userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
-    m_messDb(db),
+    m_dbSet(dbSet),
     m_dbId(dbId),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
@@ -136,7 +136,7 @@ void DlgContacts::fillContactsFromMessageDb()
 /* ========================================================================= */
 {
 	QList<QVector<QString>> contactList;
-	contactList = m_messDb.uniqueContacts();
+	contactList = m_dbSet.uniqueContacts();
 
 	for (int i = 0; i < contactList.count(); i++) {
 		if (m_dbId != contactList[i].at(0)) {

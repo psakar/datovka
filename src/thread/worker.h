@@ -26,6 +26,7 @@
 #define _WORKER_H_
 
 
+#include <QDateTime>
 #include <QMutex>
 #include <QObject>
 #include <QProgressBar> /* Progress. */
@@ -34,6 +35,7 @@
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 
 
@@ -46,32 +48,36 @@ public:
 	public:
 		Job(void)
 		    : userName(QString()),
-		    msgDb(0),
+		    dbSet(0),
 		    msgDirect(MSG_RECEIVED),
-		    msgId(-1)
+		    msgId(-1),
+		    deliveryTime()
 		{
 		}
-		Job(const QString &uName, MessageDb *mDb,
-		    enum MessageDirection direc, qint64 dmId = -1)
+		Job(const QString &uName, MessageDbSet *dSet,
+		    enum MessageDirection direc, qint64 dmId = -1,
+		    const QDateTime &dTime = QDateTime())
 		    : userName(uName),
-		    msgDb(mDb),
+		    dbSet(dSet),
 		    msgDirect(direc),
-		    msgId(dmId)
+		    msgId(dmId),
+		    deliveryTime(dTime)
 		{
 		}
 
 		bool isValid(void) const
 		{
-			return (!userName.isEmpty()) && (0 != msgDb);
+			return (!userName.isEmpty()) && (0 != dbSet);
 		}
 
 		QString userName;
-		MessageDb *msgDb;
+		MessageDbSet *dbSet;
 		enum MessageDirection msgDirect;
 		qint64 msgId; /*!<
 		               * If != -1, then only a single message is going
 		               * to be downloaded.
 		               */
+		QDateTime deliveryTime;
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -132,7 +138,7 @@ public:
 	static
 	qdatovka_error storeMessage(bool signedMsg,
 	    enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_message *msg,
+	    MessageDbSet &dbSet, const struct isds_message *msg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker);
 
 	/*!
@@ -140,22 +146,22 @@ public:
 	 */
 	static
 	qdatovka_error storeDeliveryInfo(bool signedMsg,
-	    MessageDb &messageDb, const struct isds_message *msg);
+	    MessageDbSet &dbSet, const struct isds_message *msg);
 
 	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static
 	qdatovka_error updateMessageState(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
+	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Download attachments, envelope and raw for message.
 	 */
 	static
 	qdatovka_error downloadMessage(const QString &userName,
-	    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
-	    MessageDb &messageDb, QString &errMsg, const QString &progressLabel,
+	    qint64 dmId, const QDateTime &deliveryTime, bool signedMsg, enum MessageDirection msgDirect,
+	    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel,
 	    QProgressBar *pBar, Worker *worker);
 
 	/*!
@@ -163,7 +169,7 @@ public:
 	 */
 	static
 	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
+	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Download sent/received message list from ISDS for current
@@ -171,7 +177,7 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessageList(const QString &userName,
-	    enum MessageDirection msgDirect, MessageDb &messageDb, QString &errMsg,
+	    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
 	    int &total, int &news);
 
@@ -186,14 +192,14 @@ private:
 	static
 	bool getMessageState(enum MessageDirection msgDirect,
 	    const QString &userName, qint64 dmId, bool signedMsg,
-	    MessageDb &messageDb);
+	    MessageDbSet &dbSet);
 
 	/*!
 	 * @brief Download delivery info for message.
 	 */
 	static
 	bool getDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDb &messageDb);
+	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
 
 	/*!
 	 * @brief Get additional info about author (sender)

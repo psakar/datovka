@@ -30,7 +30,7 @@
 #include <QTableWidget>
 
 #include "src/common.h"
-#include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "ui_dlg_contacts.h"
 
 
@@ -39,7 +39,7 @@ class DlgContacts : public QDialog, public Ui::Contacts
 	Q_OBJECT
 
 public:
-	DlgContacts(const MessageDb &db, const QString &dbId,
+	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	    QTableWidget &recipientTableWidget,
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QWidget *parent = 0, const QString &userName = QString());
@@ -57,7 +57,7 @@ private:
 	QString getUserInfoFormIsds(QString idDbox);
 
 	QTableWidget &m_recipientTableWidget;
-	const MessageDb &m_messDb;
+	const MessageDbSet &m_dbSet;
 	const QString m_dbId;
 	QString m_dbType;
 	bool m_dbEffectiveOVM;

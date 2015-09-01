@@ -31,7 +31,7 @@
 /* ========================================================================= */
 DbContainer::DbContainer(void)
 /* ========================================================================= */
-    : QMap<QString, MessageDb *>()
+    : QMap<QString, MessageDbSet *>()
 {
 }
 
@@ -40,7 +40,7 @@ DbContainer::DbContainer(void)
 DbContainer::~DbContainer(void)
 /* ========================================================================= */
 {
-	QMap<QString, MessageDb *>::iterator i;
+	QMap<QString, MessageDbSet *>::iterator i;
 
 	for (i = this->begin(); i != this->end(); ++i) {
 		delete i.value();
@@ -52,162 +52,26 @@ DbContainer::~DbContainer(void)
 /*
  * Access/create+open message database related to item.
  */
-MessageDb * DbContainer::accessMessageDb(const QString &primaryKey,
-    const QString &locDir, bool testing, bool create)
+MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
+    const QString &primaryKey, bool testing,
+    MessageDbSet::Organisation organisation, bool create)
 /* ========================================================================= */
 {
-	MessageDb *db = NULL;
-	bool open_ret;
+	MessageDbSet *dbSet = NULL;
 
 	/* Already opened. */
 	if (this->find(primaryKey) != this->end()) {
 		return (*this)[primaryKey];
 	}
 
-	db = new(std::nothrow) MessageDb(dbDriverType, primaryKey);
-	if (NULL == db) {
-		Q_ASSERT(0);
+	dbSet = MessageDbSet::createNew(locDir, primaryKey, testing,
+	    organisation, !create);
+	if (NULL == dbSet) {
 		return NULL;
 	}
 
-	qDebug() << "XXXXXXXXXXXXXX organisation" << MessageDbSet::dbOrganisation(locDir, primaryKey, testing);
-
-	/* TODO -- Handle file name deviations! */
-	/*
-	 * Test accounts have ___1 in their names, ___0 relates to standard
-	 * accounts.
-	 */
-	QString dbFileName = constructDbFileName(primaryKey, locDir, testing);
-	QFileInfo fileInfo(dbFileName);
-
-	if (!create && !fileInfo.isFile()) {
-		delete db;
-		return NULL;
-	} else if (!fileInfo.isFile()) {
-		/* Create missing directory. */
-		QDir dir = fileInfo.absoluteDir().absolutePath();
-		if (!dir.exists()) {
-			/* Empty file will be created automatically. */
-			if (!dir.mkpath(dir.absolutePath())) {
-				/* Cannot create directory. */
-				delete db;
-				return NULL;
-			}
-		}
-	}
-
-	open_ret = db->openDb(dbFileName);
-	if (!open_ret) {
-		delete db;
-		return NULL;
-	}
-
-	this->insert(primaryKey, db);
-	return db;
-}
-
-
-/* ========================================================================= */
-/*
- * Creates a copy of the current data base into a given new
- *     directory.
- */
-bool DbContainer::copyMessageDb(MessageDb *db, const QString &newLocDir)
-/* ========================================================================= */
-{
-	if (0 == db) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Find entry. */
-	QMap<QString, MessageDb *>::iterator it = this->begin();
-	while ((it != this->end()) && (it.value() != db)) {
-		++it;
-	}
-	/* Must exist. */
-	if (this->end() == it) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Get old and new file name. */
-	QString oldFileName = db->fileName();
-	QFileInfo fileInfo(oldFileName);
-	QString newFileName =
-	    newLocDir + QDir::separator() + fileInfo.fileName();
-
-	/* Copy database. */
-	return db->copyDb(newFileName);
-}
-
-
-/* ========================================================================= */
-/*
- * Move message database into a new directory.
- */
-bool DbContainer::moveMessageDb(MessageDb *db, const QString &newLocDir)
-/* ========================================================================= */
-{
-	if (0 == db) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Find entry. */
-	QMap<QString, MessageDb *>::iterator it = this->begin();
-	while ((it != this->end()) && (it.value() != db)) {
-		++it;
-	}
-	/* Must exist. */
-	if (this->end() == it) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Get old and new file name. */
-	QString oldFileName = db->fileName();
-	QFileInfo fileInfo(oldFileName);
-	QString newFileName =
-	    newLocDir + QDir::separator() + fileInfo.fileName();
-
-	/* Move database. */
-	return db->moveDb(newFileName);
-}
-
-
-/* ========================================================================= */
-/*
- * Re-open a new empty database file. The old file is left
- *     untouched.
- */
-bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
-/* ========================================================================= */
-{
-	if (0 == db) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Find entry. */
-	QMap<QString, MessageDb *>::iterator it = this->begin();
-	while ((it != this->end()) && (it.value() != db)) {
-		++it;
-	}
-	/* Must exist. */
-	if (this->end() == it) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	/* Get old and new file name. */
-	QString oldFileName = db->fileName();
-	QFileInfo fileInfo(oldFileName);
-	QString newFileName =
-	    newLocDir + QDir::separator() + fileInfo.fileName();
-
-	/* Move database. */
-	return db->reopenDb(newFileName);
+	this->insert(primaryKey, dbSet);
+	return dbSet;
 }
 
 
@@ -215,17 +79,17 @@ bool DbContainer::reopenMessageDb(MessageDb *db, const QString &newLocDir)
 /*
  * Delete message db.
  */
-bool DbContainer::deleteMessageDb(MessageDb *db)
+bool DbContainer::deleteDbSet(MessageDbSet *dbSet)
 /* ========================================================================= */
 {
-	if (0 == db) {
+	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
 
 	/* Find entry. */
-	QMap<QString, MessageDb *>::iterator it = this->begin();
-	while ((it != this->end()) && (it.value() != db)) {
+	QMap<QString, MessageDbSet *>::iterator it = this->begin();
+	while ((it != this->end()) && (it.value() != dbSet)) {
 		++it;
 	}
 	/* Must exist. */
@@ -237,21 +101,11 @@ bool DbContainer::deleteMessageDb(MessageDb *db)
 	/* Remove from container. */
 	this->erase(it);
 
-	/* Get file name. */
-	QString fileName = db->fileName();
+	/* Delete files. */
+	dbSet->deleteLocation();
 
 	/* Close database. */
-	delete db;
-
-	/* Delete file. */
-	logInfo("Deleting database file '%s'.\n",
-	    fileName.toUtf8().constData());
-
-	if (!QFile::remove(fileName)) {
-		logErrorNL("Failed deleting database file '%s'.",
-		    fileName.toUtf8().constData());
-		return false;
-	}
+	delete dbSet;
 
 	return true;
 }

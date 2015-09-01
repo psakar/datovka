@@ -24,15 +24,16 @@
 
 #include "dlg_msg_search.h"
 #include "src/common.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 
 
 DlgMsgSearch::DlgMsgSearch(
-    const QList< QPair <QString,MessageDb*> > messageDbList,
+    const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
     const QString &userName,
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
-    m_messageDbList(messageDbList),
+    m_messageDbSetList(messageDbSetList),
     m_userName(userName)
 {
 	setupUi(this);
@@ -67,7 +68,7 @@ void DlgMsgSearch::initSearchWindow(void)
 	this->tooMuchFields->hide();
 
 	/* is only one account available */
-	if (m_messageDbList.count() <= 1) {
+	if (m_messageDbSetList.count() <= 1) {
 		this->searchAllAcntCheckBox->setEnabled(false);
 	}
 
@@ -338,7 +339,7 @@ void DlgMsgSearch::searchMessages(void)
 	}
 
 	if (!this->searchAllAcntCheckBox->isChecked()) {
-		msgList = m_messageDbList.at(0).second->
+		msgList = m_messageDbSetList.at(0).second->
 		    msgsAdvancedSearchMessageEnvelope(
 		    this->messageIdLineEdit->text().isEmpty() ? -1 :
 		        this->messageIdLineEdit->text().toLongLong(),
@@ -355,11 +356,11 @@ void DlgMsgSearch::searchMessages(void)
 		    this->toHandsLineEdit->text(),
 		    QString(), QString(), msgType);
 		if (!msgList.isEmpty()) {
-			appendMsgsToTable(m_messageDbList.at(0), msgList);
+			appendMsgsToTable(m_messageDbSetList.at(0), msgList);
 		}
 	} else {
-		for (int i = 0; i < m_messageDbList.count(); ++i) {
-			msgList = m_messageDbList.at(i).second->
+		for (int i = 0; i < m_messageDbSetList.count(); ++i) {
+			msgList = m_messageDbSetList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    this->messageIdLineEdit->text().isEmpty() ? -1 :
 			        this->messageIdLineEdit->text().toLongLong(),
@@ -376,7 +377,7 @@ void DlgMsgSearch::searchMessages(void)
 			    this->toHandsLineEdit->text(),
 			    QString(), QString(), msgType);
 			if (!msgList.isEmpty()) {
-				appendMsgsToTable(m_messageDbList.at(i),
+				appendMsgsToTable(m_messageDbSetList.at(i),
 				    msgList);
 			}
 		}
@@ -389,7 +390,7 @@ void DlgMsgSearch::searchMessages(void)
  * Append message list to result tablewidget
  */
 void DlgMsgSearch::appendMsgsToTable(
-    QPair <QString,MessageDb*> usrNmAndMsgDb,
+    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
     const QList<MessageDb::SoughtMsg> &msgDataList)
 /* ========================================================================= */
 {
@@ -400,12 +401,17 @@ void DlgMsgSearch::appendMsgsToTable(
 		int row = this->resultsTableWidget->rowCount();
 		this->resultsTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(usrNmAndMsgDb.first);
+		item->setText(usrNmAndMsgDbSet.first);
 		this->resultsTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(msgData.mId.dmId));
 		if (ENABLE_TOOLTIP) {
-			item->setToolTip(usrNmAndMsgDb.second->descriptionHtml(
+			const MessageDb *messageDb =
+			    usrNmAndMsgDbSet.second->constAccessMessageDb(
+			        msgData.mId.deliveryTime);
+			Q_ASSERT(0 != messageDb);
+
+			item->setToolTip(messageDb->descriptionHtml(
 			    msgData.mId.dmId, 0, true, false, true));
 		}
 		this->resultsTableWidget->setItem(row,1,item);

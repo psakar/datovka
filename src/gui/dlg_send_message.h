@@ -24,13 +24,14 @@
 #ifndef _DLG_SEND_MESSAGE_H_
 #define _DLG_SEND_MESSAGE_H_
 
+#include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
 #include <QTimer>
 #include <QTreeView>
 
 #include "src/common.h"
-#include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
 #include "src/models/accounts_model.h"
@@ -56,8 +57,9 @@ public:
 		QString errInfo;
 	};
 
-	DlgSendMessage(MessageDb &messDb, const QString &dbId,
+	DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
 	    const QString &senderName, Action action, qint64 msgId,
+	    const QDateTime &deliveryTime,
 	    const QString &userName, const QString &dbType,
 	    bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QString &lastAttAddPath, const QString &pdzCredit,
@@ -85,6 +87,7 @@ private:
 	QTimer *pingTimer;
 	void initNewMessageDialog(void);
 	qint64 m_msgID;
+	QDateTime m_deliveryTime;
 	const QString m_dbId;
 	const QString m_senderName;
 	const Action m_action;
@@ -94,7 +97,7 @@ private:
 	bool m_dbOpenAddressing;
 	QString &m_lastAttAddPath;
 	const QString m_pdzCredit;
-	MessageDb &m_messDb;
+	MessageDbSet &m_dbSet;
 	int m_attachSize;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;

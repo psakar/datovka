@@ -39,6 +39,7 @@
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
@@ -71,7 +72,7 @@ public:
 		QString databoxID;
 		QString accountName;
 		QString username;
-		MessageDb *messageDb;
+		MessageDbSet *messageDbSet;
 		QModelIndex acntIndex;
 	};
 
@@ -105,7 +106,7 @@ public:
 	    const QString &pwd = QString(), const QString &otpKey = QString());
 
 	/*!
-	 * @brief Get message db to given account.
+	 * @brief Get message db set related to given account.
 	 *
 	 * @note If pointer to main window is not specified, then all dialogues
 	 *     will be suppressed.
@@ -114,7 +115,7 @@ public:
 	 * @param mw       Pointer to main window.
 	 */
 	static
-	MessageDb * accountMessageDb(const QString &userName, MainWindow *mw);
+	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
 
 protected:
 	/*!
@@ -460,29 +461,30 @@ private slots:
 	 * @brief Export message into as ZFO file dialog.
 	 */
 	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
-	    QString userName = QString(), qint64 dmID = -1);
+	    QString userName = QString(), qint64 dmID = -1,
+	    const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
 	 */
 	void exportDeliveryInfoAsZFO(const QString &attachPath = QString(),
-	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1);
+	    const QString &attachFileName = QString(),
+	    const QString &formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
 	 */
 	void exportDeliveryInfoAsPDF(const QString &attachPath = QString(),
-	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1);
+	    const QString &attachFileName = QString(),
+	    const QString &formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialog.
 	 */
 	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
-	    qint64 dmID = -1);
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Open selected message in external application.
@@ -903,12 +905,13 @@ private:
 	 * local database - based on delFromIsds parameter.
 	 */
 	qdatovka_error eraseMessage(const QString &userName, qint64 dmId,
-	    bool delFromIsds);
+	    const QDateTime &deliveryTime, bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	qdatovka_error verifyMessage(const QString &userName, qint64 dmId);
+	qdatovka_error verifyMessage(const QString &userName, qint64 dmId,
+	    const QDateTime &deliveryTime);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.
@@ -1007,7 +1010,8 @@ private:
 	 * @brief Download complete message synchronously
 	 * without worker and thread.
 	 */
-	bool downloadCompleteMessage(qint64 dmId);
+	bool downloadCompleteMessage(qint64 dmId,
+	    const QDateTime &deliveryTime);
 
 	/*!
 	 * @brief Set read status to messages with given indexes.
@@ -1055,7 +1059,7 @@ private:
 	 * @brief Export message with expired time stamp to ZFO.
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
-	    const QStringList &expirMsg);
+	    const QList<MessageDb::MsgId> &expirMsgIds);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

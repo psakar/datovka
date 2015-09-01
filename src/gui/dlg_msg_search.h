@@ -28,7 +28,7 @@
 
 #include <QDialog>
 
-#include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 #include "ui_dlg_msg_search.h"
 
@@ -40,7 +40,7 @@ class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
 	Q_OBJECT
 
 public:
-	DlgMsgSearch(const QList< QPair <QString,MessageDb*> > messageDbList,
+	DlgMsgSearch(const QList< QPair<QString, MessageDbSet *> > messageDbSetList,
 	    const QString &userName, QWidget *parent = 0,
 	    Qt::WindowFlags f = 0);
 
@@ -54,12 +54,13 @@ signals:
 	void focusSelectedMsg(QString, qint64);
 
 private:
-	const QList< QPair <QString,MessageDb*> > m_messageDbList;
+	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
 	const QString m_userName;
 
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);
-	void appendMsgsToTable(QPair <QString,MessageDb*> usrNmAndMsgDb,
+	void appendMsgsToTable(
+	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
 };
 

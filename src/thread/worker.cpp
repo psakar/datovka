@@ -23,6 +23,7 @@
 
 
 #include <QDebug>
+#include <QSet>
 #include <QThread>
 
 #include "worker.h"
@@ -194,8 +195,9 @@ void Worker::doJob(void)
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 
-		if (Q_SUCCESS == downloadMessage(job.userName, job.msgId,
-		        true, job.msgDirect, *job.msgDb, errMsg,
+		if (Q_SUCCESS == downloadMessage(job.userName,
+		        job.msgId, job.deliveryTime,
+		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage", 0, this)) {
 			/* Only on successful download. */
 			emit refreshAttachmentList(job.userName, job.msgId);
@@ -210,7 +212,7 @@ void Worker::doJob(void)
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
-		        *job.msgDb, errMsg, "GetListOfReceivedMessages",
+		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
 		        0, this, rt, rn);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
@@ -229,7 +231,7 @@ void Worker::doJob(void)
 		qDebug() << "Downloading sent message list for account"
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
-		res = downloadMessageList(job.userName, MSG_SENT, *job.msgDb,
+		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", 0, this, st, sn);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
@@ -261,7 +263,7 @@ void Worker::doJob(void)
  * Store envelope into database.
  */
 qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
-    MessageDb &messageDb, const struct isds_envelope *envel)
+    MessageDbSet &dbSet, const struct isds_envelope *envel)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -272,6 +274,10 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 	}
 
 	qint64 dmId = QString(envel->dmID).toLongLong();
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
 
 	QString dmAmbiguousRecipient;
 	if (NULL == envel->dmAmbiguousRecipient) {
@@ -317,7 +323,7 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 	}
 
 	/* insert message envelope in db */
-	if (messageDb.msgsInsertMessageEnvelope(dmId,
+	if (messageDb->msgsInsertMessageEnvelope(dmId,
 	    /* TODO - set correctly next two values */
 	    "tRecord",
 	    envel->dbIDSender,
@@ -370,7 +376,7 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
  * Download sent/received message list from ISDS for current account index
  */
 qdatovka_error Worker::downloadMessageList(const QString &userName,
-    enum MessageDirection msgDirect, MessageDb &messageDb, QString &errMsg,
+    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker,
     int &total, int &news)
 /* ========================================================================= */
@@ -444,7 +450,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	}
 
 #ifdef USE_TRANSACTIONS
-	messageDb.beginTransaction();
+	QSet<MessageDb *> usedDbs;
 #endif /* USE_TRANSACTIONS */
 	while (0 != box) {
 
@@ -462,17 +468,33 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		}
 
 		qint64 dmId = QString(item->envelope->dmID).toLongLong();
+		/*
+		 * Time may be invalid (e.g. messages which failed during
+		 * virus scan).
+		 */
+		QDateTime deliveryTime =
+		    timevalToDateTime(item->envelope->dmDeliveryTime);
+		/* Delivery time may be invalid. */
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+		Q_ASSERT(0 != messageDb);
 
-		int dmDbMsgStatus = messageDb.msgsStatusIfExists(dmId);
+#ifdef USE_TRANSACTIONS
+		if (!usedDbs.contains(messageDb)) {
+			usedDbs.insert(messageDb);
+			messageDb->beginTransaction();
+		}
+#endif /* USE_TRANSACTIONS */
+
+		int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
-			storeEnvelope(msgDirect, messageDb, item->envelope);
+			storeEnvelope(msgDirect, dbSet, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
 				QString errMsg;
-				downloadMessage(userName, dmId,
-				    true, msgDirect, messageDb, errMsg, "", 0, 0);
+				downloadMessage(userName, dmId, deliveryTime,
+				    true, msgDirect, dbSet, errMsg, "", 0, 0);
 			}
 			newcnt++;
 
@@ -489,23 +511,23 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 				if (globPref.auto_download_whole_messages &&
 				    (dmDbMsgStatus <= 2)) {
 					QString errMsg;
-					downloadMessage(userName, dmId,
-					    true, msgDirect, messageDb, errMsg,
+					downloadMessage(userName, dmId, deliveryTime,
+					    true, msgDirect, dbSet, errMsg,
 					    "", 0, 0);
 				}
 
 				if (dmDbMsgStatus != dmNewMsgStatus) {
 					getMessageState(msgDirect, userName,
-					    dmId, true, messageDb);
+					    dmId, true, dbSet);
 				}
 			}
 
 			/* Message is in db, but the content is missing. */
 			if (globPref.auto_download_whole_messages &&
-			    !messageDb.msgsStoredWhole(dmId)) {
+			    !messageDb->msgsStoredWhole(dmId)) {
 				QString errMsg;
-				downloadMessage(userName, dmId,
-				    true, msgDirect, messageDb, errMsg, "", 0, 0);
+				downloadMessage(userName, dmId, deliveryTime,
+				    true, msgDirect, dbSet, errMsg, "", 0, 0);
 			}
 		}
 
@@ -513,7 +535,10 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 
 	}
 #ifdef USE_TRANSACTIONS
-	messageDb.commitTransaction();
+	/* Commit on all opened databases. */
+	foreach (MessageDb *db, usedDbs) {
+		db->commitTransaction();
+	}
 #endif /* USE_TRANSACTIONS */
 
 	isds_list_free(&messageList);
@@ -542,7 +567,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
  * Store sent message delivery information into database.
  */
 qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
-    MessageDb &messageDb, const struct isds_envelope *envel)
+    MessageDbSet &dbSet, const struct isds_envelope *envel)
 /* ========================================================================= */
 {
 	if (NULL == envel) {
@@ -551,6 +576,10 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 	}
 
 	qint64 dmID = QString(envel->dmID).toLongLong();
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
 
 	QString dmDeliveryTime;
 	if (NULL != envel->dmDeliveryTime) {
@@ -561,7 +590,7 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
 	}
 
-	if (1 == messageDb.messageState(dmID)) {
+	if (1 == messageDb->messageState(dmID)) {
 		/*
 		 * Update message envelope when the previous state
 		 * is 1. This is because the envelope was generated by this
@@ -569,8 +598,8 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 		 * we get proper data from ISDS rather than storing potentially
 		 * guessed values.
 		 */
-		updateEnvelope(msgDirect, messageDb, envel);
-	} else if (messageDb.msgsUpdateMessageState(dmID,
+		updateEnvelope(msgDirect, *messageDb, envel);
+	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    convertHexToDecIndex(*envel->dmMessageStatus))) {
 		/* Updated message envelope delivery info in db. */
@@ -584,7 +613,7 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
-		messageDb.msgsInsertUpdateMessageEvent(dmID,
+		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
 		    convertEventTypeToString(*item->type),
 		    item->description);
@@ -601,7 +630,7 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 */
 bool Worker::getMessageState(enum MessageDirection msgDirect,
     const QString &userName, qint64 dmId, bool signedMsg,
-    MessageDb &messageDb)
+    MessageDbSet &dbSet)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -632,7 +661,7 @@ bool Worker::getMessageState(enum MessageDirection msgDirect,
 	Q_ASSERT(NULL != message);
 
 	if (Q_SUCCESS !=
-	    updateMessageState(msgDirect, messageDb, message->envelope)) {
+	    updateMessageState(msgDirect, dbSet, message->envelope)) {
 		goto fail;
 	}
 
@@ -655,7 +684,7 @@ fail:
  */
 qdatovka_error Worker::storeMessage(bool signedMsg,
     enum MessageDirection msgDirect,
-    MessageDb &messageDb, const struct isds_message *msg,
+    MessageDbSet &dbSet, const struct isds_message *msg,
     const QString &progressLabel, QProgressBar *pBar, Worker *worker)
 /* ========================================================================= */
 {
@@ -679,10 +708,14 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	}
 
 	qint64 dmID = QString(envel->dmID).toLongLong();
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
-		(messageDb.msgsInsertUpdateMessageRaw(dmID,
+		(messageDb->msgsInsertUpdateMessageRaw(dmID,
 		    QByteArray((char*) msg->raw, msg->raw_length), 0))
 		? qDebug() << "Message raw data were updated..."
 		: qDebug() << "ERROR: Message raw data update!";
@@ -691,7 +724,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	if (0 != pBar) { pBar->setValue(30); }
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 30); }
 
-	if (updateEnvelope(msgDirect, messageDb, envel)) {
+	if (updateEnvelope(msgDirect, *messageDb, envel)) {
 		qDebug() << "Message envelope was updated...";
 	} else {
 		qDebug() << "ERROR: Message envelope update!";
@@ -706,12 +739,10 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
 		qDebug() << "Verification ret" << ret;
 		if (1 == ret) {
-			messageDb.msgsSetVerified(dmID,
-			    true);
+			messageDb->msgsSetVerified(dmID, true);
 			/* TODO -- handle return error. */
 		} else if (0 == ret){
-			messageDb.msgsSetVerified(dmID,
-			    false);
+			messageDb->msgsSetVerified(dmID, false);
 			/* TODO -- handle return error. */
 		} else {
 			/* TODO -- handle this error. */
@@ -727,7 +758,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 
 		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
 		    hash->length).toBase64();
-		if (messageDb.msgsInsertUpdateMessageHash(dmID,
+		if (messageDb->msgsInsertUpdateMessageHash(dmID,
 		        hashValueBase64, convertHashAlg(hash->algorithm))) {
 			qDebug() << "Message hash was stored into db...";
 		} else {
@@ -748,7 +779,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		        item->data_length).toBase64();
 
 		/* Insert/update file to db */
-		if (messageDb.msgsInsertUpdateMessageFile(dmID,
+		if (messageDb->msgsInsertUpdateMessageFile(dmID,
 		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
 		   item->dmMimeType, item->dmFormat,
 		   convertAttachmentType(item->dmFileMetaType),
@@ -771,8 +802,8 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QString &userName,
-    qint64 dmId, bool signedMsg, enum MessageDirection msgDirect,
-    MessageDb &messageDb, QString &errMsg, const QString &progressLabel, QProgressBar *pBar,
+    qint64 dmId, const QDateTime &deliveryTime, bool signedMsg, enum MessageDirection msgDirect,
+    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel, QProgressBar *pBar,
     Worker *worker)
 /* ========================================================================= */
 {
@@ -828,7 +859,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	}
 
 	/* Download and store the message. */
-	storeMessage(signedMsg, msgDirect, messageDb, message,
+	storeMessage(signedMsg, msgDirect, dbSet, message,
 	    progressLabel, pBar, worker);
 
 	if (0 != pBar) { pBar->setValue(90); }
@@ -837,13 +868,17 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	Q_ASSERT(dmId == QString(message->envelope->dmID).toLongLong());
 
 	/* Download and save delivery info and message events */
-	if (getDeliveryInfo(userName, dmId, signedMsg, messageDb)) {
+	if (getDeliveryInfo(userName, dmId, signedMsg, dbSet)) {
 		qDebug() << "Delivery info of message was processed...";
 	} else {
 		qDebug() << "ERROR: Delivery info of message not found!";
 	}
 
-	getMessageAuthor(userName, dmId, messageDb);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	getMessageAuthor(userName, dmId, *messageDb);
 
 	if (MSG_RECEIVED == msgDirect) {
 		/*  Mark this message as downloaded in ISDS */
@@ -871,7 +906,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
  * Store received message delivery information into database.
  */
 qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
-    MessageDb &messageDb, const struct isds_message *msg)
+    MessageDbSet &dbSet, const struct isds_message *msg)
 /* ========================================================================= */
 {
 	if (NULL == msg) {
@@ -887,10 +922,14 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 	}
 
 	qint64 dmID = QString(envel->dmID).toLongLong();
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		if (messageDb.msgsInsertUpdateDeliveryInfoRaw(dmID,
+		if (messageDb->msgsInsertUpdateDeliveryInfoRaw(dmID,
 		    QByteArray((char*)msg->raw, msg->raw_length))) {
 			qDebug() << "Message raw delivery info was updated...";
 		} else {
@@ -903,7 +942,7 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
-		messageDb.msgsInsertUpdateMessageEvent(dmID,
+		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
 		    convertEventTypeToString(*item->type),
 		    item->description);
@@ -919,7 +958,7 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 * Download message delivery info, raw and get list of events message
 */
 bool Worker::getDeliveryInfo(const QString &userName,
-    qint64 dmId, bool signedMsg, MessageDb &messageDb)
+    qint64 dmId, bool signedMsg, MessageDbSet &dbSet)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -951,7 +990,7 @@ bool Worker::getDeliveryInfo(const QString &userName,
 
 	Q_ASSERT(NULL != message);
 
-	if (Q_SUCCESS != storeDeliveryInfo(signedMsg, messageDb, message)) {
+	if (Q_SUCCESS != storeDeliveryInfo(signedMsg, dbSet, message)) {
 		goto fail;
 	}
 
