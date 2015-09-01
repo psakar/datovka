@@ -63,8 +63,8 @@ bool MessageDbSet::copyToLocation(const QString &newLocDir)
 	QList< QPair<QString, MessageDb *> > oldLocations;
 	QList<QString> newLocations;
 
-	QMap<QString, MessageDb *>::iterator i = this->begin();
-	while (i != this->end()) {
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
 		QString oldFileName = db->fileName();
 		QFileInfo fileInfo(oldFileName);
@@ -110,8 +110,8 @@ bool MessageDbSet::moveToLocation(const QString &newLocDir)
 	QList< QPair<QString, MessageDb *> > oldLocations;
 	QList<QString> newLocations;
 
-	QMap<QString, MessageDb *>::iterator i = this->begin();
-	while (i != this->end()) {
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
 		QString oldFileName = db->fileName();
 		QFileInfo fileInfo(oldFileName);
@@ -161,8 +161,8 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 		return false;
 	}
 
-	QMap<QString, MessageDb *>::iterator i = this->begin();
-	while (i != this->end()) {
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
 
 		/* Close database. */
@@ -192,8 +192,8 @@ bool MessageDbSet::deleteLocation(void)
 	}
 
 	bool sucessfullyDeleted = true;
-	QMap<QString, MessageDb *>::iterator i = this->begin();
-	while (i != this->end()) {
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
 
 		/* Get file name. */
