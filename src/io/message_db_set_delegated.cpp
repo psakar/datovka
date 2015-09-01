@@ -693,15 +693,17 @@ QList<MessageDb::MsgId> MessageDbSet::getAllMessageIDsFromDB(void) const
 	return QList<MessageDb::MsgId>();
 }
 
-QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(const QDate &fromDate,
-    const QDate &toDate, enum MessageDirection msgDirect) const
+QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(
+    const QDate &fromDate, const QDate &toDate,
+    enum MessageDirection msgDirect) const
 {
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
 }
 
-QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(const QDate &fromDate,
-    const QDate &toDate, enum MessageDirection msgDirect) const
+QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
+    const QDate &fromDate, const QDate &toDate,
+    enum MessageDirection msgDirect) const
 {
 	(void) fromDate; (void) toDate; (void) msgDirect;
 	Q_ASSERT(0);
@@ -724,4 +726,74 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 	}
 
 	return QList<MessageDb::MsgId>();
+}
+
+QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
+    qint64 dmId, const QString &dmAnnotation,
+    const QString &dbIDSender, const QString &dmSender,
+    const QString &dmAddress, const QString &dbIDRecipient,
+    const QString &dmRecipient, const QString &dmSenderRefNumber,
+    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
+    const QString &dmRecipientIdent, const QString &dmToHands,
+    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+    enum MessageDirection msgDirect) const
+{
+	Q_ASSERT(this->size() == 1);
+	return this->first()->msgsAdvancedSearchMessageEnvelope(dmId,
+	    dmAnnotation, dbIDSender, dmSender, dmAddress, dbIDRecipient,
+	    dmRecipient, dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
+	    dmRecipientIdent, dmToHands, dmDeliveryTime, dmAcceptanceTime,
+	    msgDirect);
+}
+
+QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
+    qint64 dmId, const QString &dmAnnotation,
+    const QString &dbIDSender, const QString &dmSender,
+    const QString &dmAddress, const QString &dbIDRecipient,
+    const QString &dmRecipient, const QString &dmSenderRefNumber,
+    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
+    const QString &dmRecipientIdent, const QString &dmToHands,
+    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+    enum MessageDirection msgDirect) const
+{
+	(void) dmId; (void) dmAnnotation; (void) dbIDSender; (void) dmSender;
+	(void) dmAddress; (void) dbIDRecipient; (void) dmRecipient;
+	(void) dmSenderRefNumber; (void) dmSenderIdent;
+	(void) dmRecipientRefNumber; (void) dmRecipientIdent; (void) dmToHands;
+	(void) dmDeliveryTime; (void) dmAcceptanceTime; (void) msgDirect;
+	Q_ASSERT(0);
+	return QList<MessageDb::SoughtMsg>();
+}
+
+QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
+    qint64 dmId, const QString &dmAnnotation,
+    const QString &dbIDSender, const QString &dmSender,
+    const QString &dmAddress, const QString &dbIDRecipient,
+    const QString &dmRecipient, const QString &dmSenderRefNumber,
+    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
+    const QString &dmRecipientIdent, const QString &dmToHands,
+    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+    enum MessageDirection msgDirect) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_msgsAdvancedSearchMessageEnvelope(dmId, dmAnnotation,
+		    dbIDSender, dmSender, dmAddress, dbIDRecipient, dmRecipient,
+		    dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
+		    dmRecipientIdent, dmToHands, dmDeliveryTime,
+		    dmAcceptanceTime, msgDirect);
+		break;
+	case DO_YEARLY:
+		return _yrly_msgsAdvancedSearchMessageEnvelope(dmId,
+		    dmAnnotation, dbIDSender, dmSender, dmAddress,
+		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
+		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
+		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QList<MessageDb::SoughtMsg>();
 }

@@ -3233,7 +3233,7 @@ fail:
 /*
  * Advance message envelope search.
  */
-QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
+QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
     qint64 dmId,
     const QString &dmAnnotation,
     const QString &dbIDSender, const QString &dmSender,
@@ -3245,7 +3245,7 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
     const QString &dmRecipientIdent,
     const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect)
+    enum MessageDirection msgDirect) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -3269,19 +3269,18 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	    dmRecipient.split(separ, QString::SkipEmptyParts);
 	QStringList dmToHandsList =
 	    dmToHands.split(separ, QString::SkipEmptyParts);
-	QList <QStringList> msgList;
-	msgList.clear();
+	QList<SoughtMsg> msgList;
 
 	if (MSG_ALL == msgDirect) {
 		/* select from all messages */
 		queryStr = "SELECT "
-		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient "
+		    "m.dmID, m.dmDeliveryTime, m.dmAnnotation, m.dmSender, m.dmRecipient "
 		"FROM messages AS m WHERE ";
 	} else if ((MSG_RECEIVED == msgDirect) || (MSG_SENT == msgDirect)) {
 		/* means select only received (1) or sent (2) messages */
 		isMultiSelect = true;
 		queryStr = "SELECT "
-		    "m.dmID, m.dmAnnotation, m.dmSender, m.dmRecipient, "
+		    "m.dmID, m.dmDeliveryTime, m.dmAnnotation, m.dmSender, m.dmRecipient, "
 		    "s.message_type "
 		    "FROM messages AS m "
 		    "LEFT JOIN supplementary_message_data AS s "
@@ -3524,14 +3523,22 @@ QList <QStringList> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		while (query.isValid()) {
-			QStringList msgItemsList;
-			msgItemsList.clear();
-			int count = query.record().count();
-			Q_ASSERT(4 == count);
-			for (i = 0; i < count; ++i) {
-				msgItemsList.append(query.value(i).toString());
-			}
-			msgList.append(msgItemsList);
+			Q_ASSERT(5 == query.record().count());
+
+			SoughtMsg foundMsgData(
+			    query.value(0).toLongLong(),
+			    dateTimeFromDbFormat(query.value(1).toString()),
+			    query.value(2).toString(),
+			    query.value(3).toString(),
+			    query.value(4).toString());
+
+			/*
+			 * Cannot use isValid() because the dates may be
+			 * missing.
+			 */
+			Q_ASSERT(foundMsgData.mId.dmId >= 0);
+
+			msgList.append(foundMsgData);
 			query.next();
 		}
 	} else {

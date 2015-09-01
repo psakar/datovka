@@ -323,7 +323,7 @@ void DlgMsgSearch::searchMessages(void)
 	debugSlotCall();
 
 	enum MessageDirection msgType = MSG_ALL;
-	QList <QStringList> msgList;
+	QList<MessageDb::SoughtMsg> msgList;
 
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
@@ -338,7 +338,6 @@ void DlgMsgSearch::searchMessages(void)
 	}
 
 	if (!this->searchAllAcntCheckBox->isChecked()) {
-		msgList.clear();
 		msgList = m_messageDbList.at(0).second->
 		    msgsAdvancedSearchMessageEnvelope(
 		    this->messageIdLineEdit->text().isEmpty() ? -1 :
@@ -360,7 +359,6 @@ void DlgMsgSearch::searchMessages(void)
 		}
 	} else {
 		for (int i = 0; i < m_messageDbList.count(); ++i) {
-			msgList.clear();
 			msgList = m_messageDbList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    this->messageIdLineEdit->text().isEmpty() ? -1 :
@@ -392,33 +390,33 @@ void DlgMsgSearch::searchMessages(void)
  */
 void DlgMsgSearch::appendMsgsToTable(
     QPair <QString,MessageDb*> usrNmAndMsgDb,
-    QList <QStringList> msgList)
+    const QList<MessageDb::SoughtMsg> &msgDataList)
 /* ========================================================================= */
 {
 	this->resultsTableWidget->setEnabled(true);
 
-	for (int j = 0; j < msgList.count(); ++j) {
+	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
+
 		int row = this->resultsTableWidget->rowCount();
 		this->resultsTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(usrNmAndMsgDb.first);
 		this->resultsTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(0));
+		item->setText(QString::number(msgData.mId.dmId));
 		if (ENABLE_TOOLTIP) {
 			item->setToolTip(usrNmAndMsgDb.second->descriptionHtml(
-			    msgList.at(j).at(0).toInt(), 0,
-			    true, false, true));
+			    msgData.mId.dmId, 0, true, false, true));
 		}
 		this->resultsTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(1));
+		item->setText(msgData.dmAnnotation);
 		this->resultsTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(2));
+		item->setText(msgData.dmSender);
 		this->resultsTableWidget->setItem(row,3,item);
 		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(3));
+		item->setText(msgData.dmRecipient);
 		this->resultsTableWidget->setItem(row,4,item);
 	}
 

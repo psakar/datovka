@@ -184,11 +184,52 @@ public:
 		qint64 dmId; /*!< Message identifier. */
 		QDateTime deliveryTime; /*!< Message delivery time. */
 
-		MsgId(void) : dmId(-1), deliveryTime() { }
-		MsgId(qint64 id, const QDateTime &dTime) : dmId(id), deliveryTime(dTime) { }
-		~MsgId(void) { }
+		MsgId(void) : dmId(-1), deliveryTime()
+		{ }
+		MsgId(qint64 id, const QDateTime &dTime)
+		    : dmId(id), deliveryTime(dTime)
+		{ }
+		~MsgId(void)
+		{ }
 
-		bool isValid(void) const { return (dmId >= 0) && (deliveryTime.isValid()); }
+		bool isValid(void) const
+		{
+			return (dmId >= 0) && (deliveryTime.isValid());
+		}
+	};
+
+	/*!
+	 * @brief Basic message information for search dialogue.
+	 */
+	class SoughtMsg {
+	public:
+		MsgId mId; /*!< Message identifier. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmSender; /*!< Message sender. */
+		QString dmRecipient; /*!< Recipient. */
+
+		SoughtMsg(void)
+		    : mId(), dmAnnotation(), dmSender(), dmRecipient()
+		{ }
+		SoughtMsg(const MsgId &id, const QString &annot,
+		    const QString &sen, const QString &rec)
+		    : mId(id), dmAnnotation(annot),
+		    dmSender(sen), dmRecipient(rec)
+		{ }
+		SoughtMsg(qint64 id, const QDateTime &dTime,
+		    const QString &annot, const QString &sen,
+		    const QString &rec)
+		    : mId(id, dTime), dmAnnotation(annot),
+		    dmSender(sen), dmRecipient(rec)
+		{ }
+		~SoughtMsg(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return mId.isValid() && (!dmAnnotation.isEmpty()) &&
+			    (!dmSender.isEmpty()) && (!dmRecipient.isEmpty());
+		}
 	};
 
 	MessageDb(const QString &dbDriverType, const QString &connectionName,
@@ -438,25 +479,6 @@ public:
 	 * @return Message state number or -1 on error.
 	 */
 	int messageState(qint64 dmId) const;
-
-	/*!
-	 * @brief Advance message envelope search.
-	 *
-	 * @return message item list pass to search query.
-	 */
-	QList <QStringList> msgsAdvancedSearchMessageEnvelope(
-	    qint64 dmId,
-	    const QString &dmAnnotation,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dmAddress,
-	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent,
-	    const QString &dmRecipientRefNumber,
-	    const QString &dmRecipientIdent,
-	    const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Update message envelope delivery information.
@@ -869,6 +891,25 @@ public: /* May become protected. */
 	 */
 	QList<MsgId> msgsDateInterval(const QDate &fromDate,
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
+
+	/*!
+	 * @brief Advance message envelope search.
+	 *
+	 * @return message item list pass to search query.
+	 */
+	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
+	    qint64 dmId,
+	    const QString &dmAnnotation,
+	    const QString &dbIDSender, const QString &dmSender,
+	    const QString &dmAddress,
+	    const QString &dbIDRecipient, const QString &dmRecipient,
+	    const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent,
+	    const QString &dmRecipientRefNumber,
+	    const QString &dmRecipientIdent,
+	    const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    enum MessageDirection msgDirect) const;
 
 protected: /* These function are used from within a database container. */
 	/*!

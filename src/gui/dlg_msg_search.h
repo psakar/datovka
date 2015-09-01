@@ -60,7 +60,7 @@ private:
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);
 	void appendMsgsToTable(QPair <QString,MessageDb*> usrNmAndMsgDb,
-	    QList <QStringList> msgList);
+	    const QList<MessageDb::SoughtMsg> &msgDataList);
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */

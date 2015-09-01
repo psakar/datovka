@@ -485,6 +485,21 @@ public: /* Database function that have been delegate to the container. */
 	QList<MessageDb::MsgId> msgsDateInterval(const QDate &fromDate,
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
+	/*!
+	 * @brief Searches for matching messages according to envelope data.
+	 *
+	 * @return message item list pass to search query.
+	 */
+	QList<MessageDb::SoughtMsg> msgsAdvancedSearchMessageEnvelope(
+	    qint64 dmId, const QString &dmAnnotation,
+	    const QString &dbIDSender, const QString &dmSender,
+	    const QString &dmAddress, const QString &dbIDRecipient,
+	    const QString &dmRecipient, const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
+	    const QString &dmRecipientIdent, const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    enum MessageDirection msgDirect) const;
+
 private:
 	inline DbMsgsTblModel *_sf_msgsRcvdModel(void);
 	inline DbMsgsTblModel *_yrly_msgsRcvdModel(void);
@@ -554,6 +569,15 @@ private:
 
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
+
+	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
+	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
+	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
+	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
 };
 
 #endif /* _MESSAGE_DB_SET_H_ */
