@@ -216,6 +216,16 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Load configuration file. */
 	loadSettings();
+
+	// set toolbar buttons style from settings
+	if (globPref.toolbar_button_style >=0
+	    && globPref.toolbar_button_style <= 3) {
+		ui->toolBar->setToolButtonStyle(
+		    (Qt::ToolButtonStyle)globPref.toolbar_button_style);
+	} else {
+		ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+	}
+
 	/* Account list must already be set in order to connect this signal. */
 	connect(ui->accountList->selectionModel(),
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,

@@ -198,6 +198,7 @@ public:
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
 	bool store_messages_on_disk;
+	int toolbar_button_style;
 	bool store_additional_data_on_disk;
 	CertValDate certificate_validation_date;
 	bool check_crl;
