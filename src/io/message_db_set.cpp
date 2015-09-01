@@ -334,14 +334,19 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
     const QString &primaryKey, bool testing, enum Organisation organisation,
     bool mustExist)
 {
-	if (organisation == DO_UNKNOWN) {
-		return NULL;
-	}
-
 	MessageDbSet *dbSet = NULL;
 	QStringList matchingFiles;
 
 	if (mustExist) {
+		if (organisation == DO_UNKNOWN) {
+			/*
+			 * Try to determine the database organisation
+			 * structure.
+			 */
+			organisation = dbOrganisation(locDir, primaryKey,
+			    testing);
+		}
+
 		matchingFiles = existingDbFileNamesInLocation(locDir,
 		    primaryKey, testing, organisation, true);
 
@@ -370,6 +375,10 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 				return NULL;
 			}
 		}
+	}
+
+	if (organisation == DO_UNKNOWN) {
+		return NULL;
 	}
 
 	/* Create database set. */
