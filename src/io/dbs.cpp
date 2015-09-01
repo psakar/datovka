@@ -147,10 +147,11 @@ QString timevalToDbFormat(const struct timeval *tv)
 QDateTime timevalToDateTime(const struct timeval *tv)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != tv);
 	QDateTime timeStamp;
 
-	timeStamp.setTime_t(tv->tv_sec);
+	if (NULL != tv) {
+		timeStamp.setTime_t(tv->tv_sec);
+	}
 
 	return timeStamp;
 }

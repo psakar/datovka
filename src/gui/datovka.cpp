@@ -856,7 +856,6 @@ QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
 	Q_ASSERT(deliveryIdx.isValid());
 
 	QDateTime deliveryTime = dateTimeFromDbFormat(deliveryIdx.data(ROLE_PLAIN_DISPLAY).toString());
-	Q_ASSERT(deliveryTime.isValid());
 
 	return deliveryTime;
 }
