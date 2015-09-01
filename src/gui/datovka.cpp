@@ -3464,7 +3464,7 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 #endif /* PORTABLE_APPLICATION */
 	html += strongAccountInfoLine(tr("Version"), version);
 	html += QString("<br><img src=") + ICON_128x128_PATH +
-	    "datovka.png />";
+	    "logo.png />";
 	html += "<h3>" + tr("Powered by") + "</h3>";
 	html += QString("<br><img src=") + ICON_128x128_PATH + "cznic.png />";
 	html += "</center>";
