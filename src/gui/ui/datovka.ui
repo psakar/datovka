@@ -553,6 +553,12 @@ sent reply on this message</string>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>32</height>
+    </size>
+   </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
    </property>
@@ -568,6 +574,7 @@ sent reply on this message</string>
    <addaction name="actionCreate_message"/>
    <addaction name="actionReply_to_the_sender"/>
    <addaction name="actionVerify_a_message"/>
+   <addaction name="separator"/>
    <addaction name="actionMsgAdvancedSearch"/>
    <addaction name="separator"/>
    <addaction name="actionAccount_props"/>
@@ -647,6 +654,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Preferences</string>
+   </property>
+   <property name="toolTip">
+    <string>Preferences of Datovka</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -752,6 +762,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Account properties</string>
+   </property>
+   <property name="toolTip">
+    <string>Change account properties</string>
    </property>
   </action>
   <action name="actionAccount_properties">
@@ -895,31 +908,31 @@ sent reply on this message</string>
   <action name="actionReceived_all">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/datovka-all-accounts-sync.png</normaloff>:/icons/24x24/datovka-all-accounts-sync.png</iconset>
+     <normaloff>:/icons/32x32/datovka-all-accounts-sync.png</normaloff>:/icons/32x32/datovka-all-accounts-sync.png</iconset>
    </property>
    <property name="text">
     <string>Sync all</string>
    </property>
    <property name="toolTip">
-    <string>Received messages from all accounts at once</string>
+    <string>Synchronize all accounts at once</string>
    </property>
   </action>
   <action name="actionDownload_messages">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/datovka-account-sync.png</normaloff>:/icons/24x24/datovka-account-sync.png</iconset>
+     <normaloff>:/icons/32x32/datovka-account-sync.png</normaloff>:/icons/32x32/datovka-account-sync.png</iconset>
    </property>
    <property name="text">
     <string>Sync account</string>
    </property>
    <property name="toolTip">
-    <string>Download messages from the box</string>
+    <string>Synchronize selected account</string>
    </property>
   </action>
   <action name="actionCreate_message">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/datovka-message.png</normaloff>:/icons/24x24/datovka-message.png</iconset>
+     <normaloff>:/icons/32x32/datovka-message.png</normaloff>:/icons/32x32/datovka-message.png</iconset>
    </property>
    <property name="text">
     <string>Create message</string>
@@ -934,13 +947,13 @@ sent reply on this message</string>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/datovka-message-reply.png</normaloff>:/icons/24x24/datovka-message-reply.png</iconset>
+     <normaloff>:/icons/32x32/datovka-message-reply.png</normaloff>:/icons/32x32/datovka-message-reply.png</iconset>
    </property>
    <property name="text">
     <string>Reply</string>
    </property>
    <property name="toolTip">
-    <string>Reply to the sender</string>
+    <string>Reply on the selected message</string>
    </property>
   </action>
   <action name="actionVerify_a_message">
@@ -952,10 +965,10 @@ sent reply on this message</string>
      <normaloff>:/icons/32x32/datovka-message-verify.png</normaloff>:/icons/32x32/datovka-message-verify.png</iconset>
    </property>
    <property name="text">
-    <string>Verify a message</string>
+    <string>Verify message</string>
    </property>
    <property name="toolTip">
-    <string>Verify a message</string>
+    <string>Verify the selected message</string>
    </property>
   </action>
   <action name="actionDownload_message_signed">

@@ -217,7 +217,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Load configuration file. */
 	loadSettings();
 
-	// set toolbar buttons style from settings
+	/* Set toolbar buttons style from settings */
 	if (globPref.toolbar_button_style >=0
 	    && globPref.toolbar_button_style <= 3) {
 		ui->toolBar->setToolButtonStyle(
