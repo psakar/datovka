@@ -73,10 +73,31 @@ public:
 		PROCSNG_COL = 7  /* Processing state. */
 	};
 
+	enum Type {
+		WORKING = 0, /*!< Ordinary model created from SQL query. */
+		DUMMY_RECEIVED, /*!< Empty received dummy. */
+		DUMMY_SENT /*!< Empty sent dummy. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 */
-	DbMsgsTblModel(QObject *parent = 0);
+	DbMsgsTblModel(enum Type type = WORKING, QObject *parent = 0);
+
+	/*!
+	 * @brief Sets the type of the model.
+	 */
+	virtual void setType(enum Type type);
+
+	/*!
+	 * @brief Returns fake column count for dummy models.
+	 */
+	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+	/*!
+	 * @brief Returns fake row count for dummy models.
+	 */
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 	/*!
 	 * @brief Convert viewed data in date/time columns.
@@ -122,6 +143,16 @@ public:
 	 */
 	virtual void clearOverridingData(void);
 
+	/*!
+	 * @brief Set header data for received model.
+	 */
+	bool setRcvdHeader(void);
+
+	/*!
+	 * @brief Set header data for sent model.
+	 */
+	bool setSntHeader(void);
+
 	/*
 	 * The view's proxy model cannot be accessed, so the message must be
 	 * addressed via its id rather than using the index.
@@ -139,6 +170,7 @@ private:
 	                                   * Holds overriding information for
 	                                   * message processing state.
 	                                   */
+	Type m_type; /*!< Model type. */
 };
 
 
@@ -959,6 +991,9 @@ private:
 	QSqlDatabase m_db; /*!< Message database. */
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
+
+	static
+	DbMsgsTblModel dummyModel; /*!< Dummy model. */
 
 	/*!
 	 * @brief Adds _dmType column.

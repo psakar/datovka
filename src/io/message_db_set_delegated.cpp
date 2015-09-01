@@ -26,6 +26,10 @@
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdModel();
 }
@@ -55,6 +59,10 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdModel(void)
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdWithin90DaysModel();
 }
@@ -84,6 +92,10 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdInYearModel(year);
 }
@@ -236,6 +248,10 @@ int MessageDbSet::msgsRcvdUnreadInYear(const QString &year) const
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntModel(void)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntModel();
 }
@@ -265,6 +281,10 @@ DbMsgsTblModel *MessageDbSet::msgsSntModel(void)
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntWithin90DaysModel();
 }
@@ -294,6 +314,10 @@ DbMsgsTblModel *MessageDbSet::msgsSntWithin90DaysModel(void)
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 {
+	if (this->size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &MessageDb::dummyModel;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntInYearModel(year);
 }
