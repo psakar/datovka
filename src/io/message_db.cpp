@@ -668,6 +668,55 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 	}
 }
 
+/*!
+ * @brief Set header data for received model.
+ */
+static
+bool setRcvdHeader(DbMsgsTblModel &rcvdModel)
+{
+	for (int i = 0; i < MessageDb::receivedItemIds.size(); ++i) {
+		/* TODO -- Handle the joined tables in a better way. */
+		if (msgsTbl.attrProps.find(MessageDb::receivedItemIds[i]) !=
+		    msgsTbl.attrProps.end()) {
+			/* Description. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(MessageDb::receivedItemIds[i]).desc);
+			/* Data type. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(MessageDb::receivedItemIds[i]).type,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if (smsgdtTbl.attrProps.find(MessageDb::receivedItemIds[i]) !=
+		    smsgdtTbl.attrProps.end()) {
+			/* Description. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(
+			    MessageDb::receivedItemIds[i]).desc);
+			/* Data type. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    smsgdtTbl.attrProps.value(MessageDb::receivedItemIds[i]).type,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("is_downloaded" == MessageDb::receivedItemIds[i]) {
+			/* Description. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Attachments downloaded"));
+			/* Data type. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("process_status" == MessageDb::receivedItemIds[i]) {
+			/* Description. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Processing state"));
+			/* Data type. */
+			rcvdModel.setHeaderData(i, Qt::Horizontal,
+			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
+		} else {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 /* ========================================================================= */
 /*
@@ -711,46 +760,9 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
-		    smsgdtTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(
-			    receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("process_status" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Processing state"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setRcvdHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
@@ -804,46 +816,9 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
-		    smsgdtTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(
-			    receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("process_status" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Processing state"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setRcvdHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
@@ -898,46 +873,9 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < receivedItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(receivedItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if (smsgdtTbl.attrProps.find(receivedItemIds[i]) !=
-		    smsgdtTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(
-			    receivedItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(receivedItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("process_status" == receivedItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Processing state"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setRcvdHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
@@ -1143,6 +1081,38 @@ fail:
 	return -1;
 }
 
+/*!
+ * @brief Set header data for sent model.
+ */
+static
+bool setSntHeader(DbMsgsTblModel &sntModel)
+{
+	for (int i = 0; i < MessageDb::sentItemIds.size(); ++i) {
+		/* TODO -- Handle the joined tables in a better way. */
+		if (msgsTbl.attrProps.find(MessageDb::sentItemIds[i]) !=
+		    msgsTbl.attrProps.end()) {
+			/* Description. */
+			sntModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(MessageDb::sentItemIds[i]).desc);
+			/* Data type. */
+			sntModel.setHeaderData(i, Qt::Horizontal,
+			    msgsTbl.attrProps.value(MessageDb::sentItemIds[i]).type,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
+		} else if ("is_downloaded" == MessageDb::sentItemIds[i]) {
+			/* Description. */
+			sntModel.setHeaderData(i, Qt::Horizontal,
+			    QObject::tr("Attachments downloaded"));
+			/* Data type. */
+			sntModel.setHeaderData(i, Qt::Horizontal,
+			    DB_BOOL_ATTACHMENT_DOWNLOADED,
+			    ROLE_MSGS_DB_ENTRY_TYPE);
+		} else {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 /* ========================================================================= */
 /*
@@ -1183,29 +1153,9 @@ DbMsgsTblModel * MessageDb::msgsSntModel(void)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < sentItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(sentItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == sentItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setSntHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
@@ -1257,29 +1207,9 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < sentItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(sentItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == sentItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setSntHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
@@ -1331,29 +1261,9 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 
 	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
-	for (int i = 0; i < sentItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(sentItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).desc);
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sentItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == sentItemIds[i]) {
-			/* Description. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    QObject::tr("Attachments downloaded"));
-			/* Data type. */
-			m_sqlMsgsModel.setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			Q_ASSERT(0);
-			goto fail;
-		}
+	if (!setSntHeader(m_sqlMsgsModel)) {
+		Q_ASSERT(0);
+		goto fail;
 	}
 
 	return &m_sqlMsgsModel;
