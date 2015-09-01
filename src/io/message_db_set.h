@@ -113,6 +113,14 @@ public:
 	QString secondaryKey(const QDateTime &time) const;
 
 	/*!
+	 * @brief Access already existent message database.
+	 *
+	 * @param secondaryKey Secondary key.
+	 * @return Message database or zero pointer if database does not exist.
+	 */
+	MessageDb *constAccessMessageDb(const QDateTime &deliveryTime) const;
+
+	/*!
 	 * @brief Accesses message database file matching the secondary key.
 	 *
 	 * @param secondaryKey Secondary key.

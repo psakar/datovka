@@ -270,6 +270,23 @@ QString MessageDbSet::secondaryKey(const QDateTime &time) const
 	return QString();
 }
 
+MessageDb *MessageDbSet::constAccessMessageDb(
+    const QDateTime &deliveryTime) const
+{
+	QString secondary = secondaryKey(deliveryTime);
+
+	if (secondary.isNull()) {
+		return 0;
+	}
+
+	/* Already opened. */
+	if (this->constFind(secondary) != this->end()) {
+		return (*this)[secondary];
+	}
+
+	return 0;
+}
+
 MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
     bool writeNew)
 {
