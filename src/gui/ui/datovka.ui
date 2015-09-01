@@ -535,6 +535,8 @@ sent reply on this message</string>
      <string>Help</string>
     </property>
     <addaction name="actionAbout_Datovka"/>
+    <addaction name="actionHomepage"/>
+    <addaction name="separator"/>
     <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
@@ -818,7 +820,7 @@ sent reply on this message</string>
   <action name="actionAbout_Datovka">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/home_16.png</normaloff>:/icons/3party/home_16.png</iconset>
+     <normaloff>:/icons/3party/info_16.png</normaloff>:/icons/3party/info_16.png</iconset>
    </property>
    <property name="text">
     <string>About Datovka</string>
@@ -1158,6 +1160,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Time stamp expiration check</string>
+   </property>
+  </action>
+  <action name="actionHomepage">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/home_16.png</normaloff>:/icons/3party/home_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Homepage</string>
    </property>
   </action>
  </widget>

@@ -584,9 +584,14 @@ private slots:
 	void aboutApplication(void);
 
 	/*!
-	 * @brief Show help.
+	 * @brief Show help/manual in a internet browser.
 	 */
 	void showHelp(void);
+
+	/*!
+	 * @brief Go to homepage.
+	 */
+	void goHome(void);
 
 	/*!
 	 * @brief Clear message filter field.

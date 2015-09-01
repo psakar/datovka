@@ -4060,6 +4060,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
 	    SLOT(aboutApplication()));
+	connect(ui->actionHomepage, SIGNAL(triggered()), this,
+	    SLOT(goHome()));
 	connect(ui->actionHelp, SIGNAL(triggered()), this,
 	    SLOT(showHelp()));
 }
@@ -7013,7 +7015,7 @@ void MainWindow::showNotificationDialogWithResult(int filesCnt,
 
 /* ========================================================================= */
 /*
- * Show help.
+ * Show help/manual in a internet browser.
  */
 void MainWindow::showHelp(void)
 /* ========================================================================= */
@@ -7022,6 +7024,19 @@ void MainWindow::showHelp(void)
 
 	QDesktopServices::openUrl(QUrl(DATOVKA_ONLINE_HELP_URL,
 	    QUrl::TolerantMode));
+}
+
+
+/* ========================================================================= */
+/*
+ * Go to homepage.
+ */
+void MainWindow::goHome(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QDesktopServices::openUrl(QUrl(DATOVKA_HOMEPAGE_URL, QUrl::TolerantMode));
 }
 
 
