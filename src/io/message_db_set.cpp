@@ -609,6 +609,10 @@ int MessageDbSet::checkExistingDbFile(const QString &locDir,
 		return MDS_ERR_MULTIPLE;
 	}
 
+	if (fileNames.isEmpty()) {
+		return MDS_ERR_MISSFILE;
+	}
+
 	foreach (const QString &fileName, fileNames) {
 		QString filePath(locDir + QDir::separator() + fileName);
 
