@@ -31,6 +31,12 @@
 
 #include "src/io/message_db.h"
 
+#define DB_SUFFIX ".db"
+#define PRIMARY_KEY_RE "[^_]+"
+#define SINGLE_FILE_SEC_KEY ""
+#define YEARLY_SEC_KEY_RE "[0-9][0-9][0-9][0-9]"
+#define YEARLY_SEC_KEY_INVALID "inv"
+
 /*
  * Flags used when creating new database file.
  */
@@ -501,10 +507,20 @@ public: /* Database function that have been delegate to the container. */
 	    enum MessageDirection msgDirect) const;
 
 private:
+	/*!
+	 * @brief Return list of seconday keys that may be involed in last 90
+	 *     days.
+	 *
+	 * @return List of keys.
+	 */
+	QStringList _yrly_secKeysIn90Days(void) const;
+
 	inline DbMsgsTblModel *_sf_msgsRcvdModel(void);
 	inline DbMsgsTblModel *_yrly_msgsRcvdModel(void);
 
 	inline DbMsgsTblModel *_sf_msgsRcvdWithin90DaysModel(void);
+	static
+	inline DbMsgsTblModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName);
 	inline DbMsgsTblModel *_yrly_msgsRcvdWithin90DaysModel(void);
 
 	inline DbMsgsTblModel *_sf_msgsRcvdInYearModel(const QString &year);

@@ -21,8 +21,101 @@
  * the two.
  */
 
+#include <QRegExp>
+#include <QSet>
+#include <QSqlError>
+#include <QSqlQuery>
+
 #include "message_db_set.h"
 #include "src/log/log.h"
+
+#define DB2 "db2"
+
+/*!
+ * @brief Attaches a database file to opened database.
+ */
+static
+bool attachDb2(QSqlDatabase &db, const QString &attachFileName)
+{
+	QSqlQuery query(db);
+
+	QString queryStr("ATTACH DATABASE :fileName AS " DB2);
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":fileName", attachFileName);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+/*!
+ * @brief Detaches database file from opened database.
+ */
+static
+bool detachDb2(QSqlDatabase &db)
+{
+	QSqlQuery query(db);
+
+	QString queryStr = "DETACH DATABASE " DB2;
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+/*!
+ * @brief Converts year to secondary key string.
+ */
+static
+QString _yrly_YearToSecondaryKey(const QString &year)
+{
+	static const QRegExp re(YEARLY_SEC_KEY_RE);
+
+	if (re.exactMatch(year)) {
+		return year;
+	} else {
+		return YEARLY_SEC_KEY_INVALID;
+	}
+}
+
+QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
+{
+	static const QRegExp re("^" YEARLY_SEC_KEY_RE "$");
+
+	QStringList keys = this->keys();
+	if (keys.isEmpty()) {
+		return keys;
+	}
+
+	keys = keys.filter(re);
+	keys.sort();
+	if (keys.size() > 1) {
+		keys = keys.mid(keys.size() - 2, 2);
+	}
+
+	return keys;
+}
 
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
 {
@@ -67,8 +160,114 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 	return this->first()->msgsRcvdWithin90DaysModel();
 }
 
+DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
+    MessageDb &db, const QString &attachFileName)
+{
+	QSqlQuery query(db.m_db);
+	DbMsgsTblModel *ret = 0;
+	bool attached = false;
+	QString queryStr;
+
+	attached = attachDb2(db.m_db, attachFileName);
+	if (!attached) {
+		goto fail;
+	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (MessageDb::receivedItemIds.size() - 2); ++i) {
+		queryStr += MessageDb::receivedItemIds[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
+	queryStr += "ifnull(p.state, 0) AS process_status";
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type1)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))"
+	    " UNION "
+	    "SELECT ";
+	for (int i = 0; i < (MessageDb::receivedItemIds.size() - 2); ++i) {
+		queryStr += MessageDb::receivedItemIds[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
+	queryStr += "ifnull(p.state, 0) AS process_status";
+	queryStr += " FROM " DB2 ".messages AS m "
+	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN " DB2 ".raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "LEFT JOIN " DB2 ".process_state AS p "
+	    "ON (m.dmId = p.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type2)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", MessageDb::TYPE_RECEIVED);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	db.m_sqlMsgsModel.clearOverridingData();
+	db.m_sqlMsgsModel.setQuery(query);
+	if (!db.m_sqlMsgsModel.setRcvdHeader()) {
+		Q_ASSERT(0);
+		goto fail;
+	}
+
+	ret = &db.m_sqlMsgsModel;
+
+fail:
+	if (attached) {
+		detachDb2(db.m_db);
+	}
+	return ret;
+}
+
 DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 {
+	QStringList secKeys = _yrly_secKeysIn90Days();
+
+	if (secKeys.size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &MessageDb::dummyModel;
+	} else if (secKeys.size() == 1) {
+		/* Query only one database. */
+		MessageDb *db = this->value(secKeys[0], NULL);
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+		return db->msgsRcvdWithin90DaysModel();
+	} else {
+		Q_ASSERT(secKeys.size() == 2);
+		/* The models need to be attached. */
+
+		MessageDb *db0 = this->value(secKeys[0], NULL);
+		MessageDb *db1 = this->value(secKeys[1], NULL);
+		if ((NULL == db0) || (NULL == db1)) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+
+//		return db0->msgsRcvdWithin90DaysModel();
+//		return db1->msgsRcvdWithin90DaysModel();
+		/* TODO -- The following code does not work as expected. */
+		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0, db1->fileName());
+	}
+
 	Q_ASSERT(0);
 	return NULL;
 }
@@ -135,9 +334,37 @@ QStringList MessageDbSet::_sf_msgsRcvdYears(enum Sorting sorting) const
 
 QStringList MessageDbSet::_yrly_msgsRcvdYears(enum Sorting sorting) const
 {
-	(void) sorting;
-	Q_ASSERT(0);
-	return QStringList();
+	if (this->size() == 0) {
+		return QStringList();
+	}
+
+	QSet<QString> years;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QStringList();
+		}
+		years.unite(db->msgsRcvdYears(sorting).toSet());
+	}
+
+	QStringList list(years.toList());
+
+	if (ASCENDING) {
+		list.sort();
+		return list;
+	} else if (DESCENDING) {
+		list.sort();
+		QStringList reversed;
+		foreach (const QString &str, list) {
+			reversed.prepend(str);
+		}
+		return reversed;
+	}
+
+	return list;
 }
 
 QStringList MessageDbSet::msgsRcvdYears(enum Sorting sorting) const
@@ -204,6 +431,38 @@ int MessageDbSet::_sf_msgsRcvdUnreadWithin90Days(void) const
 
 int MessageDbSet::_yrly_msgsRcvdUnreadWithin90Days(void) const
 {
+	QStringList secKeys = _yrly_secKeysIn90Days();
+
+	if (secKeys.size() == 0) {
+		return 0;
+	} else if (secKeys.size() == 1) {
+		/* Query only one database. */
+		MessageDb *db = this->value(secKeys[0], NULL);
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return -1;
+		}
+		return db->msgsRcvdUnreadWithin90Days();
+	} else {
+		Q_ASSERT(secKeys.size() == 2);
+		/* The models need to be attached. */
+
+		MessageDb *db0 = this->value(secKeys[0], NULL);
+		MessageDb *db1 = this->value(secKeys[1], NULL);
+		if ((NULL == db0) || (NULL == db1)) {
+			Q_ASSERT(0);
+			return -1;
+		}
+
+		int ret0 = db0->msgsRcvdUnreadWithin90Days();
+		int ret1 = db1->msgsRcvdUnreadWithin90Days();
+		if ((ret0 < 0) || (ret1 < 0)) {
+			return -1;
+		}
+
+		return ret0 + ret1;
+	}
+
 	Q_ASSERT(0);
 	return -1;
 }
@@ -236,9 +495,14 @@ int MessageDbSet::_sf_msgsRcvdUnreadInYear(const QString &year) const
 
 int MessageDbSet::_yrly_msgsRcvdUnreadInYear(const QString &year) const
 {
-	(void) year;
-	Q_ASSERT(0);
-	return -1;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return 0;
+	}
+
+	return db->msgsRcvdUnreadInYear(year);
 }
 
 int MessageDbSet::msgsRcvdUnreadInYear(const QString &year) const
@@ -369,9 +633,37 @@ QStringList MessageDbSet::_sf_msgsSntYears(enum Sorting sorting) const
 
 QStringList MessageDbSet::_yrly_msgsSntYears(enum Sorting sorting) const
 {
-	(void) sorting;
-	Q_ASSERT(0);
-	return QStringList();
+	if (this->size() == 0) {
+		return QStringList();
+	}
+
+	QSet<QString> years;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QStringList();
+		}
+		years.unite(db->msgsSntYears(sorting).toSet());
+	}
+
+	QStringList list(years.toList());
+
+	if (ASCENDING) {
+		list.sort();
+		return list;
+	} else if (DESCENDING) {
+		list.sort();
+		QStringList reversed;
+		foreach (const QString &str, list) {
+			reversed.prepend(str);
+		}
+		return reversed;
+	}
+
+	return list;
 }
 
 QStringList MessageDbSet::msgsSntYears(enum Sorting sorting) const
@@ -473,9 +765,14 @@ int MessageDbSet::_sf_msgsSntUnreadInYear(const QString &year) const
 
 int MessageDbSet::_yrly_msgsSntUnreadInYear(const QString &year) const
 {
-	(void) year;
-	Q_ASSERT(0);
-	return -1;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return 0;
+	}
+
+	return db->msgsSntUnreadInYear(year);
 }
 
 int MessageDbSet::msgsSntUnreadInYear(const QString &year) const

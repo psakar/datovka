@@ -816,25 +816,22 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded" ", ";
-	queryStr += "ifnull(process_state.state, 0) AS process_status";
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
+	queryStr += "ifnull(p.state, 0) AS process_status";
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state "
-	    "ON (m.dmId = process_state.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
 	    "WHERE "
-//	    "m.dbIDRecipient = :recipDbId"
 	    "s.message_type = :message_type";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -870,18 +867,16 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded" ", ";
-	queryStr += "ifnull(process_state.state, 0) AS process_status";
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
+	queryStr += "ifnull(p.state, 0) AS process_status";
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state "
-	    "ON (m.dmId = process_state.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
 	    "WHERE "
-//	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "(m.dmDeliveryTime >= date('now','-90 day'))";
@@ -890,7 +885,6 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":message_type", TYPE_RECEIVED);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -926,18 +920,16 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 	for (int i = 0; i < (receivedItemIds.size() - 2); ++i) {
 		queryStr += receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded" ", ";
-	queryStr += "ifnull(process_state.state, 0) AS process_status";
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
+	queryStr += "ifnull(p.state, 0) AS process_status";
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state "
-	    "ON (m.dmId = process_state.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
 	    "WHERE "
-//	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
@@ -946,7 +938,6 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
 	query.bindValue(":message_type", TYPE_RECEIVED);
 	query.bindValue(":year", year);
 	if (!query.exec()) {

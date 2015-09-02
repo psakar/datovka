@@ -980,6 +980,10 @@ protected: /* These function are used from within a database container. */
 	 */
 	bool checkDb(bool quick);
 
+protected:
+	QSqlDatabase m_db; /*!< Message database. */
+	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
+
 private:
 	static
 	const QVector<QString> msgPrintedAttribs;
@@ -988,8 +992,6 @@ private:
 	static
 	const QVector<QString> fileItemIds;
 
-	QSqlDatabase m_db; /*!< Message database. */
-	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
 
 	static
