@@ -225,6 +225,7 @@ bool MessageDbSet::deleteLocation(void)
 #define PRIMARY_KEY_RE "[^_]+"
 #define SINGLE_FILE_SEC_KEY ""
 #define YEARLY_SEC_KEY_RE "[0-9][0-9][0-9][0-9]"
+#define YEARLY_SEC_KEY_INVALID "inv"
 
 /*!
  * @brief Creates secondary key from given time.
@@ -249,7 +250,11 @@ QString secondaryKeySingleFile(const QDateTime &time)
 static
 QString secondaryKeyYearly(const QDateTime &time)
 {
-	return time.toString("yyyy");
+	if (time.isValid()) {
+		return time.toString("yyyy");
+	} else {
+		return YEARLY_SEC_KEY_INVALID;
+	}
 }
 
 QString MessageDbSet::secondaryKey(const QDateTime &time) const
@@ -441,7 +446,10 @@ bool fileNameMatchesYearly(const QString &fileName, const QString &primaryKey,
 	QRegExp re("^" + primaryKey + "_" YEARLY_SEC_KEY_RE
 	    "___" + (testing ? "1" : "0") + DB_SUFFIX "$");
 
-	return re.indexIn(fileName) > -1;
+	QString invFileName(primaryKey + "_" YEARLY_SEC_KEY_INVALID
+	    "___" + (testing ? "1" : "0") + DB_SUFFIX);
+
+	return (re.indexIn(fileName) > -1) || (fileName == invFileName);
 }
 
 enum MessageDbSet::Organisation MessageDbSet::dbOrganisation(
@@ -504,14 +512,21 @@ QString fileNameSecondaryKeySingleFile(const QString &fileName)
 static
 QString fileNameSecondaryKeyYearly(const QString &fileName)
 {
-	QRegExp re(QString("^") + PRIMARY_KEY_RE "_" YEARLY_SEC_KEY_RE
+	QRegExp reInv(QString("^") + PRIMARY_KEY_RE "_" YEARLY_SEC_KEY_INVALID
 	    "___" "[01]" DB_SUFFIX "$");
 
-	if (re.indexIn(fileName) < 0) {
-		return QString();
+	if (reInv.indexIn(fileName) > -1) {
+		return YEARLY_SEC_KEY_INVALID;
 	}
 
-	return fileName.section('_', 1, 1);
+	QRegExp reValid(QString("^") + PRIMARY_KEY_RE "_" YEARLY_SEC_KEY_RE
+	    "___" "[01]" DB_SUFFIX "$");
+
+	if (reValid.indexIn(fileName) > -1) {
+		return fileName.section('_', 1, 1);
+	}
+
+	return QString();
 }
 
 QString MessageDbSet::secondaryKeyFromFileName(const QString &fileName,
