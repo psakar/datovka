@@ -126,6 +126,9 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdInYearModel(const QString &year)
 
 QStringList MessageDbSet::_sf_msgsRcvdYears(enum Sorting sorting) const
 {
+	if (this->size() == 0) {
+		return QStringList();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdYears(sorting);
 }
@@ -157,6 +160,9 @@ QStringList MessageDbSet::msgsRcvdYears(enum Sorting sorting) const
 QList< QPair<QString, int> > MessageDbSet::_sf_msgsRcvdYearlyCounts(
     enum Sorting sorting) const
 {
+	if (this->size() == 0) {
+		return QList< QPair<QString, int> >();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdYearlyCounts(sorting);
 }
@@ -189,6 +195,9 @@ QList< QPair<QString, int> > MessageDbSet::msgsRcvdYearlyCounts(
 
 int MessageDbSet::_sf_msgsRcvdUnreadWithin90Days(void) const
 {
+	if (this->size() == 0) {
+		return 0;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdUnreadWithin90Days();
 }
@@ -218,6 +227,9 @@ int MessageDbSet::msgsRcvdUnreadWithin90Days(void) const
 
 int MessageDbSet::_sf_msgsRcvdUnreadInYear(const QString &year) const
 {
+	if (this->size() == 0) {
+		return 0;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdUnreadInYear(year);
 }
@@ -348,6 +360,9 @@ DbMsgsTblModel *MessageDbSet::msgsSntInYearModel(const QString &year)
 
 QStringList MessageDbSet::_sf_msgsSntYears(enum Sorting sorting) const
 {
+	if (this->size() == 0) {
+		return QStringList();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntYears(sorting);
 }
@@ -379,6 +394,9 @@ QStringList MessageDbSet::msgsSntYears(enum Sorting sorting) const
 QList< QPair<QString, int> > MessageDbSet::_sf_msgsSntYearlyCounts(
     enum Sorting sorting) const
 {
+	if (this->size() == 0) {
+		return QList< QPair<QString, int> >();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntYearlyCounts(sorting);
 }
@@ -411,12 +429,18 @@ QList< QPair<QString, int> > MessageDbSet::msgsSntYearlyCounts(
 
 int MessageDbSet::_sf_msgsSntUnreadWithin90Days(void) const
 {
+	if (this->size() == 0) {
+		return 0;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntUnreadWithin90Days();
 }
 
 int MessageDbSet::_yrly_msgsSntUnreadWithin90Days(void) const
 {
+	if (this->size() == 0) {
+		return 0;
+	}
 	Q_ASSERT(0);
 	return -1;
 }
@@ -440,6 +464,9 @@ int MessageDbSet::msgsSntUnreadWithin90Days(void) const
 
 int MessageDbSet::_sf_msgsSntUnreadInYear(const QString &year) const
 {
+	if (this->size() == 0) {
+		return 0;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntUnreadInYear(year);
 }
@@ -470,6 +497,9 @@ int MessageDbSet::msgsSntUnreadInYear(const QString &year) const
 
 bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->smsgdtSetAllReceivedLocallyRead(read);
 }
@@ -501,6 +531,9 @@ bool MessageDbSet::smsgdtSetAllReceivedLocallyRead(bool read)
 bool MessageDbSet::_sf_smsgdtSetReceivedYearLocallyRead(const QString &year,
     bool read)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->smsgdtSetReceivedYearLocallyRead(year, read);
 }
@@ -533,6 +566,9 @@ bool MessageDbSet::smsgdtSetReceivedYearLocallyRead(const QString &year,
 
 bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->smsgdtSetWithin90DaysReceivedLocallyRead(read);
 }
@@ -564,6 +600,9 @@ bool MessageDbSet::smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 bool MessageDbSet::_sf_msgSetAllReceivedProcessState(
     enum MessageProcessState state)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgSetAllReceivedProcessState(state);
 }
@@ -596,6 +635,9 @@ bool MessageDbSet::msgSetAllReceivedProcessState(enum MessageProcessState state)
 bool MessageDbSet::_sf_smsgdtSetReceivedYearProcessState(const QString &year,
     enum MessageProcessState state)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->smsgdtSetReceivedYearProcessState(year, state);
 }
@@ -629,6 +671,9 @@ bool MessageDbSet::smsgdtSetReceivedYearProcessState(const QString &year,
 bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedProcessState(
     enum MessageProcessState state)
 {
+	if (this->size() == 0) {
+		return false;
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->smsgdtSetWithin90DaysReceivedProcessState(state);
 }
@@ -661,6 +706,9 @@ bool MessageDbSet::smsgdtSetWithin90DaysReceivedProcessState(
 
 QList< QVector<QString> > MessageDbSet::_sf_uniqueContacts(void) const
 {
+	if (this->size() == 0) {
+		return QList< QVector<QString> >();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->uniqueContacts();
 }
@@ -690,6 +738,9 @@ QList< QVector<QString> > MessageDbSet::uniqueContacts(void) const
 
 QList<MessageDb::MsgId> MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
 {
+	if (this->size() == 0) {
+		return QList<MessageDb::MsgId>();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->getAllMessageIDsFromDB();
 }
@@ -721,6 +772,9 @@ QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const
 {
+	if (this->size() == 0) {
+		return QList<MessageDb::MsgId>();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
 }
@@ -762,6 +816,9 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     enum MessageDirection msgDirect) const
 {
+	if (this->size() == 0) {
+		return QList<MessageDb::SoughtMsg>();
+	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsAdvancedSearchMessageEnvelope(dmId,
 	    dmAnnotation, dbIDSender, dmSender, dmAddress, dbIDRecipient,
