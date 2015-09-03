@@ -1455,7 +1455,7 @@ QString createFilenameFromFormatString(QString pattern,
 	debugFuncCall();
 
 	// known atrributes
-	// {"%Y","%M","%D","%h","%m","%i","%s","%d","%u","%f"};
+	// {"%Y","%M","%D","%h","%m","%i","%s","%S","%d","%u","%f"};
 
 	if (pattern.isEmpty()) {
 		pattern = DEFAULT_TMP_FORMAT;
@@ -1489,6 +1489,9 @@ QString createFilenameFromFormatString(QString pattern,
 	pair.first = "%s";
 	pair.second = dmAnnotation.replace(" ","-");
 	knowAtrrList.append(pair);
+	pair.first = "%S";
+	pair.second = ""; /* TODO */
+	knowAtrrList.append(pair);
 	pair.first = "%d";
 	pair.second = dbID;
 	knowAtrrList.append(pair);
@@ -1502,6 +1505,13 @@ QString createFilenameFromFormatString(QString pattern,
 	for (int i = 0; i < knowAtrrList.length(); ++i) {
 		pattern.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
+
+	pattern.replace("/", QString( "_" ));
+
+#ifdef WIN32
+	pattern.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),
+	    QString( "_" ));
+#endif
 
 	return pattern;
 }
