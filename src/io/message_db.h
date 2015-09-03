@@ -42,6 +42,7 @@
 #include "src/models/files_model.h"
 #include "src/models/messages_model.h"
 
+#define INVALID_YEAR "inv"
 
 enum Sorting {
 	UNSORTED = 0,

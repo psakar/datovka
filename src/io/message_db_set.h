@@ -35,7 +35,7 @@
 #define PRIMARY_KEY_RE "[^_]+"
 #define SINGLE_FILE_SEC_KEY ""
 #define YEARLY_SEC_KEY_RE "[0-9][0-9][0-9][0-9]"
-#define YEARLY_SEC_KEY_INVALID "inv"
+#define YEARLY_SEC_KEY_INVALID INVALID_YEAR
 
 /*
  * Flags used when creating new database file.

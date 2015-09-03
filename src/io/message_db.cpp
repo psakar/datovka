@@ -369,7 +369,7 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 	    "WHERE "
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
+	    "(ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -407,16 +407,16 @@ QStringList MessageDb::msgsYears(enum MessageDb::MessageType type,
 {
 	QStringList yearList;
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
+	QString queryStr = "SELECT DISTINCT ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') "
 	    "FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
 	    "s.message_type = :message_type";
-	if (TYPE_SENT == type) {
-		queryStr += " and "
-		    "(m.dmDeliveryTime IS NOT NULL)";
-	}
+//	if (TYPE_SENT == type) {
+//		queryStr += " and "
+//		    "(m.dmDeliveryTime IS NOT NULL)";
+//	}
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
@@ -470,7 +470,7 @@ QList< QPair<QString, int> > MessageDb::msgsYearlyCounts(enum MessageType type,
 		    "WHERE "
 		    "(s.message_type = :message_type)"
 		    " and "
-		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
+		    "(ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year)";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -559,7 +559,7 @@ int MessageDb::msgsUnreadInYear(enum MessageType type,
 	    "WHERE "
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', m.dmDeliveryTime) = :year)"
+	    "(ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year)"
 	    " and "
 	    "(read_locally = 0)";
 	if (!query.prepare(queryStr)) {
@@ -651,8 +651,9 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 	    "WHERE "
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
-	    " (m.dmDeliveryTime IS NULL))";
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+//	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+//	    " (m.dmDeliveryTime IS NULL))";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -700,7 +701,7 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 	    "WHERE "
 	    "(s.message_type = :message_type)"
 	    " and "
-	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
+	    "(ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -992,7 +993,7 @@ bool MessageDb::smsgdtSetReceivedYearLocallyRead(const QString &year,
 	    " SELECT s.message_id, s.message_type, :read, s.custom_data "
 	    "FROM supplementary_message_data AS s "
 	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
-	    "WHERE (strftime('%Y', m.dmDeliveryTime) = :year) and "
+	    "WHERE (ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year) and "
 	    "(s.message_type = :message_type)";
 
 	if (!query.prepare(queryStr)) {
@@ -3904,7 +3905,7 @@ bool MessageDb::smsgdtSetReceivedYearProcessState(const QString &year,
 	    " SELECT s.message_id, :state "
 	    "FROM supplementary_message_data AS s "
 	    "LEFT JOIN messages AS m ON (s.message_id = m.dmID) "
-	    "WHERE (strftime('%Y', m.dmDeliveryTime) = :year) and "
+	    "WHERE (ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') = :year) and "
 	    "(s.message_type = :message_type)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
