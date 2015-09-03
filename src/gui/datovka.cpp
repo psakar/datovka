@@ -78,6 +78,12 @@
 
 QNetworkAccessManager* nam;
 
+/*
+ * If defined then no message table is going to be generated when clicking
+ * on all sent or received messages.
+ */
+#define DISABLE_ALL_TABLE 1
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -596,14 +602,32 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeReceived:
+#ifdef DISABLE_ALL_TABLE
+		setMessageActionVisibility(false);
+		html = createAccountInfoMessagesCount(
+		    tr("All received messages"),
+		    dbSet->msgsRcvdYearlyCounts(DESCENDING),
+		    MessageDb::TYPE_RECEIVED);
+		ui->actionDelete_message_from_db->setEnabled(false);
+#else /* !DISABLE_ALL_TABLE */
 		msgTblMdl = dbSet->msgsRcvdModel();
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
+#endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeSent:
+#ifdef DISABLE_ALL_TABLE
+		setMessageActionVisibility(false);
+		html = createAccountInfoMessagesCount(
+		    tr("All sent messages"),
+		    dbSet->msgsSntYearlyCounts(DESCENDING),
+		    MessageDb::TYPE_SENT);
+		ui->actionDelete_message_from_db->setEnabled(false);
+#else /* !DISABLE_ALL_TABLE */
 		msgTblMdl = dbSet->msgsSntModel();
 		ui->actionDelete_message_from_db->setEnabled(true);
+#endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
@@ -648,12 +672,18 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 	case AccountModel::nodeAll:
+#ifdef DISABLE_ALL_TABLE
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeSent:
+#endif /* DISABLE_ALL_TABLE */
 		ui->messageStackedWidget->setCurrentIndex(0);
 		ui->accountTextInfo->setHtml(html);
 		ui->accountTextInfo->setReadOnly(true);
 		break;
 	case AccountModel::nodeRecentReceived:
+#ifndef DISABLE_ALL_TABLE
 	case AccountModel::nodeReceived:
+#endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
 		Q_ASSERT(0 != msgTblMdl);
@@ -665,7 +695,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		received = true;
 		goto setmodel;
 	case AccountModel::nodeRecentSent:
+#ifndef DISABLE_ALL_TABLE
 	case AccountModel::nodeSent:
+#endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
 		Q_ASSERT(0 != msgTblMdl);
@@ -3364,6 +3396,37 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 	return html;
 }
 
+/* ========================================================================= */
+/*
+ * Generate overall account information only for sent or received messages.
+ */
+QString MainWindow::createAccountInfoMessagesCount(const QString &accountName,
+    const QList< QPair<QString, int> > &counts,
+    enum MessageDb::MessageType type) const
+/* ========================================================================= */
+{
+	QString html = indentDivStart;
+	html.append ("<h3>" + accountName + "</h3>");
+
+	if (type == MessageDb::TYPE_RECEIVED) {
+		html.append(strongAccountInfoLine(tr("Received messages"), ""));
+	} else {
+		html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+	}
+	html.append(indentDivStart);
+	if (0 == counts.size()) {
+		html.append(tr("none"));
+	} else {
+		for (int i = 0; i < counts.size(); ++i) {
+			html.append(accountInfoLine(counts[i].first,
+			    QString::number(counts[i].second)));
+		}
+	}
+	html.append(divEnd);
+
+	html.append(divEnd);
+	return html;
+}
 
 /* ========================================================================= */
 /*

@@ -872,7 +872,15 @@ private:
 	 */
 	QString createAccountInfoAllField(const QString &accountName,
 	    const QList< QPair<QString, int> > &receivedCounts,
-	    const QList< QPair<QString, int> > &sent) const;
+	    const QList< QPair<QString, int> > &sentCounts) const;
+
+	/*!
+	 * @brief Generate overall account information only for sent or
+	 *     received messages.
+	 */
+	QString createAccountInfoMessagesCount(const QString &accountName,
+	    const QList< QPair<QString, int> > &counts,
+	    enum MessageDb::MessageType type) const;
 
 	/*!
 	 * @brief Generate banner.
