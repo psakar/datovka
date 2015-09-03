@@ -252,16 +252,14 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
 		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
-	queryStr += "ifnull(p.state, 0) AS process_status";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
+	    "ifnull(p.state, 0) AS process_status"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
@@ -303,16 +301,14 @@ fail:
 DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
 		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
-	queryStr += "ifnull(p.state, 0) AS process_status";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
+	    "ifnull(p.state, 0) AS process_status"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
@@ -356,16 +352,14 @@ fail:
 DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
 		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
-	queryStr += "ifnull(p.state, 0) AS process_status";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
+	    "ifnull(p.state, 0) AS process_status"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
@@ -411,8 +405,6 @@ QStringList MessageDb::msgsYears(enum MessageDb::MessageType type,
     enum Sorting sorting) const
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QStringList yearList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
@@ -465,8 +457,6 @@ QList< QPair<QString, int> > MessageDb::msgsYearlyCounts(enum MessageType type,
     enum Sorting sorting) const
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QList< QPair<QString, int> > yearlyCounts;
 	QList<QString> yearList = msgsYears(type, sorting);
 	QSqlQuery query(m_db);
@@ -601,29 +591,24 @@ fail:
 DbMsgsTblModel * MessageDb::msgsSntModel(void)
 /* ========================================================================= */
 {
-//	Former argument: const QString &sendDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
 	    "WHERE "
-//	    "m.dbIDSender = :sendDbId"
 	    "s.message_type = :message_type";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -652,15 +637,13 @@ fail:
 DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 /* ========================================================================= */
 {
-//	Former argument: const QString &sendDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
@@ -703,22 +686,18 @@ fail:
 DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 /* ========================================================================= */
 {
-//	Former argument: const QString &sendDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded";
-	queryStr += " FROM messages AS m "
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
+	    " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
 	    "WHERE "
-//	    "(m.dbIDSender = :sendDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "(strftime('%Y', m.dmDeliveryTime) = :year)";
@@ -727,7 +706,6 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":message_type", TYPE_SENT);
 	query.bindValue(":year", year);
 	if (!query.exec()) {
