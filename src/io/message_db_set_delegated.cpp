@@ -426,16 +426,18 @@ QList< QPair<QString, int> > MessageDbSet::msgsYearlyCounts(
 	return QList< QPair<QString, int> >();
 }
 
-int MessageDbSet::_sf_msgsRcvdUnreadWithin90Days(void) const
+int MessageDbSet::_sf_msgsUnreadWithin90Days(
+    enum MessageDb::MessageType type) const
 {
 	if (this->size() == 0) {
 		return 0;
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdUnreadWithin90Days();
+	return this->first()->msgsUnreadWithin90Days(type);
 }
 
-int MessageDbSet::_yrly_msgsRcvdUnreadWithin90Days(void) const
+int MessageDbSet::_yrly_msgsUnreadWithin90Days(
+    enum MessageDb::MessageType type) const
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
@@ -448,7 +450,7 @@ int MessageDbSet::_yrly_msgsRcvdUnreadWithin90Days(void) const
 			Q_ASSERT(0);
 			return -1;
 		}
-		return db->msgsRcvdUnreadWithin90Days();
+		return db->msgsUnreadWithin90Days(type);
 	} else {
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
@@ -460,8 +462,8 @@ int MessageDbSet::_yrly_msgsRcvdUnreadWithin90Days(void) const
 			return -1;
 		}
 
-		int ret0 = db0->msgsRcvdUnreadWithin90Days();
-		int ret1 = db1->msgsRcvdUnreadWithin90Days();
+		int ret0 = db0->msgsUnreadWithin90Days(type);
+		int ret1 = db1->msgsUnreadWithin90Days(type);
 		if ((ret0 < 0) || (ret1 < 0)) {
 			return -1;
 		}
@@ -473,14 +475,14 @@ int MessageDbSet::_yrly_msgsRcvdUnreadWithin90Days(void) const
 	return -1;
 }
 
-int MessageDbSet::msgsRcvdUnreadWithin90Days(void) const
+int MessageDbSet::msgsUnreadWithin90Days(enum MessageDb::MessageType type) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdUnreadWithin90Days();
+		return _sf_msgsUnreadWithin90Days(type);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdUnreadWithin90Days();
+		return _yrly_msgsUnreadWithin90Days(type);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -490,16 +492,18 @@ int MessageDbSet::msgsRcvdUnreadWithin90Days(void) const
 	return -1;
 }
 
-int MessageDbSet::_sf_msgsRcvdUnreadInYear(const QString &year) const
+int MessageDbSet::_sf_msgsUnreadInYear(enum MessageDb::MessageType type,
+    const QString &year) const
 {
 	if (this->size() == 0) {
 		return 0;
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdUnreadInYear(year);
+	return this->first()->msgsUnreadInYear(type, year);
 }
 
-int MessageDbSet::_yrly_msgsRcvdUnreadInYear(const QString &year) const
+int MessageDbSet::_yrly_msgsUnreadInYear(enum MessageDb::MessageType type,
+    const QString &year) const
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
@@ -508,17 +512,18 @@ int MessageDbSet::_yrly_msgsRcvdUnreadInYear(const QString &year) const
 		return 0;
 	}
 
-	return db->msgsRcvdUnreadInYear(year);
+	return db->msgsUnreadInYear(type, year);
 }
 
-int MessageDbSet::msgsRcvdUnreadInYear(const QString &year) const
+int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
+    const QString &year) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdUnreadInYear(year);
+		return _sf_msgsUnreadInYear(type, year);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdUnreadInYear(year);
+		return _yrly_msgsUnreadInYear(type, year);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -727,79 +732,6 @@ DbMsgsTblModel *MessageDbSet::msgsSntInYearModel(const QString &year)
 	}
 
 	return NULL;
-}
-
-int MessageDbSet::_sf_msgsSntUnreadWithin90Days(void) const
-{
-	if (this->size() == 0) {
-		return 0;
-	}
-	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntUnreadWithin90Days();
-}
-
-int MessageDbSet::_yrly_msgsSntUnreadWithin90Days(void) const
-{
-	if (this->size() == 0) {
-		return 0;
-	}
-	Q_ASSERT(0);
-	return -1;
-}
-
-int MessageDbSet::msgsSntUnreadWithin90Days(void) const
-{
-	switch (m_organisation) {
-	case DO_SINGLE_FILE:
-		return _sf_msgsSntUnreadWithin90Days();
-		break;
-	case DO_YEARLY:
-		return _yrly_msgsSntUnreadWithin90Days();
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
-
-	return -1;
-}
-
-int MessageDbSet::_sf_msgsSntUnreadInYear(const QString &year) const
-{
-	if (this->size() == 0) {
-		return 0;
-	}
-	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntUnreadInYear(year);
-}
-
-int MessageDbSet::_yrly_msgsSntUnreadInYear(const QString &year) const
-{
-	QString secondaryKey = _yrly_YearToSecondaryKey(year);
-
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
-		return 0;
-	}
-
-	return db->msgsSntUnreadInYear(year);
-}
-
-int MessageDbSet::msgsSntUnreadInYear(const QString &year) const
-{
-	switch (m_organisation) {
-	case DO_SINGLE_FILE:
-		return _sf_msgsSntUnreadInYear(year);
-		break;
-	case DO_YEARLY:
-		return _yrly_msgsSntUnreadInYear(year);
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
-
-	return -1;
 }
 
 bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)

@@ -514,11 +514,9 @@ fail:
  * Return number of unread messages received within past 90
  *     days.
  */
-int MessageDb::msgsRcvdUnreadWithin90Days(void) const
+int MessageDb::msgsUnreadWithin90Days(enum MessageType type) const
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -527,7 +525,6 @@ int MessageDb::msgsRcvdUnreadWithin90Days(void) const
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-//	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "(m.dmDeliveryTime >= date('now','-90 day'))"
@@ -538,8 +535,7 @@ int MessageDb::msgsRcvdUnreadWithin90Days(void) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
-	query.bindValue(":message_type", TYPE_RECEIVED);
+	query.bindValue(":message_type", type);
 	if (query.exec() && query.isActive() &&
 	    query.first() &&query.isValid()) {
 		return query.value(0).toInt();
@@ -559,11 +555,10 @@ fail:
 /*
  * Return number of unread received messages in year.
  */
-int MessageDb::msgsRcvdUnreadInYear(const QString &year) const
+int MessageDb::msgsUnreadInYear(enum MessageType type,
+    const QString &year) const
 /* ========================================================================= */
 {
-//	Former argument: const QString &recipDbId
-
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -572,7 +567,6 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &year) const
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-//	    "(m.dbIDRecipient = :recipDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "(strftime('%Y', m.dmDeliveryTime) = :year)"
@@ -583,8 +577,7 @@ int MessageDb::msgsRcvdUnreadInYear(const QString &year) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
-	query.bindValue(":message_type", TYPE_RECEIVED);
+	query.bindValue(":message_type", type);
 	query.bindValue(":year", year);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -754,98 +747,6 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 
 fail:
 	return 0;
-}
-
-
-/* ========================================================================= */
-/*
- * Return number of unread messages sent within past 90
- *     days.
- */
-int MessageDb::msgsSntUnreadWithin90Days(void) const
-/* ========================================================================= */
-{
-//	Former argument: const QString &sendDbId
-
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "WHERE "
-//	    "(m.dbIDSender = :sendDbId)"
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))"
-	    " and "
-	    "(s.read_locally = 0)";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-//	query.bindValue(":sendDbId", sendDbId);
-	query.bindValue(":message_type", TYPE_SENT);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toInt();
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-fail:
-	return -1;
-}
-
-
-/* ========================================================================= */
-/*
- * Return number of unread sent messages in year.
- */
-int MessageDb::msgsSntUnreadInYear(const QString &year) const
-/* ========================================================================= */
-{
-//	Former argument: const QString &sendDbId
-
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT COUNT(*) AS nrUnread "
-	    "FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "WHERE "
-//	    "(m.dbIDSender = :sendDbId)"
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(strftime('%Y', m.dmDeliveryTime) = :year)"
-	    " and "
-	    "(s.read_locally = 0)";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-//	query.bindValue(":sendDbId", sendDbId);
-	query.bindValue(":message_type", TYPE_SENT);
-	query.bindValue(":year", year);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toInt();
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-fail:
-	return -1;
 }
 
 

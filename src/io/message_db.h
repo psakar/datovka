@@ -631,17 +631,20 @@ protected: /* These function are used from within a database container. */
 	 * @brief Return number of unread messages received within past 90
 	 *     days.
 	 *
+	 * @param[in] type Whether to obtain sent or received messages.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadWithin90Days(void) const;
+	int msgsUnreadWithin90Days(enum MessageType type) const;
 
 	/*!
 	 * @brief Return number of unread received messages in year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] type Whether to obtain sent or received messages.
+	 * @param[in] year Year number.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadInYear(const QString &year) const;
+	int msgsUnreadInYear(enum MessageType type,
+	    const QString &year) const;
 
 	/*!
 	 * @brief Return all sent messages model.
@@ -670,22 +673,6 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return number of unread messages sent within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread sent messages in year.
-	 *
-	 * @param year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadInYear(const QString &year) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.

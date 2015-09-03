@@ -341,17 +341,20 @@ public: /* Database function that have been delegate to the container. */
 	 * @brief Return number of unread messages received within past 90
 	 *     days.
 	 *
+	 * @param[in] type Whether to obtain sent or received messages.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadWithin90Days(void) const;
+	int msgsUnreadWithin90Days(enum MessageDb::MessageType type) const;
 
 	/*!
 	 * @brief Return number of unread received messages in year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] type Whether to obtain sent or received messages.
+	 * @param[in] year Year number.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsRcvdUnreadInYear(const QString &year) const;
+	int msgsUnreadInYear(enum MessageDb::MessageType type,
+	    const QString &year) const;
 
 	/*!
 	 * @brief Return all sent messages model.
@@ -380,22 +383,6 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel *msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return number of unread messages sent within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread sent messages in year.
-	 *
-	 * @param year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadInYear(const QString &year) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -518,11 +505,11 @@ private:
 	inline QList< QPair<QString, int> > _sf_msgsYearlyCounts(enum MessageDb::MessageType type, enum Sorting sorting) const;
 	inline QList< QPair<QString, int> > _yrly_msgsYearlyCounts(enum MessageDb::MessageType type, enum Sorting sorting) const;
 
-	inline int _sf_msgsRcvdUnreadWithin90Days(void) const;
-	inline int _yrly_msgsRcvdUnreadWithin90Days(void) const;
+	inline int _sf_msgsUnreadWithin90Days(enum MessageDb::MessageType type) const;
+	inline int _yrly_msgsUnreadWithin90Days(enum MessageDb::MessageType type) const;
 
-	inline int _sf_msgsRcvdUnreadInYear(const QString &year) const;
-	inline int _yrly_msgsRcvdUnreadInYear(const QString &year) const;
+	inline int _sf_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
+	inline int _yrly_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 
 	inline DbMsgsTblModel *_sf_msgsSntModel(void);
 	inline DbMsgsTblModel *_yrly_msgsSntModel(void);
@@ -534,12 +521,6 @@ private:
 
 	inline DbMsgsTblModel *_sf_msgsSntInYearModel(const QString &year);
 	inline DbMsgsTblModel *_yrly_msgsSntInYearModel(const QString &year);
-
-	inline int _sf_msgsSntUnreadWithin90Days(void) const;
-	inline int _yrly_msgsSntUnreadWithin90Days(void) const;
-
-	inline int _sf_msgsSntUnreadInYear(const QString &year) const;
-	inline int _yrly_msgsSntUnreadInYear(const QString &year) const;
 
 	inline bool _sf_smsgdtSetAllReceivedLocallyRead(bool read);
 	inline bool _yrly_smsgdtSetAllReceivedLocallyRead(bool read);

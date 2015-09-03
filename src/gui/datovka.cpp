@@ -4351,25 +4351,27 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	Q_ASSERT(0 != dbSet);
 
 	/* Received. */
-	unreadMsgs = dbSet->msgsRcvdUnreadWithin90Days();
+	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
-		unreadMsgs = dbSet->msgsRcvdUnreadInYear(yearList.value(j));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
+		    yearList.value(j));
 		m_accountModel.updateYear(topItem,
 		    AccountModel::nodeReceivedYear, yearList.value(j),
 		    unreadMsgs);
 	}
 	/* Sent. */
-	//unreadMsgs = dbSet->msgsSntUnreadWithin90Days();
+	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
-		//unreadMsgs = dbSet->msgsSntUnreadInYear(yearList.value(j));
+		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		//    yearList.value(j));
 		m_accountModel.updateYear(topItem, AccountModel::nodeSentYear,
 		    yearList.value(j), 0);
 	}
@@ -4405,24 +4407,26 @@ bool MainWindow::regenerateAccountModelYears(QModelIndex index)
 	Q_ASSERT(0 != dbSet);
 
 	/* Received. */
-	unreadMsgs = dbSet->msgsRcvdUnreadWithin90Days();
+	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
-		unreadMsgs = dbSet->msgsRcvdUnreadInYear(yearList.value(j));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
+		    yearList.value(j));
 		m_accountModel.addYear(topItem, AccountModel::nodeReceivedYear,
 		    yearList.value(j), unreadMsgs);
 	}
 	/* Sent. */
-	//unreadMsgs = dbSet->msgsSntUnreadWithin90Days();
+	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
 	m_accountModel.updateRecentUnread(topItem,
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
-		//unreadMsgs = dbSet->msgsSntUnreadInYear(yearList.value(j));
+		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		//    yearList.value(j));
 		m_accountModel.addYear(topItem, AccountModel::nodeSentYear,
 		    yearList.value(j), 0);
 	}
@@ -4463,28 +4467,30 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		}
 
 		/* Received. */
-		unreadMsgs = dbSet->msgsRcvdUnreadWithin90Days();
+		unreadMsgs = dbSet->msgsUnreadWithin90Days(
+		    MessageDb::TYPE_RECEIVED);
 		m_accountModel.updateRecentUnread(itemTop,
 		    AccountModel::nodeRecentReceived, unreadMsgs);
 		yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED,
 		    DESCENDING);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
-			unreadMsgs = dbSet->msgsRcvdUnreadInYear(
-			    yearList.value(j));
+			unreadMsgs = dbSet->msgsUnreadInYear(
+			    MessageDb::TYPE_RECEIVED, yearList.value(j));
 			m_accountModel.addYear(itemTop,
 			    AccountModel::nodeReceivedYear, yearList.value(j),
 			    unreadMsgs);
 		}
 		/* Sent. */
-		//unreadMsgs = dbSet->msgsSntUnreadWithin90Days();
+		//unreadMsgs = dbSet->msgsUnreadWithin90Days(
+		//    MessageDb::TYPE_SENT);
 		m_accountModel.updateRecentUnread(itemTop,
 		    AccountModel::nodeRecentSent, 0);
 		yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 		for (int j = 0; j < yearList.size(); ++j) {
 			//qDebug() << yearList.value(j);
-			//unreadMsgs = dbSet->msgsSntUnreadInYear(
-			//    yearList.value(j));
+			//unreadMsgs = dbSet->msgsUnreadInYear(
+			//    MessageDb::TYPE_SENT, yearList.value(j));
 			m_accountModel.addYear(itemTop,
 			    AccountModel::nodeSentYear, yearList.value(j),
 			    0);
