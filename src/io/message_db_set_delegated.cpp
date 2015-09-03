@@ -187,7 +187,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	    "LEFT JOIN process_state AS p "
 	    "ON (m.dmId = p.message_id) "
 	    "WHERE "
-	    "(s.message_type = :message_type1)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " UNION "
@@ -205,7 +205,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	    "LEFT JOIN " DB2 ".process_state AS p "
 	    "ON (m.dmId = p.message_id) "
 	    "WHERE "
-	    "(s.message_type = :message_type2)"
+	    "(s.message_type = :message_type)"
 	    " and "
 	    "(m.dmDeliveryTime >= date('now','-90 day'))";
 	if (!query.prepare(queryStr)) {
