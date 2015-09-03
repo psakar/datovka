@@ -255,6 +255,7 @@ SOURCES += src/common.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
+    src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_view_zfo.cpp \
@@ -293,6 +294,7 @@ HEADERS += src/common.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/models/accounts_model.h \
+    src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
     src/gui/dlg_about.h \
     src/gui/dlg_view_zfo.h \

@@ -120,8 +120,9 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(
+		    DbMsgsTblModel::DUMMY_RECEIVED);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdModel();
@@ -153,8 +154,9 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdModel(void)
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(
+		    DbMsgsTblModel::DUMMY_RECEIVED);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdWithin90DaysModel();
@@ -174,8 +176,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (MessageDb::receivedItemIds.size() - 2); ++i) {
-		queryStr += MessageDb::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -192,8 +194,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (MessageDb::receivedItemIds.size() - 2); ++i) {
-		queryStr += MessageDb::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -241,8 +243,9 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(
+		    DbMsgsTblModel::DUMMY_RECEIVED);
+		return &DbMsgsTblModel::dummyModel;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
 		MessageDb *db = this->value(secKeys[0], NULL);
@@ -290,8 +293,9 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
 DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(
+		    DbMsgsTblModel::DUMMY_RECEIVED);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdInYearModel(year);
@@ -523,8 +527,8 @@ int MessageDbSet::msgsRcvdUnreadInYear(const QString &year) const
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntModel(void)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntModel();
@@ -556,8 +560,8 @@ DbMsgsTblModel *MessageDbSet::msgsSntModel(void)
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntWithin90DaysModel();
@@ -577,8 +581,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (MessageDb::sentItemIds.size() - 1); ++i) {
-		queryStr += MessageDb::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
@@ -593,8 +597,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	    " (m.dmDeliveryTime IS NULL))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (MessageDb::sentItemIds.size() - 1); ++i) {
-		queryStr += MessageDb::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM " DB2 ".messages AS m "
@@ -640,8 +644,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &DbMsgsTblModel::dummyModel;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
 		MessageDb *db = this->value(secKeys[0], NULL);
@@ -689,8 +693,8 @@ DbMsgsTblModel *MessageDbSet::msgsSntWithin90DaysModel(void)
 DbMsgsTblModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
-		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
-		return &MessageDb::dummyModel;
+		DbMsgsTblModel::dummyModel.setType(DbMsgsTblModel::DUMMY_SENT);
+		return &DbMsgsTblModel::dummyModel;
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntInYearModel(year);

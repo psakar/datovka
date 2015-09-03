@@ -31,7 +31,6 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
-#include <QMap>
 #include <QModelIndex>
 #include <QObject>
 #include <QPair>
@@ -43,6 +42,7 @@
 #include <QVector>
 
 #include "src/common.h"
+#include "src/models/messages_model.h"
 
 
 enum Sorting {
@@ -53,133 +53,12 @@ enum Sorting {
 
 
 /*!
- * @brief Custom message model class.
- *
- * Used for data conversion on display. (Use QIdentityProxyModel?)
- *
- * @note setItemDelegate and a custom ItemDelegate would also be the solution.
- */
-class DbMsgsTblModel : public QSqlQueryModel {
-	Q_OBJECT
-
-public:
-	enum ColumnNumbers {
-		DMID_COL = 0, /* Message identifier. */
-		ANNOT_COL = 1, /* Annotation collumn. */
-		DELIVERY_COL = 3, /* Delivery time column. */
-		ACCEPT_COL = 4, /* Acceptance time column. */
-		READLOC_COL = 5, /* Read locally. */
-		ATTDOWN_COL = 6, /* Attachment downloaded. */
-		PROCSNG_COL = 7  /* Processing state. */
-	};
-
-	enum Type {
-		WORKING = 0, /*!< Ordinary model created from SQL query. */
-		DUMMY_RECEIVED, /*!< Empty received dummy. */
-		DUMMY_SENT /*!< Empty sent dummy. */
-	};
-
-	/*!
-	 * @brief Constructor.
-	 */
-	DbMsgsTblModel(enum Type type = WORKING, QObject *parent = 0);
-
-	/*!
-	 * @brief Sets the type of the model.
-	 */
-	virtual void setType(enum Type type);
-
-	/*!
-	 * @brief Returns fake column count for dummy models.
-	 */
-	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-	/*!
-	 * @brief Returns fake row count for dummy models.
-	 */
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-
-	/*!
-	 * @brief Convert viewed data in date/time columns.
-	 */
-	virtual QVariant data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const;
-
-	/*!
-	 * @brief Convert viewed header data.
-	 */
-	virtual QVariant headerData(int section, Qt::Orientation orientation,
-	    int role) const;
-
-	/*!
-	 * @brief Override message as being read.
-	 *
-	 * @param[in] dmId      Message id.
-	 * @param[in] forceRead Set whether to force read state.
-	 */
-	virtual bool overrideRead(qint64 dmId, bool forceRead = true);
-
-	/*!
-	 * @brief Override message as having its attachments having downloaded.
-	 *
-	 * @param[in] dmId            Message id.
-	 * @param[in] forceDownloaded Set whether to force attachments
-	 *                            downloaded state.
-	 */
-	virtual bool overrideDownloaded(qint64 dmId,
-	    bool forceDownloaded = true);
-
-	/*!
-	 * @brief Override message processing state.
-	 *
-	 * @param[in] dmId       Message id.
-	 * @param[in] forceState Set forced value.
-	 */
-	virtual bool overrideProcessing(qint64 dmId,
-	    enum MessageProcessState forceState);
-
-	/*!
-	 * @brief Clear all overriding data.
-	 */
-	virtual void clearOverridingData(void);
-
-	/*!
-	 * @brief Set header data for received model.
-	 */
-	bool setRcvdHeader(void);
-
-	/*!
-	 * @brief Set header data for sent model.
-	 */
-	bool setSntHeader(void);
-
-	/*
-	 * The view's proxy model cannot be accessed, so the message must be
-	 * addressed via its id rather than using the index.
-	 */
-private:
-	QMap<qint64, bool> m_overriddenRL; /*!<
-	                                    * Holds overriding information for
-	                                    * read locally.
-	                                    */
-	QMap<qint64, bool> m_overriddenAD; /*!<
-	                                    * Holds overriding information for
-	                                    * downloaded attachments.
-	                                    */
-	QMap<qint64, int> m_overriddenPS; /*!<
-	                                   * Holds overriding information for
-	                                   * message processing state.
-	                                   */
-	Type m_type; /*!< Model type. */
-};
-
-
-/*!
  * @brief Custom file model class.
  *
  * Used for data conversion on display. (Use QIdentityProxyModel?)
  */
 class DbFlsTblModel : public QSqlQueryModel {
+	Q_OBJECT
 public:
 	/*!
 	 * @brief Compute viewed data in file size column.
@@ -716,11 +595,6 @@ public:
 	 */
 	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
 
-	static
-	const QVector<QString> receivedItemIds;
-	static
-	const QVector<QString> sentItemIds;
-
 protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.
@@ -993,9 +867,6 @@ private:
 	const QVector<QString> fileItemIds;
 
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
-
-	static
-	DbMsgsTblModel dummyModel; /*!< Dummy model. */
 
 	/*!
 	 * @brief Adds _dmType column.
