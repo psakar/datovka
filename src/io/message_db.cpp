@@ -1222,15 +1222,13 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 	for (int i = 0; i < (sentItemIds.size() - 1); ++i) {
 		queryStr += sentItemIds[i] + ", ";
 	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) "
-	    "AS is_downloaded";
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "LEFT JOIN raw_message_data AS r "
 	    "ON (m.dmId = r.message_id) "
 	    "WHERE "
-//	    "(m.dbIDSender = :sendDbId)"
 	    "(s.message_type = :message_type)"
 	    " and "
 	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
@@ -1240,7 +1238,6 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":sendDbId", sendDbId);
 	query.bindValue(":message_type", TYPE_SENT);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",

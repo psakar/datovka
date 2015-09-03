@@ -542,6 +542,8 @@ private:
 	inline DbMsgsTblModel *_yrly_msgsSntModel(void);
 
 	inline DbMsgsTblModel *_sf_msgsSntWithin90DaysModel(void);
+	static
+	inline DbMsgsTblModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName);
 	inline DbMsgsTblModel *_yrly_msgsSntWithin90DaysModel(void);
 
 	inline DbMsgsTblModel *_sf_msgsSntInYearModel(const QString &year);

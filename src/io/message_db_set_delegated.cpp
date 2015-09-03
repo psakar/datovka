@@ -262,10 +262,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 			return NULL;
 		}
 
-//		return db0->msgsRcvdWithin90DaysModel();
-//		return db1->msgsRcvdWithin90DaysModel();
-		/* TODO -- The following code does not work as expected. */
-		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0, db1->fileName());
+		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0,
+		    db1->fileName());
 	}
 
 	Q_ASSERT(0);
@@ -565,8 +563,108 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 	return this->first()->msgsSntWithin90DaysModel();
 }
 
+DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
+    MessageDb &db, const QString &attachFileName)
+{
+	QSqlQuery query(db.m_db);
+	DbMsgsTblModel *ret = 0;
+	bool attached = false;
+	QString queryStr;
+
+	attached = attachDb2(db.m_db, attachFileName);
+	if (!attached) {
+		goto fail;
+	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (MessageDb::sentItemIds.size() - 1); ++i) {
+		queryStr += MessageDb::sentItemIds[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
+	queryStr += " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+	    " (m.dmDeliveryTime IS NULL))"
+	    " UNION "
+	    "SELECT ";
+	for (int i = 0; i < (MessageDb::sentItemIds.size() - 1); ++i) {
+		queryStr += MessageDb::sentItemIds[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
+	queryStr += " FROM " DB2 ".messages AS m "
+	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN " DB2 ".raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+	    " (m.dmDeliveryTime IS NULL))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", MessageDb::TYPE_SENT);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	db.m_sqlMsgsModel.clearOverridingData();
+	db.m_sqlMsgsModel.setQuery(query);
+	if (!db.m_sqlMsgsModel.setRcvdHeader()) {
+		Q_ASSERT(0);
+		goto fail;
+	}
+
+	ret = &db.m_sqlMsgsModel;
+
+fail:
+	if (attached) {
+		detachDb2(db.m_db);
+	}
+	return ret;
+}
+
 DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 {
+	QStringList secKeys = _yrly_secKeysIn90Days();
+
+	if (secKeys.size() == 0) {
+		MessageDb::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		return &MessageDb::dummyModel;
+	} else if (secKeys.size() == 1) {
+		/* Query only one database. */
+		MessageDb *db = this->value(secKeys[0], NULL);
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+		return db->msgsRcvdWithin90DaysModel();
+	} else {
+		Q_ASSERT(secKeys.size() == 2);
+		/* The models need to be attached. */
+
+		MessageDb *db0 = this->value(secKeys[0], NULL);
+		MessageDb *db1 = this->value(secKeys[1], NULL);
+		if ((NULL == db0) || (NULL == db1)) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+
+		return _yrly_2dbs_msgsSntWithin90DaysModel(*db0,
+		    db1->fileName());
+	}
+
 	Q_ASSERT(0);
 	return NULL;
 }
