@@ -1506,26 +1506,12 @@ QString createFilenameFromFormatString(QString pattern,
 		pattern.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
 
-/*
- * Eliminate illegal characters in the filename by OS.
- * Linux: /
- * Win: \/:*?"<>|
- * OSX: :
- * All these characters are replaced by "_".
-*/
-
-#ifdef Q_OS_OSX
-	pattern.replace(":", QString( "_" ));
-#endif
-
-#ifdef Q_OS_LINUX
-	pattern.replace("/", QString( "_" ));
-#endif
-
-#ifdef WIN32
+	/*
+	* Eliminate illegal characters "\/:*?"<>|" in the filename.
+	* All these characters are replaced by "_".
+	*/
 	pattern.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),
 	    QString( "_" ));
-#endif
 
 	return pattern;
 }
