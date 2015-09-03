@@ -801,10 +801,21 @@ bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)
 
 bool MessageDbSet::_yrly_smsgdtSetAllReceivedLocallyRead(bool read)
 {
-	/* TODO -- Implementation missing. */
-	(void) read;
-	Q_ASSERT(0);
-	return false;
+	bool ret = true;
+
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i)
+	{
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return false;
+		}
+
+		ret = ret && db->smsgdtSetAllReceivedLocallyRead(read);
+	}
+
+	return ret;
 }
 
 bool MessageDbSet::smsgdtSetAllReceivedLocallyRead(bool read)
@@ -837,10 +848,14 @@ bool MessageDbSet::_sf_smsgdtSetReceivedYearLocallyRead(const QString &year,
 bool MessageDbSet::_yrly_smsgdtSetReceivedYearLocallyRead(const QString &year,
     bool read)
 {
-	/* TODO -- Implementation missing. */
-	(void) year; (void) read;
-	Q_ASSERT(0);
-	return false;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return false;
+	}
+
+	return db->smsgdtSetReceivedYearLocallyRead(year, read);
 }
 
 bool MessageDbSet::smsgdtSetReceivedYearLocallyRead(const QString &year,
@@ -872,8 +887,37 @@ bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 
 bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 {
-	/* TODO -- Implementation missing. */
-	(void) read;
+	QStringList secKeys = _yrly_secKeysIn90Days();
+
+	if (secKeys.size() == 0) {
+		return false;
+	} else if (secKeys.size() == 1) {
+		/* Query only one database. */
+		MessageDb *db = this->value(secKeys[0], NULL);
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+		return db->smsgdtSetWithin90DaysReceivedLocallyRead(read);
+	} else {
+		Q_ASSERT(secKeys.size() == 2);
+		/* The models need to be attached. */
+
+		bool ret = true;
+		foreach (const QString &secKey, secKeys) {
+			MessageDb *db = this->value(secKey, NULL);
+			if (NULL == db) {
+				Q_ASSERT(0);
+				return false;
+			}
+
+			ret = ret &&
+			    db->smsgdtSetWithin90DaysReceivedLocallyRead(read);
+		}
+
+		return ret;
+	}
+
 	Q_ASSERT(0);
 	return false;
 }
