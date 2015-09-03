@@ -126,6 +126,14 @@ public:
 		}
 	};
 
+	class ContactEntry {
+	public:
+		qint64 dmId; /*!< Message id. */
+		QString boxId;
+		QString name;
+		QString address;
+	};
+
 	MessageDb(const QString &dbDriverType, const QString &connectionName,
 	    QObject *parent = 0);
 	virtual ~MessageDb(void);
@@ -733,7 +741,7 @@ protected: /* These function are used from within a database container. */
 	 * @return List of vectors containing recipientId, recipientName,
 	 *     recipentAddress.
 	 */
-	QList< QVector<QString> > uniqueContacts(void) const;
+	QList<ContactEntry> uniqueContacts(void) const;
 
 	/*!
 	 * @brief Return all message ID from database.

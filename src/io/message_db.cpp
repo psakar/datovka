@@ -1080,19 +1080,12 @@ fail:
 /*
  * Return contact list from message db.
  */
-QList< QVector<QString> > MessageDb::uniqueContacts(void) const
+QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void) const
 /* ========================================================================= */
 {
-	class ContactEntry {
-	public:
-		QString boxId;
-		QString name;
-		QString address;
-	};
-
 	QMap<QString, ContactEntry> mapOfBoxes;
 	QMap<QString, ContactEntry>::iterator it;
-	QList< QVector<QString> > contactList;
+	QList<ContactEntry> contactList;
 	QSqlQuery query(m_db);
 
 	QString queryStr = "SELECT m.dmID AS id, m.dbIDRecipient, "
@@ -1124,13 +1117,18 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 	query.bindValue(":message_type_received", TYPE_RECEIVED);
 	if (query.exec() && query.isActive()) {
 		query.first();
-		ContactEntry entry;
+		ContactEntry newEntry;
 		while (query.isValid()) {
-			entry.boxId = query.value(1).toString();
-			entry.name = query.value(2).toString();
-			entry.address = query.value(3).toString();
-			if (mapOfBoxes.end() == mapOfBoxes.find(entry.boxId)) {
-				mapOfBoxes.insert(entry.boxId, entry);
+			newEntry.dmId = query.value(0).toLongLong();
+			newEntry.boxId = query.value(1).toString();
+			newEntry.name = query.value(2).toString();
+			newEntry.address = query.value(3).toString();
+			QMap<QString, ContactEntry>::iterator found = mapOfBoxes.find(newEntry.boxId);
+			if (mapOfBoxes.end() == found) {
+				mapOfBoxes.insert(newEntry.boxId, newEntry);
+			} else if (found->dmId < newEntry.dmId) {
+				/* Prefer entries with larger ids. */
+				*found = newEntry;
 			}
 			query.next();
 		}
@@ -1140,12 +1138,8 @@ QList< QVector<QString> > MessageDb::uniqueContacts(void) const
 		goto fail;
 	}
 
-	for (it = mapOfBoxes.begin(); it != mapOfBoxes.end(); ++it) {
-		QVector<QString> contact;
-		contact.append(it.value().boxId);
-		contact.append(it.value().name);
-		contact.append(it.value().address);
-		contactList.append(contact);
+	foreach (const ContactEntry &entry, mapOfBoxes) {
+		contactList.append(entry);
 	}
 
 fail:

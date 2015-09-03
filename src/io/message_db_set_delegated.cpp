@@ -1094,23 +1094,61 @@ bool MessageDbSet::smsgdtSetWithin90DaysReceivedProcessState(
 	return false;
 }
 
-QList< QVector<QString> > MessageDbSet::_sf_uniqueContacts(void) const
+QList<MessageDb::ContactEntry> MessageDbSet::_sf_uniqueContacts(void) const
 {
 	if (this->size() == 0) {
-		return QList< QVector<QString> >();
+		return QList<MessageDb::ContactEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->uniqueContacts();
 }
 
-QList< QVector<QString> > MessageDbSet::_yrly_uniqueContacts(void) const
+/*!
+ * @brief Merge unique contacts, prefer larger message ids.
+ *
+ * @param
+ */
+void mergeUniqueContacts(QMap<QString, MessageDb::ContactEntry> &tgt,
+    const QList<MessageDb::ContactEntry> &src)
 {
-	/* TODO -- Implementation missing. */
-	Q_ASSERT(0);
-	return QList< QVector<QString> >();
+	QMap<QString, MessageDb::ContactEntry>::iterator found;
+
+	foreach (const MessageDb::ContactEntry &entry, src) {
+		found = tgt.find(entry.boxId);
+		if (tgt.end() == found) {
+			tgt.insert(entry.boxId, entry);
+		} else if (found->dmId < entry.dmId) {
+			/* Prefer entries with larger ids. */
+			*found = entry;
+		}
+	}
 }
 
-QList< QVector<QString> > MessageDbSet::uniqueContacts(void) const
+QList<MessageDb::ContactEntry> MessageDbSet::_yrly_uniqueContacts(void) const
+{
+	QMap<QString, MessageDb::ContactEntry> unique;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QList<MessageDb::ContactEntry>();
+		}
+
+		mergeUniqueContacts(unique, db->uniqueContacts());
+	}
+
+	QList<MessageDb::ContactEntry> list;
+
+	foreach (const MessageDb::ContactEntry &entry, unique) {
+		list.append(entry);
+	}
+
+	return list;
+}
+
+QList<MessageDb::ContactEntry> MessageDbSet::uniqueContacts(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -1124,7 +1162,7 @@ QList< QVector<QString> > MessageDbSet::uniqueContacts(void) const
 		break;
 	}
 
-	return QList< QVector<QString> >();
+	return QList<MessageDb::ContactEntry>();
 }
 
 QList<MessageDb::MsgId> MessageDbSet::_sf_getAllMessageIDsFromDB(void) const

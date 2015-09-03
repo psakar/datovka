@@ -443,7 +443,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @return List of vectors containing recipientId, recipientName,
 	 *     recipentAddress.
 	 */
-	QList< QVector<QString> > uniqueContacts(void) const;
+	QList<MessageDb::ContactEntry> uniqueContacts(void) const;
 
 	/*!
 	 * @brief Return all message ID from database.
@@ -540,8 +540,8 @@ private:
 	inline bool _sf_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
 	inline bool _yrly_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
 
-	inline QList< QVector<QString> > _sf_uniqueContacts(void) const;
-	inline QList< QVector<QString> > _yrly_uniqueContacts(void) const;
+	inline QList<MessageDb::ContactEntry> _sf_uniqueContacts(void) const;
+	inline QList<MessageDb::ContactEntry> _yrly_uniqueContacts(void) const;
 
 	inline QList<MessageDb::MsgId> _sf_getAllMessageIDsFromDB(void) const;
 	inline QList<MessageDb::MsgId> _yrly_getAllMessageIDsFromDB(void) const;
