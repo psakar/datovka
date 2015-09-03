@@ -402,10 +402,54 @@ QList< QPair<QString, int> > MessageDbSet::_sf_msgsYearlyCounts(
 QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
     enum MessageDb::MessageType type, enum Sorting sorting) const
 {
-	(void) type;
-	(void) sorting;
-	Q_ASSERT(0);
-	return QList< QPair<QString, int> >();
+	if (this->size() == 0) {
+		return QList< QPair<QString, int> >();
+	}
+
+	QSet<QString> years;
+	QMap<QString, int> counts;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QList< QPair<QString, int> >();
+		}
+
+		typedef QPair<QString, int> StoredPair;
+		QList< StoredPair > obtained(
+		    db->msgsYearlyCounts(type, sorting));
+
+		foreach (const StoredPair &pair, obtained) {
+			years.insert(pair.first);
+			if (counts.find(pair.first) != counts.end()) {
+				counts[pair.first] += pair.second;
+			} else {
+				counts.insert(pair.first, pair.second);
+			}
+		}
+	}
+
+	QStringList list(years.toList());
+
+	if (ASCENDING) {
+		list.sort();
+	} else if (DESCENDING) {
+		list.sort();
+		QStringList reversed;
+		foreach (const QString &str, list) {
+			reversed.prepend(str);
+		}
+		list = reversed;
+	}
+
+	QList< QPair<QString, int> > yearlyCounts;
+	foreach (const QString &year, list) {
+		yearlyCounts.append(QPair<QString, int>(year, counts[year]));
+	}
+
+	return yearlyCounts;
 }
 
 QList< QPair<QString, int> > MessageDbSet::msgsYearlyCounts(
