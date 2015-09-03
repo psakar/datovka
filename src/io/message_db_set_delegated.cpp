@@ -1176,9 +1176,20 @@ QList<MessageDb::MsgId> MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
 
 QList<MessageDb::MsgId> MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
 {
-	/* TODO -- Implementation missing. */
-	Q_ASSERT(0);
-	return QList<MessageDb::MsgId>();
+	QList<MessageDb::MsgId> msgIds;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QList<MessageDb::MsgId>();
+		}
+
+		msgIds.append(db->getAllMessageIDsFromDB());
+	}
+
+	return msgIds;
 }
 
 QList<MessageDb::MsgId> MessageDbSet::getAllMessageIDsFromDB(void) const
@@ -1213,10 +1224,21 @@ QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const
 {
-	/* TODO -- Implementation missing. */
-	(void) fromDate; (void) toDate; (void) msgDirect;
-	Q_ASSERT(0);
-	return QList<MessageDb::MsgId>();
+	QList<MessageDb::MsgId> msgIds;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QList<MessageDb::MsgId>();
+		}
+
+		msgIds.append(db->msgsDateInterval(fromDate, toDate,
+		    msgDirect));
+	}
+
+	return msgIds;
 }
 
 QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
@@ -1268,14 +1290,24 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     enum MessageDirection msgDirect) const
 {
-	/* TODO -- Implementation missing. */
-	(void) dmId; (void) dmAnnotation; (void) dbIDSender; (void) dmSender;
-	(void) dmAddress; (void) dbIDRecipient; (void) dmRecipient;
-	(void) dmSenderRefNumber; (void) dmSenderIdent;
-	(void) dmRecipientRefNumber; (void) dmRecipientIdent; (void) dmToHands;
-	(void) dmDeliveryTime; (void) dmAcceptanceTime; (void) msgDirect;
-	Q_ASSERT(0);
-	return QList<MessageDb::SoughtMsg>();
+	QList<MessageDb::SoughtMsg> msgs;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QList<MessageDb::SoughtMsg>();
+		}
+
+		msgs.append(db->msgsAdvancedSearchMessageEnvelope(dmId,
+		    dmAnnotation, dbIDSender, dmSender, dmAddress,
+		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
+		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
+		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect));
+	}
+
+	return msgs;
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
