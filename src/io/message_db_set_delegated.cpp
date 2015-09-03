@@ -130,6 +130,7 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
 
 DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdModel(void)
 {
+	/* TODO -- Implementation missing and will probably be missing. */
 	Q_ASSERT(0);
 	return NULL;
 }
@@ -303,9 +304,14 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 
 DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdInYearModel(const QString &year)
 {
-	(void) year;
-	Q_ASSERT(0);
-	return NULL;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return 0;
+	}
+
+	return db->msgsRcvdInYearModel(year);
 }
 
 DbMsgsTblModel *MessageDbSet::msgsRcvdInYearModel(const QString &year)
@@ -589,6 +595,7 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntModel(void)
 
 DbMsgsTblModel *MessageDbSet::_yrly_msgsSntModel(void)
 {
+	/* TODO -- Implementation missing and will probably be missing. */
 	Q_ASSERT(0);
 	return NULL;
 }
@@ -756,9 +763,14 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 
 DbMsgsTblModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year)
 {
-	(void) year;
-	Q_ASSERT(0);
-	return NULL;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return 0;
+	}
+
+	return db->msgsSntInYearModel(year);
 }
 
 DbMsgsTblModel *MessageDbSet::msgsSntInYearModel(const QString &year)
@@ -789,6 +801,7 @@ bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)
 
 bool MessageDbSet::_yrly_smsgdtSetAllReceivedLocallyRead(bool read)
 {
+	/* TODO -- Implementation missing. */
 	(void) read;
 	Q_ASSERT(0);
 	return false;
@@ -824,6 +837,7 @@ bool MessageDbSet::_sf_smsgdtSetReceivedYearLocallyRead(const QString &year,
 bool MessageDbSet::_yrly_smsgdtSetReceivedYearLocallyRead(const QString &year,
     bool read)
 {
+	/* TODO -- Implementation missing. */
 	(void) year; (void) read;
 	Q_ASSERT(0);
 	return false;
@@ -858,6 +872,7 @@ bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 
 bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 {
+	/* TODO -- Implementation missing. */
 	(void) read;
 	Q_ASSERT(0);
 	return false;
@@ -893,6 +908,7 @@ bool MessageDbSet::_sf_msgSetAllReceivedProcessState(
 bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
     enum MessageProcessState state)
 {
+	/* TODO -- Implementation missing. */
 	(void) state;
 	Q_ASSERT(0);
 	return false;
@@ -928,6 +944,7 @@ bool MessageDbSet::_sf_smsgdtSetReceivedYearProcessState(const QString &year,
 bool MessageDbSet::_yrly_smsgdtSetReceivedYearProcessState(const QString &year,
     enum MessageProcessState state)
 {
+	/* TODO -- Implementation missing. */
 	(void) year; (void) state;
 	Q_ASSERT(0);
 	return false;
@@ -964,6 +981,7 @@ bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedProcessState(
 bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
     enum MessageProcessState state)
 {
+	/* TODO -- Implementation missing. */
 	(void) state;
 	Q_ASSERT(0);
 	return false;
@@ -998,6 +1016,7 @@ QList< QVector<QString> > MessageDbSet::_sf_uniqueContacts(void) const
 
 QList< QVector<QString> > MessageDbSet::_yrly_uniqueContacts(void) const
 {
+	/* TODO -- Implementation missing. */
 	Q_ASSERT(0);
 	return QList< QVector<QString> >();
 }
@@ -1030,6 +1049,7 @@ QList<MessageDb::MsgId> MessageDbSet::_sf_getAllMessageIDsFromDB(void) const
 
 QList<MessageDb::MsgId> MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
 {
+	/* TODO -- Implementation missing. */
 	Q_ASSERT(0);
 	return QList<MessageDb::MsgId>();
 }
@@ -1066,6 +1086,7 @@ QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const
 {
+	/* TODO -- Implementation missing. */
 	(void) fromDate; (void) toDate; (void) msgDirect;
 	Q_ASSERT(0);
 	return QList<MessageDb::MsgId>();
@@ -1120,6 +1141,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     enum MessageDirection msgDirect) const
 {
+	/* TODO -- Implementation missing. */
 	(void) dmId; (void) dmAnnotation; (void) dbIDSender; (void) dmSender;
 	(void) dmAddress; (void) dbIDRecipient; (void) dmRecipient;
 	(void) dmSenderRefNumber; (void) dmSenderIdent;
