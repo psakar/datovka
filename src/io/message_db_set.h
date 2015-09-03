@@ -320,19 +320,22 @@ public: /* Database function that have been delegate to the container. */
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param[in] sorting  Sorting.
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
 	 * @return List of years.
 	 */
-	QStringList msgsRcvdYears(enum Sorting sorting) const;
+	QStringList msgsYears(enum MessageDb::MessageType type,
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param[in] sorting  Sorting.
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
 	 * @return List of years and counts.
 	 */
-	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    enum Sorting sorting) const;
+	QList< QPair<QString, int> > msgsYearlyCounts(
+	    enum MessageDb::MessageType type, enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages received within past 90
@@ -377,23 +380,6 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel *msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsSntYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages sent within past 90
@@ -526,11 +512,11 @@ private:
 	inline DbMsgsTblModel *_sf_msgsRcvdInYearModel(const QString &year);
 	inline DbMsgsTblModel *_yrly_msgsRcvdInYearModel(const QString &year);
 
-	inline QStringList _sf_msgsRcvdYears(enum Sorting sorting) const;
-	inline QStringList _yrly_msgsRcvdYears(enum Sorting sorting) const;
+	inline QStringList _sf_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
+	inline QStringList _yrly_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
 
-	inline QList< QPair<QString, int> > _sf_msgsRcvdYearlyCounts(enum Sorting sorting) const;
-	inline QList< QPair<QString, int> > _yrly_msgsRcvdYearlyCounts(enum Sorting sorting) const;
+	inline QList< QPair<QString, int> > _sf_msgsYearlyCounts(enum MessageDb::MessageType type, enum Sorting sorting) const;
+	inline QList< QPair<QString, int> > _yrly_msgsYearlyCounts(enum MessageDb::MessageType type, enum Sorting sorting) const;
 
 	inline int _sf_msgsRcvdUnreadWithin90Days(void) const;
 	inline int _yrly_msgsRcvdUnreadWithin90Days(void) const;
@@ -548,12 +534,6 @@ private:
 
 	inline DbMsgsTblModel *_sf_msgsSntInYearModel(const QString &year);
 	inline DbMsgsTblModel *_yrly_msgsSntInYearModel(const QString &year);
-
-	inline QStringList _sf_msgsSntYears(enum Sorting sorting) const;
-	inline QStringList _yrly_msgsSntYears(enum Sorting sorting) const;
-
-	inline QList< QPair<QString, int> > _sf_msgsSntYearlyCounts(enum Sorting sorting) const;
-	inline QList< QPair<QString, int> > _yrly_msgsSntYearlyCounts(enum Sorting sorting) const;
 
 	inline int _sf_msgsSntUnreadWithin90Days(void) const;
 	inline int _yrly_msgsSntUnreadWithin90Days(void) const;

@@ -325,16 +325,18 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdInYearModel(const QString &year)
 	return NULL;
 }
 
-QStringList MessageDbSet::_sf_msgsRcvdYears(enum Sorting sorting) const
+QStringList MessageDbSet::_sf_msgsYears(enum MessageDb::MessageType type,
+    enum Sorting sorting) const
 {
 	if (this->size() == 0) {
 		return QStringList();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdYears(sorting);
+	return this->first()->msgsYears(type, sorting);
 }
 
-QStringList MessageDbSet::_yrly_msgsRcvdYears(enum Sorting sorting) const
+QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
+    enum Sorting sorting) const
 {
 	if (this->size() == 0) {
 		return QStringList();
@@ -349,7 +351,7 @@ QStringList MessageDbSet::_yrly_msgsRcvdYears(enum Sorting sorting) const
 			Q_ASSERT(0);
 			return QStringList();
 		}
-		years.unite(db->msgsRcvdYears(sorting).toSet());
+		years.unite(db->msgsYears(type, sorting).toSet());
 	}
 
 	QStringList list(years.toList());
@@ -369,14 +371,15 @@ QStringList MessageDbSet::_yrly_msgsRcvdYears(enum Sorting sorting) const
 	return list;
 }
 
-QStringList MessageDbSet::msgsRcvdYears(enum Sorting sorting) const
+QStringList MessageDbSet::msgsYears(enum MessageDb::MessageType type,
+    enum Sorting sorting) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdYears(sorting);
+		return _sf_msgsYears(type, sorting);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdYears(sorting);
+		return _yrly_msgsYears(type, sorting);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -386,33 +389,34 @@ QStringList MessageDbSet::msgsRcvdYears(enum Sorting sorting) const
 	return QStringList();
 }
 
-QList< QPair<QString, int> > MessageDbSet::_sf_msgsRcvdYearlyCounts(
-    enum Sorting sorting) const
+QList< QPair<QString, int> > MessageDbSet::_sf_msgsYearlyCounts(
+    enum MessageDb::MessageType type, enum Sorting sorting) const
 {
 	if (this->size() == 0) {
 		return QList< QPair<QString, int> >();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdYearlyCounts(sorting);
+	return this->first()->msgsYearlyCounts(type, sorting);
 }
 
-QList< QPair<QString, int> > MessageDbSet::_yrly_msgsRcvdYearlyCounts(
-    enum Sorting sorting) const
+QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
+    enum MessageDb::MessageType type, enum Sorting sorting) const
 {
+	(void) type;
 	(void) sorting;
 	Q_ASSERT(0);
 	return QList< QPair<QString, int> >();
 }
 
-QList< QPair<QString, int> > MessageDbSet::msgsRcvdYearlyCounts(
-    enum Sorting sorting) const
+QList< QPair<QString, int> > MessageDbSet::msgsYearlyCounts(
+    enum MessageDb::MessageType type, enum Sorting sorting) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdYearlyCounts(sorting);
+		return _sf_msgsYearlyCounts(type, sorting);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdYearlyCounts(sorting);
+		return _yrly_msgsYearlyCounts(type, sorting);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -644,7 +648,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		DbMsgsTblModel::dummyModel.setType(DbMsgsTblModel::DUMMY_RECEIVED);
+		DbMsgsTblModel::dummyModel.setType(
+		    DbMsgsTblModel::DUMMY_RECEIVED);
 		return &DbMsgsTblModel::dummyModel;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
@@ -722,103 +727,6 @@ DbMsgsTblModel *MessageDbSet::msgsSntInYearModel(const QString &year)
 	}
 
 	return NULL;
-}
-
-QStringList MessageDbSet::_sf_msgsSntYears(enum Sorting sorting) const
-{
-	if (this->size() == 0) {
-		return QStringList();
-	}
-	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntYears(sorting);
-}
-
-QStringList MessageDbSet::_yrly_msgsSntYears(enum Sorting sorting) const
-{
-	if (this->size() == 0) {
-		return QStringList();
-	}
-
-	QSet<QString> years;
-
-	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
-	     i != this->end(); ++i) {
-		MessageDb *db = i.value();
-		if (NULL == db) {
-			Q_ASSERT(0);
-			return QStringList();
-		}
-		years.unite(db->msgsSntYears(sorting).toSet());
-	}
-
-	QStringList list(years.toList());
-
-	if (ASCENDING) {
-		list.sort();
-		return list;
-	} else if (DESCENDING) {
-		list.sort();
-		QStringList reversed;
-		foreach (const QString &str, list) {
-			reversed.prepend(str);
-		}
-		return reversed;
-	}
-
-	return list;
-}
-
-QStringList MessageDbSet::msgsSntYears(enum Sorting sorting) const
-{
-	switch (m_organisation) {
-	case DO_SINGLE_FILE:
-		return _sf_msgsSntYears(sorting);
-		break;
-	case DO_YEARLY:
-		return _yrly_msgsSntYears(sorting);
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
-
-	return QStringList();
-}
-
-QList< QPair<QString, int> > MessageDbSet::_sf_msgsSntYearlyCounts(
-    enum Sorting sorting) const
-{
-	if (this->size() == 0) {
-		return QList< QPair<QString, int> >();
-	}
-	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntYearlyCounts(sorting);
-}
-
-QList< QPair<QString, int> > MessageDbSet::_yrly_msgsSntYearlyCounts(
-    enum Sorting sorting) const
-{
-	(void) sorting;
-	Q_ASSERT(0);
-	return QList< QPair<QString, int> >();
-}
-
-QList< QPair<QString, int> > MessageDbSet::msgsSntYearlyCounts(
-    enum Sorting sorting) const
-{
-	switch (m_organisation) {
-	case DO_SINGLE_FILE:
-		return _sf_msgsSntYearlyCounts(sorting);
-		break;
-	case DO_YEARLY:
-		return _yrly_msgsSntYearlyCounts(sorting);
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
-
-	return QList< QPair<QString, int> >();
 }
 
 int MessageDbSet::_sf_msgsSntUnreadWithin90Days(void) const

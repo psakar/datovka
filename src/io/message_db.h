@@ -610,18 +610,21 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return list of years (strings) in database.
 	 *
-	 * @param[in] sorting  Sorting.
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
 	 * @return List of years.
 	 */
-	QStringList msgsRcvdYears(enum Sorting sorting) const;
+	QStringList msgsYears(enum MessageType type,
+	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
 	 *
-	 * @param[in] sorting  Sorting.
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
 	 * @return List of years and counts.
 	 */
-	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
+	QList< QPair<QString, int> > msgsYearlyCounts(enum MessageType type,
 	    enum Sorting sorting) const;
 
 	/*!
@@ -667,23 +670,6 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsSntYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    enum Sorting sorting) const;
 
 	/*!
 	 * @brief Return number of unread messages sent within past 90

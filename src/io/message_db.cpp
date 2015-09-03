@@ -407,7 +407,8 @@ fail:
 /*
  * Return list of years (strings) in database.
  */
-QStringList MessageDb::msgsRcvdYears(enum Sorting sorting) const
+QStringList MessageDb::msgsYears(enum MessageDb::MessageType type,
+    enum Sorting sorting) const
 /* ========================================================================= */
 {
 //	Former argument: const QString &recipDbId
@@ -419,8 +420,11 @@ QStringList MessageDb::msgsRcvdYears(enum Sorting sorting) const
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
 	    "WHERE "
-//	    "m.dbIDRecipient = :recipDbId"
 	    "s.message_type = :message_type";
+	if (TYPE_SENT == type) {
+		queryStr += " and "
+		    "(m.dmDeliveryTime IS NOT NULL)";
+	}
 	switch (sorting) {
 	case ASCENDING:
 		queryStr += " ORDER BY dmDeliveryTime ASC";
@@ -436,8 +440,7 @@ QStringList MessageDb::msgsRcvdYears(enum Sorting sorting) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-//	query.bindValue(":recipDbId", recipDbId);
-	query.bindValue(":message_type", TYPE_RECEIVED);
+	query.bindValue(":message_type", type);
 	if (query.exec()) {
 		query.first();
 		while (query.isValid()) {
@@ -458,14 +461,14 @@ fail:
 /*
  * Return list of years and number of messages in database.
  */
-QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
+QList< QPair<QString, int> > MessageDb::msgsYearlyCounts(enum MessageType type,
     enum Sorting sorting) const
 /* ========================================================================= */
 {
 //	Former argument: const QString &recipDbId
 
 	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsRcvdYears(sorting);
+	QList<QString> yearList = msgsYears(type, sorting);
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -475,7 +478,6 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 		    "LEFT JOIN supplementary_message_data AS s "
 		    "ON (m.dmID = s.message_id) "
 		    "WHERE "
-//		    "(m.dbIDRecipient = :recipDbId)"
 		    "(s.message_type = :message_type)"
 		    " and "
 		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
@@ -484,8 +486,7 @@ QList< QPair<QString, int> > MessageDb::msgsRcvdYearlyCounts(
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-//		query.bindValue(":recipDbId", recipDbId);
-		query.bindValue(":message_type", TYPE_RECEIVED);
+		query.bindValue(":message_type", type);
 		query.bindValue(":year", yearList[i]);
 		if (query.exec() && query.isActive() &&
 		    query.first() && query.isValid()) {
@@ -753,113 +754,6 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 
 fail:
 	return 0;
-}
-
-
-/* ========================================================================= */
-/*
- * Return list of years (strings) in database.
- */
-QStringList MessageDb::msgsSntYears(enum Sorting sorting) const
-/* ========================================================================= */
-{
-//	Former argument: const QString &sendDbId
-
-	QStringList yearList;
-	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT strftime('%Y', m.dmDeliveryTime) "
-	    "FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "WHERE "
-//	    "(m.dbIDSender = :sendDbId)"
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime IS NOT NULL)";
-	switch (sorting) {
-	case ASCENDING:
-		queryStr += " ORDER BY m.dmDeliveryTime ASC";
-		break;
-	case DESCENDING:
-		queryStr += " ORDER BY m.dmDeliveryTime DESC";
-		break;
-	default:
-		break;
-	}
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-//	query.bindValue(":sendDbId", sendDbId);
-	query.bindValue(":message_type", TYPE_SENT);
-	if (query.exec()) {
-		query.first();
-		while (query.isValid()) {
-			yearList.append(query.value(0).toString());
-			query.next();
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-	}
-
-fail:
-	return yearList;
-}
-
-
-/* ========================================================================= */
-/*
- * Return list of years and number of messages in database.
- */
-QList< QPair<QString, int> > MessageDb::msgsSntYearlyCounts(
-    enum Sorting sorting) const
-/* ========================================================================= */
-{
-//	Former argument: const QString &sendDbId
-
-	QList< QPair<QString, int> > yearlyCounts;
-	QList<QString> yearList = msgsSntYears(sorting);
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	for (int i = 0; i < yearList.size(); ++i) {
-		queryStr = "SELECT COUNT(*) AS nrRecords "
-		    "FROM messages AS m "
-		    "LEFT JOIN supplementary_message_data AS s "
-		    "ON (m.dmID = s.message_id) "
-		    "WHERE "
-//		    "(m.dbIDSender = :sendDbId)"
-		    "(s.message_type = :message_type)"
-		    " and "
-		    "(strftime('%Y', m.dmDeliveryTime) = :year)";
-		if (!query.prepare(queryStr)) {
-			logErrorNL("Cannot prepare SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-//		query.bindValue(":sendDbId", sendDbId);
-		query.bindValue(":message_type", TYPE_SENT);
-		query.bindValue(":year", yearList[i]);
-		if (query.exec() && query.isActive() &&
-		    query.first() && query.isValid()) {
-			yearlyCounts.append(QPair<QString, int>(
-			    yearList[i], query.value(0).toInt()));
-		} else {
-			logErrorNL(
-			    "Cannot execute SQL query and/or read SQL data: "
-			    "%s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-	}
-
-	return yearlyCounts;
-
-fail:
-	yearlyCounts.clear();
-	return yearlyCounts;
 }
 
 
