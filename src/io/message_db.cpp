@@ -68,37 +68,6 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
 
 /* ========================================================================= */
-/*
- * Compute viewed data in file size column.
- */
-QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
-/* ========================================================================= */
-{
-	if ((Qt::DisplayRole == role) && (4 == index.column())) {
-		/* Compute attachment size from base64 length. */
-		QByteArray b64 = QSqlQueryModel::data(index.sibling(
-		    index.row(), 2), role).toByteArray();
-		int b64size = b64.size();
-		int cnt = 0;
-		if (b64size >= 3) {
-			for (int i = 1; i <= 3; ++i) {
-				if ('=' == b64[b64size - i]) {
-					++cnt;
-				}
-			}
-		}
-		return QSqlQueryModel::data(index, role).toInt() * 3 / 4 - cnt;
-		/* old solution */
-		//const QByteArray &b64 = QSqlQueryModel::data(
-		//    index.sibling(index.row(), 2), role).toByteArray();
-		//return QByteArray::fromBase64(b64).size();
-	} else {
-		return QSqlQueryModel::data(index, role);
-	}
-}
-
-
-/* ========================================================================= */
 MessageDb::MessageDb(const QString &dbDriverType,
     const QString &connectionName, QObject *parent)
 /* ========================================================================= */

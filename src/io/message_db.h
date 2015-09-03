@@ -31,17 +31,15 @@
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
-#include <QModelIndex>
 #include <QObject>
 #include <QPair>
 #include <QStringList>
 #include <QSqlDatabase>
-#include <QSqlQueryModel>
 #include <QString>
-#include <QVariant>
 #include <QVector>
 
 #include "src/common.h"
+#include "src/models/files_model.h"
 #include "src/models/messages_model.h"
 
 
@@ -49,21 +47,6 @@ enum Sorting {
 	UNSORTED = 0,
 	ASCENDING,
 	DESCENDING
-};
-
-
-/*!
- * @brief Custom file model class.
- *
- * Used for data conversion on display. (Use QIdentityProxyModel?)
- */
-class DbFlsTblModel : public QSqlQueryModel {
-	Q_OBJECT
-public:
-	/*!
-	 * @brief Compute viewed data in file size column.
-	 */
-	virtual QVariant data(const QModelIndex &index, int role) const;
 };
 
 
