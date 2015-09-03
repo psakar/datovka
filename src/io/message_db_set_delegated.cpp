@@ -952,10 +952,21 @@ bool MessageDbSet::_sf_msgSetAllReceivedProcessState(
 bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
     enum MessageProcessState state)
 {
-	/* TODO -- Implementation missing. */
-	(void) state;
-	Q_ASSERT(0);
-	return false;
+	bool ret = true;
+
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i)
+	{
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return false;
+		}
+
+		ret = ret && db->msgSetAllReceivedProcessState(state);
+	}
+
+	return ret;
 }
 
 bool MessageDbSet::msgSetAllReceivedProcessState(enum MessageProcessState state)
@@ -988,10 +999,14 @@ bool MessageDbSet::_sf_smsgdtSetReceivedYearProcessState(const QString &year,
 bool MessageDbSet::_yrly_smsgdtSetReceivedYearProcessState(const QString &year,
     enum MessageProcessState state)
 {
-	/* TODO -- Implementation missing. */
-	(void) year; (void) state;
-	Q_ASSERT(0);
-	return false;
+	QString secondaryKey = _yrly_YearToSecondaryKey(year);
+
+	MessageDb *db = this->value(secondaryKey, NULL);
+	if (NULL == db) {
+		return false;
+	}
+
+	return db->smsgdtSetReceivedYearProcessState(year, state);
 }
 
 bool MessageDbSet::smsgdtSetReceivedYearProcessState(const QString &year,
@@ -1025,8 +1040,38 @@ bool MessageDbSet::_sf_smsgdtSetWithin90DaysReceivedProcessState(
 bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
     enum MessageProcessState state)
 {
-	/* TODO -- Implementation missing. */
-	(void) state;
+	QStringList secKeys = _yrly_secKeysIn90Days();
+
+	if (secKeys.size() == 0) {
+		return false;
+	} else if (secKeys.size() == 1) {
+		/* Query only one database. */
+		MessageDb *db = this->value(secKeys[0], NULL);
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return NULL;
+		}
+		return db->smsgdtSetWithin90DaysReceivedProcessState(state);
+	} else {
+		Q_ASSERT(secKeys.size() == 2);
+		/* The models need to be attached. */
+
+		bool ret = true;
+		foreach (const QString &secKey, secKeys) {
+			MessageDb *db = this->value(secKey, NULL);
+			if (NULL == db) {
+				Q_ASSERT(0);
+				return false;
+			}
+
+			ret = ret &&
+			    db->smsgdtSetWithin90DaysReceivedProcessState(
+			        state);
+		}
+
+		return ret;
+	}
+
 	Q_ASSERT(0);
 	return false;
 }
