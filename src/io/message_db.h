@@ -141,6 +141,16 @@ public:
 		QString address;
 	};
 
+
+	/* holds some additional entries for filename creation */
+	class FilenameEntry {
+	public:
+		QDateTime dmDeliveryTime;
+		QDateTime dmAcceptanceTime;
+		QString dmAnnotation;
+		QString dmSender;
+	};
+
 	MessageDb(const QString &dbDriverType, const QString &connectionName,
 	    QObject *parent = 0);
 	virtual ~MessageDb(void);
@@ -585,13 +595,13 @@ public:
 	QByteArray msgsTimestampRaw(qint64 dmId) const;
 
 	/*!
-	 * @brief Returns message acceptance date (in local time)
-	 * and annotation.
+	 * @brief Return some additional filename entries as
+	 *        (dmDeliveryTime, dmAcceptanceTime, dmAnnotation, dmSender)
 	 *
 	 * @param[in] dmId  Message identifier.
-	 * @return Message acceptance date and annotation.
+	 * @return FilenameEntry struct.
 	 */
-	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
+	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId) const;
 
 protected: /* These function are used from within a database container. */
 	/*!

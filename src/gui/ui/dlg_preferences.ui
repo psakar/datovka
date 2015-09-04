@@ -1492,7 +1492,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>name of sender</string>
+                 <string>name of sender (separated by &quot;-&quot;)</string>
                 </property>
                </widget>
               </item>
@@ -1597,7 +1597,7 @@ file name including its suffix).</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: Illegal characters in the name of file will be replaced by underscore &quot;_&quot;</string>
+             <string>Note: Illegal characters in the name of file will be replaced.</string>
             </property>
            </widget>
           </item>

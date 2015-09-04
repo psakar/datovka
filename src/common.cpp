@@ -1446,13 +1446,16 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 /*
  * Create filename based on format string.
  */
-QString createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, const QString &dmID,
-    const QString &dbID, const QString &userName,
-    const QString &attachFilename)
+QString createFilenameFromFormatString(QString pattern, const QString &dmID,
+    const QString &dbID, const QString &userName, const QString &attachFilename,
+    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
+    QString dmAnnotation, QString dmSender)
 /* ========================================================================= */
 {
 	debugFuncCall();
+
+	// for future use
+	(void) dmDeliveryTime;
 
 	// known atrributes
 	// {"%Y","%M","%D","%h","%m","%i","%s","%S","%d","%u","%f"};
@@ -1490,7 +1493,7 @@ QString createFilenameFromFormatString(QString pattern,
 	pair.second = dmAnnotation.replace(" ","-");
 	knowAtrrList.append(pair);
 	pair.first = "%S";
-	pair.second = ""; /* TODO */
+	pair.second = dmSender.replace(" ","-");
 	knowAtrrList.append(pair);
 	pair.first = "%d";
 	pair.second = dbID;

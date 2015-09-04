@@ -1735,15 +1735,16 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	fileName = createFilenameFromFormatString(
-	    globPref.attachment_filename_format,
-	    pair.first, pair.second, QString::number(dmId), dbId,
-	    userName, fileName);
+	fileName =
+	    createFilenameFromFormatString(globPref.attachment_filename_format,
+	    QString::number(dmId), dbId, userName, fileName,
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"),
@@ -1837,8 +1838,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -1870,8 +1871,9 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		fileName = createFilenameFromFormatString(
 		    globPref.attachment_filename_format,
-		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, fileName);
+		    QString::number(dmId), dbId, userName, fileName,
+		    entry.dmDeliveryTime, entry.dmAcceptanceTime,
+		    entry.dmAnnotation, entry.dmSender);
 
 		fileName = newDir + QDir::separator() + fileName;
 
@@ -7089,8 +7091,8 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -7124,10 +7126,11 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 		}
 	}
 
-	QString fileName = createFilenameFromFormatString(
-		    globPref.message_filename_format,
-		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, "");
+	QString fileName =
+	    createFilenameFromFormatString(globPref.message_filename_format,
+	    QString::number(dmId), dbId, userName, "",
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7277,8 +7280,8 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -7314,10 +7317,11 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 		}
 	}
 
-	QString fileName = createFilenameFromFormatString(
-		    formatString,
-		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, attachFileName);
+	QString fileName =
+	    createFilenameFromFormatString(formatString,
+	    QString::number(dmId), dbId, userName, attachFileName,
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7414,8 +7418,8 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -7451,10 +7455,11 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		}
 	}
 
-	QString fileName = createFilenameFromFormatString(
-		    formatString,
-		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, attachFileName);
+	QString fileName =
+	    createFilenameFromFormatString(formatString,
+	    QString::number(dmId), dbId, userName, attachFileName,
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7547,8 +7552,8 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
-	QPair<QDateTime, QString> pair =
-	    messageDb->msgsAcceptTimeAnnotation(dmId);
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -7582,10 +7587,11 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		}
 	}
 
-	QString fileName = createFilenameFromFormatString(
-		    globPref.message_filename_format,
-		    pair.first, pair.second, QString::number(dmId), dbId,
-		    userName, "");
+	QString fileName =
+	    createFilenameFromFormatString(globPref.message_filename_format,
+	    QString::number(dmId), dbId, userName, "",
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +

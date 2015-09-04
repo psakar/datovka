@@ -533,7 +533,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	int successEnvelopePdfCnt = 0;
 	int successDelInfoPdfCnt = 0;
 
-	QPair<QDateTime, QString> pair;
+	MessageDb::FilenameEntry entry;
 
 	//QMessageBox msgBoxProc(this);
 
@@ -574,13 +574,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				    m_messDbSet.constAccessMessageDb(
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
-
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, false)) {
@@ -605,12 +606,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, false)) {
@@ -642,12 +645,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, true)) {
@@ -672,12 +677,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, true)) {
@@ -708,12 +715,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(mId, fileName, false)) {
@@ -737,12 +746,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.message_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(mId, fileName, false)) {
@@ -772,12 +783,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(mId, fileName, true)) {
@@ -802,12 +815,14 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 
-				pair = messageDb->msgsAcceptTimeAnnotation(mId.dmId);
+				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
 				fileName = createFilenameFromFormatString(
 				    globPref.delivery_filename_format,
-				    pair.first, pair.second,
-				    QString::number(mId.dmId), m_dbId, m_userName,
-				    "");
+				    QString::number(mId.dmId), m_dbId,
+				    m_userName, "", entry.dmDeliveryTime,
+				    entry.dmAcceptanceTime, entry.dmAnnotation,
+				    entry.dmSender);
+
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".pdf";
 				if (!exportMessageAsPDF(mId, fileName, true)) {

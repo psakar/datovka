@@ -4623,17 +4623,19 @@ fail:
 
 /* ========================================================================= */
 /*
- * Returns message acceptance date (in local time) and annotation.
+ * Return some additional filename entries as struct:
+ * (dmDeliveryTime, dmAcceptanceTime, dmAnnotation, dmSender)
  */
-QPair<QDateTime, QString> MessageDb::msgsAcceptTimeAnnotation(qint64 dmId) const
+MessageDb::FilenameEntry MessageDb::msgsGetAdditionalFilenameEntry(qint64 dmId)
+    const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	QPair<QDateTime, QString> pair;
+	MessageDb::FilenameEntry entry;
 
-	queryStr = "SELECT dmAcceptanceTime, dmAnnotation "
-	    "FROM messages WHERE dmId = :dmId";
+	queryStr = "SELECT dmDeliveryTime, dmAcceptanceTime, dmAnnotation, "
+	    "dmSender FROM messages WHERE dmId = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4642,9 +4644,13 @@ QPair<QDateTime, QString> MessageDb::msgsAcceptTimeAnnotation(qint64 dmId) const
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		pair.first =  dateTimeFromDbFormat(query.value(0).toString());
-		pair.second = query.value(1).toString();
-		return pair;
+		entry.dmDeliveryTime =
+		    dateTimeFromDbFormat(query.value(0).toString());
+		entry.dmAcceptanceTime =
+		    dateTimeFromDbFormat(query.value(1).toString());
+		entry.dmAnnotation = query.value(2).toString();
+		entry.dmSender = query.value(3).toString();
+		return entry;
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: "
@@ -4654,7 +4660,7 @@ QPair<QDateTime, QString> MessageDb::msgsAcceptTimeAnnotation(qint64 dmId) const
 	}
 
 fail:
-	return QPair<QDateTime, QString>();
+	return entry;
 }
 
 
