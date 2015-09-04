@@ -203,7 +203,7 @@ private slots:
 	 *        message ID from search selection
 	 */
 	void messageItemFromSearchSelection(const QString &userName,
-	    qint64 msgId);
+	    qint64 msgId, const QString &deliveryYear, int msgType);
 
 	/*!
 	 * @brief Redraws widgets according to selected attachment item.

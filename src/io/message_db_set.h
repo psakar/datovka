@@ -114,7 +114,11 @@ public:
 	bool deleteLocation(void);
 
 	/*!
-	 * @brief Computes the secondary key from supplied date.
+	 * @brief Computes the secondary key from supplied date according to
+	 *     container settings.
+	 *
+	 * @param time Time to be converted.
+	 * @return Secondary key or null string on error.
 	 */
 	QString secondaryKey(const QDateTime &time) const;
 
@@ -143,6 +147,15 @@ public:
 	 * @return List of file location.
 	 */
 	QStringList fileNames(void) const;
+
+	/*!
+	 * @brief Returns the year identifier from supplied time.
+	 *
+	 * @param time Time to be converted.
+	 * @return Year identifier, or invalid identifier if time invalid.
+	 */
+	static
+	QString yearFromDateTime(const QDateTime &time);
 
 	/*!
 	 * @brief Creates a new object.

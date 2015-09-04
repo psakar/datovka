@@ -2432,21 +2432,21 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	    dmToHands.split(separ, QString::SkipEmptyParts);
 	QList<SoughtMsg> msgList;
 
+	/* Always ask for message type. */
+	queryStr = "SELECT "
+	    "m.dmID, m.dmDeliveryTime, "
+	    "m.dmAnnotation, m.dmSender, m.dmRecipient, "
+	    "s.message_type "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE ";
+
 	if (MSG_ALL == msgDirect) {
 		/* select from all messages */
-		queryStr = "SELECT "
-		    "m.dmID, m.dmDeliveryTime, m.dmAnnotation, m.dmSender, m.dmRecipient "
-		"FROM messages AS m WHERE ";
 	} else if ((MSG_RECEIVED == msgDirect) || (MSG_SENT == msgDirect)) {
 		/* means select only received (1) or sent (2) messages */
 		isMultiSelect = true;
-		queryStr = "SELECT "
-		    "m.dmID, m.dmDeliveryTime, m.dmAnnotation, m.dmSender, m.dmRecipient, "
-		    "s.message_type "
-		    "FROM messages AS m "
-		    "LEFT JOIN supplementary_message_data AS s "
-		    "ON (m.dmID = s.message_id) "
-		    "WHERE ";
 	} else {
 		/* wrong input vaules from search dialog */
 		return msgList;
@@ -2684,11 +2684,12 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		while (query.isValid()) {
-			Q_ASSERT(5 == query.record().count());
+			Q_ASSERT(6 == query.record().count());
 
 			SoughtMsg foundMsgData(
 			    query.value(0).toLongLong(),
 			    dateTimeFromDbFormat(query.value(1).toString()),
+			    query.value(5).toInt(),
 			    query.value(2).toString(),
 			    query.value(3).toString(),
 			    query.value(4).toString());

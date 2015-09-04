@@ -235,22 +235,6 @@ QString secondaryKeySingleFile(const QDateTime &time)
 	return QString(SINGLE_FILE_SEC_KEY);
 }
 
-/*!
- * @brief Creates secondary key from given time.
- *
- * @param[in] time         Time.
- * @return Secondary key or null string on error.
- */
-static
-QString secondaryKeyYearly(const QDateTime &time)
-{
-	if (time.isValid()) {
-		return time.toString("yyyy");
-	} else {
-		return YEARLY_SEC_KEY_INVALID;
-	}
-}
-
 QString MessageDbSet::secondaryKey(const QDateTime &time) const
 {
 	switch (m_organisation) {
@@ -258,7 +242,7 @@ QString MessageDbSet::secondaryKey(const QDateTime &time) const
 		return secondaryKeySingleFile(time);
 		break;
 	case DO_YEARLY:
-		return secondaryKeyYearly(time);
+		return yearFromDateTime(time);
 		break;
 	case DO_UNKNOWN:
 	default:
@@ -327,6 +311,15 @@ QStringList MessageDbSet::fileNames(void) const
 	}
 
 	return fileList;
+}
+
+QString MessageDbSet::yearFromDateTime(const QDateTime &time)
+{
+	if (time.isValid()) {
+		return time.toString("yyyy");
+	} else {
+		return YEARLY_SEC_KEY_INVALID;
+	}
 }
 
 MessageDbSet *MessageDbSet::createNew(const QString &locDir,

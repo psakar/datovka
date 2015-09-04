@@ -345,7 +345,7 @@
       <bool>false</bool>
      </property>
      <property name="columnCount">
-      <number>5</number>
+      <number>0</number>
      </property>
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
@@ -368,31 +368,6 @@
      <attribute name="verticalHeaderMinimumSectionSize">
       <number>18</number>
      </attribute>
-     <column>
-      <property name="text">
-       <string>Account</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Message ID</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Subject</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Sender</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Recipient</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>

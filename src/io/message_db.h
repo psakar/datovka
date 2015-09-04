@@ -99,22 +99,23 @@ public:
 	class SoughtMsg {
 	public:
 		MsgId mId; /*!< Message identifier. */
+		int type; /*!< Matches enum MessageType. */
 		QString dmAnnotation; /*!< Message annotation. */
 		QString dmSender; /*!< Message sender. */
 		QString dmRecipient; /*!< Recipient. */
 
 		SoughtMsg(void)
-		    : mId(), dmAnnotation(), dmSender(), dmRecipient()
+		    : mId(), type(0), dmAnnotation(), dmSender(), dmRecipient()
 		{ }
-		SoughtMsg(const MsgId &id, const QString &annot,
+		SoughtMsg(const MsgId &id, int t, const QString &annot,
 		    const QString &sen, const QString &rec)
-		    : mId(id), dmAnnotation(annot),
+		    : mId(id), type(t), dmAnnotation(annot),
 		    dmSender(sen), dmRecipient(rec)
 		{ }
-		SoughtMsg(qint64 id, const QDateTime &dTime,
+		SoughtMsg(qint64 id, const QDateTime &dTime, int t,
 		    const QString &annot, const QString &sen,
 		    const QString &rec)
-		    : mId(id, dTime), dmAnnotation(annot),
+		    : mId(id, dTime), type(t), dmAnnotation(annot),
 		    dmSender(sen), dmRecipient(rec)
 		{ }
 		~SoughtMsg(void)
@@ -122,7 +123,9 @@ public:
 
 		bool isValid(void) const
 		{
-			return mId.isValid() && (!dmAnnotation.isEmpty()) &&
+			return mId.isValid() &&
+			    ((type == TYPE_RECEIVED) || (type == TYPE_SENT)) &&
+			    (!dmAnnotation.isEmpty()) &&
 			    (!dmSender.isEmpty()) && (!dmRecipient.isEmpty());
 		}
 	};

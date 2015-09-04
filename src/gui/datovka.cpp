@@ -1512,7 +1512,7 @@ void MainWindow::messageItemRestoreSelectionAfterLayoutChange(void)
  * Select account via userName and focus on message ID from search selection.
  */
 void MainWindow::messageItemFromSearchSelection(const QString &userName,
-    qint64 msgId)
+    qint64 msgId, const QString &deliveryYear, int msgType)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -1530,45 +1530,65 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 		return;
 	}
 
-	/* second step: find and select message according to msgId */
-	/* first - allReceived */
-	QModelIndex tmpIdx = acntIdxTop.child(2,0).child(0,0);
-	for (int c = 0; c < 2; ++c) {
-		QModelIndex msgIdx;
-		ui->accountList->setCurrentIndex(tmpIdx);
-		accountItemCurrentChanged(tmpIdx);
+	/* second step: obtain index of received or sent messages */
+	QModelIndex typeIdx;
+	switch (msgType) {
+	case MessageDb::TYPE_RECEIVED:
+		typeIdx = acntIdxTop.child(2, 0).child(0, 0); /* All received. */
+		break;
+	case MessageDb::TYPE_SENT:
+		typeIdx = acntIdxTop.child(2, 0).child(1, 0); /* All sent. */
+		break;
+	default:
+		Q_ASSERT(0);
+		return;
+		break;
+	}
 
-		const QAbstractItemModel *model = ui->messageList->model();
-		Q_ASSERT(0 != model);
+	/* third step: obtain index with given year */
+	int childRow = 0;
+	QModelIndex yearIdx = typeIdx.child(childRow, 0);
+	while (yearIdx.isValid() &&
+	       (yearIdx.data().toString() != deliveryYear)) {
+		yearIdx = yearIdx.sibling(++childRow, 0);
+	}
 
-		int rowCount = model->rowCount();
+	if (!yearIdx.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
 
-		if (0 == rowCount) {
-			/* Do nothing on empty model. */
-			return;
-		}
+	/* fourth step: find and select message according to msgId */
+	QModelIndex msgIdx;
+	ui->accountList->setCurrentIndex(yearIdx);
+	accountItemCurrentChanged(yearIdx);
 
-		/* Find and select the message with the ID. */
-		for (int row = 0; row < rowCount; ++row) {
-			/*
-			 * TODO -- Search in a more resource-saving way.
-			 * Eliminate index copying, use smarter search.
-			 */
-			if (model->index(row, 0).data().toLongLong() ==
-			    msgId) {
-				msgIdx = model->index(row, 0);
-				break;
-			}
-		}
+	const QAbstractItemModel *model = ui->messageList->model();
+	Q_ASSERT(0 != model);
 
-		if (msgIdx.isValid()) { /*(row < rowCount)*/
-			/* Message found. */
-			ui->messageList->setCurrentIndex(msgIdx);
-			ui->messageList->scrollTo(msgIdx);
+	int rowCount = model->rowCount();
+
+	if (0 == rowCount) {
+		/* Do nothing on empty model. */
+		return;
+	}
+
+	/* Find and select the message with the ID. */
+	for (int row = 0; row < rowCount; ++row) {
+		/*
+		 * TODO -- Search in a more resource-saving way.
+		 * Eliminate index copying, use smarter search.
+		 */
+		if (model->index(row, 0).data().toLongLong() == msgId) {
+			msgIdx = model->index(row, 0);
 			break;
 		}
-		/* next allSent */
-		tmpIdx = acntIdxTop.child(2,0).child(1,0);
+	}
+
+	if (msgIdx.isValid()) { /*(row < rowCount)*/
+		/* Message found. */
+		ui->messageList->setCurrentIndex(msgIdx);
+		ui->messageList->scrollTo(msgIdx);
 	}
 }
 
@@ -9165,8 +9185,8 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 
 	dlgMsgSearch = new DlgMsgSearch(messageDbList, userName, this,
 	    Qt::Window);
-	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64)),
-	    this, SLOT(messageItemFromSearchSelection(QString, qint64)));
+	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64, QString, int)),
+	    this, SLOT(messageItemFromSearchSelection(QString, qint64, QString, int)));
 	connect(dlgMsgSearch, SIGNAL(finished(int)),
 	    this, SLOT(msgAdvancedDlgFinished(int)));
 	dlgMsgSearch->show();
