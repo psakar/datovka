@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>570</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1586,6 +1586,20 @@ file name including its suffix).</string>
              </spacer>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_38">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <italic>true</italic>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Note: Illegal characters in the name of file will be replaced by underscore &quot;_&quot;</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="Line" name="line_3">
