@@ -448,6 +448,18 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		delta = 80.0 / allcnt;
 	}
 
+	/* Obtain invalid message database if has a separate file. */
+	MessageDb *invalidDb = NULL;
+	{
+		QString invSecKey(dbSet.secondaryKey(QDateTime()));
+		QString valSecKey(dbSet.secondaryKey(
+		    QDateTime::currentDateTime()));
+		if (invSecKey != valSecKey) {
+			/* Invalid database file may not exist. */
+			invalidDb = dbSet.accessMessageDb(QDateTime(), false);
+		}
+	}
+
 #ifdef USE_TRANSACTIONS
 	QSet<MessageDb *> usedDbs;
 #endif /* USE_TRANSACTIONS */
@@ -474,6 +486,10 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		QDateTime deliveryTime =
 		    timevalToDateTime(item->envelope->dmDeliveryTime);
 		/* Delivery time may be invalid. */
+		if ((0 != invalidDb) && deliveryTime.isValid()) {
+			/* Try deleting possible invalid entry. */
+			invalidDb->msgsDeleteMessageData(dmId);
+		}
 		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 		Q_ASSERT(0 != messageDb);
 
@@ -860,7 +876,31 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 		return Q_ISDS_ERROR;
 	}
 
-	/* Download and store the message. */
+	{
+		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
+		QDateTime newDeliveryTime(timevalToDateTime(
+		    message->envelope->dmDeliveryTime));
+		QString secKeyAfterDonwload(dbSet.secondaryKey(newDeliveryTime));
+		if (secKeyBeforeDownload != secKeyAfterDonwload) {
+			/*
+			 * The message was likely moved from invalid somewhere
+			 * else.
+			 */
+			/* Delete the message from invalid. */
+			MessageDb *db = dbSet.accessMessageDb(mId.deliveryTime, false);
+			if (0 != db) {
+				db->msgsDeleteMessageData(mId.dmId);
+			}
+
+			/* Update message delivery time. */
+			mId.deliveryTime = newDeliveryTime;
+
+			/* Store envelope in new location. */
+			storeEnvelope(msgDirect, dbSet, message->envelope);
+		}
+	}
+
+	/* Store the message. */
 	storeMessage(signedMsg, msgDirect, dbSet, message,
 	    progressLabel, pBar, worker);
 
