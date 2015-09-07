@@ -4009,6 +4009,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(moveSelectedAccountDown()));
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
+	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
+	    this, SLOT(prepareMsgImportFromDatabase()));
 #ifdef PORTABLE_APPLICATION
 	ui->actionChange_data_directory->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
@@ -5847,11 +5849,13 @@ void MainWindow::createAccountFromDatabaseFileList(
 
 	const int dbFilesCnt = filePathList.size();
 
-	if (0== dbFilesCnt) {
+	if (0 == dbFilesCnt) {
 		return;
 	}
 
 	QStringList currentAccountList;
+	QString errMsg;
+
 	int accountCount = ui->accountList->model()->rowCount();
 	for (int i = 0; i < accountCount; i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
@@ -5862,116 +5866,77 @@ void MainWindow::createAccountFromDatabaseFileList(
 	}
 
 	for (int i = 0; i < dbFilesCnt; ++i) {
-		QPair<QString, QString> importDBinfo; /* filePath, message */
-		importDBinfo.first = filePathList.at(i);
-		const QString fileName(
-		    QFileInfo(importDBinfo.first).fileName());
-		QString userName;
-		QString testingFlag;
-		QString suffix;
-		/* Split the database file name. */
-		if (fileName.contains("___")) {
-			QStringList fileNameParts = fileName.split("___");
-			userName = fileNameParts[0];
-			fileNameParts = fileNameParts[1].split(".");
-			testingFlag = fileNameParts[0];
-			suffix = fileNameParts[1];
-			if (userName.isEmpty() || testingFlag.isEmpty() ||
-			    suffix.isEmpty()) {
-				importDBinfo.second = tr(
-				    "This file does not contain a valid "
-				    "message database or file name has wrong "
-				    "format.");
-				/* Skip further tests. */
-				userName.clear();
-				testingFlag.clear();
-				suffix.clear();
-			}
-		} else {
-			importDBinfo.second = tr("This file does not contain a"
-			    " valid message database or file name has wrong "
-			    "format.");
-			/* Skip further tests. */
-			userName.clear();
-			testingFlag.clear();
-			suffix.clear();
+
+		QFileInfo file(filePathList.at(i));
+		QString dbFileName = file.fileName();
+		QString dbUserName;
+		QString dbYearFlag;
+		bool dbTestingFlag;
+
+		/* Split and check the database file name. */
+		if (!isValidDatabaseFileName(dbFileName, dbUserName,
+		    dbYearFlag, dbTestingFlag, errMsg)) {
+			QMessageBox::warning(this,
+			    tr("Create account: %1").arg(dbUserName),
+			    tr("File") + ": " + filePathList.at(i) +
+			    "\n\n" + errMsg,
+			    QMessageBox::Ok);
+			continue;
 		}
 
 		/* Check whether account already exists. */
-		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
-		    !suffix.isEmpty()) {
-			bool exists = false;
-			for (int j = 0; j < accountCount; ++j) {
-				if (currentAccountList.at(j) == userName) {
-					exists = true;
-					break;
-				}
-			}
-
-			if (exists) {
-				importDBinfo.second = tr(
-				    "Account with user name '%1' and "
-				    "its message database already exist. "
-				    "New account was not created and "
-				    "selected database file was not "
-				    "associated with this account.").
-				    arg(userName);
-				/* Skip further tests. */
-				userName.clear();
-				testingFlag.clear();
-				suffix.clear();
+		bool exists = false;
+		for (int j = 0; j < accountCount; ++j) {
+			if (currentAccountList.at(j) == dbUserName) {
+				exists = true;
+				break;
 			}
 		}
 
-		/* Check whether testing flag has proper value. */
-		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
-		    !suffix.isEmpty()) {
-			if (("0" != testingFlag) && ("1" != testingFlag)) {
-				importDBinfo.second = tr(
-				    "This file does not contain a "
-				    "valid message database or file "
-				    "name has wrong format.");
-				/* Skip further tests. */
-				userName.clear();
-				testingFlag.clear();
-				suffix.clear();
-			}
+		if (exists) {
+			errMsg = tr(
+			    "Account with user name '%1' and "
+			    "its message database already exist. "
+			    "New account was not created and "
+			    "selected database file was not "
+			    "associated with this account.").
+			    arg(dbUserName);
+			QMessageBox::warning(this,
+			    tr("Create account: %1").arg(dbUserName),
+			    tr("File") + ": " + filePathList.at(i) +
+			    "\n\n" + errMsg,
+			    QMessageBox::Ok);
+			continue;
 		}
 
-		if (!userName.isEmpty() && !testingFlag.isEmpty() &&
-		    !suffix.isEmpty()) {
-			AccountModel::SettingsMap itemSettings;
-
-			itemSettings.setTestAccount("1" == testingFlag);
-			itemSettings.setAccountName(userName);
-			itemSettings.setUserName(userName);
-			itemSettings.setLoginMethod(LIM_USERNAME);
-			itemSettings.setPassword("");
-			itemSettings.setRememberPwd(false);
-			itemSettings.setSyncWithAll(false);
-			itemSettings.setDbDir(
-			    m_on_import_database_dir_activate);
-			m_accountModel.addAccount(userName,
-			    itemSettings);
-			importDBinfo.second =
-			    tr("Account with name '%1' has been "
-			    "created (user name '%1').").arg(userName)
-			    + " " +
-			    tr("This database file has been set as "
-			    "actual message database for this account. "
-			    "Maybe you have to change account "
-			    "properties for correct login to the "
-			    "server Datové schránky.");
-		}
+		AccountModel::SettingsMap itemSettings;
+		itemSettings.setTestAccount(dbTestingFlag);
+		itemSettings.setAccountName(dbUserName);
+		itemSettings.setUserName(dbUserName);
+		itemSettings.setLoginMethod(LIM_USERNAME);
+		itemSettings.setPassword("");
+		itemSettings.setRememberPwd(false);
+		itemSettings.setSyncWithAll(false);
+		itemSettings.setDbDir(m_on_import_database_dir_activate);
+		m_accountModel.addAccount(dbUserName, itemSettings);
+		errMsg = tr("Account with name '%1' has been "
+		    "created (user name '%1').").arg(dbUserName)
+		    + " " +
+		    tr("This database file has been set as "
+		    "actual message database for this account. "
+		    "Maybe you have to change account "
+		    "properties for correct login to the "
+		    "server Datové schránky.");
 
 		QMessageBox::information(this,
-		    tr("Create account: %1").arg(userName),
-		    tr("File") + ": " + importDBinfo.first +
-		    "\n\n" + importDBinfo.second,
+		    tr("Create account: %1").arg(dbUserName),
+		    tr("File") + ": " + filePathList.at(i) +
+		    "\n\n" + errMsg,
 		    QMessageBox::Ok);
+
+		saveSettings();
 	}
 
-	saveSettings();
 	activeAccountMenuAndButtons(true);
 	ui->accountList->expandAll();
 }
@@ -9706,5 +9671,227 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	foreach (const MessageDb::MsgId &mId, expirMsgIds) {
 		exportSelectedMessageAsZFO(newDir, userName, mId.dmId,
 		    mId.deliveryTime);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Split database filename into mandatory entries.
+ */
+bool MainWindow::isValidDatabaseFileName(QString inDbFileName,
+    QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
+/* ========================================================================= */
+{
+	QStringList fileNameParts;
+	bool ret = false;
+	errMsg = "";
+	dbUserName = "";
+	dbYear = "";
+
+	if (inDbFileName.contains("___")) {
+		// get username from filename
+		fileNameParts = inDbFileName.split("_");
+		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
+			errMsg = tr("This file does not contain a valid "
+			    "database filename.");
+			return ret;
+		}
+		if (fileNameParts[0].isEmpty() ||
+		    fileNameParts[0].length() != 6) {
+			errMsg = tr("This file does not contain a valid "
+			    "username in the database filename.");
+			return ret;
+		}
+		dbUserName = fileNameParts[0];
+
+		// get year from filename
+		if (fileNameParts[1].isEmpty()) {
+			dbYear = "";
+		} else if (fileNameParts[1].length() == 4) {
+			dbYear = fileNameParts[1];
+		} else {
+			errMsg = tr("This database file does not contain "
+			    "valid year in the database filename.");
+			dbYear = "";
+			return ret;
+		}
+
+		// get testing flag from filename
+		fileNameParts = inDbFileName.split(".");
+		if (fileNameParts.isEmpty()) {
+			errMsg = tr("This file does not contain valid "
+			    "database filename.");
+			return ret;
+		}
+		fileNameParts = fileNameParts[0].split("___");
+		if (fileNameParts.isEmpty()) {
+			errMsg = tr("This database file does not contain "
+			    "valid database filename.");
+			return ret;
+		}
+
+		if (fileNameParts[1] == "1") {
+			dbTestingFlag = true;
+		} else if (fileNameParts[1] == "0") {
+			dbTestingFlag = false;
+		} else {
+			errMsg = tr("This file does not contain a valid "
+			    "account type flag or filename has wrong format.");
+			dbTestingFlag = false;
+			return ret;
+		}
+	} else {
+		errMsg = tr("This file does not contain a valid message "
+		    "database or filename has wrong format.");
+		return ret;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Prepare import of messages from database.
+ */
+void MainWindow::prepareMsgImportFromDatabase(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* get list of selected database files */
+	QStringList files = QFileDialog::getOpenFileNames(this,
+		    tr("Select database file(s)"),
+		    m_on_import_database_dir_activate, tr("DB file (*.db)"));
+
+	if (files.isEmpty()) {
+		qDebug() << "No *.db selected file(s)";
+		showStatusTextWithTimeout(tr("Database file(s) not selected."));
+		return;
+	}
+
+	/* remember import path */
+	m_on_import_database_dir_activate =
+		    QFileInfo(files.at(0)).absoluteDir().absolutePath();
+
+	doImportMsgFromDatabase(files, userNameFromItem());
+}
+
+
+/* ========================================================================= */
+/*
+ *  Import of messages from database to selected account
+ */
+void MainWindow::doImportMsgFromDatabase(const QStringList dbFileList,
+    const QString currentUserName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	MessageDbSet *tmpDbSet = NULL;
+	QString dbDir;
+	QString dbFileName;
+	QString dbUserName;
+	QString dbYearFlag;
+	bool dbTestingFlag;
+	QString errMsg;
+
+	for (int i = 0; i < dbFileList.count(); ++i) {
+
+		QFileInfo file(dbFileList.at(i));
+		dbDir = file.path();
+		dbFileName = file.fileName();
+
+		qDebug() << dbFileList.at(i) << "file is analysed...";
+
+		/* split and check the database file name */
+		if (!isValidDatabaseFileName(dbFileName, dbUserName,
+		    dbYearFlag, dbTestingFlag, errMsg)) {
+			qDebug() << errMsg;
+			QMessageBox::critical(this,
+			    tr("Database import: %1").arg(currentUserName),
+			    tr("File") + ": " + dbFileList.at(i) +
+			    "\n\n" + errMsg,
+			    QMessageBox::Ok);
+			continue;
+		}
+
+		qDebug() << dbUserName << dbYearFlag << dbTestingFlag;
+
+		/* check if file username is relevant to account */
+		if (currentUserName != dbUserName) {
+			errMsg = tr("This database cannot import into selected"
+			    " account because usernames do not correspond.");
+			qDebug() << errMsg;
+			QMessageBox::critical(this,
+			    tr("Database import: %1").arg(currentUserName),
+			    tr("File") + ": " + dbFileList.at(i) +
+			    "\n\n" + errMsg,
+			    QMessageBox::Ok);
+			continue;
+		}
+
+		MessageDbSet::Organisation dbType;
+
+		if (dbYearFlag.isEmpty()) {
+			dbType = MessageDbSet::DO_SINGLE_FILE;
+		} else if (QDate::fromString(dbYearFlag, "YYYY").isValid()) {
+			dbType = MessageDbSet::DO_YEARLY;
+		} else {
+			dbType = MessageDbSet::DO_UNKNOWN;
+		}
+
+		DbContainer temporaryDbCont("TEMPORARYDBS");
+		/* open source database file */
+		tmpDbSet = temporaryDbCont.accessDbSet(dbDir, dbUserName,
+		    dbTestingFlag, dbType, false);
+		if (NULL == tmpDbSet) {
+			errMsg = tr("Failed to open database file.");
+			QMessageBox::critical(this,
+			    tr("Database import: %1").arg(currentUserName),
+			    tr("File") + ": " + dbFileList.at(i) +
+			    "\n\n" + errMsg,
+			    QMessageBox::Ok);
+			qDebug() << dbFileList.at(i) << errMsg;
+			continue;
+		}
+
+		qDebug() << dbFileList.at(i) << "is open";
+
+		QString databoxId =
+		    globAccountDbPtr->dbId(currentUserName + "___True");
+
+		QList<MessageDb::MsgId> msgIdList =
+		    tmpDbSet->getAllMessageIDsFromDB();
+
+		MessageDbSet *dbSet = accountDbSet(currentUserName, this);
+
+		// over all msgs
+		foreach (const MessageDb::MsgId &mId, msgIdList) {
+
+			qDebug() << mId.dmId << mId.deliveryTime;
+
+			MessageDb *tmpDb =
+			    tmpDbSet->accessMessageDb(mId.deliveryTime, false);
+
+			/* select database via delivery time */
+			MessageDb *messageDb =
+			    dbSet->accessMessageDb(mId.deliveryTime, false);
+			Q_ASSERT(0 != messageDb);
+
+			/* check if msg does not exist in database */
+			if (-1 != messageDb->msgsStatusIfExists(mId.dmId)) {
+				/* TODO - inform user */
+				continue;
+			}
+			/* check message if it is relevant for current account */
+			if (!tmpDb->isRelevantMsgForImport(mId.dmId, databoxId)) {
+				/* TODO - inform user */
+				continue;
+			}
+
+			/* insert msg to database corespond with year of delivery time */
+		}
 	}
 }

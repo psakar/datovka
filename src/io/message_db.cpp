@@ -4728,3 +4728,39 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    rawBytes.data(), rawBytes.size(), utcTime,
 	    ignoreMissingCrlCheck ? 0 : 1);
 }
+
+
+/* ========================================================================= */
+/*
+ * Test if imported message is relevent to account db.
+ */
+bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
+    const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT dmID FROM messages WHERE dmID = :dmID AND "
+	    "(dbIDSender = :dbIDSender OR dbIDRecipient = :dbIDRecipient)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":dmID", msgId);
+	query.bindValue(":dbIDSender", databoxId);
+	query.bindValue(":dbIDRecipient", databoxId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			return !query.value(0).toString().isEmpty();
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return false;
+}

@@ -433,6 +433,11 @@ private slots:
 	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
 
 	/*!
+	 * @brief Prepare import of messages from database.
+	 */
+	void prepareMsgImportFromDatabase(void);
+
+	/*!
 	 * @brief Proxy setting dialog.
 	 */
 	void proxySettings(void);
@@ -1073,6 +1078,26 @@ private:
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
 	    const QList<MessageDb::MsgId> &expirMsgIds);
+
+	/*!
+	 * @brief Import of messages from database to selected account.
+	 */
+	void doImportMsgFromDatabase(const QStringList dbFileList,
+	    const QString currentUserName);
+
+	/*!
+	 * @brief Split database filename into mandatory entries.
+	 *
+	 * @param[in] inDbFileName - input database file name.
+	 * @param[out] dbUserName - username entry.
+	 * @paran[out] dbYear - year entry if exists or NULL.
+	 * @paran[out] dbTestingFlag - true if account is testing or false
+	 * @paran[out] errMsg - error message to user
+	 * @return true if database filename is correct
+	 */
+	bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
+	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

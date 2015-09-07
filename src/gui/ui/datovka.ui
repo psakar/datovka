@@ -484,6 +484,8 @@ sent reply on this message</string>
     <addaction name="actionMove_account_down"/>
     <addaction name="separator"/>
     <addaction name="actionChange_data_directory"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_messages_from_database"/>
    </widget>
    <widget class="QMenu" name="menuMessage">
     <property name="enabled">
@@ -689,12 +691,15 @@ sent reply on this message</string>
    </property>
   </action>
   <action name="actionGet_messages">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka-account-sync.png</normaloff>:/icons/16x16/datovka-account-sync.png</iconset>
    </property>
    <property name="text">
-    <string>Get messages</string>
+    <string>Synchronize account</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -1169,6 +1174,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Homepage</string>
+   </property>
+  </action>
+  <action name="actionImport_messages_from_database">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import messages from database</string>
    </property>
   </action>
  </widget>

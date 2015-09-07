@@ -603,6 +603,15 @@ public:
 	 */
 	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId) const;
 
+	/*!
+	 * @brief Test if imported message is relevent to account db.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] databoxId  Databox ID where message should be imported.
+	 * @return Message is relevant for import to db or not.
+	 */
+	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
+
 protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.
