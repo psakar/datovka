@@ -160,15 +160,18 @@ public:
 	/*!
 	 * @brief Creates a new object.
 	 *
-	 * @param[in] locDir       Directory that holds the database files.
-	 * @param[in] primaryKey   Primary key, usually the user name.
-	 * @param[in] testing      True if this is a testing account.
-	 * @param[in] organisation How to organise the database files.
+	 * @param[in] locDir           Directory that holds the database files.
+	 * @param[in] primaryKey       Primary key, usually the user name.
+	 * @param[in] testing          True if this is a testing account.
+	 * @param[in] organisation     How to organise the database files.
+	 * @param[in] connectionPrefix Prefix of the connection name.
+	 * @param[in] mustExist        Set true if some files must be present.
 	 * @return Pointer to new container or zero pointer on error.
 	 */
 	static
 	MessageDbSet *createNew(const QString &locDir,
-	    const QString &primaryKey, bool testing, enum Organisation organisation,
+	    const QString &primaryKey, bool testing,
+	    enum Organisation organisation, const QString &connectionPrefix,
 	    bool mustExist);
 
 	/*!
@@ -269,13 +272,15 @@ private:
 	/*!
 	 * @brief Creates a database set.
 	 *
-	 * @param[in] locDir     Directory that holds the database files.
-	 * @param[in] primaryKey Primary key, usually the user name.
-	 * @param[in] testing    True if this is a testing account.
-	 * @param[in] organisation How to organise the database files.
+	 * @param[in] locDir           Directory that holds the database files.
+	 * @param[in] primaryKey       Primary key, usually the user name.
+	 * @param[in] testing          True if this is a testing account.
+	 * @param[in] organisation     How to organise the database files.
+	 * @param[in] connectionPrefix Prefix of the connection name.
 	 */
 	MessageDbSet(const QString &locDir, const QString &primaryKey,
-	    bool testing, enum Organisation organisation);
+	    bool testing, enum Organisation organisation,
+	    const QString &connectionPrefix);
 
 	/*!
 	 * @brief Accesses message database file matching the secondary key.
@@ -296,6 +301,7 @@ private:
 	static
 	int checkGivenDbFile(const QString &filePath, int flags);
 
+	const QString m_connectionPrefix; /*!< Used for connection naming. */
 	const QString m_primaryKey; /*!< Used for accessing the database. */
 	const bool m_testing; /*!< Whether those are a testing databases. */
 	QString m_locDir; /*!< Directory where the files reside. */

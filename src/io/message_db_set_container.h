@@ -40,7 +40,7 @@
 class DbContainer : private QMap<QString, MessageDbSet *> {
 
 public:
-	DbContainer(void);
+	DbContainer(const QString &connectionPrefix = QString());
 	~DbContainer(void);
 
 	/*!
@@ -71,6 +71,8 @@ private:
 	 */
 	static
 	const QString dbDriverType;
+
+	const QString m_connectionPrefix; /*!< Database connection prefix. */
 
 	/*!
 	 * @brief Creates the database name from supplied information.

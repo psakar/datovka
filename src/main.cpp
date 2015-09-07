@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
 	 */
 	AccountDb globAccountDb("accountDb");
 	globAccountDbPtr = &globAccountDb;
-	DbContainer globMessageDbs;
+	DbContainer globMessageDbs("GLOBALDBS");
 	globMessageDbsPtr = &globMessageDbs;
 
 	{

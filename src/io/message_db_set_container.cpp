@@ -29,9 +29,10 @@
 
 
 /* ========================================================================= */
-DbContainer::DbContainer(void)
+DbContainer::DbContainer(const QString &connectionPrefix)
 /* ========================================================================= */
-    : QMap<QString, MessageDbSet *>()
+    : QMap<QString, MessageDbSet *>(),
+    m_connectionPrefix(connectionPrefix)
 {
 }
 
@@ -65,7 +66,7 @@ MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
 	}
 
 	dbSet = MessageDbSet::createNew(locDir, primaryKey, testing,
-	    organisation, !create);
+	    organisation, m_connectionPrefix, !create);
 	if (NULL == dbSet) {
 		return NULL;
 	}

@@ -34,8 +34,10 @@
 #include "src/log/log.h"
 
 MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
-    bool testing, enum Organisation organisation)
+    bool testing, enum Organisation organisation,
+    const QString &connectionPrefix)
     : QMap<QString, MessageDb *>(),
+    m_connectionPrefix(connectionPrefix),
     m_primaryKey(primaryKey),
     m_testing(testing),
     m_locDir(locDir),
@@ -324,7 +326,7 @@ QString MessageDbSet::yearFromDateTime(const QDateTime &time)
 
 MessageDbSet *MessageDbSet::createNew(const QString &locDir,
     const QString &primaryKey, bool testing, enum Organisation organisation,
-    bool mustExist)
+    const QString &connectionPrefix, bool mustExist)
 {
 	MessageDbSet *dbSet = NULL;
 	QStringList matchingFiles;
@@ -375,7 +377,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 
 	/* Create database set. */
 	dbSet = new(std::nothrow) MessageDbSet(locDir, primaryKey, testing,
-	    organisation);
+	    organisation, connectionPrefix);
 	if (dbSet == NULL) {
 		Q_ASSERT(0);
 		return NULL;
@@ -678,9 +680,13 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 		m_organisation = org;
 	}
 
-	QString key = constructKey(m_primaryKey, secondaryKey, m_organisation);
+	QString connectionName(constructKey(m_primaryKey, secondaryKey,
+	    m_organisation));
+	if (!m_connectionPrefix.isEmpty()) {
+		connectionName = m_connectionPrefix + "_" + connectionName;
+	}
 
-	db = new(std::nothrow) MessageDb(dbDriverType, key);
+	db = new(std::nothrow) MessageDb(dbDriverType, connectionName);
 	if (NULL == db) {
 		Q_ASSERT(0);
 		return NULL;
