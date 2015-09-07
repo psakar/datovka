@@ -2716,18 +2716,18 @@ void MainWindow::deleteMessage(void)
 		return;
 	}
 
-	typedef QPair<qint64, QDateTime> MessageIdentifier;
-	QList<MessageIdentifier> msgIds;
+	QList<MessageDb::MsgId> msgIds;
 	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(MessageIdentifier(idx.data().toLongLong(),
+		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
 		    msgDeliveryTime(idx)));
 	}
 
 	/* Save current account index */
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 
-	foreach (const MessageIdentifier &id, msgIds) {
-		switch (eraseMessage(userName, id.first, id.second, delMsgIsds)) {
+	foreach (const MessageDb::MsgId &id, msgIds) {
+		switch (eraseMessage(userName, id.dmId, id.deliveryTime,
+		            delMsgIsds)) {
 		case Q_SUCCESS:
 			/*
 			 * Hiding selected line in the message model actually
@@ -3010,10 +3010,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	typedef QPair<qint64, QDateTime> MessageIdentifier;
-	QList<MessageIdentifier> msgIds;
+	QList<MessageDb::MsgId> msgIds;
 	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(MessageIdentifier(idx.data().toLongLong(),
+		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
 		    msgDeliveryTime(idx)));
 	}
 
@@ -3054,10 +3053,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		}
 	}
 
-	foreach (const MessageIdentifier &id, msgIds) {
+	foreach (const MessageDb::MsgId &id, msgIds) {
 		/* Using prepend() just to outrun other jobs. */
 		Worker::jobList.append(
-		    Worker::Job(userName, dbSet, msgDirection, id.first, id.second));
+		    Worker::Job(userName, dbSet, msgDirection, id.dmId, id.deliveryTime));
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -7192,7 +7191,8 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	Q_ASSERT(0 != dbSet);
 
 	QString errMsg;
-	if (Q_SUCCESS == Worker::downloadMessage(userName, dmId, deliveryTime, true,
+	if (Q_SUCCESS == Worker::downloadMessage(userName,
+	        MessageDb::MsgId(dmId, deliveryTime), true,
 	        msgDirect, *dbSet, errMsg, QString(), 0, 0)) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(userName, dmId);

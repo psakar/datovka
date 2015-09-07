@@ -50,8 +50,7 @@ public:
 		    : userName(QString()),
 		    dbSet(0),
 		    msgDirect(MSG_RECEIVED),
-		    msgId(-1),
-		    deliveryTime()
+		    mId(-1, QDateTime())
 		{
 		}
 		Job(const QString &uName, MessageDbSet *dSet,
@@ -60,8 +59,7 @@ public:
 		    : userName(uName),
 		    dbSet(dSet),
 		    msgDirect(direc),
-		    msgId(dmId),
-		    deliveryTime(dTime)
+		    mId(dmId, dTime)
 		{
 		}
 
@@ -73,11 +71,10 @@ public:
 		QString userName;
 		MessageDbSet *dbSet;
 		enum MessageDirection msgDirect;
-		qint64 msgId; /*!<
-		               * If != -1, then only a single message is going
-		               * to be downloaded.
-		               */
-		QDateTime deliveryTime;
+		MessageDb::MsgId mId; /*!<
+		                       * If id != -1, then only a single
+		                       * message is going to be downloaded.
+		                       */
 	};
 
 	class JobList : private QList<Job>, private QMutex {
@@ -160,7 +157,7 @@ public:
 	 */
 	static
 	qdatovka_error downloadMessage(const QString &userName,
-	    qint64 dmId, const QDateTime &deliveryTime, bool signedMsg, enum MessageDirection msgDirect,
+	    MessageDb::MsgId mId, bool signedMsg, enum MessageDirection msgDirect,
 	    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel,
 	    QProgressBar *pBar, Worker *worker);
 

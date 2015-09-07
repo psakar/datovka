@@ -1216,7 +1216,6 @@ void DlgSendMessage::sendMessage(void)
 			qint64 dmId =
 			    QString(sent_message->envelope->dmID).toLongLong();
 			QDateTime deliveryTime = timevalToDateTime(sent_message->envelope->dmDeliveryTime);
-			Q_ASSERT(deliveryTime.isValid());
 
 			MessageDb *messageDb = m_dbSet.accessMessageDb(deliveryTime, true);
 			Q_ASSERT(0 != messageDb);

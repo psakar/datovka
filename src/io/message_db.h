@@ -81,6 +81,9 @@ public:
 
 		MsgId(void) : dmId(-1), deliveryTime()
 		{ }
+		MsgId(const MsgId &id)
+		    : dmId(id.dmId), deliveryTime(id.deliveryTime)
+		{ }
 		MsgId(qint64 id, const QDateTime &dTime)
 		    : dmId(id), deliveryTime(dTime)
 		{ }
