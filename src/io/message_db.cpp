@@ -4764,3 +4764,236 @@ bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
 
 	return false;
 }
+
+
+/* ========================================================================= */
+/*
+ * Copy all message data to account database from source database.
+ */
+bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
+    qint64 msgId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	// attach new database.
+	QString	queryStr = "ATTACH DATABASE \""+ sourceDbPath + "\" AS db2";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	queryStr = "BEGIN DEFERRED TRANSACTION";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto exit;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto exit;
+	}
+
+	// copy message data from messages table into db.
+	queryStr = "INSERT INTO messages SELECT * FROM db2.messages WHERE "
+	    "dmID = :dmID";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmID", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	// copy other message data from other tables into new db.
+	queryStr = "INSERT INTO files SELECT * FROM db2.files WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO hashes SELECT * FROM db2.hashes WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO events SELECT * FROM db2.events WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO raw_message_data SELECT * "
+	    "FROM db2.raw_message_data WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO raw_delivery_info_data SELECT * "
+	    "FROM db2.raw_delivery_info_data WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO supplementary_message_data "
+	    "SELECT * FROM db2.supplementary_message_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO process_state SELECT * FROM "
+	    "db2.process_state WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO certificate_data SELECT * FROM "
+	    "db2.certificate_data";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	queryStr = "INSERT INTO message_certificate_data SELECT * "
+	    "FROM db2.message_certificate_data WHERE "
+	    "message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	// commit all inserts (transaction)
+	queryStr = "COMMIT TRANSACTION";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	// detach new database.
+	queryStr = "DETACH DATABASE db2";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+fail:
+	queryStr = "ROLLBACK TRANSACTION";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+	}
+	query.exec();
+
+exit:
+	// detach new database.
+	queryStr = "DETACH DATABASE db2";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return false;
+}

@@ -612,6 +612,17 @@ public:
 	 */
 	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
 
+	/*!
+	 * @brief Copy message data to account database from source database.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] sourceDbPath  Source db path.
+	 * @return True if copy of message data was success.
+	 */
+	bool copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
+	    qint64 msgId) const;
+
+
 protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.

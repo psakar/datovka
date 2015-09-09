@@ -9883,7 +9883,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 
 			/* select destination database via delivery time */
 			MessageDb *dstDb =
-			    dstDbSet->accessMessageDb(mId.deliveryTime, false);
+			    dstDbSet->accessMessageDb(mId.deliveryTime, true);
 			if (0 == dstDb) {
 				/* TODO */
 				continue;
@@ -9909,9 +9909,17 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 				continue;
 			}
 
-			/* insert msg to database corespond with year of delivery time */
+			/* copy all msg data to account database */
+			if (!dstDb->copyCompleteMsgDataToAccountDb(
+			    dbFileList.at(i), mId.dmId)) {
+				msg = tr("Message '%1' cannot be inserted "
+				    "into database of this account. An error "
+				    "occurred during insertion procedure.").
+				    arg(mId.dmId);
+				errImportList.append(msg);
+				continue;
+			}
 			sMsgCnt++;
-
 		}
 
 		QMessageBox msgBox(this);
@@ -9919,9 +9927,11 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		msgBox.setWindowTitle(tr("Messages import result"));
 		msg = tr("Import of messages into account '%1' "
 		    "finished with result:").arg(aUserName) +
-		    "<br/><br/>" + tr("Source database file: '%1'").arg(dbFileList.at(i));
+		    "<br/><br/>" + tr("Source database file: '%1'").
+		    arg(dbFileList.at(i));
 		msgBox.setText(msg);
-		msg = tr("Total of messages in database: %1").arg(msgIdList.count())
+		msg = tr("Total of messages in database: %1").
+		    arg(msgIdList.count())
 		    + "<br/><b>" +
 		    tr("Imported messages: %1").arg(sMsgCnt)
 		    + "<br/>" +
