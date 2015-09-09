@@ -4010,7 +4010,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
 	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
-	    this, SLOT(prepareMsgImportFromDatabase()));
+	    this, SLOT(prepareMsgsImportFromDatabase()));
 #ifdef PORTABLE_APPLICATION
 	ui->actionChange_data_directory->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
@@ -9755,7 +9755,7 @@ bool MainWindow::isValidDatabaseFileName(QString inDbFileName,
 /*
  * Prepare import of messages from database.
  */
-void MainWindow::prepareMsgImportFromDatabase(void)
+void MainWindow::prepareMsgsImportFromDatabase(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -9775,7 +9775,7 @@ void MainWindow::prepareMsgImportFromDatabase(void)
 	m_on_import_database_dir_activate =
 		    QFileInfo(files.at(0)).absoluteDir().absolutePath();
 
-	doImportMsgFromDatabase(files, userNameFromItem());
+	doMsgsImportFromDatabase(files, userNameFromItem());
 }
 
 
@@ -9783,19 +9783,21 @@ void MainWindow::prepareMsgImportFromDatabase(void)
 /*
  *  Import of messages from database to selected account
  */
-void MainWindow::doImportMsgFromDatabase(const QStringList dbFileList,
-    const QString currentUserName)
+void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
+    const QString &aUserName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	MessageDbSet *tmpDbSet = NULL;
+	MessageDbSet *srcDbSet = NULL;
 	QString dbDir;
 	QString dbFileName;
 	QString dbUserName;
 	QString dbYearFlag;
 	bool dbTestingFlag;
-	QString errMsg;
+	int sMsgCnt = 0;
+	QString msg;
+	QStringList errImportList;
 
 	for (int i = 0; i < dbFileList.count(); ++i) {
 
@@ -9807,12 +9809,12 @@ void MainWindow::doImportMsgFromDatabase(const QStringList dbFileList,
 
 		/* split and check the database file name */
 		if (!isValidDatabaseFileName(dbFileName, dbUserName,
-		    dbYearFlag, dbTestingFlag, errMsg)) {
-			qDebug() << errMsg;
+		    dbYearFlag, dbTestingFlag, msg)) {
+			qDebug() << msg;
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(currentUserName),
+			    tr("Database import: %1").arg(aUserName),
 			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + errMsg,
+			    "\n\n" + msg,
 			    QMessageBox::Ok);
 			continue;
 		}
@@ -9820,14 +9822,14 @@ void MainWindow::doImportMsgFromDatabase(const QStringList dbFileList,
 		qDebug() << dbUserName << dbYearFlag << dbTestingFlag;
 
 		/* check if file username is relevant to account */
-		if (currentUserName != dbUserName) {
-			errMsg = tr("This database cannot import into selected"
+		if (aUserName != dbUserName) {
+			msg = tr("This database cannot import into selected"
 			    " account because usernames do not correspond.");
-			qDebug() << errMsg;
+			qDebug() << msg;
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(currentUserName),
+			    tr("Database import: %1").arg(aUserName),
 			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + errMsg,
+			    "\n\n" + msg,
 			    QMessageBox::Ok);
 			continue;
 		}
@@ -9844,54 +9846,96 @@ void MainWindow::doImportMsgFromDatabase(const QStringList dbFileList,
 
 		DbContainer temporaryDbCont("TEMPORARYDBS");
 		/* open source database file */
-		tmpDbSet = temporaryDbCont.accessDbSet(dbDir, dbUserName,
+		srcDbSet = temporaryDbCont.accessDbSet(dbDir, dbUserName,
 		    dbTestingFlag, dbType, false);
-		if (NULL == tmpDbSet) {
-			errMsg = tr("Failed to open database file.");
+		if (NULL == srcDbSet) {
+			msg = tr("Failed to open database file.");
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(currentUserName),
+			    tr("Database import: %1").arg(aUserName),
 			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + errMsg,
+			    "\n\n" + msg,
 			    QMessageBox::Ok);
-			qDebug() << dbFileList.at(i) << errMsg;
+			qDebug() << dbFileList.at(i) << msg;
 			continue;
 		}
 
 		qDebug() << dbFileList.at(i) << "is open";
 
-		QString databoxId =
-		    globAccountDbPtr->dbId(currentUserName + "___True");
+		QString dboxId = globAccountDbPtr->dbId(aUserName + "___True");
 
+		/* get all msgs from source database */
 		QList<MessageDb::MsgId> msgIdList =
-		    tmpDbSet->getAllMessageIDsFromDB();
+		    srcDbSet->getAllMessageIDsFromDB();
 
-		MessageDbSet *dbSet = accountDbSet(currentUserName, this);
+		MessageDbSet *dstDbSet = accountDbSet(aUserName, this);
+
+		errImportList.clear();
+		sMsgCnt = 0;
 
 		// over all msgs
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
 
 			qDebug() << mId.dmId << mId.deliveryTime;
 
-			MessageDb *tmpDb =
-			    tmpDbSet->accessMessageDb(mId.deliveryTime, false);
+			/* select source database via delivery time */
+			MessageDb *srcDb =
+			    srcDbSet->accessMessageDb(mId.deliveryTime, false);
 
-			/* select database via delivery time */
-			MessageDb *messageDb =
-			    dbSet->accessMessageDb(mId.deliveryTime, false);
-			Q_ASSERT(0 != messageDb);
-
-			/* check if msg does not exist in database */
-			if (-1 != messageDb->msgsStatusIfExists(mId.dmId)) {
-				/* TODO - inform user */
+			/* select destination database via delivery time */
+			MessageDb *dstDb =
+			    dstDbSet->accessMessageDb(mId.deliveryTime, false);
+			if (0 == dstDb) {
+				/* TODO */
 				continue;
 			}
-			/* check message if it is relevant for current account */
-			if (!tmpDb->isRelevantMsgForImport(mId.dmId, databoxId)) {
-				/* TODO - inform user */
+			Q_ASSERT(0 != dstDb);
+
+			/* check if msg exists in destination database */
+			if (-1 != dstDb->msgsStatusIfExists(mId.dmId)) {
+				msg = tr("Message '%1' already exists in "
+				    "database for this account.").arg(mId.dmId);
+				errImportList.append(msg);
+				continue;
+			}
+
+			/* check if msg is relevant for account databox ID  */
+			if (!srcDb->isRelevantMsgForImport(mId.dmId, dboxId)) {
+				msg = tr("Message '%1' cannot be imported "
+				    "into this account. Message does not "
+				    "contain any valid ID of databox "
+				    "corresponding with this account.").
+				    arg(mId.dmId);
+				errImportList.append(msg);
 				continue;
 			}
 
 			/* insert msg to database corespond with year of delivery time */
+			sMsgCnt++;
+
 		}
+
+		QMessageBox msgBox(this);
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Messages import result"));
+		msg = tr("Import of messages into account '%1' "
+		    "finished with result:").arg(aUserName) +
+		    "<br/><br/>" + tr("Source database file: '%1'").arg(dbFileList.at(i));
+		msgBox.setText(msg);
+		msg = tr("Total of messages in database: %1").arg(msgIdList.count())
+		    + "<br/><b>" +
+		    tr("Imported messages: %1").arg(sMsgCnt)
+		    + "<br/>" +
+		    tr("Non-imported messages: %1").arg(errImportList.count()) +
+		    "</b><br/>";
+		msgBox.setInformativeText(msg);
+		if (errImportList.count() > 0) {
+			msg = "";
+			for (int m = 0; m < errImportList.count(); ++ m) {
+				msg += errImportList.at(m) + "\n";
+			}
+			msgBox.setDetailedText(msg);
+		}
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.exec();
 	}
 }

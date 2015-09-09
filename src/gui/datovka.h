@@ -435,7 +435,7 @@ private slots:
 	/*!
 	 * @brief Prepare import of messages from database.
 	 */
-	void prepareMsgImportFromDatabase(void);
+	void prepareMsgsImportFromDatabase(void);
 
 	/*!
 	 * @brief Proxy setting dialog.
@@ -1082,8 +1082,8 @@ private:
 	/*!
 	 * @brief Import of messages from database to selected account.
 	 */
-	void doImportMsgFromDatabase(const QStringList dbFileList,
-	    const QString currentUserName);
+	void doMsgsImportFromDatabase(const QStringList &dbFileList,
+	    const QString &aUserName);
 
 	/*!
 	 * @brief Split database filename into mandatory entries.
