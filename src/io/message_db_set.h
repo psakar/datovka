@@ -149,6 +149,12 @@ public:
 	QStringList fileNames(void) const;
 
 	/*!
+	 * @brief Returns the database organisation.
+	 * @return Database organisation.
+	 */
+	Organisation organisation(void) const;
+
+	/*!
 	 * @brief Returns the year identifier from supplied time.
 	 *
 	 * @param time Time to be converted.

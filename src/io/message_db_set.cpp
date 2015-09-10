@@ -284,6 +284,11 @@ MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
 	return _accessMessageDb(secondary, writeNew);
 }
 
+MessageDbSet::Organisation MessageDbSet::organisation(void) const
+{
+	return m_organisation;
+}
+
 QStringList MessageDbSet::fileNames(void) const
 {
 	QStringList fileList;
