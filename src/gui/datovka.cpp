@@ -881,6 +881,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 #endif /* PORTABLE_APPLICATION */
 
 		menu->addSeparator();
+		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		    tr("Import messages from database"),
+		    this, SLOT(prepareMsgsImportFromDatabase()));
 		menu->addAction(QIcon(ICON_3PARTY_PATH "statistics_16.png"),
 		    tr("Split database by years"),
 		    this, SLOT(splitMsgDbByYearsSlot()));
@@ -4015,6 +4018,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(moveSelectedAccountDown()));
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
+	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
+	    this, SLOT(splitMsgDbByYearsSlot()));
 	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
 	    this, SLOT(prepareMsgsImportFromDatabase()));
 #ifdef PORTABLE_APPLICATION
@@ -9979,46 +9984,121 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 	debugFuncCall();
 
 	int flags = 0;
+	QString newDbDir;
 
+	/* get message db set based on username */
+	MessageDbSet *msgDbSet = accountDbSet(userName, this);
+	if (0 == msgDbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/*
+	 * test if current account already use database files
+	 * split according to years
+	 */
+	if (MessageDbSet::DO_YEARLY == msgDbSet->organisation()) {
+			QMessageBox msgBox(this);
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Database split"));
+			msgBox.setText(tr("Database file cannot split by years "
+			    "because this account already use database files "
+			    "split according to years."));
+			msgBox.setInformativeText(tr("Action will be ignored."));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.exec();
+		return;
+	}
+
+	/* get current db file location */
 	AccountModel::SettingsMap &itemSettings =
 	    AccountModel::globAccounts[userName];
-
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		dbDir = globPref.confDir();
 	}
 
-	QString testacnt = "0";
-	if (itemSettings.isTestAccount()) {
-		testacnt = "1";
-	}
+	/* get directory for saving of split database files */
+	do {
+		newDbDir = QFileDialog::getExistingDirectory(this,
+		    tr("Select Directory"), m_on_import_database_dir_activate,
+		    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (itemSettings.isTestAccount()) {
-		flags |= DBC_FLG_TESTING;
-	}
+		if (newDbDir.isEmpty()) {
+			return;
+		}
 
-	MessageDb *messageDb = accountMessageDb(userName, this);
+		/* new db files cannot save into same location as original db */
+		if (dbDir == newDbDir) {
+			QMessageBox msgBox(this);
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Database split"));
+			msgBox.setText(tr("Database file cannot split into "
+			    "same directory."));
+			msgBox.setInformativeText(tr("Please, you must choose "
+			    "another directory."));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.exec();
+		}
+	} while (dbDir == newDbDir);
+
+	/* remember import path */
+	m_on_import_database_dir_activate = newDbDir;
+
+	/* get message db for split */
+	MessageDb *messageDb = msgDbSet->accessMessageDb(QDateTime(), false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	QStringList yearList = messageDb->getAllUniqueYearsFormMsgs();
-	qDebug() << "yearList:" << yearList;
+	/* is testing account db */
+	QString testAcnt = "0";
+	if (itemSettings.isTestAccount()) {
+		testAcnt = "1";
+		flags |= MDS_FLG_TESTING;
+	}
+
+	/* get all unique years from database */
+	QStringList yearList = msgDbSet->msgsYears(MessageDb::TYPE_RECEIVED,
+	    DESCENDING);
+	yearList.append(msgDbSet->msgsYears(MessageDb::TYPE_SENT,
+	    DESCENDING));
+	yearList.removeDuplicates();
+
+	/* create new db set for splitting of database files */
+	MessageDbSet *dstDbSet = NULL;
+	DbContainer temporaryDbCont("TEMPORARYDBS");
+	/* open source database file */
+	dstDbSet = temporaryDbCont.accessDbSet(newDbDir, userName,
+	    flags, MessageDbSet::DO_YEARLY, true);
+	if (0 == dstDbSet) {
+		/* TODO */
+
+	}
+	Q_ASSERT(0 != dstDbSet);
 
 	for (int i = 0; i < yearList.count(); ++i) {
+
 		QString newDbName = userName + "_" + yearList.at(i);
-		if (DBC_ERR_MISSFILE !=
-		    DbContainer::checkExistingDbFile(newDbName, dbDir, flags)) {
-			qDebug() << "Database for year" << yearList.at(i) <<
-			    "already exists";
+		qDebug() << "Create a new database for year" << yearList.at(i);
+
+		QString  dateStr = QString("%1-06-06 06:06:06.000")
+		    .arg(yearList.at(i));
+		QDateTime fakeTime = QDateTime::fromString(dateStr,
+		    "yyyy-MM-dd HH:mm:ss.zzz");
+
+		/* select destination database via fake delivery time */
+		MessageDb *dstDb =
+		    dstDbSet->accessMessageDb(fakeTime, true);
+		if (0 == dstDb) {
+			/* TODO */
 			continue;
 		}
+		Q_ASSERT(0 != dstDb);
 
-		qDebug() << "Create a new database for year" << yearList.at(i);
-		MessageDb *newMsgDb = globMessageDbsPtr->accessMessageDb(
-		    newDbName, dbDir, itemSettings.isTestAccount(), true);
-		messageDb->copyRelevantMsgsToNewDb(dbDir + "/" + newDbName
-		    + "___" + testacnt + ".db", yearList.at(i));
+		/* copy all message data to new database */
+		messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" + newDbName
+		    + "___" + testAcnt + ".db", yearList.at(i));
 	}
 }

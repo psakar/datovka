@@ -622,6 +622,14 @@ public:
 	bool copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	    qint64 msgId) const;
 
+	/*!
+	 * @brief Copy all messages correspond with
+	 *        year and their records from tables into new db.
+	 *
+	 * @return Return success or fail.
+	 */
+	bool copyRelevantMsgsToNewDb(const QString &newDbFileName,
+	   const QString &year) const;
 
 protected: /* These function are used from within a database container. */
 	/*!
@@ -785,10 +793,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @return message id list.
 	 */
-
 	QList<MsgId> getAllMessageIDsFromDB(void) const;
-
-	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
 
 	/*!
 	 * @brief Get all unique years from messages db.
@@ -803,15 +808,6 @@ protected: /* These function are used from within a database container. */
 	 * @return Return message ID list.
 	 */
 	QStringList getAllMsgsIDEqualWithYear(const QString &year) const;
-
-	/*!
-	 * @brief Copy all messages correspond with
-	 *        year and their records from tables into new db.
-	 *
-	 * @return Return success or fail.
-	 */
-	bool copyRelevantMsgsToNewDb(const QString &newDbFileName,
-	   const QString &year) const;
 
 	static
 	const QVector<QString> receivedItemIds;
