@@ -8374,9 +8374,6 @@ bool MainWindow::loginMethodCertificateUserPwd(
 
 	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
-	ret = checkConnectionError(status, accountInfo.accountName(),
-	    isdsMsg, mw);
-
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
 		accountInfo._setPassphrase(passphrase);
@@ -8389,8 +8386,6 @@ bool MainWindow::loginMethodCertificateUserPwd(
 
 	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
-
-	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    isdsMsg, mw);
