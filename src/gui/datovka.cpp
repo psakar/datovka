@@ -201,11 +201,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Message state combo box. */
 	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
-	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "red.png"),
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "red.png"),
 	    tr("Unsettled"));
-	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "yellow.png"),
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "yellow.png"),
 	    tr("In Progress"));
-	ui->messageStateCombo->addItem(QIcon(ICON_16x16_PATH "grey.png"),
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "grey.png"),
 	    tr("Settled"));
 
 	/* Show banner. */

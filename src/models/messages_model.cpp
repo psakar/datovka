@@ -151,10 +151,10 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				        QSqlQueryModel::data(
 				            index).toBool())) {
 					return QIcon(
-					    ICON_16x16_PATH "grey.png");
+					    ICON_14x14_PATH "grey.png");
 				} else {
 					return QIcon(
-					    ICON_16x16_PATH "green.png");
+					    ICON_14x14_PATH "green.png");
 				}
 			}
 			break;
@@ -184,15 +184,15 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				                index).toInt())) {
 				case UNSETTLED:
 					return QIcon(
-					    ICON_16x16_PATH "red.png");
+					    ICON_14x14_PATH "red.png");
 					break;
 				case IN_PROGRESS:
 					return QIcon(
-					    ICON_16x16_PATH "yellow.png");
+					    ICON_14x14_PATH "yellow.png");
 					break;
 				case SETTLED:
 					return QIcon(
-					    ICON_16x16_PATH "grey.png");
+					    ICON_14x14_PATH "grey.png");
 					break;
 				default:
 					Q_ASSERT(0);

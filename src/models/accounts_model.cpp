@@ -232,7 +232,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 			    index.data(ROLE_ACNT_USER_NAME).toString();
 			qDebug() << "A001" << globPref.confDir();
 			if (!globAccounts[userName].dbDir().isEmpty()) {
-				return QIcon(ICON_16x16_PATH "grey.png");
+				return QIcon(ICON_14x14_PATH "grey.png");
 			}
 		}
 		return QStandardItemModel::data(index, role);
