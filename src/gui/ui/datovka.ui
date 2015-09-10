@@ -466,7 +466,7 @@ sent reply on this message</string>
    </widget>
    <widget class="QMenu" name="menuDatabox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Data box</string>
@@ -486,6 +486,7 @@ sent reply on this message</string>
     <addaction name="actionChange_data_directory"/>
     <addaction name="separator"/>
     <addaction name="actionImport_messages_from_database"/>
+    <addaction name="actionSplit_database_by_years"/>
    </widget>
    <widget class="QMenu" name="menuMessage">
     <property name="enabled">
@@ -1183,6 +1184,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Import messages from database</string>
+   </property>
+  </action>
+  <action name="actionSplit_database_by_years">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/statistics_16.png</normaloff>:/icons/3party/statistics_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Split database by years</string>
    </property>
   </action>
  </widget>

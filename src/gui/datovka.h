@@ -677,6 +677,11 @@ private slots:
 	 */
 	void prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction action);
 
+	/*!
+	 * @brief Split message database slot.
+	 */
+	void splitMsgDbByYearsSlot(void);
+
 private:
 
 	QThread *m_syncAcntThread;
@@ -1098,6 +1103,12 @@ private:
 	bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
 	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
 
+
+	/*!
+	 * @brief Split message database into new databases
+	 * contain messages for single years.
+	 */
+	void splitMsgDbByYears(const QString &userName);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
