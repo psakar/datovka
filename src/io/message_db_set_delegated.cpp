@@ -1255,6 +1255,51 @@ QList<MessageDb::MsgId> MessageDbSet::getAllMessageIDsFromDB(void) const
 	return QList<MessageDb::MsgId>();
 }
 
+QStringList MessageDbSet::_sf_getAllMessageIDsWithoutAttach(void) const
+{
+	if (this->size() == 0) {
+		return QStringList();
+	}
+	Q_ASSERT(this->size() == 1);
+	return this->first()->getAllMessageIDsWithoutAttach();
+}
+
+QStringList MessageDbSet::_yrly_getAllMessageIDsWithoutAttach(void) const
+{
+	QStringList msgIds;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return QStringList();
+		}
+
+		msgIds.append(db->getAllMessageIDsWithoutAttach());
+	}
+
+	return msgIds;
+}
+
+QStringList MessageDbSet::getAllMessageIDsWithoutAttach(void) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_getAllMessageIDsWithoutAttach();
+		break;
+	case DO_YEARLY:
+		return _yrly_getAllMessageIDsWithoutAttach();
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return QStringList();
+}
+
+
 QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const

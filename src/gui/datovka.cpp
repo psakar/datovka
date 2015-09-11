@@ -8055,22 +8055,9 @@ bool MainWindow::loginMethodUserNamePwd(
 		ret = (IE_SUCCESS == status);
 	}
 
-<<<<<<< HEAD
 	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
-=======
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-
-	status = isdsLoginUserName(session,
-	    userName, usedPwd, accountInfo.isTestAccount());
-
-	isdsSessions.setSessionTimeout(userName,
-	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
-
-	QString isdsMsg = isdsLongMessage(session);
->>>>>>> Removed assertion check in GlobIsdsSessions::session().
 
 	return ret;
 }
@@ -8270,13 +8257,9 @@ bool MainWindow::loginMethodCertificateOnly(
 
 	mw->saveSettings();
 
-<<<<<<< HEAD
 	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
-=======
-	QString isdsMsg = isdsLongMessage(session);
->>>>>>> Removed assertion check in GlobIsdsSessions::session().
 
 	return ret;
 }
@@ -8420,11 +8403,6 @@ bool MainWindow::loginMethodCertificateUserPwd(
 	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-<<<<<<< HEAD
-=======
-	QString isdsMsg = isdsLongMessage(session);
-
->>>>>>> Removed assertion check in GlobIsdsSessions::session().
 	return checkConnectionError(status, accountInfo.accountName(),
 	    isdsMsg, mw);
 }

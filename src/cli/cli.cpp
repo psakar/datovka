@@ -28,6 +28,7 @@
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
 #include "src/thread/worker.h"
+#include "src/io/dbs.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -133,7 +134,7 @@ const QStringList parseDbIDRecipient(const QString &dbIDRecipient)
 
 
 /* ========================================================================= */
-cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
+cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
     QString &errmsg)
 /* ========================================================================= */
 {
@@ -189,7 +190,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 	if (map["dmType"].toString() == MT_RECEIVED) {
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, err, NULL, 0, 0, rt, rn, newMsgIdList,
+		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
@@ -208,7 +209,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 	} else if (map["dmType"].toString() == MT_SENT) {
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, err, NULL, 0, 0, st, sn, newMsgIdList,
+		    *msgDbSet, err, NULL, 0, 0, st, sn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
@@ -227,7 +228,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 
 		cli_error lret = CLI_SUCCESS;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *messageDb, err, NULL, 0, 0, rt, rn, newMsgIdList,
+		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Received message list has "
@@ -240,7 +241,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 			lret = CLI_ERROR;
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *messageDb, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
+		    *msgDbSet, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
 		    dmLimit, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Sent message list has been "
@@ -266,7 +267,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 
 
 /* ========================================================================= */
-cli_error getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
+cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
     bool needsISDS, QString &errmsg)
 /* ========================================================================= */
 {
@@ -277,12 +278,28 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 	qdatovka_error ret;
 	const QString username = map["username"].toString();
 
+	MessageDb::MsgId msgId =
+	    msgDbSet->msgsMsgId(map["dmID"].toLongLong());
+	if (msgId.dmId < 0) {
+		errmsg = "Message does not exist in the database "
+		    "for user " + username;
+		qDebug() << CLI_PREFIX << errmsg;
+		return CLI_ERROR;
+	}
+	MessageDb *messageDb =
+	    msgDbSet->accessMessageDb(msgId.deliveryTime, false);
+	if (messageDb == NULL) {
+		errmsg = "Database doesn't exists for user " + username;
+		qDebug() << CLI_PREFIX << errmsg;
+		return CLI_ERROR;
+	}
+
 	if (needsISDS) {
 		if (map["dmType"].toString() == MT_RECEIVED) {
 
 			ret = Worker::downloadMessage(username,
-			    map["dmID"].toLongLong(), true, MSG_RECEIVED,
-			    *messageDb, err, NULL, 0, 0);
+			    msgId, true, MSG_RECEIVED,
+			    *msgDbSet, err, NULL, 0, 0);
 
 			if (Q_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Received message" <<
@@ -299,8 +316,8 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 		} else if (map["dmType"].toString() == MT_SENT) {
 
 			ret = Worker::downloadMessage(username,
-			    map["dmID"].toLongLong(), true, MSG_SENT,
-			    *messageDb, err, NULL, 0, 0);
+			    msgId, true, MSG_SENT,
+			    *msgDbSet, err, NULL, 0, 0);
 
 			if (Q_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Sent message" <<
@@ -424,26 +441,38 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDb *messageDb,
 
 /* ========================================================================= */
 cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
-    MessageDb *messageDb, bool needsISDS, QString &errmsg)
+    MessageDbSet *msgDbSet, bool needsISDS, QString &errmsg)
 /* ========================================================================= */
 {
 	qDebug() << CLI_PREFIX << "Downloading of delivery info for message" <<
 	    map["dmID"].toString();
 
-	qdatovka_error ret;
 	const QString username = map["username"].toString();
 
-	if (needsISDS) {
-		ret = Worker::getDeliveryInfo(username,
-		    map["dmID"].toLongLong(), true, *messageDb);
+	MessageDb::MsgId msgId =
+	    msgDbSet->msgsMsgId(map["dmID"].toLongLong());
+	if (msgId.dmId < 0) {
+		errmsg = "Message does not exist in the database "
+		    "for user " + username;
+		qDebug() << CLI_PREFIX << errmsg;
+		return CLI_ERROR;
+	}
+	MessageDb *messageDb =
+	    msgDbSet->accessMessageDb(msgId.deliveryTime, false);
+	if (messageDb == NULL) {
+		errmsg = "Database doesn't exists for user " + username;
+		qDebug() << CLI_PREFIX << errmsg;
+		return CLI_ERROR;
+	}
 
-		if (Q_SUCCESS == ret) {
+	if (needsISDS) {
+		if (Worker::getDeliveryInfo(username,
+		    map["dmID"].toLongLong(), true, *msgDbSet)) {
 			qDebug() << CLI_PREFIX << "Delivery info of message" <<
 			    map["dmID"].toString() << "has been downloaded.";
 		} else {
 			errmsg = "Error while downloading delivery info";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:" <<
-			    ret;
+			qDebug() << CLI_PREFIX << errmsg;
 			return CLI_ERROR;
 		}
 	}
@@ -457,9 +486,8 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 			return CLI_ERROR;
 		}
 
-		QByteArray base64 =
-		    messageDb->msgsGetDeliveryInfoBase64(
-		         map["dmID"].toLongLong());
+		QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(
+		    map["dmID"].toLongLong());
 
 		if (base64.isEmpty()) {
 			errmsg = "Cannot export delivery info to ZFO";
@@ -488,7 +516,7 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 
 /* ========================================================================= */
 cli_error checkAttachment(const QMap<QString,QVariant> &map,
-    MessageDb *messageDb)
+    MessageDbSet *msgDbSet)
 /* ========================================================================= */
 {
 	const QString username = map["username"].toString();
@@ -496,7 +524,7 @@ cli_error checkAttachment(const QMap<QString,QVariant> &map,
 	qDebug() << CLI_PREFIX << "Checking of missing messages attachment for"
 	    " username" <<  username;
 
-	printDataToStdOut(messageDb->getAllMessageIDsWithoutAttach());
+	printDataToStdOut(msgDbSet->getAllMessageIDsWithoutAttach());
 
 	return CLI_SUCCESS;
 }
@@ -540,7 +568,7 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 
 /* ========================================================================= */
 cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
-    MessageDb *messageDb, QString &errmsg)
+    MessageDbSet *msgDbSet, QString &errmsg)
 /* ========================================================================= */
 {
 	isds_error status = IE_ERROR;
@@ -876,6 +904,19 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			const QString dmSender = globAccountDbPtr->
 			    senderNameGuess(map["username"].toString() +
 			    "___True");
+			QDateTime deliveryTime = timevalToDateTime(
+			    sent_message->envelope->dmDeliveryTime);
+			MessageDb *messageDb =
+			    msgDbSet->accessMessageDb(deliveryTime, true);
+			if (messageDb == NULL) {
+				errmsg = "Message has been sent but "
+				    "it was not stored to database. "
+				    "Database doesn't exists for user "
+				    + map["username"].toString();
+				qDebug() << CLI_PREFIX << errmsg;
+				ret = CLI_ERROR;
+			}
+
 			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
 				    dbIDSender,
 				    dmSender,
@@ -1235,24 +1276,24 @@ cli_error parsePamamString(const QString &service, const QString &paramString,
 
 /* ========================================================================= */
 cli_error doService(const QString &service, const QMap<QString,QVariant> &map,
-    MessageDb *messageDb, bool needsISDS, QString &errmsg)
+    MessageDbSet *msgDbSet, bool needsISDS, QString &errmsg)
 /* ========================================================================= */
 {
 
 	if (service == SER_GET_MSG_LIST) {
-		return getMsgList(map, messageDb, errmsg);
+		return getMsgList(map, msgDbSet, errmsg);
 	} else if (service == SER_SEND_MSG) {
-		return createAndSendMsg(map, messageDb, errmsg);
+		return createAndSendMsg(map, msgDbSet, errmsg);
 	} else if (service == SER_GET_MSG) {
-		return getMsg(map, messageDb, needsISDS, errmsg);
+		return getMsg(map, msgDbSet, needsISDS, errmsg);
 	} else if (service == SER_GET_DEL_INFO) {
-		return getDeliveryInfo(map, messageDb, needsISDS, errmsg);
+		return getDeliveryInfo(map, msgDbSet, needsISDS, errmsg);
 	} else if (service == SER_GET_USER_INFO) {
 		return getUserInfo(map, errmsg);
 	} else if (service == SER_GET_OWNER_INFO) {
 		return getOwnerInfo(map, errmsg);
 	} else if (service == SER_CHECK_ATTACHMENT) {
-		return checkAttachment(map, messageDb);
+		return checkAttachment(map, msgDbSet);
 	}
 	errmsg = "Unknown service name";
 	return CLI_UNKNOWN_SER;
@@ -1298,9 +1339,9 @@ int runService(const QString &lParam,
 	/* get username from login */
 	const QString username = loginMap["username"].toString();
 
-	/* get message database */
-	MessageDb *messageDb = MainWindow::accountMessageDb(username,0);
-	if (messageDb == NULL) {
+	/* get message database set */
+	MessageDbSet *msgDbSet = MainWindow::accountDbSet(username, 0);
+	if (msgDbSet == NULL) {
 		errmsg = "Database doesn't exists for user " + username;
 		qDebug() << CLI_PREFIX << errmsg;
 		printErrToStdErr(CLI_DB_ERR, errmsg);
@@ -1308,6 +1349,24 @@ int runService(const QString &lParam,
 	}
 
 	if (service == SER_GET_MSG) {
+		MessageDb::MsgId msgId =
+		    msgDbSet->msgsMsgId(serviceMap["dmID"].toLongLong());
+		if (msgId.dmId < 0) {
+			errmsg = "Message does not exist in the database "
+			    "for user " + username;
+			qDebug() << CLI_PREFIX << errmsg;
+			printErrToStdErr(CLI_DB_ERR, errmsg);
+			return ret;
+		}
+		MessageDb *messageDb =
+		    msgDbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (messageDb == NULL) {
+			errmsg = "Database doesn't exists for user " + username;
+			qDebug() << CLI_PREFIX << errmsg;
+			printErrToStdErr(CLI_DB_ERR, errmsg);
+			return ret;
+		}
+
 		if (serviceMap.contains("download")) {
 			QString download =
 			    serviceMap.value("download").toString();
@@ -1324,6 +1383,24 @@ int runService(const QString &lParam,
 	}
 
 	if (service == SER_GET_DEL_INFO) {
+		MessageDb::MsgId msgId =
+		    msgDbSet->msgsMsgId(serviceMap["dmID"].toLongLong());
+		if (msgId.dmId < 0) {
+			errmsg = "Message does not exist in the database "
+			    "for user " + username;
+			qDebug() << CLI_PREFIX << errmsg;
+			printErrToStdErr(CLI_DB_ERR, errmsg);
+			return ret;
+		}
+		MessageDb *messageDb =
+		    msgDbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (messageDb == NULL) {
+			errmsg = "Database doesn't exists for user " + username;
+			qDebug() << CLI_PREFIX << errmsg;
+			printErrToStdErr(CLI_DB_ERR, errmsg);
+			return ret;
+		}
+
 		if (serviceMap.contains("download")) {
 			QString download =
 			    serviceMap.value("download").toString();
@@ -1373,7 +1450,7 @@ int runService(const QString &lParam,
 	/* do service */
 	if (!service.isNull()) {
 		serviceMap["username"] = username;
-		cret = doService(service, serviceMap, messageDb, needsISDS,
+		cret = doService(service, serviceMap, msgDbSet, needsISDS,
 		    errmsg);
 	}
 

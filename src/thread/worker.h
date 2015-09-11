@@ -149,8 +149,8 @@ public:
 	 * @brief Download delivery info for message.
 	 */
 	static
-	qdatovka_error getDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDb &messageDb);
+	bool getDeliveryInfo(const QString &userName,
+	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
 
 	/*!
 	 * @brief Store sent message delivery information into database.
@@ -198,13 +198,6 @@ private:
 	bool getMessageState(enum MessageDirection msgDirect,
 	    const QString &userName, qint64 dmId, bool signedMsg,
 	    MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Download delivery info for message.
-	 */
-	static
-	bool getDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
 
 	/*!
 	 * @brief Get additional info about author (sender)
