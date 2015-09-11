@@ -463,6 +463,19 @@ public: /* Database function that have been delegate to the container. */
 	    enum MessageProcessState state);
 
 	/*!
+	 * @brief Returns message identifier of message with given id number.
+	 *
+	 * @note This method is quire expensive as it scans all database files,
+	 *     don't use it if not absolutely necessary.
+	 *
+	 * @paran[in] dmId Message identification number.
+	 * @return Message identifier containing the seeked id number.
+	 *     If no such message is found then a message identifier
+	 *     containing -1 dmId returned.
+	 */
+	MessageDb::MsgId msgsMsgId(qint64 dmId) const;
+
+	/*!
 	 * @brief Return contacts from message db.
 	 *
 	 * @return List of vectors containing recipientId, recipientName,
@@ -564,6 +577,9 @@ private:
 
 	inline bool _sf_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
 	inline bool _yrly_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
+
+	MessageDb::MsgId _sf_msgsMsgId(qint64 dmId) const;
+	MessageDb::MsgId _yrly_msgsMsgId(qint64 dmId) const;
 
 	inline QList<MessageDb::ContactEntry> _sf_uniqueContacts(void) const;
 	inline QList<MessageDb::ContactEntry> _yrly_uniqueContacts(void) const;

@@ -1057,6 +1057,41 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Returns message identifier of message with given id number.
+ */
+MessageDb::MsgId MessageDb::msgsMsgId(qint64 dmId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	MsgId ret;
+
+	QString queryStr = "SELECT dmID, dmDeliveryTime FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		ret.dmId = query.value(0).toLongLong();
+		ret.deliveryTime = dateTimeFromDbFormat(
+		    query.value(1).toString());
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
  * Return contact list from message db.
  */
 QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void) const
