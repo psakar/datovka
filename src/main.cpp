@@ -31,6 +31,7 @@
 #include <QDir>
 #include <QtWidgets>
 
+#include "src/cli/cli.h"
 #include "src/common.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_threads.h"
@@ -151,8 +152,58 @@ int main(int argc, char *argv[])
 	    QObject::tr("level"));
 	parser.addOption(debugVerb);
 #endif /* DEBUG */
+
+	/* Options with values. */
+	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
+	        QObject::tr("Service: connect to isds and loggin into databox."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
+	        QObject::tr("Service: download list of received/sent "
+	        "messages from ISDS."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
+	        QObject::tr("Service: create and send a new message to ISDS."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
+	        QObject::tr("Service: download complete message with "
+	        "signature and time stamp of MV."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
+	        QObject::tr("Service: download delivery info of message "
+	        "with signature and time stamp of MV."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
+	        QObject::tr("Service: get information about user "
+	        "(role, privileges, ...)."),
+	        NULL))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
+	        QObject::tr("Service: get information about owner and "
+	        "its databox."),
+	        NULL))) {
+		Q_ASSERT(0);
+	}
+	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
+	        QObject::tr("Service: get list of messages where "
+	        "attachment missing (local database only)."),
+	        NULL))) {
+		Q_ASSERT(0);
+	}
+
 	parser.addPositionalArgument("[zfo-file]",
 	    QObject::tr("ZFO file to be viewed."));
+
 	/* Process command-line arguments. */
 	parser.process(app);
 
@@ -208,6 +259,7 @@ int main(int argc, char *argv[])
 		logInfo("Setting logging verbosity to value '%d'.\n", value);
 		globLog.setLogVerbosity(value);
 	}
+
 	QStringList cmdLineFileNames = parser.positionalArguments();
 
 	qint64 start, stop, diff;
@@ -405,10 +457,47 @@ int main(int argc, char *argv[])
 	}
 
 	int ret = 0;
-	if (cmdLineFileNames.isEmpty()) {
+
+	/* Parse account information. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globProxSet.loadFromSettings(settings);
+		AccountModel::globAccounts.loadFromSettings(settings);
+	}
+
+	if (parser.isSet(SER_LOGIN)) {
+		if (parser.isSet(SER_GET_MSG_LIST)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_MSG_LIST, parser.value(SER_GET_MSG_LIST));
+		} else if (parser.isSet(SER_SEND_MSG)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_SEND_MSG, parser.value(SER_SEND_MSG));
+		} else if (parser.isSet(SER_GET_MSG)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_MSG, parser.value(SER_GET_MSG));
+		} else if (parser.isSet(SER_GET_DEL_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_DEL_INFO, parser.value(SER_GET_DEL_INFO));
+		} else if (parser.isSet(SER_GET_USER_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_USER_INFO, parser.value(SER_GET_USER_INFO));
+		} else if (parser.isSet(SER_GET_OWNER_INFO)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_GET_OWNER_INFO, parser.value(SER_GET_OWNER_INFO));
+		} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_CHECK_ATTACHMENT, parser.value(SER_CHECK_ATTACHMENT));
+		} else {
+			ret = runService(parser.value(SER_LOGIN),
+			    NULL, NULL);
+		}
+
+	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
 		mainwin.show();
-		ret = app.exec();
+		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
 	} else {
 		foreach (const QString &fileName, cmdLineFileNames) {
 			ret = showZfo(fileName);
@@ -431,5 +520,5 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	return (0 == ret) ? EXIT_SUCCESS : EXIT_FAILURE;
+	return ret;
 }

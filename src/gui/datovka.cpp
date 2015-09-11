@@ -2824,9 +2824,10 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		default:
 			break;
 		}
+		struct isds_ctx *session = isdsSessions.session(userName);
+		Q_ASSERT(0 != session);
 		/* first delete message on ISDS */
-		status = isds_delete_message_from_storage(
-		    isdsSessions.session(userName),
+		status = isds_delete_message_from_storage(session,
 		    QString::number(dmId).toUtf8().constData(), incoming);
 
 		if (IE_SUCCESS == status) {
@@ -3552,11 +3553,22 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	MessageDbSet *dbSet = NULL;
 	int flags, dbPresenceCode;
 
-	Q_ASSERT(!userName.isEmpty());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return 0;
+	}
 
 	/* Get user name and db location. */
 	AccountModel::SettingsMap &itemSettings =
 	    AccountModel::globAccounts[userName];
+
+	if (!itemSettings.isValid()) {
+		logWarning(
+		    "Attempting to accessing database for user name '%s'. "
+		    "The account seems not to exist.\n",
+		    userName.toUtf8().constData());
+		return 0;
+	}
 
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
@@ -5505,7 +5517,9 @@ qdatovka_error MainWindow::verifyMessage(const QString &userName, qint64 dmId,
 
 	struct isds_hash *hashIsds = NULL;
 
-	status = isds_download_message_hash(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+	status = isds_download_message_hash(session,
 	    QString::number(dmId).toUtf8().constData(), &hashIsds);
 
 	if (IE_SUCCESS != status) {
@@ -5577,8 +5591,14 @@ bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
 
 	struct isds_DbOwnerInfo *db_owner_info = NULL;
 
-	isds_error status = isds_GetOwnerInfoFromLogin(isdsSessions.session(
-	    userName), &db_owner_info);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	isds_error status = isds_GetOwnerInfoFromLogin(session,
+	    &db_owner_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -5664,8 +5684,13 @@ bool MainWindow::getPasswordInfoFromLogin(const QString &userName)
 		return false;
 	}
 
-	status = isds_get_password_expiration(isdsSessions.session(userName),
-	    &expiration);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	status = isds_get_password_expiration(session, &expiration);
 
 	if (IE_SUCCESS == status) {
 		if (NULL != expiration) {
@@ -5706,8 +5731,13 @@ bool MainWindow::getUserInfoFromLogin(const QString &userName)
 
 	struct isds_DbUserInfo *db_user_info = NULL;
 
-	isds_error status = isds_GetUserInfoFromLogin(isdsSessions.session(
-	    userName), &db_user_info);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	isds_error status = isds_GetUserInfoFromLogin(session, &db_user_info);
 
 	if (IE_SUCCESS != status) {
 		qDebug() << status << isds_strerror(status);
@@ -6002,8 +6032,10 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 		}
 	}
 
-	status = isds_authenticate_message(isdsSessions.session(userName),
-	    bytes.data(), length);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isds_authenticate_message(session, bytes.data(), length);
 
 	if (IE_NOTEQUAL == status) {
 		return Q_NOTEQUAL;
@@ -6954,8 +6986,10 @@ int MainWindow::isImportMsgInISDS(const QString &zfoFile,
 		}
 	}
 
-	status = isds_authenticate_message(isdsSessions.session(userName),
-	    bytes.data(), length);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isds_authenticate_message(session, bytes.data(), length);
 
 	// not in ISDS
 	if (IE_NOTEQUAL == status) {
@@ -8202,7 +8236,10 @@ bool MainWindow::loginMethodCertificateOnly(
 		return false;
 	}
 
-	status = isdsLoginSystemCert(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isdsLoginSystemCert(session,
 	    certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
@@ -8344,7 +8381,10 @@ bool MainWindow::loginMethodCertificateUserPwd(
 		return false;
 	}
 
-	status = isdsLoginUserCertPwd(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isdsLoginUserCertPwd(session,
 	    userName, usedPwd, certPath, passphrase,
 	    accountInfo.isTestAccount());
 
@@ -8459,7 +8499,10 @@ bool MainWindow::loginMethodCertificateIdBox(
 		return false;
 	}
 
-	status = isdsLoginUserCert(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isdsLoginUserCert(session,
 	    idBox, certPath, passphrase, accountInfo.isTestAccount());
 
 	if (IE_SUCCESS == status) {
@@ -8475,7 +8518,7 @@ bool MainWindow::loginMethodCertificateIdBox(
 	isdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
-	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+	QString isdsMsg = isdsLongMessage(session);
 
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
@@ -8574,11 +8617,14 @@ bool MainWindow::loginMethodUserNamePwdOtp(
 			return false;
 		}
 
-		status = isdsLoginUserOtp(isdsSessions.session(userName),
+		struct isds_ctx *session = isdsSessions.session(userName);
+		Q_ASSERT(0 != session);
+
+		status = isdsLoginUserOtp(session,
 		    userName, usedPwd, accountInfo.isTestAccount(),
 		    accountInfo.loginMethod(), QString(), otpres);
 
-		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+		isdsMsg = isdsLongMessage(session);
 
 		isdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
@@ -8651,12 +8697,15 @@ bool MainWindow::loginMethodUserNamePwdOtp(
 			otpCode = otp;
 		}
 
+		struct isds_ctx *session = isdsSessions.session(userName);
+		Q_ASSERT(0 != session);
+
 		/* sent security code to ISDS */
-		status = isdsLoginUserOtp(isdsSessions.session(userName),
+		status = isdsLoginUserOtp(session,
 		    userName, usedPwd, accountInfo.isTestAccount(),
 		    accountInfo.loginMethod(), otpCode, otpres);
 
-		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+		isdsMsg = isdsLongMessage(session);
 
 		isdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
@@ -8717,6 +8766,13 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	/* Check password expiration. */
 	AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
+
+	if (!accountInfo.isValid()) {
+		logWarning("Account for user name '%s' is invalid.\n",
+		    userName.toUtf8().constData());
+		return false;
+	}
+
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
 		accountInfo._setPwdExpirDlgShown(true);
@@ -9326,14 +9382,16 @@ QString MainWindow::getPDZCreditFromISDS(void)
 	char *email = NULL;
 	struct isds_list *history = NULL;
 
-	status = isds_get_commercial_credit(isdsSessions.session(userName),
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isds_get_commercial_credit(session,
 	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
 
 	isds_list_free(&history);
 
 	if (IE_SUCCESS != status) {
-		qDebug() << status <<
-		    isdsLongMessage(isdsSessions.session(userName));
+		qDebug() << status << isdsLongMessage(session);
 		return str;
 	}
 

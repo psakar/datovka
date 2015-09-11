@@ -466,6 +466,13 @@ public:
 	    int messageType);
 
 	/*!
+	 * @brief Return all message ID from database without attachment.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsWithoutAttach(void) const;
+
+	/*!
 	 * @brief Check whether whole message is stored in database.
 	 *
 	 * @param[in] dmId  Message identifier.
@@ -779,6 +786,16 @@ protected: /* These function are used from within a database container. */
 	 */
 	bool smsgdtSetWithin90DaysReceivedProcessState(
 	    enum MessageProcessState state);
+
+	/*!
+	 * @brief Returns message identifier of message with given id number.
+	 *
+	 * @paran[in] dmId Message identification number.
+	 * @return Message identifier containing the seeked id number.
+	 *     If no such message is found then a message identifier
+	 *     containing -1 dmId returned.
+	 */
+	MsgId msgsMsgId(qint64 dmId) const;
 
 	/*!
 	 * @brief Return contacts from message db.

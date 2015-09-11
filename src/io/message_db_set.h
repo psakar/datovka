@@ -463,6 +463,19 @@ public: /* Database function that have been delegate to the container. */
 	    enum MessageProcessState state);
 
 	/*!
+	 * @brief Returns message identifier of message with given id number.
+	 *
+	 * @note This method is quire expensive as it scans all database files,
+	 *     don't use it if not absolutely necessary.
+	 *
+	 * @paran[in] dmId Message identification number.
+	 * @return Message identifier containing the seeked id number.
+	 *     If no such message is found then a message identifier
+	 *     containing -1 dmId returned.
+	 */
+	MessageDb::MsgId msgsMsgId(qint64 dmId) const;
+
+	/*!
 	 * @brief Return contacts from message db.
 	 *
 	 * @return List of vectors containing recipientId, recipientName,
@@ -476,6 +489,13 @@ public: /* Database function that have been delegate to the container. */
 	 * @return message id list.
 	 */
 	QList<MessageDb::MsgId> getAllMessageIDsFromDB(void) const;
+
+	/*!
+	 * @brief Return all message ID from database without attachment.
+	 *
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDsWithoutAttach(void) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -565,11 +585,17 @@ private:
 	inline bool _sf_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
 	inline bool _yrly_smsgdtSetWithin90DaysReceivedProcessState(enum MessageProcessState state);
 
+	MessageDb::MsgId _sf_msgsMsgId(qint64 dmId) const;
+	MessageDb::MsgId _yrly_msgsMsgId(qint64 dmId) const;
+
 	inline QList<MessageDb::ContactEntry> _sf_uniqueContacts(void) const;
 	inline QList<MessageDb::ContactEntry> _yrly_uniqueContacts(void) const;
 
 	inline QList<MessageDb::MsgId> _sf_getAllMessageIDsFromDB(void) const;
 	inline QList<MessageDb::MsgId> _yrly_getAllMessageIDsFromDB(void) const;
+
+	inline QStringList _sf_getAllMessageIDsWithoutAttach(void) const;
+	inline QStringList _yrly_getAllMessageIDsWithoutAttach(void) const;
 
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;

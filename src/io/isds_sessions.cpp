@@ -88,6 +88,7 @@ void logCallback(isds_log_facility facility, isds_log_level level,
 /* ========================================================================= */
 {
 	(void) data;
+	(void) length;
 	const char *logFac = logFacilityName(facility);
 
 	switch (level) {
@@ -275,8 +276,6 @@ bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
 struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != m_sessions.value(userName, NULL));
-
 	return m_sessions.value(userName, NULL);
 }
 
@@ -845,8 +844,13 @@ isds_error isdsSearch(struct isds_list **result, const QString &userName,
 		return IE_ERROR;
 	}
 
-	ret = isds_FindDataBox(isdsSessions.session(userName), ownerInfo,
-	    result);
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return IE_ERROR;
+	}
+
+	ret = isds_FindDataBox(session, ownerInfo, result);
 
 	qDebug() << ret << isds_strerror(ret);
 	return ret;

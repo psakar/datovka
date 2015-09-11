@@ -212,6 +212,12 @@ void DlgChangePwd::sendSmsCode(void)
 		return;
 	}
 
+	struct isds_ctx *session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	isds_error status;
 	char * refnumber = NULL;
 	struct isds_otp *otp = NULL;
@@ -220,7 +226,7 @@ void DlgChangePwd::sendSmsCode(void)
 	otp->method = OTP_TIME;
 	otp->otp_code = NULL;
 
-	status = isds_change_password(isdsSessions.session(m_userName),
+	status = isds_change_password(session,
 	    this->currentPwdLineEdit->text().toUtf8().constData(),
 	    this->newPwdLineEdit->text().toUtf8().constData(),
 	    otp, &refnumber);
@@ -265,6 +271,12 @@ void DlgChangePwd::changePassword(void)
 	isds_error status;
 	char * refnumber = NULL;
 
+	struct isds_ctx *session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
 	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
 		struct isds_otp *otp = NULL;
@@ -282,7 +294,7 @@ void DlgChangePwd::changePassword(void)
 		    strdup(this->secCodeLineEdit->text().toUtf8().constData())
 		    : NULL;
 
-		status = isds_change_password(isdsSessions.session(m_userName),
+		status = isds_change_password(session,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    otp, &refnumber);
@@ -290,7 +302,7 @@ void DlgChangePwd::changePassword(void)
 		free(otp->otp_code);
 		free(otp);
 	} else {
-		status = isds_change_password(isdsSessions.session(m_userName),
+		status = isds_change_password(session,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
 		    NULL, &refnumber);
@@ -317,8 +329,7 @@ void DlgChangePwd::changePassword(void)
 	} else {
 		Q_ASSERT(!m_userName.isEmpty());
 		QString error = tr("Error: ") + isds_strerror(status);
-		QString isdslog = isds_long_message(
-			isdsSessions.session(m_userName));
+		QString isdslog = isds_long_message(session);
 		if (!isdslog.isEmpty()) {
 			error = tr("ISDS returns: ") + isdslog;
 		}

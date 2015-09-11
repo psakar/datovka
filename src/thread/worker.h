@@ -146,6 +146,13 @@ public:
 	    MessageDbSet &dbSet, const struct isds_message *msg);
 
 	/*!
+	 * @brief Download delivery info for message.
+	 */
+	static
+	bool getDeliveryInfo(const QString &userName,
+	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
+
+	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static
@@ -176,7 +183,8 @@ public:
 	qdatovka_error downloadMessageList(const QString &userName,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
 	    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-	    int &total, int &news);
+	    int &total, int &news, QStringList &newMsgIdList, ulong *dmLimit,
+	    int dmStatusFilter);
 
 private:
 
@@ -190,13 +198,6 @@ private:
 	bool getMessageState(enum MessageDirection msgDirect,
 	    const QString &userName, qint64 dmId, bool signedMsg,
 	    MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Download delivery info for message.
-	 */
-	static
-	bool getDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
 
 	/*!
 	 * @brief Get additional info about author (sender)

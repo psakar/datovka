@@ -1212,9 +1212,15 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
+		struct isds_ctx *session = isdsSessions.session(m_userName);
+		if (NULL == session) {
+			Q_ASSERT(0);
+			errorMsg = "Missing ISDS session.";
+			goto finish;
+		}
+
 		qDebug() << "sending message from user name" << m_userName;
-		status = isds_send_message(isdsSessions.session(m_userName),
-		    sent_message);
+		status = isds_send_message(session, sent_message);
 
 		sendMsgResultStruct sendMsgResults;
 		sendMsgResults.dbID = this->recipientTableWidget->
@@ -1225,8 +1231,7 @@ void DlgSendMessage::sendMessage(void)
 		sendMsgResults.isPDZ = (this->recipientTableWidget->
 		    item(i, 3)->text() == tr("yes")) ? true : false;
 		sendMsgResults.status = (int) status;
-		sendMsgResults.errInfo =
-		    isdsLongMessage(isdsSessions.session(m_userName));
+		sendMsgResults.errInfo = isdsLongMessage(session);
 		sendMsgResultList.append(sendMsgResults);
 
 		if (status == IE_SUCCESS) {

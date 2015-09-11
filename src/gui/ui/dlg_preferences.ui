@@ -1483,7 +1483,7 @@ file name including its suffix).</string>
                </widget>
               </item>
               <item row="4" column="1">
-               <widget class="QLabel" name="label_10">
+               <widget class="QLabel" name="label_101">
                 <property name="font">
                  <font>
                   <weight>50</weight>
