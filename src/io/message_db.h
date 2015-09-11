@@ -795,6 +795,16 @@ protected: /* These function are used from within a database container. */
 	    enum MessageProcessState state);
 
 	/*!
+	 * @brief Returns message identifier of message with given id number.
+	 *
+	 * @paran[in] dmId Message identification number.
+	 * @return Message identifier containing the seeked id number.
+	 *     If no such message is found then a message identifier
+	 *     containing -1 dmId returned.
+	 */
+	MsgId msgsMsgId(qint64 dmId) const;
+
+	/*!
 	 * @brief Return contacts from message db.
 	 *
 	 * @return List of vectors containing recipientId, recipientName,

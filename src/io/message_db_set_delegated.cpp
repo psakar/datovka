@@ -1094,6 +1094,52 @@ bool MessageDbSet::smsgdtSetWithin90DaysReceivedProcessState(
 	return false;
 }
 
+MessageDb::MsgId MessageDbSet::_sf_msgsMsgId(qint64 dmId) const
+{
+	if (this->size() == 0) {
+		return MessageDb::MsgId();
+	}
+	Q_ASSERT(this->size() == 1);
+	return this->first()->msgsMsgId(dmId);
+}
+
+MessageDb::MsgId MessageDbSet::_yrly_msgsMsgId(qint64 dmId) const
+{
+	MessageDb::MsgId soFar;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		MessageDb::MsgId found = db->msgsMsgId(dmId);
+
+		if (found.dmId >= 0) {
+			if (soFar.dmId >= 0) {
+				Q_ASSERT(0);
+			}
+			soFar = found;
+		}
+	}
+
+	return soFar;
+}
+
+MessageDb::MsgId MessageDbSet::msgsMsgId(qint64 dmId) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_msgsMsgId(dmId);
+		break;
+	case DO_YEARLY:
+		return _yrly_msgsMsgId(dmId);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return MessageDb::MsgId();
+}
+
 QList<MessageDb::ContactEntry> MessageDbSet::_sf_uniqueContacts(void) const
 {
 	if (this->size() == 0) {
