@@ -10156,7 +10156,7 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 		Q_ASSERT(0 != dstDb);
 
 		/* copy all message data to new database */
-		messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" + newDbName
-		    + "___" + testAcnt + ".db", yearList.at(i));
+		messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" +
+		   newDbName + "___" + testAcnt + ".db",yearList.at(i));
 	}
 }

@@ -3332,9 +3332,15 @@ QStringList MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
 {
 	QSqlQuery query(m_db);
 	QStringList msgList;
+	QString	queryStr;
 
-	QString	queryStr = "SELECT dmID FROM messages WHERE "
-		   "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+	if (year == "inv") {
+		queryStr = "SELECT dmID FROM messages WHERE "
+		    "ifnull(dmDeliveryTime, '') = ''";
+	} else {
+		queryStr = "SELECT dmID FROM messages WHERE "
+		    "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+	}
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -3381,8 +3387,14 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	}
 
 	// copy message data from messages table into new db.
-	queryStr = "INSERT INTO db2.messages SELECT * FROM messages WHERE "
-		   "strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+	if (year == "inv") {
+		queryStr = "INSERT INTO db2.messages SELECT * FROM messages "
+		"WHERE ifnull(dmDeliveryTime, '') = ''";
+	} else {
+		queryStr = "INSERT INTO db2.messages SELECT * FROM messages "
+		    "WHERE strftime('%Y', dmDeliveryTime) = '"+ year + "'";
+	}
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
