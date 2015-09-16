@@ -569,9 +569,9 @@ void DlgDsSearch::insertDsItems(void)
 			    item(i,3)->text() + " " +
 			    this->resultsTableWidget->item(i,4)->text());
 			this->m_recipientTableWidget->setItem(row,2,item);
-			item = new QTableWidgetItem;
-			item->setText(this->resultsTableWidget->
-			    item(i,5)->text());
+			item = new QTableWidgetItem;			
+			item->setText(m_dbEffectiveOVM ? tr("no") :
+			    this->resultsTableWidget->item(i,5)->text());
 			item->setTextAlignment(Qt::AlignCenter);
 			this->m_recipientTableWidget->setItem(row,3,item);
 		}
