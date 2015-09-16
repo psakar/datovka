@@ -90,3 +90,9 @@ QList<MessageDb::MsgId> MessageDbSingle::getAllMessageIDsFromDB(void) const
 {
 	return m_db->getAllMessageIDsFromDB();
 }
+
+bool MessageDbSingle::isRelevantMsgForImport(qint64 msgId,
+    const QString databoxId) const
+{
+	return m_db->isRelevantMsgForImport(msgId, databoxId);
+}

@@ -83,6 +83,8 @@ public:
 	 * @return message id list.
 	 */
 	QList<MessageDb::MsgId> getAllMessageIDsFromDB(void) const;
+
+	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
 };
 
 #endif /* _MESSAGE_DB_SINGLE_H_ */

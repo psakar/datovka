@@ -611,15 +611,6 @@ public:
 	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId) const;
 
 	/*!
-	 * @brief Test if imported message is relevent to account db.
-	 *
-	 * @param[in] dmId  Message identifier.
-	 * @param[in] databoxId  Databox ID where message should be imported.
-	 * @return Message is relevant for import to db or not.
-	 */
-	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
-
-	/*!
 	 * @brief Copy message data to account database from source database.
 	 *
 	 * @param[in] dmId  Message identifier.
@@ -862,6 +853,15 @@ protected: /* These function are used from within a database container. */
 	    const QString &dmToHands,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    enum MessageDirection msgDirect) const;
+
+	/*!
+	 * @brief Test if imported message is relevent to account db.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] databoxId  Databox ID where message should be imported.
+	 * @return Message is relevant for import to db or not.
+	 */
+	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
 
 	/*!
 	 * @brief Close database file.
