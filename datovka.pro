@@ -251,6 +251,7 @@ SOURCES += src/common.cpp \
     src/io/message_db_set.cpp \
     src/io/message_db_set_container.cpp \
     src/io/message_db_set_delegated.cpp \
+    src/io/message_db_single.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -291,6 +292,7 @@ HEADERS += src/common.h \
     src/io/message_db.h \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
+    src/io/message_db_single.h \
     src/log/log.h \
     src/log/log_c.h \
     src/log/log_common.h \
