@@ -983,6 +983,7 @@ private:
 	    const QByteArray &crtBase64);
 
 	friend class MessageDbSet;
+	friend class MessageDbSingle;
 };
 
 
