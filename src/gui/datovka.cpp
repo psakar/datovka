@@ -9832,10 +9832,24 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 {
 	debugSlotCall();
 
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(tr("Import of mesages form database"));
+	msgBox.setText(tr("This action allow to import messages from selected"
+	    " database files into current account. Keep in mind that this "
+	    "action may takes a few minutes based on number of messages "
+	    "in the imported database."));
+	msgBox.setInformativeText(tr("Do you want to continue?"));
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::No == msgBox.exec()) {
+		return;
+	}
+
 	/* get list of selected database files */
 	QStringList files = QFileDialog::getOpenFileNames(this,
-		    tr("Select database file(s)"),
-		    m_on_import_database_dir_activate, tr("DB file (*.db)"));
+	    tr("Select database file(s)"),
+	    m_on_import_database_dir_activate, tr("DB file (*.db)"));
 
 	if (files.isEmpty()) {
 		qDebug() << "No *.db selected file(s)";
@@ -9845,7 +9859,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 
 	/* remember import path */
 	m_on_import_database_dir_activate =
-		    QFileInfo(files.at(0)).absoluteDir().absolutePath();
+	    QFileInfo(files.at(0)).absoluteDir().absolutePath();
 
 	doMsgsImportFromDatabase(files, userNameFromItem());
 }
@@ -9873,6 +9887,9 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 	/* for all selected import database files */
 	for (int i = 0; i < dbFileList.count(); ++i) {
 
+		showStatusTextPermanently(tr("Import of messages from %1 "
+		    "to account %2").arg(aUserName));
+
 		errImportList.clear();
 		sMsgCnt = 0;
 
@@ -9882,6 +9899,9 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		QFileInfo file(dbFileList.at(i));
 		dbDir = file.path();
 		dbFileName = file.fileName();
+
+		showStatusTextPermanently(tr("Import of messages from %1 "
+		    "to account %2 is running").arg(dbFileName).arg(aUserName));
 
 		/* parse and check the import database file name */
 		if (!isValidDatabaseFileName(dbFileName, dbUserName,
@@ -10024,8 +10044,11 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			msgBox.setDetailedText(msg);
 		}
 		msgBox.setStandardButtons(QMessageBox::Ok);
+		showStatusTextPermanently(tr("Import of messages from %1 "
+		    "to account %2 finished").arg(dbFileName).arg(aUserName));
 		msgBox.exec();
 	}
+	showStatusTextWithTimeout("");
 }
 
 
@@ -10037,7 +10060,21 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
-	splitMsgDbByYears(userNameFromItem());
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(tr("Database split"));
+	msgBox.setText(tr("This action split actual account message database "
+	    "into new databases by single years. Every new database file will "
+	    "contain messages relevant by year. Keep in mind that this "
+	    "action may takes a few minutes based on number of messages "
+	    "in the account message database."));
+	msgBox.setInformativeText(tr("Do you want to continue?"));
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::Yes == msgBox.exec()) {
+		splitMsgDbByYears(userNameFromItem());
+	}
 }
 
 
@@ -10095,8 +10132,10 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 	/* get directory for saving of split database files */
 	do {
 		newDbDir = QFileDialog::getExistingDirectory(this,
-		    tr("Select Directory"), m_on_import_database_dir_activate,
-		    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+		    tr("Select directory for new databases"),
+		    m_on_import_database_dir_activate,
+		    QFileDialog::ShowDirsOnly |
+		    QFileDialog::DontResolveSymlinks);
 
 		if (newDbDir.isEmpty()) {
 			return;
@@ -10169,8 +10208,11 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 
 	for (int i = 0; i < yearList.count(); ++i) {
 
+		showStatusTextPermanently(tr("Creation of new "
+		    "database file for year %1").arg(yearList.at(i)));
+
 		QString newDbName = userName + "_" + yearList.at(i);
-		qDebug() << "Create a new database for year" << yearList.at(i);
+		qDebug() << "Creation of new database for year" << yearList.at(i);
 
 		QString  dateStr = QString("%1-06-06 06:06:06.000")
 		    .arg(yearList.at(i));
@@ -10213,7 +10255,6 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 
 	QMessageBox msgBox(this);
 	msgBox.setWindowTitle(tr("Database split: %1").arg(userName));
-
 	if (errOccurrence) {
 		msgBox.setIcon(QMessageBox::Critical);
 		msgBox.setText(tr("Database file for "
@@ -10228,7 +10269,8 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 		    .arg(userName));
 		msgBox.setInformativeText(newDbDir);
 	}
-
 	msgBox.setStandardButtons(QMessageBox::Ok);
+	showStatusTextWithTimeout(tr("Split of database file finished"));
 	msgBox.exec();
+	showStatusTextWithTimeout("");
 }
