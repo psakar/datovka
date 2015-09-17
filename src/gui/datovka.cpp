@@ -10064,12 +10064,13 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(tr("Database split"));
-	msgBox.setText(tr("This action split actual account message database "
-	    "into new databases by single years. Every new database file will "
-	    "contain messages relevant by year. Keep in mind that this "
-	    "action may takes a few minutes based on number of messages "
-	    "in the account message database."));
-	msgBox.setInformativeText(tr("Do you want to continue?"));
+	msgBox.setText(tr("This action split current account message database "
+	    "into several new databases which will contain messages relevant "
+	    "by year only. It is recommended for large database because the "
+	    "performance of application will be better."));
+	msgBox.setInformativeText(tr("Keep in mind that this action may "
+	    "takes a few minutes based on number of messages in the database.")
+	    + "\n\n" + tr("Do you want to continue?"));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::No);
 	if (QMessageBox::Yes == msgBox.exec()) {
@@ -10080,46 +10081,39 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 
 /* ========================================================================= */
 /*
+ * Show error message box.
+ */
+void MainWindow::showErrMessageBox(const QString &msgTitle,
+    const QString &msgText, const QString &msgInformativeText)
+/* ========================================================================= */
+{
+	showStatusTextWithTimeout(tr("Split of message database "
+	    "finished with error"));
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Critical);
+	msgBox.setWindowTitle(msgTitle);
+	msgBox.setText(msgText);
+	msgBox.setInformativeText(msgInformativeText);
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
+	showStatusTextWithTimeout("");
+}
+
+
+/* ========================================================================= */
+/*
  * Split message database into new databases contain messages for single years.
  */
-void MainWindow::splitMsgDbByYears(const QString &userName)
+bool MainWindow::splitMsgDbByYears(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
 	int flags = 0;
 	QString newDbDir;
-
-	/* get message db set based on username */
-	MessageDbSet *msgDbSet = accountDbSet(userName, this);
-	if (0 == msgDbSet) {
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Database split"));
-		msgBox.setText(tr("Database file for account '%1' "
-		    "does not exist.").arg(userName));
-		msgBox.setInformativeText(tr("Action will be ignored."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.exec();
-		return;
-	}
-
-	/*
-	 * test if current account already use database files
-	 * split according to years
-	 */
-	if (MessageDbSet::DO_YEARLY == msgDbSet->organisation()) {
-			QMessageBox msgBox(this);
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Database split"));
-			msgBox.setText(tr("Database file cannot split by years "
-			    "because this account already use database files "
-			    "split according to years."));
-			msgBox.setInformativeText(tr("Action will be ignored."));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.exec();
-		return;
-	}
+	QString msgText;
+	QString msgTitle = tr("Database split: %1").arg(userName);
+	QString msgInformativeText = tr("Action will be canceled.");
 
 	/* get current db file location */
 	AccountModel::SettingsMap &itemSettings =
@@ -10127,6 +10121,34 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		dbDir = globPref.confDir();
+	}
+
+	/* is testing account db */
+	QString testAcnt = "0";
+	if (itemSettings.isTestAccount()) {
+		testAcnt = "1";
+		flags |= MDS_FLG_TESTING;
+	}
+
+	/* get message db set based on username */
+	MessageDbSet *msgDbSet = accountDbSet(userName, this);
+	if (0 == msgDbSet) {
+		msgText = tr("Database file for account '%1' "
+		    "does not exist.").arg(userName);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
+	}
+
+	/*
+	 * test if current account already use database files
+	 * split according to years
+	 */
+	if (MessageDbSet::DO_YEARLY == msgDbSet->organisation()) {
+		msgText = tr("Database file cannot split by years "
+		    "because this account already use database files "
+		    "split according to years.");
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
 	}
 
 	/* get directory for saving of split database files */
@@ -10138,45 +10160,37 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 		    QFileDialog::DontResolveSymlinks);
 
 		if (newDbDir.isEmpty()) {
-			return;
+			return false;
 		}
 
 		/* new db files cannot save into same location as original db */
 		if (dbDir == newDbDir) {
-			QMessageBox msgBox(this);
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Database split"));
-			msgBox.setText(tr("Database file cannot split into "
-			    "same directory."));
-			msgBox.setInformativeText(tr("Please, you must choose "
-			    "another directory."));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.exec();
+			msgText = tr("Database file cannot split into "
+			    "same directory.");
+			msgInformativeText = tr("Please, you must choose "
+			    "another directory.");
+			showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		}
 	} while (dbDir == newDbDir);
 
-	/* remember import path */
+	/* remember path */
 	m_on_import_database_dir_activate = newDbDir;
+
+	/* copy current account dbset to new location */
+	if (!msgDbSet->copyToLocation(newDbDir)) {
+		msgText = tr("Cannot copy database file for account '%1' "
+		    "to '%2'").arg(userName).arg(newDbDir);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
+	}
 
 	/* get message db for split */
 	MessageDb *messageDb = msgDbSet->accessMessageDb(QDateTime(), false);
 	if (0 == messageDb) {
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Database split"));
-		msgBox.setText(tr("Database file for account '%1' "
-		    "does not exist.").arg(userName));
-		msgBox.setInformativeText(tr("Action will be ignored."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.exec();
-		return;
-	}
-
-	/* is testing account db */
-	QString testAcnt = "0";
-	if (itemSettings.isTestAccount()) {
-		testAcnt = "1";
-		flags |= MDS_FLG_TESTING;
+		msgText = tr("Database file for account '%1' "
+		    "does not exist.").arg(userName);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
 	}
 
 	/* get all unique years from database */
@@ -10193,18 +10207,11 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 	dstDbSet = temporaryDbCont.accessDbSet(newDbDir, userName,
 	    flags, MessageDbSet::DO_YEARLY, true);
 	if (0 == dstDbSet) {
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Database split"));
-		msgBox.setText(tr("Set of new database files for account '%1' "
-		    "could not be created.").arg(userName));
-		msgBox.setInformativeText(tr("Action will be ignored."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.exec();
-		return;
+		msgText = tr("Set of new database files for account '%1' "
+		    "could not be created.").arg(userName);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
 	}
-
-	bool errOccurrence = false;
 
 	for (int i = 0; i < yearList.count(); ++i) {
 
@@ -10223,54 +10230,55 @@ void MainWindow::splitMsgDbByYears(const QString &userName)
 		MessageDb *dstDb =
 		    dstDbSet->accessMessageDb(fakeTime, true);
 		if (0 == dstDb) {
-			QMessageBox msgBox(this);
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.setWindowTitle(tr("Database split"));
-			msgBox.setText(tr("New database file for account '%1' "
+			msgText = tr("New database file for account '%1' "
 			    "corresponds with year '%2' could not be created.").
-			    arg(userName).arg(yearList.at(i)));
-			msgBox.setInformativeText(tr("Messages were not copied."));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.exec();
-			errOccurrence = true;
-			continue;
+			    arg(userName).arg(yearList.at(i));
+			msgInformativeText = tr("Messages were not copied.");
+			showErrMessageBox(msgTitle, msgText, msgInformativeText);
+			return false;
 		}
 
 		/* copy all message data to new database */
 		if (!messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" +
 		    newDbName + "___" + testAcnt + ".db",yearList.at(i))) {
-			QMessageBox msgBox(this);
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.setWindowTitle(tr("Database split"));
-			msgBox.setText(tr("Messages correspond with year "
+			msgText = tr("Messages correspond with year "
 			    "'%1' for account '%2' were not copied.")
-			    .arg(yearList.at(i)).arg(userName));
-			msgBox.setInformativeText(tr("Action will be ignored."));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.exec();
-			errOccurrence = true;
-			continue;
+			    .arg(yearList.at(i)).arg(userName);
+			showErrMessageBox(msgTitle, msgText, msgInformativeText);
+			return false;
 		}
 	}
 
-	QMessageBox msgBox(this);
-	msgBox.setWindowTitle(tr("Database split: %1").arg(userName));
-	if (errOccurrence) {
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setText(tr("Database file for "
-		    "account '%1' was NOT split because an error "
-		    "occurred during splitting.").arg(userName));
-		msgBox.setInformativeText(tr("Please, you delete created "
-		    "files from directory\n%1").arg(newDbDir));
-	} else {
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setText(tr("Congratulation: database file for "
-		    "account '%1' was split successfully into directory:")
-		    .arg(userName));
-		msgBox.setInformativeText(newDbDir);
+	/* set back original database path */
+	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation())) {
+		msgText = tr("Error to set original database for "
+		    "account '%1'").arg(userName);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
 	}
+
+	/* copy new databases to original single path */
+	if (!dstDbSet->moveToLocation(dbDir)) {
+		msgText = tr("Error when move new databases for "
+		    "account '%1'").arg(userName);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
+	}
+
+	showStatusTextWithTimeout(tr("Split of message database finished"));
+	msgText = tr("Congratulation: message database for "
+	    "account '%1' was split successfully. "
+	    "Please, restart the application.").arg(userName);
+	msgInformativeText = tr("Original database file "
+	    "was backup to:") + "\n" + newDbDir;
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowTitle(msgTitle);
+	msgBox.setText(msgText);
+	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
-	showStatusTextWithTimeout(tr("Split of database file finished"));
 	msgBox.exec();
 	showStatusTextWithTimeout("");
+
+	return true;
 }

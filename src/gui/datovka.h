@@ -1103,12 +1103,22 @@ private:
 	bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
 	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
 
-
 	/*!
 	 * @brief Split message database into new databases
 	 * contain messages for single years.
+	 * @param[in] userName - username of account.
+	 * @return true if success
 	 */
-	void splitMsgDbByYears(const QString &userName);
+	bool splitMsgDbByYears(const QString &userName);
+
+	/*!
+	 * @brief Show error message box
+	 * @param[in] msgTitle - title of message box.
+	 * @param[in] msgText - main text of message box.
+	 * @param[in] msgInformativeText - info text of message box.
+	 */
+	void showErrMessageBox(const QString &msgTitle,
+	    const QString &msgText, const QString &msgInformativeText);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
