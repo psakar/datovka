@@ -55,6 +55,97 @@ MessageDbSet::~MessageDbSet(void)
 	}
 }
 
+bool MessageDbSet::openLocation(const QString &newLocDir,
+   enum Organisation organisation)
+{
+	QStringList matchingFiles;
+
+	/* New location must exist. */
+	QDir dir(newLocDir);
+	if (!dir.exists()) {
+		logErrorNL("Directory '%s' does not exist.\n",
+		    newLocDir.toUtf8().constData());
+		return false;
+	}
+
+	/* Try to determine the database organisation structure. */
+	enum Organisation existingOrganisation = dbOrganisation(newLocDir,
+	    m_primaryKey, m_testing);
+	matchingFiles = existingDbFileNamesInLocation(newLocDir,
+	    m_primaryKey, m_testing, DO_UNKNOWN, true);
+	if ((existingOrganisation == DO_UNKNOWN) &&
+	    (!matchingFiles.isEmpty())) {
+		logErrorNL("Ambiguous organisation of database '%s' in %s'.",
+		    m_primaryKey.toUtf8().constData(),
+		    newLocDir.toUtf8().constData());
+		return false;
+	}
+
+	if (organisation == DO_UNKNOWN) {
+		if (existingOrganisation != DO_UNKNOWN) {
+			organisation = existingOrganisation;
+		} else {
+			logError("Unspecified organisation of database '%s' in '%s'.",
+			    m_primaryKey.toUtf8().constData(),
+			    newLocDir.toUtf8().constData());
+			return false;
+		}
+	} else if (organisation != existingOrganisation) {
+		logError("Differently organised database '%s' in '%s' already exists.",
+		    m_primaryKey.toUtf8().constData(),
+		    newLocDir.toUtf8().constData());
+		return false;
+	}
+
+	for (QMap<QString, MessageDb *>::iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+
+		/* Close database. */
+		delete db;
+	}
+
+	/* Remove all elements from this map. */
+	this->clear();
+
+	matchingFiles = existingDbFileNamesInLocation(newLocDir,
+	    m_primaryKey, m_testing, organisation, true);
+
+	/* There may be no matching files. */
+
+	/* Check primary keys. */
+	foreach (const QString &fileName, matchingFiles) {
+		QString secondaryKey = secondaryKeyFromFileName(
+		    fileName, organisation);
+
+		if (secondaryKey.isNull()) {
+			logErrorNL("Failed obtaining secondary key from file name '%s'.",
+			    fileName.toUtf8().constData());
+			return false;
+		}
+	}
+
+	MessageDb *db = NULL;
+	/* Load files that have been found. */
+	foreach (const QString &fileName, matchingFiles) {
+		QString secondaryKey = secondaryKeyFromFileName(fileName,
+		    organisation);
+		Q_ASSERT(!secondaryKey.isNull());
+
+		db = _accessMessageDb(secondaryKey, false);
+		if (db == NULL) {
+			logErrorNL("Failed opening database file '%s'.",
+			    fileName.toUtf8().constData());
+			/* TODO -- How can be this operation aborted? */
+		}
+	}
+
+	m_locDir = newLocDir;
+	m_organisation = organisation;
+
+	return true;
+}
+
 bool MessageDbSet::copyToLocation(const QString &newLocDir)
 {
 	if (m_organisation == DO_UNKNOWN) {
@@ -377,6 +468,9 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 	}
 
 	if (organisation == DO_UNKNOWN) {
+		logErrorNL("Ambiguous organisation of database '%s' in %s'.",
+		    primaryKey.toUtf8().constData(),
+		    locDir.toUtf8().constData());
 		return NULL;
 	}
 
