@@ -125,6 +125,9 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		}
 	}
 
+	m_locDir = newLocDir;
+	m_organisation = organisation;
+
 	MessageDb *db = NULL;
 	/* Load files that have been found. */
 	foreach (const QString &fileName, matchingFiles) {
@@ -139,9 +142,6 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 			/* TODO -- How can be this operation aborted? */
 		}
 	}
-
-	m_locDir = newLocDir;
-	m_organisation = organisation;
 
 	return true;
 }
