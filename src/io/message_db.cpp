@@ -92,44 +92,6 @@ const QString MessageDb::memoryLocation(":memory:");
 
 /* ========================================================================= */
 /*
- * Open database file.
- */
-bool MessageDb::openDb(const QString &fileName, bool createMissing)
-/* ========================================================================= */
-{
-	bool ret;
-
-	if (m_db.isOpen()) {
-		m_db.close();
-	}
-
-	if (globPref.store_messages_on_disk) {
-		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
-	} else {
-		m_db.setDatabaseName(memoryLocation);
-	}
-
-	ret = m_db.open();
-
-	if (createMissing && ret) {
-		/* Ensure database contains all tables. */
-		ret = createEmptyMissingTables();
-	}
-
-	if (ret) {
-		ret = ensurePrimaryKeyInProcessStateTable();
-	}
-
-	if (!ret) {
-		m_db.close();
-	}
-
-	return ret;
-}
-
-
-/* ========================================================================= */
-/*
  * Get file name.
  */
 QString MessageDb::fileName(void) const
@@ -4377,6 +4339,44 @@ bool MessageDb::addDmtypeColumn(void)
 
 fail:
 	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Open database file.
+ */
+bool MessageDb::openDb(const QString &fileName, bool createMissing)
+/* ========================================================================= */
+{
+	bool ret;
+
+	if (m_db.isOpen()) {
+		m_db.close();
+	}
+
+	if (globPref.store_messages_on_disk) {
+		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	} else {
+		m_db.setDatabaseName(memoryLocation);
+	}
+
+	ret = m_db.open();
+
+	if (createMissing && ret) {
+		/* Ensure database contains all tables. */
+		ret = createEmptyMissingTables();
+	}
+
+	if (ret) {
+		ret = ensurePrimaryKeyInProcessStateTable();
+	}
+
+	if (!ret) {
+		m_db.close();
+	}
+
+	return ret;
 }
 
 

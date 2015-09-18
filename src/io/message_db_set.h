@@ -79,6 +79,19 @@ public:
 	~MessageDbSet(void);
 
 	/*!
+	 * @brief Opens a location. Old file(s) is(are) left untouched.
+	 *     Files in new location are opened if any exist.
+	 *
+	 * @note The new location must exist.
+	 *
+	 * @param[in] newLocDir    New location directory.
+	 * @paran[in] organisation Organisation type.
+	 * @reurn True if database was opened.
+	 */
+	bool openLocation(const QString &newLocDir,
+	   enum Organisation organisation);
+
+	/*!
 	 * @brief Creates a copy of the current database into a given new
 	 *     directory.
 	 *
@@ -96,11 +109,11 @@ public:
 	bool moveToLocation(const QString &newLocDir);
 
 	/*!
-	 * @brief Re-open a new empty database file. The old file is left
-	 *     untouched.
+	 * @brief Re-open a new empty database file. The old file(s) is(are)
+	 *     left untouched. The new location is emptied.
 	 *
 	 * @param[in] newLocDir New location directory.
-	 * @paran[on] organisation Organisation type.
+	 * @paran[in] organisation Organisation type.
 	 * @return True if database was re-opened.
 	 */
 	bool reopenLocation(const QString &newLocDir,

@@ -155,15 +155,6 @@ public:
 	    QObject *parent = 0);
 	virtual ~MessageDb(void);
 
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName       File name.
-	 * @param[in] createMissing  Whether to create missing tables.
-	 * @return True on success.
-	 */
-	bool openDb(const QString &fileName, bool createMissing = true);
-
 	static
 	const QString memoryLocation;
 
@@ -862,6 +853,15 @@ protected: /* These function are used from within a database container. */
 	 * @return Message is relevant for import to db or not.
 	 */
 	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
+
+	/*!
+	 * @brief Open database file.
+	 *
+	 * @param[in] fileName       File name.
+	 * @param[in] createMissing  Whether to create missing tables.
+	 * @return True on success.
+	 */
+	bool openDb(const QString &fileName, bool createMissing = true);
 
 	/*!
 	 * @brief Close database file.
