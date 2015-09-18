@@ -659,6 +659,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	}
 
+	/* Enable/disable split database by year submenu */
+	if (MessageDbSet::DO_YEARLY == dbSet->organisation()) {
+		ui->actionSplit_database_by_years->setEnabled(false);
+	} else {
+		ui->actionSplit_database_by_years->setEnabled(true);
+	}
+
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
 	 * handled multiple times.
@@ -885,9 +892,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from database"),
 		    this, SLOT(prepareMsgsImportFromDatabase()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "statistics_16.png"),
-		    tr("Split database by years"),
-		    this, SLOT(splitMsgDbByYearsSlot()));
+//		menu->addAction(QIcon(ICON_3PARTY_PATH "statistics_16.png"),
+//		    tr("Split database by years"),
+//		    this, SLOT(splitMsgDbByYearsSlot()));
 
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
@@ -10048,7 +10055,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		    "to account %2 finished").arg(dbFileName).arg(aUserName));
 		msgBox.exec();
 	}
-	showStatusTextWithTimeout("");
+	setDefaultProgressStatus();
 }
 
 
@@ -10068,7 +10075,13 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	    "into several new databases which will contain messages relevant "
 	    "by year only. It is recommended for large database because the "
 	    "performance of application will be better."));
-	msgBox.setInformativeText(tr("Keep in mind that this action may "
+	msgBox.setInformativeText(tr("Original database file will copy to "
+	    "selected directory and new database files will created in "
+	    "the same location. If action finished with success, new databases"
+	    " will be used instead of original. Restart of application "
+	    "is required.")
+	    +"\n\n" +
+	    tr("Note: Keep in mind that this action may "
 	    "takes a few minutes based on number of messages in the database.")
 	    + "\n\n" + tr("Do you want to continue?"));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -10096,7 +10109,27 @@ void MainWindow::showErrMessageBox(const QString &msgTitle,
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	showStatusTextWithTimeout("");
+	setDefaultProgressStatus();
+}
+
+
+/* ========================================================================= */
+/*
+ * Set back original database path if error during database splitting.
+ */
+bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir) {
+/* ========================================================================= */
+
+	if (0 == dbset) {
+		return false;
+	}
+
+	if (!dbset->openLocation(dbDir, dbset->organisation())) {
+		return false;
+	}
+
+	/* TODO - update account model */
+	return true;
 }
 
 
@@ -10187,6 +10220,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	/* get message db for split */
 	MessageDb *messageDb = msgDbSet->accessMessageDb(QDateTime(), false);
 	if (0 == messageDb) {
+		setBackOriginDb(msgDbSet, dbDir);
 		msgText = tr("Database file for account '%1' "
 		    "does not exist.").arg(userName);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
@@ -10207,6 +10241,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	dstDbSet = temporaryDbCont.accessDbSet(newDbDir, userName,
 	    flags, MessageDbSet::DO_YEARLY, true);
 	if (0 == dstDbSet) {
+		setBackOriginDb(msgDbSet, dbDir);
 		msgText = tr("Set of new database files for account '%1' "
 		    "could not be created.").arg(userName);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
@@ -10230,6 +10265,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		MessageDb *dstDb =
 		    dstDbSet->accessMessageDb(fakeTime, true);
 		if (0 == dstDb) {
+			setBackOriginDb(msgDbSet, dbDir);
 			msgText = tr("New database file for account '%1' "
 			    "corresponds with year '%2' could not be created.").
 			    arg(userName).arg(yearList.at(i));
@@ -10241,6 +10277,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		/* copy all message data to new database */
 		if (!messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" +
 		    newDbName + "___" + testAcnt + ".db",yearList.at(i))) {
+			setBackOriginDb(msgDbSet, dbDir);
 			msgText = tr("Messages correspond with year "
 			    "'%1' for account '%2' were not copied.")
 			    .arg(yearList.at(i)).arg(userName);
@@ -10248,6 +10285,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 			return false;
 		}
 	}
+
 
 	/* set back original database path */
 	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation())) {
@@ -10267,10 +10305,10 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 
 	showStatusTextWithTimeout(tr("Split of message database finished"));
 	msgText = tr("Congratulation: message database for "
-	    "account '%1' was split successfully. "
-	    "Please, restart the application.").arg(userName);
-	msgInformativeText = tr("Original database file "
-	    "was backup to:") + "\n" + newDbDir;
+	    "account '%1' was split successfully. Please, restart the "
+	    "application for loading of new databases.").arg(userName);
+	msgInformativeText = tr("Note: Original database file was backup to:")
+	    + "\n" + newDbDir;
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.setWindowTitle(msgTitle);
@@ -10278,7 +10316,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	showStatusTextWithTimeout("");
+	setDefaultProgressStatus();
+
+	/* TODO - update account model */
 
 	return true;
 }

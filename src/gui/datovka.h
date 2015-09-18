@@ -1120,6 +1120,16 @@ private:
 	void showErrMessageBox(const QString &msgTitle,
 	    const QString &msgText, const QString &msgInformativeText);
 
+	/*!
+	 * @brief Set back original database path if error during
+	 *    database splitting
+	 * @param[in] dbset - MessageDbSet.
+	 * @param[in] dbDir - origin database dir.
+	 * @return true if success
+	 */
+	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir);
+
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

@@ -134,7 +134,6 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		QString secondaryKey = secondaryKeyFromFileName(fileName,
 		    organisation);
 		Q_ASSERT(!secondaryKey.isNull());
-
 		db = _accessMessageDb(secondaryKey, false);
 		if (db == NULL) {
 			logErrorNL("Failed opening database file '%s'.",
