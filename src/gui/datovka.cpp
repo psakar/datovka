@@ -10055,7 +10055,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		    "to account %2 finished").arg(dbFileName).arg(aUserName));
 		msgBox.exec();
 	}
-	setDefaultProgressStatus();
+	statusBar->clearMessage();
 }
 
 
@@ -10109,7 +10109,7 @@ void MainWindow::showErrMessageBox(const QString &msgTitle,
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	setDefaultProgressStatus();
+	statusBar->clearMessage();
 }
 
 
@@ -10209,10 +10209,15 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	/* remember path */
 	m_on_import_database_dir_activate = newDbDir;
 
+	showStatusTextPermanently(tr("Copying origin database file to selected "
+	    "location"));
+
 	/* copy current account dbset to new location */
 	if (!msgDbSet->copyToLocation(newDbDir)) {
 		msgText = tr("Cannot copy database file for account '%1' "
 		    "to '%2'").arg(userName).arg(newDbDir);
+		msgInformativeText = tr("Probably not enough disk space.") +
+		    + " " + tr("Action will be canceled.");
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
@@ -10250,11 +10255,11 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 
 	for (int i = 0; i < yearList.count(); ++i) {
 
-		showStatusTextPermanently(tr("Creation of new "
+		showStatusTextPermanently(tr("Creating a new "
 		    "database file for year %1").arg(yearList.at(i)));
 
 		QString newDbName = userName + "_" + yearList.at(i);
-		qDebug() << "Creation of new database for year" << yearList.at(i);
+		qDebug() << "Creating a new database for year" << yearList.at(i);
 
 		QString  dateStr = QString("%1-06-06 06:06:06.000")
 		    .arg(yearList.at(i));
@@ -10286,7 +10291,6 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		}
 	}
 
-
 	/* set back original database path */
 	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation())) {
 		msgText = tr("Error to set original database for "
@@ -10294,6 +10298,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
+
+	showStatusTextPermanently(tr("Replacing of new database files to "
+	    "origin database location"));
 
 	/* copy new databases to original single path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
@@ -10316,7 +10323,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	setDefaultProgressStatus();
+	statusBar->clearMessage();
 
 	/* TODO - update account model */
 
