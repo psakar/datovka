@@ -162,10 +162,11 @@ public:
 	 */
 	bool setSntHeader(void);
 
+	/* Methods behaving as singletons. */
 	static
-	const QVector<QString> receivedItemIds;
+	const QVector<QString> &rcvdItemIds(void);
 	static
-	const QVector<QString> sentItemIds;
+	const QVector<QString> &sntItemIds(void);
 
 	/*
 	 * Beware of the static initialization order fiasco.

@@ -216,8 +216,8 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status"
@@ -265,8 +265,8 @@ DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status"
@@ -316,8 +316,8 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status"
@@ -555,8 +555,8 @@ DbMsgsTblModel * MessageDb::msgsSntModel(void)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
 	    " FROM messages AS m "
@@ -601,8 +601,8 @@ DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
 	    " FROM messages AS m "
@@ -651,8 +651,8 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
 	    " FROM messages AS m "

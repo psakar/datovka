@@ -177,8 +177,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -195,8 +195,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::receivedItemIds.size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::receivedItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -641,8 +641,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
@@ -657,8 +657,8 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	    " (m.dmDeliveryTime IS NULL))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sentItemIds[i] + ", ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM " DB2 ".messages AS m "
