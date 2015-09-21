@@ -609,7 +609,7 @@ public:
 	 * @return True if copy of message data was success.
 	 */
 	bool copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
-	    qint64 msgId) const;
+	    qint64 msgId);
 
 	/*!
 	 * @brief Copy all messages correspond with

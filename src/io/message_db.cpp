@@ -5093,10 +5093,11 @@ bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
  * Copy all message data to account database from source database.
  */
 bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
-    qint64 msgId) const
+    qint64 msgId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
+	QByteArray der_data;
 
 	// attach new database.
 	QString	queryStr = "ATTACH DATABASE \""+ sourceDbPath + "\" AS db2";
@@ -5240,19 +5241,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO certificate_data SELECT * FROM "
-	    "db2.certificate_data";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
+	/* insert message_certificate_data */
 	queryStr = "INSERT INTO message_certificate_data SELECT * "
 	    "FROM db2.message_certificate_data WHERE "
 	    "message_id = :message_id";
@@ -5265,6 +5254,37 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* get cert der_data based to message_id from source database */
+	queryStr = "SELECT der_data FROM db2.certificate_data WHERE id IN "
+	    "(SELECT certificate_id FROM db2.message_certificate_data "
+	    "WHERE message_id = :message_id)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", msgId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		der_data = query.value(0).toByteArray();
+	} else {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+	}
+
+	if (der_data.isEmpty()) {
+		/* TODO - get message certificate from raw */
+		//der_data = msgsMessageRaw(msgId);
+		goto fail;
+	}
+
+	/* check if der_data exists in the target database and update
+	 * message certificate_id
+	 */
+	if (!msgsInsertUpdateMessageCertBase64(msgId, der_data)) {
 		goto fail;
 	}
 
