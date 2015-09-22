@@ -29,8 +29,6 @@
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
 
-DbMsgsTblModel DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_RECEIVED);
-
 DbMsgsTblModel::DbMsgsTblModel(enum Type type, QObject *parent)
     : QSqlQueryModel(parent),
     m_overriddenRL(),
@@ -529,4 +527,10 @@ const QVector<QString> &DbMsgsTblModel::sntItemIds(void)
 	    ids.append("is_downloaded");
 	}
 	return ids;
+}
+
+DbMsgsTblModel &DbMsgsTblModel::dummyModel(void)
+{
+	static DbMsgsTblModel dummy(DbMsgsTblModel::DUMMY_RECEIVED);
+	return dummy;
 }

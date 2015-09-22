@@ -172,7 +172,7 @@ public:
 	 * Beware of the static initialization order fiasco.
 	 */
 	static
-	DbMsgsTblModel dummyModel; /*!< Dummy model. */
+	DbMsgsTblModel &dummyModel(void); /*!< Dummy model. */
 
 	/*
 	 * The view's proxy model cannot be accessed, so the message must be
