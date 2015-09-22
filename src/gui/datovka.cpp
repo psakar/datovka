@@ -5230,11 +5230,11 @@ void MainWindow::setReceivedColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_received_1);
 	ui->messageList->setColumnWidth(2, m_received_2);
-	for (i = 3; i < (DbMsgsTblModel::receivedItemIds.size() - 3); ++i) {
+	for (i = 3; i < (DbMsgsTblModel::rcvdItemIds().size() - 3); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last three columns display icons. */
-	for (; i < DbMsgsTblModel::receivedItemIds.size(); ++i) {
+	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -5260,11 +5260,11 @@ void MainWindow::setSentColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
 	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (i = 3; i < (DbMsgsTblModel::sentItemIds.size() - 1); ++i) {
+	for (i = 3; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last column displays an icon. */
-	for (; i < DbMsgsTblModel::receivedItemIds.size(); ++i) {
+	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
