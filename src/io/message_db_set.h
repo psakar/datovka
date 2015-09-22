@@ -71,6 +71,24 @@ public:
 		DO_YEARLY /*!< Content is split according to delivery year. */
 	};
 
+	/*!
+	 * How to access/create databases.
+	 */
+	enum CreationManner {
+		CM_MUST_EXIST, /*!<
+		                * At least one database file must already exist.
+		                */
+		CM_CREATE_EMPTY_CURRENT, /*!<
+		                          * Create at least one empty file
+		                          * according to current time if no
+		                          * file exists.
+		                          */
+		CM_CREATE_ON_DEMAND /*!<
+		                     * The first file is going to be created on
+		                     * database write.
+		                     */
+	};
+
 	/* Constructor is private. */
 
 	/*!
@@ -184,14 +202,14 @@ public:
 	 * @param[in] testing          True if this is a testing account.
 	 * @param[in] organisation     How to organise the database files.
 	 * @param[in] connectionPrefix Prefix of the connection name.
-	 * @param[in] mustExist        Set true if some files must be present.
+	 * @param[in] manner           How to treat files when opening database.
 	 * @return Pointer to new container or zero pointer on error.
 	 */
 	static
 	MessageDbSet *createNew(const QString &locDir,
 	    const QString &primaryKey, bool testing,
 	    enum Organisation organisation, const QString &connectionPrefix,
-	    bool mustExist);
+	    enum CreationManner manner);
 
 	/*!
 	 * @brief Get the organisation type of the database.

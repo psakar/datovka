@@ -3593,7 +3593,8 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 			}
 			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_UNKNOWN, false);
+			    MessageDbSet::DO_UNKNOWN,
+			    MessageDbSet::CM_MUST_EXIST);
 		}
 		break;
 	case MDS_ERR_MISSFILE:
@@ -3619,7 +3620,8 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 			}
 			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_SINGLE_FILE, true);
+			    MessageDbSet::DO_SINGLE_FILE,
+			    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 		}
 		break;
 	case MDS_ERR_NOTAFILE:

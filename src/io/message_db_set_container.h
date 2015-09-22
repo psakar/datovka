@@ -50,12 +50,13 @@ public:
 	 * @param[in] primaryKey   Part of database file name, usually the login.
 	 * @param[in] testing      True for testing accounts.
 	 * @param[in] organisation Way how the database is organised.
-	 * @param[in] create       Whether to create non-existing file.
+	 * @param[in] manner       How to treat files when opening database.
 	 * @return Pointer to database, zero pointer on error.
 	 */
 	MessageDbSet *accessDbSet(const QString &locDir,
 	    const QString &primaryKey, bool testing,
-	    MessageDbSet::Organisation organisation, bool create);
+	    MessageDbSet::Organisation organisation,
+	    enum MessageDbSet::CreationManner manner);
 
 	/*!
 	 * @brief Delete all files related to dbset.
