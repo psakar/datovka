@@ -687,7 +687,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 
 	db.m_sqlMsgsModel.clearOverridingData();
 	db.m_sqlMsgsModel.setQuery(query);
-	if (!db.m_sqlMsgsModel.setRcvdHeader()) {
+	if (!db.m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
