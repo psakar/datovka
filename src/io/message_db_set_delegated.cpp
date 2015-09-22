@@ -707,7 +707,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 
 	if (secKeys.size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
-		    DbMsgsTblModel::DUMMY_RECEIVED);
+		    DbMsgsTblModel::DUMMY_SENT);
 		return &DbMsgsTblModel::dummyModel();
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
@@ -716,7 +716,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 			Q_ASSERT(0);
 			return NULL;
 		}
-		return db->msgsRcvdWithin90DaysModel();
+		return db->msgsSntWithin90DaysModel();
 	} else {
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
