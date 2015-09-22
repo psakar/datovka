@@ -9845,7 +9845,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
-	msgBox.setWindowTitle(tr("Import of mesages form database"));
+	msgBox.setWindowTitle(tr("Import of mesages from database"));
 	msgBox.setText(tr("This action allow to import messages from selected"
 	    " database files into current account. Keep in mind that this "
 	    "action may takes a few minutes based on number of messages "
