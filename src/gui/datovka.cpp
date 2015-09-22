@@ -3661,7 +3661,7 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 			}
 			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_SINGLE_FILE,
+			    MessageDbSet::DO_YEARLY,
 			    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 		}
 		break;
@@ -10246,9 +10246,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	/* create new db set for splitting of database files */
 	MessageDbSet *dstDbSet = NULL;
 	DbContainer temporaryDbCont("TEMPORARYDBS");
-	/* open source database file */
+	/* open destination database file */
 	dstDbSet = temporaryDbCont.accessDbSet(newDbDir, userName,
-	    flags, MessageDbSet::DO_YEARLY, true);
+	    flags, MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
 	if (0 == dstDbSet) {
 		setBackOriginDb(msgDbSet, dbDir);
 		msgText = tr("Set of new database files for account '%1' "
