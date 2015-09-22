@@ -9849,7 +9849,8 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	msgBox.setText(tr("This action allow to import messages from selected"
 	    " database files into current account. Keep in mind that this "
 	    "action may takes a few minutes based on number of messages "
-	    "in the imported database."));
+	    "in the imported database. Import progress will be displayed "
+	    "in the status bar."));
 	msgBox.setInformativeText(tr("Do you want to continue?"));
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::No);
@@ -9981,6 +9982,10 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 
 		// over all messages in source database do import */
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
+
+			showStatusTextPermanently(tr("Importing of message %1"
+			    " into account %2 ...").arg(mId.dmId)
+			    .arg(aUserName));
 
 			/* select target database via delivery time for account */
 			MessageDb *dstDb =
