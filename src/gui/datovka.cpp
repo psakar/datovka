@@ -7775,10 +7775,12 @@ void MainWindow::showSignatureDetails(void)
 	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 	qint64 dmId = msgIdx.data().toLongLong();
 	QDateTime deliveryTime = msgDeliveryTime(msgIdx);
-	Q_ASSERT(deliveryTime.isValid());
+	if (!deliveryTime.isValid()) {
+		return;
+	}
 
-	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 
