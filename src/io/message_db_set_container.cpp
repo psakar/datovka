@@ -55,7 +55,8 @@ DbContainer::~DbContainer(void)
  */
 MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
     const QString &primaryKey, bool testing,
-    MessageDbSet::Organisation organisation, bool create)
+    MessageDbSet::Organisation organisation,
+    enum MessageDbSet::CreationManner manner)
 /* ========================================================================= */
 {
 	MessageDbSet *dbSet = NULL;
@@ -66,7 +67,7 @@ MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
 	}
 
 	dbSet = MessageDbSet::createNew(locDir, primaryKey, testing,
-	    organisation, m_connectionPrefix, !create);
+	    organisation, m_connectionPrefix, manner);
 	if (NULL == dbSet) {
 		return NULL;
 	}

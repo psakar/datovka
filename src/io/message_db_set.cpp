@@ -421,12 +421,12 @@ QString MessageDbSet::yearFromDateTime(const QDateTime &time)
 
 MessageDbSet *MessageDbSet::createNew(const QString &locDir,
     const QString &primaryKey, bool testing, enum Organisation organisation,
-    const QString &connectionPrefix, bool mustExist)
+    const QString &connectionPrefix, enum CreationManner manner)
 {
 	MessageDbSet *dbSet = NULL;
 	QStringList matchingFiles;
 
-	if (mustExist) {
+	if (manner == CM_MUST_EXIST) {
 		if (organisation == DO_UNKNOWN) {
 			/*
 			 * Try to determine the database organisation
@@ -482,14 +482,32 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 	}
 
 	MessageDb *db = NULL;
-	/* Load files that have been found. */
-	foreach (const QString &fileName, matchingFiles) {
-		QString secondaryKey = secondaryKeyFromFileName(fileName,
-		    organisation);
+	if (matchingFiles.size()) {
+		/* Load files that have been found. */
+		foreach (const QString &fileName, matchingFiles) {
+			QString secondaryKey = secondaryKeyFromFileName(
+			    fileName, organisation);
+			Q_ASSERT(!secondaryKey.isNull());
+
+			db = dbSet->_accessMessageDb(secondaryKey, false);
+			if (db == NULL) {
+				logErrorNL("Failed opening database file '%s'.",
+				    fileName.toUtf8().constData());
+				delete dbSet;
+				return NULL;
+			}
+		}
+	} else if (manner == CM_CREATE_EMPTY_CURRENT) {
+		/* Create empty file matching current date. */
+		QString secondaryKey = dbSet->secondaryKey(
+		    QDateTime::currentDateTime());
 		Q_ASSERT(!secondaryKey.isNull());
 
-		db = dbSet->_accessMessageDb(secondaryKey, false);
+		db = dbSet->_accessMessageDb(secondaryKey, true);
 		if (db == NULL) {
+			QString fileName(constructDbFileName(dbSet->m_locDir,
+			    dbSet->m_primaryKey, secondaryKey, dbSet->m_testing,
+			    dbSet->m_organisation));
 			logErrorNL("Failed opening database file '%s'.",
 			    fileName.toUtf8().constData());
 			delete dbSet;

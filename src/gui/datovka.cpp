@@ -3634,7 +3634,8 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 			}
 			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_UNKNOWN, false);
+			    MessageDbSet::DO_UNKNOWN,
+			    MessageDbSet::CM_MUST_EXIST);
 		}
 		break;
 	case MDS_ERR_MISSFILE:
@@ -3660,7 +3661,8 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 			}
 			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_SINGLE_FILE, true);
+			    MessageDbSet::DO_SINGLE_FILE,
+			    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 		}
 		break;
 	case MDS_ERR_NOTAFILE:
@@ -7822,10 +7824,12 @@ void MainWindow::showSignatureDetails(void)
 	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
 	qint64 dmId = msgIdx.data().toLongLong();
 	QDateTime deliveryTime = msgDeliveryTime(msgIdx);
-	Q_ASSERT(deliveryTime.isValid());
+	if (!deliveryTime.isValid()) {
+		return;
+	}
 
-	Q_ASSERT(msgIdx.isValid());
 	if (!msgIdx.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 
