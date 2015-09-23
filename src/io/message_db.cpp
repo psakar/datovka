@@ -5271,21 +5271,18 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	    query.first() && query.isValid()) {
 		der_data = query.value(0).toByteArray();
 	} else {
-		logErrorNL("Cannot exec SQL query: %s.",
+		logErrorNL("Cannot exec SQL query - "
+		    "message cert data missing: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 
-	if (der_data.isEmpty()) {
-		/* TODO - get message certificate from raw */
-		//der_data = msgsMessageRaw(msgId);
-		goto fail;
-	}
-
-	/* check if der_data exists in the target database and update
-	 * message certificate_id
-	 */
-	if (!msgsInsertUpdateMessageCertBase64(msgId, der_data)) {
-		goto fail;
+	if (!der_data.isEmpty()) {
+		/* check if der_data exists in the target database and update
+		* message certificate_id
+		*/
+		if (!msgsInsertUpdateMessageCertBase64(msgId, der_data)) {
+			goto fail;
+		}
 	}
 
 	// commit all inserts (transaction)
