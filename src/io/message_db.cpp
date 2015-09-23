@@ -5271,7 +5271,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	    query.first() && query.isValid()) {
 		der_data = query.value(0).toByteArray();
 	} else {
-		logErrorNL("Cannot exec SQL query - "
+		logInfoMl("Cannot exec SQL query - "
 		    "message cert data missing: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
