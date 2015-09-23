@@ -155,5 +155,6 @@
         <file>icons/3party/bookmark_32.png</file>
         <file>icons/3party/block_32.png</file>
         <file>icons/3party/address_32.png</file>
+        <file>datovka.png</file>
     </qresource>
 </RCC>
