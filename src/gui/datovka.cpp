@@ -5068,21 +5068,22 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 			itemSettings.setDbDir(newDir);
 			saveSettings();
 
-			logInfo("Database files for '%s' have been moved from '%s' to '%s'.\n",
+			logInfo("Database files for '%s' have been moved "
+			    "from '%s' to '%s'.\n",
 			    userName.toUtf8().constData(),
 			    oldDir.toUtf8().constData(),
 			    newDir.toUtf8().constData());
 
 			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' have been successfully moved to\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("Database files for '%1' have been successfully"
+			    " moved to\n\n'%2'.").arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		} else {
 			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' could not be moved to\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("Database files for '%1' could not be moved "
+			        "to\n\n'%2'.").arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		}
 
@@ -5092,21 +5093,22 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 			itemSettings.setDbDir(newDir);
 			saveSettings();
 
-			logInfo("Database files for '%s' have been copied from '%s' to '%s'.\n",
+			logInfo("Database files for '%s' have been copied "
+			    "from '%s' to '%s'.\n",
 			    userName.toUtf8().constData(),
 			    oldDir.toUtf8().constData(),
 			    newDir.toUtf8().constData());
 
 			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' have been successfully copied to\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("Database files for '%1' have been successfully"
+			    " copied to\n\n'%2'.").arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		} else {
 			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' could not be copied to\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("Database files for '%1' could not be copied "
+			    "to\n\n'%2'.").arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		}
 
@@ -5118,20 +5120,21 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 			itemSettings.setDbDir(newDir);
 			saveSettings();
 
-			logInfo("Database files for '%s' have been created in '%s'.\n",
-			    userName.toUtf8().constData(),
+			logInfo("Database files for '%s' have been created "
+			    "in '%s'.\n", userName.toUtf8().constData(),
 			    newDir.toUtf8().constData());
 
 			QMessageBox::information(this,
 			    tr("Change data directory for current account"),
-			    tr("New database files for '%1' have been successfully created in\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("New database files for '%1' have been "
+			    "successfully created in\n\n'%2'.")
+			    .arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		} else {
 			QMessageBox::critical(this,
 			    tr("Change data directory for current account"),
-			    tr("New database files for '%1' could not be created in\n\n'%2'."
-			        ).arg(userName).arg(newDir),
+			    tr("New database files for '%1' could not be "
+			    "created in\n\n'%2'.").arg(userName).arg(newDir),
 			    QMessageBox::Ok);
 		}
 	} else {
