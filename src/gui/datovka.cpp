@@ -1548,7 +1548,6 @@ QModelIndex MainWindow::accountYearlyIndex(const QString &userName,
 	}
 
 	if (!yearIdx.isValid()) {
-		Q_ASSERT(0);
 		return QModelIndex();
 	}
 
@@ -1609,7 +1608,6 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 	QModelIndex yearIdx(accountYearlyIndex(userName, deliveryYear,
 	    msgType));
 	if (!yearIdx.isValid()) {
-		Q_ASSERT(0);
 		return;
 	}
 
@@ -4720,25 +4718,7 @@ void MainWindow::openSendMessageDialog(int action)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		/*
-		 * Message model must be regenerated to show the sent if
-		 * residing on sent messages.
-		 *
-		 * TODO -- Regenerating year list (as this could add entries).
-		 */
-		if (selectedAcntIndex.isValid()) {
-			switch (AccountModel::nodeType(selectedAcntIndex)) {
-			case AccountModel::nodeRecentSent:
-			case AccountModel::nodeAll:
-			case AccountModel::nodeSent:
-			case AccountModel::nodeSentYear:
-				accountItemCurrentChanged(selectedAcntIndex);
-				break;
-			default:
-				/* Do nothing. */
-				break;
-			}
-		}
+		refreshAccountListFromWorker(userName);
 	}
 
 	if (!globPref.use_global_paths) {

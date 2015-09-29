@@ -199,6 +199,7 @@ void Worker::doJob(void)
 		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage", 0, this)) {
 			/* Only on successful download. */
+			emit refreshAccountList(job.userName);
 			emit refreshAttachmentList(job.userName, job.mId.dmId);
 		} else {
 			emit clearStatusBarAndShowDialog(job.mId.dmId, errMsg);
@@ -881,6 +882,10 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 		QDateTime newDeliveryTime(timevalToDateTime(
 		    message->envelope->dmDeliveryTime));
 		QString secKeyAfterDonwload(dbSet.secondaryKey(newDeliveryTime));
+		/*
+		 * Secondary keys may be the sam for valid and invalid
+		 * delivery time when storing into single file.
+		 */
 		if (secKeyBeforeDownload != secKeyAfterDonwload) {
 			/*
 			 * The message was likely moved from invalid somewhere
@@ -892,12 +897,11 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 				db->msgsDeleteMessageData(mId.dmId);
 			}
 
-			/* Update message delivery time. */
-			mId.deliveryTime = newDeliveryTime;
-
 			/* Store envelope in new location. */
 			storeEnvelope(msgDirect, dbSet, message->envelope);
 		}
+		/* Update message delivery time. */
+		mId.deliveryTime = newDeliveryTime;
 	}
 
 	/* Store the message. */
