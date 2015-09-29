@@ -5066,7 +5066,8 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	/* Create a new account database into new directory */
 	} else if ("new" == action) {
 		if (dbSet->reopenLocation(newDir,
-		        MessageDbSet::DO_SINGLE_FILE)) {
+		        MessageDbSet::DO_SINGLE_FILE,
+		        MessageDbSet::CM_CREATE_EMPTY_CURRENT)) {
 			itemSettings.setDbDir(newDir);
 			saveSettings();
 
