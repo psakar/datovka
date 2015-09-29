@@ -712,6 +712,17 @@ private:
 	void showStatusTextPermanently(const QString &qStr);
 
 	/*!
+	 * @brief Return index for yearly entry with given properties.
+	 */
+	QModelIndex accountYearlyIndex(const QString &userName,
+	    const QString &year, int msgType);
+
+	/*!
+	 * @brief Return index for message with given properties.
+	 */
+	QModelIndex messageIndex(qint64 msgId) const;
+
+	/*!
 	 * @brief Check message time stamp expiration for account.
 	 */
 	void checkMsgsTmstmpExpiration(const QString &userName,

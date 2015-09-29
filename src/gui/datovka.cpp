@@ -1536,25 +1536,20 @@ void MainWindow::messageItemRestoreSelectionAfterLayoutChange(void)
 
 /* ========================================================================= */
 /*
- * Select account via userName and focus on message ID from search selection.
+ * Return index for yearly entry with given properties.
  */
-void MainWindow::messageItemFromSearchSelection(const QString &userName,
-    qint64 msgId, const QString &deliveryYear, int msgType)
+QModelIndex MainWindow::accountYearlyIndex(const QString &userName,
+    const QString &year, int msgType)
 /* ========================================================================= */
 {
-	debugSlotCall();
-
-	/* If the ID does not exist then don't search for it. */
-	if (-1 == msgId) {
-		return;
-	}
+	debugFuncCall();
 
 	/* first step: search correspond account index from username */
 	QModelIndex acntIdxTop =
 	    m_accountModel.indexFromItem(itemFromUserName(userName));
 
 	if (!acntIdxTop.isValid()) {
-		return;
+		return QModelIndex();
 	}
 
 	/* second step: obtain index of received or sent messages */
@@ -1568,27 +1563,33 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 		break;
 	default:
 		Q_ASSERT(0);
-		return;
+		return QModelIndex();
 		break;
 	}
 
 	/* third step: obtain index with given year */
 	int childRow = 0;
 	QModelIndex yearIdx = typeIdx.child(childRow, 0);
-	while (yearIdx.isValid() &&
-	       (yearIdx.data().toString() != deliveryYear)) {
+	while (yearIdx.isValid() && (yearIdx.data().toString() != year)) {
 		yearIdx = yearIdx.sibling(++childRow, 0);
 	}
 
 	if (!yearIdx.isValid()) {
-		Q_ASSERT(0);
-		return;
+		return QModelIndex();
 	}
 
-	/* fourth step: find and select message according to msgId */
-	QModelIndex msgIdx;
-	ui->accountList->setCurrentIndex(yearIdx);
-	accountItemCurrentChanged(yearIdx);
+	return yearIdx;
+}
+
+
+/* ========================================================================= */
+/*
+ * Return index for message with given properties.
+ */
+QModelIndex MainWindow::messageIndex(qint64 msgId) const
+/* ========================================================================= */
+{
+	debugFuncCall();
 
 	const QAbstractItemModel *model = ui->messageList->model();
 	Q_ASSERT(0 != model);
@@ -1597,7 +1598,7 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 
 	if (0 == rowCount) {
 		/* Do nothing on empty model. */
-		return;
+		return QModelIndex();
 	}
 
 	/* Find and select the message with the ID. */
@@ -1607,13 +1608,43 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 		 * Eliminate index copying, use smarter search.
 		 */
 		if (model->index(row, 0).data().toLongLong() == msgId) {
-			msgIdx = model->index(row, 0);
-			break;
+			return model->index(row, 0);
 		}
 	}
 
-	if (msgIdx.isValid()) { /*(row < rowCount)*/
-		/* Message found. */
+	return QModelIndex();
+}
+
+
+/* ========================================================================= */
+/*
+ * Select account via userName and focus on message ID from search selection.
+ */
+void MainWindow::messageItemFromSearchSelection(const QString &userName,
+    qint64 msgId, const QString &deliveryYear, int msgType)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* If the ID does not exist then don't search for it. */
+	if (-1 == msgId) {
+		return;
+	}
+
+	/* first step: navigate year entry in account list */
+	QModelIndex yearIdx(accountYearlyIndex(userName, deliveryYear,
+	    msgType));
+	if (!yearIdx.isValid()) {
+		return;
+	}
+
+	ui->accountList->setCurrentIndex(yearIdx);
+	accountItemCurrentChanged(yearIdx);
+
+	/* second step: find and select message according to msgId */
+	QModelIndex msgIdx(messageIndex(msgId));
+
+	if (msgIdx.isValid()) {
 		ui->messageList->setCurrentIndex(msgIdx);
 		ui->messageList->scrollTo(msgIdx);
 	}
@@ -4734,25 +4765,7 @@ void MainWindow::openSendMessageDialog(int action)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		/*
-		 * Message model must be regenerated to show the sent if
-		 * residing on sent messages.
-		 *
-		 * TODO -- Regenerating year list (as this could add entries).
-		 */
-		if (selectedAcntIndex.isValid()) {
-			switch (AccountModel::nodeType(selectedAcntIndex)) {
-			case AccountModel::nodeRecentSent:
-			case AccountModel::nodeAll:
-			case AccountModel::nodeSent:
-			case AccountModel::nodeSentYear:
-				accountItemCurrentChanged(selectedAcntIndex);
-				break;
-			default:
-				/* Do nothing. */
-				break;
-			}
-		}
+		refreshAccountListFromWorker(userName);
 	}
 
 	if (!globPref.use_global_paths) {
@@ -5475,22 +5488,77 @@ void MainWindow::refreshAccountListFromWorker(const QString &userName)
 {
 	debugSlotCall();
 
-	QModelIndex acntTopIdx =
-	    m_accountModel.indexFromItem(itemFromUserName(userName));
+	QModelIndex selectedIdx(ui->accountList->currentIndex());
+	QModelIndex selectedTopIdx(AccountModel::indexTop(selectedIdx));
+
+	QModelIndex acntTopIdx(
+	    m_accountModel.indexFromItem(itemFromUserName(userName)));
 
 	if (!acntTopIdx.isValid()) {
 		Q_ASSERT(0);
 		return;
 	}
 
+	AccountModel::NodeType nodeType = AccountModel::nodeUnknown;
+	MessageDb::MessageType msgType;
+	QString year;
+	qint64 dmId = -1;
+
+	if (selectedTopIdx == acntTopIdx) {
+		/* Currently selected is the one being processed. */
+		nodeType = AccountModel::nodeType(selectedIdx);
+		switch (nodeType) {
+		case AccountModel::nodeReceivedYear:
+			year = selectedIdx.data().toString();
+			msgType = MessageDb::TYPE_RECEIVED;
+			break;
+		case AccountModel::nodeSentYear:
+			year = selectedIdx.data().toString();
+			msgType = MessageDb::TYPE_SENT;
+			break;
+		default:
+			nodeType = AccountModel::nodeUnknown;
+			break;
+		}
+
+		if (nodeType != AccountModel::nodeUnknown) {
+			QModelIndexList firstMsgColumnIdxs =
+			    ui->messageList->selectionModel()->selectedRows(0);
+			if (firstMsgColumnIdxs.size() == 1) {
+				QModelIndex msgIdx(firstMsgColumnIdxs.first());
+				if (msgIdx.isValid()) {
+					dmId = msgIdx.sibling(msgIdx.row(), 0)
+					    .data().toLongLong();
+				}
+			}
+		}
+	}
+
 	/* Redraw views' content. */
 	regenerateAccountModelYears(acntTopIdx);
+
 	/*
 	 * Force repaint.
 	 * TODO -- A better solution?
 	 */
 	ui->accountList->repaint();
-	accountItemCurrentChanged(ui->accountList->currentIndex());
+	if ((nodeType != AccountModel::nodeUnknown) && !year.isEmpty()) {
+		QModelIndex yearIdx(accountYearlyIndex(userName, year,
+		    msgType));
+
+		if (yearIdx.isValid()) {
+			ui->accountList->setCurrentIndex(yearIdx);
+			accountItemCurrentChanged(selectedIdx);
+		}
+
+		if (dmId != -1) {
+			QModelIndex msgIdx(messageIndex(dmId));
+			if (msgIdx.isValid()) {
+				ui->messageList->setCurrentIndex(msgIdx);
+				ui->messageList->scrollTo(msgIdx);
+			}
+		}
+	}
 }
 
 
