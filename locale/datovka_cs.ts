@@ -2294,22 +2294,22 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
     <message>
         <location filename="../src/gui/datovka.cpp" line="3624"/>
         <source>The existing database files %1 in &apos;%2&apos; are going to be used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Existující databázové soubory %1 v &apos;%2&apos; budou použity.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3655"/>
         <source>Database files are missing in &apos;%1&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory chybí v &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3692"/>
         <source>Some databases of %1 in &apos;%2&apos; are not a file.</source>
-        <translation type="unfinished"></translation>
+        <translation>Některé databáze %1 v &apos;%2&apos; asi nejsou soubory.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3722"/>
         <source>Some databases of &apos;%1&apos; in &apos;%2&apos; cannot be accessed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Některé databáze %1 v &apos;%2&apos; nelze zpřístupnit.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3725"/>
@@ -3727,64 +3727,76 @@ Change password now?</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3764"/>
         <source>Some databases of %1 in &apos;%2&apos; cannot be used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Některé databáze %1 v &apos;%2&apos; nelze použít.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3800"/>
         <source>Conflicting databases %1 in &apos;%2&apos; cannot be used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konfliktní databáze %1 v &apos;%2&apos; nelze použít.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3803"/>
         <source>Please remove the conflicting files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prosím, odstraňte konfliktní databázové soubory.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3840"/>
         <source>Database files in &apos;%1&apos; cannot be created or are corrupted.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory v &apos;%1&apos; nelze vytvořit nebo jsou poškozené.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5079"/>
         <source>Database files for &apos;%1&apos; have been successfully moved to
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; byl úspěšně přesunuty do
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5085"/>
         <source>Database files for &apos;%1&apos; could not be moved to
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; nemohly být přesunuty do
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5104"/>
         <source>Database files for &apos;%1&apos; have been successfully copied to
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; byl úspěšně překopírovány do
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5110"/>
         <source>Database files for &apos;%1&apos; could not be copied to
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; nemohli být překopírovány do
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5129"/>
         <source>New database files for &apos;%1&apos; have been successfully created in
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; byl úspěšně vytvořeny v
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5136"/>
         <source>New database files for &apos;%1&apos; could not be created in
 
 &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Databázové soubory pro &apos;%1&apos; nemohli být vytvořeny v
+
+&apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="6519"/>
