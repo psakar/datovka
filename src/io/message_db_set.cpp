@@ -56,7 +56,7 @@ MessageDbSet::~MessageDbSet(void)
 }
 
 bool MessageDbSet::openLocation(const QString &newLocDir,
-   enum Organisation organisation)
+   enum Organisation organisation, enum CreationManner manner)
 {
 	QStringList matchingFiles;
 
@@ -85,13 +85,23 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		if (existingOrganisation != DO_UNKNOWN) {
 			organisation = existingOrganisation;
 		} else {
-			logError("Unspecified organisation of database '%s' in '%s'.",
+			logErrorNL("Unspecified organisation of database '%s' in '%s'.",
 			    m_primaryKey.toUtf8().constData(),
 			    newLocDir.toUtf8().constData());
 			return false;
 		}
 	} else if (organisation != existingOrganisation) {
-		logError("Differently organised database '%s' in '%s' already exists.",
+		logErrorNL("Differently organised database '%s' in '%s' already exists.",
+		    m_primaryKey.toUtf8().constData(),
+		    newLocDir.toUtf8().constData());
+		return false;
+	}
+
+	matchingFiles = existingDbFileNamesInLocation(newLocDir,
+	    m_primaryKey, m_testing, organisation, true);
+
+	if ((manner == CM_MUST_EXIST) && matchingFiles.isEmpty()) {
+		logErrorNL("No matching database file for '%s' in '%s'.",
 		    m_primaryKey.toUtf8().constData(),
 		    newLocDir.toUtf8().constData());
 		return false;
@@ -107,9 +117,6 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 
 	/* Remove all elements from this map. */
 	this->clear();
-
-	matchingFiles = existingDbFileNamesInLocation(newLocDir,
-	    m_primaryKey, m_testing, organisation, true);
 
 	/* There may be no matching files. */
 
@@ -129,16 +136,32 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 	m_organisation = organisation;
 
 	MessageDb *db = NULL;
-	/* Load files that have been found. */
-	foreach (const QString &fileName, matchingFiles) {
-		QString secondaryKey = secondaryKeyFromFileName(fileName,
-		    organisation);
-		Q_ASSERT(!secondaryKey.isNull());
-		db = _accessMessageDb(secondaryKey, false);
+	if (matchingFiles.size()) {
+		/* Load files that have been found. */
+		foreach (const QString &fileName, matchingFiles) {
+			QString secondaryKey = secondaryKeyFromFileName(
+			    fileName, organisation);
+			Q_ASSERT(!secondaryKey.isNull());
+
+			db = _accessMessageDb(secondaryKey, false);
+			if (db == NULL) {
+				logErrorNL("Failed opening database file '%s'.",
+				    fileName.toUtf8().constData());
+				/* TODO -- How can be this operation aborted? */
+			}
+		}
+	} else if (manner == CM_CREATE_EMPTY_CURRENT) {
+		/* Create empty file matching current date. */
+		QString secKey = secondaryKey(QDateTime::currentDateTime());
+		Q_ASSERT(!secKey.isNull());
+
+		db = _accessMessageDb(secKey, true);
 		if (db == NULL) {
+			QString fileName(constructDbFileName(m_locDir,
+			    m_primaryKey, secKey, m_testing, m_organisation));
 			logErrorNL("Failed opening database file '%s'.",
 			    fileName.toUtf8().constData());
-			/* TODO -- How can be this operation aborted? */
+			return false;
 		}
 	}
 
@@ -241,13 +264,12 @@ bool MessageDbSet::moveToLocation(const QString &newLocDir)
 		}
 		m_locDir = newLocDir;
 	}
-	return true;
 
 	return true;
 }
 
 bool MessageDbSet::reopenLocation(const QString &newLocDir,
-    enum Organisation organisation)
+    enum Organisation organisation, enum CreationManner manner)
 {
 	if (m_organisation == DO_UNKNOWN) {
 		return false;
@@ -273,6 +295,22 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 
 	m_locDir = newLocDir;
 	m_organisation = organisation;
+
+	MessageDb *db = NULL;
+	if (manner == CM_CREATE_EMPTY_CURRENT) {
+		/* Create empty file matching current date. */
+		QString secKey = secondaryKey(QDateTime::currentDateTime());
+		Q_ASSERT(!secKey.isNull());
+
+		db = _accessMessageDb(secKey, true);
+		if (db == NULL) {
+			QString fileName(constructDbFileName(m_locDir,
+			    m_primaryKey, secKey, m_testing, m_organisation));
+			logErrorNL("Failed opening database file '%s'.",
+			    fileName.toUtf8().constData());
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -499,14 +537,14 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 		}
 	} else if (manner == CM_CREATE_EMPTY_CURRENT) {
 		/* Create empty file matching current date. */
-		QString secondaryKey = dbSet->secondaryKey(
+		QString secKey = dbSet->secondaryKey(
 		    QDateTime::currentDateTime());
-		Q_ASSERT(!secondaryKey.isNull());
+		Q_ASSERT(!secKey.isNull());
 
-		db = dbSet->_accessMessageDb(secondaryKey, true);
+		db = dbSet->_accessMessageDb(secKey, true);
 		if (db == NULL) {
 			QString fileName(constructDbFileName(dbSet->m_locDir,
-			    dbSet->m_primaryKey, secondaryKey, dbSet->m_testing,
+			    dbSet->m_primaryKey, secKey, dbSet->m_testing,
 			    dbSet->m_organisation));
 			logErrorNL("Failed opening database file '%s'.",
 			    fileName.toUtf8().constData());

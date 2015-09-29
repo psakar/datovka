@@ -5113,7 +5113,8 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	/* Create a new account database into new directory */
 	} else if ("new" == action) {
 		if (dbSet->reopenLocation(newDir,
-		        MessageDbSet::DO_SINGLE_FILE)) {
+		        MessageDbSet::DO_YEARLY,
+		        MessageDbSet::CM_CREATE_EMPTY_CURRENT)) {
 			itemSettings.setDbDir(newDir);
 			saveSettings();
 
@@ -10133,7 +10134,8 @@ bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir) {
 		return false;
 	}
 
-	if (!dbset->openLocation(dbDir, dbset->organisation())) {
+	if (!dbset->openLocation(dbDir, dbset->organisation(),
+	    MessageDbSet::CM_MUST_EXIST)) {
 		return false;
 	}
 
@@ -10301,7 +10303,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	}
 
 	/* set back original database path */
-	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation())) {
+	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation(),
+	        MessageDbSet::CM_CREATE_ON_DEMAND)) {
 		msgText = tr("Error to set original database for "
 		    "account '%1'").arg(userName);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);

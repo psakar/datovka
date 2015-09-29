@@ -104,10 +104,11 @@ public:
 	 *
 	 * @param[in] newLocDir    New location directory.
 	 * @paran[in] organisation Organisation type.
+	 * @param[in] manner       How to treat files when opening database.
 	 * @reurn True if database was opened.
 	 */
 	bool openLocation(const QString &newLocDir,
-	   enum Organisation organisation);
+	   enum Organisation organisation, enum CreationManner manner);
 
 	/*!
 	 * @brief Creates a copy of the current database into a given new
@@ -130,12 +131,15 @@ public:
 	 * @brief Re-open a new empty database file. The old file(s) is(are)
 	 *     left untouched. The new location is emptied.
 	 *
-	 * @param[in] newLocDir New location directory.
+	 * @note The CM_MUST_EXIST value of `manner` parameter is ignored.
+	 *
+	 * @param[in] newLocDir    New location directory.
 	 * @paran[in] organisation Organisation type.
+	 * @param[in] manner       How to treat files when opening database.
 	 * @return True if database was re-opened.
 	 */
 	bool reopenLocation(const QString &newLocDir,
-	    enum Organisation organisation);
+	    enum Organisation organisation, enum CreationManner manner);
 
 	/*!
 	 * @brief Delete associated message db files in location.
