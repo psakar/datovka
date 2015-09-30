@@ -1099,7 +1099,7 @@ private:
 	 * @brief Import of messages from database to selected account.
 	 */
 	void doMsgsImportFromDatabase(const QStringList &dbFileList,
-	    const QString &aUserName);
+	    const QString &userName);
 
 	/*!
 	 * @brief Split database filename into mandatory entries.
@@ -1136,9 +1136,11 @@ private:
 	 *    database splitting
 	 * @param[in] dbset - MessageDbSet.
 	 * @param[in] dbDir - origin database dir.
+	 * @param[in] userName - username of account.
 	 * @return true if success
 	 */
-	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir);
+	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
+	    const QString &userName);
 
 
 	QString m_confDirName; /*!< Configuration directory location. */

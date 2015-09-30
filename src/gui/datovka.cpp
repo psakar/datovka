@@ -9954,7 +9954,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
  *  Import of messages from database to selected account
  */
 void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
-    const QString &aUserName)
+    const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -9972,7 +9972,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 	for (int i = 0; i < dbFileList.count(); ++i) {
 
 		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2").arg(aUserName));
+		    "to account %2").arg(dbFileList.at(i)).arg(userName));
 
 		errImportList.clear();
 		sMsgCnt = 0;
@@ -9985,14 +9985,14 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		dbFileName = file.fileName();
 
 		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2 is running").arg(dbFileName).arg(aUserName));
+		    "to account %2 is running").arg(dbFileName).arg(userName));
 
 		/* parse and check the import database file name */
 		if (!isValidDatabaseFileName(dbFileName, dbUserName,
 		    dbYearFlag, dbTestingFlag, msg)) {
 			qDebug() << msg;
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(aUserName),
+			    tr("Database import: %1").arg(userName),
 			    tr("File") + ": " + dbFileList.at(i) +
 			    "\n\n" + msg,
 			    QMessageBox::Ok);
@@ -10000,13 +10000,13 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		}
 
 		/* check if username of db file is relevant to account */
-		if (aUserName != dbUserName) {
+		if (userName != dbUserName) {
 			msg = tr("This database file cannot import into "
 			    "selected account because username of account "
 			    "and username of database file do not correspond.");
 			qDebug() << msg;
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(aUserName),
+			    tr("Database import: %1").arg(userName),
 			    tr("File") + ": " + dbFileList.at(i) +
 			    "\n\n" + msg,
 			    QMessageBox::Ok);
@@ -10020,7 +10020,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		if (0 == srcDbSingle) {
 			msg = tr("Failed to open import database file.");
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(aUserName),
+			    tr("Database import: %1").arg(userName),
 			    tr("File") + ": " + dbFileList.at(i) +
 			    "\n\n" + msg,
 			    QMessageBox::Ok);
@@ -10032,19 +10032,19 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 
 		/* get databox ID for test if imported message is
 		 * relevant to destination account */
-		QString dboxId = globAccountDbPtr->dbId(aUserName + "___True");
+		QString dboxId = globAccountDbPtr->dbId(userName + "___True");
 
 		/* get all messages from source single database */
 		QList<MessageDb::MsgId> msgIdList =
 		    srcDbSingle->getAllMessageIDsFromDB();
 
 		/* get database set for selected account */
-		MessageDbSet *dstDbSet = accountDbSet(aUserName, this);
+		MessageDbSet *dstDbSet = accountDbSet(userName, this);
 		if (0 == dstDbSet) {
 			msg = tr("Failed to open database file of "
-			    "target account '%1'").arg(aUserName);
+			    "target account '%1'").arg(userName);
 			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(aUserName),
+			    tr("Database import: %1").arg(userName),
 			    tr("File") + ": " + dbFileList.at(i) +
 			    "\n\n" + msg,
 			    QMessageBox::Ok);
@@ -10057,16 +10057,16 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 
 			showStatusTextPermanently(tr("Importing of message %1"
 			    " into account %2 ...").arg(mId.dmId)
-			    .arg(aUserName));
+			    .arg(userName));
 
 			/* select target database via delivery time for account */
 			MessageDb *dstDb =
 			    dstDbSet->accessMessageDb(mId.deliveryTime, true);
 			if (0 == dstDb) {
 				msg = tr("Failed to open database file of "
-				    "target account '%1'").arg(aUserName);
+				    "target account '%1'").arg(userName);
 				QMessageBox::critical(this,
-				    tr("Database import: %1").arg(aUserName),
+				    tr("Database import: %1").arg(userName),
 				    tr("File") + ": " + dbFileList.at(i) +
 				    "\n\n" + msg,
 				    QMessageBox::Ok);
@@ -10112,7 +10112,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		msgBox.setIcon(QMessageBox::Information);
 		msgBox.setWindowTitle(tr("Messages import result"));
 		msg = tr("Import of messages into account '%1' "
-		    "finished with result:").arg(aUserName) +
+		    "finished with result:").arg(userName) +
 		    "<br/><br/>" + tr("Source database file: '%1'").
 		    arg(dbFileList.at(i));
 		msgBox.setText(msg);
@@ -10133,10 +10133,13 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		}
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2 finished").arg(dbFileName).arg(aUserName));
+		    "to account %2 finished").arg(dbFileName).arg(userName));
 		msgBox.exec();
 	}
 	statusBar->clearMessage();
+
+	/* update account model */
+	refreshAccountListFromWorker(userName);
 }
 
 
@@ -10198,7 +10201,8 @@ void MainWindow::showErrMessageBox(const QString &msgTitle,
 /*
  * Set back original database path if error during database splitting.
  */
-bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir) {
+bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
+    const QString &userName) {
 /* ========================================================================= */
 
 	if (0 == dbset) {
@@ -10210,7 +10214,9 @@ bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir) {
 		return false;
 	}
 
-	/* TODO - update account model */
+	/* update account model */
+	refreshAccountListFromWorker(userName);
+
 	return true;
 }
 
@@ -10228,7 +10234,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	QString newDbDir;
 	QString msgText;
 	QString msgTitle = tr("Database split: %1").arg(userName);
-	QString msgInformativeText = tr("Action will be canceled.");
+	QString msgInformativeText = tr("Action was canceled and original "
+	    "database file was returned back.");
 
 	/* get current db file location */
 	AccountModel::SettingsMap &itemSettings =
@@ -10245,7 +10252,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		flags |= MDS_FLG_TESTING;
 	}
 
-	/* get message db set based on username */
+	/* get origin message db set based on username */
 	MessageDbSet *msgDbSet = accountDbSet(userName, this);
 	if (0 == msgDbSet) {
 		msgText = tr("Database file for account '%1' "
@@ -10288,26 +10295,26 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		}
 	} while (dbDir == newDbDir);
 
-	/* remember path */
+	/* remember import path */
 	m_on_import_database_dir_activate = newDbDir;
 
 	showStatusTextPermanently(tr("Copying origin database file to selected "
 	    "location"));
 
-	/* copy current account dbset to new location */
+	/* copy current account dbset to new location and open here */
 	if (!msgDbSet->copyToLocation(newDbDir)) {
 		msgText = tr("Cannot copy database file for account '%1' "
 		    "to '%2'").arg(userName).arg(newDbDir);
 		msgInformativeText = tr("Probably not enough disk space.") +
-		    + " " + tr("Action will be canceled.");
+		    + " " + msgInformativeText;
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
 
-	/* get message db for split */
+	/* get message db for splitting */
 	MessageDb *messageDb = msgDbSet->accessMessageDb(QDateTime(), false);
 	if (0 == messageDb) {
-		setBackOriginDb(msgDbSet, dbDir);
+		setBackOriginDb(msgDbSet, dbDir, userName);
 		msgText = tr("Database file for account '%1' "
 		    "does not exist.").arg(userName);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
@@ -10328,7 +10335,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	dstDbSet = temporaryDbCont.accessDbSet(newDbDir, userName,
 	    flags, MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
 	if (0 == dstDbSet) {
-		setBackOriginDb(msgDbSet, dbDir);
+		setBackOriginDb(msgDbSet, dbDir, userName);
 		msgText = tr("Set of new database files for account '%1' "
 		    "could not be created.").arg(userName);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
@@ -10352,7 +10359,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		MessageDb *dstDb =
 		    dstDbSet->accessMessageDb(fakeTime, true);
 		if (0 == dstDb) {
-			setBackOriginDb(msgDbSet, dbDir);
+			setBackOriginDb(msgDbSet, dbDir, userName);
 			msgText = tr("New database file for account '%1' "
 			    "corresponds with year '%2' could not be created.").
 			    arg(userName).arg(yearList.at(i));
@@ -10364,7 +10371,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		/* copy all message data to new database */
 		if (!messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" +
 		    newDbName + "___" + testAcnt + ".db",yearList.at(i))) {
-			setBackOriginDb(msgDbSet, dbDir);
+			setBackOriginDb(msgDbSet, dbDir, userName);
 			msgText = tr("Messages correspond with year "
 			    "'%1' for account '%2' were not copied.")
 			    .arg(yearList.at(i)).arg(userName);
@@ -10373,26 +10380,56 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		}
 	}
 
-	/* set back original database path */
-	if (!msgDbSet->reopenLocation(dbDir, msgDbSet->organisation(),
-	        MessageDbSet::CM_CREATE_ON_DEMAND)) {
-		msgText = tr("Error to set original database for "
+	/* set back original database path and removed previous connection */
+	if (!msgDbSet->openLocation(dbDir, msgDbSet->organisation(),
+	    MessageDbSet::CM_MUST_EXIST)) {
+		msgText = tr("Error to set and open original database for "
 		    "account '%1'").arg(userName);
+		msgInformativeText = tr("Action was canceled and the origin "
+		    "database is now used from location:\n'%1'").arg(newDbDir);
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
 
-	showStatusTextPermanently(tr("Replacing of new database files to "
-	    "origin database location"));
-
-	/* copy new databases to original single path */
+	/* move new database set to origin database path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
 		msgText = tr("Error when move new databases for "
 		    "account '%1'").arg(userName);
+		msgInformativeText = tr("Action was canceled because new "
+		    "databases cannot move from\n'%1'\nto origin path\n'%2'")
+		    .arg(newDbDir).arg(dbDir) + "\n\n" +
+		    tr("Probably not enough disk space. The origin database "
+		    "is still used.");
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
 
+	/* delete origin database file */
+	if (!msgDbSet->deleteLocation()) {
+		msgText = tr("Error when removed origin database for "
+		    "account '%1'").arg(userName);
+		msgInformativeText = tr("Action was canceled. Please, remove "
+		    "the origin database file manually from "
+		    "origin location:\n'%1'").arg(dbDir);
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
+	}
+
+	/* open new database set in the origin location */
+	if (!msgDbSet->openLocation(dbDir, msgDbSet->organisation(),
+	    MessageDbSet::CM_MUST_EXIST)) {
+		msgText = tr("A problem when opening new databases for "
+		    "account '%1'").arg(userName);
+		msgInformativeText = tr("Action was done but it cannot open "
+		    "new database files. Please, restart the application.");
+		showErrMessageBox(msgTitle, msgText, msgInformativeText);
+		return false;
+	}
+
+	/* refresh account model and account list */
+	refreshAccountListFromWorker(userName);
+
+	/* show final success notification */
 	showStatusTextWithTimeout(tr("Split of message database finished"));
 	msgText = tr("Congratulation: message database for "
 	    "account '%1' was split successfully. Please, restart the "
@@ -10407,8 +10444,6 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
 	statusBar->clearMessage();
-
-	/* TODO - update account model */
 
 	return true;
 }
