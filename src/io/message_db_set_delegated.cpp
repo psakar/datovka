@@ -371,6 +371,12 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 		foreach (const QString &str, list) {
 			reversed.prepend(str);
 		}
+		/* Keep invalid year always last. */
+		if ((reversed.size() > 1) &&
+		    (reversed.first() == INVALID_YEAR)) {
+			reversed.removeFirst();
+			reversed.append(INVALID_YEAR);
+		}
 		return reversed;
 	}
 
@@ -446,6 +452,12 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 		QStringList reversed;
 		foreach (const QString &str, list) {
 			reversed.prepend(str);
+		}
+		/* Keep invalid year always last. */
+		if ((reversed.size() > 1) &&
+		    (reversed.first() == INVALID_YEAR)) {
+			reversed.removeFirst();
+			reversed.append(INVALID_YEAR);
 		}
 		list = reversed;
 	}
