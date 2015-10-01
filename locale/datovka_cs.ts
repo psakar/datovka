@@ -3018,7 +3018,7 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10398"/>
+        <location filename="../src/gui/datovka.cpp" line="10401"/>
         <source>Action was canceled because new databases cannot move from
 &apos;%1&apos;
 to origin path
@@ -3027,6 +3027,11 @@ to origin path
 &apos;%1&apos;
 do původního umístění
 &apos;%2&apos;</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="10424"/>
+        <source>Opening of new database files</source>
+        <translation>Otevírání nových databázových souborů</translation>
     </message>
     <message>
         <source>Action will be canceled.</source>
@@ -3103,11 +3108,12 @@ do původního umístění
         <translation type="vanished">Chyba při nastavení původní databáze pro účet &apos;%1&apos;</translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="10394"/>
         <source>Replacing of new database files to origin database location</source>
-        <translation type="vanished">Přemisťování nových databázových souborů do původní složky</translation>
+        <translation>Přemisťování nových databázových souborů do původní složky</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10396"/>
+        <location filename="../src/gui/datovka.cpp" line="10399"/>
         <source>Error when move new databases for account &apos;%1&apos;</source>
         <translation>Chyba při přesouvání nových databázových souborů pro účet &apos;%1&apos;</translation>
     </message>
@@ -3121,44 +3127,53 @@ do původního umístění
 &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10401"/>
+        <location filename="../src/gui/datovka.cpp" line="10404"/>
         <source>Probably not enough disk space. The origin database is still used.</source>
         <translation>Pravděpodobně není dostatek místa na disku. Bude použita původní databáze.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10409"/>
+        <location filename="../src/gui/datovka.cpp" line="10410"/>
+        <source>Deleting of old database from origin location</source>
+        <translation>Mazání staré databáze z původní lokace</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="10415"/>
         <source>Error when removed origin database for account &apos;%1&apos;</source>
         <translation>Nepodařilo se odstranit původní databázi pro účet &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10411"/>
+        <location filename="../src/gui/datovka.cpp" line="10417"/>
         <source>Action was canceled. Please, remove the origin database file manually from origin location:
 &apos;%1&apos;</source>
         <translation>Akce byla zrušena. Prosím, odstraňte ručně původní databázi z adresáře:
 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10421"/>
+        <source>Open new database files from origin location</source>
+        <translation type="obsolete"> nových databázových souborů z původní lokace</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="10429"/>
         <source>A problem when opening new databases for account &apos;%1&apos;</source>
         <translation>Objevil se problém s otevřením nových databázových souborů pro účet &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10423"/>
+        <location filename="../src/gui/datovka.cpp" line="10431"/>
         <source>Action was done but it cannot open new database files. Please, restart the application.</source>
         <translation>Akce rozdělení sice proběhla, nepodařilo se však otevřít nové databáze. Prosím, restartujte aplikaci.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10433"/>
+        <location filename="../src/gui/datovka.cpp" line="10441"/>
         <source>Split of message database finished</source>
         <translation>Rozdělení databáze zpráv skončilo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10434"/>
+        <location filename="../src/gui/datovka.cpp" line="10442"/>
         <source>Congratulation: message database for account &apos;%1&apos; was split successfully. Please, restart the application for loading of new databases.</source>
         <translation>Gratulujeme: databáze zpráv pro účet &apos;%1&apos; byla úspěšně rozdělena. Prosím, restartujte aplikaci pro načtení nových databází zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="10437"/>
+        <location filename="../src/gui/datovka.cpp" line="10445"/>
         <source>Note: Original database file was backup to:</source>
         <translation>Původní databáze byla přesunuta do:</translation>
     </message>

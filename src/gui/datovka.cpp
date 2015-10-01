@@ -10391,6 +10391,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		return false;
 	}
 
+	showStatusTextPermanently(tr("Replacing of new database files to "
+	    "origin database location"));
+
 	/* move new database set to origin database path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
 		msgText = tr("Error when move new databases for "
@@ -10404,6 +10407,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		return false;
 	}
 
+	showStatusTextPermanently(tr("Deleting of old database from "
+	    "origin location"));
+
 	/* delete origin database file */
 	if (!msgDbSet->deleteLocation()) {
 		msgText = tr("Error when removed origin database for "
@@ -10415,6 +10421,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		return false;
 	}
 
+	showStatusTextPermanently(tr("Opening of new database files"));
+
 	/* open new database set in the origin location */
 	if (!msgDbSet->openLocation(dbDir, msgDbSet->organisation(),
 	    MessageDbSet::CM_MUST_EXIST)) {
@@ -10425,9 +10433,6 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
-
-	/* refresh account model and account list */
-	refreshAccountListFromWorker(userName);
 
 	/* show final success notification */
 	showStatusTextWithTimeout(tr("Split of message database finished"));
@@ -10444,6 +10449,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
 	statusBar->clearMessage();
+
+	/* refresh account model and account list */
+	refreshAccountListFromWorker(userName);
 
 	return true;
 }
