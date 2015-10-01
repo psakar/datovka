@@ -4,6 +4,8 @@ SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+OSX_MIN_VER=10.6
+MAKEOPTS="-j 2"
 
 SDK_VER="$1"
 if [ "x${SDK_VER}" = "x" ]; then
@@ -71,8 +73,8 @@ if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --static"
 
-	./configure ${CONFOPTS} --archs="-arch i386"
-	make && make install || exit 1
+	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} --archs="-arch i386"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -94,8 +96,11 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
-	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
-	make && make install || exit 1
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -117,8 +122,11 @@ if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
-	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
-	make && make install || exit 1
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -140,8 +148,11 @@ if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
-	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
-	make && make install || exit 1
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -165,8 +176,11 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --without-python"
 	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 
-	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386"
-	make && make install || exit 1
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -190,10 +204,12 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
-	./configure ${CONFOPTS} CFLAGS="-arch i386" CXXFLAGS="-arch i386" \
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
 	    CPPFLAGS="-I${BUILTDIR}/include" \
-	    LDFLAGS="-L${BUILTDIR}/lib"
-	make && make install || exit 1
+	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -220,10 +236,10 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --disable-ldap"
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
-	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT}"
-	make && make install || exit 1
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 fi
@@ -244,7 +260,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	# no-asm
 	# darwin-i386-cc
 	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 --prefix="${BUILTDIR}"
-	make && make install_sw || exit 1
+	make ${MAKEOPTS} && make install_sw || exit 1
 fi
 
 
@@ -275,11 +291,11 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
 	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
-	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
-	make && make install || exit 1
+	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 
@@ -308,11 +324,11 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -isysroot ${ISYSROOT}" \
+	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
 	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
-	    LDFLAGS="-arch i386 -isysroot ${ISYSROOT} -L${BUILTDIR}/lib"
-	make && make install || exit 1
+	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 
