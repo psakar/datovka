@@ -362,10 +362,10 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 
 	QStringList list(years.toList());
 
-	if (ASCENDING) {
+	if (sorting == ASCENDING) {
 		list.sort();
 		return list;
-	} else if (DESCENDING) {
+	} else if (sorting == DESCENDING) {
 		list.sort();
 		QStringList reversed;
 		foreach (const QString &str, list) {
@@ -439,9 +439,9 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 
 	QStringList list(years.toList());
 
-	if (ASCENDING) {
+	if (sorting == ASCENDING) {
 		list.sort();
-	} else if (DESCENDING) {
+	} else if (sorting == DESCENDING) {
 		list.sort();
 		QStringList reversed;
 		foreach (const QString &str, list) {
