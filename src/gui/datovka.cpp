@@ -10209,6 +10209,7 @@ bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
 		return false;
 	}
 
+	/* set back and open origin database */
 	if (!dbset->openLocation(dbDir, dbset->organisation(),
 	    MessageDbSet::CM_MUST_EXIST)) {
 		return false;

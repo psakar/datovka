@@ -2923,7 +2923,7 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
     <message>
         <location filename="../src/gui/datovka.cpp" line="10058"/>
         <source>Importing of message %1 into account %2 ...</source>
-        <translation>Import zpráv z %1 do účtu %2 ...</translation>
+        <translation>Importuji zprávu %1 do účtu %2 ...</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="10079"/>
