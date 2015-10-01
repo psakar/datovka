@@ -5508,6 +5508,9 @@ void MainWindow::refreshAccountListFromWorker(const QString &userName)
 				ui->messageList->scrollTo(msgIdx);
 			}
 		}
+	} else {
+		/* Update message model. */
+		accountItemCurrentChanged(selectedIdx);
 	}
 }
 
