@@ -362,14 +362,20 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 
 	QStringList list(years.toList());
 
-	if (ASCENDING) {
+	if (sorting == ASCENDING) {
 		list.sort();
 		return list;
-	} else if (DESCENDING) {
+	} else if (sorting == DESCENDING) {
 		list.sort();
 		QStringList reversed;
 		foreach (const QString &str, list) {
 			reversed.prepend(str);
+		}
+		/* Keep invalid year always last. */
+		if ((reversed.size() > 1) &&
+		    (reversed.first() == INVALID_YEAR)) {
+			reversed.removeFirst();
+			reversed.append(INVALID_YEAR);
 		}
 		return reversed;
 	}
@@ -439,13 +445,19 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 
 	QStringList list(years.toList());
 
-	if (ASCENDING) {
+	if (sorting == ASCENDING) {
 		list.sort();
-	} else if (DESCENDING) {
+	} else if (sorting == DESCENDING) {
 		list.sort();
 		QStringList reversed;
 		foreach (const QString &str, list) {
 			reversed.prepend(str);
+		}
+		/* Keep invalid year always last. */
+		if ((reversed.size() > 1) &&
+		    (reversed.first() == INVALID_YEAR)) {
+			reversed.removeFirst();
+			reversed.append(INVALID_YEAR);
 		}
 		list = reversed;
 	}
