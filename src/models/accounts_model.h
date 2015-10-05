@@ -355,6 +355,15 @@ public:
 	QStandardItem * itemTop(QStandardItem *item);
 
 	/*!
+	 * @brief Returns pointer to related year-top item.
+	 */
+	static
+	const QStandardItem * itemTopYear(const QStandardItem *item,
+	    NodeType nodeType);
+	static
+	QStandardItem * itemTopYear(QStandardItem *item, NodeType nodeType);
+
+	/*!
 	 * @brief Returns index to related top-most item.
 	 */
 	static

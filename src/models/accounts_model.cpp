@@ -565,6 +565,72 @@ QStandardItem * AccountModel::itemTop(QStandardItem *item)
 
 /* ========================================================================= */
 /*
+ * Returns pointer to related top-most item.
+ */
+const QStandardItem * AccountModel::itemTopYear(const QStandardItem *item,
+    NodeType nodeType)
+/* ========================================================================= */
+{
+	item = itemTop(item);
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
+QStandardItem * AccountModel::itemTopYear(QStandardItem *item, NodeType nodeType)
+/* ========================================================================= */
+{
+	item = itemTop(item);
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
+/*
  * Returns index to related top-most item.
  */
 QModelIndex AccountModel::indexTop(const QModelIndex &index)
@@ -634,24 +700,7 @@ bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
     const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
-	/* Find account top. */
-	item = itemTop(item);
-
-	if (0 == item) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	if (nodeReceivedYear == nodeType) {
-		/* Get received node. */
-		item = item->child(2, 0)->child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		/* Get sent node. */
-		item = item->child(2, 0)->child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
-	}
+	item = itemTopYear(item, nodeType);
 
 	if (0 == item) {
 		Q_ASSERT(0);
@@ -692,24 +741,7 @@ bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
     const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
-	/* Find account top. */
-	item = itemTop(item);
-
-	if (0 == item) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	if (nodeReceivedYear == nodeType) {
-		/* Get received node. */
-		item = item->child(2, 0)->child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		/* Get sent node. */
-		item = item->child(2, 0)->child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
-	}
+	item = itemTopYear(item, nodeType);
 
 	if (0 == item) {
 		Q_ASSERT(0);
