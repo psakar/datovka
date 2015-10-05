@@ -6552,17 +6552,17 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
     <message>
         <location filename="../src/io/db_tables.cpp" line="261"/>
         <source>City of birth</source>
-        <translation>Rodné město</translation>
+        <translation>Místo narození</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="262"/>
         <source>County of birth</source>
-        <translation>Rodný kraj</translation>
+        <translation>Okres narození</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="263"/>
         <source>State of birth</source>
-        <translation>Rodný stát</translation>
+        <translation>Stát narození</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="264"/>
@@ -6604,7 +6604,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
     <message>
         <location filename="../src/io/db_tables.cpp" line="270"/>
         <source>Nationality</source>
-        <translation>Národnost</translation>
+        <translation>Státní občanství</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="273"/>
@@ -7105,7 +7105,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
     <message>
         <location filename="../src/io/message_db.cpp" line="1494"/>
         <source>Databox Type</source>
-        <translation>Typ schránky</translation>
+        <translation>Typ datové schránky</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1320"/>
