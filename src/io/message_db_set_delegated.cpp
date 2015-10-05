@@ -911,7 +911,7 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 		MessageDb *db = this->value(secKeys[0], NULL);
 		if (NULL == db) {
 			Q_ASSERT(0);
-			return NULL;
+			return false;
 		}
 		return db->smsgdtSetWithin90DaysReceivedLocallyRead(read);
 	} else {
@@ -1064,7 +1064,7 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
 		MessageDb *db = this->value(secKeys[0], NULL);
 		if (NULL == db) {
 			Q_ASSERT(0);
-			return NULL;
+			return false;
 		}
 		return db->smsgdtSetWithin90DaysReceivedProcessState(state);
 	} else {
