@@ -892,10 +892,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from database"),
 		    this, SLOT(prepareMsgsImportFromDatabase()));
-//		menu->addAction(QIcon(ICON_3PARTY_PATH "statistics_16.png"),
-//		    tr("Split database by years"),
-//		    this, SLOT(splitMsgDbByYearsSlot()));
-
+		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		    tr("Import messages from ZFO files"),
+		    this, SLOT(showImportZFOActionDialog()));
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
@@ -4075,6 +4074,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(splitMsgDbByYearsSlot()));
 	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
 	    this, SLOT(prepareMsgsImportFromDatabase()));
+	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
+	    SLOT(showImportZFOActionDialog()));
 #ifdef PORTABLE_APPLICATION
 	ui->actionChange_data_directory->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
@@ -4120,8 +4121,6 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(viewMessageFromZFO()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
 	    SLOT(exportCorrespondenceOverview()));
-	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
-	    SLOT(showImportZFOActionDialog()));
 	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
 	    SLOT(showMsgTmstmpExpirDialog()));
 
