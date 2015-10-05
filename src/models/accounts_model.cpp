@@ -25,6 +25,7 @@
 #include <QtAlgorithms> /* qSort() */
 #include <QDebug>
 #include <QRegExp>
+#include <QSet>
 
 #include "accounts_model.h"
 #include "src/common.h"
@@ -694,9 +695,9 @@ bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
 
 /* ========================================================================= */
 /*
- * Add year node into account.
+ * Append year node into account.
  */
-bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
+bool AccountModel::appendYear(QStandardItem *item, NodeType nodeType,
     const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
@@ -728,6 +729,80 @@ bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
 		yearItem->setData(unreadMsgs, ROLE_ACNT_UNREAD_MSGS);
 	}
 	item->appendRow(yearItem);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Update year nodes.
+ */
+bool AccountModel::updateYearNodes(QStandardItem *item, NodeType nodeType,
+    const QList< QPair<QString, int> > &yearlyUnreadList)
+/* ========================================================================= */
+{
+	typedef QPair<QString, int> YearlyContent;
+
+	item = itemTopYear(item, nodeType);
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QSet<QString> yearsCurrent;
+	for (int i = 0; i < item->rowCount(); ++i) {
+		yearsCurrent.insert(item->child(i, 0)->text());
+	}
+
+	QSet<QString> yearsNew;
+	foreach (const YearlyContent &content, yearlyUnreadList) {
+		yearsNew.insert(content.first);
+	}
+
+	QSet<QString> yearsRemoved = yearsCurrent - yearsNew;
+	QSet<QString> yearsAdded = yearsNew - yearsCurrent;
+
+	/* Remove unneeded nodes. */
+	int i = 0;
+	while (i < item->rowCount()) {
+		if (yearsRemoved.contains(item->child(i, 0)->text())) {
+			item->removeRow(i);
+		} else {
+			++i;
+		}
+	}
+
+	for (int i = 0; i < yearlyUnreadList.size(); ++i) {
+		const YearlyContent &content = yearlyUnreadList[i];
+		if (yearsAdded.contains(content.first)) {
+			/* Add year entry. */
+			QStandardItem *yearItem = new QStandardItem(content.first);
+			if (nodeReceivedYear == nodeType) {
+				yearItem->setIcon(QIcon(ICON_16x16_PATH +
+				    QString("datovka-message-download.png")));
+			} else {
+				yearItem->setIcon(QIcon(ICON_16x16_PATH +
+				    QString("datovka-message-reply.png")));
+			}
+			yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
+			if (0 < content.second) {
+				yearItem->setData(content.second, ROLE_ACNT_UNREAD_MSGS);
+			}
+			item->insertRow(i, yearItem);
+		} else {
+			/* Update year entry. */
+			Q_ASSERT(item->child(i, 0)->text() == content.first);
+			if (0 < content.second) {
+				item->child(i, 0)->setData(content.second,
+				    ROLE_ACNT_UNREAD_MSGS);
+			} else {
+				item->child(i, 0)->setData(QVariant(),
+				    ROLE_ACNT_UNREAD_MSGS);
+			}
+		}
+	}
 
 	return true;
 }
