@@ -260,6 +260,8 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	# no-asm
 	# darwin-i386-cc
 	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 --prefix="${BUILTDIR}"
+	# Patch Makefile
+	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
 	make ${MAKEOPTS} && make install_sw || exit 1
 fi
 
