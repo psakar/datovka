@@ -261,9 +261,6 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		qDebug() << CLI_PREFIX << errmsg;
 		return CLI_ATR_VAL_ERR;
 	}
-
-	errmsg = "Unknown service error";
-	return CLI_ERROR;
 }
 
 
