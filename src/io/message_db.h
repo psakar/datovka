@@ -43,6 +43,7 @@
 #include "src/models/messages_model.h"
 
 #define INVALID_YEAR "inv"
+#define DB2 "db2"
 
 enum Sorting {
 	UNSORTED = 0,
@@ -618,9 +619,28 @@ public:
 	 * @return Return success or fail.
 	 */
 	bool copyRelevantMsgsToNewDb(const QString &newDbFileName,
-	   const QString &year) const;
+	   const QString &year);
 
 protected: /* These function are used from within a database container. */
+	/*!
+	 * @brief Attaches a database file to opened database.
+	 *
+	 * @param[in,out] db             Database connection.
+	 * @param[in]     attachFileName File containing database to be attached.
+	 * @return False on error.
+	 */
+	static
+	bool attachDb2(QSqlDatabase &db, const QString &attachFileName);
+
+	/*!
+	 * @brief Detaches attached database file from opened database.
+	 *
+	 * @param[in,out] db Database connection.
+	 * @return False on error.
+	 */
+	static
+	bool detachDb2(QSqlDatabase &db);
+
 	/*!
 	 * @brief Return all received messages model.
 	 *

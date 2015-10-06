@@ -209,6 +209,63 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 
 /* ========================================================================= */
 /*
+ * Attaches a database file to opened database.
+ */
+bool MessageDb::attachDb2(QSqlDatabase &db, const QString &attachFileName)
+/* ========================================================================= */
+{
+	QSqlQuery query(db);
+
+	QString queryStr("ATTACH DATABASE :fileName AS " DB2);
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":fileName", attachFileName);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
+ * Detaches attached database file from opened database.
+ */
+bool MessageDb::detachDb2(QSqlDatabase &db)
+/* ========================================================================= */
+{
+	QSqlQuery query(db);
+
+	QString queryStr = "DETACH DATABASE " DB2;
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Return all received messages model.
  */
 DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
@@ -3331,29 +3388,26 @@ fail:
  * from tables into new db.
  */
 bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
-    const QString &year) const
+    const QString &year)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
+	bool attached = false;
+	QString queryStr;
+
 	QStringList idList = getAllMsgsIDEqualWithYear(year);
 
-	// attach new database.
-	QString	queryStr = "ATTACH DATABASE \""+ newDbFileName+ "\" AS db2";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+	attached = MessageDb::attachDb2(m_db, newDbFileName);
+	if (!attached) {
 		goto fail;
-	}
-	if (query.exec() && query.isActive()) {
-		/* TODO */
 	}
 
 	// copy message data from messages table into new db.
 	if (year == "inv") {
-		queryStr = "INSERT INTO db2.messages SELECT * FROM messages "
-		"WHERE ifnull(dmDeliveryTime, '') = ''";
+		queryStr = "INSERT INTO " DB2 ".messages SELECT * FROM messages "
+		    "WHERE ifnull(dmDeliveryTime, '') = ''";
 	} else {
-		queryStr = "INSERT INTO db2.messages SELECT * FROM messages "
+		queryStr = "INSERT INTO " DB2 ".messages SELECT * FROM messages "
 		    "WHERE strftime('%Y', dmDeliveryTime) = '"+ year + "'";
 	}
 
@@ -3377,8 +3431,8 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	// copy other message data from other tables into new db.
 	for (int i = 0; i < idList.count(); ++i) {
 
-		queryStr = "INSERT INTO db2.files SELECT * FROM files WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO " DB2 ".files SELECT * FROM files WHERE "
+		   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3388,8 +3442,8 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.hashes SELECT * FROM hashes WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO " DB2 ".hashes SELECT * FROM hashes WHERE "
+		   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3399,8 +3453,8 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.events SELECT * FROM events WHERE "
-			   "message_id = '"+ idList.at(i) + "'";
+		queryStr = "INSERT INTO " DB2 ".events SELECT * FROM events WHERE "
+		   "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3410,7 +3464,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.raw_message_data SELECT * "
+		queryStr = "INSERT INTO " DB2 ".raw_message_data SELECT * "
 		    "FROM raw_message_data WHERE message_id = "
 		    "'"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
@@ -3422,7 +3476,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.raw_delivery_info_data SELECT * "
+		queryStr = "INSERT INTO " DB2 ".raw_delivery_info_data SELECT * "
 		    "FROM raw_delivery_info_data WHERE message_id = "
 		    "'"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
@@ -3434,7 +3488,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.supplementary_message_data "
+		queryStr = "INSERT INTO " DB2 ".supplementary_message_data "
 		    "SELECT * FROM supplementary_message_data WHERE "
 		    "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
@@ -3446,7 +3500,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.process_state SELECT * FROM "
+		queryStr = "INSERT INTO " DB2 ".process_state SELECT * FROM "
 		    "process_state WHERE message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
@@ -3457,7 +3511,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.certificate_data SELECT * FROM "
+		queryStr = "INSERT INTO " DB2 ".certificate_data SELECT * FROM "
 		    "certificate_data";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
@@ -3468,7 +3522,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			/* TODO */
 		}
 
-		queryStr = "INSERT INTO db2.message_certificate_data SELECT * "
+		queryStr = "INSERT INTO " DB2 ".message_certificate_data SELECT * "
 		    "FROM message_certificate_data WHERE "
 		    "message_id = '"+ idList.at(i) + "'";
 		if (!query.prepare(queryStr)) {
@@ -3489,19 +3543,14 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	}
 	query.exec();
 
-	// detach new database.
-	queryStr = "DETACH DATABASE db2";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (query.exec() && query.isActive()) {
-		/* TODO */
-	}
+	MessageDb::detachDb2(m_db);
 
 	return true;
+
 fail:
+	if (attached) {
+		MessageDb::detachDb2(m_db);
+	}
 	return false;
 }
 

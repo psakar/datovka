@@ -29,61 +29,6 @@
 #include "message_db_set.h"
 #include "src/log/log.h"
 
-#define DB2 "db2"
-
-/*!
- * @brief Attaches a database file to opened database.
- */
-static
-bool attachDb2(QSqlDatabase &db, const QString &attachFileName)
-{
-	QSqlQuery query(db);
-
-	QString queryStr("ATTACH DATABASE :fileName AS " DB2);
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":fileName", attachFileName);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
-/*!
- * @brief Detaches database file from opened database.
- */
-static
-bool detachDb2(QSqlDatabase &db)
-{
-	QSqlQuery query(db);
-
-	QString queryStr = "DETACH DATABASE " DB2;
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
 /*!
  * @brief Converts year to secondary key string.
  */
@@ -171,7 +116,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	bool attached = false;
 	QString queryStr;
 
-	attached = attachDb2(db.m_db, attachFileName);
+	attached = MessageDb::attachDb2(db.m_db, attachFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -234,7 +179,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 
 fail:
 	if (attached) {
-		detachDb2(db.m_db);
+		MessageDb::detachDb2(db.m_db);
 	}
 	return ret;
 }
@@ -649,7 +594,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	bool attached = false;
 	QString queryStr;
 
-	attached = attachDb2(db.m_db, attachFileName);
+	attached = MessageDb::attachDb2(db.m_db, attachFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -708,7 +653,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 
 fail:
 	if (attached) {
-		detachDb2(db.m_db);
+		MessageDb::detachDb2(db.m_db);
 	}
 	return ret;
 }
