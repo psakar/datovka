@@ -107,6 +107,24 @@ void DlgPreferences::initPrefDialog(void)
 	connect(this->prefButtonBox, SIGNAL(accepted()),
 	    this, SLOT(saveChanges(void)));
 
+	if (Qt::ToolButtonIconOnly == globPref.toolbar_button_style) {
+		this->rToolButtonIconOnly->setChecked(true);
+		this->rToolButtonTextBesideIcon->setChecked(false);
+		this->rToolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextBesideIcon ==
+	   globPref.toolbar_button_style) {
+		this->rToolButtonIconOnly->setChecked(false);
+		this->rToolButtonTextBesideIcon->setChecked(true);
+		this->rToolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextUnderIcon ==
+	    globPref.toolbar_button_style) {
+		this->rToolButtonIconOnly->setChecked(false);
+		this->rToolButtonTextBesideIcon->setChecked(false);
+		this->rToolButtonTextUnderIcon->setChecked(true);
+	} else {
+		Q_ASSERT(0);
+	}
+
 	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
 		this->after_start_select_1->setChecked(true);
 		this->after_start_select_2->setChecked(false);
@@ -243,6 +261,15 @@ void DlgPreferences::saveChanges(void) const
 		    GlobPreferences::SELECT_LAST_VISITED;
 	} else {
 		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
+	}
+
+	if (this->rToolButtonIconOnly->isChecked()) {
+		globPref.toolbar_button_style = Qt::ToolButtonIconOnly;
+	} else if (this->rToolButtonTextBesideIcon->isChecked()) {
+		globPref.toolbar_button_style =
+		    Qt::ToolButtonTextBesideIcon;
+	} else {
+		globPref.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
 	}
 
 	globPref.use_global_paths = this->enableGlobalPaths->isChecked();

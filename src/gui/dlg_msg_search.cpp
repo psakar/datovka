@@ -24,15 +24,23 @@
 
 #include "dlg_msg_search.h"
 #include "src/common.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 
+#define COL_USER_NAME 0
+#define COL_MESSAGE_ID 1
+#define COL_DELIVERY_YEAR 2
+#define COL_MESSAGE_TYPE 3
+#define COL_ANNOTATION 4
+#define COL_SENDER 5
+#define COL_RECIPIENT 6
 
 DlgMsgSearch::DlgMsgSearch(
-    const QList< QPair <QString,MessageDb*> > messageDbList,
+    const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
     const QString &userName,
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
-    m_messageDbList(messageDbList),
+    m_messageDbSetList(messageDbSetList),
     m_userName(userName)
 {
 	setupUi(this);
@@ -67,12 +75,22 @@ void DlgMsgSearch::initSearchWindow(void)
 	this->tooMuchFields->hide();
 
 	/* is only one account available */
-	if (m_messageDbList.count() <= 1) {
+	if (m_messageDbSetList.count() <= 1) {
 		this->searchAllAcntCheckBox->setEnabled(false);
 	}
 
-	/* hide first column of resultWidget (userName string) */
-	//this->resultsTableWidget->setColumnHidden(0,true);
+	this->resultsTableWidget->setColumnCount(7);
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_ID, new QTableWidgetItem(tr("Message ID")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_ANNOTATION, new QTableWidgetItem(tr("Subject")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_SENDER, new QTableWidgetItem(tr("Sender")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_RECIPIENT, new QTableWidgetItem(tr("Recipient")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_DELIVERY_YEAR, new QTableWidgetItem(tr("Delivery Year")));
+	this->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_TYPE, new QTableWidgetItem(tr("Message Type")));
+
+	/* Hide column with delivery time and message type. */
+	this->resultsTableWidget->setColumnHidden(COL_DELIVERY_YEAR, true);
+	this->resultsTableWidget->setColumnHidden(COL_MESSAGE_TYPE, true);
 
 	connect(this->searchReceivedMsgCheckBox, SIGNAL(clicked()),
 	    this, SLOT(checkInputFields()));
@@ -323,7 +341,7 @@ void DlgMsgSearch::searchMessages(void)
 	debugSlotCall();
 
 	enum MessageDirection msgType = MSG_ALL;
-	QList <QStringList> msgList;
+	QList<MessageDb::SoughtMsg> msgList;
 
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
@@ -338,8 +356,7 @@ void DlgMsgSearch::searchMessages(void)
 	}
 
 	if (!this->searchAllAcntCheckBox->isChecked()) {
-		msgList.clear();
-		msgList = m_messageDbList.at(0).second->
+		msgList = m_messageDbSetList.at(0).second->
 		    msgsAdvancedSearchMessageEnvelope(
 		    this->messageIdLineEdit->text().isEmpty() ? -1 :
 		        this->messageIdLineEdit->text().toLongLong(),
@@ -356,12 +373,11 @@ void DlgMsgSearch::searchMessages(void)
 		    this->toHandsLineEdit->text(),
 		    QString(), QString(), msgType);
 		if (!msgList.isEmpty()) {
-			appendMsgsToTable(m_messageDbList.at(0), msgList);
+			appendMsgsToTable(m_messageDbSetList.at(0), msgList);
 		}
 	} else {
-		for (int i = 0; i < m_messageDbList.count(); ++i) {
-			msgList.clear();
-			msgList = m_messageDbList.at(i).second->
+		for (int i = 0; i < m_messageDbSetList.count(); ++i) {
+			msgList = m_messageDbSetList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    this->messageIdLineEdit->text().isEmpty() ? -1 :
 			        this->messageIdLineEdit->text().toLongLong(),
@@ -378,7 +394,7 @@ void DlgMsgSearch::searchMessages(void)
 			    this->toHandsLineEdit->text(),
 			    QString(), QString(), msgType);
 			if (!msgList.isEmpty()) {
-				appendMsgsToTable(m_messageDbList.at(i),
+				appendMsgsToTable(m_messageDbSetList.at(i),
 				    msgList);
 			}
 		}
@@ -391,35 +407,41 @@ void DlgMsgSearch::searchMessages(void)
  * Append message list to result tablewidget
  */
 void DlgMsgSearch::appendMsgsToTable(
-    QPair <QString,MessageDb*> usrNmAndMsgDb,
-    QList <QStringList> msgList)
+    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
+    const QList<MessageDb::SoughtMsg> &msgDataList)
 /* ========================================================================= */
 {
 	this->resultsTableWidget->setEnabled(true);
 
-	for (int j = 0; j < msgList.count(); ++j) {
+	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
 		int row = this->resultsTableWidget->rowCount();
 		this->resultsTableWidget->insertRow(row);
+
+		this->resultsTableWidget->setItem(row, COL_USER_NAME,
+		    new QTableWidgetItem(usrNmAndMsgDbSet.first));
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(usrNmAndMsgDb.first);
-		this->resultsTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(0));
+		item->setText(QString::number(msgData.mId.dmId));
 		if (ENABLE_TOOLTIP) {
-			item->setToolTip(usrNmAndMsgDb.second->descriptionHtml(
-			    msgList.at(j).at(0).toInt(), 0,
-			    true, false, true));
+			const MessageDb *messageDb =
+			    usrNmAndMsgDbSet.second->constAccessMessageDb(
+			        msgData.mId.deliveryTime);
+			Q_ASSERT(0 != messageDb);
+
+			item->setToolTip(messageDb->descriptionHtml(
+			    msgData.mId.dmId, 0, true, false, true));
 		}
-		this->resultsTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(1));
-		this->resultsTableWidget->setItem(row,2,item);
-		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(2));
-		this->resultsTableWidget->setItem(row,3,item);
-		item = new QTableWidgetItem;
-		item->setText(msgList.at(j).at(3));
-		this->resultsTableWidget->setItem(row,4,item);
+		this->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
+		this->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,
+		    new QTableWidgetItem(
+		        MessageDbSet::yearFromDateTime(
+		            msgData.mId.deliveryTime)));
+		this->resultsTableWidget->setItem(row, COL_MESSAGE_TYPE, new QTableWidgetItem(QString::number(msgData.type)));
+		this->resultsTableWidget->setItem(row, COL_ANNOTATION,
+		    new QTableWidgetItem(msgData.dmAnnotation));
+		this->resultsTableWidget->setItem(row, COL_SENDER,
+		    new QTableWidgetItem(msgData.dmSender));
+		this->resultsTableWidget->setItem(row, COL_RECIPIENT,
+		    new QTableWidgetItem(msgData.dmRecipient));
 	}
 
 	this->resultsTableWidget->resizeColumnsToContents();
@@ -436,7 +458,10 @@ void DlgMsgSearch::getSelectedMsg(int row, int column)
 /* ========================================================================= */
 {
 	(void) column;
-	emit focusSelectedMsg(this->resultsTableWidget->item(row, 0)->text(),
-	    this->resultsTableWidget->item(row, 1)->text().toLongLong());
+	emit focusSelectedMsg(
+	    this->resultsTableWidget->item(row, COL_USER_NAME)->text(),
+	    this->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),
+	    this->resultsTableWidget->item(row, COL_DELIVERY_YEAR)->text(),
+	    this->resultsTableWidget->item(row, COL_MESSAGE_TYPE)->text().toInt());
 	//this->close();
 }

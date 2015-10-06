@@ -29,6 +29,7 @@
 #include "dlg_signature_detail.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "ui_dlg_signature_detail.h"
 
@@ -37,17 +38,27 @@
 /*
  * Constructor.
  */
-DlgSignatureDetail::DlgSignatureDetail(const MessageDb &messageDb, qint64 dmId,
-    QWidget *parent)
+DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet, qint64 dmId,
+    const QDateTime &deliveryTime, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
-    m_msgDER(messageDb.msgsVerificationAttempted(dmId) ?
-        messageDb.msgsMessageRaw(dmId): QByteArray()),
-    m_tstDER(messageDb.msgsTimestampRaw(dmId)),
+    m_msgDER(),
+    m_tstDER(),
     m_constructedFromDb(true),
-    m_dbIsVerified(messageDb.msgsVerified(dmId)),
-    dSize(QSize())
+    m_dbIsVerified(),
+    dSize()
 {
+	/* Obtain raw message and time stamp. */
+	Q_ASSERT(dmId >= 0);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.constAccessMessageDb(deliveryTime);
+	Q_ASSERT(0 != messageDb);
+	if (messageDb->msgsVerificationAttempted(dmId)) {
+		m_msgDER = messageDb->msgsMessageRaw(dmId);
+	}
+	m_tstDER = messageDb->msgsTimestampRaw(dmId);
+	m_dbIsVerified = messageDb->msgsVerified(dmId);
+
 	setupUi(this);
 
 	this->verifyWidget->setHidden(true);

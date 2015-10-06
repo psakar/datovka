@@ -71,6 +71,7 @@ GlobPreferences::GlobPreferences(void)
     default_download_signed(true),
     //store_passwords_on_disk(false),
     store_messages_on_disk(true),
+    toolbar_button_style(Qt::ToolButtonTextUnderIcon),
     store_additional_data_on_disk(true),
     certificate_validation_date(DOWNLOAD_DATE),
     check_crl(true),
@@ -144,6 +145,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	download_at_start = settings.value(
 	    "preferences/download_at_start",
 	    dlftlGlobPref.download_at_start).toBool();
+
+	toolbar_button_style = settings.value(
+	    "preferences/toolbar_button_style",
+	    dlftlGlobPref.toolbar_button_style).toInt();
 
 	timer_value = settings.value(
 	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
@@ -345,6 +350,10 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.after_start_select != after_start_select) {
 		settings.setValue("after_start_select", after_start_select);
+	}
+
+	if (dlftlGlobPref.toolbar_button_style != toolbar_button_style) {
+		settings.setValue("toolbar_button_style", toolbar_button_style);
 	}
 
 	if (dlftlGlobPref.timer_value != timer_value) {
@@ -1437,16 +1446,19 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 /*
  * Create filename based on format string.
  */
-QString createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, const QString &dmID,
-    const QString &dbID, const QString &userName,
-    const QString &attachFilename)
+QString createFilenameFromFormatString(QString pattern, const QString &dmID,
+    const QString &dbID, const QString &userName, const QString &attachFilename,
+    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
+    QString dmAnnotation, QString dmSender)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
+	// for future use
+	(void) dmDeliveryTime;
+
 	// known atrributes
-	// {"%Y","%M","%D","%h","%m","%i","%s","%d","%u","%f"};
+	// {"%Y","%M","%D","%h","%m","%i","%s","%S","%d","%u","%f"};
 
 	if (pattern.isEmpty()) {
 		pattern = DEFAULT_TMP_FORMAT;
@@ -1480,6 +1492,9 @@ QString createFilenameFromFormatString(QString pattern,
 	pair.first = "%s";
 	pair.second = dmAnnotation.replace(" ","-");
 	knowAtrrList.append(pair);
+	pair.first = "%S";
+	pair.second = dmSender.replace(" ","-");
+	knowAtrrList.append(pair);
 	pair.first = "%d";
 	pair.second = dbID;
 	knowAtrrList.append(pair);
@@ -1493,6 +1508,13 @@ QString createFilenameFromFormatString(QString pattern,
 	for (int i = 0; i < knowAtrrList.length(); ++i) {
 		pattern.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
+
+	/*
+	* Eliminate illegal characters "\/:*?"<>|" in the filename.
+	* All these characters are replaced by "_".
+	*/
+	pattern.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),
+	    QString( "_" ));
 
 	return pattern;
 }

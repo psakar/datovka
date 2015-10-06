@@ -52,7 +52,8 @@
 #define TIMER_MARK_MSG_READ_MS 5000 /* Mark message as read after 5 seconds. */
 
 #define CZ_NIC_URL "https://www.nic.cz"
-#define DATOVKA_ONLINE_HELP_URL "https://labs.nic.cz/cs/datovka.html"
+#define DATOVKA_ONLINE_HELP_URL "https://gitlab.labs.nic.cz/labs/qdatovka/wikis/manual"
+#define DATOVKA_HOMEPAGE_URL "https://labs.nic.cz/cs/datovka.html"
 #define DATOVKA_OFFLINE_HELP_URL "file:///help/index.html"
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
@@ -118,18 +119,19 @@ enum MessageDirection {
 /*
  * Defined roles across the application.
  */
-#define ROLE_ACNT_USER_NAME (Qt::UserRole + 1) /*
+#define ROLE_PLAIN_DISPLAY (Qt::UserRole + 1) /* Low level data. */
+#define ROLE_ACNT_USER_NAME (Qt::UserRole + 2) /*
                                                 * Used to access the user name.
                                                 */
-#define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 2) /*
+#define ROLE_ACNT_UNREAD_MSGS (Qt::UserRole + 3) /*
                                                   * Used to store number of
                                                   * unread messages.
                                                   */
-#define ROLE_MSGS_DB_ENTRY_TYPE (Qt::UserRole + 3) /*
+#define ROLE_MSGS_DB_ENTRY_TYPE (Qt::UserRole + 4) /*
                                                     * Used to determine the db
                                                     * data type of the column.
                                                     */
-#define ROLE_MSGS_DB_PROXYSORT (Qt::UserRole + 4) /*
+#define ROLE_MSGS_DB_PROXYSORT (Qt::UserRole + 5) /*
                                                    * Used for sorting according
                                                    * to boolean values which
                                                    * are displayed as icons.
@@ -197,6 +199,7 @@ public:
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
 	bool store_messages_on_disk;
+	int toolbar_button_style;
 	bool store_additional_data_on_disk;
 	CertValDate certificate_validation_date;
 	bool check_crl;
@@ -483,9 +486,9 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 /*!
  * @brief Create filename based on format string.
  */
-QString createFilenameFromFormatString(QString pattern,
-    QDateTime dmAcceptanceTime, QString dmAnnotation, const QString &dmID,
-    const QString &dbID, const QString &userName,
-    const QString &attachFilename);
+QString createFilenameFromFormatString(QString pattern, const QString &dmID,
+    const QString &dbID, const QString &userName, const QString &attachFilename,
+    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
+    QString dmAnnotation, QString dmSender);
 
 #endif /* _COMMON_H_ */

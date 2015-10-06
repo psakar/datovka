@@ -32,7 +32,7 @@
 
 #include "src/common.h"
 #include "ui_dlg_correspondence_overview.h"
-#include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 
 
@@ -43,11 +43,11 @@ class DlgCorrespondenceOverview : public QDialog,
 public:
 	class ExportedMessageList {
 	public:
-		QList<qint64> sentdmIDs;
-		QList<qint64> receivedmIDs;
+		QList<MessageDb::MsgId> sentdmIDs;
+		QList<MessageDb::MsgId> receivedmIDs;
 	};
 
-	DlgCorrespondenceOverview(const MessageDb &db, const QString &userName,
+	DlgCorrespondenceOverview(const MessageDbSet &dbSet, const QString &userName,
 	    QString &exportCorrespondDir, const QString &dbId,
 	    QWidget *parent = 0);
 
@@ -57,19 +57,19 @@ private slots:
 	void exportData(void);
 
 private:
-	const MessageDb &m_messDb;
+	const MessageDbSet &m_messDbSet;
 	const QString m_userName;
 	ExportedMessageList m_messages;
 	QString &m_exportCorrespondDir;
 	const QString &m_dbId;
 
 	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
-	QString msgInCsv(qint64 dmId) const;
-	QString msgInHtml(qint64 dmId) const;
-	bool exportMessageAsZFO(qint64 dmId, const QString &fileName,
-	    bool deliveryInfo) const;
-	bool exportMessageAsPDF(qint64 dmId, const QString &fileName,
-	    bool deliveryInfo) const;
+	QString msgInCsv(const MessageDb::MsgId &mId) const;
+	QString msgInHtml(const MessageDb::MsgId &mId) const;
+	bool exportMessageAsZFO(const MessageDb::MsgId &mId,
+	    const QString &fileName, bool deliveryInfo) const;
+	bool exportMessageAsPDF(const MessageDb::MsgId &mId,
+	    const QString &fileName, bool deliveryInfo) const;
 	bool exportMessagesToCsv(const QString &fileName) const;
 	bool exportMessagesToHtml(const QString &fileName) const;
 

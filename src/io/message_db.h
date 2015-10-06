@@ -28,126 +28,26 @@
 
 #include <QAbstractButton>
 #include <QAbstractTableModel>
+#include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
-#include <QMap>
-#include <QModelIndex>
 #include <QObject>
 #include <QPair>
 #include <QStringList>
 #include <QSqlDatabase>
-#include <QSqlQueryModel>
 #include <QString>
-#include <QVariant>
 #include <QVector>
 
 #include "src/common.h"
+#include "src/models/files_model.h"
+#include "src/models/messages_model.h"
 
+#define INVALID_YEAR "inv"
 
 enum Sorting {
 	UNSORTED = 0,
 	ASCENDING,
 	DESCENDING
-};
-
-
-/*!
- * @brief Custom message model class.
- *
- * Used for data conversion on display. (Use QIdentityProxyModel?)
- *
- * @note setItemDelegate and a custom ItemDelegate would also be the solution.
- */
-class DbMsgsTblModel : public QSqlQueryModel {
-	Q_OBJECT
-
-public:
-	enum ColumnNumbers {
-		READLOC_COL = 5, /* Read locally. */
-		ATTDOWN_COL = 6, /* Attachment downloaded. */
-		PROCSNG_COL = 7  /* Processing state. */
-	};
-
-	/*!
-	 * @brief Constructor.
-	 */
-	DbMsgsTblModel(QObject *parent = 0);
-
-	/*!
-	 * @brief Convert viewed data in date/time columns.
-	 */
-	virtual QVariant data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const;
-
-	/*!
-	 * @brief Convert viewed header data.
-	 */
-	virtual QVariant headerData(int section, Qt::Orientation orientation,
-	    int role) const;
-
-	/*!
-	 * @brief Override message as being read.
-	 *
-	 * @param[in] dmId      Message id.
-	 * @param[in] forceRead Set whether to force read state.
-	 */
-	virtual bool overrideRead(qint64 dmId, bool forceRead = true);
-
-	/*!
-	 * @brief Override message as having its attachments having downloaded.
-	 *
-	 * @param[in] dmId            Message id.
-	 * @param[in] forceDownloaded Set whether to force attachments
-	 *                            downloaded state.
-	 */
-	virtual bool overrideDownloaded(qint64 dmId,
-	    bool forceDownloaded = true);
-
-	/*!
-	 * @brief Override message processing state.
-	 *
-	 * @param[in] dmId       Message id.
-	 * @param[in] forceState Set forced value.
-	 */
-	virtual bool overrideProcessing(qint64 dmId,
-	    enum MessageProcessState forceState);
-
-	/*!
-	 * @brief Clear all overriding data.
-	 */
-	virtual void clearOverridingData(void);
-
-	/*
-	 * The view's proxy model cannot be accessed, so the message must be
-	 * addressed via its id rather than using the index.
-	 */
-private:
-	QMap<qint64, bool> m_overriddenRL; /*!<
-	                                    * Holds overriding information for
-	                                    * read locally.
-	                                    */
-	QMap<qint64, bool> m_overriddenAD; /*!<
-	                                    * Holds overriding information for
-	                                    * downloaded attachments.
-	                                    */
-	QMap<qint64, int> m_overriddenPS; /*!<
-	                                   * Holds overriding information for
-	                                   * message processing state.
-	                                   */
-};
-
-
-/*!
- * @brief Custom file model class.
- *
- * Used for data conversion on display. (Use QIdentityProxyModel?)
- */
-class DbFlsTblModel : public QSqlQueryModel {
-public:
-	/*!
-	 * @brief Compute viewed data in file size column.
-	 */
-	virtual QVariant data(const QModelIndex &index, int role) const;
 };
 
 
@@ -168,17 +68,92 @@ public:
 		TYPE_SENT = 2 /*!< Two is sent. */
 	};
 
-	MessageDb(const QString &connectionName, QObject *parent = 0);
-	virtual ~MessageDb(void);
+	/*!
+	 * @brief Message identifier.
+	 *
+	 * @note Messages are identified according to their id and delivery
+	 *     time.
+	 */
+	class MsgId {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QDateTime deliveryTime; /*!< Message delivery time. */
+
+		MsgId(void) : dmId(-1), deliveryTime()
+		{ }
+		MsgId(const MsgId &id)
+		    : dmId(id.dmId), deliveryTime(id.deliveryTime)
+		{ }
+		MsgId(qint64 id, const QDateTime &dTime)
+		    : dmId(id), deliveryTime(dTime)
+		{ }
+		~MsgId(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return (dmId >= 0) && (deliveryTime.isValid());
+		}
+	};
 
 	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName       File name.
-	 * @param[in] createMissing  Whether to create missing tables.
-	 * @return True on success.
+	 * @brief Basic message information for search dialogue.
 	 */
-	bool openDb(const QString &fileName, bool createMissing = true);
+	class SoughtMsg {
+	public:
+		MsgId mId; /*!< Message identifier. */
+		int type; /*!< Matches enum MessageType. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmSender; /*!< Message sender. */
+		QString dmRecipient; /*!< Recipient. */
+
+		SoughtMsg(void)
+		    : mId(), type(0), dmAnnotation(), dmSender(), dmRecipient()
+		{ }
+		SoughtMsg(const MsgId &id, int t, const QString &annot,
+		    const QString &sen, const QString &rec)
+		    : mId(id), type(t), dmAnnotation(annot),
+		    dmSender(sen), dmRecipient(rec)
+		{ }
+		SoughtMsg(qint64 id, const QDateTime &dTime, int t,
+		    const QString &annot, const QString &sen,
+		    const QString &rec)
+		    : mId(id, dTime), type(t), dmAnnotation(annot),
+		    dmSender(sen), dmRecipient(rec)
+		{ }
+		~SoughtMsg(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return mId.isValid() &&
+			    ((type == TYPE_RECEIVED) || (type == TYPE_SENT)) &&
+			    (!dmAnnotation.isEmpty()) &&
+			    (!dmSender.isEmpty()) && (!dmRecipient.isEmpty());
+		}
+	};
+
+	class ContactEntry {
+	public:
+		qint64 dmId; /*!< Message id. */
+		QString boxId;
+		QString name;
+		QString address;
+	};
+
+
+	/* holds some additional entries for filename creation */
+	class FilenameEntry {
+	public:
+		QDateTime dmDeliveryTime;
+		QDateTime dmAcceptanceTime;
+		QString dmAnnotation;
+		QString dmSender;
+	};
+
+	MessageDb(const QString &dbDriverType, const QString &connectionName,
+	    QObject *parent = 0);
+	virtual ~MessageDb(void);
 
 	static
 	const QString memoryLocation;
@@ -230,128 +205,6 @@ public:
 	bool rollbackTransaction(const QString &savePointName = QString());
 
 	/*!
-	 * @brief Return all received messages model.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdModel(void);
-
-	/*!
-	 * @brief Return received messages within past 90 days.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
-
-	/*!
-	 * @brief Return received messages within given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsRcvdYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsRcvdYearlyCounts(
-	    enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return number of unread messages received within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsRcvdUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread received messages in year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsRcvdUnreadInYear(const QString &year) const;
-
-	/*!
-	 * @brief Return all sent messages model.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntModel(void);
-
-	/*!
-	 * @brief Return sent messages within past 90 days.
-	 *
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
-
-	/*!
-	 * @brief Return sent messages within given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
-	 */
-	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
-
-	/*!
-	 * @brief Return list of years (strings) in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years.
-	 */
-	QStringList msgsSntYears(enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return list of years and number of messages in database.
-	 *
-	 * @param[in] sorting  Sorting.
-	 * @return List of years and counts.
-	 */
-	QList< QPair<QString, int> > msgsSntYearlyCounts(
-	    enum Sorting sorting) const;
-
-	/*!
-	 * @brief Return number of unread messages sent within past 90
-	 *     days.
-	 *
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadWithin90Days(void) const;
-
-	/*!
-	 * @brief Return number of unread sent messages in year.
-	 *
-	 * @param year  Year number.
-	 * @return Number of unread messages, -1 on error.
-	 */
-	int msgsSntUnreadInYear(const QString &year) const;
-
-	/*!
 	 * @brief Generate information for reply dialogue.
 	 *
 	 * @param[in] dmId  Message id.
@@ -395,40 +248,6 @@ public:
 	 * @return True on success.
 	 */
 	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
-
-	/*!
-	 * @brief Set message read locally for all received messages.
-	 *
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
-
-	/*!
-	 * @brief Set message read locally for received messages in given year.
-	 *
-	 * @param[in] year  Year number.
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
-	    bool read = true);
-
-	/*!
-	 * @brief Set message read locally for recently received messages.
-	 *
-	 * @param[in] read  New read status.
-	 * @return True on success.
-	 */
-	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
-
-	/*!
-	 * @brief Return contacts from message db.
-	 *
-	 * @return List of vectors containing recipientId, recipientName,
-	 *     recipentAddress.
-	 */
-	QList< QVector<QString> > uniqueContacts(void) const;
 
 	/*!
 	 * @brief Return HTML formatted message description.
@@ -572,25 +391,6 @@ public:
 	int messageState(qint64 dmId) const;
 
 	/*!
-	 * @brief Advance message envelope search.
-	 *
-	 * @return message item list pass to search query.
-	 */
-	QList <QStringList> msgsAdvancedSearchMessageEnvelope(
-	    qint64 dmId,
-	    const QString &dmAnnotation,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dmAddress,
-	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent,
-	    const QString &dmRecipientRefNumber,
-	    const QString &dmRecipientIdent,
-	    const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect);
-
-	/*!
 	 * @brief Update message envelope delivery information.
 	 *
 	 * @param[in] dmId              Message identifier.
@@ -657,11 +457,11 @@ public:
 	    int messageType);
 
 	/*!
-	 * @brief Return all message ID from database.
+	 * @brief Return all message ID from database without attachment.
 	 *
 	 * @return message id list.
 	 */
-	QStringList getAllMessageIDsFromDB(void) const;
+	QStringList getAllMessageIDsWithoutAttach(void) const;
 
 	/*!
 	 * @brief Check whether whole message is stored in database.
@@ -736,18 +536,6 @@ public:
 	bool msgsDeleteMessageData(qint64 dmId) const;
 
 	/*!
-	 * @brief Return list of message ids corresponding to given date
-	 *     interval.
-	 *
-	 * @param[in] fromDate  Start date.
-	 * @param[in] toDate    Stop date.
-	 * @param[in] sent      True for sent messages, false for received.
-	 * @return List of message ids. Empty list on error.
-	 */
-	QList<qint64> msgsDateInterval(const QDate &fromDate,
-	    const QDate &toDate, enum MessageDirection msgDirect) const;
-
-	/*!
 	 * @brief Return some message items in order to export correspondence
 	 *     to HTML.
 	 *
@@ -796,6 +584,165 @@ public:
 	int msgGetProcessState(qint64 dmId) const;
 
 	/*!
+	 * @brief Returns time stamp in raw (DER) format.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return Qualified time stamp in DER format.
+	 *     Empty byte array on error.
+	 */
+	QByteArray msgsTimestampRaw(qint64 dmId) const;
+
+	/*!
+	 * @brief Return some additional filename entries as
+	 *        (dmDeliveryTime, dmAcceptanceTime, dmAnnotation, dmSender)
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return FilenameEntry struct.
+	 */
+	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId) const;
+
+	/*!
+	 * @brief Copy message data to account database from source database.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] sourceDbPath  Source db path.
+	 * @return True if copy of message data was success.
+	 */
+	bool copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
+	    qint64 msgId);
+
+	/*!
+	 * @brief Copy all messages correspond with
+	 *        year and their records from tables into new db.
+	 *
+	 * @return Return success or fail.
+	 */
+	bool copyRelevantMsgsToNewDb(const QString &newDbFileName,
+	   const QString &year) const;
+
+protected: /* These function are used from within a database container. */
+	/*!
+	 * @brief Return all received messages model.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsRcvdModel(void);
+
+	/*!
+	 * @brief Return received messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return received messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
+
+	/*!
+	 * @brief Return list of years (strings) in database.
+	 *
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
+	 * @return List of years.
+	 */
+	QStringList msgsYears(enum MessageType type,
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return list of years and number of messages in database.
+	 *
+	 * @param[in] type    Whether to obtain sent or received messages.
+	 * @param[in] sorting Sorting.
+	 * @return List of years and counts.
+	 */
+	QList< QPair<QString, int> > msgsYearlyCounts(enum MessageType type,
+	    enum Sorting sorting) const;
+
+	/*!
+	 * @brief Return number of unread messages received within past 90
+	 *     days.
+	 *
+	 * @param[in] type Whether to obtain sent or received messages.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsUnreadWithin90Days(enum MessageType type) const;
+
+	/*!
+	 * @brief Return number of unread received messages in year.
+	 *
+	 * @param[in] type Whether to obtain sent or received messages.
+	 * @param[in] year Year number.
+	 * @return Number of unread messages, -1 on error.
+	 */
+	int msgsUnreadInYear(enum MessageType type,
+	    const QString &year) const;
+
+	/*!
+	 * @brief Return all sent messages model.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntModel(void);
+
+	/*!
+	 * @brief Return sent messages within past 90 days.
+	 *
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
+
+	/*!
+	 * @brief Return sent messages within given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @return Pointer to model, 0 on failure.
+	 *
+	 * @note The model must not be freed.
+	 */
+	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
+
+	/*!
+	 * @brief Set message read locally for all received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetAllReceivedLocallyRead(bool read = true);
+
+	/*!
+	 * @brief Set message read locally for received messages in given year.
+	 *
+	 * @param[in] year  Year number.
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetReceivedYearLocallyRead(const QString &year,
+	    bool read = true);
+
+	/*!
+	 * @brief Set message read locally for recently received messages.
+	 *
+	 * @param[in] read  New read status.
+	 * @return True on success.
+	 */
+	bool smsgdtSetWithin90DaysReceivedLocallyRead(bool read = true);
+
+	/*!
 	 * @brief Set process state of received messages.
 	 *
 	 * @param[in] state  Message state to be set.
@@ -823,22 +770,43 @@ public:
 	    enum MessageProcessState state);
 
 	/*!
-	 * @brief Returns time stamp in raw (DER) format.
+	 * @brief Returns message identifier of message with given id number.
 	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return Qualified time stamp in DER format.
-	 *     Empty byte array on error.
+	 * @paran[in] dmId Message identification number.
+	 * @return Message identifier containing the seeked id number.
+	 *     If no such message is found then a message identifier
+	 *     containing -1 dmId returned.
 	 */
-	QByteArray msgsTimestampRaw(qint64 dmId) const;
+	MsgId msgsMsgId(qint64 dmId) const;
 
 	/*!
-	 * @brief Returns message acceptance date (in local time)
-	 * and annotation.
+	 * @brief Return contacts from message db.
 	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return Message acceptance date and annotation.
+	 * @return List of vectors containing recipientId, recipientName,
+	 *     recipentAddress.
 	 */
-	QPair<QDateTime, QString> msgsAcceptTimeAnnotation(qint64 dmId) const;
+	QList<ContactEntry> uniqueContacts(void) const;
+
+	/*!
+	 * @brief Return all message ID from database.
+	 *
+	 * @return message id list.
+	 */
+	QList<MsgId> getAllMessageIDsFromDB(void) const;
+
+	/*!
+	 * @brief Get all unique years from messages db.
+	 *
+	 * @return Return unique year list.
+	 */
+	QStringList getAllUniqueYearsFormMsgs(void) const;
+
+	/*!
+	 * @brief Get list of all messages ID correspond with year.
+	 *
+	 * @return Return message ID list.
+	 */
+	QStringList getAllMsgsIDEqualWithYear(const QString &year) const;
 
 	static
 	const QVector<QString> receivedItemIds;
@@ -846,16 +814,54 @@ public:
 	const QVector<QString> sentItemIds;
 
 
-protected:
 	/*!
-	 * @brief Adds _dmType column.
+	 * @brief Return list of message ids corresponding to given date
+	 *     interval.
 	 *
-	 * @return True on success.
-	 *
-	 * @note This code may be needed to update database between different
-	 * versions.
+	 * @param[in] fromDate  Start date.
+	 * @param[in] toDate    Stop date.
+	 * @param[in] sent      True for sent messages, false for received.
+	 * @return List of message ids. Empty list on error.
 	 */
-	bool addDmtypeColumn(void);
+	QList<MsgId> msgsDateInterval(const QDate &fromDate,
+	    const QDate &toDate, enum MessageDirection msgDirect) const;
+
+	/*!
+	 * @brief Advance message envelope search.
+	 *
+	 * @return message item list pass to search query.
+	 */
+	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
+	    qint64 dmId,
+	    const QString &dmAnnotation,
+	    const QString &dbIDSender, const QString &dmSender,
+	    const QString &dmAddress,
+	    const QString &dbIDRecipient, const QString &dmRecipient,
+	    const QString &dmSenderRefNumber,
+	    const QString &dmSenderIdent,
+	    const QString &dmRecipientRefNumber,
+	    const QString &dmRecipientIdent,
+	    const QString &dmToHands,
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
+	    enum MessageDirection msgDirect) const;
+
+	/*!
+	 * @brief Test if imported message is relevent to account db.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] databoxId  Databox ID where message should be imported.
+	 * @return Message is relevant for import to db or not.
+	 */
+	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
+
+	/*!
+	 * @brief Open database file.
+	 *
+	 * @param[in] fileName       File name.
+	 * @param[in] createMissing  Whether to create missing tables.
+	 * @return True on success.
+	 */
+	bool openDb(const QString &fileName, bool createMissing = true);
 
 	/*!
 	 * @brief Close database file.
@@ -894,15 +900,9 @@ protected:
 	 */
 	bool checkDb(bool quick);
 
-	/*!
-	 * @brief Add/update message certificate in database.
-	 *
-	 * @brief[in] dmId       Message identifier.
-	 * @brief[in] crtBase64  Base64-encoded certificate.
-	 * @return True on success.
-	 */
-	bool msgsInsertUpdateMessageCertBase64(qint64 dmId,
-	    const QByteArray &crtBase64);
+protected:
+	QSqlDatabase m_db; /*!< Message database. */
+	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 
 private:
 	static
@@ -912,9 +912,17 @@ private:
 	static
 	const QVector<QString> fileItemIds;
 
-	QSqlDatabase m_db; /*!< Message database. */
-	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
+
+	/*!
+	 * @brief Adds _dmType column.
+	 *
+	 * @return True on success.
+	 *
+	 * @note This code may be needed to update database between different
+	 * versions.
+	 */
+	bool addDmtypeColumn(void);
 
 	/*!
 	 * @brief Create empty tables if tables do not already exist.
@@ -964,130 +972,19 @@ private:
 	bool msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    bool ignoreMissingCrlCheck = false) const;
 
-	friend class DbContainer;
-};
-
-
-/*
- * Flags used when creating new database file.
- */
-#define DBC_FLG_TESTING         0x01 /*!< Create a testing database. */
-#define DBC_FLG_CREATE_FILE     0x02 /*!< Create file if does not exist. */
-#define DBC_FLG_CHECK_QUICK     0x04 /*!< Perform a quick database check. */
-#define DBC_FLG_CHECK_INTEGRITY 0x08 /*!< Perform a full integrity check. */
-
-/*
- * Error codes returned when accessing/creating new database file.
- */
-#define DBC_ERR_OK       0 /*!< No error. */
-#define DBC_ERR_MISSFILE 1 /*!< Database file does not exist. */
-#define DBC_ERR_NOTAFILE 2 /*!< Database file is not a file. */
-#define DBC_ERR_ACCESS   3 /*!< Error reading/writing database file. */
-#define DBC_ERR_CREATE   4 /*!< Error creating database file. */
-#define DBC_ERR_DATA     5 /*!< Data corrupted or not a database file. */
-
-/*!
- * @brief Database container.
- *
- * TODO -- Should there be a single globally accessible instance?
- *     (Actually no singleton.)
- */
-class DbContainer : public QMap<QString, MessageDb *> {
-
-public:
-	DbContainer(void);
-	~DbContainer(void);
-
 	/*!
-	 * @brief Access/create+open message database related to item.
+	 * @brief Add/update message certificate in database.
 	 *
-	 * @param[in] key      Part of database file name, usually the login.
-	 * @param[in] locDir   Directory where to search for the file.
-	 * @param[in] testing  True for testing accounts.
-	 * @param[in] create   Whether to create non-existing file.
-	 * @return Pointer to database, zero pointer on error.
-	 */
-	MessageDb * accessMessageDb(const QString &key, const QString &locDir,
-	    bool testing, bool create);
-
-	/*!
-	 * @brief Creates a copy of the current database into a given new
-	 *     directory.
-	 *
-	 * @param[in] newLocDir  New location directory.
-	 * @return True if database was copied and re-opened.
-	 */
-	bool copyMessageDb(MessageDb *db, const QString &newLocDir);
-
-	/*!
-	 * @brief Move message database into a new directory.
-	 *
-	 * @param[in] newLocDir New location directory.
-	 * @return True if database was moved and re-opened.
-	 */
-	bool moveMessageDb(MessageDb *db, const QString &newLocDir);
-
-	/*!
-	 * @brief Re-open a new empty database file. The old file is left
-	 *     untouched.
-	 *
-	 * @param[in] newLocDir New location directory.
-	 * @return True if database was re-opened.
-	 */
-	bool reopenMessageDb(MessageDb *db, const QString &newLocDir);
-
-	/*!
-	 * @brief Delete message db file.
-	 *
-	 * @param db Deleted database.
+	 * @brief[in] dmId       Message identifier.
+	 * @brief[in] crtBase64  Base64-encoded certificate.
 	 * @return True on success.
 	 */
-	bool deleteMessageDb(MessageDb *db);
+	bool msgsInsertUpdateMessageCertBase64(qint64 dmId,
+	    const QByteArray &crtBase64);
 
-	/*!
-	 * @brief Database driver name.
-	 */
-	static
-	const QString dbDriverType;
-
-	/*!
-	 * @brief Check whether required SQL driver is present.
-	 *
-	 * @return True if database driver is present.
-	 */
-	static
-	bool dbDriverSupport(void);
-
-	/*!
-	 * @brief Check existing database file for basic faults.
-	 *
-	 * @param[in] key     ISDS user name.
-	 * @param[in] locDir  Directory where to store the file.
-	 * @param[in] flags   Flags to be passed.
-	 * @return Error code.
-	 */
-	static
-	int checkExistingDbFile(const QString &key, const QString &locDir,
-	    int flags);
-
-	/*!
-	 * @brief Creates the database name from supplied information.
-	 *
-	 * @param[in] key     ISDS user name.
-	 * @param[in] locDir  Directory where to store the file.
-	 * @param[in] testing Whether it is a testing account.
-	 * @return Path to database file.
-	 */
-	static
-	QString constructDbFileName(const QString &key, const QString &locDir,
-	    bool testing);
+	friend class MessageDbSet;
+	friend class MessageDbSingle;
 };
-
-
-/*!
- * @brief Global database container.
- */
-extern DbContainer *globMessageDbsPtr;
 
 
 #endif /* _MESSAGE_DB_H_ */

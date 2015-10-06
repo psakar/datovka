@@ -25,6 +25,7 @@
 #include <QtAlgorithms> /* qSort() */
 #include <QDebug>
 #include <QRegExp>
+#include <QSet>
 
 #include "accounts_model.h"
 #include "src/common.h"
@@ -232,7 +233,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 			    index.data(ROLE_ACNT_USER_NAME).toString();
 			qDebug() << "A001" << globPref.confDir();
 			if (!globAccounts[userName].dbDir().isEmpty()) {
-				return QIcon(ICON_16x16_PATH "grey.png");
+				return QIcon(ICON_14x14_PATH "grey.png");
 			}
 		}
 		return QStandardItemModel::data(index, role);
@@ -565,6 +566,72 @@ QStandardItem * AccountModel::itemTop(QStandardItem *item)
 
 /* ========================================================================= */
 /*
+ * Returns pointer to related top-most item.
+ */
+const QStandardItem * AccountModel::itemTopYear(const QStandardItem *item,
+    NodeType nodeType)
+/* ========================================================================= */
+{
+	item = itemTop(item);
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
+QStandardItem * AccountModel::itemTopYear(QStandardItem *item, NodeType nodeType)
+/* ========================================================================= */
+{
+	item = itemTop(item);
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (nodeReceivedYear == nodeType) {
+		/* Get received node. */
+		item = item->child(2, 0)->child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		/* Get sent node. */
+		item = item->child(2, 0)->child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	if (0 == item) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	return item;
+}
+
+
+/* ========================================================================= */
+/*
  * Returns index to related top-most item.
  */
 QModelIndex AccountModel::indexTop(const QModelIndex &index)
@@ -628,30 +695,13 @@ bool AccountModel::updateRecentUnread(QStandardItem *item, NodeType nodeType,
 
 /* ========================================================================= */
 /*
- * Add year node into account.
+ * Append year node into account.
  */
-bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
+bool AccountModel::appendYear(QStandardItem *item, NodeType nodeType,
     const QString &year, unsigned unreadMsgs)
 /* ========================================================================= */
 {
-	/* Find account top. */
-	item = itemTop(item);
-
-	if (0 == item) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	if (nodeReceivedYear == nodeType) {
-		/* Get received node. */
-		item = item->child(2, 0)->child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		/* Get sent node. */
-		item = item->child(2, 0)->child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
-	}
+	item = itemTopYear(item, nodeType);
 
 	if (0 == item) {
 		Q_ASSERT(0);
@@ -686,30 +736,87 @@ bool AccountModel::addYear(QStandardItem *item, NodeType nodeType,
 
 /* ========================================================================= */
 /*
- * Update existing year node in account.
+ * Update year nodes.
  */
-bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
-    const QString &year, unsigned unreadMsgs)
+bool AccountModel::updateYearNodes(QStandardItem *item, NodeType nodeType,
+    const QList< QPair<QString, int> > &yearlyUnreadList)
 /* ========================================================================= */
 {
-	/* Find account top. */
-	item = itemTop(item);
+	typedef QPair<QString, int> YearlyContent;
+
+	item = itemTopYear(item, nodeType);
 
 	if (0 == item) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	if (nodeReceivedYear == nodeType) {
-		/* Get received node. */
-		item = item->child(2, 0)->child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		/* Get sent node. */
-		item = item->child(2, 0)->child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
+	QSet<QString> yearsCurrent;
+	for (int i = 0; i < item->rowCount(); ++i) {
+		yearsCurrent.insert(item->child(i, 0)->text());
 	}
+
+	QSet<QString> yearsNew;
+	foreach (const YearlyContent &content, yearlyUnreadList) {
+		yearsNew.insert(content.first);
+	}
+
+	QSet<QString> yearsRemoved = yearsCurrent - yearsNew;
+	QSet<QString> yearsAdded = yearsNew - yearsCurrent;
+
+	/* Remove unneeded nodes. */
+	int i = 0;
+	while (i < item->rowCount()) {
+		if (yearsRemoved.contains(item->child(i, 0)->text())) {
+			item->removeRow(i);
+		} else {
+			++i;
+		}
+	}
+
+	for (int i = 0; i < yearlyUnreadList.size(); ++i) {
+		const YearlyContent &content = yearlyUnreadList[i];
+		if (yearsAdded.contains(content.first)) {
+			/* Add year entry. */
+			QStandardItem *yearItem = new QStandardItem(content.first);
+			if (nodeReceivedYear == nodeType) {
+				yearItem->setIcon(QIcon(ICON_16x16_PATH +
+				    QString("datovka-message-download.png")));
+			} else {
+				yearItem->setIcon(QIcon(ICON_16x16_PATH +
+				    QString("datovka-message-reply.png")));
+			}
+			yearItem->setFlags(yearItem->flags() & ~Qt::ItemIsEditable);
+			if (0 < content.second) {
+				yearItem->setData(content.second, ROLE_ACNT_UNREAD_MSGS);
+			}
+			item->insertRow(i, yearItem);
+		} else {
+			/* Update year entry. */
+			Q_ASSERT(item->child(i, 0)->text() == content.first);
+			if (0 < content.second) {
+				item->child(i, 0)->setData(content.second,
+				    ROLE_ACNT_UNREAD_MSGS);
+			} else {
+				item->child(i, 0)->setData(QVariant(),
+				    ROLE_ACNT_UNREAD_MSGS);
+			}
+		}
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Update existing year node in account.
+ */
+bool AccountModel::updateYear(QStandardItem *item, NodeType nodeType,
+    const QString &year, unsigned unreadMsgs)
+/* ========================================================================= */
+{
+	item = itemTopYear(item, nodeType);
 
 	if (0 == item) {
 		Q_ASSERT(0);

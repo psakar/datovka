@@ -67,8 +67,8 @@ void aboutDialog::initAboutDialog(void)
 	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelCopy->setOpenExternalLinks(true);
 
-	QString url = "&lt;<a href=\"" DATOVKA_ONLINE_HELP_URL "\">"
-	    DATOVKA_ONLINE_HELP_URL "</a>&gt;";
+	QString url = "&lt;<a href=\"" DATOVKA_HOMEPAGE_URL "\">"
+	    DATOVKA_HOMEPAGE_URL "</a>&gt;";
 	this->labelUrl->setText(url);
 	this->labelUrl->setTextFormat(Qt::RichText);
 	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);

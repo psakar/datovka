@@ -26,13 +26,13 @@
 #include "src/io/isds_sessions.h"
 
 
-DlgContacts::DlgContacts(const MessageDb &db, const QString &dbId,
+DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
     QTableWidget &recipientTableWidget,
     QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, const QString &userName)
     : QDialog(parent),
     m_recipientTableWidget(recipientTableWidget),
-    m_messDb(db),
+    m_dbSet(dbSet),
     m_dbId(dbId),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
@@ -135,25 +135,24 @@ void DlgContacts::clearContactText(void)
 void DlgContacts::fillContactsFromMessageDb()
 /* ========================================================================= */
 {
-	QList<QVector<QString>> contactList;
-	contactList = m_messDb.uniqueContacts();
+	QList<MessageDb::ContactEntry> contactList(m_dbSet.uniqueContacts());
 
-	for (int i = 0; i < contactList.count(); i++) {
-		if (m_dbId != contactList[i].at(0)) {
+	foreach (const MessageDb::ContactEntry &entry, contactList) {
+		if (m_dbId != entry.boxId) {
 			int row = this->contactTableWidget->rowCount();
 			this->contactTableWidget->insertRow(row);
 			QTableWidgetItem *item = new QTableWidgetItem;
 			item->setCheckState(Qt::Unchecked);
-			this->contactTableWidget->setItem(row,0,item);
+			this->contactTableWidget->setItem(row, 0, item);
 			item = new QTableWidgetItem;
-			item->setText(contactList[i].at(0));
-			this->contactTableWidget->setItem(row,1,item);
+			item->setText(entry.boxId);
+			this->contactTableWidget->setItem(row, 1, item);
 			item = new QTableWidgetItem;
-			item->setText(contactList[i].at(1));
-			this->contactTableWidget->setItem(row,2,item);
+			item->setText(entry.name);
+			this->contactTableWidget->setItem(row, 2, item);
 			item = new QTableWidgetItem;
-			item->setText(contactList[i].at(2));
-			this->contactTableWidget->setItem(row,3,item);
+			item->setText(entry.address);
+			this->contactTableWidget->setItem(row, 3, item);
 		};
 	}
 	this->contactTableWidget->resizeColumnsToContents();

@@ -77,6 +77,11 @@ public:
 	public:
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
+		bool isValid(void) const
+		{
+			return !QMap<QString, QVariant>::isEmpty() &&
+			    !accountName().isEmpty() && !userName().isEmpty();
+		}
 		inline QString accountName(void) const
 		{
 			return QMap<QString, QVariant>::operator[](
@@ -355,6 +360,15 @@ public:
 	QStandardItem * itemTop(QStandardItem *item);
 
 	/*!
+	 * @brief Returns pointer to related year-top item.
+	 */
+	static
+	const QStandardItem * itemTopYear(const QStandardItem *item,
+	    NodeType nodeType);
+	static
+	QStandardItem * itemTopYear(QStandardItem *item, NodeType nodeType);
+
+	/*!
 	 * @brief Returns index to related top-most item.
 	 */
 	static
@@ -372,7 +386,7 @@ public:
 	    unsigned unreadMsgs = 0);
 
 	/*!
-	 * @brief Add year node into account.
+	 * @brief Append year node into account.
 	 *
 	 * @param[in] item       Some item identifying the processed account.
 	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
@@ -380,8 +394,19 @@ public:
 	 * @param[in] unreadMsgs Number of unread messages.
 	 * @return True on success.
 	 */
-	bool addYear(QStandardItem *item, NodeType nodeType,
+	bool appendYear(QStandardItem *item, NodeType nodeType,
 	    const QString &year, unsigned unreadMsgs = 0);
+
+	/*!
+	 * @brief Update year nodes.
+	 *
+	 * @param[in] item             Some item identifying the processed account.
+	 * @param[in] nodeType         May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] yearlyUnreadList List of paired years and unread messages numbers.
+	 * @return True on success.
+	 */
+	bool updateYearNodes(QStandardItem *item, NodeType nodeType,
+	    const QList< QPair<QString, int> > &yearlyUnreadList);
 
 	/*!
 	 * @brief Update existing year node in account.

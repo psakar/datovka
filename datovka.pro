@@ -248,10 +248,16 @@ SOURCES += src/common.cpp \
     src/io/file_downloader.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
+    src/io/message_db_set.cpp \
+    src/io/message_db_set_container.cpp \
+    src/io/message_db_set_delegated.cpp \
+    src/io/message_db_single.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
+    src/models/files_model.cpp \
+    src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_view_zfo.cpp \
@@ -264,7 +270,8 @@ SOURCES += src/common.cpp \
     src/gui/dlg_account_from_db.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
     src/gui/dlg_msg_search.cpp \
-    src/gui/dlg_timestamp_expir.cpp
+    src/gui/dlg_timestamp_expir.cpp \
+    src/cli/cli.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
@@ -284,10 +291,15 @@ HEADERS += src/common.h \
     src/io/file_downloader.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
+    src/io/message_db_set.h \
+    src/io/message_db_set_container.h \
+    src/io/message_db_single.h \
     src/log/log.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/models/accounts_model.h \
+    src/models/files_model.h \
+    src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
     src/gui/dlg_about.h \
     src/gui/dlg_view_zfo.h \
@@ -300,7 +312,8 @@ HEADERS += src/common.h \
     src/gui/dlg_account_from_db.h \
     src/gui/dlg_yes_no_checkbox.h \
     src/gui/dlg_msg_search.h \
-    src/gui/dlg_timestamp_expir.h
+    src/gui/dlg_timestamp_expir.h \
+    src/cli/cli.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \

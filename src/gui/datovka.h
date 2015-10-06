@@ -39,6 +39,7 @@
 #include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/message_db.h"
+#include "src/io/message_db_set.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
@@ -71,7 +72,7 @@ public:
 		QString databoxID;
 		QString accountName;
 		QString username;
-		MessageDb *messageDb;
+		MessageDbSet *messageDbSet;
 		QModelIndex acntIndex;
 	};
 
@@ -105,7 +106,7 @@ public:
 	    const QString &pwd = QString(), const QString &otpKey = QString());
 
 	/*!
-	 * @brief Get message db to given account.
+	 * @brief Get message db set related to given account.
 	 *
 	 * @note If pointer to main window is not specified, then all dialogues
 	 *     will be suppressed.
@@ -114,7 +115,25 @@ public:
 	 * @param mw       Pointer to main window.
 	 */
 	static
-	MessageDb * accountMessageDb(const QString &userName, MainWindow *mw);
+	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
+
+	/*!
+	 * @brief Get data about logged in user and his box.
+	 */
+	static
+	bool getOwnerInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get information about password expiration date.
+	 */
+	static
+	bool getPasswordInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	static
+	bool getUserInfoFromLogin(const QString &userName);
 
 protected:
 	/*!
@@ -202,7 +221,7 @@ private slots:
 	 *        message ID from search selection
 	 */
 	void messageItemFromSearchSelection(const QString &userName,
-	    qint64 msgId);
+	    qint64 msgId, const QString &deliveryYear, int msgType);
 
 	/*!
 	 * @brief Redraws widgets according to selected attachment item.
@@ -432,6 +451,11 @@ private slots:
 	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
 
 	/*!
+	 * @brief Prepare import of messages from database.
+	 */
+	void prepareMsgsImportFromDatabase(void);
+
+	/*!
 	 * @brief Proxy setting dialog.
 	 */
 	void proxySettings(void);
@@ -460,29 +484,30 @@ private slots:
 	 * @brief Export message into as ZFO file dialog.
 	 */
 	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
-	    QString userName = QString(), qint64 dmID = -1);
+	    QString userName = QString(), qint64 dmID = -1,
+	    const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialog.
 	 */
 	void exportDeliveryInfoAsZFO(const QString &attachPath = QString(),
-	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1);
+	    const QString &attachFileName = QString(),
+	    const QString &formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export delivery information as PDF file dialog.
 	 */
 	void exportDeliveryInfoAsPDF(const QString &attachPath = QString(),
-	    QString attachFileName = QString(),
-	    QString formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1);
+	    const QString &attachFileName = QString(),
+	    const QString &formatString = globPref.delivery_filename_format,
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialog.
 	 */
 	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
-	    qint64 dmID = -1);
+	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
 	 * @brief Open selected message in external application.
@@ -582,9 +607,14 @@ private slots:
 	void aboutApplication(void);
 
 	/*!
-	 * @brief Show help.
+	 * @brief Show help/manual in a internet browser.
 	 */
 	void showHelp(void);
+
+	/*!
+	 * @brief Go to homepage.
+	 */
+	void goHome(void);
 
 	/*!
 	 * @brief Clear message filter field.
@@ -665,6 +695,11 @@ private slots:
 	 */
 	void prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction action);
 
+	/*!
+	 * @brief Split message database slot.
+	 */
+	void splitMsgDbByYearsSlot(void);
+
 private:
 
 	QThread *m_syncAcntThread;
@@ -675,6 +710,17 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Return index for yearly entry with given properties.
+	 */
+	QModelIndex accountYearlyIndex(const QString &userName,
+	    const QString &year, int msgType);
+
+	/*!
+	 * @brief Return index for message with given properties.
+	 */
+	QModelIndex messageIndex(qint64 msgId) const;
 
 	/*!
 	 * @brief Check message time stamp expiration for account.
@@ -870,7 +916,15 @@ private:
 	 */
 	QString createAccountInfoAllField(const QString &accountName,
 	    const QList< QPair<QString, int> > &receivedCounts,
-	    const QList< QPair<QString, int> > &sent) const;
+	    const QList< QPair<QString, int> > &sentCounts) const;
+
+	/*!
+	 * @brief Generate overall account information only for sent or
+	 *     received messages.
+	 */
+	QString createAccountInfoMessagesCount(const QString &accountName,
+	    const QList< QPair<QString, int> > &counts,
+	    enum MessageDb::MessageType type) const;
 
 	/*!
 	 * @brief Generate banner.
@@ -903,12 +957,13 @@ private:
 	 * local database - based on delFromIsds parameter.
 	 */
 	qdatovka_error eraseMessage(const QString &userName, qint64 dmId,
-	    bool delFromIsds);
+	    const QDateTime &deliveryTime, bool delFromIsds);
 
 	/*!
 	 * @brief Verify message. Compare hash with hash stored in ISDS.
 	 */
-	qdatovka_error verifyMessage(const QString &userName, qint64 dmId);
+	qdatovka_error verifyMessage(const QString &userName, qint64 dmId,
+	    const QDateTime &deliveryTime);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.
@@ -939,7 +994,7 @@ private:
 	 */
 	static
 	bool loginMethodUserNamePwd(
-	    const AccountModel::SettingsMap &accountInfo,
+	    AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString());
 
 	/*!
@@ -947,7 +1002,7 @@ private:
 	 */
 	static
 	bool loginMethodUserNamePwdOtp(
-	    const AccountModel::SettingsMap &accountInfo,
+	    AccountModel::SettingsMap &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &otp = QString());
 
@@ -1007,7 +1062,8 @@ private:
 	 * @brief Download complete message synchronously
 	 * without worker and thread.
 	 */
-	bool downloadCompleteMessage(qint64 dmId);
+	bool downloadCompleteMessage(qint64 dmId,
+	    const QDateTime &deliveryTime);
 
 	/*!
 	 * @brief Set read status to messages with given indexes.
@@ -1028,34 +1084,64 @@ private:
 	int showDialogueAboutPwdExpir(const QString &accountName,
 	    const QString &userName, qint64 days, const QDateTime &dateTime);
 
-	/*
-	 * @brief Get data about logged in user and his box.
-	 */
-	static
-	bool getOwnerInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get information about password expiration date.
-	 */
-	static
-	bool getPasswordInfoFromLogin(const QString &userName);
-
 	/*!
 	 * @brief Get information about remaining PDZ credit.
 	 */
 	QString getPDZCreditFromISDS(void);
 
 	/*!
-	 * @brief Get data about logged in user.
-	 */
-	static
-	bool getUserInfoFromLogin(const QString &userName);
-
-	/*!
 	 * @brief Export message with expired time stamp to ZFO.
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
-	    const QStringList &expirMsg);
+	    const QList<MessageDb::MsgId> &expirMsgIds);
+
+	/*!
+	 * @brief Import of messages from database to selected account.
+	 */
+	void doMsgsImportFromDatabase(const QStringList &dbFileList,
+	    const QString &userName);
+
+	/*!
+	 * @brief Split database filename into mandatory entries.
+	 *
+	 * @param[in] inDbFileName - input database file name.
+	 * @param[out] dbUserName - username entry.
+	 * @paran[out] dbYear - year entry if exists or NULL.
+	 * @paran[out] dbTestingFlag - true if account is testing or false
+	 * @paran[out] errMsg - error message to user
+	 * @return true if database filename is correct
+	 */
+	bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
+	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
+	/*!
+	 * @brief Split message database into new databases
+	 * contain messages for single years.
+	 * @param[in] userName - username of account.
+	 * @return true if success
+	 */
+	bool splitMsgDbByYears(const QString &userName);
+
+	/*!
+	 * @brief Show error message box
+	 * @param[in] msgTitle - title of message box.
+	 * @param[in] msgText - main text of message box.
+	 * @param[in] msgInformativeText - info text of message box.
+	 */
+	void showErrMessageBox(const QString &msgTitle,
+	    const QString &msgText, const QString &msgInformativeText);
+
+	/*!
+	 * @brief Set back original database path if error during
+	 *    database splitting
+	 * @param[in] dbset - MessageDbSet.
+	 * @param[in] dbDir - origin database dir.
+	 * @param[in] userName - username of account.
+	 * @return true if success
+	 */
+	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
+	    const QString &userName);
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
