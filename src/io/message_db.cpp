@@ -3393,11 +3393,12 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 {
 	QSqlQuery query(m_db);
 	bool attached = false;
+	bool transaction = false;
 	QString queryStr;
 
 	QStringList idList = getAllMsgsIDEqualWithYear(year);
 
-	attached = MessageDb::attachDb2(m_db, newDbFileName);
+	attached = attachDb2(m_db, newDbFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -3420,13 +3421,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		/* TODO */
 	}
 
-	queryStr = "BEGIN DEFERRED TRANSACTION";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+	transaction = beginTransaction();
+	if (!transaction) {
 		goto fail;
 	}
-	query.exec();
 
 	// copy other message data from other tables into new db.
 	for (int i = 0; i < idList.count(); ++i) {
@@ -3535,21 +3533,17 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 	}
 
-	queryStr = "COMMIT TRANSACTION";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.exec();
-
-	MessageDb::detachDb2(m_db);
+	commitTransaction();
+	detachDb2(m_db);
 
 	return true;
 
 fail:
+	if (transaction) {
+		rollbackTransaction();
+	}
 	if (attached) {
-		MessageDb::detachDb2(m_db);
+		detachDb2(m_db);
 	}
 	return false;
 }
@@ -5147,34 +5141,22 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 {
 	QSqlQuery query(m_db);
 	QByteArray der_data;
+	bool attached = false;
+	bool transaction = false;
+	QString queryStr;
 
-	// attach new database.
-	QString	queryStr = "ATTACH DATABASE \""+ sourceDbPath + "\" AS db2";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
+	attached = attachDb2(m_db, sourceDbPath);
+	if (!attached) {
+		goto fail;
 	}
 
-	queryStr = "BEGIN DEFERRED TRANSACTION";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto exit;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto exit;
+	transaction = beginTransaction();
+	if (!transaction) {
+		goto fail;
 	}
 
 	// copy message data from messages table into db.
-	queryStr = "INSERT INTO messages SELECT * FROM db2.messages WHERE "
+	queryStr = "INSERT INTO messages SELECT * FROM " DB2 ".messages WHERE "
 	    "dmID = :dmID";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5189,7 +5171,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	// copy other message data from other tables into new db.
-	queryStr = "INSERT INTO files SELECT * FROM db2.files WHERE "
+	queryStr = "INSERT INTO files SELECT * FROM " DB2 ".files WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5203,7 +5185,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO hashes SELECT * FROM db2.hashes WHERE "
+	queryStr = "INSERT INTO hashes SELECT * FROM " DB2 ".hashes WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5217,7 +5199,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO events SELECT * FROM db2.events WHERE "
+	queryStr = "INSERT INTO events SELECT * FROM " DB2 ".events WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5232,7 +5214,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	queryStr = "INSERT INTO raw_message_data SELECT * "
-	    "FROM db2.raw_message_data WHERE message_id = :message_id";
+	    "FROM " DB2 ".raw_message_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5247,7 +5229,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	queryStr = "INSERT INTO raw_delivery_info_data SELECT * "
-	    "FROM db2.raw_delivery_info_data WHERE message_id = :message_id";
+	    "FROM " DB2 ".raw_delivery_info_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5262,7 +5244,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	queryStr = "INSERT INTO supplementary_message_data "
-	    "SELECT * FROM db2.supplementary_message_data WHERE "
+	    "SELECT * FROM " DB2 ".supplementary_message_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5276,8 +5258,8 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO process_state SELECT * FROM "
-	    "db2.process_state WHERE message_id = :message_id";
+	queryStr = "INSERT INTO process_state SELECT * FROM " DB2
+	    ".process_state WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5292,7 +5274,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 
 	/* insert message_certificate_data */
 	queryStr = "INSERT INTO message_certificate_data SELECT * "
-	    "FROM db2.message_certificate_data WHERE "
+	    "FROM " DB2 ".message_certificate_data WHERE "
 	    "message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5307,8 +5289,8 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	/* get cert der_data based to message_id from source database */
-	queryStr = "SELECT der_data FROM db2.certificate_data WHERE id IN "
-	    "(SELECT certificate_id FROM db2.message_certificate_data "
+	queryStr = "SELECT der_data FROM " DB2 ".certificate_data WHERE id IN "
+	    "(SELECT certificate_id FROM " DB2 ".message_certificate_data "
 	    "WHERE message_id = :message_id)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -5334,54 +5316,17 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		}
 	}
 
-	// commit all inserts (transaction)
-	queryStr = "COMMIT TRANSACTION";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	// detach new database.
-	queryStr = "DETACH DATABASE db2";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
+	commitTransaction();
+	detachDb2(m_db);
 
 	return true;
+
 fail:
-	queryStr = "ROLLBACK TRANSACTION";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+	if (transaction) {
+		rollbackTransaction();
 	}
-	query.exec();
-
-exit:
-	// detach new database.
-	queryStr = "DETACH DATABASE db2";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
+	if (attached) {
+		detachDb2(m_db);
 	}
-	if (!query.exec()) {
-		logErrorNL("Cannot exec SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
 	return false;
 }
