@@ -3411,14 +3411,15 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		queryStr = "INSERT INTO " DB2 ".messages SELECT * FROM messages "
 		    "WHERE strftime('%Y', dmDeliveryTime) = '"+ year + "'";
 	}
-
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	if (query.exec() && query.isActive()) {
-		/* TODO */
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
 	}
 
 	transaction = beginTransaction();
@@ -3436,8 +3437,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".hashes SELECT * FROM hashes WHERE "
@@ -3447,8 +3450,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".events SELECT * FROM events WHERE "
@@ -3458,8 +3463,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".raw_message_data SELECT * "
@@ -3470,8 +3477,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".raw_delivery_info_data SELECT * "
@@ -3482,8 +3491,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".supplementary_message_data "
@@ -3494,8 +3505,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".process_state SELECT * FROM "
@@ -3505,8 +3518,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".certificate_data SELECT * FROM "
@@ -3516,8 +3531,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 
 		queryStr = "INSERT INTO " DB2 ".message_certificate_data SELECT * "
@@ -3528,8 +3545,10 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
-		if (query.exec() && query.isActive()) {
-			/* TODO */
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
 		}
 	}
 
