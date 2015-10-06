@@ -45,6 +45,12 @@
 #define MT_RECEIVED "received"
 #define MT_SENT_RECEIVED "all"
 
+// Databox type
+#define DB_OVM "OVM"
+#define DB_PO "PO"
+#define DB_PFO "PFO"
+#define DB_FO "FO"
+
 // Define services names
 #define SER_LOGIN "login"
 #define SER_GET_MSG_LIST "get-msg-list"
@@ -54,6 +60,8 @@
 #define SER_GET_USER_INFO "get-user-info"
 #define SER_GET_OWNER_INFO "get-owner-info"
 #define SER_CHECK_ATTACHMENT "check-attachment"
+#define SER_FIND_DATABOX "find-databox"
+
 
 // set of return error values
 enum cli_error {

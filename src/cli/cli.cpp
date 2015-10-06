@@ -45,8 +45,10 @@ const QStringList sendMsgAttrs = QStringList()
 const QStringList getMsgAttrs = QStringList()
     << "dmID" << "dmType" << "zfoFile" << "download" << "markDownload"
     << "attachmentDir";
-const QStringList getDelInfoAttrs = QStringList()
-    << "dmID" << "zfoFile" << "download";
+const QStringList getDelInfoAttrs = QStringList() << "dmID" << "zfoFile"
+    << "download";
+const QStringList findDataboxAttrs = QStringList() << "dbType" << "dbID"
+    << "ic" << "firmName" << "pnFirstName" << "pnLastName" << "adZipCode";
 
 
 /* ========================================================================= */
@@ -106,6 +108,8 @@ bool checkAttributeIfExists(const QString &service, const QString &attribute)
 		return getMsgAttrs.contains(attribute);
 	} else if (service == SER_GET_DEL_INFO) {
 		return getDelInfoAttrs.contains(attribute);
+	} else if (service == SER_FIND_DATABOX) {
+		return findDataboxAttrs.contains(attribute);
 	}
 	return false;
 }
@@ -561,6 +565,176 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 
 	errmsg = "Cannot download owner info";
 	return CLI_ERROR;
+}
+
+
+/* ========================================================================= */
+cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "find info about databox from username"
+	    <<  username;
+
+	struct isds_ctx *session;
+	struct isds_PersonName *personName = NULL;
+	struct isds_Address *address = NULL;
+	struct isds_DbOwnerInfo *ownerInfo = NULL;
+	struct isds_list *boxes = NULL;
+	isds_DbType dbType;
+
+	/* set type of search databox */
+	QString dbTypeTmp = map.value("dbType").toString();
+	if (dbTypeTmp == DB_FO) {
+		dbType = DBTYPE_FO;
+	} else if (dbTypeTmp == DB_PFO) {
+		dbType = DBTYPE_PFO;
+	} else if (dbTypeTmp == DB_PO) {
+		dbType = DBTYPE_PO;
+	} else {
+		dbType = DBTYPE_OVM;
+	}
+
+	/* set person firt and last name */
+	personName = isds_PersonName_create(
+	    map.contains("pnFirstName") ?
+	        map.value("pnFirstName").toString() : QString(),
+	    QString(),
+	    map.contains("pnLastName") ?
+	        map.value("pnLastName").toString() : QString(),
+	    QString());
+	if (NULL == personName) {
+		errmsg = "Error while create find databox request";
+		isds_PersonName_free(&personName);
+		return CLI_ERROR;
+	}
+	/* set PSC */
+	address = isds_Address_create(QString(), QString(), QString(),
+	    QString(),
+	    map.contains("adZipCode") ?
+	         map.value("adZipCode").toString() : QString(),
+	    QString());
+	if (NULL == address) {
+		errmsg = "Error while create find databox request";
+		isds_PersonName_free(&personName);
+		isds_Address_free(&address);
+		return CLI_ERROR;
+	}
+
+	ownerInfo = isds_DbOwnerInfo_createConsume(
+	    map.contains("dbID") ?
+	        map.value("dbID").toString() : QString(),
+	    dbType,
+	    map.contains("ic") ?
+	        map.value("ic").toString() : QString(),
+	    personName,
+	    map.contains("firmName") ?
+	        map.value("firmName").toString() : QString(),
+	    NULL, address, QString(), QString(),
+	    QString(), QString(), QString(), 0, false, false);
+	if (NULL != ownerInfo) {
+		personName = NULL;
+		address = NULL;
+	} else {
+		errmsg = "Error while create find databox request";
+		isds_PersonName_free(&personName);
+		isds_Address_free(&address);
+		isds_DbOwnerInfo_free(&ownerInfo);
+		return CLI_ERROR;
+	}
+
+	isds_error status = isdsSearch(&boxes, username, ownerInfo);
+	isds_DbOwnerInfo_free(&ownerInfo);
+
+	session = isdsSessions.session(username);
+	if (NULL == session) {
+		errmsg = "Error while create find databox request";
+		isds_PersonName_free(&personName);
+		isds_Address_free(&address);
+		isds_DbOwnerInfo_free(&ownerInfo);
+		return CLI_ERROR;
+	}
+
+	if (IE_SUCCESS != status) {
+		errmsg = isdsLongMessage(session);
+		isds_PersonName_free(&personName);
+		isds_Address_free(&address);
+		isds_DbOwnerInfo_free(&ownerInfo);
+		return CLI_ERROR;
+	}
+
+	struct isds_list *box;
+	box = boxes;
+
+	while (0 != box) {
+		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+		QStringList contact;
+		contact.clear();
+		contact.append(item->dbID);
+		QString name;
+
+		if ((item->dbType != NULL) && (*item->dbType == DBTYPE_FO)) {
+			name = QString(item->personName->pnFirstName) +
+			    " " + QString(item->personName->pnLastName);
+		} else if ((item->dbType != NULL) &&
+		    (*item->dbType == DBTYPE_PFO)) {
+			QString firmName = item->firmName;
+			if (firmName.isEmpty() || firmName == " ") {
+				name = QString(item->personName->pnFirstName) +
+				    " " + QString(item->personName->pnLastName);
+			} else {
+				name = item->firmName;
+			}
+		} else {
+			name = item->firmName;
+		}
+
+		QString address,street,adNumberInStreet,adNumberInMunicipality;
+		if (NULL != item->address) {
+
+			street = item->address->adStreet;
+			adNumberInStreet = item->address->adNumberInStreet;
+			adNumberInMunicipality =
+			     item->address->adNumberInMunicipality;
+
+			if (street.isEmpty() || street == " ") {
+				address = item->address->adCity;
+			} else {
+				address = street;
+				if (adNumberInStreet.isEmpty() ||
+				    adNumberInStreet == " ") {
+					address += + " " +
+					    adNumberInMunicipality +
+					    ", " + QString(item->address->adCity);
+				} else if (adNumberInMunicipality.isEmpty() ||
+				    adNumberInMunicipality == " ") {
+					address += + " " +
+					    adNumberInStreet +
+					    ", " + QString(item->address->adCity);
+				} else {
+					address += + " "+
+					    adNumberInMunicipality
+					    + "/" +
+					    adNumberInStreet +
+					", " + QString(item->address->adCity);
+				}
+			}
+
+			contact.append("|" + name + "|" + address + "|" +
+			     QString(item->address->adZipCode)) ;
+			printDataToStdOut(contact);
+
+		}
+		box = box->next;
+	}
+
+	isds_PersonName_free(&personName);
+	isds_Address_free(&address);
+	isds_DbOwnerInfo_free(&ownerInfo);
+	isds_list_free(&boxes);
+
+	return CLI_SUCCESS;
 }
 
 
@@ -1112,6 +1286,107 @@ cli_error checkDownloadDeliveryMandatoryAttributes(
 
 
 /* ========================================================================= */
+cli_error checkFindDataboxMandatoryAttributes(
+    const QMap<QString,QVariant> &map, QString &errmsg)
+/* ========================================================================= */
+{
+	errmsg = "checking of mandatory parameters "
+	    "for find databox...";
+
+	bool isAttr = false;
+
+	/* dbType */
+	if (map.contains("dbType")) {
+		QString dbType = map.value("dbType").toString();
+		if (!(dbType == DB_OVM) && !(dbType == DB_PO)
+		    && !(dbType == DB_PFO) && !(dbType == DB_FO)) {
+			errmsg = "dbType attribute has wrong value";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_ATR_VAL_ERR;
+		}
+	} else {
+		errmsg = "dbType attribute missing";
+		qDebug() << createErrorMsg(errmsg);
+		return CLI_REQ_ATR_ERR;
+	}
+
+	/* dbID */
+	if (map.contains("dbID")) {
+		if (map.value("dbID").toString().length() != 7) {
+			errmsg = "dbID attribute contains wrong "
+			    "value or is empty";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	/* ic */
+	if (map.contains("ic")) {
+		if (map.value("ic").toString().length() != 8) {
+			errmsg = "ic attribute contains wrong "
+			    "value or is empty";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	/* firmName */
+	if (map.contains("firmName")) {
+		if (map.value("firmName").toString().length() < 3) {
+			errmsg = "firmName attribute is empty or contains "
+			    "less than 3 characters";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	/* pnFirstName */
+	if (map.contains("pnFirstName")) {
+		if (map.value("pnFirstName").toString().length() < 3) {
+			errmsg = "pnFirstName attribute is empty or contains "
+			    "less than 3 characters";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	/* pnLastName */
+	if (map.contains("pnLastName")) {
+		if (map.value("pnLastName").toString().length() < 3) {
+			errmsg = "pnLastName attribute is empty or contains "
+			    "less than 3 characters";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	/* adZipCode */
+	if (map.contains("adZipCode")) {
+		if (map.value("adZipCode").toString().length() != 5) {
+			errmsg = "adZipCode attribute is empty or contains "
+			    "wrong value";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_REQ_ATR_ERR;
+		}
+		isAttr = true;
+	}
+
+	if (!isAttr) {
+		errmsg = "Not specified some attribute for this service";
+		qDebug() << createErrorMsg(errmsg);
+		return CLI_REQ_ATR_ERR;
+	}
+
+	return CLI_SUCCESS;
+}
+
+
+/* ========================================================================= */
 cli_error checkMandatoryAttributes(const QString &service,
     QMap<QString,QVariant> &map, QString &errmsg)
 /* ========================================================================= */
@@ -1126,6 +1401,8 @@ cli_error checkMandatoryAttributes(const QString &service,
 		return checkGetMsgMandatoryAttributes(map, errmsg);
 	} else if (service == SER_GET_DEL_INFO) {
 		return checkDownloadDeliveryMandatoryAttributes(map, errmsg);
+	} else if (service == SER_FIND_DATABOX) {
+		return checkFindDataboxMandatoryAttributes(map, errmsg);
 	}
 	errmsg = "Unknown service name";
 	return CLI_UNKNOWN_SER;
@@ -1287,6 +1564,8 @@ cli_error doService(const QString &service, const QMap<QString,QVariant> &map,
 		return getOwnerInfo(map, errmsg);
 	} else if (service == SER_CHECK_ATTACHMENT) {
 		return checkAttachment(map, msgDbSet);
+	} else if (service == SER_FIND_DATABOX) {
+		return findDatabox(map, errmsg);
 	}
 	errmsg = "Unknown service name";
 	return CLI_UNKNOWN_SER;

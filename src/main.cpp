@@ -200,6 +200,11 @@ int main(int argc, char *argv[])
 	        NULL))) {
 		Q_ASSERT(0);
 	}
+	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
+	        QObject::tr("Service: find a databox via several parameters."),
+	        QObject::tr("string-of-parameters")))) {
+		Q_ASSERT(0);
+	}
 
 	parser.addPositionalArgument("[zfo-file]",
 	    QObject::tr("ZFO file to be viewed."));
@@ -489,6 +494,9 @@ int main(int argc, char *argv[])
 		} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
 			ret = runService(parser.value(SER_LOGIN),
 			    SER_CHECK_ATTACHMENT, parser.value(SER_CHECK_ATTACHMENT));
+		} else if (parser.isSet(SER_FIND_DATABOX)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    SER_FIND_DATABOX, parser.value(SER_FIND_DATABOX));
 		} else {
 			ret = runService(parser.value(SER_LOGIN),
 			    NULL, NULL);

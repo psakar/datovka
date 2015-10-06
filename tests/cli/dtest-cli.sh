@@ -637,6 +637,59 @@ else
 	exit
 fi
 
+
+echo ""
+echo "***********************************************************************"
+echo "TEST 09: Find databoxes"
+echo "***********************************************************************"
+# this request must finish with success
+"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	--login "username='$TEST_FIND_DATABOX1'" \
+	--find-databox "dbType='OVM',ic='12345678'" \
+	2>/dev/null
+if [ 0 != $? ]; then
+	echo "FindDatabox: $TEST_FIND_DATABOX1 - ERROR"
+	exit
+else
+	echo "FindDatabox: $TEST_FIND_DATABOX1 - OK"
+fi
+
+# this request must finish with success
+"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	--login "username='$TEST_FIND_DATABOX1'" \
+	--find-databox "dbType='OVM',ic='00000001'" \
+	2>/dev/null
+if [ 0 != $? ]; then
+	echo "FindDatabox: $TEST_FIND_DATABOX1 - ERROR"
+	exit
+else
+	echo "FindDatabox: $TEST_FIND_DATABOX1 - OK"
+fi
+
+# this request must finish with success
+"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	--login "username='$TEST_FIND_DATABOX2'" \
+	--find-databox "dbType='OVM',firmName='Ministerstvo dopravy'" \
+	2>/dev/null
+if [ 0 != $? ]; then
+	echo "FindDatabox: $TEST_FIND_DATABOX2 - ERROR"
+	exit
+else
+	echo "FindDatabox: $TEST_FIND_DATABOX2 - OK"
+fi
+
+# this request must finish with error
+"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	--login "username='$TEST_FIND_DATABOX2'" \
+	--find-databox "dbType='FO',firmName='Ministerstvo dopravy'" \
+	2>/dev/null
+if [ 0 != $? ]; then
+	echo "FindDatabox: $TEST_FIND_DATABOX2 - ERROR: it is OK"
+else
+	echo "FindDatabox: $TEST_FIND_DATABOX2 - ERROR"
+	exit
+fi
+
 echo ""
 echo ""
 echo "-------------------------------------------------"
