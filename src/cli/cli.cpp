@@ -894,7 +894,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		QString err = isds_long_message(session);
 
 		if (IE_SUCCESS == status) {
-			/* Added a new message into database */
+			/* Store new message into database. */
 			qint64 dmId =
 			    QString(sent_message->envelope->dmID).toLongLong();
 			const QString dbIDSender = globAccountDbPtr->dbId(
@@ -912,17 +912,12 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 				    "Database doesn't exists for user "
 				    + map["username"].toString();
 				qDebug() << CLI_PREFIX << errmsg;
-				ret = CLI_ERROR;
-			}
-
-			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
-				    dbIDSender,
-				    dmSender,
-				    dbIds.at(i),
-				    "Databox ID: " +
-				    dbIds.at(i),
-				    "unknown",
+			} else {
+				messageDb->msgsInsertNewlySentMessageEnvelope(
+				    dmId, dbIDSender, dmSender, dbIds.at(i),
+				    "Databox ID: " + dbIds.at(i), "unknown",
 				    map["dmAnnotation"].toString());
+			}
 			qDebug() << CLI_PREFIX << "message has been sent"
 			    << QString(sent_message->envelope->dmID);
 			sendID.append(sent_message->envelope->dmID);
