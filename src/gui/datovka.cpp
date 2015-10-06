@@ -10107,6 +10107,8 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			sMsgCnt++;
 		}
 
+		delete srcDbSingle; srcDbSingle = NULL;
+
 		/* show import result for import databse file */
 		QMessageBox msgBox(this);
 		msgBox.setIcon(QMessageBox::Information);
