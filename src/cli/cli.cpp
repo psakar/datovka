@@ -148,7 +148,8 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	st = sn = rt = rn = 0;
 	qdatovka_error ret;
 	QStringList newMsgIdList;
-	ulong *dmLimit = NULL;
+	unsigned long dmLimit = 0;
+	unsigned long *dmLimitPtr = NULL;
 	uint dmStatusFilter = MESSAGESTATE_ANY;
 	bool ok;
 
@@ -176,14 +177,14 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	}
 
 	if (map.contains("dmLimit")) {
-		dmLimit = (ulong *) malloc(sizeof(ulong));
-		*dmLimit = map["dmLimit"].toString().toULong(&ok);
+		dmLimit = map["dmLimit"].toString().toULong(&ok);
 		if (!ok) {
 			errmsg = "Wrong dmLimit value: " +
 			    map["dmLimit"].toString();
 			qDebug() << CLI_PREFIX << errmsg;
 			return CLI_ATR_VAL_ERR;
 		}
+		dmLimitPtr = &dmLimit;
 	}
 
 	QString err;
@@ -191,7 +192,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
-		    dmLimit, dmStatusFilter);
+		    dmLimitPtr, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Received message list "
@@ -210,7 +211,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, err, NULL, 0, 0, st, sn, newMsgIdList,
-		    dmLimit, dmStatusFilter);
+		    dmLimitPtr, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Sent message list has been "
@@ -229,7 +230,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		cli_error lret = CLI_SUCCESS;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
-		    dmLimit, dmStatusFilter);
+		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Received message list has "
 			    "been downloaded";
@@ -242,7 +243,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
-		    dmLimit, dmStatusFilter);
+		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Sent message list has been "
 			    "downloaded";
