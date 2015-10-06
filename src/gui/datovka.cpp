@@ -8337,7 +8337,9 @@ bool MainWindow::loginMethodCertificateOnly(
 		accountInfo.setPassword("");
 	}
 
-	mw->saveSettings();
+	if (0 != mw) {
+		mw->saveSettings();
+	}
 
 	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
