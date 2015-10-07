@@ -512,7 +512,7 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 	cms = cms_load_der(der, der_size);
 	if (NULL == cms) {
 		log_error("%s\n", "Could not load CMS.");
-		goto fail;
+		return -1;
 	}
 
 	ret = cms_verify_signature(cms,
@@ -528,12 +528,6 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 	CMS_ContentInfo_free(cms); cms = NULL;
 
 	return ret;
-
-fail:
-	if (NULL != cms) {
-		CMS_ContentInfo_free(cms);
-	}
-	return -1;
 
 #ifdef PRINT_HANDLED_CERT
 #  undef PRINT_HANDLED_CERT
@@ -1480,9 +1474,11 @@ int x509_store_add_cert_file(X509_STORE *store, const char *fname,
 		*num_loaded = stored_pems;
 	}
 
+	/* stored_pems cannot be 0 here
 	if (0 == stored_pems) {
 		goto fail;
 	}
+	*/
 
 	return 0;
 
@@ -1490,9 +1486,11 @@ fail:
 	if (NULL != bio) {
 		BIO_free(bio);
 	}
+	/* x509 cannot be NULL here
 	if (NULL != x509) {
 		X509_free(x509);
 	}
+	*/
 	return -1;
 
 #ifdef PRINT_HANDLED_CERT

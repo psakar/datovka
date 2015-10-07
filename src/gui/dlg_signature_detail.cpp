@@ -123,12 +123,12 @@ bool DlgSignatureDetail::signingCertValid(const QByteArray &DER,
 	debugFuncCall();
 
 	if (DER.isEmpty()) {
-		goto fail;
+		return false;
 	}
 
 	signing_cert = raw_cms_signing_cert(DER.data(), DER.size());
 	if (NULL == signing_cert) {
-		goto fail;
+		return false;
 	}
 
 	ret = x509_crt_verify(signing_cert);
@@ -137,12 +137,6 @@ bool DlgSignatureDetail::signingCertValid(const QByteArray &DER,
 
 	x509_crt_destroy(signing_cert); signing_cert = NULL;
 	return 1 == ret;
-
-fail:
-	if (NULL != signing_cert) {
-		x509_crt_destroy(signing_cert);
-	}
-	return false;
 }
 
 
