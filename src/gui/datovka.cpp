@@ -10049,6 +10049,7 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			    "\n\n" + msg,
 			    QMessageBox::Ok);
 			qDebug() << dbFileList.at(i) << msg;
+			delete srcDbSingle; srcDbSingle = NULL;
 			continue;
 		}
 
