@@ -49,6 +49,10 @@
 #define SAVE_CONF_OPT "save-conf"
 #define LOG_FILE "log-file"
 
+#define LOG_VERBOSITY_OPT "log-verbosity"
+#define DEBUG_OPT "debug"
+#define DEBUG_VERBOSITY_OPT "debug-verbosity"
+
 
 /* ========================================================================= */
 static
@@ -67,6 +71,256 @@ int showZfo(const QString &fileName)
 	return 0;
 }
 
+/* ========================================================================= */
+static
+int setupCmdLineParser(QCommandLineParser &parser)
+/* ========================================================================= */
+{
+	parser.setApplicationDescription(QObject::tr("Data box application"));
+	parser.addHelpOption();
+	parser.addVersionOption();
+	/* Options with values. */
+	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
+	        QObject::tr(
+	            "Use <conf-subdir> subdirectory for configuration."),
+	        QObject::tr("conf-subdir")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
+	        QObject::tr("On start load <conf> file."),
+	        QObject::tr("conf")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SAVE_CONF_OPT,
+	        QObject::tr("On stop save <conf> file."),
+	        QObject::tr("conf")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(LOG_FILE,
+	        QObject::tr("Log messages to <file>."),
+	        QObject::tr("file")))) {
+		return -1;
+	}
+	QCommandLineOption logVerb(QStringList() << "L" << LOG_VERBOSITY_OPT,
+	    QObject::tr("Set verbosity of logged messages to <level>. "
+	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
+	    QObject::tr("level"));
+	if (!parser.addOption(logVerb)) {
+		return -1;
+	}
+	/* Boolean options. */
+#ifdef DEBUG
+	QCommandLineOption debugOpt(QStringList() << "D" << DEBUG_OPT,
+	    "Enable debugging information.");
+	if (!parser.addOption(debugOpt)) {
+		return -1;
+	}
+	QCommandLineOption debugVerb(QStringList() << "V" << DEBUG_VERBOSITY_OPT,
+	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
+	    QString::number(globLog.debugVerbosity()) + ".",
+	    QObject::tr("level"));
+	if (!parser.addOption(debugVerb)) {
+		return -1;
+	}
+#endif /* DEBUG */
+
+	/* Options with values. */
+	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
+	        QObject::tr("Service: connect to isds and login into databox."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
+	        QObject::tr("Service: download list of received/sent "
+	        "messages from ISDS."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
+	        QObject::tr("Service: create and send a new message to ISDS."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
+	        QObject::tr("Service: download complete message with "
+	        "signature and time stamp of MV."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
+	        QObject::tr("Service: download delivery info of message "
+	        "with signature and time stamp of MV."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
+	        QObject::tr("Service: get information about user "
+	        "(role, privileges, ...)."),
+	        NULL))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
+	        QObject::tr("Service: get information about owner and "
+	        "its databox."),
+	        NULL))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
+	        QObject::tr("Service: get list of messages where "
+	        "attachment missing (local database only)."),
+	        NULL))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
+	        QObject::tr("Service: find a databox via several parameters."),
+	        QObject::tr("string-of-parameters")))) {
+		return -1;
+	}
+
+	parser.addPositionalArgument("[zfo-file]",
+	    QObject::tr("ZFO file to be viewed."));
+
+	return 0;
+}
+
+/* ========================================================================= */
+static
+int setupPreferences(const QCommandLineParser &parser,
+    GlobPreferences &prefs, GlobLog &log)
+/* ========================================================================= */
+{
+	int logFileId = -1;
+
+	if (parser.isSet(CONF_SUBDIR_OPT)) {
+		prefs.confSubdir = parser.value(CONF_SUBDIR_OPT);
+	}
+	if (parser.isSet(LOAD_CONF_OPT)) {
+		prefs.loadFromConf = parser.value(LOAD_CONF_OPT);
+	}
+	if (parser.isSet(SAVE_CONF_OPT)) {
+		prefs.saveToConf = parser.value(SAVE_CONF_OPT);
+	}
+	if (parser.isSet(LOG_FILE)) {
+		QString logFileName = parser.value(LOG_FILE);
+		logFileId = log.openFile(logFileName.toUtf8().constData(),
+		    GlobLog::LM_APPEND);
+		if (-1 == logFileId) {
+			logError("Cannot open log file '%s'.\n",
+			    logFileName.toUtf8().constData());
+			return -1;
+		}
+		/* Log warnings. */
+		log.setLogLevels(logFileId, LOGSRC_ANY,
+		    LOG_UPTO(LOG_WARNING));
+	}
+#ifdef DEBUG
+	if (parser.isSet(DEBUG_OPT) || parser.isSet(DEBUG_VERBOSITY_OPT)) {
+		log.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+		    LOG_UPTO(LOG_DEBUG));
+		if (-1 != logFileId) {
+			log.setLogLevels(logFileId, LOGSRC_ANY,
+			    LOG_UPTO(LOG_DEBUG));
+		}
+	}
+	if (parser.isSet(DEBUG_VERBOSITY_OPT)) {
+		bool ok;
+		int value = parser.value(DEBUG_VERBOSITY_OPT).toInt(&ok, 10);
+		if (!ok) {
+			logError("%s\n", "Invalid debug-verbosity parameter.");
+			exit(EXIT_FAILURE);
+		}
+		logInfo("Setting debugging verbosity to value '%d'.\n", value);
+		log.setDebugVerbosity(value);
+	}
+#endif /* DEBUG */
+	if (parser.isSet(LOG_VERBOSITY_OPT)) {
+		bool ok;
+		int value = parser.value(LOG_VERBOSITY_OPT).toInt(&ok, 10);
+		if (!ok) {
+			logError("%s\n", "Invalid log-verbosity parameter.");
+			exit(EXIT_FAILURE);
+		}
+		logInfo("Setting logging verbosity to value '%d'.\n", value);
+		log.setLogVerbosity(value);
+	}
+
+	return 0;
+}
+
+/* ========================================================================= */
+static
+void loadLocalisation(QApplication &app)
+/* ========================================================================= */
+{
+	static QTranslator qtTranslator, appTranslator;
+
+	QSettings settings(globPref.loadConfPath(),
+	    QSettings::IniFormat);
+	settings.setIniCodec("UTF-8");
+
+	QString language =
+	    settings.value("preferences/language").toString();
+
+	/* Check for application localisation location. */
+	QString localisationDir;
+	QString localisationFile;
+
+
+	localisationDir = appLocalisationDir();
+
+	logInfo("Loading application localisation from path '%s'.\n",
+	    localisationDir.toUtf8().constData());
+
+	localisationFile = "datovka_";
+
+	if (language == "cs") {
+		localisationFile += "cs";
+		programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
+	} else if (language == "en") {
+		localisationFile += "en";
+		programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
+	} else {
+		/* Use system locale. */
+		localisationFile += QLocale::system().name();
+		programLocale = QLocale::system();
+	}
+
+	if (!appTranslator.load(localisationFile, localisationDir)) {
+		logWarning("Could not load localisation file '%s' "
+		    "from directory '%s'.\n",
+		    localisationFile.toUtf8().constData(),
+		    localisationDir.toUtf8().constData());
+	}
+
+	app.installTranslator(&appTranslator);
+
+
+	localisationDir = qtLocalisationDir();
+
+	logInfo("Loading Qt localisation from path '%s'.\n",
+	    localisationDir.toUtf8().constData());
+
+	localisationFile = "qtbase_";
+
+	if (language == "cs") {
+		localisationFile += "cs";
+	} else if (language == "en") {
+		localisationFile = QString();
+	} else {
+		/* Use system locale. */
+		localisationFile += QLocale::system().name();
+	}
+
+	if (!localisationFile.isEmpty() &&
+	    !qtTranslator.load(localisationFile, localisationDir)) {
+		logWarning("Could not load localisation file '%s' "
+		    "from directory '%s'.\n",
+		    localisationFile.toUtf8().constData(),
+		    localisationDir.toUtf8().constData());
+	}
+
+	app.installTranslator(&qtTranslator);
+}
 
 /* ========================================================================= */
 /* ========================================================================= */
@@ -80,8 +334,6 @@ int main(int argc, char *argv[])
 	/* Log warnings. */
 	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
-
-	int logFileId = -1;
 
 #ifndef WIN32
 	{
@@ -111,164 +363,18 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 
 	QCommandLineParser parser;
-	parser.setApplicationDescription(QObject::tr("Data box application"));
-	parser.addHelpOption();
-	parser.addVersionOption();
-	/* Options with values. */
-	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
-	        QObject::tr(
-	            "Use <conf-subdir> subdirectory for configuration."),
-	        QObject::tr("conf-subdir")))) {
-		Q_ASSERT(0);
+	if (0 != setupCmdLineParser(parser)) {
+		logErrorNL("%s", "Cannot set up command-line parser.");
+		return EXIT_FAILURE;
 	}
-	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
-	        QObject::tr("On start load <conf> file."),
-	        QObject::tr("conf")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SAVE_CONF_OPT,
-	        QObject::tr("On stop save <conf> file."),
-	        QObject::tr("conf")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(LOG_FILE,
-	        QObject::tr("Log messages to <file>."),
-	        QObject::tr("file")))) {
-		Q_ASSERT(0);
-	}
-	QCommandLineOption logVerb(QStringList() << "L" << "log-verbosity",
-	    QObject::tr("Set verbosity of logged messages to <level>. "
-	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
-	    QObject::tr("level"));
-	if (!parser.addOption(logVerb)) {
-		Q_ASSERT(0);
-	}
-	/* Boolean options. */
-#ifdef DEBUG
-	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
-	    "Enable debugging information.");
-	if (!parser.addOption(debugOpt)) {
-		Q_ASSERT(0);
-	}
-	QCommandLineOption debugVerb(QStringList() << "V" << "debug-verbosity",
-	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
-	    QString::number(globLog.debugVerbosity()) + ".",
-	    QObject::tr("level"));
-	if (!parser.addOption(debugVerb)) {
-		Q_ASSERT(0);
-	}
-#endif /* DEBUG */
-
-	/* Options with values. */
-	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
-	        QObject::tr("Service: connect to isds and loggin into databox."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
-	        QObject::tr("Service: download list of received/sent "
-	        "messages from ISDS."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
-	        QObject::tr("Service: create and send a new message to ISDS."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
-	        QObject::tr("Service: download complete message with "
-	        "signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
-	        QObject::tr("Service: download delivery info of message "
-	        "with signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
-	        QObject::tr("Service: get information about user "
-	        "(role, privileges, ...)."),
-	        NULL))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
-	        QObject::tr("Service: get information about owner and "
-	        "its databox."),
-	        NULL))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
-	        QObject::tr("Service: get list of messages where "
-	        "attachment missing (local database only)."),
-	        NULL))) {
-		Q_ASSERT(0);
-	}
-	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
-	        QObject::tr("Service: find a databox via several parameters."),
-	        QObject::tr("string-of-parameters")))) {
-		Q_ASSERT(0);
-	}
-
-	parser.addPositionalArgument("[zfo-file]",
-	    QObject::tr("ZFO file to be viewed."));
 
 	/* Process command-line arguments. */
 	parser.process(app);
 
-	if (parser.isSet(CONF_SUBDIR_OPT)) {
-		globPref.confSubdir = parser.value(CONF_SUBDIR_OPT);
-	}
-	if (parser.isSet(LOAD_CONF_OPT)) {
-		globPref.loadFromConf = parser.value(LOAD_CONF_OPT);
-	}
-	if (parser.isSet(SAVE_CONF_OPT)) {
-		globPref.saveToConf = parser.value(SAVE_CONF_OPT);
-	}
-	if (parser.isSet(LOG_FILE)) {
-		QString logFileName = parser.value(LOG_FILE);
-		logFileId = globLog.openFile(logFileName.toUtf8().constData(),
-		    GlobLog::LM_APPEND);
-		if (-1 == logFileId) {
-			logError("Cannot open log file '%s'.\n",
-			    logFileName.toUtf8().constData());
-			exit(1);
-		}
-		/* Log warnings. */
-		globLog.setLogLevels(logFileId, LOGSRC_ANY,
-		    LOG_UPTO(LOG_WARNING));
-	}
-#ifdef DEBUG
-	if (parser.isSet(debugOpt) || parser.isSet(debugVerb)) {
-		globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
-		    LOG_UPTO(LOG_DEBUG));
-		if (-1 != logFileId) {
-			globLog.setLogLevels(logFileId, LOGSRC_ANY,
-			    LOG_UPTO(LOG_DEBUG));
-		}
-	}
-	if (parser.isSet(debugVerb)) {
-		bool ok;
-		int value = parser.value(debugVerb).toInt(&ok, 10);
-		if (!ok) {
-			logError("%s\n", "Invalid debug-verbosity parameter.");
-			exit(1);
-		}
-		logInfo("Setting debugging verbosity to value '%d'.\n", value);
-		globLog.setDebugVerbosity(value);
-	}
-#endif /* DEBUG */
-	if (parser.isSet(logVerb)) {
-		bool ok;
-		int value = parser.value(logVerb).toInt(&ok, 10);
-		if (!ok) {
-			logError("%s\n", "Invalid log-verbosity parameter.");
-			exit(1);
-		}
-		logInfo("Setting logging verbosity to value '%d'.\n", value);
-		globLog.setLogVerbosity(value);
+	if (0 != setupPreferences(parser, globPref, globLog)) {
+		logErrorNL("%s",
+		    "Cannot apply command line arguments on global settings.");
+		return EXIT_FAILURE;
 	}
 
 	QStringList cmdLineFileNames = parser.positionalArguments();
@@ -282,7 +388,7 @@ int main(int argc, char *argv[])
 
 	if (0 != crypto_init()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
-		/* TODO -- throw a dialog notifying the user. */
+		/* TODO -- throw a dialogue notifying the user. */
 		/*
 		 * TODO -- the function should fail only when all certificates
 		 * failed to load.
@@ -356,80 +462,10 @@ int main(int argc, char *argv[])
 
 	logDebugLv0NL("GUI main thread: %p.", QThread::currentThreadId());
 
-	QTranslator qtTranslator, appTranslator;
-
 	logDebugLv0NL("App path: '%s'.",
 	    app.applicationDirPath().toUtf8().constData());
 
-	/* Load localisation. */
-	{
-		QSettings settings(globPref.loadConfPath(),
-		    QSettings::IniFormat);
-		settings.setIniCodec("UTF-8");
-
-		QString language =
-		    settings.value("preferences/language").toString();
-
-		/* Check for application localisation location. */
-		QString localisationDir;
-		QString localisationFile;
-
-
-		localisationDir = appLocalisationDir();
-
-		logInfo("Loading application localisation from path '%s'.\n",
-		    localisationDir.toUtf8().constData());
-
-		localisationFile = "datovka_";
-
-		if (language == "cs") {
-			localisationFile += "cs";
-			programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
-		} else if (language == "en") {
-			localisationFile += "en";
-			programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
-		} else {
-			/* Use system locale. */
-			localisationFile += QLocale::system().name();
-			programLocale = QLocale::system();
-		}
-
-		if (!appTranslator.load(localisationFile, localisationDir)) {
-			logWarning("Could not load localisation file '%s' "
-			    "from directory '%s'.\n",
-			    localisationFile.toUtf8().constData(),
-			    localisationDir.toUtf8().constData());
-		}
-
-		app.installTranslator(&appTranslator);
-
-
-		localisationDir = qtLocalisationDir();
-
-		logInfo("Loading Qt localisation from path '%s'.\n",
-		    localisationDir.toUtf8().constData());
-
-		localisationFile = "qtbase_";
-
-		if (language == "cs") {
-			localisationFile += "cs";
-		} else if (language == "en") {
-			localisationFile = QString();
-		} else {
-			/* Use system locale. */
-			localisationFile += QLocale::system().name();
-		}
-
-		if (!localisationFile.isEmpty() &&
-		    !qtTranslator.load(localisationFile, localisationDir)) {
-			logWarning("Could not load localisation file '%s' "
-			    "from directory '%s'.\n",
-			    localisationFile.toUtf8().constData(),
-			    localisationDir.toUtf8().constData());
-		}
-
-		app.installTranslator(&qtTranslator);
-	}
+	loadLocalisation(app);
 
 	/* Localise description in tables. */
 	accntinfTbl.reloadLocalisedDescription();
@@ -467,7 +503,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	int ret = 0;
+	int ret = EXIT_SUCCESS;
 
 	/* Parse account information. */
 	{
