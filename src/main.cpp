@@ -140,17 +140,23 @@ int main(int argc, char *argv[])
 	    QObject::tr("Set verbosity of logged messages to <level>. "
 	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
 	    QObject::tr("level"));
-	parser.addOption(logVerb);
+	if (!parser.addOption(logVerb)) {
+		Q_ASSERT(0);
+	}
 	/* Boolean options. */
 #ifdef DEBUG
 	QCommandLineOption debugOpt(QStringList() << "D" << "debug",
 	    "Enable debugging information.");
-	parser.addOption(debugOpt);
+	if (!parser.addOption(debugOpt)) {
+		Q_ASSERT(0);
+	}
 	QCommandLineOption debugVerb(QStringList() << "V" << "debug-verbosity",
 	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
 	    QString::number(globLog.debugVerbosity()) + ".",
 	    QObject::tr("level"));
-	parser.addOption(debugVerb);
+	if (!parser.addOption(debugVerb)) {
+		Q_ASSERT(0);
+	}
 #endif /* DEBUG */
 
 	/* Options with values. */
