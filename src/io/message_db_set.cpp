@@ -379,8 +379,6 @@ QString MessageDbSet::secondaryKey(const QDateTime &time) const
 		Q_ASSERT(0);
 		return QString();
 	}
-
-	return QString();
 }
 
 MessageDb *MessageDbSet::constAccessMessageDb(
