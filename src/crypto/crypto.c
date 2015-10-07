@@ -310,7 +310,7 @@ int crypto_init(void)
 	const struct pem_str *pem_desc;
 	int loaded_at_once;
 #define MAX_PATH_LEN 256
-	size_t crt_dir_path_len, file_name_len;
+	size_t file_name_len;
 	char file_path[MAX_PATH_LEN];
 
 	debug_func_call();
@@ -335,21 +335,22 @@ int crypto_init(void)
 	/* Load from files. */
 	pem_file = pem_files;
 	assert(NULL != pem_file);
+	/* The prefix doesn't change. */
+	const char *crt_dir = CERT_PATH_PREFIX CERT_DIR;
+	const size_t crt_dir_path_len = strlen(crt_dir);
+	if (crt_dir_path_len >= MAX_PATH_LEN) {
+		log_error("File path buffer is too short for '%s'.\n",
+		    crt_dir);
+		goto skip_files;
+	}
+	memcpy(file_path, crt_dir, crt_dir_path_len);
+	file_path[crt_dir_path_len] = '\0';
 	while (NULL != *pem_file) {
-		/* Construct full file name. */
-		crt_dir_path_len = strlen(CERT_PATH_PREFIX CERT_DIR);
-		if (crt_dir_path_len >= MAX_PATH_LEN) {
-			log_error("File path buffer is to short for '%s%s'.\n",
-			    CERT_PATH_PREFIX, CERT_DIR);
-			continue;
-		}
-		memcpy(file_path, CERT_PATH_PREFIX CERT_DIR, crt_dir_path_len);
-		file_path[crt_dir_path_len] = '\0';
+		/* Append file name to construct full file name. */
 		file_name_len = strlen(*pem_file);
 		if ((crt_dir_path_len + file_name_len) >= MAX_PATH_LEN) {
-			log_error(
-			    "File path buffer is to short for '%s%s%s'.\n",
-			    CERT_PATH_PREFIX, CERT_DIR, *pem_file);
+			log_error("File path buffer is too short for '%s%s'.\n",
+			    crt_dir, *pem_file);
 			continue;
 		}
 		memcpy(file_path + crt_dir_path_len, *pem_file, file_name_len);
@@ -364,6 +365,7 @@ int crypto_init(void)
 		}
 		++pem_file;
 	}
+skip_files:
 
 	/* Load from built-in certificates. */
 	pem_desc = pem_strs;
