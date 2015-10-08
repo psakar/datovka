@@ -6945,9 +6945,9 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>ID zprávy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="526"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="564"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="637"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="520"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="558"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="631"/>
         <location filename="../src/io/message_db.cpp" line="1548"/>
         <location filename="../src/io/message_db.cpp" line="1560"/>
         <location filename="../src/io/message_db.cpp" line="1738"/>
@@ -6962,7 +6962,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>Obecné informace</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="553"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="547"/>
         <location filename="../src/io/message_db.cpp" line="1215"/>
         <location filename="../src/io/message_db.cpp" line="1572"/>
         <location filename="../src/io/message_db.cpp" line="1754"/>
@@ -7105,7 +7105,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>ID datové schránky příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="619"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="613"/>
         <location filename="../src/io/message_db.cpp" line="1867"/>
         <source>Time</source>
         <translation>Čas</translation>
@@ -7236,10 +7236,10 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>Podpis zprávy a její obsah si neodpovídají!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="383"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="387"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="424"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="610"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="377"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="381"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="418"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="604"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="604"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="613"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="629"/>
@@ -7253,8 +7253,8 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>Platný</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="437"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="485"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="431"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="479"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="619"/>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="733"/>
         <location filename="../src/io/message_db.cpp" line="1449"/>
@@ -7281,8 +7281,8 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation>Závisí na knihovnách:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="369"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="413"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="363"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="407"/>
         <source>Message signature is not present.</source>
         <translation>Podpis zprávy není přítomný.</translation>
     </message>
@@ -7291,111 +7291,111 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation type="vanished">Platné:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="350"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="344"/>
         <source>No</source>
         <translation>Ne</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="347"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="341"/>
         <source>Yes</source>
         <translation>Ano</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="354"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="348"/>
         <source>Information not available</source>
         <translation>Informace není dostupná</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="415"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="409"/>
         <source>Cannot check signing certificate.</source>
         <translation>Nelze zkontrolovat podpisový certifikát.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="456"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="450"/>
         <source>Trusted certificates were found</source>
         <translation>Důvěryhodné certifikáty nalezeny</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="461"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="455"/>
         <source>Signing algorithm supported</source>
         <translation>Podepisující algoritmus je podporován</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="467"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="461"/>
         <source>Trusted parent certificate found</source>
         <translation>Důvěryhodný rodičovský certifikát nalezen</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="472"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="466"/>
         <source>Certificate time validity is ok</source>
         <translation>Časová platnost certifikátu je v pořádku</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="481"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="475"/>
         <source>Certificate was not revoked</source>
         <translation>Certifikát nebyl revokován</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="491"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="485"/>
         <source>Certificate signature verified</source>
         <translation>Podpis certifikátu ověřen</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="503"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="497"/>
         <source>Version</source>
         <translation>Verze</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="505"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="571"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="499"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="565"/>
         <source>Serial number</source>
         <translation>Sériové číslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="510"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="504"/>
         <source>Signature algorithm</source>
         <translation>Algoritmus podpisu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="513"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="626"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="507"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="620"/>
         <source>Issuer</source>
         <translation>Vydal</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="519"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="558"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="629"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="513"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="552"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="623"/>
         <source>Organisation</source>
         <translation>Organizace</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="532"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="577"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="642"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="526"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="571"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="636"/>
         <source>Country</source>
         <translation>Země</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="536"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="647"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="530"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="641"/>
         <source>Validity</source>
         <translation>Platnost</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="545"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="650"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="539"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="644"/>
         <source>Valid from</source>
         <translation>Platnost od</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="548"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="654"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="542"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="648"/>
         <source>Valid to</source>
         <translation>Platnost do</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="633"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="627"/>
         <source>Organisational unit</source>
         <translation>Organizační jednotka</translation>
     </message>
@@ -7436,7 +7436,7 @@ dnů budou zahrnuta do upozornění o expiraci.</translation>
         <translation type="vanished">Předmět:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="601"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="595"/>
         <source>Time stamp not present.</source>
         <translation>Časové razítko není přítomno.</translation>
     </message>
