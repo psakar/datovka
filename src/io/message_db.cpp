@@ -211,11 +211,9 @@ bool MessageDb::rollbackTransaction(const QString &savePointName)
 /*
  * Attaches a database file to opened database.
  */
-bool MessageDb::attachDb2(QSqlDatabase &db, const QString &attachFileName)
+bool MessageDb::attachDb2(QSqlQuery &query, const QString &attachFileName)
 /* ========================================================================= */
 {
-	QSqlQuery query(db);
-
 	QString queryStr("ATTACH DATABASE :fileName AS " DB2);
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -240,11 +238,9 @@ fail:
 /*
  * Detaches attached database file from opened database.
  */
-bool MessageDb::detachDb2(QSqlDatabase &db)
+bool MessageDb::detachDb2(QSqlQuery &query)
 /* ========================================================================= */
 {
-	QSqlQuery query(db);
-
 	QString queryStr = "DETACH DATABASE " DB2;
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -3400,7 +3396,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 
 	QStringList idList = getAllMsgsIDEqualWithYear(year);
 
-	attached = attachDb2(m_db, newDbFileName);
+	attached = attachDb2(query, newDbFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -3555,7 +3551,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	}
 
 	commitTransaction();
-	detachDb2(m_db);
+	detachDb2(query);
 
 	return true;
 
@@ -3564,7 +3560,7 @@ fail:
 		rollbackTransaction();
 	}
 	if (attached) {
-		detachDb2(m_db);
+		detachDb2(query);
 	}
 	return false;
 }
@@ -5166,7 +5162,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	bool transaction = false;
 	QString queryStr;
 
-	attached = attachDb2(m_db, sourceDbPath);
+	attached = attachDb2(query, sourceDbPath);
 	if (!attached) {
 		goto fail;
 	}
@@ -5338,7 +5334,11 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	commitTransaction();
-	detachDb2(m_db);
+	/*
+	 * Detach has to work directly on query here. Another query cannot be
+	 * created because this locks the database for some reason.
+	 */
+	detachDb2(query);
 
 	return true;
 
@@ -5347,7 +5347,7 @@ fail:
 		rollbackTransaction();
 	}
 	if (attached) {
-		detachDb2(m_db);
+		detachDb2(query);
 	}
 	return false;
 }

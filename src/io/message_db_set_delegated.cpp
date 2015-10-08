@@ -116,7 +116,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	bool attached = false;
 	QString queryStr;
 
-	attached = MessageDb::attachDb2(db.m_db, attachFileName);
+	attached = MessageDb::attachDb2(query, attachFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -179,7 +179,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 
 fail:
 	if (attached) {
-		MessageDb::detachDb2(db.m_db);
+		MessageDb::detachDb2(query);
 	}
 	return ret;
 }
@@ -594,7 +594,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	bool attached = false;
 	QString queryStr;
 
-	attached = MessageDb::attachDb2(db.m_db, attachFileName);
+	attached = MessageDb::attachDb2(query, attachFileName);
 	if (!attached) {
 		goto fail;
 	}
@@ -653,7 +653,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 
 fail:
 	if (attached) {
-		MessageDb::detachDb2(db.m_db);
+		MessageDb::detachDb2(query);
 	}
 	return ret;
 }

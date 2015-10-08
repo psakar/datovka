@@ -625,21 +625,21 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Attaches a database file to opened database.
 	 *
-	 * @param[in,out] db             Database connection.
+	 * @param[in,out] query          Query to work with.
 	 * @param[in]     attachFileName File containing database to be attached.
 	 * @return False on error.
 	 */
 	static
-	bool attachDb2(QSqlDatabase &db, const QString &attachFileName);
+	bool attachDb2(QSqlQuery &query, const QString &attachFileName);
 
 	/*!
 	 * @brief Detaches attached database file from opened database.
 	 *
-	 * @param[in,out] db Database connection.
+	 * @param[in,out] query Query to work with.
 	 * @return False on error.
 	 */
 	static
-	bool detachDb2(QSqlDatabase &db);
+	bool detachDb2(QSqlQuery &query);
 
 	/*!
 	 * @brief Return all received messages model.
