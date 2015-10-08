@@ -5,6 +5,8 @@ SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+MAKEOPTS="-j 4"
+
 SRCDIR="${SCRIPT_LOCATION}/srcs"
 WORKDIR="${SCRIPT_LOCATION}/work"
 BUILTDIR="${SCRIPT_LOCATION}/built"
@@ -57,7 +59,7 @@ if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/zlib*
 
-	make -f win32/Makefile.gcc SHARED_MODE=1 PREFIX=${X86_MINGW_PREFIX} BINARY_PATH=${BUILTDIR}/bin INCLUDE_PATH=${BUILTDIR}/include LIBRARY_PATH=${BUILTDIR}/lib install || exit 1
+	make ${MAKEOPTS} -f win32/Makefile.gcc SHARED_MODE=1 PREFIX=${X86_MINGW_PREFIX} BINARY_PATH=${BUILTDIR}/bin INCLUDE_PATH=${BUILTDIR}/include LIBRARY_PATH=${BUILTDIR}/lib install || exit 1
 fi
 
 
@@ -74,7 +76,7 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	cd "${WORKDIR}"/expat*
 
 	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -91,7 +93,7 @@ if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"/libtool*
 
 	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -109,7 +111,7 @@ if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 
 	# --disable-static
 	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -127,7 +129,7 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 
 	# --disable-static
 	./configure --without-python --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-iconv="${BUILTDIR}"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -145,7 +147,7 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 
 	# --disable-static
 	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-libxml2-prefix="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include" LDFLAGS="-L${BUILTDIR}/lib"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -163,7 +165,7 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 
 	# --disable-static
 	./configure --enable-ipv6 --with-winssl --without-axtls --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
-	make && make install || exit 1
+	make ${MAKEOPTS} && make install || exit 1
 fi
 
 
@@ -181,7 +183,7 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 
 	# no-asm
 	./Configure mingw enable-static-engine shared no-krb5 --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
-	make && make install_sw || exit 1
+	make ${MAKEOPTS} && make install_sw || exit 1
 
 	cp libeay32.dll "${BUILTDIR}/bin/"
 	cp ssleay32.dll "${BUILTDIR}/bin/"
@@ -206,7 +208,7 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 
 	# --disable-static
 	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
-	make
+	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
 	#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
@@ -227,7 +229,7 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	mv nomalloc_configure.ac configure.ac
 	autoheader && libtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
 	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
-	make
+	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
 	#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
