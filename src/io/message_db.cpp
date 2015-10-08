@@ -2821,8 +2821,9 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 	int dbId = -1;
 
 	QString queryStr = "SELECT id FROM files WHERE "
-	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr "
-	    "AND _dmMimeType = :dmMimeType";
+	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr AND "
+	    "_dmMimeType = :dmMimeType AND "
+	    "dmEncodedContent = :dmEncodedContent";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -2831,6 +2832,7 @@ bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
 	query.bindValue(":message_id", dmId);
 	query.bindValue(":dmFileDescr", dmFileDescr);
 	query.bindValue(":dmMimeType", dmMimeType);
+	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
