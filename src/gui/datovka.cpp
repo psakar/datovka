@@ -10355,10 +10355,27 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		QString newDbName = userName + "_" + yearList.at(i);
 		qDebug() << "Creating a new database for year" << yearList.at(i);
 
-		QString  dateStr = QString("%1-06-06 06:06:06.000")
+		QString dateStr = QString("%1-06-06 06:06:06.000")
 		    .arg(yearList.at(i));
 		QDateTime fakeTime = QDateTime::fromString(dateStr,
 		    "yyyy-MM-dd HH:mm:ss.zzz");
+
+		/* Delete the database file if it already exists. */
+		QString fullNewDbFileName(newDbDir + "/" +
+		    newDbName + "___" + testAcnt + ".db");
+		if (QFileInfo::exists(fullNewDbFileName)) {
+			if (QFile::remove(fullNewDbFileName)) {
+				logInfo("Deleted existing file '%s'.",
+				    fullNewDbFileName.toUtf8().constData());
+			} else {
+				logErrorNL("Cannot delete file '%s'.",
+				    fullNewDbFileName.toUtf8().constData());
+				msgText = tr("Existing file '%1' could not be deleted.").
+				    arg(fullNewDbFileName);
+				showErrMessageBox(msgTitle, msgText, msgInformativeText);
+				return false;
+			}
+		}
 
 		/* select destination database via fake delivery time */
 		MessageDb *dstDb =
@@ -10374,8 +10391,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		}
 
 		/* copy all message data to new database */
-		if (!messageDb->copyRelevantMsgsToNewDb(newDbDir + "/" +
-		    newDbName + "___" + testAcnt + ".db",yearList.at(i))) {
+		if (!messageDb->copyRelevantMsgsToNewDb(fullNewDbFileName,
+		        yearList.at(i))) {
 			setBackOriginDb(msgDbSet, dbDir, userName);
 			msgText = tr("Messages correspond with year "
 			    "'%1' for account '%2' were not copied.")
