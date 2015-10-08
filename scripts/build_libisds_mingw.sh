@@ -5,6 +5,7 @@ SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+WIN_VER="0x0501" #https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745%28v=vs.85%29.aspx
 MAKEOPTS="-j 4"
 
 SRCDIR="${SCRIPT_LOCATION}/srcs"
@@ -164,7 +165,7 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"/curl*
 
 	# --disable-static
-	./configure --enable-ipv6 --with-winssl --without-axtls --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	./configure CFLAGS="-DWINVER=${WIN_VER}" --enable-ipv6 --with-winssl --without-axtls --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
 	make ${MAKEOPTS} && make install || exit 1
 fi
 
