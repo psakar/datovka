@@ -1,3 +1,27 @@
+4.4.0 / 2015-10-08
+ * Attachments can be directly opened from the create and send message
+   dialogue.
+ * Fixed issue when a message information was not refreshed after downloading
+   a whole message.
+ * Added link to manual page into top menu.
+ * Fixed sending messages with OVM subcategory sender.
+ * Command-line interface. Messages can be send and received directly from
+   command line.
+ * Messages can be imported from a existing older database file.
+ * Fixed problem when entering wrong password for the first time, then the
+   application remembered the wrong password.
+ * Fixed problem when the application saved the account password even thou it
+   shouldn't be saved.
+ * When saving files then the sender name can be used.
+ * Fixed problem with saving messages that contain illegal characters. Illegal
+   characters are automatically replaced.
+ * Increased icons in top tool bar. Icon description can be optionally enabled.
+ * Increased icons indicating message status in message list.
+ * New application logo.
+ * It is possible to split a single large database file into several smaller
+   ones according to years. Newly created accounts use this type of
+   organisation.
+
 4.3.1 / 2015-06-26
  * Fixed 'Open delivery info externally' operation. It opened the whole
    message instead of the delivery information.
