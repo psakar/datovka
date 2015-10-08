@@ -3524,7 +3524,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 			goto fail;
 		}
 
-		queryStr = "INSERT INTO " DB2 ".certificate_data SELECT * FROM "
+		queryStr = "INSERT OR REPLACE INTO " DB2 ".certificate_data SELECT * FROM "
 		    "certificate_data";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
