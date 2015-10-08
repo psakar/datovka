@@ -4,7 +4,7 @@ SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
-OSX_MIN_VER=10.6
+OSX_MIN_VER=10.7
 MAKEOPTS="-j 2"
 
 SDK_VER="$1"
