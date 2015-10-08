@@ -32,6 +32,7 @@
 
 #include "src/common.h"
 #include "ui_dlg_create_account.h"
+#include "src/models/accounts_model.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/account_db.h"
 
@@ -50,8 +51,8 @@ public:
 	};
 
 	/* TODO -- What is the purpose of @acntTopIdx ? */
-	DlgCreateAccount(const QString &userName, Action action,
-	    QWidget *parent = 0);
+	DlgCreateAccount(const AccountModel::SettingsMap &accountInfo,
+	    Action action, QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -67,7 +68,7 @@ private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);
 
-	const QString m_userName;
+	const AccountModel::SettingsMap m_accountInfo;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;

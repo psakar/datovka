@@ -30,10 +30,10 @@
 #include "src/models/accounts_model.h"
 
 
-DlgCreateAccount::DlgCreateAccount(const QString &userName, Action action,
-    QWidget *parent)
+DlgCreateAccount::DlgCreateAccount(const AccountModel::SettingsMap &accountInfo,
+    Action action, QWidget *parent)
     : QDialog(parent),
-    m_userName(userName),
+    m_accountInfo(accountInfo),
     m_action(action),
     m_loginmethod(0),
     m_certPath("")
@@ -88,61 +88,62 @@ void DlgCreateAccount::setCurrentAccountData(void)
 {
 	int itemindex;
 
-	Q_ASSERT(!m_userName.isEmpty());
-	const AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[m_userName];
+	if (m_accountInfo.userName().isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	switch (m_action) {
 	case ACT_EDIT:
 		this->setWindowTitle(tr("Update account") + " "
-		    + itemSettings.accountName());
-		this->accountLineEdit->setText(itemSettings.accountName());
-		this->usernameLineEdit->setText(m_userName);
+		    + m_accountInfo.accountName());
+		this->accountLineEdit->setText(m_accountInfo.accountName());
+		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_PWD:
 		this->setWindowTitle(tr("Enter password for account") + " "
-		    + itemSettings.accountName());
-		this->accountLineEdit->setText(itemSettings.accountName());
+		    + m_accountInfo.accountName());
+		this->accountLineEdit->setText(m_accountInfo.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(m_userName);
+		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
 		this->setWindowTitle(tr("Set certificate for account") + " "
-		    + itemSettings.accountName());
-		this->accountLineEdit->setText(itemSettings.accountName());
+		    + m_accountInfo.accountName());
+		this->accountLineEdit->setText(m_accountInfo.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(m_userName);
+		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		this->setWindowTitle(tr("Enter password/certificate for account")
-		    + " " + itemSettings.accountName());
-		this->accountLineEdit->setText(itemSettings.accountName());
+		    + " " + m_accountInfo.accountName());
+		this->accountLineEdit->setText(m_accountInfo.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(m_userName);
+		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
 		break;
 	case ACT_IDBOX:
 		this->setWindowTitle(tr("Enter ID of your databox for account")
-		    + " " + itemSettings.accountName());
-		this->accountLineEdit->setText(itemSettings.accountName());
+		    + " " + m_accountInfo.accountName());
+		this->accountLineEdit->setText(m_accountInfo.accountName());
 		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(m_userName);
+		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
@@ -153,7 +154,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		break;
 	}
 
-	const QString login_method = itemSettings.loginMethod();
+	const QString login_method = m_accountInfo.loginMethod();
 	if (LIM_USERNAME == login_method) {
 		itemindex = USER_NAME;
 	} else if (LIM_CERT == login_method) {
@@ -169,17 +170,17 @@ void DlgCreateAccount::setCurrentAccountData(void)
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
 	setActiveButton(itemindex);
 
-	this->passwordLineEdit->setText(itemSettings.password());
-	this->testAccountCheckBox->setChecked(itemSettings.isTestAccount());
-	this->rememberPswcheckBox->setChecked(itemSettings.rememberPwd());
-	this->synchroCheckBox->setChecked(itemSettings.syncWithAll());
+	this->passwordLineEdit->setText(m_accountInfo.password());
+	this->testAccountCheckBox->setChecked(m_accountInfo.isTestAccount());
+	this->rememberPswcheckBox->setChecked(m_accountInfo.rememberPwd());
+	this->synchroCheckBox->setChecked(m_accountInfo.syncWithAll());
 
-	if (!itemSettings.p12File().isEmpty()) {
+	if (!m_accountInfo.p12File().isEmpty()) {
 		this->addCertificateButton->setText(QDir::
-		    toNativeSeparators(itemSettings.p12File()));
+		    toNativeSeparators(m_accountInfo.p12File()));
 		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
-		m_certPath = QDir::toNativeSeparators(itemSettings.p12File());
+		m_certPath = QDir::toNativeSeparators(m_accountInfo.p12File());
 	}
 
 	checkInputFields();
@@ -276,23 +277,20 @@ void DlgCreateAccount::saveAccount(void)
 	debugSlotCall();
 
 	AccountModel::SettingsMap itemSettings;
+	const QString userName(m_accountInfo.userName());
 
 	/* set account index, itemTop and map itemSettings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
 		break;
 	case ACT_EDIT:
-		Q_ASSERT(!m_userName.isEmpty());
-		Q_ASSERT(m_userName == this->usernameLineEdit->text());
-		itemSettings = AccountModel::globAccounts[m_userName];
-		break;
 	case ACT_PWD:
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		Q_ASSERT(!m_userName.isEmpty());
-		Q_ASSERT(m_userName == this->usernameLineEdit->text());
-		itemSettings = AccountModel::globAccounts[m_userName];
+		Q_ASSERT(!userName.isEmpty());
+		Q_ASSERT(userName == this->usernameLineEdit->text());
+		itemSettings = AccountModel::globAccounts[userName];
 		break;
 	default:
 		Q_ASSERT(0);
@@ -341,14 +339,12 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
 		/* TODO -- Update account model according to settings. */
-//		itemTop->setText(this->accountLineEdit->text());
-//		itemTop->setData(userName, ROLE_ACNT_USER_NAME);
-		AccountModel::globAccounts[m_userName] = itemSettings;
+		AccountModel::globAccounts[userName] = itemSettings;
 		/*
 		 * Catching the following signal is required only when
 		 * ACT_EDIT was enabled.
 		 */
-		emit changedAccountProperties(m_userName);
+		emit changedAccountProperties(userName);
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:

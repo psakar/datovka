@@ -4781,8 +4781,8 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *newAccountDialog = new DlgCreateAccount(QString(),
-	   DlgCreateAccount::ACT_ADDNEW, this);
+	QDialog *newAccountDialog = new DlgCreateAccount(
+	   AccountModel::SettingsMap(), DlgCreateAccount::ACT_ADDNEW, this);
 
 	connect(newAccountDialog,
 	    SIGNAL(getAccountUserDataboxInfo(AccountModel::SettingsMap)),
@@ -4932,8 +4932,9 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *editAccountDialog = new DlgCreateAccount(userName,
-	    DlgCreateAccount::ACT_EDIT, this);
+	QDialog *editAccountDialog = new DlgCreateAccount(
+	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
+	    this);
 
 	connect(editAccountDialog, SIGNAL(changedAccountProperties(QString)),
 	    this, SLOT(updateAccountListEntry(QString)));
@@ -8078,7 +8079,7 @@ bool MainWindow::loginMethodUserNamePwd(
 		// when pwd is not stored in settings then open account dialog
 		if (usedPwd.isEmpty()) {
 			QDialog *editAccountDialog = new DlgCreateAccount(
-			    userName, DlgCreateAccount::ACT_PWD, mw);
+			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
 			} else {
@@ -8101,7 +8102,7 @@ bool MainWindow::loginMethodUserNamePwd(
 		// if error, to show account dialog again
 		while (!ret) {
 			QDialog *editAccountDialog = new DlgCreateAccount(
-			    userName, DlgCreateAccount::ACT_PWD, mw);
+			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
 				status = isdsLoginUserName(isdsSessions.session(userName),
@@ -8232,8 +8233,8 @@ bool MainWindow::loginMethodCertificateOnly(
 
 	if (certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(userName,
-			    DlgCreateAccount::ACT_CERT, mw);
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    accountInfo, DlgCreateAccount::ACT_CERT, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				certPath = accountInfo.p12File();
 				mw->saveSettings();
@@ -8377,8 +8378,8 @@ bool MainWindow::loginMethodCertificateUserPwd(
 
 	if (usedPwd.isEmpty() || certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(userName,
-			    DlgCreateAccount::ACT_CERTPWD, mw);
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    accountInfo, DlgCreateAccount::ACT_CERTPWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				certPath = accountInfo.p12File();
 				usedPwd = accountInfo.password();
@@ -8640,8 +8641,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(
 	QString usedPwd = accountInfo.password();
 	if (usedPwd.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(userName,
-			    DlgCreateAccount::ACT_PWD, mw);
+			QDialog *editAccountDialog = new DlgCreateAccount(
+			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
