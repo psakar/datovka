@@ -1934,7 +1934,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		QByteArray data =
 		    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
-		if (WF_SUCCESS != writeFile(fileName, data)) {
+		if (WF_SUCCESS !=
+		    writeFile(getNonConflictingFileName(fileName), data)) {
 			unsuccessfullFiles.append(fileName);
 			continue;
 		}

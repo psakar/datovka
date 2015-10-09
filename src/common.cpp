@@ -1518,3 +1518,35 @@ QString createFilenameFromFormatString(QString pattern, const QString &dmID,
 
 	return pattern;
 }
+
+
+/* ========================================================================= */
+/*
+ * Check if file exists in the path and return non-conflicting filename.
+ */
+QString getNonConflictingFileName(QString fileName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (QFile::exists(fileName)) {
+
+		int fileCnt = 0;
+		QFileInfo fi(fileName);
+		// remember origin filename and path
+		const QString base(fi.baseName());
+		const QString path(fi.path());
+		const QString suffix(fi.completeSuffix());
+
+		do {
+			fileCnt++;
+			// create a new filename
+			QString newName(base + "_" + QString::number(fileCnt));
+			// join path and new filename
+			fileName = path + QString(QDir::separator())
+			    + newName + "." + suffix;
+		} while (QFile::exists(fileName));
+	}
+
+	return fileName;
+}

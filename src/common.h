@@ -491,4 +491,10 @@ QString createFilenameFromFormatString(QString pattern, const QString &dmID,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
     QString dmAnnotation, QString dmSender);
 
+
+/*!
+ * @brief Check if file exists in the path and return non-conflicting filename.
+ */
+QString getNonConflictingFileName(QString fileName);
+
 #endif /* _COMMON_H_ */
