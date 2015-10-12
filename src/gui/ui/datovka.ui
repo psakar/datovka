@@ -1135,6 +1135,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Import messages from ZFO files</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionCreate_message_from_template">
    <property name="icon">
@@ -1159,6 +1162,9 @@ sent reply on this message</string>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionCheck_message_timestamp_expiration">
    <property name="icon">
@@ -1177,6 +1183,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Homepage</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionImport_messages_from_database">
    <property name="icon">
@@ -1186,6 +1195,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Import messages from database</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionSplit_database_by_years">
    <property name="icon">
@@ -1194,6 +1206,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Split database by years</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
