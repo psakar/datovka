@@ -99,13 +99,17 @@ APP="datovka.app"
 
 
 if [ "x${COMPILE_SRC}" = "xyes" ]; then
-	QMAKE_PATH="/usr/local/Qt-${QT_VER}-macx-clang-32-macosx${SDK_VER}-static/bin/qmake"
+	QT_PATH="/usr/local/Qt-${QT_VER}-macx-clang-32-macosx${SDK_VER}-static"
+	QMAKE="${QT_PATH}/bin/qmake"
+	LRELEASE="${QT_PATH}/bin/lrelease"
 
-	# Test qmake presence.
-	if [ ! -x ${QMAKE_PATH} ]; then
-		echo "Cannot find executable '${QMAKE_PATH}'." >&2
-		exit 1
-	fi
+	# Test command presence.
+	for CMD in "${LRELEASE}" "${QMAKE}"; do
+		if [ ! -x "${CMD}" ]; then
+			echo "Cannot find executable '${CMD}'." >&2
+			exit 1
+		fi
+	done
 
 	LIBS_DIR="built_osx${SDK_VER}"
 	LIBS_PATH="libs_static/${LIBS_DIR}"
@@ -120,7 +124,8 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 		ln -s "${LIBS_DIR}" "${LIBS_LINK}"
 	fi
 
-	${QMAKE_PATH} SDK_VER="${SDK_VER}" STATIC=1 datovka.pro
+	${LRELEASE} datovka.pro
+	${QMAKE} SDK_VER="${SDK_VER}" STATIC=1 datovka.pro
 	rm -rf "${APP}"
 	make clean
 	make
