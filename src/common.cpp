@@ -1418,7 +1418,11 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 		return QString();
 	}
 
-	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + fileName);
+	QString nameCopy(fileName);
+	nameCopy.replace(QRegExp("[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]"),
+	    QString( "_" ));
+
+	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + nameCopy);
 	if (!fout.open()) {
 		return QString();
 	}

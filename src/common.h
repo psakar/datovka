@@ -43,7 +43,7 @@
 #define ISDS_PING_TIMEOUT_MS 10000
 #define ISDS_CONNECT_TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define ISDS_DOWNLOAD_TIMEOUT_MS 300000
-#define TIMESTAMP_EXPIR_BEFORE_DAYS 15	/* Show timestamp expiration before days*/
+#define TIMESTAMP_EXPIR_BEFORE_DAYS 15 /* Show timestamp expiration before days*/
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
