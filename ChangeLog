@@ -1,4 +1,8 @@
-4.4.0 / 2015-10-08
+4.4.0 / 2015-10-12
+ * Fixed opening of attachments when attachment name contains non-standard
+   characters.
+ * Fixed displaying of attachments when the attachments have exactly same
+   names.
  * Attachments can be directly opened from the create and send message
    dialogue.
  * Fixed issue when a message information was not refreshed after downloading
