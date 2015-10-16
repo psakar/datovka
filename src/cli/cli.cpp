@@ -1323,7 +1323,7 @@ cli_error checkFindDataboxMandatoryAttributes(
 
 	/* ic */
 	if (map.contains("ic")) {
-		if (map.value("ic").toString().length() != 8) {
+		if (map.value("ic").toString().length() > 8) {
 			errmsg = "ic attribute contains wrong "
 			    "value or is empty";
 			qDebug() << createErrorMsg(errmsg);
