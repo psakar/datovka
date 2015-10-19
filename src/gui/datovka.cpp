@@ -5229,6 +5229,15 @@ void MainWindow::filterMessages(const QString &text)
 	columnList.append(1);
 	columnList.append(2);
 	m_messageListProxyModel.setFilterKeyColumns(columnList);
+
+	/* Set filter field background colour. */
+	if (text.isEmpty()) {
+		m_filterLine->setStyleSheet("QLineEdit{background: white;}");
+	} else if (m_messageListProxyModel.rowCount() != 0) {
+		m_filterLine->setStyleSheet("QLineEdit{background: #afffaf;}");
+	} else {
+		m_filterLine->setStyleSheet("QLineEdit{background: #ffafaf;}");
+	}
 }
 
 
