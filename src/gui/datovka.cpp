@@ -1019,12 +1019,13 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 		/* Mark message locally read. */
 		if (!messageDb->smsgdtLocallyRead(msgId)) {
-			qDebug()
-			    << "Starting timer to mark as read for message"
-			    << msgId;
-			m_messageMarker.setSingleShot(true);
-			m_messageMarker.start(
-			    globPref.message_mark_as_read_timeout);
+			if (globPref.message_mark_as_read_timeout >= 0) {
+				qDebug() << "Starting timer to mark as "
+				    "read for message" << msgId;
+				m_messageMarker.setSingleShot(true);
+				m_messageMarker.start(
+				    globPref.message_mark_as_read_timeout);
+			}
 		} else {
 			m_messageMarker.stop();
 		}

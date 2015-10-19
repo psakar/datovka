@@ -161,6 +161,10 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	    "preferences/timestamp_expir_before_days",
 	    dlftlGlobPref.timestamp_expir_before_days).toInt();
 
+	message_mark_as_read_timeout = settings.value(
+	    "preferences/message_mark_as_read_timeout",
+	    dlftlGlobPref.message_mark_as_read_timeout).toInt();
+
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
 	    dlftlGlobPref.use_global_paths).toBool();
@@ -370,6 +374,12 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	    timestamp_expir_before_days) {
 		settings.setValue("timestamp_expir_before_days",
 		    timestamp_expir_before_days);
+	}
+
+	if (dlftlGlobPref.message_mark_as_read_timeout !=
+	    message_mark_as_read_timeout) {
+		settings.setValue("message_mark_as_read_timeout",
+		    message_mark_as_read_timeout);
 	}
 
 	if (dlftlGlobPref.download_on_background != download_on_background) {

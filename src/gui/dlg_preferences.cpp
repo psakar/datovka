@@ -51,7 +51,12 @@ void DlgPreferences::initPrefDialog(void)
 	    "the connection timeout. Default value is %1 minutes. "
 	    "Use 0 to disable timeout limit (not recommended).").arg(
 	        ISDS_DOWNLOAD_TIMEOUT_MS / 60000));
-
+	this->timeoutMarkMsgSpinBox->setValue(
+	    globPref.message_mark_as_read_timeout / 1000);
+	this->noteMarkMsgLabel->setText(
+	    tr("Note: Marked unread message will be marked as read after set "
+	       "interval. Default value is %1 seconds. Use -1 disable "
+	       "the function.").arg(TIMER_MARK_MSG_READ_MS / 1000));
 	this->check_new_versions->setChecked(globPref.check_new_versions);
 	this->store_messages_on_disk->
 	    setChecked(globPref.store_messages_on_disk);
@@ -250,6 +255,8 @@ void DlgPreferences::saveChanges(void) const
 	globPref.timer_value = this->timerSpinBox->value();
 	globPref.isds_download_timeout_ms =
 	    this->timeoutMinSpinBox->value() * 60000;
+	globPref.message_mark_as_read_timeout =
+	    this->timeoutMarkMsgSpinBox->value() * 1000;
 	globPref.timestamp_expir_before_days =
 	    this->timestampExpirSpinBox->value();
 	globPref.language =
