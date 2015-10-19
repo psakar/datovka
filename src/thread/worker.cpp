@@ -519,7 +519,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		}
 #endif /* USE_TRANSACTIONS */
 
-		int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
+		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
@@ -536,10 +536,15 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 
 		/* Message is in db (dmDbMsgStatus <> -1). */
 		} else {
-			if (MSG_SENT == msgDirect) {
-				int dmNewMsgStatus = convertHexToDecIndex(
-				     *item->envelope->dmMessageStatus);
+			/* Update envelope if message status has changed. */
+			const int dmNewMsgStatus = convertHexToDecIndex(
+			     *item->envelope->dmMessageStatus);
 
+			if (dmNewMsgStatus != dmDbMsgStatus) {
+				updateEnvelope(msgDirect, *messageDb, item->envelope);
+			}
+
+			if (MSG_SENT == msgDirect) {
 				/*
 				 * Sent messages content will be downloaded
 				 * only if those message state is 1 or 2.
