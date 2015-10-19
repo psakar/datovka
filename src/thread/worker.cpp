@@ -758,6 +758,14 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 
+	/*
+	 * If there is no raw message then all the attachments have been
+	 * stored when the message has been set.
+	 */
+	if (!messageDb->msgsStoredWhole(dmID)) {
+		messageDb->flsDeleteMessageFiles(dmID);
+	}
+
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
 		(messageDb->msgsInsertUpdateMessageRaw(dmID,
@@ -815,20 +823,31 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	if (0 != worker) { emit worker->valueChanged(progressLabel, 70); }
 
 	/* Insert/update all attachment files */
-	const struct isds_list *file = msg->documents;
-	while (0 != file) {
+	storeAttachments(*messageDb, dmID, msg->documents);
+
+	return Q_SUCCESS;
+}
+
+
+/* ========================================================================= */
+qdatovka_error Worker::storeAttachments(MessageDb &db, qint64 dmID,
+    const struct isds_list *documents)
+/* ========================================================================= */
+{
+	const struct isds_list *file = documents;
+
+	while (NULL != file) {
 		const isds_document *item = (isds_document *) file->data;
 
-		QByteArray dmEncodedContentBase64 =
-		    QByteArray((char *)item->data,
-		        item->data_length).toBase64();
+		QByteArray dmEncodedContentBase64 = QByteArray(
+		    (char *)item->data, item->data_length).toBase64();
 
 		/* Insert/update file to db */
-		if (messageDb->msgsInsertUpdateMessageFile(dmID,
-		   item->dmFileDescr, item->dmUpFileGuid, item->dmFileGuid,
-		   item->dmMimeType, item->dmFormat,
-		   convertAttachmentType(item->dmFileMetaType),
-		   dmEncodedContentBase64)) {
+		if (db.msgsInsertUpdateMessageFile(dmID, item->dmFileDescr,
+		        item->dmUpFileGuid, item->dmFileGuid, item->dmMimeType,
+		        item->dmFormat,
+		        convertAttachmentType(item->dmFileMetaType),
+		        dmEncodedContentBase64)) {
 			qDebug() << "Message file" << item->dmFileDescr
 			    << "was stored into db...";
 		} else {

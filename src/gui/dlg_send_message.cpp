@@ -36,6 +36,7 @@
 #include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/dbs.h"
+#include "src/thread/worker.h"
 
 
 DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
@@ -1249,6 +1250,9 @@ void DlgSendMessage::sendMessage(void)
 			    this->recipientTableWidget->item(i,1)->text(),
 			    this->recipientTableWidget->item(i,2)->text(),
 			    this->subjectText->text());
+
+			Worker::storeAttachments(*messageDb, dmId,
+			    sent_message->documents);
 
 			successSendCnt++;
 		}

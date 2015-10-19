@@ -2892,6 +2892,35 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Delete all files related to message with given id.
+ */
+bool MessageDb::flsDeleteMessageFiles(qint64 dmId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM files WHERE message_id = :message_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_id", dmId);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+
+/* ========================================================================= */
+/*
  * Insert/update message hash into hashes table.
  */
 bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,

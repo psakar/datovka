@@ -422,6 +422,14 @@ public:
 	    const QByteArray &dmEncodedContentBase64);
 
 	/*!
+	 * @brief Delete all files related to message with given id.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return True on success.
+	 */
+	bool flsDeleteMessageFiles(qint64 dmId);
+
+	/*!
 	 * @brief Insert/update message hash into hashes table.
 	 *
 	 * @param[in] dmId         Message identifier.
