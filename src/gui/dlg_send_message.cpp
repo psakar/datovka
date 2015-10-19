@@ -381,7 +381,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(msgData[0]);
+		pdz = getUserInfoFormIsds(msgData[4]);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
