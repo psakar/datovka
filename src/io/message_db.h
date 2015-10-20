@@ -159,6 +159,31 @@ public:
 		}
 	};
 
+	class PartialEnvelopeData {
+	public:
+		QString dbIDSender;
+		QString dmSender;
+		QString dmSenderAddress;
+		QString dmSenderType;
+		QString dbIDRecipient;
+		QString dmRecipient;
+		QString dmRecipientAddress;
+		QString dmAnnotation;
+		QString dmSenderRefNumber;
+		QString dmSenderIdent;
+		QString dmRecipientRefNumber;
+		QString dmRecipientIdent;
+		QString dmToHands;
+		bool dmPersonalDelivery;
+		bool dmAllowSubstDelivery;
+		QString dmLegalTitleLaw;
+		QString dmLegalTitleYear;
+		QString dmLegalTitleSect;
+		QString dmLegalTitlePar;
+		QString dmLegalTitlePoint;
+		QString dmType;
+	};
+
 	class ContactEntry {
 	public:
 		qint64 dmId; /*!< Message id. */
@@ -238,7 +263,7 @@ public:
 	 *     mesageType, senderRefNumber.
 	 *     Returns empty vector in failure.
 	 */
-	QVector<QString> msgsReplyData(qint64 dmId) const;
+	PartialEnvelopeData msgsReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns true if verification attempt was performed.

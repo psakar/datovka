@@ -748,10 +748,10 @@ fail:
 /*
  * Get message information for reply/template send message dialog.
  */
-QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
+MessageDb::PartialEnvelopeData MessageDb::msgsReplyData(qint64 dmId) const
 /* ========================================================================= */
 {
-	QVector<QString> msgData(21);
+	PartialEnvelopeData envData;
 	QSqlQuery query(m_db);
 	QString queryStr;
 
@@ -776,36 +776,28 @@ QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		msgData[0] = query.value(0).toString();
-		msgData[1] = query.value(1).toString();
-		msgData[2] = query.value(2).toString();
-		msgData[3] = query.value(3).toString();
-		msgData[4] = query.value(4).toString();
-		msgData[5] = query.value(5).toString();
-		msgData[6] = query.value(6).toString();
-		msgData[7] = query.value(7).toString();
-		msgData[8] = query.value(8).toString();
-		msgData[9] = query.value(9).toString();
-		msgData[10] = query.value(10).toString();
-		msgData[11] = query.value(11).toString();
-		msgData[12] = query.value(12).toString();
-		if (query.value(13).toBool()) {
-			msgData[13] = "1";
-		} else {
-			msgData[13] = "0";
-		}
-		if (query.value(14).toBool()) {
-			msgData[14] = "1";
-		} else {
-			msgData[14] = "0";
-		}
-		msgData[15] = query.value(15).toString();
-		msgData[16] = query.value(16).toString();
-		msgData[17] = query.value(17).toString();
-		msgData[18] = query.value(18).toString();
-		msgData[19] = query.value(19).toString();
-		msgData[20] = query.value(20).toString();
-		return msgData;
+		envData.dbIDSender = query.value(0).toString();
+		envData.dmSender = query.value(1).toString();
+		envData.dmSenderAddress = query.value(2).toString();
+		envData.dmSenderType = query.value(3).toString();
+		envData.dbIDRecipient = query.value(4).toString();
+		envData.dmRecipient = query.value(5).toString();
+		envData.dmRecipientAddress = query.value(6).toString();
+		envData.dmAnnotation = query.value(7).toString();
+		envData.dmSenderRefNumber = query.value(8).toString();
+		envData.dmSenderIdent = query.value(9).toString();
+		envData.dmRecipientRefNumber = query.value(10).toString();
+		envData.dmRecipientIdent = query.value(11).toString();
+		envData.dmToHands = query.value(12).toString();
+		envData.dmPersonalDelivery = query.value(13).toBool();
+		envData.dmAllowSubstDelivery = query.value(14).toBool();
+		envData.dmLegalTitleLaw = query.value(15).toString();
+		envData.dmLegalTitleYear = query.value(16).toString();
+		envData.dmLegalTitleSect = query.value(17).toString();
+		envData.dmLegalTitlePar = query.value(18).toString();
+		envData.dmLegalTitlePoint = query.value(19).toString();
+		envData.dmType = query.value(20).toString();
+		return envData;
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
@@ -814,7 +806,7 @@ QVector<QString> MessageDb::msgsReplyData(qint64 dmId) const
 	}
 
 fail:
-	return QVector<QString>();
+	return PartialEnvelopeData();
 }
 
 

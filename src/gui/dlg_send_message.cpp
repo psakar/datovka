@@ -250,32 +250,32 @@ void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 void DlgSendMessage::fillDlgAsReply(void)
 /* ========================================================================= */
 {
-	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
 
 	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
-	msgData = messageDb->msgsReplyData(m_msgID);
-	m_dmType = msgData[20];
-	m_dmSenderRefNumber = msgData[10];
+	MessageDb::PartialEnvelopeData envData =
+	    messageDb->msgsReplyData(m_msgID);
+	m_dmType = envData.dmType;
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	this->subjectText->setText("Re: " + msgData[7]);
+	this->subjectText->setText("Re: " + envData.dmAnnotation);
 
-	if (!msgData[8].isEmpty()) {
-		this->dmRecipientRefNumber->setText(msgData[8]);
+	if (!envData.dmSenderRefNumber.isEmpty()) {
+		this->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[9].isEmpty()) {
-		this->dmRecipientIdent->setText(msgData[9]);
+	if (!envData.dmSenderIdent.isEmpty()) {
+		this->dmRecipientIdent->setText(envData.dmSenderIdent);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[10].isEmpty()) {
-		this->dmSenderRefNumber->setText(msgData[10]);
+	if (!envData.dmRecipientRefNumber.isEmpty()) {
+		this->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[11].isEmpty()) {
-		this->dmSenderIdent->setText(msgData[11]);
+	if (!envData.dmRecipientIdent.isEmpty()) {
+		this->dmSenderIdent->setText(envData.dmRecipientIdent);
 		hideOptionalWidget = false;
 	}
 
@@ -287,7 +287,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(msgData[0]);
+		pdz = getUserInfoFormIsds(envData.dbIDSender);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -313,13 +313,13 @@ void DlgSendMessage::fillDlgAsReply(void)
 	int row = this->recipientTableWidget->rowCount();
 	this->recipientTableWidget->insertRow(row);
 	QTableWidgetItem *item = new QTableWidgetItem;
-	item->setText(msgData[0]);
+	item->setText(envData.dbIDSender);
 	this->recipientTableWidget->setItem(row, RTW_ID, item);
 	item = new QTableWidgetItem;
-	item->setText(msgData[1]);
+	item->setText(envData.dmSender);
 	this->recipientTableWidget->setItem(row, RTW_NAME, item);
 	item = new QTableWidgetItem;
-	item->setText(msgData[2]);
+	item->setText(envData.dmSenderAddress);
 	this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 	item = new QTableWidgetItem;
 	item->setText(pdz);
@@ -335,65 +335,61 @@ void DlgSendMessage::fillDlgAsReply(void)
 void DlgSendMessage::fillDlgFromTmpMsg(void)
 /* ========================================================================= */
 {
-	QVector<QString> msgData;
 	bool hideOptionalWidget = true;
 
 	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
-	msgData = messageDb->msgsReplyData(m_msgID);
-	m_dmType = msgData[20];
-	m_dmSenderRefNumber = msgData[10];
+	MessageDb::PartialEnvelopeData envData =
+	    messageDb->msgsReplyData(m_msgID);
+	m_dmType = envData.dmType;
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	this->subjectText->setText(msgData[7]);
+	this->subjectText->setText(envData.dmAnnotation);
 
-	/* fill optional fileds  */
-	if (!msgData[8].isEmpty()) {
-		this->dmSenderRefNumber->setText(msgData[8]);
+	/* Fill in optional fields.  */
+	if (!envData.dmSenderRefNumber.isEmpty()) {
+		this->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[9].isEmpty()) {
-		this->dmSenderIdent->setText(msgData[9]);
+	if (!envData.dmSenderIdent.isEmpty()) {
+		this->dmSenderIdent->setText(envData.dmSenderIdent);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[10].isEmpty()) {
-		this->dmRecipientRefNumber->setText(msgData[10]);
+	if (!envData.dmRecipientRefNumber.isEmpty()) {
+		this->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[11].isEmpty()) {
-		this->dmRecipientIdent->setText(msgData[11]);
+	if (!envData.dmRecipientIdent.isEmpty()) {
+		this->dmRecipientIdent->setText(envData.dmRecipientIdent);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[12].isEmpty()) {
-		this->dmToHands->setText(msgData[12]);
+	if (!envData.dmToHands.isEmpty()) {
+		this->dmToHands->setText(envData.dmToHands);
 		hideOptionalWidget = false;
 	}
-	/* set checkboxes */
-	if (msgData[13] == "1") {
-		this->dmPersonalDelivery->setChecked(true);
-	}
-	if (msgData[14] == "1") {
-		this->dmAllowSubstDelivery->setChecked(true);
-	}
+	/* set check boxes */
+	this->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
+	this->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
 	/* fill optional LegalTitle - Law, year, ... */
-	if (!msgData[15].isEmpty()) {
-		this->dmLegalTitleLaw->setText(msgData[15]);
+	if (!envData.dmLegalTitleLaw.isEmpty()) {
+		this->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[16].isEmpty()) {
-		this->dmLegalTitleYear->setText(msgData[16]);
+	if (!envData.dmLegalTitleYear.isEmpty()) {
+		this->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[17].isEmpty()) {
-		this->dmLegalTitleSect->setText(msgData[17]);
+	if (!envData.dmLegalTitleSect.isEmpty()) {
+		this->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[18].isEmpty()) {
-		this->dmLegalTitlePar->setText(msgData[18]);
+	if (!envData.dmLegalTitlePar.isEmpty()) {
+		this->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
 		hideOptionalWidget = false;
 	}
-	if (!msgData[19].isEmpty()) {
-		this->dmLegalTitlePoint->setText(msgData[19]);
+	if (!envData.dmLegalTitlePoint.isEmpty()) {
+		this->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
 		hideOptionalWidget = false;
 	}
 
@@ -402,7 +398,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(msgData[4]);
+		pdz = getUserInfoFormIsds(envData.dbIDRecipient);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -412,17 +408,17 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	}
 
 	/* message is received -> recipient == sender */
-	if (m_dbId != msgData[4]) {
+	if (m_dbId != envData.dbIDRecipient) {
 		int row = this->recipientTableWidget->rowCount();
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(msgData[4]);
+		item->setText(envData.dbIDRecipient);
 		this->recipientTableWidget->setItem(row, RTW_ID, item);
 		item = new QTableWidgetItem;
-		item->setText(msgData[5]);
+		item->setText(envData.dmRecipient);
 		this->recipientTableWidget->setItem(row, RTW_NAME, item);
 		item = new QTableWidgetItem;
-		item->setText(msgData[6]);
+		item->setText(envData.dmRecipientAddress);
 		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
 		item->setText(pdz);
