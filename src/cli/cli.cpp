@@ -1097,9 +1097,10 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			sendID.append(sent_message->envelope->dmID);
 			ret = CLI_SUCCESS;
 		} else {
-			errmsg = "Error while sending message";
+			errmsg = "Error while sending message! ISDS says: "
+			    + err;
 			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << status << err;
+			    << status;
 			ret = CLI_ERROR;
 		}
 	}
@@ -1126,7 +1127,8 @@ cli_error checkLoginMandatoryAttributes(const QMap<QString,QVariant> &map,
 	if (!map.contains("username") ||
 	    map.value("username").toString().isEmpty() ||
 	    map.value("username").toString().length() != 6) {
-		errmsg = "Username attribute missing or contains wrong value";
+		errmsg = "Username attribute missing or contains wrong value. "
+		"Username must be exactly 6 chars long.";
 		qDebug() << createErrorMsg(errmsg);
 		return CLI_REQ_ATR_ERR;
 	}
@@ -1154,8 +1156,9 @@ cli_error checkSendMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
 	for (int i = 0; i < dbIds.count(); ++i) {
 		if (dbIds.at(i).length() != 7) {
 			errmsg = (QString("dbIDRecipient "
-			    "attribute contains wrong value or length at "
-			    "position %1!").arg(i+1));
+			    "attribute contains wrong value at "
+			    "position %1! dbIDRecipient must be exactly 7 "
+			    "chars long.").arg(i+1));
 			qDebug() << createErrorMsg(errmsg);
 			return CLI_ATR_VAL_ERR;
 		}
@@ -1243,7 +1246,8 @@ cli_error checkGetMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
 		QString download = map.value("download").toString();
 		if (!(download == "no") && !(download == "yes")
 		    && !(download == "ondemand")) {
-			errmsg = "download attribute has wrong value";
+			errmsg = "download attribute has wrong value "
+			"(no,yes,ondemand is required)";
 			qDebug() << createErrorMsg(errmsg);
 			return CLI_ATR_VAL_ERR;
 		}
@@ -1275,7 +1279,7 @@ cli_error checkDownloadDeliveryMandatoryAttributes(
 		if (!(download == "no") && !(download == "yes")
 		    && !(download == "ondemand")) {
 			errmsg = "download attribute has "
-			    "wrong value";
+			    "wrong value (no,yes,ondemand is required)";
 			qDebug() << createErrorMsg(errmsg);
 			return CLI_ATR_VAL_ERR;
 		}
@@ -1438,7 +1442,8 @@ cli_error parsePamamString(const QString &service, const QString &paramString,
 				}
 				if (value.isEmpty()) {
 					errmsg = QString("empty attribute "
-					    "value on position '%1'").
+					    "value on position '%1' or value "
+					    "is not between apostrophes").
 					    arg(attrPosition);
 					qDebug() << createErrorMsg(errmsg);
 					return CLI_ATR_VAL_ERR;
@@ -1512,8 +1517,8 @@ cli_error parsePamamString(const QString &service, const QString &paramString,
 		return CLI_ATR_NAME_ERR;
 	}
 	if (value.isEmpty()) {
-		errmsg = QString("empty attribute "
-		    "value on position '%1'").arg(attrPosition);
+		errmsg = QString("empty attribute value on position '%1' "
+		"or value is not between apostrophes").arg(attrPosition);
 		qDebug() << createErrorMsg(errmsg);
 		return CLI_ATR_VAL_ERR;
 	}

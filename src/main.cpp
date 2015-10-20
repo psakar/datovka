@@ -56,6 +56,62 @@
 
 /* ========================================================================= */
 static
+int doCLI(const QStringList &serList, const QCommandLineParser &parser)
+/* ========================================================================= */
+{
+	int ret = CLI_EXIT_ERROR;
+	QString errmsg;
+	QString serName;
+	int index = 0;
+	QTextStream cout(stderr);
+
+	// every valid CLI action must have only one login parameter
+	// or one login parameter and one name service
+	switch (serList.count()) {
+	case 0:
+		errmsg = "No service has been defined for CLI action!";
+		break;
+	case 1:
+		if (serList.contains(SER_LOGIN)) {
+			ret = runService(parser.value(SER_LOGIN),
+			    NULL, NULL);
+			return ret;
+		} else {
+			errmsg = "Only service name was set. "
+			    "Login parameter is missing!";
+		}
+		break;
+	case 2:
+		if (serList.contains(SER_LOGIN)) {
+			index = serList.indexOf(SER_LOGIN);
+			if (index == 0) {
+				serName = serList.at(1);
+			} else {
+				serName = serList.at(0);
+			}
+			ret = runService(parser.value(SER_LOGIN),
+			    serName, parser.value(serName));
+			return ret;
+		} else {
+			errmsg = "Login parameter is missing! "
+			    "Maybe two service names were set.";
+		}
+		break;
+	default:
+		errmsg = "More than two service names or logins were set! "
+		    "This situation is not allowed.";
+		break;
+	}
+
+	// print error to stderr
+	cout << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
+	    << errmsg << endl;
+
+	return ret;
+}
+
+/* ========================================================================= */
+static
 int showZfo(const QString &fileName)
 /* ========================================================================= */
 {
@@ -514,36 +570,22 @@ int main(int argc, char *argv[])
 		AccountModel::globAccounts.loadFromSettings(settings);
 	}
 
-	if (parser.isSet(SER_LOGIN)) {
-		if (parser.isSet(SER_GET_MSG_LIST)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_GET_MSG_LIST, parser.value(SER_GET_MSG_LIST));
-		} else if (parser.isSet(SER_SEND_MSG)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_SEND_MSG, parser.value(SER_SEND_MSG));
-		} else if (parser.isSet(SER_GET_MSG)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_GET_MSG, parser.value(SER_GET_MSG));
-		} else if (parser.isSet(SER_GET_DEL_INFO)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_GET_DEL_INFO, parser.value(SER_GET_DEL_INFO));
-		} else if (parser.isSet(SER_GET_USER_INFO)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_GET_USER_INFO, parser.value(SER_GET_USER_INFO));
-		} else if (parser.isSet(SER_GET_OWNER_INFO)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_GET_OWNER_INFO, parser.value(SER_GET_OWNER_INFO));
-		} else if (parser.isSet(SER_CHECK_ATTACHMENT)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_CHECK_ATTACHMENT, parser.value(SER_CHECK_ATTACHMENT));
-		} else if (parser.isSet(SER_FIND_DATABOX)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    SER_FIND_DATABOX, parser.value(SER_FIND_DATABOX));
-		} else {
-			ret = runService(parser.value(SER_LOGIN),
-			    NULL, NULL);
-		}
+	QStringList inOptions = parser.optionNames();
+	QStringList serList;
 
+	// check if any CLI service was set from command line
+	for (int i = 0; i < inOptions.count(); ++i) {
+		for (int j = 0; j < serviceList.count(); ++j) {
+			if (inOptions.at(i) == serviceList.at(j)) {
+				serList.append(inOptions.at(i));
+				break;
+			}
+		}
+	}
+
+	// if any CLI service was set run CLI
+	if (!serList.isEmpty()) {
+		ret = doCLI(serList, parser);
 	} else if (cmdLineFileNames.isEmpty()) {
 		MainWindow mainwin;
 		mainwin.show();

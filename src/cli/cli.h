@@ -76,6 +76,13 @@ enum cli_error {
 	CLI_REQ_ATR_ERR
 };
 
+// IMORTANT: if any another service is/ will be defined,
+// it must be added into this service list
+const QStringList serviceList = QStringList() << SER_LOGIN <<
+SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
+SER_GET_USER_INFO << SER_GET_OWNER_INFO << SER_CHECK_ATTACHMENT <<
+SER_FIND_DATABOX;
+
 /*
  * Run login + service
  * [in] lParam = login parameter string
