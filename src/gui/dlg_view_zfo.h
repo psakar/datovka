@@ -169,16 +169,54 @@ private:
 	 * @brief Generate description from supplied message.
 	 *
 	 * @param[in] attachmentCount Number of attached files.
+	 * @param[in] msgDER          Raw message data.
+	 * @param[in] msgSize         Raw message size.
+	 * @param[in] tstDer          Time stamp data.
+	 * @param[in] tstSize         Time stamp size.
 	 * @return String containing description in HTML format.
 	 */
 	QString messageDescriptionHtml(int attachmentCount,
 	    const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize);
+	    const void *tstDER, size_t tstSize) const;
 
-	QString deliveryDescriptionHtml(
-	    const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize);
+	/*!
+	 * @brief Generate description for supplied delivery information.
+	 *
+	 * @param[in] msgDER          Raw message data.
+	 * @param[in] msgSize         Raw message size.
+	 * @param[in] tstDer          Time stamp data.
+	 * @param[in] tstSize         Time stamp size.
+	 * @return String containing description in HTML format.
+	 */
+	QString deliveryDescriptionHtml(const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize) const;
 
+	/*!
+	 * @brief Generates header description according to the supplied
+	 *     envelope.
+	 *
+	 * @param[out] html     HTML text to which the data should be appended.
+	 * @param[in]  envelope Message envelope structure.
+	 * @return True on success.
+	 */
+	static
+	bool envelopeHeaderDescriptionHtml(QString &html,
+	    const isds_envelope *envelope);
+
+	/*!
+	 * @brief Generates footer description according to the supplied
+	 *     message data.
+	 *
+	 * @param[out] html     HTML text to which the data should be appended.
+	 * @param[in]  msgDER   Raw message data.
+	 * @param[in]  msgSize  Raw message size.
+	 * @param[in]  tstDer   Time stamp data.
+	 * @param[in]  tstSize  Time stamp size.
+	 * @return True on success.
+	 */
+	static
+	bool signatureFooterDescription(QString &html, const void *msgDER,
+	    size_t msgSize, const void *tstDER, size_t tstSize);
 
 	isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*

@@ -353,6 +353,7 @@ void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
 	}
 
 	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	Q_ASSERT(NULL == m_message);
 	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
 	if (NULL == m_message) {
 		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
@@ -543,95 +544,31 @@ void DlgViewZfo::showSignatureDetails(void)
  * Generate description from supplied message.
  */
 QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
-    const void *msgDER, size_t msgSize, const void *tstDER, size_t tstSize)
+    const void *msgDER, size_t msgSize, const void *tstDER,
+    size_t tstSize) const
 /* ========================================================================= */
 {
-	const isds_envelope *envelope;
-	isds_message_status *state;
+	if (NULL == m_message) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
-	envelope = m_message->envelope;
-	Q_ASSERT(NULL != envelope);
+	const isds_envelope *envelope = m_message->envelope;
+	if (NULL == envelope) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
-	state = envelope->dmMessageStatus;
-	Q_ASSERT(NULL != state);
+	QString html(indentDivStart);
 
-	QString html;
+	envelopeHeaderDescriptionHtml(html, envelope);
 
-	html += indentDivStart;
-	html += "<h3>" + tr("Identification") + "</h3>";
-
-	html += strongAccountInfoLine(tr("ID"), envelope->dmID);
-	html += strongAccountInfoLine(tr("Subject"), envelope->dmAnnotation);
-	html += strongAccountInfoLine(tr("Message type"), envelope->dmType);
-
-	html += "<br/>";
-
-	/* Information about message author. */
-	html += strongAccountInfoLine(tr("Sender"), envelope->dmSender);
-	html += strongAccountInfoLine(tr("Sender Databox ID"), envelope->dbIDSender);
-	html += strongAccountInfoLine(tr("Sender Address"),
-	    envelope->dmSenderAddress);
-
-	html += "<br/>";
-
-	html += strongAccountInfoLine(tr("Recipient"), envelope->dmRecipient);
-	html += strongAccountInfoLine(tr("Recipient Databox ID"), envelope->dbIDRecipient);
-	html += strongAccountInfoLine(tr("Recipient Address"),
-	    envelope->dmRecipientAddress);
-
-	html += "<h3>" + tr("Status") + "</h3>";
-
-	html += strongAccountInfoLine(tr("Delivery time"),
-	    dateTimeStrFromDbFormat(
-	        timevalToDbFormat(envelope->dmDeliveryTime),
-	        dateTimeDisplayFormat));
-	html += strongAccountInfoLine(tr("Acceptance time"),
-	    dateTimeStrFromDbFormat(
-	        timevalToDbFormat(envelope->dmAcceptanceTime),
-	        dateTimeDisplayFormat));
-	html += strongAccountInfoLine(tr("Status"),
-	    QString::number(convertHexToDecIndex(
-	        *(envelope->dmMessageStatus))) + " -- " +
-	    msgStatusToText(convertHexToDecIndex(
-	        *(envelope->dmMessageStatus))));
 	html += strongAccountInfoLine(tr("Attachments"),
 	    QString::number(attachmentCount));
 
-	html += "<h3>" + tr("Signature") + "</h3>";
+	signatureFooterDescription(html, msgDER, msgSize, tstDER, tstSize);
 
-	QString resultStr;
-	if (1 == raw_msg_verify_signature(msgDER, msgSize, 0, 0)) {
-		resultStr = QObject::tr("Valid");
-	} else {
-		resultStr = QObject::tr("Invalid")  + " -- " +
-		    QObject::tr("Message signature and content do not "
-		        "correspond!");
-	}
-	html += strongAccountInfoLine(tr("Message signature"), resultStr);
-	if (1 == raw_msg_verify_signature_date(msgDER, msgSize,
-	        QDateTime::currentDateTime().toTime_t(), 0)) {
-		resultStr = QObject::tr("Valid");
-	} else {
-		resultStr = QObject::tr("Invalid");
-	}
-	if (!globPref.check_crl) {
-		resultStr += " (" +
-		    QObject::tr("Certificate revocation check is turned off!") +
-		    ")";
-	}
-	html += strongAccountInfoLine(tr("Signing certificate"), resultStr);
-	time_t utc_time = 0;
-	QDateTime tst;
-	int ret = raw_tst_verify(tstDER, tstSize, &utc_time);
-	if (-1 != ret) {
-		tst = QDateTime::fromTime_t(utc_time);
-	}
-	resultStr = (1 == ret) ? QObject::tr("Valid") : QObject::tr("Invalid");
-	if (-1 != ret) {
-		resultStr += " (" + tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
-		    tst.timeZone().abbreviation(tst) + ")";
-	}
-	html += strongAccountInfoLine(tr("Time stamp"), resultStr);
+	html += divEnd;
 
 	return html;
 }
@@ -643,25 +580,55 @@ QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
  * Generate description from supplied delivery info.
  */
 QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
-    size_t msgSize, const void *tstDER, size_t tstSize)
+    size_t msgSize, const void *tstDER, size_t tstSize) const
 /* ========================================================================= */
 {
-	const isds_envelope *envelope;
-	const struct isds_list *event;
-	isds_message_status *state;
+	if (NULL == m_message) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
-	envelope = m_message->envelope;
-	Q_ASSERT(NULL != envelope);
+	const isds_envelope *envelope = m_message->envelope;
+	if (NULL == envelope) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
-	event = m_message->envelope->events;
-	Q_ASSERT(NULL != event);
+	QString html(indentDivStart);
 
-	state = envelope->dmMessageStatus;
-	Q_ASSERT(NULL != state);
+	envelopeHeaderDescriptionHtml(html, envelope);
 
-	QString html;
+	html += strongAccountInfoLine(tr("Events"),"");
 
 	html += indentDivStart;
+	const struct isds_list *event = envelope->events;
+	while (NULL != event) {
+		isds_event *item = (isds_event *) event->data;
+		html += strongAccountInfoLine(
+		        dateTimeStrFromDbFormat(timevalToDbFormat(item->time),
+		        dateTimeDisplayFormat),
+		        item->description);
+		event = event->next;
+	}
+	html += divEnd;
+
+	signatureFooterDescription(html, msgDER, msgSize, tstDER, tstSize);
+
+	html += divEnd;
+
+	return html;
+}
+
+/* ========================================================================= */
+bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
+    const isds_envelope *envelope)
+/* ========================================================================= */
+{
+	if (NULL == envelope) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	html += "<h3>" + tr("Identification") + "</h3>";
 
 	html += strongAccountInfoLine(tr("ID"), envelope->dmID);
@@ -693,24 +660,24 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 	    dateTimeStrFromDbFormat(
 	        timevalToDbFormat(envelope->dmAcceptanceTime),
 	        dateTimeDisplayFormat));
-	html += strongAccountInfoLine(tr("Status"),
-	    QString::number(convertHexToDecIndex(
-	        *(envelope->dmMessageStatus))) + " -- " +
-	    msgStatusToText(convertHexToDecIndex(
-	        *(envelope->dmMessageStatus))));
-	html += strongAccountInfoLine(tr("Events"),"");
 
-	html += indentDivStart;
-	while (0 != event) {
-		isds_event *item = (isds_event *) event->data;
-		html += strongAccountInfoLine(
-		        dateTimeStrFromDbFormat(timevalToDbFormat(item->time),
-		        dateTimeDisplayFormat),
-		        item->description);
-		event = event->next;
+	QString statusString;
+	if (NULL != envelope->dmMessageStatus) {
+		statusString =
+		    QString::number(convertHexToDecIndex(*(envelope->dmMessageStatus))) +
+		    " -- " +
+		    msgStatusToText(convertHexToDecIndex(*(envelope->dmMessageStatus)));
 	}
-	html += divEnd;
+	html += strongAccountInfoLine(tr("Status"), statusString);
 
+	return true;
+}
+
+/* ========================================================================= */
+bool DlgViewZfo::signatureFooterDescription(QString &html,
+    const void *msgDER, size_t msgSize, const void *tstDER, size_t tstSize)
+/* ========================================================================= */
+{
 	html += "<h3>" + tr("Signature") + "</h3>";
 
 	QString resultStr;
@@ -747,7 +714,7 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 	}
 	html += strongAccountInfoLine(tr("Time stamp"), resultStr);
 
-	return html;
+	return true;
 }
 
 /* ========================================================================= */
