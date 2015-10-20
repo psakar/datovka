@@ -39,6 +39,15 @@
 #include "src/thread/worker.h"
 
 
+/*
+ * Column indexes into recipient table widget.
+ */
+#define RTW_ID 0
+#define RTW_NAME 1
+#define RTW_ADDR 2
+#define RTW_PDZ 3
+
+
 DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
     const QString &senderName, Action action, qint64 msgId,
     const QDateTime &deliveryTime,
@@ -294,17 +303,17 @@ void DlgSendMessage::fillDlgAsReply(void)
 	this->recipientTableWidget->insertRow(row);
 	QTableWidgetItem *item = new QTableWidgetItem;
 	item->setText(msgData[0]);
-	this->recipientTableWidget->setItem(row,0,item);
+	this->recipientTableWidget->setItem(row, RTW_ID, item);
 	item = new QTableWidgetItem;
 	item->setText(msgData[1]);
-	this->recipientTableWidget->setItem(row,1,item);
+	this->recipientTableWidget->setItem(row, RTW_NAME, item);
 	item = new QTableWidgetItem;
 	item->setText(msgData[2]);
-	this->recipientTableWidget->setItem(row,2,item);
+	this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 	item = new QTableWidgetItem;
 	item->setText(pdz);
 	item->setTextAlignment(Qt::AlignCenter);
-	this->recipientTableWidget->setItem(row,3,item);
+	this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 }
 
 
@@ -397,17 +406,17 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(msgData[4]);
-		this->recipientTableWidget->setItem(row, 0, item);
+		this->recipientTableWidget->setItem(row, RTW_ID, item);
 		item = new QTableWidgetItem;
 		item->setText(msgData[5]);
-		this->recipientTableWidget->setItem(row, 1, item);
+		this->recipientTableWidget->setItem(row, RTW_NAME, item);
 		item = new QTableWidgetItem;
 		item->setText(msgData[6]);
-		this->recipientTableWidget->setItem(row, 2, item);
+		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
 		item->setText(pdz);
 		item->setTextAlignment(Qt::AlignCenter);
-		this->recipientTableWidget->setItem(row, 3, item);
+		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 	}
 
 	/* fill attachments from template message */
@@ -908,7 +917,7 @@ void DlgSendMessage::sendMessage(void)
 
 	/* Compute number of messages which the sender has to pay for. */
 	for (int i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
-		if (this->recipientTableWidget->item(i, 3)->text() ==
+		if (this->recipientTableWidget->item(i, RTW_PDZ)->text() ==
 		    tr("yes")) {
 			++pdzCnt;
 		}
@@ -1180,7 +1189,7 @@ void DlgSendMessage::sendMessage(void)
 			sent_message->envelope->dbIDRecipient = NULL;
 		}
 		sent_message->envelope->dbIDRecipient =
-		    strdup(this->recipientTableWidget->item(i,0)->
+		    strdup(this->recipientTableWidget->item(i, RTW_ID)->
 		    text().toUtf8().constData());
 		if (NULL == sent_message->envelope->dbIDRecipient) {
 			errorMsg = "Out of memory.";
@@ -1212,12 +1221,12 @@ void DlgSendMessage::sendMessage(void)
 
 		sendMsgResultStruct sendMsgResults;
 		sendMsgResults.dbID = this->recipientTableWidget->
-		    item(i,0)->text();
+		    item(i, RTW_ID)->text();
 		sendMsgResults.recipientName = this->recipientTableWidget->
-		    item(i,1)->text();
+		    item(i, RTW_NAME)->text();
 		sendMsgResults.dmID = sent_message->envelope->dmID;
 		sendMsgResults.isPDZ = (this->recipientTableWidget->
-		    item(i, 3)->text() == tr("yes")) ? true : false;
+		    item(i, RTW_PDZ)->text() == tr("yes")) ? true : false;
 		sendMsgResults.status = (int) status;
 		sendMsgResults.errInfo = isdsLongMessage(session);
 		sendMsgResultList.append(sendMsgResults);
@@ -1233,9 +1242,9 @@ void DlgSendMessage::sendMessage(void)
 			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
 			    m_dbId,
 			    m_senderName,
-			    this->recipientTableWidget->item(i,0)->text(),
-			    this->recipientTableWidget->item(i,1)->text(),
-			    this->recipientTableWidget->item(i,2)->text(),
+			    this->recipientTableWidget->item(i, RTW_ID)->text(),
+			    this->recipientTableWidget->item(i, RTW_NAME)->text(),
+			    this->recipientTableWidget->item(i, RTW_ADDR)->text(),
 			    this->subjectText->text());
 
 			Worker::storeAttachments(*messageDb, dmId,
@@ -1375,7 +1384,7 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 
 		/* exists dbID in the recipientTableWidget? */
 		for (int i = 0; i < row; ++i) {
-			if (this->recipientTableWidget->item(i,0)->text() ==
+			if (this->recipientTableWidget->item(i, RTW_ID)->text() ==
 			    dbID) {
 				return;
 			}
@@ -1384,15 +1393,15 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(dbID);
-		this->recipientTableWidget->setItem(row,0,item);
+		this->recipientTableWidget->setItem(row, RTW_ID, item);
 		item = new QTableWidgetItem;
 		item->setText("Unknown");
-		this->recipientTableWidget->setItem(row,1,item);
+		this->recipientTableWidget->setItem(row, RTW_NAME, item);
 		item = new QTableWidgetItem;
 		item->setText("Unknown");
-		this->recipientTableWidget->setItem(row,2,item);
+		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
 		item->setText("n/a");
-		this->recipientTableWidget->setItem(row,3,item);
+		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 	}
 }
