@@ -29,6 +29,7 @@
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
+#include "src/common.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/models/accounts_model.h"
@@ -447,7 +448,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(
-		    base64realSize(fileData.dmEncodedContent)));
+		    base64RealSize(fileData.dmEncodedContent)));
 		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
 		item = new QTableWidgetItem;
 		item->setText(tr("local database"));
