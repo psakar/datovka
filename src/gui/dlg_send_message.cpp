@@ -47,6 +47,16 @@
 #define RTW_ADDR 2
 #define RTW_PDZ 3
 
+/*
+ * Column indexes into attachment table widget.
+ */
+#define ATW_FILE 0
+#define ATW_TYPE 1
+#define ATW_MIME 2
+#define ATW_SIZE 3
+#define ATW_PATH 4
+#define ATW_DATA 5 /* Base64 encoded and hidden. */
+
 
 DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
     const QString &senderName, Action action, qint64 msgId,
@@ -424,28 +434,27 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	    messageDb->getFilesFromMessage(m_msgID);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
-
 		int row = this->attachmentTableWidget->rowCount();
 		this->attachmentTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(fileData.dmFileDescr);
-		this->attachmentTableWidget->setItem(row, 0, item);
+		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
 		item = new QTableWidgetItem;
 		item->setText("");
-		this->attachmentTableWidget->setItem(row, 1, item);
+		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
 		item = new QTableWidgetItem;
 		item->setText(tr("unknown"));
-		this->attachmentTableWidget->setItem(row, 2, item);
+		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(
 		    base64realSize(fileData.dmEncodedContent)));
-		this->attachmentTableWidget->setItem(row, 3, item);
+		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
 		item = new QTableWidgetItem;
 		item->setText(tr("local database"));
-		this->attachmentTableWidget->setItem(row, 4, item);
+		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
 		item = new QTableWidgetItem;
 		item->setData(Qt::DisplayRole, fileData.dmEncodedContent);
-		this->attachmentTableWidget->setItem(row, 5, item);
+		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
 	}
 }
 
@@ -564,7 +573,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		bool isInTable = false;
 
 		for (int j = 0; j < row; ++j) {
-			if (this->attachmentTableWidget->item(j,0)->text() ==
+			if (this->attachmentTableWidget->item(j, ATW_FILE)->text() ==
 			    filename) {
 				isInTable = true;
 				break;
@@ -579,22 +588,22 @@ void DlgSendMessage::addAttachmentFile(void)
 
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(filename);
-		this->attachmentTableWidget->setItem(row, 0, item);
+		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
 		item = new QTableWidgetItem;
 		item->setText("");
-		this->attachmentTableWidget->setItem(row, 1, item);
+		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
 		item = new QTableWidgetItem;
 		item->setText(type.name());
-		this->attachmentTableWidget->setItem(row, 2, item);
+		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(fileSize));
-		this->attachmentTableWidget->setItem(row, 3, item);
+		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
 		item = new QTableWidgetItem;
 		item->setText(fileName);
-		this->attachmentTableWidget->setItem(row, 4, item);
+		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
 		item = new QTableWidgetItem;
 		item->setData(Qt::DisplayRole, getFileBase64(fileName));
-		this->attachmentTableWidget->setItem(row, 5, item);
+		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
 	}
 }
 
@@ -720,7 +729,7 @@ int DlgSendMessage::cmptAttachmentSize(void)
 	int attachSize = 0;
 
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
-		attachSize += this->attachmentTableWidget->item(i,3)->text().
+		attachSize += this->attachmentTableWidget->item(i, ATW_SIZE)->text().
 		    toInt();
 	}
 
@@ -801,7 +810,7 @@ void DlgSendMessage::openAttachmentFile(void)
 	}
 
 	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 0);
+	    selectedIndex.sibling(selectedIndex.row(), ATW_FILE);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		return;
@@ -815,7 +824,7 @@ void DlgSendMessage::openAttachmentFile(void)
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 5);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), ATW_DATA);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		return;
@@ -968,7 +977,7 @@ void DlgSendMessage::sendMessage(void)
 		 // TODO - document is binary document only -> is_xml = false;
 		document->is_xml = false;
 		document->dmFileDescr = strdup(this->attachmentTableWidget->
-		    item(i, 0)->text().toUtf8().constData());
+		    item(i, ATW_FILE)->text().toUtf8().constData());
 		if (NULL == document->dmFileDescr) {
 			errorMsg = "Out of memory.";
 			goto finish;
@@ -986,14 +995,14 @@ void DlgSendMessage::sendMessage(void)
 		*/
 		QString mimeType = "";
 		//document->dmMimeType = strdup(this->attachmentTableWidget->
-		//    item(i, 2)->text().toUtf8().constData());
+		//    item(i, ATW_MIME)->text().toUtf8().constData());
 		document->dmMimeType = strdup(mimeType.toUtf8().constData());
 		if (NULL == document->dmMimeType) {
 			errorMsg = "Out of memory.";
 			goto finish;
 		}
 
-		QByteArray bytes(this->attachmentTableWidget->item(i, 5)->data(Qt::DisplayRole).toByteArray());
+		QByteArray bytes(this->attachmentTableWidget->item(i, ATW_DATA)->data(Qt::DisplayRole).toByteArray());
 		bytes = QByteArray::fromBase64(bytes);
 		document->data_length = bytes.size();
 		document->data = malloc(bytes.size());
