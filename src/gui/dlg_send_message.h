@@ -108,6 +108,9 @@ private:
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
 
+	struct isds_list *buildDocuments(void) const;
+	struct isds_envelope *buildEnvelope(void) const;
+
 	static
 	QByteArray getFileBase64(const QString &filePath);
 	QString getUserInfoFormIsds(QString idDbox);
