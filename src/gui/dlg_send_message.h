@@ -86,7 +86,6 @@ private slots:
 
 private:
 	QTimer *pingTimer;
-	void initNewMessageDialog(void);
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;
 	const QString m_dbId;
@@ -103,12 +102,14 @@ private:
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
 
+	void initNewMessageDialog(void);
 	int cmptAttachmentSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
-	QString getFileBase64(QString filePath);
-	int getFileSizeFromBase64(QString fileBase64);
+
+	static
+	QByteArray getFileBase64(const QString &filePath);
 	QString getUserInfoFormIsds(QString idDbox);
 };
 

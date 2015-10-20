@@ -397,45 +397,46 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(msgData[4]);
-		this->recipientTableWidget->setItem(row,0,item);
+		this->recipientTableWidget->setItem(row, 0, item);
 		item = new QTableWidgetItem;
 		item->setText(msgData[5]);
-		this->recipientTableWidget->setItem(row,1,item);
+		this->recipientTableWidget->setItem(row, 1, item);
 		item = new QTableWidgetItem;
 		item->setText(msgData[6]);
-		this->recipientTableWidget->setItem(row,2,item);
+		this->recipientTableWidget->setItem(row, 2, item);
 		item = new QTableWidgetItem;
 		item->setText(pdz);
 		item->setTextAlignment(Qt::AlignCenter);
-		this->recipientTableWidget->setItem(row,3,item);
+		this->recipientTableWidget->setItem(row, 3, item);
 	}
 
 	/* fill attachments from template message */
-	QList<QStringList> msgFileList;
-	msgFileList = messageDb->getFilesFromMessage(m_msgID);
+	QList<MessageDb::FileData> msgFileList =
+	    messageDb->getFilesFromMessage(m_msgID);
 
-	for (int i = 0; i < msgFileList.size(); ++i) {
+	foreach (const MessageDb::FileData &fileData, msgFileList) {
+
 		int row = this->attachmentTableWidget->rowCount();
 		this->attachmentTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(msgFileList.at(i).at(0));
-		this->attachmentTableWidget->setItem(row,0,item);
+		item->setText(fileData.dmFileDescr);
+		this->attachmentTableWidget->setItem(row, 0, item);
 		item = new QTableWidgetItem;
 		item->setText("");
-		this->attachmentTableWidget->setItem(row,1,item);
+		this->attachmentTableWidget->setItem(row, 1, item);
 		item = new QTableWidgetItem;
 		item->setText(tr("unknown"));
-		this->attachmentTableWidget->setItem(row,2,item);
+		this->attachmentTableWidget->setItem(row, 2, item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(
-		    getFileSizeFromBase64(msgFileList.at(i).at(1))));
-		this->attachmentTableWidget->setItem(row,3,item);
+		    base64realSize(fileData.dmEncodedContent)));
+		this->attachmentTableWidget->setItem(row, 3, item);
 		item = new QTableWidgetItem;
 		item->setText(tr("local database"));
-		this->attachmentTableWidget->setItem(row,4,item);
+		this->attachmentTableWidget->setItem(row, 4, item);
 		item = new QTableWidgetItem;
-		item->setText(msgFileList.at(i).at(1));
-		this->attachmentTableWidget->setItem(row,5,item);
+		item->setData(Qt::DisplayRole, fileData.dmEncodedContent);
+		this->attachmentTableWidget->setItem(row, 5, item);
 	}
 }
 
@@ -494,7 +495,7 @@ void DlgSendMessage::pingIsdsServer(void)
 /*
  * Return file content as Base64 string
  */
-QString DlgSendMessage::getFileBase64(QString filePath)
+QByteArray DlgSendMessage::getFileBase64(const QString &filePath)
 /* ========================================================================= */
  {
 	QFile file(filePath);
@@ -506,21 +507,7 @@ QString DlgSendMessage::getFileBase64(QString filePath)
 		return file.readAll().toBase64();
 	}
 fail:
-	return QString();
-}
-
-
-/* ========================================================================= */
-/*
- * Return QByteArray file size from Base64.
- */
-int DlgSendMessage::getFileSizeFromBase64(QString fileBase64)
-/* ========================================================================= */
- {
-		QByteArray bytes;
-		bytes.append(fileBase64);
-		bytes = QByteArray::fromBase64(bytes);
-		return bytes.size();
+	return QByteArray();
 }
 
 
@@ -544,21 +531,21 @@ void DlgSendMessage::addAttachmentFile(void)
 		}
 	}
 
-	for (int i = 0; i < fileNames.count(); ++i) {
+	foreach (const QString &fileName, fileNames) {
 
-		int size = 0;
+		int fileSize = 0;
 		QString filename = "";
-		QFile attFile(fileNames[i]);
-		size = attFile.size();
-		if (size > MAX_ATTACHMENT_SIZE) {
+		QFile attFile(fileName);
+		fileSize = attFile.size();
+		if (fileSize > MAX_ATTACHMENT_SIZE) {
 			QMessageBox::warning(this, tr("Wrong file size"),
 			    tr("File '%1' could not be added into attachment "
 			    "because its size is bigger than 10MB.").
-			    arg(fileNames[i]),
+			    arg(fileName),
 			    QMessageBox::Ok);
 			continue;
 		}
-		m_attachSize += size;
+		m_attachSize += fileSize;
 		QFileInfo fileInfo(attFile.fileName());
 		filename = fileInfo.fileName();
 		QMimeDatabase db;
@@ -580,24 +567,25 @@ void DlgSendMessage::addAttachmentFile(void)
 		}
 
 		this->attachmentTableWidget->insertRow(row);
+
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(filename);
-		this->attachmentTableWidget->setItem(row,0,item);
+		this->attachmentTableWidget->setItem(row, 0, item);
 		item = new QTableWidgetItem;
 		item->setText("");
-		this->attachmentTableWidget->setItem(row,1,item);
+		this->attachmentTableWidget->setItem(row, 1, item);
 		item = new QTableWidgetItem;
 		item->setText(type.name());
-		this->attachmentTableWidget->setItem(row,2,item);
+		this->attachmentTableWidget->setItem(row, 2, item);
 		item = new QTableWidgetItem;
-		item->setText(QString::number(size));
-		this->attachmentTableWidget->setItem(row,3,item);
+		item->setText(QString::number(fileSize));
+		this->attachmentTableWidget->setItem(row, 3, item);
 		item = new QTableWidgetItem;
-		item->setText(fileNames[i]);
-		this->attachmentTableWidget->setItem(row,4,item);
+		item->setText(fileName);
+		this->attachmentTableWidget->setItem(row, 4, item);
 		item = new QTableWidgetItem;
-		item->setText(getFileBase64(fileNames[i]));
-		this->attachmentTableWidget->setItem(row,5,item);
+		item->setData(Qt::DisplayRole, getFileBase64(fileName));
+		this->attachmentTableWidget->setItem(row, 5, item);
 	}
 }
 
@@ -996,15 +984,14 @@ void DlgSendMessage::sendMessage(void)
 			goto finish;
 		}
 
-		QByteArray bytes;
-		bytes.append(this->attachmentTableWidget->item(i, 5)->text());
+		QByteArray bytes(this->attachmentTableWidget->item(i, 5)->data(Qt::DisplayRole).toByteArray());
 		bytes = QByteArray::fromBase64(bytes);
 		document->data_length = bytes.size();
 		document->data = malloc(bytes.size());
-			if (NULL == document->data) {
-				errorMsg = "Out of memory.";
-				goto finish;
-			}
+		if (NULL == document->data) {
+			errorMsg = "Out of memory.";
+			goto finish;
+		}
 		memcpy(document->data, bytes.data(), document->data_length);
 
 		/* Add document on the list of document. */

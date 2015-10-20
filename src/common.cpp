@@ -1189,6 +1189,22 @@ QString toBase64(const QString &plain)
 	return QString::fromUtf8(plain.toUtf8().toBase64());
 }
 
+/* ========================================================================= */
+int base64RealSize(const QByteArray &b64)
+/* ========================================================================= */
+{
+	int b64size = b64.size();
+	int cnt = 0;
+	if (b64size >= 3) {
+		for (int i = 1; i <= 3; ++i) {
+			if ('=' == b64[b64size - i]) {
+				++cnt;
+			}
+		}
+	}
+	return b64size * 3 / 4 - cnt;
+}
+
 
 #define CREDITS_FILE "AUTHORS"
 #define LICENCE_FILE "COPYING"

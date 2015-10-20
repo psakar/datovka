@@ -1883,11 +1883,11 @@ fail:
 /*
  * Return fileList related to given message.
  */
-QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
+QList<MessageDb::FileData> MessageDb::getFilesFromMessage(qint64 msgId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QList<QStringList> retList;
+	QList<FileData> retList;
 
 	QString queryStr = "SELECT _dmFileDescr, "
 	    "dmEncodedContent FROM files WHERE message_id = :msgId";
@@ -1903,10 +1903,10 @@ QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			QStringList fileItem;
-			fileItem.append(query.value(0).toString());
-			fileItem.append(query.value(1).toString());
-			retList.append(fileItem);
+			retList.append(
+			    FileData(
+			        query.value(0).toString(),
+			        query.value(1).toByteArray()));
 			query.next();
 		}
 	} else {
@@ -1917,7 +1917,7 @@ QList<QStringList> MessageDb::getFilesFromMessage(qint64 msgId) const
 
 	return retList;
 fail:
-	return QList<QStringList>();
+	return QList<FileData>();
 }
 
 

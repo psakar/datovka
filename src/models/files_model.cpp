@@ -22,6 +22,7 @@
  */
 
 #include "files_model.h"
+#include "src/common.h"
 
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
@@ -29,20 +30,7 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 		/* Compute attachment size from base64 length. */
 		QByteArray b64 = QSqlQueryModel::data(index.sibling(
 		    index.row(), 2), role).toByteArray();
-		int b64size = b64.size();
-		int cnt = 0;
-		if (b64size >= 3) {
-			for (int i = 1; i <= 3; ++i) {
-				if ('=' == b64[b64size - i]) {
-					++cnt;
-				}
-			}
-		}
-		return QSqlQueryModel::data(index, role).toInt() * 3 / 4 - cnt;
-		/* old solution */
-		//const QByteArray &b64 = QSqlQueryModel::data(
-		//    index.sibling(index.row(), 2), role).toByteArray();
-		//return QByteArray::fromBase64(b64).size();
+		return base64RealSize(b64);
 	} else {
 		return QSqlQueryModel::data(index, role);
 	}

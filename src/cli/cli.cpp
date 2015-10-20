@@ -350,12 +350,12 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			return CLI_ERROR;
 		}
 
-		QList<QStringList> files =
+		QList<MessageDb::FileData> files =
 		    messageDb->getFilesFromMessage(map["dmID"].toLongLong());
 
-		for (int i = 0; i < files.count(); ++i) {
+		foreach (const MessageDb::FileData &file, files) {
 
-			QString fileName = files.at(i).at(0);
+			QString fileName = file.dmFileDescr;
 			if (fileName.isEmpty()) {
 				errmsg = "Cannot save file because name "
 				    "of file missing";
@@ -363,26 +363,16 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 				return CLI_ERROR;
 			}
 
-			QByteArray base64(
-				files.at(i).at(1).toStdString().c_str(),
-				files.at(i).at(1).length()
-				);
-
-			if (base64.isEmpty()) {
+			if (file.dmEncodedContent.isEmpty()) {
 				errmsg = "Cannot save file " + fileName +
 				    "because file content missing";
 				qDebug() << CLI_PREFIX << errmsg;
 				return CLI_ERROR;
 			}
-/*
-			QString fileName = createFilenameFromFormatString(
-			    globPref.attachment_filename_format,
-			    pair.first, pair.second, QString::number(dmId), dbId,
-			    userName, fileName);
-*/
+
 			fileName = path + QDir::separator() + fileName;
 
-			QByteArray data = QByteArray::fromBase64(base64);
+			QByteArray data = QByteArray::fromBase64(file.dmEncodedContent);
 			enum WriteFileState ret = writeFile(fileName, data);
 			if (WF_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Save file" <<

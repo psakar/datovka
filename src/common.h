@@ -422,6 +422,11 @@ QString fromBase64(const QString &base64);
  */
 QString toBase64(const QString &plain);
 
+/*!
+ * @brief Computes the size of real (decoded from base64) data.
+ */
+int base64RealSize(const QByteArray &b64);
+
 
 /*!
  * @brief Text files supplied with the application.

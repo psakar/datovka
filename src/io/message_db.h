@@ -134,6 +134,31 @@ public:
 		}
 	};
 
+	/*!
+	 * @brief File entry data.
+	 */
+	class FileData {
+	public:
+		QString dmFileDescr; /*!< File name. */
+		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
+
+		FileData(void)
+		    : dmFileDescr(), dmEncodedContent()
+		{ }
+		FileData(const QString &fileDescr,
+		    const QByteArray &encodedContent)
+		    :  dmFileDescr(fileDescr), dmEncodedContent(encodedContent)
+		{ }
+		~FileData(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return (!dmFileDescr.isEmpty()) &&
+			    (!dmEncodedContent.isEmpty());
+		}
+	};
+
 	class ContactEntry {
 	public:
 		qint64 dmId; /*!< Message id. */
@@ -293,7 +318,7 @@ public:
 	 * @param[in] msgId  Message identifier.
 	 * @return List of files and their attributes.
 	 */
-	QList<QStringList> getFilesFromMessage(qint64 msgId) const;
+	QList<FileData> getFilesFromMessage(qint64 msgId) const;
 
 	/*!
 	 * @brief Return files related to given message.
