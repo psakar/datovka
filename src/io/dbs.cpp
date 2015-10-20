@@ -24,7 +24,6 @@
 
 #include <time.h>
 #include <QDateTime>
-#include <QDebug>
 #include <QString>
 
 #include "dbs.h"
@@ -125,7 +124,11 @@ QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt)
 QString timevalToDbFormat(const struct timeval *tv)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != tv);
+	if (NULL == tv) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
 	QDateTime timeStamp;
 
 	timeStamp.setTime_t(tv->tv_sec);
@@ -133,8 +136,6 @@ QString timevalToDbFormat(const struct timeval *tv)
 	QString ret = timeStamp.toString(dbShortDateTimeFormat) + ".%1";
 	Q_ASSERT(tv->tv_usec < 1000000);
 	ret = ret.arg(QString::number(tv->tv_usec), 6, '0');
-
-	//qDebug() << "timeStamp" << ret;
 
 	return ret;
 }
@@ -164,17 +165,19 @@ QDateTime timevalToDateTime(const struct timeval *tv)
 QString tmToDbFormat(const struct tm *t)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != t);
+	QString ret;
 
-	QString ret = "%1-%2-%3 %4:%5:%6.%7";
+	if (NULL != t) {
+		ret = "%1-%2-%3 %4:%5:%6.%7";
 
-	ret = ret.arg(QString::number(t->tm_year + 1900))
-	    .arg(QString::number(t->tm_mon, 2, '0'))
-	    .arg(QString::number(t->tm_mday, 2, '0'))
-	    .arg(QString::number(t->tm_hour), 2, '0')
-	    .arg(QString::number(t->tm_min), 2, '0')
-	    .arg(QString::number(t->tm_sec), 2, '0')
-	    .arg(QString::number(0), 3, '0');
+		ret = ret.arg(QString::number(t->tm_year + 1900))
+		    .arg(QString::number(t->tm_mon, 2, '0'))
+		    .arg(QString::number(t->tm_mday, 2, '0'))
+		    .arg(QString::number(t->tm_hour), 2, '0')
+		    .arg(QString::number(t->tm_min), 2, '0')
+		    .arg(QString::number(t->tm_sec), 2, '0')
+		    .arg(QString::number(0), 3, '0');
+	}
 
 	return ret;
 }
@@ -186,23 +189,25 @@ QString tmToDbFormat(const struct tm *t)
 QString tmBirthToDbFormat(const struct tm *t)
 /* ========================================================================= */
 {
-	Q_ASSERT(NULL != t);
+	QString ret;
 
-	QString ret = "%1-%2-%3";
+	if (NULL != t) {
+		ret = "%1-%2-%3";
 
-	QString month = QString::number(t->tm_mon+1, 10);
-	if (month.size() == 1) {
-		month = "0" + month;
+		QString month = QString::number(t->tm_mon+1, 10);
+		if (month.size() == 1) {
+			month = "0" + month;
+		}
+
+		QString mday = QString::number(t->tm_mday, 10);
+		if (mday.size() == 1) {
+			mday = "0" + mday;
+		}
+
+		ret = ret.arg(QString::number(t->tm_year + 1900))
+		    .arg(month)
+		    .arg(mday);
 	}
-
-	QString mday = QString::number(t->tm_mday, 10);
-	if (mday.size() == 1) {
-		mday = "0" + mday;
-	}
-
-	ret = ret.arg(QString::number(t->tm_year + 1900))
-	    .arg(month)
-	    .arg(mday);
 
 	return ret;
 }
