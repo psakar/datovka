@@ -107,6 +107,10 @@ Download period you can set bellow.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>Allows to set a time interval for automatically
+synchronise all accounts in the background.</string>
+              </property>
               <property name="text">
                <string> Check every</string>
               </property>
@@ -119,6 +123,10 @@ Download period you can set bellow.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>Allows to set a time interval for automatically
+synchronise all accounts in the background.</string>
               </property>
               <property name="minimum">
                <number>5</number>
@@ -221,6 +229,12 @@ and also download new messages on background at startup.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>Allows to set a timeout interval for network connection.
+If you have a slow network connection or you cannot 
+download complete messages, here you can increase
+connection timeout.</string>
+              </property>
               <property name="text">
                <string>Timeout for message downloading is set on</string>
               </property>
@@ -233,6 +247,12 @@ and also download new messages on background at startup.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>Allows to set a timeout interval for network connection.
+If you have a slow network connection or you cannot 
+download complete messages, here you can increase
+connection timeout.</string>
               </property>
               <property name="maximum">
                <number>15</number>
@@ -315,6 +335,10 @@ and also download new messages on background at startup.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>Allows to set a timeout interval for
+automatically marking message as read.</string>
+              </property>
               <property name="text">
                <string>Automatically mark message as read after</string>
               </property>
@@ -327,6 +351,10 @@ and also download new messages on background at startup.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>Allows to set a timeout interval for
+automatically marking message as read.</string>
               </property>
               <property name="minimum">
                <number>-1</number>
@@ -653,6 +681,10 @@ of days will be included into the expiration notification summary.</string>
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Allows to set a interval how many days before expiring 
+of timestamp will be message included in the check results.</string>
+            </property>
             <property name="text">
              <string>Check for time stamps expiring within</string>
             </property>
@@ -665,6 +697,10 @@ of days will be included into the expiration notification summary.</string>
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>Allows to set a interval how many days before expiring 
+of timestamp will be message included in the check results.</string>
             </property>
             <property name="readOnly">
              <bool>false</bool>
@@ -841,6 +877,9 @@ displayed in this account will be selected.</string>
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Only icons will be displayed in the toolbar.</string>
+            </property>
             <property name="text">
              <string>Only display the icon</string>
             </property>
@@ -854,6 +893,9 @@ displayed in this account will be selected.</string>
               <bold>false</bold>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Icons and text beside them will be displayed in the toolbar.</string>
+            </property>
             <property name="text">
              <string>The text appears beside the icon</string>
             </property>
@@ -866,6 +908,9 @@ displayed in this account will be selected.</string>
               <weight>50</weight>
               <bold>false</bold>
              </font>
+            </property>
+            <property name="toolTip">
+             <string>Icons and text under them will be displayed in the toolbar.</string>
             </property>
             <property name="text">
              <string>The text appears under the icon</string>
@@ -975,6 +1020,9 @@ Per-account path remembering will be disabled.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>Select a new path for saving of attachments.</string>
+              </property>
               <property name="text">
                <string>Change</string>
               </property>
@@ -1031,6 +1079,9 @@ Per-account path remembering will be disabled.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>Select a new path for adding of files to attachments.</string>
               </property>
               <property name="text">
                <string>Change</string>
@@ -1103,6 +1154,10 @@ Per-account path remembering will be disabled.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>When saving all attachments also save
+signed message as ZFO to the same path.</string>
+              </property>
               <property name="text">
                <string>Save signed message to ZFO</string>
               </property>
@@ -1115,6 +1170,10 @@ Per-account path remembering will be disabled.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>When saving all attachments also save
+message envelope as PDF to the same path.</string>
               </property>
               <property name="text">
                <string>Save message envelope to PDF</string>
@@ -1129,6 +1188,10 @@ Per-account path remembering will be disabled.</string>
                 <bold>false</bold>
                </font>
               </property>
+              <property name="toolTip">
+               <string>When saving all attachments also save
+signed delivery info as ZFO to the same path.</string>
+              </property>
               <property name="text">
                <string>Save signed delivery info to ZFO</string>
               </property>
@@ -1141,6 +1204,10 @@ Per-account path remembering will be disabled.</string>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
+              </property>
+              <property name="toolTip">
+               <string>When saving all attachments also save
+delivery info as PDF to the same path.</string>
               </property>
               <property name="text">
                <string>Save delivery info to PDF</string>

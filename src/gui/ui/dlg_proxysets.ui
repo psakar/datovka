@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>452</width>
-    <height>599</height>
+    <height>643</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -72,6 +72,9 @@
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>No proxy</string>
+        </property>
         <property name="text">
          <string>No proxy</string>
         </property>
@@ -84,6 +87,9 @@
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Automatic proxy detection</string>
         </property>
         <property name="text">
          <string>Automatic proxy detection</string>
@@ -115,6 +121,9 @@
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Manual proxy setting</string>
+        </property>
         <property name="text">
          <string>Manual proxy setting</string>
         </property>
@@ -142,6 +151,9 @@
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>Enter your proxy hostname</string>
           </property>
          </widget>
         </item>
@@ -172,6 +184,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Enter port</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -190,6 +205,9 @@
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Show HTTPS proxy authentication</string>
         </property>
         <property name="text">
          <string>Show HTTPS proxy authentication.</string>
@@ -213,7 +231,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpsUnameEdit"/>
+          <widget class="QLineEdit" name="httpsUnameEdit">
+           <property name="toolTip">
+            <string>Enter your username</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="httpsPwdLabel">
@@ -230,6 +252,9 @@
          </item>
          <item>
           <widget class="QLineEdit" name="httpsPwdEdit">
+           <property name="toolTip">
+            <string>Enter your password</string>
+           </property>
            <property name="echoMode">
             <enum>QLineEdit::Password</enum>
            </property>
@@ -261,6 +286,9 @@
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>No proxy</string>
+        </property>
         <property name="text">
          <string>No proxy</string>
         </property>
@@ -273,6 +301,9 @@
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Automatic proxy detection</string>
         </property>
         <property name="text">
          <string>Automatic proxy detection</string>
@@ -304,6 +335,9 @@
           <bold>false</bold>
          </font>
         </property>
+        <property name="toolTip">
+         <string>Manual proxy setting</string>
+        </property>
         <property name="text">
          <string>Manual proxy setting</string>
         </property>
@@ -331,6 +365,9 @@
             <weight>50</weight>
             <bold>false</bold>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>Enter your proxy hostname</string>
           </property>
          </widget>
         </item>
@@ -373,6 +410,9 @@
             <bold>false</bold>
            </font>
           </property>
+          <property name="toolTip">
+           <string>Enter port</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -391,6 +431,9 @@
           <weight>50</weight>
           <bold>false</bold>
          </font>
+        </property>
+        <property name="toolTip">
+         <string>Show HTTP proxy authentication.</string>
         </property>
         <property name="text">
          <string>Show HTTP proxy authentication.</string>
@@ -414,7 +457,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpUnameEdit"/>
+          <widget class="QLineEdit" name="httpUnameEdit">
+           <property name="toolTip">
+            <string>Enter your username</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="httpPwdLabel">
@@ -431,6 +478,9 @@
          </item>
          <item>
           <widget class="QLineEdit" name="httpPwdEdit">
+           <property name="toolTip">
+            <string>Enter your password</string>
+           </property>
            <property name="echoMode">
             <enum>QLineEdit::Password</enum>
            </property>
