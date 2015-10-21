@@ -24,11 +24,12 @@
 #include <QTextStream>
 
 #include "src/cli/cli.h"
-#include "src/io/isds_sessions.h"
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
-#include "src/thread/worker.h"
 #include "src/io/dbs.h"
+#include "src/io/isds_sessions.h"
+#include "src/log/log.h"
+#include "src/thread/worker.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -729,47 +730,17 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 
 
 /* ========================================================================= */
-cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
-    MessageDbSet *msgDbSet, QString &errmsg)
+static
+struct isds_list *buildDocuments(const QStringList &filePaths)
 /* ========================================================================= */
 {
-	isds_error status = IE_ERROR;
-	cli_error ret = CLI_ERROR;
-	QStringList dbIds = map.value("dbIDRecipient").toStringList();
-	QStringList sendID;
-	sendID.clear();
-
-	qDebug() << CLI_PREFIX << "creating a new message...";
-
-	/* Sent message. */
-	struct isds_message *sent_message = NULL;
-	/* All remaining structures are created to be a part of the message. */
 	struct isds_document *document = NULL; /* Attachment. */
-	struct isds_list *documents = NULL; /* Attachment list. */
-	struct isds_envelope *sent_envelope = NULL; /* Message envelope. */
+	struct isds_list *documents = NULL; /* Attachment list (entry). */
 	struct isds_list *last = NULL; /* No need to free it explicitly. */
 
-	sent_envelope = (struct isds_envelope *)
-	    malloc(sizeof(struct isds_envelope));
-	if (sent_envelope == NULL) {
-		errmsg = "Out of memory";
-		goto finish;
-	}
-	memset(sent_envelope, 0, sizeof(struct isds_envelope));
+	bool mainFile = true;
 
-	sent_message = (struct isds_message *)
-	    malloc(sizeof(struct isds_message));
-	if (sent_message == NULL) {
-		errmsg = "Out of memory";
-		goto finish;
-	}
-	memset(sent_message, 0, sizeof(struct isds_message));
-
-	/* Load attachments. */
-	for (int i = 0; i < map["dmAttachment"].toStringList().count(); ++i) {
-
-		const QString filePath = map["dmAttachment"].
-		    toStringList().at(i);
+	foreach (const QString &filePath, filePaths) {
 
 		if (filePath.isEmpty()) {
 			continue;
@@ -777,262 +748,322 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 
 		QFileInfo fi(filePath);
 		if (!fi.isReadable() || !fi.isFile()) {
-			errmsg = "wrong file name or file missing!";
-			qDebug() << CLI_PREFIX << filePath << errmsg;
-			goto finish;
+			logErrorNL(CLI_PREFIX "Wrong file name '%s' or file is missing.",
+			    filePath.toUtf8().constData());
+			goto fail;
 		}
 
 		document = (struct isds_document *)
 		    malloc(sizeof(struct isds_document));
 		if (NULL == document) {
-			errmsg = "Out of memory";
-			goto finish;
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 		memset(document, 0, sizeof(struct isds_document));
 
-		 // TODO - document is binary document only -> is_xml = false;
+		// TODO - document is binary document only -> is_xml = false;
 		document->is_xml = false;
-
 
 		QString name = fi.fileName();
 		document->dmFileDescr = strdup(name.toUtf8().constData());
 		if (NULL == document->dmFileDescr) {
-			errmsg = "Out of memory";
-			goto finish;
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 
-		if (0 == i) {
+		if (mainFile) {
 			document->dmFileMetaType = FILEMETATYPE_MAIN;
+			mainFile = false;
 		} else {
 			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
 		}
 
-		QString mimeType = "";
-		document->dmMimeType = strdup(mimeType.toUtf8().constData());
+		document->dmMimeType = strdup("");
 		if (NULL == document->dmMimeType) {
-			errmsg = "Out of memory";
-			goto finish;
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 
-		QFile file(QDir::fromNativeSeparators(
-		    map["dmAttachment"].toStringList().at(i)));
+		QFile file(QDir::fromNativeSeparators(filePath));
 		if (file.exists()) {
 			if (!file.open(QIODevice::ReadOnly)) {
-				errmsg = "Couldn't open the file \""
-				    + map["dmAttachment"].toStringList().at(i)
-				    + "\"";
-				goto finish;
+				logErrorNL(CLI_PREFIX "Couldn't open file '%s'.",
+				    filePath.toUtf8().constData());
+				goto fail;
 			}
 		}
 		QByteArray bytes = file.readAll();
 		document->data_length = bytes.size();
 		document->data = malloc(bytes.size());
-			if (NULL == document->data) {
-				errmsg = "Out of memory";
-				goto finish;
-			}
+		if (NULL == document->data) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
+		}
 		memcpy(document->data, bytes.data(), document->data_length);
 
-		struct isds_list *newListItem = (struct isds_list *) malloc(
-		    sizeof(struct isds_list));
+		/* Add document on the list of document. */
+		struct isds_list *newListItem = (struct isds_list *)
+		    malloc(sizeof(struct isds_list));
 		if (NULL == newListItem) {
-			errmsg = "Out of memory";
-			goto finish;
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
-
 		newListItem->data = document; document = NULL;
 		newListItem->next = NULL;
 		newListItem->destructor = isds_document_free_void;
-
 		if (last == NULL) {
 			documents = last = newListItem;
 		} else {
 			last->next = newListItem;
 			last = newListItem;
 		}
+
 	}
 
+	return documents;
+
+fail:
+	isds_document_free(&document);
+	isds_list_free(&documents);
+	return NULL;
+}
+
+/* ========================================================================= */
+struct isds_envelope *buildEnvelope(const QMap <QString, QVariant> &map)
+/* ========================================================================= */
+{
+	struct isds_envelope *envelope = NULL; /* Message envelope. */
+
+	envelope = (struct isds_envelope *)
+	    malloc(sizeof(struct isds_envelope));
+	if (envelope == NULL) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
+	}
+	memset(envelope, 0, sizeof(struct isds_envelope));
+
 	/* Set mandatory fields of envelope. */
-	sent_envelope->dmID = NULL;
-	sent_envelope->dmAnnotation =
-	    strdup(map["dmAnnotation"].toString().toUtf8().constData());
-	if (NULL == sent_envelope->dmAnnotation) {
-		errmsg = "Out of memory";
-		goto finish;
+	envelope->dmID = NULL;
+	envelope->dmAnnotation = strdup(
+	    map["dmAnnotation"].toString().toUtf8().constData());
+	if (NULL == envelope->dmAnnotation) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
 	}
 
 	/* Set optional fields. */
 	if (map.contains("dmSenderIdent")) {
-		sent_envelope->dmSenderIdent =
-		    strdup(map["dmSenderIdent"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmSenderIdent) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmSenderIdent = strdup(
+		    map["dmSenderIdent"].toString().toUtf8().constData());
+		if (NULL == envelope->dmSenderIdent) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmRecipientIdent")) {
-		sent_envelope->dmRecipientIdent =
-		    strdup(map["dmRecipientIdent"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmRecipientIdent) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmRecipientIdent = strdup(
+		    map["dmRecipientIdent"].toString().toUtf8().constData());
+		if (NULL == envelope->dmRecipientIdent) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmSenderRefNumber")) {
-		sent_envelope->dmSenderRefNumber =
-		    strdup(map["dmSenderRefNumber"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmSenderRefNumber) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmSenderRefNumber = strdup(
+		    map["dmSenderRefNumber"].toString().toUtf8().constData());
+		if (NULL == envelope->dmSenderRefNumber) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmRecipientRefNumber")) {
-		sent_envelope->dmRecipientRefNumber =
-		    strdup(map["dmRecipientRefNumber"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmRecipientRefNumber) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmRecipientRefNumber = strdup(
+		    map["dmRecipientRefNumber"].toString().toUtf8().constData());
+		if (NULL == envelope->dmRecipientRefNumber) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmToHands")) {
-		sent_envelope->dmToHands =
-		    strdup(map["dmToHands"].toString().toUtf8().constData());
-		if (NULL == sent_envelope->dmToHands) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmToHands = strdup(
+		    map["dmToHands"].toString().toUtf8().constData());
+		if (NULL == envelope->dmToHands) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmLegalTitleLaw")) {
-		sent_envelope->dmLegalTitleLaw =
+		envelope->dmLegalTitleLaw =
 		    (long int *) malloc(sizeof(long int));
-		if (NULL == sent_envelope->dmLegalTitleLaw) {
-			errmsg = "Out of memory";
-			goto finish;
+		if (NULL == envelope->dmLegalTitleLaw) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
-		*sent_envelope->dmLegalTitleLaw =
+		*envelope->dmLegalTitleLaw =
 		    map["dmLegalTitleLaw"].toLongLong();
 	} else {
-		sent_envelope->dmLegalTitleLaw = NULL;
+		envelope->dmLegalTitleLaw = NULL;
 	}
 
 	if (map.contains("dmLegalTitleYear")) {
-		sent_envelope->dmLegalTitleYear =
+		envelope->dmLegalTitleYear =
 		    (long int *) malloc(sizeof(long int));
-		if (NULL == sent_envelope->dmLegalTitleYear) {
-			errmsg = "Out of memory";
-			goto finish;
+		if (NULL == envelope->dmLegalTitleYear) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
-		*sent_envelope->dmLegalTitleYear =
+		*envelope->dmLegalTitleYear =
 		    map["dmLegalTitleYear"].toLongLong();
 	} else {
-		sent_envelope->dmLegalTitleYear = NULL;
+		envelope->dmLegalTitleYear = NULL;
 	}
 
 	if (map.contains("dmLegalTitleSect")) {
-		sent_envelope->dmLegalTitleSect =
-		    strdup(map["dmLegalTitleSect"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmLegalTitleSect) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmLegalTitleSect = strdup(
+		    map["dmLegalTitleSect"].toString().toUtf8().constData());
+		if (NULL == envelope->dmLegalTitleSect) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmLegalTitlePar")) {
-		sent_envelope->dmLegalTitlePar =
-		    strdup(map["dmLegalTitlePar"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmLegalTitlePar) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmLegalTitlePar = strdup(
+		    map["dmLegalTitlePar"].toString().toUtf8().constData());
+		if (NULL == envelope->dmLegalTitlePar) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmLegalTitlePoint")) {
-		sent_envelope->dmLegalTitlePoint =
-		    strdup(map["dmLegalTitlePoint"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmLegalTitlePoint) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmLegalTitlePoint = strdup(
+		    map["dmLegalTitlePoint"].toString().toUtf8().constData());
+		if (NULL == envelope->dmLegalTitlePoint) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
 	if (map.contains("dmType")) {
-		sent_envelope->dmType =
-		    strdup(map["dmType"].toString().toUtf8()
-		    .constData());
-		if (NULL == sent_envelope->dmType) {
-			errmsg = "Out of memory";
-			goto finish;
+		envelope->dmType = strdup(
+		    map["dmType"].toString().toUtf8().constData());
+		if (NULL == envelope->dmType) {
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
+			goto fail;
 		}
 	}
 
-	sent_envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == sent_envelope->dmPersonalDelivery) {
-		errmsg = "Out of memory";
-		goto finish;
+	envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == envelope->dmPersonalDelivery) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
 	}
 	if (map.contains("dmPersonalDelivery")) {
-		*sent_envelope->dmPersonalDelivery =
-		    (map["dmPersonalDelivery"].toString() == "0")
-		    ? false : true;
+		*envelope->dmPersonalDelivery =
+		    map["dmPersonalDelivery"].toString() != "0";
 	} else {
-		*sent_envelope->dmPersonalDelivery = true;
+		*envelope->dmPersonalDelivery = false;
 	}
 
-	sent_envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == sent_envelope->dmAllowSubstDelivery) {
-		errmsg = "Out of memory";
-		goto finish;
+	envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == envelope->dmAllowSubstDelivery) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
 	}
 	if (map.contains("dmAllowSubstDelivery")) {
-		*sent_envelope->dmAllowSubstDelivery =
-		    (map["dmAllowSubstDelivery"].toString() == "0")
-		    ? false : true;
+		*envelope->dmAllowSubstDelivery =
+		    map["dmAllowSubstDelivery"].toString() != "0";
 	} else {
-		*sent_envelope->dmAllowSubstDelivery = true;
+		*envelope->dmAllowSubstDelivery = true;
 	}
 
-	sent_envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == sent_envelope->dmOVM) {
-		errmsg = "Out of memory";
-		goto finish;
+	envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == envelope->dmOVM) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
 	}
 	if (map.contains("dmOVM")) {
-		*sent_envelope->dmOVM =
-		    (map["dmOVM"].toString() == "0") ? false : true;
+		*envelope->dmOVM = map["dmOVM"].toString() != "0";
 	} else {
-		*sent_envelope->dmOVM = true;
+		*envelope->dmOVM = true;
 	}
 
-	sent_envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == sent_envelope->dmPublishOwnID) {
-		errmsg = "Out of memory.";
-		goto finish;
+	envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
+	if (NULL == envelope->dmPublishOwnID) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto fail;
 	}
 	if (map.contains("dmPublishOwnID")) {
-		*sent_envelope->dmPublishOwnID =
-		    (map["dmPublishOwnID"].toString() == "0") ? false : true;
+		*envelope->dmPublishOwnID =
+		    map["dmPublishOwnID"].toString() != "0";
 	} else {
-		*sent_envelope->dmPublishOwnID = false;
+		*envelope->dmPublishOwnID = false;
 	}
 
-	sent_message->documents = documents; documents = NULL;
-	sent_message->envelope = sent_envelope; sent_envelope = NULL;
+fail:
+	isds_envelope_free(&envelope);
+	return NULL;
+}
 
-	for (int i = 0; i < dbIds.count(); ++i) {
+/* ========================================================================= */
+cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
+    MessageDbSet *msgDbSet, QString &errmsg)
+/* ========================================================================= */
+{
+	isds_error status = IE_ERROR;
+	cli_error ret = CLI_ERROR;
+	QStringList sendID;
 
-		qDebug() << CLI_PREFIX << "message sending..." << dbIds.at(i);
+	qDebug() << CLI_PREFIX << "creating a new message...";
+
+	/* Sent message. */
+	struct isds_message *sent_message = NULL;
+
+	sent_message = (struct isds_message *)
+	    malloc(sizeof(struct isds_message));
+	if (sent_message == NULL) {
+		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
+		goto finish;
+	}
+	memset(sent_message, 0, sizeof(struct isds_message));
+
+	/* Attach envelope and attachment files to message structure. */
+	sent_message->documents =
+	    buildDocuments(map["dmAttachment"].toStringList());
+	if (NULL == sent_message->documents) {
+		goto finish;
+	}
+	sent_message->envelope = buildEnvelope(map);
+	if (NULL == sent_message->envelope) {
+		goto finish;
+	}
+
+	foreach (const QString &recipientId, map.value("dbIDRecipient").toStringList()) {
+
+		logInfo(CLI_PREFIX "Sending message to '%s'.\n",
+		    recipientId.toUtf8().constData());
 
 		if (NULL != sent_message->envelope->dbIDRecipient) {
 			free(sent_message->envelope->dbIDRecipient);
@@ -1040,9 +1071,10 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		sent_message->envelope->dbIDRecipient =
-		    strdup(dbIds.at(i).toUtf8().constData());
+		    strdup(recipientId.toUtf8().constData());
 		if (NULL == sent_message->envelope->dbIDRecipient) {
-			errmsg = "Out of memory";
+			logErrorNL(CLI_PREFIX "%s",
+			    "Memory allocation failed.");
 			goto finish;
 		}
 
@@ -1078,8 +1110,8 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 				qDebug() << CLI_PREFIX << errmsg;
 			} else {
 				messageDb->msgsInsertNewlySentMessageEnvelope(
-				    dmId, dbIDSender, dmSender, dbIds.at(i),
-				    "Databox ID: " + dbIds.at(i), "unknown",
+				    dmId, dbIDSender, dmSender, recipientId,
+				    "Databox ID: " + recipientId, "unknown",
 				    map["dmAnnotation"].toString());
 			}
 			qDebug() << CLI_PREFIX << "message has been sent"
@@ -1098,9 +1130,6 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 	printDataToStdOut(sendID);
 
 finish:
-	isds_document_free(&document);
-	isds_list_free(&documents);
-	isds_envelope_free(&sent_envelope);
 	isds_message_free(&sent_message);
 
 	return ret;
