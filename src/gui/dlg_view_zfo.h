@@ -218,7 +218,7 @@ private:
 	bool signatureFooterDescription(QString &html, const void *msgDER,
 	    size_t msgSize, const void *tstDER, size_t tstSize);
 
-	isds_message *m_message; /*!< ISDS message pointer copy. */
+	struct isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
 	 * (char *) m_message->raw
 	 *     m_message->raw_length

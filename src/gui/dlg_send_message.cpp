@@ -1156,20 +1156,94 @@ fail:
 
 
 /* ========================================================================= */
+DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
+    struct isds_message *message, int row) const
+/* ========================================================================= */
+{
+	Q_ASSERT(NULL != message);
+	Q_ASSERT(NULL != message->envelope);
+
+	MsgSendingResult sendMsgResult;
+	struct isds_envelope *envelope = message->envelope;
+	struct isds_ctx *session = NULL;
+
+	/* Clear fields. */
+	if (NULL != envelope->dbIDRecipient) {
+		free(envelope->dbIDRecipient);
+		envelope->dbIDRecipient = NULL;
+	}
+	if (NULL != envelope->dmToHands) {
+		free(envelope->dmToHands);
+		envelope->dmToHands = NULL;
+	}
+	if (NULL != envelope->dmID) {
+		free(envelope->dmID);
+		envelope->dmID = NULL;
+	}
+
+	/* Set new recipient. */
+	envelope->dbIDRecipient = strdup(
+	    this->recipientTableWidget->item(row, RTW_ID)->text().toUtf8().constData());
+	if (NULL == envelope->dbIDRecipient) {
+		logErrorNL("%s", "Memory allocation failed.");
+		goto fail;
+	}
+
+	if (!this->dmToHands->text().isEmpty()) {
+		envelope->dmToHands =
+		    strdup(this->dmToHands->text().toUtf8().constData());
+		if (NULL == envelope->dmToHands) {
+			logErrorNL("%s", "Memory allocation failed.");
+			goto fail;
+		}
+	}
+
+	session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Missing ISDS session.");
+		goto fail;
+	}
+
+	logInfo("Sending message from user '%s'.\n",
+	    m_userName.toUtf8().constData());
+	sendMsgResult.status = isds_send_message(session, message);
+
+	sendMsgResult.dbID =
+	    this->recipientTableWidget->item(row, RTW_ID)->text();
+	sendMsgResult.recipientName =
+	    this->recipientTableWidget->item(row, RTW_NAME)->text();
+	{
+		bool ok = false;
+		sendMsgResult.dmId = QString(envelope->dmID).toLongLong(&ok);
+		if (!ok) {
+			sendMsgResult.dmId = -1;
+		}
+	}
+	sendMsgResult.isPDZ =
+	    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes");
+	sendMsgResult.errInfo = isdsLongMessage(session);
+
+	return sendMsgResult;
+
+fail:
+	return MsgSendingResult();
+}
+
+
+/* ========================================================================= */
 /*
  * Send message/multiple message
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
-	isds_error status = IE_ERROR;
 	QString detailText;
 
-	struct isds_message *sent_message = NULL;
+	struct isds_message *message = NULL;
 
 	/* List of send message result */
-	QList<sendMsgResultStruct> sendMsgResultList;
-	sendMsgResultList.clear();
+	QList<MsgSendingResult> sentMsgResultList;
 
 	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
@@ -1196,21 +1270,20 @@ void DlgSendMessage::sendMessage(void)
 		}
 	}
 
-	sent_message = (struct isds_message *)
-	    malloc(sizeof(struct isds_message));
-	if (sent_message == NULL) {
+	message = (struct isds_message *) malloc(sizeof(struct isds_message));
+	if (message == NULL) {
 		logErrorNL("%s", "Memory allocation failed.");
 		goto finish;
 	}
-	memset(sent_message, 0, sizeof(struct isds_message));
+	memset(message, 0, sizeof(struct isds_message));
 
 	/* Attach envelope and attachment files to message structure. */
-	sent_message->documents = buildDocuments();
-	if (NULL == sent_message->documents) {
+	message->documents = buildDocuments();
+	if (NULL == message->documents) {
 		goto finish;
 	}
-	sent_message->envelope = buildEnvelope();
-	if (NULL == sent_message->envelope) {
+	message->envelope = buildEnvelope();
+	if (NULL == message->envelope) {
 		goto finish;
 	}
 
@@ -1218,101 +1291,59 @@ void DlgSendMessage::sendMessage(void)
 		goto finish;
 	}
 
-	for (int i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
+	/* Send message to all recipients. */
+	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
+		MsgSendingResult sendingResult =
+		    sendSingleMessage(message, row);
 
-		if (NULL != sent_message->envelope->dbIDRecipient) {
-			free(sent_message->envelope->dbIDRecipient);
-			sent_message->envelope->dbIDRecipient = NULL;
-		}
-		sent_message->envelope->dbIDRecipient =
-		    strdup(this->recipientTableWidget->item(i, RTW_ID)->
-		    text().toUtf8().constData());
-		if (NULL == sent_message->envelope->dbIDRecipient) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto finish;
-		}
+		sentMsgResultList.append(sendingResult);
 
-		if (NULL != sent_message->envelope->dmToHands) {
-			free(sent_message->envelope->dmToHands);
-			sent_message->envelope->dmToHands = NULL;
-		}
-		if (!this->dmToHands->text().isEmpty()) {
-			sent_message->envelope->dmToHands =
-			    strdup(this->dmToHands->text().toUtf8().constData());
-			if (NULL == sent_message->envelope->dmToHands) {
-				logErrorNL("%s", "Memory allocation failed.");
-				goto finish;
-			}
-		}
-
-		struct isds_ctx *session = isdsSessions.session(m_userName);
-		if (NULL == session) {
-			Q_ASSERT(0);
-			logErrorNL("%s", "Missing ISDS session.");
-			goto finish;
-		}
-
-		qDebug() << "sending message from user name" << m_userName;
-		status = isds_send_message(session, sent_message);
-
-		sendMsgResultStruct sendMsgResults;
-		sendMsgResults.dbID = this->recipientTableWidget->
-		    item(i, RTW_ID)->text();
-		sendMsgResults.recipientName = this->recipientTableWidget->
-		    item(i, RTW_NAME)->text();
-		sendMsgResults.dmID = sent_message->envelope->dmID;
-		sendMsgResults.isPDZ = (this->recipientTableWidget->
-		    item(i, RTW_PDZ)->text() == tr("yes")) ? true : false;
-		sendMsgResults.status = (int) status;
-		sendMsgResults.errInfo = isdsLongMessage(session);
-		sendMsgResultList.append(sendMsgResults);
-
-		if (status == IE_SUCCESS) {
-			qint64 dmId =
-			    QString(sent_message->envelope->dmID).toLongLong();
-			QDateTime deliveryTime = timevalToDateTime(sent_message->envelope->dmDeliveryTime);
+		if (sendingResult.status == IE_SUCCESS) {
+			QDateTime deliveryTime =
+			    timevalToDateTime(message->envelope->dmDeliveryTime);
 
 			MessageDb *messageDb = m_dbSet.accessMessageDb(deliveryTime, true);
 			Q_ASSERT(0 != messageDb);
 
-			messageDb->msgsInsertNewlySentMessageEnvelope(dmId,
+			/* TODO -- Move the function into worker. */
+			messageDb->msgsInsertNewlySentMessageEnvelope(sendingResult.dmId,
 			    m_dbId,
 			    m_senderName,
-			    this->recipientTableWidget->item(i, RTW_ID)->text(),
-			    this->recipientTableWidget->item(i, RTW_NAME)->text(),
-			    this->recipientTableWidget->item(i, RTW_ADDR)->text(),
+			    this->recipientTableWidget->item(row, RTW_ID)->text(),
+			    this->recipientTableWidget->item(row, RTW_NAME)->text(),
+			    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 			    this->subjectText->text());
 
-			Worker::storeAttachments(*messageDb, dmId,
-			    sent_message->documents);
+			Worker::storeAttachments(*messageDb, sendingResult.dmId,
+			    message->documents);
 
 			successSendCnt++;
 		}
 	}
 
-	for (int i = 0; i < sendMsgResultList.size(); ++i) {
-		if (sendMsgResultList.at(i).status == IE_SUCCESS) {
-			if (sendMsgResultList.at(i).isPDZ) {
+	foreach (const MsgSendingResult &result, sentMsgResultList) {
+		if (result.status == IE_SUCCESS) {
+			if (result.isPDZ) {
 				detailText += tr("Message was successfully "
-				"sent to <i>%1 (%2)</i> as PDZ with number "
+				    "sent to <i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
-				    arg(sendMsgResultList.at(i).recipientName).
-				    arg(sendMsgResultList.at(i).dbID).
-				    arg(sendMsgResultList.at(i).dmID) + "<br/>";
+				    arg(result.recipientName).
+				    arg(result.dbID).
+				    arg(result.dmId) + "<br/>";
 			} else {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
-				    arg(sendMsgResultList.at(i).recipientName).
-				    arg(sendMsgResultList.at(i).dbID).
-				    arg(sendMsgResultList.at(i).dmID) + "<br/>";
+				    arg(result.recipientName).
+				    arg(result.dbID).
+				    arg(result.dmId) + "<br/>";
 			}
 		} else {
 			detailText += tr("Message was NOT successfully "
-			"sent to <i>%1 (%2)</i>. Server says: %3").
-			    arg(sendMsgResultList.at(i).recipientName).
-			    arg(sendMsgResultList.at(i).dbID).
-			    arg(sendMsgResultList.at(i).errInfo) + "<br/>";
+			    "sent to <i>%1 (%2)</i>. Server says: %3").
+			    arg(result.recipientName).
+			    arg(result.dbID).
+			    arg(result.errInfo) + "<br/>";
 		}
 	}
 
@@ -1327,7 +1358,7 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
 
-		isds_message_free(&sent_message);
+		isds_message_free(&message);
 
 		this->accept(); /* Set return code to accepted. */
 		return;
@@ -1343,11 +1374,11 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
-			isds_message_free(&sent_message);
+			isds_message_free(&message);
 			this->close(); /* Set return code to closed. */
 			return;
 		} else {
-			isds_message_free(&sent_message);
+			isds_message_free(&message);
 			return;
 		}
 	}
@@ -1373,13 +1404,13 @@ finish:
 	msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::Yes);
 	if (msgBox.exec() == QMessageBox::No) {
-		isds_message_free(&sent_message);
+		isds_message_free(&message);
 		this->close(); /* Set return code to closed. */
 		return;
 	}
 
 	/* Functions do nothing on NULL pointers. */
-	isds_message_free(&sent_message);
+	isds_message_free(&message);
 }
 
 

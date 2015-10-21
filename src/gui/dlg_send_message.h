@@ -47,14 +47,19 @@ public:
 		ACT_NEW_FROM_TMP
 	};
 
-	class sendMsgResultStruct {
+	class MsgSendingResult {
 	public:
+		int status;
 		QString dbID;
 		QString recipientName;
-		QString dmID;
+		qint64 dmId;
 		bool isPDZ;
-		int status;
 		QString errInfo;
+
+		MsgSendingResult(void)
+		    : status(-1), dbID(), recipientName(), dmId(-1),
+		    isPDZ(false), errInfo()
+		{ }
 	};
 
 	DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
@@ -110,6 +115,8 @@ private:
 
 	struct isds_list *buildDocuments(void) const;
 	struct isds_envelope *buildEnvelope(void) const;
+	MsgSendingResult sendSingleMessage(struct isds_message *message,
+	    int row) const;
 
 	static
 	QByteArray getFileBase64(const QString &filePath);
