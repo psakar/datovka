@@ -289,54 +289,19 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 
-	qint64 dmId = QString(envel->dmID).toLongLong();
+	qint64 dmId = -1;
+	{
+		bool ok = false;
+		dmId = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
+
 	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
 	/* Allow invalid delivery time. */
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
-
-	QString dmAmbiguousRecipient;
-	if (NULL == envel->dmAmbiguousRecipient) {
-		dmAmbiguousRecipient = "0";
-	} else {
-		dmAmbiguousRecipient = QString::number(
-		    *envel->dmAmbiguousRecipient);
-	}
-
-	QString dmLegalTitleYear;
-	if (NULL != envel->dmLegalTitleYear) {
-		dmLegalTitleYear = QString::number(
-		    *envel->dmLegalTitleYear);
-	}
-
-	QString dmLegalTitleLaw;
-	if (NULL != envel->dmLegalTitleLaw) {
-		dmLegalTitleLaw = QString::number(
-		    *envel->dmLegalTitleLaw);
-	}
-
-	QString dmSenderOrgUnitNum;
-	if ((NULL != envel->dmSenderOrgUnitNum) &&
-	    (0 != *envel->dmSenderOrgUnitNum)) {
-		dmSenderOrgUnitNum = QString::number(
-		    *envel->dmSenderOrgUnitNum);
-	}
-
-	QString dmRecipientOrgUnitNum;
-	if ((NULL != envel->dmRecipientOrgUnitNum) &&
-	    (0 != *envel->dmRecipientOrgUnitNum)) {
-		dmRecipientOrgUnitNum = QString::number(
-		    *envel->dmRecipientOrgUnitNum);
-	}
-
-	QString dmDeliveryTime;
-	if (NULL != envel->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
-	}
-	QString dmAcceptanceTime;
-	if (NULL != envel->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
-	}
 
 	/* insert message envelope in db */
 	if (messageDb->msgsInsertMessageEnvelope(dmId,
@@ -345,35 +310,47 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,
-	    (int) *envel->dmSenderType,
+	    envel->dmSenderType ?
+	        (int) *envel->dmSenderType : 0,
 	    envel->dmRecipient,
 	    envel->dmRecipientAddress,
-	    dmAmbiguousRecipient,
+	    envel->dmAmbiguousRecipient ?
+	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
 	    envel->dmSenderOrgUnit,
-	    dmSenderOrgUnitNum,
+	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
+	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
 	    envel->dbIDRecipient,
 	    envel->dmRecipientOrgUnit,
-	    dmRecipientOrgUnitNum,
+	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
+	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
 	    envel->dmToHands,
 	    envel->dmAnnotation,
 	    envel->dmRecipientRefNumber,
 	    envel->dmSenderRefNumber,
 	    envel->dmRecipientIdent,
 	    envel->dmSenderIdent,
-	    dmLegalTitleLaw,
-	    dmLegalTitleYear,
+	    envel->dmLegalTitleLaw ?
+	        QString::number(*envel->dmLegalTitleLaw) : QString(),
+	    envel->dmLegalTitleYear ?
+	        QString::number(*envel->dmLegalTitleYear) : QString(),
 	    envel->dmLegalTitleSect,
 	    envel->dmLegalTitlePar,
 	    envel->dmLegalTitlePoint,
-	    envel->dmPersonalDelivery,
-	    envel->dmAllowSubstDelivery,
-	    (NULL != envel->timestamp) ?
+	    envel->dmPersonalDelivery ?
+	        *envel->dmPersonalDelivery : false,
+	    envel->dmAllowSubstDelivery ?
+	        *envel->dmAllowSubstDelivery : false,
+	    envel->timestamp ?
 	        QByteArray((char *) envel->timestamp,
 	            envel->timestamp_length).toBase64() : QByteArray(),
-	    dmDeliveryTime,
-	    dmAcceptanceTime,
-	    convertHexToDecIndex(*envel->dmMessageStatus),
-	    (int) *envel->dmAttachmentSize,
+	    envel->dmDeliveryTime ?
+	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
+	    envel->dmAcceptanceTime ?
+	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	    envel->dmAttachmentSize ?
+	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
 	    msgDirect)) {
 		qDebug() << "Message envelope" << dmId <<
@@ -617,7 +594,14 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 
-	qint64 dmID = QString(envel->dmID).toLongLong();
+	qint64 dmID = -1;
+	{
+		bool ok = false;
+		dmID = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
 	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
@@ -643,7 +627,8 @@ qdatovka_error Worker::updateMessageState(enum MessageDirection msgDirect,
 		updateEnvelope(msgDirect, *messageDb, envel);
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
-	    convertHexToDecIndex(*envel->dmMessageStatus))) {
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0)) {
 		/* Updated message envelope delivery info in db. */
 		qDebug() << "Message envelope delivery info was updated...";
 	} else {
@@ -752,7 +737,14 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		return Q_GLOBAL_ERROR;
 	}
 
-	qint64 dmID = QString(envel->dmID).toLongLong();
+	qint64 dmID = -1;
+	{
+		bool ok = false;
+		dmID = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
 	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
@@ -1187,78 +1179,62 @@ qdatovka_error Worker::updateEnvelope(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 
-	qint64 dmID = QString(envel->dmID).toLongLong();
-
-	QString dmAmbiguousRecipient;
-	if (NULL != envel->dmAmbiguousRecipient) {
-		dmAmbiguousRecipient = QString::number(
-		    *envel->dmAmbiguousRecipient);
-	}
-	QString dmLegalTitleYear;
-	if (NULL != envel->dmLegalTitleYear) {
-		dmLegalTitleYear = QString::number(*envel->dmLegalTitleYear);
-	}
-	QString dmLegalTitleLaw;
-	if (NULL != envel->dmLegalTitleLaw) {
-		dmLegalTitleLaw = QString::number(*envel->dmLegalTitleLaw);
-	}
-	QString dmSenderOrgUnitNum;
-	if ((NULL != envel->dmSenderOrgUnitNum) &&
-	    (0 != *envel->dmSenderOrgUnitNum)) {
-		dmSenderOrgUnitNum = QString::number(
-		    *envel->dmSenderOrgUnitNum);
-	}
-	QString dmRecipientOrgUnitNum;
-	if ((NULL != envel->dmRecipientOrgUnitNum) &&
-	    (0 != *envel->dmRecipientOrgUnitNum)) {
-		dmRecipientOrgUnitNum = QString::number(
-		    *envel->dmRecipientOrgUnitNum);
-	}
-	QString dmDeliveryTime;
-	if (NULL != envel->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
-	}
-	QString dmAcceptanceTime;
-	if (NULL != envel->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
+	qint64 dmId = -1;
+	{
+		bool ok = false;
+		dmId = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
 	}
 
 	/* Update message envelope in db. */
-	if (messageDb.msgsUpdateMessageEnvelope(dmID,
+	if (messageDb.msgsUpdateMessageEnvelope(dmId,
 	    /* TODO - set correctly next two values */
 	    "tReturnedMessage",
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,
-	    (int) *envel->dmSenderType,
+	    envel->dmSenderType ?
+	        (int) *envel->dmSenderType : 0,
 	    envel->dmRecipient,
 	    envel->dmRecipientAddress,
-	    dmAmbiguousRecipient,
+	    envel->dmAmbiguousRecipient ?
+	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
 	    envel->dmSenderOrgUnit,
-	    dmSenderOrgUnitNum,
+	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
+	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
 	    envel->dbIDRecipient,
 	    envel->dmRecipientOrgUnit,
-	    dmRecipientOrgUnitNum,
+	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
+	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
 	    envel->dmToHands,
 	    envel->dmAnnotation,
 	    envel->dmRecipientRefNumber,
 	    envel->dmSenderRefNumber,
 	    envel->dmRecipientIdent,
 	    envel->dmSenderIdent,
-	    dmLegalTitleLaw,
-	    dmLegalTitleYear,
+	    envel->dmLegalTitleLaw ?
+	        QString::number(*envel->dmLegalTitleLaw) : QString(),
+	    envel->dmLegalTitleYear ?
+	        QString::number(*envel->dmLegalTitleYear) : QString(),
 	    envel->dmLegalTitleSect,
 	    envel->dmLegalTitlePar,
 	    envel->dmLegalTitlePoint,
-	    envel->dmPersonalDelivery,
-	    envel->dmAllowSubstDelivery,
-	    (NULL != envel->timestamp) ?
+	    envel->dmPersonalDelivery ?
+	        *envel->dmPersonalDelivery : false,
+	    envel->dmAllowSubstDelivery ?
+	        *envel->dmAllowSubstDelivery : false,
+	    envel->timestamp ?
 	        QByteArray((char *) envel->timestamp,
 	            envel->timestamp_length).toBase64() : QByteArray(),
-	    dmDeliveryTime,
-	    dmAcceptanceTime,
-	    convertHexToDecIndex(*envel->dmMessageStatus),
-	    (NULL != envel->dmAttachmentSize) ?
+	    envel->dmDeliveryTime ?
+	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
+	    envel->dmAcceptanceTime ?
+	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	    envel->dmAttachmentSize ?
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
 	    msgDirect)) {
