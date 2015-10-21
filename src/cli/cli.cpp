@@ -1022,6 +1022,8 @@ struct isds_envelope *buildEnvelope(const QMap <QString, QVariant> &map)
 		*envelope->dmPublishOwnID = false;
 	}
 
+	return envelope;
+
 fail:
 	isds_envelope_free(&envelope);
 	return NULL;
