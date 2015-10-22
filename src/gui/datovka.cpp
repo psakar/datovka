@@ -79,6 +79,41 @@
 
 QNetworkAccessManager* nam;
 
+TableHomeEndFilter::TableHomeEndFilter(QObject *parent)
+    : QObject(parent)
+{ }
+
+TableHomeEndFilter::~TableHomeEndFilter(void)
+{ }
+
+bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
+{
+	QKeyEvent *ke = 0;
+
+	QTableView *tw = dynamic_cast<QTableView *>(object);
+
+	if ((0 != tw) && (event->type() == QEvent::KeyPress)) {
+		ke = (QKeyEvent *) event;
+	}
+
+	if (0 != ke) {
+		switch (ke->key()) {
+		case Qt::Key_Home:
+			tw->selectRow(0);
+			return false;
+			break;
+		case Qt::Key_End:
+			tw->selectRow(tw->model()->rowCount() - 1);
+			return false;
+			break;
+		default:
+			break;
+		}
+	}
+
+	return QObject::eventFilter(object,event);
+}
+
 /*
  * If defined then no message table is going to be generated when clicking
  * on all sent or received messages.
@@ -199,6 +234,7 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->messageList->setStyleSheet(
 //	    "QTableView::item:focus { border-color:green; "
 //	    "border-style:outset; border-width:2px; color:black; }");
+	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* Message state combo box. */
 	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
@@ -254,6 +290,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
 	    SLOT(attachmentItemDoubleClicked(QModelIndex)));
+	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
 	connect(ui->messageList->horizontalHeader(),
