@@ -22,7 +22,6 @@
  */
 
 
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QDialog>
@@ -30,7 +29,6 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
-#include <QTemporaryFile>
 #include <QTimeZone>
 #include <QUrl>
 
@@ -41,171 +39,6 @@
 #include "src/io/dbs.h"
 #include "src/log/log.h"
 #include "src/gui/dlg_import_zfo.h"
-
-#define COL_NUM 2
-#define FNAME_COL 0
-#define FSIZE_COL 1
-
-
-const QVector<QString> AttachmentModel::m_headerLabels = {
-QObject::tr("File name"),
-QObject::tr("Size")
-};
-
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
-AttachmentModel::AttachmentModel(QObject *parent)
-/* ========================================================================= */
-    : QAbstractTableModel(parent),
-    m_docs()
-{
-}
-
-
-/* ========================================================================= */
-/*
- * Destructor.
- */
-AttachmentModel::~AttachmentModel(void)
-/* ========================================================================= */
-{
-}
-
-
-/* ========================================================================= */
-/*
- * Returns row count.
- */
-int AttachmentModel::rowCount(const QModelIndex &parent) const
-/* ========================================================================= */
-{
-	/* unused */
-	(void) parent;
-
-	return m_docs.size();
-}
-
-
-/* ========================================================================= */
-/*
- * Returns column count.
- */
-int AttachmentModel::columnCount(const QModelIndex &parent) const
-/* ========================================================================= */
-{
-	/* unused */
-	(void) parent;
-
-	return COL_NUM;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns data.
- */
-QVariant AttachmentModel::data(const QModelIndex &index, int role) const
-/* ========================================================================= */
-{
-	int row, col;
-
-	switch (role) {
-	case Qt::DisplayRole:
-		row = index.row();
-		col = index.column();
-		Q_ASSERT(row < m_docs.size());
-		Q_ASSERT(col < COL_NUM);
-
-		if (FNAME_COL == col) {
-			/* File name. */
-			return QString(m_docs[row]->dmFileDescr);
-		} else if (FSIZE_COL == col) {
-			/* File size. */
-			return QString::number(m_docs[row]->data_length);
-		}
-
-		return QVariant();
-		break;
-	case Qt::TextAlignmentRole:
-		return Qt::AlignLeft;
-		break;
-	default:
-		return QVariant();
-		break;
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Returns header data.
- */
-QVariant AttachmentModel::headerData(int section,
-    Qt::Orientation orientation, int role) const
-/* ========================================================================= */
-{
-	(void) orientation; /* Unused. */
-
-	if (role != Qt::DisplayRole) {
-		return QVariant();
-	}
-	return m_headerLabels[section];
-}
-
-
-/* ========================================================================= */
-/*
- * Set attachment model according to message content.
- */
-bool AttachmentModel::setModelData(const isds_message *message)
-/* ========================================================================= */
-{
-	const struct isds_list *docListItem;
-
-	if (NULL == message) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	docListItem = message->documents;
-	if (NULL == docListItem) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	this->beginResetModel();
-
-	m_docs.clear();
-
-	while (NULL != docListItem) {
-		Q_ASSERT(NULL != docListItem->data);
-		m_docs.append((struct isds_document *) docListItem->data);
-		docListItem = docListItem->next;
-	}
-
-	this->endResetModel();
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Get attachment content.
- */
-QByteArray AttachmentModel::attachmentData(int indexRow) const
-/* ========================================================================= */
-{
-	Q_ASSERT(m_docs.size() > 0);
-
-	QByteArray data((char *) m_docs[indexRow]->data,
-	    (int) m_docs[indexRow]->data_length);
-
-	return data;
-}
 
 
 /* ========================================================================= */
