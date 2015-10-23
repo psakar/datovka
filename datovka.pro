@@ -272,7 +272,8 @@ SOURCES += src/common.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_timestamp_expir.cpp \
-    src/cli/cli.cpp
+    src/cli/cli.cpp \
+    src/views/table_home_end_filter.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
@@ -315,7 +316,8 @@ HEADERS += src/common.h \
     src/gui/dlg_yes_no_checkbox.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_timestamp_expir.h \
-    src/cli/cli.h
+    src/cli/cli.h \
+    src/views/table_home_end_filter.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \

@@ -39,6 +39,7 @@
 #include "src/io/dbs.h"
 #include "src/log/log.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/views/table_home_end_filter.h"
 
 
 /* ========================================================================= */
@@ -100,6 +101,7 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
 		    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
 
+		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
 	}
 
 	/* Signature details. */

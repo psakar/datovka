@@ -68,6 +68,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
+#include "src/views/table_home_end_filter.h"
 #include "ui_datovka.h"
 
 
@@ -78,41 +79,6 @@
 #define WIN_POSITION_H "h"
 
 QNetworkAccessManager* nam;
-
-TableHomeEndFilter::TableHomeEndFilter(QObject *parent)
-    : QObject(parent)
-{ }
-
-TableHomeEndFilter::~TableHomeEndFilter(void)
-{ }
-
-bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
-{
-	QKeyEvent *ke = 0;
-
-	QTableView *tw = dynamic_cast<QTableView *>(object);
-
-	if ((0 != tw) && (event->type() == QEvent::KeyPress)) {
-		ke = (QKeyEvent *) event;
-	}
-
-	if (0 != ke) {
-		switch (ke->key()) {
-		case Qt::Key_Home:
-			tw->selectRow(0);
-			return false;
-			break;
-		case Qt::Key_End:
-			tw->selectRow(tw->model()->rowCount() - 1);
-			return false;
-			break;
-		default:
-			break;
-		}
-	}
-
-	return QObject::eventFilter(object,event);
-}
 
 /*
  * If defined then no message table is going to be generated when clicking

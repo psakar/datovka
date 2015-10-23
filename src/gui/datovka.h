@@ -47,21 +47,6 @@
 #include "thread/worker.h"
 
 
-/*!
- * @brief This object is used as to tweak the behaviour of a QTableWidget
- *    when Hone and End keys are pressed.
- */
-class TableHomeEndFilter : public QObject {
-	Q_OBJECT
-
-public:
-	explicit TableHomeEndFilter(QObject *parent=0);
-	virtual ~TableHomeEndFilter(void);
-
-	virtual bool eventFilter(QObject *object, QEvent *event);
-};
-
-
 namespace Ui {
 	class MainWindow;
 }
