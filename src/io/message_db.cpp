@@ -5193,7 +5193,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	// copy message data from messages table into db.
+	// copy message envelope data from messages table into db.
 	queryStr = "INSERT INTO messages SELECT * FROM " DB2 ".messages WHERE "
 	    "dmID = :dmID";
 	if (!query.prepare(queryStr)) {
@@ -5209,8 +5209,14 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	// copy other message data from other tables into new db.
-	queryStr = "INSERT INTO files SELECT * FROM " DB2 ".files WHERE "
-	    "message_id = :message_id";
+	// FILES - insert all columns without id.
+	queryStr = "INSERT INTO files "
+	    "(message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent) "
+	    "SELECT "
+	    "message_id, _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent "
+	    "FROM " DB2 ".files WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5223,8 +5229,12 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO hashes SELECT * FROM " DB2 ".hashes WHERE "
-	    "message_id = :message_id";
+	// HASHES - insert all columns without id.
+	queryStr = "INSERT INTO hashes "
+	    "(message_id, value, _algorithm) "
+	    "SELECT "
+	    "message_id, value, _algorithm "
+	    "FROM " DB2 ".hashes WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5237,8 +5247,12 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
-	queryStr = "INSERT INTO events SELECT * FROM " DB2 ".events WHERE "
-	    "message_id = :message_id";
+	// HASHES - insert all columns without id.
+	queryStr = "INSERT INTO events "
+	    "(message_id, dmEventTime, dmEventDescr) "
+	    "SELECT "
+	    "message_id, dmEventTime, dmEventDescr "
+	    "FROM " DB2 ".events WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -5251,6 +5265,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
+	// RAW_MESSAGE_DATA - insert all columns.
 	queryStr = "INSERT INTO raw_message_data SELECT * "
 	    "FROM " DB2 ".raw_message_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
@@ -5258,7 +5273,6 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":message_id", msgId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
@@ -5266,6 +5280,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
+	// RAW_DELIVERY_INFO_DATA - insert all columns.
 	queryStr = "INSERT INTO raw_delivery_info_data SELECT * "
 	    "FROM " DB2 ".raw_delivery_info_data WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
@@ -5273,7 +5288,6 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":message_id", msgId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
@@ -5281,6 +5295,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
+	// supplementary_message_data - insert all columns.
 	queryStr = "INSERT INTO supplementary_message_data "
 	    "SELECT * FROM " DB2 ".supplementary_message_data WHERE "
 	    "message_id = :message_id";
@@ -5296,6 +5311,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		goto fail;
 	}
 
+	// process_state - insert all columns.
 	queryStr = "INSERT INTO process_state SELECT * FROM " DB2
 	    ".process_state WHERE message_id = :message_id";
 	if (!query.prepare(queryStr)) {
