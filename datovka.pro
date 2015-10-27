@@ -256,6 +256,7 @@ SOURCES += src/common.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
+    src/models/attachment_model.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
@@ -271,7 +272,8 @@ SOURCES += src/common.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_timestamp_expir.cpp \
-    src/cli/cli.cpp
+    src/cli/cli.cpp \
+    src/views/table_home_end_filter.cpp
 
 HEADERS += src/common.h \
     src/crypto/crypto.h \
@@ -298,6 +300,7 @@ HEADERS += src/common.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/models/accounts_model.h \
+    src/models/attachment_model.h \
     src/models/files_model.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
@@ -313,7 +316,8 @@ HEADERS += src/common.h \
     src/gui/dlg_yes_no_checkbox.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_timestamp_expir.h \
-    src/cli/cli.h
+    src/cli/cli.h \
+    src/views/table_home_end_filter.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_change_pwd.ui \

@@ -68,6 +68,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
+#include "src/views/table_home_end_filter.h"
 #include "ui_datovka.h"
 
 
@@ -199,6 +200,7 @@ MainWindow::MainWindow(QWidget *parent)
 //	ui->messageList->setStyleSheet(
 //	    "QTableView::item:focus { border-color:green; "
 //	    "border-style:outset; border-width:2px; color:black; }");
+	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* Message state combo box. */
 	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
@@ -254,6 +256,7 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
 	    SLOT(attachmentItemDoubleClicked(QModelIndex)));
+	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
 	connect(ui->messageList->horizontalHeader(),
