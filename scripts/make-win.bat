@@ -3,8 +3,8 @@
 :: There are define paths to QT, NSIS and 7-ZIP
 :: Qt paths must be set into PATH on Windows envirom.varialbe
 :: User have to change it
-set QTPATH="C:\Qt\Qt5.5.0\5.5\mingw492_32\bin\" 
-set QTMAKEPATH="C:\Qt\Qt5.5.0\Tools\mingw492_32\bin\"
+set QTPATH="C:\Qt\Qt5.5.1\5.5\mingw492_32\bin\" 
+set QTMAKEPATH="C:\Qt\Qt5.5.1\Tools\mingw492_32\bin\"
 set NSISPATH="C:\Program Files (x86)\NSIS\makensis.exe"
 set ZIPPATH="C:\Program Files (x86)\7-Zip\7z.exe"
 
