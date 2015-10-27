@@ -1,3 +1,22 @@
+4.4.1 /
+ * Fixed logo sizes.
+ * Enabled Home/End navigation in table views.
+ * Fixed bug when importing messages into database from another database file.
+ * Small modification of the command-line interface in order to make the usage
+   more convenient.
+ * Fixed potential null pointer dereference.
+ * Added some missing tool tips.
+ * Application stores sent attachments into database when the message has been
+   successfully sent.
+ * The time-out for marking messages as read can be user specified or
+   disabled.
+ * Background of filter field is changed to green or red when a filter is set.
+ * Fixed message status updating and delivery time on accounts with restricted
+   privileges.
+ * Fixed issues when sending commercial messages from templates.
+ * Fixed issue with missing leading zeroes when passing identification
+   numbers from command line.
+
 4.4.0 / 2015-10-12
  * Fixed opening of attachments when attachment name contains non-standard
    characters.
