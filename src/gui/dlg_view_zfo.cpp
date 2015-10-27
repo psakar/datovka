@@ -337,6 +337,8 @@ void DlgViewZfo::openSelectedAttachment(void)
 		Q_ASSERT(0);
 		return;
 	}
+	attachName.replace(QRegExp("\\s"), "_").replace(
+	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
 	/* TODO -- Add message id into file name? */
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 

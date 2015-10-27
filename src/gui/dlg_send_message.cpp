@@ -818,6 +818,8 @@ void DlgSendMessage::openAttachmentFile(void)
 	if (attachName.isEmpty()) {
 		return;
 	}
+	attachName.replace(QRegExp("\\s"), "_").replace(
+	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
 	/* TODO -- Add message id into file name? */
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 

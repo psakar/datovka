@@ -1,4 +1,6 @@
 4.4.1 /
+ * Temporary attachment files are renamed so that the names won't contain
+   potentially problematic characters.
  * Fixed logo sizes.
  * Enabled Home/End navigation in table views.
  * Fixed bug when importing messages into database from another database file.
