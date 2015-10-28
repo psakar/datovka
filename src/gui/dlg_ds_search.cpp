@@ -27,6 +27,7 @@
 
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
+#include "src/views/table_home_end_filter.h"
 
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
@@ -127,6 +128,9 @@ void DlgDsSearch::initSearchWindow(void)
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->resultsTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->resultsTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);

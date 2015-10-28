@@ -26,6 +26,7 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
+#include "src/views/table_home_end_filter.h"
 
 #define COL_USER_NAME 0
 #define COL_MESSAGE_ID 1
@@ -131,6 +132,9 @@ void DlgMsgSearch::initSearchWindow(void)
 
 	this->resultsTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->resultsTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
 }
 
 

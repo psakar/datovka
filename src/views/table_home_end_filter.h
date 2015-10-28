@@ -27,8 +27,8 @@
 #include <QObject>
 
 /*!
- * @brief This object is used as to tweak the behaviour of a QTableWidget
- *    when Hone and End keys are pressed.
+ * @brief This object is used as to tweak the behaviour of a QTableView and
+ *    QTableWidget when Hone and End keys are pressed.
  */
 class TableHomeEndFilter : public QObject {
 	Q_OBJECT

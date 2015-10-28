@@ -30,15 +30,16 @@
 
 #include "dlg_send_message.h"
 #include "src/common.h"
-#include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_contacts.h"
+#include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
-#include "src/io/message_db.h"
-#include "ui_dlg_send_message.h"
-#include "src/io/isds_sessions.h"
 #include "src/io/dbs.h"
+#include "src/io/isds_sessions.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/thread/worker.h"
+#include "src/views/table_home_end_filter.h"
+#include "ui_dlg_send_message.h"
 
 
 /*
@@ -211,6 +212,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 	this->attachmentTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->recipientTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
+	this->attachmentTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	//connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));

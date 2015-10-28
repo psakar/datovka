@@ -24,6 +24,7 @@
 
 #include "dlg_contacts.h"
 #include "src/io/isds_sessions.h"
+#include "src/views/table_home_end_filter.h"
 
 
 DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
@@ -74,6 +75,9 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->contactTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
 }
 
 

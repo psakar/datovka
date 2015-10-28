@@ -2,7 +2,7 @@
  * Temporary attachment files are renamed so that the names won't contain
    potentially problematic characters.
  * Fixed logo sizes.
- * Enabled Home/End navigation in table views.
+ * Enabled Home/End navigation in table views and widgets.
  * Fixed bug when importing messages into database from another database file.
  * Small modification of the command-line interface in order to make the usage
    more convenient.

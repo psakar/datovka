@@ -24,6 +24,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QTableView>
+#include <QTableWidget>
 
 #include "src/views/table_home_end_filter.h"
 
@@ -34,30 +35,87 @@ TableHomeEndFilter::TableHomeEndFilter(QObject *parent)
 TableHomeEndFilter::~TableHomeEndFilter(void)
 { }
 
+/*!
+ * @brief Performs Home/End navigation on a QTableView.
+ *
+ * @param[in,out] tv Non-null pointer to table view.
+ * @param[in]     ke Non-null pointer to key event.
+ */
+static
+void viewFilter(QTableView *tv, const QKeyEvent *ke)
+{
+	if (0 == tv) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (0 == ke) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	switch (ke->key()) {
+	case Qt::Key_Home:
+		tv->selectRow(0);
+		break;
+	case Qt::Key_End:
+		tv->selectRow(tv->model()->rowCount() - 1);
+		break;
+	default:
+		break;
+	}
+}
+
+/*!
+ * @brief Perfeorms Home/End navigation on a QTableWidget.
+ *
+ * @param[in,out] tw Non-null pointer to table widget.
+ * @param[in]     ke Non-null pointer to key event.
+ */
+static
+void widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
+{
+	if (0 == tw) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (0 == ke) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	switch (ke->key()) {
+	case Qt::Key_Home:
+		tw->selectRow(0);
+		break;
+	case Qt::Key_End:
+		tw->selectRow(tw->rowCount() - 1);
+		break;
+	default:
+		break;
+	}
+}
+
 bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
 {
-	QKeyEvent *ke = 0;
-
-	QTableView *tw = dynamic_cast<QTableView *>(object);
-
-	if ((0 != tw) && (event->type() == QEvent::KeyPress)) {
+	const QKeyEvent *ke = 0;
+	QTableView *tv = 0;
+	QTableWidget *tw = 0;
+	if (event->type() == QEvent::KeyPress) {
 		ke = (QKeyEvent *) event;
 	}
 
 	if (0 != ke) {
-		switch (ke->key()) {
-		case Qt::Key_Home:
-			tw->selectRow(0);
-			return false;
-			break;
-		case Qt::Key_End:
-			tw->selectRow(tw->model()->rowCount() - 1);
-			return false;
-			break;
-		default:
-			break;
-		}
+		tv = dynamic_cast<QTableView *>(object);
+		tw = dynamic_cast<QTableWidget *>(object);
 	}
 
-	return QObject::eventFilter(object,event);
+	if (0 != tv) {
+		viewFilter(tv, ke);
+		return false;
+	} else if (0 != tw) {
+		widgetFilter(tw, ke);
+		return false;
+	}
+
+	return QObject::eventFilter(object, event);
 }
