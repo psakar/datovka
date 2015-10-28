@@ -1,4 +1,6 @@
-4.4.1 /
+4.4.1 / 2015-10-28
+ * Fixed issue when two pop-ups have been shown on errors when sending a
+   message.
  * Temporary attachment files are renamed so that the names won't contain
    potentially problematic characters.
  * Fixed logo sizes.
