@@ -1279,23 +1279,31 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	message = (struct isds_message *) malloc(sizeof(struct isds_message));
+	memset(message, 0, sizeof(struct isds_message));
 	if (message == NULL) {
 		logErrorNL("%s", "Memory allocation failed.");
+		detailText = tr("An error has occurred during message creation."
+		    " Memory allocation failed.");
 		goto finish;
 	}
-	memset(message, 0, sizeof(struct isds_message));
 
 	/* Attach envelope and attachment files to message structure. */
 	message->documents = buildDocuments();
 	if (NULL == message->documents) {
+		detailText = tr("An error has occurred during loading "
+		    "of attachments into message.");
 		goto finish;
 	}
 	message->envelope = buildEnvelope();
 	if (NULL == message->envelope) {
+		detailText = tr("An error has occurred during "
+		    "message envelope creation.");
 		goto finish;
 	}
 
 	if (!isdsSessions.isConnectedToIsds(m_userName)) {
+		detailText = tr("It was not possible to establish a "
+		    "connection to the server or authorization failed.");
 		goto finish;
 	}
 
@@ -1395,30 +1403,14 @@ finish:
 	QMessageBox msgBox;
 	msgBox.setIcon(QMessageBox::Critical);
 	msgBox.setWindowTitle(tr("Send message error"));
-	msgBox.setText("<b>"+tr("It was not possible to send message "
-	    "to the server Datové schránky.")+"</b>");
-	detailText += tr("It can be caused by following") +  ":<br/><br/>";
-	detailText += "1. " + tr("It was not possible to establish a "
-	    "connection to the server.") + "<br/>";
-	detailText += "2. " + tr("Authorization on the server "
-	    "failed.") + "<br/>";
-	detailText += "3. " + tr("Wrong/unsupported MIME type of some file in "
-	    "the attachment.") + "<br/>";
-	detailText += "4. " + tr("An internal error has occurred in "
-	    "the application.") + "<br/>";
-	detailText += "<br/><br/><b>" +
-	    tr("Do you want to close the Send message form?") + "</b>";
+	msgBox.setText(tr("It was not possible to send message "
+	    "to the server Datové schránky."));
+	detailText += "\n\n" + tr("The message will be discarded.");
 	msgBox.setInformativeText(detailText);
-	msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::Yes);
-	if (msgBox.exec() == QMessageBox::No) {
-		isds_message_free(&message);
-		this->close(); /* Set return code to closed. */
-		return;
-	}
-
-	/* Functions do nothing on NULL pointers. */
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
 	isds_message_free(&message);
+	this->close();
 }
 
 
