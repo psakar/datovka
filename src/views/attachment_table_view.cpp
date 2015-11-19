@@ -32,6 +32,7 @@
 
 #include "src/common.h"
 #include "src/log/log.h"
+#include "src/models/attachment_model.h"
 #include "src/views/attachment_table_view.h"
 
 AttachmentTableView::AttachmentTableView(QWidget *parent)
@@ -121,7 +122,8 @@ QList<QString> AttachmentTableView::temporaryFiles(
 		QString attachAbsName(subirPath + QDir::separator());
 		{
 			/* Determine file name. */
-			QModelIndex fileNameIndex = idx.sibling(idx.row(), 3);
+			QModelIndex fileNameIndex = idx.sibling(idx.row(),
+			    AttachmentModel::FNAME_COL);
 			if(!fileNameIndex.isValid()) {
 				Q_ASSERT(0);
 				return QList<QString>();
@@ -136,7 +138,8 @@ QList<QString> AttachmentTableView::temporaryFiles(
 		QByteArray attachData;
 		{
 			/* Obtain data. */
-			QModelIndex dataIndex = idx.sibling(idx.row(), 2);
+			QModelIndex dataIndex = idx.sibling(idx.row(),
+			    AttachmentModel::CONTENT_COL);
 			if (!dataIndex.isValid()) {
 				Q_ASSERT(0);
 				return QList<QString>();

@@ -1760,8 +1760,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	qint64 dmId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toLongLong();
 
-	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 3);
+	QModelIndex fileNameIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::FNAME_COL);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		showStatusTextWithTimeout(tr("Saving attachment of message "
@@ -1816,7 +1816,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	}
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::CONTENT_COL);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		showStatusTextWithTimeout(tr("Saving attachment of message "
@@ -1909,7 +1910,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			continue;
 		}
 
-		QModelIndex fileNameIndex = index.sibling(index.row(), 3);
+		QModelIndex fileNameIndex = index.sibling(index.row(),
+		    AttachmentModel::FNAME_COL);
 		Q_ASSERT(fileNameIndex.isValid());
 		if(!fileNameIndex.isValid()) {
 			unspecifiedFailed = true;
@@ -1932,7 +1934,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		fileName = newDir + QDir::separator() + fileName;
 
-		QModelIndex dataIndex = index.sibling(index.row(), 2);
+		QModelIndex dataIndex = index.sibling(index.row(),
+		    AttachmentModel::CONTENT_COL);
 		Q_ASSERT(dataIndex.isValid());
 		if (!dataIndex.isValid()) {
 			unsuccessfullFiles.append(fileName);
@@ -2033,8 +2036,8 @@ void MainWindow::openSelectedAttachment(void)
 		return;
 	}
 
-	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 3);
+	QModelIndex fileNameIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::FNAME_COL);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		return;
@@ -2050,7 +2053,8 @@ void MainWindow::openSelectedAttachment(void)
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::CONTENT_COL);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		return;
