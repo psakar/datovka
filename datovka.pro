@@ -128,7 +128,8 @@ unix:!macx {
 
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
-	-Wall -Wextra -pedantic
+	-Wall -Wextra -pedantic \
+	-Isrc/views
 
 INCLUDEPATH += \
 	src
@@ -273,6 +274,7 @@ SOURCES += src/common.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_timestamp_expir.cpp \
     src/cli/cli.cpp \
+    src/views/attachment_table_view.cpp \
     src/views/table_home_end_filter.cpp
 
 HEADERS += src/common.h \
@@ -317,6 +319,7 @@ HEADERS += src/common.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_timestamp_expir.h \
     src/cli/cli.h \
+    src/views/attachment_table_view.h \
     src/views/table_home_end_filter.h
 
 FORMS += src/gui/ui/datovka.ui \

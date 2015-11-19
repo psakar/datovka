@@ -393,7 +393,7 @@ sent reply on this message</string>
                </layout>
               </item>
               <item>
-               <widget class="QTableView" name="messageAttachmentList">
+               <widget class="AttachmentTableView" name="messageAttachmentList">
                 <property name="selectionMode">
                  <enum>QAbstractItemView::SingleSelection</enum>
                 </property>
@@ -1206,6 +1206,13 @@ sent reply on this message</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AttachmentTableView</class>
+   <extends>QTableView</extends>
+   <header>attachment_table_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>
