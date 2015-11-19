@@ -93,7 +93,15 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 
 		/* Attachment list. */
 		attachmentTable->setModel(&m_attachmentModel);
-		attachmentTable->resizeColumnToContents(0);
+		/* First three columns contain hidden data. */
+		attachmentTable->setColumnHidden(AttachmentModel::ATTACHID_COL,
+		    true);
+		attachmentTable->setColumnHidden(AttachmentModel::MSGID_COL,
+		    true);
+		attachmentTable->setColumnHidden(AttachmentModel::CONTENT_COL,
+		    true);
+		attachmentTable->resizeColumnToContents(
+		    AttachmentModel::FNAME_COL);
 
 		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
@@ -574,7 +582,8 @@ QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
 		return QModelIndex();
 	}
 
-	return selectedIndex.sibling(selectedIndex.row(), FNAME_COL);
+	return selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::FNAME_COL);
 }
 
 

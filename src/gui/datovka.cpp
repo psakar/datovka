@@ -1066,16 +1066,20 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		//qDebug() << "Setting files";
 		ui->messageAttachmentList->setModel(fileTblMdl);
 		/* First three columns contain hidden data. */
-		ui->messageAttachmentList->setColumnHidden(0, true);
-		ui->messageAttachmentList->setColumnHidden(1, true);
-		ui->messageAttachmentList->setColumnHidden(2, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::ATTACHID_COL, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::MSGID_COL, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::CONTENT_COL, true);
 
 		if (ui->messageAttachmentList->model()->rowCount() > 0) {
 			ui->saveAttachments->setEnabled(true);
 			ui->actionSave_all_attachments->setEnabled(true);
 		}
 
-		ui->messageAttachmentList->resizeColumnToContents(3);
+		ui->messageAttachmentList->resizeColumnToContents(
+		    AttachmentModel::FNAME_COL);
 
 		/* Connect new slot. */
 		connect(ui->messageAttachmentList->selectionModel(),
@@ -2231,9 +2235,12 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	Q_ASSERT(0 != fileTblMdl);
 	ui->messageAttachmentList->setModel(fileTblMdl);
 	/* First three columns contain hidden data. */
-	ui->messageAttachmentList->setColumnHidden(0, true);
-	ui->messageAttachmentList->setColumnHidden(1, true);
-	ui->messageAttachmentList->setColumnHidden(2, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::ATTACHID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::MSGID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::CONTENT_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->saveAttachments->setEnabled(true);
@@ -2243,7 +2250,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		ui->actionSave_all_attachments->setEnabled(false);
 	}
 
-	ui->messageAttachmentList->resizeColumnToContents(3);
+	ui->messageAttachmentList->resizeColumnToContents(
+	    AttachmentModel::FNAME_COL);
 
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),

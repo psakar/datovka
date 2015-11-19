@@ -24,6 +24,9 @@
 #include "src/models/attachment_model.h"
 
 const QVector<QString> AttachmentModel::m_headerLabels = {
+	QString(),
+	QString(),
+	QString(),
 	QObject::tr("File name"),
 	QObject::tr("Size")
 };
@@ -51,7 +54,7 @@ int AttachmentModel::columnCount(const QModelIndex &parent) const
 	/* unused */
 	(void) parent;
 
-	return COL_NUM;
+	return MAX_COL;
 }
 
 QVariant AttachmentModel::data(const QModelIndex &index, int role) const
@@ -63,14 +66,19 @@ QVariant AttachmentModel::data(const QModelIndex &index, int role) const
 		row = index.row();
 		col = index.column();
 		Q_ASSERT(row < m_docs.size());
-		Q_ASSERT(col < COL_NUM);
+		Q_ASSERT(col < MAX_COL);
 
-		if (FNAME_COL == col) {
+		switch (col) {
+		case FNAME_COL:
 			/* File name. */
 			return QString(m_docs[row]->dmFileDescr);
-		} else if (FSIZE_COL == col) {
+			break;
+		case FSIZE_COL:
 			/* File size. */
 			return QString::number(m_docs[row]->data_length);
+			break;
+		default:
+			break;
 		}
 
 		return QVariant();
