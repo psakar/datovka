@@ -744,7 +744,7 @@ of postal data messages active.</string>
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="attachmentTableWidget">
+    <widget class="AttachmentTableWidget" name="attachmentTableWidget">
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
@@ -873,6 +873,13 @@ of postal data messages active.</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AttachmentTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>attachment_table_widget.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>subjectText</tabstop>
   <tabstop>dmSenderRefNumber</tabstop>

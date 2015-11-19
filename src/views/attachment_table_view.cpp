@@ -44,6 +44,11 @@ AttachmentTableView::AttachmentTableView(QWidget *parent)
 
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 {
+	if (0 == event) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	if (!(event->buttons() & Qt::LeftButton) ||
 	    (event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
 		QTableView::mouseMoveEvent(event);
