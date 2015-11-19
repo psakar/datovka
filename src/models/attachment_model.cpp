@@ -69,6 +69,11 @@ QVariant AttachmentModel::data(const QModelIndex &index, int role) const
 		Q_ASSERT(col < MAX_COL);
 
 		switch (col) {
+		case CONTENT_COL:
+			Q_ASSERT(m_docs.size() > row);
+			return QByteArray((char *) m_docs[row]->data,
+			    (int) m_docs[row]->data_length).toBase64();
+			break;
 		case FNAME_COL:
 			/* File name. */
 			return QString(m_docs[row]->dmFileDescr);

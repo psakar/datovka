@@ -32,7 +32,7 @@
 #include <QUrl>
 
 /*!
- * @brief Custom class with dragging enabled.
+ * @brief Custom attachment table view class with dragging enabled.
  */
 class AttachmentTableView : public QTableView {
 	Q_OBJECT
@@ -44,18 +44,37 @@ public:
 	AttachmentTableView(QWidget *parent = 0);
 
 protected:
+	/*!
+	 * @brief Activates the drag.
+	 */
 	virtual
 	void mouseMoveEvent(QMouseEvent *event);
 
+	/*
+	 * @brief Used for storing the beginning position of the drag.
+	 */
 	virtual
 	void mousePressEvent(QMouseEvent *event);
 
 private:
+	/*!
+	 * @brief Creates temporary files related to selected view items.
+	 *
+	 * @param[in] tmpDir Temporary directory object.
+	 * @return List of absolute file names or empty list on error.
+	 */
 	QList<QString> temporaryFiles(const QTemporaryDir &tmpDir) const;
+
+	/*!
+	 * @brief Converts list of absolute file names to list of URLs.
+	 *
+	 * @param[in] tmpFileNames List of absolute file names.
+	 * @return List of URLs or empty list on error.
+	 */
 	static
 	QList<QUrl> temporaryFileUrls(const QList<QString> &tmpFileNames);
 
-	QPoint m_dragStartPosition;
+	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;
 };
 
 #endif /* _ATTACHMENT_TABLE_VIEW_H_ */
