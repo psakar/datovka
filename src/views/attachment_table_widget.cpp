@@ -33,7 +33,6 @@
 AttachmentTableWidget::AttachmentTableWidget(QWidget *parent)
     : QTableWidget(parent)
 {
-	logDebugLv0NL("%s", "acept drops");
 	setAcceptDrops(true);
 }
 
@@ -54,8 +53,10 @@ int AttachmentTableWidget::addFile(const QString &filePath)
 	int row = this->rowCount();
 
 	for (int i = 0; i < row; ++i) {
-		if (this->item(i, ATW_FILE)->text() == fileName) {
+		if (this->item(i, ATW_PATH)->text() == filePath) {
 			/* Already in table. */
+			logWarning("File '%s' already in table.\n",
+			    filePath.toUtf8().constData());
 			return -1;
 		}
 	}
@@ -78,7 +79,7 @@ int AttachmentTableWidget::addFile(const QString &filePath)
 	item->setText(filePath);
 	this->setItem(row, ATW_PATH, item);
 	item = new QTableWidgetItem;
-	item->setData(Qt::DisplayRole, getFileBase64(fileName));
+	item->setData(Qt::DisplayRole, getFileBase64(filePath));
 	this->setItem(row, ATW_DATA, item);
 
 	return fileSize;
@@ -91,14 +92,13 @@ void AttachmentTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		return;
 	}
 
-	logDebugLv0NL("%s", "A001");
-
 	if (event->mimeData()->hasUrls()) {
-		logDebugLv0NL("%s", "A002");
 		event->acceptProposedAction();
+	} else {
+		logInfo("Rejecting drag enter event with mime type '%s'.\n",
+		    event->mimeData()->formats()
+		        .join(" ").toUtf8().constData());
 	}
-
-	logDebugLv0NL("%s", "A003");
 }
 
 void AttachmentTableWidget::dragMoveEvent(QDragMoveEvent *event)
@@ -107,8 +107,6 @@ void AttachmentTableWidget::dragMoveEvent(QDragMoveEvent *event)
 		Q_ASSERT(0);
 		return;
 	}
-
-	logDebugLv0NL("%s", "B001");
 
 	event->acceptProposedAction();
 }
@@ -120,13 +118,9 @@ void AttachmentTableWidget::dropEvent(QDropEvent *event)
 		return;
 	}
 
-	logDebugLv0NL("%s", "C001");
-
 	if (!event->mimeData()->hasUrls()) {
 		return;
 	}
-
-	logDebugLv0NL("%s", "C002");
 
 	QList<QString> paths = filePaths(event->mimeData()->urls());
 
@@ -151,8 +145,6 @@ QList<QString> AttachmentTableWidget::filePaths(const QList<QUrl> &uriList)
 			    uri.toString().toUtf8().constData());
 			return QList<QString>();
 		}
-
-		logDebugLv0NL("%s", uri.toLocalFile().toUtf8().constData());
 
 		filePaths.append(uri.toLocalFile());
 	}
