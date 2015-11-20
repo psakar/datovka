@@ -21,8 +21,6 @@
  * the two.
  */
 
-#include <QDebug>
-
 #include <QApplication>
 #include <QDir>
 #include <QDrag>
@@ -60,8 +58,13 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 		logErrorNL("%s", "Could not create a temporary directory.");
 		return;
 	}
-	dir.setAutoRemove(false); // TODO -- Remove.
-	qDebug() << "XXXX" << dir.path(); // TODO -- Remove.
+	/*
+	 * Automatic removal cannot be set because his removes the files
+	 * before actual copying of the file.
+	 *
+	 * TODO -- Represent the copied data in a different way than an URL.
+	 */
+	dir.setAutoRemove(false);
 
 	QList<QString> tmpFileNames = temporaryFiles(dir);
 	if (tmpFileNames.isEmpty()) {
@@ -69,15 +72,17 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	qDebug() << "XXXXX start drag"; // TODO -- Remove.
 	QDrag *drag = new (std::nothrow) QDrag(this);
-
-	QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
-	qDebug() << urlList; // TODO -- Remove.
+	if (0 == drag) {
+		return;
+	}
 
 	QMimeData *mimeData = new (std::nothrow) QMimeData;
-	mimeData->setUrls(urlList);
-	drag->setMimeData(mimeData);
+	if (0 != mimeData) {
+		QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
+		mimeData->setUrls(urlList);
+		drag->setMimeData(mimeData);
+	}
 
 	/* Ignore the return value of the drop action. */
 	drag->exec(Qt::CopyAction | Qt::MoveAction);
@@ -116,7 +121,10 @@ QList<QString> AttachmentTableView::temporaryFiles(
 		QString subirPath(tmpPath + QDir::separator() +
 		    QString::number(fileNumber++));
 		{
-			/* Every file has its subdirectory. */
+			/*
+			 * Create a separate subdirectory because the files
+			 * may have equal names.
+			 */
 			QDir dir(tmpPath);
 			if (!dir.mkpath(subirPath)) {
 				logError("Could not create directory '%s'.",
@@ -124,9 +132,9 @@ QList<QString> AttachmentTableView::temporaryFiles(
 				return QList<QString>();
 			}
 		}
-		QString attachAbsName(subirPath + QDir::separator());
+		QString attachAbsPath(subirPath + QDir::separator());
 		{
-			/* Determine file name. */
+			/* Determine full file path. */
 			QModelIndex fileNameIndex = idx.sibling(idx.row(),
 			    AttachmentModel::FNAME_COL);
 			if(!fileNameIndex.isValid()) {
@@ -138,7 +146,7 @@ QList<QString> AttachmentTableView::temporaryFiles(
 				Q_ASSERT(0);
 				return QList<QString>();
 			}
-			attachAbsName += attachFileName;
+			attachAbsPath += attachFileName;
 		}
 		QByteArray attachData;
 		{
@@ -156,11 +164,11 @@ QList<QString> AttachmentTableView::temporaryFiles(
 				return QList<QString>();
 			}
 		}
-		if (WF_SUCCESS != writeFile(attachAbsName, attachData, false)) {
+		if (WF_SUCCESS != writeFile(attachAbsPath, attachData, false)) {
 			return QList<QString>();
 		}
 
-		tmpFileList.append(attachAbsName);
+		tmpFileList.append(attachAbsPath);
 	}
 
 	return tmpFileList;
