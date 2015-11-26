@@ -35,3 +35,14 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 		return QSqlQueryModel::data(index, role);
 	}
 }
+
+Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags defaultFlags = QSqlQueryModel::flags(index);
+
+	if (index.isValid()) {
+		defaultFlags |= Qt::ItemIsDragEnabled;
+	}
+
+	return defaultFlags;
+}
