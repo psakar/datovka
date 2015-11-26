@@ -37,7 +37,7 @@ AttachmentTableView::AttachmentTableView(QWidget *parent)
     : QTableView(parent),
     m_dragStartPosition()
 {
-
+	setDragEnabled(true);
 }
 
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
@@ -50,6 +50,7 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 	if (!(event->buttons() & Qt::LeftButton) ||
 	    (event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
 		QTableView::mouseMoveEvent(event);
+		return;
 	}
 
 	/* Create temporary directory. Automatic remove is on by default. */

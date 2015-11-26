@@ -62,6 +62,12 @@ public:
 	~AttachmentModel(void);
 
 	/*!
+	 * @brief Used to set items draggable.
+	 */
+	virtual
+	Qt::ItemFlags flags(const QModelIndex &index) const;
+
+	/*!
 	 * @brief Returns row count.
 	 */
 	virtual

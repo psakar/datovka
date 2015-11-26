@@ -41,6 +41,17 @@ AttachmentModel::~AttachmentModel(void)
 {
 }
 
+Qt::ItemFlags AttachmentModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags defaultFlags = QAbstractTableModel::flags(index);
+
+	if (index.isValid()) {
+		defaultFlags |= Qt::ItemIsDragEnabled;
+	}
+
+	return defaultFlags;
+}
+
 int AttachmentModel::rowCount(const QModelIndex &parent) const
 {
 	/* unused */
