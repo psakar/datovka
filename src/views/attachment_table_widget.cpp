@@ -92,12 +92,17 @@ void AttachmentTableWidget::dragEnterEvent(QDragEnterEvent *event)
 		return;
 	}
 
-	if (event->mimeData()->hasUrls()) {
+	const QMimeData *mimeData = event->mimeData();
+	if (0 == mimeData) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (mimeData->hasUrls()) {
 		event->acceptProposedAction();
 	} else {
 		logInfo("Rejecting drag enter event with mime type '%s'.\n",
-		    event->mimeData()->formats()
-		        .join(" ").toUtf8().constData());
+		    mimeData->formats().join(" ").toUtf8().constData());
 	}
 }
 
@@ -118,11 +123,17 @@ void AttachmentTableWidget::dropEvent(QDropEvent *event)
 		return;
 	}
 
-	if (!event->mimeData()->hasUrls()) {
+	const QMimeData *mimeData = event->mimeData();
+	if (0 == mimeData) {
+		Q_ASSERT(0);
 		return;
 	}
 
-	QList<QString> paths = filePaths(event->mimeData()->urls());
+	if (!mimeData->hasUrls()) {
+		return;
+	}
+
+	QList<QString> paths = filePaths(mimeData->urls());
 
 	foreach (const QString &filePath, paths) {
 		addFile(filePath);
