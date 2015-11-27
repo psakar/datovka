@@ -144,6 +144,9 @@
         <file>icons/3party/flag_32.png</file>
         <file>icons/3party/down_32.png</file>
         <file>icons/3party/document_32.png</file>
+        <file>icons/3party/document_plus_32.png</file>
+        <file>icons/3party/documents_32.png</file>
+        <file>icons/3party/documents_plus_32.png</file>
         <file>icons/3party/diagram_32.png</file>
         <file>icons/3party/delete_32.png</file>
         <file>icons/3party/clock_32.png</file>

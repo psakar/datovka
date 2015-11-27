@@ -26,6 +26,7 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QPixmap>
 #include <QUrl>
 
 #include "src/common.h"
@@ -83,6 +84,22 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 		QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
 		mimeData->setUrls(urlList);
 		drag->setMimeData(mimeData);
+	}
+
+	if (tmpFileNames.size() == 1) {
+		drag->setDragCursor(
+		    QPixmap(ICON_3PARTY_PATH "document_32.png"),
+		    Qt::MoveAction);
+		drag->setDragCursor(
+		    QPixmap(ICON_3PARTY_PATH "document_plus_32.png"),
+		    Qt::CopyAction);
+	} else {
+		drag->setDragCursor(
+		    QPixmap(ICON_3PARTY_PATH "documents_32.png"),
+		    Qt::MoveAction);
+		drag->setDragCursor(
+		    QPixmap(ICON_3PARTY_PATH "documents_plus_32.png"),
+		    Qt::CopyAction);
 	}
 
 	/* Ignore the return value of the drop action. */
