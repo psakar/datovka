@@ -711,6 +711,9 @@ private:
 
 	void showStatusTextPermanently(const QString &qStr);
 
+	/*!
+	 * @brief Save attachment identified by indexes to file.
+	 */
 	void saveAttachmentToFile(const QModelIndex &messageIndex,
 	    const QModelIndex &attachmentIndex);
 
