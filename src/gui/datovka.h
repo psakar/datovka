@@ -224,10 +224,10 @@ private slots:
 	    qint64 msgId, const QString &deliveryYear, int msgType);
 
 	/*!
-	 * @brief Redraws widgets according to selected attachment item.
+	 * @brief Redraws widgets according to attachment item selection.
 	 */
-	void attachmentItemCurrentChanged(const QModelIndex &current,
-	    const QModelIndex &previous = QModelIndex());
+	void attachmentItemsSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected = QItemSelection());
 
 	/*!
 	 * @brief Generates menu to selected message item.
@@ -241,9 +241,9 @@ private slots:
 	void attachmentItemDoubleClicked(const QModelIndex &index);
 
 	/*!
-	 * @brief Saves selected attachment to file.
+	 * @brief Saves selected attachments to file.
 	 */
-	void saveSelectedAttachmentToFile(void);
+	void saveSelectedAttachmentsToFile(void);
 
 	/*!
 	 * @brief Save all attachments to dir.
@@ -710,6 +710,9 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	void saveAttachmentToFile(const QModelIndex &messageIndex,
+	    const QModelIndex &attachmentIndex);
 
 	/*!
 	 * @brief Return index for yearly entry with given properties.

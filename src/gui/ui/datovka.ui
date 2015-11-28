@@ -394,12 +394,6 @@ sent reply on this message</string>
               </item>
               <item>
                <widget class="AttachmentTableView" name="messageAttachmentList">
-                <property name="selectionMode">
-                 <enum>QAbstractItemView::SingleSelection</enum>
-                </property>
-                <property name="selectionBehavior">
-                 <enum>QAbstractItemView::SelectRows</enum>
-                </property>
                 <property name="showGrid">
                  <bool>false</bool>
                 </property>
