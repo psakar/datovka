@@ -38,6 +38,7 @@
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/thread/worker.h"
+#include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
 #include "ui_dlg_send_message.h"
 
@@ -49,16 +50,6 @@
 #define RTW_NAME 1
 #define RTW_ADDR 2
 #define RTW_PDZ 3
-
-/*
- * Column indexes into attachment table widget.
- */
-#define ATW_FILE 0
-#define ATW_TYPE 1
-#define ATW_MIME 2
-#define ATW_SIZE 3
-#define ATW_PATH 4
-#define ATW_DATA 5 /* Base64 encoded and hidden. */
 
 
 DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
@@ -515,26 +506,6 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- * Return file content as Base64 string
- */
-QByteArray DlgSendMessage::getFileBase64(const QString &filePath)
-/* ========================================================================= */
- {
-	QFile file(filePath);
-	if (file.exists()) {
-		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << filePath;
-			goto fail;
-		}
-		return file.readAll().toBase64();
-	}
-fail:
-	return QByteArray();
-}
-
-
-/* ========================================================================= */
-/*
  * Add file to attachment table widget
  */
 void DlgSendMessage::addAttachmentFile(void)
@@ -555,10 +526,7 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	foreach (const QString &fileName, fileNames) {
 
-		int fileSize = 0;
-		QString filename = "";
-		QFile attFile(fileName);
-		fileSize = attFile.size();
+		int fileSize = QFile(fileName).size();
 		if (fileSize > MAX_ATTACHMENT_SIZE) {
 			QMessageBox::warning(this, tr("Wrong file size"),
 			    tr("File '%1' could not be added into attachment "
@@ -567,47 +535,14 @@ void DlgSendMessage::addAttachmentFile(void)
 			    QMessageBox::Ok);
 			continue;
 		}
-		m_attachSize += fileSize;
-		QFileInfo fileInfo(attFile.fileName());
-		filename = fileInfo.fileName();
-		QMimeDatabase db;
-		QMimeType type = db.mimeTypeForFile(attFile);
 
-		int row = this->attachmentTableWidget->rowCount();
-		bool isInTable = false;
-
-		for (int j = 0; j < row; ++j) {
-			if (this->attachmentTableWidget->item(j, ATW_FILE)->text() ==
-			    filename) {
-				isInTable = true;
-				break;
-			}
-		}
-
-		if (isInTable) {
+		fileSize = this->attachmentTableWidget->addFile(fileName);
+		if (fileSize <= 0) {
 			continue;
 		}
 
-		this->attachmentTableWidget->insertRow(row);
-
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(filename);
-		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
-		item = new QTableWidgetItem;
-		item->setText("");
-		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
-		item = new QTableWidgetItem;
-		item->setText(type.name());
-		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
-		item = new QTableWidgetItem;
-		item->setText(QString::number(fileSize));
-		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
-		item = new QTableWidgetItem;
-		item->setText(fileName);
-		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
-		item = new QTableWidgetItem;
-		item->setData(Qt::DisplayRole, getFileBase64(fileName));
-		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
+		/* TODO -- Total file size must be evaluated somewhere else. */
+		m_attachSize += fileSize;
 	}
 }
 

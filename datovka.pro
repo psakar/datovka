@@ -29,6 +29,10 @@ win32 {
 # Required Qt versions
 REQUIRED_MAJOR = 5
 REQUIRED_MINOR = 2
+# Qt 5.2.1 contains a bug causing the application to crash on some drop events.
+# Version 5.3.2 should be fine.
+ADVISED_MINOR = 3
+ADVISED_PATCH = 2
 
 lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
@@ -40,11 +44,19 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 	lessThan(QT_MINOR_VERSION, $${REQUIRED_MINOR}) {
 		error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
 	}
+
+	lessThan(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
+		warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
+	} else {
+		isEqual(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
+			lessThan(QT_PATCH_VERSION, $${ADVISED_PATCH}) {
+				warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
+			}
+		}
+	}
 } else {
 	warning(The current Qt version $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION} may not work.)
 }
-
-#lessThan(QT_MAJOR_VERSION)
 
 #LIBISDS_PREFIX = "$$HOME/third_party/built"
 
@@ -128,7 +140,8 @@ unix:!macx {
 
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
-	-Wall -Wextra -pedantic
+	-Wall -Wextra -pedantic \
+	-Isrc/views
 
 INCLUDEPATH += \
 	src
@@ -273,6 +286,8 @@ SOURCES += src/common.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_timestamp_expir.cpp \
     src/cli/cli.cpp \
+    src/views/attachment_table_widget.cpp \
+    src/views/attachment_table_view.cpp \
     src/views/table_home_end_filter.cpp
 
 HEADERS += src/common.h \
@@ -317,6 +332,8 @@ HEADERS += src/common.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_timestamp_expir.h \
     src/cli/cli.h \
+    src/views/attachment_table_widget.h \
+    src/views/attachment_table_view.h \
     src/views/table_home_end_filter.h
 
 FORMS += src/gui/ui/datovka.ui \

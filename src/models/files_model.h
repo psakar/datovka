@@ -29,6 +29,13 @@
 #include <QSqlQueryModel>
 #include <QVariant>
 
+/*
+ * TODO -- AttachmentModel and DbFlsTblModel provide same abstraction over
+ * different data (message and SQL query result).
+ * These classes should probably share some code or at least share a parent
+ * class.
+ */
+
 /*!
  * @brief Custom file model class.
  *
@@ -45,6 +52,12 @@ public:
 	 * @return Data modified according to the given role.
 	 */
 	virtual QVariant data(const QModelIndex &index, int role) const;
+
+	/*!
+	 * @brief Used to set items draggable.
+	 */
+	virtual
+	Qt::ItemFlags flags(const QModelIndex &index) const;
 };
 
 #endif /* _FILES_MODEL_H_ */

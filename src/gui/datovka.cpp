@@ -245,11 +245,18 @@ MainWindow::MainWindow(QWidget *parent)
 	if (0 != ui->messageAttachmentList->selectionModel()) {
 		/* Selection model may not be set. */
 		connect(ui->messageAttachmentList->selectionModel(),
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemCurrentChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 	}
 	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
+	ui->messageAttachmentList->setSelectionMode(
+	    QAbstractItemView::ExtendedSelection);
+//	ui->messageAttachmentList->setSelectionMode(
+//	    QAbstractItemView::SingleSelection);
+	ui->messageAttachmentList->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
 	connect(ui->messageAttachmentList,
 	    SIGNAL(customContextMenuRequested(QPoint)), this,
 	    SLOT(attachmentItemRightClicked(QPoint)));
@@ -941,9 +948,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	if (0 != ui->messageAttachmentList->selectionModel()) {
 		/* New model hasn't been set yet. */
 		ui->messageAttachmentList->selectionModel()->disconnect(
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemCurrentChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 	}
 
 	/* Disable message/attachment related buttons. */
@@ -1066,22 +1074,27 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		//qDebug() << "Setting files";
 		ui->messageAttachmentList->setModel(fileTblMdl);
 		/* First three columns contain hidden data. */
-		ui->messageAttachmentList->setColumnHidden(0, true);
-		ui->messageAttachmentList->setColumnHidden(1, true);
-		ui->messageAttachmentList->setColumnHidden(2, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::ATTACHID_COL, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::MSGID_COL, true);
+		ui->messageAttachmentList->setColumnHidden(
+		    AttachmentModel::CONTENT_COL, true);
 
 		if (ui->messageAttachmentList->model()->rowCount() > 0) {
 			ui->saveAttachments->setEnabled(true);
 			ui->actionSave_all_attachments->setEnabled(true);
 		}
 
-		ui->messageAttachmentList->resizeColumnToContents(3);
+		ui->messageAttachmentList->resizeColumnToContents(
+		    AttachmentModel::FNAME_COL);
 
 		/* Connect new slot. */
 		connect(ui->messageAttachmentList->selectionModel(),
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemCurrentChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 	} else {
 		/*
 		 * Disable all actions that cannot be performed when
@@ -1656,31 +1669,42 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 
 /* ========================================================================= */
 /*
- * Redraws widgets according to selected attachment item.
+ * Redraws widgets according to attachment item selection.
  */
-void MainWindow::attachmentItemCurrentChanged(const QModelIndex &current,
-    const QModelIndex &previous)
+void MainWindow::attachmentItemsSelectionChanged(
+    const QItemSelection &selected, const QItemSelection &deselected)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	/* If the row has not been changed then do nothing. */
-	if (current.isValid() && previous.isValid() &&
-	    (current.row() == previous.row())) {
-		return;
+	/* Unused. */
+	(void) selected;
+	(void) deselected;
+
+	QModelIndexList selectedIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageAttachmentList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		selectedIndexes = selectionModel->selectedRows(0);
 	}
 
-	Q_ASSERT(current.isValid());
-	if (!current.isValid()) {
-		return;
+	if (1 == selectedIndexes.size()) {
+		ui->saveAttachment->setEnabled(true);
+		//ui->saveAttachments->setEnabled(true);
+		ui->openAttachment->setEnabled(true);
+		ui->actionSave_attachment->setEnabled(true);
+		ui->actionOpen_attachment->setEnabled(true);
+	} else {
+		ui->saveAttachment->setEnabled(false);
+		//ui->saveAttachments->setEnabled(false);
+		ui->openAttachment->setEnabled(false);
+		ui->actionSave_attachment->setEnabled(false);
+		ui->actionOpen_attachment->setEnabled(false);
 	}
-
-	//qDebug() << "Attachment selection changed.";
-	ui->saveAttachment->setEnabled(true);
-	//ui->saveAttachments->setEnabled(true);
-	ui->openAttachment->setEnabled(true);
-	ui->actionSave_attachment->setEnabled(true);
-	ui->actionOpen_attachment->setEnabled(true);
 }
 
 
@@ -1694,22 +1718,37 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 {
 	debugSlotCall();
 
-	QModelIndex index = ui->messageAttachmentList->indexAt(point);
+	{
+		QModelIndex index = ui->messageAttachmentList->indexAt(point);
+		if (!index.isValid()) {
+			/* Do nothing. */
+			return;
+		}
+	}
+
+	QModelIndexList selectedIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageAttachmentList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		selectedIndexes = selectionModel->selectedRows(0);
+	}
+
+	Q_ASSERT(selectedIndexes.size() > 0);
+
 	QMenu *menu = new QMenu;
 
-	if (index.isValid()) {
-		//attachmentItemCurrentChanged(index);
-
-		/* TODO */
+	if (selectedIndexes.size() == 1) {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
 		    tr("Open attachment"), this,
 		    SLOT(openSelectedAttachment()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
-		    tr("Save attachment"), this,
-		    SLOT(saveSelectedAttachmentToFile()));
-	} else {
-		/* Do nothing. */
 	}
+	menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
+	    tr("Save attachment"), this, SLOT(saveSelectedAttachmentsToFile()));
+
 	menu->exec(QCursor::pos());
 }
 
@@ -1733,35 +1772,63 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 /*
  * Saves selected attachment to file.
  */
-void MainWindow::saveSelectedAttachmentToFile(void)
+void MainWindow::saveSelectedAttachmentsToFile(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex selectedIndex =
-	    ui->messageAttachmentList->selectionModel()->currentIndex();
-	    /* selection().indexes() ? */
+	QModelIndexList attachmentIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageAttachmentList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		attachmentIndexes = selectionModel->selectedRows(0);
+	}
 
-	//qDebug() << "Save attachment to file." << selectedIndex;
+	QModelIndex messageIndex;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		messageIndex = selectionModel->currentIndex();
+		if (!messageIndex.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
 
-	Q_ASSERT(selectedIndex.isValid());
-	if (!selectedIndex.isValid()) {
+	foreach (const QModelIndex &attachmentIndex, attachmentIndexes) {
+		saveAttachmentToFile(messageIndex, attachmentIndex);
+	}
+}
+
+/* ========================================================================= */
+void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
+   const QModelIndex &attachmentIndex)
+/* ========================================================================= */
+{
+	if (!attachmentIndex.isValid()) {
+		Q_ASSERT(0);
 		showStatusTextWithTimeout(tr("Saving attachment of message to "
 		    "files was not successful!"));
 		return;
 	}
 
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
 	qint64 dmId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toLongLong();
 
-	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 3);
+	QModelIndex fileNameIndex = attachmentIndex.sibling(
+	    attachmentIndex.row(), AttachmentModel::FNAME_COL);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to files was not successful!").arg(dmId));
+		    "\"%1\" to files was not successful!").arg(dmId));
 		return;
 	}
 	QString fileName = fileNameIndex.data().toString();
@@ -1812,7 +1879,8 @@ void MainWindow::saveSelectedAttachmentToFile(void)
 	}
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	QModelIndex dataIndex = attachmentIndex.sibling(attachmentIndex.row(),
+	    AttachmentModel::CONTENT_COL);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		showStatusTextWithTimeout(tr("Saving attachment of message "
@@ -1905,7 +1973,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			continue;
 		}
 
-		QModelIndex fileNameIndex = index.sibling(index.row(), 3);
+		QModelIndex fileNameIndex = index.sibling(index.row(),
+		    AttachmentModel::FNAME_COL);
 		Q_ASSERT(fileNameIndex.isValid());
 		if(!fileNameIndex.isValid()) {
 			unspecifiedFailed = true;
@@ -1928,7 +1997,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		fileName = newDir + QDir::separator() + fileName;
 
-		QModelIndex dataIndex = index.sibling(index.row(), 2);
+		QModelIndex dataIndex = index.sibling(index.row(),
+		    AttachmentModel::CONTENT_COL);
 		Q_ASSERT(dataIndex.isValid());
 		if (!dataIndex.isValid()) {
 			unsuccessfullFiles.append(fileName);
@@ -2020,17 +2090,34 @@ void MainWindow::openSelectedAttachment(void)
 {
 	debugSlotCall();
 
-	QModelIndex selectedIndex =
-	    ui->messageAttachmentList->selectionModel()->currentIndex();
-	    /* selection().indexes() ? */
+	QModelIndex selectedIndex;
 
-	Q_ASSERT(selectedIndex.isValid());
+	{
+		QModelIndexList attachmentIndexes;
+
+		QItemSelectionModel *selectionModel =
+		    ui->messageAttachmentList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		attachmentIndexes = selectionModel->selectedRows(0);
+
+		if (attachmentIndexes.size() != 1) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		selectedIndex = attachmentIndexes[0];
+	}
+
 	if (!selectedIndex.isValid()) {
+		Q_ASSERT(0);
 		return;
 	}
 
-	QModelIndex fileNameIndex =
-	    selectedIndex.sibling(selectedIndex.row(), 3);
+	QModelIndex fileNameIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::FNAME_COL);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		return;
@@ -2046,7 +2133,8 @@ void MainWindow::openSelectedAttachment(void)
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), 2);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    AttachmentModel::CONTENT_COL);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		return;
@@ -2211,9 +2299,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	if (0 != ui->messageAttachmentList->selectionModel()) {
 		/* New model hasn't been set yet. */
 		ui->messageAttachmentList->selectionModel()->disconnect(
-		    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-		    SLOT(attachmentItemCurrentChanged(QModelIndex,
-		        QModelIndex)));
+		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		    this,
+		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+		        QItemSelection)));
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
@@ -2231,9 +2320,12 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	Q_ASSERT(0 != fileTblMdl);
 	ui->messageAttachmentList->setModel(fileTblMdl);
 	/* First three columns contain hidden data. */
-	ui->messageAttachmentList->setColumnHidden(0, true);
-	ui->messageAttachmentList->setColumnHidden(1, true);
-	ui->messageAttachmentList->setColumnHidden(2, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::ATTACHID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::MSGID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    AttachmentModel::CONTENT_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->saveAttachments->setEnabled(true);
@@ -2243,12 +2335,14 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		ui->actionSave_all_attachments->setEnabled(false);
 	}
 
-	ui->messageAttachmentList->resizeColumnToContents(3);
+	ui->messageAttachmentList->resizeColumnToContents(
+	    AttachmentModel::FNAME_COL);
 
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
-	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
-	    SLOT(attachmentItemCurrentChanged(QModelIndex, QModelIndex)));
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
+	    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+	        QItemSelection)));
 }
 
 
@@ -4113,7 +4207,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
 	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
-	    SLOT(saveSelectedAttachmentToFile()));
+	    SLOT(saveSelectedAttachmentsToFile()));
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
@@ -4194,7 +4288,7 @@ void MainWindow::connectMessageActionBarSlots(void)
 	connect(ui->downloadComplete, SIGNAL(clicked()), this,
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
-	    SLOT(saveSelectedAttachmentToFile()));
+	    SLOT(saveSelectedAttachmentsToFile()));
 	connect(ui->saveAttachments, SIGNAL(clicked()), this,
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,

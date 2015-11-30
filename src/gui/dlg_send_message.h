@@ -118,8 +118,6 @@ private:
 	MsgSendingResult sendSingleMessage(struct isds_message *message,
 	    int row) const;
 
-	static
-	QByteArray getFileBase64(const QString &filePath);
 	QString getUserInfoFormIsds(QString idDbox);
 };
 

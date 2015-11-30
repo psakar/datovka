@@ -33,6 +33,7 @@
 #include <QDir>
 
 #define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
+#define TMP_DIR_NAME "qdatovka_dir_XXXXXX"
 
 #define ID_ISDS_SYS_DATABOX "aaaaaaa"
 #define ICON_14x14_PATH ":/icons/14x14/"

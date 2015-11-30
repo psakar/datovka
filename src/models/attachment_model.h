@@ -28,10 +28,6 @@
 
 #include "src/io/isds_sessions.h"
 
-#define COL_NUM 2
-#define FNAME_COL 0
-#define FSIZE_COL 1
-
 /*!
  * @brief Custom attachment table model class.
  */
@@ -39,6 +35,21 @@ class AttachmentModel : public QAbstractTableModel {
 	Q_OBJECT /* Not supported for nested classes. */
 
 public:
+	/*!
+	 * @brief Indexes into columns.
+	 *
+	 * @note Order is the same as in model returned from
+	 *     MessageDb::flsModel().
+	 */
+	enum ColumnNumbers {
+		ATTACHID_COL = 0,
+		MSGID_COL = 1,
+		CONTENT_COL = 2,
+		FNAME_COL = 3,
+		FSIZE_COL = 4,
+		MAX_COL = 5 /* Number of columns. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 */
@@ -49,6 +60,12 @@ public:
 	 */
 	virtual
 	~AttachmentModel(void);
+
+	/*!
+	 * @brief Used to set items draggable.
+	 */
+	virtual
+	Qt::ItemFlags flags(const QModelIndex &index) const;
 
 	/*!
 	 * @brief Returns row count.

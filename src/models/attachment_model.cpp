@@ -24,6 +24,9 @@
 #include "src/models/attachment_model.h"
 
 const QVector<QString> AttachmentModel::m_headerLabels = {
+	QString(),
+	QString(),
+	QString(),
 	QObject::tr("File name"),
 	QObject::tr("Size")
 };
@@ -36,6 +39,17 @@ AttachmentModel::AttachmentModel(QObject *parent)
 
 AttachmentModel::~AttachmentModel(void)
 {
+}
+
+Qt::ItemFlags AttachmentModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags defaultFlags = QAbstractTableModel::flags(index);
+
+	if (index.isValid()) {
+		defaultFlags |= Qt::ItemIsDragEnabled;
+	}
+
+	return defaultFlags;
 }
 
 int AttachmentModel::rowCount(const QModelIndex &parent) const
@@ -51,7 +65,7 @@ int AttachmentModel::columnCount(const QModelIndex &parent) const
 	/* unused */
 	(void) parent;
 
-	return COL_NUM;
+	return MAX_COL;
 }
 
 QVariant AttachmentModel::data(const QModelIndex &index, int role) const
@@ -63,14 +77,24 @@ QVariant AttachmentModel::data(const QModelIndex &index, int role) const
 		row = index.row();
 		col = index.column();
 		Q_ASSERT(row < m_docs.size());
-		Q_ASSERT(col < COL_NUM);
+		Q_ASSERT(col < MAX_COL);
 
-		if (FNAME_COL == col) {
+		switch (col) {
+		case CONTENT_COL:
+			Q_ASSERT(m_docs.size() > row);
+			return QByteArray((char *) m_docs[row]->data,
+			    (int) m_docs[row]->data_length).toBase64();
+			break;
+		case FNAME_COL:
 			/* File name. */
 			return QString(m_docs[row]->dmFileDescr);
-		} else if (FSIZE_COL == col) {
+			break;
+		case FSIZE_COL:
 			/* File size. */
 			return QString::number(m_docs[row]->data_length);
+			break;
+		default:
+			break;
 		}
 
 		return QVariant();

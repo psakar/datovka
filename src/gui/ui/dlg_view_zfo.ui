@@ -20,7 +20,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QTextEdit" name="envelopeTextEdit"/>
-     <widget class="QTableView" name="attachmentTable">
+     <widget class="AttachmentTableView" name="attachmentTable">
       <property name="enabled">
        <bool>false</bool>
       </property>
@@ -84,6 +84,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AttachmentTableView</class>
+   <extends>QTableView</extends>
+   <header>attachment_table_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
