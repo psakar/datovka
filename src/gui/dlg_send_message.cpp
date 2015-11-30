@@ -74,7 +74,6 @@ DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
     m_dmType(""),
     m_dmSenderRefNumber("")
 {
-	m_attachSize = 0;
 	setupUi(this);
 	initNewMessageDialog();
 }
@@ -129,15 +128,85 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 
 	connect(this->payReply, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalFormAndSet(int)));
 
 	this->OptionalWidget->setHidden(true);
+
+	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
+	    SLOT(showOptionalForm(int)));
+
+	connect(this->addRecipient, SIGNAL(clicked()), this,
+	    SLOT(addRecipientFromLocalContact()));
+	connect(this->removeRecipient, SIGNAL(clicked()), this,
+	    SLOT(deleteRecipientData()));
+	connect(this->findRecipient, SIGNAL(clicked()), this,
+	    SLOT(findAndAddRecipient()));
+
+	connect(this->addAttachment, SIGNAL(clicked()), this,
+	    SLOT(addAttachmentFile()));
+	connect(this->removeAttachment, SIGNAL(clicked()), this,
+	    SLOT(deleteSelectedAttachmentFiles()));
+	connect(this->openAttachment, SIGNAL(clicked()), this,
+	    SLOT(openAttachmentFile()));
+
+	connect(this->recipientTableWidget,
+	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
+	    SLOT(recItemSelect()));
+
+	connect(this->attachmentTableWidget,
+	    SIGNAL(itemDoubleClicked(QTableWidgetItem *)),
+	    this, SLOT(tableItemDoubleClicked(QTableWidgetItem *)));
+
+	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
+	    SLOT(addDbIdToRecipientList()));
+
+	connect(this->subjectText, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
+	    SLOT(checkInputFields()));
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
+	    SLOT(checkInputFields()));
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
+	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+	connect(this->attachmentTableWidget->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
+	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
+
+	this->recipientTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+	this->attachmentTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	this->recipientTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
+	this->attachmentTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
+
+	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+
+	pingTimer = new QTimer(this);
+	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+
+	connect(pingTimer, SIGNAL(timeout()), this,
+	    SLOT(pingIsdsServer()));
+
+	this->attachmentSizeInfo->setText(
+	    tr("Total size of attachments is %1 B").arg(0));
+
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		this->dmAllowSubstDelivery->setEnabled(false);
+		this->dmAllowSubstDelivery->hide();
+	}
 
 	if (ACT_REPLY == m_action) {
 		fillDlgAsReply();
@@ -156,86 +225,20 @@ void DlgSendMessage::initNewMessageDialog(void)
 			fillDlgFromTmpMsg();
 		}
 	}
-
-	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
-	    SLOT(showOptionalForm(int)));
-
-	connect(this->addRecipient, SIGNAL(clicked()), this,
-	    SLOT(addRecipientFromLocalContact()));
-	connect(this->removeRecipient, SIGNAL(clicked()), this,
-	    SLOT(deleteRecipientData()));
-	connect(this->findRecipient, SIGNAL(clicked()), this,
-	    SLOT(findAndAddRecipient()));
-
-	connect(this->addAttachment, SIGNAL(clicked()), this,
-	    SLOT(addAttachmentFile()));
-	connect(this->removeAttachment, SIGNAL(clicked()), this,
-	    SLOT(deleteAttachmentFile()));
-	connect(this->openAttachment, SIGNAL(clicked()), this,
-	    SLOT(openAttachmentFile()));
-
-	connect(this->recipientTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(recItemSelect()));
-
-	connect(this->attachmentTableWidget,
-	    SIGNAL(itemDoubleClicked(QTableWidgetItem *)),
-	    this, SLOT(tableItemDoubleClicked(QTableWidgetItem *)));
-
-	connect(this->attachmentTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(attItemSelect()));
-
-	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
-	    SLOT(addDbIdToRecipientList()));
-
-	connect(this->subjectText, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-
-	connect(this->attachmentTableWidget->model(),
-	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(checkInputFields()));
-	connect(this->attachmentTableWidget->model(),
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
-
-	this->recipientTableWidget->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-	this->attachmentTableWidget->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	this->recipientTableWidget->installEventFilter(
-	    new TableHomeEndFilter(this));
-	this->attachmentTableWidget->installEventFilter(
-	    new TableHomeEndFilter(this));
-
-	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	//connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
-
-	pingTimer = new QTimer(this);
-	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
-
-	connect(pingTimer, SIGNAL(timeout()), this,
-	    SLOT(pingIsdsServer()));
-
-	this->attachmentWarning->setStyleSheet("QLabel { color: red }");
-	this->attachmentWarning->hide();
-
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		this->dmAllowSubstDelivery->setEnabled(false);
-		this->dmAllowSubstDelivery->hide();
-	}
 }
 
 
 /* ========================================================================= */
 /*
- * Slot is fired when user double clicked on attachment item - open file
+ * Slot is fired when user double clicked on attachment item - open file.
  */
 void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 /* ========================================================================= */
 {
-	qDebug() << "tableItemDoubleClicked(" << item << ")";
+	debugSlotCall();
+
+	/* Unused. */
+	(void) item;
 
 	openAttachmentFile();
 }
@@ -243,7 +246,56 @@ void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog as reply
+ * Whenever any data in attachment table change.
+ */
+void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
+    const QModelIndex &bottomRight, const QVector<int> &roles)
+/* ========================================================================= */
+{
+	/* Unused. */
+	(void) topLeft;
+	(void) bottomRight;
+	(void) roles;
+
+	debugSlotCall();
+
+	calculateAndShowTotalAttachSize();
+}
+
+
+/* ========================================================================= */
+/*
+ * Whenever attachment selection changes.
+ */
+void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
+    const QItemSelection &deselected)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) selected;
+	(void) deselected;
+
+	QModelIndexList selectedIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    this->attachmentTableWidget->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		selectedIndexes = selectionModel->selectedRows(0);
+	}
+
+	this->removeAttachment->setEnabled(selectedIndexes.size() > 0);
+	this->openAttachment->setEnabled(1 == selectedIndexes.size());
+}
+
+
+/* ========================================================================= */
+/*
+ * Fill Send Message Dialog as reply.
  */
 void DlgSendMessage::fillDlgAsReply(void)
 /* ========================================================================= */
@@ -328,7 +380,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog from template message
+ * fill Send Message Dialog from template message.
  */
 void DlgSendMessage::fillDlgFromTmpMsg(void)
 /* ========================================================================= */
@@ -456,7 +508,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 /* ========================================================================= */
 /*
- * return dbEffectiveOVM for recipient
+ * Return state of dbEffectiveOVM for recipient.
  */
 QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 /* ========================================================================= */
@@ -491,7 +543,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 
 /* ========================================================================= */
 /*
- * Ping isds server, test if connection on isds server is active
+ * Ping isds server, test if connection on isds server is active.
  */
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
@@ -506,13 +558,12 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- * Add file to attachment table widget
+ * Add file to attachment table widget.
  */
 void DlgSendMessage::addAttachmentFile(void)
 /* ========================================================================= */
 {
 	QFileDialog dialog(this);
-
 	dialog.setDirectory(m_lastAttAddPath);
 	dialog.setFileMode(QFileDialog::ExistingFiles);
 	QStringList fileNames;
@@ -526,42 +577,27 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	foreach (const QString &fileName, fileNames) {
 
-		int fileSize = QFile(fileName).size();
-		if (fileSize > MAX_ATTACHMENT_SIZE) {
-			QMessageBox::warning(this, tr("Wrong file size"),
-			    tr("File '%1' could not be added into attachment "
-			    "because its size is bigger than 10MB.").
-			    arg(fileName),
-			    QMessageBox::Ok);
-			continue;
-		}
+//		int fileSize = QFile(fileName).size();
+//		if (fileSize > MAX_ATTACHMENT_SIZE) {
+//			QMessageBox::warning(this, tr("Wrong file size"),
+//			    tr("File '%1' could not be added into attachment "
+//			    "because its size is bigger than 10MB.").
+//			    arg(fileName),
+//			    QMessageBox::Ok);
+//			continue;
+//		}
 
-		fileSize = this->attachmentTableWidget->addFile(fileName);
+		int fileSize = this->attachmentTableWidget->addFile(fileName);
 		if (fileSize <= 0) {
 			continue;
 		}
-
-		/* TODO -- Total file size must be evaluated somewhere else. */
-		m_attachSize += fileSize;
 	}
 }
 
 
 /* ========================================================================= */
 /*
- * Selection of attachment item
- */
-void DlgSendMessage::attItemSelect(void)
-/* ========================================================================= */
-{
-	this->removeAttachment->setEnabled(true);
-	this->openAttachment->setEnabled(true);
-}
-
-
-/* ========================================================================= */
-/*
- * Enable/disable optional fields in dialog
+ * Enable/disable optional fields in dialog.
  */
 void DlgSendMessage::recItemSelect(void)
 /* ========================================================================= */
@@ -576,19 +612,7 @@ void DlgSendMessage::recItemSelect(void)
 
 /* ========================================================================= */
 /*
- * Check all intputs when any item was changed in the tablewidget
- */
-void DlgSendMessage::tableItemInsRem(void)
-/* ========================================================================= */
-{
-	m_attachSize = cmptAttachmentSize();
-	checkInputFields();
-}
-
-
-/* ========================================================================= */
-/*
- * Show/hide optional fields in dialog
+ * Show/hide optional fields in dialog.
  */
 void DlgSendMessage::showOptionalForm(int state)
 /* ========================================================================= */
@@ -599,7 +623,7 @@ void DlgSendMessage::showOptionalForm(int state)
 
 /* ========================================================================= */
 /*
- * Show/hide optional fields in dialog and set any items
+ * Show/hide optional fields in dialog and set any items.
  */
 void DlgSendMessage::showOptionalFormAndSet(int state)
 /* ========================================================================= */
@@ -627,10 +651,9 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 }
 
 
-
 /* ========================================================================= */
 /*
- * Add recipient from local contact list
+ * Add recipient from local contact list.
  */
 void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
@@ -644,41 +667,74 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 
 /* ========================================================================= */
 /*
- * Delete file (item) from attachment table widget
+ * Remove file (item) from attachment table widget.
  */
-void DlgSendMessage::deleteAttachmentFile(void)
+void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /* ========================================================================= */
 {
-	int row = this->attachmentTableWidget->currentRow();
-	if (row >= 0) {
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	   this->attachmentTableWidget->selectionModel()->selectedRows(0);
+
+	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
+		/*
+		 * Delete rows in reverse order so that we don't mess with
+		 * indexes.
+		 */
+		int row = firstMsgColumnIdxs.at(i).row();
 		this->attachmentTableWidget->removeRow(row);
-		this->removeAttachment->setEnabled(false);
-		this->openAttachment->setEnabled(false);
 	}
+
+	calculateAndShowTotalAttachSize();
 }
 
 
 /* ========================================================================= */
 /*
- * Get attachment size when any item was removed from tablewidget
+ * Calculate total attachment size when an item was added/removed in the table.
  */
-int DlgSendMessage::cmptAttachmentSize(void)
+void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 /* ========================================================================= */
 {
-	int attachSize = 0;
+	int aSize = 0;
 
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
-		attachSize += this->attachmentTableWidget->item(i, ATW_SIZE)->text().
-		    toInt();
+		QTableWidgetItem *item =
+		    this->attachmentTableWidget->item(i, ATW_SIZE);
+		if (0 != item) {
+			aSize += item->text().toInt();
+		}
 	}
 
-	return attachSize;
+	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+
+	if (aSize > 0) {
+		if (aSize >= 1024) {
+			this->attachmentSizeInfo->setText(
+			    tr("Total size of attachments is ~%1 KB").
+			    arg(aSize/1024));
+			if (aSize >= MAX_ATTACHMENT_SIZE) {
+				this->attachmentSizeInfo->
+				     setStyleSheet("QLabel { color: red }");
+				this->attachmentSizeInfo->setText(
+				    tr("Warning: Total size of attachments "
+				    "is larger than 10 MB!"));
+			}
+		} else {
+			this->attachmentSizeInfo->setText(
+			   tr("Total size of attachments is ~%1 B").arg(aSize));
+		}
+	} else {
+		this->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is %1 B").arg(aSize));
+	}
 }
 
 
 /* ========================================================================= */
 /*
- * Check non-empty mandatory items in send message dialog
+ * Check non-empty mandatory items in send message dialog.
  */
 void DlgSendMessage::checkInputFields(void)
 /* ========================================================================= */
@@ -686,13 +742,6 @@ void DlgSendMessage::checkInputFields(void)
 	bool buttonEnabled = !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
 		    && (this->attachmentTableWidget->rowCount() > 0);
-
-	if (m_attachSize <= MAX_ATTACHMENT_SIZE) {
-		this->attachmentWarning->hide();
-	} else {
-		this->attachmentWarning->show();
-		buttonEnabled = false;
-	}
 
 	if (this->payReply->isChecked()) {
 		if (this->dmSenderRefNumber->text().isEmpty()) {
@@ -706,7 +755,7 @@ void DlgSendMessage::checkInputFields(void)
 
 /* ========================================================================= */
 /*
- * Delete recipient from table widget
+ * Delete recipient from table widget.
  */
 void DlgSendMessage::deleteRecipientData(void)
 /* ========================================================================= */
@@ -721,7 +770,7 @@ void DlgSendMessage::deleteRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Find recipent in the ISDS
+ * Find recipent in the ISDS.
  */
 void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
@@ -765,7 +814,8 @@ void DlgSendMessage::openAttachmentFile(void)
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), ATW_DATA);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    ATW_DATA);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		return;
@@ -789,7 +839,7 @@ void DlgSendMessage::openAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Free document list
+ * Free document list.
  */
 static
 void isds_document_free_void(void **document)
@@ -839,6 +889,9 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 
 
 /* ========================================================================= */
+/*
+ * Create message attachments.
+ */
 struct isds_list *DlgSendMessage::buildDocuments(void) const
 /* ========================================================================= */
 {
@@ -886,7 +939,8 @@ struct isds_list *DlgSendMessage::buildDocuments(void) const
 		}
 
 		QByteArray fileData(QByteArray::fromBase64(
-		    this->attachmentTableWidget->item(i, ATW_DATA)->data(Qt::DisplayRole).toByteArray()));
+		    this->attachmentTableWidget->item(i, ATW_DATA)->
+		         data(Qt::DisplayRole).toByteArray()));
 		document->data_length = fileData.size();
 		document->data = malloc(fileData.size());
 		if (NULL == document->data) {
@@ -923,6 +977,9 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Create message envelope.
+ */
 struct isds_envelope *DlgSendMessage::buildEnvelope(void) const
 /* ========================================================================= */
 {
@@ -1099,6 +1156,9 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Send single message.
+ */
 DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
     struct isds_message *message, int row) const
 /* ========================================================================= */
@@ -1176,7 +1236,7 @@ fail:
 
 /* ========================================================================= */
 /*
- * Send message/multiple message
+ * Send message/multiple message.
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
@@ -1351,7 +1411,7 @@ finish:
 
 /* ========================================================================= */
 /*
- * Enter DB ID manually
+ * Enter DB ID manually.
  */
 void DlgSendMessage::addDbIdToRecipientList(void)
 /* ========================================================================= */

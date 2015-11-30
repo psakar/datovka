@@ -75,19 +75,21 @@ private slots:
 	void showOptionalForm(int);
 	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
-	void deleteAttachmentFile(void);
+	void deleteSelectedAttachmentFiles(void);
 	void openAttachmentFile(void);
 	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
 	void findAndAddRecipient(void);
 	void recItemSelect(void);
-	void attItemSelect(void);
 	void checkInputFields(void);
-	void tableItemInsRem(void);
 	void sendMessage(void);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
 	void tableItemDoubleClicked(QTableWidgetItem *item);
+	void attachmentDataChanged(const QModelIndex &topLeft,
+	    const QModelIndex &bottomRight, const QVector<int> &roles);
+	void attachmentSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected);
 
 private:
 	QTimer *pingTimer;
@@ -103,12 +105,11 @@ private:
 	QString &m_lastAttAddPath;
 	const QString m_pdzCredit;
 	MessageDbSet &m_dbSet;
-	int m_attachSize;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
 
 	void initNewMessageDialog(void);
-	int cmptAttachmentSize(void);
+	void calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
