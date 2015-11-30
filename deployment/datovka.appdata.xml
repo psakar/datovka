@@ -38,6 +38,11 @@
 		</p>
 	</description>
 
+	<kudos>
+		<kudo>HiDpiIcon</kudo>
+		<kudo>ModernToolkit</kudo>
+	</kudos>
+
 	<screenshots>
 		<screenshot type="default">
 			<image>https://www.nic.cz/files/labs/datove_schranky/datovka-screen.png</image>
