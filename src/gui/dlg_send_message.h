@@ -75,13 +75,12 @@ private slots:
 	void showOptionalForm(int);
 	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
-	void deleteAttachmentFile(void);
+	void deleteSelectedAttachmentFiles(void);
 	void openAttachmentFile(void);
 	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
 	void findAndAddRecipient(void);
 	void recItemSelect(void);
-	void attItemSelect(void);
 	void checkInputFields(void);
 	void tableItemInsRem(void);
 	void sendMessage(void);
@@ -90,6 +89,8 @@ private slots:
 	void tableItemDoubleClicked(QTableWidgetItem *item);
 	void attachmentDataChanged(const QModelIndex &topLeft,
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
+	void attachmentSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected);
 
 private:
 	QTimer *pingTimer;

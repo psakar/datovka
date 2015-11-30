@@ -169,7 +169,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->addAttachment, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
 	connect(this->removeAttachment, SIGNAL(clicked()), this,
-	    SLOT(deleteAttachmentFile()));
+	    SLOT(deleteSelectedAttachmentFiles()));
 	connect(this->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openAttachmentFile()));
 
@@ -180,10 +180,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->attachmentTableWidget,
 	    SIGNAL(itemDoubleClicked(QTableWidgetItem *)),
 	    this, SLOT(tableItemDoubleClicked(QTableWidgetItem *)));
-
-	connect(this->attachmentTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(attItemSelect()));
 
 	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
 	    SLOT(addDbIdToRecipientList()));
@@ -200,6 +196,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
 	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+	connect(this->attachmentTableWidget->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
+	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
 
 	this->recipientTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -236,7 +235,10 @@ void DlgSendMessage::initNewMessageDialog(void)
 void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 /* ========================================================================= */
 {
-	qDebug() << "tableItemDoubleClicked(" << item << ")";
+	debugSlotCall();
+
+	/* Unused. */
+	(void) item;
 
 	openAttachmentFile();
 }
@@ -258,6 +260,36 @@ void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
 	debugSlotCall();
 
 	calculateAndShowTotalAttachSize();
+}
+
+
+/* ========================================================================= */
+/*
+ * Whenever attachment selection changes.
+ */
+void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
+    const QItemSelection &deselected)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) selected;
+	(void) deselected;
+
+	QModelIndexList selectedIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    this->attachmentTableWidget->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		selectedIndexes = selectionModel->selectedRows(0);
+	}
+
+	this->removeAttachment->setEnabled(selectedIndexes.size() > 0);
+	this->openAttachment->setEnabled(1 == selectedIndexes.size());
 }
 
 
@@ -565,18 +597,6 @@ void DlgSendMessage::addAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Selection of attachment item
- */
-void DlgSendMessage::attItemSelect(void)
-/* ========================================================================= */
-{
-	this->removeAttachment->setEnabled(true);
-	this->openAttachment->setEnabled(true);
-}
-
-
-/* ========================================================================= */
-/*
  * Enable/disable optional fields in dialog
  */
 void DlgSendMessage::recItemSelect(void)
@@ -660,15 +680,21 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 /*
  * Remove file (item) from attachment table widget.
  */
-void DlgSendMessage::deleteAttachmentFile(void)
+void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /* ========================================================================= */
 {
-	int row = this->attachmentTableWidget->currentRow();
+	debugSlotCall();
 
-	if (row >= 0) {
+	QModelIndexList firstMsgColumnIdxs =
+	   this->attachmentTableWidget->selectionModel()->selectedRows(0);
+
+	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
+		/*
+		 * Delete rows in reverse order so that we don't mess with
+		 * indexes.
+		 */
+		int row = firstMsgColumnIdxs.at(i).row();
 		this->attachmentTableWidget->removeRow(row);
-		this->removeAttachment->setEnabled(false);
-		this->openAttachment->setEnabled(false);
 	}
 
 	calculateAndShowTotalAttachSize();
