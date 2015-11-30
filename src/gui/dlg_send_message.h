@@ -103,12 +103,11 @@ private:
 	QString &m_lastAttAddPath;
 	const QString m_pdzCredit;
 	MessageDbSet &m_dbSet;
-	int m_attachSize;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
 
 	void initNewMessageDialog(void);
-	int cmptAttachmentSize(void);
+	void calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);

@@ -74,7 +74,6 @@ DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
     m_dmType(""),
     m_dmSenderRefNumber("")
 {
-	m_attachSize = 0;
 	setupUi(this);
 	initNewMessageDialog();
 }
@@ -218,8 +217,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(pingTimer, SIGNAL(timeout()), this,
 	    SLOT(pingIsdsServer()));
 
-	this->attachmentWarning->setStyleSheet("QLabel { color: red }");
-	this->attachmentWarning->hide();
+	this->attachmentSizeInfo->setText(
+	    tr("Total size of attachments is %1 KB").arg(0));
 
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		this->dmAllowSubstDelivery->setEnabled(false);
@@ -230,7 +229,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 /* ========================================================================= */
 /*
- * Slot is fired when user double clicked on attachment item - open file
+ * Slot is fired when user double clicked on attachment item - open file.
  */
 void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 /* ========================================================================= */
@@ -243,7 +242,7 @@ void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog as reply
+ * Fill Send Message Dialog as reply.
  */
 void DlgSendMessage::fillDlgAsReply(void)
 /* ========================================================================= */
@@ -328,7 +327,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog from template message
+ * fill Send Message Dialog from template message.
  */
 void DlgSendMessage::fillDlgFromTmpMsg(void)
 /* ========================================================================= */
@@ -456,7 +455,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 /* ========================================================================= */
 /*
- * return dbEffectiveOVM for recipient
+ * Return state of dbEffectiveOVM for recipient.
  */
 QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 /* ========================================================================= */
@@ -491,7 +490,7 @@ QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
 
 /* ========================================================================= */
 /*
- * Ping isds server, test if connection on isds server is active
+ * Ping isds server, test if connection on isds server is active.
  */
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
@@ -506,13 +505,12 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- * Add file to attachment table widget
+ * Add file to attachment table widget.
  */
 void DlgSendMessage::addAttachmentFile(void)
 /* ========================================================================= */
 {
 	QFileDialog dialog(this);
-
 	dialog.setDirectory(m_lastAttAddPath);
 	dialog.setFileMode(QFileDialog::ExistingFiles);
 	QStringList fileNames;
@@ -527,23 +525,22 @@ void DlgSendMessage::addAttachmentFile(void)
 	foreach (const QString &fileName, fileNames) {
 
 		int fileSize = QFile(fileName).size();
-		if (fileSize > MAX_ATTACHMENT_SIZE) {
-			QMessageBox::warning(this, tr("Wrong file size"),
-			    tr("File '%1' could not be added into attachment "
-			    "because its size is bigger than 10MB.").
-			    arg(fileName),
-			    QMessageBox::Ok);
-			continue;
-		}
+//		if (fileSize > MAX_ATTACHMENT_SIZE) {
+//			QMessageBox::warning(this, tr("Wrong file size"),
+//			    tr("File '%1' could not be added into attachment "
+//			    "because its size is bigger than 10MB.").
+//			    arg(fileName),
+//			    QMessageBox::Ok);
+//			continue;
+//		}
 
 		fileSize = this->attachmentTableWidget->addFile(fileName);
 		if (fileSize <= 0) {
 			continue;
 		}
-
-		/* TODO -- Total file size must be evaluated somewhere else. */
-		m_attachSize += fileSize;
 	}
+
+	calculateAndShowTotalAttachSize();
 }
 
 
@@ -581,7 +578,6 @@ void DlgSendMessage::recItemSelect(void)
 void DlgSendMessage::tableItemInsRem(void)
 /* ========================================================================= */
 {
-	m_attachSize = cmptAttachmentSize();
 	checkInputFields();
 }
 
@@ -627,7 +623,6 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 }
 
 
-
 /* ========================================================================= */
 /*
  * Add recipient from local contact list
@@ -644,35 +639,59 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 
 /* ========================================================================= */
 /*
- * Delete file (item) from attachment table widget
+ * Remove file (item) from attachment table widget.
  */
 void DlgSendMessage::deleteAttachmentFile(void)
 /* ========================================================================= */
 {
 	int row = this->attachmentTableWidget->currentRow();
+
 	if (row >= 0) {
 		this->attachmentTableWidget->removeRow(row);
 		this->removeAttachment->setEnabled(false);
 		this->openAttachment->setEnabled(false);
 	}
+
+	calculateAndShowTotalAttachSize();
 }
 
 
 /* ========================================================================= */
 /*
- * Get attachment size when any item was removed from tablewidget
+ * Calculate total attachment size when an item was added/removed in the table.
  */
-int DlgSendMessage::cmptAttachmentSize(void)
+void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 /* ========================================================================= */
 {
-	int attachSize = 0;
+	int aSize = 0;
 
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
-		attachSize += this->attachmentTableWidget->item(i, ATW_SIZE)->text().
-		    toInt();
+		aSize += this->attachmentTableWidget->item(i, ATW_SIZE)->text()
+		    .toInt();
 	}
 
-	return attachSize;
+	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+
+	if (aSize > 0) {
+		if (aSize >= 1024) {
+			this->attachmentSizeInfo->setText(
+			    tr("Total size of attachments is ~%1 KB").
+			    arg(aSize/1024));
+			if (aSize >= MAX_ATTACHMENT_SIZE) {
+				this->attachmentSizeInfo->
+				     setStyleSheet("QLabel { color: red }");
+				this->attachmentSizeInfo->setText(
+				    tr("Warning: Total size of attachments "
+				    "is larger than 10 MB!"));
+			}
+		} else {
+			this->attachmentSizeInfo->setText(
+			   tr("Total size of attachments is ~%1 B").arg(aSize));
+		}
+	} else {
+		this->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is %1 KB").arg(aSize));
+	}
 }
 
 
@@ -686,13 +705,6 @@ void DlgSendMessage::checkInputFields(void)
 	bool buttonEnabled = !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
 		    && (this->attachmentTableWidget->rowCount() > 0);
-
-	if (m_attachSize <= MAX_ATTACHMENT_SIZE) {
-		this->attachmentWarning->hide();
-	} else {
-		this->attachmentWarning->show();
-		buttonEnabled = false;
-	}
 
 	if (this->payReply->isChecked()) {
 		if (this->dmSenderRefNumber->text().isEmpty()) {
