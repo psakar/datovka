@@ -128,33 +128,15 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 
 	connect(this->payReply, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalFormAndSet(int)));
 
 	this->OptionalWidget->setHidden(true);
-
-	if (ACT_REPLY == m_action) {
-		fillDlgAsReply();
-	} else {
-		if (m_dbOpenAddressing) {
-			this->payReply->setEnabled(true);
-			this->payReply->show();
-		} else {
-			this->payReply->setEnabled(false);
-			this->payReply->hide();
-		}
-
-		this->payRecipient->setEnabled(false);
-		this->payRecipient->hide();
-		if (ACT_NEW_FROM_TMP == m_action) {
-			fillDlgFromTmpMsg();
-		}
-	}
 
 	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalForm(int)));
@@ -192,7 +174,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(checkInputFields()));
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(tableItemInsRem()));
+	    SLOT(checkInputFields()));
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
 	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
@@ -224,6 +206,24 @@ void DlgSendMessage::initNewMessageDialog(void)
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		this->dmAllowSubstDelivery->setEnabled(false);
 		this->dmAllowSubstDelivery->hide();
+	}
+
+	if (ACT_REPLY == m_action) {
+		fillDlgAsReply();
+	} else {
+		if (m_dbOpenAddressing) {
+			this->payReply->setEnabled(true);
+			this->payReply->show();
+		} else {
+			this->payReply->setEnabled(false);
+			this->payReply->hide();
+		}
+
+		this->payRecipient->setEnabled(false);
+		this->payRecipient->hide();
+		if (ACT_NEW_FROM_TMP == m_action) {
+			fillDlgFromTmpMsg();
+		}
 	}
 }
 
@@ -577,7 +577,7 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	foreach (const QString &fileName, fileNames) {
 
-		int fileSize = QFile(fileName).size();
+//		int fileSize = QFile(fileName).size();
 //		if (fileSize > MAX_ATTACHMENT_SIZE) {
 //			QMessageBox::warning(this, tr("Wrong file size"),
 //			    tr("File '%1' could not be added into attachment "
@@ -587,7 +587,7 @@ void DlgSendMessage::addAttachmentFile(void)
 //			continue;
 //		}
 
-		fileSize = this->attachmentTableWidget->addFile(fileName);
+		int fileSize = this->attachmentTableWidget->addFile(fileName);
 		if (fileSize <= 0) {
 			continue;
 		}
@@ -597,7 +597,7 @@ void DlgSendMessage::addAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Enable/disable optional fields in dialog
+ * Enable/disable optional fields in dialog.
  */
 void DlgSendMessage::recItemSelect(void)
 /* ========================================================================= */
@@ -612,18 +612,7 @@ void DlgSendMessage::recItemSelect(void)
 
 /* ========================================================================= */
 /*
- * Check all intputs when any item was changed in the tablewidget
- */
-void DlgSendMessage::tableItemInsRem(void)
-/* ========================================================================= */
-{
-	checkInputFields();
-}
-
-
-/* ========================================================================= */
-/*
- * Show/hide optional fields in dialog
+ * Show/hide optional fields in dialog.
  */
 void DlgSendMessage::showOptionalForm(int state)
 /* ========================================================================= */
@@ -634,7 +623,7 @@ void DlgSendMessage::showOptionalForm(int state)
 
 /* ========================================================================= */
 /*
- * Show/hide optional fields in dialog and set any items
+ * Show/hide optional fields in dialog and set any items.
  */
 void DlgSendMessage::showOptionalFormAndSet(int state)
 /* ========================================================================= */
@@ -664,7 +653,7 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 
 /* ========================================================================= */
 /*
- * Add recipient from local contact list
+ * Add recipient from local contact list.
  */
 void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
@@ -745,7 +734,7 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 /* ========================================================================= */
 /*
- * Check non-empty mandatory items in send message dialog
+ * Check non-empty mandatory items in send message dialog.
  */
 void DlgSendMessage::checkInputFields(void)
 /* ========================================================================= */
@@ -766,7 +755,7 @@ void DlgSendMessage::checkInputFields(void)
 
 /* ========================================================================= */
 /*
- * Delete recipient from table widget
+ * Delete recipient from table widget.
  */
 void DlgSendMessage::deleteRecipientData(void)
 /* ========================================================================= */
@@ -781,7 +770,7 @@ void DlgSendMessage::deleteRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Find recipent in the ISDS
+ * Find recipent in the ISDS.
  */
 void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
@@ -825,7 +814,8 @@ void DlgSendMessage::openAttachmentFile(void)
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
 	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(), ATW_DATA);
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    ATW_DATA);
 	Q_ASSERT(dataIndex.isValid());
 	if (!dataIndex.isValid()) {
 		return;
@@ -849,7 +839,7 @@ void DlgSendMessage::openAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Free document list
+ * Free document list.
  */
 static
 void isds_document_free_void(void **document)
@@ -899,6 +889,9 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 
 
 /* ========================================================================= */
+/*
+ * Create message attachments.
+ */
 struct isds_list *DlgSendMessage::buildDocuments(void) const
 /* ========================================================================= */
 {
@@ -946,7 +939,8 @@ struct isds_list *DlgSendMessage::buildDocuments(void) const
 		}
 
 		QByteArray fileData(QByteArray::fromBase64(
-		    this->attachmentTableWidget->item(i, ATW_DATA)->data(Qt::DisplayRole).toByteArray()));
+		    this->attachmentTableWidget->item(i, ATW_DATA)->
+		         data(Qt::DisplayRole).toByteArray()));
 		document->data_length = fileData.size();
 		document->data = malloc(fileData.size());
 		if (NULL == document->data) {
@@ -983,6 +977,9 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Create message envelope.
+ */
 struct isds_envelope *DlgSendMessage::buildEnvelope(void) const
 /* ========================================================================= */
 {
@@ -1159,6 +1156,9 @@ fail:
 
 
 /* ========================================================================= */
+/*
+ * Send single message.
+ */
 DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
     struct isds_message *message, int row) const
 /* ========================================================================= */
@@ -1236,7 +1236,7 @@ fail:
 
 /* ========================================================================= */
 /*
- * Send message/multiple message
+ * Send message/multiple message.
  */
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
@@ -1411,7 +1411,7 @@ finish:
 
 /* ========================================================================= */
 /*
- * Enter DB ID manually
+ * Enter DB ID manually.
  */
 void DlgSendMessage::addDbIdToRecipientList(void)
 /* ========================================================================= */

@@ -82,7 +82,6 @@ private slots:
 	void findAndAddRecipient(void);
 	void recItemSelect(void);
 	void checkInputFields(void);
-	void tableItemInsRem(void);
 	void sendMessage(void);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
