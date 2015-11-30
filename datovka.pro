@@ -29,6 +29,10 @@ win32 {
 # Required Qt versions
 REQUIRED_MAJOR = 5
 REQUIRED_MINOR = 2
+# Qt 5.2.1 contains a bug causing the application to crash on some drop events.
+# Version 5.3.2 should be fine.
+ADVISED_MINOR = 3
+ADVISED_PATCH = 2
 
 lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
@@ -40,11 +44,19 @@ isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
 	lessThan(QT_MINOR_VERSION, $${REQUIRED_MINOR}) {
 		error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
 	}
+
+	lessThan(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
+		warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
+	} else {
+		isEqual(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
+			lessThan(QT_PATCH_VERSION, $${ADVISED_PATCH}) {
+				warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
+			}
+		}
+	}
 } else {
 	warning(The current Qt version $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION} may not work.)
 }
-
-#lessThan(QT_MAJOR_VERSION)
 
 #LIBISDS_PREFIX = "$$HOME/third_party/built"
 
