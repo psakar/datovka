@@ -197,6 +197,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->attachmentTableWidget->model(),
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
 	    SLOT(tableItemInsRem()));
+	connect(this->attachmentTableWidget->model(),
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
+	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 
 	this->recipientTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -209,7 +212,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	//connect(this->sendButton, SIGNAL(clicked(bool)), this, SLOT(accept()));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -237,6 +239,25 @@ void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 	qDebug() << "tableItemDoubleClicked(" << item << ")";
 
 	openAttachmentFile();
+}
+
+
+/* ========================================================================= */
+/*
+ * Whenever any data in attachment table change.
+ */
+void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
+    const QModelIndex &bottomRight, const QVector<int> &roles)
+/* ========================================================================= */
+{
+	/* Unused. */
+	(void) topLeft;
+	(void) bottomRight;
+	(void) roles;
+
+	debugSlotCall();
+
+	calculateAndShowTotalAttachSize();
 }
 
 
@@ -539,8 +560,6 @@ void DlgSendMessage::addAttachmentFile(void)
 			continue;
 		}
 	}
-
-	calculateAndShowTotalAttachSize();
 }
 
 
@@ -666,8 +685,11 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 	int aSize = 0;
 
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); i++) {
-		aSize += this->attachmentTableWidget->item(i, ATW_SIZE)->text()
-		    .toInt();
+		QTableWidgetItem *item =
+		    this->attachmentTableWidget->item(i, ATW_SIZE);
+		if (0 != item) {
+			aSize += item->text().toInt();
+		}
 	}
 
 	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");

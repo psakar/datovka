@@ -88,6 +88,8 @@ private slots:
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
 	void tableItemDoubleClicked(QTableWidgetItem *item);
+	void attachmentDataChanged(const QModelIndex &topLeft,
+	    const QModelIndex &bottomRight, const QVector<int> &roles);
 
 private:
 	QTimer *pingTimer;
