@@ -45,12 +45,12 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<image>https://www.nic.cz/files/labs/datove_schranky/datovka-screen.png</image>
+			<image>https://www.nic.cz/files/labs/datove_schranky/datovka4.png</image>
 			<caption>The main window showing the application in action</caption>
 			<caption xml:lang="cs">Hlavní okno aplikace</caption>
 		</screenshot>
 	</screenshots>
 
 	<updatecontact>datove-schranky@labs.nic.cz</updatecontact>
-	<url type="homepage">https://labs.nic.cz/cs/nova-datovka.html</url>
+	<url type="homepage">https://labs.nic.cz/cs/datovka.html</url>
 </application>
