@@ -219,7 +219,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(pingIsdsServer()));
 
 	this->attachmentSizeInfo->setText(
-	    tr("Total size of attachments is %1 KB").arg(0));
+	    tr("Total size of attachments is %1 B").arg(0));
 
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		this->dmAllowSubstDelivery->setEnabled(false);
@@ -738,7 +738,7 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 		}
 	} else {
 		this->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is %1 KB").arg(aSize));
+		    tr("Total size of attachments is %1 B").arg(aSize));
 	}
 }
 
