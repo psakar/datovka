@@ -61,7 +61,6 @@
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
 /* Define default filename of saved/exported files */
-#define DEFAULT_TMP_FORMAT "%Y-%M-%D_%i_tmp"
 #define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
 #define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
 #define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
@@ -487,20 +486,5 @@ enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
  */
 QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
     bool deleteOnError = false);
-
-
-/*!
- * @brief Create filename based on format string.
- */
-QString createFilenameFromFormatString(QString pattern, const QString &dmID,
-    const QString &dbID, const QString &userName, const QString &attachFilename,
-    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
-    QString dmAnnotation, QString dmSender);
-
-
-/*!
- * @brief Check if file exists in the path and return non-conflicting filename.
- */
-QString getNonConflictingFileName(QString fileName);
 
 #endif /* _COMMON_H_ */

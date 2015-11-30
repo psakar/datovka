@@ -66,6 +66,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/views/table_home_end_filter.h"
@@ -1919,11 +1920,9 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	fileName =
-	    createFilenameFromFormatString(globPref.attachment_filename_format,
-	    QString::number(dmId), dbId, userName, fileName,
-	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
-	    entry.dmSender);
+	fileName = fileNameFromFormat(globPref.attachment_filename_format,
+	    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	fileName = QFileDialog::getSaveFileName(this,
 	    tr("Save attachment"),
@@ -2050,11 +2049,10 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			continue;
 		}
 
-		fileName = createFilenameFromFormatString(
+		fileName = fileNameFromFormat(
 		    globPref.attachment_filename_format,
-		    QString::number(dmId), dbId, userName, fileName,
-		    entry.dmDeliveryTime, entry.dmAcceptanceTime,
-		    entry.dmAnnotation, entry.dmSender);
+		    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
+		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 		fileName = newDir + QDir::separator() + fileName;
 
@@ -2070,7 +2068,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 		if (WF_SUCCESS !=
-		    writeFile(getNonConflictingFileName(fileName), data)) {
+		    writeFile(nonconflictingFileName(fileName), data)) {
 			unsuccessfullFiles.append(fileName);
 			continue;
 		}
@@ -7414,11 +7412,9 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 		}
 	}
 
-	QString fileName =
-	    createFilenameFromFormatString(globPref.message_filename_format,
-	    QString::number(dmId), dbId, userName, "",
-	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
-	    entry.dmSender);
+	QString fileName = fileNameFromFormat(globPref.message_filename_format,
+	    dmId, dbId, userName, "", entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7605,11 +7601,9 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 		}
 	}
 
-	QString fileName =
-	    createFilenameFromFormatString(formatString,
-	    QString::number(dmId), dbId, userName, attachFileName,
-	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
-	    entry.dmSender);
+	QString fileName = fileNameFromFormat(formatString, dmId, dbId,
+	    userName, attachFileName, entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7743,11 +7737,9 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		}
 	}
 
-	QString fileName =
-	    createFilenameFromFormatString(formatString,
-	    QString::number(dmId), dbId, userName, attachFileName,
-	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
-	    entry.dmSender);
+	QString fileName = fileNameFromFormat(formatString, dmId, dbId,
+	    userName, attachFileName, entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
@@ -7875,11 +7867,9 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		}
 	}
 
-	QString fileName =
-	    createFilenameFromFormatString(globPref.message_filename_format,
-	    QString::number(dmId), dbId, userName, "",
-	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
-	    entry.dmSender);
+	QString fileName = fileNameFromFormat(globPref.message_filename_format,
+	    dmId, dbId, userName, "", entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	if (attachPath.isNull()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +

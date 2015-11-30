@@ -28,6 +28,7 @@
 #include <QTextDocument>
 
 #include "dlg_correspondence_overview.h"
+#include "src/io/filesystem.h"
 
 
 /* ========================================================================= */
@@ -575,10 +576,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				        mId.deliveryTime);
 				Q_ASSERT(0 != messageDb);
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.message_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -607,10 +608,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.message_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -646,10 +647,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.delivery_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -678,10 +679,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.delivery_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -716,10 +717,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.message_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -747,10 +748,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.message_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -784,10 +785,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.delivery_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
@@ -816,10 +817,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				Q_ASSERT(0 != messageDb);
 
 				entry = messageDb->msgsGetAdditionalFilenameEntry(mId.dmId);
-				fileName = createFilenameFromFormatString(
+				fileName = fileNameFromFormat(
 				    globPref.delivery_filename_format,
-				    QString::number(mId.dmId), m_dbId,
-				    m_userName, "", entry.dmDeliveryTime,
+				    mId.dmId, m_dbId, m_userName, "",
+				    entry.dmDeliveryTime,
 				    entry.dmAcceptanceTime, entry.dmAnnotation,
 				    entry.dmSender);
 
