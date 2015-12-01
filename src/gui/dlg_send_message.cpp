@@ -53,24 +53,20 @@
 #define RTW_PDZ 3
 
 
-DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
-    const QString &senderName, Action action, qint64 msgId,
-    const QDateTime &deliveryTime,
-    const QString &userName, const QString &dbType,
-    bool dbEffectiveOVM, bool dbOpenAddressing,
-    QString &lastAttAddPath, const QString &pdzCredit, QWidget *parent)
+DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
+    const QDateTime &deliveryTime, const QString &userName, QWidget *parent)
     : QDialog(parent),
     m_msgID(msgId),
     m_deliveryTime(deliveryTime),
-    m_dbId(dbId),
-    m_senderName(senderName),
+    m_dbId(""),
+    m_senderName(""),
     m_action(action),
     m_userName(userName),
-    m_dbType(dbType),
-    m_dbEffectiveOVM(dbEffectiveOVM),
-    m_dbOpenAddressing(dbOpenAddressing),
-    m_lastAttAddPath(lastAttAddPath),
-    m_pdzCredit(pdzCredit),
+    m_dbType(""),
+    m_dbEffectiveOVM(false),
+    m_dbOpenAddressing(false),
+    m_lastAttAddPath(""),
+    m_pdzCredit(""),
     m_dbSet(dbSet),
     m_dmType(""),
     m_dmSenderRefNumber("")
@@ -107,6 +103,43 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);
 
+
+	Q_ASSERT(!m_userName.isEmpty());
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[m_userName];
+
+	if (!isdsSessions.isConnectedToIsds(m_userName)) {
+		return;
+	}
+
+	/* Method connectToIsds() acquires account information. */
+	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+	Q_ASSERT(!m_dbId.isEmpty());
+	m_senderName =
+	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
+	QList<QString> accountData =
+	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
+
+	if (accountData.isEmpty()) {
+		return;
+	}
+
+	m_dbType = accountData.at(0);
+	m_dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
+	m_dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+
+	QString lastAttachAddPath;
+	if (globPref.use_global_paths) {
+		lastAttachAddPath = globPref.add_file_to_attachments_path;
+	} else {
+		lastAttachAddPath = accountInfo.lastAttachAddPath();
+	}
+
+	if (m_dbOpenAddressing) {
+		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+	}
+
 	QString dbOpenAddressing = "";
 
 	if (!m_dbEffectiveOVM) {
@@ -119,8 +152,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 			    " - " + tr("sending of PDZ: disabled");
 		}
 	}
-
-	Q_ASSERT(!m_userName.isEmpty());
 
 	this->fromUser->setText("<strong>" +
 	    AccountModel::globAccounts[m_userName].accountName() +
@@ -226,6 +257,49 @@ void DlgSendMessage::initNewMessageDialog(void)
 			fillDlgFromTmpMsg();
 		}
 	}
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Show remaining PDZ credit.
+ */
+QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
+    const QString &dbId)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QString str("0");
+
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		return str;
+	}
+
+	isds_error status;
+	long int credit;
+	char *email = NULL;
+	struct isds_list *history = NULL;
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	Q_ASSERT(0 != session);
+
+	status = isds_get_commercial_credit(session,
+	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
+
+	isds_list_free(&history);
+
+	if (IE_SUCCESS != status) {
+		qDebug() << status << isdsLongMessage(session);
+		return str;
+	}
+
+	if (credit > 0) {
+		str = programLocale.toString((float)credit / 100, 'f', 2);
+	}
+
+	return str;
 }
 
 

@@ -62,12 +62,8 @@ public:
 		{ }
 	};
 
-	DlgSendMessage(MessageDbSet &dbSet, const QString &dbId,
-	    const QString &senderName, Action action, qint64 msgId,
-	    const QDateTime &deliveryTime,
-	    const QString &userName, const QString &dbType,
-	    bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QString &lastAttAddPath, const QString &pdzCredit,
+	DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
+	    const QDateTime &deliveryTime, const QString &userName,
 	    QWidget *parent = 0);
 
 private slots:
@@ -95,15 +91,15 @@ private:
 	QTimer *pingTimer;
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;
-	const QString m_dbId;
-	const QString m_senderName;
-	const Action m_action;
-	const QString m_userName;
-	const QString m_dbType;
+	QString m_dbId;
+	QString m_senderName;
+	Action m_action;
+	QString m_userName;
+	QString m_dbType;
 	bool m_dbEffectiveOVM;
 	bool m_dbOpenAddressing;
-	QString &m_lastAttAddPath;
-	const QString m_pdzCredit;
+	QString m_lastAttAddPath;
+	QString m_pdzCredit;
 	MessageDbSet &m_dbSet;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
@@ -120,6 +116,9 @@ private:
 	    int row) const;
 
 	QString getUserInfoFormIsds(QString idDbox);
+	QString getPDZCreditFromISDS(const QString &userName,
+	    const QString &dbId);
+
 };
 
 

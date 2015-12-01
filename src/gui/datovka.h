@@ -1104,11 +1104,6 @@ private:
 	    const QString &userName, qint64 days, const QDateTime &dateTime);
 
 	/*!
-	 * @brief Get information about remaining PDZ credit.
-	 */
-	QString getPDZCreditFromISDS(void);
-
-	/*!
 	 * @brief Export message with expired time stamp to ZFO.
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,

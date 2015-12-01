@@ -4880,22 +4880,6 @@ void MainWindow::openSendMessageDialog(int action)
 		}
 	}
 
-	/* Method connectToIsds() acquires account information. */
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-	Q_ASSERT(!dbId.isEmpty());
-	QString senderName =
-	    globAccountDbPtr->senderNameGuess(userName + "___True");
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(userName + "___True");
-
-	if (accountData.isEmpty()) {
-		return;
-	}
-
-	QString dbType = accountData.at(0);
-	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
-
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
 	QString lastAttachAddPath;
@@ -4905,15 +4889,9 @@ void MainWindow::openSendMessageDialog(int action)
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
 
-	QString pdzCredit("0");
-	if (dbOpenAddressing) {
-		pdzCredit = getPDZCreditFromISDS();
-	}
-
-	QDialog *newMessageDialog = new DlgSendMessage(*dbSet, dbId,
-	    senderName, (DlgSendMessage::Action) action, msgId, deliveryTime,
-	    userName, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    lastAttachAddPath, pdzCredit, this);
+	QDialog *newMessageDialog = new DlgSendMessage(*dbSet,
+	    (DlgSendMessage::Action) action, msgId, deliveryTime,
+	    userName, this);
 
 	if (newMessageDialog->exec() == QDialog::Accepted) {
 
@@ -9622,56 +9600,6 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 	}
 
 	return msgBox.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * Show remaining PDZ credit.
- */
-QString MainWindow::getPDZCreditFromISDS(void)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QString str("0");
-
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-	const QString userName =
-	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return str;
-		}
-	}
-
-	isds_error status;
-	long int credit;
-	char *email = NULL;
-	struct isds_list *history = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-
-	status = isds_get_commercial_credit(session,
-	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
-
-	isds_list_free(&history);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isdsLongMessage(session);
-		return str;
-	}
-
-	if (credit > 0) {
-		str = programLocale.toString((float)credit / 100, 'f', 2);
-	}
-
-	return str;
 }
 
 
