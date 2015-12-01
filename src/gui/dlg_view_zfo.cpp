@@ -32,14 +32,14 @@
 #include <QTimeZone>
 #include <QUrl>
 
-#include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
-#include "src/gui/dlg_import_zfo.h"
+#include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
 
 

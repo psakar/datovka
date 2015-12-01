@@ -44,7 +44,8 @@
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
-#include "thread/worker.h"
+#include "src/settings/preferences.h"
+#include "src/thread/worker.h"
 
 
 namespace Ui {

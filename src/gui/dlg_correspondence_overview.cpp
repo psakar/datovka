@@ -29,6 +29,7 @@
 
 #include "dlg_correspondence_overview.h"
 #include "src/io/filesystem.h"
+#include "src/settings/preferences.h"
 
 
 /* ========================================================================= */

@@ -33,9 +33,9 @@
 #include <QVariant>
 
 #include "account_db.h"
-#include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 
 
 /* ========================================================================= */

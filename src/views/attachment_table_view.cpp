@@ -29,6 +29,7 @@
 #include <QPixmap>
 #include <QUrl>
 
+#include "src/common.h"
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
 #include "src/models/attachment_model.h"

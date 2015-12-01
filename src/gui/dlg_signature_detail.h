@@ -29,7 +29,6 @@
 #include <QDialog>
 #include <QSslCertificate>
 
-#include "src/common.h"
 #include "src/io/message_db_set.h"
 #include "ui_dlg_signature_detail.h"
 

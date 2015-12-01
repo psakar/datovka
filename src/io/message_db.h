@@ -38,7 +38,6 @@
 #include <QString>
 #include <QVector>
 
-#include "src/common.h"
 #include "src/models/files_model.h"
 #include "src/models/messages_model.h"
 
