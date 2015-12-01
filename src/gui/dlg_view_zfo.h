@@ -27,7 +27,6 @@
 
 #include <QDialog>
 
-#include "src/common.h"
 #include "src/io/isds_sessions.h"
 #include "src/models/attachment_model.h"
 #include "ui_dlg_view_zfo.h"

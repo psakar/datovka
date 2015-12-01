@@ -49,11 +49,11 @@
 #include <QVector>
 
 #include "message_db.h"
-#include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 
 
 const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",

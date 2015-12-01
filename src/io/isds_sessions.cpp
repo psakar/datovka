@@ -32,7 +32,7 @@
 #include "isds_sessions.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/log/log.h"
-
+#include "src/settings/preferences.h"
 
 
 GlobIsdsSessions isdsSessions;

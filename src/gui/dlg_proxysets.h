@@ -27,7 +27,7 @@
 
 #include <QDialog>
 
-#include "src/common.h"
+#include "src/settings/proxy.h"
 #include "ui_dlg_proxysets.h"
 
 

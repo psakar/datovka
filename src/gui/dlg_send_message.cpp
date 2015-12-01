@@ -29,7 +29,6 @@
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
-#include "src/common.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
@@ -38,6 +37,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 #include "src/thread/worker.h"
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"

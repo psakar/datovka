@@ -32,15 +32,14 @@
 #include <QDebug>
 #include <QDir>
 
-#define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
-#define TMP_DIR_NAME "qdatovka_dir_XXXXXX"
-
-#define ID_ISDS_SYS_DATABOX "aaaaaaa"
 #define ICON_14x14_PATH ":/icons/14x14/"
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
+
+#define ID_ISDS_SYS_DATABOX "aaaaaaa"
+
 #define ISDS_PING_TIMEOUT_MS 10000
 #define ISDS_CONNECT_TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define ISDS_DOWNLOAD_TIMEOUT_MS 300000
@@ -60,11 +59,6 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
-/* Define default filename of saved/exported files */
-#define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
-#define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
-#define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
-#define DEFAULT_DELIVERY_ATTACH_FORMAT "DD-%i-%f"
 
 /* return values of Datovka login methods */
 typedef enum {
@@ -162,158 +156,6 @@ enum MessageDirection {
 
 #define messageTableInfoEndPdf() (QString("</table>"))
 
-
-
-
-
-class GlobPreferences {
-
-public:
-	typedef enum {
-		DOWNLOAD_DATE = 1,
-		CURRENT_DATE = 2
-	} CertValDate;
-
-	typedef enum {
-		DATE_FORMAT_LOCALE = 1,
-		DATE_FORMAT_ISO = 2,
-		DATE_FORMAT_DEFAULT = 3//,
-		//DATE_FORMAT_CUSTOM = 4
-	} DateFmt;
-
-	enum SelectType {
-		SELECT_NEWEST = 1,
-		SELECT_LAST_VISITED = 2,
-		SELECT_NOTHING = 3
-	};
-
-
-	GlobPreferences(void);
-	~GlobPreferences(void);
-
-	QString confSubdir; /*!< Configuration directory. */
-	QString loadFromConf; /*!< Configuration file to load from. */
-	QString saveToConf; /*!< Configuration file to save to. */
-	const QString accountDbFile; /*!< Account db file. */
-	bool auto_download_whole_messages;
-	bool default_download_signed; /*!< Default downloading method. */
-	//bool store_passwords_on_disk;
-	bool store_messages_on_disk;
-	int toolbar_button_style;
-	bool store_additional_data_on_disk;
-	CertValDate certificate_validation_date;
-	bool check_crl;
-	bool check_new_versions;
-	bool send_stats_with_version_checks;
-	bool download_on_background;
-	int timer_value;
-	bool download_at_start;
-	DateFmt date_format;
-	QString language;
-	enum SelectType after_start_select;
-	int message_mark_as_read_timeout;
-	bool use_global_paths;
-	QString save_attachments_path;
-	QString add_file_to_attachments_path;
-	bool all_attachments_save_zfo_delinfo;
-	bool all_attachments_save_zfo_msg;
-	bool all_attachments_save_pdf_msgenvel;
-	bool all_attachments_save_pdf_delinfo;
-	QString message_filename_format;
-	QString delivery_filename_format;
-	QString attachment_filename_format;
-	QString delivery_filename_format_all_attach;
-	bool delivery_info_for_every_file;
-	int isds_download_timeout_ms;
-	int timestamp_expir_before_days;
-
-	/*!
-	 * @brief Load data from supplied settings.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-	/*!
-	 * @brief Store data to settings structure.
-	 */
-	void saveToSettings(QSettings &settings) const;
-
-	/*!
-	 * @brief Return path to configuration directory.
-	 */
-	QString confDir(void) const;
-
-	/*!
-	 * @brief Returns whole configuration file path.
-	 */
-	inline
-	QString loadConfPath(void) const
-	{
-		return confDir() + QDir::separator() + loadFromConf;
-	}
-
-	/*!
-	 * @brief Returns whole configuration file path.
-	 */
-	inline
-	QString saveConfPath(void) const
-	{
-		return confDir() + QDir::separator() + saveToConf;
-	}
-
-	/*!
-	 * @brief Returns whole account db path.
-	 */
-	inline
-	QString accountDbPath(void) const
-	{
-		return confDir() + QDir::separator() + accountDbFile;
-	}
-};
-
-
-class ProxiesSettings {
-public:
-	static
-	const QString noProxyStr;
-	static
-	const QString autoProxyStr;
-
-	class ProxySettings {
-	public:
-		ProxySettings(void);
-
-		QString hostName;
-		int port;
-		QString userName;
-		QString password;
-	};
-
-	ProxiesSettings(void);
-
-	ProxySettings https;
-	ProxySettings http;
-
-	/*!
-	 * @brief Load data from supplied settings.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-	/*!
-	 * @brief Store data to settings structure.
-	 */
-	void saveToSettings(QSettings &settings) const;
-
-	/*!
-	 * @brief Detect HTTP proxy. Return host and port number.
-	 */
-	static
-	ProxiesSettings::ProxySettings detectHttpProxy(void);
-};
-
-
-/* Global preferences structure. */
-extern GlobPreferences globPref;
-extern ProxiesSettings globProxSet;
 
 /*!
  * @brief Date/time format used in the application.

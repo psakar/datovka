@@ -24,12 +24,14 @@
 
 #include <QtAlgorithms> /* qSort() */
 #include <QDebug>
+#include <QDir>
 #include <QRegExp>
 #include <QSet>
 
 #include "accounts_model.h"
 #include "src/common.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 
 
 /* ========================================================================= */

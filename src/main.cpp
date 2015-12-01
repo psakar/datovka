@@ -32,7 +32,6 @@
 #include <QtWidgets>
 
 #include "src/cli/cli.h"
-#include "src/common.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_funcs.h"
@@ -44,6 +43,7 @@
 #include "src/io/message_db.h"
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
+#include "src/settings/proxy.h"
 
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"

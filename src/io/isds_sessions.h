@@ -36,7 +36,6 @@
 #include <QMap>
 #include <QString>
 
-#include "src/common.h"
 #include "src/models/accounts_model.h"
 
 

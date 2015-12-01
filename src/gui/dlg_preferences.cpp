@@ -24,6 +24,7 @@
 #include <QFileDialog>
 
 #include "dlg_preferences.h"
+#include "src/settings/preferences.h"
 #include "ui_dlg_preferences.h"
 
 DlgPreferences::DlgPreferences(QWidget * parent)

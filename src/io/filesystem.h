@@ -28,8 +28,15 @@
 #include <QDateTime>
 #include <QString>
 
+#define TMP_ATTACHMENT_PREFIX "qdatovka_XXXXXX_"
+#define TMP_DIR_NAME "qdatovka_dir_XXXXXX"
+
 /* Default file name formats of saved/exported files. */
 #define DEFAULT_TMP_FORMAT "%Y-%M-%D_%i_tmp"
+#define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
+#define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
+#define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
+#define DEFAULT_DELIVERY_ATTACH_FORMAT "DD-%i-%f"
 
 /*!
  * @brief Create file name according to the format string.

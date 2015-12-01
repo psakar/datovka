@@ -26,9 +26,9 @@
 #include <QNetworkProxy>
 #include <QTimer>
 
-#include "src/common.h"
 #include "src/io/file_downloader.h"
 #include "src/log/log.h"
+#include "src/settings/proxy.h"
 
 
 /* ========================================================================= */
