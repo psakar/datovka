@@ -33,6 +33,15 @@
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
 
+/*!
+ * @brief Illegal characters in file name.
+ */
+#define ILL_FNAME_CH "\\/:*?\"<>|"
+/*!
+ * @brief Replacement character for illegal characters.
+ */
+#define ILL_FNAME_REP "_"
+
 QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
     const QString &userName, const QString &attachName,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
@@ -90,12 +99,8 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
 		format.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
 
-	/*
-	 * Eliminate illegal characters "\/:*?"<>|" in the file name.
-	 * All these characters are replaced by "_".
-	 */
-	format.replace(QRegExp("[" + QRegExp::escape("\\/:*?\"<>|") + "]"),
-	    "_");
+	format.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
+	    ILL_FNAME_REP);
 
 	return format;
 }
@@ -163,8 +168,8 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 	}
 
 	QString nameCopy(fileName);
-	nameCopy.replace(QRegExp("[" + QRegExp::escape("\\/:*?\"<>|") + "]"),
-	    QString( "_" ));
+	nameCopy.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
+	    ILL_FNAME_REP);
 
 	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + nameCopy);
 	if (!fout.open()) {
