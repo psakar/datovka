@@ -157,49 +157,6 @@ enum MessageDirection {
 #define messageTableInfoEndPdf() (QString("</table>"))
 
 
-class ProxiesSettings {
-public:
-	static
-	const QString noProxyStr;
-	static
-	const QString autoProxyStr;
-
-	class ProxySettings {
-	public:
-		ProxySettings(void);
-
-		QString hostName;
-		int port;
-		QString userName;
-		QString password;
-	};
-
-	ProxiesSettings(void);
-
-	ProxySettings https;
-	ProxySettings http;
-
-	/*!
-	 * @brief Load data from supplied settings.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-	/*!
-	 * @brief Store data to settings structure.
-	 */
-	void saveToSettings(QSettings &settings) const;
-
-	/*!
-	 * @brief Detect HTTP proxy. Return host and port number.
-	 */
-	static
-	ProxiesSettings::ProxySettings detectHttpProxy(void);
-};
-
-
-/* Global preferences structure. */
-extern ProxiesSettings globProxSet;
-
 /*!
  * @brief Date/time format used in the application.
  */
