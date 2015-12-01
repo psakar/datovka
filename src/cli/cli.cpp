@@ -27,6 +27,7 @@
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
+#include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/thread/worker.h"

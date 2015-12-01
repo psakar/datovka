@@ -36,7 +36,7 @@
 #include <QFile>
 
 #include "dlg_about.h"
-#include "src/common.h"
+#include "src/io/filesystem.h"
 
 
 aboutDialog::aboutDialog(QWidget *parent) :

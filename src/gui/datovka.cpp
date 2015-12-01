@@ -4799,7 +4799,7 @@ void MainWindow::saveSettings(void) const
 	settings.sync();
 
 	/* Remove " symbols from passwords in dsgui.conf */
-	removeDoubleQuotesFromAccountPassword(globPref.saveConfPath());
+	confFileRemovePwdQuotes(globPref.saveConfPath());
 }
 
 
