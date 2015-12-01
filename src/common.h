@@ -61,7 +61,6 @@
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
 /* Define default filename of saved/exported files */
-#define DEFAULT_TMP_FORMAT "%Y-%M-%D_%i_tmp"
 #define DEFAULT_MESSAGE_FILENAME_FORMAT "DZ-%i"
 #define DEFAULT_DELIVERY_FILENAME_FORMAT "DD-%i"
 #define DEFAULT_ATTACHMENT_FILENAME_FORMAT "%f"
@@ -347,18 +346,6 @@ const QString msgStatusToText(int status);
 
 
 /*!
- * @brief Changes all occurrences of '\' to '/' in given file.
- */
-void fixBackSlashesInFile(const QString &fileName);
-
-
-/*!
- * @brief Fix account password format = compatibility with old Datovka.
- */
-void removeDoubleQuotesFromAccountPassword(const QString &fileName);
-
-
-/*!
  * @brief Return dec index from hex.
  */
 int convertHexToDecIndex(int value);
@@ -427,80 +414,5 @@ QString toBase64(const QString &plain);
  * @brief Computes the size of real (decoded from base64) data.
  */
 int base64RealSize(const QByteArray &b64);
-
-
-/*!
- * @brief Text files supplied with the application.
- */
-enum text_file {
-	TEXT_FILE_CREDITS = 1,
-	TEXT_FILE_LICENCE
-};
-
-
-/*!
- * @brief Returns the content of the supplied text file.
- */
-QString suppliedTextFileContent(enum text_file textFile);
-
-
-/*!
- * @brief Returns the path to directory where supplied localisation resides.
- */
-QString appLocalisationDir(void);
-
-
-/*!
- * @brief Returns the path to directory where supplied localisation resides.
- */
-QString qtLocalisationDir(void);
-
-
-enum WriteFileState {
-	WF_SUCCESS = 0, /*!< File was successfully created and written. */
-	WF_CANNOT_CREATE, /*!< File could not be created. */
-	WF_CANNOT_WRITE_WHOLE, /*!< File could not be entirely written. */
-	WF_ERROR /*!< Different error. */
-};
-
-
-/*!
- * @brief Create and write data to file.
- *
- * @param[in] fileName      File name.
- * @param[in] data          Data to be written into file.
- * @param[in] deleteOnError Delete created file when cannot be entirely
- *                          written.
- */
-enum WriteFileState writeFile(const QString &fileName, const QByteArray &data,
-    bool deleteOnError = false);
-
-
-/*!
- * @brief Create and write data to temporary file.
- *
- * @param[in] fileName      File name.
- * @param[in] data          Data to be written into file.
- * @param[in] deleteOnError Delete created file when cannot be entirely
- *                          written.
- * @return Full path to written file on success, empty string on failure.
- */
-QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
-    bool deleteOnError = false);
-
-
-/*!
- * @brief Create filename based on format string.
- */
-QString createFilenameFromFormatString(QString pattern, const QString &dmID,
-    const QString &dbID, const QString &userName, const QString &attachFilename,
-    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
-    QString dmAnnotation, QString dmSender);
-
-
-/*!
- * @brief Check if file exists in the path and return non-conflicting filename.
- */
-QString getNonConflictingFileName(QString fileName);
 
 #endif /* _COMMON_H_ */

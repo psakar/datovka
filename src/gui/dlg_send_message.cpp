@@ -34,6 +34,7 @@
 #include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
 #include "src/io/dbs.h"
+#include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"

@@ -37,6 +37,7 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
+#include "src/io/filesystem.h"
 #include "src/log/log.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/views/table_home_end_filter.h"

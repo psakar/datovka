@@ -40,6 +40,7 @@
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
+#include "src/io/filesystem.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
@@ -462,7 +463,7 @@ int main(int argc, char *argv[])
 		    globPref.saveConfPath().toUtf8().constData());
 
 		/* Change "\" to "/" */
-		fixBackSlashesInFile(globPref.loadConfPath());
+		confFileFixBackSlashes(globPref.loadConfPath());
 	}
 
 	{
