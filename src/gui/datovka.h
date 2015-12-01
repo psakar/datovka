@@ -59,8 +59,6 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
 
-	void setDefaultProgressStatus(void);
-
 	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
 	QLabel *statusOnlineLabel;
 	QLabel *statusDbMode;
@@ -639,12 +637,27 @@ private slots:
 	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
-	void setProgressBarFromWorker(QString label, int value);
+	void updateProgressBar(QString label, int value);
+
+	/*!
+	 * @brief Set Status bar text.
+	 */
+	void updateStatusBarText(QString text);
+
+	/*!
+	 * @brief Clear progerss bar text.
+	 */
+	void clearProgressBar(void);
+
+	/*!
+	 * @brief Clear status bar text.
+	 */
+	void clearStatusBar(void);
 
 	/*!
 	 * @brief Refresh AccountList.
 	 */
-	void refreshAccountListFromWorker(const QString &userName);
+	void refreshAccountList(const QString &userName);
 
 	/*!
 	 * @brief Set and run any actions after main window has been created.

@@ -179,7 +179,7 @@ MainWindow::MainWindow(QWidget *parent)
 	m_statusProgressBar->setTextVisible(true);
 	m_statusProgressBar->setRange(0,100);
 	m_statusProgressBar->setValue(0);
-	setDefaultProgressStatus();
+	clearProgressBar();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
 	/* Account list. */
@@ -422,13 +422,74 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 
 /* ========================================================================= */
 /*
- * Set default status of progress bar
+ * Show text in the status bar with timeout
  */
-void MainWindow::setDefaultProgressStatus(void)
+void MainWindow::showStatusTextWithTimeout(const QString &qStr)
+/* ========================================================================= */
+{
+	clearStatusBar();
+	statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS);
+}
+
+
+/* ========================================================================= */
+/*
+ * Show text in the status bar without timeout
+ */
+void MainWindow::showStatusTextPermanently(const QString &qStr)
+/* ========================================================================= */
+{
+	clearStatusBar();
+	statusBar->showMessage((qStr), 0);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Clear progress bar and set default text
+ */
+void MainWindow::clearProgressBar(void)
 /* ========================================================================= */
 {
 	m_statusProgressBar->setFormat("Idle");
 	m_statusProgressBar->setValue(0);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Clear status bar
+ */
+void MainWindow::clearStatusBar(void)
+/* ========================================================================= */
+{
+	statusBar->clearMessage();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Update ProgressBar text and value.
+ */
+void MainWindow::updateProgressBar(QString label, int value)
+ /* ========================================================================= */
+{
+	//debugSlotCall();
+	m_statusProgressBar->setFormat(label);
+	m_statusProgressBar->setValue(value);
+	m_statusProgressBar->repaint();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Update StatusBar text.
+ */
+void MainWindow::updateStatusBarText(QString text)
+/* ========================================================================= */
+{
+	//debugSlotCall();
+	showStatusTextWithTimeout(text);
 }
 
 
@@ -3267,7 +3328,7 @@ void MainWindow::processPendingWorkerJobs(void)
 	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
 	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
-	    this, SLOT(setProgressBarFromWorker(QString, int)));
+	    this, SLOT(updateProgressBar(QString, int)));
 	{
 		/* Downloading message list. */
 		connect(m_syncAcntWorker,
@@ -3279,7 +3340,7 @@ void MainWindow::processPendingWorkerJobs(void)
 		connect(m_syncAcntWorker,
 		    SIGNAL(refreshAccountList(const QString)),
 		    this,
-		    SLOT(refreshAccountListFromWorker(const QString)));
+		    SLOT(refreshAccountList(const QString)));
 	}
 	{
 		/* Downloading attachment. */
@@ -4861,7 +4922,7 @@ void MainWindow::openSendMessageDialog(int action)
 		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 		    "send.").arg(accountInfo.accountName()));
 
-		refreshAccountListFromWorker(userName);
+		refreshAccountList(userName);
 	}
 
 	if (!globPref.use_global_paths) {
@@ -4869,7 +4930,7 @@ void MainWindow::openSendMessageDialog(int action)
 		storeExportPath();
 	}
 
-	setDefaultProgressStatus();
+	clearProgressBar();
 }
 
 
@@ -5587,9 +5648,9 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 
 /* ========================================================================= */
 /*
-* Refresh AccountList
+* Slot: Refresh AccountList
 */
-void MainWindow::refreshAccountListFromWorker(const QString &userName)
+void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -5668,21 +5729,6 @@ void MainWindow::refreshAccountListFromWorker(const QString &userName)
 		/* Update message model. */
 		accountItemCurrentChanged(selectedIdx);
 	}
-}
-
-
-/* ========================================================================= */
-/*
-* Set ProgressBar value and Status bar text.
-*/
-void MainWindow::setProgressBarFromWorker(QString label, int value)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	m_statusProgressBar->setFormat(label);
-	m_statusProgressBar->setValue(value);
-	m_statusProgressBar->repaint();
 }
 
 
@@ -6442,7 +6488,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 
 /* ========================================================================= */
 /*
- * Show dialog with settings of import ZFO file(s) into database.
+ * Slot: Show dialog with settings of import ZFO file(s) into database.
  */
 void MainWindow::showImportZFOActionDialog(void)
 /* ========================================================================= */
@@ -6462,7 +6508,7 @@ void MainWindow::showImportZFOActionDialog(void)
 
 /* ========================================================================= */
 /*
- * Create ZFO file(s) list for import into database.
+ * Func: Create ZFO file(s) list for import into database.
  */
 void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
     enum ImportZFODialog::ZFOaction importType)
@@ -6544,12 +6590,14 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	}
 
 	prepareZFOImportIntoDatabase(filePathList, zfoType);
+
+	clearProgressBar();
 }
 
 
 /* ========================================================================= */
 /*
- * Create account info for ZFO file(s) import into database.
+ * Func: Create account info for ZFO file(s) import into database.
  */
 QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
 /* ========================================================================= */
@@ -6585,7 +6633,7 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 
 /* ========================================================================= */
 /*
- * Get message type of import ZFO file (message/delivery/unknown).
+ * Func: Get message type of import ZFO file (message/delivery/unknown).
  */
 int MainWindow::getMessageTypeFromZFO(const QString &file)
 /* ========================================================================= */
@@ -6628,7 +6676,7 @@ int MainWindow::getMessageTypeFromZFO(const QString &file)
 
 /* ========================================================================= */
 /*
- * Prepare import ZFO file(s) into database by ZFO type.
+ * Func: Prepare import ZFO file(s) into database by ZFO type.
  */
 void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
     enum ImportZFODialog::ZFOtype zfoType)
@@ -6636,6 +6684,14 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 {
 	debugFuncCall();
 
+	const QString progressBarTitle = "ZFOImport";
+	int zfoFileType = 0;
+	QPair<QString,QString> impZFOInfo;
+	QList<QPair<QString,QString>> errorFilesList; // red
+	QList<QPair<QString,QString>> existFilesList; // black
+	QList<QPair<QString,QString>> successFilesList; // green
+	QStringList messageZFOList;
+	QStringList deliveryZFOList;
 	int zfoCnt =  files.size();
 
 	qDebug() << "ZFO-IMPORT:" << "number of ZFO:" << zfoCnt;
@@ -6656,14 +6712,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	int zfoFileType = 0;
-	QPair<QString,QString> impZFOInfo;
-	QList<QPair<QString,QString>> errorFilesList; // red
-	QList<QPair<QString,QString>> existFilesList; // black
-	QList<QPair<QString,QString>> successFilesList; // green
-	QStringList messageZFOList;
-	QStringList deliveryZFOList;
-
+	updateProgressBar(progressBarTitle, 5);
 
 	/* sort ZFOs by format type */
 	for (int i = 0; i < zfoCnt; i++) {
@@ -6687,6 +6736,8 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 			errorFilesList.append(impZFOInfo);
 		}
 	}
+
+	updateProgressBar(progressBarTitle, 10);
 
 	switch (zfoType) {
 	case ImportZFODialog::IMPORT_ALL_ZFO:
@@ -6737,6 +6788,8 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		break;
 	}
 
+	updateProgressBar(progressBarTitle, 100);
+
 	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Completed"));
 
 	showNotificationDialogWithResult(zfoCnt, successFilesList,
@@ -6746,7 +6799,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 
 /* ========================================================================= */
 /*
- * Execute the import of delivery info ZFO file(s) into database.
+ * Func: Execute the import of delivery info ZFO file(s) into database.
  */
 void MainWindow::importDeliveryInfoZFO(
     const QList<AccountDataStruct> &accountList, const QStringList &files,
@@ -6755,14 +6808,29 @@ void MainWindow::importDeliveryInfoZFO(
     QList<QPair<QString,QString>> &errorFilesList)
 /* ========================================================================= */
 {
+	/* ProgressBar text and diference */
+	const QString progressBarTitle = "ZFOImport";
+	float delta = 0.0;
+	float diff = 0.0;
+
 	int fileCnt = files.size();
 	QPair<QString,QString> importZFOInfo;
 	QString pInfoText = "";
 	QString nInfoText = "";
 	QString eInfoText = "";
 
+	updateProgressBar(progressBarTitle, 20);
+	delta = 80.0 / fileCnt;
+
 	/* for every ZFO file detect if message is in the database */
 	for (int i = 0; i < fileCnt; ++i) {
+
+		if (fileCnt == 0) {
+			updateProgressBar(progressBarTitle, 50);
+		} else {
+			diff += delta;
+			updateProgressBar(progressBarTitle, (20 + diff));
+		}
 
 		pInfoText = "";
 		nInfoText = "";
@@ -6900,12 +6968,14 @@ void MainWindow::importDeliveryInfoZFO(
 		isds_message_free(&message);
 		isds_ctx_free(&dummy_session);
 	}
+
+	updateProgressBar(progressBarTitle, 100);
 }
 
 
 /* ========================================================================= */
 /*
- * Execute the import of message ZFO file(s) into database.
+ * Func: Execute the import of message ZFO file(s) into database.
  */
 void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
     const QStringList &files, QList<QPair<QString,QString>> &successFilesList,
@@ -6913,14 +6983,29 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
     QList<QPair<QString,QString>> &errorFilesList)
 /* ========================================================================= */
 {
+	/* ProgressBar text and diference */
+	const QString progressBarTitle = "ZFOImport";
+	float delta = 0.0;
+	float diff = 0.0;
+
 	int fileCnt = files.size();
 	QPair<QString,QString> importZFOInfo;
 	QString pInfoText = "";
 	QString nInfoText = "";
 	QString eInfoText = "";
 
+	updateProgressBar(progressBarTitle, 20);
+	delta = 80.0 / fileCnt;
+
 	/* for every ZFO file detect its database and message type */
 	for (int i = 0; i < fileCnt; ++i) {
+
+		if (fileCnt == 0) {
+			updateProgressBar(progressBarTitle, 50);
+		} else {
+			diff += delta;
+			updateProgressBar(progressBarTitle, (20 + diff));
+		}
 
 		pInfoText = "";
 		nInfoText = "";
@@ -7137,6 +7222,8 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 		isds_message_free(&message);
 		isds_ctx_free(&dummy_session);
 	} //for
+
+	updateProgressBar(progressBarTitle, 100);
 }
 
 
@@ -9710,20 +9797,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 		break;
 	}
 
-	statusBar->clearMessage();
-}
-
-
-void MainWindow::showStatusTextWithTimeout(const QString &qStr)
-{
-	statusBar->clearMessage();
-	statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS);
-}
-
-void MainWindow::showStatusTextPermanently(const QString &qStr)
-{
-	statusBar->clearMessage();
-	statusBar->showMessage((qStr), 0);
+	clearStatusBar();
 }
 
 
@@ -9941,7 +10015,7 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 
 /* ========================================================================= */
 /*
- * Split database filename into mandatory entries.
+ * Func: Split database filename into mandatory entries.
  */
 bool MainWindow::isValidDatabaseFileName(QString inDbFileName,
     QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
@@ -10019,7 +10093,7 @@ bool MainWindow::isValidDatabaseFileName(QString inDbFileName,
 
 /* ========================================================================= */
 /*
- * Prepare import of messages from database.
+ * Slot: Prepare import of messages from database.
  */
 void MainWindow::prepareMsgsImportFromDatabase(void)
 /* ========================================================================= */
@@ -10062,7 +10136,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 
 /* ========================================================================= */
 /*
- *  Import of messages from database to selected account
+ *  Func: Import of messages from database to selected account
  */
 void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
     const QString &userName)
@@ -10070,17 +10144,26 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 {
 	debugFuncCall();
 
+	/* ProgressBar text and diference */
+	const QString progressBarTitle = "DatabaseImport";
+	float delta = 0.0;
+	float diff = 0.0;
+	clearProgressBar();
+
+	QString msg;
 	QString dbDir;
 	QString dbFileName;
 	QString dbUserName;
 	QString dbYearFlag;
 	bool dbTestingFlag;
 	int sMsgCnt = 0;
-	QString msg;
+
 	QStringList errImportList;
 
 	/* for all selected import database files */
 	for (int i = 0; i < dbFileList.count(); ++i) {
+
+		updateProgressBar(progressBarTitle, 0);
 
 		showStatusTextPermanently(tr("Import of messages from %1 "
 		    "to account %2").arg(dbFileList.at(i)).arg(userName));
@@ -10094,6 +10177,8 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		QFileInfo file(dbFileList.at(i));
 		dbDir = file.path();
 		dbFileName = file.fileName();
+
+		updateProgressBar(progressBarTitle, 5);
 
 		showStatusTextPermanently(tr("Import of messages from %1 "
 		    "to account %2 is running").arg(dbFileName).arg(userName));
@@ -10109,6 +10194,8 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			    QMessageBox::Ok);
 			continue;
 		}
+
+		updateProgressBar(progressBarTitle, 10);
 
 		/* check if username of db file is relevant to account */
 		if (userName != dbUserName) {
@@ -10164,8 +10251,19 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			continue;
 		}
 
+		updateProgressBar(progressBarTitle, 20);
+		int msgs = msgIdList.count();
+		delta = 80.0 / msgs;
+
 		// over all messages in source database do import */
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
+
+			if (msgs == 0) {
+				updateProgressBar(progressBarTitle, 50);
+			} else {
+				diff += delta;
+				updateProgressBar(progressBarTitle, (20+diff));
+			}
 
 			showStatusTextPermanently(tr("Importing of message %1"
 			    " into account %2 ...").arg(mId.dmId)
@@ -10219,6 +10317,8 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 			sMsgCnt++;
 		}
 
+		updateProgressBar(progressBarTitle, 100);
+
 		delete srcDbSingle; srcDbSingle = NULL;
 
 		/* show import result for import databse file */
@@ -10249,17 +10349,20 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		showStatusTextPermanently(tr("Import of messages from %1 "
 		    "to account %2 finished").arg(dbFileName).arg(userName));
 		msgBox.exec();
+
+		clearProgressBar();
 	}
-	statusBar->clearMessage();
+
+	clearStatusBar();
 
 	/* update account model */
-	refreshAccountListFromWorker(userName);
+	refreshAccountList(userName);
 }
 
 
 /* ========================================================================= */
 /*
- * Split message database slot.
+ * SLot: Split message database by years.
  */
 void MainWindow::splitMsgDbByYearsSlot(void)
 /* ========================================================================= */
@@ -10292,12 +10395,13 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 
 /* ========================================================================= */
 /*
- * Show error message box.
+ * Func: Show error message box.
  */
 void MainWindow::showErrMessageBox(const QString &msgTitle,
     const QString &msgText, const QString &msgInformativeText)
 /* ========================================================================= */
 {
+	clearProgressBar();
 	showStatusTextWithTimeout(tr("Split of message database "
 	    "finished with error"));
 	QMessageBox msgBox(this);
@@ -10307,13 +10411,13 @@ void MainWindow::showErrMessageBox(const QString &msgTitle,
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	statusBar->clearMessage();
+	clearStatusBar();
 }
 
 
 /* ========================================================================= */
 /*
- * Set back original database path if error during database splitting.
+ * Func: Set back original database path if error during database splitting.
  */
 bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
     const QString &userName) {
@@ -10330,7 +10434,7 @@ bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
 	}
 
 	/* update account model */
-	refreshAccountListFromWorker(userName);
+	refreshAccountList(userName);
 
 	return true;
 }
@@ -10338,12 +10442,19 @@ bool MainWindow::setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
 
 /* ========================================================================= */
 /*
- * Split message database into new databases contain messages for single years.
+ * Func: Split message database into new databases contain messages
+ *       for single years.
  */
 bool MainWindow::splitMsgDbByYears(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
+
+	/* ProgressBar text and diference */
+	const QString progressBarTitle = "DatabaseSplit";
+	float delta = 0.0;
+	float diff = 0.0;
+	clearProgressBar();
 
 	int flags = 0;
 	QString newDbDir;
@@ -10366,6 +10477,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		testAcnt = "1";
 		flags |= MDS_FLG_TESTING;
 	}
+
+	updateProgressBar(progressBarTitle, 5);
 
 	/* get origin message db set based on username */
 	MessageDbSet *msgDbSet = accountDbSet(userName, this);
@@ -10416,6 +10529,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	showStatusTextPermanently(tr("Copying origin database file to selected "
 	    "location"));
 
+	updateProgressBar(progressBarTitle, 10);
+
 	/* copy current account dbset to new location and open here */
 	if (!msgDbSet->copyToLocation(newDbDir)) {
 		msgText = tr("Cannot copy database file for account '%1' "
@@ -10457,7 +10572,19 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		return false;
 	}
 
-	for (int i = 0; i < yearList.count(); ++i) {
+	updateProgressBar(progressBarTitle, 20);
+
+	int years = yearList.count();
+	delta = 60.0 / years;
+
+	for (int i = 0; i < years; ++i) {
+
+		if (years == 0) {
+			updateProgressBar(progressBarTitle, 50);
+		} else {
+			diff += delta;
+			updateProgressBar(progressBarTitle, (20 + diff));
+		}
 
 		showStatusTextPermanently(tr("Creating a new "
 		    "database file for year %1").arg(yearList.at(i)));
@@ -10512,6 +10639,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		}
 	}
 
+	updateProgressBar(progressBarTitle, 85);
+
 	/* set back original database path and removed previous connection */
 	if (!msgDbSet->openLocation(dbDir, msgDbSet->organisation(),
 	    MessageDbSet::CM_MUST_EXIST)) {
@@ -10525,6 +10654,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 
 	showStatusTextPermanently(tr("Replacing of new database files to "
 	    "origin database location"));
+
+	updateProgressBar(progressBarTitle, 90);
 
 	/* move new database set to origin database path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
@@ -10553,6 +10684,8 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		return false;
 	}
 
+	updateProgressBar(progressBarTitle, 95);
+
 	showStatusTextPermanently(tr("Opening of new database files"));
 
 	/* open new database set in the origin location */
@@ -10565,6 +10698,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 		showErrMessageBox(msgTitle, msgText, msgInformativeText);
 		return false;
 	}
+
+	updateProgressBar(progressBarTitle, 100);
+	clearProgressBar();
 
 	/* show final success notification */
 	showStatusTextWithTimeout(tr("Split of message database finished"));
@@ -10580,10 +10716,11 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	msgBox.setInformativeText(msgInformativeText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	statusBar->clearMessage();
+
+	clearStatusBar();
 
 	/* refresh account model and account list */
-	refreshAccountListFromWorker(userName);
+	refreshAccountList(userName);
 
 	return true;
 }
