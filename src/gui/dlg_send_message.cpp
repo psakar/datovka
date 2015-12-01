@@ -66,7 +66,7 @@ DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
     m_lastAttAddPath(""),
-    m_pdzCredit(""),
+    m_pdzCredit("0"),
     m_dbSet(dbSet),
     m_dmType(""),
     m_dmSenderRefNumber("")
@@ -109,46 +109,40 @@ void DlgSendMessage::initNewMessageDialog(void)
 	const AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[m_userName];
 
-	if (!isdsSessions.isConnectedToIsds(m_userName)) {
-		return;
-	}
-
-	/* Method connectToIsds() acquires account information. */
 	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+
 	Q_ASSERT(!m_dbId.isEmpty());
+
 	m_senderName =
 	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
+
 	QList<QString> accountData =
 	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
 
-	if (accountData.isEmpty()) {
-		return;
+	if (!accountData.isEmpty()) {
+		m_dbType = accountData.at(0);
+		m_dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
+		m_dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 	}
 
-	m_dbType = accountData.at(0);
-	m_dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-	m_dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
-
-	QString lastAttachAddPath;
 	if (globPref.use_global_paths) {
-		lastAttachAddPath = globPref.add_file_to_attachments_path;
+		m_lastAttAddPath = globPref.add_file_to_attachments_path;
 	} else {
-		lastAttachAddPath = accountInfo.lastAttachAddPath();
+		m_lastAttAddPath = accountInfo.lastAttachAddPath();
 	}
 
 	if (m_dbOpenAddressing) {
 		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
 	}
 
-	QString dbOpenAddressing = "";
-
+	QString dbOpenAddressingText = "";
 	if (!m_dbEffectiveOVM) {
 		if (m_dbOpenAddressing) {
-			dbOpenAddressing =
+			dbOpenAddressingText =
 			    " - " + tr("sending of PDZ: enabled") + "; " +
 			    tr("remaining credit: ") + m_pdzCredit + " Kč";
 		} else {
-			dbOpenAddressing =
+			dbOpenAddressingText =
 			    " - " + tr("sending of PDZ: disabled");
 		}
 	}
@@ -156,7 +150,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->fromUser->setText("<strong>" +
 	    AccountModel::globAccounts[m_userName].accountName() +
 	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
-	    dbOpenAddressing);
+	    dbOpenAddressingText);
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
@@ -258,7 +252,6 @@ void DlgSendMessage::initNewMessageDialog(void)
 		}
 	}
 }
-
 
 
 /* ========================================================================= */
