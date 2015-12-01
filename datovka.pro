@@ -244,17 +244,29 @@ win32 {
 		-lcrypto
 }
 
-SOURCES += src/common.cpp \
+SOURCES += src/cli/cli.cpp \
+    src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
     src/gui/datovka.cpp \
+    src/gui/dlg_about.cpp \
+    src/gui/dlg_account_from_db.cpp \
+    src/gui/dlg_change_directory.cpp \
     src/gui/dlg_change_pwd.cpp \
     src/gui/dlg_contacts.cpp \
+    src/gui/dlg_correspondence_overview.cpp \
     src/gui/dlg_create_account.cpp \
     src/gui/dlg_ds_search.cpp \
+    src/gui/dlg_import_zfo.cpp \
+    src/gui/dlg_import_zfo_result.cpp \
+    src/gui/dlg_msg_search.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_send_message.cpp \
+    src/gui/dlg_signature_detail.cpp \
+    src/gui/dlg_timestamp_expir.cpp \
+    src/gui/dlg_view_zfo.cpp \
+    src/gui/dlg_yes_no_checkbox.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
@@ -274,35 +286,35 @@ SOURCES += src/common.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
-    src/gui/dlg_about.cpp \
-    src/gui/dlg_view_zfo.cpp \
     src/thread/worker.cpp \
-    src/gui/dlg_signature_detail.cpp \
-    src/gui/dlg_change_directory.cpp \
-    src/gui/dlg_correspondence_overview.cpp \
-    src/gui/dlg_import_zfo.cpp \
-    src/gui/dlg_import_zfo_result.cpp \
-    src/gui/dlg_account_from_db.cpp \
-    src/gui/dlg_yes_no_checkbox.cpp \
-    src/gui/dlg_msg_search.cpp \
-    src/gui/dlg_timestamp_expir.cpp \
-    src/cli/cli.cpp \
-    src/views/attachment_table_widget.cpp \
     src/views/attachment_table_view.cpp \
+    src/views/attachment_table_widget.cpp \
     src/views/table_home_end_filter.cpp
 
-HEADERS += src/common.h \
+HEADERS += src/cli/cli.h \
+    src/common.h \
     src/crypto/crypto.h \
-    src/crypto/crypto_threads.h \
     src/crypto/crypto_funcs.h \
+    src/crypto/crypto_threads.h \
     src/gui/datovka.h \
+    src/gui/dlg_about.h \
+    src/gui/dlg_account_from_db.h \
+    src/gui/dlg_change_directory.h \
     src/gui/dlg_change_pwd.h \
     src/gui/dlg_contacts.h \
+    src/gui/dlg_correspondence_overview.h \
     src/gui/dlg_create_account.h \
     src/gui/dlg_ds_search.h \
+    src/gui/dlg_import_zfo.h \
+    src/gui/dlg_import_zfo_result.h \
+    src/gui/dlg_msg_search.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_send_message.h \
+    src/gui/dlg_signature_detail.h \
+    src/gui/dlg_timestamp_expir.h \
+    src/gui/dlg_view_zfo.h \
+    src/gui/dlg_yes_no_checkbox.h \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
@@ -313,50 +325,38 @@ HEADERS += src/common.h \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
-    src/log/log.h \
     src/log/log_c.h \
     src/log/log_common.h \
+    src/log/log.h \
     src/models/accounts_model.h \
     src/models/attachment_model.h \
     src/models/files_model.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
-    src/gui/dlg_about.h \
-    src/gui/dlg_view_zfo.h \
     src/thread/worker.h \
-    src/gui/dlg_signature_detail.h \
-    src/gui/dlg_change_directory.h \
-    src/gui/dlg_correspondence_overview.h \
-    src/gui/dlg_import_zfo.h \
-    src/gui/dlg_import_zfo_result.h \
-    src/gui/dlg_account_from_db.h \
-    src/gui/dlg_yes_no_checkbox.h \
-    src/gui/dlg_msg_search.h \
-    src/gui/dlg_timestamp_expir.h \
-    src/cli/cli.h \
-    src/views/attachment_table_widget.h \
     src/views/attachment_table_view.h \
+    src/views/attachment_table_widget.h \
     src/views/table_home_end_filter.h
 
 FORMS += src/gui/ui/datovka.ui \
+    src/gui/ui/dlg_about.ui \
+    src/gui/ui/dlg_account_from_db.ui \
+    src/gui/ui/dlg_change_directory.ui \
     src/gui/ui/dlg_change_pwd.ui \
     src/gui/ui/dlg_contacts.ui \
+    src/gui/ui/dlg_correspondence_overview.ui \
     src/gui/ui/dlg_create_account.ui \
     src/gui/ui/dlg_ds_search.ui \
+    src/gui/ui/dlg_import_zfo_result.ui \
+    src/gui/ui/dlg_import_zfo.ui \
+    src/gui/ui/dlg_msg_search.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \
-    src/gui/ui/dlg_about.ui \
-    src/gui/ui/dlg_view_zfo.ui \
     src/gui/ui/dlg_signature_detail.ui \
-    src/gui/ui/dlg_change_directory.ui \
-    src/gui/ui/dlg_correspondence_overview.ui \
-    src/gui/ui/dlg_import_zfo.ui \
-    src/gui/ui/dlg_import_zfo_result.ui \
-    src/gui/ui/dlg_account_from_db.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui \
-    src/gui/ui/dlg_msg_search.ui \
-    src/gui/ui/dlg_timestamp_expir.ui
+    src/gui/ui/dlg_timestamp_expir.ui \
+    src/gui/ui/dlg_view_zfo.ui \
+    src/gui/ui/dlg_yes_no_checkbox.ui
 
 RESOURCES += \
     res/resources.qrc
