@@ -8276,8 +8276,8 @@ bool MainWindow::loginMethodUserNamePwd(
 				ret = checkConnectionError(status,
 				    accountInfo.accountName(), isdsMsg, mw);
 			} else {
-				accountInfo.setRememberPwd(false);
-				accountInfo.setPassword("");
+				//accountInfo.setRememberPwd(false);
+				//accountInfo.setPassword("");
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
 				    "your databox from account \"%1\".")
@@ -8498,9 +8498,6 @@ bool MainWindow::loginMethodCertificateOnly(
 		 * TODO -- Notify the user that he should protect his
 		 * certificates with a password?
 		 */
-	} else {
-		accountInfo.setRememberPwd(false);
-		accountInfo.setPassword("");
 	}
 
 	if (0 != mw) {
