@@ -71,9 +71,11 @@ private slots:
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
 	void attachmentSelectionChanged(const QItemSelection &selected,
 	    const QItemSelection &deselected);
+	void setAccountInfo(int item);
 
 private:
 	QTimer *pingTimer;
+	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;
 	QString m_dbId;
@@ -85,9 +87,11 @@ private:
 	bool m_dbOpenAddressing;
 	QString m_lastAttAddPath;
 	QString m_pdzCredit;
-	MessageDbSet &m_dbSet;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
+
+	MessageDbSet *m_dbSet;
+
 
 	void initNewMessageDialog(void);
 	void calculateAndShowTotalAttachSize(void);

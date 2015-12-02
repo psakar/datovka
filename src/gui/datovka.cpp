@@ -4829,11 +4829,35 @@ void MainWindow::openSendMessageDialog(int action)
 {
 	debugFuncCall();
 
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-
+	QPair <QString, MessageDbSet *> userNameAndMsgDbSet;
+	QList< QPair<QString, MessageDbSet *> > messageDbList;
 	qint64 msgId = -1;
 	QDateTime deliveryTime;
+
+	/* get pointer to database for current accounts */
+	QModelIndex currIndex = ui->accountList->currentIndex();
+	currIndex = AccountModel::indexTop(currIndex);
+	const QString userName = currIndex.data(ROLE_ACNT_USER_NAME).toString();
+	Q_ASSERT(!userName.isEmpty());
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	Q_ASSERT(0 != dbSet);
+	userNameAndMsgDbSet.first = userName;
+	userNameAndMsgDbSet.second = dbSet;
+	messageDbList.append(userNameAndMsgDbSet);
+
+	/* get pointer to database for other accounts */
+	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+		QModelIndex index = m_accountModel.index(i, 0);
+		if (currIndex != index) {
+			const QString usrName =
+			    index.data(ROLE_ACNT_USER_NAME).toString();
+			Q_ASSERT(!usrName.isEmpty());
+			MessageDbSet *dbSet = accountDbSet(usrName, this);
+			userNameAndMsgDbSet.first = usrName;
+			userNameAndMsgDbSet.second = dbSet;
+			messageDbList.append(userNameAndMsgDbSet);
+		}
+	}
 
 	/* if is reply or template, ID of selected message is required */
 	if (DlgSendMessage::ACT_REPLY == action ||
@@ -4847,14 +4871,8 @@ void MainWindow::openSendMessageDialog(int action)
 		deliveryTime = msgDeliveryTime(index);
 	}
 
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 	const AccountModel::SettingsMap &accountInfo =
 	    AccountModel::globAccounts[userName];
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, this)) {
@@ -4871,7 +4889,7 @@ void MainWindow::openSendMessageDialog(int action)
 		lastAttachAddPath = accountInfo.lastAttachAddPath();
 	}
 
-	QDialog *newMessageDialog = new DlgSendMessage(*dbSet,
+	QDialog *newMessageDialog = new DlgSendMessage(messageDbList,
 	    (DlgSendMessage::Action) action, msgId, deliveryTime,
 	    userName, this);
 
