@@ -291,7 +291,9 @@ SOURCES += src/cli/cli.cpp \
     src/thread/worker.cpp \
     src/views/attachment_table_view.cpp \
     src/views/attachment_table_widget.cpp \
-    src/views/table_home_end_filter.cpp
+    src/views/table_home_end_filter.cpp \
+    src/worker/pool.cpp \
+    src/worker/task.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -340,7 +342,9 @@ HEADERS += src/cli/cli.h \
     src/thread/worker.h \
     src/views/attachment_table_view.h \
     src/views/attachment_table_widget.h \
-    src/views/table_home_end_filter.h
+    src/views/table_home_end_filter.h \
+    src/worker/pool.h \
+    src/worker/task.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
