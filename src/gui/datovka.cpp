@@ -7940,98 +7940,174 @@ void MainWindow::showConnectionErrorMessageBox(int status,
     const QString &accountName, QString isdsMsg)
 /* ========================================================================= */
 {
-	QString msgBoxTitle;
+
 	QString msgBoxContent;
+	QString msgBoxTitle = accountName +
+	    ": " + tr("Error during a connection to ISDS server!");
 
 	if (isdsMsg.isEmpty()) {
 		isdsMsg = isds_strerror((isds_error)status);
 	}
 
+
 	switch(status) {
 	case IE_NOT_LOGGED_IN:
-		msgBoxTitle = accountName + ": " + tr("Authentication error!");
+		msgBoxTitle = accountName + ": "
+		    + tr("Error during authentication!");
 		msgBoxContent =
 		    tr("It was not possible to connect to your Databox "
-		    "from account \"%1\"").arg(accountName) + "." +
+		    "from account \"%1\".").arg(accountName)
 		    + "<br><br>" +
-		    "<b>" + accountName + ": " + isdsMsg
+		    "<b>" + tr("Authentication failed!")
 		    + "</b>" + "<br><br>" +
-		    tr("Please check your credentials including the test-"
-			"environment setting and login method.") + "<br>" +
-		    tr("It is possible that your password has expired - "
-			"in this case, you need to use the official web "
-			"interface of Datové schránky to change it.");
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("Please check your credentials and login method "
+		    "together with your password.") + " " +
+		    tr("It is also possible that your password has expired - "
+		    "in this case, you need to use the official web "
+		    "interface of Datové schránky to change it.");
 		break;
 
 	case IE_PARTIAL_SUCCESS:
 		msgBoxTitle = accountName +
-		    ": " + tr("OTP authentication error!");
+		    ": " + tr("Error during OTP authentication!");
 		msgBoxContent =
 		    tr("It was not possible to connect to your Databox.")
 		    + "<br><br>" +
-		    "<b>" + isdsMsg + "</b>"
-		    + "<br><br>" +
-		    tr("Please check your credentials including the test-"
-			"environment setting.") + "<br>" +
+		    "<b>" + tr("OTP authentication failed!")
+		    + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("Please check your credentials together with entered "
+		    "security/SMS code and try again.") + " " +
 		    tr("It is aslo possible that your password has expired - "
-			"in this case, you need to use the official web "
-			"interface of Datové schránky to change it.");
+		    "in this case, you need to use the official web "
+		    "interface of Datové schránky to change it.");
 		break;
 
 	case IE_TIMED_OUT:
-		msgBoxTitle = accountName +
-		    ": " + tr("Connection to ISDS error!");
 		msgBoxContent =
 		    tr("It was not possible to establish a connection "
-		    "within a set time.") + "<br><br>" +
-		    "<b>" + isdsMsg + "</b>"
+		    "within a set time.")
 		    + "<br><br>" +
+		    "<b>" + tr("Timeout for connection to server expired!")
+		    + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
 		    tr("This is either caused by an extremely slow and/or "
-		    "unstable connection or by an improper setup.") + "<br>" +
+		    "unstable connection or by an improper setup.") + " " +
 		    tr("Please check your internet connection and try again.")
-		    + "<br><br>" + tr("It might be necessary to use a proxy to "
-		    "connect to the server. If yes, please set it up in the "
+		    + "<br><br>" + tr("It might be necessary to use a proxy to"
+		    " connect to the server. Also is possible that the server"
+		    " ISDS is inoperative or busy. Try again later.");
+		break;
+
+	case IE_HTTP:
+		msgBoxContent =
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("HTTPS problem occurred or redirect to server"
+		    " failed!") + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is usually caused by either lack of internet "
+		    "connection or by some problem with the server ISDS.")
+		    + "<br><br>" + tr("It is possible that the server ISDS is"
+		    " inoperative or busy. Try again later.");
+		break;
+
+	case IE_ISDS:
+		msgBoxContent =
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("ISDS server problem or service"
+		    " was not found!") + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is usually caused by either lack of internet "
+		    "connection or by some problem with the server ISDS.")
+		    + "<br><br>" + tr("It is possible that the server ISDS is"
+		    " inoperative or busy. Try again later.");
+		break;
+
+	case IE_NETWORK:
+		msgBoxContent =
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("Connection to server failed or problem with"
+		    " network occurred!") + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is usually caused by either lack of internet "
+		    "connection or by a firewall on the way.") + " " +
+		    tr("Please check your internet connection and try again.")
+		    + "<br><br>" + tr("It might be necessary to use a proxy to"
+		    " connect to the server. If yes, please set it up in the "
 		    "File/Proxy settings menu.");
 		break;
 
-	case IE_INVAL:
-	case IE_ENUM:
-	case IE_NOMEM:
-	case IE_INVALID_CONTEXT:
-	case IE_NOTSUP:
-	case IE_HTTP:
-	case IE_ERROR:
-		msgBoxTitle = accountName +
-		    ": " + tr("Datovka internal error!");
+	case IE_CONNECTION_CLOSED:
 		msgBoxContent =
-		    tr("It was not possible to establish a connection "
-		    "to server Datové Schránky.") + "<br><br>" +
-		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
-		    "<b>" + tr("Datovka internal error!") + "</b>" + "<br><br>" +
-		    tr("Please check your internet connection and try again.");
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("Problem with HTTPS connection!")
+		    + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is maybe caused by missing certificate for SSL"
+		    " communication or application cannot open SSL socket.")
+		    + "<br><br>" + tr("It is also possible that some "
+		    "connection libraries are missing (CURL, SSL).");
+		break;
+
+	case IE_SECURITY:
+		msgBoxContent =
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("HTTPS problem or security problem!")
+		    + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is maybe caused by missing SSL certificate"
+		    " needed for communication with server or it"
+		    " was not possible establish secure connection with"
+		    " the server ISDS.")
+		    + "<br><br>" + tr("It is possible that the certificate"
+		    " expired.");
+		break;
+
+	case IE_XML:
+	case IE_SOAP:
+		msgBoxContent =
+		    tr("It was not possible to establish a connection between"
+		    " your computer and the server Datove schranky.")
+		    + "<br><br>" +
+		    "<b>" + tr("SOAP problem or XML problem!")
+		    + "</b>" + "<br><br>" +
+		    tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("This is maybe caused by error in SOAP or"
+		    " XML content for this web service is wrong.")
+		    + "<br><br>" + tr("Also it is possible that the server "
+		    "ISDS is inoperative or busy. Try again later.");
 		break;
 
 	default:
 		msgBoxTitle = accountName +
-		    ": " + tr("Connection to ISDS error!");
+		    ": " + tr("Datovka internal error!");
 		msgBoxContent =
-		    tr("It was not possible a connection between your computer "
-		    "and the server of Datove schranky.") + "<br><br>" +
-		    "<b>" + tr("Connection to ISDS failed!") + "</b>" + "<br><br>" +
-		    tr("ISDS error: ") + isdsMsg + "<br><br>" +
-		    tr("This is usually caused by either lack of internet "
-		    "connection or by a firewall on the way.") + "<br>" +
-		    tr("Please check your internet connection and try again.")
-		    + "<br><br>" + tr("It might be necessary to use a proxy to "
-		    "connect to the server. If yes, please set it up in the "
-		    "File/Proxy settings menu.");
+		    tr("It was not possible to establish a connection "
+		    "to server Datove schranky.") + "<br><br>" +
+		    "<b>" + tr("Datovka internal error!") + "</b>" + "<br><br>"
+		    + tr("Error: ") + isdsMsg + "<br><br>" +
+		    tr("An unexpected error occurred. Please restart "
+		    "application and try again or you should contact the "
+		    "support for this application.");
 		break;
 	}
 
 	showStatusTextWithTimeout(tr("It was not possible to connect to your"
 	    " databox from account \"%1\".").arg(accountName));
 
-	QMessageBox::critical(this, msgBoxTitle, msgBoxContent, QMessageBox::Ok);
+	QMessageBox::critical(this, msgBoxTitle, msgBoxContent,
+	    QMessageBox::Ok);
 }
 
 
@@ -8115,10 +8191,10 @@ bool MainWindow::loginMethodUserNamePwd(
 		ret = checkConnectionError(status, accountInfo.accountName(),
 		    isdsMsg, mw);
 
-		// if error, to show account dialog again
-		while (!ret) {
+		// if authentication error, show account dialog
+		while (status == IE_NOT_LOGGED_IN || status == IE_PARTIAL_SUCCESS) {
 			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
+			    accountInfo, DlgCreateAccount::ACT_EDIT, mw);
 			if (QDialog::Accepted == editAccountDialog->exec()) {
 				usedPwd = accountInfo.password();
 				status = isdsLoginUserName(isdsSessions.session(userName),
@@ -8127,6 +8203,7 @@ bool MainWindow::loginMethodUserNamePwd(
 				ret = checkConnectionError(status,
 				    accountInfo.accountName(), isdsMsg, mw);
 			} else {
+				// info: we dont reset pwd in this time.
 				//accountInfo.setRememberPwd(false);
 				//accountInfo.setPassword("");
 				mw->showStatusTextWithTimeout(
