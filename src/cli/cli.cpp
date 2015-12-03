@@ -202,7 +202,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	if (map["dmType"].toString() == MT_RECEIVED) {
 
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
+		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
@@ -221,7 +221,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	} else if (map["dmType"].toString() == MT_SENT) {
 
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *msgDbSet, err, NULL, 0, 0, st, sn, newMsgIdList,
+		    *msgDbSet, err, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
 		if (Q_SUCCESS == ret) {
@@ -240,7 +240,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		cli_error lret = CLI_SUCCESS;
 		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
-		    *msgDbSet, err, NULL, 0, 0, rt, rn, newMsgIdList,
+		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Received message list has "
@@ -253,7 +253,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			lret = CLI_ERROR;
 		}
 		ret = Worker::downloadMessageList(username, MSG_SENT,
-		    *msgDbSet, errmsg, NULL, 0, 0, st, sn, newMsgIdList,
+		    *msgDbSet, errmsg, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX << "Sent message list has been "
@@ -308,7 +308,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 			ret = Worker::downloadMessage(username,
 			    msgId, true, MSG_RECEIVED,
-			    *msgDbSet, err, NULL, 0, 0);
+			    *msgDbSet, err, NULL);
 
 			if (Q_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Received message" <<
@@ -326,7 +326,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 			ret = Worker::downloadMessage(username,
 			    msgId, true, MSG_SENT,
-			    *msgDbSet, err, NULL, 0, 0);
+			    *msgDbSet, err, NULL);
 
 			if (Q_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Sent message" <<

@@ -7047,7 +7047,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
 						Worker::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "", 0, 0)) {
+						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
@@ -7116,7 +7116,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
 						Worker::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "", 0, 0)) {
+						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							/* update message state into database */
 							messageDb->msgSetProcessState(dmId, SETTLED, false);
@@ -7486,7 +7486,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	QString errMsg;
 	if (Q_SUCCESS == Worker::downloadMessage(userName,
 	        MessageDb::MsgId(dmId, deliveryTime), true,
-	        msgDirect, *dbSet, errMsg, QString(), 0, 0)) {
+	        msgDirect, *dbSet, errMsg, QString())) {
 		/* TODO -- Wouldn't it be better with selection changed? */
 		postDownloadSelectedMessageAttachments(userName, dmId);
 		return true;

@@ -199,7 +199,7 @@ void Worker::doJob(void)
 
 		if (Q_SUCCESS == downloadMessage(job.userName, job.mId,
 		        true, job.msgDirect, *job.dbSet, errMsg,
-		        "DownloadMessage", 0, this)) {
+		        "DownloadMessage")) {
 			/* Only on successful download. */
 			emit refreshAccountList(job.userName);
 			emit refreshAttachmentList(job.userName, job.mId.dmId);
@@ -228,7 +228,7 @@ void Worker::doJob(void)
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
-		        0, this, rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
+		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -249,7 +249,7 @@ void Worker::doJob(void)
 
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
-		        errMsg, "GetListOfSentMessages", 0, this, st, sn,
+		        errMsg, "GetListOfSentMessages", st, sn,
 		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
@@ -372,9 +372,8 @@ qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
  */
 qdatovka_error Worker::downloadMessageList(const QString &userName,
     enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
-    const QString &progressLabel, QProgressBar *pBar, Worker *worker,
-    int &total, int &news, QStringList &newMsgIdList, ulong *dmLimit,
-    int dmStatusFilter)
+    const QString &progressLabel, int &total, int &news,
+    QStringList &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
 /* ========================================================================= */
 {
 #define USE_TRANSACTIONS 1
@@ -388,13 +387,11 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		return Q_GLOBAL_ERROR;
 	}
 
-	if (0 != pBar) { pBar->setValue(0); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 0); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
 	isds_error status = IE_ERROR;
 
-	if (0 != pBar) { pBar->setValue(10); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 10); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 10);
 
 	struct isds_ctx *session = isdsSessions.session(userName);
 	if (NULL == session) {
@@ -416,8 +413,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 		    0, dmLimit, &messageList);
 	}
 
-	if (0 != pBar) { pBar->setValue(20); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 20); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 20);
 
 	if (status != IE_SUCCESS) {
 		errMsg = isdsLongMessage(session);
@@ -439,8 +435,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	box = messageList;
 
 	if (allcnt == 0) {
-		if (0 != pBar) { pBar->setValue(50); }
-		if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 50); }
+		emit globMsgProcEmitter.progressChange(progressLabel, 50);
 	} else {
 		delta = 80.0 / allcnt;
 	}
@@ -463,9 +458,8 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 	while (0 != box) {
 
 		diff += delta;
-		if (0 != pBar) { pBar->setValue((int) (20 + diff)); }
-		if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel,
-		    (int) (20 + diff)); }
+		emit globMsgProcEmitter.progressChange(progressLabel,
+		    (int) (20 + diff));
 
 
 		const isds_message *item = (isds_message *) box->data;
@@ -508,7 +502,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 				QString errMsg;
 				downloadMessage(userName,
 				    MessageDb::MsgId(dmId, deliveryTime),
-				    true, msgDirect, dbSet, errMsg, "", 0, 0);
+				    true, msgDirect, dbSet, errMsg, "");
 			}
 			newMsgIdList.append(dmID);
 			newcnt++;
@@ -534,7 +528,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 					downloadMessage(userName,
 					    MessageDb::MsgId(dmId, deliveryTime),
 					    true, msgDirect, dbSet, errMsg,
-					    "", 0, 0);
+					    "");
 				}
 
 				if (dmDbMsgStatus != dmNewMsgStatus) {
@@ -549,7 +543,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 				QString errMsg;
 				downloadMessage(userName,
 				    MessageDb::MsgId(dmId, deliveryTime),
-				    true, msgDirect, dbSet, errMsg, "", 0, 0);
+				    true, msgDirect, dbSet, errMsg, "");
 			}
 		}
 
@@ -565,8 +559,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 
 	isds_list_free(&messageList);
 
-	if (0 != pBar) { pBar->setValue(100); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 100); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	if (MSG_RECEIVED == msgDirect) {
 		qDebug() << "#Received total:" << allcnt
@@ -717,7 +710,7 @@ fail:
 qdatovka_error Worker::storeMessage(bool signedMsg,
     enum MessageDirection msgDirect,
     MessageDbSet &dbSet, const struct isds_message *msg,
-    const QString &progressLabel, QProgressBar *pBar, Worker *worker)
+    const QString &progressLabel)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -768,8 +761,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		: qDebug() << "ERROR: Message raw data update!";
 	}
 
-	if (0 != pBar) { pBar->setValue(30); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 30); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
 	if (updateEnvelope(msgDirect, *messageDb, envel)) {
 		qDebug() << "Message envelope was updated...";
@@ -777,8 +769,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		qDebug() << "ERROR: Message envelope update!";
 	}
 
-	if (0 != pBar) { pBar->setValue(50); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 50); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 50);
 
 	if (signedMsg) {
 		/* Verify message signature. */
@@ -796,8 +787,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		}
 	}
 
-	if (0 != pBar) { pBar->setValue(60); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 60); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 60);
 
 	/* insert/update hash into db */
 	if (NULL != envel->hash) {
@@ -813,8 +803,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 		}
 	}
 
-	if (0 != pBar) { pBar->setValue(70); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 70); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 70);
 
 	/* Insert/update all attachment files */
 	storeAttachments(*messageDb, dmID, msg->documents);
@@ -861,16 +850,14 @@ qdatovka_error Worker::storeAttachments(MessageDb &db, qint64 dmID,
  */
 qdatovka_error Worker::downloadMessage(const QString &userName,
     MessageDb::MsgId mId, bool signedMsg, enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel, QProgressBar *pBar,
-    Worker *worker)
+    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
 	qDebug() << "Downloading complete message" << mId.dmId;
 
-	if (0 != pBar) { pBar->setValue(0); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 0); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
 	isds_error status;
 
@@ -882,8 +869,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	// message structures - all members
 	struct isds_message *message = NULL;
 
-	if (0 != pBar) { pBar->setValue(10); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 10); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 10);
 
 	/* download signed message? */
 	if (signedMsg) {
@@ -910,8 +896,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 		*/
 	}
 
-	if (0 != pBar) { pBar->setValue(20); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 20); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 20);
 
 	if (IE_SUCCESS != status) {
 		errMsg = isdsLongMessage(session);
@@ -949,10 +934,9 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 
 	/* Store the message. */
 	storeMessage(signedMsg, msgDirect, dbSet, message,
-	    progressLabel, pBar, worker);
+	    progressLabel);
 
-	if (0 != pBar) { pBar->setValue(90); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 90); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 90);
 
 	Q_ASSERT(mId.dmId == QString(message->envelope->dmID).toLongLong());
 
@@ -978,8 +962,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 		}
 	}
 
-	if (0 != pBar) { pBar->setValue(100); }
-	if (0 != worker) { emit globMsgProcEmitter.progressChange(progressLabel, 100); }
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	isds_list_free(&message->documents);
 	isds_message_free(&message);
