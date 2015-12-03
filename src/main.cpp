@@ -44,6 +44,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
 #include "src/settings/proxy.h"
+#include "src/worker/pool.h"
 
 #define CONF_SUBDIR_OPT "conf-subdir"
 #define LOAD_CONF_OPT "load-conf"
@@ -571,6 +572,10 @@ int main(int argc, char *argv[])
 		AccountModel::globAccounts.loadFromSettings(settings);
 	}
 
+	/* Start worker threads. */
+	globWorkPool.start();
+	logInfo("%s\n", "Worker pool started.");
+
 	QStringList inOptions = parser.optionNames();
 	QStringList serList;
 
@@ -599,6 +604,11 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+	/* Wait until all threads finished. */
+	logInfo("%s\n", "Wainting for pending worker threads.");
+	globWorkPool.wait();
+	logInfo("%s\n", "All worker therads finished");
 
 	stop = QDateTime::currentMSecsSinceEpoch();
 	diff = stop - start;
