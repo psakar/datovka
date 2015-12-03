@@ -47,6 +47,18 @@ signals:
 	    const QString &err);
 
 	/*!
+	 * @brief This signal is emitted when account is processed.
+	 *     It sends the number of processed messages.
+	 *
+	 * @param[in] add Whether to add the obtained value.
+	 * @param[in] rt Number of received messages on server.
+	 * @param[in] rn Number of new received messages (locally unknown).
+	 * @param[in] st Number of sent messages on server.
+	 * @param[in] sn Number of new sent messages (locally unknown).
+	 */
+	void downloadListSummary(bool add, int rt, int rn, int st, int sn);
+
+	/*!
 	 * @brief Emitted when download process succeeds.
 	 *
 	 * @note Message identifier -1 means list of received messages,

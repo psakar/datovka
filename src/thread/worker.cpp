@@ -230,7 +230,8 @@ void Worker::doJob(void)
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
 		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit globMsgProcEmitter.downloadSuccess(job.userName, -1);
-		emit changeStatusBarInfo(true, rt, rn , st, sn);
+		emit globMsgProcEmitter.downloadListSummary(true,
+		    rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
 			qDebug() << "All DONE!";
@@ -253,7 +254,8 @@ void Worker::doJob(void)
 		        errMsg, "GetListOfSentMessages", st, sn,
 		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit globMsgProcEmitter.downloadSuccess(job.userName, -2);
-		emit changeStatusBarInfo(true, rt, rn , st, sn);
+		emit globMsgProcEmitter.downloadListSummary(true,
+		    rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
 			qDebug() << "All DONE!";

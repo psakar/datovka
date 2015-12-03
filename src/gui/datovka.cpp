@@ -190,8 +190,12 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(QString, qint64)),
 	    this, SLOT(refreshAccountAndAttachmentList(QString, qint64)));
-	connect(&globMsgProcEmitter, SIGNAL(downloadFail(QString, qint64, QString)),
-	    this, SLOT(clearInfoInStatusBarAndShowDialog(QString, qint64, QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadFail(QString, qint64, QString)), this,
+	    SLOT(clearInfoInStatusBarAndShowDialog(QString, qint64, QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadListSummary(bool, int, int, int, int)), this,
+	    SLOT(dataFromWorkerToStatusBarInfo(bool, int, int, int, int)));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -3338,15 +3342,6 @@ void MainWindow::processPendingWorkerJobs(void)
 	m_syncAcntWorker = new Worker();
 	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
-	{
-		/* Downloading message list. */
-		connect(m_syncAcntWorker,
-		    SIGNAL(changeStatusBarInfo(bool,
-		        int, int, int, int)),
-		    this,
-		    SLOT(dataFromWorkerToStatusBarInfo(bool,
-		        int, int, int, int)));
-	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
 	connect(m_syncAcntThread, SIGNAL(started()),

@@ -232,12 +232,6 @@ signals:
 	void workRequested(void);
 
 	/*!
-	 * @brief This signal is emitted when account is processed.
-	 *     It sends the number of processed messages.
-	 */
-	void changeStatusBarInfo(bool, int, int, int, int);
-
-	/*!
 	 * @brief This signal is emitted when process is finished
 	 */
 	void finished(void);
