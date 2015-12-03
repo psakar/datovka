@@ -656,11 +656,6 @@ private slots:
 	void clearStatusBar(void);
 
 	/*!
-	 * @brief Refresh AccountList.
-	 */
-	void refreshAccountList(const QString &userName);
-
-	/*!
 	 * @brief Set and run any actions after main window has been created.
 	 */
 	void setWindowsAfterInit(void);
@@ -673,9 +668,9 @@ private slots:
 	    QString action);
 
 	/*!
-	 * @brief Set tablewidget when message download worker is done.
+	 * @brief Update account list and attachment list.
 	 */
-	void postDownloadSelectedMessageAttachments(const QString &userName,
+	void refreshAccountAndAttachmentList(const QString &userName,
 	    qint64 dmId);
 
 	/*!
@@ -724,6 +719,17 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Refresh AccountList.
+	 */
+	void refreshAccountList(const QString &userName);
+
+	/*!
+	 * @brief Set tablewidget when message download worker is done.
+	 */
+	void postDownloadSelectedMessageAttachments(const QString &userName,
+	    qint64 dmId);
 
 	/*!
 	 * @brief Save attachment identified by indexes to file.

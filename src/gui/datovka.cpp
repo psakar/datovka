@@ -188,8 +188,8 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Message processing signals. */
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
-	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(const QString)),
-	    this, SLOT(refreshAccountList(const QString)));
+	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(QString, qint64)),
+	    this, SLOT(refreshAccountAndAttachmentList(QString, qint64)));
 	connect(&globMsgProcEmitter, SIGNAL(downloadFail(qint64, QString)),
 	    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64, QString)));
 
@@ -2296,7 +2296,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
     const QString &userName, qint64 dmId)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	showStatusTextWithTimeout(tr("Message \"%1\" "
 	    " was downloaded from ISDS server.").arg(dmId));
@@ -5624,12 +5624,30 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 
 /* ========================================================================= */
 /*
+ * Update account list and attachment list.
+ */
+void MainWindow::refreshAccountAndAttachmentList(const QString &userName,
+    qint64 dmId)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	refreshAccountList(userName);
+
+	if (0 <= dmId) {
+		postDownloadSelectedMessageAttachments(userName, dmId);
+	}
+}
+
+
+/* ========================================================================= */
+/*
 * Slot: Refresh AccountList
 */
 void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	QModelIndex selectedIdx(ui->accountList->currentIndex());
 	QModelIndex selectedTopIdx(AccountModel::indexTop(selectedIdx));

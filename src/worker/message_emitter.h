@@ -47,9 +47,12 @@ signals:
 	/*!
 	 * @brief Emitted when download process succeeds.
 	 *
+	 * @note -1 means list of received messages,
+	 *     -2 means list of sent messages.
+	 *
 	 * @param[in] usrName Account identifier (user login name).
 	 */
-	void downloadSuccess(const QString &usrName);
+	void downloadSuccess(const QString &usrName, qint64 msgId);
 
 	/*!
 	 * @brief This signal is emitted when counted value is changed

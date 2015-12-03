@@ -232,11 +232,6 @@ signals:
 	void workRequested(void);
 
 	/*!
-	 * @brief This signal is emitted when message downloading is finished
-	 */
-	void refreshAttachmentList(const QString, qint64);
-
-	/*!
 	 * @brief This signal is emitted when account is processed.
 	 *     It sends the number of processed messages.
 	 */

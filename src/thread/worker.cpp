@@ -201,8 +201,7 @@ void Worker::doJob(void)
 		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage")) {
 			/* Only on successful download. */
-			emit globMsgProcEmitter.downloadSuccess(job.userName);
-			emit refreshAttachmentList(job.userName, job.mId.dmId);
+			emit globMsgProcEmitter.downloadSuccess(job.userName, job.mId.dmId);
 		} else {
 			emit globMsgProcEmitter.downloadFail(job.mId.dmId,
 			    errMsg);
@@ -230,7 +229,7 @@ void Worker::doJob(void)
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
 		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit globMsgProcEmitter.downloadSuccess(job.userName);
+		emit globMsgProcEmitter.downloadSuccess(job.userName, -1);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
@@ -252,7 +251,7 @@ void Worker::doJob(void)
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", st, sn,
 		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit globMsgProcEmitter.downloadSuccess(job.userName);
+		emit globMsgProcEmitter.downloadSuccess(job.userName, -2);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
