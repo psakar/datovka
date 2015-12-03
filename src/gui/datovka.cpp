@@ -188,8 +188,9 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Message processing signals. */
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
-	connect(&globMsgProcEmitter,
-	    SIGNAL(messageDownloadFailed(qint64, QString)),
+	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(const QString)),
+	    this, SLOT(refreshAccountList(const QString)));
+	connect(&globMsgProcEmitter, SIGNAL(downloadFail(qint64, QString)),
 	    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64, QString)));
 
 	/* Account list. */
@@ -3342,10 +3343,6 @@ void MainWindow::processPendingWorkerJobs(void)
 		    this,
 		    SLOT(dataFromWorkerToStatusBarInfo(bool,
 		        int, int, int, int)));
-		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAccountList(const QString)),
-		    this,
-		    SLOT(refreshAccountList(const QString)));
 	}
 	{
 		/* Downloading attachment. */

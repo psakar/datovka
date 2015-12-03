@@ -42,7 +42,14 @@ signals:
 	 * @param[in] msgId Message identifier.
 	 * @param[in] err   Error description.
 	 */
-	void messageDownloadFailed(qint64 msgId, const QString &err);
+	void downloadFail(qint64 msgId, const QString &err);
+
+	/*!
+	 * @brief Emitted when download process succeeds.
+	 *
+	 * @param[in] usrName Account identifier (user login name).
+	 */
+	void downloadSuccess(const QString &usrName);
 
 	/*!
 	 * @brief This signal is emitted when counted value is changed

@@ -201,11 +201,11 @@ void Worker::doJob(void)
 		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage")) {
 			/* Only on successful download. */
-			emit refreshAccountList(job.userName);
+			emit globMsgProcEmitter.downloadSuccess(job.userName);
 			emit refreshAttachmentList(job.userName, job.mId.dmId);
 		} else {
-			emit globMsgProcEmitter.messageDownloadFailed(
-			    job.mId.dmId, errMsg);
+			emit globMsgProcEmitter.downloadFail(job.mId.dmId,
+			    errMsg);
 		}
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
@@ -230,7 +230,7 @@ void Worker::doJob(void)
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
 		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit refreshAccountList(job.userName);
+		emit globMsgProcEmitter.downloadSuccess(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
@@ -238,8 +238,7 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -1 means list of received messages
-			emit globMsgProcEmitter.messageDownloadFailed(-1,
-			    errMsg);
+			emit globMsgProcEmitter.downloadFail(-1, errMsg);
 		}
 
 	} else if (MSG_SENT == job.msgDirect) {
@@ -253,7 +252,7 @@ void Worker::doJob(void)
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", st, sn,
 		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit refreshAccountList(job.userName);
+		emit globMsgProcEmitter.downloadSuccess(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
 		if (Q_SUCCESS == res) {
@@ -261,8 +260,7 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -2 means list of sent messages
-			emit globMsgProcEmitter.messageDownloadFailed(-2,
-			    errMsg);
+			emit globMsgProcEmitter.downloadFail(-2, errMsg);
 		}
 	}
 
