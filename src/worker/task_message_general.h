@@ -62,7 +62,7 @@ public:
 	/*!
 	 * @brief Download whole message (envelope, attachments, raw).
 	 *
-	 * TODO -- This method ought to be private.
+	 * TODO -- This method ought to be protected.
 	 *
 	 * @param[in]     userName      Account identifier (user login name).
 	 * @param[in]     mId           Message identifier.
@@ -79,6 +79,31 @@ public:
 	    MessageDb::MsgId mId, bool signedMsg,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
 	    QString &errMsg, const QString &progressLabel);
+
+	/*!
+	 * @brief Download message list from ISDS for given account.
+	 *
+	 * TODO -- This method ought to be protected.
+	 *
+	 * @param[in]     userName       Account identifier (user login name).
+	 * @param[in]     msgDirect      Received or sent message.
+	 * @param[in,out] dbSet          Database container.
+	 * @param[out]    errMsg         Error message.
+	 * @param[in]     progressLabel  Progress-bar label.
+	 * @param[out]    total          Total number of messages.
+	 * @param[out]    news           Number of new messages.
+	 * @param[out]    newMsgIdList   Identifiers of new messages.
+	 * @param[in]     dmLimit        Maximum number of message list;
+	 *                               NULL if you don't care.
+	 * @param[in]     dmStatusFilter Libisds status filter.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error downloadMessageList(const QString &userName,
+	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+	    QString &errMsg, const QString &progressLabel, int &total,
+	    int &news, QStringList &newMsgIdList, ulong *dmLimit,
+	    int dmStatusFilter);
 
 	/*!
 	 * @brief Store attachments into database.
@@ -156,6 +181,22 @@ private:
 	    MessageDb &messageDb);
 
 	/*!
+	 * @brief Download sent message delivery info and get list of events.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in]     userName  Account identifier (user login name).
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in]     signedMsg Whether to store signed message;
+	 *                          must be true.
+	 * @param[in,out] dbSet     Database container.
+	 * @return True on success.
+	 */
+	static
+	bool downloadMessageState(enum MessageDirection msgDirect,
+	    const QString &userName, qint64 dmId, bool signedMsg,
+	    MessageDbSet &dbSet);
+
+	/*!
 	 * @brief Set message as downloaded from ISDS.
 	 *
 	 * TODO -- Is there a way how to download the information about read
@@ -179,6 +220,18 @@ private:
 	static
 	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_envelope *envel);
+
+	/*!
+	 * @brief Update message information according to supplied envelope.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] dbSet     Database container.
+	 * @param[in]     envel     Message envelope.
+	 * @return True on success.
+	 */
+	static
+	qdatovka_error updateMessageState(enum MessageDirection msgDirect,
+	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 };
 
 #endif /* _TASK_MESSAGE_GENERAL_H_ */

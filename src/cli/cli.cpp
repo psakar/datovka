@@ -30,7 +30,6 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
-#include "src/thread/worker.h"
 #include "src/worker/task_message_general.h"
 
 // Known attributes definition
@@ -202,7 +201,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	QString err;
 	if (map["dmType"].toString() == MT_RECEIVED) {
 
-		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
+		ret = MessageTaskGeneral::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
@@ -221,7 +220,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 	} else if (map["dmType"].toString() == MT_SENT) {
 
-		ret = Worker::downloadMessageList(username, MSG_SENT,
+		ret = MessageTaskGeneral::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, err, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
@@ -240,7 +239,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	} else if (map["dmType"].toString() == MT_SENT_RECEIVED) {
 
 		cli_error lret = CLI_SUCCESS;
-		ret = Worker::downloadMessageList(username, MSG_RECEIVED,
+		ret = MessageTaskGeneral::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
@@ -253,7 +252,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			    ret << err;
 			lret = CLI_ERROR;
 		}
-		ret = Worker::downloadMessageList(username, MSG_SENT,
+		ret = MessageTaskGeneral::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, errmsg, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {

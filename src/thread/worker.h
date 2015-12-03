@@ -130,42 +130,9 @@ public:
 	 */
 	void requestWork(void);
 
-	/*!
-	 * @brief Store sent message delivery information into database.
-	 */
-	static
-	qdatovka_error updateMessageState(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
-
-	/*!
-	 * @brief Download sent/received message list from ISDS for current
-	 *     account index.
-	 */
-	static
-	qdatovka_error downloadMessageList(const QString &userName,
-	    enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &errMsg,
-	    const QString &progressLabel, int &total, int &news,
-	    QStringList &newMsgIdList, ulong *dmLimit, int dmStatusFilter);
-
 private:
 
 	const Job m_job; /*!< If invalid, then a job list is used. */
-
-	/*!
-	* @brief Download sent message delivery info and get list of events
-	* message
-	*/
-	static
-	bool getMessageState(enum MessageDirection msgDirect,
-	    const QString &userName, qint64 dmId, bool signedMsg,
-	    MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Update message envelope.
-	 */
-	static
-	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 signals:
 	/*!
