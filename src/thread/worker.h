@@ -157,7 +157,7 @@ public:
 	 * @brief Download delivery info for message.
 	 */
 	static
-	bool getDeliveryInfo(const QString &userName,
+	qdatovka_error getDeliveryInfo(const QString &userName,
 	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
 
 	/*!

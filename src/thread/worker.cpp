@@ -1033,7 +1033,7 @@ qdatovka_error Worker::storeDeliveryInfo(bool signedMsg,
 /*
 * Download message delivery info, raw and get list of events message
 */
-bool Worker::getDeliveryInfo(const QString &userName,
+qdatovka_error Worker::getDeliveryInfo(const QString &userName,
     qint64 dmId, bool signedMsg, MessageDbSet &dbSet)
 /* ========================================================================= */
 {

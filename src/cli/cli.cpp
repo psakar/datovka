@@ -465,7 +465,7 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 	}
 
 	if (needsISDS) {
-		if (Worker::getDeliveryInfo(username,
+		if (Q_SUCCESS == Worker::getDeliveryInfo(username,
 		    map["dmID"].toLongLong(), true, *msgDbSet)) {
 			qDebug() << CLI_PREFIX << "Delivery info of message" <<
 			    map["dmID"].toString() << "has been downloaded.";
