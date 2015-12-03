@@ -7053,7 +7053,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
+						MessageTaskGeneral::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
@@ -7122,7 +7122,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
+						MessageTaskGeneral::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
 						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							/* update message state into database */

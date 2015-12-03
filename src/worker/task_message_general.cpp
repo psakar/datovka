@@ -110,7 +110,7 @@ qdatovka_error MessageTaskGeneral::storeDeliveryInfo(bool signedMsg,
 			    dmID);
 		} else {
 			logErrorNL(
-			    "Raw delivery info of maeesa '%d' update failed.",
+			    "Raw delivery info of message '%d' update failed.",
 			    dmID);
 		}
 	}
@@ -128,4 +128,88 @@ qdatovka_error MessageTaskGeneral::storeDeliveryInfo(bool signedMsg,
 	}
 
 	return Q_SUCCESS;
+}
+
+qdatovka_error MessageTaskGeneral::storeEnvelope(
+    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+    const struct isds_envelope *envel)
+{
+	debugFuncCall();
+
+	if (NULL == envel) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
+
+	qint64 dmId = -1;
+	{
+		bool ok = false;
+		dmId = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
+
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	/* Allow invalid delivery time. */
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	/* insert message envelope in db */
+	if (messageDb->msgsInsertMessageEnvelope(dmId,
+	    /* TODO - set correctly next two values */
+	    "tRecord",
+	    envel->dbIDSender,
+	    envel->dmSender,
+	    envel->dmSenderAddress,
+	    envel->dmSenderType ?
+	        (int) *envel->dmSenderType : 0,
+	    envel->dmRecipient,
+	    envel->dmRecipientAddress,
+	    envel->dmAmbiguousRecipient ?
+	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
+	    envel->dmSenderOrgUnit,
+	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
+	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
+	    envel->dbIDRecipient,
+	    envel->dmRecipientOrgUnit,
+	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
+	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
+	    envel->dmToHands,
+	    envel->dmAnnotation,
+	    envel->dmRecipientRefNumber,
+	    envel->dmSenderRefNumber,
+	    envel->dmRecipientIdent,
+	    envel->dmSenderIdent,
+	    envel->dmLegalTitleLaw ?
+	        QString::number(*envel->dmLegalTitleLaw) : QString(),
+	    envel->dmLegalTitleYear ?
+	        QString::number(*envel->dmLegalTitleYear) : QString(),
+	    envel->dmLegalTitleSect,
+	    envel->dmLegalTitlePar,
+	    envel->dmLegalTitlePoint,
+	    envel->dmPersonalDelivery ?
+	        *envel->dmPersonalDelivery : false,
+	    envel->dmAllowSubstDelivery ?
+	        *envel->dmAllowSubstDelivery : false,
+	    envel->timestamp ?
+	        QByteArray((char *) envel->timestamp,
+	            envel->timestamp_length).toBase64() : QByteArray(),
+	    envel->dmDeliveryTime ?
+	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
+	    envel->dmAcceptanceTime ?
+	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	    envel->dmAttachmentSize ?
+	        (int) *envel->dmAttachmentSize : 0,
+	    envel->dmType,
+	    msgDirect)) {
+		logDebugLv0NL("Stored envelope of message '%d' into database.",
+		    dmId);
+		return Q_SUCCESS;
+	} else {
+		logError("Storing envelope of message '%d' failed.", dmId);
+		return Q_GLOBAL_ERROR;
+	}
 }

@@ -162,13 +162,6 @@ public:
 	    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel);
 
 	/*!
-	 * @brief Store envelope into database.
-	 */
-	static
-	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
-
-	/*!
 	 * @brief Download sent/received message list from ISDS for current
 	 *     account index.
 	 */

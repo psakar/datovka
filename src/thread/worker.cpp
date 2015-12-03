@@ -283,96 +283,6 @@ void Worker::doJob(void)
 
 /* ========================================================================= */
 /*
- * Store envelope into database.
- */
-qdatovka_error Worker::storeEnvelope(enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, const struct isds_envelope *envel)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	if (NULL == envel) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	qint64 dmId = -1;
-	{
-		bool ok = false;
-		dmId = QString(envel->dmID).toLongLong(&ok);
-		if (!ok) {
-			return Q_GLOBAL_ERROR;
-		}
-	}
-
-	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
-	/* Allow invalid delivery time. */
-	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
-
-	/* insert message envelope in db */
-	if (messageDb->msgsInsertMessageEnvelope(dmId,
-	    /* TODO - set correctly next two values */
-	    "tRecord",
-	    envel->dbIDSender,
-	    envel->dmSender,
-	    envel->dmSenderAddress,
-	    envel->dmSenderType ?
-	        (int) *envel->dmSenderType : 0,
-	    envel->dmRecipient,
-	    envel->dmRecipientAddress,
-	    envel->dmAmbiguousRecipient ?
-	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
-	    envel->dmSenderOrgUnit,
-	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
-	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
-	    envel->dbIDRecipient,
-	    envel->dmRecipientOrgUnit,
-	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
-	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
-	    envel->dmToHands,
-	    envel->dmAnnotation,
-	    envel->dmRecipientRefNumber,
-	    envel->dmSenderRefNumber,
-	    envel->dmRecipientIdent,
-	    envel->dmSenderIdent,
-	    envel->dmLegalTitleLaw ?
-	        QString::number(*envel->dmLegalTitleLaw) : QString(),
-	    envel->dmLegalTitleYear ?
-	        QString::number(*envel->dmLegalTitleYear) : QString(),
-	    envel->dmLegalTitleSect,
-	    envel->dmLegalTitlePar,
-	    envel->dmLegalTitlePoint,
-	    envel->dmPersonalDelivery ?
-	        *envel->dmPersonalDelivery : false,
-	    envel->dmAllowSubstDelivery ?
-	        *envel->dmAllowSubstDelivery : false,
-	    envel->timestamp ?
-	        QByteArray((char *) envel->timestamp,
-	            envel->timestamp_length).toBase64() : QByteArray(),
-	    envel->dmDeliveryTime ?
-	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
-	    envel->dmAcceptanceTime ?
-	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
-	    envel->dmMessageStatus ?
-	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
-	    envel->dmAttachmentSize ?
-	        (int) *envel->dmAttachmentSize : 0,
-	    envel->dmType,
-	    msgDirect)) {
-		qDebug() << "Message envelope" << dmId <<
-		    "was inserted into db...";
-		return Q_SUCCESS;
-	} else {
-		qDebug() << "ERROR: Message envelope " << dmId <<
-		    "insert!";
-		return Q_GLOBAL_ERROR;
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Download sent/received message list from ISDS for current account index
  */
 qdatovka_error Worker::downloadMessageList(const QString &userName,
@@ -501,7 +411,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
-			storeEnvelope(msgDirect, dbSet, item->envelope);
+			MessageTaskGeneral::storeEnvelope(msgDirect, dbSet, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
 				QString errMsg;
@@ -931,7 +841,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 			}
 
 			/* Store envelope in new location. */
-			storeEnvelope(msgDirect, dbSet, message->envelope);
+			MessageTaskGeneral::storeEnvelope(msgDirect, dbSet, message->envelope);
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;
