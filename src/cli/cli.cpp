@@ -307,7 +307,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	if (needsISDS) {
 		if (map["dmType"].toString() == MT_RECEIVED) {
 
-			ret = Worker::downloadMessage(username,
+			ret = MessageTaskGeneral::downloadMessage(username,
 			    msgId, true, MSG_RECEIVED,
 			    *msgDbSet, err, NULL);
 
@@ -325,7 +325,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		} else if (map["dmType"].toString() == MT_SENT) {
 
-			ret = Worker::downloadMessage(username,
+			ret = MessageTaskGeneral::downloadMessage(username,
 			    msgId, true, MSG_SENT,
 			    *msgDbSet, err, NULL);
 

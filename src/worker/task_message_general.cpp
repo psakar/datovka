@@ -59,7 +59,7 @@ qdatovka_error MessageTaskGeneral::downloadDeliveryInfo(const QString &userName,
 
 	if (IE_SUCCESS != status) {
 		logErrorNL(
-		    "Dowloading delivery information returned status %d: '%s'.",
+		    "Downloading delivery information returned status %d: '%s'.",
 		    status, isds_strerror(status));
 		goto fail;
 	}
@@ -80,6 +80,135 @@ fail:
 	}
 
 	return Q_ISDS_ERROR;
+}
+
+qdatovka_error MessageTaskGeneral::downloadMessage(const QString &userName,
+    MessageDb::MsgId mId, bool signedMsg, enum MessageDirection msgDirect,
+    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel)
+{
+	debugFuncCall();
+
+	logDebugLv0NL("Trying to download complete message '%d'", mId.dmId);
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+
+	isds_error status;
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
+	// message structures - all members
+	struct isds_message *message = NULL;
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 10);
+
+	/* download signed message? */
+	if (signedMsg) {
+		/* sent or received message? */
+		if (MSG_RECEIVED == msgDirect) {
+			status = isds_get_signed_received_message(
+			    isdsSessions.session(userName),
+			    QString::number(mId.dmId).toUtf8().constData(),
+			    &message);
+		} else {
+			status = isds_get_signed_sent_message(
+			    isdsSessions.session(userName),
+			    QString::number(mId.dmId).toUtf8().constData(),
+			    &message);
+		}
+	} else {
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
+		return Q_GLOBAL_ERROR;
+		/*
+		status = isds_get_received_message(isdsSessions.session(
+		    userName),
+		    QString::number(mId.dmId).toUtf8().constData(),
+		    &message);
+		*/
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 20);
+
+	if (IE_SUCCESS != status) {
+		errMsg = isdsLongMessage(session);
+		logErrorNL("Downloading message returned status %d: '%s' '%s'.",
+		    status, isds_strerror(status), errMsg.toUtf8().constData());
+		isds_message_free(&message);
+		return Q_ISDS_ERROR;
+	}
+
+	{
+		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
+		QDateTime newDeliveryTime(timevalToDateTime(
+		    message->envelope->dmDeliveryTime));
+		QString secKeyAfterDonwload(dbSet.secondaryKey(newDeliveryTime));
+		/*
+		 * Secondary keys may be the sam for valid and invalid
+		 * delivery time when storing into single file.
+		 */
+		if (secKeyBeforeDownload != secKeyAfterDonwload) {
+			/*
+			 * The message was likely moved from invalid somewhere
+			 * else.
+			 */
+			/* Delete the message from invalid. */
+			MessageDb *db = dbSet.accessMessageDb(mId.deliveryTime, false);
+			if (0 != db) {
+				db->msgsDeleteMessageData(mId.dmId);
+			}
+
+			/* Store envelope in new location. */
+			storeEnvelope(msgDirect, dbSet, message->envelope);
+		}
+		/* Update message delivery time. */
+		mId.deliveryTime = newDeliveryTime;
+	}
+
+	/* Store the message. */
+	storeMessage(signedMsg, msgDirect, dbSet, message,
+	    progressLabel);
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 90);
+
+	Q_ASSERT(mId.dmId == QString(message->envelope->dmID).toLongLong());
+
+	/* Download and save delivery info and message events */
+	if (Q_SUCCESS == downloadDeliveryInfo(userName, mId.dmId, signedMsg, dbSet)) {
+		logDebugLv0NL("Delivery info of message '%d' processed.",
+		    mId.dmId);
+	} else {
+		logErrorNL("Processing delivery info of message '%d' failed.",
+		    mId.dmId);
+	}
+
+	Q_ASSERT(mId.deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(mId.deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	downloadMessageAuthor(userName, mId.dmId, *messageDb);
+
+	if (MSG_RECEIVED == msgDirect) {
+		/*  Mark this message as downloaded in ISDS */
+		if (markMessageAsDownloaded(userName, mId.dmId)) {
+			logDebugLv0NL("Message '%d' marked as downloaded.",
+			    mId.dmId);
+		} else {
+			logErrorNL(
+			    "Marking message '%d' as downloaded failed.",
+			    mId.dmId);
+		}
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+
+	isds_list_free(&message->documents);
+	isds_message_free(&message);
+
+	logDebugLv0NL("Done with %s().", __func__);
+
+	return Q_SUCCESS;
 }
 
 qdatovka_error MessageTaskGeneral::storeAttachments(MessageDb &messageDb,
@@ -352,6 +481,68 @@ qdatovka_error MessageTaskGeneral::storeMessage(bool signedMsg,
 	storeAttachments(*messageDb, dmID, msg->documents);
 
 	return Q_SUCCESS;
+}
+
+bool MessageTaskGeneral::downloadMessageAuthor(const QString &userName,
+    qint64 dmId, MessageDb &messageDb)
+{
+	isds_error status;
+
+	isds_sender_type *sender_type = NULL;
+	char * raw_sender_type = NULL;
+	char * sender_name = NULL;
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	status = isds_get_message_sender(session,
+	    QString::number(dmId).toUtf8().constData(),
+	    &sender_type, &raw_sender_type, &sender_name);
+
+	if (IE_SUCCESS != status) {
+		logErrorNL(
+		    "Downloading author information returned status %d: '%s'.",
+		    status, isds_strerror(status));
+		return false;
+	}
+
+	if (messageDb.updateMessageAuthorInfo(dmId,
+	        convertSenderTypeToString((int) *sender_type), sender_name)) {
+		logDebugLv0NL(
+		    "Author information of message '%d' were updated.",
+		    dmId);
+	} else {
+		logErrorNL(
+		    "Updating author information of message '%d' failed.",
+		    dmId);
+	}
+
+	return true;
+}
+
+bool MessageTaskGeneral::markMessageAsDownloaded(const QString &userName,
+    qint64 dmId)
+{
+	debugFuncCall();
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	isds_error status;
+
+	status = isds_mark_message_read(session,
+	    QString::number(dmId).toUtf8().constData());
+
+	if (IE_SUCCESS != status) {
+		return false;
+	}
+	return true;
 }
 
 qdatovka_error MessageTaskGeneral::updateEnvelope(

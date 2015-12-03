@@ -7491,7 +7491,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	Q_ASSERT(0 != dbSet);
 
 	QString errMsg;
-	if (Q_SUCCESS == Worker::downloadMessage(userName,
+	if (Q_SUCCESS == MessageTaskGeneral::downloadMessage(userName,
 	        MessageDb::MsgId(dmId, deliveryTime), true,
 	        msgDirect, *dbSet, errMsg, QString())) {
 		/* TODO -- Wouldn't it be better with selection changed? */

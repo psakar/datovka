@@ -138,14 +138,6 @@ public:
 	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 
 	/*!
-	 * @brief Download attachments, envelope and raw for message.
-	 */
-	static
-	qdatovka_error downloadMessage(const QString &userName,
-	    MessageDb::MsgId mId, bool signedMsg, enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel);
-
-	/*!
 	 * @brief Download sent/received message list from ISDS for current
 	 *     account index.
 	 */
@@ -167,19 +159,6 @@ private:
 	bool getMessageState(enum MessageDirection msgDirect,
 	    const QString &userName, qint64 dmId, bool signedMsg,
 	    MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Get additional info about author (sender)
-	 */
-	static
-	bool getMessageAuthor(const QString &userName,
-	    qint64 dmId, MessageDb &messageDb);
-
-	/*!
-	 * @brief Set message as downloaded from ISDS.
-	 */
-	static
-	bool markMessageAsDownloaded(const QString &userName, qint64 dmId);
 
 	/*!
 	 * @brief Update message envelope.

@@ -198,7 +198,7 @@ void Worker::doJob(void)
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 
-		if (Q_SUCCESS == downloadMessage(job.userName, job.mId,
+		if (Q_SUCCESS == MessageTaskGeneral::downloadMessage(job.userName, job.mId,
 		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage")) {
 			/* Only on successful download. */
@@ -415,7 +415,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 
 			if (globPref.auto_download_whole_messages) {
 				QString errMsg;
-				downloadMessage(userName,
+				MessageTaskGeneral::downloadMessage(userName,
 				    MessageDb::MsgId(dmId, deliveryTime),
 				    true, msgDirect, dbSet, errMsg, "");
 			}
@@ -440,7 +440,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 				if (globPref.auto_download_whole_messages &&
 				    (dmDbMsgStatus <= 2)) {
 					QString errMsg;
-					downloadMessage(userName,
+					MessageTaskGeneral::downloadMessage(userName,
 					    MessageDb::MsgId(dmId, deliveryTime),
 					    true, msgDirect, dbSet, errMsg,
 					    "");
@@ -456,7 +456,7 @@ qdatovka_error Worker::downloadMessageList(const QString &userName,
 			if (globPref.auto_download_whole_messages &&
 			    !messageDb->msgsStoredWhole(dmId)) {
 				QString errMsg;
-				downloadMessage(userName,
+				MessageTaskGeneral::downloadMessage(userName,
 				    MessageDb::MsgId(dmId, deliveryTime),
 				    true, msgDirect, dbSet, errMsg, "");
 			}
@@ -615,202 +615,6 @@ fail:
 	}
 
 	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Download attachments, envelope and raw for message.
- */
-qdatovka_error Worker::downloadMessage(const QString &userName,
-    MessageDb::MsgId mId, bool signedMsg, enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, QString &errMsg, const QString &progressLabel)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	qDebug() << "Downloading complete message" << mId.dmId;
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
-
-	isds_error status;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-	// message structures - all members
-	struct isds_message *message = NULL;
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 10);
-
-	/* download signed message? */
-	if (signedMsg) {
-		/* sent or received message? */
-		if (MSG_RECEIVED == msgDirect) {
-			status = isds_get_signed_received_message(
-			    isdsSessions.session(userName),
-			    QString::number(mId.dmId).toUtf8().constData(),
-			    &message);
-		} else {
-			status = isds_get_signed_sent_message(
-			    isdsSessions.session(userName),
-			    QString::number(mId.dmId).toUtf8().constData(),
-			    &message);
-		}
-	} else {
-		Q_ASSERT(0); /* Only signed messages can be downloaded. */
-		return Q_GLOBAL_ERROR;
-		/*
-		status = isds_get_received_message(isdsSessions.session(
-		    userName),
-		    QString::number(mId.dmId).toUtf8().constData(),
-		    &message);
-		*/
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 20);
-
-	if (IE_SUCCESS != status) {
-		errMsg = isdsLongMessage(session);
-		qDebug() << status << isds_strerror(status) << errMsg;
-		isds_message_free(&message);
-		return Q_ISDS_ERROR;
-	}
-
-	{
-		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
-		QDateTime newDeliveryTime(timevalToDateTime(
-		    message->envelope->dmDeliveryTime));
-		QString secKeyAfterDonwload(dbSet.secondaryKey(newDeliveryTime));
-		/*
-		 * Secondary keys may be the sam for valid and invalid
-		 * delivery time when storing into single file.
-		 */
-		if (secKeyBeforeDownload != secKeyAfterDonwload) {
-			/*
-			 * The message was likely moved from invalid somewhere
-			 * else.
-			 */
-			/* Delete the message from invalid. */
-			MessageDb *db = dbSet.accessMessageDb(mId.deliveryTime, false);
-			if (0 != db) {
-				db->msgsDeleteMessageData(mId.dmId);
-			}
-
-			/* Store envelope in new location. */
-			MessageTaskGeneral::storeEnvelope(msgDirect, dbSet, message->envelope);
-		}
-		/* Update message delivery time. */
-		mId.deliveryTime = newDeliveryTime;
-	}
-
-	/* Store the message. */
-	MessageTaskGeneral::storeMessage(signedMsg, msgDirect, dbSet, message,
-	    progressLabel);
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 90);
-
-	Q_ASSERT(mId.dmId == QString(message->envelope->dmID).toLongLong());
-
-	/* Download and save delivery info and message events */
-	if (Q_SUCCESS == MessageTaskGeneral::downloadDeliveryInfo(userName, mId.dmId, signedMsg, dbSet)) {
-		qDebug() << "Delivery info of message was processed...";
-	} else {
-		qDebug() << "ERROR: Delivery info of message not found!";
-	}
-
-	Q_ASSERT(mId.deliveryTime.isValid());
-	MessageDb *messageDb = dbSet.accessMessageDb(mId.deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
-
-	getMessageAuthor(userName, mId.dmId, *messageDb);
-
-	if (MSG_RECEIVED == msgDirect) {
-		/*  Mark this message as downloaded in ISDS */
-		if (markMessageAsDownloaded(userName, mId.dmId)) {
-			qDebug() << "Message was marked as downloaded...";
-		} else {
-			qDebug() << "ERROR: Message was not marked as downloaded!";
-		}
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 100);
-
-	isds_list_free(&message->documents);
-	isds_message_free(&message);
-
-	qDebug() << "downloadMessage(): Done!";
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
-* Get additional info about author (sender)
-*/
-bool Worker::getMessageAuthor(const QString &userName,
-    qint64 dmId, MessageDb &messageDb)
-/* ========================================================================= */
-{
-	isds_error status;
-
-	isds_sender_type *sender_type = NULL;
-	char * raw_sender_type = NULL;
-	char * sender_name = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	status = isds_get_message_sender(session,
-	    QString::number(dmId).toUtf8().constData(),
-	    &sender_type, &raw_sender_type, &sender_name);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return false;
-	}
-
-	if (messageDb.updateMessageAuthorInfo(dmId,
-	        convertSenderTypeToString((int) *sender_type), sender_name)) {
-		qDebug() << "Author info of message was added...";
-	} else {
-		qDebug() << "ERROR: Author info of message wrong!";
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
-* Set message as downloaded from ISDS.
-*/
-bool Worker::markMessageAsDownloaded(const QString &userName, qint64 dmId)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	isds_error status;
-
-	status = isds_mark_message_read(session,
-	    QString::number(dmId).toUtf8().constData());
-
-	if (IE_SUCCESS != status) {
-		return false;
-	}
-	return true;
 }
 
 
