@@ -3347,13 +3347,6 @@ void MainWindow::processPendingWorkerJobs(void)
 		    SLOT(dataFromWorkerToStatusBarInfo(bool,
 		        int, int, int, int)));
 	}
-	{
-		/* Downloading attachment. */
-		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAttachmentList(const QString, qint64)),
-		    this, SLOT(postDownloadSelectedMessageAttachments(
-		        const QString, qint64)));
-	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
 	connect(m_syncAcntThread, SIGNAL(started()),
