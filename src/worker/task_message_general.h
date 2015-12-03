@@ -167,6 +167,18 @@ private:
 	 */
 	static
 	bool markMessageAsDownloaded(const QString &userName, qint64 dmId);
+
+	/*!
+	 * @brief Update message envelope.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] messageDb Database.
+	 * @param[in]     envel     Message envelope.
+	 * @return True on success.
+	 */
+	static
+	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
+	    MessageDb &messageDb, const struct isds_envelope *envel);
 };
 
 #endif /* _TASK_MESSAGE_GENERAL_H_ */

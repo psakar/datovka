@@ -620,115 +620,6 @@ fail:
 
 /* ========================================================================= */
 /*
- * Store message into database.
- */
-qdatovka_error Worker::storeMessage(bool signedMsg,
-    enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, const struct isds_message *msg,
-    const QString &progressLabel)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	if (!signedMsg) {
-		Q_ASSERT(0); /* Only signed messages can be downloaded. */
-		return Q_GLOBAL_ERROR;
-	}
-
-	if (NULL == msg) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	const struct isds_envelope *envel = msg->envelope;
-
-	if (NULL == envel) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	qint64 dmID = -1;
-	{
-		bool ok = false;
-		dmID = QString(envel->dmID).toLongLong(&ok);
-		if (!ok) {
-			return Q_GLOBAL_ERROR;
-		}
-	}
-	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
-	Q_ASSERT(deliveryTime.isValid());
-	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
-
-	/*
-	 * If there is no raw message then all the attachments have been
-	 * stored when the message has been set.
-	 */
-	if (!messageDb->msgsStoredWhole(dmID)) {
-		messageDb->flsDeleteMessageFiles(dmID);
-	}
-
-	/* Get signed raw data from message and store to db. */
-	if (signedMsg) {
-		(messageDb->msgsInsertUpdateMessageRaw(dmID,
-		    QByteArray((char*) msg->raw, msg->raw_length), 0))
-		? qDebug() << "Message raw data were updated..."
-		: qDebug() << "ERROR: Message raw data update!";
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 30);
-
-	if (updateEnvelope(msgDirect, *messageDb, envel)) {
-		qDebug() << "Message envelope was updated...";
-	} else {
-		qDebug() << "ERROR: Message envelope update!";
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 50);
-
-	if (signedMsg) {
-		/* Verify message signature. */
-		int ret = raw_msg_verify_signature(msg->raw,
-		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
-		qDebug() << "Verification ret" << ret;
-		if (1 == ret) {
-			messageDb->msgsSetVerified(dmID, true);
-			/* TODO -- handle return error. */
-		} else if (0 == ret){
-			messageDb->msgsSetVerified(dmID, false);
-			/* TODO -- handle return error. */
-		} else {
-			/* TODO -- handle this error. */
-		}
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 60);
-
-	/* insert/update hash into db */
-	if (NULL != envel->hash) {
-		const struct isds_hash *hash = envel->hash;
-
-		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
-		    hash->length).toBase64();
-		if (messageDb->msgsInsertUpdateMessageHash(dmID,
-		        hashValueBase64, convertHashAlg(hash->algorithm))) {
-			qDebug() << "Message hash was stored into db...";
-		} else {
-			qDebug() << "ERROR: Message hash insert!";
-		}
-	}
-
-	emit globMsgProcEmitter.progressChange(progressLabel, 70);
-
-	/* Insert/update all attachment files */
-	MessageTaskGeneral::storeAttachments(*messageDb, dmID, msg->documents);
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
  * Download attachments, envelope and raw for message.
  */
 qdatovka_error Worker::downloadMessage(const QString &userName,
@@ -816,7 +707,7 @@ qdatovka_error Worker::downloadMessage(const QString &userName,
 	}
 
 	/* Store the message. */
-	storeMessage(signedMsg, msgDirect, dbSet, message,
+	MessageTaskGeneral::storeMessage(signedMsg, msgDirect, dbSet, message,
 	    progressLabel);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 90);

@@ -103,7 +103,7 @@ qdatovka_error MessageTaskGeneral::storeAttachments(MessageDb &messageDb,
 			    "Attachment file '%s' was stored into database.",
 			    item->dmFileDescr);
 		} else {
-			logError("Storing attachment file '%s' failed.",
+			logErrorNL("Storing attachment file '%s' failed.",
 			    item->dmFileDescr);
 		}
 		file = file->next;
@@ -241,7 +241,194 @@ qdatovka_error MessageTaskGeneral::storeEnvelope(
 		    dmId);
 		return Q_SUCCESS;
 	} else {
-		logError("Storing envelope of message '%d' failed.", dmId);
+		logErrorNL("Storing envelope of message '%d' failed.", dmId);
+		return Q_GLOBAL_ERROR;
+	}
+}
+
+qdatovka_error MessageTaskGeneral::storeMessage(bool signedMsg,
+    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+    const struct isds_message *msg, const QString &progressLabel)
+{
+	debugFuncCall();
+
+	if (!signedMsg) {
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
+		return Q_GLOBAL_ERROR;
+	}
+
+	if (NULL == msg) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
+
+	const struct isds_envelope *envel = msg->envelope;
+
+	if (NULL == envel) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
+
+	qint64 dmID = -1;
+	{
+		bool ok = false;
+		dmID = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	/*
+	 * If there is no raw message then all the attachments have been
+	 * stored when the message has been set.
+	 */
+	if (!messageDb->msgsStoredWhole(dmID)) {
+		messageDb->flsDeleteMessageFiles(dmID);
+	}
+
+	/* Get signed raw data from message and store to db. */
+	if (signedMsg) {
+		if (messageDb->msgsInsertUpdateMessageRaw(dmID,
+		        QByteArray((char*) msg->raw, msg->raw_length), 0)) {
+			logDebugLv0NL("Raw data of message '%d' were updated.",
+			    dmID);
+		} else {
+			logErrorNL("Updating raw data of message '%d' failed.",
+			    dmID);
+		}
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 30);
+
+	if (updateEnvelope(msgDirect, *messageDb, envel)) {
+		logDebugLv0NL("Envelope of message '%d' updated.", dmID);
+	} else {
+		logErrorNL("Updating envelope of message '%d' failed.", dmID);
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 50);
+
+	if (signedMsg) {
+		/* Verify message signature. */
+		int ret = raw_msg_verify_signature(msg->raw,
+		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
+		logDebugLv0NL("Verification of message '%d' returned: %d.",
+		    dmID, ret);
+		if (1 == ret) {
+			messageDb->msgsSetVerified(dmID, true);
+			/* TODO -- handle return error. */
+		} else if (0 == ret){
+			messageDb->msgsSetVerified(dmID, false);
+			/* TODO -- handle return error. */
+		} else {
+			/* TODO -- handle this error. */
+		}
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 60);
+
+	/* insert/update hash into db */
+	if (NULL != envel->hash) {
+		const struct isds_hash *hash = envel->hash;
+
+		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
+		    hash->length).toBase64();
+		if (messageDb->msgsInsertUpdateMessageHash(dmID,
+		        hashValueBase64, convertHashAlg(hash->algorithm))) {
+			logDebugLv0NL("Hash of message '%d' stored.", dmID);
+		} else {
+			logErrorNL("Storing hash of message '%s' failed.",
+			    dmID);
+		}
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 70);
+
+	/* Insert/update all attachment files */
+	storeAttachments(*messageDb, dmID, msg->documents);
+
+	return Q_SUCCESS;
+}
+
+qdatovka_error MessageTaskGeneral::updateEnvelope(
+    enum MessageDirection msgDirect, MessageDb &messageDb,
+    const struct isds_envelope *envel)
+{
+	debugFuncCall();
+
+	if (NULL == envel) {
+		Q_ASSERT(0);
+		return Q_GLOBAL_ERROR;
+	}
+
+	qint64 dmId = -1;
+	{
+		bool ok = false;
+		dmId = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return Q_GLOBAL_ERROR;
+		}
+	}
+
+	/* Update message envelope in db. */
+	if (messageDb.msgsUpdateMessageEnvelope(dmId,
+	    /* TODO - set correctly next two values */
+	    "tReturnedMessage",
+	    envel->dbIDSender,
+	    envel->dmSender,
+	    envel->dmSenderAddress,
+	    envel->dmSenderType ?
+	        (int) *envel->dmSenderType : 0,
+	    envel->dmRecipient,
+	    envel->dmRecipientAddress,
+	    envel->dmAmbiguousRecipient ?
+	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
+	    envel->dmSenderOrgUnit,
+	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
+	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
+	    envel->dbIDRecipient,
+	    envel->dmRecipientOrgUnit,
+	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
+	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
+	    envel->dmToHands,
+	    envel->dmAnnotation,
+	    envel->dmRecipientRefNumber,
+	    envel->dmSenderRefNumber,
+	    envel->dmRecipientIdent,
+	    envel->dmSenderIdent,
+	    envel->dmLegalTitleLaw ?
+	        QString::number(*envel->dmLegalTitleLaw) : QString(),
+	    envel->dmLegalTitleYear ?
+	        QString::number(*envel->dmLegalTitleYear) : QString(),
+	    envel->dmLegalTitleSect,
+	    envel->dmLegalTitlePar,
+	    envel->dmLegalTitlePoint,
+	    envel->dmPersonalDelivery ?
+	        *envel->dmPersonalDelivery : false,
+	    envel->dmAllowSubstDelivery ?
+	        *envel->dmAllowSubstDelivery : false,
+	    envel->timestamp ?
+	        QByteArray((char *) envel->timestamp,
+	            envel->timestamp_length).toBase64() : QByteArray(),
+	    envel->dmDeliveryTime ?
+	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
+	    envel->dmAcceptanceTime ?
+	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	    envel->dmAttachmentSize ?
+	        (int) *envel->dmAttachmentSize : 0,
+	    envel->dmType,
+	    msgDirect)) {
+		logDebugLv0NL("Updated envelope of message '%d' in database.",
+		    dmId);
+		return Q_SUCCESS;
+	} else {
+		logErrorNL("Updating envelope of message '%d' failed.", dmId);
 		return Q_GLOBAL_ERROR;
 	}
 }

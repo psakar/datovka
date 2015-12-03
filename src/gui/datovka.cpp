@@ -7054,7 +7054,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
 						MessageTaskGeneral::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
+						if (Q_SUCCESS == MessageTaskGeneral::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
@@ -7123,7 +7123,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
 						MessageTaskGeneral::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
+						if (Q_SUCCESS == MessageTaskGeneral::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							/* update message state into database */
 							messageDb->msgSetProcessState(dmId, SETTLED, false);

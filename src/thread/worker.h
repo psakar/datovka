@@ -131,15 +131,6 @@ public:
 	void requestWork(void);
 
 	/*!
-	 * @brief Store message into database.
-	 */
-	static
-	qdatovka_error storeMessage(bool signedMsg,
-	    enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_message *msg,
-	    const QString &progressLabel);
-
-	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static
