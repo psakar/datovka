@@ -669,6 +669,13 @@ private slots:
 	 */
 	void splitMsgDbByYearsSlot(void);
 
+ 	/*!
+	 * @brief Store last add attachment path and refresh accountlist
+	 *        after sent message slot.
+	 */
+	void doActionAfterSentMsgSlot(const QString userName,
+	    const QString lastDir);
+
 private:
 
 	QTimer m_timerSyncAccounts;

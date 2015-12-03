@@ -31,6 +31,7 @@
 #include <QTreeView>
 
 #include "src/common.h"
+#include "src/gui/datovka.h"
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/task_send_message.h"
@@ -47,9 +48,12 @@ public:
 		ACT_NEW_FROM_TMP
 	};
 
-	DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
-	    const QDateTime &deliveryTime, const QString &userName,
-	    QWidget *parent = 0);
+	DlgSendMessage(const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
+	    Action action, qint64 msgId, const QDateTime &deliveryTime,
+	    const QString &userName, MainWindow *mv, QWidget *parent = 0);
+
+signals:
+	void doActionAfterSentMsgSignal(const QString, const QString);
 
 private slots:
 	void on_cancelButton_clicked(void);
@@ -89,7 +93,7 @@ private:
 	QString m_pdzCredit;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
-
+	MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
 
 
@@ -102,7 +106,12 @@ private:
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
+<<<<<<< HEAD
 	static
+=======
+	QString getUserInfoFormIsds(const QString idDbox,
+	    const QString &userName);
+>>>>>>> Second prototype of account selection in the send msg dialogue
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 

@@ -59,7 +59,7 @@
 DlgSendMessage::DlgSendMessage(
     const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
     Action action, qint64 msgId, const QDateTime &deliveryTime,
-    const QString &userName, QWidget *parent)
+    const QString &userName, MainWindow *mv, QWidget *parent)
     : QDialog(parent),
     m_messageDbSetList(messageDbSetList),
     m_msgID(msgId),
@@ -74,7 +74,8 @@ DlgSendMessage::DlgSendMessage(
     m_lastAttAddPath(""),
     m_pdzCredit("0"),
     m_dmType(""),
-    m_dmSenderRefNumber("")
+    m_dmSenderRefNumber(""),
+    m_mv(mv)
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -111,11 +112,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	Q_ASSERT(!m_userName.isEmpty());
 
 	for (int i = 0; i < m_messageDbSetList.count(); ++i) {
-		QString accountName = m_messageDbSetList.at(i).first;
-		//accountName =
-		//    AccountModel::globAccounts[accountName].accountName() +
-		//    " (" + accountName + ")";
-		this->fromComboBox->addItem(accountName);
+		const QString userName = m_messageDbSetList.at(i).first;
+		const QString accountName =
+		    AccountModel::globAccounts[userName].accountName() +
+		    " (" + userName + ")";
+		this->fromComboBox->addItem(accountName, QVariant(userName));
 		if (i == 0) {
 			setAccountInfo(0);
 		}
@@ -233,7 +234,13 @@ void DlgSendMessage::initNewMessageDialog(void)
 void DlgSendMessage::setAccountInfo(int item)
 /* ========================================================================= */
 {
-	m_userName = this->fromComboBox->itemText(item);
+	debugSlotCall();
+
+	/* get username for selectet account */
+	const QString userName = this->fromComboBox->itemData(item).toString();
+	if (!userName.isEmpty()) {
+		m_userName = userName;
+	}
 
 	for (int i = 0; i < m_messageDbSetList.count(); ++i) {
 		if (m_messageDbSetList.at(i).first == m_userName) {
@@ -286,7 +293,7 @@ void DlgSendMessage::setAccountInfo(int item)
 
 /* ========================================================================= */
 /*
- * Show remaining PDZ credit.
+ * Func: Return remaining PDZ credit.
  */
 QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
     const QString &dbId)
@@ -295,6 +302,7 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 	debugFuncCall();
 
 	TaskDownloadCreditInfo *task;
+
 
 	task = new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
 	task->setAutoDelete(false);
@@ -378,11 +386,13 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 
 /* ========================================================================= */
 /*
- * Fill Send Message Dialog as reply.
+ * Func: Fill Send Message Dialog as reply.
  */
 void DlgSendMessage::fillDlgAsReply(void)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	bool hideOptionalWidget = true;
 
 	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
@@ -464,11 +474,13 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog from template message.
+ * Func: Fill Send Message Dialog from template message.
  */
 void DlgSendMessage::fillDlgFromTmpMsg(void)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	bool hideOptionalWidget = true;
 
 	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
@@ -1014,6 +1026,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 
 	envelope.dmType = dmType;
 
+
 	envelope.dmOVM = m_dbEffectiveOVM;
 
 	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
@@ -1067,12 +1080,6 @@ void DlgSendMessage::sendMessage(void)
 	}
 	if (!buildEnvelope(message.envelope)) {
 		detailText = tr("An error occurred during message envelope creation.");
-		goto finish;
-	}
-
-	if (!isdsSessions.isConnectedToIsds(m_userName)) {
-		detailText = tr("It was not possible to establish a "
-		    "connection to the server or authorization failed.");
 		goto finish;
 	}
 
@@ -1143,6 +1150,9 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.exec();
 
 		this->accept(); /* Set return code to accepted. */
+
+		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+
 		return;
 	} else {
 		QMessageBox msgBox;
@@ -1157,6 +1167,8 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
+			emit doActionAfterSentMsgSignal(m_userName,
+			    m_lastAttAddPath);
 			return;
 		} else {
 			return;

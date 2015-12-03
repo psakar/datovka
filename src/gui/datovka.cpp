@@ -4834,7 +4834,7 @@ void MainWindow::openSendMessageDialog(int action)
 	qint64 msgId = -1;
 	QDateTime deliveryTime;
 
-	/* get pointer to database for current accounts */
+	/* get pointer to database for selected account */
 	QModelIndex currIndex = ui->accountList->currentIndex();
 	currIndex = AccountModel::indexTop(currIndex);
 	const QString userName = currIndex.data(ROLE_ACNT_USER_NAME).toString();
@@ -4845,17 +4845,19 @@ void MainWindow::openSendMessageDialog(int action)
 	userNameAndMsgDbSet.second = dbSet;
 	messageDbList.append(userNameAndMsgDbSet);
 
-	/* get pointer to database for other accounts */
-	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-		if (currIndex != index) {
-			const QString usrName =
-			    index.data(ROLE_ACNT_USER_NAME).toString();
-			Q_ASSERT(!usrName.isEmpty());
-			MessageDbSet *dbSet = accountDbSet(usrName, this);
-			userNameAndMsgDbSet.first = usrName;
-			userNameAndMsgDbSet.second = dbSet;
-			messageDbList.append(userNameAndMsgDbSet);
+	/* if not reply, get pointers to database for other accounts */
+	if (DlgSendMessage::ACT_REPLY != action) {
+		for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+			QModelIndex index = m_accountModel.index(i, 0);
+			if (currIndex != index) {
+				const QString uName =
+				    index.data(ROLE_ACNT_USER_NAME).toString();
+				Q_ASSERT(!uName.isEmpty());
+				MessageDbSet *dbSet = accountDbSet(uName,this);
+				userNameAndMsgDbSet.first = uName;
+				userNameAndMsgDbSet.second = dbSet;
+				messageDbList.append(userNameAndMsgDbSet);
+			}
 		}
 	}
 
@@ -4871,40 +4873,41 @@ void MainWindow::openSendMessageDialog(int action)
 		deliveryTime = msgDeliveryTime(index);
 	}
 
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
-	}
-
-	showStatusTextWithTimeout(tr("Create and send a message."));
-
-	QString lastAttachAddPath;
-	if (globPref.use_global_paths) {
-		lastAttachAddPath = globPref.add_file_to_attachments_path;
-	} else {
-		lastAttachAddPath = accountInfo.lastAttachAddPath();
-	}
-
-	QDialog *newMessageDialog = new DlgSendMessage(messageDbList,
+	QDialog *sendMsgDialog = new DlgSendMessage(messageDbList,
 	    (DlgSendMessage::Action) action, msgId, deliveryTime,
 	    userName, this);
 
-	if (newMessageDialog->exec() == QDialog::Accepted) {
+	showStatusTextWithTimeout(tr("Create and send a message."));
 
-		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
-		    "send.").arg(accountInfo.accountName()));
+	connect(sendMsgDialog,
+	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
+	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
 
-		refreshAccountList(userName);
-	}
+	sendMsgDialog->exec();
+
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Store last add attachment path and refresh accountlist after sent
+ *       message.
+ */
+void MainWindow::doActionAfterSentMsgSlot(const QString userName,
+    const QString lastDir)
+/* ========================================================================= */
+{
+	debugSlotCall();
 
 	if (!globPref.use_global_paths) {
-		m_add_attach_dir = lastAttachAddPath;
+		m_add_attach_dir = lastDir;
 		storeExportPath();
 	}
+
+	showStatusTextWithTimeout(tr("Message from account \"%1\" was "
+	    "send.").arg(userName));
+
+	refreshAccountList(userName);
 
 	clearProgressBar();
 }
