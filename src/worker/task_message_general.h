@@ -27,11 +27,14 @@
 #include <QRunnable>
 
 /*!
- * @brief This class contans generic functions that can be used in derived
+ * @brief This class contains generic functions that can be used in derived
  *     classes.
  */
 class messageTaskGeneral : public QRunnable {
 public:
+	/*!
+	 * @brief Method to be implemented in derived classes.
+	 */
 	virtual
 	void run(void) = 0;
 };

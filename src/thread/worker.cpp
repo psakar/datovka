@@ -204,7 +204,8 @@ void Worker::doJob(void)
 			emit refreshAccountList(job.userName);
 			emit refreshAttachmentList(job.userName, job.mId.dmId);
 		} else {
-			emit clearStatusBarAndShowDialog(job.mId.dmId, errMsg);
+			emit globMsgProcEmitter.messageDownloadFailed(
+			    job.mId.dmId, errMsg);
 		}
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
@@ -237,7 +238,8 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -1 means list of received messages
-			emit clearStatusBarAndShowDialog(-1, errMsg);
+			emit globMsgProcEmitter.messageDownloadFailed(-1,
+			    errMsg);
 		}
 
 	} else if (MSG_SENT == job.msgDirect) {
@@ -259,7 +261,8 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -2 means list of sent messages
-			emit clearStatusBarAndShowDialog(-2, errMsg);
+			emit globMsgProcEmitter.messageDownloadFailed(-2,
+			    errMsg);
 		}
 	}
 

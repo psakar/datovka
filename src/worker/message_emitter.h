@@ -34,6 +34,17 @@ class MessageProcessingEmitter : public QObject {
 
 signals:
 	/*!
+	 * @brief Emitted when message download failed.
+	 *
+	 * @note -1 means list of received messages,
+	 *     -2 means list of sent messages.
+	 *
+	 * @param[in] msgId Message identifier.
+	 * @param[in] err   Error description.
+	 */
+	void messageDownloadFailed(qint64 msgId, const QString &err);
+
+	/*!
 	 * @brief This signal is emitted when counted value is changed
 	 *
 	 * @param[in] label Progress bar label.

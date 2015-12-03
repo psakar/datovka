@@ -185,8 +185,12 @@ MainWindow::MainWindow(QWidget *parent)
 	clearProgressBar();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
+	/* Message processing signals. */
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(messageDownloadFailed(qint64, QString)),
+	    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64, QString)));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -3349,10 +3353,6 @@ void MainWindow::processPendingWorkerJobs(void)
 		    SIGNAL(refreshAttachmentList(const QString, qint64)),
 		    this, SLOT(postDownloadSelectedMessageAttachments(
 		        const QString, qint64)));
-		connect(m_syncAcntWorker,
-		    SIGNAL(clearStatusBarAndShowDialog(qint64, QString)),
-		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64,
-		    QString)));
 	}
 	connect(m_syncAcntWorker, SIGNAL(workRequested()),
 	    m_syncAcntThread, SLOT(start()));
