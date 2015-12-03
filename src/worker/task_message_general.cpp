@@ -21,9 +21,11 @@
  * the two.
  */
 
+#include "src/crypto/crypto_funcs.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_message_general.h"
 
@@ -78,6 +80,36 @@ fail:
 	}
 
 	return Q_ISDS_ERROR;
+}
+
+qdatovka_error MessageTaskGeneral::storeAttachments(MessageDb &messageDb,
+    qint64 dmId, const struct isds_list *documents)
+{
+	const struct isds_list *file = documents;
+
+	while (NULL != file) {
+		const isds_document *item = (isds_document *) file->data;
+
+		QByteArray dmEncodedContentBase64 = QByteArray(
+		    (char *)item->data, item->data_length).toBase64();
+
+		/* Insert/update file to db */
+		if (messageDb.msgsInsertUpdateMessageFile(dmId,
+		        item->dmFileDescr, item->dmUpFileGuid,
+		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
+		        convertAttachmentType(item->dmFileMetaType),
+		        dmEncodedContentBase64)) {
+			logDebugLv0NL(
+			    "Attachment file '%s' was stored into database.",
+			    item->dmFileDescr);
+		} else {
+			logError("Storing attachment file '%s' failed.",
+			    item->dmFileDescr);
+		}
+		file = file->next;
+	}
+
+	return Q_SUCCESS;
 }
 
 qdatovka_error MessageTaskGeneral::storeDeliveryInfo(bool signedMsg,

@@ -140,13 +140,6 @@ public:
 	    const QString &progressLabel);
 
 	/*!
-	 * @brief Store attachments into database.
-	 */
-	static
-	qdatovka_error storeAttachments(MessageDb &db, qint64 dmID,
-	    const struct isds_list *documents);
-
-	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static

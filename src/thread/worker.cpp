@@ -721,39 +721,7 @@ qdatovka_error Worker::storeMessage(bool signedMsg,
 	emit globMsgProcEmitter.progressChange(progressLabel, 70);
 
 	/* Insert/update all attachment files */
-	storeAttachments(*messageDb, dmID, msg->documents);
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-qdatovka_error Worker::storeAttachments(MessageDb &db, qint64 dmID,
-    const struct isds_list *documents)
-/* ========================================================================= */
-{
-	const struct isds_list *file = documents;
-
-	while (NULL != file) {
-		const isds_document *item = (isds_document *) file->data;
-
-		QByteArray dmEncodedContentBase64 = QByteArray(
-		    (char *)item->data, item->data_length).toBase64();
-
-		/* Insert/update file to db */
-		if (db.msgsInsertUpdateMessageFile(dmID, item->dmFileDescr,
-		        item->dmUpFileGuid, item->dmFileGuid, item->dmMimeType,
-		        item->dmFormat,
-		        convertAttachmentType(item->dmFileMetaType),
-		        dmEncodedContentBase64)) {
-			qDebug() << "Message file" << item->dmFileDescr
-			    << "was stored into db...";
-		} else {
-			qDebug() << "ERROR: Message file" << item->dmFileDescr
-			    << "insert!";
-		}
-		file = file->next;
-	}
+	MessageTaskGeneral::storeAttachments(*messageDb, dmID, msg->documents);
 
 	return Q_SUCCESS;
 }
