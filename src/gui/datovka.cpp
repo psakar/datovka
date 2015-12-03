@@ -71,6 +71,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/message_emitter.h"
+#include "src/worker/task_message_general.h"
 #include "src/worker/pool.h"
 #include "ui_datovka.h"
 
@@ -6869,7 +6870,7 @@ void MainWindow::importDeliveryInfoZFO(
 					    accountList.at(j).acntIndex);
 					if (resISDS == MSG_IS_IN_ISDS) {
 						if (Q_SUCCESS ==
-						    Worker::storeDeliveryInfo(true,
+						    MessageTaskGeneral::storeDeliveryInfo(true,
 						    *(accountList.at(j).messageDbSet), message)) {
 							pInfoText += tr("Imported as delivery "
 							    "info for message "

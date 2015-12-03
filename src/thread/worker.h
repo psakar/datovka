@@ -147,20 +147,6 @@ public:
 	    const struct isds_list *documents);
 
 	/*!
-	 * @brief Store received message delivery information into database.
-	 */
-	static
-	qdatovka_error storeDeliveryInfo(bool signedMsg,
-	    MessageDbSet &dbSet, const struct isds_message *msg);
-
-	/*!
-	 * @brief Download delivery info for message.
-	 */
-	static
-	qdatovka_error getDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
-
-	/*!
 	 * @brief Store sent message delivery information into database.
 	 */
 	static

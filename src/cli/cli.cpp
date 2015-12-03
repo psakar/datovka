@@ -31,6 +31,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/thread/worker.h"
+#include "src/worker/task_message_general.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -465,7 +466,7 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 	}
 
 	if (needsISDS) {
-		if (Q_SUCCESS == Worker::getDeliveryInfo(username,
+		if (Q_SUCCESS == MessageTaskGeneral::downloadDeliveryInfo(username,
 		    map["dmID"].toLongLong(), true, *msgDbSet)) {
 			qDebug() << CLI_PREFIX << "Delivery info of message" <<
 			    map["dmID"].toString() << "has been downloaded.";
