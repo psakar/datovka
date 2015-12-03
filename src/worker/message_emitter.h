@@ -36,21 +36,24 @@ signals:
 	/*!
 	 * @brief Emitted when message download failed.
 	 *
-	 * @note -1 means list of received messages,
+	 * @note Message identifier -1 means list of received messages,
 	 *     -2 means list of sent messages.
 	 *
+	 * @param[in] usrName Account identifier (user login name).
 	 * @param[in] msgId Message identifier.
 	 * @param[in] err   Error description.
 	 */
-	void downloadFail(qint64 msgId, const QString &err);
+	void downloadFail(const QString &usrName, qint64 msgId,
+	    const QString &err);
 
 	/*!
 	 * @brief Emitted when download process succeeds.
 	 *
-	 * @note -1 means list of received messages,
+	 * @note Message identifier -1 means list of received messages,
 	 *     -2 means list of sent messages.
 	 *
 	 * @param[in] usrName Account identifier (user login name).
+	 * @param[in] msgId Message identifier.
 	 */
 	void downloadSuccess(const QString &usrName, qint64 msgId);
 

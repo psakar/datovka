@@ -203,8 +203,8 @@ void Worker::doJob(void)
 			/* Only on successful download. */
 			emit globMsgProcEmitter.downloadSuccess(job.userName, job.mId.dmId);
 		} else {
-			emit globMsgProcEmitter.downloadFail(job.mId.dmId,
-			    errMsg);
+			emit globMsgProcEmitter.downloadFail(job.userName,
+			    job.mId.dmId, errMsg);
 		}
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
@@ -237,7 +237,8 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -1 means list of received messages
-			emit globMsgProcEmitter.downloadFail(-1, errMsg);
+			emit globMsgProcEmitter.downloadFail(job.userName, -1,
+			    errMsg);
 		}
 
 	} else if (MSG_SENT == job.msgDirect) {
@@ -259,7 +260,8 @@ void Worker::doJob(void)
 		} else {
 			qDebug() << "An error occurred!";
 			// -2 means list of sent messages
-			emit globMsgProcEmitter.downloadFail(-2, errMsg);
+			emit globMsgProcEmitter.downloadFail(job.userName, -2,
+			    errMsg);
 		}
 	}
 

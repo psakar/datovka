@@ -190,8 +190,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(QString, qint64)),
 	    this, SLOT(refreshAccountAndAttachmentList(QString, qint64)));
-	connect(&globMsgProcEmitter, SIGNAL(downloadFail(qint64, QString)),
-	    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64, QString)));
+	connect(&globMsgProcEmitter, SIGNAL(downloadFail(QString, qint64, QString)),
+	    this, SLOT(clearInfoInStatusBarAndShowDialog(QString, qint64, QString)));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -2233,11 +2233,14 @@ void MainWindow::openSelectedAttachment(void)
 /*
  * Clear status bar if download of complete message fails.
  */
-void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
-    const QString &errMsg)
+void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
+    qint64 msgId, const QString &errMsg)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	/* Unused. */
+	(void) usrName;
 
 	QMessageBox msgBox(this);
 
