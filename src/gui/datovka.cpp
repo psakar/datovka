@@ -70,6 +70,8 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/message_emitter.h"
+#include "src/worker/pool.h"
 #include "ui_datovka.h"
 
 
@@ -182,6 +184,9 @@ MainWindow::MainWindow(QWidget *parent)
 	m_statusProgressBar->setValue(0);
 	clearProgressBar();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
+
+	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
+	    this, SLOT(updateProgressBar(QString, int)));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -3325,8 +3330,6 @@ void MainWindow::processPendingWorkerJobs(void)
 	m_syncAcntWorker = new Worker();
 	m_syncAcntWorker->moveToThread(m_syncAcntThread);
 
-	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
 	{
 		/* Downloading message list. */
 		connect(m_syncAcntWorker,

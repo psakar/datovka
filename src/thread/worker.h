@@ -234,11 +234,6 @@ signals:
 	void workRequested(void);
 
 	/*!
-	 * @brief This signal is emitted when counted value is changed
-	 */
-	void valueChanged(QString label, int value);
-
-	/*!
 	 * @brief This signal is emitted when process is finished
 	 */
 	void refreshAccountList(const QString);
