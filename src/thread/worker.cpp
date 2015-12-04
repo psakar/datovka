@@ -35,7 +35,7 @@
 #include "src/gui/datovka.h"
 #include "src/io/isds_sessions.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_message_general.h"
+#include "src/worker/task.h"
 
 
 /* ========================================================================= */
@@ -198,7 +198,7 @@ void Worker::doJob(void)
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 
-		if (Q_SUCCESS == MessageTaskGeneral::downloadMessage(job.userName, job.mId,
+		if (Q_SUCCESS == Task::downloadMessage(job.userName, job.mId,
 		        true, job.msgDirect, *job.dbSet, errMsg,
 		        "DownloadMessage")) {
 			/* Only on successful download. */
@@ -227,7 +227,7 @@ void Worker::doJob(void)
 		    << AccountModel::globAccounts[job.userName].accountName();
 		qDebug() << "-----------------------------------------------";
 		QStringList newMsgIdList;
-		res = MessageTaskGeneral::downloadMessageList(job.userName, MSG_RECEIVED,
+		res = Task::downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
 		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit globMsgProcEmitter.downloadSuccess(job.userName, -1);
@@ -251,7 +251,7 @@ void Worker::doJob(void)
 		qDebug() << "-----------------------------------------------";
 
 		QStringList newMsgIdList;
-		res = MessageTaskGeneral::downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
+		res = Task::downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", st, sn,
 		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit globMsgProcEmitter.downloadSuccess(job.userName, -2);

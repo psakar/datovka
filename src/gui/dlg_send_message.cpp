@@ -41,7 +41,7 @@
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
-#include "src/worker/task_message_general.h"
+#include "src/worker/task.h"
 #include "ui_dlg_send_message.h"
 
 
@@ -1394,7 +1394,7 @@ void DlgSendMessage::sendMessage(void)
 			    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 			    this->subjectText->text());
 
-			MessageTaskGeneral::storeAttachments(*messageDb, sendingResult.dmId,
+			Task::storeAttachments(*messageDb, sendingResult.dmId,
 			    message->documents);
 
 			successSendCnt++;

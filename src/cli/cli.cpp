@@ -30,7 +30,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
-#include "src/worker/task_message_general.h"
+#include "src/worker/task.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -201,7 +201,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	QString err;
 	if (map["dmType"].toString() == MT_RECEIVED) {
 
-		ret = MessageTaskGeneral::downloadMessageList(username, MSG_RECEIVED,
+		ret = Task::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
@@ -220,7 +220,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 	} else if (map["dmType"].toString() == MT_SENT) {
 
-		ret = MessageTaskGeneral::downloadMessageList(username, MSG_SENT,
+		ret = Task::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, err, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 
@@ -239,7 +239,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	} else if (map["dmType"].toString() == MT_SENT_RECEIVED) {
 
 		cli_error lret = CLI_SUCCESS;
-		ret = MessageTaskGeneral::downloadMessageList(username, MSG_RECEIVED,
+		ret = Task::downloadMessageList(username, MSG_RECEIVED,
 		    *msgDbSet, err, NULL, rt, rn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
@@ -252,7 +252,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			    ret << err;
 			lret = CLI_ERROR;
 		}
-		ret = MessageTaskGeneral::downloadMessageList(username, MSG_SENT,
+		ret = Task::downloadMessageList(username, MSG_SENT,
 		    *msgDbSet, errmsg, NULL, st, sn, newMsgIdList,
 		    dmLimitPtr, dmStatusFilter);
 		if (Q_SUCCESS == ret) {
@@ -306,7 +306,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	if (needsISDS) {
 		if (map["dmType"].toString() == MT_RECEIVED) {
 
-			ret = MessageTaskGeneral::downloadMessage(username,
+			ret = Task::downloadMessage(username,
 			    msgId, true, MSG_RECEIVED,
 			    *msgDbSet, err, NULL);
 
@@ -324,7 +324,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		} else if (map["dmType"].toString() == MT_SENT) {
 
-			ret = MessageTaskGeneral::downloadMessage(username,
+			ret = Task::downloadMessage(username,
 			    msgId, true, MSG_SENT,
 			    *msgDbSet, err, NULL);
 
@@ -465,7 +465,7 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 	}
 
 	if (needsISDS) {
-		if (Q_SUCCESS == MessageTaskGeneral::downloadDeliveryInfo(username,
+		if (Q_SUCCESS == Task::downloadDeliveryInfo(username,
 		    map["dmID"].toLongLong(), true, *msgDbSet)) {
 			qDebug() << CLI_PREFIX << "Delivery info of message" <<
 			    map["dmID"].toString() << "has been downloaded.";

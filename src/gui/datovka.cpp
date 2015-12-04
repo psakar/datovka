@@ -71,8 +71,8 @@
 #include "src/io/message_db_set_container.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_message_general.h"
 #include "src/worker/pool.h"
+#include "src/worker/task.h"
 #include "ui_datovka.h"
 
 
@@ -6870,7 +6870,7 @@ void MainWindow::importDeliveryInfoZFO(
 					    accountList.at(j).acntIndex);
 					if (resISDS == MSG_IS_IN_ISDS) {
 						if (Q_SUCCESS ==
-						    MessageTaskGeneral::storeDeliveryInfo(true,
+						    Task::storeDeliveryInfo(true,
 						    *(accountList.at(j).messageDbSet), message)) {
 							pInfoText += tr("Imported as delivery "
 							    "info for message "
@@ -7053,8 +7053,8 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				    accountList.at(j).acntIndex);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						MessageTaskGeneral::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == MessageTaskGeneral::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
+						Task::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
+						if (Q_SUCCESS == Task::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
@@ -7122,8 +7122,8 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						MessageTaskGeneral::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == MessageTaskGeneral::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
+						Task::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
+						if (Q_SUCCESS == Task::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
 							import = true;
 							/* update message state into database */
 							messageDb->msgSetProcessState(dmId, SETTLED, false);
@@ -7491,7 +7491,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	Q_ASSERT(0 != dbSet);
 
 	QString errMsg;
-	if (Q_SUCCESS == MessageTaskGeneral::downloadMessage(userName,
+	if (Q_SUCCESS == Task::downloadMessage(userName,
 	        MessageDb::MsgId(dmId, deliveryTime), true,
 	        msgDirect, *dbSet, errMsg, QString())) {
 		/* TODO -- Wouldn't it be better with selection changed? */
