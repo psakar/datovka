@@ -4907,7 +4907,13 @@ void MainWindow::doActionAfterSentMsgSlot(const QString userName,
 	showStatusTextWithTimeout(tr("Message from account \"%1\" was "
 	    "send.").arg(userName));
 
-	refreshAccountList(userName);
+	/* refersh account list if the current selected username
+	 * corresponds with sending username.
+	 */
+	const QString currentUserName = userNameFromItem();
+	if (currentUserName == userName) {
+		refreshAccountList(userName);
+	}
 
 	clearProgressBar();
 }

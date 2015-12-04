@@ -64,7 +64,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Select account:</string>
+        <string>Send from account:</string>
        </property>
       </widget>
      </item>
@@ -91,7 +91,7 @@
      <item>
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>From: </string>
+        <string>Sender: </string>
        </property>
       </widget>
      </item>

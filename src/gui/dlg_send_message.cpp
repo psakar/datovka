@@ -395,6 +395,8 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	bool hideOptionalWidget = true;
 
+	this->fromComboBox->setEnabled(false);
+
 	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
