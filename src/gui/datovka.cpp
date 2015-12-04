@@ -73,6 +73,7 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task.h"
+#include "src/worker/task_download_message_list.h"
 #include "ui_datovka.h"
 
 
@@ -3161,10 +3162,17 @@ void MainWindow::synchroniseAllAccounts(void)
 				continue;
 			}
 
-			Worker::jobList.append(Worker::Job(userName, dbSet,
-			    MSG_RECEIVED));
-			Worker::jobList.append(Worker::Job(userName, dbSet,
-			    MSG_SENT));
+			TaskDownloadMessageList *task;
+
+			task = new (std::nothrow) TaskDownloadMessageList(
+			    userName, dbSet, MSG_RECEIVED);
+			task->setAutoDelete(true);
+			globWorkPool.assign(task);
+
+			task = new (std::nothrow) TaskDownloadMessageList(
+			    userName, dbSet, MSG_SENT);
+			task->setAutoDelete(true);
+			globWorkPool.assign(task);
 
 			appended = true;
 		}
@@ -3179,12 +3187,11 @@ void MainWindow::synchroniseAllAccounts(void)
 		return;
 	}
 
+	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-	processPendingWorkerJobs();
 }
 
 
@@ -3217,15 +3224,23 @@ void MainWindow::synchroniseSelectedAccount(void)
 		}
 	}
 
-	Worker::jobList.append(Worker::Job(userName, dbSet, MSG_RECEIVED));
-	Worker::jobList.append(Worker::Job(userName, dbSet, MSG_SENT));
+	TaskDownloadMessageList *task;
 
+	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
+	    MSG_RECEIVED);
+	task->setAutoDelete(true);
+	globWorkPool.assign(task);
+
+	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
+	    MSG_SENT);
+	task->setAutoDelete(true);
+	globWorkPool.assign(task);
+
+	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-	processPendingWorkerJobs();
 }
 
 

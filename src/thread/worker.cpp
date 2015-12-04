@@ -210,62 +210,12 @@ void Worker::doJob(void)
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
 
-		/* dmStatusFilter
-		 *
-		 * MESSAGESTATE_SENT |
-		 * MESSAGESTATE_STAMPED |
-		 * MESSAGESTATE_DELIVERED |
-		 * MESSAGESTATE_RECEIVED |
-		 * MESSAGESTATE_READ |
-		 * MESSAGESTATE_REMOVED |
-		 * MESSAGESTATE_IN_SAFE |
-		 * MESSAGESTATE_ANY
-		 */
-
-		qDebug() << "-----------------------------------------------";
-		qDebug() << "Downloading received message list for account"
-		    << AccountModel::globAccounts[job.userName].accountName();
-		qDebug() << "-----------------------------------------------";
-		QStringList newMsgIdList;
-		res = Task::downloadMessageList(job.userName, MSG_RECEIVED,
-		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
-		        rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit globMsgProcEmitter.downloadSuccess(job.userName, -1);
-		emit globMsgProcEmitter.downloadListSummary(true,
-		    rt, rn , st, sn);
-
-		if (Q_SUCCESS == res) {
-			qDebug() << "All DONE!";
-		} else {
-			qDebug() << "An error occurred!";
-			// -1 means list of received messages
-			emit globMsgProcEmitter.downloadFail(job.userName, -1,
-			    errMsg);
-		}
+		Q_ASSERT(0);
 
 	} else if (MSG_SENT == job.msgDirect) {
 
-		qDebug() << "-----------------------------------------------";
-		qDebug() << "Downloading sent message list for account"
-		    << AccountModel::globAccounts[job.userName].accountName();
-		qDebug() << "-----------------------------------------------";
+		Q_ASSERT(0);
 
-		QStringList newMsgIdList;
-		res = Task::downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
-		        errMsg, "GetListOfSentMessages", st, sn,
-		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
-		emit globMsgProcEmitter.downloadSuccess(job.userName, -2);
-		emit globMsgProcEmitter.downloadListSummary(true,
-		    rt, rn , st, sn);
-
-		if (Q_SUCCESS == res) {
-			qDebug() << "All DONE!";
-		} else {
-			qDebug() << "An error occurred!";
-			// -2 means list of sent messages
-			emit globMsgProcEmitter.downloadFail(job.userName, -2,
-			    errMsg);
-		}
 	}
 
 	emit globMsgProcEmitter.progressChange("Idle", 0);
