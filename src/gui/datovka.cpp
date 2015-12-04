@@ -4834,31 +4834,28 @@ void MainWindow::openSendMessageDialog(int action)
 	qint64 msgId = -1;
 	QDateTime deliveryTime;
 
-	/* get pointer to database for selected account */
-	QModelIndex currIndex = ui->accountList->currentIndex();
-	currIndex = AccountModel::indexTop(currIndex);
-	const QString userName = currIndex.data(ROLE_ACNT_USER_NAME).toString();
+	/* get username of selected account */
+	const QString userName = userNameFromItem();
 	Q_ASSERT(!userName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
-	userNameAndMsgDbSet.first = userName;
-	userNameAndMsgDbSet.second = dbSet;
-	messageDbList.append(userNameAndMsgDbSet);
 
 	/* if not reply, get pointers to database for other accounts */
 	if (DlgSendMessage::ACT_REPLY != action) {
-		for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
+		for (int i=0; i < ui->accountList->model()->rowCount(); i++) {
 			QModelIndex index = m_accountModel.index(i, 0);
-			if (currIndex != index) {
-				const QString uName =
-				    index.data(ROLE_ACNT_USER_NAME).toString();
-				Q_ASSERT(!uName.isEmpty());
-				MessageDbSet *dbSet = accountDbSet(uName,this);
-				userNameAndMsgDbSet.first = uName;
-				userNameAndMsgDbSet.second = dbSet;
-				messageDbList.append(userNameAndMsgDbSet);
-			}
+			const QString uName =
+			    index.data(ROLE_ACNT_USER_NAME).toString();
+			Q_ASSERT(!uName.isEmpty());
+			MessageDbSet *dbSet = accountDbSet(uName,this);
+			userNameAndMsgDbSet.first = uName;
+			userNameAndMsgDbSet.second = dbSet;
+			messageDbList.append(userNameAndMsgDbSet);
 		}
+	} else {
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		Q_ASSERT(0 != dbSet);
+		userNameAndMsgDbSet.first = userName;
+		userNameAndMsgDbSet.second = dbSet;
+		messageDbList.append(userNameAndMsgDbSet);
 	}
 
 	/* if is reply or template, ID of selected message is required */

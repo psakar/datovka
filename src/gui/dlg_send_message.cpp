@@ -91,7 +91,7 @@ void DlgSendMessage::on_cancelButton_clicked(void)
 
 /* ========================================================================= */
 /*
- * Init dialog
+ * Init send message dialogue.
  */
 void DlgSendMessage::initNewMessageDialog(void)
 /* ========================================================================= */
@@ -117,8 +117,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 		    AccountModel::globAccounts[userName].accountName() +
 		    " (" + userName + ")";
 		this->fromComboBox->addItem(accountName, QVariant(userName));
-		if (i == 0) {
-			setAccountInfo(0);
+		if (m_userName == userName) {
+			this->fromComboBox->setCurrentIndex(i);
+			setAccountInfo(i);
 		}
 	}
 
@@ -238,7 +239,15 @@ void DlgSendMessage::setAccountInfo(int item)
 
 	/* get username for selectet account */
 	const QString userName = this->fromComboBox->itemData(item).toString();
+
 	if (!userName.isEmpty()) {
+		/* if account was changed, remove all recipients */
+		if (m_userName != userName) {
+			for (int i = this->recipientTableWidget->rowCount() - 1;
+			    i >= 0; --i) {
+				this->recipientTableWidget->removeRow(i);
+			}
+		}
 		m_userName = userName;
 	}
 
