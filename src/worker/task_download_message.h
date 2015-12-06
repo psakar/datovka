@@ -21,18 +21,17 @@
  * the two.
  */
 
-#ifndef _TASK_DOWNLOAD_MESSAGE_LIST_H_
-#define _TASK_DOWNLOAD_MESSAGE_LIST_H_
+#ifndef _TASK_DOWNLOAD_MESSAGE_H_
+#define _TASK_DOWNLOAD_MESSAGE_H_
 
+#include <QDateTime>
 #include <QString>
 
+#include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
-/*!
- * @brief Task describing download message list.
- */
-class TaskDownloadMessageList : public Task {
+class TaskDownloadMessage : public Task {
 public:
 	/*!
 	 * @brief Constructor.
@@ -40,9 +39,12 @@ public:
 	 * @param[in]     userName  Account identifier (user login name).
 	 * @param[in,out] dbSet     Non-null pointer to database container.
 	 * @param[in]     msgDirect Received or sent list.
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in]     dTime     Delivery time.
 	 */
-	explicit TaskDownloadMessageList(const QString &userName,
-	    MessageDbSet *dbSet, enum MessageDirection msgDirect);
+	explicit TaskDownloadMessage(const QString &userName,
+	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
+	    qint64 dmId, const QDateTime &dTime);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -53,7 +55,8 @@ public:
 private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
-	enum MessageDirection m_msgDirect; /*!< Sent or received list. */
+	enum MessageDirection m_msgDirect; /*!< Sent or received message. */
+	MessageDb::MsgId m_mId; /*!< Message identifier. */
 };
 
-#endif /* _TASK_DOWNLOAD_MESSAGE_LIST_H_ */
+#endif /* _TASK_DOWNLOAD_MESSAGE_H_ */

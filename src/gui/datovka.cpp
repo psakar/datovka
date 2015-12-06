@@ -73,6 +73,7 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task.h"
+#include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "ui_datovka.h"
 
@@ -3308,16 +3309,21 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	foreach (const MessageDb::MsgId &id, msgIds) {
 		/* Using prepend() just to outrun other jobs. */
-		Worker::jobList.append(
-		    Worker::Job(userName, dbSet, msgDirection, id.dmId, id.deliveryTime));
+		TaskDownloadMessage *task;
+
+		task = new (std::nothrow) TaskDownloadMessage(
+		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task);
 	}
 
+	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 
-	processPendingWorkerJobs();
+//	processPendingWorkerJobs(); /* TODO -- Remove the code. */
 }
 
 

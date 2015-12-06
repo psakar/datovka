@@ -177,36 +177,10 @@ void Worker::doJob(void)
 		return;
 	}
 
-	/* Messages counters
-	 * rt = receivedTotal, rn = receivedNews,
-	 * st = sentTotal, sn = sentNews.
-	 * Message counters are send to mainwindow and show in info-statusbar.
-	*/
-	int rt = 0;
-	int rn = 0;
-	int st = 0;
-	int sn = 0;
-	QString errMsg;
-	qdatovka_error res = Q_SUCCESS;
-	unsigned long dmLimit = MESSAGE_LIST_LIMIT;
-
 	/* != -1 -- specific message required. */
 	if (0 <= job.mId.dmId) {
 
-		qDebug() << "-----------------------------------------------";
-		qDebug() << "Downloading message" << job.mId.dmId << "for account"
-		    << AccountModel::globAccounts[job.userName].accountName();
-		qDebug() << "-----------------------------------------------";
-
-		if (Q_SUCCESS == Task::downloadMessage(job.userName, job.mId,
-		        true, job.msgDirect, *job.dbSet, errMsg,
-		        "DownloadMessage")) {
-			/* Only on successful download. */
-			emit globMsgProcEmitter.downloadSuccess(job.userName, job.mId.dmId);
-		} else {
-			emit globMsgProcEmitter.downloadFail(job.userName,
-			    job.mId.dmId, errMsg);
-		}
+		Q_ASSERT(0);
 
 	} else if (MSG_RECEIVED == job.msgDirect) {
 

@@ -295,6 +295,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/message_emitter.cpp \
     src/worker/pool.cpp \
     src/worker/task.cpp \
+    src/worker/task_download_message.cpp \
     src/worker/task_download_message_list.cpp
 
 HEADERS += src/cli/cli.h \
@@ -348,6 +349,7 @@ HEADERS += src/cli/cli.h \
     src/worker/message_emitter.h \
     src/worker/pool.h \
     src/worker/task.h \
+    src/worker/task_download_message.h \
     src/worker/task_download_message_list.h
 
 FORMS += src/gui/ui/datovka.ui \

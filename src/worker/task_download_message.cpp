@@ -27,18 +27,21 @@
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_download_message_list.h"
+#include "src/worker/task_download_message.h"
 
-TaskDownloadMessageList::TaskDownloadMessageList(const QString &userName,
-    MessageDbSet *dbSet, enum MessageDirection msgDirect)
+TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
+    MessageDbSet *dbSet, enum MessageDirection msgDirect,
+    qint64 dmId, const QDateTime &dTime)
     : m_userName(userName),
     m_dbSet(dbSet),
-    m_msgDirect(msgDirect)
+    m_msgDirect(msgDirect),
+    m_mId(dmId, dTime)
 {
-	Q_ASSERT(0 != m_dbSet);
+	Q_ASSERT(0 != dbSet);
+	Q_ASSERT(0 <= dmId);
 }
 
-void TaskDownloadMessageList::run(void)
+void TaskDownloadMessage::run(void)
 {
 	if (m_userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -55,64 +58,42 @@ void TaskDownloadMessageList::run(void)
 		return;
 	}
 
-	logDebugLv0NL("Starting download message list task in thread '%p'",
+	if (0 > m_mId.dmId) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	logDebugLv0NL("Starting download message task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	int rt = 0; /*!< Received total. */
-	int rn = 0; /*!< Received new. */
-	int st = 0; /*!< Sent total. */
-	int sn = 0; /*!< Sent new. */
-        QString errMsg;
-	QStringList newMsgIdList;
+	QString errMsg;
 	qdatovka_error res = Q_SUCCESS;
 
-	/* dmStatusFilter
-	 *
-	 * MESSAGESTATE_SENT |
-	 * MESSAGESTATE_STAMPED |
-	 * MESSAGESTATE_DELIVERED |
-	 * MESSAGESTATE_RECEIVED |
-	 * MESSAGESTATE_READ |
-	 * MESSAGESTATE_REMOVED |
-	 * MESSAGESTATE_IN_SAFE |
-	 * MESSAGESTATE_ANY
-	 */
-
 	logDebugLv1NL("%s", "-----------------------------------------------");
-	logDebugLv1NL("Downloading %s message list for account '%s'.",
-	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent",
+	logDebugLv1NL("Downloading %s message '%d' for account '%s'.",
+	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent", m_mId.dmId,
 	    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
-	if (MSG_RECEIVED == m_msgDirect) {
-		res = Task::downloadMessageList(m_userName, MSG_RECEIVED,
-		    *m_dbSet, errMsg, "GetListOfReceivedMessages",
-		    rt, rn, newMsgIdList, NULL, MESSAGESTATE_ANY);
-	} else {
-		res = Task::downloadMessageList(m_userName, MSG_SENT,
-		    *m_dbSet, errMsg, "GetListOfSentMessages",
-		    st, sn, newMsgIdList, NULL, MESSAGESTATE_ANY);
-	}
-
-	/*
-	 * -1 means list of received messages.
-	 * -2 means list of sent messages.
-	 */
-	emit globMsgProcEmitter.downloadSuccess(m_userName,
-	    (MSG_RECEIVED == m_msgDirect) ? -1 : -2);
-	emit globMsgProcEmitter.downloadListSummary(true, rt, rn , st, sn);
+	res = Task::downloadMessage(m_userName, m_mId, true, m_msgDirect,
+	    *m_dbSet, errMsg, "DownloadMessage");
 
 	if (Q_SUCCESS == res) {
-		logDebugLv1NL("Done downloading message list for account '%s'.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
-	} else {
-		logErrorNL("Downloading message list for account '%s' failed.",
+		logDebugLv1NL("Done downloading message '%d' for account '%s'.",
+		    m_mId.dmId,
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 
-		emit globMsgProcEmitter.downloadFail(m_userName,
-		    (MSG_RECEIVED == m_msgDirect) ? -1 : -2, errMsg);
+		/* Only on successful download. */
+		emit globMsgProcEmitter.downloadSuccess(m_userName, m_mId.dmId);
+	} else {
+		logErrorNL("Downloading message '%d' for account '%s' failed.",
+		    m_mId.dmId,
+		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+
+		emit globMsgProcEmitter.downloadFail(m_userName, m_mId.dmId,
+		    errMsg);
 	}
 
 	emit globMsgProcEmitter.progressChange("Idle", 0);
