@@ -127,6 +127,17 @@ void WorkerPool::clear(void)
 	m_lock.unlock();
 }
 
+bool WorkerPool::working(void)
+{
+	bool isWorking = false;
+
+	m_lock.lock();
+	isWorking = !((0 == m_running) && m_tasks.isEmpty());
+	m_lock.unlock();
+
+	return isWorking;
+}
+
 void WorkerPool::run(WorkerPool *pool)
 {
 	Q_ASSERT(0 != pool);
@@ -146,6 +157,9 @@ void WorkerPool::run(WorkerPool *pool)
 		}
 
 		if (0 == task) {
+			if (0 == pool->m_running) {
+				emit pool->finished();
+			}
 			pool->m_wake.wait(&pool->m_lock);
 			continue;
 		}

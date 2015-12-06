@@ -31,7 +31,6 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QProgressBar>
-#include <QThread>
 #include <QTimer>
 #include <QPushButton>
 #include <QNetworkReply>
@@ -45,7 +44,6 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
-#include "src/thread/worker.h"
 
 
 namespace Ui {
@@ -143,6 +141,11 @@ protected:
 
 
 private slots:
+
+	/*!
+	 * @brief Workers finished.
+	 */
+	void workersFinished(void);
 
 	/*!
 	 * @brief Clear info status bar if download of complete message fails.
@@ -383,16 +386,6 @@ private slots:
 	 * @brief Downloads the attachments for the selected message.
 	 */
 	void downloadSelectedMessageAttachments(void);
-
-	/*!
-	 * @brief Process pending worker jobs.
-	 */
-	void processPendingWorkerJobs(void);
-
-	/*!
-	 * @brief End current worker job.
-	 */
-	void endCurrentWorkerJob(void);
 
 	/*!
 	 * @brief Create and send a new message form selected account.
@@ -711,8 +704,6 @@ private slots:
 
 private:
 
-	QThread *m_syncAcntThread;
-	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 

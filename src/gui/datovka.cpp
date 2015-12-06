@@ -97,8 +97,6 @@ MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
     m_statusProgressBar(NULL),
-    m_syncAcntThread(0),
-    m_syncAcntWorker(0),
     m_accountModel(this),
     m_filterLine(NULL),
     m_messageListProxyModel(this),
@@ -199,6 +197,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadListSummary(bool, int, int, int, int)), this,
 	    SLOT(dataFromWorkerToStatusBarInfo(bool, int, int, int, int)));
+	connect(&globWorkPool, SIGNAL(finished()),
+	    this, SLOT(workersFinished()));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -2238,6 +2238,31 @@ void MainWindow::openSelectedAttachment(void)
 
 /* ========================================================================= */
 /*
+ * Workers finished.
+ */
+void MainWindow::workersFinished(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	int accountCount = ui->accountList->model()->rowCount();
+	if (accountCount > 0) {
+		ui->actionSync_all_accounts->setEnabled(true);
+		ui->actionReceived_all->setEnabled(true);
+		ui->actionDownload_messages->setEnabled(true);
+		ui->actionGet_messages->setEnabled(true);
+	}
+	/* Prepare counters for next action. */
+	dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
+
+	if (globPref.download_on_background) {
+		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Clear status bar if download of complete message fails.
  */
 void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
@@ -3188,7 +3213,6 @@ void MainWindow::synchroniseAllAccounts(void)
 		return;
 	}
 
-	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
@@ -3237,7 +3261,6 @@ void MainWindow::synchroniseSelectedAccount(void)
 	task->setAutoDelete(true);
 	globWorkPool.assign(task);
 
-	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
@@ -3317,98 +3340,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		globWorkPool.assign(task);
 	}
 
-	/* TODO -- Disable these actions only temporarily. */
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-//	processPendingWorkerJobs(); /* TODO -- Remove the code. */
-}
-
-
-/* ========================================================================= */
-/*
- * Process pending worker jobs.
- */
-void MainWindow::processPendingWorkerJobs(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	/* Only if no other worker is present. */
-	if ((0 != m_syncAcntThread) || (0 != m_syncAcntWorker)) {
-		qDebug() << "Worker already doing something.";
-		return;
-	}
-
-	/* Only if no other worker is present. */
-
-	Worker::Job job = Worker::jobList.firstPop(false);
-	if (!job.isValid()) {
-		/* TODO -- Re-enable buttons? */
-		return;
-	}
-
-	showStatusTextPermanently(
-	    tr("Synchronise account \"%1\" with ISDS server.")
-	        .arg(AccountModel::globAccounts[job.userName].accountName()));
-
-	if (!isdsSessions.isConnectedToIsds(job.userName)) {
-		if (!connectToIsds(job.userName, this)) {
-			return;
-		}
-	}
-
-	m_syncAcntThread = new QThread();
-	m_syncAcntWorker = new Worker();
-	m_syncAcntWorker->moveToThread(m_syncAcntThread);
-
-	connect(m_syncAcntWorker, SIGNAL(workRequested()),
-	    m_syncAcntThread, SLOT(start()));
-	connect(m_syncAcntThread, SIGNAL(started()),
-	    m_syncAcntWorker, SLOT(doJob()));
-	connect(m_syncAcntWorker, SIGNAL(finished()),
-	    m_syncAcntThread, SLOT(quit()), Qt::DirectConnection);
-	connect(m_syncAcntThread, SIGNAL(finished()),
-	    this, SLOT(endCurrentWorkerJob()));
-
-	m_syncAcntWorker->requestWork();
-}
-
-
-/* ========================================================================= */
-/*
- * End current worker job.
- */
-void MainWindow::endCurrentWorkerJob(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	qDebug() << "Deleting Worker and Thread objects.";
-
-	delete m_syncAcntThread; m_syncAcntThread = NULL;
-	delete m_syncAcntWorker; m_syncAcntWorker = NULL;
-
-	if (Worker::jobList.firstPop(false).isValid()) {
-		/* Queue still contains pending jobs. */
-		processPendingWorkerJobs();
-	} else {
-		int accountCount = ui->accountList->model()->rowCount();
-		if (accountCount > 0) {
-			ui->actionSync_all_accounts->setEnabled(true);
-			ui->actionReceived_all->setEnabled(true);
-			ui->actionDownload_messages->setEnabled(true);
-			ui->actionGet_messages->setEnabled(true);
-		}
-		/* Prepare cunters for next action. */
-		dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
-
-		if (globPref.download_on_background) {
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-		}
-	}
 }
 
 
@@ -9323,10 +9258,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	msgBox.setWindowTitle(tr("Datovka"));
 
 	/* check if some worker works now
-	 * if any worker is not working, lock mutex and show exit dialog,
+	 * if any worker is not working, lock mutex and show exit dialogue,
 	 * else waits for worker until he is done.
 	*/
-	if (Worker::downloadMessagesMutex.tryLock()) {
+	if (!globWorkPool.working()) {
+		/* TODO -- Ensure that nothing can be started in-between. */
+
 		msgBox.setIcon(QMessageBox::Question);
 		msgBox.setText(tr("Do you want to close application Datovka?"));
 		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
@@ -9334,9 +9271,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		if (QMessageBox::No == msgBox.exec()) {
 			event->ignore();
 		}
-		Worker::downloadMessagesMutex.unlock();
 
 	} else {
+		/* TODO -- Give possibility to abort jobs and finish. */
+
 		event->ignore();
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setText(tr("Datovka cannot be closed now because "

@@ -31,6 +31,8 @@
 #include "src/io/message_db.h" // MessageDb::MsgId
 #include "src/io/message_db_set.h"
 
+#define MESSAGE_LIST_LIMIT 100000
+
 /*!
  * @brief This class contains generic functions that can be used in derived
  *     classes.

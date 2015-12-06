@@ -124,6 +124,17 @@ public:
 	 */
 	void clear(void);
 
+	/*!
+	 * @brief Return true if some workers have jobs to do.
+	 */
+	bool working(void);
+
+signals:
+	/*!
+	 * @brief Emitted when all jobs finished and queue is empty.
+	 */
+	void finished(void);
+
 protected:
 	/*!
 	 * @brief Worker code.
