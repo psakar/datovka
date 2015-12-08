@@ -1,3 +1,11 @@
+4.4.2 / 2015-12-08
+ * Explicitly specified the limit to 100000 entries in downloaded message
+   list.
+ * Added better explanation of some returned error codes the connection
+   failed.
+ * Fixed remembering of passwords when connecting of ISDS failed.
+ * Added <kudos> into datovka.appdata.xml.
+
 4.4.1 / 2015-10-28
  * Fixed issue when two pop-ups have been shown on errors when sending a
    message.
