@@ -9265,7 +9265,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		/* TODO -- Ensure that nothing can be started in-between. */
 
 		msgBox.setIcon(QMessageBox::Question);
-		msgBox.setText(tr("Do you want to close application Datovka?"));
+		msgBox.setText(tr("Do you want to close Datovka?"));
 		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
 		msgBox.setDefaultButton(QMessageBox::Yes);
 		if (QMessageBox::No == msgBox.exec()) {
@@ -9273,16 +9273,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		}
 
 	} else {
-		/* TODO -- Give possibility to abort jobs and finish. */
-
-		event->ignore();
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setText(tr("Datovka cannot be closed now because "
-		    "downloading of messages on the background is running..."));
-		msgBox.setInformativeText(tr("Wait until the action will "
-		    "finished and try again."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.exec();
+		msgBox.setIcon(QMessageBox::Question);
+		msgBox.setText(
+		    tr("Datovka is currently receiving or sending messages."));
+		msgBox.setInformativeText(
+		    tr("Do you want to abort pending work and close Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			globWorkPool.stop();
+			globWorkPool.clear();
+		} else {
+			event->ignore();
+		}
 	}
 }
 

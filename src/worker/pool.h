@@ -74,6 +74,14 @@ class WorkerPool : public QObject {
 
 public:
 	/*!
+	 * @brief Whether to enqueue at the front or the rear of the queue.
+	 */
+	enum EnqueueOrder {
+		APPEND = 0,
+		PREPEND
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] threads Number of threads to create.
@@ -115,9 +123,10 @@ public:
 	/*!
 	 * @brief Assign a task to be performed by a worker in the pool.
 	 *
-	 * @param[in] task Task to be performed by the worker.
+	 * @param[in] task  Task to be performed by the worker.
+	 * @param[in] order Whether to prepend a task, default is append.
 	 */
-	void assign(QRunnable *task);
+	void assign(QRunnable *task, enum EnqueueOrder order = APPEND);
 
 	/*!
 	 * @brief Clear all tasks enqueued in pool processing queue.

@@ -103,14 +103,18 @@ void WorkerPool::wait(void)
 	m_lock.unlock();
 }
 
-void WorkerPool::assign(QRunnable *task)
+void WorkerPool::assign(QRunnable *task, enum WorkerPool::EnqueueOrder order)
 {
 	if (0 == task) {
 		return;
 	}
 
 	m_lock.lock();
-	m_tasks.enqueue(task);
+	if (APPEND == order) {
+		m_tasks.enqueue(task);
+	} else {
+		m_tasks.prepend(task);
+	}
 	m_wake.wakeAll();
 	m_lock.unlock();
 }

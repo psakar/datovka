@@ -27,7 +27,9 @@
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
+#include "src/worker/pool.h" /* List with whole messages. */
 #include "src/worker/task.h"
+#include "src/worker/task_download_message.h" /* List with whole messages. */
 
 qdatovka_error Task::downloadDeliveryInfo(const QString &userName, qint64 dmId,
     bool signedMsg, MessageDbSet &dbSet)
@@ -343,9 +345,14 @@ qdatovka_error Task::downloadMessageList(const QString &userName,
 
 			if (globPref.auto_download_whole_messages) {
 				QString errMsg;
-				downloadMessage(userName,
-				    MessageDb::MsgId(dmId, deliveryTime),
-				    true, msgDirect, dbSet, errMsg, "");
+
+				TaskDownloadMessage *task;
+
+				task = new (std::nothrow) TaskDownloadMessage(
+				    userName, &dbSet, msgDirect, dmId,
+				    deliveryTime);
+				task->setAutoDelete(true);
+				globWorkPool.assign(task, WorkerPool::PREPEND);
 			}
 			newMsgIdList.append(dmID);
 			newcnt++;
@@ -369,11 +376,15 @@ qdatovka_error Task::downloadMessageList(const QString &userName,
 				if (globPref.auto_download_whole_messages &&
 				    (dmDbMsgStatus <= 2)) {
 					QString errMsg;
-					downloadMessage(userName,
-					    MessageDb::MsgId(dmId,
-					        deliveryTime),
-					    true, msgDirect, dbSet, errMsg,
-					    "");
+
+					TaskDownloadMessage *task;
+
+					task = new (std::nothrow) TaskDownloadMessage(
+					    userName, &dbSet, msgDirect, dmId,
+					    deliveryTime);
+					task->setAutoDelete(true);
+					globWorkPool.assign(task,
+					    WorkerPool::PREPEND);
 				}
 
 				if (dmDbMsgStatus != dmNewMsgStatus) {
@@ -386,9 +397,14 @@ qdatovka_error Task::downloadMessageList(const QString &userName,
 			if (globPref.auto_download_whole_messages &&
 			    !messageDb->msgsStoredWhole(dmId)) {
 				QString errMsg;
-				downloadMessage(userName,
-				    MessageDb::MsgId(dmId, deliveryTime),
-				    true, msgDirect, dbSet, errMsg, "");
+
+				TaskDownloadMessage *task;
+
+				task = new (std::nothrow) TaskDownloadMessage(
+				    userName, &dbSet, msgDirect, dmId,
+				    deliveryTime);
+				task->setAutoDelete(true);
+				globWorkPool.assign(task, WorkerPool::PREPEND);
 			}
 		}
 
