@@ -31,6 +31,9 @@
 #include "src/io/message_db.h" // MessageDb::MsgId
 #include "src/io/message_db_set.h"
 
+/*!
+ * @brief Maximum length of message list to be downloaded.
+ */
 #define MESSAGE_LIST_LIMIT 100000
 
 /*!

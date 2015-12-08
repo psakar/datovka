@@ -86,14 +86,16 @@ void TaskDownloadMessageList::run(void)
 	    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
+	unsigned long dmLimit = MESSAGE_LIST_LIMIT;
+
 	if (MSG_RECEIVED == m_msgDirect) {
 		res = Task::downloadMessageList(m_userName, MSG_RECEIVED,
 		    *m_dbSet, errMsg, "GetListOfReceivedMessages",
-		    rt, rn, newMsgIdList, NULL, MESSAGESTATE_ANY);
+		    rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 	} else {
 		res = Task::downloadMessageList(m_userName, MSG_SENT,
 		    *m_dbSet, errMsg, "GetListOfSentMessages",
-		    st, sn, newMsgIdList, NULL, MESSAGESTATE_ANY);
+		    st, sn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 	}
 
 	/*
