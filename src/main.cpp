@@ -606,9 +606,9 @@ int main(int argc, char *argv[])
 	}
 
 	/* Wait until all threads finished. */
-	logInfo("%s\n", "Wainting for pending worker threads.");
+	logInfo("%s\n", "Waiting for pending worker threads.");
 	globWorkPool.wait();
-	logInfo("%s\n", "All worker therads finished");
+	logInfo("%s\n", "All worker threads finished");
 
 	stop = QDateTime::currentMSecsSinceEpoch();
 	diff = stop - start;
