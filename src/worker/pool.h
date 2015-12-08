@@ -129,6 +129,15 @@ public:
 	void assign(QRunnable *task, enum EnqueueOrder order = APPEND);
 
 	/*!
+	 * @brief Run a single task to be performed by a worker in the pool.
+	 *
+	 * @note Blocks until it can be enqueued and waits for being finished.
+	 *
+	 * @param[in] task Task to be performed by the worker.
+	 */
+	void runSingle(QRunnable *task);
+
+	/*!
 	 * @brief Clear all tasks enqueued in pool processing queue.
 	 */
 	void clear(void);
@@ -166,6 +175,24 @@ private:
 	int m_running; /*!< Number of running threads. */
 
 	QQueue<QRunnable *> m_tasks; /*!< Queue of tasks. */
+
+	/*
+	 * Single task has the highest priority. The runSingle() method
+	 * blocks when a single task has already been assigned but didn't
+	 * finish.
+	 *
+	 * The single task is meant a as a synchronous blocking supplement of
+	 * direct worker calls such as download single message.
+	 */
+
+	enum ExecutionState {
+		PENDING, /*!< Task waiting to be executed. */
+		EXECUTING, /*!< Task currently being executed. */
+		FINISHED /*!< Task execution finished. */
+	};
+
+	QRunnable *m_singleTask; /*!< Single task. */
+	enum ExecutionState m_singleState; /*!< Single execution state. */
 };
 
 /*!

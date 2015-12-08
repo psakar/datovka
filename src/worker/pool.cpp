@@ -24,6 +24,12 @@
 #include "src/worker/pool.h"
 
 WorkerPool globWorkPool(1); /*!< Only one worker thread currently. */
+/*
+ * TODO -- To be able to run multiple therads in the pool a locking mechanism
+ * over libisds context structures must be implemented.
+ * Also, per-context queueing ought to be implemented to avoid unnecessary
+ * waiting.
+ */
 
 WorkerThread::WorkerThread(WorkerPool *pool)
     : m_pool(pool)
@@ -43,7 +49,9 @@ WorkerPool::WorkerPool(unsigned threads, QObject *parent)
     m_terminating(false),
     m_suspended(false),
     m_running(0),
-    m_tasks()
+    m_tasks(),
+    m_singleTask(0),
+    m_singleState(FINISHED)
 {
 	for (unsigned i = 0; i < threads; ++i) {
 		m_threadPtrs[i] = new (std::nothrow) WorkerThread(this);
@@ -119,6 +127,30 @@ void WorkerPool::assign(QRunnable *task, enum WorkerPool::EnqueueOrder order)
 	m_lock.unlock();
 }
 
+void WorkerPool::runSingle(QRunnable *task)
+{
+	if (0 == task) {
+		return;
+	}
+
+	m_lock.lock();
+	while (0 != m_singleTask) {
+		m_wake.wait(&m_lock);
+	}
+	m_singleTask = task;
+	m_singleState = PENDING;
+	m_wake.wakeAll();
+	m_lock.unlock();
+
+	m_lock.lock();
+	while (FINISHED != m_singleState) {
+		m_wake.wait(&m_lock);
+	}
+	m_singleTask = 0; /* Leave in FINISHED. */
+	m_wake.wakeAll();
+	m_lock.unlock();
+}
+
 void WorkerPool::clear(void)
 {
 	m_lock.lock();
@@ -155,7 +187,10 @@ void WorkerPool::run(WorkerPool *pool)
 
 		QRunnable *task = 0;
 		if (!pool->m_suspended) {
-			if (!pool->m_tasks.isEmpty()) {
+			if ((0 != pool->m_singleTask) && (PENDING == pool->m_singleState)) {
+				task = pool->m_singleTask;
+				pool->m_singleState = EXECUTING;
+			} else if (!pool->m_tasks.isEmpty()) {
 				task = pool->m_tasks.dequeue();
 			}
 		}
@@ -178,6 +213,11 @@ void WorkerPool::run(WorkerPool *pool)
 		pool->m_lock.lock();
 
 		--pool->m_running;
+		if (task == pool->m_singleTask) {
+			Q_ASSERT(EXECUTING == pool->m_singleState);
+			pool->m_singleState = FINISHED;
+		}
+
 		pool->m_wake.wakeAll();
 	}
 
