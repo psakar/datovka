@@ -186,6 +186,7 @@ void Worker::doJob(void)
 	int sn = 0;
 	QString errMsg;
 	qdatovka_error res = Q_SUCCESS;
+	unsigned long dmLimit = MESSAGE_LIST_LIMIT;
 
 	/* != -1 -- specific message required. */
 	if (0 <= job.mId.dmId) {
@@ -226,7 +227,7 @@ void Worker::doJob(void)
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_RECEIVED,
 		        *job.dbSet, errMsg, "GetListOfReceivedMessages",
-		        0, this, rt, rn, newMsgIdList, NULL, MESSAGESTATE_ANY);
+		        0, this, rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
@@ -248,7 +249,7 @@ void Worker::doJob(void)
 		QStringList newMsgIdList;
 		res = downloadMessageList(job.userName, MSG_SENT, *job.dbSet,
 		        errMsg, "GetListOfSentMessages", 0, this, st, sn,
-		        newMsgIdList, NULL, MESSAGESTATE_ANY);
+		        newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 		emit refreshAccountList(job.userName);
 		emit changeStatusBarInfo(true, rt, rn , st, sn);
 
