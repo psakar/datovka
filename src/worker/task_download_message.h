@@ -52,6 +52,8 @@ public:
 	virtual
 	void run(void);
 
+	bool m_donloadSucceeded; /*!< True if download succeeds. */
+
 private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */

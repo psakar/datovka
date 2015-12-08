@@ -32,7 +32,8 @@
 TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
     MessageDbSet *dbSet, enum MessageDirection msgDirect,
     qint64 dmId, const QDateTime &dTime)
-    : m_userName(userName),
+    : m_donloadSucceeded(false),
+    m_userName(userName),
     m_dbSet(dbSet),
     m_msgDirect(msgDirect),
     m_mId(dmId, dTime)
@@ -79,6 +80,8 @@ void TaskDownloadMessage::run(void)
 
 	res = Task::downloadMessage(m_userName, m_mId, true, m_msgDirect,
 	    *m_dbSet, errMsg, "DownloadMessage");
+
+	m_donloadSucceeded = Q_SUCCESS == res;
 
 	if (Q_SUCCESS == res) {
 		logDebugLv1NL("Done downloading message '%d' for account '%s'.",
