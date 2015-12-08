@@ -38,6 +38,7 @@
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 
+#define MESSAGE_LIST_LIMIT 100000
 
 class Worker : public QObject {
 	Q_OBJECT

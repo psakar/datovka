@@ -193,6 +193,11 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		dmLimitPtr = &dmLimit;
 	}
 
+	if (NULL == dmLimitPtr) {
+		dmLimit = MESSAGE_LIST_LIMIT;
+		dmLimitPtr = &dmLimit;
+	}
+
 	QString err;
 	if (map["dmType"].toString() == MT_RECEIVED) {
 

@@ -8364,7 +8364,6 @@ bool MainWindow::loginMethodUserNamePwd(
 		}
 		// save new pwd to settings
 		mw->saveSettings();
-		ret = true;
 
 	// is CLI, disable dialogs
 	} else {
@@ -8570,7 +8569,7 @@ bool MainWindow::loginMethodCertificateOnly(
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
 		accountInfo._setPassphrase(passphrase);
-
+		ret = true;
 		/*
 		 * TODO -- Notify the user that he should protect his
 		 * certificates with a password?
