@@ -7446,16 +7446,17 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
-	QString errMsg;
-	if (Q_SUCCESS == Task::downloadMessage(userName,
-	        MessageDb::MsgId(dmId, deliveryTime), true,
-	        msgDirect, *dbSet, errMsg, QString())) {
-		/* TODO -- Wouldn't it be better with selection changed? */
-		postDownloadSelectedMessageAttachments(userName, dmId);
-		return true;
-	}
+	bool ret = false;
+	TaskDownloadMessage *task;
 
-	return false;
+	task = new (std::nothrow) TaskDownloadMessage(
+	    userName, dbSet, msgDirect, dmId, deliveryTime);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+	ret = task->m_donloadSucceeded;
+	delete task;
+
+	return ret;
 }
 
 
