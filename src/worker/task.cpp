@@ -463,16 +463,16 @@ qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
 	    userName.toUtf8().constData());
 	status = isds_send_message(session, message);
 
-	{
-		bool ok = false;
-		dmId = QString(envelope->dmID).toLongLong(&ok);
-		if (!ok) {
-			Q_ASSERT(0);
-			dmId = -1;
-		}
-	}
-
 	if (IE_SUCCESS == status) {
+		{
+			bool ok = false;
+			dmId = QString(envelope->dmID).toLongLong(&ok);
+			if (!ok) {
+				Q_ASSERT(0);
+				dmId = -1;
+			}
+		}
+
 		QDateTime deliveryTime =
 		    timevalToDateTime(message->envelope->dmDeliveryTime);
 
