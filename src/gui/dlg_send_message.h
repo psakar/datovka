@@ -34,6 +34,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
+#include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
 
@@ -95,8 +96,8 @@ private:
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
 
-	struct isds_list *buildDocuments(void) const;
-	struct isds_envelope *buildEnvelope(void) const;
+	bool buildDocuments(QList<IsdsDocument> &documents) const;
+	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
 	QString getUserInfoFormIsds(QString idDbox);
 	QString getPDZCreditFromISDS(const QString &userName,
