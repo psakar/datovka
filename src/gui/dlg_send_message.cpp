@@ -909,18 +909,6 @@ void DlgSendMessage::openAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Free document list.
- */
-static
-void isds_document_free_void(void **document)
-/* ========================================================================= */
-{
-	isds_document_free((struct isds_document **) document);
-}
-
-
-/* ========================================================================= */
-/*
  * Dialog informs user that message contains one or more PDZs.
  */
 int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
