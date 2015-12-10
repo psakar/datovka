@@ -49,16 +49,16 @@ public:
 
 	class MsgSendingResult {
 	public:
-		int status;
-		QString dbID;
-		QString recipientName;
-		qint64 dmId;
-		bool isPDZ;
-		QString errInfo;
+		isds_error sendStatus; /*!< Sending status as returned by libisds. */
+		QString dbIDRecipient; /*!< Recipient identifier. */
+		QString recipientName; /*!< Recipient name. */
+		qint64 dmId; /*!< Sent message identifier. */
+		bool isPDZ; /*!< True if message was sent as PDZ. */
+		QString errInfo; /*!< Error description. */
 
 		MsgSendingResult(void)
-		    : status(-1), dbID(), recipientName(), dmId(-1),
-		    isPDZ(false), errInfo()
+		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
+		    dmId(-1), isPDZ(false), errInfo()
 		{ }
 	};
 
@@ -113,10 +113,10 @@ private:
 	struct isds_list *buildDocuments(void) const;
 	struct isds_envelope *buildEnvelope(void) const;
 	static
-	MsgSendingResult sendSingleMessage(const QString &userName,
+	qdatovka_error sendSingleMessage(const QString &userName,
 	    MessageDbSet &dbSet, struct isds_message *message,
 	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ);
+	    bool isPDZ, MsgSendingResult *result);
 
 	QString getUserInfoFormIsds(QString idDbox);
 	QString getPDZCreditFromISDS(const QString &userName,

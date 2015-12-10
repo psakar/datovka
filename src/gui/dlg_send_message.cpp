@@ -1228,9 +1228,10 @@ fail:
 /*
  * Send single message.
  */
-DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
+qdatovka_error DlgSendMessage::sendSingleMessage(
     const QString &userName, MessageDbSet &dbSet, struct isds_message *message,
-    const QString &recipientName, const QString &recipientAddress, bool isPDZ)
+    const QString &recipientName, const QString &recipientAddress, bool isPDZ,
+    DlgSendMessage::MsgSendingResult *result)
 /* ========================================================================= */
 {
 	Q_ASSERT(!userName.isEmpty());
@@ -1238,7 +1239,8 @@ DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
 	Q_ASSERT(NULL != message);
 	Q_ASSERT(NULL != message->envelope);
 
-	MsgSendingResult sendMsgResult;
+	isds_error status;
+	qint64 dmId = -1;
 	struct isds_envelope *envelope = message->envelope;
 	struct isds_ctx *session = NULL;
 
@@ -1251,22 +1253,18 @@ DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
 
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
-	sendMsgResult.status = isds_send_message(session, message);
+	status = isds_send_message(session, message);
 
-	sendMsgResult.dbID = message->envelope->dbIDRecipient;
-	sendMsgResult.recipientName = recipientName;
 	{
 		bool ok = false;
-		sendMsgResult.dmId = QString(envelope->dmID).toLongLong(&ok);
+		dmId = QString(envelope->dmID).toLongLong(&ok);
 		if (!ok) {
 			Q_ASSERT(0);
-			sendMsgResult.dmId = -1;
+			dmId = -1;
 		}
 	}
-	sendMsgResult.isPDZ = isPDZ;
-	sendMsgResult.errInfo = isdsLongMessage(session);
 
-	if (sendMsgResult.status == IE_SUCCESS) {
+	if (IE_SUCCESS == status) {
 		QDateTime deliveryTime =
 		    timevalToDateTime(message->envelope->dmDeliveryTime);
 
@@ -1278,20 +1276,26 @@ DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
 		    globAccountDbPtr->senderNameGuess(userName + "___True");
 
 		/* TODO -- Move the function into worker. */
-		messageDb->msgsInsertNewlySentMessageEnvelope(
-		    sendMsgResult.dmId, dbId, senderName,
-		    message->envelope->dbIDRecipient,
-		    recipientName, recipientAddress,
-		    envelope->dmAnnotation);
+		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
+		    senderName, message->envelope->dbIDRecipient,
+		    recipientName, recipientAddress, envelope->dmAnnotation);
 
-		Task::storeAttachments(*messageDb, sendMsgResult.dmId,
-		    message->documents);
+		Task::storeAttachments(*messageDb, dmId, message->documents);
 	}
 
-	return sendMsgResult;
+	if (0 != result) {
+		result->sendStatus = status;
+		result->dbIDRecipient = message->envelope->dbIDRecipient;
+		result->recipientName = recipientName;
+		result->dmId = dmId;
+		result->isPDZ = isPDZ;
+		result->errInfo = isdsLongMessage(session);
+	}
+
+	return Q_SUCCESS;
 
 fail:
-	return MsgSendingResult();
+	return Q_GLOBAL_ERROR;
 }
 
 
@@ -1396,13 +1400,14 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
-		MsgSendingResult sendingResult =
-		    sendSingleMessage(m_userName, m_dbSet, message,
-		        this->recipientTableWidget->item(row, RTW_NAME)->text(),
-		        this->recipientTableWidget->item(row, RTW_ADDR)->text(),
-		        this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
+		MsgSendingResult sendingResult;
+		sendSingleMessage(m_userName, m_dbSet, message,
+		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
+		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
+		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"),
+		    &sendingResult);
 
-		if (sendingResult.status == IE_SUCCESS) {
+		if (sendingResult.sendStatus == IE_SUCCESS) {
 			successSendCnt++;
 		}
 
@@ -1410,27 +1415,27 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	foreach (const MsgSendingResult &result, sentMsgResultList) {
-		if (result.status == IE_SUCCESS) {
+		if (result.sendStatus == IE_SUCCESS) {
 			if (result.isPDZ) {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
 				    arg(result.recipientName).
-				    arg(result.dbID).
+				    arg(result.dbIDRecipient).
 				    arg(result.dmId) + "<br/>";
 			} else {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
 				    arg(result.recipientName).
-				    arg(result.dbID).
+				    arg(result.dbIDRecipient).
 				    arg(result.dmId) + "<br/>";
 			}
 		} else {
 			detailText += tr("Message was NOT successfully "
 			    "sent to <i>%1 (%2)</i>. Server says: %3").
 			    arg(result.recipientName).
-			    arg(result.dbID).
+			    arg(result.dbIDRecipient).
 			    arg(result.errInfo) + "<br/>";
 		}
 	}
