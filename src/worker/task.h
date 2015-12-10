@@ -111,6 +111,47 @@ public:
 	    int dmStatusFilter);
 
 	/*!
+	 * @brief Gives more detailed information about sending outcome.
+	 */
+	class MsgSendingResult {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		MsgSendingResult(void)
+		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
+		    dmId(-1), isPDZ(false), errInfo()
+		{ }
+
+		isds_error sendStatus; /*!< Status as returned by libisds. */
+		QString dbIDRecipient; /*!< Recipient identifier. */
+		QString recipientName; /*!< Recipient name. */
+		qint64 dmId; /*!< Sent message identifier. */
+		bool isPDZ; /*!< True if message was sent as PDZ. */
+		QString errInfo; /*!< Error description. */
+	};
+
+	/*!
+	 * @brief Sends a single message to ISDS fro given account.
+	 *
+	 * TODO -- This method ought to be protected.
+	 *
+	 * @param[in]     userName         Account identifier (user login name).
+	 * @param[in,out] dbSet            Database container.
+	 * @param[in,out] message          Message being sent.
+	 * @param[in]     recipientName    Message recipient name.
+	 * @param[in]     recipientAddress Message recipient address.
+	 * @param[in]     isPDZ            True if message is a PDZ.
+	 * @param[out]    result           Results, pass NULL if not desired.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error sendMessage(const QString &userName,
+	    MessageDbSet &dbSet, struct isds_message *message,
+	    const QString &recipientName, const QString &recipientAddress,
+	    bool isPDZ, MsgSendingResult *result);
+
+	/*!
 	 * @brief Store attachments into database.
 	 *
 	 * TODO -- This method must be private.

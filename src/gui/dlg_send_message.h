@@ -31,10 +31,10 @@
 #include <QTreeView>
 
 #include "src/common.h"
-#include "src/io/message_db_set.h"
-#include "ui_dlg_send_message.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
+#include "ui_dlg_send_message.h"
 
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
@@ -45,21 +45,6 @@ public:
 		ACT_NEW,
 		ACT_REPLY,
 		ACT_NEW_FROM_TMP
-	};
-
-	class MsgSendingResult {
-	public:
-		isds_error sendStatus; /*!< Sending status as returned by libisds. */
-		QString dbIDRecipient; /*!< Recipient identifier. */
-		QString recipientName; /*!< Recipient name. */
-		qint64 dmId; /*!< Sent message identifier. */
-		bool isPDZ; /*!< True if message was sent as PDZ. */
-		QString errInfo; /*!< Error description. */
-
-		MsgSendingResult(void)
-		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
-		    dmId(-1), isPDZ(false), errInfo()
-		{ }
 	};
 
 	DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
@@ -112,11 +97,6 @@ private:
 
 	struct isds_list *buildDocuments(void) const;
 	struct isds_envelope *buildEnvelope(void) const;
-	static
-	qdatovka_error sendSingleMessage(const QString &userName,
-	    MessageDbSet &dbSet, struct isds_message *message,
-	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ, MsgSendingResult *result);
 
 	QString getUserInfoFormIsds(QString idDbox);
 	QString getPDZCreditFromISDS(const QString &userName,

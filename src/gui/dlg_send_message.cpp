@@ -1226,81 +1226,6 @@ fail:
 
 /* ========================================================================= */
 /*
- * Send single message.
- */
-qdatovka_error DlgSendMessage::sendSingleMessage(
-    const QString &userName, MessageDbSet &dbSet, struct isds_message *message,
-    const QString &recipientName, const QString &recipientAddress, bool isPDZ,
-    DlgSendMessage::MsgSendingResult *result)
-/* ========================================================================= */
-{
-	Q_ASSERT(!userName.isEmpty());
-
-	Q_ASSERT(NULL != message);
-	Q_ASSERT(NULL != message->envelope);
-
-	isds_error status;
-	qint64 dmId = -1;
-	struct isds_envelope *envelope = message->envelope;
-	struct isds_ctx *session = NULL;
-
-	session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		logErrorNL("%s", "Missing ISDS session.");
-		goto fail;
-	}
-
-	logInfo("Sending message from user '%s'.\n",
-	    userName.toUtf8().constData());
-	status = isds_send_message(session, message);
-
-	{
-		bool ok = false;
-		dmId = QString(envelope->dmID).toLongLong(&ok);
-		if (!ok) {
-			Q_ASSERT(0);
-			dmId = -1;
-		}
-	}
-
-	if (IE_SUCCESS == status) {
-		QDateTime deliveryTime =
-		    timevalToDateTime(message->envelope->dmDeliveryTime);
-
-		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-		Q_ASSERT(0 != messageDb);
-
-		QString dbId = globAccountDbPtr->dbId(userName + "___True");
-		QString senderName =
-		    globAccountDbPtr->senderNameGuess(userName + "___True");
-
-		/* TODO -- Move the function into worker. */
-		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
-		    senderName, message->envelope->dbIDRecipient,
-		    recipientName, recipientAddress, envelope->dmAnnotation);
-
-		Task::storeAttachments(*messageDb, dmId, message->documents);
-	}
-
-	if (0 != result) {
-		result->sendStatus = status;
-		result->dbIDRecipient = message->envelope->dbIDRecipient;
-		result->recipientName = recipientName;
-		result->dmId = dmId;
-		result->isPDZ = isPDZ;
-		result->errInfo = isdsLongMessage(session);
-	}
-
-	return Q_SUCCESS;
-
-fail:
-	return Q_GLOBAL_ERROR;
-}
-
-
-/* ========================================================================= */
-/*
  * Send message/multiple message.
  */
 void DlgSendMessage::sendMessage(void)
@@ -1311,7 +1236,7 @@ void DlgSendMessage::sendMessage(void)
 	struct isds_message *message = NULL;
 
 	/* List of send message result */
-	QList<MsgSendingResult> sentMsgResultList;
+	QList<Task::MsgSendingResult> sentMsgResultList;
 
 	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
@@ -1400,8 +1325,8 @@ void DlgSendMessage::sendMessage(void)
 			}
 		}
 
-		MsgSendingResult sendingResult;
-		sendSingleMessage(m_userName, m_dbSet, message,
+		Task::MsgSendingResult sendingResult;
+		Task::sendMessage(m_userName, m_dbSet, message,
 		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
 		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"),
@@ -1414,7 +1339,7 @@ void DlgSendMessage::sendMessage(void)
 		sentMsgResultList.append(sendingResult);
 	}
 
-	foreach (const MsgSendingResult &result, sentMsgResultList) {
+	foreach (const Task::MsgSendingResult &result, sentMsgResultList) {
 		if (result.sendStatus == IE_SUCCESS) {
 			if (result.isPDZ) {
 				detailText += tr("Message was successfully "
