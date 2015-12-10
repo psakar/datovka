@@ -152,20 +152,6 @@ public:
 	    bool isPDZ, MsgSendingResult *result);
 
 	/*!
-	 * @brief Store attachments into database.
-	 *
-	 * TODO -- This method must be private.
-	 *
-	 * @param[in,out] messageDb Database.
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in]     documents Attachments.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
-	    const struct isds_list *documents);
-
-	/*!
 	 * @brief Store message delivery information into database.
 	 *
 	 * TODO -- This method must be private.
@@ -214,6 +200,18 @@ public:
 	    const QString &progressLabel);
 
 private:
+	/*!
+	 * @brief Store attachments into database.
+	 *
+	 * @param[in,out] messageDb Database.
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in]     documents Attachments.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
+	    const struct isds_list *documents);
+
 	/*!
 	 * @brief Download additional info about author (sender).
 	 *

@@ -506,36 +506,6 @@ fail:
 	return Q_GLOBAL_ERROR;
 }
 
-qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
-    const struct isds_list *documents)
-{
-	const struct isds_list *file = documents;
-
-	while (NULL != file) {
-		const isds_document *item = (isds_document *) file->data;
-
-		QByteArray dmEncodedContentBase64 = QByteArray(
-		    (char *)item->data, item->data_length).toBase64();
-
-		/* Insert/update file to db */
-		if (messageDb.msgsInsertUpdateMessageFile(dmId,
-		        item->dmFileDescr, item->dmUpFileGuid,
-		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
-		        convertAttachmentType(item->dmFileMetaType),
-		        dmEncodedContentBase64)) {
-			logDebugLv0NL(
-			    "Attachment file '%s' was stored into database.",
-			    item->dmFileDescr);
-		} else {
-			logErrorNL("Storing attachment file '%s' failed.",
-			    item->dmFileDescr);
-		}
-		file = file->next;
-	}
-
-	return Q_SUCCESS;
-}
-
 qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
     const struct isds_message *msg)
 {
@@ -773,6 +743,36 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	/* Insert/update all attachment files */
 	storeAttachments(*messageDb, dmID, msg->documents);
+
+	return Q_SUCCESS;
+}
+
+qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
+    const struct isds_list *documents)
+{
+	const struct isds_list *file = documents;
+
+	while (NULL != file) {
+		const isds_document *item = (isds_document *) file->data;
+
+		QByteArray dmEncodedContentBase64 = QByteArray(
+		    (char *)item->data, item->data_length).toBase64();
+
+		/* Insert/update file to db */
+		if (messageDb.msgsInsertUpdateMessageFile(dmId,
+		        item->dmFileDescr, item->dmUpFileGuid,
+		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
+		        convertAttachmentType(item->dmFileMetaType),
+		        dmEncodedContentBase64)) {
+			logDebugLv0NL(
+			    "Attachment file '%s' was stored into database.",
+			    item->dmFileDescr);
+		} else {
+			logErrorNL("Storing attachment file '%s' failed.",
+			    item->dmFileDescr);
+		}
+		file = file->next;
+	}
 
 	return Q_SUCCESS;
 }
