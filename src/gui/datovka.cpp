@@ -3337,7 +3337,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		task = new (std::nothrow) TaskDownloadMessage(
 		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task);
+		globWorkPool.assign(task, WorkerPool::PREPEND);
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
