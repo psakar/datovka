@@ -103,6 +103,6 @@ void TaskDownloadMessage::run(void)
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download message list task finished in thread '%p'",
+	logDebugLv0NL("Download message task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
