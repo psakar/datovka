@@ -112,8 +112,11 @@ private:
 
 	struct isds_list *buildDocuments(void) const;
 	struct isds_envelope *buildEnvelope(void) const;
-	MsgSendingResult sendSingleMessage(struct isds_message *message,
-	    int row) const;
+	static
+	MsgSendingResult sendSingleMessage(const QString &userName,
+	    MessageDbSet &dbSet, struct isds_message *message,
+	    const QString &recipientName, const QString &recipientAddress,
+	    bool isPDZ);
 
 	QString getUserInfoFormIsds(QString idDbox);
 	QString getPDZCreditFromISDS(const QString &userName,

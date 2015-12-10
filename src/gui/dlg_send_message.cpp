@@ -1229,9 +1229,12 @@ fail:
  * Send single message.
  */
 DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
-    struct isds_message *message, int row) const
+    const QString &userName, MessageDbSet &dbSet, struct isds_message *message,
+    const QString &recipientName, const QString &recipientAddress, bool isPDZ)
 /* ========================================================================= */
 {
+	Q_ASSERT(!userName.isEmpty());
+
 	Q_ASSERT(NULL != message);
 	Q_ASSERT(NULL != message->envelope);
 
@@ -1239,38 +1242,7 @@ DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
 	struct isds_envelope *envelope = message->envelope;
 	struct isds_ctx *session = NULL;
 
-	/* Clear fields. */
-	if (NULL != envelope->dbIDRecipient) {
-		free(envelope->dbIDRecipient);
-		envelope->dbIDRecipient = NULL;
-	}
-	if (NULL != envelope->dmToHands) {
-		free(envelope->dmToHands);
-		envelope->dmToHands = NULL;
-	}
-	if (NULL != envelope->dmID) {
-		free(envelope->dmID);
-		envelope->dmID = NULL;
-	}
-
-	/* Set new recipient. */
-	envelope->dbIDRecipient = strdup(
-	    this->recipientTableWidget->item(row, RTW_ID)->text().toUtf8().constData());
-	if (NULL == envelope->dbIDRecipient) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-
-	if (!this->dmToHands->text().isEmpty()) {
-		envelope->dmToHands =
-		    strdup(this->dmToHands->text().toUtf8().constData());
-		if (NULL == envelope->dmToHands) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-
-	session = isdsSessions.session(m_userName);
+	session = isdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		logErrorNL("%s", "Missing ISDS session.");
@@ -1278,23 +1250,43 @@ DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
 	}
 
 	logInfo("Sending message from user '%s'.\n",
-	    m_userName.toUtf8().constData());
+	    userName.toUtf8().constData());
 	sendMsgResult.status = isds_send_message(session, message);
 
-	sendMsgResult.dbID =
-	    this->recipientTableWidget->item(row, RTW_ID)->text();
-	sendMsgResult.recipientName =
-	    this->recipientTableWidget->item(row, RTW_NAME)->text();
+	sendMsgResult.dbID = message->envelope->dbIDRecipient;
+	sendMsgResult.recipientName = recipientName;
 	{
 		bool ok = false;
 		sendMsgResult.dmId = QString(envelope->dmID).toLongLong(&ok);
 		if (!ok) {
+			Q_ASSERT(0);
 			sendMsgResult.dmId = -1;
 		}
 	}
-	sendMsgResult.isPDZ =
-	    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes");
+	sendMsgResult.isPDZ = isPDZ;
 	sendMsgResult.errInfo = isdsLongMessage(session);
+
+	if (sendMsgResult.status == IE_SUCCESS) {
+		QDateTime deliveryTime =
+		    timevalToDateTime(message->envelope->dmDeliveryTime);
+
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+		Q_ASSERT(0 != messageDb);
+
+		QString dbId = globAccountDbPtr->dbId(userName + "___True");
+		QString senderName =
+		    globAccountDbPtr->senderNameGuess(userName + "___True");
+
+		/* TODO -- Move the function into worker. */
+		messageDb->msgsInsertNewlySentMessageEnvelope(
+		    sendMsgResult.dmId, dbId, senderName,
+		    message->envelope->dbIDRecipient,
+		    recipientName, recipientAddress,
+		    envelope->dmAnnotation);
+
+		Task::storeAttachments(*messageDb, sendMsgResult.dmId,
+		    message->documents);
+	}
 
 	return sendMsgResult;
 
@@ -1373,32 +1365,48 @@ void DlgSendMessage::sendMessage(void)
 
 	/* Send message to all recipients. */
 	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
-		MsgSendingResult sendingResult =
-		    sendSingleMessage(message, row);
+		/* Clear fields. */
+		if (NULL != message->envelope->dbIDRecipient) {
+			free(message->envelope->dbIDRecipient);
+			message->envelope->dbIDRecipient = NULL;
+		}
+		if (NULL != message->envelope->dmToHands) {
+			free(message->envelope->dmToHands);
+			message->envelope->dmToHands = NULL;
+		}
+		if (NULL != message->envelope->dmID) {
+			free(message->envelope->dmID);
+			message->envelope->dmID = NULL;
+		}
 
-		sentMsgResultList.append(sendingResult);
+		/* Set new recipient. */
+		message->envelope->dbIDRecipient = strdup(
+		    this->recipientTableWidget->item(row, RTW_ID)->text().toUtf8().constData());
+		if (NULL == message->envelope->dbIDRecipient) {
+			logErrorNL("%s", "Memory allocation failed.");
+			goto finish;
+		}
+
+		if (!this->dmToHands->text().isEmpty()) {
+			message->envelope->dmToHands =
+			    strdup(this->dmToHands->text().toUtf8().constData());
+			if (NULL == message->envelope->dmToHands) {
+				logErrorNL("%s", "Memory allocation failed.");
+				goto finish;
+			}
+		}
+
+		MsgSendingResult sendingResult =
+		    sendSingleMessage(m_userName, m_dbSet, message,
+		        this->recipientTableWidget->item(row, RTW_NAME)->text(),
+		        this->recipientTableWidget->item(row, RTW_ADDR)->text(),
+		        this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
 
 		if (sendingResult.status == IE_SUCCESS) {
-			QDateTime deliveryTime =
-			    timevalToDateTime(message->envelope->dmDeliveryTime);
-
-			MessageDb *messageDb = m_dbSet.accessMessageDb(deliveryTime, true);
-			Q_ASSERT(0 != messageDb);
-
-			/* TODO -- Move the function into worker. */
-			messageDb->msgsInsertNewlySentMessageEnvelope(sendingResult.dmId,
-			    m_dbId,
-			    m_senderName,
-			    this->recipientTableWidget->item(row, RTW_ID)->text(),
-			    this->recipientTableWidget->item(row, RTW_NAME)->text(),
-			    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
-			    this->subjectText->text());
-
-			Task::storeAttachments(*messageDb, sendingResult.dmId,
-			    message->documents);
-
 			successSendCnt++;
 		}
+
+		sentMsgResultList.append(sendingResult);
 	}
 
 	foreach (const MsgSendingResult &result, sentMsgResultList) {
