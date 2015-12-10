@@ -132,26 +132,6 @@ public:
 	};
 
 	/*!
-	 * @brief Sends a single message to ISDS fro given account.
-	 *
-	 * TODO -- This method ought to be protected.
-	 *
-	 * @param[in]     userName         Account identifier (user login name).
-	 * @param[in,out] dbSet            Database container.
-	 * @param[in,out] message          Message being sent.
-	 * @param[in]     recipientName    Message recipient name.
-	 * @param[in]     recipientAddress Message recipient address.
-	 * @param[in]     isPDZ            True if message is a PDZ.
-	 * @param[out]    result           Results, pass NULL if not desired.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error sendMessage(const QString &userName,
-	    MessageDbSet &dbSet, struct isds_message *message,
-	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ, MsgSendingResult *result);
-
-	/*!
 	 * @brief Store message delivery information into database.
 	 *
 	 * TODO -- This method must be private.
@@ -198,6 +178,25 @@ public:
 	    enum MessageDirection msgDirect,
 	    MessageDbSet &dbSet, const struct isds_message *msg,
 	    const QString &progressLabel);
+
+protected:
+	/*!
+	 * @brief Sends a single message to ISDS fro given account.
+	 *
+	 * @param[in]     userName         Account identifier (user login name).
+	 * @param[in,out] dbSet            Database container.
+	 * @param[in,out] message          Message being sent.
+	 * @param[in]     recipientName    Message recipient name.
+	 * @param[in]     recipientAddress Message recipient address.
+	 * @param[in]     isPDZ            True if message is a PDZ.
+	 * @param[out]    result           Results, pass NULL if not desired.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error sendMessage(const QString &userName,
+	    MessageDbSet &dbSet, struct isds_message *message,
+	    const QString &recipientName, const QString &recipientAddress,
+	    bool isPDZ, MsgSendingResult *result);
 
 private:
 	/*!

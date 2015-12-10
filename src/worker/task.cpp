@@ -437,75 +437,6 @@ qdatovka_error Task::downloadMessageList(const QString &userName,
 #undef USE_TRANSACTIONS
 }
 
-qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
-    struct isds_message *message, const QString &recipientName,
-    const QString &recipientAddress, bool isPDZ,
-    Task::MsgSendingResult *result)
-{
-	Q_ASSERT(!userName.isEmpty());
-
-	Q_ASSERT(NULL != message);
-	Q_ASSERT(NULL != message->envelope);
-
-	isds_error status;
-	qint64 dmId = -1;
-	struct isds_envelope *envelope = message->envelope;
-	struct isds_ctx *session = NULL;
-
-	session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		logErrorNL("%s", "Missing ISDS session.");
-		goto fail;
-	}
-
-	logInfo("Sending message from user '%s'.\n",
-	    userName.toUtf8().constData());
-	status = isds_send_message(session, message);
-
-	if (IE_SUCCESS == status) {
-		{
-			bool ok = false;
-			dmId = QString(envelope->dmID).toLongLong(&ok);
-			if (!ok) {
-				Q_ASSERT(0);
-				dmId = -1;
-			}
-		}
-
-		QDateTime deliveryTime =
-		    timevalToDateTime(message->envelope->dmDeliveryTime);
-
-		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-		Q_ASSERT(0 != messageDb);
-
-		QString dbId = globAccountDbPtr->dbId(userName + "___True");
-		QString senderName =
-		    globAccountDbPtr->senderNameGuess(userName + "___True");
-
-		/* TODO -- Move the function into worker. */
-		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
-		    senderName, message->envelope->dbIDRecipient,
-		    recipientName, recipientAddress, envelope->dmAnnotation);
-
-		storeAttachments(*messageDb, dmId, message->documents);
-	}
-
-	if (0 != result) {
-		result->sendStatus = status;
-		result->dbIDRecipient = message->envelope->dbIDRecipient;
-		result->recipientName = recipientName;
-		result->dmId = dmId;
-		result->isPDZ = isPDZ;
-		result->errInfo = isdsLongMessage(session);
-	}
-
-	return Q_SUCCESS;
-
-fail:
-	return Q_GLOBAL_ERROR;
-}
-
 qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
     const struct isds_message *msg)
 {
@@ -745,6 +676,75 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	storeAttachments(*messageDb, dmID, msg->documents);
 
 	return Q_SUCCESS;
+}
+
+qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
+    struct isds_message *message, const QString &recipientName,
+    const QString &recipientAddress, bool isPDZ,
+    Task::MsgSendingResult *result)
+{
+	Q_ASSERT(!userName.isEmpty());
+
+	Q_ASSERT(NULL != message);
+	Q_ASSERT(NULL != message->envelope);
+
+	isds_error status;
+	qint64 dmId = -1;
+	struct isds_envelope *envelope = message->envelope;
+	struct isds_ctx *session = NULL;
+
+	session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Missing ISDS session.");
+		goto fail;
+	}
+
+	logInfo("Sending message from user '%s'.\n",
+	    userName.toUtf8().constData());
+	status = isds_send_message(session, message);
+
+	if (IE_SUCCESS == status) {
+		{
+			bool ok = false;
+			dmId = QString(envelope->dmID).toLongLong(&ok);
+			if (!ok) {
+				Q_ASSERT(0);
+				dmId = -1;
+			}
+		}
+
+		QDateTime deliveryTime =
+		    timevalToDateTime(message->envelope->dmDeliveryTime);
+
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+		Q_ASSERT(0 != messageDb);
+
+		QString dbId = globAccountDbPtr->dbId(userName + "___True");
+		QString senderName =
+		    globAccountDbPtr->senderNameGuess(userName + "___True");
+
+		/* TODO -- Move the function into worker. */
+		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
+		    senderName, message->envelope->dbIDRecipient,
+		    recipientName, recipientAddress, envelope->dmAnnotation);
+
+		storeAttachments(*messageDb, dmId, message->documents);
+	}
+
+	if (0 != result) {
+		result->sendStatus = status;
+		result->dbIDRecipient = message->envelope->dbIDRecipient;
+		result->recipientName = recipientName;
+		result->dmId = dmId;
+		result->isPDZ = isPDZ;
+		result->errInfo = isdsLongMessage(session);
+	}
+
+	return Q_SUCCESS;
+
+fail:
+	return Q_GLOBAL_ERROR;
 }
 
 qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
