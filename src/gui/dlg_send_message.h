@@ -99,7 +99,6 @@ private:
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
-	QString getUserInfoFormIsds(QString idDbox);
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 

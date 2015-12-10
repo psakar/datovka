@@ -407,7 +407,8 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(envData.dbIDSender);
+		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
+		    envData.dbIDSender);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -518,7 +519,8 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(envData.dbIDRecipient);
+		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
+		    envData.dbIDRecipient);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -573,41 +575,6 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		item->setData(Qt::DisplayRole, fileData.dmEncodedContent);
 		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Return state of dbEffectiveOVM for recipient.
- */
-QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
-/* ========================================================================= */
-{
-	QString str = tr("no");
-	struct isds_DbOwnerInfo *doi = NULL;
-	struct isds_list *box = NULL;
-	isds_DbType dbType = DBTYPE_FO;
-
-	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
-	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
-	    QString(), QString(), 0, false, false);
-	if (NULL == doi) {
-		return str;
-	}
-
-	isdsSearch(&box, m_userName, doi);
-	isds_DbOwnerInfo_free(&doi);
-
-	if (NULL != box) {
-		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
-		    box->data;
-		Q_ASSERT(NULL != item);
-		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
-	}
-
-	isds_list_free(&box);
-
-	return str;
 }
 
 
