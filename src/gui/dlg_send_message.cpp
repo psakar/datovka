@@ -1018,7 +1018,7 @@ void DlgSendMessage::sendMessage(void)
 	QString detailText;
 
 	/* List of send message result */
-	QList<Task::MsgSendingResult> sentMsgResultList;
+	QList<TaskSendMessage::Result> sentMsgResultList;
 
 	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
@@ -1091,7 +1091,7 @@ void DlgSendMessage::sendMessage(void)
 		delete task;
 	}
 
-	foreach (const Task::MsgSendingResult &result, sentMsgResultList) {
+	foreach (const TaskSendMessage::Result &result, sentMsgResultList) {
 		if (result.sendStatus == IE_SUCCESS) {
 			if (result.isPDZ) {
 				detailText += tr("Message was successfully "

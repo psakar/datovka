@@ -25,6 +25,8 @@
 #include <cstring>
 #include <QThread>
 
+#include "src/io/account_db.h"
+#include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
@@ -381,7 +383,7 @@ void TaskSendMessage::run(void)
 		return;
 	}
 
-	Task::sendMessage(m_userName, *m_dbSet, message, m_recipientName,
+	sendMessage(m_userName, *m_dbSet, message, m_recipientName,
 	    m_recipientAddress, m_isPDZ, PL_SEND_MESSAGE, &m_sendingResult);
 
 	isds_message_free(&message);
@@ -392,4 +394,82 @@ void TaskSendMessage::run(void)
 
 	logDebugLv0NL("Send message task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
+}
+
+qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
+    MessageDbSet &dbSet, struct isds_message *message,
+    const QString &recipientName, const QString &recipientAddress,
+    bool isPDZ, const QString &progressLabel, TaskSendMessage::Result *result)
+{
+	Q_ASSERT(!userName.isEmpty());
+
+	Q_ASSERT(NULL != message);
+	Q_ASSERT(NULL != message->envelope);
+
+	isds_error status;
+	qint64 dmId = -1;
+	struct isds_envelope *envelope = message->envelope;
+	struct isds_ctx *session = NULL;
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+
+	session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Missing ISDS session.");
+		goto fail;
+	}
+
+	logInfo("Sending message from user '%s'.\n",
+	    userName.toUtf8().constData());
+	status = isds_send_message(session, message);
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 30);
+
+	if (IE_SUCCESS == status) {
+		{
+			bool ok = false;
+			dmId = QString(envelope->dmID).toLongLong(&ok);
+			if (!ok) {
+				Q_ASSERT(0);
+				dmId = -1;
+			}
+		}
+
+		QDateTime deliveryTime =
+		    timevalToDateTime(message->envelope->dmDeliveryTime);
+
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+		Q_ASSERT(0 != messageDb);
+
+		QString dbId = globAccountDbPtr->dbId(userName + "___True");
+		QString senderName =
+		    globAccountDbPtr->senderNameGuess(userName + "___True");
+
+		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
+		    senderName, message->envelope->dbIDRecipient,
+		    recipientName, recipientAddress, envelope->dmAnnotation);
+
+		emit globMsgProcEmitter.progressChange(progressLabel, 60);
+
+		Task::storeAttachments(*messageDb, dmId, message->documents);
+
+		emit globMsgProcEmitter.progressChange(progressLabel, 90);
+	}
+
+	if (0 != result) {
+		result->sendStatus = status;
+		result->dbIDRecipient = message->envelope->dbIDRecipient;
+		result->recipientName = recipientName;
+		result->dmId = dmId;
+		result->isPDZ = isPDZ;
+		result->errInfo = isdsLongMessage(session);
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+
+	return Q_SUCCESS;
+
+fail:
+	return Q_GLOBAL_ERROR;
 }

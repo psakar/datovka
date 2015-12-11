@@ -149,6 +149,27 @@ public:
 class TaskSendMessage : public Task {
 public:
 	/*!
+	 * @brief Gives more detailed information about sending outcome.
+	 */
+	class Result {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		Result(void)
+		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
+		    dmId(-1), isPDZ(false), errInfo()
+		{ }
+
+		isds_error sendStatus; /*!< Status as returned by libisds. */
+		QString dbIDRecipient; /*!< Recipient identifier. */
+		QString recipientName; /*!< Recipient name. */
+		qint64 dmId; /*!< Sent message identifier. */
+		bool isPDZ; /*!< True if message was sent as PDZ. */
+		QString errInfo; /*!< Error description. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in]     userName         Account identifier (user login name).
@@ -170,9 +191,40 @@ public:
 	virtual
 	void run(void);
 
-	Task::MsgSendingResult m_sendingResult; /*!< Sending outcome. */
+	Result m_sendingResult; /*!< Sending outcome. */
 
 private:
+	/*!
+	 * @brief Sends a single message to ISDS fro given account.
+	 *
+	 * @param[in]     userName         Account identifier (user login name).
+	 * @param[in,out] dbSet            Database container.
+	 * @param[in,out] message          Message being sent.
+	 * @param[in]     recipientName    Message recipient name.
+	 * @param[in]     recipientAddress Message recipient address.
+	 * @param[in]     isPDZ            True if message is a PDZ.
+	 * @param[in]     progressLabel    Progress-bar label.
+	 * @param[out]    result           Results, pass NULL if not desired.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error sendMessage(const QString &userName,
+	    MessageDbSet &dbSet, struct isds_message *message,
+	    const QString &recipientName, const QString &recipientAddress,
+	    bool isPDZ, const QString &progressLabel, Result *result);
+
+	/*!
+	 * @brief Store attachments into database.
+	 *
+	 * @param[in,out] messageDb Database.
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in]     documents Attachments.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
+	    const struct isds_list *documents);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const IsdsMessage m_message; /*!< Message to be sent. */

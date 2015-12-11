@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _TASK_MESSAGE_GENERAL_H_
-#define _TASK_MESSAGE_GENERAL_H_
+#ifndef _TASK_H_
+#define _TASK_H_
 
 #include <QRunnable>
 #include <QString>
@@ -120,27 +120,6 @@ public:
 	    int dmStatusFilter);
 
 	/*!
-	 * @brief Gives more detailed information about sending outcome.
-	 */
-	class MsgSendingResult {
-	public:
-		/*!
-		 * @brief Constructor.
-		 */
-		MsgSendingResult(void)
-		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
-		    dmId(-1), isPDZ(false), errInfo()
-		{ }
-
-		isds_error sendStatus; /*!< Status as returned by libisds. */
-		QString dbIDRecipient; /*!< Recipient identifier. */
-		QString recipientName; /*!< Recipient name. */
-		qint64 dmId; /*!< Sent message identifier. */
-		bool isPDZ; /*!< True if message was sent as PDZ. */
-		QString errInfo; /*!< Error description. */
-	};
-
-	/*!
 	 * @brief Store message delivery information into database.
 	 *
 	 * TODO -- This method must be private.
@@ -190,26 +169,6 @@ public:
 
 protected:
 	/*!
-	 * @brief Sends a single message to ISDS fro given account.
-	 *
-	 * @param[in]     userName         Account identifier (user login name).
-	 * @param[in,out] dbSet            Database container.
-	 * @param[in,out] message          Message being sent.
-	 * @param[in]     recipientName    Message recipient name.
-	 * @param[in]     recipientAddress Message recipient address.
-	 * @param[in]     isPDZ            True if message is a PDZ.
-	 * @param[in]     progressLabel    Progress-bar label.
-	 * @param[out]    result           Results, pass NULL if not desired.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error sendMessage(const QString &userName,
-	    MessageDbSet &dbSet, struct isds_message *message,
-	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ, const QString &progressLabel, MsgSendingResult *result);
-
-private:
-	/*!
 	 * @brief Store attachments into database.
 	 *
 	 * @param[in,out] messageDb Database.
@@ -221,6 +180,7 @@ private:
 	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
 	    const struct isds_list *documents);
 
+private:
 	/*!
 	 * @brief Download additional info about author (sender).
 	 *
@@ -287,4 +247,4 @@ private:
 	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 };
 
-#endif /* _TASK_MESSAGE_GENERAL_H_ */
+#endif /* _TASK_H_ */
