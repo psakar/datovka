@@ -469,7 +469,7 @@ void MainWindow::showStatusTextPermanently(const QString &qStr)
 void MainWindow::clearProgressBar(void)
 /* ========================================================================= */
 {
-	m_statusProgressBar->setFormat("Idle");
+	m_statusProgressBar->setFormat(PL_IDLE);
 	m_statusProgressBar->setValue(0);
 }
 

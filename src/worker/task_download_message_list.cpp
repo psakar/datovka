@@ -90,11 +90,11 @@ void TaskDownloadMessageList::run(void)
 
 	if (MSG_RECEIVED == m_msgDirect) {
 		res = Task::downloadMessageList(m_userName, MSG_RECEIVED,
-		    *m_dbSet, errMsg, "GetListOfReceivedMessages",
+		    *m_dbSet, errMsg, PL_DOWNLOAD_RECEIVED_LIST,
 		    rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 	} else {
 		res = Task::downloadMessageList(m_userName, MSG_SENT,
-		    *m_dbSet, errMsg, "GetListOfSentMessages",
+		    *m_dbSet, errMsg, PL_DOWNLOAD_SENT_LIST,
 		    st, sn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
 	}
 
@@ -117,7 +117,7 @@ void TaskDownloadMessageList::run(void)
 		    (MSG_RECEIVED == m_msgDirect) ? -1 : -2, errMsg);
 	}
 
-	emit globMsgProcEmitter.progressChange("Idle", 0);
+	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

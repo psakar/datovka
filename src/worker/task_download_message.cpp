@@ -79,7 +79,7 @@ void TaskDownloadMessage::run(void)
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
 	res = Task::downloadMessage(m_userName, m_mId, true, m_msgDirect,
-	    *m_dbSet, errMsg, "DownloadMessage");
+	    *m_dbSet, errMsg, PL_DOWNLOAD_MESSAGE);
 
 	m_donloadSucceeded = Q_SUCCESS == res;
 
@@ -99,7 +99,7 @@ void TaskDownloadMessage::run(void)
 		    errMsg);
 	}
 
-	emit globMsgProcEmitter.progressChange("Idle", 0);
+	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

@@ -680,7 +680,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
     struct isds_message *message, const QString &recipientName,
-    const QString &recipientAddress, bool isPDZ,
+    const QString &recipientAddress, bool isPDZ, const QString &progressLabel,
     Task::MsgSendingResult *result)
 {
 	Q_ASSERT(!userName.isEmpty());
@@ -693,6 +693,8 @@ qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
 	struct isds_envelope *envelope = message->envelope;
 	struct isds_ctx *session = NULL;
 
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+
 	session = isdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
@@ -703,6 +705,8 @@ qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 	status = isds_send_message(session, message);
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
 	if (IE_SUCCESS == status) {
 		{
@@ -724,12 +728,15 @@ qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
 		QString senderName =
 		    globAccountDbPtr->senderNameGuess(userName + "___True");
 
-		/* TODO -- Move the function into worker. */
 		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
 		    senderName, message->envelope->dbIDRecipient,
 		    recipientName, recipientAddress, envelope->dmAnnotation);
 
+		emit globMsgProcEmitter.progressChange(progressLabel, 60);
+
 		storeAttachments(*messageDb, dmId, message->documents);
+
+		emit globMsgProcEmitter.progressChange(progressLabel, 90);
 	}
 
 	if (0 != result) {
@@ -740,6 +747,8 @@ qdatovka_error Task::sendMessage(const QString &userName, MessageDbSet &dbSet,
 		result->isPDZ = isPDZ;
 		result->errInfo = isdsLongMessage(session);
 	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	return Q_SUCCESS;
 

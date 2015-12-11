@@ -37,6 +37,15 @@
 #define MESSAGE_LIST_LIMIT 100000
 
 /*!
+ * @brief Progress-bar labels used.
+ */
+#define PL_IDLE "Idle"
+#define PL_DOWNLOAD_MESSAGE "DownloadMessage"
+#define PL_DOWNLOAD_RECEIVED_LIST "DownloadReceivedMessageList"
+#define PL_DOWNLOAD_SENT_LIST "DownloadSentMessageList"
+#define PL_SEND_MESSAGE "SendingMessage"
+
+/*!
  * @brief This class contains generic functions that can be used in derived
  *     classes.
  */
@@ -189,6 +198,7 @@ protected:
 	 * @param[in]     recipientName    Message recipient name.
 	 * @param[in]     recipientAddress Message recipient address.
 	 * @param[in]     isPDZ            True if message is a PDZ.
+	 * @param[in]     progressLabel    Progress-bar label.
 	 * @param[out]    result           Results, pass NULL if not desired.
 	 * @return Error state.
 	 */
@@ -196,7 +206,7 @@ protected:
 	qdatovka_error sendMessage(const QString &userName,
 	    MessageDbSet &dbSet, struct isds_message *message,
 	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ, MsgSendingResult *result);
+	    bool isPDZ, const QString &progressLabel, MsgSendingResult *result);
 
 private:
 	/*!

@@ -382,11 +382,11 @@ void TaskSendMessage::run(void)
 	}
 
 	Task::sendMessage(m_userName, *m_dbSet, message, m_recipientName,
-	    m_recipientAddress, m_isPDZ, &m_sendingResult);
+	    m_recipientAddress, m_isPDZ, PL_SEND_MESSAGE, &m_sendingResult);
 
 	isds_message_free(&message);
 
-	emit globMsgProcEmitter.progressChange("Idle", 0);
+	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
