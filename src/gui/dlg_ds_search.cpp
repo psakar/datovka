@@ -28,6 +28,8 @@
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_download_user_info.h"
 
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
@@ -338,8 +340,17 @@ void DlgDsSearch::searchDataBox(void)
 		goto fail;
 	}
 
-	isds_error status;
-	status = isdsSearch(&boxes, m_userName, ownerInfo);
+	int status;
+	TaskDownloadUserInfo *task;
+
+	task = new (std::nothrow) TaskDownloadUserInfo(m_userName, ownerInfo);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	status = task->m_isdsError;
+	boxes = task->m_results; task->m_results = NULL;
+
+	delete task;
 	isds_DbOwnerInfo_free(&ownerInfo);
 
 	session = isdsSessions.session(m_userName);

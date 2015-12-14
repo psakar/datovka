@@ -31,6 +31,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/task.h"
+#include "src/worker/task_download_user_info.h"
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -641,7 +642,7 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 		return CLI_ERROR;
 	}
 
-	isds_error status = isdsSearch(&boxes, username, ownerInfo);
+	int status = TaskDownloadUserInfo::isdsSearch(username, ownerInfo, &boxes);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
 	session = isdsSessions.session(username);
