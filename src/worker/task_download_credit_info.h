@@ -21,32 +21,26 @@
  * the two.
  */
 
-#ifndef _TASK_DOWNLOAD_USER_INFO_H_
-#define _TASK_DOWNLOAD_USER_INFO_H_
+#ifndef _TASK_DOWNLOAD_CREDIT_INFO_H_
+#define _TASK_DOWNLOAD_CREDIT_INFO_H_
 
 #include <QString>
 
 #include "src/worker/task.h"
 
 /*!
- * @brief Task describing download user information.
+ * @brief Task describing download credit information.
  */
-class TaskDownloadUserInfo : public Task {
+class TaskDownloadCreditInfo : public Task {
 public:
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] info     Sought box identifiers.
+	 * @param[in] dbId     Data box identifier.
 	 */
-	explicit TaskDownloadUserInfo(const QString &userName,
-	    const struct isds_DbOwnerInfo *info);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskDownloadUserInfo(void);
+	explicit TaskDownloadCreditInfo(const QString &userName,
+	    const QString &dbId);
 
 	/*!
 	 * @brief Performs action.
@@ -54,26 +48,22 @@ public:
 	virtual
 	void run(void);
 
-	/*!
-	 * @brief Search for data boxes matching supplied criteria.
-	 *
-	 * TODO -- This method must be private.
-	 *
-	 * @param[in]  userName Account identifier (user login name).
-	 * @param[in]  info     Sought box identifiers.
-	 * @param[out] results  List of found data boxes.
-	 * @return Value of isds_error.
-	 */
-	static
-	int isdsSearch(const QString &userName,
-	    const struct isds_DbOwnerInfo *info, struct isds_list **results);
-
-	int m_isdsRetError; /*!< Returned error code. */
-	struct isds_list *m_results; /*!< List of found data boxes. */
+	long m_heller; /*!< Credit in hundredths of crowns. */
 
 private:
+	/*!
+	 * @brief Download credit information from ISDS.
+	 *
+	 * @param[in] userName Account identifier (user login name).
+	 * @param[in] dbId     Data box identifier.
+	 * @retrun Credit in heller, -1 on error.
+	 */
+	static
+	long downloadCreditFromISDS(const QString &userName,
+	    const QString &dbId);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
+	const QString m_dbId; /*!< Data box identifier. */
 };
 
-#endif /* _TASK_DOWNLOAD_USER_INFO_H_ */
+#endif /* _TASK_DOWNLOAD_CREDIT_INFO_H_ */

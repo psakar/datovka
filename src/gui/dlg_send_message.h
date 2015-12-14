@@ -31,7 +31,6 @@
 #include <QTreeView>
 
 #include "src/common.h"
-#include "src/io/isds_sessions.h"
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/task_send_message.h"
@@ -99,6 +98,7 @@ private:
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
+	static
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 

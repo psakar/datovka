@@ -156,12 +156,9 @@ public:
 		/*!
 		 * @brief Constructor.
 		 */
-		Result(void)
-		    : sendStatus(IE_ERROR), dbIDRecipient(), recipientName(),
-		    dmId(-1), isPDZ(false), errInfo()
-		{ }
+		Result(void);
 
-		isds_error sendStatus; /*!< Status as returned by libisds. */
+		int isdsRetError; /*!< Status as returned by libisds. */
 		QString dbIDRecipient; /*!< Recipient identifier. */
 		QString recipientName; /*!< Recipient name. */
 		qint64 dmId; /*!< Sent message identifier. */

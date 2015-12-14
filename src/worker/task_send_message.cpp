@@ -32,6 +32,16 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
 
+TaskSendMessage::Result::Result(void)
+    : isdsRetError(IE_ERROR),
+    dbIDRecipient(),
+    recipientName(),
+    dmId(-1),
+    isPDZ(false),
+    errInfo()
+{
+}
+
 TaskSendMessage::TaskSendMessage(const QString &userName,
     MessageDbSet *dbSet, const IsdsMessage &message,
     const QString &recipientName, const QString &recipientAddress, bool isPDZ)
@@ -458,7 +468,7 @@ qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
 	}
 
 	if (0 != result) {
-		result->sendStatus = status;
+		result->isdsRetError = status;
 		result->dbIDRecipient = message->envelope->dbIDRecipient;
 		result->recipientName = recipientName;
 		result->dmId = dmId;

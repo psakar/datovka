@@ -42,6 +42,7 @@
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/pool.h"
+#include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
@@ -266,35 +267,20 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 {
 	debugFuncCall();
 
-	QString str("0");
+	TaskDownloadCreditInfo *task;
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		return str;
+	task = new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	long int credit = task->m_heller;
+	delete task;
+
+	if (credit <= 0) {
+		return "0";
 	}
 
-	isds_error status;
-	long int credit;
-	char *email = NULL;
-	struct isds_list *history = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-
-	status = isds_get_commercial_credit(session,
-	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
-
-	isds_list_free(&history);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isdsLongMessage(session);
-		return str;
-	}
-
-	if (credit > 0) {
-		str = programLocale.toString((float)credit / 100, 'f', 2);
-	}
-
-	return str;
+	return programLocale.toString((float)credit / 100, 'f', 2);
 }
 
 
@@ -1082,7 +1068,7 @@ void DlgSendMessage::sendMessage(void)
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
 
-		if (task->m_sendingResult.sendStatus == IE_SUCCESS) {
+		if (task->m_sendingResult.isdsRetError == IE_SUCCESS) {
 			successSendCnt++;
 		}
 
@@ -1092,7 +1078,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	foreach (const TaskSendMessage::Result &result, sentMsgResultList) {
-		if (result.sendStatus == IE_SUCCESS) {
+		if (result.isdsRetError == IE_SUCCESS) {
 			if (result.isPDZ) {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as PDZ with number "

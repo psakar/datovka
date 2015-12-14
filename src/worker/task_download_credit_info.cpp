@@ -21,77 +21,76 @@
  * the two.
  */
 
-#include <cstdlib>
-#include <cstring>
 #include <QThread>
 
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_download_user_info.h"
+#include "src/worker/task_download_credit_info.h"
 
-TaskDownloadUserInfo::TaskDownloadUserInfo(const QString &userName,
-    const struct isds_DbOwnerInfo *info)
-    : m_isdsRetError(IE_ERROR),
-    m_results(NULL),
+TaskDownloadCreditInfo::TaskDownloadCreditInfo(const QString &userName,
+    const QString &dbId)
+    : m_heller(-1),
     m_userName(userName),
-    m_info(info)
+    m_dbId(dbId)
 {
 	Q_ASSERT(!m_userName.isEmpty());
-	Q_ASSERT(NULL != m_info);
+	Q_ASSERT(!m_dbId.isEmpty());
 }
 
-TaskDownloadUserInfo::~TaskDownloadUserInfo(void)
-{
-	isds_list_free(&m_results);
-}
-
-void TaskDownloadUserInfo::run(void)
+void TaskDownloadCreditInfo::run(void)
 {
 	if (m_userName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	if (NULL == m_info) {
+	if (m_dbId.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	logDebugLv0NL("Starting download user info task in thread '%p'",
+	logDebugLv0NL("Starting download credit info task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_isdsRetError = isdsSearch(m_userName, m_info, &m_results);
+	m_heller = downloadCreditFromISDS(m_userName, m_dbId);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download user info task finished in thread '%p'",
+	logDebugLv0NL("Download credit info task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
 
-int TaskDownloadUserInfo::isdsSearch(const QString &userName,
-    const struct isds_DbOwnerInfo *info, struct isds_list **results)
+long TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
+    const QString &dbId)
 {
-	isds_error ret = IE_ERROR;
+	long credit = 0;
 
-	if ((NULL == results) || (NULL == info)) {
-		Q_ASSERT(0);
-		return IE_ERROR;
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		return -1;
 	}
+
+	isds_error status;
+	struct isds_list *history = NULL;
 
 	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return IE_ERROR;
+	Q_ASSERT(0 != session);
+
+	status = isds_get_commercial_credit(session,
+	    dbId.toUtf8().constData(), NULL, NULL, &credit, NULL, &history);
+
+	isds_list_free(&history);
+
+	if (IE_SUCCESS != status) {
+		logErrorNL(
+		    "Downloading credit information returned '%d': '%s'.",
+		    status, isds_long_message(session));
+		return -1;
 	}
 
-	ret = isds_FindDataBox(session, info, results);
-
-	logDebugLv1NL("Find databox returned '%d': '%s'.",
-	    ret, isds_strerror(ret));
-	return ret;
+	return credit;
 }

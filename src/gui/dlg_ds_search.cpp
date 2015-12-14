@@ -347,7 +347,7 @@ void DlgDsSearch::searchDataBox(void)
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	status = task->m_isdsError;
+	status = task->m_isdsRetError;
 	boxes = task->m_results; task->m_results = NULL;
 
 	delete task;
