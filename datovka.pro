@@ -294,6 +294,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/message_emitter.cpp \
     src/worker/pool.cpp \
     src/worker/task.cpp \
+    src/worker/task_change_pwd.cpp \
     src/worker/task_download_message.cpp \
     src/worker/task_download_message_list.cpp \
     src/worker/task_download_credit_info.cpp \
@@ -350,6 +351,7 @@ HEADERS += src/cli/cli.h \
     src/worker/message_emitter.h \
     src/worker/pool.h \
     src/worker/task.h \
+    src/worker/task_change_pwd.h \
     src/worker/task_download_message.h \
     src/worker/task_download_message_list.h \
     src/worker/task_download_credit_info.h \
