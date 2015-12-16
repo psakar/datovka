@@ -68,10 +68,10 @@ public:
 	void run(void);
 
 	int m_isdsRetError; /*!< Returned error code. */
-	QString m_refNumber; /*!< Reference number as returned by ISDS. */
-
 	QString m_isdsError; /*!< Error description. */
 	QString m_isdsLongError; /*!< Long error description. */
+
+	QString m_refNumber; /*!< Reference number as returned by ISDS. */
 
 private:
 	/*!
