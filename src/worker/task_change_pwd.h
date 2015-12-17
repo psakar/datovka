@@ -90,6 +90,7 @@ private:
 	 * @param[out]    refNumber Reference number.
 	 * @param[out]    error     Error description.
 	 * @param[out]    longError Long error description.
+	 * @return Libisds error code.
 	 */
 	static
 	int changePassword(const QString &userName, const QString &oldPwd,

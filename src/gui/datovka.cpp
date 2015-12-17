@@ -73,6 +73,7 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task.h"
+#include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "ui_datovka.h"
@@ -3029,27 +3030,9 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
 
-	if (!delFromIsds) {
-		if (messageDb->msgsDeleteMessageData(dmId)) {
-			qDebug() << "Message" << dmId <<
-			    "was deleted from local database";
-			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from local database.").arg(dmId));
-			return Q_SUCCESS;
-		}
-	} else {
-
-		isds_error status;
-		if (!isdsSessions.isConnectedToIsds(userName)) {
-			if (!connectToIsds(userName, this)) {
-				return Q_CONNECT_ERROR;
-			}
-		}
-
-		bool incoming = true;
+	bool incoming = true;
+	{
 		QModelIndex acntIdx = ui->accountList->
 		    selectionModel()->currentIndex();
 
@@ -3067,43 +3050,64 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		default:
 			break;
 		}
-		struct isds_ctx *session = isdsSessions.session(userName);
-		Q_ASSERT(0 != session);
-		/* first delete message on ISDS */
-		status = isds_delete_message_from_storage(session,
-		    QString::number(dmId).toUtf8().constData(), incoming);
+	}
 
-		if (IE_SUCCESS == status) {
-			if (messageDb->msgsDeleteMessageData(dmId)) {
-				qDebug() << "Message" << dmId <<
-				    "was deleted from ISDS and local databse";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted from ISDS and local database.")
-				    .arg(dmId));
-				return Q_SUCCESS;
-			} else {
-				qDebug() << "Message" << dmId <<
-				    "was deleted only from ISDS.";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted only from ISDS.").arg(dmId));
-				return Q_SQL_ERROR;
-			}
-		} else if (IE_INVAL == status) {
-			qDebug() << "Error: "<< status << isds_strerror(status);
-			if (messageDb->msgsDeleteMessageData(dmId)) {
-				qDebug() << "Message" << dmId <<
-				    "was deleted only from local database.";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted only from local database.")
-				    .arg(dmId));
-				return Q_ISDS_ERROR;
+	if (delFromIsds) {
+		if (!isdsSessions.isConnectedToIsds(userName)) {
+			if (!connectToIsds(userName, this)) {
+				return Q_CONNECT_ERROR;
 			}
 		}
 	}
 
-	qDebug() << "Message" << dmId << "was not deleted.";
-	showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
-	    .arg(dmId));
+	QString errorStr, longErrorStr;
+	TaskEraseMessage *task;
+
+	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, dmId,
+	    deliveryTime, incoming, delFromIsds);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	TaskEraseMessage::Result result = task->m_result;
+	errorStr = task->m_isdsError;
+	longErrorStr = task->m_isdsLongError;
+	delete task;
+
+	switch (result) {
+	case TaskEraseMessage::NOT_DELETED:
+		showStatusTextWithTimeout(
+		    tr("Message \"%1\" was not deleted.").arg(dmId));
+		return Q_ISDS_ERROR;
+		break;
+	case TaskEraseMessage::DELETED_ISDS:
+		showStatusTextWithTimeout(tr(
+		    "Message \"%1\" was deleted only from ISDS.").arg(dmId));
+		return Q_SQL_ERROR;
+		break;
+	case TaskEraseMessage::DELETED_LOCAL:
+		if (delFromIsds) {
+			showStatusTextWithTimeout(tr(
+			    "Message \"%1\" was deleted only from local database.")
+			    .arg(dmId));
+			return Q_ISDS_ERROR;
+		} else {
+			showStatusTextWithTimeout(tr(
+			    "Message \"%1\" was deleted from local database.")
+			    .arg(dmId));
+			return Q_SUCCESS;
+		}
+		break;
+	case TaskEraseMessage::DELETED_ISDS_LOCAL:
+		showStatusTextWithTimeout(tr(
+		    "Message \"%1\" was deleted from ISDS and local database.")
+		    .arg(dmId));
+		return Q_SUCCESS;
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
 	return Q_ISDS_ERROR;
 }
 
