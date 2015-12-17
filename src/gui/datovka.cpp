@@ -76,6 +76,7 @@
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
+#include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
 
@@ -5680,86 +5681,6 @@ void MainWindow::refreshAccountList(const QString &userName)
 
 /* ========================================================================= */
 /*
- * Verify message. Compare hash with hash stored in ISDS.
- */
-qdatovka_error MainWindow::verifyMessage(const QString &userName, qint64 dmId,
-    const QDateTime &deliveryTime)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-
-	isds_error status;
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	struct isds_hash *hashIsds = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-	status = isds_download_message_hash(session,
-	    QString::number(dmId).toUtf8().constData(), &hashIsds);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	struct isds_hash *hashLocal = NULL;
-	hashLocal = (struct isds_hash *) malloc(sizeof(struct isds_hash));
-
-	if (hashLocal == NULL) {
-		free(hashLocal);
-		return Q_GLOBAL_ERROR;
-	}
-
-	memset(hashLocal, 0, sizeof(struct isds_hash));
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
-
-	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmId);
-
-	/* TODO - check if hash info is in db */
-	if (hashLocaldata.isEmpty()) {
-		isds_hash_free(&hashLocal);
-		isds_hash_free(&hashIsds);
-		return Q_SQL_ERROR;
-	}
-
-	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata[0].toUtf8());
-	hashLocal->length = (size_t)rawHash.size();
-	hashLocal->algorithm =
-	    (isds_hash_algorithm)convertHashAlg2(hashLocaldata[1]);
-	hashLocal->value = malloc(hashLocal->length);
-	memcpy(hashLocal->value, rawHash.data(), hashLocal->length);
-
-	status = isds_hash_cmp(hashIsds, hashLocal);
-
-	isds_hash_free(&hashIsds);
-	isds_hash_free(&hashLocal);
-
-	if (IE_NOTEQUAL == status) {
-		return Q_NOTEQUAL;
-	}
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
  * Get data about logged in user and his box.
  */
 bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
@@ -6324,8 +6245,31 @@ void MainWindow::verifySelectedMessage(void)
 	Q_ASSERT(dmId >= 0);
 	Q_ASSERT(deliveryTime.isValid());
 
-	switch (verifyMessage(userName, dmId, deliveryTime)) {
-	case Q_SUCCESS:
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	Q_ASSERT(0 != dbSet);
+
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		if (!connectToIsds(userName, this)) {
+			showStatusTextWithTimeout(tr("Message verification failed."));
+			QMessageBox::critical(this, tr("Verification error"),
+			    tr("An undefined error occurred!\nTry again."),
+			    QMessageBox::Ok);
+			return;
+		}
+	}
+
+	TaskVerifyMessage *task;
+
+	task = new (std::nothrow) TaskVerifyMessage(userName, dbSet, dmId,
+	    deliveryTime);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	TaskVerifyMessage::Result result = task->m_result;
+	delete task;
+
+	switch (result) {
+	case TaskVerifyMessage::VERIFY_SUCCESS:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is valid."));
 		QMessageBox::information(this, tr("Message is valid"),
@@ -6336,7 +6280,7 @@ void MainWindow::verifySelectedMessage(void)
 		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
-	case Q_NOTEQUAL:
+	case TaskVerifyMessage::VERIFY_NOT_EQUAL:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is not valid."));
 		QMessageBox::critical(this, tr("Message is not valid"),
@@ -6346,7 +6290,7 @@ void MainWindow::verifySelectedMessage(void)
 		    "since it was downloaded from Datové schránky."),
 		     QMessageBox::Ok);
 		break;
-	case Q_ISDS_ERROR:
+	case TaskVerifyMessage::VERIFY_ISDS_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification failed"),
 		    tr("Authentication of message has been stopped because "
@@ -6354,14 +6298,14 @@ void MainWindow::verifySelectedMessage(void)
 		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
-	case Q_SQL_ERROR:
+	case TaskVerifyMessage::VERIFY_SQL_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification error"),
 		    tr("The message hash is not in local database.\nPlease "
 		    "download complete message from ISDS and try again."),
 		    QMessageBox::Ok);
 		break;
-	case Q_GLOBAL_ERROR:
+	case TaskVerifyMessage::VERIFY_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
 		    tr("The message hash cannot be verified because an internal"

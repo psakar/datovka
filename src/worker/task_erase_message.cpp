@@ -53,6 +53,11 @@ void TaskEraseMessage::run(void)
 		return;
 	}
 
+	if (0 == m_dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	if (0 > m_dmId) {
 		Q_ASSERT(0);
 		return;
@@ -74,9 +79,10 @@ void TaskEraseMessage::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-TaskEraseMessage::Result TaskEraseMessage::eraseMessage(const QString &userName,
-    MessageDbSet *dbSet, qint64 dmId, const QDateTime &deliveryTime,
-    bool incoming, bool delFromIsds, QString &error, QString &longError)
+enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
+    const QString &userName, MessageDbSet *dbSet, qint64 dmId,
+    const QDateTime &deliveryTime, bool incoming, bool delFromIsds,
+    QString &error, QString &longError)
 {
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(0 != dbSet);

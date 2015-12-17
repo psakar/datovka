@@ -977,12 +977,6 @@ private:
 	    const QDateTime &deliveryTime, bool delFromIsds);
 
 	/*!
-	 * @brief Verify message. Compare hash with hash stored in ISDS.
-	 */
-	qdatovka_error verifyMessage(const QString &userName, qint64 dmId,
-	    const QDateTime &deliveryTime);
-
-	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
 	qdatovka_error authenticateMessageFromZFO(void);
