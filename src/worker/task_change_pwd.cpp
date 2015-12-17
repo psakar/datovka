@@ -111,7 +111,7 @@ void TaskChangePwd::run(void)
 		return;
 	}
 
-	logDebugLv0NL("Starting download credit info task in thread '%p'",
+	logDebugLv0NL("Starting change password task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
@@ -123,7 +123,7 @@ void TaskChangePwd::run(void)
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download credit info task finished in thread '%p'",
+	logDebugLv0NL("Change password task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
 
