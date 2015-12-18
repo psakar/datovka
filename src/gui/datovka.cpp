@@ -76,6 +76,7 @@
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
+#include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -5688,84 +5689,16 @@ bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	TaskDownloadOwnerInfo *task;
 
-	struct isds_DbOwnerInfo *db_owner_info = NULL;
+	task = new (std::nothrow) TaskDownloadOwnerInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	isds_error status = isds_GetOwnerInfoFromLogin(session,
-	    &db_owner_info);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		isds_DbOwnerInfo_free(&db_owner_info);
-		return false;
-	}
-
-	QString birthDate;
-	if ((NULL != db_owner_info->birthInfo) &&
-	    (NULL != db_owner_info->birthInfo->biDate)) {
-		birthDate = tmBirthToDbFormat(db_owner_info->birthInfo->biDate);
-	}
-
-	int ic = 0;
-	if (NULL != db_owner_info->ic) {
-		ic = QString(db_owner_info->ic).toInt();
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->insertAccountIntoDb(
-	    key,
-	    db_owner_info->dbID,
-	    convertDbTypeToString(*db_owner_info->dbType),
-	    ic,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnFirstName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnMiddleName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnLastName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnLastNameAtBirth : NULL,
-	    db_owner_info->firmName,
-	    birthDate,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biCity : NULL,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biCounty : NULL,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biState : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adCity : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adStreet : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adNumberInStreet : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adNumberInMunicipality : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adZipCode : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adState : NULL,
-	    db_owner_info->nationality,
-	    db_owner_info->identifier,
-	    db_owner_info->registryCode,
-	    (int)*db_owner_info->dbState,
-	    *db_owner_info->dbEffectiveOVM,
-	    *db_owner_info->dbOpenAddressing);
-
-	isds_DbOwnerInfo_free(&db_owner_info);
-
-	return true;
+	return result;
 }
 
 
