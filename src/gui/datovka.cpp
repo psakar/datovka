@@ -77,6 +77,7 @@
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_owner_info.h"
+#include "src/worker/task_download_password_info.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -5711,44 +5712,16 @@ bool MainWindow::getPasswordInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	isds_error status;
-	struct timeval *expiration = NULL;
-	QString expirDate;
-	bool retval = false;
+	TaskDownloadPasswordInfo *task;
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	task = new (std::nothrow) TaskDownloadPasswordInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	status = isds_get_password_expiration(session, &expiration);
-
-	if (IE_SUCCESS == status) {
-		if (NULL != expiration) {
-			expirDate = timevalToDbFormat(expiration);
-		} else {
-			/* Password without expiration. */
-			expirDate.clear();
-		}
-		retval = true;
-	} else {
-		expirDate.clear();
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->setPwdExpirIntoDb(key, expirDate);
-
-	if (NULL != expiration) {
-		free(expiration);
-	}
-	return retval;
+	return result;
 }
 
 

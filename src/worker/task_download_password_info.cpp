@@ -21,77 +21,76 @@
  * the two.
  */
 
-#include <cstdlib>
-#include <cstring>
 #include <QThread>
 
+#include "src/io/account_db.h"
+#include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_search_owner.h"
+#include "src/worker/task_download_password_info.h"
 
-TaskSearchOwner::TaskSearchOwner(const QString &userName,
-    const struct isds_DbOwnerInfo *info)
-    : m_isdsRetError(IE_ERROR),
-    m_results(NULL),
-    m_userName(userName),
-    m_info(info)
+TaskDownloadPasswordInfo::TaskDownloadPasswordInfo(const QString &userName)
+    : m_success(false),
+    m_isdsError(),
+    m_isdsLongError(),
+    m_userName(userName)
 {
 	Q_ASSERT(!m_userName.isEmpty());
-	Q_ASSERT(NULL != m_info);
 }
 
-TaskSearchOwner::~TaskSearchOwner(void)
-{
-	isds_list_free(&m_results);
-}
-
-void TaskSearchOwner::run(void)
+void TaskDownloadPasswordInfo::run(void)
 {
 	if (m_userName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	if (NULL == m_info) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	logDebugLv0NL("Starting search owner task in thread '%p'",
+	logDebugLv0NL("Starting download password info task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_isdsRetError = isdsSearch(m_userName, m_info, &m_results);
+	m_success = downloadPasswordInfoFromISDS(m_userName, m_isdsError,
+	    m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Search owner task finished in thread '%p'",
+	logDebugLv0NL("Download password info task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
 
-int TaskSearchOwner::isdsSearch(const QString &userName,
-    const struct isds_DbOwnerInfo *info, struct isds_list **results)
+bool TaskDownloadPasswordInfo::downloadPasswordInfoFromISDS(
+    const QString &userName, QString &error, QString &longError)
 {
-	isds_error ret = IE_ERROR;
-
-	if ((NULL == results) || (NULL == info)) {
-		Q_ASSERT(0);
-		return IE_ERROR;
-	}
-
 	struct isds_ctx *session = isdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
-		return IE_ERROR;
+		return false;
 	}
 
-	ret = isds_FindDataBox(session, info, results);
+	struct timeval *expiration = NULL;
+	isds_error status = isds_get_password_expiration(session, &expiration);
 
-	logDebugLv1NL("Find databox returned '%d': '%s'.",
-	    ret, isds_strerror(ret));
-	return ret;
+	if (IE_SUCCESS != status) {
+		logErrorNL(
+		    "Downloading password information for account '%s' returned '%d': '%s'.",
+		    userName.toUtf8().constData(),
+		    status, isds_error(status));
+		error = isds_error(status);
+		longError = isds_long_message(session);
+		free(expiration);
+		return false;
+	}
+
+	QString expirDate;
+	if (NULL != expiration) {
+		expirDate = timevalToDbFormat(expiration);
+		free(expiration); expiration = NULL;
+	} /* else -> password without expiration */
+
+	QString key = userName + "___True";
+	return globAccountDbPtr->setPwdExpirIntoDb(key, expirDate);
 }

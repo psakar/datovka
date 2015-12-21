@@ -78,7 +78,10 @@ long TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 	struct isds_list *history = NULL;
 
 	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return -1;
+	}
 
 	status = isds_get_commercial_credit(session,
 	    dbId.toUtf8().constData(), NULL, NULL, &credit, NULL, &history);

@@ -21,32 +21,24 @@
  * the two.
  */
 
-#ifndef _TASK_SEARCH_OWNER_H_
-#define _TASK_SEARCH_OWNER_H_
+#ifndef _TASK_DOWNLOAD_PASSWORD_INFO_H_
+#define _TASK_DOWNLOAD_PASSWORD_INFO_H_
 
 #include <QString>
 
 #include "src/worker/task.h"
 
 /*!
- * @brief Task describing contact searching.
+ * @brief Task describing download password information.
  */
-class TaskSearchOwner : public Task {
+class TaskDownloadPasswordInfo : public Task {
 public:
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] info     Sought box identifiers.
 	 */
-	explicit TaskSearchOwner(const QString &userName,
-	    const struct isds_DbOwnerInfo *info);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskSearchOwner(void);
+	explicit TaskDownloadPasswordInfo(const QString &userName);
 
 	/*!
 	 * @brief Performs action.
@@ -54,26 +46,24 @@ public:
 	virtual
 	void run(void);
 
-	/*!
-	 * @brief Search for data boxes matching supplied criteria.
-	 *
-	 * TODO -- This method must be private.
-	 *
-	 * @param[in]  userName Account identifier (user login name).
-	 * @param[in]  info     Sought box identifiers.
-	 * @param[out] results  List of found data boxes.
-	 * @return Value of isds_error.
-	 */
-	static
-	int isdsSearch(const QString &userName,
-	    const struct isds_DbOwnerInfo *info, struct isds_list **results);
-
-	int m_isdsRetError; /*!< Returned error code. */
-	struct isds_list *m_results; /*!< List of found data boxes. */
+	bool m_success; /*! True of success. */
+	QString m_isdsError; /*!< Error description. */
+	QString m_isdsLongError; /*!< Long error description. */
 
 private:
+	/*!
+	 * @brief Download credit information from ISDS.
+	 *
+	 * @param[in]  userName  Account identifier (user login name).
+	 * @param[out] error     Error description.
+	 * @param[out] longError Long error description.
+	 * @retrun True if operation succeeded.
+	 */
+	static
+	bool downloadPasswordInfoFromISDS(const QString &userName,
+	    QString &error, QString &longError);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
 };
 
-#endif /* _TASK_SEARCH_OWNER_H_ */
+#endif /* _TASK_DOWNLOAD_PASSWORD_INFO_H_ */
