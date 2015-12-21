@@ -3059,7 +3059,7 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 	if (delFromIsds) {
 		if (!isdsSessions.isConnectedToIsds(userName)) {
 			if (!connectToIsds(userName, this)) {
-				return Q_CONNECT_ERROR;
+				return Q_ISDS_ERROR;
 			}
 		}
 	}
@@ -5960,21 +5960,21 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 
-	QString attachFileName = QFileDialog::getOpenFileName(this,
+	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
-	if (attachFileName.isNull()) {
+	if (fileName.isNull()) {
 		return Q_CANCEL;
 	}
 
 	size_t length;
 	isds_error status;
 	QByteArray bytes;
-	QFile file(attachFileName);
+	QFile file(fileName);
 
 	if (file.exists()) {
 		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << attachFileName;
+			qDebug() << "Couldn't open the file" << fileName;
 			return Q_FILE_ERROR;
 		}
 
@@ -5985,11 +5985,11 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	}
 
 	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
-	    .arg(attachFileName));
+	    .arg(fileName));
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, this)) {
-			return Q_CONNECT_ERROR;
+			return Q_ISDS_ERROR;
 		}
 	}
 
@@ -6043,7 +6043,6 @@ void MainWindow::authenticateMessageFile(void)
 		    QMessageBox::Ok);
 		break;
 	case Q_ISDS_ERROR:
-	case Q_CONNECT_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
