@@ -29,7 +29,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_download_user_info.h"
+#include "src/worker/task_search_owner.h"
 
 
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
@@ -341,9 +341,9 @@ void DlgDsSearch::searchDataBox(void)
 	}
 
 	int status;
-	TaskDownloadUserInfo *task;
+	TaskSearchOwner *task;
 
-	task = new (std::nothrow) TaskDownloadUserInfo(m_userName, ownerInfo);
+	task = new (std::nothrow) TaskSearchOwner(m_userName, ownerInfo);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 

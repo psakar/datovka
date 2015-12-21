@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _TASK_DOWNLOAD_USER_INFO_H_
-#define _TASK_DOWNLOAD_USER_INFO_H_
+#ifndef _TASK_SEARCH_OWNER_H_
+#define _TASK_SEARCH_OWNER_H_
 
 #include <QString>
 
@@ -31,7 +31,7 @@
 /*!
  * @brief Task describing download user information.
  */
-class TaskDownloadUserInfo : public Task {
+class TaskSearchOwner : public Task {
 public:
 	/*!
 	 * @brief Constructor.
@@ -39,14 +39,14 @@ public:
 	 * @param[in] userName Account identifier (user login name).
 	 * @param[in] info     Sought box identifiers.
 	 */
-	explicit TaskDownloadUserInfo(const QString &userName,
+	explicit TaskSearchOwner(const QString &userName,
 	    const struct isds_DbOwnerInfo *info);
 
 	/*!
 	 * @brief Destructor.
 	 */
 	virtual
-	~TaskDownloadUserInfo(void);
+	~TaskSearchOwner(void);
 
 	/*!
 	 * @brief Performs action.
@@ -76,4 +76,4 @@ private:
 	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
 };
 
-#endif /* _TASK_DOWNLOAD_USER_INFO_H_ */
+#endif /* _TASK_SEARCH_OWNER_H_ */

@@ -28,9 +28,9 @@
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_download_user_info.h"
+#include "src/worker/task_search_owner.h"
 
-TaskDownloadUserInfo::TaskDownloadUserInfo(const QString &userName,
+TaskSearchOwner::TaskSearchOwner(const QString &userName,
     const struct isds_DbOwnerInfo *info)
     : m_isdsRetError(IE_ERROR),
     m_results(NULL),
@@ -41,12 +41,12 @@ TaskDownloadUserInfo::TaskDownloadUserInfo(const QString &userName,
 	Q_ASSERT(NULL != m_info);
 }
 
-TaskDownloadUserInfo::~TaskDownloadUserInfo(void)
+TaskSearchOwner::~TaskSearchOwner(void)
 {
 	isds_list_free(&m_results);
 }
 
-void TaskDownloadUserInfo::run(void)
+void TaskSearchOwner::run(void)
 {
 	if (m_userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -73,7 +73,7 @@ void TaskDownloadUserInfo::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-int TaskDownloadUserInfo::isdsSearch(const QString &userName,
+int TaskSearchOwner::isdsSearch(const QString &userName,
     const struct isds_DbOwnerInfo *info, struct isds_list **results)
 {
 	isds_error ret = IE_ERROR;

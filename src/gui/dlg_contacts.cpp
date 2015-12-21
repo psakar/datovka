@@ -26,7 +26,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_download_user_info.h"
+#include "src/worker/task_search_owner.h"
 
 
 DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
@@ -263,9 +263,9 @@ QString DlgContacts::getUserInfoFromIsds(const QString &userName,
 		return str;
 	}
 
-	TaskDownloadUserInfo *task;
+	TaskSearchOwner *task;
 
-	task = new (std::nothrow) TaskDownloadUserInfo(userName, doi);
+	task = new (std::nothrow) TaskSearchOwner(userName, doi);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
