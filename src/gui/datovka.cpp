@@ -78,6 +78,7 @@
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
+#include "src/worker/task_download_user_info.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -5734,66 +5735,16 @@ bool MainWindow::getUserInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	TaskDownloadUserInfo *task;
 
-	struct isds_DbUserInfo *db_user_info = NULL;
+	task = new (std::nothrow) TaskDownloadUserInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	isds_error status = isds_GetUserInfoFromLogin(session, &db_user_info);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		isds_DbUserInfo_free(&db_user_info);
-		return false;
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->insertUserIntoDb(
-	    key,
-	    convertUserTypeToString(*db_user_info->userType),
-	    (int)*db_user_info->userPrivils,
-	    db_user_info->personName ?
-		db_user_info->personName->pnFirstName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnMiddleName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnLastName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnLastNameAtBirth : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adCity : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adStreet : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adNumberInStreet : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adNumberInMunicipality : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adZipCode : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adState : NULL,
-	    db_user_info->biDate ?
-		tmBirthToDbFormat(db_user_info->biDate) : NULL,
-	    db_user_info->ic ? QString(db_user_info->ic).toInt() : 0,
-	    db_user_info->firmName,
-	    db_user_info->caStreet,
-	    db_user_info->caCity,
-	    db_user_info->caZipCode,
-	    db_user_info->caState
-	    );
-
-	isds_DbUserInfo_free(&db_user_info);
-
-	return true;
+	return result;
 }
 
 

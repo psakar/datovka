@@ -300,6 +300,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_download_credit_info.cpp \
     src/worker/task_download_owner_info.cpp \
     src/worker/task_download_password_info.cpp \
+    src/worker/task_download_user_info.cpp \
     src/worker/task_erase_message.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
@@ -361,6 +362,7 @@ HEADERS += src/cli/cli.h \
     src/worker/task_download_credit_info.h \
     src/worker/task_download_owner_info.h \
     src/worker/task_download_password_info.h \
+    src/worker/task_download_user_info.cpp \
     src/worker/task_erase_message.h \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.h \
