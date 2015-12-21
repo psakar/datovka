@@ -38,7 +38,7 @@ public:
 	 *
 	 * @param[in] userName Account identifier (user login name).
 	 */
-	TaskDownloadUserInfo(const QString &userName);
+	explicit TaskDownloadUserInfo(const QString &userName);
 
 	/*!
 	 * @brief Performs action.

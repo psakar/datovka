@@ -30,6 +30,9 @@
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
+/*!
+ * @brief Task describing message verification.
+ */
 class TaskVerifyMessage : public Task {
 public:
 	/*!
