@@ -979,7 +979,7 @@ private:
 	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
-	qdatovka_error authenticateMessageFromZFO(void);
+	int authenticateMessageFromZFO(void);
 
 	/*!
 	 * @brief Show message info for user if connection to ISDS fails.

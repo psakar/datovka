@@ -73,6 +73,7 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task.h"
+#include "src/worker/task_authenticate_message.h"
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
@@ -5948,7 +5949,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 /*
  * Authenticate message from ZFO file.
  */
-qdatovka_error MainWindow::authenticateMessageFromZFO(void)
+int MainWindow::authenticateMessageFromZFO(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -5964,50 +5965,28 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
 	if (fileName.isNull()) {
-		return Q_CANCEL;
+		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
 
-	size_t length;
-	isds_error status;
-	QByteArray bytes;
-	QFile file(fileName);
-
-	if (file.exists()) {
-		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << fileName;
-			return Q_FILE_ERROR;
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		if (!connectToIsds(userName, this)) {
+			return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 		}
-
-		bytes = file.readAll();
-		length = bytes.size();
-	} else {
-		return Q_FILE_ERROR;
 	}
 
 	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
 	    .arg(fileName));
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return Q_ISDS_ERROR;
-		}
-	}
+	TaskAuthenticateMessage *task;
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
+	task = new (std::nothrow) TaskAuthenticateMessage(userName, fileName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	status = isds_authenticate_message(session, bytes.data(), length);
+	TaskAuthenticateMessage::Result result = task->m_result;
+	delete task;
 
-	if (IE_NOTEQUAL == status) {
-		return Q_NOTEQUAL;
-	}
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
+	return result;
 }
 
 
@@ -6021,7 +6000,7 @@ void MainWindow::authenticateMessageFile(void)
 	debugSlotCall();
 
 	switch (authenticateMessageFromZFO()) {
-	case Q_SUCCESS:
+	case TaskAuthenticateMessage::AUTH_SUCCESS:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is authentic."));
 		QMessageBox::information(this, tr("Message is authentic"),
@@ -6032,7 +6011,7 @@ void MainWindow::authenticateMessageFile(void)
 		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
-	case Q_NOTEQUAL:
+	case TaskAuthenticateMessage::AUTH_NOT_EQUAL:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is not authentic."));
 		QMessageBox::critical(this, tr("Message is not authentic"),
@@ -6042,7 +6021,7 @@ void MainWindow::authenticateMessageFile(void)
 		    "since it was downloaded from Datové schránky."),
 		    QMessageBox::Ok);
 		break;
-	case Q_ISDS_ERROR:
+	case TaskAuthenticateMessage::AUTH_ISDS_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
@@ -6050,14 +6029,14 @@ void MainWindow::authenticateMessageFile(void)
 		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
-	case Q_FILE_ERROR:
+	case TaskAuthenticateMessage::AUTH_DATA_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
 		    "the message file has wrong format!"),
 		    QMessageBox::Ok);
 		break;
-	case Q_CANCEL:
+	case TaskAuthenticateMessage::AUTH_CANCELLED:
 		break;
 	default:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
