@@ -55,6 +55,12 @@ public:
 	bool m_donloadSucceeded; /*!< True if download succeeds. */
 
 private:
+	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskDownloadMessage(const TaskDownloadMessage &);
+	TaskDownloadMessage &operator=(const TaskDownloadMessage &);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received message. */

@@ -181,6 +181,12 @@ protected:
 	    const struct isds_list *documents);
 
 private:
+//	/*!
+//	 * Disable copy and assignment.
+//	 */
+//	Task(const Task &);
+//	Task &operator=(const Task &);
+
 	/*!
 	 * @brief Download additional info about author (sender).
 	 *

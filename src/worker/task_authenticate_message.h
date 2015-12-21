@@ -94,7 +94,7 @@ private:
 	 * Disable copy and assignment.
 	 */
 	TaskAuthenticateMessage(const TaskAuthenticateMessage &);
-	TaskAuthenticateMessage & operator=(const TaskAuthenticateMessage &);
+	TaskAuthenticateMessage &operator=(const TaskAuthenticateMessage &);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	QByteArray m_data; /*!< Message data. */

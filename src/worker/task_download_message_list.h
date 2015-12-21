@@ -51,6 +51,12 @@ public:
 	void run(void);
 
 private:
+	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskDownloadMessageList(const TaskDownloadMessageList &);
+	TaskDownloadMessageList &operator=(const TaskDownloadMessageList &);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received list. */

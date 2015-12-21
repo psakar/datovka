@@ -52,6 +52,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskDownloadUserInfo(const TaskDownloadUserInfo &);
+	TaskDownloadUserInfo &operator=(const TaskDownloadUserInfo &);
+
+	/*!
 	 * @brief Download user information.
 	 *
 	 * @param[in]     userName     Account identifier (user login name).

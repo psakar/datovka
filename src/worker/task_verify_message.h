@@ -69,6 +69,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskVerifyMessage(const TaskVerifyMessage &);
+	TaskVerifyMessage &operator=(const TaskVerifyMessage &);
+
+	/*!
 	 * @brief Verifies a message.
 	 *
 	 * @param[in]     userName     Account identifier (user login name).

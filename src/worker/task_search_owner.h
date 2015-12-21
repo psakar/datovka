@@ -72,6 +72,12 @@ public:
 	struct isds_list *m_results; /*!< List of found data boxes. */
 
 private:
+	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskSearchOwner(const TaskSearchOwner &);
+	TaskSearchOwner &operator=(const TaskSearchOwner &);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
 };

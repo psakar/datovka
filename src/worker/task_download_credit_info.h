@@ -52,6 +52,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskDownloadCreditInfo(const TaskDownloadCreditInfo &);
+	TaskDownloadCreditInfo &operator=(const TaskDownloadCreditInfo &);
+
+	/*!
 	 * @brief Download credit information from ISDS.
 	 *
 	 * @param[in] userName Account identifier (user login name).

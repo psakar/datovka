@@ -52,6 +52,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskDownloadOwnerInfo(const TaskDownloadOwnerInfo &);
+	TaskDownloadOwnerInfo &operator=(const TaskDownloadOwnerInfo &);
+
+	/*!
 	 * @brief Download owner information.
 	 *
 	 * @param[in]     userName     Account identifier (user login name).

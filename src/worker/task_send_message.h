@@ -192,6 +192,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskSendMessage(const TaskSendMessage &);
+	TaskSendMessage &operator=(const TaskSendMessage &);
+
+	/*!
 	 * @brief Sends a single message to ISDS fro given account.
 	 *
 	 * @param[in]     userName         Account identifier (user login name).

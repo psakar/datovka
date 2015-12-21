@@ -78,7 +78,7 @@ private:
 	 * Disable copy and assignment.
 	 */
 	TaskChangePwd(const TaskChangePwd &);
-	TaskChangePwd & operator=(const TaskChangePwd &);
+	TaskChangePwd &operator=(const TaskChangePwd &);
 
 	/*!
 	 * @brief Change password action.

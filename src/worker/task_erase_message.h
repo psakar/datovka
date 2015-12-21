@@ -68,6 +68,12 @@ public:
 
 private:
 	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskEraseMessage(const TaskEraseMessage &);
+	TaskEraseMessage &operator=(const TaskEraseMessage &);
+
+	/*!
 	 * @brief Erases messages form ISDS and/or from local database.
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
