@@ -6331,21 +6331,18 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 
 	AccountDataStruct accountData;
 	QList<AccountDataStruct> accountList;
-	accountList.clear();
 
-	/* get username, accountName, ID of databox and pointer to database
+	/* get username and pointer to database
 	 * for all accounts from settings */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName =
+		accountData.username =
 		    index.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
-		accountData.username = userName;
-		accountData.accountName =
-		    AccountModel::globAccounts[userName].accountName();
-		accountData.messageDbSet = dbSet;
+		Q_ASSERT(!accountData.username.isEmpty());
+		accountData.messageDbSet =
+		    accountDbSet(accountData.username, this);
+		Q_ASSERT(0 != accountData.messageDbSet);
+
 		accountList.append(accountData);
 	}
 
@@ -6597,6 +6594,8 @@ void MainWindow::importDeliveryInfoZFO(
 			MessageDb *messageDb =
 			    accountList.at(j).messageDbSet->accessMessageDb(
 			        deliveryTime, true);
+			const QString accountName(
+			    AccountModel::globAccounts[accountList.at(j).username].accountName());
 			Q_ASSERT(0 != messageDb);
 			if (-1 != messageDb->msgsStatusIfExists(dmId)) {
 				/* check if raw is in database */
@@ -6611,7 +6610,7 @@ void MainWindow::importDeliveryInfoZFO(
 							pInfoText += tr("Imported as delivery "
 							    "info for message "
 							    "\"%1\", account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
+							    arg(dmId).arg(accountName);
 							pInfoText += "<br/>";
 							imported = true;
 						} else {
@@ -6662,7 +6661,7 @@ void MainWindow::importDeliveryInfoZFO(
 					exists = true;
 					eInfoText += tr("Delivery info for message \"%1\" already exists in the "
 					    "local database, account \"%2\".").
-					    arg(dmId).arg(accountList.at(j).accountName);
+					    arg(dmId).arg(accountName);
 					eInfoText += "<br/>";
 				}
 			} else {
@@ -6777,6 +6776,8 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 			MessageDb *messageDb =
 			    accountList.at(j).messageDbSet->accessMessageDb(
 			        deliveryTime, true);
+			const QString accountName(
+			    AccountModel::globAccounts[accountList.at(j).username].accountName());
 
 			const QString databoxID(globAccountDbPtr->dbId(
 			    accountList.at(j).username + "___True"));
@@ -6797,7 +6798,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
+							    arg(dmId).arg(accountName);
 							pInfoText += "<br/>";
 						} else {
 							nInfoText =
@@ -6812,7 +6813,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 						exists = true;
 						eInfoText += tr("Message \"%1\" already exists in the "
 						    "local database, account \"%2\".").
-						    arg(dmId).arg(accountList.at(j).accountName);
+						    arg(dmId).arg(accountName);
 						eInfoText += "<br/>";
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
@@ -6868,7 +6869,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 							messageDb->msgSetProcessState(dmId, SETTLED, false);
 							pInfoText += tr("Imported as received message "
 							    "\"%1\" into account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
+							    arg(dmId).arg(accountName);
 							pInfoText += "<br/>";
 						} else {
 							nInfoText =
@@ -6883,7 +6884,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 						exists = true;
 						eInfoText += tr("Message \"%1\" already exists in the "
 						    "local database, account \"%2\".").
-						    arg(dmId).arg(accountList.at(j).accountName);
+						    arg(dmId).arg(accountName);
 						eInfoText += "<br/>";
 					}
 				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
