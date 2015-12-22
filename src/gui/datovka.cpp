@@ -6342,7 +6342,6 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 		Q_ASSERT(!userName.isEmpty());
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		Q_ASSERT(0 != dbSet);
-		accountData.acntIndex = index;
 		accountData.username = userName;
 		accountData.accountName =
 		    AccountModel::globAccounts[userName].accountName();
@@ -6606,7 +6605,7 @@ void MainWindow::importDeliveryInfoZFO(
 				if (!messageDb->isDeliveryInfoRawDb(dmId)) {
 					/* Is/was ZFO message in ISDS */
 					resISDS = isImportMsgInISDS(files.at(i),
-					    accountList.at(j).acntIndex);
+					    accountList.at(j).username);
 					if (resISDS == MSG_IS_IN_ISDS) {
 						if (Q_SUCCESS ==
 						    Task::storeDeliveryInfo(true,
@@ -6789,7 +6788,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 
 				/* Is/was ZFO message in ISDS */
 				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).acntIndex);
+				    accountList.at(j).username);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
 						Task::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
@@ -6857,7 +6856,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 				isReceived = accountList.at(j).username;
 				qDebug() << dmId << "isReceived" << isReceived;
 				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).acntIndex);
+				    accountList.at(j).username);
 
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
@@ -6957,10 +6956,10 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
  * Check if import ZFO file is/was in ISDS.
  */
 int MainWindow::isImportMsgInISDS(const QString &zfoFile,
-    QModelIndex accountIndex)
+    const QString &userName)
 /* ========================================================================= */
 {
-	Q_ASSERT(accountIndex.isValid());
+	Q_ASSERT(!userName.isEmpty());
 
 	size_t length;
 	isds_error status;
@@ -6979,10 +6978,6 @@ int MainWindow::isImportMsgInISDS(const QString &zfoFile,
 		return MSG_FILE_ERROR;
 	}
 
-	accountIndex = AccountModel::indexTop(accountIndex);
-	const QString userName =
-	    accountIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, this)) {
 			return MSG_ISDS_ERROR;

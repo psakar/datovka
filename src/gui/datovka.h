@@ -70,7 +70,6 @@ public:
 		QString accountName;
 		QString username;
 		MessageDbSet *messageDbSet;
-		QModelIndex acntIndex;
 	};
 
 	enum isdsResult {
@@ -590,8 +589,7 @@ private slots:
 	/*!
 	 * @brief Check if import ZFO file is/was in ISDS.
 	 */
-	int isImportMsgInISDS(const QString &zfoFile,
-	    QModelIndex accountIndex);
+	int isImportMsgInISDS(const QString &zfoFile, const QString &userName);
 
 	/*!
 	 * @brief About application dialog.
