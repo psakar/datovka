@@ -66,7 +66,6 @@ public:
 	/* tmp account info struct for ZFO import */
 	class AccountDataStruct {
 	public:
-		QString databoxID;
 		QString accountName;
 		QString username;
 		MessageDbSet *messageDbSet;

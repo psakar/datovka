@@ -6345,8 +6345,6 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 		accountData.username = userName;
 		accountData.accountName =
 		    AccountModel::globAccounts[userName].accountName();
-		accountData.databoxID =
-		    globAccountDbPtr->dbId(userName + "___True");
 		accountData.messageDbSet = dbSet;
 		accountList.append(accountData);
 	}
@@ -6780,8 +6778,11 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 			    accountList.at(j).messageDbSet->accessMessageDb(
 			        deliveryTime, true);
 
+			const QString databoxID(globAccountDbPtr->dbId(
+			    accountList.at(j).username + "___True"));
+
 			/* is sent */
-			if (accountList.at(j).databoxID == dbIDSender) {
+			if (databoxID == dbIDSender) {
 
 				isSent = accountList.at(j).username;
 				qDebug() << dmId << "isSent" << isSent;
@@ -6852,7 +6853,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 			}
 
 			/* is received */
-			if (accountList.at(j).databoxID == dbIDRecipient) {
+			if (databoxID == dbIDRecipient) {
 				isReceived = accountList.at(j).username;
 				qDebug() << dmId << "isReceived" << isReceived;
 				resISDS = isImportMsgInISDS(files.at(i),
