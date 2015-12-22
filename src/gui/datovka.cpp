@@ -6332,15 +6332,15 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 	AccountDataStruct accountData;
 	QList<AccountDataStruct> accountList;
 
-	/* get username and pointer to database
+	/* get userName and pointer to database
 	 * for all accounts from settings */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		accountData.username =
+		accountData.userName =
 		    index.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!accountData.username.isEmpty());
+		Q_ASSERT(!accountData.userName.isEmpty());
 		accountData.messageDbSet =
-		    accountDbSet(accountData.username, this);
+		    accountDbSet(accountData.userName, this);
 		Q_ASSERT(0 != accountData.messageDbSet);
 
 		accountList.append(accountData);
@@ -6521,7 +6521,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
  * Func: Execute the import of delivery info ZFO file(s) into database.
  */
 void MainWindow::importDeliveryInfoZFO(
-    const QList<AccountDataStruct> &accountList, const QStringList &files,
+    const QList<AccountDataStruct> &accounts, const QStringList &fileNames,
     QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
     QList<QPair<QString,QString>> &errorFilesList)
@@ -6529,34 +6529,32 @@ void MainWindow::importDeliveryInfoZFO(
 {
 	/* ProgressBar text and diference */
 	const QString progressBarTitle = "ZFOImport";
-	float delta = 0.0;
-	float diff = 0.0;
 
-	int fileCnt = files.size();
 	QPair<QString,QString> importZFOInfo;
-	QString pInfoText = "";
-	QString nInfoText = "";
-	QString eInfoText = "";
+	QString pInfoText;
+	QString nInfoText;
+	QString eInfoText;
 
 	updateProgressBar(progressBarTitle, 20);
-	delta = 80.0 / fileCnt;
+	float diff = 0.0;
+	float delta = 80.0 / fileNames.size();
+
+	if (fileNames.isEmpty()) {
+		updateProgressBar(progressBarTitle, 50);
+	}
 
 	/* for every ZFO file detect if message is in the database */
-	for (int i = 0; i < fileCnt; ++i) {
+	foreach (const QString &fileName, fileNames) {
 
-		if (fileCnt == 0) {
-			updateProgressBar(progressBarTitle, 50);
-		} else {
-			diff += delta;
-			updateProgressBar(progressBarTitle, (20 + diff));
-		}
+		diff += delta;
+		updateProgressBar(progressBarTitle, (20 + diff));
 
 		pInfoText = "";
 		nInfoText = "";
 		eInfoText = "";
 
 		showStatusTextPermanently(tr("Processing of "
-		    "delivery info ZFO: %1 ...").arg(files.at(i)));
+		    "delivery info ZFO: %1 ...").arg(fileName));
 
 		struct isds_message *message = NULL;
 		struct isds_ctx *dummy_session = NULL;
@@ -6570,10 +6568,10 @@ void MainWindow::importDeliveryInfoZFO(
 			return;
 		}
 
-		message = loadZfoFile(dummy_session, files.at(i),
+		message = loadZfoFile(dummy_session, fileName,
 		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
 		if (NULL == message || message->envelope == NULL) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = tr("Wrong ZFO "
 			    "format. This file does not contain correct "
 			    "data for import.");
@@ -6589,24 +6587,24 @@ void MainWindow::importDeliveryInfoZFO(
 		QDateTime deliveryTime = timevalToDateTime(message->envelope->dmDeliveryTime);
 		Q_ASSERT(deliveryTime.isValid());
 
-		for (int j = 0; j < accountList.size(); j++) {
+		foreach (const AccountDataStruct &acnt, accounts) {
 			/* check if message envelope is in database */
 			MessageDb *messageDb =
-			    accountList.at(j).messageDbSet->accessMessageDb(
-			        deliveryTime, true);
+			    acnt.messageDbSet->accessMessageDb(deliveryTime,
+			        true);
 			const QString accountName(
-			    AccountModel::globAccounts[accountList.at(j).username].accountName());
+			    AccountModel::globAccounts[acnt.userName].accountName());
 			Q_ASSERT(0 != messageDb);
 			if (-1 != messageDb->msgsStatusIfExists(dmId)) {
 				/* check if raw is in database */
 				if (!messageDb->isDeliveryInfoRawDb(dmId)) {
 					/* Is/was ZFO message in ISDS */
-					resISDS = isImportMsgInISDS(files.at(i),
-					    accountList.at(j).username);
+					resISDS = isImportMsgInISDS(fileName,
+					    acnt.userName);
 					if (resISDS == MSG_IS_IN_ISDS) {
 						if (Q_SUCCESS ==
 						    Task::storeDeliveryInfo(true,
-						    *(accountList.at(j).messageDbSet), message)) {
+						    *(acnt.messageDbSet), message)) {
 							pInfoText += tr("Imported as delivery "
 							    "info for message "
 							    "\"%1\", account \"%2\".").
@@ -6643,7 +6641,7 @@ void MainWindow::importDeliveryInfoZFO(
 							    "schránky and verify validity of "
 							    "this ZFO file.");
 							nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-							importZFOInfo.first = files.at(i);
+							importZFOInfo.first = fileName;
 							importZFOInfo.second = nInfoText;
 							errorFilesList.append(importZFOInfo);
 							isds_message_free(&message);
@@ -6673,15 +6671,15 @@ void MainWindow::importDeliveryInfoZFO(
 		} // for
 
 		if (imported) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = pInfoText;
 			successFilesList.append(importZFOInfo);
 		} else if (exists){
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = eInfoText;
 			existFilesList.append(importZFOInfo);
 		} else {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = nInfoText;
 			errorFilesList.append(importZFOInfo);
 		}
@@ -6698,42 +6696,41 @@ void MainWindow::importDeliveryInfoZFO(
 /*
  * Func: Execute the import of message ZFO file(s) into database.
  */
-void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
-    const QStringList &files, QList<QPair<QString,QString>> &successFilesList,
+void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
+    const QStringList &fileNames,
+    QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
     QList<QPair<QString,QString>> &errorFilesList)
 /* ========================================================================= */
 {
 	/* ProgressBar text and diference */
 	const QString progressBarTitle = "ZFOImport";
-	float delta = 0.0;
-	float diff = 0.0;
 
-	int fileCnt = files.size();
 	QPair<QString,QString> importZFOInfo;
-	QString pInfoText = "";
-	QString nInfoText = "";
-	QString eInfoText = "";
+	QString pInfoText;
+	QString nInfoText;
+	QString eInfoText;
 
 	updateProgressBar(progressBarTitle, 20);
-	delta = 80.0 / fileCnt;
+	float diff = 0.0;
+	float delta = 80.0 / fileNames.size();
+
+	if (fileNames.isEmpty()) {
+		updateProgressBar(progressBarTitle, 50);
+	}
 
 	/* for every ZFO file detect its database and message type */
-	for (int i = 0; i < fileCnt; ++i) {
+	foreach (const QString &fileName, fileNames) {
 
-		if (fileCnt == 0) {
-			updateProgressBar(progressBarTitle, 50);
-		} else {
-			diff += delta;
-			updateProgressBar(progressBarTitle, (20 + diff));
-		}
+		diff += delta;
+		updateProgressBar(progressBarTitle, (20 + diff));
 
 		pInfoText = "";
 		nInfoText = "";
 		eInfoText = "";
 
 		showStatusTextPermanently(tr("Processing of "
-		    "message ZFO: %1 ...").arg(files.at(i)));
+		    "message ZFO: %1 ...").arg(fileName));
 
 		struct isds_message *message = NULL;
 		struct isds_ctx *dummy_session = NULL;
@@ -6747,10 +6744,10 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 			return;
 		}
 
-		message = loadZfoFile(dummy_session, files.at(i),
+		message = loadZfoFile(dummy_session, fileName,
 		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
 		if (NULL == message || message->envelope == NULL) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = tr("Wrong ZFO format. "
 			    "File does not contain correct data for import.");
 			errorFilesList.append(importZFOInfo);
@@ -6772,29 +6769,29 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 		bool exists = false;
 
 		/* message type recognition {sent,received}, insert into DB */
-		for (int j = 0; j < accountList.size(); j++) {
+		foreach (const AccountDataStruct &acnt, accounts) {
 			MessageDb *messageDb =
-			    accountList.at(j).messageDbSet->accessMessageDb(
-			        deliveryTime, true);
+			    acnt.messageDbSet->accessMessageDb(deliveryTime,
+			        true);
 			const QString accountName(
-			    AccountModel::globAccounts[accountList.at(j).username].accountName());
+			    AccountModel::globAccounts[acnt.userName].accountName());
 
 			const QString databoxID(globAccountDbPtr->dbId(
-			    accountList.at(j).username + "___True"));
+			    acnt.userName + "___True"));
 
 			/* is sent */
 			if (databoxID == dbIDSender) {
 
-				isSent = accountList.at(j).username;
+				isSent = acnt.userName;
 				qDebug() << dmId << "isSent" << isSent;
 
 				/* Is/was ZFO message in ISDS */
-				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).username);
+				resISDS = isImportMsgInISDS(fileName,
+				    acnt.userName);
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Task::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Task::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "")) {
+						Task::storeEnvelope(MSG_SENT, *(acnt.messageDbSet), message->envelope);
+						if (Q_SUCCESS == Task::storeMessage(true, MSG_SENT, *(acnt.messageDbSet), message, "")) {
 							import = true;
 							pInfoText += tr("Imported as sent message "
 							    "\"%1\" into account \"%2\".").
@@ -6837,7 +6834,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 						    "schránky and verify validity of "
 						    "this ZFO file.");
 						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-						importZFOInfo.first = files.at(i);
+						importZFOInfo.first = fileName;
 						importZFOInfo.second = nInfoText;
 						errorFilesList.append(importZFOInfo);
 						isds_message_free(&message);
@@ -6855,15 +6852,15 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 
 			/* is received */
 			if (databoxID == dbIDRecipient) {
-				isReceived = accountList.at(j).username;
+				isReceived = acnt.userName;
 				qDebug() << dmId << "isReceived" << isReceived;
-				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).username);
+				resISDS = isImportMsgInISDS(fileName,
+				    acnt.userName);
 
 				if (resISDS == MSG_IS_IN_ISDS) {
 					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Task::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Task::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "")) {
+						Task::storeEnvelope(MSG_RECEIVED, *(acnt.messageDbSet), message->envelope);
+						if (Q_SUCCESS == Task::storeMessage(true, MSG_RECEIVED, *(acnt.messageDbSet), message, "")) {
 							import = true;
 							/* update message state into database */
 							messageDb->msgSetProcessState(dmId, SETTLED, false);
@@ -6908,7 +6905,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 						    "schránky and verify validity of "
 						    "this ZFO file.");
 						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-						importZFOInfo.first = files.at(i);
+						importZFOInfo.first = fileName;
 						importZFOInfo.second = nInfoText;
 						errorFilesList.append(importZFOInfo);
 						isds_message_free(&message);
@@ -6927,20 +6924,20 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
 
 		/* */
 		if (isReceived.isNull() && isSent.isNull()) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = tr("For this file does not "
 			    "exist correct databox or relevant account.");
 			errorFilesList.append(importZFOInfo);
 		} else if (import) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = pInfoText;
 			successFilesList.append(importZFOInfo);
 		} else if (exists) {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = eInfoText;
 			existFilesList.append(importZFOInfo);
 		} else {
-			importZFOInfo.first = files.at(i);
+			importZFOInfo.first = fileName;
 			importZFOInfo.second = nInfoText;
 			errorFilesList.append(importZFOInfo);
 		}

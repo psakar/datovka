@@ -66,7 +66,7 @@ public:
 	/* tmp account info struct for ZFO import */
 	class AccountDataStruct {
 	public:
-		QString username;
+		QString userName;
 		MessageDbSet *messageDbSet;
 	};
 
@@ -560,8 +560,8 @@ private slots:
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
 	void importDeliveryInfoZFO(
-	    const QList<AccountDataStruct> &accountList,
-	    const QStringList &files,
+	    const QList<AccountDataStruct> &accounts,
+	    const QStringList &fileNames,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,
 	    QList<QPair<QString,QString>> &errorFilesList);
@@ -570,8 +570,8 @@ private slots:
 	 * @brief Import only message ZFO file(s) into database.
 	 */
 	void importMessageZFO(
-	    const QList<AccountDataStruct> &accountList,
-	    const QStringList &files,
+	    const QList<AccountDataStruct> &accounts,
+	    const QStringList &fileNames,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,
 	    QList<QPair<QString,QString>> &errorFilesList);
