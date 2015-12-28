@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>301</height>
+    <height>346</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -169,6 +169,18 @@ at least one digit and one capital letter.</string>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="infoPassword">
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>Note: Mark or remember a new password somewhere.</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line">

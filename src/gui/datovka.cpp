@@ -8947,42 +8947,6 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		return false;
 	}
 
-	if (!accountInfo._pwdExpirDlgShown()) {
-		/* Notify only once. */
-		accountInfo._setPwdExpirDlgShown(true);
-
-		QString dbDateTimeString = globAccountDbPtr->getPwdExpirFromDb(
-		    userName + "___True");
-		const QDateTime dbDateTime = QDateTime::fromString(
-		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
-		const QDate dbDate = dbDateTime.date();
-
-		if (dbDate.isValid()) {
-			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
-			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
-				logWarning("Password of account '%lu' expires "
-				    "in %lu days.\n",
-				    accountInfo.accountName().toUtf8().constData(),
-				    daysTo);
-				if ((0 != mw) && (QMessageBox::Yes ==
-				    mw->showDialogueAboutPwdExpir(
-				        accountInfo.accountName(),
-				        userName, daysTo,
-				        dbDateTime))) {
-					mw->showStatusTextWithTimeout(
-					    tr("Change password of account "
-					        "\"%1\".")
-					    .arg(accountInfo.accountName()));
-					QString dbId = globAccountDbPtr->dbId(
-					    userName + "___True");
-					QDialog *changePwd = new DlgChangePwd(
-					    dbId, userName, mw);
-					changePwd->exec();
-				}
-			}
-		}
-	}
-
 	/* Login method based on username and password */
 	if (accountInfo.loginMethod() == LIM_USERNAME) {
 		loginRet = loginMethodUserNamePwd(accountInfo, mw, pwd);
@@ -9063,6 +9027,42 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	}
 	Q_ASSERT(!dbId.isEmpty());
 	 */
+
+	if (!accountInfo._pwdExpirDlgShown()) {
+		/* Notify only once. */
+		accountInfo._setPwdExpirDlgShown(true);
+
+		QString dbDateTimeString = globAccountDbPtr->getPwdExpirFromDb(
+		    userName + "___True");
+		const QDateTime dbDateTime = QDateTime::fromString(
+		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
+		const QDate dbDate = dbDateTime.date();
+
+		if (dbDate.isValid()) {
+			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
+			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
+				logWarning("Password of account '%lu' expires "
+				    "in %lu days.\n",
+				    accountInfo.accountName().toUtf8().constData(),
+				    daysTo);
+				if ((0 != mw) && (QMessageBox::Yes ==
+				    mw->showDialogueAboutPwdExpir(
+				        accountInfo.accountName(),
+				        userName, daysTo,
+				        dbDateTime))) {
+					mw->showStatusTextWithTimeout(
+					    tr("Change password of account "
+					        "\"%1\".")
+					    .arg(accountInfo.accountName()));
+					QString dbId = globAccountDbPtr->dbId(
+					    userName + "___True");
+					QDialog *changePwd = new DlgChangePwd(
+					    dbId, userName, mw);
+					changePwd->exec();
+				}
+			}
+		}
+	}
 
 	return loginRet;
 }
