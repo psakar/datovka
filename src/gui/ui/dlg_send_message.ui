@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>553</width>
-    <height>727</height>
+    <height>812</height>
    </rect>
   </property>
   <property name="font">
@@ -736,7 +736,7 @@ of postal data messages active.</string>
       </font>
      </property>
      <property name="text">
-      <string>Attachment size is larger than 10 MB. Message cannot be sent!</string>
+      <string>Attachment size is larger than 20 MB. Message cannot be sent!</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
