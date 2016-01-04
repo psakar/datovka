@@ -27,7 +27,7 @@
    <item>
     <widget class="QLabel" name="infoLabel">
      <property name="text">
-      <string>You can change there the password on the server Datové schránky for login into your databox. Please enter you current and new password below:</string>
+      <string>Here you can change the login password into your data box. Please enter you current and new password below:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -181,7 +181,7 @@ at least one digit and one capital letter.</string>
       </font>
      </property>
      <property name="text">
-      <string>Note: Mark or remember a new password somewhere.</string>
+      <string>Note: Remember your new password.</string>
      </property>
     </widget>
    </item>
