@@ -164,23 +164,22 @@ Založeno na knihovně libisds.</translation>
         <translation>Změnit heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="30"/>
         <source>Please enter you current and new password below:</source>
-        <translation>Prosím, zadejte staré a nové heslo níže:</translation>
+        <translation type="vanished">Prosím, zadejte staré a nové heslo níže:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="42"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="45"/>
         <source>DataBox ID:</source>
         <translation>ID datové schránky:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="59"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="62"/>
         <source>Current password:</source>
         <translation>Staré heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="73"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="84"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="76"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="87"/>
         <source>The password must be at least 8 characters long and
 must contain at least one digit and one capital letter.</source>
         <translation>Heslo musí mít nejméně 8 znaků a musí obsahovat
@@ -193,7 +192,7 @@ and must contain least one number and capital letter. </source>
 obsahovat nejméně jednu číslici a velké písmeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="77"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="80"/>
         <source>New password:</source>
         <translation>Nové heslo:</translation>
     </message>
@@ -206,8 +205,13 @@ contain least one number and capital letter.</source>
 jednu číslici a velké písmeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="95"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="107"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="30"/>
+        <source>This sets a new password on the ISDS server. Please enter your current and new password below:</source>
+        <translation>Zde se nastavuje nové heslo na serveru ISDS. Zadejte prosím stávající a nové heslo:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="98"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="110"/>
         <source>Repeat the password. The password must be
 at least 8 characters long and must contain
 at least one digit and one capital letter.</source>
@@ -216,42 +220,47 @@ znaků a musí obsahovat alespoň
 jednu číslici a jedno velké písmeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="100"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="103"/>
         <source>Repeat new password:</source>
         <translation>Nové heslo znovu:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="141"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="144"/>
         <source>Show</source>
         <translation>Ukázat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="148"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="151"/>
         <source>Generate</source>
         <translation>Generovat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="157"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="160"/>
         <source>Username:</source>
         <translation>Uživatelské jméno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="185"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="184"/>
+        <source>Note: Remember your new password.</source>
+        <translation>Poznámka: Zapamatujte si Vaše nové heslo.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="200"/>
         <source>Enter SMS code:</source>
         <translation>Zadejte SMS kód:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="192"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="207"/>
         <source>Enter SMS or security code</source>
         <translation>Zadejte bezpečnostní SMS kód</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="199"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="214"/>
         <source>Send SMS security code.</source>
         <translation>Odeslat bezpečnostní SMS kód.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="202"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="217"/>
         <source>Send SMS code</source>
         <translation>Odeslat SMS kód</translation>
     </message>
@@ -647,8 +656,12 @@ všech účtů na pozadí aplikace</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="318"/>
+        <source>Restart the application. Also don&apos;t forget to remember the new password so you will still be able to log into your data box via the web interface.</source>
+        <translation>Restartujte aplikaci. Nezapomeňte si také zapamatovat nové heslo, abyste je byli schopni použít pro přihlašování přes webové rozhraní.</translation>
+    </message>
+    <message>
         <source>Please, set your new password in the account settings and restarts the application. Otherwise you can not connect to your databox.</source>
-        <translation>Nastavte si, prosím, nové heslo v nastavení účtu a restartujte aplikaci, jinak se nebudete moct přihlásit k Vaší schránce.</translation>
+        <translation type="vanished">Nastavte si, prosím, nové heslo v nastavení účtu a restartujte aplikaci, jinak se nebudete moct přihlásit k Vaší schránce.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="331"/>
@@ -1369,9 +1382,13 @@ Momentálně není možné zasílat zprávy do této schránky. Hledejte dál.</
         <translation>Neplatná velikost souboru</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="564"/>
         <source>File &apos;%1&apos; could not be added into attachment because its size is bigger than 10MB.</source>
-        <translation>Soubor &apos;%1&apos; nemohl být přidán do přílohy, protože jeho velikost přesahuje 10MB.</translation>
+        <translation type="vanished">Soubor &apos;%1&apos; nemohl být přidán do přílohy, protože jeho velikost přesahuje 10MB.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="564"/>
+        <source>File &apos;%1&apos; could not be added into attachment because its size is bigger than 20MB.</source>
+        <translation>Soubor &apos;%1&apos; nemohl být přidán do přílohy, protože jeho velikost přesahuje 20MB.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="680"/>
@@ -4209,7 +4226,7 @@ Change password now?</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="4916"/>
-        <location filename="../src/gui/datovka.cpp" line="8973"/>
+        <location filename="../src/gui/datovka.cpp" line="9054"/>
         <source>Change password of account &quot;%1&quot;.</source>
         <translation>Změnit heslo pro účet &quot;%1&quot;.</translation>
     </message>
@@ -7930,6 +7947,11 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Příjemci:</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="739"/>
+        <source>Attachment size is larger than 20 MB. Message cannot be sent!</source>
+        <translation>Velikost příloh je větší než 20 MB. Zprávu nebude možné odeslat!</translation>
+    </message>
+    <message>
         <source>Add a recipient to the current message</source>
         <translation type="vanished">Přidat příjemce do seznamu</translation>
     </message>
@@ -8105,9 +8127,8 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
         <translation>Otevřít</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="739"/>
         <source>Attachment size is larger than 10 MB. Message cannot be sent!</source>
-        <translation>Velikost příloh je větší než 10 MB. Zprávu nebude možné odeslat!</translation>
+        <translation type="vanished">Velikost příloh je větší než 10 MB. Zprávu nebude možné odeslat!</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="783"/>

@@ -27,7 +27,7 @@
    <item>
     <widget class="QLabel" name="infoLabel">
      <property name="text">
-      <string>Here you can change the login password into your data box. Please enter you current and new password below:</string>
+      <string>This sets a new password on the ISDS server. Please enter your current and new password below:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
