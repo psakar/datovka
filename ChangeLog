@@ -1,3 +1,8 @@
+4.4.3 / 2016-01-04
+ * Fixed bug when changing expired password and the new password was not
+   saved.
+ * Increased message attachment size limit to 20 MB.
+
 4.4.2 / 2015-12-08
  * Explicitly specified the limit to 100000 entries in downloaded message
    list.

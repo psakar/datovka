@@ -47,7 +47,7 @@
 #define RUN_FIRST_ACTION_MS 3000 // 3 sec run action after datovka start
 #define TIMER_DEFAULT_TIMEOUT_MS 600000 // 10 min timer period
 #define DLG_ISDS_KEEPALIVE_MS 180000 // 3 min dialog isds ping timer period
-#define MAX_ATTACHMENT_SIZE 10000000 // 10MB
+#define MAX_ATTACHMENT_SIZE 20000000 // 20MB
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
 #define TIMER_MARK_MSG_READ_MS 5000 /* Mark message as read after 5 seconds. */
 

@@ -315,9 +315,9 @@ void DlgChangePwd::changePassword(void)
 		    tr("Password has been changed "
 		        "successfully on the server ISDS.")
 		    + "\n\n" +
-		    tr("Please, set your new password in the account "
-		        "settings and restarts the application. "
-		        "Otherwise you can not connect to your databox."),
+		    tr("Restart the application. Also don't forget to remember "
+		        "the new password so you will still be able to log "
+		        "into your data box via the web interface."),
 		    QMessageBox::Ok);
 
 		AccountModel::globAccounts[m_userName].setPassword(
@@ -345,7 +345,7 @@ void DlgChangePwd::changePassword(void)
 
 /* ========================================================================= */
 /*
- * Set of possilbe chars for generation of new passsword
+ * Set of possible chars for generation of new password
  */
 const QString DlgChangePwd::possibleCharacters(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
