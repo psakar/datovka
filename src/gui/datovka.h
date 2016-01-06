@@ -540,12 +540,6 @@ private slots:
 	    enum ImportZFODialog::ZFOaction importType);
 
 	/*!
-	 * @brief Get message type of import ZFO file (message/delivery/unknown).
-	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
-	 */
-	int getMessageTypeFromZFO(const QString &file);
-
-	/*!
 	 * @brief Create account info for ZFO file(s) import into database.
 	 */
 	QList<AccountDataStruct> createAccountInfoForZFOImport(void);

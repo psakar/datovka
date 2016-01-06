@@ -80,6 +80,7 @@
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
+#include "src/worker/task_import_zfo.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -6352,49 +6353,6 @@ QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(v
 
 /* ========================================================================= */
 /*
- * Func: Get message type of import ZFO file (message/delivery/unknown).
- */
-int MainWindow::getMessageTypeFromZFO(const QString &file)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	int zfoType = -1;
-	struct isds_message *message = NULL;
-	struct isds_ctx *dummy_session = NULL;
-
-	dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		qDebug() << "ZFO-TYPE:"<< "Cannot create dummy ISDS session.";
-		return zfoType;
-	}
-
-	/* Check ZFO type */
-	message = loadZfoFile(dummy_session, file,
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-	if (NULL == message) {
-		message = loadZfoFile(dummy_session, file,
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
-		if (NULL == message) {
-			/* ZFO format unknown */
-			zfoType = 0;
-		} else {
-			/* ZFO is delivery info */
-			zfoType = 2;
-		}
-	} else {
-		/* ZFO is message */
-		zfoType = 1;
-	}
-
-	isds_message_free(&message);
-	isds_ctx_free(&dummy_session);
-
-	return zfoType;
-}
-
-/* ========================================================================= */
-/*
  * Func: Prepare import ZFO file(s) into database by ZFO type.
  */
 void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
@@ -6404,14 +6362,13 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	debugFuncCall();
 
 	const QString progressBarTitle = "ZFOImport";
-	int zfoFileType = 0;
 	QPair<QString,QString> impZFOInfo;
 	QList<QPair<QString,QString>> errorFilesList; // red
 	QList<QPair<QString,QString>> existFilesList; // black
 	QList<QPair<QString,QString>> successFilesList; // green
 	QStringList messageZFOList;
 	QStringList deliveryZFOList;
-	int zfoCnt =  files.size();
+	int zfoCnt = files.size();
 
 	qDebug() << "ZFO-IMPORT:" << "number of ZFO:" << zfoCnt;
 
@@ -6433,26 +6390,23 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 
 	updateProgressBar(progressBarTitle, 5);
 
-	/* sort ZFOs by format type */
-	for (int i = 0; i < zfoCnt; i++) {
-		/* retrun -1=error, 0=unknown, 1=message, 2=delivery info */
-		zfoFileType = getMessageTypeFromZFO(files.at(i));
-		qDebug() << i << zfoFileType << files.at(i);
-
-
-		if (zfoFileType == 0) {
-			impZFOInfo.first = files.at(i);
+	/* Sort ZFOs by format types. */
+	foreach (const QString &file, files) {
+		switch (TaskImportZfo::determineFileType(file)) {
+		case TaskImportZfo::ZT_UKNOWN:
+			impZFOInfo.first = file;
 			impZFOInfo.second = tr("Wrong ZFO format. This "
 			    "file does not contain correct data for import.");
 			errorFilesList.append(impZFOInfo);
-		} else if (zfoFileType == 1) {
-			messageZFOList.append(files.at(i));
-		} else if (zfoFileType == 2) {
-			deliveryZFOList.append(files.at(i));
-		} else {
-			impZFOInfo.first = files.at(i);
-			impZFOInfo.second = tr("Error during file parsing.");
-			errorFilesList.append(impZFOInfo);
+			break;
+		case TaskImportZfo::ZT_MESSAGE:
+			messageZFOList.append(file);
+			break;
+		case TaskImportZfo::ZT_DELIVERY_INFO:
+			deliveryZFOList.append(file);
+			break;
+		default:
+			break;
 		}
 	}
 
