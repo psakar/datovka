@@ -46,7 +46,7 @@ TaskAuthenticateMessage::TaskAuthenticateMessage(const QString &userName,
 			m_data = file.readAll();
 			file.close();
 		} else {
-			logErrorNL("Couldn;t open file '%s'.",
+			logErrorNL("Couldn't open file '%s'.",
 			    fileName.toUtf8().constData());
 		}
 	}
