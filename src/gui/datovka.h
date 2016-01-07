@@ -44,6 +44,7 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
+#include "src/worker/task_import_zfo.h" /* TODO -- remove this header file. */
 
 
 namespace Ui {
@@ -62,13 +63,6 @@ public:
 	QLabel *statusOnlineLabel;
 	QLabel *statusDbMode;
 	QStatusBar *statusBar;
-
-	/* tmp account info struct for ZFO import */
-	class AccountDataStruct {
-	public:
-		QString userName;
-		MessageDbSet *messageDbSet;
-	};
 
 	enum isdsResult {
 		MSG_IS_IN_ISDS,
@@ -542,7 +536,7 @@ private slots:
 	/*!
 	 * @brief Create account info for ZFO file(s) import into database.
 	 */
-	QList<AccountDataStruct> createAccountInfoForZFOImport(void);
+	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(void);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
@@ -554,7 +548,7 @@ private slots:
 	 * @brief Import only delivery info ZFO file(s) into database.
 	 */
 	void importDeliveryInfoZFO(
-	    const QList<AccountDataStruct> &accounts,
+	    const QList<TaskImportZfo::AccountData> &accounts,
 	    const QStringList &fileNames,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,
@@ -564,7 +558,7 @@ private slots:
 	 * @brief Import only message ZFO file(s) into database.
 	 */
 	void importMessageZFO(
-	    const QList<AccountDataStruct> &accounts,
+	    const QList<TaskImportZfo::AccountData> &accounts,
 	    const QStringList &fileNames,
 	    QList<QPair<QString,QString>> &successFilesList,
 	    QList<QPair<QString,QString>> &existFilesList,

@@ -24,6 +24,8 @@
 #ifndef _TASK_IMPORT_ZFO_H_
 #define _TASK_IMPORT_ZFO_H_
 
+#include <QString>
+
 #include "src/worker/task.h"
 
 /*!
@@ -38,6 +40,25 @@ public:
 		ZT_UKNOWN = 0, /*!< Unknown format. */
 		ZT_MESSAGE = 1, /*!< ZFO holds message. */
 		ZT_DELIVERY_INFO = 2 /*!< ZFO holds delivery information. */
+	};
+
+	/*!
+	 * @brief Holds information about accounts that should be processed.
+	 */
+	class AccountData {
+	public:
+		/*!
+		 * @brief Constructors.
+		 */
+//		AccountData(void)
+//		    : userName(), messageDbSet(0)
+//		{ }
+		AccountData(const QString &uN, class MessageDbSet *mDS)
+		    : userName(uN), messageDbSet(mDS)
+		{ }
+
+		QString userName; /*!< Account identifier (user name). */
+		class MessageDbSet *messageDbSet; /*!< Database set related to account. */
 	};
 
 	/*!

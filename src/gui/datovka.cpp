@@ -6325,26 +6325,25 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 /*
  * Func: Create account info for ZFO file(s) import into database.
  */
-QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
+QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	AccountDataStruct accountData;
-	QList<AccountDataStruct> accountList;
+	QList<TaskImportZfo::AccountData> accountList;
 
 	/* get userName and pointer to database
 	 * for all accounts from settings */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		accountData.userName =
-		    index.data(ROLE_ACNT_USER_NAME).toString();
-		Q_ASSERT(!accountData.userName.isEmpty());
-		accountData.messageDbSet =
-		    accountDbSet(accountData.userName, this);
-		Q_ASSERT(0 != accountData.messageDbSet);
 
-		accountList.append(accountData);
+		QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+		Q_ASSERT(!userName.isEmpty());
+		MessageDbSet *messageDbSet = accountDbSet(userName, this);
+		Q_ASSERT(0 != messageDbSet);
+
+		accountList.append(
+		    TaskImportZfo::AccountData(userName, messageDbSet));
 	}
 
 	return accountList;
@@ -6378,7 +6377,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	QList<AccountDataStruct> const accountList =
+	QList<TaskImportZfo::AccountData> const accountList =
 	    createAccountInfoForZFOImport();
 
 	if (accountList.isEmpty()) {
@@ -6475,7 +6474,8 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
  * Func: Execute the import of delivery info ZFO file(s) into database.
  */
 void MainWindow::importDeliveryInfoZFO(
-    const QList<AccountDataStruct> &accounts, const QStringList &fileNames,
+    const QList<TaskImportZfo::AccountData> &accounts,
+    const QStringList &fileNames,
     QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
     QList<QPair<QString,QString>> &errorFilesList)
@@ -6507,13 +6507,9 @@ void MainWindow::importDeliveryInfoZFO(
 		nInfoText = "";
 		eInfoText = "";
 
-		showStatusTextPermanently(tr("Processing of "
-		    "delivery info ZFO: %1 ...").arg(fileName));
-
 		struct isds_message *message = NULL;
-		struct isds_ctx *dummy_session = NULL;
+		struct isds_ctx *dummy_session = isds_ctx_create();
 
-		dummy_session = isds_ctx_create();
 		if (NULL == dummy_session) {
 			qDebug() << "Cannot create dummy ISDS session.";
 			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
@@ -6524,13 +6520,13 @@ void MainWindow::importDeliveryInfoZFO(
 
 		message = loadZfoFile(dummy_session, fileName,
 		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		isds_ctx_free(&dummy_session);
 		if (NULL == message || message->envelope == NULL) {
 			importZFOInfo.first = fileName;
 			importZFOInfo.second = tr("Wrong ZFO "
 			    "format. This file does not contain correct "
 			    "data for import.");
 			errorFilesList.append(importZFOInfo);
-			isds_ctx_free(&dummy_session);
 			continue;
 		}
 
@@ -6541,7 +6537,7 @@ void MainWindow::importDeliveryInfoZFO(
 		QDateTime deliveryTime = timevalToDateTime(message->envelope->dmDeliveryTime);
 		Q_ASSERT(deliveryTime.isValid());
 
-		foreach (const AccountDataStruct &acnt, accounts) {
+		foreach (const TaskImportZfo::AccountData &acnt, accounts) {
 			/* check if message envelope is in database */
 			MessageDb *messageDb =
 			    acnt.messageDbSet->accessMessageDb(deliveryTime,
@@ -6599,7 +6595,6 @@ void MainWindow::importDeliveryInfoZFO(
 							importZFOInfo.second = nInfoText;
 							errorFilesList.append(importZFOInfo);
 							isds_message_free(&message);
-							isds_ctx_free(&dummy_session);
 							showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
 							return;
 						} else {
@@ -6639,7 +6634,6 @@ void MainWindow::importDeliveryInfoZFO(
 		}
 
 		isds_message_free(&message);
-		isds_ctx_free(&dummy_session);
 	}
 
 	updateProgressBar(progressBarTitle, 100);
@@ -6650,7 +6644,8 @@ void MainWindow::importDeliveryInfoZFO(
 /*
  * Func: Execute the import of message ZFO file(s) into database.
  */
-void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
+void  MainWindow::importMessageZFO(
+    const QList<TaskImportZfo::AccountData> &accounts,
     const QStringList &fileNames,
     QList<QPair<QString,QString>> &successFilesList,
     QList<QPair<QString,QString>> &existFilesList,
@@ -6683,13 +6678,9 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 		nInfoText = "";
 		eInfoText = "";
 
-		showStatusTextPermanently(tr("Processing of "
-		    "message ZFO: %1 ...").arg(fileName));
-
 		struct isds_message *message = NULL;
-		struct isds_ctx *dummy_session = NULL;
+		struct isds_ctx *dummy_session = isds_ctx_create();
 
-		dummy_session = isds_ctx_create();
 		if (NULL == dummy_session) {
 			qDebug() << "Cannot create dummy ISDS session.";
 			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
@@ -6700,12 +6691,12 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 
 		message = loadZfoFile(dummy_session, fileName,
 		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+		isds_ctx_free(&dummy_session);
 		if (NULL == message || message->envelope == NULL) {
 			importZFOInfo.first = fileName;
 			importZFOInfo.second = tr("Wrong ZFO format. "
 			    "File does not contain correct data for import.");
 			errorFilesList.append(importZFOInfo);
-			isds_ctx_free(&dummy_session);
 			continue;
 		}
 
@@ -6723,7 +6714,7 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 		bool exists = false;
 
 		/* message type recognition {sent,received}, insert into DB */
-		foreach (const AccountDataStruct &acnt, accounts) {
+		foreach (const TaskImportZfo::AccountData &acnt, accounts) {
 			MessageDb *messageDb =
 			    acnt.messageDbSet->accessMessageDb(deliveryTime,
 			        true);
@@ -6792,7 +6783,6 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 						importZFOInfo.second = nInfoText;
 						errorFilesList.append(importZFOInfo);
 						isds_message_free(&message);
-						isds_ctx_free(&dummy_session);
 						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
 						return;
 					} else {
@@ -6863,7 +6853,6 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 						importZFOInfo.second = nInfoText;
 						errorFilesList.append(importZFOInfo);
 						isds_message_free(&message);
-						isds_ctx_free(&dummy_session);
 						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
 						return;
 					} else {
@@ -6897,7 +6886,6 @@ void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accounts,
 		}
 
 		isds_message_free(&message);
-		isds_ctx_free(&dummy_session);
 	} //for
 
 	updateProgressBar(progressBarTitle, 100);
