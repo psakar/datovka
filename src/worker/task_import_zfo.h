@@ -34,6 +34,20 @@
 class TaskImportZfo : public Task {
 public:
 	/*!
+	 * @brief Return state describing what happened.
+	 */
+	enum Result {
+		IMP_SUCCESS, /*!< Import was successful. */
+		IMP_DATA_ERROR, /*!< Data couldn't be read or do not match supplied type. */
+		IMP_AUTH_ERR, /*!< Data couldn't be authenticated. */
+		IMP_ISDS_ERROR, /*!< Error communicating with ISDS. */
+		IMP_DB_INS_ERR, /*!< Error inserting into database. */
+		IMP_DB_MISSING_MSG, /*!< Related message to delivery info is missing. */
+		IMP_DB_EXISTS, /*!< Message already exists. */
+		IMP_ERR /*!< Other error. */
+	};
+
+	/*!
 	 * @brief ZFO type.
 	 */
 	enum ZfoType {
@@ -57,18 +71,31 @@ public:
 		    : userName(uN), messageDbSet(mDS)
 		{ }
 
-		QString userName; /*!< Account identifier (user name). */
+		/*!
+		 * @brief Checks whether contains valid data.
+		 *
+		 * @return False if invalid data held.
+		 */
+		bool isValid(void) const
+		{
+			return !userName.isEmpty() && (0 != messageDbSet);
+		}
+
+		QString userName; /*!< Account identifier (user login name). */
 		class MessageDbSet *messageDbSet; /*!< Database set related to account. */
 	};
 
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] fileName Full path to ZFO file.
+	 * @param[in] accounts     List of account identifiers.
+	 * @param[in] fileName     Full path to ZFO file.
+	 * @param[in] type         ZFO file type; type is determined if unknown.
+	 * @param[in] authenticate True if you want to authenticate message
+	 *                         before importing.
 	 */
-	explicit TaskImportZfo(const QString &userName,
-	    const QString &fileName);
+	explicit TaskImportZfo(const QList<AccountData> &accounts,
+	    const QString &fileName, enum ZfoType type, bool authenticate);
 
 	/*!
 	 * @brief Performs action.
@@ -85,9 +112,40 @@ public:
 	static
 	enum ZfoType determineFileType(const QString &fileName);
 
-private:
-	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_fileName; /*!< Full file path to imported file. */
+
+	enum Result m_result; /*!< Import outcome. */
+	QString m_isdsError; /*!< Error description. */
+	QString m_isdsLongError; /*!< Long error description. */
+	QString m_resultDesc; /*!<
+	                       * Result description that has mostly nothing
+	                       * to do with libisds.
+	                       */
+
+private:
+	/*!
+	 * Disable copy and assignment.
+	 */
+	TaskImportZfo(const TaskImportZfo &);
+	TaskImportZfo &operator=(const TaskImportZfo &);
+
+	/*!
+	 * @brief Imports delivery info into databases.
+	 *
+	 * @param[in] accounts     List of accounts to try to import data into.
+	 * @param[in] fileName     Full name of ZFO file holding delivery info.
+	 * @param[in] authenticate True if data should be authenticated before
+	 *                         inserting.
+	 * @param[in] resultDesc   String holding result description.
+	 * @return Status or error code.
+	 */
+	static
+	enum Result importDeliveryZfo(const QList<AccountData> &accounts,
+	    const QString &fileName, bool authenticate, QString &resultDesc);
+
+	QList<AccountData> m_accounts; /*!< List of accounts to be inserted into. */
+	enum ZfoType m_zfoType; /*!< Type of the ZFO file. */
+	const bool m_auth; /*!< True if authentication before importing. */
 };
 
 #endif /* _TASK_IMPORT_ZFO_H_ */
