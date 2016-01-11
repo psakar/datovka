@@ -115,8 +115,8 @@ public:
 	const QString m_fileName; /*!< Full file path to imported file. */
 
 	enum Result m_result; /*!< Import outcome. */
-	QString m_isdsError; /*!< Error description. */
-	QString m_isdsLongError; /*!< Long error description. */
+//	QString m_isdsError; /*!< Error description. */
+//	QString m_isdsLongError; /*!< Long error description. */
 	QString m_resultDesc; /*!<
 	                       * Result description that has mostly nothing
 	                       * to do with libisds.
@@ -128,6 +128,20 @@ private:
 	 */
 	TaskImportZfo(const TaskImportZfo &);
 	TaskImportZfo &operator=(const TaskImportZfo &);
+
+	/*!
+	 * @brief Imports message info database.
+	 *
+	 * @param[in] accounts     List of accounts to try to import data into.
+	 * @param[in] fileName     Full name of ZFO file holding the message.
+	 * @param[in] authenticate True if data should be authenticated before
+	 *                         inserting.
+	 * @param[in] resultDesc   String holding result description.
+	 * @return Status or error code.
+	 */
+	static
+	enum Result importMessageZfo(const QList<AccountData> &accounts,
+	    const QString &fileName, bool authenticate, QString &resultDesc);
 
 	/*!
 	 * @brief Imports delivery info into databases.
