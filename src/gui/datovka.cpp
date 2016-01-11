@@ -6247,8 +6247,6 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	QStringList fileList, filePathList;
 	QStringList nameFilter("*.zfo");
 	QDir directory(QDir::home());
-	fileList.clear();
-	filePathList.clear();
 
 	switch (importType) {
 	case ImportZFODialog::IMPORT_FROM_SUBDIR:
@@ -6281,8 +6279,9 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		}
 
 		if (filePathList.isEmpty()) {
-			qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the "
-			    "selected directory";
+			logWarning(
+			    "No *.zfo files in selected directory '%s'.\n",
+			    importDir.toUtf8().constData());
 			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
 			    "selected directory."));
 			QMessageBox::warning(this,
@@ -6300,7 +6299,7 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		    tr("ZFO file (*.zfo)"));
 
 		if (filePathList.isEmpty()) {
-			qDebug() << "ZFO-IMPORT:" <<"No *.zfo selected file(s)";
+			logWarning("%s\n", "No selected *.zfo files.");
 			showStatusTextWithTimeout(
 			    tr("ZFO file(s) not selected."));
 			return;
@@ -6369,11 +6368,11 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	QStringList deliveryZFOList;
 	int zfoCnt = files.size();
 
-	qDebug() << "ZFO-IMPORT:" << "number of ZFO:" << zfoCnt;
+	logInfo("Trying to import %d ZFO files.\n", zfoCnt);
 
 	if (zfoCnt == 0) {
-		qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the fileList";
-		showStatusTextWithTimeout(tr("No ZFO file(s) for import."));
+		logInfo("%s\n", "No *.zfo files in received file list.");
+		showStatusTextWithTimeout(tr("No ZFO files to import."));
 		return;
 	}
 
@@ -6381,9 +6380,9 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 	    createAccountInfoForZFOImport();
 
 	if (accountList.isEmpty()) {
-		qDebug() << "ZFO-IMPORT:" << "There is no account for import.";
-		showStatusTextWithTimeout(tr("There is no account for "
-		    "import of ZFO file(s)."));
+		logInfo("%s\n", "No accounts to import into.");
+		showStatusTextWithTimeout(tr("There is no account to "
+		    "import of ZFO files into."));
 		return;
 	}
 
@@ -6399,10 +6398,16 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 			errorFilesList.append(impZFOInfo);
 			break;
 		case TaskImportZfo::ZT_MESSAGE:
-			messageZFOList.append(file);
+			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
+			    (ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType)) {
+				messageZFOList.append(file);
+			}
 			break;
 		case TaskImportZfo::ZT_DELIVERY_INFO:
-			deliveryZFOList.append(file);
+			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
+			    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType)) {
+				deliveryZFOList.append(file);
+			}
 			break;
 		default:
 			break;
@@ -6411,54 +6416,19 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 
 	updateProgressBar(progressBarTitle, 10);
 
-	switch (zfoType) {
-	case ImportZFODialog::IMPORT_ALL_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_ALL_ZFO";
-		if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain "
-			        "any valid ZFO files."),
-			    QMessageBox::Ok);
-			return;
-		}
-		/* First, import messages. */
-		importMessageZFO(accountList, messageZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		/* Second, import delivery information. */
-		importDeliveryInfoZFO(accountList, deliveryZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	case ImportZFODialog::IMPORT_MESSAGE_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_MESSAGE_ZFO";
-		if (messageZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain "
-			         "any valid ZFO messages."),
-			    QMessageBox::Ok);
-			return;
-		}
-		importMessageZFO(accountList, messageZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	case ImportZFODialog::IMPORT_DELIVERY_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_DELIVERY_ZFO";
-		if (deliveryZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain any valid "
-			        "ZFO delivery infos."),
-			    QMessageBox::Ok);
-			return;
-		}
-		importDeliveryInfoZFO(accountList, deliveryZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	default:
+	if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
+		QMessageBox::warning(this, tr("No ZFO file(s)"),
+		    tr("The selection does not contain any valid ZFO files."),
+		    QMessageBox::Ok);
 		return;
-		break;
 	}
+
+	/* First, import messages. */
+	importMessageZFO(accountList, messageZFOList,
+	    successFilesList, existFilesList, errorFilesList);
+	/* Second, import delivery information. */
+	importDeliveryInfoZFO(accountList, deliveryZFOList,
+	    successFilesList, existFilesList, errorFilesList);
 
 	updateProgressBar(progressBarTitle, 100);
 
