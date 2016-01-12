@@ -6367,7 +6367,8 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 /*
  * Func: Create account info for ZFO file(s) import into database.
  */
-QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(void)
+QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
+    bool activeOnly)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -6381,11 +6382,17 @@ QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(void
 
 		QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *messageDbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != messageDbSet);
 
-		accountList.append(
-		    TaskImportZfo::AccountData(userName, messageDbSet));
+		if ((!activeOnly) ||
+		    isdsSessions.isConnectedToIsds(userName) ||
+		    connectToIsds(userName, this)) {
+			MessageDbSet *messageDbSet = accountDbSet(userName,
+			    this);
+			Q_ASSERT(0 != messageDbSet);
+
+			accountList.append(
+			    TaskImportZfo::AccountData(userName, messageDbSet));
+		}
 	}
 
 	return accountList;
@@ -6426,20 +6433,8 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	QList<TaskImportZfo::AccountData> accountList;
-
-	if (authenticate) {
-		/* Only active sessions when authentication needed. */
-		foreach (const TaskImportZfo::AccountData acnt,
-		         createAccountInfoForZFOImport()) {
-			if (isdsSessions.isConnectedToIsds(acnt.userName) ||
-			    connectToIsds(acnt.userName, this)) {
-				accountList.append(acnt);
-			}
-		}
-	} else {
-		accountList = createAccountInfoForZFOImport();
-	}
+	const QList<TaskImportZfo::AccountData> accountList(
+	    createAccountInfoForZFOImport(authenticate));
 
 	if (accountList.isEmpty()) {
 		logInfo("%s\n", "No accounts to import into.");

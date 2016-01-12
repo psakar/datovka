@@ -541,9 +541,15 @@ private slots:
 	    const QString &resultDesc);
 
 	/*!
-	 * @brief Create account info for ZFO file(s) import into database.
+	 * @brief Create account info list for ZFO files import into database.
+	 *
+	 * @note The user if going to be prompted about missing password.
+	 *
+	 * @param[in] activeOnly Whether to list only active accounts.
+	 * @return List of accounts.
 	 */
-	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(void);
+	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(
+	    bool activeOnly);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
