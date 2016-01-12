@@ -35,7 +35,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
-#include <QSet>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
@@ -204,6 +203,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadListSummary(bool, int, int, int, int)), this,
 	    SLOT(dataFromWorkerToStatusBarInfo(bool, int, int, int, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(importZfoFinished(QString, int, QString)), this,
+	    SLOT(collectImportZfoStatus(QString, int, QString)));
 	connect(&globWorkPool, SIGNAL(finished()),
 	    this, SLOT(workersFinished()));
 
@@ -6319,6 +6321,47 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	clearProgressBar();
 }
 
+/* ========================================================================= */
+void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
+    const QString &resultDesc)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	logDebugLv0NL("Received import ZFO finished for file '%s' %d: '%s'",
+	    fileName.toUtf8().constData(), result,
+	    resultDesc.toUtf8().constData());
+
+	switch (result) {
+	case TaskImportZfo::IMP_SUCCESS:
+		m_importSucceeded.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	case TaskImportZfo::IMP_DB_EXISTS:
+		m_importExisted.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	default:
+		m_importFailed.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	}
+
+	if (!m_zfoFilesToImport.remove(fileName)) {
+		logErrorNL("Processed ZFO file that '%s' the application "
+		    "has not been aware of.", fileName.toUtf8().constData());
+	}
+
+	if (m_zfoFilesToImport.isEmpty()) {
+		showNotificationDialogWithResult(m_numFilesToImport,
+		    m_importSucceeded, m_importExisted, m_importFailed);
+
+		m_numFilesToImport = 0;
+		m_importSucceeded.clear();
+		m_importExisted.clear();
+		m_importFailed.clear();
+	}
+}
 
 /* ========================================================================= */
 /*
@@ -6359,15 +6402,21 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 {
 	debugFuncCall();
 
+	bool authenticate = true;
+
 	const QString progressBarTitle = "ZFOImport";
 	QPair<QString,QString> impZFOInfo;
 	QList<QPair<QString,QString>> errorFilesList; // red
 	QList<QPair<QString,QString>> existFilesList; // black
 	QList<QPair<QString,QString>> successFilesList; // green
-	QStringList messageZFOList;
-	QStringList deliveryZFOList;
+	QSet<QString> messageZfoFiles;
+	QSet<QString> deliveryZfoFiles;
 	int zfoCnt = files.size();
 
+	m_zfoFilesToImport.clear();
+	m_importSucceeded.clear();
+	m_importExisted.clear();
+	m_importFailed.clear();
 	logInfo("Trying to import %d ZFO files.\n", zfoCnt);
 
 	if (zfoCnt == 0) {
@@ -6376,8 +6425,20 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	QList<TaskImportZfo::AccountData> const accountList =
-	    createAccountInfoForZFOImport();
+	QList<TaskImportZfo::AccountData> accountList;
+
+	if (authenticate) {
+		/* Only active sessions when authentication needed. */
+		foreach (const TaskImportZfo::AccountData acnt,
+		         createAccountInfoForZFOImport()) {
+			if (isdsSessions.isConnectedToIsds(acnt.userName) ||
+			    connectToIsds(acnt.userName, this)) {
+				accountList.append(acnt);
+			}
+		}
+	} else {
+		accountList = createAccountInfoForZFOImport();
+	}
 
 	if (accountList.isEmpty()) {
 		logInfo("%s\n", "No accounts to import into.");
@@ -6400,13 +6461,15 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		case TaskImportZfo::ZT_MESSAGE:
 			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
 			    (ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType)) {
-				messageZFOList.append(file);
+				messageZfoFiles.insert(file);
+				m_zfoFilesToImport.insert(file);
 			}
 			break;
 		case TaskImportZfo::ZT_DELIVERY_INFO:
 			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
 			    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType)) {
-				deliveryZFOList.append(file);
+				deliveryZfoFiles.insert(file);
+				m_zfoFilesToImport.insert(file);
 			}
 			break;
 		default:
@@ -6414,28 +6477,59 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		}
 	}
 
+	m_numFilesToImport = m_zfoFilesToImport.size();
+
 	updateProgressBar(progressBarTitle, 10);
 
-	if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
+	if (messageZfoFiles.isEmpty() && deliveryZfoFiles.isEmpty()) {
 		QMessageBox::warning(this, tr("No ZFO file(s)"),
 		    tr("The selection does not contain any valid ZFO files."),
 		    QMessageBox::Ok);
 		return;
 	}
 
-	/* First, import messages. */
-	importMessageZFO(accountList, messageZFOList,
-	    successFilesList, existFilesList, errorFilesList);
-	/* Second, import delivery information. */
-	importDeliveryInfoZFO(accountList, deliveryZFOList,
-	    successFilesList, existFilesList, errorFilesList);
-
 	updateProgressBar(progressBarTitle, 100);
 
-	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Completed"));
+	showStatusTextWithTimeout(tr("Import of ZFO files ... Planned"));
 
+#define OLDSTYLE 0
+
+	/* First, import messages. */
+#if OLDSTYLE
+#warning "Old style"
+	importMessageZFO(accountList, messageZfoFiles.toList(),
+	    successFilesList, existFilesList, errorFilesList);
+#else
+	foreach (const QString &fileName, messageZfoFiles) {
+		TaskImportZfo *task;
+
+		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
+		    TaskImportZfo::ZT_MESSAGE, authenticate);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task);
+	}
+#endif
+	/* Second, import delivery information. */
+#if OLDSTYLE
+#warning "Old style"
+	importDeliveryInfoZFO(accountList, deliveryZfoFiles.toList(),
+	    successFilesList, existFilesList, errorFilesList);
+#else
+	foreach (const QString &fileName, deliveryZfoFiles) {
+		TaskImportZfo *task;
+
+		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
+		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task);
+	}
+#endif
+
+#if OLDSTYLE
+#warning "Old style"
 	showNotificationDialogWithResult(zfoCnt, successFilesList,
 	    existFilesList, errorFilesList);
+#endif
 }
 
 

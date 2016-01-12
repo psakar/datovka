@@ -29,6 +29,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QSet>
 #include <QStandardItemModel>
 #include <QProgressBar>
 #include <QTimer>
@@ -532,6 +533,12 @@ private slots:
 	 */
 	void createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	    enum ImportZFODialog::ZFOaction importType);
+
+	/*!
+	 * @brief Collects information about import status.
+	 */
+	void collectImportZfoStatus(const QString &fileName, int result,
+	    const QString &resultDesc);
 
 	/*!
 	 * @brief Create account info for ZFO file(s) import into database.
@@ -1157,6 +1164,12 @@ private:
 	    m_lastStoredAccountNodeType; /*!< Last stored account position. */
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
+
+	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
+	int m_numFilesToImport;
+	QList< QPair<QString, QString> > m_importSucceeded,
+	                                 m_importExisted,
+	                                 m_importFailed;
 
 	int m_received_1;
 	int m_received_2;

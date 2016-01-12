@@ -70,6 +70,16 @@ signals:
 	void downloadSuccess(const QString &usrName, qint64 msgId);
 
 	/*!
+	 * @brief Emitted when ZFO import finishes.
+	 *
+	 * @param[in] fileName   ZFO file name.
+	 * @param[in] result     Import outcome (enum TaskImportZfo::Result).
+	 * @param[in] resultDesc Result description string.
+	 */
+	void importZfoFinished(const QString &fileName, int result,
+	    const QString &resultDesc);
+
+	/*!
 	 * @brief This signal is emitted when counted value is changed
 	 *
 	 * @param[in] label Progress bar label.

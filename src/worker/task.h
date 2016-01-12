@@ -43,7 +43,9 @@
 #define PL_DOWNLOAD_MESSAGE "DownloadMessage"
 #define PL_DOWNLOAD_RECEIVED_LIST "DownloadReceivedMessageList"
 #define PL_DOWNLOAD_SENT_LIST "DownloadSentMessageList"
-#define PL_SEND_MESSAGE "SendingMessage"
+#define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
+#define PL_IMPORT_ZFO_MSG "ImportZfoMessage"
+#define PL_SEND_MESSAGE "SendMessage"
 
 /*!
  * @brief This class contains generic functions that can be used in derived
