@@ -2307,7 +2307,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
-			    "occured."));
+			    "occurred."));
 		}
 	} else if (msgId == -2) {
 		showStatusTextWithTimeout(tr("It was not possible download "
@@ -2320,7 +2320,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
-			    "occured."));
+			    "occurred."));
 		}
 	} else {
 		showStatusTextWithTimeout(tr("It was not possible download "
@@ -2333,7 +2333,7 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
 			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
-			    "occured or the message has already been deleted "
+			    "occurred or the message has already been deleted "
 			    "from the server."));
 		}
 	}
