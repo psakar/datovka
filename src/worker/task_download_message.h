@@ -34,6 +34,16 @@
 class TaskDownloadMessage : public Task {
 public:
 	/*!
+	 * @brief Return state describing what happened.
+	 */
+	enum Result {
+		DM_SUCCESS, /*!< Operation was successful. */
+		DM_ISDS_ERROR, /*!< Error communicating with ISDS. */
+		DM_DB_INS_ERR, /*!< Error inserting into database. */
+		DM_ERR /*!< Other error. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in]     userName  Account identifier (user login name).
@@ -52,7 +62,50 @@ public:
 	virtual
 	void run(void);
 
-	bool m_donloadSucceeded; /*!< True if download succeeds. */
+	/*!
+	 * @brief Download delivery info for message.
+	 *
+	 * TODO -- This method must be private.
+	 *
+	 * @param[in]     userName  Account identifier (user login name).
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in]     signedMsg Whether to download signed data;
+	 *                          must be true.
+	 * @param[in,out] dbSet     Database container.
+	 * @param[out]    error     Error description.
+	 * @param[out]    longError Long error description.
+	 * @return Error State.
+	 */
+	static
+	enum Result downloadDeliveryInfo(const QString &userName,
+	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet, QString &error,
+	    QString &longError);
+
+	/*!
+	 * @brief Download whole message (envelope, attachments, raw).
+	 *
+	 * TODO -- This method ought to be protected.
+	 *
+	 * @param[in]     userName      Account identifier (user login name).
+	 * @param[in]     mId           Message identifier.
+	 * @param[in]     signedMsg     Whether to download signed message;
+	 *                              must be true.
+	 * @param[in]     msgDirect     Received or sent message.
+	 * @param[in,out] dbSet         Database container.
+	 * @param[out]    error         Error description.
+	 * @param[out]    longError     Long error description.
+	 * @param[in]     progressLabel Progress-bar label.
+	 * @return Error state.
+	 */
+	static
+	enum Result downloadMessage(const QString &userName,
+	    MessageDb::MsgId mId, bool signedMsg,
+	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+	    QString &error, QString &longError, const QString &progressLabel);
+
+	enum Result m_result; /*!< Return state. */
+	QString m_isdsError; /*!< Error description. */
+	QString m_isdsLongError; /*!< Long error description. */
 
 private:
 	/*!
@@ -60,6 +113,36 @@ private:
 	 */
 	TaskDownloadMessage(const TaskDownloadMessage &);
 	TaskDownloadMessage &operator=(const TaskDownloadMessage &);
+
+	/*!
+	 * @brief Download additional info about author (sender).
+	 *
+	 * @param[in]     userName  Account identifier (user login name).
+	 * @param[in]     dmId      Message identifier.
+	 * @param[in,out] messageDb Database.
+	 * @param[out]    error     Error description.
+	 * @param[out]    longError Long error description.
+	 * @return Error state.
+	 */
+	static
+	enum Result downloadMessageAuthor(const QString &userName, qint64 dmId,
+	    MessageDb &messageDb, QString &error, QString &longError);
+
+	/*!
+	 * @brief Set message as downloaded from ISDS.
+	 *
+	 * TODO -- Is there a way how to download the information about read
+	 *     messages and apply it on the database?
+	 *
+	 * @param[in]  userName  Account identifier (user login name).
+	 * @param[in]  dmId      Message identifier.
+	 * @param[out] error     Error description.
+	 * @param[out] longError Long error description.
+	 * @return Error state.
+	 */
+	static
+	enum Result markMessageAsDownloaded(const QString &userName,
+	    qint64 dmId, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */

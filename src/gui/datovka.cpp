@@ -6754,7 +6754,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	    userName, dbSet, msgDirect, dmId, deliveryTime);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
-	ret = task->m_donloadSucceeded;
+	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
 	delete task;
 
 	return ret;

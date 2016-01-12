@@ -60,43 +60,6 @@ public:
 	void run(void) = 0;
 
 	/*!
-	 * @brief Download delivery info for message.
-	 *
-	 * TODO -- This method must be private.
-	 *
-	 * @param[in]     userName  Account identifier (user login name).
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in]     signedMsg Whether to download signed data;
-	 *                          must be true.
-	 * @param[in,out] dbSet     Database container.
-	 * @return Error State.
-	 */
-	static
-	qdatovka_error downloadDeliveryInfo(const QString &userName,
-	    qint64 dmId, bool signedMsg, MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Download whole message (envelope, attachments, raw).
-	 *
-	 * TODO -- This method ought to be protected.
-	 *
-	 * @param[in]     userName      Account identifier (user login name).
-	 * @param[in]     mId           Message identifier.
-	 * @param[in]     signedMsg     Whether to download signed message;
-	 *                              must be true.
-	 * @param[in]     msgDirect     Received or sent message.
-	 * @param[in,out] dbSet         Database container.
-	 * @param[out]    errMsg        Error message.
-	 * @param[in]     progressLabel Progress-bar label.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error downloadMessage(const QString &userName,
-	    MessageDb::MsgId mId, bool signedMsg,
-	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
-	    QString &errMsg, const QString &progressLabel);
-
-	/*!
 	 * @brief Download message list from ISDS for given account.
 	 *
 	 * TODO -- This method ought to be protected.
@@ -190,18 +153,6 @@ private:
 //	Task &operator=(const Task &);
 
 	/*!
-	 * @brief Download additional info about author (sender).
-	 *
-	 * @param[in]     userName  Account identifier (user login name).
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in,out] messageDb Database.
-	 * @return True on success.
-	 */
-	static
-	bool downloadMessageAuthor(const QString &userName, qint64 dmId,
-	    MessageDb &messageDb);
-
-	/*!
 	 * @brief Download sent message delivery info and get list of events.
 	 *
 	 * @param[in]     msgDirect Received or sent message.
@@ -216,19 +167,6 @@ private:
 	bool downloadMessageState(enum MessageDirection msgDirect,
 	    const QString &userName, qint64 dmId, bool signedMsg,
 	    MessageDbSet &dbSet);
-
-	/*!
-	 * @brief Set message as downloaded from ISDS.
-	 *
-	 * TODO -- Is there a way how to download the information about read
-	 *     messages and apply it on the database?
-	 *
-	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] dmId     Message identifier.
-	 * @return True on success.
-	 */
-	static
-	bool markMessageAsDownloaded(const QString &userName, qint64 dmId);
 
 	/*!
 	 * @brief Update message envelope.
