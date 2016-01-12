@@ -890,9 +890,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	QModelIndex acntIdx = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
 	QMenu *submenu = 0;
-#ifdef PORTABLE_APPLICATION
 	QAction *action;
-#endif /* PORTABLE_APPLICATION */
 
 	if (acntIdx.isValid()) {
 		bool received = AccountModel::nodeTypeIsReceived(acntIdx);
@@ -987,12 +985,18 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 #endif /* PORTABLE_APPLICATION */
 
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		action = menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from database"),
 		    this, SLOT(prepareMsgsImportFromDatabase()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		action->setEnabled(
+		    ui->actionImport_messages_from_database->isEnabled());
+		action = menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from ZFO files"),
 		    this, SLOT(showImportZFOActionDialog()));
+		action->setEnabled(
+		    ui->actionImport_ZFO_file_into_database->isEnabled());
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
@@ -2260,8 +2264,15 @@ void MainWindow::workersFinished(void)
 		ui->actionReceived_all->setEnabled(true);
 		ui->actionDownload_messages->setEnabled(true);
 		ui->actionGet_messages->setEnabled(true);
+
+		/* Activate import buttons. */
+		ui->actionImport_messages_from_database->setEnabled(true);
+		ui->actionImport_ZFO_file_into_database->setEnabled(true);
 	}
-	/* Prepare counters for next action. */
+	/*
+	 * Prepare counters for next action.
+	 * TODO -- This must be moved to separate slot that waits for downloads.
+	 */
 	dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
 
 	if (globPref.download_on_background) {
@@ -6360,6 +6371,10 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 		m_importSucceeded.clear();
 		m_importExisted.clear();
 		m_importFailed.clear();
+
+		/* Activate import buttons. */
+		ui->actionImport_messages_from_database->setEnabled(true);
+		ui->actionImport_ZFO_file_into_database->setEnabled(true);
 	}
 }
 
@@ -6483,6 +6498,10 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		    QMessageBox::Ok);
 		return;
 	}
+
+	/* Block import buttons. */
+	ui->actionImport_messages_from_database->setEnabled(false);
+	ui->actionImport_ZFO_file_into_database->setEnabled(false);
 
 	updateProgressBar(progressBarTitle, 100);
 
