@@ -628,7 +628,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
-	if (updateEnvelope(msgDirect, *messageDb, envel)) {
+	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel)) {
 		logDebugLv0NL("Envelope of message '%d' updated.", dmID);
 	} else {
 		logErrorNL("Updating envelope of message '%d' failed.", dmID);
