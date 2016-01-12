@@ -552,37 +552,12 @@ private slots:
 	    enum ImportZFODialog::ZFOtype zfoType);
 
 	/*!
-	 * @brief Import only delivery info ZFO file(s) into database.
-	 */
-	void importDeliveryInfoZFO(
-	    const QList<TaskImportZfo::AccountData> &accounts,
-	    const QStringList &fileNames,
-	    QList<QPair<QString,QString>> &successFilesList,
-	    QList<QPair<QString,QString>> &existFilesList,
-	    QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
-	 * @brief Import only message ZFO file(s) into database.
-	 */
-	void importMessageZFO(
-	    const QList<TaskImportZfo::AccountData> &accounts,
-	    const QStringList &fileNames,
-	    QList<QPair<QString,QString>> &successFilesList,
-	    QList<QPair<QString,QString>> &existFilesList,
-	    QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
-	void showNotificationDialogWithResult(int filesCnt,
+	void showImportZfoResultDialogue(int filesCnt,
 	    const QList<QPair<QString,QString>> &successFilesList,
 	    const QList<QPair<QString,QString>> &existFilesList,
 	    const QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
-	 * @brief Check if import ZFO file is/was in ISDS.
-	 */
-	int isImportMsgInISDS(const QString &zfoFile, const QString &userName);
 
 	/*!
 	 * @brief About application dialog.
