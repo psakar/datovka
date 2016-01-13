@@ -203,6 +203,10 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(downloadListSummary(bool, int, int, int, int)), this,
 	    SLOT(dataFromWorkerToStatusBarInfo(bool, int, int, int, int)));
 	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
+	    this,
+	    SLOT(collectDownloadMessageStatus(QString, qint64, int, QString)));
+	connect(&globMsgProcEmitter,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
 	connect(&globWorkPool, SIGNAL(finished()),
@@ -2321,24 +2325,46 @@ void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
 			msgBox.setInformativeText(tr("A connection error "
 			    "occurred."));
 		}
+	}
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.setDefaultButton(QMessageBox::Ok);
+	msgBox.exec();
+}
+
+void MainWindow::collectDownloadMessageStatus(const QString &usrName,
+    qint64 msgId, int result, const QString &errDesc)
+{
+	debugSlotCall();
+
+	if (TaskDownloadMessage::DM_SUCCESS == result) {
+		/* Refresh account and attachment list. */
+		refreshAccountList(usrName);
+
+		if (0 <= msgId) {
+			postDownloadSelectedMessageAttachments(usrName, msgId);
+		}
 	} else {
+		/* Notify the user. */
+		QMessageBox msgBox(this);
+
 		showStatusTextWithTimeout(tr("It was not possible download "
 		    "complete message \"%1\" from ISDS server.").arg(msgId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(tr("Download message error"));
 		msgBox.setText(tr("It was not possible to download a complete "
 		    "message \"%1\" from server Datové schránky.").arg(msgId));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		if (!errDesc.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
 			    "occurred or the message has already been deleted "
 			    "from the server."));
 		}
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
 	}
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.exec();
 }
 
 

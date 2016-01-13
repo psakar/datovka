@@ -85,17 +85,16 @@ void TaskDownloadMessage::run(void)
 		logDebugLv1NL("Done downloading message '%d' for account '%s'.",
 		    m_mId.dmId,
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
-
-		/* Only on successful download. */
-		emit globMsgProcEmitter.downloadSuccess(m_userName, m_mId.dmId);
 	} else {
 		logErrorNL("Downloading message '%d' for account '%s' failed.",
 		    m_mId.dmId,
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
-
-		emit globMsgProcEmitter.downloadFail(m_userName, m_mId.dmId,
-		    m_isdsError + " " + m_isdsLongError);
 	}
+
+	emit globMsgProcEmitter.downloadMessageFinished(m_userName, m_mId.dmId,
+	    m_result,
+	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
+	        m_isdsError + " " + m_isdsLongError : "");
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 

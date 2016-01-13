@@ -70,10 +70,23 @@ signals:
 	void downloadSuccess(const QString &usrName, qint64 msgId);
 
 	/*!
+	 * @brief Emitted when download message finishes.
+	 *
+	 * @param[in] usrName Account identifier (user login name).
+	 * @param[in] msgId   Message identifier.
+	 * @param[in] result  Operation outcome
+	 *                    (enum TaskDownloadMessage::Result).
+	 * @param[in] errDesc Error description string.
+	 */
+	void downloadMessageFinished(const QString &usrName, qint64 msgId,
+	    int result, const QString &errDesc);
+
+	/*!
 	 * @brief Emitted when ZFO import finishes.
 	 *
 	 * @param[in] fileName   ZFO file name.
-	 * @param[in] result     Import outcome (enum TaskImportZfo::Result).
+	 * @param[in] result     Operation outcome
+	 *                       (enum TaskImportZfo::Result).
 	 * @param[in] resultDesc Result description string.
 	 */
 	void importZfoFinished(const QString &fileName, int result,

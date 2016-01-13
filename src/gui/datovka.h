@@ -146,6 +146,12 @@ private slots:
 	    qint64 msgId, const QString &errMsg);
 
 	/*!
+	 * @brief Performs action depending on message download outcome.
+	 */
+	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
+	    int result, const QString &errDesc);
+
+	/*!
 	 * @brief Version response slot.
 	 */
 	void datovkaVersionResponce(QNetworkReply* reply);

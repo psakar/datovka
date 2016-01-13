@@ -31,6 +31,9 @@
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
+/*!
+ * @brief Task describing download message.
+ */
 class TaskDownloadMessage : public Task {
 public:
 	/*!
