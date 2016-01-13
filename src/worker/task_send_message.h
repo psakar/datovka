@@ -216,18 +216,6 @@ private:
 	    const QString &recipientName, const QString &recipientAddress,
 	    bool isPDZ, const QString &progressLabel, Result *result);
 
-	/*!
-	 * @brief Store attachments into database.
-	 *
-	 * @param[in,out] messageDb Database.
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in]     documents Attachments.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
-	    const struct isds_list *documents);
-
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const IsdsMessage m_message; /*!< Message to be sent. */
