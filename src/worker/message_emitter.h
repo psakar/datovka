@@ -34,42 +34,6 @@ class MessageProcessingEmitter : public QObject {
 
 signals:
 	/*!
-	 * @brief Emitted when message download failed.
-	 *
-	 * @note Message identifier -1 means list of received messages,
-	 *     -2 means list of sent messages.
-	 *
-	 * @param[in] usrName Account identifier (user login name).
-	 * @param[in] msgId Message identifier.
-	 * @param[in] err   Error description.
-	 */
-	void downloadFail(const QString &usrName, qint64 msgId,
-	    const QString &err);
-
-	/*!
-	 * @brief This signal is emitted when account is processed.
-	 *     It sends the number of processed messages.
-	 *
-	 * @param[in] add Whether to add the obtained value.
-	 * @param[in] rt Number of received messages on server.
-	 * @param[in] rn Number of new received messages (locally unknown).
-	 * @param[in] st Number of sent messages on server.
-	 * @param[in] sn Number of new sent messages (locally unknown).
-	 */
-	void downloadListSummary(bool add, int rt, int rn, int st, int sn);
-
-	/*!
-	 * @brief Emitted when download process succeeds.
-	 *
-	 * @note Message identifier -1 means list of received messages,
-	 *     -2 means list of sent messages.
-	 *
-	 * @param[in] usrName Account identifier (user login name).
-	 * @param[in] msgId Message identifier.
-	 */
-	void downloadSuccess(const QString &usrName, qint64 msgId);
-
-	/*!
 	 * @brief Emitted when download message finishes.
 	 *
 	 * @param[in] usrName Account identifier (user login name).
@@ -80,6 +44,25 @@ signals:
 	 */
 	void downloadMessageFinished(const QString &usrName, qint64 msgId,
 	    int result, const QString &errDesc);
+
+	/*!
+	 * @brief Emitted when download message finishes.
+	 *
+	 * @param[in] usrName   Account identifier (user login name).
+	 * @param[in] direction Sent or received messages
+	 *                      (enum MessageDirection).
+	 * @param[in] result    Operation outcome
+	 *                      (enum TaskDownloadMessageList::Result).
+	 * @param[in] errDesc   Error description string.
+	 * @param[in] add       Whether to add the obtained value.
+	 * @param[in] rt        Number of received messages on server.
+	 * @param[in] rn        Number of new received messages (locally unknown).
+	 * @param[in] st        Number of sent messages on server.
+	 * @param[in] sn        Number of new sent messages (locally unknown).
+	 */
+	void downloadMessageListFinished(const QString &usrName,
+	    int direction, int result, const QString &errDesc,
+	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
 	 * @brief Emitted when ZFO import finishes.

@@ -191,21 +191,18 @@ MainWindow::MainWindow(QWidget *parent)
 	clearProgressBar();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
-	/* Message processing signals. */
+	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
-	connect(&globMsgProcEmitter, SIGNAL(downloadSuccess(QString, qint64)),
-	    this, SLOT(refreshAccountAndAttachmentList(QString, qint64)));
-	connect(&globMsgProcEmitter,
-	    SIGNAL(downloadFail(QString, qint64, QString)), this,
-	    SLOT(clearInfoInStatusBarAndShowDialog(QString, qint64, QString)));
-	connect(&globMsgProcEmitter,
-	    SIGNAL(downloadListSummary(bool, int, int, int, int)), this,
-	    SLOT(dataFromWorkerToStatusBarInfo(bool, int, int, int, int)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
 	    this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, int, QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
+	        bool, int, int, int, int)), this,
+	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
+	        bool, int, int, int, int)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
@@ -2283,54 +2280,6 @@ void MainWindow::workersFinished(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Clear status bar if download of complete message fails.
- */
-void MainWindow::clearInfoInStatusBarAndShowDialog(const QString &usrName,
-    qint64 msgId, const QString &errMsg)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	/* Unused. */
-	(void) usrName;
-
-	QMessageBox msgBox(this);
-
-	if (msgId == -1) {
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "received message list from ISDS server."));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message list error"));
-		msgBox.setText(tr("It was not possible download "
-		    "received message list from ISDS server."));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
-		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occurred."));
-		}
-	} else if (msgId == -2) {
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "sent message list from ISDS server."));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message list error"));
-		msgBox.setText(tr("It was not possible download "
-		    "sent message list from ISDS server."));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
-		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occurred."));
-		}
-	}
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.exec();
-}
-
 void MainWindow::collectDownloadMessageStatus(const QString &usrName,
     qint64 msgId, int result, const QString &errDesc)
 {
@@ -2367,6 +2316,43 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 	}
 }
 
+void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
+    int direction, int result, const QString &errDesc,
+    bool add, int rt, int rn, int st, int sn)
+{
+	debugSlotCall();
+
+	/* Refresh account list. */
+	refreshAccountList(usrName);
+
+	dataFromWorkerToStatusBarInfo(add, rt, rn, st, sn);
+
+	if (TaskDownloadMessageList::DL_SUCCESS != result) {
+		/* Notify the user. */
+		QMessageBox msgBox(this);
+
+		QString errorMessage = (MSG_RECEIVED == direction) ?
+		    tr("It was not possible download received message list from"
+		        " ISDS server.") :
+		    tr("It was not possible download sent message list from"
+		        " ISDS server.");
+
+		showStatusTextWithTimeout(errorMessage);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(errorMessage);
+		if (!errDesc.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+		} else {
+			msgBox.setInformativeText(
+			    tr("A connection error occurred."));
+		}
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+	}
+}
 
 /* ========================================================================= */
 /*
@@ -3164,7 +3150,7 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool add,
     int rt, int rn, int st, int sn)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	static int s_rt = 0, s_rn = 0, s_st = 0, s_sn = 0;
 
@@ -5615,24 +5601,6 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 	settings.setValue("on_import_database_dir_activate",
 	    m_on_import_database_dir_activate);
 	settings.endGroup();
-}
-
-
-/* ========================================================================= */
-/*
- * Update account list and attachment list.
- */
-void MainWindow::refreshAccountAndAttachmentList(const QString &userName,
-    qint64 dmId)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	refreshAccountList(userName);
-
-	if (0 <= dmId) {
-		postDownloadSelectedMessageAttachments(userName, dmId);
-	}
 }
 
 

@@ -140,16 +140,17 @@ private slots:
 	void workersFinished(void);
 
 	/*!
-	 * @brief Clear info status bar if download of complete message fails.
-	 */
-	void clearInfoInStatusBarAndShowDialog(const QString &usrName,
-	    qint64 msgId, const QString &errMsg);
-
-	/*!
 	 * @brief Performs action depending on message download outcome.
 	 */
 	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
 	    int result, const QString &errDesc);
+
+	/*!
+	 * @brief Performs action depending on message list download outcome.
+	 */
+	void collectDownloadMessageListStatus(const QString &usrName,
+	    int direction, int result, const QString &errDesc,
+	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
 	 * @brief Version response slot.
@@ -639,18 +640,6 @@ private slots:
 	    QString action);
 
 	/*!
-	 * @brief Update account list and attachment list.
-	 */
-	void refreshAccountAndAttachmentList(const QString &userName,
-	    qint64 dmId);
-
-	/*!
-	 * @brief Set info status bar from worker.
-	 */
-	void dataFromWorkerToStatusBarInfo(bool add,
-	    int rt, int rn, int st, int sn);
-
-	/*!
 	 * @brief set message process state into db
 	 */
 	void msgSetSelectedMessageProcessState(int stateIndex);
@@ -688,6 +677,12 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Set info status bar from worker.
+	 */
+	void dataFromWorkerToStatusBarInfo(bool add,
+	    int rt, int rn, int st, int sn);
 
 	/*!
 	 * @brief Refresh AccountList.

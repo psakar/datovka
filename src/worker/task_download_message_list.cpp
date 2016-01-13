@@ -105,25 +105,19 @@ void TaskDownloadMessageList::run(void)
 		    MESSAGESTATE_ANY);
 	}
 
-	/*
-	 * -1 means list of received messages.
-	 * -2 means list of sent messages.
-	 */
-	emit globMsgProcEmitter.downloadSuccess(m_userName,
-	    (MSG_RECEIVED == m_msgDirect) ? -1 : -2);
-	emit globMsgProcEmitter.downloadListSummary(true, rt, rn , st, sn);
-
 	if (DL_SUCCESS == m_result) {
 		logDebugLv1NL("Done downloading message list for account '%s'.",
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message list for account '%s' failed.",
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
-
-		emit globMsgProcEmitter.downloadFail(m_userName,
-		    (MSG_RECEIVED == m_msgDirect) ? -1 : -2,
-		    m_isdsError + " " + m_isdsLongError);
 	}
+
+	emit globMsgProcEmitter.downloadMessageListFinished(m_userName,
+	    m_msgDirect, m_result,
+	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
+	        m_isdsError + " " + m_isdsLongError : "",
+	    true, rt, rn , st, sn);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
