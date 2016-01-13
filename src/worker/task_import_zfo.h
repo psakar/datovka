@@ -130,6 +130,29 @@ private:
 	TaskImportZfo &operator=(const TaskImportZfo &);
 
 	/*!
+	 * @brief Tries to import a single message ZFO file into a single
+	 *     account.
+	 *
+	 * @param[in]  acnt          Account to try to insert into.
+	 * @param[in]  message       Parsed message.
+	 * @param[in]  dmId          Message identifier.
+	 * @param[in]  deliveryTime  Message delivery time.
+	 * @param[in]  direct        Whether it is sent or received message.
+	 * @param[in]  fileName      If supplied then the file is going to be
+	 *                           authenticated on ISDS server.
+	 * @param[out] isdsError     Error description.
+	 * @param[out] isdsLongError Long error description.
+	 * @param[out] resultDesc    Result description.
+	 * @returns Error identifier.
+	 */
+	static
+	enum Result importMessageZfoSingle(const AccountData &acnt,
+	    const struct isds_message *message, qint64 dmId,
+	    const QDateTime &deliveryTime, enum MessageDirection direct,
+	    const QString &fileName, QString &isdsError, QString &isdsLongError,
+	    QString &resultDesc);
+
+	/*!
 	 * @brief Imports message info database.
 	 *
 	 * @param[in] accounts     List of accounts to try to import data into.
@@ -142,6 +165,27 @@ private:
 	static
 	enum Result importMessageZfo(const QList<AccountData> &accounts,
 	    const QString &fileName, bool authenticate, QString &resultDesc);
+
+	/*!
+	 * @brief Tries to import a single delivery info ZFO file into a single
+	 *     account.
+	 *
+	 * @param[in]  acnt          Account to try to insert into.
+	 * @param[in]  message       Parsed delivery info.
+	 * @param[in]  dmId          Message identifier.
+	 * @param[in]  deliveryTime  Message delivery time.
+	 * @param[in]  fileName      If supplied then the file is going to be
+	 *                           authenticated on ISDS server.
+	 * @param[out] isdsError     Error description.
+	 * @param[out] isdsLongError Long error description.
+	 * @param[out] resultDesc    Result description.
+	 * @returns Error identifier.
+	 */
+	static
+	enum Result importDeliveryZfoSingle(const AccountData &acnt,
+	    const struct isds_message *message, qint64 dmId,
+	    const QDateTime &deliveryTime, const QString &fileName,
+	    QString &isdsError, QString &isdsLongError, QString &resultDesc);
 
 	/*!
 	 * @brief Imports delivery info into databases.

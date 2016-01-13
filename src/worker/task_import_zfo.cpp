@@ -201,23 +201,7 @@ TaskAuthenticateMessage::Result authenticateMessageFile(const QString &userName,
 	    isdsError, isdsLongError);
 }
 
-/*!
- * @brief Tries to import a single message ZFO file into a single account.
- *
- * @param[in]  acnt          Account to try to insert delivery info into.
- * @param[in]  message       Parsed message.
- * @param[in]  dmId          Message identifier.
- * @param[in]  deliveryTime  Message delivery time.
- * @param[in]  direct        Whether it is sent or received message.
- * @param[in]  fileName      If supplied then the file is going to be
- *                           authenticated on ISDS server.
- * @param[out] isdsError     Error description.
- * @param[out] isdsLongError Long error description.
- * @param[out] resultDesc    Result description.
- * @returns Error identifier.
- */
-static
-enum TaskImportZfo::Result importMessageZfoSingle(
+enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
     const TaskImportZfo::AccountData &acnt, const struct isds_message *message,
     qint64 dmId, const QDateTime &deliveryTime, enum MessageDirection direct,
     const QString &fileName, QString &isdsError, QString &isdsLongError,
@@ -374,22 +358,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 	}
 }
 
-/*!
- * @brief Tries to import a single delivery info ZFO file into a single account.
- *
- * @param[in]  acnt          Account to try to insert delivery info into.
- * @param[in]  message       Parsed delivery info.
- * @param[in]  dmId          Message identifier.
- * @param[in]  deliveryTime  Message delivery time.
- * @param[in]  fileName      If supplied then the file is going to be
- *                           authenticated on ISDS server.
- * @param[out] isdsError     Error description.
- * @param[out] isdsLongError Long error description.
- * @param[out] resultDesc    Result description.
- * @returns Error identifier.
- */
-static
-enum TaskImportZfo::Result importDeliveryZfoSingle(
+enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
     const TaskImportZfo::AccountData &acnt, const struct isds_message *message,
     qint64 dmId, const QDateTime &deliveryTime, const QString &fileName,
     QString &isdsError, QString &isdsLongError, QString &resultDesc)

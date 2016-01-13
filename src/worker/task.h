@@ -59,10 +59,9 @@ public:
 	virtual
 	void run(void) = 0;
 
+protected:
 	/*!
 	 * @brief Store message delivery information into database.
-	 *
-	 * TODO -- This method must be private.
 	 *
 	 * @param[in]     signedMsg Whether to store signed message;
 	 *                          must be true.
@@ -77,8 +76,6 @@ public:
 	/*!
 	 * @brief Store envelope into database.
 	 *
-	 * TODO -- This method must be private.
-	 *
 	 * @param[in]     msgDirect Received or sent message.
 	 * @param[in,out] dbSet     Database container.
 	 * @param[in]     envel     Message envelope.
@@ -90,8 +87,6 @@ public:
 
 	/*!
 	 * @brief Store message into database.
-	 *
-	 * TODO -- This method must be private.
 	 *
 	 * @param[in]     signedMsg     Whether to store signed message;
 	 *                              must be true.
@@ -107,7 +102,6 @@ public:
 	    MessageDbSet &dbSet, const struct isds_message *msg,
 	    const QString &progressLabel);
 
-protected:
 	/*!
 	 * @brief Store attachments into database.
 	 *

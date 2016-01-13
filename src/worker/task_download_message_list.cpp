@@ -264,7 +264,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
-			storeEnvelope(msgDirect, dbSet, item->envelope);
+			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
 
 			if (globPref.auto_download_whole_messages) {
 				QString errMsg;
