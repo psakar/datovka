@@ -71,7 +71,6 @@
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task.h"
 #include "src/worker/task_authenticate_message.h"
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"

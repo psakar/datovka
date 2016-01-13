@@ -23,15 +23,22 @@
 
 #include <QThread>
 
+#include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/settings/preferences.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
+#include "src/worker/pool.h" /* List with whole messages. */
+#include "src/worker/task_download_message.h" /* List with whole messages. */
 #include "src/worker/task_download_message_list.h"
 
 TaskDownloadMessageList::TaskDownloadMessageList(const QString &userName,
     MessageDbSet *dbSet, enum MessageDirection msgDirect)
-    : m_userName(userName),
+    : m_result(DL_ERR),
+    m_isdsError(),
+    m_isdsLongError(),
+    m_userName(userName),
     m_dbSet(dbSet),
     m_msgDirect(msgDirect)
 {
@@ -64,9 +71,7 @@ void TaskDownloadMessageList::run(void)
 	int rn = 0; /*!< Received new. */
 	int st = 0; /*!< Sent total. */
 	int sn = 0; /*!< Sent new. */
-        QString errMsg;
 	QStringList newMsgIdList;
-	qdatovka_error res = Q_SUCCESS;
 
 	/* dmStatusFilter
 	 *
@@ -89,13 +94,15 @@ void TaskDownloadMessageList::run(void)
 	unsigned long dmLimit = MESSAGE_LIST_LIMIT;
 
 	if (MSG_RECEIVED == m_msgDirect) {
-		res = Task::downloadMessageList(m_userName, MSG_RECEIVED,
-		    *m_dbSet, errMsg, PL_DOWNLOAD_RECEIVED_LIST,
-		    rt, rn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
+		m_result = downloadMessageList(m_userName, MSG_RECEIVED,
+		    *m_dbSet, m_isdsError, m_isdsLongError,
+		    PL_DOWNLOAD_RECEIVED_LIST, rt, rn, newMsgIdList, &dmLimit,
+		    MESSAGESTATE_ANY);
 	} else {
-		res = Task::downloadMessageList(m_userName, MSG_SENT,
-		    *m_dbSet, errMsg, PL_DOWNLOAD_SENT_LIST,
-		    st, sn, newMsgIdList, &dmLimit, MESSAGESTATE_ANY);
+		m_result = downloadMessageList(m_userName, MSG_SENT,
+		    *m_dbSet, m_isdsError, m_isdsLongError,
+		    PL_DOWNLOAD_SENT_LIST, st, sn, newMsgIdList, &dmLimit,
+		    MESSAGESTATE_ANY);
 	}
 
 	/*
@@ -106,7 +113,7 @@ void TaskDownloadMessageList::run(void)
 	    (MSG_RECEIVED == m_msgDirect) ? -1 : -2);
 	emit globMsgProcEmitter.downloadListSummary(true, rt, rn , st, sn);
 
-	if (Q_SUCCESS == res) {
+	if (DL_SUCCESS == m_result) {
 		logDebugLv1NL("Done downloading message list for account '%s'.",
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	} else {
@@ -114,7 +121,8 @@ void TaskDownloadMessageList::run(void)
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 
 		emit globMsgProcEmitter.downloadFail(m_userName,
-		    (MSG_RECEIVED == m_msgDirect) ? -1 : -2, errMsg);
+		    (MSG_RECEIVED == m_msgDirect) ? -1 : -2,
+		    m_isdsError + " " + m_isdsLongError);
 	}
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
@@ -123,4 +131,359 @@ void TaskDownloadMessageList::run(void)
 
 	logDebugLv0NL("Download message list task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
+}
+
+enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageList(
+    const QString &userName, enum MessageDirection msgDirect,
+    MessageDbSet &dbSet, QString &error, QString &longError,
+    const QString &progressLabel, int &total, int &news,
+    QStringList &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
+{
+	#define USE_TRANSACTIONS 1
+	debugFuncCall();
+
+	int newcnt = 0;
+	int allcnt = 0;
+
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return DL_ERR;
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+
+	isds_error status = IE_ERROR;
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 10);
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return DL_ERR;
+	}
+	struct isds_list *messageList = NULL;
+
+	/* Download sent/received message list from ISDS for current account */
+	if (MSG_SENT == msgDirect) {
+		status = isds_get_list_of_sent_messages(session,
+		    NULL, NULL, NULL,
+		    dmStatusFilter,
+		    0, dmLimit, &messageList);
+	} else if (MSG_RECEIVED == msgDirect) {
+		status = isds_get_list_of_received_messages(session,
+		    NULL, NULL, NULL,
+		    dmStatusFilter,
+		    0, dmLimit, &messageList);
+	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 20);
+
+	if (status != IE_SUCCESS) {
+		error = isds_error(status);
+		longError = isdsLongMessage(session);
+		logErrorNL(
+		    "Downloading message list returned status %d: '%s' '%s'.",
+		    status, error.toUtf8().constData(),
+		    longError.toUtf8().constData());
+		isds_list_free(&messageList);
+		return DL_ISDS_ERROR;
+	}
+
+	const struct isds_list *box;
+	box = messageList;
+	float delta = 0.0;
+	float diff = 0.0;
+
+	while (0 != box) {
+		allcnt++;
+		box = box->next;
+	}
+
+	box = messageList;
+
+	if (allcnt == 0) {
+		emit globMsgProcEmitter.progressChange(progressLabel, 50);
+	} else {
+		delta = 80.0 / allcnt;
+	}
+
+	/* Obtain invalid message database if has a separate file. */
+	MessageDb *invalidDb = NULL;
+	{
+		QString invSecKey(dbSet.secondaryKey(QDateTime()));
+		QString valSecKey(dbSet.secondaryKey(
+		    QDateTime::currentDateTime()));
+		if (invSecKey != valSecKey) {
+			/* Invalid database file may not exist. */
+			invalidDb = dbSet.accessMessageDb(QDateTime(), false);
+		}
+	}
+
+#ifdef USE_TRANSACTIONS
+	QSet<MessageDb *> usedDbs;
+#endif /* USE_TRANSACTIONS */
+	while (0 != box) {
+
+		diff += delta;
+		emit globMsgProcEmitter.progressChange(progressLabel,
+		    (int) (20 + diff));
+
+
+		const isds_message *item = (isds_message *) box->data;
+
+		if (NULL == item->envelope) {
+			/* TODO - free allocated stuff */
+			return DL_ISDS_ERROR;
+		}
+
+		QString dmID = QString(item->envelope->dmID);
+		qint64 dmId = QString(item->envelope->dmID).toLongLong();
+		/*
+		 * Time may be invalid (e.g. messages which failed during
+		 * virus scan).
+		 */
+		QDateTime deliveryTime =
+		    timevalToDateTime(item->envelope->dmDeliveryTime);
+		/* Delivery time may be invalid. */
+		if ((0 != invalidDb) && deliveryTime.isValid()) {
+			/* Try deleting possible invalid entry. */
+			invalidDb->msgsDeleteMessageData(dmId);
+		}
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
+		    true);
+		Q_ASSERT(0 != messageDb);
+
+#ifdef USE_TRANSACTIONS
+		if (!usedDbs.contains(messageDb)) {
+			usedDbs.insert(messageDb);
+			messageDb->beginTransaction();
+		}
+#endif /* USE_TRANSACTIONS */
+
+		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
+
+		/* message is not in db (-1) */
+		if (-1 == dmDbMsgStatus) {
+			storeEnvelope(msgDirect, dbSet, item->envelope);
+
+			if (globPref.auto_download_whole_messages) {
+				QString errMsg;
+
+				TaskDownloadMessage *task;
+
+				task = new (std::nothrow) TaskDownloadMessage(
+				    userName, &dbSet, msgDirect, dmId,
+				    deliveryTime);
+				task->setAutoDelete(true);
+				globWorkPool.assign(task, WorkerPool::PREPEND);
+			}
+			newMsgIdList.append(dmID);
+			newcnt++;
+
+		/* Message is in db (dmDbMsgStatus <> -1). */
+		} else {
+			/* Update envelope if message status has changed. */
+			const int dmNewMsgStatus = convertHexToDecIndex(
+			     *item->envelope->dmMessageStatus);
+
+			if (dmNewMsgStatus != dmDbMsgStatus) {
+				Task::updateEnvelope(msgDirect, *messageDb,
+				    item->envelope);
+			}
+
+			if (MSG_SENT == msgDirect) {
+				/*
+				 * Sent messages content will be downloaded
+				 * only if those message state is 1 or 2.
+				 */
+				if (globPref.auto_download_whole_messages &&
+				    (dmDbMsgStatus <= 2)) {
+					QString errMsg;
+
+					TaskDownloadMessage *task;
+
+					task = new (std::nothrow) TaskDownloadMessage(
+					    userName, &dbSet, msgDirect, dmId,
+					    deliveryTime);
+					task->setAutoDelete(true);
+					globWorkPool.assign(task,
+					    WorkerPool::PREPEND);
+				}
+
+				if (dmDbMsgStatus != dmNewMsgStatus) {
+					downloadMessageState(msgDirect,
+					    userName, dmId, true, dbSet,
+					    error, longError);
+				}
+			}
+
+			/* Message is in db, but the content is missing. */
+			if (globPref.auto_download_whole_messages &&
+			    !messageDb->msgsStoredWhole(dmId)) {
+				QString errMsg;
+
+				TaskDownloadMessage *task;
+
+				task = new (std::nothrow) TaskDownloadMessage(
+				    userName, &dbSet, msgDirect, dmId,
+				    deliveryTime);
+				task->setAutoDelete(true);
+				globWorkPool.assign(task, WorkerPool::PREPEND);
+			}
+		}
+
+		box = box->next;
+
+	}
+#ifdef USE_TRANSACTIONS
+	/* Commit on all opened databases. */
+	foreach (MessageDb *db, usedDbs) {
+		db->commitTransaction();
+	}
+#endif /* USE_TRANSACTIONS */
+
+	isds_list_free(&messageList);
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+
+	if (MSG_RECEIVED == msgDirect) {
+		logDebugLv0NL("#Received total: %d #Received new: %d",
+		    allcnt, newcnt);
+	} else {
+		logDebugLv0NL("#Sent total: %d #Sent new: %d", allcnt, newcnt);
+	}
+
+	total = allcnt;
+	news =  newcnt;
+
+	return DL_SUCCESS;
+#undef USE_TRANSACTIONS
+}
+
+enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageState(
+    enum MessageDirection msgDirect, const QString &userName, qint64 dmId,
+    bool signedMsg, MessageDbSet &dbSet, QString &error, QString &longError)
+{
+	debugFuncCall();
+
+	enum TaskDownloadMessageList::Result res = DL_ERR;
+
+	isds_error status = IE_ERROR;
+
+	struct isds_ctx *session = isdsSessions.session(userName);
+	if (NULL == session) {
+		Q_ASSERT(0);
+		return DL_ERR;
+	}
+	struct isds_message *message = NULL;
+
+	if (signedMsg) {
+		status = isds_get_signed_delivery_info(session,
+		    QString::number(dmId).toUtf8().constData(), &message);
+	} else {
+		Q_ASSERT(0); /* Only signed messages can be downloaded. */
+		res = DL_ERR;
+		goto fail;
+		/*
+		status = isds_get_delivery_info(session,
+		    QString::number(dmId).toUtf8().constData(), &message);
+		*/
+	}
+
+	if (IE_SUCCESS != status) {
+		error = isds_error(status);
+		longError = isdsLongMessage(session);
+		logErrorNL(
+		    "Downloading message state returned status %d: '%s'.",
+		    status, isds_strerror(status));
+		res = DL_ISDS_ERROR;
+		goto fail;
+	}
+
+	Q_ASSERT(NULL != message);
+
+	res = updateMessageState(msgDirect, dbSet, message->envelope);
+	if (DL_SUCCESS != res) {
+		goto fail;
+	}
+
+	isds_message_free(&message);
+
+	return DL_SUCCESS;
+
+fail:
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+
+	return res;
+}
+
+enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState(
+    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+    const struct isds_envelope *envel)
+{
+	if (NULL == envel) {
+		Q_ASSERT(0);
+		return DL_ERR;
+	}
+
+	qint64 dmID = -1;
+	{
+		bool ok = false;
+		dmID = QString(envel->dmID).toLongLong(&ok);
+		if (!ok) {
+			return DL_ERR;
+		}
+	}
+	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	Q_ASSERT(deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	QString dmDeliveryTime;
+	if (NULL != envel->dmDeliveryTime) {
+		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
+	}
+	QString dmAcceptanceTime;
+	if (NULL != envel->dmAcceptanceTime) {
+		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
+	}
+
+	if (1 == messageDb->messageState(dmID)) {
+		/*
+		 * Update message envelope when the previous state
+		 * is 1. This is because the envelope was generated by this
+		 * application when sending a message and we must ensure that
+		 * we get proper data from ISDS rather than storing potentially
+		 * guessed values.
+		 */
+		Task::updateEnvelope(msgDirect, *messageDb, envel);
+	} else if (messageDb->msgsUpdateMessageState(dmID,
+	    dmDeliveryTime, dmAcceptanceTime,
+	    envel->dmMessageStatus ?
+	        convertHexToDecIndex(*envel->dmMessageStatus) : 0)) {
+		/* Updated message envelope delivery info in db. */
+		logDebugLv0NL(
+		    "Delivery information of message '%d' were updated.",
+		    dmID);
+	} else {
+		logErrorNL(
+		    "Updating delivery information of message '%d' failed.",
+		    dmID);
+	}
+
+	const struct isds_list *event;
+	event = envel->events;
+
+	while (0 != event) {
+		isds_event *item = (isds_event *) event->data;
+		messageDb->msgsInsertUpdateMessageEvent(dmID,
+		    timevalToDbFormat(item->time),
+		    convertEventTypeToString(*item->type),
+		    item->description);
+		event = event->next;
+	}
+
+	return DL_SUCCESS;
 }
