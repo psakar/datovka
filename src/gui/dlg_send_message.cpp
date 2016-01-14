@@ -75,7 +75,8 @@ DlgSendMessage::DlgSendMessage(
     m_pdzCredit("0"),
     m_dmType(""),
     m_dmSenderRefNumber(""),
-    m_mv(mv)
+    m_mv(mv),
+    m_isLogged(false)
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -249,6 +250,21 @@ void DlgSendMessage::setAccountInfo(int item)
 			}
 		}
 		m_userName = userName;
+	}
+
+	struct isds_ctx *session = NULL;
+
+	m_isLogged = true;
+
+	if (!isdsSessions.isConnectedToIsds(m_userName)) {
+		if (!m_mv->connectToIsds(m_userName, m_mv)) {
+			m_isLogged = false;
+		}
+	}
+	session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		logErrorNL("%s", "Missing ISDS session.");
+		m_isLogged = false;
 	}
 
 	for (int i = 0; i < m_messageDbSetList.count(); ++i) {
@@ -822,7 +838,11 @@ void DlgSendMessage::checkInputFields(void)
 		}
 	}
 
-	this->sendButton->setEnabled(buttonEnabled);
+	if (m_isLogged) {
+		this->sendButton->setEnabled(buttonEnabled);
+	} else {
+		this->sendButton->setEnabled(false);
+	}
 }
 
 

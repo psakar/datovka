@@ -95,7 +95,7 @@ private:
 	QString m_dmSenderRefNumber;
 	MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
-
+	bool m_isLogged;
 
 	void initNewMessageDialog(void);
 	void calculateAndShowTotalAttachSize(void);
