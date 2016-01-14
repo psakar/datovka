@@ -32,15 +32,18 @@
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
+#include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
-#include "src/thread/worker.h"
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_download_credit_info.h"
+#include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
 
@@ -264,35 +267,20 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 {
 	debugFuncCall();
 
-	QString str("0");
+	TaskDownloadCreditInfo *task;
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		return str;
+	task = new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	long int credit = task->m_heller;
+	delete task;
+
+	if (credit <= 0) {
+		return "0";
 	}
 
-	isds_error status;
-	long int credit;
-	char *email = NULL;
-	struct isds_list *history = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-
-	status = isds_get_commercial_credit(session,
-	    dbId.toStdString().c_str(), NULL, NULL, &credit, &email, &history);
-
-	isds_list_free(&history);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isdsLongMessage(session);
-		return str;
-	}
-
-	if (credit > 0) {
-		str = programLocale.toString((float)credit / 100, 'f', 2);
-	}
-
-	return str;
+	return programLocale.toString((float)credit / 100, 'f', 2);
 }
 
 
@@ -405,7 +393,8 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(envData.dbIDSender);
+		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
+		    envData.dbIDSender);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -516,7 +505,8 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFormIsds(envData.dbIDRecipient);
+		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
+		    envData.dbIDRecipient);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -571,41 +561,6 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		item->setData(Qt::DisplayRole, fileData.dmEncodedContent);
 		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Return state of dbEffectiveOVM for recipient.
- */
-QString DlgSendMessage::getUserInfoFormIsds(QString idDbox)
-/* ========================================================================= */
-{
-	QString str = tr("no");
-	struct isds_DbOwnerInfo *doi = NULL;
-	struct isds_list *box = NULL;
-	isds_DbType dbType = DBTYPE_FO;
-
-	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
-	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
-	    QString(), QString(), 0, false, false);
-	if (NULL == doi) {
-		return str;
-	}
-
-	isdsSearch(&box, m_userName, doi);
-	isds_DbOwnerInfo_free(&doi);
-
-	if (NULL != box) {
-		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
-		    box->data;
-		Q_ASSERT(NULL != item);
-		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
-	}
-
-	isds_list_free(&box);
-
-	return str;
 }
 
 
@@ -907,18 +862,6 @@ void DlgSendMessage::openAttachmentFile(void)
 
 /* ========================================================================= */
 /*
- * Free document list.
- */
-static
-void isds_document_free_void(void **document)
-/* ========================================================================= */
-{
-	isds_document_free((struct isds_document **) document);
-}
-
-
-/* ========================================================================= */
-/*
  * Dialog informs user that message contains one or more PDZs.
  */
 int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
@@ -955,221 +898,75 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 	return msgBox.exec();
 }
 
-
-/* ========================================================================= */
-/*
- * Create message attachments.
- */
-struct isds_list *DlgSendMessage::buildDocuments(void) const
-/* ========================================================================= */
+bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 {
-	struct isds_document *document = NULL; /* Attachment. */
-	struct isds_list *documents = NULL; /* Attachment list (entry). */
-	struct isds_list *last = NULL; /* No need to free it explicitly. */
-
 	/* Load attachments. */
 	for (int i = 0; i < this->attachmentTableWidget->rowCount(); ++i) {
+		IsdsDocument document;
 
-		document = (struct isds_document *)
-		    malloc(sizeof(struct isds_document));
-		if (NULL == document) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-		memset(document, 0, sizeof(struct isds_document));
+		document.isXml = false;
 
-		/* Set document content. */
-		// TODO - document is binary document only -> is_xml = false;
-		document->is_xml = false;
-		document->dmFileDescr = strdup(this->attachmentTableWidget->
-		    item(i, ATW_FILE)->text().toUtf8().constData());
-		if (NULL == document->dmFileDescr) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
+		document.dmFileDescr = this->attachmentTableWidget->
+		    item(i, ATW_FILE)->text();
 
-		if (0 == i) {
-			document->dmFileMetaType = FILEMETATYPE_MAIN;
-		} else {
-			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
-		}
+		/*
+		 * First document must have dmFileMetaType set to
+		 * FILEMETATYPE_MAIN. Remaining documents have
+		 * FILEMETATYPE_ENCLOSURE.
+		 */
 
-		/* Since 2011 Mime Type can be empty and MIME type will
-		 * be filled up on the ISDS server. It allows send files
-		 * with special mime type without recognition by application.
-		*/
-		//document->dmMimeType = strdup(this->attachmentTableWidget->
-		//    item(i, ATW_MIME)->text().toUtf8().constData());
-		document->dmMimeType = strdup("");
-		if (NULL == document->dmMimeType) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
+		/*
+		 * Since 2011 Mime Type can be empty and MIME type will
+		 * be filled up on the ISDS server. It allows sending files
+		 * with special mime types without recognition by application.
+		 */
+		document.dmMimeType = "";
 
-		QByteArray fileData(QByteArray::fromBase64(
+		document.data = QByteArray::fromBase64(
 		    this->attachmentTableWidget->item(i, ATW_DATA)->
-		         data(Qt::DisplayRole).toByteArray()));
-		document->data_length = fileData.size();
-		document->data = malloc(fileData.size());
-		if (NULL == document->data) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-		memcpy(document->data, fileData.data(), document->data_length);
+		         data(Qt::DisplayRole).toByteArray());
 
-		/* Add document on the list of document. */
-		struct isds_list *newListItem = (struct isds_list *)
-		    malloc(sizeof(struct isds_list));
-		if (NULL == newListItem) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-		newListItem->data = document; document = NULL;
-		newListItem->next = NULL;
-		newListItem->destructor = isds_document_free_void;
-		if (last == NULL) {
-			documents = last = newListItem;
-		} else {
-			last->next = newListItem;
-			last = newListItem;
-		}
+		documents.append(document);
 	}
 
-	return documents;
-
-fail:
-	isds_document_free(&document);
-	isds_list_free(&documents);
-	return NULL;
+	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Create message envelope.
- */
-struct isds_envelope *DlgSendMessage::buildEnvelope(void) const
-/* ========================================================================= */
+bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 {
-	struct isds_envelope *envelope = NULL;
 	QString dmType;
 
-	envelope = (struct isds_envelope *)
-	    malloc(sizeof(struct isds_envelope));
-	if (envelope == NULL) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-	memset(envelope, 0, sizeof(struct isds_envelope));
-
 	/* Set mandatory fields of envelope. */
-	envelope->dmID = NULL;
-	envelope->dmAnnotation = strdup(
-	    this->subjectText->text().toUtf8().constData());
-	if (NULL == envelope->dmAnnotation) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
+	envelope.dmID.clear();
+	envelope.dmAnnotation = this->subjectText->text();
 
 	/* Set optional fields. */
-	if (!this->dmSenderIdent->text().isEmpty()) {
-		envelope->dmSenderIdent = strdup(
-		    this->dmSenderIdent->text().toUtf8().constData());
-		if (NULL == envelope->dmSenderIdent) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmRecipientIdent->text().isEmpty()) {
-		envelope->dmRecipientIdent = strdup(
-		    this->dmRecipientIdent->text().toUtf8().constData());
-		if (NULL == envelope->dmRecipientIdent) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmSenderRefNumber->text().isEmpty()) {
-		envelope->dmSenderRefNumber = strdup(
-		    this->dmSenderRefNumber->text().toUtf8().constData());
-		if (NULL == envelope->dmSenderRefNumber) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmRecipientRefNumber->text().isEmpty()) {
-		envelope->dmRecipientRefNumber = strdup(
-		    this->dmRecipientRefNumber->text().toUtf8().constData());
-		if (NULL == envelope->dmRecipientRefNumber) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmLegalTitleLaw->text().isEmpty()) {
-		envelope->dmLegalTitleLaw =
-		    (long int *) malloc(sizeof(long int));
-		if (NULL == envelope->dmLegalTitleLaw) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-		*envelope->dmLegalTitleLaw =
+	envelope.dmSenderIdent = this->subjectText->text();
+	envelope.dmRecipientIdent = this->dmSenderIdent->text();
+	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
+	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
+	envelope._using_dmLegalTitleLaw =
+	    !this->dmLegalTitleLaw->text().isEmpty();
+	if (envelope._using_dmLegalTitleLaw) {
+		envelope.dmLegalTitleLaw =
 		    this->dmLegalTitleLaw->text().toLong();
-	} else {
-		envelope->dmLegalTitleLaw = NULL;
 	}
-	if (!this->dmLegalTitleYear->text().isEmpty()) {
-		envelope->dmLegalTitleYear =
-		    (long int *) malloc(sizeof(long int));
-		if (NULL == envelope->dmLegalTitleYear) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-		*envelope->dmLegalTitleYear =
+	envelope._using_dmLegalTitleYear =
+	    !this->dmLegalTitleYear->text().isEmpty();
+	if (envelope._using_dmLegalTitleYear) {
+		envelope.dmLegalTitleYear =
 		    this->dmLegalTitleYear->text().toLong();
-	} else {
-		envelope->dmLegalTitleYear = NULL;
 	}
+	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
+	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
+	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
+	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
 
-	if (!this->dmLegalTitleSect->text().isEmpty()) {
-		envelope->dmLegalTitleSect = strdup(
-		    this->dmLegalTitleSect->text().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitleSect) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmLegalTitlePar->text().isEmpty()) {
-		envelope->dmLegalTitlePar = strdup(
-		    this->dmLegalTitlePar->text().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitlePar) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	if (!this->dmLegalTitlePoint->text().isEmpty()) {
-		envelope->dmLegalTitlePoint = strdup(
-		    this->dmLegalTitlePoint->text().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitlePoint) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-	envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmPersonalDelivery) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-	*envelope->dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
-
-	/* only OVM can change */
-	envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmAllowSubstDelivery) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
+	/* Only OVM can change. */
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		*envelope->dmAllowSubstDelivery = true;
+		envelope.dmAllowSubstDelivery = true;
 	} else {
-		*envelope->dmAllowSubstDelivery =
+		envelope.dmAllowSubstDelivery =
 		    this->dmAllowSubstDelivery->isChecked();
 	}
 
@@ -1180,12 +977,7 @@ struct isds_envelope *DlgSendMessage::buildEnvelope(void) const
 			dmType = "K";
 		}
 		if (!m_dmSenderRefNumber.isEmpty()) {
-			envelope->dmRecipientRefNumber = strdup(
-			    m_dmSenderRefNumber.toUtf8().constData());
-			if (NULL == envelope->dmRecipientRefNumber) {
-				logErrorNL("%s", "Memory allocation failed.");
-				goto fail;
-			}
+			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
 		}
 	} else {
 		if (this->payReply->isChecked()) {
@@ -1193,114 +985,14 @@ struct isds_envelope *DlgSendMessage::buildEnvelope(void) const
 		}
 	}
 
-	if (!dmType.isEmpty()) {
-		envelope->dmType = strdup(dmType.toUtf8().constData());
-		if (NULL == envelope->dmType) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
+	envelope.dmType = dmType;
 
-	envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmOVM) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-	*envelope->dmOVM = m_dbEffectiveOVM;
+	envelope.dmOVM = m_dbEffectiveOVM;
 
-	envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmPublishOwnID) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-	*envelope->dmPublishOwnID = this->dmPublishOwnID->isChecked();
+	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
 
-	return envelope;
-
-fail:
-	isds_envelope_free(&envelope);
-	return NULL;
+	return true;
 }
-
-
-/* ========================================================================= */
-/*
- * Send single message.
- */
-DlgSendMessage::MsgSendingResult DlgSendMessage::sendSingleMessage(
-    struct isds_message *message, int row) const
-/* ========================================================================= */
-{
-	Q_ASSERT(NULL != message);
-	Q_ASSERT(NULL != message->envelope);
-
-	MsgSendingResult sendMsgResult;
-	struct isds_envelope *envelope = message->envelope;
-	struct isds_ctx *session = NULL;
-
-	/* Clear fields. */
-	if (NULL != envelope->dbIDRecipient) {
-		free(envelope->dbIDRecipient);
-		envelope->dbIDRecipient = NULL;
-	}
-	if (NULL != envelope->dmToHands) {
-		free(envelope->dmToHands);
-		envelope->dmToHands = NULL;
-	}
-	if (NULL != envelope->dmID) {
-		free(envelope->dmID);
-		envelope->dmID = NULL;
-	}
-
-	/* Set new recipient. */
-	envelope->dbIDRecipient = strdup(
-	    this->recipientTableWidget->item(row, RTW_ID)->text().toUtf8().constData());
-	if (NULL == envelope->dbIDRecipient) {
-		logErrorNL("%s", "Memory allocation failed.");
-		goto fail;
-	}
-
-	if (!this->dmToHands->text().isEmpty()) {
-		envelope->dmToHands =
-		    strdup(this->dmToHands->text().toUtf8().constData());
-		if (NULL == envelope->dmToHands) {
-			logErrorNL("%s", "Memory allocation failed.");
-			goto fail;
-		}
-	}
-
-	session = isdsSessions.session(m_userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		logErrorNL("%s", "Missing ISDS session.");
-		goto fail;
-	}
-
-	logInfo("Sending message from user '%s'.\n",
-	    m_userName.toUtf8().constData());
-	sendMsgResult.status = isds_send_message(session, message);
-
-	sendMsgResult.dbID =
-	    this->recipientTableWidget->item(row, RTW_ID)->text();
-	sendMsgResult.recipientName =
-	    this->recipientTableWidget->item(row, RTW_NAME)->text();
-	{
-		bool ok = false;
-		sendMsgResult.dmId = QString(envelope->dmID).toLongLong(&ok);
-		if (!ok) {
-			sendMsgResult.dmId = -1;
-		}
-	}
-	sendMsgResult.isPDZ =
-	    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes");
-	sendMsgResult.errInfo = isdsLongMessage(session);
-
-	return sendMsgResult;
-
-fail:
-	return MsgSendingResult();
-}
-
 
 /* ========================================================================= */
 /*
@@ -1311,10 +1003,8 @@ void DlgSendMessage::sendMessage(void)
 {
 	QString detailText;
 
-	struct isds_message *message = NULL;
-
 	/* List of send message result */
-	QList<MsgSendingResult> sentMsgResultList;
+	QList<TaskSendMessage::ResultData> sentMsgResultList;
 
 	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
@@ -1341,26 +1031,15 @@ void DlgSendMessage::sendMessage(void)
 		}
 	}
 
-	message = (struct isds_message *) malloc(sizeof(struct isds_message));
-	memset(message, 0, sizeof(struct isds_message));
-	if (message == NULL) {
-		logErrorNL("%s", "Memory allocation failed.");
-		detailText = tr("An error has occurred during message creation."
-		    " Memory allocation failed.");
-		goto finish;
-	}
+	IsdsMessage message;
 
 	/* Attach envelope and attachment files to message structure. */
-	message->documents = buildDocuments();
-	if (NULL == message->documents) {
-		detailText = tr("An error has occurred during loading "
-		    "of attachments into message.");
+	if (!buildDocuments(message.documents)) {
+		detailText = tr("An error occurred while loading attachments into message.");
 		goto finish;
 	}
-	message->envelope = buildEnvelope();
-	if (NULL == message->envelope) {
-		detailText = tr("An error has occurred during "
-		    "message envelope creation.");
+	if (!buildEnvelope(message.envelope)) {
+		detailText = tr("An error occurred during message envelope creation.");
 		goto finish;
 	}
 
@@ -1372,57 +1051,56 @@ void DlgSendMessage::sendMessage(void)
 
 	/* Send message to all recipients. */
 	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
-		MsgSendingResult sendingResult =
-		    sendSingleMessage(message, row);
+		/* Clear fields. */
+		message.envelope.dmID.clear();
 
-		sentMsgResultList.append(sendingResult);
+		/* Set new recipient. */
+		message.envelope.dbIDRecipient = this->recipientTableWidget->item(row, RTW_ID)->text();
+		message.envelope.dmToHands = this->dmToHands->text();
 
-		if (sendingResult.status == IE_SUCCESS) {
-			QDateTime deliveryTime =
-			    timevalToDateTime(message->envelope->dmDeliveryTime);
+		TaskSendMessage *task;
 
-			MessageDb *messageDb = m_dbSet.accessMessageDb(deliveryTime, true);
-			Q_ASSERT(0 != messageDb);
+		task = new (std::nothrow) TaskSendMessage(
+		    m_userName, &m_dbSet, message,
+		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
+		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
+		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
 
-			/* TODO -- Move the function into worker. */
-			messageDb->msgsInsertNewlySentMessageEnvelope(sendingResult.dmId,
-			    m_dbId,
-			    m_senderName,
-			    this->recipientTableWidget->item(row, RTW_ID)->text(),
-			    this->recipientTableWidget->item(row, RTW_NAME)->text(),
-			    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
-			    this->subjectText->text());
-
-			Worker::storeAttachments(*messageDb, sendingResult.dmId,
-			    message->documents);
-
+		if (TaskSendMessage::SM_SUCCESS == task->m_resultData.result) {
 			successSendCnt++;
 		}
+
+		sentMsgResultList.append(task->m_resultData);
+
+		delete task;
 	}
 
-	foreach (const MsgSendingResult &result, sentMsgResultList) {
-		if (result.status == IE_SUCCESS) {
-			if (result.isPDZ) {
+	foreach (const TaskSendMessage::ResultData &resultData,
+	         sentMsgResultList) {
+		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
+			if (resultData.isPDZ) {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
-				    arg(result.recipientName).
-				    arg(result.dbID).
-				    arg(result.dmId) + "<br/>";
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
 			} else {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
-				    arg(result.recipientName).
-				    arg(result.dbID).
-				    arg(result.dmId) + "<br/>";
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
 			}
 		} else {
 			detailText += tr("Message was NOT successfully "
 			    "sent to <i>%1 (%2)</i>. Server says: %3").
-			    arg(result.recipientName).
-			    arg(result.dbID).
-			    arg(result.errInfo) + "<br/>";
+			    arg(resultData.recipientName).
+			    arg(resultData.dbIDRecipient).
+			    arg(resultData.errInfo) + "<br/>";
 		}
 	}
 
@@ -1436,8 +1114,6 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
-
-		isds_message_free(&message);
 
 		this->accept(); /* Set return code to accepted. */
 		return;
@@ -1453,11 +1129,9 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
-			isds_message_free(&message);
 			this->close(); /* Set return code to closed. */
 			return;
 		} else {
-			isds_message_free(&message);
 			return;
 		}
 	}
@@ -1472,7 +1146,6 @@ finish:
 	msgBox.setInformativeText(detailText);
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-	isds_message_free(&message);
 	this->close();
 }
 

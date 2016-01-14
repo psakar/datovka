@@ -29,9 +29,9 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QSet>
 #include <QStandardItemModel>
 #include <QProgressBar>
-#include <QThread>
 #include <QTimer>
 #include <QPushButton>
 #include <QNetworkReply>
@@ -45,7 +45,7 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
-#include "src/thread/worker.h"
+#include "src/worker/task_import_zfo.h" /* TODO -- remove this header file. */
 
 
 namespace Ui {
@@ -64,16 +64,6 @@ public:
 	QLabel *statusOnlineLabel;
 	QLabel *statusDbMode;
 	QStatusBar *statusBar;
-
-	/* tmp account info struct for ZFO import */
-	class AccountDataStruct {
-	public:
-		QString databoxID;
-		QString accountName;
-		QString username;
-		MessageDbSet *messageDbSet;
-		QModelIndex acntIndex;
-	};
 
 	enum isdsResult {
 		MSG_IS_IN_ISDS,
@@ -145,10 +135,22 @@ protected:
 private slots:
 
 	/*!
-	 * @brief Clear info status bar if download of complete message fails.
+	 * @brief Workers finished.
 	 */
-	void clearInfoInStatusBarAndShowDialog(qint64 msgId,
-	    const QString &errMsg);
+	void workersFinished(void);
+
+	/*!
+	 * @brief Performs action depending on message download outcome.
+	 */
+	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
+	    int result, const QString &errDesc);
+
+	/*!
+	 * @brief Performs action depending on message list download outcome.
+	 */
+	void collectDownloadMessageListStatus(const QString &usrName,
+	    int direction, int result, const QString &errDesc,
+	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
 	 * @brief Version response slot.
@@ -385,16 +387,6 @@ private slots:
 	void downloadSelectedMessageAttachments(void);
 
 	/*!
-	 * @brief Process pending worker jobs.
-	 */
-	void processPendingWorkerJobs(void);
-
-	/*!
-	 * @brief End current worker job.
-	 */
-	void endCurrentWorkerJob(void);
-
-	/*!
 	 * @brief Create and send a new message form selected account.
 	 */
 	void createAndSendMessage(void);
@@ -550,15 +542,21 @@ private slots:
 	    enum ImportZFODialog::ZFOaction importType);
 
 	/*!
-	 * @brief Get message type of import ZFO file (message/delivery/unknown).
-	 * Return: -1=error, 0=unknown, 1=message, 2=delivery info
+	 * @brief Collects information about import status.
 	 */
-	int getMessageTypeFromZFO(const QString &file);
+	void collectImportZfoStatus(const QString &fileName, int result,
+	    const QString &resultDesc);
 
 	/*!
-	 * @brief Create account info for ZFO file(s) import into database.
+	 * @brief Create account info list for ZFO files import into database.
+	 *
+	 * @note The user if going to be prompted about missing password.
+	 *
+	 * @param[in] activeOnly Whether to list only active accounts.
+	 * @return List of accounts.
 	 */
-	QList<AccountDataStruct> createAccountInfoForZFOImport(void);
+	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(
+	    bool activeOnly);
 
 	/*!
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
@@ -567,38 +565,12 @@ private slots:
 	    enum ImportZFODialog::ZFOtype zfoType);
 
 	/*!
-	 * @brief Import only delivery info ZFO file(s) into database.
-	 */
-	void importDeliveryInfoZFO(
-	    const QList<AccountDataStruct> &accountList,
-	    const QStringList &files,
-	    QList<QPair<QString,QString>> &successFilesList,
-	    QList<QPair<QString,QString>> &existFilesList,
-	    QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
-	 * @brief Import only message ZFO file(s) into database.
-	 */
-	void importMessageZFO(
-	    const QList<AccountDataStruct> &accountList,
-	    const QStringList &files,
-	    QList<QPair<QString,QString>> &successFilesList,
-	    QList<QPair<QString,QString>> &existFilesList,
-	    QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
 	 * @brief Show ZFO import notification dialog with results of import.
 	 */
-	void showNotificationDialogWithResult(int filesCnt,
+	void showImportZfoResultDialogue(int filesCnt,
 	    const QList<QPair<QString,QString>> &successFilesList,
 	    const QList<QPair<QString,QString>> &existFilesList,
 	    const QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
-	 * @brief Check if import ZFO file is/was in ISDS.
-	 */
-	int isImportMsgInISDS(const QString &zfoFile,
-	    QModelIndex accountIndex);
 
 	/*!
 	 * @brief About application dialog.
@@ -656,11 +628,6 @@ private slots:
 	void clearStatusBar(void);
 
 	/*!
-	 * @brief Refresh AccountList.
-	 */
-	void refreshAccountList(const QString &userName);
-
-	/*!
 	 * @brief Set and run any actions after main window has been created.
 	 */
 	void setWindowsAfterInit(void);
@@ -671,18 +638,6 @@ private slots:
 	 */
 	void receiveNewDataPath(QString oldDir, QString newDir,
 	    QString action);
-
-	/*!
-	 * @brief Set tablewidget when message download worker is done.
-	 */
-	void postDownloadSelectedMessageAttachments(const QString &userName,
-	    qint64 dmId);
-
-	/*!
-	 * @brief Set info status bar from worker.
-	 */
-	void dataFromWorkerToStatusBarInfo(bool add,
-	    int rt, int rn, int st, int sn);
 
 	/*!
 	 * @brief set message process state into db
@@ -716,14 +671,29 @@ private slots:
 
 private:
 
-	QThread *m_syncAcntThread;
-	Worker *m_syncAcntWorker;
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Set info status bar from worker.
+	 */
+	void dataFromWorkerToStatusBarInfo(bool add,
+	    int rt, int rn, int st, int sn);
+
+	/*!
+	 * @brief Refresh AccountList.
+	 */
+	void refreshAccountList(const QString &userName);
+
+	/*!
+	 * @brief Set tablewidget when message download worker is done.
+	 */
+	void postDownloadSelectedMessageAttachments(const QString &userName,
+	    qint64 dmId);
 
 	/*!
 	 * @brief Save attachment identified by indexes to file.
@@ -980,15 +950,9 @@ private:
 	    const QDateTime &deliveryTime, bool delFromIsds);
 
 	/*!
-	 * @brief Verify message. Compare hash with hash stored in ISDS.
-	 */
-	qdatovka_error verifyMessage(const QString &userName, qint64 dmId,
-	    const QDateTime &deliveryTime);
-
-	/*!
 	 * @brief Authenticate message from ZFO file.
 	 */
-	qdatovka_error authenticateMessageFromZFO(void);
+	int authenticateMessageFromZFO(void);
 
 	/*!
 	 * @brief Show message info for user if connection to ISDS fails.
@@ -1182,6 +1146,12 @@ private:
 	    m_lastStoredAccountNodeType; /*!< Last stored account position. */
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
+
+	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
+	int m_numFilesToImport;
+	QList< QPair<QString, QString> > m_importSucceeded,
+	                                 m_importExisted,
+	                                 m_importFailed;
 
 	int m_received_1;
 	int m_received_2;

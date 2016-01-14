@@ -180,13 +180,6 @@ struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
 
 
 /*!
- * @brief Search DataBoxes.
- */
-isds_error isdsSearch(struct isds_list **result, const QString &userName,
-    const struct isds_DbOwnerInfo *ownerInfo);
-
-
-/*!
  * @brief Create DbUserInfo structure.
  *
  * @return NULL on failure.

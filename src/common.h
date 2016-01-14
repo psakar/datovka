@@ -79,15 +79,9 @@ enum MessageProcessState {
 /* return values of Datovka functions */
 typedef enum {
 	Q_SUCCESS = 0,   // all operations success
-	Q_CANCEL,        // operation cancelled or file dialog cancelled
 	Q_GLOBAL_ERROR,  // any qdatovka error
-	Q_CONNECT_ERROR, // ISDS login error
-	Q_NETWORK_ERROR, // error
 	Q_ISDS_ERROR,
-	Q_SQL_ERROR,
-	Q_FILE_ERROR,
-	Q_DIALOG_ERROR,
-	Q_NOTEQUAL
+	Q_SQL_ERROR
 } qdatovka_error;
 
 /* Message direction. */

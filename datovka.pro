@@ -288,10 +288,25 @@ SOURCES += src/cli/cli.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
-    src/thread/worker.cpp \
     src/views/attachment_table_view.cpp \
     src/views/attachment_table_widget.cpp \
-    src/views/table_home_end_filter.cpp
+    src/views/table_home_end_filter.cpp \
+    src/worker/message_emitter.cpp \
+    src/worker/pool.cpp \
+    src/worker/task.cpp \
+    src/worker/task_authenticate_message.cpp \
+    src/worker/task_change_pwd.cpp \
+    src/worker/task_download_message.cpp \
+    src/worker/task_download_message_list.cpp \
+    src/worker/task_download_credit_info.cpp \
+    src/worker/task_download_owner_info.cpp \
+    src/worker/task_download_password_info.cpp \
+    src/worker/task_download_user_info.cpp \
+    src/worker/task_erase_message.cpp \
+    src/worker/task_import_zfo.cpp \
+    src/worker/task_search_owner.cpp \
+    src/worker/task_send_message.cpp \
+    src/worker/task_verify_message.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -337,10 +352,25 @@ HEADERS += src/cli/cli.h \
     src/models/sort_filter_proxy_model.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
-    src/thread/worker.h \
     src/views/attachment_table_view.h \
     src/views/attachment_table_widget.h \
-    src/views/table_home_end_filter.h
+    src/views/table_home_end_filter.h \
+    src/worker/message_emitter.h \
+    src/worker/pool.h \
+    src/worker/task.h \
+    src/worker/task_authenticate_message.h \
+    src/worker/task_change_pwd.h \
+    src/worker/task_download_message.h \
+    src/worker/task_download_message_list.h \
+    src/worker/task_download_credit_info.h \
+    src/worker/task_download_owner_info.h \
+    src/worker/task_download_password_info.h \
+    src/worker/task_download_user_info.h \
+    src/worker/task_erase_message.h \
+    src/worker/task_import_zfo.h \
+    src/worker/task_search_owner.h \
+    src/worker/task_send_message.h \
+    src/worker/task_verify_message.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \

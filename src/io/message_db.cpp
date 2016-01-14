@@ -3700,11 +3700,10 @@ fail:
 /*
  * Get message hash from db
  */
-QStringList MessageDb::msgsGetHashFromDb(qint64 dmId) const
+MessageDb::MessageHash MessageDb::msgsGetHashFromDb(qint64 dmId) const
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QStringList retitem;
 	QString queryStr;
 
 	queryStr = "SELECT value, _algorithm FROM hashes WHERE "
@@ -3719,9 +3718,8 @@ QStringList MessageDb::msgsGetHashFromDb(qint64 dmId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			retitem.append(query.value(0).toString());
-			retitem.append(query.value(1).toString());
-			return retitem;
+			return MessageHash(query.value(0).toByteArray(),
+			    query.value(1).toString());
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -3730,7 +3728,7 @@ QStringList MessageDb::msgsGetHashFromDb(qint64 dmId) const
 	}
 
 fail:
-	return QStringList();
+	return MessageHash();
 }
 
 

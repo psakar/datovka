@@ -499,13 +499,15 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 	html += "<h3>" + tr("Status") + "</h3>";
 
 	html += strongAccountInfoLine(tr("Delivery time"),
-	    dateTimeStrFromDbFormat(
-	        timevalToDbFormat(envelope->dmDeliveryTime),
-	        dateTimeDisplayFormat));
+	    (NULL != envelope->dmDeliveryTime) ?
+	        dateTimeStrFromDbFormat(
+	            timevalToDbFormat(envelope->dmDeliveryTime),
+	            dateTimeDisplayFormat) : "");
 	html += strongAccountInfoLine(tr("Acceptance time"),
-	    dateTimeStrFromDbFormat(
-	        timevalToDbFormat(envelope->dmAcceptanceTime),
-	        dateTimeDisplayFormat));
+	    (NULL != envelope->dmAcceptanceTime) ?
+	        dateTimeStrFromDbFormat(
+	            timevalToDbFormat(envelope->dmAcceptanceTime),
+	            dateTimeDisplayFormat) : "");
 
 	QString statusString;
 	if (NULL != envelope->dmMessageStatus) {

@@ -27,6 +27,8 @@
 #include "dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
 #include "src/models/accounts_model.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_change_pwd.h"
 
 
 DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
@@ -212,28 +214,18 @@ void DlgChangePwd::sendSmsCode(void)
 		return;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(m_userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return;
-	}
+	int status;
+	TaskChangePwd *task;
 
-	isds_error status;
-	char * refnumber = NULL;
-	struct isds_otp *otp = NULL;
-	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
-	memset(otp, 0, sizeof(struct isds_otp));
-	otp->method = OTP_TIME;
-	otp->otp_code = NULL;
-
-	status = isds_change_password(session,
+	task = new (std::nothrow) TaskChangePwd(m_userName,
 	    this->currentPwdLineEdit->text().toUtf8().constData(),
 	    this->newPwdLineEdit->text().toUtf8().constData(),
-	    otp, &refnumber);
+	    OTP_TIME, QString());
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	free(refnumber);
-	free(otp->otp_code);
-	free(otp);
+	status = task->m_isdsRetError;
+	delete task;
 
 	if (IE_PARTIAL_SUCCESS == status) {
 		QMessageBox::information(this, tr("Enter SMS security code"),
@@ -268,47 +260,29 @@ void DlgChangePwd::sendSmsCode(void)
 void DlgChangePwd::changePassword(void)
 /* ========================================================================= */
 {
-	isds_error status;
-	char * refnumber = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(m_userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return;
-	}
+	int status;
+	QString errorStr, longErrorStr;
+	TaskChangePwd *task;
 
 	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
 	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
-		struct isds_otp *otp = NULL;
-		otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
-		memset(otp, 0, sizeof(struct isds_otp));
-
-		if (AccountModel::globAccounts[m_userName].loginMethod() ==
-		    LIM_HOTP) {
-			otp->method = OTP_HMAC;
-		} else {
-			otp->method = OTP_TIME;
-		}
-
-		otp->otp_code = !this->secCodeLineEdit->text().isEmpty() ?
-		    strdup(this->secCodeLineEdit->text().toUtf8().constData())
-		    : NULL;
-
-		status = isds_change_password(session,
+		task = new (std::nothrow) TaskChangePwd(m_userName,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
-		    otp, &refnumber);
-
-		free(otp->otp_code);
-		free(otp);
+		    (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP) ? OTP_HMAC : OTP_TIME,
+		    this->secCodeLineEdit->text());
 	} else {
-		status = isds_change_password(session,
+		task = new (std::nothrow) TaskChangePwd(m_userName,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
-		    this->newPwdLineEdit->text().toUtf8().constData(),
-		    NULL, &refnumber);
+		    this->newPwdLineEdit->text().toUtf8().constData());
 	}
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	free(refnumber);
+	status = task->m_isdsRetError;
+	errorStr = task->m_isdsError;
+	longErrorStr = task->m_isdsLongError;
+	delete task;
 
 	if (status == IE_SUCCESS) {
 		QMessageBox::information(this, tr("Password has been changed"),
@@ -328,10 +302,9 @@ void DlgChangePwd::changePassword(void)
 		 */
 	} else {
 		Q_ASSERT(!m_userName.isEmpty());
-		QString error = tr("Error: ") + isds_strerror(status);
-		QString isdslog = isds_long_message(session);
-		if (!isdslog.isEmpty()) {
-			error = tr("ISDS returns: ") + isdslog;
+		QString error = tr("Error: ") + errorStr;
+		if (!longErrorStr.isEmpty()) {
+			error = tr("ISDS returns: ") + longErrorStr;
 		}
 
 		QMessageBox::warning(this, tr("Password error"),

@@ -44,6 +44,10 @@ public:
 	    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QWidget *parent = 0, const QString &userName = QString());
 
+	static
+	QString getUserInfoFromIsds(const QString &userName,
+	    const QString &idDbox);
+
 private slots:
 	void filterContact(const QString &text);
 	void clearContactText(void);
@@ -54,7 +58,6 @@ private slots:
 
 private:
 	bool isInRecipientTable(const QString &idDs) const;
-	QString getUserInfoFormIsds(QString idDbox);
 
 	QTableWidget &m_recipientTableWidget;
 	const MessageDbSet &m_dbSet;

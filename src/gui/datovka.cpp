@@ -35,7 +35,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
-#include <QSet>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
@@ -70,6 +69,17 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/message_emitter.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_authenticate_message.h"
+#include "src/worker/task_erase_message.h"
+#include "src/worker/task_download_message.h"
+#include "src/worker/task_download_message_list.h"
+#include "src/worker/task_download_owner_info.h"
+#include "src/worker/task_download_password_info.h"
+#include "src/worker/task_download_user_info.h"
+#include "src/worker/task_import_zfo.h"
+#include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
 
@@ -92,8 +102,6 @@ MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
     m_statusProgressBar(NULL),
-    m_syncAcntThread(0),
-    m_syncAcntWorker(0),
     m_accountModel(this),
     m_filterLine(NULL),
     m_messageListProxyModel(this),
@@ -182,6 +190,24 @@ MainWindow::MainWindow(QWidget *parent)
 	m_statusProgressBar->setValue(0);
 	clearProgressBar();
 	ui->statusBar->addWidget(m_statusProgressBar,1);
+
+	/* Worker-related processing signals. */
+	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
+	    this, SLOT(updateProgressBar(QString, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
+	    this,
+	    SLOT(collectDownloadMessageStatus(QString, qint64, int, QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
+	        bool, int, int, int, int)), this,
+	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
+	        bool, int, int, int, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(importZfoFinished(QString, int, QString)), this,
+	    SLOT(collectImportZfoStatus(QString, int, QString)));
+	connect(&globWorkPool, SIGNAL(finished()),
+	    this, SLOT(workersFinished()));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -452,7 +478,7 @@ void MainWindow::showStatusTextPermanently(const QString &qStr)
 void MainWindow::clearProgressBar(void)
 /* ========================================================================= */
 {
-	m_statusProgressBar->setFormat("Idle");
+	m_statusProgressBar->setFormat(PL_IDLE);
 	m_statusProgressBar->setValue(0);
 }
 
@@ -864,9 +890,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	QModelIndex acntIdx = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
 	QMenu *submenu = 0;
-#ifdef PORTABLE_APPLICATION
 	QAction *action;
-#endif /* PORTABLE_APPLICATION */
 
 	if (acntIdx.isValid()) {
 		bool received = AccountModel::nodeTypeIsReceived(acntIdx);
@@ -961,12 +985,18 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 #endif /* PORTABLE_APPLICATION */
 
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		action = menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from database"),
 		    this, SLOT(prepareMsgsImportFromDatabase()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
+		action->setEnabled(
+		    ui->actionImport_messages_from_database->isEnabled());
+		action = menu->addAction(
+		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
 		    tr("Import messages from ZFO files"),
 		    this, SLOT(showImportZFOActionDialog()));
+		action->setEnabled(
+		    ui->actionImport_ZFO_file_into_database->isEnabled());
 	} else {
 		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
 		    tr("Add new account"),
@@ -2221,62 +2251,108 @@ void MainWindow::openSelectedAttachment(void)
 
 /* ========================================================================= */
 /*
- * Clear status bar if download of complete message fails.
+ * Workers finished.
  */
-void MainWindow::clearInfoInStatusBarAndShowDialog(qint64 msgId,
-    const QString &errMsg)
+void MainWindow::workersFinished(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QMessageBox msgBox(this);
+	int accountCount = ui->accountList->model()->rowCount();
+	if (accountCount > 0) {
+		ui->actionSync_all_accounts->setEnabled(true);
+		ui->actionReceived_all->setEnabled(true);
+		ui->actionDownload_messages->setEnabled(true);
+		ui->actionGet_messages->setEnabled(true);
 
-	if (msgId == -1) {
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "received message list from ISDS server."));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message list error"));
-		msgBox.setText(tr("It was not possible download "
-		    "received message list from ISDS server."));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
-		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occured."));
-		}
-	} else if (msgId == -2) {
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "sent message list from ISDS server."));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message list error"));
-		msgBox.setText(tr("It was not possible download "
-		    "sent message list from ISDS server."));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
-		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occured."));
+		/* Activate import buttons. */
+		ui->actionImport_messages_from_database->setEnabled(true);
+		ui->actionImport_ZFO_file_into_database->setEnabled(true);
+	}
+	/*
+	 * Prepare counters for next action.
+	 * TODO -- This must be moved to separate slot that waits for downloads.
+	 */
+	dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
+
+	if (globPref.download_on_background) {
+		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
+	}
+}
+
+void MainWindow::collectDownloadMessageStatus(const QString &usrName,
+    qint64 msgId, int result, const QString &errDesc)
+{
+	debugSlotCall();
+
+	if (TaskDownloadMessage::DM_SUCCESS == result) {
+		/* Refresh account and attachment list. */
+		refreshAccountList(usrName);
+
+		if (0 <= msgId) {
+			postDownloadSelectedMessageAttachments(usrName, msgId);
 		}
 	} else {
+		/* Notify the user. */
+		QMessageBox msgBox(this);
+
 		showStatusTextWithTimeout(tr("It was not possible download "
 		    "complete message \"%1\" from ISDS server.").arg(msgId));
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(tr("Download message error"));
 		msgBox.setText(tr("It was not possible to download a complete "
 		    "message \"%1\" from server Datové schránky.").arg(msgId));
-		if (!errMsg.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errMsg);
+		if (!errDesc.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
 		} else {
 			msgBox.setInformativeText(tr("A connection error "
-			    "occured or the message has already been deleted "
+			    "occurred or the message has already been deleted "
 			    "from the server."));
 		}
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
 	}
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.exec();
 }
 
+void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
+    int direction, int result, const QString &errDesc,
+    bool add, int rt, int rn, int st, int sn)
+{
+	debugSlotCall();
+
+	/* Refresh account list. */
+	refreshAccountList(usrName);
+
+	dataFromWorkerToStatusBarInfo(add, rt, rn, st, sn);
+
+	if (TaskDownloadMessageList::DL_SUCCESS != result) {
+		/* Notify the user. */
+		QMessageBox msgBox(this);
+
+		QString errorMessage = (MSG_RECEIVED == direction) ?
+		    tr("It was not possible download received message list from"
+		        " ISDS server.") :
+		    tr("It was not possible download sent message list from"
+		        " ISDS server.");
+
+		showStatusTextWithTimeout(errorMessage);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Download message list error"));
+		msgBox.setText(errorMessage);
+		if (!errDesc.isEmpty()) {
+			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+		} else {
+			msgBox.setInformativeText(
+			    tr("A connection error occurred."));
+		}
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+	}
+}
 
 /* ========================================================================= */
 /*
@@ -2286,7 +2362,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
     const QString &userName, qint64 dmId)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	showStatusTextWithTimeout(tr("Message \"%1\" "
 	    " was downloaded from ISDS server.").arg(dmId));
@@ -2984,27 +3060,9 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
 
-	if (!delFromIsds) {
-		if (messageDb->msgsDeleteMessageData(dmId)) {
-			qDebug() << "Message" << dmId <<
-			    "was deleted from local database";
-			showStatusTextWithTimeout(tr("Message \"%1\" was "
-			    "deleted from local database.").arg(dmId));
-			return Q_SUCCESS;
-		}
-	} else {
-
-		isds_error status;
-		if (!isdsSessions.isConnectedToIsds(userName)) {
-			if (!connectToIsds(userName, this)) {
-				return Q_CONNECT_ERROR;
-			}
-		}
-
-		bool incoming = true;
+	bool incoming = true;
+	{
 		QModelIndex acntIdx = ui->accountList->
 		    selectionModel()->currentIndex();
 
@@ -3022,43 +3080,64 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		default:
 			break;
 		}
-		struct isds_ctx *session = isdsSessions.session(userName);
-		Q_ASSERT(0 != session);
-		/* first delete message on ISDS */
-		status = isds_delete_message_from_storage(session,
-		    QString::number(dmId).toUtf8().constData(), incoming);
+	}
 
-		if (IE_SUCCESS == status) {
-			if (messageDb->msgsDeleteMessageData(dmId)) {
-				qDebug() << "Message" << dmId <<
-				    "was deleted from ISDS and local databse";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted from ISDS and local database.")
-				    .arg(dmId));
-				return Q_SUCCESS;
-			} else {
-				qDebug() << "Message" << dmId <<
-				    "was deleted only from ISDS.";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted only from ISDS.").arg(dmId));
-				return Q_SQL_ERROR;
-			}
-		} else if (IE_INVAL == status) {
-			qDebug() << "Error: "<< status << isds_strerror(status);
-			if (messageDb->msgsDeleteMessageData(dmId)) {
-				qDebug() << "Message" << dmId <<
-				    "was deleted only from local database.";
-				showStatusTextWithTimeout(tr("Message \"%1\" "
-				    "was deleted only from local database.")
-				    .arg(dmId));
+	if (delFromIsds) {
+		if (!isdsSessions.isConnectedToIsds(userName)) {
+			if (!connectToIsds(userName, this)) {
 				return Q_ISDS_ERROR;
 			}
 		}
 	}
 
-	qDebug() << "Message" << dmId << "was not deleted.";
-	showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
-	    .arg(dmId));
+	QString errorStr, longErrorStr;
+	TaskEraseMessage *task;
+
+	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, dmId,
+	    deliveryTime, incoming, delFromIsds);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	TaskEraseMessage::Result result = task->m_result;
+	errorStr = task->m_isdsError;
+	longErrorStr = task->m_isdsLongError;
+	delete task;
+
+	switch (result) {
+	case TaskEraseMessage::NOT_DELETED:
+		showStatusTextWithTimeout(
+		    tr("Message \"%1\" was not deleted.").arg(dmId));
+		return Q_ISDS_ERROR;
+		break;
+	case TaskEraseMessage::DELETED_ISDS:
+		showStatusTextWithTimeout(tr(
+		    "Message \"%1\" was deleted only from ISDS.").arg(dmId));
+		return Q_SQL_ERROR;
+		break;
+	case TaskEraseMessage::DELETED_LOCAL:
+		if (delFromIsds) {
+			showStatusTextWithTimeout(tr(
+			    "Message \"%1\" was deleted only from local database.")
+			    .arg(dmId));
+			return Q_ISDS_ERROR;
+		} else {
+			showStatusTextWithTimeout(tr(
+			    "Message \"%1\" was deleted from local database.")
+			    .arg(dmId));
+			return Q_SUCCESS;
+		}
+		break;
+	case TaskEraseMessage::DELETED_ISDS_LOCAL:
+		showStatusTextWithTimeout(tr(
+		    "Message \"%1\" was deleted from ISDS and local database.")
+		    .arg(dmId));
+		return Q_SUCCESS;
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
 	return Q_ISDS_ERROR;
 }
 
@@ -3071,7 +3150,7 @@ void MainWindow::dataFromWorkerToStatusBarInfo(bool add,
     int rt, int rn, int st, int sn)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	static int s_rt = 0, s_rn = 0, s_st = 0, s_sn = 0;
 
@@ -3143,10 +3222,17 @@ void MainWindow::synchroniseAllAccounts(void)
 				continue;
 			}
 
-			Worker::jobList.append(Worker::Job(userName, dbSet,
-			    MSG_RECEIVED));
-			Worker::jobList.append(Worker::Job(userName, dbSet,
-			    MSG_SENT));
+			TaskDownloadMessageList *task;
+
+			task = new (std::nothrow) TaskDownloadMessageList(
+			    userName, dbSet, MSG_RECEIVED);
+			task->setAutoDelete(true);
+			globWorkPool.assign(task);
+
+			task = new (std::nothrow) TaskDownloadMessageList(
+			    userName, dbSet, MSG_SENT);
+			task->setAutoDelete(true);
+			globWorkPool.assign(task);
 
 			appended = true;
 		}
@@ -3165,8 +3251,6 @@ void MainWindow::synchroniseAllAccounts(void)
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-	processPendingWorkerJobs();
 }
 
 
@@ -3199,15 +3283,22 @@ void MainWindow::synchroniseSelectedAccount(void)
 		}
 	}
 
-	Worker::jobList.append(Worker::Job(userName, dbSet, MSG_RECEIVED));
-	Worker::jobList.append(Worker::Job(userName, dbSet, MSG_SENT));
+	TaskDownloadMessageList *task;
+
+	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
+	    MSG_RECEIVED);
+	task->setAutoDelete(true);
+	globWorkPool.assign(task);
+
+	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
+	    MSG_SENT);
+	task->setAutoDelete(true);
+	globWorkPool.assign(task);
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-	processPendingWorkerJobs();
 }
 
 
@@ -3275,127 +3366,18 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	foreach (const MessageDb::MsgId &id, msgIds) {
 		/* Using prepend() just to outrun other jobs. */
-		Worker::jobList.append(
-		    Worker::Job(userName, dbSet, msgDirection, id.dmId, id.deliveryTime));
+		TaskDownloadMessage *task;
+
+		task = new (std::nothrow) TaskDownloadMessage(
+		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task, WorkerPool::PREPEND);
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
 	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
-
-	processPendingWorkerJobs();
-}
-
-
-/* ========================================================================= */
-/*
- * Process pending worker jobs.
- */
-void MainWindow::processPendingWorkerJobs(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	/* Only if no other worker is present. */
-	if ((0 != m_syncAcntThread) || (0 != m_syncAcntWorker)) {
-		qDebug() << "Worker already doing something.";
-		return;
-	}
-
-	/* Only if no other worker is present. */
-
-	Worker::Job job = Worker::jobList.firstPop(false);
-	if (!job.isValid()) {
-		/* TODO -- Re-enable buttons? */
-		return;
-	}
-
-	showStatusTextPermanently(
-	    tr("Synchronise account \"%1\" with ISDS server.")
-	        .arg(AccountModel::globAccounts[job.userName].accountName()));
-
-	if (!isdsSessions.isConnectedToIsds(job.userName)) {
-		if (!connectToIsds(job.userName, this)) {
-			return;
-		}
-	}
-
-	m_syncAcntThread = new QThread();
-	m_syncAcntWorker = new Worker();
-	m_syncAcntWorker->moveToThread(m_syncAcntThread);
-
-	connect(m_syncAcntWorker, SIGNAL(valueChanged(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
-	{
-		/* Downloading message list. */
-		connect(m_syncAcntWorker,
-		    SIGNAL(changeStatusBarInfo(bool,
-		        int, int, int, int)),
-		    this,
-		    SLOT(dataFromWorkerToStatusBarInfo(bool,
-		        int, int, int, int)));
-		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAccountList(const QString)),
-		    this,
-		    SLOT(refreshAccountList(const QString)));
-	}
-	{
-		/* Downloading attachment. */
-		connect(m_syncAcntWorker,
-		    SIGNAL(refreshAttachmentList(const QString, qint64)),
-		    this, SLOT(postDownloadSelectedMessageAttachments(
-		        const QString, qint64)));
-		connect(m_syncAcntWorker,
-		    SIGNAL(clearStatusBarAndShowDialog(qint64, QString)),
-		    this, SLOT(clearInfoInStatusBarAndShowDialog(qint64,
-		    QString)));
-	}
-	connect(m_syncAcntWorker, SIGNAL(workRequested()),
-	    m_syncAcntThread, SLOT(start()));
-	connect(m_syncAcntThread, SIGNAL(started()),
-	    m_syncAcntWorker, SLOT(doJob()));
-	connect(m_syncAcntWorker, SIGNAL(finished()),
-	    m_syncAcntThread, SLOT(quit()), Qt::DirectConnection);
-	connect(m_syncAcntThread, SIGNAL(finished()),
-	    this, SLOT(endCurrentWorkerJob()));
-
-	m_syncAcntWorker->requestWork();
-}
-
-
-/* ========================================================================= */
-/*
- * End current worker job.
- */
-void MainWindow::endCurrentWorkerJob(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	qDebug() << "Deleting Worker and Thread objects.";
-
-	delete m_syncAcntThread; m_syncAcntThread = NULL;
-	delete m_syncAcntWorker; m_syncAcntWorker = NULL;
-
-	if (Worker::jobList.firstPop(false).isValid()) {
-		/* Queue still contains pending jobs. */
-		processPendingWorkerJobs();
-	} else {
-		int accountCount = ui->accountList->model()->rowCount();
-		if (accountCount > 0) {
-			ui->actionSync_all_accounts->setEnabled(true);
-			ui->actionReceived_all->setEnabled(true);
-			ui->actionDownload_messages->setEnabled(true);
-			ui->actionGet_messages->setEnabled(true);
-		}
-		/* Prepare cunters for next action. */
-		dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
-
-		if (globPref.download_on_background) {
-			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-		}
-	}
 }
 
 
@@ -5629,7 +5611,7 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
 	QModelIndex selectedIdx(ui->accountList->currentIndex());
 	QModelIndex selectedTopIdx(AccountModel::indexTop(selectedIdx));
@@ -5710,86 +5692,6 @@ void MainWindow::refreshAccountList(const QString &userName)
 
 /* ========================================================================= */
 /*
- * Verify message. Compare hash with hash stored in ISDS.
- */
-qdatovka_error MainWindow::verifyMessage(const QString &userName, qint64 dmId,
-    const QDateTime &deliveryTime)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-
-	isds_error status;
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return Q_CONNECT_ERROR;
-		}
-	}
-
-	struct isds_hash *hashIsds = NULL;
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-	status = isds_download_message_hash(session,
-	    QString::number(dmId).toUtf8().constData(), &hashIsds);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	struct isds_hash *hashLocal = NULL;
-	hashLocal = (struct isds_hash *) malloc(sizeof(struct isds_hash));
-
-	if (hashLocal == NULL) {
-		free(hashLocal);
-		return Q_GLOBAL_ERROR;
-	}
-
-	memset(hashLocal, 0, sizeof(struct isds_hash));
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
-
-	QStringList hashLocaldata = messageDb->msgsGetHashFromDb(dmId);
-
-	/* TODO - check if hash info is in db */
-	if (hashLocaldata.isEmpty()) {
-		isds_hash_free(&hashLocal);
-		isds_hash_free(&hashIsds);
-		return Q_SQL_ERROR;
-	}
-
-	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata[0].toUtf8());
-	hashLocal->length = (size_t)rawHash.size();
-	hashLocal->algorithm =
-	    (isds_hash_algorithm)convertHashAlg2(hashLocaldata[1]);
-	hashLocal->value = malloc(hashLocal->length);
-	memcpy(hashLocal->value, rawHash.data(), hashLocal->length);
-
-	status = isds_hash_cmp(hashIsds, hashLocal);
-
-	isds_hash_free(&hashIsds);
-	isds_hash_free(&hashLocal);
-
-	if (IE_NOTEQUAL == status) {
-		return Q_NOTEQUAL;
-	}
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
-
-	return Q_SUCCESS;
-}
-
-
-/* ========================================================================= */
-/*
  * Get data about logged in user and his box.
  */
 bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
@@ -5797,84 +5699,16 @@ bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	TaskDownloadOwnerInfo *task;
 
-	struct isds_DbOwnerInfo *db_owner_info = NULL;
+	task = new (std::nothrow) TaskDownloadOwnerInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	isds_error status = isds_GetOwnerInfoFromLogin(session,
-	    &db_owner_info);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		isds_DbOwnerInfo_free(&db_owner_info);
-		return false;
-	}
-
-	QString birthDate;
-	if ((NULL != db_owner_info->birthInfo) &&
-	    (NULL != db_owner_info->birthInfo->biDate)) {
-		birthDate = tmBirthToDbFormat(db_owner_info->birthInfo->biDate);
-	}
-
-	int ic = 0;
-	if (NULL != db_owner_info->ic) {
-		ic = QString(db_owner_info->ic).toInt();
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->insertAccountIntoDb(
-	    key,
-	    db_owner_info->dbID,
-	    convertDbTypeToString(*db_owner_info->dbType),
-	    ic,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnFirstName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnMiddleName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnLastName : NULL,
-	    db_owner_info->personName ?
-		db_owner_info->personName->pnLastNameAtBirth : NULL,
-	    db_owner_info->firmName,
-	    birthDate,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biCity : NULL,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biCounty : NULL,
-	    db_owner_info->birthInfo ?
-		db_owner_info->birthInfo->biState : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adCity : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adStreet : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adNumberInStreet : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adNumberInMunicipality : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adZipCode : NULL,
-	    db_owner_info->address ?
-		db_owner_info->address->adState : NULL,
-	    db_owner_info->nationality,
-	    db_owner_info->identifier,
-	    db_owner_info->registryCode,
-	    (int)*db_owner_info->dbState,
-	    *db_owner_info->dbEffectiveOVM,
-	    *db_owner_info->dbOpenAddressing);
-
-	isds_DbOwnerInfo_free(&db_owner_info);
-
-	return true;
+	return result;
 }
 
 
@@ -5887,44 +5721,16 @@ bool MainWindow::getPasswordInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	isds_error status;
-	struct timeval *expiration = NULL;
-	QString expirDate;
-	bool retval = false;
+	TaskDownloadPasswordInfo *task;
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	task = new (std::nothrow) TaskDownloadPasswordInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	status = isds_get_password_expiration(session, &expiration);
-
-	if (IE_SUCCESS == status) {
-		if (NULL != expiration) {
-			expirDate = timevalToDbFormat(expiration);
-		} else {
-			/* Password without expiration. */
-			expirDate.clear();
-		}
-		retval = true;
-	} else {
-		expirDate.clear();
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->setPwdExpirIntoDb(key, expirDate);
-
-	if (NULL != expiration) {
-		free(expiration);
-	}
-	return retval;
+	return result;
 }
 
 
@@ -5937,66 +5743,16 @@ bool MainWindow::getUserInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
+	TaskDownloadUserInfo *task;
 
-	struct isds_DbUserInfo *db_user_info = NULL;
+	task = new (std::nothrow) TaskDownloadUserInfo(userName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return false;
-	}
+	bool result = task->m_success;
+	delete task;
 
-	isds_error status = isds_GetUserInfoFromLogin(session, &db_user_info);
-
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		isds_DbUserInfo_free(&db_user_info);
-		return false;
-	}
-
-	QString key = userName + "___True";
-
-	globAccountDbPtr->insertUserIntoDb(
-	    key,
-	    convertUserTypeToString(*db_user_info->userType),
-	    (int)*db_user_info->userPrivils,
-	    db_user_info->personName ?
-		db_user_info->personName->pnFirstName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnMiddleName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnLastName : NULL,
-	    db_user_info->personName ?
-		db_user_info->personName->pnLastNameAtBirth : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adCity : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adStreet : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adNumberInStreet : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adNumberInMunicipality : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adZipCode : NULL,
-	    db_user_info->address ?
-		db_user_info->address->adState : NULL,
-	    db_user_info->biDate ?
-		tmBirthToDbFormat(db_user_info->biDate) : NULL,
-	    db_user_info->ic ? QString(db_user_info->ic).toInt() : 0,
-	    db_user_info->firmName,
-	    db_user_info->caStreet,
-	    db_user_info->caCity,
-	    db_user_info->caZipCode,
-	    db_user_info->caState
-	    );
-
-	isds_DbUserInfo_free(&db_user_info);
-
-	return true;
+	return result;
 }
 
 
@@ -6200,7 +5956,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 /*
  * Authenticate message from ZFO file.
  */
-qdatovka_error MainWindow::authenticateMessageFromZFO(void)
+int MainWindow::authenticateMessageFromZFO(void)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -6212,54 +5968,32 @@ qdatovka_error MainWindow::authenticateMessageFromZFO(void)
 	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 
-	QString attachFileName = QFileDialog::getOpenFileName(this,
+	QString fileName = QFileDialog::getOpenFileName(this,
 	    tr("Add ZFO file"), "", tr("ZFO file (*.zfo)"));
 
-	if (attachFileName.isNull()) {
-		return Q_CANCEL;
+	if (fileName.isNull()) {
+		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
-
-	size_t length;
-	isds_error status;
-	QByteArray bytes;
-	QFile file(attachFileName);
-
-	if (file.exists()) {
-		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << attachFileName;
-			return Q_FILE_ERROR;
-		}
-
-		bytes = file.readAll();
-		length = bytes.size();
-	} else {
-		return Q_FILE_ERROR;
-	}
-
-	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
-	    .arg(attachFileName));
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, this)) {
-			return Q_CONNECT_ERROR;
+			return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 		}
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
+	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
+	    .arg(fileName));
 
-	status = isds_authenticate_message(session, bytes.data(), length);
+	TaskAuthenticateMessage *task;
 
-	if (IE_NOTEQUAL == status) {
-		return Q_NOTEQUAL;
-	}
+	task = new (std::nothrow) TaskAuthenticateMessage(userName, fileName);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
 
-	if (IE_SUCCESS != status) {
-		qDebug() << status << isds_strerror(status);
-		return Q_ISDS_ERROR;
-	}
+	TaskAuthenticateMessage::Result result = task->m_result;
+	delete task;
 
-	return Q_SUCCESS;
+	return result;
 }
 
 
@@ -6273,7 +6007,7 @@ void MainWindow::authenticateMessageFile(void)
 	debugSlotCall();
 
 	switch (authenticateMessageFromZFO()) {
-	case Q_SUCCESS:
+	case TaskAuthenticateMessage::AUTH_SUCCESS:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is authentic."));
 		QMessageBox::information(this, tr("Message is authentic"),
@@ -6284,7 +6018,7 @@ void MainWindow::authenticateMessageFile(void)
 		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
-	case Q_NOTEQUAL:
+	case TaskAuthenticateMessage::AUTH_NOT_EQUAL:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is not authentic."));
 		QMessageBox::critical(this, tr("Message is not authentic"),
@@ -6294,8 +6028,7 @@ void MainWindow::authenticateMessageFile(void)
 		    "since it was downloaded from Datové schránky."),
 		    QMessageBox::Ok);
 		break;
-	case Q_ISDS_ERROR:
-	case Q_CONNECT_ERROR:
+	case TaskAuthenticateMessage::AUTH_ISDS_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
@@ -6303,14 +6036,14 @@ void MainWindow::authenticateMessageFile(void)
 		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
-	case Q_FILE_ERROR:
+	case TaskAuthenticateMessage::AUTH_DATA_ERROR:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
 		QMessageBox::warning(this, tr("Message authentication failed"),
 		    tr("Authentication of message has been stopped because "
 		    "the message file has wrong format!"),
 		    QMessageBox::Ok);
 		break;
-	case Q_CANCEL:
+	case TaskAuthenticateMessage::AUTH_CANCELLED:
 		break;
 	default:
 		showStatusTextWithTimeout(tr("Message authentication failed."));
@@ -6354,8 +6087,31 @@ void MainWindow::verifySelectedMessage(void)
 	Q_ASSERT(dmId >= 0);
 	Q_ASSERT(deliveryTime.isValid());
 
-	switch (verifyMessage(userName, dmId, deliveryTime)) {
-	case Q_SUCCESS:
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	Q_ASSERT(0 != dbSet);
+
+	if (!isdsSessions.isConnectedToIsds(userName)) {
+		if (!connectToIsds(userName, this)) {
+			showStatusTextWithTimeout(tr("Message verification failed."));
+			QMessageBox::critical(this, tr("Verification error"),
+			    tr("An undefined error occurred!\nTry again."),
+			    QMessageBox::Ok);
+			return;
+		}
+	}
+
+	TaskVerifyMessage *task;
+
+	task = new (std::nothrow) TaskVerifyMessage(userName, dbSet, dmId,
+	    deliveryTime);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	TaskVerifyMessage::Result result = task->m_result;
+	delete task;
+
+	switch (result) {
+	case TaskVerifyMessage::VERIFY_SUCCESS:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is valid."));
 		QMessageBox::information(this, tr("Message is valid"),
@@ -6366,7 +6122,7 @@ void MainWindow::verifySelectedMessage(void)
 		    "Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
-	case Q_NOTEQUAL:
+	case TaskVerifyMessage::VERIFY_NOT_EQUAL:
 		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
 		    "that the message is not valid."));
 		QMessageBox::critical(this, tr("Message is not valid"),
@@ -6376,7 +6132,7 @@ void MainWindow::verifySelectedMessage(void)
 		    "since it was downloaded from Datové schránky."),
 		     QMessageBox::Ok);
 		break;
-	case Q_ISDS_ERROR:
+	case TaskVerifyMessage::VERIFY_ISDS_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification failed"),
 		    tr("Authentication of message has been stopped because "
@@ -6384,14 +6140,14 @@ void MainWindow::verifySelectedMessage(void)
 		    "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
-	case Q_SQL_ERROR:
+	case TaskVerifyMessage::VERIFY_SQL_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification error"),
 		    tr("The message hash is not in local database.\nPlease "
 		    "download complete message from ISDS and try again."),
 		    QMessageBox::Ok);
 		break;
-	case Q_GLOBAL_ERROR:
+	case TaskVerifyMessage::VERIFY_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
 		    tr("The message hash cannot be verified because an internal"
@@ -6497,8 +6253,6 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	QStringList fileList, filePathList;
 	QStringList nameFilter("*.zfo");
 	QDir directory(QDir::home());
-	fileList.clear();
-	filePathList.clear();
 
 	switch (importType) {
 	case ImportZFODialog::IMPORT_FROM_SUBDIR:
@@ -6531,8 +6285,9 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		}
 
 		if (filePathList.isEmpty()) {
-			qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the "
-			    "selected directory";
+			logWarning(
+			    "No *.zfo files in selected directory '%s'.\n",
+			    importDir.toUtf8().constData());
 			showStatusTextWithTimeout(tr("ZFO file(s) not found in "
 			    "selected directory."));
 			QMessageBox::warning(this,
@@ -6550,7 +6305,7 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		    tr("ZFO file (*.zfo)"));
 
 		if (filePathList.isEmpty()) {
-			qDebug() << "ZFO-IMPORT:" <<"No *.zfo selected file(s)";
+			logWarning("%s\n", "No selected *.zfo files.");
 			showStatusTextWithTimeout(
 			    tr("ZFO file(s) not selected."));
 			return;
@@ -6570,85 +6325,87 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	clearProgressBar();
 }
 
+/* ========================================================================= */
+void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
+    const QString &resultDesc)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	logDebugLv0NL("Received import ZFO finished for file '%s' %d: '%s'",
+	    fileName.toUtf8().constData(), result,
+	    resultDesc.toUtf8().constData());
+
+	switch (result) {
+	case TaskImportZfo::IMP_SUCCESS:
+		m_importSucceeded.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	case TaskImportZfo::IMP_DB_EXISTS:
+		m_importExisted.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	default:
+		m_importFailed.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	}
+
+	if (!m_zfoFilesToImport.remove(fileName)) {
+		logErrorNL("Processed ZFO file that '%s' the application "
+		    "has not been aware of.", fileName.toUtf8().constData());
+	}
+
+	if (m_zfoFilesToImport.isEmpty()) {
+		showImportZfoResultDialogue(m_numFilesToImport,
+		    m_importSucceeded, m_importExisted, m_importFailed);
+
+		m_numFilesToImport = 0;
+		m_importSucceeded.clear();
+		m_importExisted.clear();
+		m_importFailed.clear();
+
+		/* Activate import buttons. */
+		ui->actionImport_messages_from_database->setEnabled(true);
+		ui->actionImport_ZFO_file_into_database->setEnabled(true);
+	}
+}
 
 /* ========================================================================= */
 /*
  * Func: Create account info for ZFO file(s) import into database.
  */
-QList<MainWindow::AccountDataStruct> MainWindow::createAccountInfoForZFOImport(void)
+QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
+    bool activeOnly)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	AccountDataStruct accountData;
-	QList<AccountDataStruct> accountList;
-	accountList.clear();
+	QList<TaskImportZfo::AccountData> accountList;
 
-	/* get username, accountName, ID of databox and pointer to database
+	/* get userName and pointer to database
 	 * for all accounts from settings */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName =
-		    index.data(ROLE_ACNT_USER_NAME).toString();
+
+		QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
 		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
-		accountData.acntIndex = index;
-		accountData.username = userName;
-		accountData.accountName =
-		    AccountModel::globAccounts[userName].accountName();
-		accountData.databoxID =
-		    globAccountDbPtr->dbId(userName + "___True");
-		accountData.messageDbSet = dbSet;
-		accountList.append(accountData);
+
+		if ((!activeOnly) ||
+		    isdsSessions.isConnectedToIsds(userName) ||
+		    connectToIsds(userName, this)) {
+			MessageDbSet *messageDbSet = accountDbSet(userName,
+			    this);
+			Q_ASSERT(0 != messageDbSet);
+
+			accountList.append(
+			    TaskImportZfo::AccountData(userName, messageDbSet));
+		}
 	}
 
 	return accountList;
 }
 
-
-/* ========================================================================= */
-/*
- * Func: Get message type of import ZFO file (message/delivery/unknown).
- */
-int MainWindow::getMessageTypeFromZFO(const QString &file)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	int zfoType = -1;
-	struct isds_message *message = NULL;
-	struct isds_ctx *dummy_session = NULL;
-
-	dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		qDebug() << "ZFO-TYPE:"<< "Cannot create dummy ISDS session.";
-		return zfoType;
-	}
-
-	/* Check ZFO type */
-	message = loadZfoFile(dummy_session, file,
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-	if (NULL == message) {
-		message = loadZfoFile(dummy_session, file,
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
-		if (NULL == message) {
-			/* ZFO format unknown */
-			zfoType = 0;
-		} else {
-			/* ZFO is delivery info */
-			zfoType = 2;
-		}
-	} else {
-		/* ZFO is message */
-		zfoType = 1;
-	}
-
-	isds_message_free(&message);
-	isds_ctx_free(&dummy_session);
-
-	return zfoType;
-}
 
 /* ========================================================================= */
 /*
@@ -6660,603 +6417,106 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 {
 	debugFuncCall();
 
+	bool authenticate = true;
+
 	const QString progressBarTitle = "ZFOImport";
-	int zfoFileType = 0;
 	QPair<QString,QString> impZFOInfo;
 	QList<QPair<QString,QString>> errorFilesList; // red
 	QList<QPair<QString,QString>> existFilesList; // black
 	QList<QPair<QString,QString>> successFilesList; // green
-	QStringList messageZFOList;
-	QStringList deliveryZFOList;
-	int zfoCnt =  files.size();
+	QSet<QString> messageZfoFiles;
+	QSet<QString> deliveryZfoFiles;
+	int zfoCnt = files.size();
 
-	qDebug() << "ZFO-IMPORT:" << "number of ZFO:" << zfoCnt;
+	m_zfoFilesToImport.clear();
+	m_importSucceeded.clear();
+	m_importExisted.clear();
+	m_importFailed.clear();
+
+	logInfo("Trying to import %d ZFO files.\n", zfoCnt);
 
 	if (zfoCnt == 0) {
-		qDebug() << "ZFO-IMPORT:" << "No *.zfo file(s) in the fileList";
-		showStatusTextWithTimeout(tr("No ZFO file(s) for import."));
+		logInfo("%s\n", "No *.zfo files in received file list.");
+		showStatusTextWithTimeout(tr("No ZFO files to import."));
 		return;
 	}
 
-	QList<AccountDataStruct> const accountList =
-	    createAccountInfoForZFOImport();
+	const QList<TaskImportZfo::AccountData> accountList(
+	    createAccountInfoForZFOImport(authenticate));
 
 	if (accountList.isEmpty()) {
-		qDebug() << "ZFO-IMPORT:" << "There is no account for import.";
-		showStatusTextWithTimeout(tr("There is no account for "
-		    "import of ZFO file(s)."));
+		logInfo("%s\n", "No accounts to import into.");
+		showStatusTextWithTimeout(tr("There is no account to "
+		    "import of ZFO files into."));
 		return;
 	}
 
 	updateProgressBar(progressBarTitle, 5);
 
-	/* sort ZFOs by format type */
-	for (int i = 0; i < zfoCnt; i++) {
-		/* retrun -1=error, 0=unknown, 1=message, 2=delivery info */
-		zfoFileType = getMessageTypeFromZFO(files.at(i));
-		qDebug() << i << zfoFileType << files.at(i);
-
-
-		if (zfoFileType == 0) {
-			impZFOInfo.first = files.at(i);
+	/* Sort ZFOs by format types. */
+	foreach (const QString &file, files) {
+		switch (TaskImportZfo::determineFileType(file)) {
+		case TaskImportZfo::ZT_UKNOWN:
+			impZFOInfo.first = file;
 			impZFOInfo.second = tr("Wrong ZFO format. This "
 			    "file does not contain correct data for import.");
 			errorFilesList.append(impZFOInfo);
-		} else if (zfoFileType == 1) {
-			messageZFOList.append(files.at(i));
-		} else if (zfoFileType == 2) {
-			deliveryZFOList.append(files.at(i));
-		} else {
-			impZFOInfo.first = files.at(i);
-			impZFOInfo.second = tr("Error during file parsing.");
-			errorFilesList.append(impZFOInfo);
+			break;
+		case TaskImportZfo::ZT_MESSAGE:
+			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
+			    (ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType)) {
+				messageZfoFiles.insert(file);
+				m_zfoFilesToImport.insert(file);
+			}
+			break;
+		case TaskImportZfo::ZT_DELIVERY_INFO:
+			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
+			    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType)) {
+				deliveryZfoFiles.insert(file);
+				m_zfoFilesToImport.insert(file);
+			}
+			break;
+		default:
+			break;
 		}
 	}
+
+	m_numFilesToImport = m_zfoFilesToImport.size();
 
 	updateProgressBar(progressBarTitle, 10);
 
-	switch (zfoType) {
-	case ImportZFODialog::IMPORT_ALL_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_ALL_ZFO";
-		if (messageZFOList.isEmpty() && deliveryZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain "
-			        "any valid ZFO files."),
-			    QMessageBox::Ok);
-			return;
-		}
-		/* First, import messages. */
-		importMessageZFO(accountList, messageZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		/* Second, import delivery information. */
-		importDeliveryInfoZFO(accountList, deliveryZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	case ImportZFODialog::IMPORT_MESSAGE_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_MESSAGE_ZFO";
-		if (messageZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain "
-			         "any valid ZFO messages."),
-			    QMessageBox::Ok);
-			return;
-		}
-		importMessageZFO(accountList, messageZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	case ImportZFODialog::IMPORT_DELIVERY_ZFO:
-		qDebug() << "ZFO-IMPORT:" << "IMPORT_DELIVERY_ZFO";
-		if (deliveryZFOList.isEmpty()) {
-			QMessageBox::warning(this, tr("No ZFO file(s)"),
-			    tr("The selection does not contain any valid "
-			        "ZFO delivery infos."),
-			    QMessageBox::Ok);
-			return;
-		}
-		importDeliveryInfoZFO(accountList, deliveryZFOList,
-		    successFilesList, existFilesList, errorFilesList);
-		break;
-
-	default:
+	if (messageZfoFiles.isEmpty() && deliveryZfoFiles.isEmpty()) {
+		QMessageBox::warning(this, tr("No ZFO file(s)"),
+		    tr("The selection does not contain any valid ZFO files."),
+		    QMessageBox::Ok);
 		return;
-		break;
 	}
+
+	/* Block import buttons. */
+	ui->actionImport_messages_from_database->setEnabled(false);
+	ui->actionImport_ZFO_file_into_database->setEnabled(false);
 
 	updateProgressBar(progressBarTitle, 100);
 
-	showStatusTextWithTimeout(tr("Import of ZFO file(s) ... Completed"));
+	showStatusTextWithTimeout(tr("Import of ZFO files ... Planned"));
 
-	showNotificationDialogWithResult(zfoCnt, successFilesList,
-	    existFilesList, errorFilesList);
-}
+	/* First, import messages. */
+	foreach (const QString &fileName, messageZfoFiles) {
+		TaskImportZfo *task;
 
-
-/* ========================================================================= */
-/*
- * Func: Execute the import of delivery info ZFO file(s) into database.
- */
-void MainWindow::importDeliveryInfoZFO(
-    const QList<AccountDataStruct> &accountList, const QStringList &files,
-    QList<QPair<QString,QString>> &successFilesList,
-    QList<QPair<QString,QString>> &existFilesList,
-    QList<QPair<QString,QString>> &errorFilesList)
-/* ========================================================================= */
-{
-	/* ProgressBar text and diference */
-	const QString progressBarTitle = "ZFOImport";
-	float delta = 0.0;
-	float diff = 0.0;
-
-	int fileCnt = files.size();
-	QPair<QString,QString> importZFOInfo;
-	QString pInfoText = "";
-	QString nInfoText = "";
-	QString eInfoText = "";
-
-	updateProgressBar(progressBarTitle, 20);
-	delta = 80.0 / fileCnt;
-
-	/* for every ZFO file detect if message is in the database */
-	for (int i = 0; i < fileCnt; ++i) {
-
-		if (fileCnt == 0) {
-			updateProgressBar(progressBarTitle, 50);
-		} else {
-			diff += delta;
-			updateProgressBar(progressBarTitle, (20 + diff));
-		}
-
-		pInfoText = "";
-		nInfoText = "";
-		eInfoText = "";
-
-		showStatusTextPermanently(tr("Processing of "
-		    "delivery info ZFO: %1 ...").arg(files.at(i)));
-
-		struct isds_message *message = NULL;
-		struct isds_ctx *dummy_session = NULL;
-
-		dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			qDebug() << "Cannot create dummy ISDS session.";
-			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
-			    "failed!"));
-			/* TODO */
-			return;
-		}
-
-		message = loadZfoFile(dummy_session, files.at(i),
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
-		if (NULL == message || message->envelope == NULL) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = tr("Wrong ZFO "
-			    "format. This file does not contain correct "
-			    "data for import.");
-			errorFilesList.append(importZFOInfo);
-			isds_ctx_free(&dummy_session);
-			continue;
-		}
-
-		int resISDS = 0;
-		bool imported = false;
-		bool exists = false;
-		qint64 dmId = QString(message->envelope->dmID).toLongLong();
-		QDateTime deliveryTime = timevalToDateTime(message->envelope->dmDeliveryTime);
-		Q_ASSERT(deliveryTime.isValid());
-
-		for (int j = 0; j < accountList.size(); j++) {
-			/* check if message envelope is in database */
-			MessageDb *messageDb =
-			    accountList.at(j).messageDbSet->accessMessageDb(
-			        deliveryTime, true);
-			Q_ASSERT(0 != messageDb);
-			if (-1 != messageDb->msgsStatusIfExists(dmId)) {
-				/* check if raw is in database */
-				if (!messageDb->isDeliveryInfoRawDb(dmId)) {
-					/* Is/was ZFO message in ISDS */
-					resISDS = isImportMsgInISDS(files.at(i),
-					    accountList.at(j).acntIndex);
-					if (resISDS == MSG_IS_IN_ISDS) {
-						if (Q_SUCCESS ==
-						    Worker::storeDeliveryInfo(true,
-						    *(accountList.at(j).messageDbSet), message)) {
-							pInfoText += tr("Imported as delivery "
-							    "info for message "
-							    "\"%1\", account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
-							pInfoText += "<br/>";
-							imported = true;
-						} else {
-							nInfoText =
-							    tr("File has "
-							    "not been imported "
-							    "because an error "
-							    "was detected "
-							    "during insertion "
-							    "process.");
-						}
-					} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-						nInfoText = tr("Message \"%1\""
-						    " does not exists on the server "
-						    "Datové schránky.").arg(dmId);
-					} else if (resISDS == MSG_FILE_ERROR) {
-						nInfoText = tr("Couldn't open this file "
-						    "for authentication on the "
-						    "server Datové schránky.");
-					} else {
-						QMessageBox msgBox(this);
-						msgBox.setIcon(QMessageBox::Warning);
-						msgBox.setWindowTitle(tr("ZFO import problem"));
-						msgBox.setText(tr("Do you want to continue with import?"));
-						msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-						msgBox.setDefaultButton(QMessageBox::No);
-						if (QMessageBox::No == msgBox.exec()) {
-							nInfoText = tr("It is not possible "
-							    "to connect to server Datové "
-							    "schránky and verify validity of "
-							    "this ZFO file.");
-							nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-							importZFOInfo.first = files.at(i);
-							importZFOInfo.second = nInfoText;
-							errorFilesList.append(importZFOInfo);
-							isds_message_free(&message);
-							isds_ctx_free(&dummy_session);
-							showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
-							return;
-						} else {
-							nInfoText = tr("It is not possible "
-							    "to connect to server Datové "
-							    "schránky and verify validity of "
-							    "this ZFO file.");
-						}
-					}
-				} else {
-					exists = true;
-					eInfoText += tr("Delivery info for message \"%1\" already exists in the "
-					    "local database, account \"%2\".").
-					    arg(dmId).arg(accountList.at(j).accountName);
-					eInfoText += "<br/>";
-				}
-			} else {
-				nInfoText = tr("This file (delivery info) has "
-				    "not been inserted into database because "
-				    "there isn't any related message (%1) in "
-				    "the databases.").arg(dmId);
-			}
-		} // for
-
-		if (imported) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = pInfoText;
-			successFilesList.append(importZFOInfo);
-		} else if (exists){
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = eInfoText;
-			existFilesList.append(importZFOInfo);
-		} else {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = nInfoText;
-			errorFilesList.append(importZFOInfo);
-		}
-
-		isds_message_free(&message);
-		isds_ctx_free(&dummy_session);
+		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
+		    TaskImportZfo::ZT_MESSAGE, authenticate);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task);
 	}
+	/* Second, import delivery information. */
+	foreach (const QString &fileName, deliveryZfoFiles) {
+		TaskImportZfo *task;
 
-	updateProgressBar(progressBarTitle, 100);
-}
-
-
-/* ========================================================================= */
-/*
- * Func: Execute the import of message ZFO file(s) into database.
- */
-void  MainWindow::importMessageZFO(const QList<AccountDataStruct> &accountList,
-    const QStringList &files, QList<QPair<QString,QString>> &successFilesList,
-    QList<QPair<QString,QString>> &existFilesList,
-    QList<QPair<QString,QString>> &errorFilesList)
-/* ========================================================================= */
-{
-	/* ProgressBar text and diference */
-	const QString progressBarTitle = "ZFOImport";
-	float delta = 0.0;
-	float diff = 0.0;
-
-	int fileCnt = files.size();
-	QPair<QString,QString> importZFOInfo;
-	QString pInfoText = "";
-	QString nInfoText = "";
-	QString eInfoText = "";
-
-	updateProgressBar(progressBarTitle, 20);
-	delta = 80.0 / fileCnt;
-
-	/* for every ZFO file detect its database and message type */
-	for (int i = 0; i < fileCnt; ++i) {
-
-		if (fileCnt == 0) {
-			updateProgressBar(progressBarTitle, 50);
-		} else {
-			diff += delta;
-			updateProgressBar(progressBarTitle, (20 + diff));
-		}
-
-		pInfoText = "";
-		nInfoText = "";
-		eInfoText = "";
-
-		showStatusTextPermanently(tr("Processing of "
-		    "message ZFO: %1 ...").arg(files.at(i)));
-
-		struct isds_message *message = NULL;
-		struct isds_ctx *dummy_session = NULL;
-
-		dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			qDebug() << "Cannot create dummy ISDS session.";
-			showStatusTextWithTimeout(tr("Import of ZFO file(s) "
-			    "failed!"));
-			/* TODO */
-			return;
-		}
-
-		message = loadZfoFile(dummy_session, files.at(i),
-		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-		if (NULL == message || message->envelope == NULL) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = tr("Wrong ZFO format. "
-			    "File does not contain correct data for import.");
-			errorFilesList.append(importZFOInfo);
-			isds_ctx_free(&dummy_session);
-			continue;
-		}
-
-		QString dbIDSender = message->envelope->dbIDSender;
-		QString dbIDRecipient = message->envelope->dbIDRecipient;
-
-		/* save database username where message will be inserted */
-		QString isSent;
-		QString isReceived;
-		qint64 dmId = QString(message->envelope->dmID).toLongLong();
-		QDateTime deliveryTime = timevalToDateTime(message->envelope->dmDeliveryTime);
-		Q_ASSERT(deliveryTime.isValid());
-		int resISDS = 0;
-		bool import = false;
-		bool exists = false;
-
-		/* message type recognition {sent,received}, insert into DB */
-		for (int j = 0; j < accountList.size(); j++) {
-			MessageDb *messageDb =
-			    accountList.at(j).messageDbSet->accessMessageDb(
-			        deliveryTime, true);
-
-			/* is sent */
-			if (accountList.at(j).databoxID == dbIDSender) {
-
-				isSent = accountList.at(j).username;
-				qDebug() << dmId << "isSent" << isSent;
-
-				/* Is/was ZFO message in ISDS */
-				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).acntIndex);
-				if (resISDS == MSG_IS_IN_ISDS) {
-					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope(MSG_SENT, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_SENT, *(accountList.at(j).messageDbSet), message, "", 0, 0)) {
-							import = true;
-							pInfoText += tr("Imported as sent message "
-							    "\"%1\" into account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
-							pInfoText += "<br/>";
-						} else {
-							nInfoText =
-							    tr("File has "
-							    "not been imported "
-							    "because an error "
-							    "was detected "
-							    "during insertion "
-							    "process.");
-						}
-					} else {
-						exists = true;
-						eInfoText += tr("Message \"%1\" already exists in the "
-						    "local database, account \"%2\".").
-						    arg(dmId).arg(accountList.at(j).accountName);
-						eInfoText += "<br/>";
-					}
-				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-					nInfoText = tr("Message \"%1\""
-					    " does not exists on the server "
-					    "Datové schránky.").arg(dmId);
-				} else if (resISDS == MSG_FILE_ERROR) {
-					nInfoText = tr("Couldn't open this file "
-					    "for authentication on the "
-					    "server Datové schránky.");
-				} else {
-					QMessageBox msgBox(this);
-					msgBox.setIcon(QMessageBox::Warning);
-					msgBox.setWindowTitle(tr("ZFO import problem"));
-					msgBox.setText(tr("Do you want to continue with import?"));
-					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-					msgBox.setDefaultButton(QMessageBox::No);
-					if (QMessageBox::No == msgBox.exec()) {
-						nInfoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-						importZFOInfo.first = files.at(i);
-						importZFOInfo.second = nInfoText;
-						errorFilesList.append(importZFOInfo);
-						isds_message_free(&message);
-						isds_ctx_free(&dummy_session);
-						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
-						return;
-					} else {
-						nInfoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-					}
-				}
-			}
-
-			/* is received */
-			if (accountList.at(j).databoxID == dbIDRecipient) {
-				isReceived = accountList.at(j).username;
-				qDebug() << dmId << "isReceived" << isReceived;
-				resISDS = isImportMsgInISDS(files.at(i),
-				    accountList.at(j).acntIndex);
-
-				if (resISDS == MSG_IS_IN_ISDS) {
-					if (-1 == messageDb->msgsStatusIfExists(dmId)) {
-						Worker::storeEnvelope(MSG_RECEIVED, *(accountList.at(j).messageDbSet), message->envelope);
-						if (Q_SUCCESS == Worker::storeMessage(true, MSG_RECEIVED, *(accountList.at(j).messageDbSet), message, "", 0, 0)) {
-							import = true;
-							/* update message state into database */
-							messageDb->msgSetProcessState(dmId, SETTLED, false);
-							pInfoText += tr("Imported as received message "
-							    "\"%1\" into account \"%2\".").
-							    arg(dmId).arg(accountList.at(j).accountName);
-							pInfoText += "<br/>";
-						} else {
-							nInfoText =
-							    tr("File has "
-							    "not been imported "
-							    "because an error "
-							    "was detected "
-							    "during insertion "
-							    "process.");
-						}
-					} else {
-						exists = true;
-						eInfoText += tr("Message \"%1\" already exists in the "
-						    "local database, account \"%2\".").
-						    arg(dmId).arg(accountList.at(j).accountName);
-						eInfoText += "<br/>";
-					}
-				} else if (resISDS == MSG_IS_NOT_IN_ISDS) {
-					nInfoText = tr("Message \"%1\""
-					    " does not exists on the server "
-					    "Datové schránky.").arg(dmId);
-				} else if (resISDS == MSG_FILE_ERROR) {
-					nInfoText = tr("Couldn't open this file "
-					    "for authentication on the "
-					    "server Datové schránky.");
-				} else {
-					QMessageBox msgBox(this);
-					msgBox.setIcon(QMessageBox::Warning);
-					msgBox.setWindowTitle(tr("ZFO import problem"));
-					msgBox.setText(tr("Do you want to continue with import?"));
-					msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-					msgBox.setDefaultButton(QMessageBox::No);
-					if (QMessageBox::No == msgBox.exec()) {
-						nInfoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-						nInfoText += "<br/><br/>" + tr("Action was canceled by user...");
-						importZFOInfo.first = files.at(i);
-						importZFOInfo.second = nInfoText;
-						errorFilesList.append(importZFOInfo);
-						isds_message_free(&message);
-						isds_ctx_free(&dummy_session);
-						showStatusTextWithTimeout(tr("Import of ZFO file(s) was canceled"));
-						return;
-					} else {
-						nInfoText = tr("It is not possible "
-						    "to connect to server Datové "
-						    "schránky and verify validity of "
-						    "this ZFO file.");
-					}
-				}
-			}
-		} //for
-
-		/* */
-		if (isReceived.isNull() && isSent.isNull()) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = tr("For this file does not "
-			    "exist correct databox or relevant account.");
-			errorFilesList.append(importZFOInfo);
-		} else if (import) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = pInfoText;
-			successFilesList.append(importZFOInfo);
-		} else if (exists) {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = eInfoText;
-			existFilesList.append(importZFOInfo);
-		} else {
-			importZFOInfo.first = files.at(i);
-			importZFOInfo.second = nInfoText;
-			errorFilesList.append(importZFOInfo);
-		}
-
-		isds_message_free(&message);
-		isds_ctx_free(&dummy_session);
-	} //for
-
-	updateProgressBar(progressBarTitle, 100);
-}
-
-
-/* ========================================================================= */
-/*
- * Check if import ZFO file is/was in ISDS.
- */
-int MainWindow::isImportMsgInISDS(const QString &zfoFile,
-    QModelIndex accountIndex)
-/* ========================================================================= */
-{
-	Q_ASSERT(accountIndex.isValid());
-
-	size_t length;
-	isds_error status;
-	QByteArray bytes;
-	QFile file(zfoFile);
-
-	if (file.exists()) {
-		if (!file.open(QIODevice::ReadOnly)) {
-			qDebug() << "Couldn't open the file" << zfoFile;
-			return MSG_FILE_ERROR;
-		}
-
-		bytes = file.readAll();
-		length = bytes.size();
-	} else {
-		return MSG_FILE_ERROR;
-	}
-
-	accountIndex = AccountModel::indexTop(accountIndex);
-	const QString userName =
-	    accountIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return MSG_ISDS_ERROR;
-		}
-	}
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	Q_ASSERT(0 != session);
-
-	status = isds_authenticate_message(session, bytes.data(), length);
-
-	// not in ISDS
-	if (IE_NOTEQUAL == status) {
-		return MSG_IS_NOT_IN_ISDS;
-	}
-
-	if (IE_SUCCESS == status) {
-		// is/was in ISDS
-		return MSG_IS_IN_ISDS;
-	} else {
-		// any error
-		qDebug() << status << isds_strerror(status);
-		return MSG_ISDS_ERROR;
+		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
+		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
+		task->setAutoDelete(true);
+		globWorkPool.assign(task);
 	}
 }
 
@@ -7265,7 +6525,7 @@ int MainWindow::isImportMsgInISDS(const QString &zfoFile,
 /*
  * Show ZFO import notification dialog with results of import
  */
-void MainWindow::showNotificationDialogWithResult(int filesCnt,
+void MainWindow::showImportZfoResultDialogue(int filesCnt,
     const QList<QPair<QString,QString>> &successFilesList,
     const QList<QPair<QString,QString>> &existFilesList,
     const QList<QPair<QString,QString>> &errorFilesList)
@@ -7480,16 +6740,17 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
-	QString errMsg;
-	if (Q_SUCCESS == Worker::downloadMessage(userName,
-	        MessageDb::MsgId(dmId, deliveryTime), true,
-	        msgDirect, *dbSet, errMsg, QString(), 0, 0)) {
-		/* TODO -- Wouldn't it be better with selection changed? */
-		postDownloadSelectedMessageAttachments(userName, dmId);
-		return true;
-	}
+	bool ret = false;
+	TaskDownloadMessage *task;
 
-	return false;
+	task = new (std::nothrow) TaskDownloadMessage(
+	    userName, dbSet, msgDirect, dmId, deliveryTime);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
+	delete task;
+
+	return ret;
 }
 
 
@@ -9292,28 +8553,34 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	msgBox.setWindowTitle(tr("Datovka"));
 
 	/* check if some worker works now
-	 * if any worker is not working, lock mutex and show exit dialog,
+	 * if any worker is not working, lock mutex and show exit dialogue,
 	 * else waits for worker until he is done.
 	*/
-	if (Worker::downloadMessagesMutex.tryLock()) {
+	if (!globWorkPool.working()) {
+		/* TODO -- Ensure that nothing can be started in-between. */
+
 		msgBox.setIcon(QMessageBox::Question);
-		msgBox.setText(tr("Do you want to close application Datovka?"));
+		msgBox.setText(tr("Do you want to close Datovka?"));
 		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
 		msgBox.setDefaultButton(QMessageBox::Yes);
 		if (QMessageBox::No == msgBox.exec()) {
 			event->ignore();
 		}
-		Worker::downloadMessagesMutex.unlock();
 
 	} else {
-		event->ignore();
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setText(tr("Datovka cannot be closed now because "
-		    "downloading of messages on the background is running..."));
-		msgBox.setInformativeText(tr("Wait until the action will "
-		    "finished and try again."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.exec();
+		msgBox.setIcon(QMessageBox::Question);
+		msgBox.setText(
+		    tr("Datovka is currently receiving or sending messages."));
+		msgBox.setInformativeText(
+		    tr("Do you want to abort pending work and close Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			globWorkPool.stop();
+			globWorkPool.clear();
+		} else {
+			event->ignore();
+		}
 	}
 }
 

@@ -25,6 +25,8 @@
 #include "dlg_contacts.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_search_owner.h"
 
 
 DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
@@ -226,7 +228,8 @@ void DlgContacts::insertDsItems(void)
 
 				item = new QTableWidgetItem;
 				if (!m_dbEffectiveOVM) {
-					item->setText(getUserInfoFormIsds(
+					item->setText(getUserInfoFromIsds(
+					    m_userName,
 					    this->contactTableWidget->item(i,1)
 					    ->text()));
 				} else {
@@ -244,7 +247,8 @@ void DlgContacts::insertDsItems(void)
 /*
  * Get and return dbEffectiveOVM info for recipient
  */
-QString DlgContacts::getUserInfoFormIsds(QString idDbox)
+QString DlgContacts::getUserInfoFromIsds(const QString &userName,
+    const QString &idDbox)
 /* ========================================================================= */
 {
 	QString str = tr("no");
@@ -259,7 +263,15 @@ QString DlgContacts::getUserInfoFormIsds(QString idDbox)
 		return str;
 	}
 
-	isdsSearch(&box, m_userName, doi);
+	TaskSearchOwner *task;
+
+	task = new (std::nothrow) TaskSearchOwner(userName, doi);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	box = task->m_results; task->m_results = NULL;
+
+	delete task;
 	isds_DbOwnerInfo_free(&doi);
 
 	if (NULL != box) {

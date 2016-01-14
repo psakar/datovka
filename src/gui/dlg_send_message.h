@@ -32,9 +32,9 @@
 
 #include "src/common.h"
 #include "src/io/message_db_set.h"
-#include "ui_dlg_send_message.h"
-#include "src/io/isds_sessions.h"
 #include "src/models/accounts_model.h"
+#include "src/worker/task_send_message.h"
+#include "ui_dlg_send_message.h"
 
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
@@ -45,21 +45,6 @@ public:
 		ACT_NEW,
 		ACT_REPLY,
 		ACT_NEW_FROM_TMP
-	};
-
-	class MsgSendingResult {
-	public:
-		int status;
-		QString dbID;
-		QString recipientName;
-		qint64 dmId;
-		bool isPDZ;
-		QString errInfo;
-
-		MsgSendingResult(void)
-		    : status(-1), dbID(), recipientName(), dmId(-1),
-		    isPDZ(false), errInfo()
-		{ }
 	};
 
 	DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
@@ -110,12 +95,10 @@ private:
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
 
-	struct isds_list *buildDocuments(void) const;
-	struct isds_envelope *buildEnvelope(void) const;
-	MsgSendingResult sendSingleMessage(struct isds_message *message,
-	    int row) const;
+	bool buildDocuments(QList<IsdsDocument> &documents) const;
+	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
-	QString getUserInfoFormIsds(QString idDbox);
+	static
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 

@@ -832,32 +832,6 @@ fail:
 
 /* ========================================================================= */
 /*
- * Search DataBoxes.
- */
-isds_error isdsSearch(struct isds_list **result, const QString &userName,
-    const struct isds_DbOwnerInfo *ownerInfo)
-/* ========================================================================= */
-{
-	isds_error ret = IE_ERROR;
-
-	if ((NULL == result) || (NULL == ownerInfo)) {
-		return IE_ERROR;
-	}
-
-	struct isds_ctx *session = isdsSessions.session(userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		return IE_ERROR;
-	}
-
-	ret = isds_FindDataBox(session, ownerInfo, result);
-
-	qDebug() << ret << isds_strerror(ret);
-	return ret;
-}
-
-/* ========================================================================= */
-/*
  * Create DbUserInfo structure and Search DataBoxes.
  */
 struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
