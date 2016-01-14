@@ -77,7 +77,7 @@ public:
 	 * @param[in,out] dbSet     Database container.
 	 * @param[out]    error     Error description.
 	 * @param[out]    longError Long error description.
-	 * @return Error State.
+	 * @return Error state.
 	 */
 	static
 	enum Result downloadDeliveryInfo(const QString &userName,

@@ -32,8 +32,8 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
 
-TaskSendMessage::Result::Result(void)
-    : isdsRetError(IE_ERROR),
+TaskSendMessage::ResultData::ResultData(void)
+    : result(SM_ERR),
     dbIDRecipient(),
     recipientName(),
     dmId(-1),
@@ -45,7 +45,7 @@ TaskSendMessage::Result::Result(void)
 TaskSendMessage::TaskSendMessage(const QString &userName,
     MessageDbSet *dbSet, const IsdsMessage &message,
     const QString &recipientName, const QString &recipientAddress, bool isPDZ)
-    : m_sendingResult(),
+    : m_resultData(),
     m_userName(userName),
     m_dbSet(dbSet),
     m_message(message),
@@ -394,7 +394,7 @@ void TaskSendMessage::run(void)
 	}
 
 	sendMessage(m_userName, *m_dbSet, message, m_recipientName,
-	    m_recipientAddress, m_isPDZ, PL_SEND_MESSAGE, &m_sendingResult);
+	    m_recipientAddress, m_isPDZ, PL_SEND_MESSAGE, &m_resultData);
 
 	isds_message_free(&message);
 
@@ -406,20 +406,24 @@ void TaskSendMessage::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
-    MessageDbSet &dbSet, struct isds_message *message,
-    const QString &recipientName, const QString &recipientAddress,
-    bool isPDZ, const QString &progressLabel, TaskSendMessage::Result *result)
+enum TaskSendMessage::Result TaskSendMessage::sendMessage(
+    const QString &userName, MessageDbSet &dbSet, struct isds_message *message,
+    const QString &recipientName, const QString &recipientAddress, bool isPDZ,
+    const QString &progressLabel, TaskSendMessage::ResultData *resultData)
 {
 	Q_ASSERT(!userName.isEmpty());
 
 	Q_ASSERT(NULL != message);
 	Q_ASSERT(NULL != message->envelope);
 
+	enum TaskSendMessage::Result ret = SM_ERR;
+
 	isds_error status;
 	qint64 dmId = -1;
 	struct isds_envelope *envelope = message->envelope;
 	struct isds_ctx *session = NULL;
+
+	QString isdsError, isdsLongError;
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
@@ -427,16 +431,26 @@ qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
 	if (NULL == session) {
 		Q_ASSERT(0);
 		logErrorNL("%s", "Missing ISDS session.");
+		ret = SM_ERR;
 		goto fail;
 	}
 
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 	status = isds_send_message(session, message);
+	if (IE_SUCCESS != status) {
+		isdsError = isds_error(status);
+		isdsLongError = isds_long_message(session);
+		logErrorNL("Sending message returned status %d: '%s' '%s'.",
+		    status, isdsError.toUtf8().constData(),
+		    isdsLongError.toUtf8().constData());
+		ret = SM_ISDS_ERROR;
+		goto fail;
+	}
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
-	if (IE_SUCCESS == status) {
+	{
 		{
 			bool ok = false;
 			dmId = QString(envelope->dmID).toLongLong(&ok);
@@ -449,16 +463,27 @@ qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
 		QDateTime deliveryTime =
 		    timevalToDateTime(message->envelope->dmDeliveryTime);
 
-		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-		Q_ASSERT(0 != messageDb);
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
+		    true);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			ret = SM_DB_INS_ERR;
+			goto fail;
+		}
 
 		QString dbId = globAccountDbPtr->dbId(userName + "___True");
 		QString senderName =
 		    globAccountDbPtr->senderNameGuess(userName + "___True");
 
-		messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
-		    senderName, message->envelope->dbIDRecipient,
-		    recipientName, recipientAddress, envelope->dmAnnotation);
+		if (!messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
+		        senderName, message->envelope->dbIDRecipient,
+		        recipientName, recipientAddress,
+		        envelope->dmAnnotation)) {
+			logErrorNL("Cannot insert newly sent message '%d' "
+			    "into database.", dmId);
+			ret = SM_DB_INS_ERR;
+			goto fail;
+		}
 
 		emit globMsgProcEmitter.progressChange(progressLabel, 60);
 
@@ -467,19 +492,21 @@ qdatovka_error TaskSendMessage::sendMessage(const QString &userName,
 		emit globMsgProcEmitter.progressChange(progressLabel, 90);
 	}
 
-	if (0 != result) {
-		result->isdsRetError = status;
-		result->dbIDRecipient = message->envelope->dbIDRecipient;
-		result->recipientName = recipientName;
-		result->dmId = dmId;
-		result->isPDZ = isPDZ;
-		result->errInfo = isdsLongMessage(session);
-	}
+	ret = SM_SUCCESS;
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
-	return Q_SUCCESS;
-
 fail:
-	return Q_GLOBAL_ERROR;
+	if (0 != resultData) {
+		resultData->result = ret;
+		resultData->dbIDRecipient = message->envelope->dbIDRecipient;
+		resultData->recipientName = recipientName;
+		resultData->dmId = dmId;
+		resultData->isPDZ = isPDZ;
+		resultData->errInfo =
+		    (!isdsError.isEmpty() || !isdsLongError.isEmpty()) ?
+		        isdsError + " " + isdsLongError : ""; 
+	}
+
+	return ret;
 }

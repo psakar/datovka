@@ -149,16 +149,26 @@ public:
 class TaskSendMessage : public Task {
 public:
 	/*!
+	 * @brief Return state describing what happened.
+	 */
+	enum Result {
+		SM_SUCCESS, /*!< Operation was successful. */
+		SM_ISDS_ERROR, /*!< Error communicating with ISDS. */
+		SM_DB_INS_ERR, /*!< Error inserting into database. */
+		SM_ERR /*!< Other error. */
+	};
+
+	/*!
 	 * @brief Gives more detailed information about sending outcome.
 	 */
-	class Result {
+	class ResultData {
 	public:
 		/*!
 		 * @brief Constructor.
 		 */
-		Result(void);
+		ResultData(void);
 
-		int isdsRetError; /*!< Status as returned by libisds. */
+		enum Result result; /*!< Return state. */
 		QString dbIDRecipient; /*!< Recipient identifier. */
 		QString recipientName; /*!< Recipient name. */
 		qint64 dmId; /*!< Sent message identifier. */
@@ -188,7 +198,7 @@ public:
 	virtual
 	void run(void);
 
-	Result m_sendingResult; /*!< Sending outcome. */
+	ResultData m_resultData; /*!< Return state data. */
 
 private:
 	/*!
@@ -211,10 +221,10 @@ private:
 	 * @return Error state.
 	 */
 	static
-	qdatovka_error sendMessage(const QString &userName,
-	    MessageDbSet &dbSet, struct isds_message *message,
-	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ, const QString &progressLabel, Result *result);
+	enum Result sendMessage(const QString &userName, MessageDbSet &dbSet,
+	    struct isds_message *message, const QString &recipientName,
+	    const QString &recipientAddress, bool isPDZ,
+	    const QString &progressLabel, ResultData *result);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */

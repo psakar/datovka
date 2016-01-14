@@ -1004,7 +1004,7 @@ void DlgSendMessage::sendMessage(void)
 	QString detailText;
 
 	/* List of send message result */
-	QList<TaskSendMessage::Result> sentMsgResultList;
+	QList<TaskSendMessage::ResultData> sentMsgResultList;
 
 	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
@@ -1068,38 +1068,39 @@ void DlgSendMessage::sendMessage(void)
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
 
-		if (task->m_sendingResult.isdsRetError == IE_SUCCESS) {
+		if (TaskSendMessage::SM_SUCCESS == task->m_resultData.result) {
 			successSendCnt++;
 		}
 
-		sentMsgResultList.append(task->m_sendingResult);
+		sentMsgResultList.append(task->m_resultData);
 
 		delete task;
 	}
 
-	foreach (const TaskSendMessage::Result &result, sentMsgResultList) {
-		if (result.isdsRetError == IE_SUCCESS) {
-			if (result.isPDZ) {
+	foreach (const TaskSendMessage::ResultData &resultData,
+	         sentMsgResultList) {
+		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
+			if (resultData.isPDZ) {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
-				    arg(result.recipientName).
-				    arg(result.dbIDRecipient).
-				    arg(result.dmId) + "<br/>";
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
 			} else {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
-				    arg(result.recipientName).
-				    arg(result.dbIDRecipient).
-				    arg(result.dmId) + "<br/>";
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
 			}
 		} else {
 			detailText += tr("Message was NOT successfully "
 			    "sent to <i>%1 (%2)</i>. Server says: %3").
-			    arg(result.recipientName).
-			    arg(result.dbIDRecipient).
-			    arg(result.errInfo) + "<br/>";
+			    arg(resultData.recipientName).
+			    arg(resultData.dbIDRecipient).
+			    arg(resultData.errInfo) + "<br/>";
 		}
 	}
 
