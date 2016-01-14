@@ -328,7 +328,6 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 
 	TaskDownloadCreditInfo *task;
 
-
 	task = new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
@@ -1126,7 +1125,7 @@ void DlgSendMessage::sendMessage(void)
 		TaskSendMessage *task;
 
 		task = new (std::nothrow) TaskSendMessage(
-		    m_userName, &m_dbSet, message,
+		    m_userName, m_dbSet, message,
 		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
 		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));

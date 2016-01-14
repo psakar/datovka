@@ -106,12 +106,7 @@ private:
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
 
-<<<<<<< HEAD
 	static
-=======
-	QString getUserInfoFormIsds(const QString idDbox,
-	    const QString &userName);
->>>>>>> Second prototype of account selection in the send msg dialogue
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 
