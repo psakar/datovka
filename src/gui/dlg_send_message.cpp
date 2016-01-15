@@ -1114,6 +1114,8 @@ void DlgSendMessage::sendMessage(void)
 		goto finish;
 	}
 
+	this->setCursor(Qt::WaitCursor);
+
 	/* Send message to all recipients. */
 	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
 		/* Clear fields. */
@@ -1141,6 +1143,8 @@ void DlgSendMessage::sendMessage(void)
 
 		delete task;
 	}
+
+	this->setCursor(Qt::ArrowCursor);
 
 	foreach (const TaskSendMessage::ResultData &resultData,
 	         sentMsgResultList) {

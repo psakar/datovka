@@ -498,7 +498,7 @@ void MainWindow::clearStatusBar(void)
 /*
  * Slot: Update ProgressBar text and value.
  */
-void MainWindow::updateProgressBar(QString label, int value)
+void MainWindow::updateProgressBar(const QString &label, int value)
  /* ========================================================================= */
 {
 	//debugSlotCall();
@@ -512,7 +512,7 @@ void MainWindow::updateProgressBar(QString label, int value)
 /*
  * Slot: Update StatusBar text.
  */
-void MainWindow::updateStatusBarText(QString text)
+void MainWindow::updateStatusBarText(const QString &text)
 /* ========================================================================= */
 {
 	//debugSlotCall();

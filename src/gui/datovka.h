@@ -610,12 +610,12 @@ private slots:
 	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
-	void updateProgressBar(QString label, int value);
+	void updateProgressBar(const QString &label, int value);
 
 	/*!
 	 * @brief Set Status bar text.
 	 */
-	void updateStatusBarText(QString text);
+	void updateStatusBarText(const QString &text);
 
 	/*!
 	 * @brief Clear progerss bar text.
