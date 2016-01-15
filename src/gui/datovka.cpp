@@ -4876,7 +4876,7 @@ void MainWindow::openSendMessageDialog(int action)
 	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
 	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
 
-	sendMsgDialog->exec();
+	sendMsgDialog->show();
 
 }
 
