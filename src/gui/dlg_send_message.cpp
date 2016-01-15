@@ -1179,12 +1179,8 @@ void DlgSendMessage::sendMessage(void)
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
-
 		this->accept(); /* Set return code to accepted. */
-
 		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
-
-		return;
 	} else {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Warning);
@@ -1200,11 +1196,11 @@ void DlgSendMessage::sendMessage(void)
 			this->close(); /* Set return code to closed. */
 			emit doActionAfterSentMsgSignal(m_userName,
 			    m_lastAttAddPath);
-			return;
-		} else {
-			return;
 		}
+
 	}
+
+	return;
 
 finish:
 	QMessageBox msgBox;
