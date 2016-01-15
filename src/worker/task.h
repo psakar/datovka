@@ -54,6 +54,35 @@
 class Task : public QRunnable {
 public:
 	/*!
+	 * @brief Describes accounts that should be processed.
+	 */
+	class AccountDescr {
+	public:
+		/*!
+		 * @brief Constructors.
+		 */
+//		AccountDescr(void)
+//		    : userName(), messageDbSet(0)
+//		{ }
+		AccountDescr(const QString &uN, class MessageDbSet *mDS)
+		    : userName(uN), messageDbSet(mDS)
+		{ }
+
+		/*!
+		 * @brief Checks whether contains valid data.
+		 *
+		 * @return False if invalid data held.
+		 */
+		bool isValid(void) const
+		{
+			return !userName.isEmpty() && (0 != messageDbSet);
+		}
+
+		QString userName; /*!< Account identifier (user login name). */
+		class MessageDbSet *messageDbSet; /*!< Database set related to account. */
+	};
+
+	/*!
 	 * @brief Method to be implemented in derived classes.
 	 */
 	virtual

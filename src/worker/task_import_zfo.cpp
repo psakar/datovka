@@ -35,8 +35,8 @@
 #include "src/worker/task_authenticate_message.h"
 #include "src/worker/task_import_zfo.h"
 
-TaskImportZfo::TaskImportZfo(const QList<AccountData> &accounts, const QString &fileName,
-    enum ZfoType type, bool authenticate)
+TaskImportZfo::TaskImportZfo(const QList<Task::AccountDescr> &accounts,
+    const QString &fileName, enum ZfoType type, bool authenticate)
     : m_fileName(fileName),
     m_result(IMP_ERR),
 //    m_isdsError(),
@@ -202,7 +202,7 @@ TaskAuthenticateMessage::Result authenticateMessageFile(const QString &userName,
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
-    const TaskImportZfo::AccountData &acnt, const struct isds_message *message,
+    const Task::AccountDescr &acnt, const struct isds_message *message,
     qint64 dmId, const QDateTime &deliveryTime, enum MessageDirection direct,
     const QString &fileName, QString &isdsError, QString &isdsLongError,
     QString &resultDesc)
@@ -269,7 +269,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
-    const QList<AccountData> &accounts,
+    const QList<Task::AccountDescr> &accounts,
     const QString &fileName, bool authenticate, QString &resultDesc)
 {
 	struct isds_message *message = NULL;
@@ -311,7 +311,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 
 	float increment = 90.0 / accounts.size();
 
-	foreach (const AccountData &acnt, accounts) {
+	foreach (const Task::AccountDescr &acnt, accounts) {
 		isdsError.clear();
 		isdsLongError.clear();
 		resultDesc.clear();
@@ -359,7 +359,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
-    const TaskImportZfo::AccountData &acnt, const struct isds_message *message,
+    const Task::AccountDescr &acnt, const struct isds_message *message,
     qint64 dmId, const QDateTime &deliveryTime, const QString &fileName,
     QString &isdsError, QString &isdsLongError, QString &resultDesc)
 {
@@ -426,7 +426,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
-    const QList<TaskImportZfo::AccountData> &accounts, const QString &fileName,
+    const QList<Task::AccountDescr> &accounts, const QString &fileName,
     bool authenticate, QString &resultDesc)
 {
 	struct isds_message *message = NULL;
@@ -465,7 +465,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 
 	float increment = 90.0 / accounts.size();
 
-	foreach (const AccountData &acnt, accounts) {
+	foreach (const Task::AccountDescr &acnt, accounts) {
 		isdsError.clear();
 		isdsLongError.clear();
 		resultDesc.clear();

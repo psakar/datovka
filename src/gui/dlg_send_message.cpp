@@ -57,7 +57,7 @@
 
 
 DlgSendMessage::DlgSendMessage(
-    const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
+    const QList<Task::AccountDescr> &messageDbSetList,
     Action action, qint64 msgId, const QDateTime &deliveryTime,
     const QString &userName, MainWindow *mv, QWidget *parent)
     : QDialog(parent),
@@ -112,13 +112,14 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	Q_ASSERT(!m_userName.isEmpty());
 
-	for (int i = 0; i < m_messageDbSetList.count(); ++i) {
-		const QString userName = m_messageDbSetList.at(i).first;
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
 		const QString accountName =
-		    AccountModel::globAccounts[userName].accountName() +
-		    " (" + userName + ")";
-		this->fromComboBox->addItem(accountName, QVariant(userName));
-		if (m_userName == userName) {
+		    AccountModel::globAccounts[acnt.userName].accountName() +
+		    " (" + acnt.userName + ")";
+		this->fromComboBox->addItem(accountName, QVariant(acnt.userName));
+		if (m_userName == acnt.userName) {
+			int i = this->fromComboBox->count() - 1;
+			Q_ASSERT(0 <= i);
 			this->fromComboBox->setCurrentIndex(i);
 			setAccountInfo(i);
 		}
@@ -267,9 +268,9 @@ void DlgSendMessage::setAccountInfo(int item)
 		m_isLogged = false;
 	}
 
-	for (int i = 0; i < m_messageDbSetList.count(); ++i) {
-		if (m_messageDbSetList.at(i).first == m_userName) {
-			m_dbSet = m_messageDbSetList.at(i).second;
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
+		if (acnt.userName == m_userName) {
+			m_dbSet = acnt.messageDbSet;
 			break;
 		}
 	}
@@ -284,8 +285,8 @@ void DlgSendMessage::setAccountInfo(int item)
 	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
 	if (!accountData.isEmpty()) {
 		m_dbType = accountData.at(0);
-		m_dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-		m_dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+		m_dbEffectiveOVM = (accountData.at(1) == "1");
+		m_dbOpenAddressing = (accountData.at(2) == "1");
 	}
 	if (globPref.use_global_paths) {
 		m_lastAttAddPath = globPref.add_file_to_attachments_path;

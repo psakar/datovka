@@ -45,7 +45,7 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
-#include "src/worker/task_import_zfo.h" /* TODO -- remove this header file. */
+#include "src/worker/task.h" /* TODO -- remove this header file. */
 
 
 namespace Ui {
@@ -555,7 +555,7 @@ private slots:
 	 * @param[in] activeOnly Whether to list only active accounts.
 	 * @return List of accounts.
 	 */
-	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(
+	QList<Task::AccountDescr> createAccountInfoForZFOImport(
 	    bool activeOnly);
 
 	/*!
@@ -669,12 +669,12 @@ private slots:
 	 */
 	void splitMsgDbByYearsSlot(void);
 
- 	/*!
+	/*!
 	 * @brief Store last add attachment path and refresh accountlist
 	 *        after sent message slot.
 	 */
-	void doActionAfterSentMsgSlot(const QString userName,
-	    const QString lastDir);
+	void doActionAfterSentMsgSlot(const QString &userName,
+	    const QString &lastDir);
 
 private:
 

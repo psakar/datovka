@@ -34,6 +34,7 @@
 #include "src/gui/datovka.h"
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
+#include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
@@ -48,7 +49,7 @@ public:
 		ACT_NEW_FROM_TMP
 	};
 
-	DlgSendMessage(const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
+	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    Action action, qint64 msgId, const QDateTime &deliveryTime,
 	    const QString &userName, MainWindow *mv, QWidget *parent = 0);
 
@@ -79,7 +80,7 @@ private slots:
 
 private:
 	QTimer *pingTimer;
-	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
+	const QList<Task::AccountDescr> m_messageDbSetList;
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;
 	QString m_dbId;

@@ -4829,13 +4829,12 @@ void MainWindow::openSendMessageDialog(int action)
 {
 	debugFuncCall();
 
-	QPair <QString, MessageDbSet *> userNameAndMsgDbSet;
-	QList< QPair<QString, MessageDbSet *> > messageDbList;
+	QList<Task::AccountDescr> messageDbList;
 	qint64 msgId = -1;
 	QDateTime deliveryTime;
 
 	/* get username of selected account */
-	const QString userName = userNameFromItem();
+	const QString userName(userNameFromItem());
 	Q_ASSERT(!userName.isEmpty());
 
 	/* if not reply, get pointers to database for other accounts */
@@ -4845,17 +4844,14 @@ void MainWindow::openSendMessageDialog(int action)
 			const QString uName =
 			    index.data(ROLE_ACNT_USER_NAME).toString();
 			Q_ASSERT(!uName.isEmpty());
-			MessageDbSet *dbSet = accountDbSet(uName,this);
-			userNameAndMsgDbSet.first = uName;
-			userNameAndMsgDbSet.second = dbSet;
-			messageDbList.append(userNameAndMsgDbSet);
+			MessageDbSet *dbSet = accountDbSet(uName, this);
+			Q_ASSERT(0 != dbSet);
+			messageDbList.append(Task::AccountDescr(uName, dbSet));
 		}
 	} else {
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		Q_ASSERT(0 != dbSet);
-		userNameAndMsgDbSet.first = userName;
-		userNameAndMsgDbSet.second = dbSet;
-		messageDbList.append(userNameAndMsgDbSet);
+		messageDbList.append(Task::AccountDescr(userName, dbSet));
 	}
 
 	/* if is reply or template, ID of selected message is required */
@@ -4890,8 +4886,8 @@ void MainWindow::openSendMessageDialog(int action)
  * Slot: Store last add attachment path and refresh accountlist after sent
  *       message.
  */
-void MainWindow::doActionAfterSentMsgSlot(const QString userName,
-    const QString lastDir)
+void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
+    const QString &lastDir)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -4907,8 +4903,7 @@ void MainWindow::doActionAfterSentMsgSlot(const QString userName,
 	/* refersh account list if the current selected username
 	 * corresponds with sending username.
 	 */
-	const QString currentUserName = userNameFromItem();
-	if (currentUserName == userName) {
+	if (userName == userNameFromItem()) {
 		refreshAccountList(userName);
 	}
 
@@ -6399,13 +6394,13 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 /*
  * Func: Create account info for ZFO file(s) import into database.
  */
-QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
+QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
     bool activeOnly)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QList<TaskImportZfo::AccountData> accountList;
+	QList<Task::AccountDescr> accountList;
 
 	/* get userName and pointer to database
 	 * for all accounts from settings */
@@ -6423,7 +6418,7 @@ QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
 			Q_ASSERT(0 != messageDbSet);
 
 			accountList.append(
-			    TaskImportZfo::AccountData(userName, messageDbSet));
+			    Task::AccountDescr(userName, messageDbSet));
 		}
 	}
 
@@ -6465,7 +6460,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	const QList<TaskImportZfo::AccountData> accountList(
+	const QList<Task::AccountDescr> accountList(
 	    createAccountInfoForZFOImport(authenticate));
 
 	if (accountList.isEmpty()) {
