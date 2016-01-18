@@ -676,11 +676,12 @@ void DlgSendMessage::addAttachmentFile(void)
 	foreach (const QString &fileName, fileNames) {
 
 //		int fileSize = QFile(fileName).size();
-//		if (fileSize > MAX_ATTACHMENT_SIZE) {
+//		if (fileSize > MAX_ATTACHMENT_SIZE_BYTES) {
 //			QMessageBox::warning(this, tr("Wrong file size"),
 //			    tr("File '%1' could not be added into attachment "
-//			    "because its size is bigger than 20MB.").
-//			    arg(fileName),
+//			    "because its size is bigger than %2 MB.").
+//			    arg(fileName).
+//			    arg(QString::number(MAX_ATTACHMENT_SIZE_MB)),
 //			    QMessageBox::Ok);
 //			continue;
 //		}
@@ -812,12 +813,14 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 			this->attachmentSizeInfo->setText(
 			    tr("Total size of attachments is ~%1 KB").
 			    arg(aSize/1024));
-			if (aSize >= MAX_ATTACHMENT_SIZE) {
+			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
 				this->attachmentSizeInfo->
 				     setStyleSheet("QLabel { color: red }");
 				this->attachmentSizeInfo->setText(
 				    tr("Warning: Total size of attachments "
-				    "is larger than 10 MB!"));
+				        "is larger than %1 MB!").
+				    arg(QString::number(
+				        MAX_ATTACHMENT_SIZE_MB)));
 			}
 		} else {
 			this->attachmentSizeInfo->setText(
