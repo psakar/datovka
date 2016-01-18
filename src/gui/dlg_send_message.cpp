@@ -248,7 +248,7 @@ void DlgSendMessage::setAccountInfo(int item)
 {
 	debugSlotCall();
 
-	/* get username for selectet account */
+	/* Get user name for selected account. */
 	const QString userName = this->fromComboBox->itemData(item).toString();
 
 	if (!userName.isEmpty()) {

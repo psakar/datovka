@@ -192,8 +192,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
 	/* Worker-related processing signals. */
-	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
 	    this,
@@ -206,6 +204,13 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
+	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
+	    this, SLOT(updateProgressBar(QString, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
+	        QString, QString, bool, qint64)), this,
+	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
+	        QString, QString, bool, qint64)));
 	connect(&globWorkPool, SIGNAL(finished()),
 	    this, SLOT(workersFinished()));
 
@@ -2352,6 +2357,38 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
 	}
+}
+
+void MainWindow::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId)
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) userName;
+	(void) transactId;
+	(void) resultDesc;
+	(void) isPDZ;
+	(void) dmId;
+
+	if (TaskSendMessage::SM_SUCCESS == result) {
+		showStatusTextWithTimeout(tr(
+		    "Message from '%1' (%2) has been successfully sent to '%3' (%4).").
+		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(userName).arg(recipientName).arg(dbIDRecipient));
+
+		/* Refresh account list. */
+		refreshAccountList(userName);
+	} else {
+		showStatusTextWithTimeout(tr(
+		    "Error while sending message from '%1' (%2) to '%3' (%4).").
+		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(userName).arg(recipientName).arg(dbIDRecipient));
+	}
+
+	clearProgressBar();
 }
 
 /* ========================================================================= */
@@ -4883,8 +4920,7 @@ void MainWindow::openSendMessageDialog(int action)
 
 /* ========================================================================= */
 /*
- * Slot: Store last add attachment path and refresh accountlist after sent
- *       message.
+ * Slot: Store last add attachment path.
  */
 void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
     const QString &lastDir)
@@ -4892,22 +4928,13 @@ void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
 {
 	debugSlotCall();
 
+	/* Unused. */
+	(void) userName;
+
 	if (!globPref.use_global_paths) {
 		m_add_attach_dir = lastDir;
 		storeExportPath();
 	}
-
-	showStatusTextWithTimeout(tr("Message from account \"%1\" was "
-	    "send.").arg(userName));
-
-	/* refersh account list if the current selected username
-	 * corresponds with sending username.
-	 */
-	if (userName == userNameFromItem()) {
-		refreshAccountList(userName);
-	}
-
-	clearProgressBar();
 }
 
 

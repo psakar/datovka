@@ -153,6 +153,14 @@ private slots:
 	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
+	 * @brief Performs action depending on message send outcome.
+	 */
+	void collectSendMessageStatus(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId);
+
+	/*!
 	 * @brief Version response slot.
 	 */
 	void datovkaVersionResponce(QNetworkReply* reply);
@@ -670,8 +678,7 @@ private slots:
 	void splitMsgDbByYearsSlot(void);
 
 	/*!
-	 * @brief Store last add attachment path and refresh accountlist
-	 *        after sent message slot.
+	 * @brief Store last add attachment path.
 	 */
 	void doActionAfterSentMsgSlot(const QString &userName,
 	    const QString &lastDir);
