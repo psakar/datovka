@@ -647,9 +647,9 @@ void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
 {
 	if (isdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
+		logInfo("%s\n", "Connection to ISDS is alive :)");
 	} else {
-		qDebug() << "Connection to ISDS is dead :(";
+		logWarning("%s\n", "Connection to ISDS is dead :(");
 	}
 }
 
@@ -1173,7 +1173,7 @@ finish:
 	QMessageBox msgBox;
 	msgBox.setIcon(QMessageBox::Critical);
 	msgBox.setWindowTitle(tr("Send message error"));
-	msgBox.setText(tr("It was not possible to send message "
+	msgBox.setText(tr("It has not been possible to send a message "
 	    "to the server Datové schránky."));
 	detailText += "\n\n" + tr("The message will be discarded.");
 	msgBox.setInformativeText(detailText);
@@ -1225,23 +1225,25 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 			++successfullySentCnt;
 
 			if (resultData.isPDZ) {
-				detailText += tr("Message was successfully "
-				    "sent to <i>%1 (%2)</i> as PDZ with number "
+				detailText += tr(
+				    "Message has successfully been sent to "
+				    "<i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
 				    arg(resultData.recipientName).
 				    arg(resultData.dbIDRecipient).
 				    arg(resultData.dmId) + "<br/>";
 			} else {
-				detailText += tr("Message was successfully "
-				    "sent to <i>%1 (%2)</i> as message number "
+				detailText += tr(
+				    "Message has successfully been sent to "
+				    "<i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
 				    arg(resultData.recipientName).
 				    arg(resultData.dbIDRecipient).
 				    arg(resultData.dmId) + "<br/>";
 			}
 		} else {
-			detailText += tr("Message was NOT successfully "
-			    "sent to <i>%1 (%2)</i>. Server says: %3").
+			detailText += tr("Message has NOT been sent to "
+			    "<i>%1 (%2)</i>. Server says: %3").
 			    arg(resultData.recipientName).
 			    arg(resultData.dbIDRecipient).
 			    arg(resultData.errInfo) + "<br/>";
@@ -1252,9 +1254,9 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	if (this->recipientTableWidget->rowCount() == successfullySentCnt) {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Message was sent"));
+		msgBox.setWindowTitle(tr("Message sent"));
 		msgBox.setText("<b>" +
-		    tr("Message was successfully sent to all recipients.") +
+		    tr("Message has successfully been sent to all recipients.") +
 		    "</b>");
 		msgBox.setInformativeText(detailText);
 		msgBox.setStandardButtons(QMessageBox::Ok);
@@ -1265,9 +1267,9 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	} else {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Message was sent with error"));
+		msgBox.setWindowTitle(tr("Message sending error"));
 		msgBox.setText("<b>" +
-		    tr("Message was NOT successfully sent to all recipients.") +
+		    tr("Message has NOT been sent to all recipients.") +
 		    "</b>");
 		detailText += "<br/><br/><b>" +
 		    tr("Do you want to close the Send message form?") + "</b>";
