@@ -1126,6 +1126,7 @@ void DlgSendMessage::sendMessage(void)
 	}
 
 	this->setCursor(Qt::WaitCursor);
+	this->setEnabled(false);
 
 	/*
 	 * Generate unique identifiers.
@@ -1210,6 +1211,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	/* All transactions finished. */
 
 	this->setCursor(Qt::ArrowCursor);
+	this->setEnabled(true);
 
 	int successfullySentCnt = 0;
 	QString detailText;
