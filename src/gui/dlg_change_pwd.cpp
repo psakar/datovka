@@ -116,7 +116,8 @@ void DlgChangePwd::pingIsdsServer(void)
 void DlgChangePwd::generatePassword(void)
 /* ========================================================================= */
 {
-	QString pwd = generateRandomString();
+	/* set one digit as last char */
+	QString pwd = generateRandomString(randomStringLength) + "0";
 	this->newPwdLineEdit->setText(pwd);
 	this->NewPwdLineEdit2->setText(pwd);
 }
@@ -126,18 +127,17 @@ void DlgChangePwd::generatePassword(void)
 /*
  * Generate a new password string from set of char
  */
-QString DlgChangePwd::generateRandomString(void)
+QString DlgChangePwd::generateRandomString(int stringLength)
 /* ========================================================================= */
 {
 	QString randomString;
 
-	for(int i=0; i<randomStringLength; ++i) {
+	for(int i = 0; i < stringLength; ++i) {
 		int index = qrand() % possibleCharacters.length();
 		QChar nextChar = possibleCharacters.at(index);
 		randomString.append(nextChar);
 	}
-	/* set one digit as last char */
-	return randomString + "0";
+	return randomString;
 }
 
 

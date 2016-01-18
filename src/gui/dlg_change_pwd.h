@@ -43,6 +43,9 @@ public:
 	DlgChangePwd(const QString &boxId, const QString &userName,
 	    QWidget *parent = 0);
 
+	static
+	QString generateRandomString(int stringLength);
+
 private slots:
 	void generatePassword(void);
 	void showHidePasswordLine(void);
@@ -54,9 +57,6 @@ private slots:
 private:
 	QTimer *pingTimer;
 	void initPwdChangeDialog(void);
-
-	static
-	QString generateRandomString(void);
 
 	static
 	const QString possibleCharacters;

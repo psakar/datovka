@@ -34,20 +34,32 @@
 
 TaskSendMessage::ResultData::ResultData(void)
     : result(SM_ERR),
+    errInfo(),
     dbIDRecipient(),
     recipientName(),
-    dmId(-1),
     isPDZ(false),
-    errInfo()
+    dmId(-1)
+{
+}
+
+TaskSendMessage::ResultData::ResultData(enum Result res, const QString &eInfo,
+    const QString &recId, const QString &recName, bool pdz, qint64 mId)
+    : result(res),
+    errInfo(eInfo),
+    dbIDRecipient(recId),
+    recipientName(recName),
+    isPDZ(pdz),
+    dmId(mId)
 {
 }
 
 TaskSendMessage::TaskSendMessage(const QString &userName,
-    MessageDbSet *dbSet, const IsdsMessage &message,
+    MessageDbSet *dbSet, const QString &transactId, const IsdsMessage &message,
     const QString &recipientName, const QString &recipientAddress, bool isPDZ)
     : m_resultData(),
     m_userName(userName),
     m_dbSet(dbSet),
+    m_transactId(transactId),
     m_message(message),
     m_recipientName(recipientName),
     m_recipientAddress(recipientAddress),
@@ -397,6 +409,11 @@ void TaskSendMessage::run(void)
 	    m_recipientAddress, m_isPDZ, PL_SEND_MESSAGE, &m_resultData);
 
 	isds_message_free(&message);
+
+	emit globMsgProcEmitter.sendMessageFinished(m_userName, m_transactId,
+	    m_resultData.result, m_resultData.errInfo,
+	    m_resultData.dbIDRecipient, m_resultData.recipientName,
+	    m_isPDZ, m_resultData.dmId);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 

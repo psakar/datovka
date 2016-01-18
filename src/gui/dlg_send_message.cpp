@@ -29,6 +29,7 @@
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
+#include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
@@ -41,6 +42,7 @@
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_send_message.h"
@@ -76,7 +78,9 @@ DlgSendMessage::DlgSendMessage(
     m_dmType(""),
     m_dmSenderRefNumber(""),
     m_mv(mv),
-    m_isLogged(false)
+    m_isLogged(false),
+    m_transactIds(),
+    m_sentMsgResultList()
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -195,6 +199,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
+	        QString, QString, bool, qint64)), this,
+	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
+	        QString, QString, bool, qint64)));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -1072,12 +1081,14 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	QString detailText;
 
-	/* List of send message result */
-	QList<TaskSendMessage::ResultData> sentMsgResultList;
+	/* List of unique identifiers. */
+	QList<QString> taskIdentifiers;
+	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
 
-	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
 
 	/* Compute number of messages which the sender has to pay for. */
@@ -1116,6 +1127,22 @@ void DlgSendMessage::sendMessage(void)
 
 	this->setCursor(Qt::WaitCursor);
 
+	/*
+	 * Generate unique identifiers.
+	 * These must be complete before creating first task.
+	 */
+	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
+		QString taskIdentifier =
+		    m_userName + "_" +
+		    this->recipientTableWidget->item(row, RTW_ID)->text() +
+		    "_" + currentTime.toString() + "_" +
+		    DlgChangePwd::generateRandomString(6);
+
+		taskIdentifiers.append(taskIdentifier);
+	}
+	m_transactIds = taskIdentifiers.toSet();
+	m_sentMsgResultList.clear();
+
 	/* Send message to all recipients. */
 	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
 		/* Clear fields. */
@@ -1128,27 +1155,70 @@ void DlgSendMessage::sendMessage(void)
 		TaskSendMessage *task;
 
 		task = new (std::nothrow) TaskSendMessage(
-		    m_userName, m_dbSet, message,
+		    m_userName, m_dbSet, taskIdentifiers.at(row), message,
 		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
 		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
-
-		if (TaskSendMessage::SM_SUCCESS == task->m_resultData.result) {
-			successSendCnt++;
-		}
-
-		sentMsgResultList.append(task->m_resultData);
-
-		delete task;
+		task->setAutoDelete(true);
+		globWorkPool.assignHi(task);
 	}
+
+	return;
+
+finish:
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Critical);
+	msgBox.setWindowTitle(tr("Send message error"));
+	msgBox.setText(tr("It was not possible to send message "
+	    "to the server Datové schránky."));
+	detailText += "\n\n" + tr("The message will be discarded.");
+	msgBox.setInformativeText(detailText);
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
+	this->close();
+}
+
+void DlgSendMessage::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId)
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) userName;
+
+	if (m_transactIds.end() == m_transactIds.find(transactId)) {
+		/* Nothing found. */
+		return;
+	}
+
+	m_sentMsgResultList.append(TaskSendMessage::ResultData(
+	    (enum TaskSendMessage::Result) result, resultDesc,
+	    dbIDRecipient, recipientName, isPDZ, dmId));
+
+	if (!m_transactIds.remove(transactId)) {
+		logErrorNL("%s", "Could not be able to remove a transaction "
+		    "identifier from list of unfinished transactions.");
+	}
+
+	if (!m_transactIds.isEmpty()) {
+		/* Still has some pending transactions. */
+		return;
+	}
+
+	/* All transactions finished. */
 
 	this->setCursor(Qt::ArrowCursor);
 
+	int successfullySentCnt = 0;
+	QString detailText;
+
 	foreach (const TaskSendMessage::ResultData &resultData,
-	         sentMsgResultList) {
+	         m_sentMsgResultList) {
 		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
+			++successfullySentCnt;
+
 			if (resultData.isPDZ) {
 				detailText += tr("Message was successfully "
 				    "sent to <i>%1 (%2)</i> as PDZ with number "
@@ -1172,13 +1242,15 @@ void DlgSendMessage::sendMessage(void)
 			    arg(resultData.errInfo) + "<br/>";
 		}
 	}
+	m_sentMsgResultList.clear();
 
-	if (this->recipientTableWidget->rowCount() == successSendCnt) {
+	if (this->recipientTableWidget->rowCount() == successfullySentCnt) {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Information);
 		msgBox.setWindowTitle(tr("Message was sent"));
-		msgBox.setText("<b>"+tr("Message was successfully sent to "
-		    "all recipients.")+"</b>");
+		msgBox.setText("<b>" +
+		    tr("Message was successfully sent to all recipients.") +
+		    "</b>");
 		msgBox.setInformativeText(detailText);
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setDefaultButton(QMessageBox::Ok);
@@ -1189,36 +1261,21 @@ void DlgSendMessage::sendMessage(void)
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(tr("Message was sent with error"));
-		msgBox.setText("<b>"+tr("Message was NOT successfully sent "
-		    "to all recipients.")+"</b>");
+		msgBox.setText("<b>" +
+		    tr("Message was NOT successfully sent to all recipients.") +
+		    "</b>");
 		detailText += "<br/><br/><b>" +
-		    tr("Do you want to close the Send message form?") +"</b>";
+		    tr("Do you want to close the Send message form?") + "</b>";
 		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
 			emit doActionAfterSentMsgSignal(m_userName,
 			    m_lastAttAddPath);
 		}
-
 	}
-
-	return;
-
-finish:
-	QMessageBox msgBox;
-	msgBox.setIcon(QMessageBox::Critical);
-	msgBox.setWindowTitle(tr("Send message error"));
-	msgBox.setText(tr("It was not possible to send message "
-	    "to the server Datové schránky."));
-	detailText += "\n\n" + tr("The message will be discarded.");
-	msgBox.setInformativeText(detailText);
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.exec();
-	this->close();
 }
-
 
 /* ========================================================================= */
 /*

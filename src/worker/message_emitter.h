@@ -82,6 +82,24 @@ signals:
 	 * @param[in] value Progress value.
 	 */
 	void progressChange(const QString &label, int value);
+
+	/*
+	 * @brief Emitted when send message finishes.
+	 *
+	 * @param[in] userName      Account identifier (user login name).
+	 * @param[in] transactId    Transaction identifier.
+	 * @param[in] result        Operation outcome
+	 *                          (enum TaskSendMessage::Result).
+	 * @param[in] resultDesc    Result description string.
+	 * @param[in] dbIDRecipient Recipient identifier.
+	 * @param[in] recipientName Recipient name.
+	 * @param[in] isPDZ         True if message was a PDZ.
+	 * @param[in] dmId          Message identifier if message has been sent.
+	 */
+	void sendMessageFinished(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId);
 };
 
 /*!

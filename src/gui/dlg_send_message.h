@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
+#include <QSet>
 #include <QTimer>
 #include <QTreeView>
 
@@ -69,6 +70,10 @@ private slots:
 	void recItemSelect(void);
 	void checkInputFields(void);
 	void sendMessage(void);
+	void collectSendMessageStatus(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
 	void tableItemDoubleClicked(QTableWidgetItem *item);
@@ -97,6 +102,10 @@ private:
 	MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
 	bool m_isLogged;
+
+	/* Used to collect sending results. */
+	QSet<QString> m_transactIds;
+	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
 
 	void initNewMessageDialog(void);
 	void calculateAndShowTotalAttachSize(void);
