@@ -121,12 +121,22 @@ public:
 	void wait(void);
 
 	/*!
-	 * @brief Assign a task to be performed by a worker in the pool.
+	 * @brief Assign a low priority task to be performed by a worker in
+	 *     the pool.
 	 *
 	 * @param[in] task  Task to be performed by the worker.
 	 * @param[in] order Whether to prepend a task, default is append.
 	 */
-	void assign(QRunnable *task, enum EnqueueOrder order = APPEND);
+	void assignLo(QRunnable *task, enum EnqueueOrder order = APPEND);
+
+	/*!
+	 * @brief Assign a high priority task to be performed by a worker in
+	 *     the pool.
+	 *
+	 * @param[in] task  Task to be performed by the worker.
+	 * @param[in] order Whether to prepend a task, default is append.
+	 */
+	void assignHi(QRunnable *task, enum EnqueueOrder order = APPEND);
 
 	/*!
 	 * @brief Run a single task to be performed by a worker in the pool.
@@ -174,7 +184,20 @@ private:
 	bool m_suspended; /*!< Is the execution temporarily suspended? */
 	int m_running; /*!< Number of running threads. */
 
-	QQueue<QRunnable *> m_tasks; /*!< Queue of tasks. */
+	/*
+	 * Single task has the highest priority. It is used when the code
+	 * has to directly wait for the results -- it may block the event loop.
+	 * Single tasks are advised to have the auto delete property disabled.
+	 *
+	 * Tasks in high priority queue take precedence over all low priority
+	 * tasks. High priority tasks are mainly used for sending messages,
+	 * whereas low priority tasks are prevalently used for downloading
+	 * data. Tasks in these queues should have their auto delete properties
+	 * enabled as there is currently no other mechanism how to delete them.
+	 */
+	QRunnable *m_singleTask; /*!< Single task. */
+	QQueue<QRunnable *> m_tasksHi; /*!< Queue of high priority tasks. */
+	QQueue<QRunnable *> m_tasksLo; /*!< Queue of low priority tasks. */
 
 	/*
 	 * Single task has the highest priority. The runSingle() method
@@ -191,7 +214,6 @@ private:
 		FINISHED /*!< Task execution finished. */
 	};
 
-	QRunnable *m_singleTask; /*!< Single task. */
 	enum ExecutionState m_singleState; /*!< Single execution state. */
 };
 

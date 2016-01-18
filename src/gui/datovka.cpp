@@ -3227,12 +3227,12 @@ void MainWindow::synchroniseAllAccounts(void)
 			task = new (std::nothrow) TaskDownloadMessageList(
 			    userName, dbSet, MSG_RECEIVED);
 			task->setAutoDelete(true);
-			globWorkPool.assign(task);
+			globWorkPool.assignLo(task);
 
 			task = new (std::nothrow) TaskDownloadMessageList(
 			    userName, dbSet, MSG_SENT);
 			task->setAutoDelete(true);
-			globWorkPool.assign(task);
+			globWorkPool.assignLo(task);
 
 			appended = true;
 		}
@@ -3288,12 +3288,12 @@ void MainWindow::synchroniseSelectedAccount(void)
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_RECEIVED);
 	task->setAutoDelete(true);
-	globWorkPool.assign(task);
+	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_SENT);
 	task->setAutoDelete(true);
-	globWorkPool.assign(task);
+	globWorkPool.assignLo(task);
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
@@ -3371,7 +3371,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		task = new (std::nothrow) TaskDownloadMessage(
 		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task, WorkerPool::PREPEND);
+		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -6526,7 +6526,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
 		    TaskImportZfo::ZT_MESSAGE, authenticate);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task);
+		globWorkPool.assignLo(task);
 	}
 	/* Second, import delivery information. */
 	foreach (const QString &fileName, deliveryZfoFiles) {
@@ -6535,7 +6535,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
 		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task);
+		globWorkPool.assignLo(task);
 	}
 }
 

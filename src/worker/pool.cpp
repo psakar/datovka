@@ -49,8 +49,9 @@ WorkerPool::WorkerPool(unsigned threads, QObject *parent)
     m_terminating(false),
     m_suspended(false),
     m_running(0),
-    m_tasks(),
     m_singleTask(0),
+    m_tasksHi(),
+    m_tasksLo(),
     m_singleState(FINISHED)
 {
 	for (unsigned i = 0; i < threads; ++i) {
@@ -105,13 +106,14 @@ void WorkerPool::resume(void)
 void WorkerPool::wait(void)
 {
 	m_lock.lock();
-	while (!m_tasks.isEmpty() || (m_running > 0)) {
+	while ((0 != m_singleTask) || !m_tasksHi.isEmpty() ||
+	       !m_tasksLo.isEmpty() || (m_running > 0)) {
 		m_wake.wait(&m_lock);
 	}
 	m_lock.unlock();
 }
 
-void WorkerPool::assign(QRunnable *task, enum WorkerPool::EnqueueOrder order)
+void WorkerPool::assignLo(QRunnable *task, enum WorkerPool::EnqueueOrder order)
 {
 	if (0 == task) {
 		return;
@@ -119,9 +121,25 @@ void WorkerPool::assign(QRunnable *task, enum WorkerPool::EnqueueOrder order)
 
 	m_lock.lock();
 	if (APPEND == order) {
-		m_tasks.enqueue(task);
+		m_tasksLo.enqueue(task);
 	} else {
-		m_tasks.prepend(task);
+		m_tasksLo.prepend(task);
+	}
+	m_wake.wakeAll();
+	m_lock.unlock();
+}
+
+void WorkerPool::assignHi(QRunnable *task, enum WorkerPool::EnqueueOrder order)
+{
+	if (0 == task) {
+		return;
+	}
+
+	m_lock.lock();
+	if (APPEND == order) {
+		m_tasksHi.enqueue(task);
+	} else {
+		m_tasksHi.prepend(task);
 	}
 	m_wake.wakeAll();
 	m_lock.unlock();
@@ -151,15 +169,27 @@ void WorkerPool::runSingle(QRunnable *task)
 	m_lock.unlock();
 }
 
-void WorkerPool::clear(void)
+/*!
+ * @brief Empties task queues.
+ *
+ * @param[in,out] taskQueue Task queue to be emptied.
+ */
+static
+void clearTaskQueue(QQueue<QRunnable *> &taskQueue)
 {
-	m_lock.lock();
-	while (!m_tasks.isEmpty()) {
-		QRunnable *task = m_tasks.dequeue();
+	while (!taskQueue.isEmpty()) {
+		QRunnable *task = taskQueue.dequeue();
 		if (task->autoDelete()) {
 			delete task;
 		}
 	}
+}
+
+void WorkerPool::clear(void)
+{
+	m_lock.lock();
+	clearTaskQueue(m_tasksHi);
+	clearTaskQueue(m_tasksLo);
 	m_lock.unlock();
 }
 
@@ -168,7 +198,8 @@ bool WorkerPool::working(void)
 	bool isWorking = false;
 
 	m_lock.lock();
-	isWorking = !((0 == m_running) && m_tasks.isEmpty());
+	isWorking = !((0 == m_running) && (0 == m_singleTask) &&
+	    m_tasksHi.isEmpty() && m_tasksLo.isEmpty());
 	m_lock.unlock();
 
 	return isWorking;
@@ -190,8 +221,10 @@ void WorkerPool::run(WorkerPool *pool)
 			if ((0 != pool->m_singleTask) && (PENDING == pool->m_singleState)) {
 				task = pool->m_singleTask;
 				pool->m_singleState = EXECUTING;
-			} else if (!pool->m_tasks.isEmpty()) {
-				task = pool->m_tasks.dequeue();
+			} else if (!pool->m_tasksHi.isEmpty()) {
+				task = pool->m_tasksHi.dequeue();
+			} else if (!pool->m_tasksLo.isEmpty()) {
+				task = pool->m_tasksLo.dequeue();
 			}
 		}
 

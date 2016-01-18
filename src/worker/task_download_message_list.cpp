@@ -269,7 +269,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				    userName, &dbSet, msgDirect, dmId,
 				    deliveryTime);
 				task->setAutoDelete(true);
-				globWorkPool.assign(task, WorkerPool::PREPEND);
+				globWorkPool.assignLo(task, WorkerPool::PREPEND);
 			}
 			newMsgIdList.append(dmID);
 			newcnt++;
@@ -300,7 +300,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 					    userName, &dbSet, msgDirect, dmId,
 					    deliveryTime);
 					task->setAutoDelete(true);
-					globWorkPool.assign(task,
+					globWorkPool.assignLo(task,
 					    WorkerPool::PREPEND);
 				}
 
@@ -322,7 +322,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				    userName, &dbSet, msgDirect, dmId,
 				    deliveryTime);
 				task->setAutoDelete(true);
-				globWorkPool.assign(task, WorkerPool::PREPEND);
+				globWorkPool.assignLo(task, WorkerPool::PREPEND);
 			}
 		}
 
