@@ -8598,27 +8598,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	QMessageBox msgBox(this);
 	msgBox.setWindowTitle(tr("Datovka"));
 
-	/* check if some worker works now
-	 * if any worker is not working, lock mutex and show exit dialogue,
-	 * else waits for worker until he is done.
-	*/
-	if (!globWorkPool.working()) {
-		/* TODO -- Ensure that nothing can be started in-between. */
-
-		msgBox.setIcon(QMessageBox::Question);
-		msgBox.setText(tr("Do you want to close Datovka?"));
-		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		if (QMessageBox::No == msgBox.exec()) {
-			event->ignore();
-		}
-
-	} else {
+	/*
+	 * Check whether currently some tasks are being processed or are
+	 * pending. If nothing works finish immediately, else show question.
+	 */
+	if (globWorkPool.working()) {
 		msgBox.setIcon(QMessageBox::Question);
 		msgBox.setText(
-		    tr("Datovka is currently receiving or sending messages."));
-		msgBox.setInformativeText(
-		    tr("Do you want to abort pending work and close Datovka?"));
+		    tr("Datovka is currently processing some tasks."));
+		msgBox.setInformativeText(tr(
+		    "Do you want to abort pending actions and close Datovka?"));
 		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (QMessageBox::Yes == msgBox.exec()) {
