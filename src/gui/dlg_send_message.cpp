@@ -29,6 +29,7 @@
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
+#include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/models/accounts_model.h"
@@ -41,6 +42,7 @@
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_widget.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_send_message.h"
@@ -56,9 +58,12 @@
 #define RTW_PDZ 3
 
 
-DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
-    const QDateTime &deliveryTime, const QString &userName, QWidget *parent)
+DlgSendMessage::DlgSendMessage(
+    const QList<Task::AccountDescr> &messageDbSetList,
+    Action action, qint64 msgId, const QDateTime &deliveryTime,
+    const QString &userName, MainWindow *mv, QWidget *parent)
     : QDialog(parent),
+    m_messageDbSetList(messageDbSetList),
     m_msgID(msgId),
     m_deliveryTime(deliveryTime),
     m_dbId(""),
@@ -70,9 +75,12 @@ DlgSendMessage::DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
     m_dbOpenAddressing(false),
     m_lastAttAddPath(""),
     m_pdzCredit("0"),
-    m_dbSet(dbSet),
     m_dmType(""),
-    m_dmSenderRefNumber("")
+    m_dmSenderRefNumber(""),
+    m_mv(mv),
+    m_isLogged(false),
+    m_transactIds(),
+    m_sentMsgResultList()
 {
 	setupUi(this);
 	initNewMessageDialog();
@@ -88,7 +96,7 @@ void DlgSendMessage::on_cancelButton_clicked(void)
 
 /* ========================================================================= */
 /*
- * Init dialog
+ * Init send message dialogue.
  */
 void DlgSendMessage::initNewMessageDialog(void)
 /* ========================================================================= */
@@ -106,54 +114,23 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);
 
-
 	Q_ASSERT(!m_userName.isEmpty());
 
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[m_userName];
-
-	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
-
-	Q_ASSERT(!m_dbId.isEmpty());
-
-	m_senderName =
-	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
-
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
-
-	if (!accountData.isEmpty()) {
-		m_dbType = accountData.at(0);
-		m_dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-		m_dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
-	}
-
-	if (globPref.use_global_paths) {
-		m_lastAttAddPath = globPref.add_file_to_attachments_path;
-	} else {
-		m_lastAttAddPath = accountInfo.lastAttachAddPath();
-	}
-
-	if (m_dbOpenAddressing) {
-		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
-	}
-
-	QString dbOpenAddressingText = "";
-	if (!m_dbEffectiveOVM) {
-		if (m_dbOpenAddressing) {
-			dbOpenAddressingText =
-			    " - " + tr("sending of PDZ: enabled") + "; " +
-			    tr("remaining credit: ") + m_pdzCredit + " Kč";
-		} else {
-			dbOpenAddressingText =
-			    " - " + tr("sending of PDZ: disabled");
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
+		const QString accountName =
+		    AccountModel::globAccounts[acnt.userName].accountName() +
+		    " (" + acnt.userName + ")";
+		this->fromComboBox->addItem(accountName, QVariant(acnt.userName));
+		if (m_userName == acnt.userName) {
+			int i = this->fromComboBox->count() - 1;
+			Q_ASSERT(0 <= i);
+			this->fromComboBox->setCurrentIndex(i);
+			setAccountInfo(i);
 		}
 	}
 
-	this->fromUser->setText("<strong>" +
-	    AccountModel::globAccounts[m_userName].accountName() +
-	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
-	    dbOpenAddressingText);
+	connect(this->fromComboBox, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(setAccountInfo(int)));
 
 	connect(this->recipientTableWidget->model(),
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
@@ -222,6 +199,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
+	        QString, QString, bool, qint64)), this,
+	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
+	        QString, QString, bool, qint64)));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -259,7 +241,94 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 /* ========================================================================= */
 /*
- * Show remaining PDZ credit.
+ * Slot: Set info data and database for selected account
+ */
+void DlgSendMessage::setAccountInfo(int item)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* Get user name for selected account. */
+	const QString userName = this->fromComboBox->itemData(item).toString();
+
+	if (!userName.isEmpty()) {
+		/* if account was changed, remove all recipients */
+		if (m_userName != userName) {
+			for (int i = this->recipientTableWidget->rowCount() - 1;
+			    i >= 0; --i) {
+				this->recipientTableWidget->removeRow(i);
+			}
+		}
+		m_userName = userName;
+	}
+
+	struct isds_ctx *session = NULL;
+
+	m_isLogged = true;
+
+	if (!isdsSessions.isConnectedToIsds(m_userName)) {
+		if (!m_mv->connectToIsds(m_userName, m_mv)) {
+			m_isLogged = false;
+		}
+	}
+	session = isdsSessions.session(m_userName);
+	if (NULL == session) {
+		logErrorNL("%s", "Missing ISDS session.");
+		m_isLogged = false;
+	}
+
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
+		if (acnt.userName == m_userName) {
+			m_dbSet = acnt.messageDbSet;
+			break;
+		}
+	}
+
+	const AccountModel::SettingsMap &accountInfo =
+	    AccountModel::globAccounts[m_userName];
+	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+	Q_ASSERT(!m_dbId.isEmpty());
+	m_senderName =
+	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
+	QList<QString> accountData =
+	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
+	if (!accountData.isEmpty()) {
+		m_dbType = accountData.at(0);
+		m_dbEffectiveOVM = (accountData.at(1) == "1");
+		m_dbOpenAddressing = (accountData.at(2) == "1");
+	}
+	if (globPref.use_global_paths) {
+		m_lastAttAddPath = globPref.add_file_to_attachments_path;
+	} else {
+		m_lastAttAddPath = accountInfo.lastAttachAddPath();
+	}
+	if (m_dbOpenAddressing) {
+		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+	}
+
+	QString dbOpenAddressingText = "";
+	if (!m_dbEffectiveOVM) {
+		if (m_dbOpenAddressing) {
+			dbOpenAddressingText =
+			    " - " + tr("sending of PDZ: enabled") + "; " +
+			    tr("remaining credit: ") + m_pdzCredit + " Kč";
+		} else {
+			dbOpenAddressingText =
+			    " - " + tr("sending of PDZ: disabled");
+		}
+	}
+
+	this->fromUser->setText("<strong>" +
+	    AccountModel::globAccounts[m_userName].accountName() +
+	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
+	    dbOpenAddressingText);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Func: Return remaining PDZ credit.
  */
 QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
     const QString &dbId)
@@ -351,14 +420,18 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 
 /* ========================================================================= */
 /*
- * Fill Send Message Dialog as reply.
+ * Func: Fill Send Message Dialog as reply.
  */
 void DlgSendMessage::fillDlgAsReply(void)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	bool hideOptionalWidget = true;
 
-	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
+	this->fromComboBox->setEnabled(false);
+
+	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
@@ -437,14 +510,16 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 /* ========================================================================= */
 /*
- * fill Send Message Dialog from template message.
+ * Func: Fill Send Message Dialog from template message.
  */
 void DlgSendMessage::fillDlgFromTmpMsg(void)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	bool hideOptionalWidget = true;
 
-	MessageDb *messageDb = m_dbSet.accessMessageDb(m_deliveryTime, false);
+	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
@@ -572,9 +647,9 @@ void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
 {
 	if (isdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
+		logInfo("%s\n", "Connection to ISDS is alive :)");
 	} else {
-		qDebug() << "Connection to ISDS is dead :(";
+		logWarning("%s\n", "Connection to ISDS is dead :(");
 	}
 }
 
@@ -601,11 +676,12 @@ void DlgSendMessage::addAttachmentFile(void)
 	foreach (const QString &fileName, fileNames) {
 
 //		int fileSize = QFile(fileName).size();
-//		if (fileSize > MAX_ATTACHMENT_SIZE) {
+//		if (fileSize > MAX_ATTACHMENT_SIZE_BYTES) {
 //			QMessageBox::warning(this, tr("Wrong file size"),
 //			    tr("File '%1' could not be added into attachment "
-//			    "because its size is bigger than 20MB.").
-//			    arg(fileName),
+//			    "because its size is bigger than %2 MB.").
+//			    arg(fileName).
+//			    arg(QString::number(MAX_ATTACHMENT_SIZE_MB)),
 //			    QMessageBox::Ok);
 //			continue;
 //		}
@@ -681,7 +757,7 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
-	QDialog *dlg_cont = new DlgContacts(m_dbSet, m_dbId,
+	QDialog *dlg_cont = new DlgContacts(*m_dbSet, m_dbId,
 	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
 	dlg_cont->show();
@@ -737,12 +813,14 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 			this->attachmentSizeInfo->setText(
 			    tr("Total size of attachments is ~%1 KB").
 			    arg(aSize/1024));
-			if (aSize >= MAX_ATTACHMENT_SIZE) {
+			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
 				this->attachmentSizeInfo->
 				     setStyleSheet("QLabel { color: red }");
 				this->attachmentSizeInfo->setText(
 				    tr("Warning: Total size of attachments "
-				    "is larger than 10 MB!"));
+				        "is larger than %1 MB!").
+				    arg(QString::number(
+				        MAX_ATTACHMENT_SIZE_MB)));
 			}
 		} else {
 			this->attachmentSizeInfo->setText(
@@ -772,7 +850,11 @@ void DlgSendMessage::checkInputFields(void)
 		}
 	}
 
-	this->sendButton->setEnabled(buttonEnabled);
+	if (m_isLogged) {
+		this->sendButton->setEnabled(buttonEnabled);
+	} else {
+		this->sendButton->setEnabled(false);
+	}
 }
 
 
@@ -987,6 +1069,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 
 	envelope.dmType = dmType;
 
+
 	envelope.dmOVM = m_dbEffectiveOVM;
 
 	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
@@ -1001,12 +1084,14 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
+	debugSlotCall();
+
 	QString detailText;
 
-	/* List of send message result */
-	QList<TaskSendMessage::ResultData> sentMsgResultList;
+	/* List of unique identifiers. */
+	QList<QString> taskIdentifiers;
+	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
 
-	int successSendCnt = 0;
 	int pdzCnt = 0; /* Number of paid messages. */
 
 	/* Compute number of messages which the sender has to pay for. */
@@ -1043,11 +1128,24 @@ void DlgSendMessage::sendMessage(void)
 		goto finish;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(m_userName)) {
-		detailText = tr("It was not possible to establish a "
-		    "connection to the server or authorization failed.");
-		goto finish;
+	this->setCursor(Qt::WaitCursor);
+	this->setEnabled(false);
+
+	/*
+	 * Generate unique identifiers.
+	 * These must be complete before creating first task.
+	 */
+	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
+		QString taskIdentifier =
+		    m_userName + "_" +
+		    this->recipientTableWidget->item(row, RTW_ID)->text() +
+		    "_" + currentTime.toString() + "_" +
+		    DlgChangePwd::generateRandomString(6);
+
+		taskIdentifiers.append(taskIdentifier);
 	}
+	m_transactIds = taskIdentifiers.toSet();
+	m_sentMsgResultList.clear();
 
 	/* Send message to all recipients. */
 	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
@@ -1061,86 +1159,21 @@ void DlgSendMessage::sendMessage(void)
 		TaskSendMessage *task;
 
 		task = new (std::nothrow) TaskSendMessage(
-		    m_userName, &m_dbSet, message,
+		    m_userName, m_dbSet, taskIdentifiers.at(row), message,
 		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
 		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
 		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
-
-		if (TaskSendMessage::SM_SUCCESS == task->m_resultData.result) {
-			successSendCnt++;
-		}
-
-		sentMsgResultList.append(task->m_resultData);
-
-		delete task;
+		task->setAutoDelete(true);
+		globWorkPool.assignHi(task);
 	}
 
-	foreach (const TaskSendMessage::ResultData &resultData,
-	         sentMsgResultList) {
-		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
-			if (resultData.isPDZ) {
-				detailText += tr("Message was successfully "
-				    "sent to <i>%1 (%2)</i> as PDZ with number "
-				    "<i>%3</i>.").
-				    arg(resultData.recipientName).
-				    arg(resultData.dbIDRecipient).
-				    arg(resultData.dmId) + "<br/>";
-			} else {
-				detailText += tr("Message was successfully "
-				    "sent to <i>%1 (%2)</i> as message number "
-				    "<i>%3</i>.").
-				    arg(resultData.recipientName).
-				    arg(resultData.dbIDRecipient).
-				    arg(resultData.dmId) + "<br/>";
-			}
-		} else {
-			detailText += tr("Message was NOT successfully "
-			    "sent to <i>%1 (%2)</i>. Server says: %3").
-			    arg(resultData.recipientName).
-			    arg(resultData.dbIDRecipient).
-			    arg(resultData.errInfo) + "<br/>";
-		}
-	}
-
-	if (this->recipientTableWidget->rowCount() == successSendCnt) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Message was sent"));
-		msgBox.setText("<b>"+tr("Message was successfully sent to "
-		    "all recipients.")+"</b>");
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-
-		this->accept(); /* Set return code to accepted. */
-		return;
-	} else {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Message was sent with error"));
-		msgBox.setText("<b>"+tr("Message was NOT successfully sent "
-		    "to all recipients.")+"</b>");
-		detailText += "<br/><br/><b>" +
-		    tr("Do you want to close the Send message form?") +"</b>";
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (msgBox.exec() == QMessageBox::Yes) {
-			this->close(); /* Set return code to closed. */
-			return;
-		} else {
-			return;
-		}
-	}
+	return;
 
 finish:
 	QMessageBox msgBox;
 	msgBox.setIcon(QMessageBox::Critical);
 	msgBox.setWindowTitle(tr("Send message error"));
-	msgBox.setText(tr("It was not possible to send message "
+	msgBox.setText(tr("It has not been possible to send a message "
 	    "to the server Datové schránky."));
 	detailText += "\n\n" + tr("The message will be discarded.");
 	msgBox.setInformativeText(detailText);
@@ -1149,6 +1182,107 @@ finish:
 	this->close();
 }
 
+void DlgSendMessage::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId)
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) userName;
+
+	if (m_transactIds.end() == m_transactIds.find(transactId)) {
+		/* Nothing found. */
+		return;
+	}
+
+	m_sentMsgResultList.append(TaskSendMessage::ResultData(
+	    (enum TaskSendMessage::Result) result, resultDesc,
+	    dbIDRecipient, recipientName, isPDZ, dmId));
+
+	if (!m_transactIds.remove(transactId)) {
+		logErrorNL("%s", "Could not be able to remove a transaction "
+		    "identifier from list of unfinished transactions.");
+	}
+
+	if (!m_transactIds.isEmpty()) {
+		/* Still has some pending transactions. */
+		return;
+	}
+
+	/* All transactions finished. */
+
+	this->setCursor(Qt::ArrowCursor);
+	this->setEnabled(true);
+
+	int successfullySentCnt = 0;
+	QString detailText;
+
+	foreach (const TaskSendMessage::ResultData &resultData,
+	         m_sentMsgResultList) {
+		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
+			++successfullySentCnt;
+
+			if (resultData.isPDZ) {
+				detailText += tr(
+				    "Message has successfully been sent to "
+				    "<i>%1 (%2)</i> as PDZ with number "
+				    "<i>%3</i>.").
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
+			} else {
+				detailText += tr(
+				    "Message has successfully been sent to "
+				    "<i>%1 (%2)</i> as message number "
+				    "<i>%3</i>.").
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
+			}
+		} else {
+			detailText += tr("Message has NOT been sent to "
+			    "<i>%1 (%2)</i>. Server says: %3").
+			    arg(resultData.recipientName).
+			    arg(resultData.dbIDRecipient).
+			    arg(resultData.errInfo) + "<br/>";
+		}
+	}
+	m_sentMsgResultList.clear();
+
+	if (this->recipientTableWidget->rowCount() == successfullySentCnt) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message sent"));
+		msgBox.setText("<b>" +
+		    tr("Message has successfully been sent to all recipients.") +
+		    "</b>");
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		this->accept(); /* Set return code to accepted. */
+		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+	} else {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message sending error"));
+		msgBox.setText("<b>" +
+		    tr("Message has NOT been sent to all recipients.") +
+		    "</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") + "</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			this->close(); /* Set return code to closed. */
+			emit doActionAfterSentMsgSignal(m_userName,
+			    m_lastAttAddPath);
+		}
+	}
+}
 
 /* ========================================================================= */
 /*

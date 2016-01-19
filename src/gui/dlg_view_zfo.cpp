@@ -38,6 +38,7 @@
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
+#include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
@@ -175,8 +176,6 @@ void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
 	(void) index;
-
-	//qDebug() << "Attachment double clicked.";
 
 	openSelectedAttachment();
 }
@@ -467,7 +466,7 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 
 /* ========================================================================= */
 bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
-    const isds_envelope *envelope)
+    const struct isds_envelope *envelope)
 /* ========================================================================= */
 {
 	if (NULL == envelope) {

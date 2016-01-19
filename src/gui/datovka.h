@@ -45,7 +45,7 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
-#include "src/worker/task_import_zfo.h" /* TODO -- remove this header file. */
+#include "src/worker/task.h" /* TODO -- remove this header file. */
 
 
 namespace Ui {
@@ -151,6 +151,14 @@ private slots:
 	void collectDownloadMessageListStatus(const QString &usrName,
 	    int direction, int result, const QString &errDesc,
 	    bool add, int rt, int rn, int st, int sn);
+
+	/*!
+	 * @brief Performs action depending on message send outcome.
+	 */
+	void collectSendMessageStatus(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId);
 
 	/*!
 	 * @brief Version response slot.
@@ -555,7 +563,7 @@ private slots:
 	 * @param[in] activeOnly Whether to list only active accounts.
 	 * @return List of accounts.
 	 */
-	QList<TaskImportZfo::AccountData> createAccountInfoForZFOImport(
+	QList<Task::AccountDescr> createAccountInfoForZFOImport(
 	    bool activeOnly);
 
 	/*!
@@ -610,12 +618,12 @@ private slots:
 	/*!
 	 * @brief Set ProgressBar value and Status bar text.
 	 */
-	void updateProgressBar(QString label, int value);
+	void updateProgressBar(const QString &label, int value);
 
 	/*!
 	 * @brief Set Status bar text.
 	 */
-	void updateStatusBarText(QString text);
+	void updateStatusBarText(const QString &text);
 
 	/*!
 	 * @brief Clear progerss bar text.
@@ -668,6 +676,12 @@ private slots:
 	 * @brief Split message database slot.
 	 */
 	void splitMsgDbByYearsSlot(void);
+
+	/*!
+	 * @brief Store last add attachment path.
+	 */
+	void doActionAfterSentMsgSlot(const QString &userName,
+	    const QString &lastDir);
 
 private:
 

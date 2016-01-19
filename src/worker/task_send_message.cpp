@@ -34,20 +34,32 @@
 
 TaskSendMessage::ResultData::ResultData(void)
     : result(SM_ERR),
+    errInfo(),
     dbIDRecipient(),
     recipientName(),
-    dmId(-1),
     isPDZ(false),
-    errInfo()
+    dmId(-1)
+{
+}
+
+TaskSendMessage::ResultData::ResultData(enum Result res, const QString &eInfo,
+    const QString &recId, const QString &recName, bool pdz, qint64 mId)
+    : result(res),
+    errInfo(eInfo),
+    dbIDRecipient(recId),
+    recipientName(recName),
+    isPDZ(pdz),
+    dmId(mId)
 {
 }
 
 TaskSendMessage::TaskSendMessage(const QString &userName,
-    MessageDbSet *dbSet, const IsdsMessage &message,
+    MessageDbSet *dbSet, const QString &transactId, const IsdsMessage &message,
     const QString &recipientName, const QString &recipientAddress, bool isPDZ)
     : m_resultData(),
     m_userName(userName),
     m_dbSet(dbSet),
+    m_transactId(transactId),
     m_message(message),
     m_recipientName(recipientName),
     m_recipientAddress(recipientAddress),
@@ -398,6 +410,11 @@ void TaskSendMessage::run(void)
 
 	isds_message_free(&message);
 
+	emit globMsgProcEmitter.sendMessageFinished(m_userName, m_transactId,
+	    m_resultData.result, m_resultData.errInfo,
+	    m_resultData.dbIDRecipient, m_resultData.recipientName,
+	    m_isPDZ, m_resultData.dmId);
+
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
@@ -416,6 +433,8 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	Q_ASSERT(NULL != message);
 	Q_ASSERT(NULL != message->envelope);
 
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+
 	enum TaskSendMessage::Result ret = SM_ERR;
 
 	isds_error status;
@@ -425,8 +444,6 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	QString isdsError, isdsLongError;
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
-
 	session = isdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
@@ -434,6 +451,8 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		ret = SM_ERR;
 		goto fail;
 	}
+
+	emit globMsgProcEmitter.progressChange(progressLabel, 40);
 
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
@@ -448,7 +467,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		goto fail;
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 30);
+	emit globMsgProcEmitter.progressChange(progressLabel, 70);
 
 	{
 		{
@@ -485,7 +504,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 			goto fail;
 		}
 
-		emit globMsgProcEmitter.progressChange(progressLabel, 60);
+		emit globMsgProcEmitter.progressChange(progressLabel, 80);
 
 		Task::storeAttachments(*messageDb, dmId, message->documents);
 

@@ -26,8 +26,6 @@
 
 #include <QAbstractTableModel>
 
-#include "src/io/isds_sessions.h"
-
 /*!
  * @brief Custom attachment table model class.
  */
@@ -99,7 +97,7 @@ public:
 	 * @param[in] message Pointer to ISDS message.
 	 * @return True on success.
 	 */
-	bool setModelData(const isds_message *message);
+	bool setModelData(const struct isds_message *message);
 
 	/*!
 	 * @brief Get attachment content.

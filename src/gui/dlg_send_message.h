@@ -27,12 +27,15 @@
 #include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
+#include <QSet>
 #include <QTimer>
 #include <QTreeView>
 
 #include "src/common.h"
+#include "src/gui/datovka.h"
 #include "src/io/message_db_set.h"
 #include "src/models/accounts_model.h"
+#include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
@@ -47,9 +50,12 @@ public:
 		ACT_NEW_FROM_TMP
 	};
 
-	DlgSendMessage(MessageDbSet &dbSet, Action action, qint64 msgId,
-	    const QDateTime &deliveryTime, const QString &userName,
-	    QWidget *parent = 0);
+	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
+	    Action action, qint64 msgId, const QDateTime &deliveryTime,
+	    const QString &userName, MainWindow *mv, QWidget *parent = 0);
+
+signals:
+	void doActionAfterSentMsgSignal(const QString, const QString);
 
 private slots:
 	void on_cancelButton_clicked(void);
@@ -64,6 +70,10 @@ private slots:
 	void recItemSelect(void);
 	void checkInputFields(void);
 	void sendMessage(void);
+	void collectSendMessageStatus(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
 	void tableItemDoubleClicked(QTableWidgetItem *item);
@@ -71,9 +81,11 @@ private slots:
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
 	void attachmentSelectionChanged(const QItemSelection &selected,
 	    const QItemSelection &deselected);
+	void setAccountInfo(int item);
 
 private:
 	QTimer *pingTimer;
+	const QList<Task::AccountDescr> m_messageDbSetList;
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;
 	QString m_dbId;
@@ -85,9 +97,15 @@ private:
 	bool m_dbOpenAddressing;
 	QString m_lastAttAddPath;
 	QString m_pdzCredit;
-	MessageDbSet &m_dbSet;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
+	MainWindow *m_mv;
+	MessageDbSet *m_dbSet;
+	bool m_isLogged;
+
+	/* Used to collect sending results. */
+	QSet<QString> m_transactIds;
+	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
 
 	void initNewMessageDialog(void);
 	void calculateAndShowTotalAttachSize(void);

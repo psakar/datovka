@@ -27,7 +27,6 @@
 
 #include <QDialog>
 
-#include "src/io/isds_sessions.h"
 #include "src/models/attachment_model.h"
 #include "ui_dlg_view_zfo.h"
 
@@ -135,7 +134,7 @@ private:
 	 */
 	static
 	bool envelopeHeaderDescriptionHtml(QString &html,
-	    const isds_envelope *envelope);
+	    const struct isds_envelope *envelope);
 
 	/*!
 	 * @brief Generates footer description according to the supplied

@@ -57,35 +57,6 @@ public:
 	};
 
 	/*!
-	 * @brief Holds information about accounts that should be processed.
-	 */
-	class AccountData {
-	public:
-		/*!
-		 * @brief Constructors.
-		 */
-//		AccountData(void)
-//		    : userName(), messageDbSet(0)
-//		{ }
-		AccountData(const QString &uN, class MessageDbSet *mDS)
-		    : userName(uN), messageDbSet(mDS)
-		{ }
-
-		/*!
-		 * @brief Checks whether contains valid data.
-		 *
-		 * @return False if invalid data held.
-		 */
-		bool isValid(void) const
-		{
-			return !userName.isEmpty() && (0 != messageDbSet);
-		}
-
-		QString userName; /*!< Account identifier (user login name). */
-		class MessageDbSet *messageDbSet; /*!< Database set related to account. */
-	};
-
-	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] accounts     List of account identifiers.
@@ -94,7 +65,7 @@ public:
 	 * @param[in] authenticate True if you want to authenticate message
 	 *                         before importing.
 	 */
-	explicit TaskImportZfo(const QList<AccountData> &accounts,
+	explicit TaskImportZfo(const QList<Task::AccountDescr> &accounts,
 	    const QString &fileName, enum ZfoType type, bool authenticate);
 
 	/*!
@@ -146,7 +117,7 @@ private:
 	 * @returns Error identifier.
 	 */
 	static
-	enum Result importMessageZfoSingle(const AccountData &acnt,
+	enum Result importMessageZfoSingle(const Task::AccountDescr &acnt,
 	    const struct isds_message *message, qint64 dmId,
 	    const QDateTime &deliveryTime, enum MessageDirection direct,
 	    const QString &fileName, QString &isdsError, QString &isdsLongError,
@@ -163,7 +134,7 @@ private:
 	 * @return Status or error code.
 	 */
 	static
-	enum Result importMessageZfo(const QList<AccountData> &accounts,
+	enum Result importMessageZfo(const QList<Task::AccountDescr> &accounts,
 	    const QString &fileName, bool authenticate, QString &resultDesc);
 
 	/*!
@@ -182,7 +153,7 @@ private:
 	 * @returns Error identifier.
 	 */
 	static
-	enum Result importDeliveryZfoSingle(const AccountData &acnt,
+	enum Result importDeliveryZfoSingle(const Task::AccountDescr &acnt,
 	    const struct isds_message *message, qint64 dmId,
 	    const QDateTime &deliveryTime, const QString &fileName,
 	    QString &isdsError, QString &isdsLongError, QString &resultDesc);
@@ -198,10 +169,10 @@ private:
 	 * @return Status or error code.
 	 */
 	static
-	enum Result importDeliveryZfo(const QList<AccountData> &accounts,
+	enum Result importDeliveryZfo(const QList<Task::AccountDescr> &accounts,
 	    const QString &fileName, bool authenticate, QString &resultDesc);
 
-	QList<AccountData> m_accounts; /*!< List of accounts to be inserted into. */
+	QList<Task::AccountDescr> m_accounts; /*!< List of accounts to be inserted into. */
 	enum ZfoType m_zfoType; /*!< Type of the ZFO file. */
 	const bool m_auth; /*!< True if authentication before importing. */
 };

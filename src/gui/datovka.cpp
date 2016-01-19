@@ -192,8 +192,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->statusBar->addWidget(m_statusProgressBar,1);
 
 	/* Worker-related processing signals. */
-	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
 	    this,
@@ -206,6 +204,13 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
+	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
+	    this, SLOT(updateProgressBar(QString, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
+	        QString, QString, bool, qint64)), this,
+	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
+	        QString, QString, bool, qint64)));
 	connect(&globWorkPool, SIGNAL(finished()),
 	    this, SLOT(workersFinished()));
 
@@ -498,7 +503,7 @@ void MainWindow::clearStatusBar(void)
 /*
  * Slot: Update ProgressBar text and value.
  */
-void MainWindow::updateProgressBar(QString label, int value)
+void MainWindow::updateProgressBar(const QString &label, int value)
  /* ========================================================================= */
 {
 	//debugSlotCall();
@@ -512,7 +517,7 @@ void MainWindow::updateProgressBar(QString label, int value)
 /*
  * Slot: Update StatusBar text.
  */
-void MainWindow::updateStatusBarText(QString text)
+void MainWindow::updateStatusBarText(const QString &text)
 /* ========================================================================= */
 {
 	//debugSlotCall();
@@ -2354,6 +2359,38 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 	}
 }
 
+void MainWindow::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId)
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) userName;
+	(void) transactId;
+	(void) resultDesc;
+	(void) isPDZ;
+	(void) dmId;
+
+	if (TaskSendMessage::SM_SUCCESS == result) {
+		showStatusTextWithTimeout(tr(
+		    "Message from '%1' (%2) has been successfully sent to '%3' (%4).").
+		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(userName).arg(recipientName).arg(dbIDRecipient));
+
+		/* Refresh account list. */
+		refreshAccountList(userName);
+	} else {
+		showStatusTextWithTimeout(tr(
+		    "Error while sending message from '%1' (%2) to '%3' (%4).").
+		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(userName).arg(recipientName).arg(dbIDRecipient));
+	}
+
+	clearProgressBar();
+}
+
 /* ========================================================================= */
 /*
  * Set tablewidget when message download worker is done.
@@ -3227,12 +3264,12 @@ void MainWindow::synchroniseAllAccounts(void)
 			task = new (std::nothrow) TaskDownloadMessageList(
 			    userName, dbSet, MSG_RECEIVED);
 			task->setAutoDelete(true);
-			globWorkPool.assign(task);
+			globWorkPool.assignLo(task);
 
 			task = new (std::nothrow) TaskDownloadMessageList(
 			    userName, dbSet, MSG_SENT);
 			task->setAutoDelete(true);
-			globWorkPool.assign(task);
+			globWorkPool.assignLo(task);
 
 			appended = true;
 		}
@@ -3288,12 +3325,12 @@ void MainWindow::synchroniseSelectedAccount(void)
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_RECEIVED);
 	task->setAutoDelete(true);
-	globWorkPool.assign(task);
+	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_SENT);
 	task->setAutoDelete(true);
-	globWorkPool.assign(task);
+	globWorkPool.assignLo(task);
 
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionReceived_all->setEnabled(false);
@@ -3371,7 +3408,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		task = new (std::nothrow) TaskDownloadMessage(
 		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task, WorkerPool::PREPEND);
+		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -4829,11 +4866,30 @@ void MainWindow::openSendMessageDialog(int action)
 {
 	debugFuncCall();
 
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-
+	QList<Task::AccountDescr> messageDbList;
 	qint64 msgId = -1;
 	QDateTime deliveryTime;
+
+	/* get username of selected account */
+	const QString userName(userNameFromItem());
+	Q_ASSERT(!userName.isEmpty());
+
+	/* if not reply, get pointers to database for other accounts */
+	if (DlgSendMessage::ACT_REPLY != action) {
+		for (int i=0; i < ui->accountList->model()->rowCount(); i++) {
+			QModelIndex index = m_accountModel.index(i, 0);
+			const QString uName =
+			    index.data(ROLE_ACNT_USER_NAME).toString();
+			Q_ASSERT(!uName.isEmpty());
+			MessageDbSet *dbSet = accountDbSet(uName, this);
+			Q_ASSERT(0 != dbSet);
+			messageDbList.append(Task::AccountDescr(uName, dbSet));
+		}
+	} else {
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		Q_ASSERT(0 != dbSet);
+		messageDbList.append(Task::AccountDescr(userName, dbSet));
+	}
 
 	/* if is reply or template, ID of selected message is required */
 	if (DlgSendMessage::ACT_REPLY == action ||
@@ -4847,48 +4903,38 @@ void MainWindow::openSendMessageDialog(int action)
 		deliveryTime = msgDeliveryTime(index);
 	}
 
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
-
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
-	}
-
-	showStatusTextWithTimeout(tr("Create and send a message."));
-
-	QString lastAttachAddPath;
-	if (globPref.use_global_paths) {
-		lastAttachAddPath = globPref.add_file_to_attachments_path;
-	} else {
-		lastAttachAddPath = accountInfo.lastAttachAddPath();
-	}
-
-	QDialog *newMessageDialog = new DlgSendMessage(*dbSet,
+	QDialog *sendMsgDialog = new DlgSendMessage(messageDbList,
 	    (DlgSendMessage::Action) action, msgId, deliveryTime,
 	    userName, this);
 
-	if (newMessageDialog->exec() == QDialog::Accepted) {
+	showStatusTextWithTimeout(tr("Create and send a message."));
 
-		showStatusTextWithTimeout(tr("Message from account \"%1\" was "
-		    "send.").arg(accountInfo.accountName()));
+	connect(sendMsgDialog,
+	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
+	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
 
-		refreshAccountList(userName);
-	}
+	sendMsgDialog->show();
+
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Store last add attachment path.
+ */
+void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
+    const QString &lastDir)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	/* Unused. */
+	(void) userName;
 
 	if (!globPref.use_global_paths) {
-		m_add_attach_dir = lastAttachAddPath;
+		m_add_attach_dir = lastDir;
 		storeExportPath();
 	}
-
-	clearProgressBar();
 }
 
 
@@ -6375,13 +6421,13 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 /*
  * Func: Create account info for ZFO file(s) import into database.
  */
-QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
+QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
     bool activeOnly)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QList<TaskImportZfo::AccountData> accountList;
+	QList<Task::AccountDescr> accountList;
 
 	/* get userName and pointer to database
 	 * for all accounts from settings */
@@ -6399,7 +6445,7 @@ QList<TaskImportZfo::AccountData> MainWindow::createAccountInfoForZFOImport(
 			Q_ASSERT(0 != messageDbSet);
 
 			accountList.append(
-			    TaskImportZfo::AccountData(userName, messageDbSet));
+			    Task::AccountDescr(userName, messageDbSet));
 		}
 	}
 
@@ -6441,7 +6487,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	const QList<TaskImportZfo::AccountData> accountList(
+	const QList<Task::AccountDescr> accountList(
 	    createAccountInfoForZFOImport(authenticate));
 
 	if (accountList.isEmpty()) {
@@ -6507,7 +6553,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
 		    TaskImportZfo::ZT_MESSAGE, authenticate);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task);
+		globWorkPool.assignLo(task);
 	}
 	/* Second, import delivery information. */
 	foreach (const QString &fileName, deliveryZfoFiles) {
@@ -6516,7 +6562,7 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
 		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
 		task->setAutoDelete(true);
-		globWorkPool.assign(task);
+		globWorkPool.assignLo(task);
 	}
 }
 
