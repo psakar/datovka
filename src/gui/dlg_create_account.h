@@ -33,7 +33,6 @@
 #include "src/common.h"
 #include "ui_dlg_create_account.h"
 #include "src/models/accounts_model.h"
-#include "src/io/isds_sessions.h"
 #include "src/io/account_db.h"
 
 

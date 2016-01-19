@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include "src/io/isds_sessions.h"
 #include "src/models/attachment_model.h"
 
 const QVector<QString> AttachmentModel::m_headerLabels = {
@@ -119,7 +120,7 @@ QVariant AttachmentModel::headerData(int section,
 	return m_headerLabels[section];
 }
 
-bool AttachmentModel::setModelData(const isds_message *message)
+bool AttachmentModel::setModelData(const struct isds_message *message)
 {
 	const struct isds_list *docListItem;
 
