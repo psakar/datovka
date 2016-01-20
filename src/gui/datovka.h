@@ -143,7 +143,7 @@ private slots:
 	 * @brief Performs action depending on message download outcome.
 	 */
 	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
-	    int result, const QString &errDesc);
+	    const QDateTime &deliveryTime, int result, const QString &errDesc);
 
 	/*!
 	 * @brief Performs action depending on message list download outcome.

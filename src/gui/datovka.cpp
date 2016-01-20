@@ -193,9 +193,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter,
-	    SIGNAL(downloadMessageFinished(QString, qint64, int, QString)),
+	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
+	        QString)),
 	    this,
-	    SLOT(collectDownloadMessageStatus(QString, qint64, int, QString)));
+	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
+	        QString)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
@@ -2286,9 +2288,13 @@ void MainWindow::workersFinished(void)
 }
 
 void MainWindow::collectDownloadMessageStatus(const QString &usrName,
-    qint64 msgId, int result, const QString &errDesc)
+    qint64 msgId, const QDateTime &deliveryTime, int result,
+    const QString &errDesc)
 {
 	debugSlotCall();
+
+	/* Unused. */
+	(void) deliveryTime;
 
 	if (TaskDownloadMessage::DM_SUCCESS == result) {
 		/* Refresh account and attachment list. */
@@ -6648,7 +6654,7 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 		deliveryTime = delivTime;
 	}
 	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
+	/* Delivery time can be invalid. */
 
 	if (userName.isEmpty()) {
 		QModelIndex acntIndex = ui->accountList->currentIndex();
@@ -6787,6 +6793,10 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
+	if (ret) {
+		deliveryTime = task->m_mId.deliveryTime;
+	}
+
 	delete task;
 
 	return ret;
@@ -6862,7 +6872,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 		deliveryTime = delivTime;
 	}
 	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
+	/* Delivery time can be invalid. */
 
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
@@ -6989,7 +6999,7 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		deliveryTime = delivTime;
 	}
 	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
+	/* Delivery time can be invalid. */
 
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
@@ -7112,7 +7122,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		deliveryTime = delivTime;
 	}
 	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
+	/* Delivery time can be invalid. */
 
 	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
 	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);

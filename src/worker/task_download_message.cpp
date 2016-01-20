@@ -36,10 +36,10 @@ TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
     : m_result(DM_ERR),
     m_isdsError(),
     m_isdsLongError(),
+    m_mId(dmId, dTime),
     m_userName(userName),
     m_dbSet(dbSet),
-    m_msgDirect(msgDirect),
-    m_mId(dmId, dTime)
+    m_msgDirect(msgDirect)
 {
 	Q_ASSERT(0 != dbSet);
 	Q_ASSERT(0 <= dmId);
@@ -92,7 +92,7 @@ void TaskDownloadMessage::run(void)
 	}
 
 	emit globMsgProcEmitter.downloadMessageFinished(m_userName, m_mId.dmId,
-	    m_result,
+	    m_mId.deliveryTime, m_result,
 	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
 	        m_isdsError + " " + m_isdsLongError : "");
 
@@ -166,7 +166,7 @@ fail:
 }
 
 enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
-    const QString &userName, MessageDb::MsgId mId, bool signedMsg,
+    const QString &userName, MessageDb::MsgId &mId, bool signedMsg,
     enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &error,
     QString &longError, const QString &progressLabel)
 {
@@ -259,7 +259,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 90);
 
-	Q_ASSERT(mId.dmId == QString(message->envelope->dmID).toLongLong());
+	Q_ASSERT(QString(message->envelope->dmID).toLongLong() == mId.dmId);
 
 	/* Download and save delivery info and message events */
 	if (DM_SUCCESS == downloadDeliveryInfo(userName, mId.dmId, signedMsg,

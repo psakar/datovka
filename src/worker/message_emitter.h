@@ -36,14 +36,15 @@ signals:
 	/*!
 	 * @brief Emitted when download message finishes.
 	 *
-	 * @param[in] usrName Account identifier (user login name).
-	 * @param[in] msgId   Message identifier.
-	 * @param[in] result  Operation outcome
-	 *                    (enum TaskDownloadMessage::Result).
-	 * @param[in] errDesc Error description string.
+	 * @param[in] usrName      Account identifier (user login name).
+	 * @param[in] msgId        Message identifier.
+	 * @param[in] deliveryTime Message delivery time.
+	 * @param[in] result       Operation outcome
+	 *                         (enum TaskDownloadMessage::Result).
+	 * @param[in] errDesc      Error description string.
 	 */
 	void downloadMessageFinished(const QString &usrName, qint64 msgId,
-	    int result, const QString &errDesc);
+	   const QDateTime &deliveryTime, int result, const QString &errDesc);
 
 	/*!
 	 * @brief Emitted when download message finishes.

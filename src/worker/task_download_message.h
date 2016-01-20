@@ -90,7 +90,7 @@ public:
 	 * TODO -- This method ought to be protected.
 	 *
 	 * @param[in]     userName      Account identifier (user login name).
-	 * @param[in]     mId           Message identifier.
+	 * @param[in,out] mId           Message identifier.
 	 * @param[in]     signedMsg     Whether to download signed message;
 	 *                              must be true.
 	 * @param[in]     msgDirect     Received or sent message.
@@ -102,13 +102,16 @@ public:
 	 */
 	static
 	enum Result downloadMessage(const QString &userName,
-	    MessageDb::MsgId mId, bool signedMsg,
+	    MessageDb::MsgId &mId, bool signedMsg,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
 	    QString &error, QString &longError, const QString &progressLabel);
 
 	enum Result m_result; /*!< Return state. */
 	QString m_isdsError; /*!< Error description. */
 	QString m_isdsLongError; /*!< Long error description. */
+
+	/* Delivery time may change. */
+	MessageDb::MsgId m_mId; /*!< Message identifier. */
 
 private:
 	/*!
@@ -150,7 +153,6 @@ private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received message. */
-	MessageDb::MsgId m_mId; /*!< Message identifier. */
 };
 
 #endif /* _TASK_DOWNLOAD_MESSAGE_H_ */
