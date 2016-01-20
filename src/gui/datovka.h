@@ -1059,9 +1059,22 @@ private:
 	/*!
 	 * @brief Download complete message synchronously
 	 * without worker and thread.
+	 *
+	 * @note Delivery time may change if invalid given.
 	 */
 	bool downloadCompleteMessage(qint64 dmId,
-	    const QDateTime &deliveryTime);
+	    QDateTime &deliveryTime);
+
+	/*!
+	 * @brief Shows notification dialogue and offers downloading of
+	 *     missing message.
+	 *
+	 * @note Delivery time may change if invalid given.
+	 *
+	 * @return True on success.
+	 */
+	bool messageMissingOfferDownload(qint64 dmId,
+	    QDateTime &deliveryTime, const QString &title);
 
 	/*!
 	 * @brief Set read status to messages with given indexes.

@@ -6669,29 +6669,22 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);
-		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Cannot export complete message '%1'.").
-		    arg(dmId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		    tr("First you must download the whole message before "
-		        "exporting.") + "\n\n" +
-		    tr("Do you want to download complete message now?"));
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		if (QMessageBox::Yes == msgBox.exec()) {
-			if (!downloadCompleteMessage(dmId, deliveryTime)) {
-				showStatusTextWithTimeout(tr("Export of message "
-				"\"%1\" to ZFO was not successful!")
-				.arg(dmId));
-				return;
-			} else {
-				base64 = messageDb->msgsMessageBase64(dmId);
-			}
-		} else {
-			showStatusTextWithTimeout(tr("Export of message "
-			"\"%1\" to ZFO was not successful!").arg(dmId));
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%d'.", dmId);
+			return;
+		}
+
+		base64 = messageDb->msgsMessageBase64(dmId);
+		if (base64.isEmpty()) {
+			Q_ASSERT(0);
 			return;
 		}
 	}
@@ -6750,7 +6743,7 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
  * Download complete message synchronously without worker and thread
  */
 bool MainWindow::downloadCompleteMessage(qint64 dmId,
-    const QDateTime &deliveryTime)
+    QDateTime &deliveryTime)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -6799,6 +6792,38 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	return ret;
 }
 
+bool MainWindow::messageMissingOfferDownload(qint64 dmId,
+    QDateTime &deliveryTime, const QString &title)
+{
+	debugFuncCall();
+
+	QMessageBox msgBox(this);
+
+	msgBox.setWindowTitle(title);
+	msgBox.setText(tr("Complete message '%1' is missing.").arg(dmId));
+
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setInformativeText(
+	    tr("First you must download the complete message before export.") +
+	    "\n\n" +
+	    tr("Do you want to download the complete message now?"));
+
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::Yes);
+
+	if ((QMessageBox::Yes == msgBox.exec()) &&
+	    downloadCompleteMessage(dmId, deliveryTime)) {
+		showStatusTextWithTimeout(
+		    tr("Complete message '%1' has been downloaded.").
+		    arg(dmId));
+		return true;
+	} else {
+		showStatusTextWithTimeout(
+		    tr("Complete message '%1' has not been downloaded.").
+		    arg(dmId));
+		return false;
+	}
+}
 
 /* ========================================================================= */
 /*
@@ -6857,31 +6882,22 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);
-		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(
-		    tr("Cannot export delivery info for message '%1'.").
-		    arg(dmId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		    tr("First you must download message before export.") +
-		    "\n\n" +
-		    tr("Do you want to download complete message now?"));
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		if (QMessageBox::Yes == msgBox.exec()) {
-			if (!downloadCompleteMessage(dmId, deliveryTime)) {
-				showStatusTextWithTimeout(tr("Export of "
-				    "message delivery info \"%1\" to ZFO was "
-				    "not successful!").arg(dmId));
-				return;
-			} else {
-				base64 =
-				    messageDb->msgsGetDeliveryInfoBase64(dmId);
-			}
-		} else {
-			showStatusTextWithTimeout(tr("Export of message delivery "
-			"info \"%1\" to ZFO was not successful!").arg(dmId));
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Delivery info export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%d'.", dmId);
+			return;
+		}
+
+		base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
+		if (base64.isEmpty()) {
+			Q_ASSERT(0);
 			return;
 		}
 	}
@@ -6993,31 +7009,22 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
-		msgBox.setWindowTitle(tr("Delivery info export error!"));
-		msgBox.setText(
-		    tr("Cannot export delivery info for message '%1'.").
-		        arg(dmId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		    tr("First you must download message before export.") +
-		    "\n\n" +
-		    tr("Do you want to download complete message now?"));
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		if (QMessageBox::Yes == msgBox.exec()) {
-			if (!downloadCompleteMessage(dmId, deliveryTime)) {
-				showStatusTextWithTimeout(tr("Export of "
-				    "message delivery info \"%1\" to PDF was "
-				    "not successful!").arg(dmId));
-				return;
-			} else {
-				base64 =
-				    messageDb->msgsGetDeliveryInfoBase64(dmId);
-			}
-		} else {
-			showStatusTextWithTimeout(tr("Export of message delivery "
-			"info \"%1\" to PDF was not successful!").arg(dmId));
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Delivery info export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%d'.", dmId);
+			return;
+		}
+
+		base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
+		if (base64.isEmpty()) {
+			Q_ASSERT(0);
 			return;
 		}
 	}
@@ -7125,29 +7132,22 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
 
-		QMessageBox msgBox(this);;
-		msgBox.setWindowTitle(tr("Message export error!"));
-		msgBox.setText(tr("Cannot export complete message '%1'.").
-		    arg(dmId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		    tr("First you must download the whole message before "
-		        "exporting.") + "\n\n" +
-		    tr("Do you want to download complete message now?"));
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::Yes);
-		if (QMessageBox::Yes == msgBox.exec()) {
-			if (!downloadCompleteMessage(dmId, deliveryTime)) {
-				showStatusTextWithTimeout(tr("Export of message "
-				"envelope \"%1\" to PDF was not successful!")
-				.arg(dmId));
-				return;
-			} else {
-				base64 = messageDb->msgsMessageBase64(dmId);
-			}
-		} else {
-			showStatusTextWithTimeout(tr("Export of message "
-			"envelope \"%1\" to PDF was not successful!").arg(dmId));
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%d'.", dmId);
+			return;
+		}
+
+		base64 = messageDb->msgsMessageBase64(dmId);
+		if (base64.isEmpty()) {
+			Q_ASSERT(0);
 			return;
 		}
 	}
