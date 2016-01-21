@@ -500,6 +500,8 @@ sent reply on this message</string>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
     <addaction name="separator"/>
+    <addaction name="actionSend_ZFO"/>
+    <addaction name="separator"/>
     <addaction name="actionSave_all_attachments"/>
     <addaction name="actionOpen_attachment"/>
     <addaction name="actionSave_attachment"/>
@@ -1194,6 +1196,14 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Split database by years</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSend_ZFO">
+   <property name="text">
+    <string>Send ZFO</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

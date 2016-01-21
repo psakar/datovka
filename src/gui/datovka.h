@@ -509,6 +509,11 @@ private slots:
 	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
 
 	/*!
+	 * @brief Sends selected message as ZFO into default e-mail client.
+	 */
+	void sendMessageZfoEmail(void);
+
+	/*!
 	 * @brief Open selected message in external application.
 	 */
 	void openSelectedMessageExternally(void);
