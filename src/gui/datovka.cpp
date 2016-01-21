@@ -2243,7 +2243,7 @@ void MainWindow::openSelectedAttachment(void)
 	if (!fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Attachment '%1' stored to "
 		    "temporary file '%2'.").arg(attachName).arg(fileName));
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Attachment '%1' couldn't be "
@@ -7274,7 +7274,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	if (!fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Message '%1' stored to "
 		    "temporary file '%2'.").arg(dmId).arg(fileName));
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Message '%1' couldn't be "
@@ -7345,7 +7345,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		showStatusTextWithTimeout(tr("Message delivery information "
 		    "'%1' stored to temporary file '%2'.").arg(dmId)
 		    .arg(fileName));
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Message delivery information "

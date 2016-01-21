@@ -355,7 +355,7 @@ void DlgViewZfo::openSelectedAttachment(void)
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
-		QDesktopServices::openUrl(QUrl("file:///" + fileName));
+		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		QMessageBox::warning(this,
