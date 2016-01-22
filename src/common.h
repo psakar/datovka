@@ -52,7 +52,13 @@
 #define TIMER_STATUS_TIMEOUT_MS 5000 // 5s will message in status bar shown
 #define TIMER_MARK_MSG_READ_MS 5000 /* Mark message as read after 5 seconds. */
 
-#define URL_FILE_PREFIX "file://"
+#if !defined(Q_OS_WIN)
+    /* "file://localhost" */
+#  define URL_FILE_PREFIX "file://"
+#else /* defined(Q_OS_WIN) */
+    /* "file://localhost/" */
+#  define URL_FILE_PREFIX "file:///"
+#endif /* !defined(Q_OS_WIN) */
 
 #define CZ_NIC_URL "https://www.nic.cz"
 #define DATOVKA_ONLINE_HELP_URL "https://gitlab.labs.nic.cz/labs/qdatovka/wikis/manual"
