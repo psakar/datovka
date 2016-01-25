@@ -38,7 +38,8 @@
 const QStringList connectAttrs = QStringList()
     << "username" << "password" << "certificate" << "otpcode";
 const QStringList getMsgListAttrs = QStringList()
-    << "dmType" << "dmStatusFilter" << "dmLimit" << "dmFromTime" << "dmToTime";
+    << "dmType" << "dmStatusFilter" << "dmLimit" << "dmFromTime" << "dmToTime"
+    << "complete";
 const QStringList sendMsgAttrs = QStringList()
     << "dbIDRecipient" << "dmAnnotation" << "dmToHands"
     << "dmRecipientRefNumber" << "dmSenderRefNumber" << "dmRecipientIdent"
@@ -156,6 +157,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	st = sn = rt = rn = 0;
 	enum TaskDownloadMessageList::Result ret;
 	QStringList newMsgIdList;
+	bool complete = false;
 	unsigned long dmLimit = 0;
 	unsigned long *dmLimitPtr = NULL;
 	uint dmStatusFilter = MESSAGESTATE_ANY;
@@ -182,6 +184,17 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		case 10: dmStatusFilter = MESSAGESTATE_IN_SAFE; break;
 		default: dmStatusFilter = MESSAGESTATE_ANY; break;
 		}
+	}
+
+	if (map.contains("complete")) {
+		QString compValue = map.value("complete").toString();
+		if (!(compValue == "no") && !(compValue == "yes")) {
+			errmsg = "complete attribute has wrong value "
+			    "(no,yes is required)";
+			qDebug() << createErrorMsg(errmsg);
+			return CLI_ATR_VAL_ERR;
+		}
+		complete = (compValue == "yes") ? true : false;
 	}
 
 	if (map.contains("dmLimit")) {
