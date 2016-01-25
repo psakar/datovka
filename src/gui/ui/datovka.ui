@@ -501,6 +501,7 @@ sent reply on this message</string>
     <addaction name="actionExport_message_envelope_as_PDF"/>
     <addaction name="separator"/>
     <addaction name="actionSend_ZFO"/>
+    <addaction name="actionSend_all_attachments"/>
     <addaction name="separator"/>
     <addaction name="actionSave_all_attachments"/>
     <addaction name="actionOpen_attachment"/>
@@ -1204,6 +1205,14 @@ sent reply on this message</string>
   <action name="actionSend_ZFO">
    <property name="text">
     <string>Send ZFO</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSend_all_attachments">
+   <property name="text">
+    <string>Send all attachments</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

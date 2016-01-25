@@ -4283,7 +4283,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
 	    SLOT(exportMessageEnvelopeAsPDF()));
 	connect(ui->actionSend_ZFO, SIGNAL(triggered()), this,
-	    SLOT(sendMessageZfoEmail()));
+	    SLOT(sendMessagesZfoEmail()));
+	connect(ui->actionSend_all_attachments, SIGNAL(triggered()), this,
+	    SLOT(sendAllAttachmentsEmail()));
 	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
 	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
@@ -7212,7 +7214,79 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	    "PDF was successful.").arg(dmId));
 }
 
-void MainWindow::sendMessageZfoEmail(void)
+/*!
+ * @brief Creates email header and message body.
+ */
+static
+void createEmailMessage(QString &message, const QString &subj,
+    const QString &boundary)
+{
+	message.clear();
+
+	const QString newLine("\n"); /* "\r\n" ? */
+
+	/* Rudimentary header. */
+	message += "Subject: " + subj + newLine;
+	message += "MIME-Version: 1.0" + newLine;
+	message += "Content-Type: multipart/mixed;" + newLine +
+	    " boundary=\"" + boundary + "\"" + newLine;
+
+	/* Body. */
+	message += newLine;
+	message += "--" + boundary + newLine;
+	message += "Content-Type: text/plain; charset=UTF-8" + newLine;
+	message += "Content-Transfer-Encoding: 8bit" + newLine;
+
+//	message += newLine + newLine + newLine + newLine;
+	message += newLine;
+	message += "-- " + newLine; /* Must contain the space. */
+	message += " " + QObject::tr("Created using Datovka") + " " VERSION "." + newLine;
+	message += " <URL: " DATOVKA_HOMEPAGE_URL ">" + newLine;
+}
+
+/*!
+ * @brief Adds attachment into email.
+ */
+static
+void addAttachmentToEmailMessage(QString &message, const QString &attachName,
+    const QByteArray &base64, const QString &boundary)
+{
+	const QString newLine("\n"); /* "\r\n" ? */
+
+	QMimeDatabase mimeDb;
+
+	QMimeType mimeType(
+	    mimeDb.mimeTypeForData(QByteArray::fromBase64(base64)));
+
+	message += newLine;
+	message += "--" + boundary + newLine;
+	message += "Content-Type: " + mimeType.name() + "; charset=UTF-8;" + newLine +
+	    " name=\"" + attachName +  "\"" + newLine;
+	message += "Content-Transfer-Encoding: base64" + newLine;
+	message += "Content-Disposition: attachment;" + newLine +
+	    " filename=\"" + attachName + "\"" + newLine;
+
+	for (int i = 0; i < base64.size(); ++i) {
+		if ((i % 60) == 0) {
+			message += newLine;
+		}
+		message += base64.at(i);
+	}
+	message += newLine;
+}
+
+/*!
+ * @brief Adds last line into email.
+ */
+static
+void finishEmailMessage(QString &message, const QString &boundary)
+{
+	const QString newLine("\n"); /* "\r\n" ? */
+
+	message += newLine + "--" + boundary + "--" + newLine;
+}
+
+void MainWindow::sendMessagesZfoEmail(void)
 {
 	debugSlotCall();
 
@@ -7222,30 +7296,24 @@ void MainWindow::sendMessageZfoEmail(void)
 		return;
 	}
 
-	QMimeDatabase mimeDb;
 	QString emailMessage;
-	const QString newLine("\n"); /* "\r\n" ? */
-	const QString boundary("-----someRandomBoundary_date_");
+	const QString boundary("-----" +
+	    DlgChangePwd::generateRandomString(16) + "_" +
+	    QDateTime::currentDateTimeUtc().toString(
+	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
-	/* Rudimentary header. */
-	emailMessage += "Subject: " +
-	    ((1 == firstMsgColumnIdxs.size()) ?
-	        tr("Data message") : tr("Data messages")) + newLine;
-	emailMessage += "MIME-Version: 1.0" + newLine;
-	emailMessage += "Content-Type: multipart/mixed;" + newLine +
-	    " boundary=\"" + boundary + "\"" + newLine;
+	QString subject = (1 == firstMsgColumnIdxs.size()) ?
+	    tr("Data message") : tr("Data messages");
 
-	/* Body. */
-	emailMessage += newLine;
-	emailMessage += "--" + boundary + newLine;
-	emailMessage += "Content-Type: text/plain; charset=UTF-8" + newLine;
-	emailMessage += "Content-Transfer-Encoding: 8bit" + newLine;
+	subject += " " + firstMsgColumnIdxs.first().data().toString();
+	if (firstMsgColumnIdxs.size() > 1) {
+		for (int i = 1; i < firstMsgColumnIdxs.size(); ++i) {
+			subject += ", " +
+			    firstMsgColumnIdxs.at(i).data().toString();
+		}
+	}
 
-	emailMessage += newLine;
-	emailMessage += newLine + newLine + newLine + newLine;
-	emailMessage += "--" + newLine;
-	emailMessage += " " + tr("Created using Datovka") + " " VERSION "." + newLine;
-	emailMessage += " <URL: " DATOVKA_HOMEPAGE_URL ">" + newLine;
+	createEmailMessage(emailMessage, subject, boundary);
 
 	qint64 dmId(firstMsgColumnIdxs.first().data().toLongLong());
 	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
@@ -7299,27 +7367,107 @@ void MainWindow::sendMessageZfoEmail(void)
 			return;
 		}
 
-		QMimeType mimeType(
-		    mimeDb.mimeTypeForData(QByteArray::fromBase64(base64)));
-
-		emailMessage += newLine;
-		emailMessage += "--" + boundary + newLine;
-		emailMessage += "Content-Type: " + mimeType.name() + "; charset=UTF-8;" + newLine +
-		    " name=\"" + attachName +  "\"" + newLine;
-		emailMessage += "Content-Transfer-Encoding: base64" + newLine;
-		emailMessage += "Content-Disposition: attachment;" + newLine +
-		    " filename=\"" + attachName + "\"" + newLine;
-
-		for (int i = 0; i < base64.size(); ++i) {
-			if ((i % 60) == 0) {
-				emailMessage += newLine;
-			}
-			emailMessage += base64.at(i);
-		}
-		emailMessage += newLine;
+		addAttachmentToEmailMessage(emailMessage, attachName, base64,
+		    boundary);
 	}
 
-	emailMessage += newLine + "--" + boundary + "--" + newLine;
+	finishEmailMessage(emailMessage, boundary);
+
+	QString tmpEmailFile = writeTemporaryFile(
+	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
+
+	if (!tmpEmailFile.isEmpty()) {
+		QDesktopServices::openUrl(
+		    QUrl(URL_FILE_PREFIX + tmpEmailFile));
+	}
+}
+
+void MainWindow::sendAllAttachmentsEmail(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	QString emailMessage;
+	const QString boundary("-----" +
+	    DlgChangePwd::generateRandomString(16) + "_" +
+	    QDateTime::currentDateTimeUtc().toString(
+	        "dd.MM.yyyy-HH:mm:ss.zzz"));
+
+	QString subject = (1 == firstMsgColumnIdxs.size()) ?
+	    tr("Attachments of message") : tr("Attachments of messages");
+
+	subject += " " + firstMsgColumnIdxs.first().data().toString();
+	if (firstMsgColumnIdxs.size() > 1) {
+		for (int i = 1; i < firstMsgColumnIdxs.size(); ++i) {
+			subject += ", " +
+			    firstMsgColumnIdxs.at(i).data().toString();
+		}
+	}
+
+	createEmailMessage(emailMessage, subject, boundary);
+
+	qint64 dmId(firstMsgColumnIdxs.first().data().toLongLong());
+	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
+
+	QModelIndex acntTopIndex(
+	    AccountModel::indexTop(ui->accountList->currentIndex()));
+	const QString userName(
+	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	Q_ASSERT(!userName.isEmpty());
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		dmId = frstIdx.data().toLongLong();
+
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		Q_ASSERT(0 != dbSet);
+		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		Q_ASSERT(0 != messageDb);
+
+		QList<MessageDb::FileData> attachList =
+		    messageDb->getFilesFromMessage(dmId);
+		if (attachList.isEmpty()) {
+
+			if (!messageMissingOfferDownload(dmId, deliveryTime,
+			        tr("Message export error!"))) {
+				return;
+			}
+
+			messageDb = dbSet->accessMessageDb(deliveryTime, false);
+			if (0 == messageDb) {
+				Q_ASSERT(0);
+				logErrorNL("Could not access database of "
+				    "freshly downloaded message '%d'.", dmId);
+				return;
+			}
+
+			attachList = messageDb->getFilesFromMessage(dmId);
+			if (attachList.isEmpty()) {
+				Q_ASSERT(0);
+				return;
+			}
+		}
+
+		foreach (const MessageDb::FileData &attach, attachList) {
+			Q_ASSERT(!attach.dmFileDescr.isEmpty());
+			Q_ASSERT(!attach.dmEncodedContent.isEmpty());
+
+			addAttachmentToEmailMessage(emailMessage,
+			    attach.dmFileDescr, attach.dmEncodedContent,
+			    boundary);
+		}
+	}
+
+	finishEmailMessage(emailMessage, boundary);
 
 	QString tmpEmailFile = writeTemporaryFile(
 	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
