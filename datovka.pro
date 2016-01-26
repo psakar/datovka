@@ -285,6 +285,7 @@ SOURCES += src/cli/cli.cpp \
     src/models/attachment_model.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
+    src/models/new_messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
@@ -349,6 +350,7 @@ HEADERS += src/cli/cli.h \
     src/models/attachment_model.h \
     src/models/files_model.h \
     src/models/messages_model.h \
+    src/models/new_messages_model.h \
     src/models/sort_filter_proxy_model.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
