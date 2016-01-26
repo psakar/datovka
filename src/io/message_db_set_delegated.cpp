@@ -62,7 +62,7 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 	return keys;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
+QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(void)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -73,14 +73,14 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdModel(void)
 	return this->first()->msgsRcvdModel();
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdModel(void)
+QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdModel(void)
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_ASSERT(0);
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::msgsRcvdModel(void)
+QAbstractTableModel *MessageDbSet::msgsRcvdModel(void)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -97,7 +97,7 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -108,11 +108,11 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 	return this->first()->msgsRcvdWithin90DaysModel();
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
     MessageDb &db, const QString &attachFileName)
 {
 	QSqlQuery query(db.m_db);
-	DbMsgsTblModel *ret = 0;
+	QAbstractTableModel *ret = 0;
 	bool attached = false;
 	QString queryStr;
 
@@ -184,7 +184,7 @@ fail:
 	return ret;
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
@@ -219,7 +219,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -236,7 +236,7 @@ DbMsgsTblModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -247,7 +247,7 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 	return this->first()->msgsRcvdInYearModel(year);
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdInYearModel(const QString &year)
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
@@ -259,7 +259,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsRcvdInYearModel(const QString &year)
 	return db->msgsRcvdInYearModel(year);
 }
 
-DbMsgsTblModel *MessageDbSet::msgsRcvdInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::msgsRcvdInYearModel(const QString &year)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -540,7 +540,7 @@ int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
 	return -1;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsSntModel(void)
+QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(void)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -551,14 +551,14 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntModel(void)
 	return this->first()->msgsSntModel();
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsSntModel(void)
+QAbstractTableModel *MessageDbSet::_yrly_msgsSntModel(void)
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_ASSERT(0);
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::msgsSntModel(void)
+QAbstractTableModel *MessageDbSet::msgsSntModel(void)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -575,7 +575,7 @@ DbMsgsTblModel *MessageDbSet::msgsSntModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -586,11 +586,11 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 	return this->first()->msgsSntWithin90DaysModel();
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
     MessageDb &db, const QString &attachFileName)
 {
 	QSqlQuery query(db.m_db);
-	DbMsgsTblModel *ret = 0;
+	QAbstractTableModel *ret = 0;
 	bool attached = false;
 	QString queryStr;
 
@@ -658,7 +658,7 @@ fail:
 	return ret;
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
@@ -693,7 +693,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::msgsSntWithin90DaysModel(void)
+QAbstractTableModel *MessageDbSet::msgsSntWithin90DaysModel(void)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -710,7 +710,7 @@ DbMsgsTblModel *MessageDbSet::msgsSntWithin90DaysModel(void)
 	return NULL;
 }
 
-DbMsgsTblModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
 		DbMsgsTblModel::dummyModel().setType(
@@ -721,7 +721,7 @@ DbMsgsTblModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 	return this->first()->msgsSntInYearModel(year);
 }
 
-DbMsgsTblModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year)
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
@@ -733,7 +733,7 @@ DbMsgsTblModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year)
 	return db->msgsSntInYearModel(year);
 }
 
-DbMsgsTblModel *MessageDbSet::msgsSntInYearModel(const QString &year)
+QAbstractTableModel *MessageDbSet::msgsSntInYearModel(const QString &year)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:

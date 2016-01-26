@@ -723,7 +723,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdModel(void);
+	QAbstractTableModel * msgsRcvdModel(void);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -732,7 +732,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
+	QAbstractTableModel * msgsRcvdWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return received messages within given year.
@@ -742,7 +742,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
+	QAbstractTableModel * msgsRcvdInYearModel(const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -790,7 +790,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntModel(void);
+	QAbstractTableModel * msgsSntModel(void);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
@@ -799,7 +799,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
+	QAbstractTableModel * msgsSntWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return sent messages within given year.
@@ -809,7 +809,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
+	QAbstractTableModel * msgsSntInYearModel(const QString &year);
 
 	/*!
 	 * @brief Set message read locally for all received messages.

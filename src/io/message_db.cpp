@@ -264,7 +264,7 @@ fail:
 /*
  * Return all received messages model.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
+QAbstractTableModel * MessageDb::msgsRcvdModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -313,7 +313,7 @@ fail:
 /*
  * Return received messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
+QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -364,7 +364,7 @@ fail:
 /*
  * Return received messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
+QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -603,7 +603,7 @@ fail:
 /*
  * Return all sent messages model.
  */
-DbMsgsTblModel * MessageDb::msgsSntModel(void)
+QAbstractTableModel * MessageDb::msgsSntModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -649,7 +649,7 @@ fail:
 /*
  * Return sent messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
+QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -699,7 +699,7 @@ fail:
 /*
  * Return sent messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
+QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);

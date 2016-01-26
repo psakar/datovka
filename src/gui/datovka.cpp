@@ -596,7 +596,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	QString html;
-	DbMsgsTblModel *msgTblMdl = 0;
+	QAbstractTableModel *msgTblMdl = 0;
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -1250,8 +1250,8 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	 * Mark message as read without reloading
 	 * the whole model.
 	 */
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	messageModel->overrideRead(msgId, !isRead);
@@ -2429,8 +2429,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 	QModelIndex msgIdIdx;
 	/* Find corresponding message in model. */
@@ -8761,8 +8761,8 @@ void MainWindow::messageItemsSetReadStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
@@ -8823,8 +8823,8 @@ void MainWindow::messageItemsSetProcessStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
