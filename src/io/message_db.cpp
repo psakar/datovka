@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -264,7 +264,7 @@ fail:
 /*
  * Return all received messages model.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
+QAbstractTableModel * MessageDb::msgsRcvdModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -295,13 +295,11 @@ DbMsgsTblModel * MessageDb::msgsRcvdModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -313,46 +311,20 @@ fail:
 /*
  * Return received messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdWithin90DaysModel(void)
+QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
-	    "ifnull(p.state, 0) AS process_status"
-	    " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state AS p "
-	    "ON (m.dmId = p.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", TYPE_RECEIVED);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+
+	if (!msgsRcvdWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -364,7 +336,7 @@ fail:
 /*
  * Return received messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
+QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -398,13 +370,11 @@ DbMsgsTblModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -603,7 +573,7 @@ fail:
 /*
  * Return all sent messages model.
  */
-DbMsgsTblModel * MessageDb::msgsSntModel(void)
+QAbstractTableModel * MessageDb::msgsSntModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -631,13 +601,11 @@ DbMsgsTblModel * MessageDb::msgsSntModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -649,45 +617,20 @@ fail:
 /*
  * Return sent messages within past 90 days.
  */
-DbMsgsTblModel * MessageDb::msgsSntWithin90DaysModel(void)
+QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
-	    " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))";
-//	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
-//	    " (m.dmDeliveryTime IS NULL))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", TYPE_SENT);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+
+	if (!msgsSntWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -699,7 +642,7 @@ fail:
 /*
  * Return sent messages within given year.
  */
-DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
+QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -730,13 +673,11 @@ DbMsgsTblModel * MessageDb::msgsSntInYearModel(const QString &year)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -4656,6 +4597,78 @@ fail:
 	return false;
 }
 
+bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
+{
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
+	    "ifnull(p.state, 0) AS process_status"
+	    " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", TYPE_RECEIVED);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
+{
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
+	    " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+//	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+//	    " (m.dmDeliveryTime IS NULL))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", TYPE_SENT);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
 
 /* ========================================================================= */
 /*

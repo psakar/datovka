@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -596,7 +596,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	(void) previous; /* Unused. */
 
 	QString html;
-	DbMsgsTblModel *msgTblMdl = 0;
+	QAbstractTableModel *msgTblMdl = 0;
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -1250,15 +1250,11 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	 * Mark message as read without reloading
 	 * the whole model.
 	 */
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	messageModel->overrideRead(msgId, !isRead);
-	/* Inform the view that the model has changed. */
-	emit messageModel->dataChanged(
-	    index.sibling(index.row(), 0),
-	    index.sibling(index.row(), messageModel->columnCount() - 1));
 
 	/*
 	 * Reload/update account model only for
@@ -2429,8 +2425,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 	QModelIndex msgIdIdx;
 	/* Find corresponding message in model. */
@@ -2453,10 +2449,6 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	messageModel->overrideDownloaded(dmId, true);
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
-	/* Inform the view that the model has changed. */
-	emit messageModel->dataChanged(
-	    msgIdIdx.sibling(msgIdIdx.row(), 0),
-	    msgIdIdx.sibling(msgIdIdx.row(), messageModel->columnCount() - 1));
 	ui->messageList->selectionModel()->select(storedMsgSelection,
 	    QItemSelectionModel::ClearAndSelect);
 
@@ -8761,8 +8753,8 @@ void MainWindow::messageItemsSetReadStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
@@ -8782,11 +8774,6 @@ void MainWindow::messageItemsSetReadStatus(
 		 * the whole model.
 		 */
 		messageModel->overrideRead(dmId, read);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -8823,8 +8810,8 @@ void MainWindow::messageItemsSetProcessStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = (DbMsgsTblModel *)
-	    m_messageListProxyModel.sourceModel();
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
@@ -8844,11 +8831,6 @@ void MainWindow::messageItemsSetProcessStatus(
 		 * the whole model.
 		 */
 		messageModel->overrideProcessing(dmId, state);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,

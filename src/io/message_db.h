@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -723,7 +723,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdModel(void);
+	QAbstractTableModel * msgsRcvdModel(void);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -732,7 +732,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdWithin90DaysModel(void);
+	QAbstractTableModel * msgsRcvdWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return received messages within given year.
@@ -742,7 +742,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsRcvdInYearModel(const QString &year);
+	QAbstractTableModel * msgsRcvdInYearModel(const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -790,7 +790,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntModel(void);
+	QAbstractTableModel * msgsSntModel(void);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
@@ -799,7 +799,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntWithin90DaysModel(void);
+	QAbstractTableModel * msgsSntWithin90DaysModel(void);
 
 	/*!
 	 * @brief Return sent messages within given year.
@@ -809,7 +809,7 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	DbMsgsTblModel * msgsSntInYearModel(const QString &year);
+	QAbstractTableModel * msgsSntInYearModel(const QString &year);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -996,6 +996,22 @@ protected: /* These function are used from within a database container. */
 	bool checkDb(bool quick);
 
 protected:
+	/*!
+	 * @brief Query received messages within past 90 days.
+	 *
+	 * @param[in,out] query Query already assigned to a database.
+	 * @return True on success.
+	 */
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query);
+
+	/*!
+	 * @brief Query received messages within past 90 days.
+	 *
+	 * @param[in,out] query Query already assigned to a database.
+	 * @return True on success.
+	 */
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
+
 	QSqlDatabase m_db; /*!< Message database. */
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 
