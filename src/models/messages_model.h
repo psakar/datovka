@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@
 #ifndef _MESSAGES_MODEL_H_
 #define _MESSAGES_MODEL_H_
 
+#include <QAbstractTableModel>
 #include <QMap>
-#include <QModelIndex>
-#include <QObject>
-#include <QSqlQueryModel>
+#include <QSqlQuery>
 #include <QVariant>
+#include <QVector>
 
-#include "src/common.h"
+#include "src/common.h" /* enum MessageProcessState */
 
 /*!
  * @brief Custom message model class.
@@ -39,8 +39,8 @@
  *
  * @note setItemDelegate and a custom ItemDelegate would also be the solution.
  */
-class DbMsgsTblModel : public QSqlQueryModel {
-	Q_OBJECT
+class DbMsgsTblModel : public QAbstractTableModel {
+    Q_OBJECT
 
 public:
 	/*!
@@ -57,7 +57,9 @@ public:
 	};
 
 	/*!
-	 * @brief Dummies are used to fake empty models.
+	 * @brief Specifies the type of the table model.
+	 *
+	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
 		WORKING = 0, /*!< Ordinary model created from SQL query. */
@@ -68,130 +70,214 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] type   Type of the model.
-	 * @param[in] parent Parent.
+	 * @param[in]     type   Type of the table model.
+	 * @param[parent] parent Parent object.
 	 */
 	DbMsgsTblModel(enum Type type = WORKING, QObject *parent = 0);
 
 	/*!
-	 * @brief Sets the type of the model.
-	 *
-	 * @paran[in] type Model type.
-	 */
-	virtual void setType(enum Type type);
-
-	/*!
-	 * @brief Returns fake column count for dummy models.
-	 *
-	 * @param[in] index Parent index.
-	 * @return Column count.
-	 */
-	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-
-	/*!
-	 * @brief Returns fake row count for dummy models.
+	 * @brief Returns number of rows under given parent.
 	 *
 	 * @param[in] parent Parent index.
-	 * @return Row count.
+	 * @return Number of rows.
 	 */
-	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual
+	int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
 	/*!
-	 * @brief Convert viewed data in date/time columns.
+	 * @brief Returns number of columns (for the children of given parent).
 	 *
-	 * @param[in] index Item index.
-	 * @param[in] role  Display role.
-	 * @return Data modified according to the given role.
+	 * @param[in] parent Parent index.
+	 * @return Number of columns.
 	 */
-	virtual QVariant data(const QModelIndex &index,
+	virtual
+	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+	/*!
+	 * @brief Returns the data stored under the given role.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role  Role if the position.
+	 * @return Data or invalid QVariant if no matching data found.
+	 */
+	virtual
+	QVariant data(const QModelIndex &index,
 	    int role = Qt::DisplayRole) const;
 
 	/*!
-	 * @brief Convert viewed header data.
+	 * @brief Sets header data for the given role and section.
 	 *
-	 * @param[in] section     Section index.
-	 * @param[in] orientation Header orientation.
-	 * @param[in] role Display role.
-	 * @return Header data modified according to the given role.
+	 * @param[in] section     Position.
+	 * @param[in] orientation Orientation of the header.
+	 * @param[in] value       Value to be set.
+	 * @param[in] role        Role of the data.
+	 * @return True when data have been set successfully.
 	 */
-	virtual QVariant headerData(int section, Qt::Orientation orientation,
-	    int role) const;
+	virtual
+	bool setHeaderData(int section, Qt::Orientation orientation,
+	    const QVariant &value, int role = Qt::EditRole);
+
+	/*!
+	 * @brief Obtains header data.
+	 *
+	 * @param[in] section     Position.
+	 * @param[in] orientation Orientation of the header.
+	 * @param[in] role        Role of the data.
+	 * @return Data or invalid QVariant in no matching data found.
+	 */
+	virtual
+	QVariant headerData(int section, Qt::Orientation orientation,
+	    int role = Qt::DisplayRole) const;
+
+	/*!
+	 * @brief Sets the type of the model.
+	 *
+	 * @note Also sets the headers according to the dummy type.
+	 *
+	 * @param[in] type Type of the table model.
+	 * @return True if everything has been set successfully.
+	 */
+	bool setType(enum Type type);
+
+	/*!
+	 * @brief Sets the content of the model according to the supplied query.
+	 *
+	 * @param[in,out] qyery SQL query result.
+	 */
+	void setQuery(QSqlQuery &query);
+
+	/*!
+	 * @brief Singleton method returning received column identifiers.
+	 *
+	 * @return List of received column identifiers.
+	 */
+	static
+	const QVector<QString> &rcvdItemIds(void);
+
+	/*!
+	 * @brief Singleton method returning sent column identifiers.
+	 *
+	 * @return List of sent column identifiers.
+	 */
+	static
+	const QVector<QString> &sntItemIds(void);
+
+	/*!
+	 * @brief Set header data for received model.
+	 *
+	 * @return False on error.
+	 */
+	bool setRcvdHeader(void);
+
+	/*!
+	 * @Brief Set header data for sent model.
+	 *
+	 * @return False on error.
+	 */
+	bool setSntHeader(void);
 
 	/*!
 	 * @brief Override message as being read.
+	 *
+	 * @note Emits dataChanged signal.
 	 *
 	 * @param[in] dmId      Message id.
 	 * @param[in] forceRead Set whether to force read state.
 	 * @return True on success.
 	 */
-	virtual bool overrideRead(qint64 dmId, bool forceRead = true);
+	bool overrideRead(qint64 dmId, bool forceRead = true);
 
 	/*!
 	 * @brief Override message as having its attachments having downloaded.
+	 *
+	 * note Emits dataChanged signal.
 	 *
 	 * @param[in] dmId            Message id.
 	 * @param[in] forceDownloaded Set whether to force attachments
 	 *                            downloaded state.
 	 * @return True on success.
 	 */
-	virtual bool overrideDownloaded(qint64 dmId,
-	    bool forceDownloaded = true);
+	bool overrideDownloaded(qint64 dmId, bool forceDownloaded = true);
 
 	/*!
 	 * @brief Override message processing state.
+	 *
+	 * note Emits dataChanged signal.
 	 *
 	 * @param[in] dmId       Message id.
 	 * @param[in] forceState Set forced value.
 	 * @return True on success.
 	 */
-	virtual bool overrideProcessing(qint64 dmId,
+	bool overrideProcessing(qint64 dmId,
 	    enum MessageProcessState forceState);
 
 	/*!
-	 * @brief Clear all overriding data.
-	 */
-	virtual void clearOverridingData(void);
-
-	/*!
-	 * @brief Set header data for received model.
-	 */
-	bool setRcvdHeader(void);
-
-	/*!
-	 * @brief Set header data for sent model.
-	 */
-	bool setSntHeader(void);
-
-	/* Methods behaving as singletons. */
-	static
-	const QVector<QString> &rcvdItemIds(void);
-	static
-	const QVector<QString> &sntItemIds(void);
-
-	/*
-	 * Beware of the static initialization order fiasco.
+	 * @brief Returns reference to a dummy model.
+	 *
+	 * @note Beware of the static initialization order fiasco.
+	 *
+	 * @param[in] type Type of the table model.
+	 * @returns Reference to a static dummy model.
 	 */
 	static
-	DbMsgsTblModel &dummyModel(void); /*!< Dummy model. */
+	DbMsgsTblModel &dummyModel(enum Type type);
 
-	/*
-	 * The view's proxy model cannot be accessed, so the message must be
-	 * addressed via its id rather than using the index.
-	 */
 private:
-	QMap<qint64, bool> m_overriddenRL; /*!<
-	                                    * Holds overriding information for
-	                                    * read locally.
-	                                    */
-	QMap<qint64, bool> m_overriddenAD; /*!<
-	                                    * Holds overriding information for
-	                                    * downloaded attachments.
-	                                    */
-	QMap<qint64, int> m_overriddenPS; /*!<
-	                                   * Holds overriding information for
-	                                   * message processing state.
-	                                   */
-	Type m_type; /*!< Model type. */
+	/*!
+	 * @brief Returns raw data stored under the given role.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role  Role if the position (accepts only display role).
+	 * @return Data or invalid QVariant if no matching data found.
+	 */
+	QVariant _data(const QModelIndex &index,
+	    int role = Qt::DisplayRole) const;
+
+	/*!
+	 * @brief Returns raw data stored under the given role.
+	 *
+	 * @param[in] row   Position.
+	 * @param[in] col   Position.
+	 * @param[in] role  Role if the position (accepts only display role).
+	 * @return Data or invalid QVariant if no matching data found.
+	 */
+	QVariant _data(int row, int col, int role = Qt::DisplayRole) const;
+
+	/*!
+	 * @brief Returns raw header data as they have been stored.
+	 *
+	 * @param[in] section     Position.
+	 * @param[in] orientation Orientation of the header (is ignored).
+	 * @param[in] role        Role of the data.
+	 * @return Data or invalid QVariant in no matching data found.
+	 */
+	inline
+	QVariant _headerData(int section, Qt::Orientation orientation,
+	    int role = Qt::DisplayRole) const;
+
+	/*
+	 * Maps are organised in this order from outside:
+	 * key[section] -> key[role] -> value[data]
+	 * Orientation is ignored.
+	 */
+	QMap< int, QMap<int, QVariant> > m_headerData; /*!< Header data. */
+
+	/*
+	 * Data are organised using a two-dimensional array.
+	 * The size of the array is incremented using several lines at once.
+	 */
+	QVector< QVector<QVariant> > m_data; /*!< Model data. */
+	int m_rowsAllocated; /*!< Number of rows allocated. */
+	static
+	const int m_rowAllocationIncrement; /*!<
+	                                     * Number of lines to be added
+	                                     * in a single resize attempt.
+	                                     */
+
+	int m_rowCount; /*!< Number of used rows.*/
+	int m_columnCount; /*!< Number of columns. */
+
+	Type m_type; /*!< Whether this is a model dummy or contains data. */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

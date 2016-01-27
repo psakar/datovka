@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -295,13 +295,11 @@ QAbstractTableModel * MessageDb::msgsRcvdModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -346,13 +344,11 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -398,13 +394,11 @@ QAbstractTableModel * MessageDb::msgsRcvdInYearModel(const QString &year)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -631,13 +625,11 @@ QAbstractTableModel * MessageDb::msgsSntModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -681,13 +673,11 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(void)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:
@@ -730,13 +720,11 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year)
 		goto fail;
 	}
 
-	m_sqlMsgsModel.clearOverridingData();
 	m_sqlMsgsModel.setQuery(query);
 	if (!m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
 		goto fail;
 	}
-
 	return &m_sqlMsgsModel;
 
 fail:

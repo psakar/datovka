@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,9 +65,8 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(void)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
+		return &DbMsgsTblModel::dummyModel(
 		    DbMsgsTblModel::DUMMY_RECEIVED);
-		return &DbMsgsTblModel::dummyModel();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdModel();
@@ -100,9 +99,8 @@ QAbstractTableModel *MessageDbSet::msgsRcvdModel(void)
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
+		return &DbMsgsTblModel::dummyModel(
 		    DbMsgsTblModel::DUMMY_RECEIVED);
-		return &DbMsgsTblModel::dummyModel();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdWithin90DaysModel();
@@ -168,7 +166,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 		goto fail;
 	}
 
-	db.m_sqlMsgsModel.clearOverridingData();
 	db.m_sqlMsgsModel.setQuery(query);
 	if (!db.m_sqlMsgsModel.setRcvdHeader()) {
 		Q_ASSERT(0);
@@ -189,9 +186,8 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
+		return &DbMsgsTblModel::dummyModel(
 		    DbMsgsTblModel::DUMMY_RECEIVED);
-		return &DbMsgsTblModel::dummyModel();
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
 		MessageDb *db = this->value(secKeys[0], NULL);
@@ -239,9 +235,8 @@ QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(void)
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
+		return &DbMsgsTblModel::dummyModel(
 		    DbMsgsTblModel::DUMMY_RECEIVED);
-		return &DbMsgsTblModel::dummyModel();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsRcvdInYearModel(year);
@@ -543,9 +538,7 @@ int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
 QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(void)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
-		    DbMsgsTblModel::DUMMY_SENT);
-		return &DbMsgsTblModel::dummyModel();
+		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SENT);
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntModel();
@@ -578,9 +571,7 @@ QAbstractTableModel *MessageDbSet::msgsSntModel(void)
 QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
-		    DbMsgsTblModel::DUMMY_SENT);
-		return &DbMsgsTblModel::dummyModel();
+		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SENT);
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntWithin90DaysModel();
@@ -642,7 +633,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 		goto fail;
 	}
 
-	db.m_sqlMsgsModel.clearOverridingData();
 	db.m_sqlMsgsModel.setQuery(query);
 	if (!db.m_sqlMsgsModel.setSntHeader()) {
 		Q_ASSERT(0);
@@ -663,9 +653,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
-		    DbMsgsTblModel::DUMMY_SENT);
-		return &DbMsgsTblModel::dummyModel();
+		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SENT);
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
 		MessageDb *db = this->value(secKeys[0], NULL);
@@ -713,9 +701,7 @@ QAbstractTableModel *MessageDbSet::msgsSntWithin90DaysModel(void)
 QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year)
 {
 	if (this->size() == 0) {
-		DbMsgsTblModel::dummyModel().setType(
-		    DbMsgsTblModel::DUMMY_SENT);
-		return &DbMsgsTblModel::dummyModel();
+		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SENT);
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsSntInYearModel(year);

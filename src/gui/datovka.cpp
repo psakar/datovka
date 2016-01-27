@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1255,10 +1255,6 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	Q_ASSERT(0 != messageModel);
 
 	messageModel->overrideRead(msgId, !isRead);
-	/* Inform the view that the model has changed. */
-	emit messageModel->dataChanged(
-	    index.sibling(index.row(), 0),
-	    index.sibling(index.row(), messageModel->columnCount() - 1));
 
 	/*
 	 * Reload/update account model only for
@@ -2453,10 +2449,6 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	messageModel->overrideDownloaded(dmId, true);
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
-	/* Inform the view that the model has changed. */
-	emit messageModel->dataChanged(
-	    msgIdIdx.sibling(msgIdIdx.row(), 0),
-	    msgIdIdx.sibling(msgIdIdx.row(), messageModel->columnCount() - 1));
 	ui->messageList->selectionModel()->select(storedMsgSelection,
 	    QItemSelectionModel::ClearAndSelect);
 
@@ -8782,11 +8774,6 @@ void MainWindow::messageItemsSetReadStatus(
 		 * the whole model.
 		 */
 		messageModel->overrideRead(dmId, read);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -8844,11 +8831,6 @@ void MainWindow::messageItemsSetProcessStatus(
 		 * the whole model.
 		 */
 		messageModel->overrideProcessing(dmId, state);
-		/* Inform the view that the model has changed. */
-		emit messageModel->dataChanged(
-		    it->sibling(it->row(), 0),
-		    it->sibling(it->row(), messageModel->columnCount() - 1));
-
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
