@@ -211,7 +211,7 @@ QVariant NewDbMsgsTblModel::data(const QModelIndex &index, int role) const
 //				id = m_overriddenRL.value(dmId,
 //				    _data(index,
 //				        Qt::DisplayRole).toBool()) ? 1 : 0;
-				id = _data(index,Qt::DisplayRole).toBool() ?
+				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
 				id = id << 48;
 				id += dmId;
@@ -509,6 +509,70 @@ bool NewDbMsgsTblModel::setSntHeader(void)
 	return true;
 }
 
+bool NewDbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
+{
+	if (columnCount() != 8) {
+		/* Not a read messages model. */
+		return false;
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
+		    dmId) {
+			m_data[row][READLOC_COL] = QVariant(forceRead);
+
+			emit dataChanged(QAbstractTableModel::index(row, 0),
+			    QAbstractTableModel::index(row, columnCount() - 1));
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool NewDbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
+{
+	if (columnCount() != 8) {
+		/* Not a read messages model. */
+		return false;
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
+		    dmId) {
+			m_data[row][ATTDOWN_COL] = QVariant(forceDownloaded);
+
+			emit dataChanged(QAbstractTableModel::index(row, 0),
+			    QAbstractTableModel::index(row, columnCount() - 1));
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool NewDbMsgsTblModel::overrideProcessing(qint64 dmId,
+    enum MessageProcessState forceState)
+{
+	if (columnCount() != 8) {
+		/* Not a read messages model. */
+		return false;
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
+		    dmId) {
+			m_data[row][PROCSNG_COL] = QVariant(forceState);
+
+			emit dataChanged(QAbstractTableModel::index(row, 0),
+			    QAbstractTableModel::index(row, columnCount() - 1));
+			return true;
+		}
+	}
+
+	return false;
+}
+
 QVariant NewDbMsgsTblModel::_data(const QModelIndex &index, int role) const
 {
 	if (role != Qt::DisplayRole) {
@@ -517,6 +581,19 @@ QVariant NewDbMsgsTblModel::_data(const QModelIndex &index, int role) const
 
 	if ((index.row() < m_rowCount) && (index.column() < m_columnCount)) {
 		return m_data.at(index.row()).at(index.column());
+	} else {
+		return QVariant();
+	}
+}
+
+QVariant NewDbMsgsTblModel::_data(int row, int col, int role) const
+{
+	if (role != Qt::DisplayRole) {
+		return QVariant();
+	}
+
+	if ((row < m_rowCount) && (col < m_columnCount)) {
+		return m_data.at(row).at(col);
 	} else {
 		return QVariant();
 	}

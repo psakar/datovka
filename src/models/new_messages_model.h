@@ -30,6 +30,8 @@
 #include <QVariant>
 #include <QVector>
 
+#include "src/common.h" /* enum MessageProcessState */
+
 /*!
  * @brief Custom message model class.
  *
@@ -167,13 +169,47 @@ public:
 	 */
 	bool setRcvdHeader(void);
 
-
 	/*!
 	 * @Brief Set header data for sent model.
 	 *
 	 * @return False on error.
 	 */
 	bool setSntHeader(void);
+
+	/*!
+	 * @brief Override message as being read.
+	 *
+	 * @note Emits dataChanged signal.
+	 *
+	 * @param[in] dmId      Message id.
+	 * @param[in] forceRead Set whether to force read state.
+	 * @return True on success.
+	 */
+	bool overrideRead(qint64 dmId, bool forceRead = true);
+
+	/*!
+	 * @brief Override message as having its attachments having downloaded.
+	 *
+	 * note Emits dataChanged signal.
+	 *
+	 * @param[in] dmId            Message id.
+	 * @param[in] forceDownloaded Set whether to force attachments
+	 *                            downloaded state.
+	 * @return True on success.
+	 */
+	bool overrideDownloaded(qint64 dmId, bool forceDownloaded = true);
+
+	/*!
+	 * @brief Override message processing state.
+	 *
+	 * note Emits dataChanged signal.
+	 *
+	 * @param[in] dmId       Message id.
+	 * @param[in] forceState Set forced value.
+	 * @return True on success.
+	 */
+	bool overrideProcessing(qint64 dmId,
+	    enum MessageProcessState forceState);
 
 private:
 	/*!
@@ -185,6 +221,16 @@ private:
 	 */
 	QVariant _data(const QModelIndex &index,
 	    int role = Qt::DisplayRole) const;
+
+	/*!
+	 * @brief Returns raw data stored under the given role.
+	 *
+	 * @param[in] row   Position.
+	 * @param[in] col   Position.
+	 * @param[in] role  Role if the position (accepts only display role).
+	 * @return Data or invalid QVariant if no matching data found.
+	 */
+	QVariant _data(int row, int col, int role = Qt::DisplayRole) const;
 
 	/*!
 	 * @brief Returns raw header data as they have been stored.
