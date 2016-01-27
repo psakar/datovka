@@ -574,7 +574,9 @@ private:
 
 	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(void);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	static
+	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1);
 	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(void);
 
 	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year);
@@ -597,7 +599,9 @@ private:
 
 	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(void);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	static
+	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1);
 	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(void);
 
 	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year);

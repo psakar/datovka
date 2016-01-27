@@ -996,6 +996,22 @@ protected: /* These function are used from within a database container. */
 	bool checkDb(bool quick);
 
 protected:
+	/*!
+	 * @brief Query received messages within past 90 days.
+	 *
+	 * @param[in,out] query Query already assigned to a database.
+	 * @return True on success.
+	 */
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query);
+
+	/*!
+	 * @brief Query received messages within past 90 days.
+	 *
+	 * @param[in,out] query Query already assigned to a database.
+	 * @return True on success.
+	 */
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
+
 	QSqlDatabase m_db; /*!< Message database. */
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 

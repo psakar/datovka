@@ -377,7 +377,20 @@ void DbMsgsTblModel::setQuery(QSqlQuery &query)
 	m_data.clear();
 	m_rowsAllocated = 0;
 	m_rowCount = 0;
+
+	/* Looks like empty results have column count set. */
 	m_columnCount = query.record().count();
+
+	appendQueryData(query);
+}
+
+bool DbMsgsTblModel::appendQueryData(QSqlQuery &query)
+{
+	if (query.record().count() != m_columnCount) {
+		return false;
+	}
+
+	beginResetModel();
 
 	query.first();
 	while (query.isActive() && query.isValid()) {
@@ -399,6 +412,8 @@ void DbMsgsTblModel::setQuery(QSqlQuery &query)
 	}
 
 	endResetModel();
+
+	return true;
 }
 
 const QVector<QString> &DbMsgsTblModel::rcvdItemIds(void)

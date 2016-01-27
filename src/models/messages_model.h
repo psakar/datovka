@@ -147,6 +147,16 @@ public:
 	void setQuery(QSqlQuery &query);
 
 	/*!
+	 * @brief Appends data from the supplied query to the model.
+	 *
+	 * @param[in,out] query   SQL query result.
+	 * @param[in]     columns Number of columns the model and query must
+	 *                        match.
+	 * @return True on success.
+	 */
+	bool appendQueryData(QSqlQuery &query);
+
+	/*!
 	 * @brief Singleton method returning received column identifiers.
 	 *
 	 * @return List of received column identifiers.

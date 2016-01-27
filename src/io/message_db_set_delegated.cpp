@@ -106,7 +106,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(void)
 	return this->first()->msgsRcvdWithin90DaysModel();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
     MessageDb &db, const QString &attachFileName)
 {
 	QSqlQuery query(db.m_db);
@@ -175,10 +175,46 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	ret = &db.m_sqlMsgsModel;
 
 fail:
+	/* Query must be finished before detaching. */
 	query.finish();
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
+	return ret;
+}
+
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
+    MessageDb &db0, MessageDb &db1)
+{
+	QAbstractTableModel *ret = 0;
+
+	{
+		QSqlQuery query(db0.m_db);
+
+		if (!db0.msgsRcvdWithin90DaysQuery(query)) {
+			goto fail;
+		}
+
+		db0.m_sqlMsgsModel.setQuery(query);
+		if (!db0.m_sqlMsgsModel.setRcvdHeader()) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+	}
+
+	{
+		QSqlQuery query(db1.m_db);
+
+		if (!db1.msgsRcvdWithin90DaysQuery(query)) {
+			goto fail;
+		}
+
+		db0.m_sqlMsgsModel.appendQueryData(query);
+	}
+
+	ret = &db0.m_sqlMsgsModel;
+
+fail:
 	return ret;
 }
 
@@ -208,8 +244,12 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(void)
 			return NULL;
 		}
 
-		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0,
+#if 0
+		return _yrly_2dbs_attach_msgsRcvdWithin90DaysModel(*db0,
 		    db1->fileName());
+#else
+		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0, *db1);
+#endif
 	}
 
 	Q_ASSERT(0);
@@ -578,7 +618,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(void)
 	return this->first()->msgsSntWithin90DaysModel();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
     MessageDb &db, const QString &attachFileName)
 {
 	QSqlQuery query(db.m_db);
@@ -643,10 +683,46 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	ret = &db.m_sqlMsgsModel;
 
 fail:
+	/* Query must be finished before detaching. */
 	query.finish();
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
+	return ret;
+}
+
+QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
+    MessageDb &db0, MessageDb &db1)
+{
+	QAbstractTableModel *ret = 0;
+
+	{
+		QSqlQuery query(db0.m_db);
+
+		if (!db0.msgsSntWithin90DaysQuery(query)) {
+			goto fail;
+		}
+
+		db0.m_sqlMsgsModel.setQuery(query);
+		if (!db0.m_sqlMsgsModel.setSntHeader()) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+	}
+
+	{
+		QSqlQuery query(db1.m_db);
+
+		if (!db1.msgsSntWithin90DaysQuery(query)) {
+			goto fail;
+		}
+
+		db0.m_sqlMsgsModel.appendQueryData(query);
+	}
+
+	ret = &db0.m_sqlMsgsModel;
+
+fail:
 	return ret;
 }
 
@@ -675,8 +751,12 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(void)
 			return NULL;
 		}
 
-		return _yrly_2dbs_msgsSntWithin90DaysModel(*db0,
+#if 0
+		return _yrly_2dbs_attach_msgsSntWithin90DaysModel(*db0,
 		    db1->fileName());
+#else
+		return _yrly_2dbs_msgsSntWithin90DaysModel(*db0, *db1);
+#endif
 	}
 
 	Q_ASSERT(0);

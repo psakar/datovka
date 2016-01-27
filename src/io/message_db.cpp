@@ -315,32 +315,8 @@ QAbstractTableModel * MessageDb::msgsRcvdWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
-	    "ifnull(p.state, 0) AS process_status"
-	    " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state AS p "
-	    "ON (m.dmId = p.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", TYPE_RECEIVED);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+
+	if (!msgsRcvdWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
@@ -645,31 +621,8 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(void)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
-	    " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))";
-//	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
-//	    " (m.dmDeliveryTime IS NULL))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", TYPE_SENT);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+
+	if (!msgsSntWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
@@ -4644,6 +4597,78 @@ fail:
 	return false;
 }
 
+bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
+{
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
+		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
+	    "ifnull(p.state, 0) AS process_status"
+	    " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "LEFT JOIN process_state AS p "
+	    "ON (m.dmId = p.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", TYPE_RECEIVED);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
+{
+	QString queryStr = "SELECT ";
+	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	}
+	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded"
+	    " FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN raw_message_data AS r "
+	    "ON (m.dmId = r.message_id) "
+	    "WHERE "
+	    "(s.message_type = :message_type)"
+	    " and "
+	    "(m.dmDeliveryTime >= date('now','-90 day'))";
+//	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
+//	    " (m.dmDeliveryTime IS NULL))";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":message_type", TYPE_SENT);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
 
 /* ========================================================================= */
 /*
