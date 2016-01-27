@@ -175,6 +175,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	ret = &db.m_sqlMsgsModel;
 
 fail:
+	query.finish();
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
@@ -642,6 +643,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	ret = &db.m_sqlMsgsModel;
 
 fail:
+	query.finish();
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
