@@ -873,7 +873,10 @@ sent reply on this message</string>
      <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
    </property>
    <property name="text">
-    <string>Download message signed</string>
+    <string>Download signed message</string>
+   </property>
+   <property name="toolTip">
+    <string>Download the whole signed message including its content</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -888,7 +891,7 @@ sent reply on this message</string>
     <string>Reply to message</string>
    </property>
    <property name="toolTip">
-    <string>Reply on the selected message</string>
+    <string>Reply to the selected message</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -904,6 +907,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Signature details</string>
+   </property>
+   <property name="toolTip">
+    <string>Display details about the signature</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -932,6 +938,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Delete message</string>
    </property>
+   <property name="toolTip">
+    <string>Deletes message from local database and/or from ISDS server</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -939,6 +948,9 @@ sent reply on this message</string>
   <action name="actionExport_as_ZFO">
    <property name="text">
     <string>Export message as ZFO</string>
+   </property>
+   <property name="toolTip">
+    <string>Export the selected message as ZFO file</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -948,6 +960,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Open message externally</string>
    </property>
+   <property name="toolTip">
+    <string>Pass the selected message to an external application</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -955,6 +970,9 @@ sent reply on this message</string>
   <action name="actionOpen_delivery_info_externally">
    <property name="text">
     <string>Open delivery info externally</string>
+   </property>
+   <property name="toolTip">
+    <string>Pass the delivery information of the selected message to an external application</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -964,6 +982,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Export delivery info as ZFO</string>
    </property>
+   <property name="toolTip">
+    <string>Export the delivery information of the selected message as ZFO file</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -972,6 +993,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Export delivery info as PDF</string>
    </property>
+   <property name="toolTip">
+    <string>Export the delivery information of the selected message as PDF file</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -979,6 +1003,9 @@ sent reply on this message</string>
   <action name="actionExport_message_envelope_as_PDF">
    <property name="text">
     <string>Export message envelope as PDF</string>
+   </property>
+   <property name="toolTip">
+    <string>Export the envelope of the selected message as PDF file</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1039,6 +1066,12 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Use message as template</string>
+   </property>
+   <property name="toolTip">
+    <string>Use the selected message as a template</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionMsgAdvancedSearch">
@@ -1108,6 +1141,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Send ZFO</string>
    </property>
+   <property name="toolTip">
+    <string>Creates an e-mail containing the selected message ZFO</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -1115,6 +1151,9 @@ sent reply on this message</string>
   <action name="actionSend_all_attachments">
    <property name="text">
     <string>Send all attachments</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates an e-mail containing the selected message attachments</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

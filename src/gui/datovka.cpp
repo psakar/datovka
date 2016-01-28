@@ -1221,68 +1221,27 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 
 	/* TODO use QAction::iconText() instead of direct strings here. */
 
-	menu->addAction(
-	    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
-	    tr("Download message signed"), this,
-	    SLOT(downloadSelectedMessageAttachments()))->
-	    setEnabled(ui->actionDownload_message_signed->isEnabled());
+	menu->addAction(ui->actionDownload_message_signed);
 	if (singleSelected) {
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
-		    tr("Reply to message"), this,
-		    SLOT(createAndSendMessageReply()))->
-		    setEnabled(ui->actionReply->isEnabled());
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-message.png"),
-		    tr("Use message as template"), this,
-		    SLOT(createAndSendMessageFromTmpl()))->
-		    setEnabled(
-		        ui->actionCreate_message_from_template->isEnabled());
+		menu->addAction(ui->actionReply);
+		menu->addAction(ui->actionCreate_message_from_template);
 	}
 	menu->addSeparator();
 	if (singleSelected) {
-		menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "label_16.png"),
-		    tr("Signature details"), this,
-		    SLOT(showSignatureDetails()))->
-		    setEnabled(ui->actionSignature_detail->isEnabled());
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
-		    tr("Authenticate message"), this,
-		    SLOT(verifySelectedMessage()))->
-		    setEnabled(ui->actionAuthenticate_message->isEnabled());
+		menu->addAction(ui->actionSignature_detail);
+		menu->addAction(ui->actionAuthenticate_message);
 		menu->addSeparator();
-		menu->addAction(
-		    tr("Open message externally"), this,
-		    SLOT(openSelectedMessageExternally()))->
-		    setEnabled(ui->actionOpen_message_externally->isEnabled());
-		menu->addAction(
-		    tr("Open delivery info externally"), this,
-		    SLOT(openDeliveryInfoExternally()))->
-		    setEnabled(ui->actionOpen_delivery_info_externally->isEnabled());
+		menu->addAction(ui->actionOpen_message_externally);
+		menu->addAction(ui->actionOpen_delivery_info_externally);
 		menu->addSeparator();
-		menu->addAction(
-		    tr("Export message as ZFO"), this,
-		    SLOT(exportSelectedMessageAsZFO()))->
-		    setEnabled(ui->actionExport_as_ZFO->isEnabled());
-		menu->addAction(
-		    tr("Export delivery info as ZFO"), this,
-		    SLOT(exportDeliveryInfoAsZFO()))->
-		    setEnabled(ui->actionExport_delivery_info_as_ZFO->isEnabled());
-		menu->addAction(
-		    tr("Export delivery info as PDF"), this,
-		    SLOT(exportDeliveryInfoAsPDF()))->
-		    setEnabled(ui->actionExport_delivery_info_as_PDF->isEnabled());
-		menu->addAction(
-		    tr("Export message envelope as PDF"), this,
-		    SLOT(exportMessageEnvelopeAsPDF()))->
-		    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
+		menu->addAction(ui->actionExport_as_ZFO);
+		menu->addAction(ui->actionExport_delivery_info_as_ZFO);
+		menu->addAction(ui->actionExport_delivery_info_as_PDF);
+		menu->addAction(ui->actionExport_message_envelope_as_PDF);
 		menu->addSeparator();
 	}
-	menu->addAction(tr("Send ZFO"), this, SLOT(sendMessagesZfoEmail()))->
-	    setEnabled(ui->actionSend_ZFO->isEnabled());
-	menu->addAction(tr("Send all attachments"), this, SLOT(sendAllAttachmentsEmail()))->
-	    setEnabled(ui->actionSend_all_attachments->isEnabled());
+	menu->addAction(ui->actionSend_ZFO);
+	menu->addAction(ui->actionSend_all_attachments);
 	menu->addSeparator();
 
 	if (received) {
@@ -1302,11 +1261,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
-	menu->addAction(
-	    QIcon(ICON_3PARTY_PATH "delete_16.png"),
-	    tr("Delete message"), this,
-	    SLOT(deleteMessage()))->
-	    setEnabled(ui->actionDelete_message_from_db->isEnabled());
+	menu->addAction(ui->actionDelete_message_from_db);
 
 	menu->exec(QCursor::pos());
 }
