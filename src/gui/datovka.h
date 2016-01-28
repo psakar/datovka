@@ -65,13 +65,6 @@ public:
 	QLabel *statusDbMode;
 	QStatusBar *statusBar;
 
-	enum isdsResult {
-		MSG_IS_IN_ISDS,
-		MSG_IS_NOT_IN_ISDS,
-		MSG_ISDS_ERROR,
-		MSG_FILE_ERROR
-	};
-
 	/*!
 	 * @brief Create configuration file if not present.
 	 */
