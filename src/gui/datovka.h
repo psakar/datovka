@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -507,6 +507,22 @@ private slots:
 	 */
 	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
 	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
+
+	/*!
+	 * @brief Sends selected messages as ZFO into default e-mail client.
+	 */
+	void sendMessagesZfoEmail(void);
+
+	/*!
+	 * @brief Sends all attachments of selected messages into default
+	 *     e-mail client.
+	 */
+	void sendAllAttachmentsEmail(void);
+
+	/*!
+	 * @brief Sends selected attachments into default e-mail client.
+	 */
+	void sendAttachmentsEmail(void);
 
 	/*!
 	 * @brief Open selected message in external application.
