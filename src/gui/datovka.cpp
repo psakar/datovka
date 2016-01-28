@@ -4118,7 +4118,6 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);
 				ui->actionAccount_props->setEnabled(true);
-				ui->actionChange_pwd->setEnabled(true);
 				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
 				ui->actionMsgAdvancedSearch->setEnabled(true);
@@ -4301,8 +4300,6 @@ void MainWindow::connectTopToolBarSlots(void)
 	    SLOT(showMsgAdvancedSearchDlg()));
 	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
-	connect(ui->actionChange_pwd, SIGNAL(triggered()), this,
-	    SLOT(changeAccountPassword()));
 	connect(ui->actionPrefs, SIGNAL(triggered()), this,
 	    SLOT(applicationPreferences()));
 }
@@ -4359,7 +4356,6 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionReply_to_the_sender->setEnabled(false);
 	ui->actionVerify_a_message->setEnabled(false);
 	ui->actionAccount_props->setEnabled(false);
-	ui->actionChange_pwd->setEnabled(false);
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);

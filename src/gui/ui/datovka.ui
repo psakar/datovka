@@ -740,21 +740,6 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionChange_pwd">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Change password</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
-   </property>
-  </action>
   <action name="actionAccount_props">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
