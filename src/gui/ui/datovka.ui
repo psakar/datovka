@@ -565,26 +565,18 @@ sent reply on this message</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionReceived_all"/>
-   <addaction name="actionDownload_messages"/>
-   <addaction name="separator"/>
-   <addaction name="actionCreate_message"/>
-   <addaction name="actionReply_to_the_sender"/>
-   <addaction name="actionVerify_a_message"/>
-   <addaction name="separator"/>
-   <addaction name="actionMsgAdvancedSearch"/>
-   <addaction name="separator"/>
-   <addaction name="actionAccount_props"/>
-   <addaction name="actionPrefs"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSync_all_accounts">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-all-accounts-sync.png</normaloff>:/icons/16x16/datovka-all-accounts-sync.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Sync all accounts</string>
+   </property>
+   <property name="toolTip">
+    <string>Synchronize all accounts at once</string>
    </property>
    <property name="shortcut">
     <string>Shift+F5</string>
@@ -635,25 +627,16 @@ sent reply on this message</string>
   <action name="actionPreferences">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Preferences</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::PreferencesRole</enum>
-   </property>
-  </action>
-  <action name="actionPrefs">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/gear_32.png</normaloff>:/icons/3party/gear_32.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Preferences</string>
    </property>
    <property name="toolTip">
     <string>Preferences of Datovka</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
    </property>
   </action>
   <action name="actionQuit">
@@ -684,15 +667,15 @@ sent reply on this message</string>
    </property>
   </action>
   <action name="actionGet_messages">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-account-sync.png</normaloff>:/icons/16x16/datovka-account-sync.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
-    <string>Synchronize account</string>
+    <string>Sync account</string>
+   </property>
+   <property name="toolTip">
+    <string>Synchronize selected account</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -704,10 +687,13 @@ sent reply on this message</string>
   <action name="actionSend_message">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
    </property>
    <property name="text">
     <string>Create message</string>
+   </property>
+   <property name="toolTip">
+    <string>Create and send a new message</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -740,25 +726,16 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionAccount_props">
+  <action name="actionAccount_properties">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/letter_32.png</normaloff>:/icons/3party/letter_32.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/3party/letter_16.png</iconset>
    </property>
    <property name="text">
     <string>Account properties</string>
    </property>
    <property name="toolTip">
     <string>Change account properties</string>
-   </property>
-  </action>
-  <action name="actionAccount_properties">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/letter_16.png</normaloff>:/icons/3party/letter_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Account properties</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -890,72 +867,6 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionReceived_all">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/32x32/datovka-all-accounts-sync.png</normaloff>:/icons/32x32/datovka-all-accounts-sync.png</iconset>
-   </property>
-   <property name="text">
-    <string>Sync all</string>
-   </property>
-   <property name="toolTip">
-    <string>Synchronize all accounts at once</string>
-   </property>
-  </action>
-  <action name="actionDownload_messages">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/32x32/datovka-account-sync.png</normaloff>:/icons/32x32/datovka-account-sync.png</iconset>
-   </property>
-   <property name="text">
-    <string>Sync account</string>
-   </property>
-   <property name="toolTip">
-    <string>Synchronize selected account</string>
-   </property>
-  </action>
-  <action name="actionCreate_message">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/32x32/datovka-message.png</normaloff>:/icons/32x32/datovka-message.png</iconset>
-   </property>
-   <property name="text">
-    <string>Create message</string>
-   </property>
-   <property name="toolTip">
-    <string>Create and send a new message</string>
-   </property>
-  </action>
-  <action name="actionReply_to_the_sender">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/32x32/datovka-message-reply.png</normaloff>:/icons/32x32/datovka-message-reply.png</iconset>
-   </property>
-   <property name="text">
-    <string>Reply</string>
-   </property>
-   <property name="toolTip">
-    <string>Reply on the selected message</string>
-   </property>
-  </action>
-  <action name="actionVerify_a_message">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/32x32/datovka-message-verify.png</normaloff>:/icons/32x32/datovka-message-verify.png</iconset>
-   </property>
-   <property name="text">
-    <string>Verify message</string>
-   </property>
-   <property name="toolTip">
-    <string>Verify the selected message</string>
-   </property>
-  </action>
   <action name="actionDownload_message_signed">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
@@ -971,10 +882,13 @@ sent reply on this message</string>
   <action name="actionReply">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message-reply.png</normaloff>:/icons/16x16/datovka-message-reply.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Reply to message</string>
+   </property>
+   <property name="toolTip">
+    <string>Reply on the selected message</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -998,10 +912,13 @@ sent reply on this message</string>
   <action name="actionAuthenticate_message">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message-verify.png</normaloff>:/icons/16x16/datovka-message-verify.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Authenticate message</string>
+   </property>
+   <property name="toolTip">
+    <string>Verify the selected message</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1127,7 +1044,7 @@ sent reply on this message</string>
   <action name="actionMsgAdvancedSearch">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/search_32.png</normaloff>:/icons/3party/search_32.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/3party/search_32.png</iconset>
    </property>
    <property name="text">
     <string>Search message</string>

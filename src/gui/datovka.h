@@ -778,11 +778,6 @@ private:
 	void connectTopMenuBarSlots(void);
 
 	/*!
-	 * @brief Connect top tool-bar buttons to appropriate actions.
-	 */
-	void connectTopToolBarSlots(void);
-
-	/*!
 	 * @brief Connect message-action-bar buttons to appropriate actions.
 	 */
 	void connectMessageActionBarSlots(void);
@@ -1214,6 +1209,11 @@ private:
 	 * @brief Adds actions to to tool bar.
 	 */
 	void topToolBarSetUp(void);
+
+	/*!
+	 * @brief Sets action icons.
+	 */
+	void setMenuActionIcons(void);
 };
 
 

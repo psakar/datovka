@@ -232,7 +232,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Connect non-automatic menu actions. */
 	connectTopMenuBarSlots();
-	connectTopToolBarSlots();
 	connectMessageActionBarSlots();
 
 	/* Message marking timer. */
@@ -780,8 +779,6 @@ setmodel:
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
 			messageItemRestoreSelectionOnModelChange();
 			ui->menuMessage->setEnabled(true);
-			//ui->actionReply_to_the_sender->setEnabled(true);
-			ui->actionVerify_a_message->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
@@ -791,8 +788,6 @@ setmodel:
 			ui->menuMessage->setEnabled(false);
 			ui->actionReply->setEnabled(false);
 			ui->actionCreate_message_from_template->setEnabled(false);
-			ui->actionReply_to_the_sender->setEnabled(false);
-			ui->actionVerify_a_message->setEnabled(false);
 			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
 		break;
@@ -1015,7 +1010,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
 	    selectionModel()->currentIndex());
 	ui->actionReply->setEnabled(received);
-	ui->actionReply_to_the_sender->setEnabled(received);
 
 	ui->messageStateCombo->setEnabled(received);
 
@@ -1130,9 +1124,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		ui->actionExport_delivery_info_as_ZFO->setEnabled(false);
 		ui->actionExport_delivery_info_as_PDF->setEnabled(false);
 		ui->actionExport_message_envelope_as_PDF->setEnabled(false);
-
-		ui->actionReply_to_the_sender->setEnabled(false);
-		ui->actionVerify_a_message->setEnabled(false);
 	}
 }
 
@@ -2199,8 +2190,6 @@ void MainWindow::workersFinished(void)
 	int accountCount = ui->accountList->model()->rowCount();
 	if (accountCount > 0) {
 		ui->actionSync_all_accounts->setEnabled(true);
-		ui->actionReceived_all->setEnabled(true);
-		ui->actionDownload_messages->setEnabled(true);
 		ui->actionGet_messages->setEnabled(true);
 
 		/* Activate import buttons. */
@@ -3218,8 +3207,6 @@ void MainWindow::synchroniseAllAccounts(void)
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionReceived_all->setEnabled(false);
-	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 }
 
@@ -3266,8 +3253,6 @@ void MainWindow::synchroniseSelectedAccount(void)
 	globWorkPool.assignLo(task);
 
 	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionReceived_all->setEnabled(false);
-	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 }
 
@@ -3345,8 +3330,6 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	}
 
 	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionReceived_all->setEnabled(false);
-	ui->actionDownload_messages->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 }
 
@@ -4117,14 +4100,10 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 				ui->menuDatabox->setEnabled(true);
 				ui->actionDelete_account->setEnabled(true);
 				ui->actionSync_all_accounts->setEnabled(true);
-				ui->actionAccount_props->setEnabled(true);
-				ui->actionCreate_message->setEnabled(true);
 				ui->actionFind_databox->setEnabled(true);
 				ui->actionMsgAdvancedSearch->setEnabled(true);
 				ui->actionImport_ZFO_file_into_database->
 				    setEnabled(true);
-				ui->actionDownload_messages->setEnabled(true);
-				ui->actionReceived_all->setEnabled(true);
 				break;
 			}
 		}
@@ -4257,10 +4236,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
 	    SLOT(showMsgTmstmpExpirDialog()));
 	    /* Separator. */
-	/*
-	 * Advanced search is connected from top tool bar.
-	 * TODO -- Map all actions from top tool bar onto actions in top menu.
-	 */
+	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()), this,
+	    SLOT(showMsgAdvancedSearchDlg()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -4269,39 +4246,6 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(goHome()));
 	connect(ui->actionHelp, SIGNAL(triggered()), this,
 	    SLOT(showHelp()));
-}
-
-
-/* ========================================================================= */
-/*
- * Connect top tool-bar buttons to appropriate actions.
- */
-void MainWindow::connectTopToolBarSlots(void)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	/*
-	 * Actions that cannot be automatically connected
-	 * via QMetaObject::connectSlotsByName because of mismatching names.
-	 */
-
-	connect(ui->actionReceived_all, SIGNAL(triggered()), this,
-	    SLOT(synchroniseAllAccounts()));
-	connect(ui->actionDownload_messages, SIGNAL(triggered()), this,
-	    SLOT(synchroniseSelectedAccount()));
-	connect(ui->actionCreate_message, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessage()));
-	connect(ui->actionReply_to_the_sender, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessageReply()));
-	connect(ui->actionVerify_a_message, SIGNAL(triggered()), this,
-	    SLOT(verifySelectedMessage()));
-	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()), this,
-	    SLOT(showMsgAdvancedSearchDlg()));
-	connect(ui->actionAccount_props, SIGNAL(triggered()), this,
-	    SLOT(manageAccountProperties()));
-	connect(ui->actionPrefs, SIGNAL(triggered()), this,
-	    SLOT(applicationPreferences()));
 }
 
 
@@ -4349,13 +4293,6 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// TopMenu
 	ui->menuDatabox->setEnabled(false);
 	ui->menuMessage->setEnabled(false);
-	// ToolBar
-	ui->actionReceived_all->setEnabled(false);
-	ui->actionDownload_messages->setEnabled(false);
-	ui->actionCreate_message->setEnabled(false);
-	ui->actionReply_to_the_sender->setEnabled(false);
-	ui->actionVerify_a_message->setEnabled(false);
-	ui->actionAccount_props->setEnabled(false);
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
@@ -4382,10 +4319,6 @@ void MainWindow::setMessageActionVisibility(bool action) const
 
 	ui->actionSend_ZFO->setEnabled(action);
 	ui->actionSend_all_attachments->setEnabled(action);
-
-	/* Top tool bar. */
-	ui->actionReply_to_the_sender->setEnabled(action);
-	ui->actionVerify_a_message->setEnabled(action);
 }
 
 
@@ -4397,10 +4330,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 /* ========================================================================= */
 {
 	ui->menuDatabox->setEnabled(action);
-	ui->actionReceived_all->setEnabled(action);
-	ui->actionCreate_message->setEnabled(action);
 	ui->actionAccount_properties->setEnabled(action);
-	ui->actionDownload_messages->setEnabled(action);
 	ui->actionChange_password->setEnabled(action);
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
@@ -10312,6 +10242,8 @@ void MainWindow::setUpUi(void)
 	setWindowTitle(windowTitle() + " - " + tr("Portable version"));
 #endif /* PORTABLE_APPLICATION */
 
+	setMenuActionIcons();
+
 	topToolBarSetUp();
 
 	/* Create info status bar */
@@ -10361,6 +10293,19 @@ void MainWindow::setUpUi(void)
 
 void MainWindow::topToolBarSetUp(void)
 {
+	/* Add actions to the top tool bar. */
+	ui->toolBar->addAction(ui->actionSync_all_accounts);
+	ui->toolBar->addAction(ui->actionGet_messages);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(ui->actionSend_message);
+	ui->toolBar->addAction(ui->actionReply);
+	ui->toolBar->addAction(ui->actionAuthenticate_message);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(ui->actionMsgAdvancedSearch);
+	ui->toolBar->addSeparator();
+	ui->toolBar->addAction(ui->actionAccount_properties);
+	ui->toolBar->addAction(ui->actionPreferences);
+
 	{
 		QWidget *spacer = new QWidget();
 		spacer->setSizePolicy(QSizePolicy::Expanding,
@@ -10390,4 +10335,122 @@ void MainWindow::topToolBarSetUp(void)
 	ui->toolBar->addWidget(mui_clearFilterLineButton);
 	connect(mui_clearFilterLineButton, SIGNAL(clicked()), this,
 	    SLOT(clearFilterField()));
+}
+
+void MainWindow::setMenuActionIcons(void)
+{
+	/* Don't remove the isEnabled() calls. */
+
+	/* File menu. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSync_all_accounts->setIcon(ico);
+	}
+	    /* Separator. */
+	ui->actionAdd_account->isEnabled();
+	ui->actionDelete_account->isEnabled();
+	    /* Separator. */
+	ui->actionImport_database_directory->isEnabled();
+	    /* Separator. */
+	ui->actionProxy_settings->isEnabled();
+	   /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/gear_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionPreferences->setIcon(ico);
+	}
+	/* actionQuit -- connected in ui file. */
+
+	/* Data box menu. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionGet_messages->setIcon(ico);
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSend_message->setIcon(ico);
+	}
+	    /* Separator. */
+	ui->actionMark_all_as_read->isEnabled();
+	    /* Separator. */
+	ui->actionChange_password->isEnabled();
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionAccount_properties->setIcon(ico);
+	}
+	    /* Separator. */
+	ui->actionMove_account_up->isEnabled();
+	ui->actionMove_account_down->isEnabled();
+	    /* Separator. */
+	ui->actionChange_data_directory->isEnabled();
+	    /* Separator. */
+	ui->actionImport_messages_from_database->isEnabled();
+	ui->actionImport_ZFO_file_into_database->isEnabled();
+	    /* Separator. */
+	ui->actionSplit_database_by_years->isEnabled();
+
+	/* Message menu. */
+	ui->actionDownload_message_signed->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionReply->setIcon(ico);
+	}
+	ui->actionCreate_message_from_template->isEnabled();
+	    /* Separator. */
+	ui->actionSignature_detail->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionAuthenticate_message->setIcon(ico);
+	}
+	    /* Separator. */
+	ui->actionOpen_message_externally->isEnabled();
+	ui->actionOpen_delivery_info_externally->isEnabled();
+	    /* Separator. */
+	ui->actionExport_as_ZFO->isEnabled();
+	ui->actionExport_delivery_info_as_ZFO->isEnabled();
+	ui->actionExport_delivery_info_as_PDF->isEnabled();
+	ui->actionExport_message_envelope_as_PDF->isEnabled();
+	    /* Separator. */
+	ui->actionSend_ZFO->isEnabled();
+	ui->actionSend_all_attachments->isEnabled();
+	    /* Separator. */
+	ui->actionSave_all_attachments->isEnabled();
+	ui->actionOpen_attachment->isEnabled();
+	ui->actionSave_attachment->isEnabled();
+	    /* Separator. */
+	ui->actionDelete_message_from_db->isEnabled();
+
+	/* Tools menu. */
+	ui->actionFind_databox->isEnabled();
+	    /* Separator. */
+	ui->actionAuthenticate_message_file->isEnabled();
+	ui->actionView_message_from_ZPO_file->isEnabled();
+	ui->actionExport_correspondence_overview->isEnabled();
+	ui->actionCheck_message_timestamp_expiration->isEnabled();
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionMsgAdvancedSearch->setIcon(ico);
+	}
+
+	/* Help. */
+	ui->actionAbout_Datovka->isEnabled();
+	ui->actionHomepage->isEnabled();
+	ui->actionHelp->isEnabled();
 }
