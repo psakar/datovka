@@ -520,6 +520,11 @@ private slots:
 	void sendAllAttachmentsEmail(void);
 
 	/*!
+	 * @brief Sends selected attachments into default e-mail client.
+	 */
+	void sendAttachmentsEmail(void);
+
+	/*!
 	 * @brief Open selected message in external application.
 	 */
 	void openSelectedMessageExternally(void);

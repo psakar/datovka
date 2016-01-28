@@ -1309,10 +1309,13 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		}
 	}
 
+	/* TODO use QAction::iconText() instead of direct strings here. */
+
 	menu->addAction(
 	    QIcon(ICON_16x16_PATH "datovka-message-download.png"),
 	    tr("Download message signed"), this,
-	    SLOT(downloadSelectedMessageAttachments()));
+	    SLOT(downloadSelectedMessageAttachments()))->
+	    setEnabled(ui->actionDownload_message_signed->isEnabled());
 	if (singleSelected) {
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-reply.png"),
@@ -1331,11 +1334,13 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(
 		    QIcon(ICON_3PARTY_PATH "label_16.png"),
 		    tr("Signature details"), this,
-		    SLOT(showSignatureDetails()));
+		    SLOT(showSignatureDetails()))->
+		    setEnabled(ui->actionSignature_detail->isEnabled());
 		menu->addAction(
 		    QIcon(ICON_16x16_PATH "datovka-message-verify.png"),
 		    tr("Authenticate message"), this,
-		    SLOT(verifySelectedMessage()));
+		    SLOT(verifySelectedMessage()))->
+		    setEnabled(ui->actionAuthenticate_message->isEnabled());
 		menu->addSeparator();
 		menu->addAction(
 		    tr("Open message externally"), this,
@@ -1364,6 +1369,12 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    setEnabled(ui->actionExport_message_envelope_as_PDF->isEnabled());
 		menu->addSeparator();
 	}
+	menu->addAction(tr("Send ZFO"), this, SLOT(sendMessagesZfoEmail()))->
+	    setEnabled(ui->actionSend_ZFO->isEnabled());
+	menu->addAction(tr("Send all attachments"), this, SLOT(sendAllAttachmentsEmail()))->
+	    setEnabled(ui->actionSend_all_attachments->isEnabled());
+	menu->addSeparator();
+
 	if (received) {
 		submenu = menu->addMenu(tr("Mark"));
 		menu->addSeparator();
@@ -1845,6 +1856,9 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	}
 	menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
 	    tr("Save attachment"), this, SLOT(saveSelectedAttachmentsToFile()));
+	menu->addSeparator();
+	menu->addAction(tr("Send selected attachments"), this,
+	    SLOT(sendAttachmentsEmail()));
 
 	menu->exec(QCursor::pos());
 }
@@ -4217,87 +4231,105 @@ void MainWindow::connectTopMenuBarSlots(void)
 	 * via QMetaObject::connectSlotsByName because of mismatching names.
 	 */
 
-	/* File. */
+	/* File menu. */
 	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
 	    SLOT(synchroniseAllAccounts()));
+	    /* Separator. */
 	connect(ui->actionAdd_account, SIGNAL(triggered()), this,
 	    SLOT(addNewAccount()));
 	connect(ui->actionDelete_account, SIGNAL(triggered()), this,
 	    SLOT(deleteSelectedAccount()));
+	    /* Separator. */
 	connect(ui->actionImport_database_directory, SIGNAL(triggered()), this,
 	    SLOT(showImportDatabaseDialog()));
+	    /* Separator. */
 	connect(ui->actionProxy_settings, SIGNAL(triggered()), this,
 	    SLOT(proxySettings()));
+	   /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()), this,
 	    SLOT(applicationPreferences()));
 	/* actionQuit -- connected in ui file. */
 
-	/* Databox. */
+	/* Data box menu. */
 	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
 	    SLOT(synchroniseSelectedAccount()));
 	connect(ui->actionSend_message, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessage()));
+	    /* Separator. */
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
 	    SLOT(accountMarkReceivedRead()));
+	    /* Separator. */
 	connect(ui->actionChange_password, SIGNAL(triggered()), this,
 	    SLOT(changeAccountPassword()));
+	    /* Separator. */
 	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
 	    SLOT(manageAccountProperties()));
+	    /* Separator. */
 	connect(ui->actionMove_account_up, SIGNAL(triggered()), this,
 	    SLOT(moveSelectedAccountUp()));
 	connect(ui->actionMove_account_down, SIGNAL(triggered()), this,
 	    SLOT(moveSelectedAccountDown()));
+	    /* Separator. */
 	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
 	    SLOT(changeDataDirectory()));
-	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
-	    this, SLOT(splitMsgDbByYearsSlot()));
+#ifdef PORTABLE_APPLICATION
+	ui->actionChange_data_directory->setEnabled(false);
+#endif /* PORTABLE_APPLICATION */
+	    /* Separator. */
 	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
 	    this, SLOT(prepareMsgsImportFromDatabase()));
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
 	    SLOT(showImportZFOActionDialog()));
-#ifdef PORTABLE_APPLICATION
-	ui->actionChange_data_directory->setEnabled(false);
-#endif /* PORTABLE_APPLICATION */
+	    /* Separator. */
+	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()), this,
+	    SLOT(splitMsgDbByYearsSlot()));
 
-	/* Message. */
+	/* Message menu. */
 	connect(ui->actionDownload_message_signed, SIGNAL(triggered()), this,
 	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->actionReply, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageReply()));
 	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()), this,
 	    SLOT(createAndSendMessageFromTmpl()));
+	    /* Separator. */
 	connect(ui->actionSignature_detail, SIGNAL(triggered()), this,
 	    SLOT(showSignatureDetails()));
 	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
 	    SLOT(verifySelectedMessage()));
-	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedMessageAsZFO()));
+	    /* Separator. */
 	connect(ui->actionOpen_message_externally, SIGNAL(triggered()), this,
 	    SLOT(openSelectedMessageExternally()));
 	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()), this,
 	    SLOT(openDeliveryInfoExternally()));
+	    /* Separator. */
+	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
+	    SLOT(exportSelectedMessageAsZFO()));
 	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()), this,
 	    SLOT(exportDeliveryInfoAsZFO()));
 	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()), this,
 	    SLOT(exportDeliveryInfoAsPDF()));
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
 	    SLOT(exportMessageEnvelopeAsPDF()));
+	    /* Separator. */
 	connect(ui->actionSend_ZFO, SIGNAL(triggered()), this,
 	    SLOT(sendMessagesZfoEmail()));
 	connect(ui->actionSend_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(sendAllAttachmentsEmail()));
+	    /* Separator. */
+	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
+	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
 	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
 	    SLOT(saveSelectedAttachmentsToFile()));
-	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
-	    SLOT(saveAllAttachmentsToDir()));
+	    /* Separator. */
 	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
 	    SLOT(deleteMessage()));
 
-	/* Tools. */
+	/* Tools menu. */
 	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
 	    SLOT(findDatabox()));
+	    /* Separator. */
 	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()), this,
 	    SLOT(authenticateMessageFile()));
 	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()), this,
@@ -4306,6 +4338,11 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(exportCorrespondenceOverview()));
 	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
 	    SLOT(showMsgTmstmpExpirDialog()));
+	    /* Separator. */
+	/*
+	 * Advanced search is connected from top tool bar.
+	 * TODO -- Map all actions from top tool bar onto actions in top menu.
+	 */
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
@@ -7465,6 +7502,71 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			    attach.dmFileDescr, attach.dmEncodedContent,
 			    boundary);
 		}
+	}
+
+	finishEmailMessage(emailMessage, boundary);
+
+	QString tmpEmailFile = writeTemporaryFile(
+	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
+
+	if (!tmpEmailFile.isEmpty()) {
+		QDesktopServices::openUrl(
+		    QUrl(URL_FILE_PREFIX + tmpEmailFile));
+	}
+}
+
+void MainWindow::sendAttachmentsEmail(void)
+{
+	debugSlotCall();
+
+	QModelIndexList attachmentIndexes;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageAttachmentList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		attachmentIndexes = selectionModel->selectedRows(0);
+	}
+
+	qint64 dmId = -1;
+	{
+		QItemSelectionModel *selectionModel =
+		    ui->messageList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		QModelIndex messageIndex = selectionModel->currentIndex();
+		if (!messageIndex.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+		dmId = messageIndex.sibling(messageIndex.row(), 0).data().
+		    toLongLong();
+	}
+
+	QString emailMessage;
+	const QString boundary("-----" +
+	    DlgChangePwd::generateRandomString(16) + "_" +
+	    QDateTime::currentDateTimeUtc().toString(
+	        "dd.MM.yyyy-HH:mm:ss.zzz"));
+
+	QString subject = ((1 == attachmentIndexes.size()) ?
+	    tr("Attachment of message %1") : tr("Attachments of message %1")).
+	    arg(dmId);
+
+	createEmailMessage(emailMessage, subject, boundary);
+
+	foreach (const QModelIndex &attachIdx, attachmentIndexes) {
+		QString attachmentName(attachIdx.sibling(attachIdx.row(),
+		    AttachmentModel::FNAME_COL).data().toString());
+		QByteArray base64Data(attachIdx.sibling(attachIdx.row(),
+		    AttachmentModel::CONTENT_COL).data().toByteArray());
+
+		addAttachmentToEmailMessage(emailMessage, attachmentName,
+		    base64Data, boundary);
 	}
 
 	finishEmailMessage(emailMessage, boundary);
