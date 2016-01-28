@@ -812,22 +812,15 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 	QModelIndex acntIdx = ui->accountList->indexAt(point);
 	QMenu *menu = new QMenu;
-	QMenu *submenu = 0;
-	QAction *action;
 
 	if (acntIdx.isValid()) {
 		bool received = AccountModel::nodeTypeIsReceived(acntIdx);
 
-		menu->addAction(
-		    QIcon(ICON_16x16_PATH "datovka-account-sync.png"),
-		    tr("Get messages"),
-		    this, SLOT(synchroniseSelectedAccount()));
-		menu->addAction(QIcon(ICON_16x16_PATH "datovka-message.png"),
-		    tr("Create message"),
-		    this, SLOT(createAndSendMessage()));
+		menu->addAction(ui->actionGet_messages);
+		menu->addAction(ui->actionSend_message);
 		menu->addSeparator();
 		if (received) {
-			submenu = menu->addMenu(tr("Mark"));
+			QMenu *submenu = menu->addMenu(tr("Mark"));
 			menu->addSeparator();
 
 			switch (AccountModel::nodeType(acntIdx)) {
@@ -878,52 +871,24 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 				break;
 			}
 		}
-		menu->addAction(QIcon(ICON_3PARTY_PATH "user_16.png"),
-		    tr("Change password"),
-		    this, SLOT(changeAccountPassword()));
+		menu->addAction(ui->actionChange_password);
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH "letter_16.png"),
-		    tr("Account properties"),
-		    this, SLOT(manageAccountProperties()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "delete_16.png"),
-		    tr("Remove Account"),
-		    this, SLOT(deleteSelectedAccount()));
+		menu->addAction(ui->actionAccount_properties);
+		menu->addAction(ui->actionDelete_account);
 		menu->addSeparator();
-		menu->addAction(QIcon(ICON_3PARTY_PATH "up_16.png"),
-		    tr("Move account up"),
-		    this, SLOT(moveSelectedAccountUp()));
-		menu->addAction(QIcon(ICON_3PARTY_PATH "down_16.png"),
-		    tr("Move account down"),
-		    this, SLOT(moveSelectedAccountDown()));
+		menu->addAction(ui->actionMove_account_up);
+		menu->addAction(ui->actionMove_account_down);
 		menu->addSeparator();
+		menu->addAction(ui->actionChange_data_directory);
 #ifdef PORTABLE_APPLICATION
-		action =
-#endif /* PORTABLE_APPLICATION */
-		    menu->addAction(
-		        QIcon(ICON_3PARTY_PATH "folder_16.png"),
-		        tr("Change data directory"),
-		        this, SLOT(changeDataDirectory()));
-#ifdef PORTABLE_APPLICATION
-		action->setEnabled(false);
+		ui->actionChange_data_directory->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
 
 		menu->addSeparator();
-		action = menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
-		    tr("Import messages from database"),
-		    this, SLOT(prepareMsgsImportFromDatabase()));
-		action->setEnabled(
-		    ui->actionImport_messages_from_database->isEnabled());
-		action = menu->addAction(
-		    QIcon(ICON_3PARTY_PATH "clipboard_16.png"),
-		    tr("Import messages from ZFO files"),
-		    this, SLOT(showImportZFOActionDialog()));
-		action->setEnabled(
-		    ui->actionImport_ZFO_file_into_database->isEnabled());
+		menu->addAction(ui->actionImport_messages_from_database);
+		menu->addAction(ui->actionImport_ZFO_file_into_database);
 	} else {
-		menu->addAction(QIcon(ICON_3PARTY_PATH "plus_16.png"),
-		    tr("Add new account"),
-		    this, SLOT(addNewAccount()));
+		menu->addAction(ui->actionAdd_account);
 	}
 
 	menu->exec(QCursor::pos());
