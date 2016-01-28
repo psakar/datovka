@@ -4465,6 +4465,9 @@ void MainWindow::setMessageActionVisibility(bool action) const
 	ui->menuMessage->setEnabled(action);
 	ui->actionReply->setEnabled(action); /* Has key short cut. */
 
+	ui->actionSend_ZFO->setEnabled(action);
+	ui->actionSend_all_attachments->setEnabled(action);
+
 	/* Top tool bar. */
 	ui->actionReply_to_the_sender->setEnabled(action);
 	ui->actionVerify_a_message->setEnabled(action);
