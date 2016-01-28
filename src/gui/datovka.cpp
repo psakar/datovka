@@ -103,9 +103,7 @@ QNetworkAccessManager* nam;
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
     : QMainWindow(parent),
-    m_statusProgressBar(NULL),
     m_accountModel(this),
-    m_filterLine(NULL),
     m_messageListProxyModel(this),
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
@@ -126,72 +124,15 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
     isMainWindow(false),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    mui_filterLine(0),
+    mui_clearFilterLineButton(0),
+    mui_statusBar(0),
+    mui_statusDbMode(0),
+    mui_statusOnlineLabel(0),
+    mui_statusProgressBar(0)
 {
-	ui->setupUi(this);
-
-	/* Window title. */
-	setWindowTitle(tr(
-	    "Datovka - Free client for Datov\303\251 schr\303\241nky"));
-#ifdef PORTABLE_APPLICATION
-	setWindowTitle(windowTitle() + " - " + tr("Portable version"));
-#endif /* PORTABLE_APPLICATION */
-
-	/* Generate messages search filter */
-	QWidget *spacer = new QWidget();
-	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-	// toolBar is a pointer to an existing toolbar
-	ui->toolBar->addWidget(spacer);
-
-	QLabel *searchLabel = new QLabel;
-	searchLabel->setText(tr("Search: "));
-	ui->toolBar->addWidget(searchLabel);
-
-	/* Message filter field. */
-	m_filterLine = new QLineEdit(this);
-	connect(m_filterLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(filterMessages(QString)));
-	m_filterLine->setFixedWidth(200);
-	m_filterLine->setToolTip(tr("Enter sought expression"));
-	ui->toolBar->addWidget(m_filterLine);
-	/* Clear message filter button. */
-	m_clearFilterLineButton = new QPushButton(this);
-	m_clearFilterLineButton->setIcon(
-	    QIcon(ICON_3PARTY_PATH "delete_16.png"));
-	m_clearFilterLineButton->setToolTip(tr("Clear search field"));
-	ui->toolBar->addWidget(m_clearFilterLineButton);
-	connect(m_clearFilterLineButton, SIGNAL(clicked()), this,
-	    SLOT(clearFilterField()));
-
-	/* Create info status bar */
-	statusBar = new QStatusBar(this);
-	statusBar->setSizeGripEnabled(false);
-	ui->statusBar->addWidget(statusBar,1);
-	showStatusTextWithTimeout(tr("Welcome..."));
-
-	/* Create status bar label shows database mode memory/disk */
-	statusDbMode = new QLabel(this);
-	statusDbMode->setText(tr("Storage: disk | disk"));
-	statusDbMode->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
-	ui->statusBar->addWidget(statusDbMode,0);
-
-
-	/* Create status bar online/offline label */
-	statusOnlineLabel = new QLabel(this);
-	statusOnlineLabel->setText(tr("Mode: offline"));
-	statusOnlineLabel->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
-	ui->statusBar->addWidget(statusOnlineLabel,0);
-
-	/* Create progress bar object and set default value */
-	m_statusProgressBar = new QProgressBar(this);
-	m_statusProgressBar->setAlignment(Qt::AlignRight);
-	m_statusProgressBar->setMinimumWidth(100);
-	m_statusProgressBar->setMaximumWidth(200);
-	m_statusProgressBar->setTextVisible(true);
-	m_statusProgressBar->setRange(0,100);
-	m_statusProgressBar->setValue(0);
-	clearProgressBar();
-	ui->statusBar->addWidget(m_statusProgressBar,1);
+	setUpUi();
 
 	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter,
@@ -229,29 +170,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList, SIGNAL(customContextMenuRequested(QPoint)),
 	    this, SLOT(messageItemRightClicked(QPoint)));
 	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-//	ui->messageList->setSelectionMode(QAbstractItemView::SingleSelection);
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
-	/* TODO -- Use a delegate? */
-//	ui->messageList->setStyleSheet(
-//	    "QTableView::item:focus { border-color:green; "
-//	    "border-style:outset; border-width:2px; color:black; }");
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
-
-	/* Message state combo box. */
-	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "red.png"),
-	    tr("Unsettled"));
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "yellow.png"),
-	    tr("In Progress"));
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "grey.png"),
-	    tr("Settled"));
-
-	/* Show banner. */
-	ui->messageStackedWidget->setCurrentIndex(0);
-	ui->accountTextInfo->setHtml(createDatovkaBanner(
-	    QCoreApplication::applicationVersion()));
-	ui->accountTextInfo->setReadOnly(true);
 
 	/* Load configuration file. */
 	loadSettings();
@@ -289,8 +210,6 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageAttachmentList->setContextMenuPolicy(Qt::CustomContextMenu);
 	ui->messageAttachmentList->setSelectionMode(
 	    QAbstractItemView::ExtendedSelection);
-//	ui->messageAttachmentList->setSelectionMode(
-//	    QAbstractItemView::SingleSelection);
 	ui->messageAttachmentList->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 	connect(ui->messageAttachmentList,
@@ -330,15 +249,16 @@ MainWindow::MainWindow(QWidget *parent)
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
 		}
 		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
-		qDebug() << "Timer set to" << m_timeoutSyncAccounts / 60000
-		    << "minutes";
+
+		logInfo("Timer set to %d minutes.\n",
+		    m_timeoutSyncAccounts / 60000);
 	}
 
 	QTimer::singleShot(RUN_FIRST_ACTION_MS, this,
 	    SLOT(setWindowsAfterInit()));
 
-	QString msgStrg = tr("disk");
-	QString acntStrg = tr("disk");
+	QString msgStrg(tr("disk"));
+	QString acntStrg(tr("disk"));
 
 	if (!globPref.store_messages_on_disk) {
 		msgStrg = tr("memory");
@@ -348,7 +268,7 @@ MainWindow::MainWindow(QWidget *parent)
 		acntStrg = tr("memory");
 	}
 
-	statusDbMode->setText(tr("Storage:") + " " + msgStrg + " | "
+	mui_statusDbMode->setText(tr("Storage:") + " " + msgStrg + " | "
 	    + acntStrg + "   ");
 }
 
@@ -464,7 +384,7 @@ void MainWindow::showStatusTextWithTimeout(const QString &qStr)
 /* ========================================================================= */
 {
 	clearStatusBar();
-	statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS);
+	mui_statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS);
 }
 
 
@@ -476,7 +396,7 @@ void MainWindow::showStatusTextPermanently(const QString &qStr)
 /* ========================================================================= */
 {
 	clearStatusBar();
-	statusBar->showMessage((qStr), 0);
+	mui_statusBar->showMessage((qStr), 0);
 }
 
 
@@ -487,8 +407,8 @@ void MainWindow::showStatusTextPermanently(const QString &qStr)
 void MainWindow::clearProgressBar(void)
 /* ========================================================================= */
 {
-	m_statusProgressBar->setFormat(PL_IDLE);
-	m_statusProgressBar->setValue(0);
+	mui_statusProgressBar->setFormat(PL_IDLE);
+	mui_statusProgressBar->setValue(0);
 }
 
 
@@ -499,7 +419,7 @@ void MainWindow::clearProgressBar(void)
 void MainWindow::clearStatusBar(void)
 /* ========================================================================= */
 {
-	statusBar->clearMessage();
+	mui_statusBar->clearMessage();
 }
 
 
@@ -510,10 +430,9 @@ void MainWindow::clearStatusBar(void)
 void MainWindow::updateProgressBar(const QString &label, int value)
  /* ========================================================================= */
 {
-	//debugSlotCall();
-	m_statusProgressBar->setFormat(label);
-	m_statusProgressBar->setValue(value);
-	m_statusProgressBar->repaint();
+	mui_statusProgressBar->setFormat(label);
+	mui_statusProgressBar->setValue(value);
+	mui_statusProgressBar->repaint();
 }
 
 
@@ -838,7 +757,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 setmodel:
 		ui->messageStackedWidget->setCurrentIndex(1);
 		/* Apply message filter. */
-		filterMessages(m_filterLine->text());
+		filterMessages(mui_filterLine->text());
 		/* Connect new slot. */
 		connect(ui->messageList->selectionModel(),
 		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -5414,7 +5333,7 @@ void MainWindow::clearFilterField(void)
 {
 	debugSlotCall();
 
-	m_filterLine->clear();
+	mui_filterLine->clear();
 }
 
 
@@ -5441,11 +5360,13 @@ void MainWindow::filterMessages(const QString &text)
 
 	/* Set filter field background colour. */
 	if (text.isEmpty()) {
-		m_filterLine->setStyleSheet("QLineEdit{background: white;}");
+		mui_filterLine->setStyleSheet("QLineEdit{background: white;}");
 	} else if (m_messageListProxyModel.rowCount() != 0) {
-		m_filterLine->setStyleSheet("QLineEdit{background: #afffaf;}");
+		mui_filterLine->setStyleSheet(
+		    "QLineEdit{background: #afffaf;}");
 	} else {
-		m_filterLine->setStyleSheet("QLineEdit{background: #ffafaf;}");
+		mui_filterLine->setStyleSheet(
+		    "QLineEdit{background: #ffafaf;}");
 	}
 }
 
@@ -7954,7 +7875,7 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 	switch (status) {
 	case IE_SUCCESS:
 		if (0 != mw) {
-			mw->statusOnlineLabel->setText(tr("Mode: online"));
+			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
 		}
 		return true;
 		break;
@@ -10382,4 +10303,95 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	refreshAccountList(userName);
 
 	return true;
+}
+
+void MainWindow::setUpUi(void)
+{
+	ui->setupUi(this);
+
+	/* Window title. */
+	setWindowTitle(
+	    tr("Datovka - Free client for Datov\303\251 schr\303\241nky"));
+#ifdef PORTABLE_APPLICATION
+	setWindowTitle(windowTitle() + " - " + tr("Portable version"));
+#endif /* PORTABLE_APPLICATION */
+
+	topToolBarSetUp();
+
+	/* Create info status bar */
+	mui_statusBar = new QStatusBar(this);
+	mui_statusBar->setSizeGripEnabled(false);
+	ui->statusBar->addWidget(mui_statusBar, 1);
+	showStatusTextWithTimeout(tr("Welcome..."));
+
+	/* Create status bar label shows database mode memory/disk */
+	mui_statusDbMode = new QLabel(this);
+	mui_statusDbMode->setText(tr("Storage: disk | disk"));
+	mui_statusDbMode->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	ui->statusBar->addWidget(mui_statusDbMode, 0);
+
+	/* Create status bar online/offline label */
+	mui_statusOnlineLabel = new QLabel(this);
+	mui_statusOnlineLabel->setText(tr("Mode: offline"));
+	mui_statusOnlineLabel->setAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+	ui->statusBar->addWidget(mui_statusOnlineLabel, 0);
+
+	/* Create progress bar object and set default value */
+	mui_statusProgressBar = new QProgressBar(this);
+	mui_statusProgressBar->setAlignment(Qt::AlignRight);
+	mui_statusProgressBar->setMinimumWidth(100);
+	mui_statusProgressBar->setMaximumWidth(200);
+	mui_statusProgressBar->setTextVisible(true);
+	mui_statusProgressBar->setRange(0, 100);
+	mui_statusProgressBar->setValue(0);
+	clearProgressBar();
+	ui->statusBar->addWidget(mui_statusProgressBar, 1);
+
+	/* Message state combo box. */
+	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "red.png"),
+	    tr("Unsettled"));
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "yellow.png"),
+	    tr("In Progress"));
+	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "grey.png"),
+	    tr("Settled"));
+
+	/* Show banner. */
+	ui->messageStackedWidget->setCurrentIndex(0);
+	ui->accountTextInfo->setHtml(createDatovkaBanner(
+	    QCoreApplication::applicationVersion()));
+	ui->accountTextInfo->setReadOnly(true);
+}
+
+void MainWindow::topToolBarSetUp(void)
+{
+	{
+		QWidget *spacer = new QWidget();
+		spacer->setSizePolicy(QSizePolicy::Expanding,
+		    QSizePolicy::Expanding);
+		ui->toolBar->addWidget(spacer);
+	}
+
+	{
+		QLabel *searchLabel = new QLabel;
+		searchLabel->setText(tr("Search: "));
+		ui->toolBar->addWidget(searchLabel);
+	}
+
+	/* Message filter field. */
+	mui_filterLine = new QLineEdit(this);
+	connect(mui_filterLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(filterMessages(QString)));
+	mui_filterLine->setFixedWidth(200);
+	mui_filterLine->setToolTip(tr("Enter sought expression"));
+	ui->toolBar->addWidget(mui_filterLine);
+
+	/* Clear message filter button. */
+	mui_clearFilterLineButton = new QPushButton(this);
+	mui_clearFilterLineButton->setIcon(
+	    QIcon(ICON_3PARTY_PATH "delete_16.png"));
+	mui_clearFilterLineButton->setToolTip(tr("Clear search field"));
+	ui->toolBar->addWidget(mui_clearFilterLineButton);
+	connect(mui_clearFilterLineButton, SIGNAL(clicked()), this,
+	    SLOT(clearFilterField()));
 }

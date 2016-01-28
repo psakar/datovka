@@ -60,11 +60,6 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
 
-	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
-	QLabel *statusOnlineLabel;
-	QLabel *statusDbMode;
-	QStatusBar *statusBar;
-
 	/*!
 	 * @brief Create configuration file if not present.
 	 */
@@ -635,7 +630,7 @@ private slots:
 	void updateStatusBarText(const QString &text);
 
 	/*!
-	 * @brief Clear progerss bar text.
+	 * @brief Clear progress bar text.
 	 */
 	void clearProgressBar(void);
 
@@ -1165,8 +1160,6 @@ private:
 	                              * Account tree view model. Generated from
 	                              * configuration file.
 	                              */
-	QLineEdit *m_filterLine; /*!< Search filter line object. */
-	QPushButton *m_clearFilterLineButton; /*!< Button object. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting and
@@ -1203,7 +1196,24 @@ private:
 	QString m_import_zfo_path;
 	bool isMainWindow;
 
-	Ui::MainWindow *ui;
+	/* User interface elements. */
+	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
+	QLineEdit *mui_filterLine; /*!< Search filter line object. */
+	QPushButton *mui_clearFilterLineButton; /*!< Clear filter button. */
+	QStatusBar *mui_statusBar; /*!< Status bar. */
+	QLabel *mui_statusDbMode; /*!< Database status label. */
+	QLabel *mui_statusOnlineLabel; /*< On-line/off-line status label. */
+	QProgressBar *mui_statusProgressBar; /*!< Progress bar. */
+
+	/*!
+	 * @brief Performs initial user interface initialisation.
+	 */
+	void setUpUi(void);
+
+	/*!
+	 * @brief Adds actions to to tool bar.
+	 */
+	void topToolBarSetUp(void);
 };
 
 
