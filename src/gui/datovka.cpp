@@ -520,7 +520,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -553,7 +553,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		/* May occur on deleting last account. */
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 
 		ui->messageList->selectionModel()->disconnect(
 		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -615,7 +615,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 		html = createAccountInfo(userName);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
@@ -631,7 +631,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 		html = createAccountInfoAllField(tr("All messages"),
 		    dbSet->msgsYearlyCounts(MessageDb::TYPE_RECEIVED,
 		        DESCENDING),
@@ -640,7 +640,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeReceived:
 #ifdef DISABLE_ALL_TABLE
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 		html = createAccountInfoMessagesCount(
 		    tr("All received messages"),
 		    dbSet->msgsYearlyCounts(MessageDb::TYPE_RECEIVED,
@@ -656,7 +656,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeSent:
 #ifdef DISABLE_ALL_TABLE
-		setMessageActionVisibility(false);
+		setMessageActionVisibility(0);
 		html = createAccountInfoMessagesCount(
 		    tr("All sent messages"),
 		    dbSet->msgsYearlyCounts(MessageDb::TYPE_SENT, DESCENDING),
@@ -778,16 +778,12 @@ setmodel:
 		/* enable/disable buttons */
 		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
 			messageItemRestoreSelectionOnModelChange();
-			ui->menuMessage->setEnabled(true);
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
 			    setEnabled(true);
 			ui->actionCheck_message_timestamp_expiration->
 			    setEnabled(true);
 		} else {
-			ui->menuMessage->setEnabled(false);
-			ui->actionReply->setEnabled(false);
-			ui->actionCreate_message_from_template->setEnabled(false);
 			ui->actionAuthenticate_message_file->setEnabled(false);
 		}
 		break;
@@ -935,11 +931,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Disable message/attachment related buttons. */
-	setMessageActionVisibility(false);
+	setMessageActionVisibility(0);
 
-	ui->actionSave_all_attachments->setEnabled(false);
-	ui->actionOpen_attachment->setEnabled(false);
-	ui->actionSave_attachment->setEnabled(false);
 	ui->messageStateCombo->setEnabled(false);
 
 	/* Disable model for attachment list. */
@@ -961,31 +954,17 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		return;
 	}
 
-	/* Enable message/attachment related buttons. */
-	setMessageActionVisibility(true);
+	/* Enable message/attachment actions depending on message selection. */
+	setMessageActionVisibility(firstColumnIdxs.size());
 
+	/* Reply only to received messages. */
 	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
 	    selectionModel()->currentIndex());
-	ui->actionReply->setEnabled(received);
+	ui->actionReply->setEnabled(received && (firstColumnIdxs.size() == 1));
 
 	ui->messageStateCombo->setEnabled(received);
 
 	if (1 == firstColumnIdxs.size()) {
-		/*
-		 * Enabled all actions that can only be performed when
-		 * single message selected.
-		 */
-		//ui->actionReply->setEnabled(received);
-		ui->actionCreate_message_from_template->setEnabled(true);
-		ui->actionSignature_detail->setEnabled(true);
-		ui->actionAuthenticate_message->setEnabled(true);
-		ui->actionOpen_message_externally->setEnabled(true);
-		ui->actionOpen_delivery_info_externally->setEnabled(true);
-		ui->actionExport_as_ZFO->setEnabled(true);
-		ui->actionExport_delivery_info_as_ZFO->setEnabled(true);
-		ui->actionExport_delivery_info_as_PDF->setEnabled(true);
-		ui->actionExport_message_envelope_as_PDF->setEnabled(true);
-
 		const QModelIndex &index = firstColumnIdxs.first();
 
 		MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
@@ -1060,21 +1039,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		    this,
 		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
 		        QItemSelection)));
-	} else {
-		/*
-		 * Disable all actions that cannot be performed when
-		 * multiple messages selected.
-		 */
-		ui->actionReply->setEnabled(false);
-		ui->actionCreate_message_from_template->setEnabled(false);
-		ui->actionSignature_detail->setEnabled(false);
-		ui->actionAuthenticate_message->setEnabled(false);
-		ui->actionOpen_message_externally->setEnabled(false);
-		ui->actionOpen_delivery_info_externally->setEnabled(false);
-		ui->actionExport_as_ZFO->setEnabled(false);
-		ui->actionExport_delivery_info_as_ZFO->setEnabled(false);
-		ui->actionExport_delivery_info_as_PDF->setEnabled(false);
-		ui->actionExport_message_envelope_as_PDF->setEnabled(false);
 	}
 }
 
@@ -4203,15 +4167,37 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 /*
  *  Set default settings of mainwindow.
  */
-void MainWindow::setMessageActionVisibility(bool action) const
+void MainWindow::setMessageActionVisibility(int numSelected) const
 /* ========================================================================= */
 {
 	/* Top menu + menu items. */
-	ui->menuMessage->setEnabled(action);
-	ui->actionReply->setEnabled(action); /* Has key short cut. */
+	ui->menuMessage->setEnabled(numSelected > 0);
 
-	ui->actionSend_ZFO->setEnabled(action);
-	ui->actionSend_all_attachments->setEnabled(action);
+	ui->actionDownload_message_signed->setEnabled(numSelected > 0);
+	ui->actionReply->setEnabled(numSelected == 1);
+	ui->actionCreate_message_from_template->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionSignature_detail->setEnabled(numSelected == 1);
+	ui->actionAuthenticate_message->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
+	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionExport_as_ZFO->setEnabled(numSelected == 1);
+	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected == 1);
+	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected == 1);
+	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionSend_ZFO->setEnabled(numSelected > 0);
+	ui->actionSend_all_attachments->setEnabled(numSelected > 0);
+	    /* Separator. */
+	/* These must be also handled with relation to attachment selection. */
+	ui->actionSave_all_attachments->setEnabled(numSelected == 1);
+	ui->actionSave_attachment->setEnabled(numSelected == 1);
+	ui->actionOpen_attachment->setEnabled(numSelected == 1);
+	    /* Separator. */
+	/* Delete action is controlled elsewhere. */
+	//ui->actionDelete_message_from_db->setEnabled(numSelected == 1);
 }
 
 

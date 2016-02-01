@@ -790,7 +790,7 @@ private:
 	/*!
 	 * @brief Set message action/button to visible.
 	 */
-	void setMessageActionVisibility(bool action) const;
+	void setMessageActionVisibility(int numSelected) const;
 
 	/*!
 	 * @brief Open send message dialog and send message.
