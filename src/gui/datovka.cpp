@@ -937,7 +937,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	/* Disable message/attachment related buttons. */
 	setMessageActionVisibility(false);
 
-	ui->openAttachment->setEnabled(false);
 	ui->actionSave_all_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
 	ui->actionSave_attachment->setEnabled(false);
@@ -1618,11 +1617,9 @@ void MainWindow::attachmentItemsSelectionChanged(
 	}
 
 	if (1 == selectedIndexes.size()) {
-		ui->openAttachment->setEnabled(true);
 		ui->actionSave_attachment->setEnabled(true);
 		ui->actionOpen_attachment->setEnabled(true);
 	} else {
-		ui->openAttachment->setEnabled(false);
 		ui->actionSave_attachment->setEnabled(false);
 		ui->actionOpen_attachment->setEnabled(false);
 	}
@@ -4115,10 +4112,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
-	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
-	    SLOT(openSelectedAttachment()));
 	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
 	    SLOT(saveSelectedAttachmentsToFile()));
+	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
+	    SLOT(openSelectedAttachment()));
 	    /* Separator. */
 	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
 	    SLOT(deleteMessage()));
@@ -4175,8 +4172,7 @@ void MainWindow::connectMessageActionBarSlots(void)
 	    ui->actionDownload_message_signed);
 	ui->saveAttachments->setDefaultAction(ui->actionSave_all_attachments);
 	ui->saveAttachment->setDefaultAction(ui->actionSave_attachment);
-	connect(ui->openAttachment, SIGNAL(clicked()), this,
-	    SLOT(openSelectedAttachment()));
+	ui->openAttachment->setDefaultAction(ui->actionOpen_attachment);
 }
 
 
@@ -10341,12 +10337,17 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(":/icons/24x24/save-all.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSave_all_attachments->setIcon(ico);
 	}
-	ui->actionOpen_attachment->isEnabled();
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSave_attachment->setIcon(ico);
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionOpen_attachment->setIcon(ico);
 	}
 	    /* Separator. */
 	ui->actionDelete_message_from_db->isEnabled();

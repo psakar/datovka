@@ -303,15 +303,9 @@ sent reply on this message</string>
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
-                  <property name="toolTip">
-                   <string>Open attachment in an associated application</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/3party/folder_32.png</normaloff>:/icons/3party/folder_32.png</iconset>
+                    <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -976,10 +970,13 @@ sent reply on this message</string>
   <action name="actionOpen_attachment">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Open attachment</string>
+   </property>
+   <property name="toolTip">
+    <string>Open attachment in an associated application</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
