@@ -1618,12 +1618,9 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu;
 
 	if (selectedIndexes.size() == 1) {
-		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
-		    tr("Open attachment"), this,
-		    SLOT(openSelectedAttachment()));
+		menu->addAction(ui->actionOpen_attachment);
 	}
-	menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
-	    tr("Save attachment"), this, SLOT(saveSelectedAttachmentsToFile()));
+	menu->addAction(ui->actionSave_selected_attachments);
 	menu->addSeparator();
 	menu->addAction(tr("Send selected attachments"), this,
 	    SLOT(sendAttachmentsEmail()));
@@ -4070,7 +4067,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveAllAttachmentsToDir()));
-	connect(ui->actionSave_attachment, SIGNAL(triggered()), this,
+	connect(ui->actionSave_selected_attachments, SIGNAL(triggered()), this,
 	    SLOT(saveSelectedAttachmentsToFile()));
 	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
 	    SLOT(openSelectedAttachment()));
@@ -4129,7 +4126,8 @@ void MainWindow::connectMessageActionBarSlots(void)
 	ui->downloadComplete->setDefaultAction(
 	    ui->actionDownload_message_signed);
 	ui->saveAttachments->setDefaultAction(ui->actionSave_all_attachments);
-	ui->saveAttachment->setDefaultAction(ui->actionSave_attachment);
+	ui->saveAttachment->setDefaultAction(
+	    ui->actionSave_selected_attachments);
 	ui->openAttachment->setDefaultAction(ui->actionOpen_attachment);
 }
 
@@ -4187,7 +4185,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	    /* Separator. */
 	/* These must be also handled with relation to attachment selection. */
 	ui->actionSave_all_attachments->setEnabled(numSelected == 1);
-	ui->actionSave_attachment->setEnabled(false);
+	ui->actionSave_selected_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
 	    /* Separator. */
 	/* Delete action is controlled elsewhere. */
@@ -4198,7 +4196,7 @@ void MainWindow::setAttachmentActionVisibility(int numSelected) const
 {
 	/* Save all attachments is handles elsewhere. */
 	//ui->actionSave_all_attachments->setEnabled(numSelected == 1);
-	ui->actionSave_attachment->setEnabled(numSelected == 1);
+	ui->actionSave_selected_attachments->setEnabled(numSelected > 0);
 	ui->actionOpen_attachment->setEnabled(numSelected == 1);
 }
 
@@ -10328,7 +10326,7 @@ void MainWindow::setMenuActionIcons(void)
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSave_attachment->setIcon(ico);
+		ui->actionSave_selected_attachments->setIcon(ico);
 	}
 	{
 		QIcon ico;

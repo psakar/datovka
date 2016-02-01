@@ -445,7 +445,7 @@ sent reply on this message</string>
     <addaction name="actionSend_all_attachments"/>
     <addaction name="separator"/>
     <addaction name="actionSave_all_attachments"/>
-    <addaction name="actionSave_attachment"/>
+    <addaction name="actionSave_selected_attachments"/>
     <addaction name="actionOpen_attachment"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_message_from_db"/>
@@ -982,7 +982,7 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionSave_attachment">
+  <action name="actionSave_selected_attachments">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
@@ -991,7 +991,7 @@ sent reply on this message</string>
     <string>Save attachment</string>
    </property>
    <property name="toolTip">
-    <string>Save selected attachment to a file</string>
+    <string>Save selected attachments to files</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
