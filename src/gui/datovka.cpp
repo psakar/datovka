@@ -941,7 +941,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->saveAttachments->setEnabled(false);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
-	ui->verifySignature->setEnabled(false);
 	ui->signatureDetails->setEnabled(false);
 	ui->actionSave_all_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
@@ -1021,8 +1020,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		}
 
 		/* Generate and show message information. */
-		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId,
-		    ui->verifySignature));
+		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId, 0));
 		ui->messageInfo->setReadOnly(true);
 
 		if (received) {
@@ -1044,8 +1042,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		}
 
 		/* Enable buttons according to database content. */
-		ui->verifySignature->setEnabled(
-		    !messageDb->msgsVerificationAttempted(msgId));
 		ui->signatureDetails->setEnabled(true);
 		/* Show files related to message message. */
 		QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
@@ -2326,8 +2322,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	Q_ASSERT(0 != messageDb);
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId,
-	    ui->verifySignature));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
 	ui->messageInfo->setReadOnly(true);
 
 	QAbstractTableModel *fileTblMdl = messageDb->flsModel(dmId);
@@ -4193,8 +4188,6 @@ void MainWindow::connectMessageActionBarSlots(void)
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 	/* Downloading attachments also triggers signature verification. */
-	connect(ui->verifySignature, SIGNAL(clicked()), this,
-	    SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->signatureDetails, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
 	/* Sets message processing state. */

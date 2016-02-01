@@ -167,47 +167,6 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
-                 <widget class="QToolButton" name="verifySignature">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="baseSize">
-                   <size>
-                    <width>0</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="toolTip">
-                   <string>Verify signature of message</string>
-                  </property>
-                  <property name="text">
-                   <string>Verify signature</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/3party/pencil_32.png</normaloff>:/icons/3party/pencil_32.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="toolButtonStyle">
-                   <enum>Qt::ToolButtonTextBesideIcon</enum>
-                  </property>
-                  <property name="autoRaise">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <widget class="QToolButton" name="signatureDetails">
                   <property name="enabled">
                    <bool>false</bool>
