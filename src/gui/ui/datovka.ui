@@ -649,7 +649,7 @@ sent reply on this message</string>
   <action name="actionSend_message">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Create message</string>
@@ -694,7 +694,7 @@ sent reply on this message</string>
   <action name="actionAccount_properties">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/3party/letter_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Account properties</string>
@@ -1051,7 +1051,7 @@ sent reply on this message</string>
   <action name="actionMsgAdvancedSearch">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/3party/search_32.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Search message</string>
