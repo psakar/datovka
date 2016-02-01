@@ -788,9 +788,14 @@ private:
 	void defaultUiMainWindowSettings(void) const;
 
 	/*!
-	 * @brief Set message action/button to visible.
+	 * @brief Enables message menu actions according to message selection.
 	 */
 	void setMessageActionVisibility(int numSelected) const;
+
+	/*!
+	 * @brief Enables message menu actions according to attachment selection.
+	 */
+	void setAttachmentActionVisibility(int numSelected) const;
 
 	/*!
 	 * @brief Open send message dialog and send message.

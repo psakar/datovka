@@ -1580,13 +1580,7 @@ void MainWindow::attachmentItemsSelectionChanged(
 		selectedIndexes = selectionModel->selectedRows(0);
 	}
 
-	if (1 == selectedIndexes.size()) {
-		ui->actionSave_attachment->setEnabled(true);
-		ui->actionOpen_attachment->setEnabled(true);
-	} else {
-		ui->actionSave_attachment->setEnabled(false);
-		ui->actionOpen_attachment->setEnabled(false);
-	}
+	setAttachmentActionVisibility(selectedIndexes.size());
 }
 
 
@@ -4165,7 +4159,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 
 /* ========================================================================= */
 /*
- *  Set default settings of mainwindow.
+ * Enables menu actions according to message selection.
  */
 void MainWindow::setMessageActionVisibility(int numSelected) const
 /* ========================================================================= */
@@ -4193,13 +4187,20 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	    /* Separator. */
 	/* These must be also handled with relation to attachment selection. */
 	ui->actionSave_all_attachments->setEnabled(numSelected == 1);
-	ui->actionSave_attachment->setEnabled(numSelected == 1);
-	ui->actionOpen_attachment->setEnabled(numSelected == 1);
+	ui->actionSave_attachment->setEnabled(false);
+	ui->actionOpen_attachment->setEnabled(false);
 	    /* Separator. */
 	/* Delete action is controlled elsewhere. */
 	//ui->actionDelete_message_from_db->setEnabled(numSelected == 1);
 }
 
+void MainWindow::setAttachmentActionVisibility(int numSelected) const
+{
+	/* Save all attachments is handles elsewhere. */
+	//ui->actionSave_all_attachments->setEnabled(numSelected == 1);
+	ui->actionSave_attachment->setEnabled(numSelected == 1);
+	ui->actionOpen_attachment->setEnabled(numSelected == 1);
+}
 
 /* ========================================================================= */
 /*
