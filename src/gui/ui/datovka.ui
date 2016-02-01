@@ -185,7 +185,7 @@
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/3party/label_32.png</normaloff>:/icons/3party/label_32.png</iconset>
+                    <normaloff>:/icons/32x32/datovka.png</normaloff>:/icons/32x32/datovka.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -251,7 +251,7 @@ sent reply on this message</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/24x24/datovka-message-download.png</normaloff>:/icons/24x24/datovka-message-download.png</iconset>
+                    <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -844,7 +844,7 @@ sent reply on this message</string>
   <action name="actionDownload_message_signed">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message-download.png</normaloff>:/icons/16x16/datovka-message-download.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Download signed message</string>
@@ -877,7 +877,7 @@ sent reply on this message</string>
   <action name="actionSignature_detail">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Signature details</string>

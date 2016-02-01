@@ -937,11 +937,9 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	/* Disable message/attachment related buttons. */
 	setMessageActionVisibility(false);
 
-	ui->downloadComplete->setEnabled(false);
 	ui->saveAttachments->setEnabled(false);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
-	ui->signatureDetails->setEnabled(false);
 	ui->actionSave_all_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
 	ui->actionSave_attachment->setEnabled(false);
@@ -968,8 +966,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 	/* Enable message/attachment related buttons. */
 	setMessageActionVisibility(true);
-
-	ui->downloadComplete->setEnabled(true);
 
 	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
 	    selectionModel()->currentIndex());
@@ -1041,8 +1037,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 			ui->messageStateCombo->setCurrentIndex(UNSETTLED);
 		}
 
-		/* Enable buttons according to database content. */
-		ui->signatureDetails->setEnabled(true);
 		/* Show files related to message message. */
 		QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
 		Q_ASSERT(0 != fileTblMdl);
@@ -4178,21 +4172,22 @@ void MainWindow::connectMessageActionBarSlots(void)
 	 * via QMetaObject::connectSlotsByName because of mismatching names.
 	 */
 
+	/* Downloading attachments also triggers signature verification. */
+	ui->signatureDetails->setDefaultAction(ui->actionSignature_detail);
+
+	/* Sets message processing state. */
+	connect(ui->messageStateCombo, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(msgSetSelectedMessageProcessState(int)));
+
 	/* Message/attachment related buttons. */
-	connect(ui->downloadComplete, SIGNAL(clicked()), this,
-	    SLOT(downloadSelectedMessageAttachments()));
+	ui->downloadComplete->setDefaultAction(
+	    ui->actionDownload_message_signed);
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
 	    SLOT(saveSelectedAttachmentsToFile()));
 	connect(ui->saveAttachments, SIGNAL(clicked()), this,
 	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
-	/* Downloading attachments also triggers signature verification. */
-	connect(ui->signatureDetails, SIGNAL(clicked()), this,
-	    SLOT(showSignatureDetails()));
-	/* Sets message processing state. */
-	connect(ui->messageStateCombo, SIGNAL(currentIndexChanged(int)),
-	    this, SLOT(msgSetSelectedMessageProcessState(int)));
 }
 
 
@@ -10313,7 +10308,13 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionSplit_database_by_years->isEnabled();
 
 	/* Message menu. */
-	ui->actionDownload_message_signed->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/24x24/datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionDownload_message_signed->setIcon(ico);
+	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -10322,7 +10323,12 @@ void MainWindow::setMenuActionIcons(void)
 	}
 	ui->actionCreate_message_from_template->isEnabled();
 	    /* Separator. */
-	ui->actionSignature_detail->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/label_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/label_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSignature_detail->setIcon(ico);
+	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
