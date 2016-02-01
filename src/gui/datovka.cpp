@@ -937,7 +937,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	/* Disable message/attachment related buttons. */
 	setMessageActionVisibility(false);
 
-	ui->saveAttachments->setEnabled(false);
 	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
 	ui->actionSave_all_attachments->setEnabled(false);
@@ -1051,7 +1050,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		    AttachmentModel::CONTENT_COL, true);
 
 		if (ui->messageAttachmentList->model()->rowCount() > 0) {
-			ui->saveAttachments->setEnabled(true);
 			ui->actionSave_all_attachments->setEnabled(true);
 		}
 
@@ -1622,13 +1620,11 @@ void MainWindow::attachmentItemsSelectionChanged(
 
 	if (1 == selectedIndexes.size()) {
 		ui->saveAttachment->setEnabled(true);
-		//ui->saveAttachments->setEnabled(true);
 		ui->openAttachment->setEnabled(true);
 		ui->actionSave_attachment->setEnabled(true);
 		ui->actionOpen_attachment->setEnabled(true);
 	} else {
 		ui->saveAttachment->setEnabled(false);
-		//ui->saveAttachments->setEnabled(false);
 		ui->openAttachment->setEnabled(false);
 		ui->actionSave_attachment->setEnabled(false);
 		ui->actionOpen_attachment->setEnabled(false);
@@ -2331,10 +2327,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	    AttachmentModel::CONTENT_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
-		ui->saveAttachments->setEnabled(true);
 		ui->actionSave_all_attachments->setEnabled(true);
 	} else {
-		ui->saveAttachments->setEnabled(false);
 		ui->actionSave_all_attachments->setEnabled(false);
 	}
 
@@ -4182,10 +4176,9 @@ void MainWindow::connectMessageActionBarSlots(void)
 	/* Message/attachment related buttons. */
 	ui->downloadComplete->setDefaultAction(
 	    ui->actionDownload_message_signed);
+	ui->saveAttachments->setDefaultAction(ui->actionSave_all_attachments);
 	connect(ui->saveAttachment, SIGNAL(clicked()), this,
 	    SLOT(saveSelectedAttachmentsToFile()));
-	connect(ui->saveAttachments, SIGNAL(clicked()), this,
-	    SLOT(saveAllAttachmentsToDir()));
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 }
@@ -10347,7 +10340,11 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionSend_ZFO->isEnabled();
 	ui->actionSend_all_attachments->isEnabled();
 	    /* Separator. */
-	ui->actionSave_all_attachments->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/24x24/save-all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSave_all_attachments->setIcon(ico);
+	}
 	ui->actionOpen_attachment->isEnabled();
 	ui->actionSave_attachment->isEnabled();
 	    /* Separator. */

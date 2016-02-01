@@ -243,12 +243,6 @@ sent reply on this message</string>
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
-                  <property name="toolTip">
-                   <string>Download complete message, including attachments and verify its signature</string>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
                     <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
@@ -269,12 +263,9 @@ sent reply on this message</string>
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
-                  <property name="toolTip">
-                   <string>Save all attachments</string>
-                  </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
-                    <normaloff>:/icons/24x24/save-all.png</normaloff>:/icons/24x24/save-all.png</iconset>
+                    <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -850,7 +841,7 @@ sent reply on this message</string>
     <string>Download signed message</string>
    </property>
    <property name="toolTip">
-    <string>Download the whole signed message including its content</string>
+    <string>Download complete message, including attachments and verify its signature</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1012,10 +1003,13 @@ sent reply on this message</string>
   <action name="actionSave_all_attachments">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/24x24/save-all.png</normaloff>:/icons/24x24/save-all.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Save all attachments</string>
+   </property>
+   <property name="toolTip">
+    <string>Saves all message attachments</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
