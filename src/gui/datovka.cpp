@@ -937,7 +937,6 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	/* Disable message/attachment related buttons. */
 	setMessageActionVisibility(false);
 
-	ui->saveAttachment->setEnabled(false);
 	ui->openAttachment->setEnabled(false);
 	ui->actionSave_all_attachments->setEnabled(false);
 	ui->actionOpen_attachment->setEnabled(false);
@@ -1619,12 +1618,10 @@ void MainWindow::attachmentItemsSelectionChanged(
 	}
 
 	if (1 == selectedIndexes.size()) {
-		ui->saveAttachment->setEnabled(true);
 		ui->openAttachment->setEnabled(true);
 		ui->actionSave_attachment->setEnabled(true);
 		ui->actionOpen_attachment->setEnabled(true);
 	} else {
-		ui->saveAttachment->setEnabled(false);
 		ui->openAttachment->setEnabled(false);
 		ui->actionSave_attachment->setEnabled(false);
 		ui->actionOpen_attachment->setEnabled(false);
@@ -4177,8 +4174,7 @@ void MainWindow::connectMessageActionBarSlots(void)
 	ui->downloadComplete->setDefaultAction(
 	    ui->actionDownload_message_signed);
 	ui->saveAttachments->setDefaultAction(ui->actionSave_all_attachments);
-	connect(ui->saveAttachment, SIGNAL(clicked()), this,
-	    SLOT(saveSelectedAttachmentsToFile()));
+	ui->saveAttachment->setDefaultAction(ui->actionSave_attachment);
 	connect(ui->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 }
@@ -10346,7 +10342,12 @@ void MainWindow::setMenuActionIcons(void)
 		ui->actionSave_all_attachments->setIcon(ico);
 	}
 	ui->actionOpen_attachment->isEnabled();
-	ui->actionSave_attachment->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSave_attachment->setIcon(ico);
+	}
 	    /* Separator. */
 	ui->actionDelete_message_from_db->isEnabled();
 
