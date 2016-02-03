@@ -1126,7 +1126,7 @@ sent reply on this message</string>
   </action>
   <action name="actionEmail_selected_attachments">
    <property name="text">
-    <string>E-mail with selected_attachments</string>
+    <string>E-mail with selected attachments</string>
    </property>
    <property name="toolTip">
     <string>Creates an e-mail containing selected attachments</string>
