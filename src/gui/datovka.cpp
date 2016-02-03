@@ -1155,8 +1155,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionExport_delivery_info_as_PDF);
 	menu->addAction(ui->actionExport_message_envelope_as_PDF);
 	menu->addSeparator();
-	menu->addAction(ui->actionSend_ZFO);
-	menu->addAction(ui->actionSend_all_attachments);
+	menu->addAction(ui->actionEmail_ZFOs);
+	menu->addAction(ui->actionEmail_all_attachments);
 	menu->addSeparator();
 
 	if (received) {
@@ -1622,8 +1622,7 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	}
 	menu->addAction(ui->actionSave_selected_attachments);
 	menu->addSeparator();
-	menu->addAction(tr("Send selected attachments"), this,
-	    SLOT(sendAttachmentsEmail()));
+	menu->addAction(ui->actionEmail_selected_attachments);
 
 	menu->exec(QCursor::pos());
 }
@@ -1639,7 +1638,6 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 	debugSlotCall();
 
 	(void) index;
-	//qDebug() << "Attachment double clicked.";
 	openSelectedAttachment();
 }
 
@@ -3981,123 +3979,127 @@ void MainWindow::connectTopMenuBarSlots(void)
 	 */
 
 	/* File menu. */
-	connect(ui->actionSync_all_accounts, SIGNAL(triggered()), this,
-	    SLOT(synchroniseAllAccounts()));
+	connect(ui->actionSync_all_accounts, SIGNAL(triggered()),
+	    this, SLOT(synchroniseAllAccounts()));
 	    /* Separator. */
-	connect(ui->actionAdd_account, SIGNAL(triggered()), this,
-	    SLOT(addNewAccount()));
-	connect(ui->actionDelete_account, SIGNAL(triggered()), this,
-	    SLOT(deleteSelectedAccount()));
+	connect(ui->actionAdd_account, SIGNAL(triggered()),
+	    this, SLOT(addNewAccount()));
+	connect(ui->actionDelete_account, SIGNAL(triggered()),
+	    this, SLOT(deleteSelectedAccount()));
 	    /* Separator. */
-	connect(ui->actionImport_database_directory, SIGNAL(triggered()), this,
-	    SLOT(showImportDatabaseDialog()));
+	connect(ui->actionImport_database_directory, SIGNAL(triggered()),
+	    this, SLOT(showImportDatabaseDialog()));
 	    /* Separator. */
-	connect(ui->actionProxy_settings, SIGNAL(triggered()), this,
-	    SLOT(proxySettings()));
+	connect(ui->actionProxy_settings, SIGNAL(triggered()),
+	    this, SLOT(proxySettings()));
 	   /* Separator. */
-	connect(ui->actionPreferences, SIGNAL(triggered()), this,
-	    SLOT(applicationPreferences()));
+	connect(ui->actionPreferences, SIGNAL(triggered()),
+	    this, SLOT(applicationPreferences()));
 	/* actionQuit -- connected in ui file. */
 
 	/* Data box menu. */
-	connect(ui->actionGet_messages, SIGNAL(triggered()), this,
-	    SLOT(synchroniseSelectedAccount()));
-	connect(ui->actionSend_message, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessage()));
+	connect(ui->actionGet_messages, SIGNAL(triggered()),
+	    this, SLOT(synchroniseSelectedAccount()));
+	connect(ui->actionSend_message, SIGNAL(triggered()),
+	    this, SLOT(createAndSendMessage()));
 	    /* Separator. */
-	connect(ui->actionMark_all_as_read, SIGNAL(triggered()), this,
-	    SLOT(accountMarkReceivedRead()));
+	connect(ui->actionMark_all_as_read, SIGNAL(triggered()),
+	    this, SLOT(accountMarkReceivedRead()));
 	    /* Separator. */
-	connect(ui->actionChange_password, SIGNAL(triggered()), this,
-	    SLOT(changeAccountPassword()));
+	connect(ui->actionChange_password, SIGNAL(triggered()),
+	    this, SLOT(changeAccountPassword()));
 	    /* Separator. */
-	connect(ui->actionAccount_properties, SIGNAL(triggered()), this,
-	    SLOT(manageAccountProperties()));
+	connect(ui->actionAccount_properties, SIGNAL(triggered()),
+	    this, SLOT(manageAccountProperties()));
 	    /* Separator. */
-	connect(ui->actionMove_account_up, SIGNAL(triggered()), this,
-	    SLOT(moveSelectedAccountUp()));
-	connect(ui->actionMove_account_down, SIGNAL(triggered()), this,
-	    SLOT(moveSelectedAccountDown()));
+	connect(ui->actionMove_account_up, SIGNAL(triggered()),
+	    this, SLOT(moveSelectedAccountUp()));
+	connect(ui->actionMove_account_down, SIGNAL(triggered()),
+	    this, SLOT(moveSelectedAccountDown()));
 	    /* Separator. */
-	connect(ui->actionChange_data_directory, SIGNAL(triggered()), this,
-	    SLOT(changeDataDirectory()));
+	connect(ui->actionChange_data_directory, SIGNAL(triggered()),
+	    this, SLOT(changeDataDirectory()));
 #ifdef PORTABLE_APPLICATION
 	ui->actionChange_data_directory->setEnabled(false);
 #endif /* PORTABLE_APPLICATION */
 	    /* Separator. */
 	connect(ui->actionImport_messages_from_database, SIGNAL(triggered()),
 	    this, SLOT(prepareMsgsImportFromDatabase()));
-	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()), this,
-	    SLOT(showImportZFOActionDialog()));
+	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()),
+	    this, SLOT(showImportZFOActionDialog()));
 	    /* Separator. */
-	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()), this,
-	    SLOT(splitMsgDbByYearsSlot()));
+	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
+	    this, SLOT(splitMsgDbByYearsSlot()));
 
 	/* Message menu. */
-	connect(ui->actionDownload_message_signed, SIGNAL(triggered()), this,
-	    SLOT(downloadSelectedMessageAttachments()));
-	connect(ui->actionReply, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessageReply()));
-	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()), this,
-	    SLOT(createAndSendMessageFromTmpl()));
+	connect(ui->actionDownload_message_signed, SIGNAL(triggered()),
+	    this, SLOT(downloadSelectedMessageAttachments()));
+	connect(ui->actionReply, SIGNAL(triggered()),
+	    this, SLOT(createAndSendMessageReply()));
+	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()),
+	    this, SLOT(createAndSendMessageFromTmpl()));
 	    /* Separator. */
-	connect(ui->actionSignature_detail, SIGNAL(triggered()), this,
-	    SLOT(showSignatureDetails()));
-	connect(ui->actionAuthenticate_message, SIGNAL(triggered()), this,
-	    SLOT(verifySelectedMessage()));
+	connect(ui->actionSignature_detail, SIGNAL(triggered()),
+	    this, SLOT(showSignatureDetails()));
+	connect(ui->actionAuthenticate_message, SIGNAL(triggered()),
+	    this, SLOT(verifySelectedMessage()));
 	    /* Separator. */
-	connect(ui->actionOpen_message_externally, SIGNAL(triggered()), this,
-	    SLOT(openSelectedMessageExternally()));
-	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()), this,
-	    SLOT(openDeliveryInfoExternally()));
+	connect(ui->actionOpen_message_externally, SIGNAL(triggered()),
+	    this, SLOT(openSelectedMessageExternally()));
+	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()),
+	    this, SLOT(openDeliveryInfoExternally()));
 	    /* Separator. */
-	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedMessagesAsZFO()));
-	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedDeliveryInfosAsZFO()));
-	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedDeliveryInfosAsPDF()));
-	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedMessageEnvelopesAsPDF()));
+	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()),
+	    this, SLOT(exportSelectedMessagesAsZFO()));
+	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()),
+	    this, SLOT(exportSelectedDeliveryInfosAsZFO()));
+	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()),
+	    this, SLOT(exportSelectedDeliveryInfosAsPDF()));
+	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()),
+	    this, SLOT(exportSelectedMessageEnvelopesAsPDF()));
 	    /* Separator. */
-	connect(ui->actionSend_ZFO, SIGNAL(triggered()), this,
-	    SLOT(sendMessagesZfoEmail()));
-	connect(ui->actionSend_all_attachments, SIGNAL(triggered()), this,
-	    SLOT(sendAllAttachmentsEmail()));
+	connect(ui->actionEmail_ZFOs, SIGNAL(triggered()),
+	    this, SLOT(sendMessagesZfoEmail()));
+	connect(ui->actionEmail_all_attachments, SIGNAL(triggered()),
+	    this, SLOT(sendAllAttachmentsEmail()));
 	    /* Separator. */
-	connect(ui->actionSave_all_attachments, SIGNAL(triggered()), this,
-	    SLOT(saveAllAttachmentsToDir()));
-	connect(ui->actionSave_selected_attachments, SIGNAL(triggered()), this,
-	    SLOT(saveSelectedAttachmentsToFile()));
-	connect(ui->actionOpen_attachment, SIGNAL(triggered()), this,
-	    SLOT(openSelectedAttachment()));
+	connect(ui->actionSave_all_attachments, SIGNAL(triggered()),
+	    this, SLOT(saveAllAttachmentsToDir()));
+	connect(ui->actionSave_selected_attachments, SIGNAL(triggered()),
+	    this, SLOT(saveSelectedAttachmentsToFile()));
+	connect(ui->actionOpen_attachment, SIGNAL(triggered()),
+	    this, SLOT(openSelectedAttachment()));
 	    /* Separator. */
-	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()), this,
-	    SLOT(deleteMessage()));
+	connect(ui->actionDelete_message_from_db, SIGNAL(triggered()),
+	    this, SLOT(deleteMessage()));
 
 	/* Tools menu. */
-	connect(ui->actionFind_databox, SIGNAL(triggered()), this,
-	    SLOT(findDatabox()));
+	connect(ui->actionFind_databox, SIGNAL(triggered()),
+	    this, SLOT(findDatabox()));
 	    /* Separator. */
-	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()), this,
-	    SLOT(authenticateMessageFile()));
-	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()), this,
-	    SLOT(viewMessageFromZFO()));
-	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()), this,
-	    SLOT(exportCorrespondenceOverview()));
-	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()), this,
-	    SLOT(showMsgTmstmpExpirDialog()));
+	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()),
+	    this, SLOT(authenticateMessageFile()));
+	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()),
+	    this, SLOT(viewMessageFromZFO()));
+	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()),
+	    this, SLOT(exportCorrespondenceOverview()));
+	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()),
+	    this, SLOT(showMsgTmstmpExpirDialog()));
 	    /* Separator. */
-	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()), this,
-	    SLOT(showMsgAdvancedSearchDlg()));
+	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()),
+	    this, SLOT(showMsgAdvancedSearchDlg()));
 
 	/* Help. */
-	connect(ui->actionAbout_Datovka, SIGNAL(triggered()), this,
-	    SLOT(aboutApplication()));
-	connect(ui->actionHomepage, SIGNAL(triggered()), this,
-	    SLOT(goHome()));
-	connect(ui->actionHelp, SIGNAL(triggered()), this,
-	    SLOT(showHelp()));
+	connect(ui->actionAbout_Datovka, SIGNAL(triggered()),
+	    this, SLOT(aboutApplication()));
+	connect(ui->actionHomepage, SIGNAL(triggered()),
+	    this, SLOT(goHome()));
+	connect(ui->actionHelp, SIGNAL(triggered()),
+	    this, SLOT(showHelp()));
+
+	/* Actions that are not shown in the top menu. */
+	connect(ui->actionEmail_selected_attachments, SIGNAL(triggered()),
+	    this, SLOT(sendAttachmentsEmail()));
 }
 
 
@@ -4180,8 +4182,8 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected > 0);
 	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected > 0);
 	    /* Separator. */
-	ui->actionSend_ZFO->setEnabled(numSelected > 0);
-	ui->actionSend_all_attachments->setEnabled(numSelected > 0);
+	ui->actionEmail_ZFOs->setEnabled(numSelected > 0);
+	ui->actionEmail_all_attachments->setEnabled(numSelected > 0);
 	    /* Separator. */
 	/* These must be also handled with relation to attachment selection. */
 	ui->actionSave_all_attachments->setEnabled(numSelected == 1);
@@ -10324,8 +10326,8 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionExport_delivery_info_as_PDF->isEnabled();
 	ui->actionExport_message_envelope_as_PDF->isEnabled();
 	    /* Separator. */
-	ui->actionSend_ZFO->isEnabled();
-	ui->actionSend_all_attachments->isEnabled();
+	ui->actionEmail_ZFOs->isEnabled();
+	ui->actionEmail_all_attachments->isEnabled();
 	    /* Separator. */
 	{
 		QIcon ico;
@@ -10366,4 +10368,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionAbout_Datovka->isEnabled();
 	ui->actionHomepage->isEnabled();
 	ui->actionHelp->isEnabled();
+
+	/* Actions that are not shown in the top menu. */
+	ui->actionEmail_selected_attachments->isEnabled();
 }

@@ -441,8 +441,8 @@ sent reply on this message</string>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
     <addaction name="separator"/>
-    <addaction name="actionSend_ZFO"/>
-    <addaction name="actionSend_all_attachments"/>
+    <addaction name="actionEmail_ZFOs"/>
+    <addaction name="actionEmail_all_attachments"/>
     <addaction name="separator"/>
     <addaction name="actionSave_all_attachments"/>
     <addaction name="actionSave_selected_attachments"/>
@@ -1102,26 +1102,34 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionSend_ZFO">
+  <action name="actionEmail_ZFOs">
    <property name="text">
-    <string>Send ZFO</string>
+    <string>E-mail with ZFOs</string>
    </property>
    <property name="toolTip">
-    <string>Creates an e-mail containing the selected message ZFO</string>
+    <string>Creates an e-mail containing ZFOs of selected messages</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionSend_all_attachments">
+  <action name="actionEmail_all_attachments">
    <property name="text">
-    <string>Send all attachments</string>
+    <string>E-mail with all attachments</string>
    </property>
    <property name="toolTip">
-    <string>Creates an e-mail containing the selected message attachments</string>
+    <string>Creates an e-mail containing all attachments of selected messages</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionEmail_selected_attachments">
+   <property name="text">
+    <string>E-mail with selected_attachments</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates an e-mail containing selected attachments</string>
    </property>
   </action>
  </widget>
