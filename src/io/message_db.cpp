@@ -1358,6 +1358,9 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 			if (0 != verSigButton) {
 				verSigButton->setEnabled(true);
 			}
+			html += "<div>" +
+			    QObject::tr("Download the complete message in order to verify its signature.") +
+			    "</div>";
 		} else if (!msgsVerified(dmId)) {
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
@@ -1413,6 +1416,11 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 			}
 			html += strongAccountInfoLine(
 			    QObject::tr("Time stamp"), timeStampStr);
+			if (tstData.isEmpty()) {
+				html += "<div>" +
+				    QObject::tr("Download the complete message in order to verify its time stamp.") +
+				    "</div>";
+			}
 		}
 
 	}

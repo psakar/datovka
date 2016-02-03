@@ -60,18 +60,6 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow(void);
 
-	QProgressBar *m_statusProgressBar; /*!< Progress-bar object. */
-	QLabel *statusOnlineLabel;
-	QLabel *statusDbMode;
-	QStatusBar *statusBar;
-
-	enum isdsResult {
-		MSG_IS_IN_ISDS,
-		MSG_IS_NOT_IN_ISDS,
-		MSG_ISDS_ERROR,
-		MSG_FILE_ERROR
-	};
-
 	/*!
 	 * @brief Create configuration file if not present.
 	 */
@@ -642,7 +630,7 @@ private slots:
 	void updateStatusBarText(const QString &text);
 
 	/*!
-	 * @brief Clear progerss bar text.
+	 * @brief Clear progress bar text.
 	 */
 	void clearProgressBar(void);
 
@@ -790,11 +778,6 @@ private:
 	void connectTopMenuBarSlots(void);
 
 	/*!
-	 * @brief Connect top tool-bar buttons to appropriate actions.
-	 */
-	void connectTopToolBarSlots(void);
-
-	/*!
 	 * @brief Connect message-action-bar buttons to appropriate actions.
 	 */
 	void connectMessageActionBarSlots(void);
@@ -805,9 +788,14 @@ private:
 	void defaultUiMainWindowSettings(void) const;
 
 	/*!
-	 * @brief Set message action/button to visible.
+	 * @brief Enables message menu actions according to message selection.
 	 */
-	void setMessageActionVisibility(bool action) const;
+	void setMessageActionVisibility(int numSelected) const;
+
+	/*!
+	 * @brief Enables message menu actions according to attachment selection.
+	 */
+	void setAttachmentActionVisibility(int numSelected) const;
 
 	/*!
 	 * @brief Open send message dialog and send message.
@@ -1172,8 +1160,6 @@ private:
 	                              * Account tree view model. Generated from
 	                              * configuration file.
 	                              */
-	QLineEdit *m_filterLine; /*!< Search filter line object. */
-	QPushButton *m_clearFilterLineButton; /*!< Button object. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                                * Used for message
 	                                                * sorting and
@@ -1210,7 +1196,29 @@ private:
 	QString m_import_zfo_path;
 	bool isMainWindow;
 
-	Ui::MainWindow *ui;
+	/* User interface elements. */
+	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
+	QLineEdit *mui_filterLine; /*!< Search filter line object. */
+	QPushButton *mui_clearFilterLineButton; /*!< Clear filter button. */
+	QStatusBar *mui_statusBar; /*!< Status bar. */
+	QLabel *mui_statusDbMode; /*!< Database status label. */
+	QLabel *mui_statusOnlineLabel; /*< On-line/off-line status label. */
+	QProgressBar *mui_statusProgressBar; /*!< Progress bar. */
+
+	/*!
+	 * @brief Performs initial user interface initialisation.
+	 */
+	void setUpUi(void);
+
+	/*!
+	 * @brief Adds actions to to tool bar.
+	 */
+	void topToolBarSetUp(void);
+
+	/*!
+	 * @brief Sets action icons.
+	 */
+	void setMenuActionIcons(void);
 };
 
 
