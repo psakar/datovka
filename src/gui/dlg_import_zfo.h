@@ -53,7 +53,7 @@ public:
 
 signals:
 	void returnZFOAction(enum ImportZFODialog::ZFOtype,
-	    enum ImportZFODialog::ZFOaction);
+	    enum ImportZFODialog::ZFOaction, bool checkOnServer);
 
 private slots:
 	void ImportFiles(void);

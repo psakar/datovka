@@ -551,7 +551,7 @@ private slots:
 	 * @brief Create ZFO file(s) list for import into database.
 	 */
 	void createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
-	    enum ImportZFODialog::ZFOaction importType);
+	    enum ImportZFODialog::ZFOaction importType, bool checkOnServer);
 
 	/*!
 	 * @brief Collects information about import status.
@@ -574,7 +574,7 @@ private slots:
 	 * @brief Prepare import ZFO file(s) into database by ZFO type.
 	 */
 	void prepareZFOImportIntoDatabase(const QStringList &files,
-	    enum ImportZFODialog::ZFOtype zfoType);
+	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate);
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of import.

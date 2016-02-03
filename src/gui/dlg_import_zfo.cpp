@@ -44,6 +44,8 @@ ImportZFODialog::ImportZFODialog(QWidget *parent) :
 	    this, SLOT(ChangeRadioBox()));
 	connect(this->radioImportSelected, SIGNAL(clicked()),
 	    this, SLOT(ChangeRadioBox()));
+
+	this->checkOnServer->setCheckState(Qt::Checked);
 }
 
 void ImportZFODialog::ChangeRadioBox(void)
@@ -78,5 +80,6 @@ void ImportZFODialog::ImportFiles(void)
 		zfoAaction = IMPORT_SEL_FILES;
 	}
 
-	emit returnZFOAction(zfoType, zfoAaction);
+	emit returnZFOAction(zfoType, zfoAaction,
+	    Qt::Unchecked != checkOnServer->checkState());
 }

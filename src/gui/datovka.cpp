@@ -6045,10 +6045,10 @@ void MainWindow::showImportZFOActionDialog(void)
 	QDialog *importZfo = new ImportZFODialog(this);
 	connect(importZfo,
 	    SIGNAL(returnZFOAction(enum ImportZFODialog::ZFOtype,
-	        enum ImportZFODialog::ZFOaction)),
+	        enum ImportZFODialog::ZFOaction, bool)),
 	    this,
 	    SLOT(createZFOListForImport(enum ImportZFODialog::ZFOtype,
-	        enum ImportZFODialog::ZFOaction)));
+	        enum ImportZFODialog::ZFOaction, bool)));
 	importZfo->exec();
 }
 
@@ -6058,7 +6058,7 @@ void MainWindow::showImportZFOActionDialog(void)
  * Func: Create ZFO file(s) list for import into database.
  */
 void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
-    enum ImportZFODialog::ZFOaction importType)
+    enum ImportZFODialog::ZFOaction importType, bool checkOnServer)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -6135,7 +6135,7 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		break;
 	}
 
-	prepareZFOImportIntoDatabase(filePathList, zfoType);
+	prepareZFOImportIntoDatabase(filePathList, zfoType, checkOnServer);
 
 	clearProgressBar();
 }
@@ -6227,12 +6227,10 @@ QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
  * Func: Prepare import ZFO file(s) into database by ZFO type.
  */
 void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
-    enum ImportZFODialog::ZFOtype zfoType)
+    enum ImportZFODialog::ZFOtype zfoType, bool authenticate)
 /* ========================================================================= */
 {
 	debugFuncCall();
-
-	bool authenticate = true;
 
 	const QString progressBarTitle = "ZFOImport";
 	QPair<QString,QString> impZFOInfo;
@@ -6256,6 +6254,11 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
+	/*
+	 * If there is no authentication request, the all account are going to
+	 * be processed. It authentication is required then only active
+	 * accounts are going to be selected.
+	 */
 	const QList<Task::AccountDescr> accountList(
 	    createAccountInfoForZFOImport(authenticate));
 
