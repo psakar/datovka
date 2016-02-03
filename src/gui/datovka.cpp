@@ -7092,14 +7092,18 @@ void MainWindow::sendMessagesZfoEmail(void)
 
 	createEmailMessage(emailMessage, subject, boundary);
 
-	qint64 dmId(firstMsgColumnIdxs.first().data().toLongLong());
-	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
-
 	QModelIndex acntTopIndex(
 	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
 	Q_ASSERT(!userName.isEmpty());
+
+	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	Q_ASSERT(0 != dbSet);
+	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	Q_ASSERT(0 != messageDb);
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
@@ -7107,12 +7111,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 			return;
 		}
 
-		dmId = frstIdx.data().toLongLong();
-
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
-		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-		Q_ASSERT(0 != messageDb);
+		qint64 dmId = frstIdx.data().toLongLong();
 
 		QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 		if (base64.isEmpty()) {
@@ -7188,14 +7187,18 @@ void MainWindow::sendAllAttachmentsEmail(void)
 
 	createEmailMessage(emailMessage, subject, boundary);
 
-	qint64 dmId(firstMsgColumnIdxs.first().data().toLongLong());
-	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
-
 	QModelIndex acntTopIndex(
 	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
 	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
 	Q_ASSERT(!userName.isEmpty());
+
+	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	Q_ASSERT(0 != dbSet);
+	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	Q_ASSERT(0 != messageDb);
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
@@ -7203,12 +7206,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			return;
 		}
 
-		dmId = frstIdx.data().toLongLong();
-
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
-		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-		Q_ASSERT(0 != messageDb);
+		qint64 dmId = frstIdx.data().toLongLong();
 
 		QList<MessageDb::FileData> attachList =
 		    messageDb->getFilesFromMessage(dmId);
@@ -9403,8 +9401,8 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	}
 
 	foreach (const MessageDb::MsgId &mId, expirMsgIds) {
-		exportSelectedMessageAsZFO(newDir, userName, mId.dmId,
-		    mId.deliveryTime);
+		exportMessageAsZFO(newDir, userName, mId.dmId,
+		    mId.deliveryTime, false);
 	}
 }
 
