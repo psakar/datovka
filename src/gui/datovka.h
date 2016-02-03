@@ -468,33 +468,24 @@ private slots:
 	void showSignatureDetails(void);
 
 	/*!
-	 * @brief Export message into as ZFO file dialog.
+	 * @brief Export selected message into ZFO files.
 	 */
-	void exportSelectedMessageAsZFO(const QString &attachPath = QString(),
-	    QString userName = QString(), qint64 dmID = -1,
-	    const QDateTime &delivTime = QDateTime());
+	void exportSelectedMessagesAsZFO(void);
 
 	/*!
-	 * @brief Export delivery information as ZFO file dialog.
+	 * @brief Export selected delivery information as ZFO files.
 	 */
-	void exportDeliveryInfoAsZFO(const QString &attachPath = QString(),
-	    const QString &attachFileName = QString(),
-	    const QString &formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
+	void exportSelectedDeliveryInfosAsZFO(void);
 
 	/*!
-	 * @brief Export delivery information as PDF file dialog.
+	 * @brief Export selected delivery information as PDF files.
 	 */
-	void exportDeliveryInfoAsPDF(const QString &attachPath = QString(),
-	    const QString &attachFileName = QString(),
-	    const QString &formatString = globPref.delivery_filename_format,
-	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
+	void exportSelectedDeliveryInfosAsPDF(void);
 
 	/*!
-	 * @brief Export selected message envelope as PDF file dialog.
+	 * @brief Export selected message envelope as PDF files.
 	 */
-	void exportMessageEnvelopeAsPDF(const QString &attachPath = QString(),
-	    qint64 dmID = -1, const QDateTime &delivTime = QDateTime());
+	void exportSelectedMessageEnvelopesAsPDF(void);
 
 	/*!
 	 * @brief Sends selected messages as ZFO into default e-mail client.
@@ -695,6 +686,36 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Export message into ZFO file dialogue.
+	 */
+	void exportMessageAsZFO(const QString &attachPath,
+	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    bool askLocation);
+
+	/*!
+	 * @brief Export delivery information as ZFO file dialogue.
+	 */
+	void exportDeliveryInfoAsZFO(const QString &attachPath,
+	    const QString &attachFileName, const QString &formatString,
+	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    bool askLocation);
+
+	/*!
+	 * @brief Export delivery information as PDF file dialogue.
+	 */
+	void exportDeliveryInfoAsPDF(const QString &attachPath,
+	    const QString &attachFileName, const QString &formatString,
+	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    bool askLocation);
+
+	/*!
+	 * @brief Export selected message envelope as PDF file dialogue.
+	 */
+	void exportMessageEnvelopeAsPDF(const QString &attachPath,
+	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    bool askLocation);
 
 	/*!
 	 * @brief Set info status bar from worker.

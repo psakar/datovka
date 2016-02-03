@@ -1149,12 +1149,12 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionOpen_message_externally);
 		menu->addAction(ui->actionOpen_delivery_info_externally);
 		menu->addSeparator();
-		menu->addAction(ui->actionExport_as_ZFO);
-		menu->addAction(ui->actionExport_delivery_info_as_ZFO);
-		menu->addAction(ui->actionExport_delivery_info_as_PDF);
-		menu->addAction(ui->actionExport_message_envelope_as_PDF);
-		menu->addSeparator();
 	}
+	menu->addAction(ui->actionExport_as_ZFO);
+	menu->addAction(ui->actionExport_delivery_info_as_ZFO);
+	menu->addAction(ui->actionExport_delivery_info_as_PDF);
+	menu->addAction(ui->actionExport_message_envelope_as_PDF);
+	menu->addSeparator();
 	menu->addAction(ui->actionSend_ZFO);
 	menu->addAction(ui->actionSend_all_attachments);
 	menu->addSeparator();
@@ -1891,35 +1891,35 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			if (globPref.all_attachments_save_zfo_delinfo) {
 				exportDeliveryInfoAsZFO(newDir, attFileName,
 				    globPref.delivery_filename_format_all_attach,
-				    dmId, deliveryTime);
+				    userName, dmId, deliveryTime, false);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
 				exportDeliveryInfoAsPDF(newDir, attFileName,
 				  globPref.delivery_filename_format_all_attach,
-				  dmId, deliveryTime);
+				  userName, dmId, deliveryTime, false);
 			}
 		}
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportSelectedMessageAsZFO(newDir, userName,
-		    dmId, deliveryTime);
+		exportMessageAsZFO(newDir, userName, dmId, deliveryTime, false);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(newDir, dmId, deliveryTime);
+		exportMessageEnvelopeAsPDF(newDir, userName, dmId, deliveryTime,
+		    false);
 	}
 
 	if (!globPref.delivery_info_for_every_file) {
 		if (globPref.all_attachments_save_zfo_delinfo) {
 			exportDeliveryInfoAsZFO(newDir, "",
 			    globPref.delivery_filename_format,
-			    dmId, deliveryTime);
+			    userName, dmId, deliveryTime, false);
 		}
 		if (globPref.all_attachments_save_pdf_delinfo) {
 			exportDeliveryInfoAsPDF(newDir, "",
 			    globPref.delivery_filename_format,
-			    dmId, deliveryTime);
+			    userName, dmId, deliveryTime, false);
 		}
 	}
 
@@ -4052,13 +4052,13 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    SLOT(openDeliveryInfoExternally()));
 	    /* Separator. */
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()), this,
-	    SLOT(exportSelectedMessageAsZFO()));
+	    SLOT(exportSelectedMessagesAsZFO()));
 	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()), this,
-	    SLOT(exportDeliveryInfoAsZFO()));
+	    SLOT(exportSelectedDeliveryInfosAsZFO()));
 	connect(ui->actionExport_delivery_info_as_PDF, SIGNAL(triggered()), this,
-	    SLOT(exportDeliveryInfoAsPDF()));
+	    SLOT(exportSelectedDeliveryInfosAsPDF()));
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()), this,
-	    SLOT(exportMessageEnvelopeAsPDF()));
+	    SLOT(exportSelectedMessageEnvelopesAsPDF()));
 	    /* Separator. */
 	connect(ui->actionSend_ZFO, SIGNAL(triggered()), this,
 	    SLOT(sendMessagesZfoEmail()));
@@ -4175,10 +4175,10 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
-	ui->actionExport_as_ZFO->setEnabled(numSelected == 1);
-	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected == 1);
-	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected == 1);
-	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected == 1);
+	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
+	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
+	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected > 0);
+	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected > 0);
 	    /* Separator. */
 	ui->actionSend_ZFO->setEnabled(numSelected > 0);
 	ui->actionSend_all_attachments->setEnabled(numSelected > 0);
@@ -6388,46 +6388,16 @@ void MainWindow::goHome(void)
 /*
  * Export message into as ZFO file dialogue.
  */
-void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
-    QString userName, qint64 dmID, const QDateTime &delivTime)
+void MainWindow::exportMessageAsZFO(const QString &attachPath,
+    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+    bool askLocation)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
-	qint64 dmId;
-	QDateTime deliveryTime;
-
-	if ((dmID == -1) || !delivTime.isValid()) {
-		QModelIndexList firstMsgColumnIdxs =
-		    ui->messageList->selectionModel()->selectedRows(0);
-		if (1 != firstMsgColumnIdxs.size()) {
-			return;
-		}
-
-		const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-
-		Q_ASSERT(msgIdx.isValid());
-		if (!msgIdx.isValid()) {
-			showStatusTextWithTimeout(tr("Export of message to "
-			    "ZFO was not successful!"));
-			return;
-		}
-
-		dmId = msgIdx.data().toLongLong();
-		deliveryTime = msgDeliveryTime(msgIdx);
-	} else {
-		dmId = dmID;
-		deliveryTime = delivTime;
-	}
+	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(dmId >= 0);
 	/* Delivery time can be invalid. */
-
-	if (userName.isEmpty()) {
-		QModelIndex acntIndex = ui->accountList->currentIndex();
-		acntIndex = AccountModel::indexTop(acntIndex);
-		userName = acntIndex.data(ROLE_ACNT_USER_NAME).toString();
-	}
-	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
@@ -6465,7 +6435,7 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 	    dmId, dbId, userName, "", entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
 		    fileName + ".zfo";
 	} else {
@@ -6474,7 +6444,7 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	if (dmID == -1) {
+	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(this,
 		    tr("Save message as ZFO file"), fileName,
 		    tr("ZFO file (*.zfo)"));
@@ -6487,7 +6457,7 @@ void MainWindow::exportSelectedMessageAsZFO(const QString &attachPath,
 	}
 
 	/* remember path for settings if attachPath was not set */
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		m_on_export_zfo_activate =
 		    QFileInfo(fileName).absoluteDir().absolutePath();
 		storeExportPath();
@@ -6606,45 +6576,16 @@ bool MainWindow::messageMissingOfferDownload(qint64 dmId,
  * Export delivery information as ZFO file dialog.
  */
 void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
-    const QString &attachFileName, const QString &formatString, qint64 dmID,
-    const QDateTime &delivTime)
+    const QString &attachFileName, const QString &formatString,
+    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+    bool askLocation)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message delivery "
-		    "info to ZFO was not successful!"));
-		return;
-	}
-
-	qint64 dmId;
-	QDateTime deliveryTime;
-
-	if ((dmID == -1) || !delivTime.isValid()) {
-		dmId = msgIdx.data().toLongLong();
-		deliveryTime = msgDeliveryTime(msgIdx);
-	} else {
-		dmId = dmID;
-		deliveryTime = delivTime;
-	}
+	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(dmId >= 0);
 	/* Delivery time can be invalid. */
-
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
@@ -6682,7 +6623,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 	    userName, attachFileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
 		    fileName + ".zfo";
 	} else {
@@ -6691,7 +6632,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 
 	Q_ASSERT(!fileName.isEmpty());
 
-	if (dmID == -1) {
+	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(this,
 		    tr("Save delivery info as ZFO file"), fileName,
 		    tr("ZFO file (*.zfo)"));
@@ -6704,7 +6645,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 	}
 
 	/* remember path for settings if attachPath was not set */
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		m_on_export_zfo_activate =
 		    QFileInfo(fileName).absoluteDir().absolutePath();
 		storeExportPath();
@@ -6734,44 +6675,15 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
  */
 void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
     const QString &attachFileName, const QString &formatString,
-    qint64 dmID, const QDateTime &delivTime)
+    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+    bool askLocation)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message delivery info "
-		    "to PDF was not successful!"));
-		return;
-	}
-
-	qint64 dmId;
-	QDateTime deliveryTime;
-
-	if ((dmID == -1) || !delivTime.isValid()) {
-		dmId = msgIdx.data().toLongLong();
-		deliveryTime = msgDeliveryTime(msgIdx);
-	} else {
-		dmId = dmID;
-		deliveryTime = delivTime;
-	}
+	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(dmId >= 0);
 	/* Delivery time can be invalid. */
-
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
@@ -6809,14 +6721,14 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 	    userName, attachFileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
 		    fileName + ".pdf";
 	} else {
 		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	if (dmID == -1) {
+	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(this,
 		    tr("Save delivery info as PDF file"), fileName,
 		    tr("PDF file (*.pdf)"));
@@ -6830,7 +6742,7 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 	}
 
 	/* remember path for settings if attachPath was not set */
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		m_on_export_zfo_activate =
 		    QFileInfo(fileName).absoluteDir().absolutePath();
 		storeExportPath();
@@ -6857,44 +6769,15 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
  * Export selected message envelope as PDF file dialog.
  */
 void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
-    qint64 dmID, const QDateTime &delivTime)
+    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+    bool askLocation)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	debugFuncCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
-		showStatusTextWithTimeout(tr("Export of message envelope to "
-		    "PDF was not successful!"));
-		return;
-	}
-
-	qint64 dmId;
-	QDateTime deliveryTime;
-
-	if ((dmID == -1) || !delivTime.isValid()) {
-		dmId = msgIdx.data().toLongLong();
-		deliveryTime = msgDeliveryTime(msgIdx);
-	} else {
-		dmId = dmID;
-		deliveryTime = delivTime;
-	}
+	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(dmId >= 0);
 	/* Delivery time can be invalid. */
-
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
@@ -6932,14 +6815,14 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	    dmId, dbId, userName, "", entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		fileName = m_on_export_zfo_activate + QDir::separator() +
 		    fileName + ".pdf";
 	} else {
 		fileName = attachPath + QDir::separator() + fileName + ".pdf";
 	}
 
-	if (dmID == -1) {
+	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(this,
 		    tr("Save message envelope as PDF file"), fileName,
 		    tr("PDF file (*.pdf)"));
@@ -6952,7 +6835,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	}
 
 	/* remember path for settings if attachPath was not set */
-	if (attachPath.isNull()) {
+	if (attachPath.isEmpty()) {
 		m_on_export_zfo_activate =
 		    QFileInfo(fileName).absoluteDir().absolutePath();
 		storeExportPath();
@@ -7052,6 +6935,132 @@ void finishEmailMessage(QString &message, const QString &boundary)
 	const QString newLine("\n"); /* "\r\n" ? */
 
 	message += newLine + "--" + boundary + "--" + newLine;
+}
+
+void MainWindow::exportSelectedMessagesAsZFO(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	QModelIndex acntTopIndex(
+	    AccountModel::indexTop(ui->accountList->currentIndex()));
+	const QString userName(
+	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	Q_ASSERT(!userName.isEmpty());
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		qint64 dmId = frstIdx.data().toLongLong();
+		Q_ASSERT(dmId >= 0);
+		QDateTime deliveryTime(msgDeliveryTime(frstIdx));
+
+		exportMessageAsZFO(QString(), userName, dmId, deliveryTime,
+		    true);
+	}
+}
+
+void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	QModelIndex acntTopIndex(
+	    AccountModel::indexTop(ui->accountList->currentIndex()));
+	const QString userName(
+	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	Q_ASSERT(!userName.isEmpty());
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		qint64 dmId = frstIdx.data().toLongLong();
+		Q_ASSERT(dmId >= 0);
+		QDateTime deliveryTime(msgDeliveryTime(frstIdx));
+
+		exportDeliveryInfoAsZFO(QString(), QString(),
+		    globPref.delivery_filename_format, userName, dmId,
+		    deliveryTime, true);
+	}
+}
+
+void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	QModelIndex acntTopIndex(
+	    AccountModel::indexTop(ui->accountList->currentIndex()));
+	const QString userName(
+	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	Q_ASSERT(!userName.isEmpty());
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		qint64 dmId = frstIdx.data().toLongLong();
+		Q_ASSERT(dmId >= 0);
+		QDateTime deliveryTime(msgDeliveryTime(frstIdx));
+
+		exportDeliveryInfoAsPDF(QString(), QString(),
+		    globPref.delivery_filename_format, userName, dmId,
+		    deliveryTime, true);
+	}
+}
+
+void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs =
+	    ui->messageList->selectionModel()->selectedRows(0);
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	QModelIndex acntTopIndex(
+	    AccountModel::indexTop(ui->accountList->currentIndex()));
+	const QString userName(
+	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	Q_ASSERT(!userName.isEmpty());
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		qint64 dmId = frstIdx.data().toLongLong();
+		Q_ASSERT(dmId >= 0);
+		QDateTime deliveryTime(msgDeliveryTime(frstIdx));
+
+		exportMessageEnvelopeAsPDF(QString(), userName, dmId,
+		    deliveryTime, true);
+	}
 }
 
 void MainWindow::sendMessagesZfoEmail(void)
