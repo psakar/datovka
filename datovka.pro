@@ -288,6 +288,7 @@ SOURCES += src/cli/cli.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
+    src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
     src/views/attachment_table_widget.cpp \
     src/views/table_home_end_filter.cpp \
@@ -352,6 +353,7 @@ HEADERS += src/cli/cli.h \
     src/models/sort_filter_proxy_model.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
+    src/single/single_instance.h \
     src/views/attachment_table_view.h \
     src/views/attachment_table_widget.h \
     src/views/table_home_end_filter.h \
