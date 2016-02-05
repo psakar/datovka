@@ -23,12 +23,14 @@
 
 #include <cstring>
 #include <QByteArray>
+#include <QSystemSemaphore>
 #include <QTimer>
 
 #include "src/log/log.h"
 #include "src/single/single_instance.h"
 
-#define UNIQUE_KEY "CZ.NIC Datovka (e-gov client)"
+#define UNIQUE_SEM_ID "CZ.NIC_Datovka_(e-gov_client)_semaphore"
+#define UNIQUE_MEM_ID "CZ.NIC_Datovka_(e-gov_client)_shared_mem"
 #define MEM_SIZE 4096
 
 SingleInstanceEmitter globSingleInstanceEmitter;
@@ -38,7 +40,29 @@ SingleInstance::SingleInstance(QObject *parent)
     m_memoryExisted(false),
     m_shMem()
 {
-	m_shMem.setKey(UNIQUE_KEY);
+	/*
+	 * On UNIX the semaphore is not removed on crash.
+	 * For now lets assume that the code does not crash here.
+	 */
+	QSystemSemaphore sema(UNIQUE_SEM_ID, 1);
+	logInfo("Trying to acquire semaphore '%s'.\n", UNIQUE_SEM_ID);
+	sema.acquire();
+	logInfo("Semaphore '%s' acquired.\n", UNIQUE_SEM_ID);
+
+#if !defined(Q_OS_WIN)
+	/*
+	 * On UNIX systems the memory is not freed opon crash.
+	 * If there is any previous instance, clean it.
+	 */
+	{
+		QSharedMemory shMem(UNIQUE_MEM_ID);
+		if (shMem.attach()) {
+			shMem.detach();
+		}
+	}
+#endif /* !defined(Q_OS_WIN) */
+
+	m_shMem.setKey(UNIQUE_MEM_ID);
 
 	if (m_shMem.create(MEM_SIZE)) {
 		m_shMem.lock();
@@ -54,6 +78,9 @@ SingleInstance::SingleInstance(QObject *parent)
 	} else {
 		logErrorNL("%s", "Cannot access shared memory.");
 	}
+
+	sema.release();
+	logInfo("Semaphore '%s' released.\n", UNIQUE_SEM_ID);
 }
 
 bool SingleInstance::existsInSystem(void) const
