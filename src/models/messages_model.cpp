@@ -38,6 +38,7 @@ DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type,
     : QAbstractTableModel(parent),
     m_headerData(),
     m_data(),
+    m_rowsAllocated(0),
     m_rowCount(0),
     m_columnCount(0),
     m_type(type)
