@@ -9971,16 +9971,14 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	updateProgressBar(progressBarTitle, 20);
 
 	int years = yearList.count();
-	delta = 60.0 / years;
+	if (years > 0) {
+		delta = 60.0 / years;
+	}
 
 	for (int i = 0; i < years; ++i) {
 
-		if (years == 0) {
-			updateProgressBar(progressBarTitle, 50);
-		} else {
-			diff += delta;
-			updateProgressBar(progressBarTitle, (20 + diff));
-		}
+		diff += delta;
+		updateProgressBar(progressBarTitle, (20 + diff));
 
 		showStatusTextPermanently(tr("Creating a new "
 		    "database file for year %1").arg(yearList.at(i)));
