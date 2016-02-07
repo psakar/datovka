@@ -224,9 +224,9 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	QString err, longErr;
 	if ((map["dmType"].toString() == MT_RECEIVED) ||
 	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_RECEIVED,
-		    *msgDbSet, err, longErr, NULL, rt, rn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
+		ret = TaskDownloadMessageList::downloadMessageList(username,
+		    MSG_RECEIVED, *msgDbSet, false, err, longErr, NULL,
+		    rt, rn, newMsgIdList, dmLimitPtr, dmStatusFilter);
 
 		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX <<
@@ -242,9 +242,9 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 	if ((map["dmType"].toString() == MT_SENT) ||
 	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_SENT,
-		    *msgDbSet, err, longErr, NULL, st, sn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
+		ret = TaskDownloadMessageList::downloadMessageList(username,
+		    MSG_SENT, *msgDbSet, false, err, longErr, NULL,
+		    st, sn, newMsgIdList, dmLimitPtr, dmStatusFilter);
 
 		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
 			qDebug() << CLI_PREFIX <<

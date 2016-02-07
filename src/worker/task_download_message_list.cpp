@@ -26,7 +26,6 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
-#include "src/settings/preferences.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h" /* List with whole messages. */
@@ -34,13 +33,14 @@
 #include "src/worker/task_download_message_list.h"
 
 TaskDownloadMessageList::TaskDownloadMessageList(const QString &userName,
-    MessageDbSet *dbSet, enum MessageDirection msgDirect)
+    MessageDbSet *dbSet, enum MessageDirection msgDirect, bool downloadWhole)
     : m_result(DL_ERR),
     m_isdsError(),
     m_isdsLongError(),
     m_userName(userName),
     m_dbSet(dbSet),
-    m_msgDirect(msgDirect)
+    m_msgDirect(msgDirect),
+    m_downloadWhole(downloadWhole)
 {
 	Q_ASSERT(0 != m_dbSet);
 }
@@ -95,12 +95,12 @@ void TaskDownloadMessageList::run(void)
 
 	if (MSG_RECEIVED == m_msgDirect) {
 		m_result = downloadMessageList(m_userName, MSG_RECEIVED,
-		    *m_dbSet, m_isdsError, m_isdsLongError,
+		    *m_dbSet, m_downloadWhole, m_isdsError, m_isdsLongError,
 		    PL_DOWNLOAD_RECEIVED_LIST, rt, rn, newMsgIdList, &dmLimit,
 		    MESSAGESTATE_ANY);
 	} else {
 		m_result = downloadMessageList(m_userName, MSG_SENT,
-		    *m_dbSet, m_isdsError, m_isdsLongError,
+		    *m_dbSet, m_downloadWhole, m_isdsError, m_isdsLongError,
 		    PL_DOWNLOAD_SENT_LIST, st, sn, newMsgIdList, &dmLimit,
 		    MESSAGESTATE_ANY);
 	}
@@ -129,7 +129,7 @@ void TaskDownloadMessageList::run(void)
 
 enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageList(
     const QString &userName, enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, QString &error, QString &longError,
+    MessageDbSet &dbSet, bool downloadWhole, QString &error, QString &longError,
     const QString &progressLabel, int &total, int &news,
     QStringList &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
 {
@@ -260,7 +260,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		if (-1 == dmDbMsgStatus) {
 			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
 
-			if (globPref.auto_download_whole_messages) {
+			if (downloadWhole) {
 				QString errMsg;
 
 				TaskDownloadMessage *task;
@@ -290,8 +290,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 * Sent messages content will be downloaded
 				 * only if those message state is 1 or 2.
 				 */
-				if (globPref.auto_download_whole_messages &&
-				    (dmDbMsgStatus <= 2)) {
+				if (downloadWhole && (dmDbMsgStatus <= 2)) {
 					QString errMsg;
 
 					TaskDownloadMessage *task;
@@ -312,7 +311,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			}
 
 			/* Message is in db, but the content is missing. */
-			if (globPref.auto_download_whole_messages &&
+			if (downloadWhole &&
 			    !messageDb->msgsStoredWhole(dmId)) {
 				QString errMsg;
 

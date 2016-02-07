@@ -3034,12 +3034,14 @@ void MainWindow::synchroniseAllAccounts(void)
 			TaskDownloadMessageList *task;
 
 			task = new (std::nothrow) TaskDownloadMessageList(
-			    userName, dbSet, MSG_RECEIVED);
+			    userName, dbSet, MSG_RECEIVED,
+			    globPref.auto_download_whole_messages);
 			task->setAutoDelete(true);
 			globWorkPool.assignLo(task);
 
 			task = new (std::nothrow) TaskDownloadMessageList(
-			    userName, dbSet, MSG_SENT);
+			    userName, dbSet, MSG_SENT,
+			    globPref.auto_download_whole_messages);
 			task->setAutoDelete(true);
 			globWorkPool.assignLo(task);
 
@@ -3093,12 +3095,12 @@ void MainWindow::synchroniseSelectedAccount(void)
 	TaskDownloadMessageList *task;
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_RECEIVED);
+	    MSG_RECEIVED, globPref.auto_download_whole_messages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_SENT);
+	    MSG_SENT, globPref.auto_download_whole_messages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
