@@ -213,80 +213,52 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		dmLimitPtr = &dmLimit;
 	}
 
-	QString err, longErr;
-	if (map["dmType"].toString() == MT_RECEIVED) {
-
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_RECEIVED,
-		    *msgDbSet, err, longErr, NULL, rt, rn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
-
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "Received message list "
-			    "has been downloaded";
-			printDataToStdOut(newMsgIdList);
-			return CLI_SUCCESS;
-		} else {
-			errmsg = "Error while downloading received message "
-			    "list";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << ret << err << longErr;
-			return CLI_ERROR;
-		}
-
-	} else if (map["dmType"].toString() == MT_SENT) {
-
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_SENT,
-		    *msgDbSet, err, longErr, NULL, st, sn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
-
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "Sent message list has been "
-			    "downloaded";
-			printDataToStdOut(newMsgIdList);
-			return CLI_SUCCESS;
-		} else {
-			errmsg = "Error while downloading sent message list";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << ret << err << longErr;
-			return CLI_ERROR;
-		}
-
-	} else if (map["dmType"].toString() == MT_SENT_RECEIVED) {
-
-		cli_error lret = CLI_SUCCESS;
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_RECEIVED,
-		    *msgDbSet, err, longErr, NULL, rt, rn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "Received message list has "
-			    "been downloaded";
-		}  else {
-			errmsg = "Error while downloading received message "
-			    "list";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:" <<
-			    ret << err << longErr;
-			lret = CLI_ERROR;
-		}
-		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_SENT,
-		    *msgDbSet, err, longErr, NULL, st, sn, newMsgIdList,
-		    dmLimitPtr, dmStatusFilter);
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
-			qDebug() << CLI_PREFIX << "Sent message list has been "
-			    "downloaded";
-		}  else {
-			errmsg = "Error while downloading sent message list";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << ret << err << longErr;
-			lret = CLI_ERROR;
-		}
-		printDataToStdOut(newMsgIdList);
-		return lret;
-
-	} else {
+	if ((map["dmType"].toString() != MT_RECEIVED) &&
+	    (map["dmType"].toString() != MT_SENT) &&
+	    (map["dmType"].toString() != MT_SENT_RECEIVED)) {
 		errmsg = "Wrong dmType value: " + map["dmType"].toString();
 		qDebug() << CLI_PREFIX << errmsg;
 		return CLI_ATR_VAL_ERR;
 	}
+
+	QString err, longErr;
+	if ((map["dmType"].toString() == MT_RECEIVED) ||
+	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
+		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_RECEIVED,
+		    *msgDbSet, err, longErr, NULL, rt, rn, newMsgIdList,
+		    dmLimitPtr, dmStatusFilter);
+
+		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX <<
+			    "Received message list has been downloaded";
+		}  else {
+			errmsg =
+			    "Error while downloading received message list";
+			qDebug() << CLI_PREFIX << errmsg << "Error code:" <<
+			    ret << err << longErr;
+			return CLI_ERROR;
+		}
+	}
+
+	if ((map["dmType"].toString() == MT_SENT) ||
+	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
+		ret = TaskDownloadMessageList::downloadMessageList(username, MSG_SENT,
+		    *msgDbSet, err, longErr, NULL, st, sn, newMsgIdList,
+		    dmLimitPtr, dmStatusFilter);
+
+		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
+			qDebug() << CLI_PREFIX <<
+			    "Sent message list has been downloaded";
+		}  else {
+			errmsg = "Error while downloading sent message list";
+			qDebug() << CLI_PREFIX << errmsg << "Error code:"
+			    << ret << err << longErr;
+			return CLI_ERROR;
+		}
+	}
+
+	printDataToStdOut(newMsgIdList);
+	return CLI_SUCCESS;
 }
 
 
