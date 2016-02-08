@@ -33,14 +33,18 @@
 #include "src/worker/task_download_message_list.h"
 
 TaskDownloadMessageList::TaskDownloadMessageList(const QString &userName,
-    MessageDbSet *dbSet, enum MessageDirection msgDirect, bool downloadWhole)
+    MessageDbSet *dbSet, enum MessageDirection msgDirect, bool downloadWhole,
+    unsigned long dmLimit, int dmStatusFltr)
     : m_result(DL_ERR),
     m_isdsError(),
     m_isdsLongError(),
+    m_newMsgIdList(),
     m_userName(userName),
     m_dbSet(dbSet),
     m_msgDirect(msgDirect),
-    m_downloadWhole(downloadWhole)
+    m_downloadWhole(downloadWhole),
+    m_dmLimit(dmLimit),
+    m_dmStatusFilter(dmStatusFltr)
 {
 	Q_ASSERT(0 != m_dbSet);
 }
@@ -71,7 +75,6 @@ void TaskDownloadMessageList::run(void)
 	int rn = 0; /*!< Received new. */
 	int st = 0; /*!< Sent total. */
 	int sn = 0; /*!< Sent new. */
-	QStringList newMsgIdList;
 
 	/* dmStatusFilter
 	 *
@@ -91,18 +94,16 @@ void TaskDownloadMessageList::run(void)
 	    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
-	unsigned long dmLimit = MESSAGE_LIST_LIMIT;
-
 	if (MSG_RECEIVED == m_msgDirect) {
 		m_result = downloadMessageList(m_userName, MSG_RECEIVED,
 		    *m_dbSet, m_downloadWhole, m_isdsError, m_isdsLongError,
-		    PL_DOWNLOAD_RECEIVED_LIST, rt, rn, newMsgIdList, &dmLimit,
-		    MESSAGESTATE_ANY);
+		    PL_DOWNLOAD_RECEIVED_LIST, rt, rn, m_newMsgIdList, &m_dmLimit,
+		    m_dmStatusFilter);
 	} else {
 		m_result = downloadMessageList(m_userName, MSG_SENT,
 		    *m_dbSet, m_downloadWhole, m_isdsError, m_isdsLongError,
-		    PL_DOWNLOAD_SENT_LIST, st, sn, newMsgIdList, &dmLimit,
-		    MESSAGESTATE_ANY);
+		    PL_DOWNLOAD_SENT_LIST, st, sn, m_newMsgIdList, &m_dmLimit,
+		    m_dmStatusFilter);
 	}
 
 	if (DL_SUCCESS == m_result) {
@@ -131,7 +132,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
     const QString &userName, enum MessageDirection msgDirect,
     MessageDbSet &dbSet, bool downloadWhole, QString &error, QString &longError,
     const QString &progressLabel, int &total, int &news,
-    QStringList &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
+    QList<qint64> &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
 {
 	#define USE_TRANSACTIONS 1
 	debugFuncCall();
@@ -230,7 +231,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			return DL_ISDS_ERROR;
 		}
 
-		QString dmID = QString(item->envelope->dmID);
 		qint64 dmId = QString(item->envelope->dmID).toLongLong();
 		/*
 		 * Time may be invalid (e.g. messages which failed during
@@ -271,7 +271,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				task->setAutoDelete(true);
 				globWorkPool.assignLo(task, WorkerPool::PREPEND);
 			}
-			newMsgIdList.append(dmID);
+			newMsgIdList.append(dmId);
 			newcnt++;
 
 		/* Message is in db (dmDbMsgStatus <> -1). */
