@@ -236,6 +236,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 			fillDlgFromTmpMsg();
 		}
 	}
+
+	this->adjustSize();
 }
 
 

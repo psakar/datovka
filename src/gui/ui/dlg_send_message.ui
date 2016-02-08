@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
-    <height>853</height>
+    <width>578</width>
+    <height>804</height>
    </rect>
   </property>
   <property name="font">
@@ -273,10 +273,24 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="dmSenderRefNumber">
+        <property name="toolTip">
+         <string>Enter our reference number</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_7">
         <property name="text">
          <string>Our file mark:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="dmSenderIdent">
+        <property name="toolTip">
+         <string>Enter our file mark</string>
         </property>
        </widget>
       </item>
@@ -287,6 +301,13 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="dmRecipientRefNumber">
+        <property name="toolTip">
+         <string>Enter your reference number</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_9">
         <property name="text">
@@ -294,20 +315,10 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="label_10">
-        <property name="text">
-         <string>Personal delivery:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QCheckBox" name="dmPersonalDelivery">
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="dmRecipientIdent">
         <property name="toolTip">
-         <string>Enable personal delivery</string>
-        </property>
-        <property name="text">
-         <string/>
+         <string>Enter our file mark</string>
         </property>
        </widget>
       </item>
@@ -319,39 +330,32 @@
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="QLineEdit" name="dmToHands">
-        <property name="toolTip">
-         <string>Enter name of person</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLineEdit" name="dmSenderIdent">
-        <property name="toolTip">
-         <string>Enter our file mark</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="dmRecipientIdent">
-        <property name="toolTip">
-         <string>Enter our file mark</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="dmSenderRefNumber">
-        <property name="toolTip">
-         <string>Enter our reference number</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="dmRecipientRefNumber">
-        <property name="toolTip">
-         <string>Enter your reference number</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLineEdit" name="dmToHands">
+          <property name="toolTip">
+           <string>Enter name of person</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Personal delivery:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="dmPersonalDelivery">
+          <property name="toolTip">
+           <string>Enable personal delivery</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -740,25 +744,6 @@ of postal data messages active.</string>
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="attachmentSizeInfo">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="font">
-      <font>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Attachment size is larger than 20 MB. Message cannot be sent!</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="AttachmentTableWidget" name="attachmentTableWidget">
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
@@ -840,6 +825,25 @@ of postal data messages active.</string>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
+      <widget class="QLabel" name="attachmentSizeInfo">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Attachment size is larger than 20 MB. Message cannot be sent!</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -900,8 +904,6 @@ of postal data messages active.</string>
   <tabstop>dmSenderIdent</tabstop>
   <tabstop>dmRecipientRefNumber</tabstop>
   <tabstop>dmRecipientIdent</tabstop>
-  <tabstop>dmPersonalDelivery</tabstop>
-  <tabstop>dmToHands</tabstop>
   <tabstop>dmLegalTitleLaw</tabstop>
   <tabstop>dmLegalTitleYear</tabstop>
   <tabstop>dmLegalTitleSect</tabstop>
