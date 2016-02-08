@@ -237,7 +237,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		TaskDownloadMessageList *task;
 
 		task = new (std::nothrow) TaskDownloadMessageList(
-		    username, msgDbSet, MSG_RECEIVED, false, dmLimit,
+		    username, msgDbSet, MSG_RECEIVED, complete, dmLimit,
 		    dmStatusFilter);
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
@@ -272,7 +272,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		TaskDownloadMessageList *task;
 
 		task = new (std::nothrow) TaskDownloadMessageList(
-		    username, msgDbSet, MSG_SENT, false, dmLimit,
+		    username, msgDbSet, MSG_SENT, complete, dmLimit,
 		    dmStatusFilter);
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
