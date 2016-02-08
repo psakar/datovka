@@ -30,6 +30,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/worker/pool.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_search_owner.h"
@@ -57,6 +58,7 @@ const QStringList findDataboxAttrs = QStringList() << "dbType" << "dbID"
 
 
 /* ========================================================================= */
+static
 void printDataToStdOut(const QStringList &data)
 /* ========================================================================= */
 {
@@ -71,6 +73,19 @@ void printDataToStdOut(const QStringList &data)
 	}
 }
 
+static
+void printDataToStdOut(const QList<qint64> &data)
+{
+	QTextStream cout(stdout);
+
+	for (int i = 0; i < data.count(); ++i) {
+		if (i == (data.count() - 1)) {
+			cout << data.at(i) << endl << endl;
+		} else {
+			cout << data.at(i) + " ";
+		}
+	}
+}
 
 /* ========================================================================= */
 void printErrToStdErr(const cli_error err, const QString errmsg)
@@ -153,13 +168,9 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	    << username;
 
 	/* messages counters */
-	int st, sn, rt, rn;
-	st = sn = rt = rn = 0;
-	enum TaskDownloadMessageList::Result ret;
-	QStringList newMsgIdList;
+	QList<qint64> newMsgIdList;
 	bool complete = false;
 	unsigned long dmLimit = 0;
-	unsigned long *dmLimitPtr = NULL;
 	uint dmStatusFilter = MESSAGESTATE_ANY;
 	bool ok;
 
@@ -205,12 +216,11 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			qDebug() << CLI_PREFIX << errmsg;
 			return CLI_ATR_VAL_ERR;
 		}
-		dmLimitPtr = &dmLimit;
 	}
 
-	if (NULL == dmLimitPtr) {
+	if (0 == dmLimit) {
+		/* Increase limit. */
 		dmLimit = MESSAGE_LIST_LIMIT;
-		dmLimitPtr = &dmLimit;
 	}
 
 	if ((map["dmType"].toString() != MT_RECEIVED) &&
@@ -224,38 +234,75 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	QString err, longErr;
 	if ((map["dmType"].toString() == MT_RECEIVED) ||
 	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
-		ret = TaskDownloadMessageList::downloadMessageList(username,
-		    MSG_RECEIVED, *msgDbSet, false, err, longErr, NULL,
-		    rt, rn, newMsgIdList, dmLimitPtr, dmStatusFilter);
+		TaskDownloadMessageList *task;
 
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
+		task = new (std::nothrow) TaskDownloadMessageList(
+		    username, msgDbSet, MSG_RECEIVED, false, dmLimit,
+		    dmStatusFilter);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		bool success =
+		   TaskDownloadMessageList::DL_SUCCESS == task->m_result;
+
+		if (success) {
+			newMsgIdList += task->m_newMsgIdList;
 			qDebug() << CLI_PREFIX <<
 			    "Received message list has been downloaded";
-		}  else {
+		} else {
 			errmsg =
 			    "Error while downloading received message list";
 			qDebug() << CLI_PREFIX << errmsg << "Error code:" <<
-			    ret << err << longErr;
+			    task->m_result << task->m_isdsError <<
+			    task->m_isdsLongError;
+		}
+
+		delete task;
+
+		if (!success) {
+			/* Stop pending jobs. */
+			globWorkPool.stop();
+			globWorkPool.clear();
 			return CLI_ERROR;
 		}
 	}
 
 	if ((map["dmType"].toString() == MT_SENT) ||
 	    (map["dmType"].toString() == MT_SENT_RECEIVED)) {
-		ret = TaskDownloadMessageList::downloadMessageList(username,
-		    MSG_SENT, *msgDbSet, false, err, longErr, NULL,
-		    st, sn, newMsgIdList, dmLimitPtr, dmStatusFilter);
+		TaskDownloadMessageList *task;
 
-		if (TaskDownloadMessageList::DL_SUCCESS == ret) {
+		task = new (std::nothrow) TaskDownloadMessageList(
+		    username, msgDbSet, MSG_SENT, false, dmLimit,
+		    dmStatusFilter);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		bool success =
+		   TaskDownloadMessageList::DL_SUCCESS == task->m_result;
+
+		if (success) {
+			newMsgIdList += task->m_newMsgIdList;
 			qDebug() << CLI_PREFIX <<
 			    "Sent message list has been downloaded";
-		}  else {
+		} else {
 			errmsg = "Error while downloading sent message list";
-			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << ret << err << longErr;
+			qDebug() << CLI_PREFIX << errmsg << "Error code:" <<
+			    task->m_result << task->m_isdsError <<
+			    task->m_isdsLongError;
+		}
+
+		delete task;
+
+		if (!success) {
+			/* Stop pending jobs. */
+			globWorkPool.stop();
+			globWorkPool.clear();
 			return CLI_ERROR;
 		}
 	}
+
+	/* Wait for possible pending jobs. */
+	globWorkPool.wait();
 
 	printDataToStdOut(newMsgIdList);
 	return CLI_SUCCESS;
