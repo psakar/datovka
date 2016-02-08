@@ -45,6 +45,7 @@
 #include "src/models/accounts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
+#include "src/single/single_instance.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
 
@@ -121,6 +122,11 @@ protected:
 
 
 private slots:
+
+	/*!
+	 * @brief Processes messages from single instance emitter.
+	 */
+	void processSingleInstanceMessages(const QString &message);
 
 	/*!
 	 * @brief Workers finished.
