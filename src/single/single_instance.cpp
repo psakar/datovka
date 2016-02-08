@@ -35,34 +35,42 @@
 
 SingleInstanceEmitter globSingleInstanceEmitter;
 
-SingleInstance::SingleInstance(QObject *parent)
+const QString SingleInstance::msgRaiseMainWindow("RaiseMainWindow");
+
+SingleInstance::SingleInstance(const QString &shMemKey, QObject *parent)
     : QObject(parent),
     m_memoryExisted(false),
     m_shMem()
 {
 	/*
 	 * On UNIX the semaphore is not removed on crash.
-	 * For now lets assume that the code does not crash here.
+	 * For now let's assume that the code does not crash here.
 	 */
 	QSystemSemaphore sema(UNIQUE_SEM_ID, 1);
 	logInfo("Trying to acquire semaphore '%s'.\n", UNIQUE_SEM_ID);
 	sema.acquire();
 	logInfo("Semaphore '%s' acquired.\n", UNIQUE_SEM_ID);
 
+	QString memKey(UNIQUE_MEM_ID);
+	if (!shMemKey.isEmpty()) {
+		memKey += "[" + shMemKey + "]";
+	}
+	logInfo("Shared memory key is '%s'.\n", memKey.toUtf8().constData());
+
 #if !defined(Q_OS_WIN)
 	/*
-	 * On UNIX systems the memory is not freed opon crash.
+	 * On UNIX systems the memory is not freed upon crash.
 	 * If there is any previous instance, clean it.
 	 */
 	{
-		QSharedMemory shMem(UNIQUE_MEM_ID);
+		QSharedMemory shMem(memKey);
 		if (shMem.attach()) {
 			shMem.detach();
 		}
 	}
 #endif /* !defined(Q_OS_WIN) */
 
-	m_shMem.setKey(UNIQUE_MEM_ID);
+	m_shMem.setKey(memKey);
 
 	if (m_shMem.create(MEM_SIZE)) {
 		m_shMem.lock();
@@ -73,10 +81,18 @@ SingleInstance::SingleInstance(QObject *parent)
 		QTimer *timer = new QTimer(this);
 		connect(timer, SIGNAL(timeout()), this, SLOT(checkMessage()));
 		timer->start(200);
+
+		logInfo("Application owns shared memory under key '%s'.\n",
+		    memKey.toUtf8().constData());
 	} else if (m_shMem.attach()) {
 		m_memoryExisted = true;
+
+		logInfo(
+		    "Another application owns shared memory under key '%s'.\n",
+		    memKey.toUtf8().constData());
 	} else {
-		logErrorNL("%s", "Cannot access shared memory.");
+		logErrorNL("Cannot access shared memory under key '%s'.\n",
+		    memKey.toUtf8().constData());
 	}
 
 	sema.release();

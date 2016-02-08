@@ -44,6 +44,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
 #include "src/settings/proxy.h"
+#include "src/single/single_instance.h"
 #include "src/worker/pool.h"
 
 #define CONF_SUBDIR_OPT "conf-subdir"
@@ -436,6 +437,20 @@ int main(int argc, char *argv[])
 	}
 
 	QStringList cmdLineFileNames = parser.positionalArguments();
+
+	/* Ensure only one instance with given configuration file. */
+	SingleInstance singleInstance(globPref.loadConfPath());
+	if (singleInstance.existsInSystem()) {
+		logErrorNL("%s",
+		    "Another application already uses same configuration.");
+		logInfo("%s\n", "Notifying key owner and exiting");
+		if (!singleInstance.sendMessage(
+		        SingleInstance::msgRaiseMainWindow)) {
+			logErrorNL("%s",
+			    "Could not send message to owner.");
+		}
+		return EXIT_FAILURE;
+	}
 
 	qint64 start, stop, diff;
 	start = QDateTime::currentMSecsSinceEpoch();

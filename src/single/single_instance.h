@@ -37,8 +37,12 @@ class SingleInstance : public QObject {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] shMemKey Shared memory key (usually configuration path).
+	 * @param[in] parent   Pointer to parent object.
 	 */
-	SingleInstance(QObject *parent = 0);
+	SingleInstance(const QString &shMemKey = QString(),
+	    QObject *parent = 0);
 
 	/*!
 	 * @brief Performs a system-wide check whether there is another
@@ -68,6 +72,12 @@ public:
 	 * @brief Sends a message to the first instance.
 	 */
 	bool sendMessage(const QString &message);
+
+	static
+	const QString msgRaiseMainWindow; /*!<
+	                                   * Notification that the main window
+	                                   * ought to be raised.
+	                                   */
 
 private slots:
 	/*!

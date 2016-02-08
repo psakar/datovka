@@ -134,6 +134,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setUpUi();
 
+	/* Single instance emitter. */
+	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
+	    this, SLOT(processSingleInstanceMessages(QString)));
+
 	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
@@ -2030,6 +2034,18 @@ void MainWindow::openSelectedAttachment(void)
 	}
 }
 
+void MainWindow::processSingleInstanceMessages(const QString &message)
+{
+	debugSlotCall();
+
+	logDebugLv0NL("Received message '%s'.", message.toUtf8().constData());
+
+	if (SingleInstance::msgRaiseMainWindow == message) {
+		this->show();
+		this->raise();
+		this->activateWindow();
+	}
+}
 
 /* ========================================================================= */
 /*
