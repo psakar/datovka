@@ -47,12 +47,17 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in]     userName  Account identifier (user login name).
-	 * @param[in,out] dbSet     Non-null pointer to database container.
-	 * @param[in]     msgDirect Received or sent list.
+	 * @param[in]     userName      Account identifier (user login name).
+	 * @param[in,out] dbSet         Non-null pointer to database container.
+	 * @param[in]     msgDirect     Received or sent list.
+	 * @param[in]     downloadWhole True to plan downloading whole messages.
+	 * @param[in]     dmLimit       Message list length limit.
+	 * @param[in]     dmStatusFltr  Type of messages to be downloaded.
 	 */
 	explicit TaskDownloadMessageList(const QString &userName,
-	    MessageDbSet *dbSet, enum MessageDirection msgDirect);
+	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
+	    bool downloadWhole, unsigned long dmLimit = MESSAGE_LIST_LIMIT,
+	    int dmStatusFltr = MESSAGESTATE_ANY);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -68,6 +73,8 @@ public:
 	 * @param[in]     userName       Account identifier (user login name).
 	 * @param[in]     msgDirect      Received or sent message.
 	 * @param[in,out] dbSet          Database container.
+	 * @param[in]     downloadWhole  True to plan downloading whole
+	 *                               messages.
 	 * @param[out]    error          Error description.
 	 * @param[out]    longError      Long error description.
 	 * @param[in]     progressLabel  Progress-bar label.
@@ -82,13 +89,17 @@ public:
 	static
 	enum Result downloadMessageList(const QString &userName,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
-	    QString &error, QString &longError, const QString &progressLabel,
-	    int &total, int &news, QStringList &newMsgIdList, ulong *dmLimit,
-	    int dmStatusFilter);
+	    bool downloadWhole, QString &error, QString &longError,
+	    const QString &progressLabel, int &total, int &news,
+	    QList<qint64> &newMsgIdList, ulong *dmLimit, int dmStatusFilter);
 
 	enum Result m_result; /*!< Return state. */
 	QString m_isdsError; /*!< Error description. */
 	QString m_isdsLongError; /*!< Long error description. */
+	QList<qint64> m_newMsgIdList; /*!<
+	                               * List of ids that have not been
+	                               * in database.
+	                               */
 
 private:
 	/*!
@@ -130,6 +141,9 @@ private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received list. */
+	const bool m_downloadWhole; /*!< Plan downloading whole messages. */
+	unsigned long m_dmLimit; /*!< List length limit. */
+	int m_dmStatusFilter; /*!< Defines type of messages to be downloaded. */
 };
 
 #endif /* _TASK_DOWNLOAD_MESSAGE_LIST_H_ */
