@@ -1,3 +1,21 @@
+4.4.99 test release
+ * A lot of changes under the hood.
+ * Actions in main window have been reduced. Duplicated actions have been
+   removed.
+ * E-mails with message attachments can be composed directly inside the
+   application.
+ * Fixed issues when displaying large amounts of messages. A custom data model
+   has been implemented.
+ * Send message dialogue allows to select the account which the message
+   should be sent from.
+ * Worker code has been redesigned on order to gain better control of pending
+   and processing tasks.
+ * Fixed issues with status bar.
+ * Fixed bugs when displaying attachment size when composing message.
+ * Drag actions on attachments.
+ * Drop actions on attachments when composing message.
+ * Required Qt version if 5.3. Qt 5.2 crashes on drop actions.
+
 4.4.3 / 2016-01-04
  * Fixed bug when changing expired password and the new password was not
    saved.
