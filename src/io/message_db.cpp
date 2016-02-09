@@ -41,7 +41,6 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QSqlQueryModel>
 #include <QSqlRecord>
 #include <QString>
 #include <QTimeZone>
