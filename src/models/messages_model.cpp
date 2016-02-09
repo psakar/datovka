@@ -23,44 +23,16 @@
 
 #include <QFont>
 #include <QIcon>
-#include <QSqlRecord>
 
 #include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
-#include "src/log/log.h"
 #include "src/models/messages_model.h"
 
-const int DbMsgsTblModel::m_rowAllocationIncrement(128);
-
-DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type,
-    QObject *parent)
-    : QAbstractTableModel(parent),
-    m_headerData(),
-    m_data(),
-    m_rowsAllocated(0),
-    m_rowCount(0),
-    m_columnCount(0),
+DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
+    : TblModel(parent),
     m_type(type)
 {
-}
-
-int DbMsgsTblModel::rowCount(const QModelIndex &parent) const
-{
-	if (parent.isValid()) {
-		return 0;
-	} else {
-		return m_rowCount;
-	}
-}
-
-int DbMsgsTblModel::columnCount(const QModelIndex &parent) const
-{
-	if (parent.isValid()) {
-		return 0;
-	} else {
-		return m_columnCount;
-	}
 }
 
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
@@ -265,18 +237,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	}
 }
 
-bool DbMsgsTblModel::setHeaderData(int section, Qt::Orientation orientation,
-    const QVariant &value, int role)
-{
-	/* Orientation is ignored. */
-
-	m_headerData[section][role] = value;
-
-	emit headerDataChanged(orientation, section, section);
-
-	return true;
-}
-
 QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
@@ -369,52 +329,6 @@ bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 		return true;
 		break;
 	}
-}
-
-void DbMsgsTblModel::setQuery(QSqlQuery &query)
-{
-	beginResetModel();
-
-	m_data.clear();
-	m_rowsAllocated = 0;
-	m_rowCount = 0;
-
-	/* Looks like empty results have column count set. */
-	m_columnCount = query.record().count();
-
-	appendQueryData(query);
-}
-
-bool DbMsgsTblModel::appendQueryData(QSqlQuery &query)
-{
-	if (query.record().count() != m_columnCount) {
-		return false;
-	}
-
-	beginResetModel();
-
-	query.first();
-	while (query.isActive() && query.isValid()) {
-
-		if (m_rowCount == m_rowsAllocated) {
-			m_rowsAllocated += m_rowAllocationIncrement;
-			m_data.resize(m_rowsAllocated);
-		}
-
-		QVector<QVariant> row(m_columnCount);
-
-		for (int i = 0; i < m_columnCount; ++i) {
-			row[i] = query.value(i);
-		}
-
-		m_data[m_rowCount++] = row;
-
-		query.next();
-	}
-
-	endResetModel();
-
-	return true;
 }
 
 const QVector<QString> &DbMsgsTblModel::rcvdItemIds(void)
@@ -594,39 +508,4 @@ DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
 	static DbMsgsTblModel dummy(DUMMY_RECEIVED);
 	dummy.setType(type);
 	return dummy;
-}
-
-QVariant DbMsgsTblModel::_data(const QModelIndex &index, int role) const
-{
-	if (role != Qt::DisplayRole) {
-		return QVariant();
-	}
-
-	if ((index.row() < m_rowCount) && (index.column() < m_columnCount)) {
-		return m_data.at(index.row()).at(index.column());
-	} else {
-		return QVariant();
-	}
-}
-
-QVariant DbMsgsTblModel::_data(int row, int col, int role) const
-{
-	if (role != Qt::DisplayRole) {
-		return QVariant();
-	}
-
-	if ((row < m_rowCount) && (col < m_columnCount)) {
-		return m_data.at(row).at(col);
-	} else {
-		return QVariant();
-	}
-}
-
-QVariant DbMsgsTblModel::_headerData(int section,
-    Qt::Orientation orientation, int role) const
-{
-	/* Unused. */
-	(void) orientation;
-
-	return m_headerData[section][role];
 }

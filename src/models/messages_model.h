@@ -24,13 +24,12 @@
 #ifndef _MESSAGES_MODEL_H_
 #define _MESSAGES_MODEL_H_
 
-#include <QAbstractTableModel>
-#include <QMap>
-#include <QSqlQuery>
+#include <QString>
 #include <QVariant>
 #include <QVector>
 
 #include "src/common.h" /* enum MessageProcessState */
+#include "src/models/table_model.h"
 
 /*!
  * @brief Custom message model class.
@@ -39,7 +38,7 @@
  *
  * @note setItemDelegate and a custom ItemDelegate would also be the solution.
  */
-class DbMsgsTblModel : public QAbstractTableModel {
+class DbMsgsTblModel : public TblModel {
     Q_OBJECT
 
 public:
@@ -70,28 +69,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in]     type   Type of the table model.
-	 * @param[parent] parent Parent object.
+	 * @param[in] type   Type of the table model.
+	 * @param[in] parent Parent object.
 	 */
 	DbMsgsTblModel(enum Type type = WORKING, QObject *parent = 0);
-
-	/*!
-	 * @brief Returns number of rows under given parent.
-	 *
-	 * @param[in] parent Parent index.
-	 * @return Number of rows.
-	 */
-	virtual
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
-
-	/*!
-	 * @brief Returns number of columns (for the children of given parent).
-	 *
-	 * @param[in] parent Parent index.
-	 * @return Number of columns.
-	 */
-	virtual
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -103,19 +84,6 @@ public:
 	virtual
 	QVariant data(const QModelIndex &index,
 	    int role = Qt::DisplayRole) const;
-
-	/*!
-	 * @brief Sets header data for the given role and section.
-	 *
-	 * @param[in] section     Position.
-	 * @param[in] orientation Orientation of the header.
-	 * @param[in] value       Value to be set.
-	 * @param[in] role        Role of the data.
-	 * @return True when data have been set successfully.
-	 */
-	virtual
-	bool setHeaderData(int section, Qt::Orientation orientation,
-	    const QVariant &value, int role = Qt::EditRole);
 
 	/*!
 	 * @brief Obtains header data.
@@ -138,23 +106,6 @@ public:
 	 * @return True if everything has been set successfully.
 	 */
 	bool setType(enum Type type);
-
-	/*!
-	 * @brief Sets the content of the model according to the supplied query.
-	 *
-	 * @param[in,out] qyery SQL query result.
-	 */
-	void setQuery(QSqlQuery &query);
-
-	/*!
-	 * @brief Appends data from the supplied query to the model.
-	 *
-	 * @param[in,out] query   SQL query result.
-	 * @param[in]     columns Number of columns the model and query must
-	 *                        match.
-	 * @return True on success.
-	 */
-	bool appendQueryData(QSqlQuery &query);
 
 	/*!
 	 * @brief Singleton method returning received column identifiers.
@@ -233,60 +184,6 @@ public:
 	DbMsgsTblModel &dummyModel(enum Type type);
 
 private:
-	/*!
-	 * @brief Returns raw data stored under the given role.
-	 *
-	 * @param[in] index Position.
-	 * @param[in] role  Role if the position (accepts only display role).
-	 * @return Data or invalid QVariant if no matching data found.
-	 */
-	QVariant _data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const;
-
-	/*!
-	 * @brief Returns raw data stored under the given role.
-	 *
-	 * @param[in] row   Position.
-	 * @param[in] col   Position.
-	 * @param[in] role  Role if the position (accepts only display role).
-	 * @return Data or invalid QVariant if no matching data found.
-	 */
-	QVariant _data(int row, int col, int role = Qt::DisplayRole) const;
-
-	/*!
-	 * @brief Returns raw header data as they have been stored.
-	 *
-	 * @param[in] section     Position.
-	 * @param[in] orientation Orientation of the header (is ignored).
-	 * @param[in] role        Role of the data.
-	 * @return Data or invalid QVariant in no matching data found.
-	 */
-	inline
-	QVariant _headerData(int section, Qt::Orientation orientation,
-	    int role = Qt::DisplayRole) const;
-
-	/*
-	 * Maps are organised in this order from outside:
-	 * key[section] -> key[role] -> value[data]
-	 * Orientation is ignored.
-	 */
-	QMap< int, QMap<int, QVariant> > m_headerData; /*!< Header data. */
-
-	/*
-	 * Data are organised using a two-dimensional array.
-	 * The size of the array is incremented using several lines at once.
-	 */
-	QVector< QVector<QVariant> > m_data; /*!< Model data. */
-	int m_rowsAllocated; /*!< Number of rows allocated. */
-	static
-	const int m_rowAllocationIncrement; /*!<
-	                                     * Number of lines to be added
-	                                     * in a single resize attempt.
-	                                     */
-
-	int m_rowCount; /*!< Number of used rows.*/
-	int m_columnCount; /*!< Number of columns. */
-
 	Type m_type; /*!< Whether this is a model dummy or contains data. */
 };
 

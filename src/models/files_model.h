@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 #ifndef _FILES_MODEL_H_
 #define _FILES_MODEL_H_
 
-#include <QModelIndex>
 #include <QObject>
-#include <QSqlQueryModel>
 #include <QVariant>
+
+#include "src/models/table_model.h"
 
 /*
  * TODO -- AttachmentModel and DbFlsTblModel provide same abstraction over
@@ -40,18 +40,40 @@
  * @brief Custom file model class.
  *
  * Used for data conversion on display. (Use QIdentityProxyModel?)
+ * It is also used for attachment content caching.
  */
-class DbFlsTblModel : public QSqlQueryModel {
-	Q_OBJECT
+class DbFlsTblModel : public TblModel {
+    Q_OBJECT
+
 public:
 	/*!
-	 * @brief Compute viewed data in file size column.
-	 *
-	 * @param[in] index Item index.
-	 * @param[in] role  Display role.
-	 * @return Data modified according to the given role.
+	 * @brief Identifies the column index.
 	 */
-	virtual QVariant data(const QModelIndex &index, int role) const;
+	enum ColumnNumbers {
+		ATT_ID_COL = 0, /* Attachment identifier. */
+		DMID_COL = 1, /* Message identifier. */
+		ATT_CONT_COL = 2, /* Encoded attachment content. */
+		ATT_FDESC_COL = 3, /* Attachment file name. */
+		ATT_FSIZE_COL = 4 /* Attachment file size. */
+	};
+
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent object.
+	 */
+	DbFlsTblModel(QObject *parent = 0);
+
+	/*!
+	 * @brief Returns the data stored under the given role.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role  Role if the position.
+	 * @return Data or invalid QVariant if no matching data found.
+	 */
+	virtual
+	QVariant data(const QModelIndex &index,
+	    int role = Qt::DisplayRole) const;
 
 	/*!
 	 * @brief Used to set items draggable.

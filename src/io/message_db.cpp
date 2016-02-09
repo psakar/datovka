@@ -1896,7 +1896,8 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	for (i = 0; i < fileItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
-		    flsTbl.attrProps.value(fileItemIds[i]).desc);
+		    flsTbl.attrProps.value(fileItemIds[i]).desc,
+		    Qt::DisplayRole);
 		/* Data type. */
 		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
 		    flsTbl.attrProps.value(fileItemIds[i]).type,
@@ -1905,7 +1906,7 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 
 	/* Rename last column to file size. */
 	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal,
-	    QObject::tr("File Size"));
+	    QObject::tr("File Size"), Qt::DisplayRole);
 
 	return &m_sqlFilesModel;
 

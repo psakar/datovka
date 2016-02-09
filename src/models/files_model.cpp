@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +24,26 @@
 #include "files_model.h"
 #include "src/common.h"
 
+DbFlsTblModel::DbFlsTblModel(QObject *parent)
+    : TblModel(parent)
+{
+}
+
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
-	if ((Qt::DisplayRole == role) && (4 == index.column())) {
+	if ((Qt::DisplayRole == role) && (ATT_FSIZE_COL == index.column())) {
 		/* Compute attachment size from base64 length. */
-		QByteArray b64 = QSqlQueryModel::data(index.sibling(
-		    index.row(), 2), role).toByteArray();
+		QByteArray b64 = _data(index.sibling(index.row(), ATT_CONT_COL),
+		    role).toByteArray();
 		return base64RealSize(b64);
 	} else {
-		return QSqlQueryModel::data(index, role);
+		return _data(index, role);
 	}
 }
 
 Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 {
-	Qt::ItemFlags defaultFlags = QSqlQueryModel::flags(index);
+	Qt::ItemFlags defaultFlags = TblModel::flags(index);
 
 	if (index.isValid()) {
 		defaultFlags |= Qt::ItemIsDragEnabled;
