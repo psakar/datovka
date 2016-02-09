@@ -1,5 +1,9 @@
 4.4.99 test release
  * A lot of changes under the hood.
+ * Only a single instance of the application with given configuration is
+   allowed.
+ * Added the possibility to download complete messages when downloading
+   message lists via the command-line interface.
  * Actions in main window have been reduced. Duplicated actions have been
    removed.
  * E-mails with message attachments can be composed directly inside the
