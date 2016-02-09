@@ -28,7 +28,7 @@ win32 {
 
 # Required Qt versions
 REQUIRED_MAJOR = 5
-REQUIRED_MINOR = 2
+REQUIRED_MINOR = 3
 # Qt 5.2.1 contains a bug causing the application to crash on some drop events.
 # Version 5.3.2 should be fine.
 ADVISED_MINOR = 3
