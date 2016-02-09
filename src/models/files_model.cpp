@@ -21,8 +21,8 @@
  * the two.
  */
 
-#include "files_model.h"
 #include "src/common.h"
+#include "src/models/files_model.h"
 
 DbFlsTblModel::DbFlsTblModel(QObject *parent)
     : TblModel(parent)
@@ -31,9 +31,9 @@ DbFlsTblModel::DbFlsTblModel(QObject *parent)
 
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
-	if ((Qt::DisplayRole == role) && (ATT_FSIZE_COL == index.column())) {
+	if ((Qt::DisplayRole == role) && (FSIZE_COL == index.column())) {
 		/* Compute attachment size from base64 length. */
-		QByteArray b64 = _data(index.sibling(index.row(), ATT_CONT_COL),
+		QByteArray b64 = _data(index.sibling(index.row(), CONTENT_COL),
 		    role).toByteArray();
 		return base64RealSize(b64);
 	} else {

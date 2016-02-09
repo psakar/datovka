@@ -451,8 +451,8 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 		    dmId) {
 			m_data[row][READLOC_COL] = QVariant(forceRead);
 
-			emit dataChanged(QAbstractTableModel::index(row, 0),
-			    QAbstractTableModel::index(row, columnCount() - 1));
+			emit dataChanged(TblModel::index(row, 0),
+			    TblModel::index(row, columnCount() - 1));
 			return true;
 		}
 	}
@@ -472,8 +472,8 @@ bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 		    dmId) {
 			m_data[row][ATTDOWN_COL] = QVariant(forceDownloaded);
 
-			emit dataChanged(QAbstractTableModel::index(row, 0),
-			    QAbstractTableModel::index(row, columnCount() - 1));
+			emit dataChanged(TblModel::index(row, 0),
+			    TblModel::index(row, columnCount() - 1));
 			return true;
 		}
 	}
@@ -494,8 +494,8 @@ bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
 		    dmId) {
 			m_data[row][PROCSNG_COL] = QVariant(forceState);
 
-			emit dataChanged(QAbstractTableModel::index(row, 0),
-			    QAbstractTableModel::index(row, columnCount() - 1));
+			emit dataChanged(TblModel::index(row, 0),
+			    TblModel::index(row, columnCount() - 1));
 			return true;
 		}
 	}

@@ -50,11 +50,12 @@ public:
 	 * @brief Identifies the column index.
 	 */
 	enum ColumnNumbers {
-		ATT_ID_COL = 0, /* Attachment identifier. */
-		DMID_COL = 1, /* Message identifier. */
-		ATT_CONT_COL = 2, /* Encoded attachment content. */
-		ATT_FDESC_COL = 3, /* Attachment file name. */
-		ATT_FSIZE_COL = 4 /* Attachment file size. */
+		ATTACHID_COL = 0, /* Attachment identifier. */
+		MSGID_COL = 1, /* Message identifier. */
+		CONTENT_COL = 2, /* Encoded attachment content. */
+		FNAME_COL = 3, /* Attachment file name. */
+		FSIZE_COL = 4, /* Attachment file size. */
+		MAX_COL = 5 /* Number of columns. */
 	};
 
 	/*!
