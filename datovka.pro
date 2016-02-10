@@ -12,8 +12,8 @@ APP_NAME = datovka
 # VERSION must contain only three dot-separated numbers because of OS X deployment.
 VERSION = 4.4.99
 
-# Generate localisation.
-system(lrelease datovka.pro)
+# Generate localisation. Must be run manually.
+#system(lrelease datovka.pro)
 
 # Copy Qt localisation on architectures.
 macx {

@@ -1,5 +1,6 @@
 4.4.99 test release
  * A lot of changes under the hood.
+ * The qmake command does not automatically call lrelease.
  * Only a single instance of the application with given configuration is
    allowed.
  * Added the possibility to download complete messages when downloading
