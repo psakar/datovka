@@ -15,6 +15,10 @@
    should be sent from.
  * Worker code has been redesigned on order to gain better control of pending
    and processing tasks.
+ * Fixed bug on accounts with split databases. Message in recently sent and
+   received messages were not displayed because of a bug in attaching second
+   database file. The problem was solved by using a non-QSqlQueryModel-based
+   model.
  * Fixed issues with status bar.
  * Fixed bugs when displaying attachment size when composing message.
  * Drag actions on attachments.
