@@ -15,7 +15,7 @@ APP_BINARY_NAME="/../../datovka"
 
 echo ""
 echo "***********************************************************************"
-echo "FIND DATABOX TEST: Find databoxes by ic, firmname, ..."
+echo "FIND DATABOX TEST: Find databoxes by ic, firmname, ... ($USERNAME_FIND_DATABOX1)"
 echo "***********************************************************************"
 # this request must finish with success
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
@@ -28,6 +28,7 @@ if [ 0 != $? ]; then
 else
 	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
 fi
+echo ""
 
 # this request must finish with success
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
@@ -40,6 +41,7 @@ if [ 0 != $? ]; then
 else
 	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
 fi
+echo ""
 
 # this request must finish with success
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
@@ -52,6 +54,7 @@ if [ 0 != $? ]; then
 else
 	echo "FindDatabox: $USERNAME_FIND_DATABOX2 - OK"
 fi
+echo ""
 
 # this request must finish with error
 "${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \

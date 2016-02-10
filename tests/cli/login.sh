@@ -56,7 +56,7 @@ echo "***********************************************************************"
 	2>/dev/null
 if [ 0 != $? ]; then
 	echo "Login: '$USERNAME_CERT' - ERROR: username not exists or required data missing!"
-#	exit
+	exit
 else
 	echo "Login: $USERNAME_CERT - OK"
 fi
@@ -72,7 +72,7 @@ for username in $RESTRICT_USERNAMES; do
 		2>/dev/null
 	if [ 0 != $? ]; then
 		echo "Login: '$username' - ERROR: username not exists or required data missing!"
-#		exit
+		exit
 	else
 		echo "Login: '$username' - OK"
 	fi
@@ -122,10 +122,10 @@ for username in $USERNAMES; do
 		--get-owner-info \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "User owner: $username - ERROR"
+		echo "Owner info: $username - ERROR"
 		exit
 	else
-		echo "User owner: $username - OK"
+		echo "Owner info: $username - OK"
 	fi
 done
 
