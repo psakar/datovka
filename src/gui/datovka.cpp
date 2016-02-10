@@ -3075,8 +3075,10 @@ void MainWindow::synchroniseAllAccounts(void)
 		return;
 	}
 
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
+	if (globWorkPool.working()) {
+		ui->actionSync_all_accounts->setEnabled(false);
+		ui->actionGet_messages->setEnabled(false);
+	}
 }
 
 
@@ -3121,8 +3123,10 @@ void MainWindow::synchroniseSelectedAccount(void)
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
+	if (globWorkPool.working()) {
+		ui->actionSync_all_accounts->setEnabled(false);
+		ui->actionGet_messages->setEnabled(false);
+	}
 }
 
 
