@@ -215,7 +215,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 20);
 
-	if (IE_SUCCESS != status) {
+	if ((IE_SUCCESS != status) ||
+	    (NULL == message) || (NULL == message->envelope)) {
 		error = isds_error(status);
 		longError = isds_long_message(session);
 		logErrorNL("Downloading message returned status %d: '%s' '%s'.",
