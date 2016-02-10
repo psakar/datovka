@@ -52,7 +52,7 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
     m_message(NULL),
-    m_attachmentModel(0)
+    m_attachmentModel(this)
 {
 	setupUi(this);
 
@@ -85,7 +85,7 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 	} else {
 		this->attachmentTable->setEnabled(true);
 		this->attachmentTable->show();
-		m_attachmentModel.setModelData(m_message);
+		m_attachmentModel.setMessage(m_message);
 		envelopeTextEdit->setHtml(
 		    messageDescriptionHtml(m_attachmentModel.rowCount(),
 		        m_message->raw, m_message->raw_length,
@@ -96,14 +96,14 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 		/* Attachment list. */
 		attachmentTable->setModel(&m_attachmentModel);
 		/* First three columns contain hidden data. */
-		attachmentTable->setColumnHidden(AttachmentModel::ATTACHID_COL,
+		attachmentTable->setColumnHidden(DbFlsTblModel::ATTACHID_COL,
 		    true);
-		attachmentTable->setColumnHidden(AttachmentModel::MSGID_COL,
+		attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
 		    true);
-		attachmentTable->setColumnHidden(AttachmentModel::CONTENT_COL,
+		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
 		    true);
 		attachmentTable->resizeColumnToContents(
-		    AttachmentModel::FNAME_COL);
+		    DbFlsTblModel::FNAME_COL);
 
 		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
 		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
@@ -242,8 +242,15 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 		return;
 	}
 
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    DbFlsTblModel::CONTENT_COL);
+	if (!dataIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	QByteArray data =
-	    m_attachmentModel.attachmentData(selectedIndex.row());
+	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 	if (WF_SUCCESS != writeFile(fileName, data)) {
 		QMessageBox::warning(this,
@@ -296,7 +303,15 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 
 		fileName = newDir + QDir::separator() + fileName;
 
-		QByteArray data = m_attachmentModel.attachmentData(idx.row());
+		QModelIndex dataIndex = idx.sibling(idx.row(),
+		    DbFlsTblModel::CONTENT_COL);
+		if (!dataIndex.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		QByteArray data =
+		    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 		if (WF_SUCCESS != writeFile(fileName, data)) {
 			unsuccessfullFiles.append(fileName);
@@ -350,8 +365,15 @@ void DlgViewZfo::openSelectedAttachment(void)
 	/* TODO -- Add message id into file name? */
 	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
 
+	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
+	    DbFlsTblModel::CONTENT_COL);
+	if (!dataIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	QByteArray data =
-	    m_attachmentModel.attachmentData(selectedIndex.row());
+	    QByteArray::fromBase64(dataIndex.data().toByteArray());
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
@@ -585,7 +607,7 @@ QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
 	}
 
 	return selectedIndex.sibling(selectedIndex.row(),
-	    AttachmentModel::FNAME_COL);
+	    DbFlsTblModel::FNAME_COL);
 }
 
 

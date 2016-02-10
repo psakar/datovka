@@ -27,7 +27,7 @@
 
 #include <QDialog>
 
-#include "src/models/attachment_model.h"
+#include "src/models/files_model.h"
 #include "ui_dlg_view_zfo.h"
 
 /*!
@@ -160,7 +160,7 @@ private:
 	 */
 
 	int m_zfoType;
-	AttachmentModel m_attachmentModel; /*!< Attachment model. */
+	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 };
 
 #endif /* _DLG_VIEW_ZFO_H_ */

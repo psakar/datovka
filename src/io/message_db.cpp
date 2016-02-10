@@ -66,6 +66,11 @@ const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
 const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
 
+/* Attachment size is computed from actual data. */
+static
+const QVector<QString> fileItemIdsNoData = {"id", "message_id",
+    "dmEncodedContent", "_dmFileDescr", "0"};
+
 /* ========================================================================= */
 MessageDb::MessageDb(const QString &dbDriverType,
     const QString &connectionName, QObject *parent)
@@ -1871,10 +1876,10 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	int i;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (i = 0; i < (fileItemIds.size() - 1); ++i) {
-		queryStr += fileItemIds[i] + ", ";
+	for (i = 0; i < (fileItemIdsNoData.size() - 1); ++i) {
+		queryStr += fileItemIdsNoData[i] + ", ";
 	}
-	queryStr += fileItemIds.last();
+	queryStr += fileItemIdsNoData.last();
 	queryStr += " FROM files WHERE "
 	    "message_id = :msgId";
 	if (!query.prepare(queryStr)) {

@@ -30,10 +30,10 @@ const int TblModel::m_rowAllocationIncrement(128);
 TblModel::TblModel(QObject *parent)
     : QAbstractTableModel(parent),
     m_data(),
-    m_headerData(),
     m_rowsAllocated(0),
     m_rowCount(0),
-    m_columnCount(0)
+    m_columnCount(0),
+    m_headerData()
 {
 }
 
@@ -75,8 +75,6 @@ QVariant TblModel::headerData(int section, Qt::Orientation orientation,
 
 void TblModel::setQuery(QSqlQuery &query)
 {
-	beginResetModel();
-
 	m_data.clear();
 	m_rowsAllocated = 0;
 	m_rowCount = 0;

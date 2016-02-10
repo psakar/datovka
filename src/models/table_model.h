@@ -149,6 +149,16 @@ protected:
 	 * The size of the array is incremented using several lines at once.
 	 */
 	QVector< QVector<QVariant> > m_data; /*!< Model data. */
+	int m_rowsAllocated; /*!< Number of rows allocated. */
+
+	int m_rowCount; /*!< Number of used rows.*/
+	int m_columnCount; /*!< Number of columns. */
+
+	static
+	const int m_rowAllocationIncrement; /*!<
+	                                     * Number of lines to be added
+	                                     * in a single resize attempt.
+	                                     */
 
 private:
 	/*
@@ -157,16 +167,6 @@ private:
 	 * Orientation is ignored.
 	 */
 	QMap< int, QMap<int, QVariant> > m_headerData; /*!< Header data. */
-
-	int m_rowsAllocated; /*!< Number of rows allocated. */
-	static
-	const int m_rowAllocationIncrement; /*!<
-	                                     * Number of lines to be added
-	                                     * in a single resize attempt.
-	                                     */
-
-	int m_rowCount; /*!< Number of used rows.*/
-	int m_columnCount; /*!< Number of columns. */
 };
 
 #endif /* _TABLE_MODEL_H_ */
