@@ -68,7 +68,7 @@ void printDataToStdOut(const QStringList &data)
 		if (i == (data.count() - 1)) {
 			cout << data.at(i) << endl << endl;
 		} else {
-			cout << data.at(i) + " ";
+			cout << data.at(i) << " ";
 		}
 	}
 }
@@ -82,7 +82,7 @@ void printDataToStdOut(const QList<qint64> &data)
 		if (i == (data.count() - 1)) {
 			cout << data.at(i) << endl << endl;
 		} else {
-			cout << data.at(i) + " ";
+			cout << data.at(i) << " ";
 		}
 	}
 }
