@@ -32,7 +32,7 @@
 #include "src/common.h"
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
-#include "src/models/attachment_model.h"
+#include "src/models/files_model.h"
 #include "src/views/attachment_table_view.h"
 
 AttachmentTableView::AttachmentTableView(QWidget *parent)
@@ -155,7 +155,7 @@ QList<QString> AttachmentTableView::temporaryFiles(
 		{
 			/* Determine full file path. */
 			QModelIndex fileNameIndex = idx.sibling(idx.row(),
-			    AttachmentModel::FNAME_COL);
+			    DbFlsTblModel::FNAME_COL);
 			if(!fileNameIndex.isValid()) {
 				Q_ASSERT(0);
 				return QList<QString>();
@@ -171,7 +171,7 @@ QList<QString> AttachmentTableView::temporaryFiles(
 		{
 			/* Obtain data. */
 			QModelIndex dataIndex = idx.sibling(idx.row(),
-			    AttachmentModel::CONTENT_COL);
+			    DbFlsTblModel::CONTENT_COL);
 			if (!dataIndex.isValid()) {
 				Q_ASSERT(0);
 				return QList<QString>();

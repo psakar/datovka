@@ -282,10 +282,10 @@ SOURCES += src/cli/cli.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
-    src/models/attachment_model.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
+    src/models/table_model.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
     src/single/single_instance.cpp \
@@ -347,10 +347,10 @@ HEADERS += src/cli/cli.h \
     src/log/log_common.h \
     src/log/log.h \
     src/models/accounts_model.h \
-    src/models/attachment_model.h \
     src/models/files_model.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
+    src/models/table_model.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
     src/single/single_instance.h \

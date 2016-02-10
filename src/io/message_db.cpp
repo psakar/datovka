@@ -41,7 +41,6 @@
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
-#include <QSqlQueryModel>
 #include <QSqlRecord>
 #include <QString>
 #include <QTimeZone>
@@ -66,6 +65,11 @@ const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
 
 const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
+
+/* Attachment size is computed from actual data. */
+static
+const QVector<QString> fileItemIdsNoData = {"id", "message_id",
+    "dmEncodedContent", "_dmFileDescr", "0"};
 
 /* ========================================================================= */
 MessageDb::MessageDb(const QString &dbDriverType,
@@ -1872,10 +1876,10 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	int i;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (i = 0; i < (fileItemIds.size() - 1); ++i) {
-		queryStr += fileItemIds[i] + ", ";
+	for (i = 0; i < (fileItemIdsNoData.size() - 1); ++i) {
+		queryStr += fileItemIdsNoData[i] + ", ";
 	}
-	queryStr += fileItemIds.last();
+	queryStr += fileItemIdsNoData.last();
 	queryStr += " FROM files WHERE "
 	    "message_id = :msgId";
 	if (!query.prepare(queryStr)) {
@@ -1896,7 +1900,8 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	for (i = 0; i < fileItemIds.size(); ++i) {
 		/* Description. */
 		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
-		    flsTbl.attrProps.value(fileItemIds[i]).desc);
+		    flsTbl.attrProps.value(fileItemIds[i]).desc,
+		    Qt::DisplayRole);
 		/* Data type. */
 		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
 		    flsTbl.attrProps.value(fileItemIds[i]).type,
@@ -1905,7 +1910,7 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 
 	/* Rename last column to file size. */
 	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal,
-	    QObject::tr("File Size"));
+	    QObject::tr("File Size"), Qt::DisplayRole);
 
 	return &m_sqlFilesModel;
 
