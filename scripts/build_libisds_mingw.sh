@@ -165,8 +165,12 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"/curl*
 
 	# --disable-static
-	./configure CFLAGS="-DWINVER=${WIN_VER}" --enable-ipv6 --with-winssl --without-axtls --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
-	make ${MAKEOPTS} && make install || exit 1
+	WITHS="--enable-ipv6 --with-winssl"
+	WITHOUTS="--without-axtls --without-zsh-functions-dir --disable-ldap --disable-ldaps --disable-rtsp"
+	#WITHOUTS="${WITHOUTS} --disable-sspi"
+	./configure CPPFLAGS="-DWINVER=${WIN_VER}" ${WITHOUTS} ${WITHS} --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	#make ${MAKEOPTS} && make install || exit 1
+	make ${MAKEOPTS}; make install
 fi
 
 
