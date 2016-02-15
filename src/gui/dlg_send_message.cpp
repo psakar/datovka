@@ -1025,8 +1025,8 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 	envelope.dmAnnotation = this->subjectText->text();
 
 	/* Set optional fields. */
-	envelope.dmSenderIdent = this->subjectText->text();
-	envelope.dmRecipientIdent = this->dmSenderIdent->text();
+	envelope.dmSenderIdent = this->dmSenderIdent->text();
+	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
 	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
 	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
 	envelope._using_dmLegalTitleLaw =
