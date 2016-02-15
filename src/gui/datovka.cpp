@@ -1792,8 +1792,6 @@ void MainWindow::saveAllAttachmentsToDir(void)
 {
 	debugSlotCall();
 
-	int attachments = ui->messageAttachmentList->model()->rowCount();
-
 	QModelIndex messageIndex =
 	    ui->messageList->selectionModel()->currentIndex();
 
@@ -1811,7 +1809,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	    tr("Save attachments"), saveAttachPath,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (newDir.isNull() || newDir.isEmpty()) {
+	if (newDir.isEmpty()) {
 		return;
 	}
 
@@ -1839,30 +1837,35 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	for (int i = 0; i < attachments; ++i) {
+	QList<MessageDb::FileData> attachList =
+	    messageDb->getFilesFromMessage(dmId);
+	if (attachList.isEmpty()) {
 
-		QModelIndex index = ui->messageAttachmentList->model()
-		    ->index(i,0);
-
-		Q_ASSERT(index.isValid());
-		if (!index.isValid()) {
-			unspecifiedFailed = true;
-			continue;
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
 		}
 
-		QModelIndex fileNameIndex = index.sibling(index.row(),
-		    DbFlsTblModel::FNAME_COL);
-		Q_ASSERT(fileNameIndex.isValid());
-		if(!fileNameIndex.isValid()) {
-			unspecifiedFailed = true;
-			continue;
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%d'.", dmId);
+			return;
 		}
 
-		QString fileName = fileNameIndex.data().toString();
-		QString attFileName = fileName;
-		Q_ASSERT(!fileName.isEmpty());
+		attachList = messageDb->getFilesFromMessage(dmId);
+		if (attachList.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	foreach (const MessageDb::FileData &attach, attachList) {
+		QString fileName(attach.dmFileDescr);
 		if (fileName.isEmpty()) {
 			unspecifiedFailed = true;
+			Q_ASSERT(0);
 			continue;
 		}
 
@@ -1873,16 +1876,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		fileName = newDir + QDir::separator() + fileName;
 
-		QModelIndex dataIndex = index.sibling(index.row(),
-		    DbFlsTblModel::CONTENT_COL);
-		if (!dataIndex.isValid()) {
-			Q_ASSERT(0);
-			unsuccessfullFiles.append(fileName);
-			continue;
-		}
-
-		QByteArray data =
-		    QByteArray::fromBase64(dataIndex.data().toByteArray());
+		QByteArray data(
+		    QByteArray::fromBase64(attach.dmEncodedContent));
 
 		if (WF_SUCCESS !=
 		    writeFile(nonconflictingFileName(fileName), data)) {
@@ -1892,12 +1887,12 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		if (globPref.delivery_info_for_every_file) {
 			if (globPref.all_attachments_save_zfo_delinfo) {
-				exportDeliveryInfoAsZFO(newDir, attFileName,
+				exportDeliveryInfoAsZFO(newDir, attach.dmFileDescr,
 				    globPref.delivery_filename_format_all_attach,
 				    userName, dmId, deliveryTime, false);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
-				exportDeliveryInfoAsPDF(newDir, attFileName,
+				exportDeliveryInfoAsPDF(newDir, attach.dmFileDescr,
 				  globPref.delivery_filename_format_all_attach,
 				  userName, dmId, deliveryTime, false);
 			}
