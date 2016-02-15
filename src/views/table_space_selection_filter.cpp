@@ -23,98 +23,98 @@
 
 #include <QEvent>
 #include <QKeyEvent>
-#include <QTableView>
 #include <QTableWidget>
 
-#include "src/views/table_home_end_filter.h"
+#include "src/views/table_space_selection_filter.h"
 
-TableHomeEndFilter::TableHomeEndFilter(QObject *parent)
+TableSpaceSelectionFilter::TableSpaceSelectionFilter(QObject *parent)
     : QObject(parent)
-{ }
-
-TableHomeEndFilter::~TableHomeEndFilter(void)
-{ }
-
-/*!
- * @brief Performs Home/End navigation on a QTableView.
- *
- * @param[in,out] tv Non-null pointer to table view.
- * @param[in]     ke Non-null pointer to key event.
- */
-static
-void viewFilter(QTableView *tv, const QKeyEvent *ke)
 {
-	if (0 == tv) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (0 == ke) {
-		Q_ASSERT(0);
-		return;
-	}
+}
 
-	switch (ke->key()) {
-	case Qt::Key_Home:
-		tv->selectRow(0);
-		break;
-	case Qt::Key_End:
-		tv->selectRow(tv->model()->rowCount() - 1);
-		break;
-	default:
-		break;
-	}
+TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
+{
 }
 
 /*!
- * @brief Performs Home/End navigation on a QTableWidget.
+ * @brief Performs space bar slection on a QTableWidget.
  *
  * @param[in,out] tw Non-null pointer to table widget.
  * @param[in]     ke Non-null pointer to key event.
+ * @return True when filter applied.
  */
 static
-void widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
+bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 {
 	if (0 == tw) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	if (0 == ke) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 
 	switch (ke->key()) {
-	case Qt::Key_Home:
-		tw->selectRow(0);
-		break;
-	case Qt::Key_End:
-		tw->selectRow(tw->rowCount() - 1);
+	case Qt::Key_Space:
+		{
+			QList<QTableWidgetItem *> selectedItems =
+			    tw->selectedItems();
+
+			if (selectedItems.isEmpty()) {
+				return false;
+			}
+
+			QTableWidgetItem *frstItem = tw->item(
+			    selectedItems.first()->row(), 0);
+
+			if (0 == frstItem) {
+				Q_ASSERT(0);
+				return false;
+			}
+
+			bool checked = frstItem->checkState() == Qt::Checked;
+
+			foreach (QTableWidgetItem *const item, selectedItems) {
+				if (0 == item) {
+					continue;
+				}
+				QTableWidgetItem *checkItem =
+				    tw->item(item->row(), 0);
+
+				if (0 == checkItem) {
+					Q_ASSERT(0);
+					continue;
+				}
+				checkItem->setCheckState(
+				    checked ? Qt::Unchecked : Qt::Checked);
+			}
+		}
+		return true;
 		break;
 	default:
 		break;
 	}
+
+	return false;
 }
 
-bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
+bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 {
 	const QKeyEvent *ke = 0;
-	QTableView *tv = 0;
 	QTableWidget *tw = 0;
 	if (event->type() == QEvent::KeyPress) {
 		ke = (QKeyEvent *) event;
 	}
 
 	if (0 != ke) {
-		tv = dynamic_cast<QTableView *>(object);
 		tw = dynamic_cast<QTableWidget *>(object);
 	}
 
-	if (0 != tv) {
-		viewFilter(tv, ke);
-		return false;
-	} else if (0 != tw) {
-		widgetFilter(tw, ke);
-		return false;
+	if (0 != tw) {
+		if (widgetFilter(tw, ke)) {
+			return true;
+		}
 	}
 
 	return QObject::eventFilter(object, event);
