@@ -762,7 +762,7 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 	QDialog *dlg_cont = new DlgContacts(*m_dbSet, m_dbId,
 	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
-	dlg_cont->show();
+	dlg_cont->exec();
 }
 
 
@@ -885,7 +885,7 @@ void DlgSendMessage::findAndAddRecipient(void)
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
 	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
 	    m_dbOpenAddressing, this, m_userName);
-	dsSearch->show();
+	dsSearch->exec();
 }
 
 
