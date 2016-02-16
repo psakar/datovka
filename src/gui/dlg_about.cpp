@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ void aboutDialog::initAboutDialog(void)
 	this->labelVersionNum->setText(VERSION);
 
 	QString copyright =
-	    "Copyright © 2014–2015 CZ.NIC, z. s. p. o. "
+	    "Copyright © 2014–2016 CZ.NIC, z. s. p. o. "
 	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;";
 	this->labelCopy->setText(copyright);
 	this->labelCopy->setTextFormat(Qt::RichText);
