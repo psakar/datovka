@@ -21,41 +21,40 @@
  * the two.
  */
 
-#ifndef _TABLE_HOME_END_FILTER_H_
-#define _TABLE_HOME_END_FILTER_H_
+#ifndef _TABLE_SPACE_SELECTION_FILTER_H_
+#define _TABLE_SPACE_SELECTION_FILTER_H_
 
 #include <QObject>
 
 /*!
- * @brief This object is used as to tweak the behaviour of a QTableView and
- *    QTableWidget when Hone and End keys are pressed.
+ * @brief This object is used as to tweak the behaviour of the QTableWidget
+ *    when selecting data boxes via pressing space bar.
  */
-class TableHomeEndFilter : public QObject {
-	Q_OBJECT
+class TableSpaceSelectionFilter : public QObject {
+    Q_OBJECT
 
 public:
 	/*!
 	 * @brief Constructor.
 	 */
-	explicit TableHomeEndFilter(QObject *parent = 0);
+	TableSpaceSelectionFilter(QObject *parent = 0);
 
 	/*!
 	 * @brief Destructor.
 	 */
-	virtual ~TableHomeEndFilter(void);
+	~TableSpaceSelectionFilter(void);
 
 	/*!
 	 * @brief Event filter function.
 	 *
-	 * @note The function catches Home and End keys and performs cursor
-	 *     navigation according to those keys. It only applies to
-	 *     QTableView and QTableWidget objects.
+	 * @note The function catches the Space key and performs selection.
+	 *     It only applies to  QTableWidget objects.
 	 *
 	 * @param[in,out] object View object.
 	 * @param[in]     event  Caught event.
-	 * @return False when filter applied.
+	 * @return True when filter applied.
 	 */
 	virtual bool eventFilter(QObject *object, QEvent *event);
 };
 
-#endif /* _TABLE_HOME_END_FILTER_H_ */
+#endif /* _TABLE_SPACE_SELECTION_FILTER_H_ */

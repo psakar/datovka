@@ -292,6 +292,7 @@ SOURCES += src/cli/cli.cpp \
     src/views/attachment_table_view.cpp \
     src/views/attachment_table_widget.cpp \
     src/views/table_home_end_filter.cpp \
+    src/views/table_space_selection_filter.cpp \
     src/worker/message_emitter.cpp \
     src/worker/pool.cpp \
     src/worker/task.cpp \
@@ -357,6 +358,7 @@ HEADERS += src/cli/cli.h \
     src/views/attachment_table_view.h \
     src/views/attachment_table_widget.h \
     src/views/table_home_end_filter.h \
+    src/views/table_space_selection_filter.h \
     src/worker/message_emitter.h \
     src/worker/pool.h \
     src/worker/task.h \

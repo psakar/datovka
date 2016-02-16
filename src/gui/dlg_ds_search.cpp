@@ -28,6 +28,7 @@
 #include "dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_search_owner.h"
 
@@ -133,6 +134,8 @@ void DlgDsSearch::initSearchWindow(void)
 
 	this->resultsTableWidget->installEventFilter(
 	    new TableHomeEndFilter(this));
+	this->resultsTableWidget->installEventFilter(
+	    new TableSpaceSelectionFilter(this));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -400,7 +403,6 @@ void DlgDsSearch::searchDataBox(void)
 		this->resultsTableWidget->setEnabled(true);
 		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
 		Q_ASSERT(0 != item);
-		qDebug() << item->dbID;
 		QVector<QString> contact;
 		contact.append(item->dbID);
 
