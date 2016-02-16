@@ -403,7 +403,6 @@ void DlgDsSearch::searchDataBox(void)
 		this->resultsTableWidget->setEnabled(true);
 		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
 		Q_ASSERT(0 != item);
-		qDebug() << item->dbID;
 		QVector<QString> contact;
 		contact.append(item->dbID);
 

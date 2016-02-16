@@ -27,6 +27,13 @@
 
 #include "src/views/table_space_selection_filter.h"
 
+/*
+ * Check box column.
+ *
+ * TODO -- The position should be defined somewhere nearer the widget.
+ */
+#define CHECK_COL 0
+
 TableSpaceSelectionFilter::TableSpaceSelectionFilter(QObject *parent)
     : QObject(parent)
 {
@@ -37,7 +44,7 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
 }
 
 /*!
- * @brief Performs space bar slection on a QTableWidget.
+ * @brief Performs space bar selection on a QTableWidget.
  *
  * @param[in,out] tw Non-null pointer to table widget.
  * @param[in]     ke Non-null pointer to key event.
@@ -66,7 +73,7 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			}
 
 			QTableWidgetItem *frstItem = tw->item(
-			    selectedItems.first()->row(), 0);
+			    selectedItems.first()->row(), CHECK_COL);
 
 			if (0 == frstItem) {
 				Q_ASSERT(0);

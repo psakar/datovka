@@ -25,6 +25,7 @@
 #include "dlg_contacts.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_search_owner.h"
 
@@ -80,6 +81,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	this->contactTableWidget->installEventFilter(
 	    new TableHomeEndFilter(this));
+	this->contactTableWidget->installEventFilter(
+	    new TableSpaceSelectionFilter(this));
 }
 
 
