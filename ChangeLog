@@ -1,5 +1,6 @@
-4.4.99 test release
+4.5.0 / 2016-02-16
  * A lot of changes under the hood.
+ * Check boxes in recipient list can be enabled by pressing space bar.
  * The qmake command does not automatically call lrelease.
  * Only a single instance of the application with given configuration is
    allowed.
@@ -23,7 +24,7 @@
  * Fixed bugs when displaying attachment size when composing message.
  * Drag actions on attachments.
  * Drop actions on attachments when composing message.
- * Required Qt version if 5.3. Qt 5.2 crashes on drop actions.
+ * Required Qt version is 5.3. Qt 5.2 crashes on drop actions.
 
 4.4.3 / 2016-01-04
  * Fixed bug when changing expired password and the new password was not
