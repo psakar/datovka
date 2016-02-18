@@ -48,7 +48,7 @@ public:
 	 * @return Number of rows.
 	 */
 	virtual
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Returns number of columns (for the children of given parent).
@@ -57,7 +57,8 @@ public:
 	 * @return Number of columns.
 	 */
 	virtual
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const
+	    Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -81,7 +82,7 @@ public:
 	 */
 	virtual
 	bool setHeaderData(int section, Qt::Orientation orientation,
-	    const QVariant &value, int role = Qt::EditRole);
+	    const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Obtains header data.
@@ -93,7 +94,7 @@ public:
 	 */
 	virtual
 	QVariant headerData(int section, Qt::Orientation orientation,
-	    int role = Qt::DisplayRole) const;
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Sets the content of the model according to the supplied query.

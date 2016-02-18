@@ -83,7 +83,7 @@ public:
 	 */
 	virtual
 	QVariant data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const;
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Obtains header data.
@@ -95,7 +95,7 @@ public:
 	 */
 	virtual
 	QVariant headerData(int section, Qt::Orientation orientation,
-	    int role = Qt::DisplayRole) const;
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Sets the type of the model.

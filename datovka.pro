@@ -282,6 +282,7 @@ SOURCES += src/cli/cli.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
     src/models/accounts_model.cpp \
+    src/models/accounts_model2.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
@@ -348,6 +349,7 @@ HEADERS += src/cli/cli.h \
     src/log/log_common.h \
     src/log/log.h \
     src/models/accounts_model.h \
+    src/models/accounts_model2.h \
     src/models/files_model.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \

@@ -1,0 +1,248 @@
+/*
+ * Copyright (C) 2014-2016 CZ.NIC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * In addition, as a special exception, the copyright holders give
+ * permission to link the code of portions of this program with the
+ * OpenSSL library under certain conditions as described in each
+ * individual source file, and distribute linked combinations including
+ * the two.
+ */
+
+#ifndef _ACCOUNTS_MODEL2_H_
+#define _ACCOUNTS_MODEL2_H_
+
+#include <QAbstractItemModel>
+#include <QList>
+#include <QMap>
+#include <QSettings>
+#include <QString>
+#include <QVariant>
+
+/*!
+ * @brief Account hierarchy.
+ */
+class AccountModel2: public QAbstractItemModel {
+    Q_OBJECT
+
+public:
+	/*!
+	 * @brief Holds account settings.
+	 */
+	class SettingsMap : public QMap<QString, QVariant> {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		SettingsMap(void);
+		SettingsMap(const QMap<QString, QVariant> &map);
+		bool isValid(void) const;
+		QString accountName(void) const;
+		void setAccountName(const QString &name);
+		QString userName(void) const;
+		void setUserName(const QString &userName);
+		QString loginMethod(void) const;
+		void setLoginMethod(const QString &method);
+		QString password(void) const;
+		void setPassword(const QString &pwd);
+		bool isTestAccount(void) const;
+		void setTestAccount(bool isTesting);
+		bool rememberPwd(void) const;
+		void setRememberPwd(bool remember);
+		QString dbDir(void) const;
+		void setDbDir(const QString &path);
+		bool syncWithAll(void) const;
+		void setSyncWithAll(bool sync);
+		QString p12File(void) const;
+		void setP12File(const QString &p12);
+		qint64 lastMsg(void) const;
+		void setLastMsg(qint64 dmId);
+		QString lastAttachSavePath(void) const;
+		void setLastAttachSavePath(const QString &path);
+		QString lastAttachAddPath(void) const;
+		void setLastAttachAddPath(const QString &path);
+		QString lastCorrespPath(void) const;
+		void setLastCorrespPath(const QString &path);
+		QString lastZFOExportPath(void) const;
+		void setLastZFOExportPath(const QString &path);
+		bool _createdFromScratch(void) const;
+		void _setCreatedFromScratch(bool fromScratch);
+		QString _passphrase(void) const;
+		void _setPassphrase(const QString &passphrase);
+		bool _pwdExpirDlgShown(void) const;
+		void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
+	private:
+		/* Prohibit these methods in public interface. */
+		QVariant operator[](const QString &key);
+		const QVariant operator[](const QString &key) const;
+	};
+
+	class AccountsMap : public QMap<QString, SettingsMap> {
+	public:
+		/*!
+		 * @brief Load data from supplied settings.
+		 */
+		void loadFromSettings(const QSettings &settings);
+	};
+
+	/*!
+	 * @brief Holds account data related to account.
+	 *
+	 * @note The key is userName. The user name is held by the top node.
+	 */
+	static
+	AccountsMap globAccounts;
+
+	/*
+	 * nodeRoot (Invisible.)
+	 * |
+	 * +- nodeAccountTop (account X)
+	 * |  |
+	 * |  +- nodeRecentReceived
+	 * |  +- nodeRecentSent
+	 * |  +- nodeAll
+	 * |     |
+	 * |     +- nodeReceived
+	 * |     |  |
+	 * |     |  +- nodeReceivedYear (yyyy)
+	 * |     |  +- nodeReceivedYear (zzzz)
+	 * |     |  .
+	 * |     |  .
+	 * |     |  .
+	 * |     |
+	 * |     +- nodeSent
+	 * |        |
+	 * |        +- nodeSentYear (aaaa)
+	 * |        +- nodeSentYear (bbbb)
+	 * |        .
+	 * |        .
+	 * |        .
+	 * |
+	 * +- nodeAccountTop (account Y)
+	 * |  |
+	 * .  .
+	 * .  .
+	 * .  .
+	 *
+	 */
+	enum NodeType {
+		nodeUnknown = 0, /* Must start at 0 (index into array)! */
+		nodeRoot,
+		nodeAccountTop,
+		nodeRecentReceived,
+		nodeRecentSent,
+		nodeAll,
+		nodeReceived,
+		nodeSent,
+		nodeReceivedYear,
+		nodeSentYear
+	};
+
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Pointer to parent object.
+	 */
+	explicit AccountModel2(QObject *parent = 0);
+
+	virtual
+	QModelIndex index(int row, int column,
+	    const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+
+//	virtual
+//	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+	virtual
+	int rowCount(const QModelIndex &parent = QModelIndex()) const
+	    Q_DECL_OVERRIDE;
+
+	virtual
+	int columnCount(const QModelIndex &parent = QModelIndex()) const
+	    Q_DECL_OVERRIDE;
+
+//	virtual
+//	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+
+//	virtual
+//	QVariant headerData(int section, Qt::Orientation orientation,
+//	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+
+	virtual
+	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Load data from supplied settings.
+	 *
+	 * @param[in] settings Settings structure to be read.
+	 */
+	void loadFromSettings(const QSettings &settings);
+
+	/*!
+	 * @brief Store data to settings structure.
+	 *
+	 * @param[out] settings Setting structure to store the model content
+	 *     into.
+	 */
+	void saveToSettings(QSettings &settings) const;
+
+	/*!
+	 * @brief Add account.
+	 *
+	 * @patam[in]  settingsMap Settings data to be added into the model.
+	 * @param[out] idx         Index of newly added account if specified.
+	 * @return -2 if account already exists,
+	 *         -1 if account could not be added,
+	 *          0 if account was added.
+	 */
+	int addAccount(const SettingsMap &settingsMap, QModelIndex *idx = 0);
+
+	/*!
+	 * @brief Returns node type.
+	 *
+	 * @param[in] index Data index.
+	 * @return Node type related to the supplied index.
+	 */
+	static
+	enum NodeType nodeType(const QModelIndex &index);
+
+	/*!
+	 * @brief Returns child node type on given row.
+	 *
+	 * @param[in] row        Child row.
+	 * @param[in] parentType Parent node type.
+	 * @return Child node type; unknown type on error.
+	 */
+	static
+	enum NodeType childNodeType(int row, enum NodeType parentType);
+
+private:
+	/*!
+	 * @brief Determines node type by traversing node structure.
+	 *
+	 * @param[in] index Data index.
+	 * @return Node type related to the supplied index.
+	 */
+	static
+	enum NodeType nodeTypeTraversed(const QModelIndex &index);
+
+	QList<QString> m_userNames; /*!<
+	                             * List of user names that are used to
+	                             * access the global accounts.
+	                             */
+	static
+	enum NodeType m_nodeTypes[]; /*!< Array of node type values. */
+};
+
+#endif /* _ACCOUNTS_MODEL2_H_ */

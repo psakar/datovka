@@ -68,7 +68,7 @@ public:
 	 */
 	virtual
 	QVariant data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const;
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Used to set items draggable.
@@ -76,7 +76,7 @@ public:
 	 * @param[in] index Index which to obtain flags for.
 	 */
 	virtual
-	Qt::ItemFlags flags(const QModelIndex &index) const;
+	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Sets the content of the model according to the supplied
