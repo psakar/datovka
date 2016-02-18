@@ -402,6 +402,59 @@ int AccountModel2::columnCount(const QModelIndex &parent) const
 	return 1;
 }
 
+QVariant AccountModel2::data(const QModelIndex &index, int role) const
+{
+	if (!index.isValid()) {
+		return QVariant();
+	}
+
+	int acntTopRow = internalIdTopRow(index.internalId());
+	enum NodeType type = internalIdNodeType(index.internalId());
+
+	switch (role) {
+	case Qt::DisplayRole:
+		switch (type) {
+		case nodeAccountTop:
+		case nodeRecentReceived:
+		case nodeRecentSent:
+		case nodeAll:
+		case nodeReceived:
+		case nodeSent:
+		case nodeReceivedYear:
+		case nodeSentYear:
+			return m_userNames[acntTopRow];
+			break;
+		default:
+			Q_ASSERT(0);
+			return QVariant();
+			break;
+		}
+		break;
+#if 0
+	case Qt::DecorationRole:
+		return QVariant();
+		break;
+#endif
+	case Qt::FontRole:
+		return QVariant();
+		break;
+	default:
+		return QVariant();
+		break;
+	}
+}
+
+QVariant AccountModel2::headerData(int section, Qt::Orientation orientation,
+    int role) const
+{
+	if ((Qt::Horizontal == orientation) && (Qt::DisplayRole == role) &&
+	    (0 == section)) {
+		return tr("Accounts");
+	}
+
+	return QVariant();
+}
+
 Qt::ItemFlags AccountModel2::flags(const QModelIndex &index) const
 {
 	if (!index.isValid()) {

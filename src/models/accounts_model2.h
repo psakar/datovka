@@ -48,6 +48,7 @@ public:
 		 */
 		SettingsMap(void);
 		SettingsMap(const QMap<QString, QVariant> &map);
+
 		bool isValid(void) const;
 		QString accountName(void) const;
 		void setAccountName(const QString &name);
@@ -173,12 +174,12 @@ public:
 	int columnCount(const QModelIndex &parent = QModelIndex()) const
 	    Q_DECL_OVERRIDE;
 
-//	virtual
-//	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+	virtual
+	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
 
-//	virtual
-//	QVariant headerData(int section, Qt::Orientation orientation,
-//	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+	virtual
+	QVariant headerData(int section, Qt::Orientation orientation,
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
