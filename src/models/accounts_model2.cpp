@@ -48,6 +48,51 @@
 #define _PKEY_PASSPHRASE "_pkey_passphrase"
 #define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
 
+/*
+ * For index navigation QModellIndex::internalId() is used. The value encodes
+ * the index of the top account node (which is also the index into the array
+ * of user names) and the actual node type.
+ *
+ * The 4 least significant bits hold the node type.
+ */
+#define TYPE_BITS 4
+#define TYPE_MASK 0x0f
+
+/*!
+ * @brief Generates model index internal identifier.
+ *
+ * @param[in] topRow   Number of the row of the top account node.
+ * @param[in] nodeType Node type.
+ * @return Internal identifier.
+ */
+#define internalIdCreate(topRow, nodeType) \
+	((((quintptr) (topRow)) << TYPE_BITS) | (nodeType))
+
+/*!
+ * @brief Change the node type in internal identifier.
+ *
+ * @param[in] intId    Internal identifier.
+ * @param[in] nodeType New type to be set.
+ * @return Internal identifier with new type.
+ */
+#define internalIdChangeType(intId, nodeType) \
+	(((intId) & ~((quintptr) TYPE_MASK)) | (nodeType))
+
+/*!
+ * @brief Obtain node type from the internal identifier.
+ *
+ * @param[in] intId Internal identifier.
+ * @return Node type.
+ */
+#define internalIdNodeType(intId) \
+	((enum NodeType) ((intId) & TYPE_BITS))
+
+/*!
+ * @brief Obtain top row from internal identifier.
+ */
+#define internalIdTopRow(intId) \
+	(((unsigned) (intId)) >> TYPE_BITS)
+
 AccountModel2::SettingsMap::SettingsMap(void)
     : QMap<QString, QVariant>()
 {
@@ -243,18 +288,6 @@ void AccountModel2::SettingsMap::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 }
 
 AccountModel2::AccountsMap AccountModel2::globAccounts;
-enum AccountModel2::NodeType AccountModel2::m_nodeTypes[] = {
-	nodeUnknown,
-	nodeRoot,
-	nodeAccountTop,
-	nodeRecentReceived,
-	nodeRecentSent,
-	nodeAll,
-	nodeReceived,
-	nodeSent,
-	nodeReceivedYear,
-	nodeSentYear
-};
 
 AccountModel2::AccountModel2(QObject *parent)
     : QAbstractItemModel(parent),
@@ -269,21 +302,62 @@ QModelIndex AccountModel2::index(int row, int column,
 		return QModelIndex();
 	}
 
-	enum NodeType type = nodeUnknown; /* Parent type. */
+	enum NodeType type = nodeUnknown;
 
+	/* Parent type. */
 	if (!parent.isValid()) {
 		type = nodeRoot;
 	} else {
 		type = nodeType(parent);
 	}
 
-	type = childNodeType(row, type); /* Child type. */
+	type = childNodeType(type, row); /* Child type. */
 
-	if (nodeUnknown != type) {
-		return createIndex(row, column, m_nodeTypes + type);
-	} else {
+	if (nodeUnknown == type) {
 		return QModelIndex();
 	}
+
+	quintptr internalId = 0;
+	if (nodeAccountTop == type) {
+		/* Set top node row and type. */
+		internalId = internalIdCreate(row, type);
+	} else {
+		/* Preserve top node row from parent, change type. */
+		internalId = internalIdChangeType(parent.internalId(), type);
+	}
+
+	return createIndex(row, column, internalId);
+}
+
+QModelIndex AccountModel2::parent(const QModelIndex &index) const
+{
+	if (!index.isValid()) {
+		return QModelIndex();
+	}
+
+	quintptr internalId = index.internalId();
+
+	/* Child type. */
+	enum NodeType type = internalIdNodeType(internalId);
+
+	int parentRow = -1;
+	type = parentNodeType(type, &parentRow); /* Parent type. */
+
+	if ((nodeUnknown == type) || (nodeRoot == type)) {
+		return QModelIndex();
+	}
+
+	if (parentRow < 0) {
+		Q_ASSERT(nodeAccountTop == type);
+		/* Determine the row of the account top node. */
+		parentRow = internalIdTopRow(internalId);
+	}
+
+	Q_ASSERT(parentRow >= 0);
+
+	/* Preserve top node row from child. */
+	return createIndex(parentRow, 0,
+	    internalIdChangeType(internalId, type));
 }
 
 int AccountModel2::rowCount(const QModelIndex &parent) const
@@ -366,18 +440,12 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 
 enum AccountModel2::NodeType AccountModel2::nodeType(const QModelIndex &index)
 {
-	enum NodeType *typePtr =
-	    static_cast<enum NodeType*>(index.internalPointer());
-
-	if (0 == typePtr) {
-		return nodeUnknown;
-	} else {
-		return *typePtr;
-	}
+	/* TODO -- Add runtime value check? */
+	return internalIdNodeType(index.internalId());
 }
 
-enum AccountModel2::NodeType AccountModel2::childNodeType(int row,
-    enum AccountModel2::NodeType parentType)
+enum AccountModel2::NodeType AccountModel2::childNodeType(
+    enum AccountModel2::NodeType parentType, int childRow)
 {
 	switch (parentType) {
 	case nodeUnknown:
@@ -387,7 +455,7 @@ enum AccountModel2::NodeType AccountModel2::childNodeType(int row,
 		return nodeAccountTop;
 		break;
 	case nodeAccountTop:
-		switch (row) {
+		switch (childRow) {
 		case 0:
 			return nodeRecentReceived;
 			break;
@@ -407,7 +475,7 @@ enum AccountModel2::NodeType AccountModel2::childNodeType(int row,
 		return nodeUnknown;
 		break;
 	case nodeAll:
-		switch (row) {
+		switch (childRow) {
 		case 0:
 			return nodeReceived;
 			break;
@@ -431,6 +499,60 @@ enum AccountModel2::NodeType AccountModel2::childNodeType(int row,
 		break;
 	default:
 		Q_ASSERT(0);
+		return nodeUnknown;
+		break;
+	}
+}
+
+enum AccountModel2::NodeType AccountModel2::parentNodeType(
+    enum AccountModel2::NodeType childType, int *parentRow)
+{
+	switch (childType) {
+	case nodeUnknown:
+	case nodeRoot:
+		if (0 != parentRow) {
+			*parentRow = -1;
+		}
+		return nodeUnknown;
+		break;
+	case nodeAccountTop:
+		if (0 != parentRow) {
+			*parentRow = -1;
+		}
+		return nodeRoot;
+		break;
+	case nodeRecentReceived:
+	case nodeRecentSent:
+	case nodeAll:
+		if (0 != parentRow) {
+			*parentRow = -1;
+		}
+		return nodeAccountTop;
+		break;
+	case nodeReceived:
+	case nodeSent:
+		if (0 != parentRow) {
+			*parentRow = 2;
+		}
+		return nodeAll;
+		break;
+	case nodeReceivedYear:
+		if (0 != parentRow) {
+			*parentRow = 0;
+		}
+		return nodeReceived;
+		break;
+	case nodeSentYear:
+		if (0 != parentRow) {
+			*parentRow = 1;
+		}
+		return nodeSent;
+		break;
+	default:
+		Q_ASSERT(0);
+		if (0 != parentRow) {
+			*parentRow = -1;
+		}
 		return nodeUnknown;
 		break;
 	}

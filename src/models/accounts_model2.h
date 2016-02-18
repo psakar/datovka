@@ -136,9 +136,10 @@ public:
 	 * .  .
 	 * .  .
 	 *
+	 * The identifier number must fit into TYPE_BITS number of bits.
 	 */
 	enum NodeType {
-		nodeUnknown = 0, /* Must start at 0 (index into array)! */
+		nodeUnknown = 0, /* Must start at 0. */
 		nodeRoot,
 		nodeAccountTop,
 		nodeRecentReceived,
@@ -161,8 +162,8 @@ public:
 	QModelIndex index(int row, int column,
 	    const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
-//	virtual
-//	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
+	virtual
+	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
 	virtual
 	int rowCount(const QModelIndex &parent = QModelIndex()) const
@@ -218,14 +219,27 @@ public:
 	enum NodeType nodeType(const QModelIndex &index);
 
 	/*!
-	 * @brief Returns child node type on given row.
+	 * @brief Returns child node type for given row.
 	 *
-	 * @param[in] row        Child row.
 	 * @param[in] parentType Parent node type.
+	 * @param[in] childRow   Child row.
 	 * @return Child node type; unknown type on error.
 	 */
 	static
-	enum NodeType childNodeType(int row, enum NodeType parentType);
+	enum NodeType childNodeType(enum NodeType parentType, int childRow);
+
+	/*!
+	 * @brief Returns parent node type for given child type.
+	 *
+	 * @note The row is set when it can be clearly determined from the node
+	 *     type. If it cannot be determined then it is set to -1.
+	 *
+	 * @param[in]  childType Child node type.
+	 * @param[out] parentRow Pointer to row value that should be set.
+	 * @return Parent node type; unknown type on error.
+	 */
+	static
+	enum NodeType parentNodeType(enum NodeType childType, int *parentRow);
 
 private:
 	/*!
@@ -241,8 +255,6 @@ private:
 	                             * List of user names that are used to
 	                             * access the global accounts.
 	                             */
-	static
-	enum NodeType m_nodeTypes[]; /*!< Array of node type values. */
 };
 
 #endif /* _ACCOUNTS_MODEL2_H_ */
