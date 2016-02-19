@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include "src/common.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model2.h"
 #include "src/settings/preferences.h"
@@ -92,6 +93,45 @@
  */
 #define internalIdTopRow(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
+
+/*!
+ * @brief Used for sorting credentials.
+ *
+ * @param[in] s1  credentials[0-9]*
+ * @param[in] s2  credentials[0-9]*
+ * @return True if s1 comes before s2.
+ *
+ * @note The number is taken by its value rather like a string of characters.
+ * cred < cred1 < cred2 < ... < cred10 < ... < cred100 < ...
+ */
+static
+bool credentialsLessThan(const QString &s1, const QString &s2)
+{
+	QRegExp trailingNumRe("(.*[^0-9]+)*([0-9]+)");
+	QString a1, a2;
+	int n1, n2;
+	int pos;
+
+	pos = trailingNumRe.indexIn(s1);
+	if (pos > -1) {
+		a1 = trailingNumRe.cap(1);
+		n1 = trailingNumRe.cap(2).toInt();
+	} else {
+		a1 = s1;
+		n1 = -1;
+	}
+
+	pos = trailingNumRe.indexIn(s2);
+	if (pos > -1) {
+		a2 = trailingNumRe.cap(1);
+		n2 = trailingNumRe.cap(2).toInt();
+	} else {
+		a2 = s2;
+		n2 = -1;
+	}
+
+	return (a1 != a2) ? (a1 < a2) : (n1 < n2);
+}
 
 AccountModel2::SettingsMap::SettingsMap(void)
     : QMap<QString, QVariant>()
@@ -287,6 +327,86 @@ void AccountModel2::SettingsMap::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 	QMap<QString, QVariant>::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
 }
 
+void AccountModel2::AccountsMap::loadFromSettings(const QSettings &settings)
+{
+	QStringList groups = settings.childGroups();
+	QRegExp credRe(CREDENTIALS".*");
+	SettingsMap itemSettings;
+
+	/* Clear present rows. */
+	this->clear();
+
+	QStringList credetialList;
+	/* Get list of credentials. */
+	for (int i = 0; i < groups.size(); ++i) {
+		/* Matches regular expression. */
+		if (credRe.exactMatch(groups.at(i))) {
+			credetialList.append(groups.at(i));
+		}
+	}
+
+	/* Sort the credentials list. */
+	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
+
+	/* For all credentials. */
+	foreach(QString group, credetialList) {
+		itemSettings.clear();
+		/*
+		 * String containing comma character are loaded as
+		 * a string list.
+		 *
+		 * FIXME -- Any white-space characters trailing
+		 * the comma are lost.
+		 */
+		itemSettings.setAccountName(
+		    settings.value(group + "/" + ACCOUNT_NAME,
+		        "").toStringList().join(", "));
+		itemSettings.setUserName(
+		    settings.value(group + "/" + USER,
+		        "").toString());
+		itemSettings.setLoginMethod(
+		    settings.value(group + "/" + LOGIN,
+		    "").toString());
+		itemSettings.setPassword(fromBase64(
+		    settings.value(group + "/" + PWD,
+		        "").toString()));
+		itemSettings.setTestAccount(
+		    settings.value(group + "/" + TEST_ACCOUNT,
+		        "").toBool());
+		itemSettings.setRememberPwd(
+		    settings.value(group + "/" + REMEMBER_PWD,
+		        "").toBool());
+		itemSettings.setDbDir(
+		    settings.value(group + "/" + DB_DIR,
+		        "").toString());
+		itemSettings.setSyncWithAll(
+		    settings.value(group + "/" + SYNC_WITH_ALL,
+		        "").toBool());
+		itemSettings.setP12File(
+		    settings.value(group + "/" + P12FILE,
+		        "").toString());
+		itemSettings.setLastMsg(
+		    settings.value(group + "/" + LAST_MSG_ID,
+		        "").toLongLong());
+		itemSettings.setLastAttachSavePath(
+		    settings.value(group + "/" + LAST_SAVE_ATTACH,
+		        "").toString());
+		itemSettings.setLastAttachAddPath(
+		    settings.value(group + "/" + LAST_ADD_ATTACH,
+		        "").toString());
+		itemSettings.setLastCorrespPath(
+		    settings.value(group + "/" + LAST_CORRESPOND,
+		        "").toString());
+		itemSettings.setLastZFOExportPath(
+		    settings.value(group + "/" + LAST_ZFO,
+		        "").toString());
+
+		/* Associate map with item node. */
+		Q_ASSERT(!itemSettings.userName().isEmpty());
+		this->operator[](itemSettings.userName()) = itemSettings;
+	}
+}
+
 AccountModel2::AccountsMap AccountModel2::globAccounts;
 
 AccountModel2::AccountModel2(QObject *parent)
@@ -464,6 +584,111 @@ Qt::ItemFlags AccountModel2::flags(const QModelIndex &index) const
 	return QAbstractItemModel::flags(index) & ~Qt::ItemIsEditable;
 }
 
+void AccountModel2::loadFromSettings(const QSettings &settings)
+{
+	/* Load into global account settings. */
+	globAccounts.loadFromSettings(settings);
+
+	QStringList groups = settings.childGroups();
+	QRegExp credRe(CREDENTIALS".*");
+
+	/* Clear present rows. */
+	this->removeRows(0, this->rowCount());
+
+	QStringList credetialList;
+	/* Get list of credentials. */
+	for (int i = 0; i < groups.size(); ++i) {
+		/* Matches regular expression. */
+		if (credRe.exactMatch(groups.at(i))) {
+			credetialList.append(groups.at(i));
+		}
+	}
+
+	/* Sort the credentials list. */
+	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
+
+	/* For all credentials. */
+	foreach(const QString &group, credetialList) {
+		const QString userName = settings.value(group + "/" + USER,
+		    QString()).toString();
+
+		/* Add user name into the model. */
+		m_userNames.append(userName);
+	}
+}
+
+void AccountModel2::saveToSettings(QSettings &settings) const
+{
+	QString groupName;
+
+	for (int i = 0; i < m_userNames.size(); ++i) {
+		const QString userName(m_userNames[i]);
+		const SettingsMap &itemSettings(globAccounts[userName]);
+
+		Q_ASSERT(userName == itemSettings.userName());
+
+		groupName = CREDENTIALS;
+		if (i > 0) {
+			groupName.append(QString::number(i + 1));
+		}
+		settings.beginGroup(groupName);
+
+		settings.setValue(ACCOUNT_NAME, itemSettings.accountName());
+		settings.setValue(USER, itemSettings.userName());
+		settings.setValue(LOGIN, itemSettings.loginMethod());
+		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
+		settings.setValue(REMEMBER_PWD, itemSettings.rememberPwd());
+		if (itemSettings.rememberPwd()) {
+			if (!itemSettings.password().isEmpty()) {
+				settings.setValue(PWD,
+				    toBase64(itemSettings.password()));
+			}
+		}
+
+		if (!itemSettings.dbDir().isEmpty()) {
+			if (itemSettings.dbDir() != globPref.confDir()) {
+				settings.setValue(DB_DIR,
+				    itemSettings.dbDir());
+			}
+		}
+		if (!itemSettings.p12File().isEmpty()) {
+			settings.setValue(P12FILE, itemSettings.p12File());
+		}
+
+		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
+
+		if (0 <= itemSettings.lastMsg()) {
+			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
+		}
+
+		/* Save last attachments save path. */
+		if (!itemSettings.lastAttachSavePath().isEmpty()) {
+			settings.setValue(LAST_SAVE_ATTACH,
+			    itemSettings.lastAttachSavePath());
+		}
+
+		/* Save last attachments add path. */
+		if (!itemSettings.lastAttachAddPath().isEmpty()) {
+			settings.setValue(LAST_ADD_ATTACH,
+			    itemSettings.lastAttachAddPath());
+		}
+
+		/* Save last correspondence export path. */
+		if (!itemSettings.lastCorrespPath().isEmpty()) {
+			settings.setValue(LAST_CORRESPOND,
+			    itemSettings.lastCorrespPath());
+		}
+
+		/* save last ZFO export path */
+		if (!itemSettings.lastZFOExportPath().isEmpty()) {
+			settings.setValue(LAST_ZFO,
+			    itemSettings.lastZFOExportPath());
+		}
+
+		settings.endGroup();
+	}
+}
+
 int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 {
 	const QString userName(settingsMap.userName());
@@ -481,8 +706,8 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 
 	Q_ASSERT(!m_userNames.contains(userName));
 
-	m_userNames.append(userName);
 	globAccounts[userName] = settingsMap;
+	m_userNames.append(userName);
 
 	if (0 != idx) {
 		*idx = index(m_userNames.size() - 1, 0, QModelIndex());

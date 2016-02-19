@@ -90,6 +90,9 @@ public:
 		const QVariant operator[](const QString &key) const;
 	};
 
+	/*!
+	 * @brief Associative array mapping user name to settings.
+	 */
 	class AccountsMap : public QMap<QString, SettingsMap> {
 	public:
 		/*!
@@ -101,7 +104,7 @@ public:
 	/*!
 	 * @brief Holds account data related to account.
 	 *
-	 * @note The key is userName. The user name is held by the top node.
+	 * @note Key is userName. The user name is held by the user name list.
 	 */
 	static
 	AccountsMap globAccounts;
@@ -159,28 +162,75 @@ public:
 	 */
 	explicit AccountModel2(QObject *parent = 0);
 
+	/*!
+	 * @brief Return index specified by supplied parameters.
+	 *
+	 * @param[in] row    Item row.
+	 * @param[in] column Parent column.
+	 * @param[in] parent Parent index.
+	 * @return Index to desired element or invalid index on error.
+	 */
 	virtual
 	QModelIndex index(int row, int column,
 	    const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Return parent index of the item with the given index.
+	 *
+	 * @param[in] index Child node index.
+	 * @return Index of the parent node or invalid index on error.
+	 */
 	virtual
 	QModelIndex parent(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Return number of rows under the given parent.
+	 *
+	 * @param[in] parent Parent node index.
+	 * @return Number of rows.
+	 */
 	virtual
 	int rowCount(const QModelIndex &parent = QModelIndex()) const
 	    Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Return the number of columns for the children of given parent.
+	 *
+	 * @param[in] parent Parent node index.
+	 * @return Number of columns.
+	 */
 	virtual
 	int columnCount(const QModelIndex &parent = QModelIndex()) const
 	    Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Return data stored in given location under given role.
+	 *
+	 * @param[in] index Index specifying the item.
+	 * @param[in] role  Data role.
+	 * @return Data from model.
+	 */
 	virtual
 	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Returns header data in given location under given role.
+	 *
+	 * @brief[in] section     Header position.
+	 * @brief[in] orientation Header orientation.
+	 * @brief[in] role        Data role.
+	 * @return Header data from model.
+	 */
 	virtual
 	QVariant headerData(int section, Qt::Orientation orientation,
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Returns item flags for given index.
+	 *
+	 * @brief[in] index Index specifying the item.
+	 * @return Item flags.
+	 */
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
