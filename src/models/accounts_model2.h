@@ -31,6 +31,13 @@
 #include <QString>
 #include <QVariant>
 
+/* Login method descriptors. */
+#define LIM_USERNAME "username"
+#define LIM_CERT "certificate"
+#define LIM_USER_CERT "user_certificate"
+#define LIM_HOTP "hotp"
+#define LIM_TOTP "totp"
+
 /*!
  * @brief Account hierarchy.
  */
@@ -261,6 +268,23 @@ public:
 	int addAccount(const SettingsMap &settingsMap, QModelIndex *idx = 0);
 
 	/*!
+	 * @brief Returns user name for given node.
+	 *
+	 * @param[in] index Data index.
+	 * @return User name of the account which the node belongs to
+	 *     or null string on error.
+	 */
+	QString userName(const QModelIndex &index) const;
+
+	/*!
+	 * @brief Returns top node related to user name.
+	 *
+	 * @param[in] userName Sought user name.
+	 * @return Top node index or invalid index if no such name found.
+	 */
+	QModelIndex topAcntIndex(const QString &userName) const;
+
+	/*!
 	 * @brief Returns node type.
 	 *
 	 * @param[in] index Data index.
@@ -269,6 +293,25 @@ public:
 	static
 	enum NodeType nodeType(const QModelIndex &index);
 
+	/*!
+	 * @brief Checks whether node type is received.
+	 *
+	 * @param[in] index Data index.
+	 * @return True if node type is received.
+	 */
+	static
+	bool nodeTypeIsReceived(const QModelIndex &index);
+
+	/*!
+	 * @brief Checks whether node type is sent.
+	 *
+	 * @param[in] index Data index.
+	 * @return True if node type is received.
+	 */
+	static
+	bool nodeTypeIsSent(const QModelIndex &index);
+
+private:
 	/*!
 	 * @brief Returns child node type for given row.
 	 *
@@ -292,7 +335,6 @@ public:
 	static
 	enum NodeType parentNodeType(enum NodeType childType, int *parentRow);
 
-private:
 	/*!
 	 * @brief Determines node type by traversing node structure.
 	 *

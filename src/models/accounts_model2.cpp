@@ -716,10 +716,68 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 	return 0;
 }
 
+QString AccountModel2::userName(const QModelIndex &index) const
+{
+	if (!index.isValid()) {
+		return QString();
+	}
+
+	int topRow = internalIdTopRow(index.internalId());
+
+	if (topRow < m_userNames.size()) {
+		return m_userNames[topRow];
+	} else {
+		return QString();
+	}
+}
+
+QModelIndex AccountModel2::topAcntIndex(const QString &userName) const
+{
+	for (int i = 0; i < m_userNames.size(); ++i) {
+		if (userName == m_userNames[i]) {
+			return index(i, 0);
+		}
+	}
+
+	return QModelIndex();
+}
+
 enum AccountModel2::NodeType AccountModel2::nodeType(const QModelIndex &index)
 {
+	if (!index.isValid()) {
+		return nodeUnknown;
+	}
+
 	/* TODO -- Add runtime value check? */
 	return internalIdNodeType(index.internalId());
+}
+
+bool AccountModel2::nodeTypeIsReceived(const QModelIndex &index)
+{
+	switch (nodeType(index)) {
+	case nodeRecentReceived:
+	case nodeReceived:
+	case nodeReceivedYear:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+}
+
+bool AccountModel2::nodeTypeIsSent(const QModelIndex &index)
+{
+	switch (nodeType(index)) {
+	case nodeRecentSent:
+	case nodeSent:
+	case nodeSentYear:
+		return true;
+		break;
+	default:
+		return false;
+		break;
+	}
 }
 
 enum AccountModel2::NodeType AccountModel2::childNodeType(
