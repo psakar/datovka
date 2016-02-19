@@ -311,6 +311,41 @@ public:
 	static
 	bool nodeTypeIsSent(const QModelIndex &index);
 
+	/*!
+	 * @brief Set number of unread messages in recent model nodes.
+	 *
+	 * @param[in] userName   User name.
+	 * @param[in] nodeType   May be nodeRecentReceived or nodeRecentSent.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateRecentUnread(const QString &userName,
+	    enum NodeType nodeType, unsigned unreadMsgs = 0);
+
+	/*!
+	 * @brief Update year nodes.
+	 *
+	 * @param[in] userName         User name.
+	 * @param[in] nodeType         May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] yearlyUnreadList List of paired years and unread messages
+	 *                             numbers.
+	 * @return True on success.
+	 */
+	bool updateYearNodes(const QString &userName, enum NodeType nodeType,
+	    const QList< QPair<QString, unsigned> > &yearlyUnreadList);
+
+	/*!
+	 * @brief Update existing year node in account.
+	 *
+	 * @param[in] userName   User name.
+	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool updateYear(const QString &userName, enum NodeType nodeType,
+	    const QString &year, unsigned unreadMsgs = 0);
+
 private:
 	/*!
 	 * @brief Returns child node type for given row.
@@ -348,6 +383,31 @@ private:
 	                             * List of user names that are used to
 	                             * access the global accounts.
 	                             */
+
+	/*!
+	 * @brief Holds additional information about the displayed data.
+	 */
+	class AccountCounters {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		AccountCounters(void)
+		    : unreadRecentReceived(0), unreadRecentSent(0),
+		    receivedGroups(), sentGroups(),
+		    unreadReceivedGroups(), unreadSentGroups()
+		{
+		}
+
+		unsigned unreadRecentReceived; /*!< Number of unread recent received messages. */
+		unsigned unreadRecentSent; /*!< Number of unread recent sent messages. */
+		QList<QString> receivedGroups; /*!< Group names and numbers of unread messages. */
+		QList<QString> sentGroups; /*!< Groups of unread messages. */
+		QMap<QString, unsigned> unreadReceivedGroups; /*< Number of unread messages. */
+		QMap<QString, unsigned> unreadSentGroups; /*!< Number of unread messages. */
+	};
+
+	QMap<QString, AccountCounters> m_countersMap; /*!< Unread counters. */
 };
 
 #endif /* _ACCOUNTS_MODEL2_H_ */

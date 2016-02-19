@@ -411,7 +411,8 @@ AccountModel2::AccountsMap AccountModel2::globAccounts;
 
 AccountModel2::AccountModel2(QObject *parent)
     : QAbstractItemModel(parent),
-    m_userNames()
+    m_userNames(),
+    m_countersMap()
 {
 }
 
@@ -607,6 +608,11 @@ void AccountModel2::loadFromSettings(const QSettings &settings)
 	/* Sort the credentials list. */
 	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
 
+	beginResetModel();
+
+	m_userNames.clear();
+	m_countersMap.clear();
+
 	/* For all credentials. */
 	foreach(const QString &group, credetialList) {
 		const QString userName = settings.value(group + "/" + USER,
@@ -615,6 +621,8 @@ void AccountModel2::loadFromSettings(const QSettings &settings)
 		/* Add user name into the model. */
 		m_userNames.append(userName);
 	}
+
+	endResetModel();
 }
 
 void AccountModel2::saveToSettings(QSettings &settings) const
@@ -706,8 +714,12 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 
 	Q_ASSERT(!m_userNames.contains(userName));
 
+	beginResetModel();
+
 	globAccounts[userName] = settingsMap;
 	m_userNames.append(userName);
+
+	endResetModel();
 
 	if (0 != idx) {
 		*idx = index(m_userNames.size() - 1, 0, QModelIndex());
@@ -778,6 +790,143 @@ bool AccountModel2::nodeTypeIsSent(const QModelIndex &index)
 		return false;
 		break;
 	}
+}
+
+bool AccountModel2::updateRecentUnread(const QString &userName,
+    enum AccountModel2::NodeType nodeType, unsigned unreadMsgs)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QModelIndex topIndex(topAcntIndex(userName));
+	if (!topIndex.isValid()) {
+		return false;
+	}
+
+	AccountCounters &cntrs(m_countersMap[userName]);
+	unsigned *unreadRecent = 0;
+	QModelIndex childIndex;
+
+	if (nodeRecentReceived == nodeType) {
+		unreadRecent = &cntrs.unreadRecentReceived;
+		/* Get recently received node. */
+		childIndex = topIndex.child(0, 0);
+	} else if (nodeRecentSent == nodeType) {
+		unreadRecent = &cntrs.unreadRecentSent;
+		/* Get recently sent node. */
+		childIndex = topIndex.child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	Q_ASSERT(0 != unreadRecent);
+	Q_ASSERT(childIndex.isValid());
+
+	*unreadRecent = unreadMsgs;
+	emit dataChanged(childIndex, childIndex);
+
+	return true;
+}
+
+bool AccountModel2::updateYearNodes(const QString &userName,
+    enum AccountModel2::NodeType nodeType,
+    const QList< QPair<QString, unsigned> > &yearlyUnreadList)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QModelIndex topIndex(topAcntIndex(userName));
+	if (!topIndex.isValid()) {
+		return false;
+	}
+
+	AccountCounters &cntrs(m_countersMap[userName]);
+	QList<QString> *groups = 0;
+	QMap<QString, unsigned> *unreadGroups = 0;
+	QModelIndex childTopIndex;
+
+	if (nodeReceivedYear == nodeType) {
+		groups = &cntrs.receivedGroups;
+		unreadGroups = &cntrs.unreadReceivedGroups;
+		/* Get received node. */
+		childTopIndex = topIndex.child(2, 0).child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		groups = &cntrs.sentGroups;
+		unreadGroups = &cntrs.unreadSentGroups;
+		/* Get sent node. */
+		childTopIndex = topIndex.child(2, 0).child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	Q_ASSERT(0 != groups);
+	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(childIndex.isValid());
+
+	/* TODO */
+}
+
+bool AccountModel2::updateYear(const QString &userName,
+    enum AccountModel2::NodeType nodeType, const QString &year,
+    unsigned unreadMsgs)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QModelIndex topIndex(topAcntIndex(userName));
+	if (!topIndex.isValid()) {
+		return false;
+	}
+
+	AccountCounters &cntrs(m_countersMap[userName]);
+	QList<QString> *groups = 0;
+	QMap<QString, unsigned> *unreadGroups = 0;
+	QModelIndex childIndex; /* Top index of children. */
+
+	if (nodeReceivedYear == nodeType) {
+		groups = &cntrs.receivedGroups;
+		unreadGroups = &cntrs.unreadReceivedGroups;
+		/* Get received node. */
+		childIndex = topIndex.child(2, 0).child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		groups = &cntrs.sentGroups;
+		unreadGroups = &cntrs.unreadSentGroups;
+		/* Get sent node. */
+		childIndex = topIndex.child(2, 0).child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	Q_ASSERT(0 != groups);
+	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(childIndex.isValid());
+
+	int row = 0;
+	for (; row < groups->size(); ++row) {
+		if (year == groups->at(row)) {
+			break;
+		}
+	}
+	if (row >= groups->size()) {
+		return false;
+	}
+	childIndex = childIndex.child(row, 0); /* Child index. */
+
+	Q_ASSERT(childIndex.isValid());
+
+	(*unreadGroups)[year] = unreadMsgs;
+	emit dataChanged(childIndex, childIndex);
+
+	return true;
 }
 
 enum AccountModel2::NodeType AccountModel2::childNodeType(
