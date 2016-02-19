@@ -831,6 +831,53 @@ bool AccountModel2::updateRecentUnread(const QString &userName,
 	return true;
 }
 
+bool AccountModel2::appendYear(const QString &userName,
+    enum AccountModel2::NodeType nodeType, const QString &year,
+    unsigned unreadMsgs)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QModelIndex topIndex(topAcntIndex(userName));
+	if (!topIndex.isValid()) {
+		return false;
+	}
+
+	AccountCounters &cntrs(m_countersMap[userName]);
+	QList<QString> *groups = 0;
+	QMap<QString, unsigned> *unreadGroups = 0;
+	QModelIndex childTopIndex;
+
+	if (nodeReceivedYear == nodeType) {
+		groups = &cntrs.receivedGroups;
+		unreadGroups = &cntrs.unreadReceivedGroups;
+		/* Get received node. */
+		childTopIndex = topIndex.child(2, 0).child(0, 0);
+	} else if (nodeSentYear == nodeType) {
+		groups = &cntrs.sentGroups;
+		unreadGroups = &cntrs.unreadSentGroups;
+		/* Get sent node. */
+		childTopIndex = topIndex.child(2, 0).child(1, 0);
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	Q_ASSERT(0 != groups);
+	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(childTopIndex.isValid());
+
+	int rows = groups->size();
+	beginInsertRows(childTopIndex, rows, rows);
+	groups->append(year);
+	(*unreadGroups)[year] = unreadMsgs;
+	endInsertRows();
+
+	return true;
+}
+
 bool AccountModel2::updateYearNodes(const QString &userName,
     enum AccountModel2::NodeType nodeType,
     const QList< QPair<QString, unsigned> > &yearlyUnreadList)
@@ -867,9 +914,28 @@ bool AccountModel2::updateYearNodes(const QString &userName,
 
 	Q_ASSERT(0 != groups);
 	Q_ASSERT(0 != unreadGroups);
-	Q_ASSERT(childIndex.isValid());
+	Q_ASSERT(childTopIndex.isValid());
 
-	/* TODO */
+	/* Delete old. */
+	int rows = groups->size();
+	beginRemoveRows(childTopIndex, 0, rows - 1);
+	groups->clear();
+	unreadGroups->clear();
+	endRemoveRows();
+
+	/* Add new. */
+	rows = yearlyUnreadList.size();
+	if (rows > 0) {
+		beginInsertRows(childTopIndex, 0, rows - 1);
+		typedef QPair<QString, unsigned> Pair;
+		foreach (const Pair &pair, yearlyUnreadList) {
+			groups->append(pair.first);
+			(*unreadGroups)[pair.first] = pair.second;
+		}
+		endInsertRows();
+	}
+
+	return true;
 }
 
 bool AccountModel2::updateYear(const QString &userName,
@@ -927,6 +993,43 @@ bool AccountModel2::updateYear(const QString &userName,
 	emit dataChanged(childIndex, childIndex);
 
 	return true;
+}
+
+void AccountModel2::removeAllYearNodes(void)
+{
+	for (int row = 0; row < rowCount(); ++row) {
+		QModelIndex topIndex(index(row, 0));
+
+		Q_ASSERT(topIndex.isValid());
+
+		removeYearNodes(topIndex);
+	}
+}
+
+void AccountModel2::removeYearNodes(const QModelIndex &topIndex)
+{
+	Q_ASSERT(topIndex.isValid());
+
+	const QString uName(userName(topIndex));
+	Q_ASSERT(!uName.isEmpty());
+
+	AccountCounters &cntrs(m_countersMap[uName]);
+
+	/* Received. */
+	QModelIndex childTopIndex = topIndex.child(2, 0).child(0, 0);
+	int rows = rowCount(childTopIndex);
+	beginRemoveRows(childTopIndex, 0, rows - 1);
+	cntrs.receivedGroups.clear();
+	cntrs.unreadReceivedGroups.clear();
+	endRemoveRows();
+
+	/* Sent. */
+	childTopIndex = topIndex.child(2, 0).child(1, 0);
+	rows = rowCount(childTopIndex);
+	beginRemoveRows(childTopIndex, 0, rows - 1);
+	cntrs.sentGroups.clear();
+	cntrs.unreadSentGroups.clear();
+	endRemoveRows();
 }
 
 enum AccountModel2::NodeType AccountModel2::childNodeType(

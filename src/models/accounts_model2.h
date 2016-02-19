@@ -323,6 +323,18 @@ public:
 	    enum NodeType nodeType, unsigned unreadMsgs = 0);
 
 	/*!
+	 * @brief Append year node into account.
+	 *
+	 * @param[in] userName   User name.
+	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] year       Year string.
+	 * @param[in] unreadMsgs Number of unread messages.
+	 * @return True on success.
+	 */
+	bool appendYear(const QString &userName, enum NodeType nodeType,
+	    const QString &year, unsigned unreadMsgs = 0);
+
+	/*!
 	 * @brief Update year nodes.
 	 *
 	 * @param[in] userName         User name.
@@ -346,7 +358,17 @@ public:
 	bool updateYear(const QString &userName, enum NodeType nodeType,
 	    const QString &year, unsigned unreadMsgs = 0);
 
+	/*!
+	 * @brief Delete all year-related nodes in model.
+	 */
+	void removeAllYearNodes(void);
+
 private:
+	/*!
+	 * @brief Delete year-related nodes in model for given account.
+	 */
+	void removeYearNodes(const QModelIndex &topIndex);
+
 	/*!
 	 * @brief Returns child node type for given row.
 	 *
