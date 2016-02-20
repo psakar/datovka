@@ -22,6 +22,7 @@
  */
 
 #include <QFont>
+#include <QIcon>
 
 #include "src/common.h"
 #include "src/log/log.h"
@@ -566,7 +567,8 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 			{
 				int row = index.row();
 				Q_ASSERT(row >= 0);
-				Q_ASSERT(m_countersMap.find(uName) != m_countersMap.constEnd());
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
 				const AccountCounters &cntrs(
 				    m_countersMap[uName]);
 				Q_ASSERT(row < cntrs.receivedGroups.size());
@@ -579,7 +581,8 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 			{
 				int row = index.row();
 				Q_ASSERT(row >= 0);
-				Q_ASSERT(m_countersMap.find(uName) != m_countersMap.constEnd());
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
 				const AccountCounters &cntrs(
 				    m_countersMap[uName]);
 				Q_ASSERT(row < cntrs.sentGroups.size());
@@ -592,11 +595,31 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 			break;
 		}
 		break;
-#if 0
+
 	case Qt::DecorationRole:
-		return QVariant();
+		switch (type) {
+		case nodeAccountTop:
+			return QIcon(ICON_3PARTY_PATH +
+			    QStringLiteral("letter_16.png"));
+			break;
+		case nodeRecentReceived:
+		case nodeReceived:
+		case nodeReceivedYear:
+			return QIcon(ICON_16x16_PATH +
+			    QStringLiteral("datovka-message-download.png"));
+			break;
+		case nodeRecentSent:
+		case nodeSent:
+		case nodeSentYear:
+			return QIcon(ICON_16x16_PATH +
+			    QStringLiteral("datovka-message-reply.png"));
+			break;
+		default:
+			return QVariant();
+			break;
+		}
 		break;
-#endif
+
 	case Qt::FontRole:
 		switch (type) {
 		case nodeAccountTop:
@@ -611,6 +634,7 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 			break;
 		}
 		break;
+
 	default:
 		return QVariant();
 		break;
