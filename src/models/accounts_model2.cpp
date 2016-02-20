@@ -86,7 +86,7 @@
  * @return Node type.
  */
 #define internalIdNodeType(intId) \
-	((enum NodeType) ((intId) & TYPE_BITS))
+	((enum NodeType) ((intId) & TYPE_MASK))
 
 /*!
  * @brief Obtain top row from internal identifier.
@@ -492,27 +492,30 @@ int AccountModel2::rowCount(const QModelIndex &parent) const
 		return m_userNames.size();
 	}
 
+	int rows = 0;
+
 	switch (nodeType(parent)) {
 	case nodeAccountTop:
-		return 3;
+		rows = 3;
 		break;
 	case nodeRecentReceived:
 	case nodeRecentSent:
-		return 0;
+		rows = 0;
 		break;
 	case nodeAll:
-		return 2;
+		rows = 2;
 		break;
 	case nodeReceived:
-		return 0; /* TODO -- Obtain years. */
+		rows = 0; /* TODO -- Obtain years. */
 		break;
 	case nodeSent:
-		return 0; /* TODO -- Obtain years. */
+		rows = 0; /* TODO -- Obtain years. */
 		break;
 	default:
-		return 0;
+		rows = 0;
 		break;
 	}
+	return rows;
 }
 
 int AccountModel2::columnCount(const QModelIndex &parent) const
