@@ -506,10 +506,18 @@ int AccountModel2::rowCount(const QModelIndex &parent) const
 		rows = 2;
 		break;
 	case nodeReceived:
-		rows = 0; /* TODO -- Obtain years. */
+		{
+			const QString uName(userName(parent));
+			Q_ASSERT(!uName.isEmpty());
+			rows = m_countersMap[uName].receivedGroups.size();
+		}
 		break;
 	case nodeSent:
-		rows = 0; /* TODO -- Obtain years. */
+		{
+			const QString uName(userName(parent));
+			Q_ASSERT(!uName.isEmpty());
+			rows = m_countersMap[uName].sentGroups.size();
+		}
 		break;
 	default:
 		rows = 0;
@@ -921,10 +929,12 @@ bool AccountModel2::updateYearNodes(const QString &userName,
 
 	/* Delete old. */
 	int rows = groups->size();
-	beginRemoveRows(childTopIndex, 0, rows - 1);
-	groups->clear();
-	unreadGroups->clear();
-	endRemoveRows();
+	if (rows > 0) {
+		beginRemoveRows(childTopIndex, 0, rows - 1);
+		groups->clear();
+		unreadGroups->clear();
+		endRemoveRows();
+	}
 
 	/* Add new. */
 	rows = yearlyUnreadList.size();
@@ -1021,18 +1031,22 @@ void AccountModel2::removeYearNodes(const QModelIndex &topIndex)
 	/* Received. */
 	QModelIndex childTopIndex = topIndex.child(2, 0).child(0, 0);
 	int rows = rowCount(childTopIndex);
-	beginRemoveRows(childTopIndex, 0, rows - 1);
-	cntrs.receivedGroups.clear();
-	cntrs.unreadReceivedGroups.clear();
-	endRemoveRows();
+	if (rows > 0) {
+		beginRemoveRows(childTopIndex, 0, rows - 1);
+		cntrs.receivedGroups.clear();
+		cntrs.unreadReceivedGroups.clear();
+		endRemoveRows();
+	}
 
 	/* Sent. */
 	childTopIndex = topIndex.child(2, 0).child(1, 0);
 	rows = rowCount(childTopIndex);
-	beginRemoveRows(childTopIndex, 0, rows - 1);
-	cntrs.sentGroups.clear();
-	cntrs.unreadSentGroups.clear();
-	endRemoveRows();
+	if (rows > 0) {
+		beginRemoveRows(childTopIndex, 0, rows - 1);
+		cntrs.sentGroups.clear();
+		cntrs.unreadSentGroups.clear();
+		endRemoveRows();
+	}
 }
 
 enum AccountModel2::NodeType AccountModel2::childNodeType(
