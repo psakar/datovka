@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QFont>
+
 #include "src/common.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model2.h"
@@ -358,48 +360,34 @@ void AccountModel2::AccountsMap::loadFromSettings(const QSettings &settings)
 		 * FIXME -- Any white-space characters trailing
 		 * the comma are lost.
 		 */
-		itemSettings.setAccountName(
-		    settings.value(group + "/" + ACCOUNT_NAME,
-		        "").toStringList().join(", "));
-		itemSettings.setUserName(
-		    settings.value(group + "/" + USER,
-		        "").toString());
-		itemSettings.setLoginMethod(
-		    settings.value(group + "/" + LOGIN,
-		    "").toString());
-		itemSettings.setPassword(fromBase64(
-		    settings.value(group + "/" + PWD,
-		        "").toString()));
-		itemSettings.setTestAccount(
-		    settings.value(group + "/" + TEST_ACCOUNT,
-		        "").toBool());
-		itemSettings.setRememberPwd(
-		    settings.value(group + "/" + REMEMBER_PWD,
-		        "").toBool());
-		itemSettings.setDbDir(
-		    settings.value(group + "/" + DB_DIR,
-		        "").toString());
-		itemSettings.setSyncWithAll(
-		    settings.value(group + "/" + SYNC_WITH_ALL,
-		        "").toBool());
-		itemSettings.setP12File(
-		    settings.value(group + "/" + P12FILE,
-		        "").toString());
-		itemSettings.setLastMsg(
-		    settings.value(group + "/" + LAST_MSG_ID,
-		        "").toLongLong());
-		itemSettings.setLastAttachSavePath(
-		    settings.value(group + "/" + LAST_SAVE_ATTACH,
-		        "").toString());
-		itemSettings.setLastAttachAddPath(
-		    settings.value(group + "/" + LAST_ADD_ATTACH,
-		        "").toString());
-		itemSettings.setLastCorrespPath(
-		    settings.value(group + "/" + LAST_CORRESPOND,
-		        "").toString());
-		itemSettings.setLastZFOExportPath(
-		    settings.value(group + "/" + LAST_ZFO,
-		        "").toString());
+		itemSettings.setAccountName(settings.value(
+		    group + "/" + ACCOUNT_NAME, "").toStringList().join(", "));
+		itemSettings.setUserName(settings.value(
+		    group + "/" + USER, "").toString());
+		itemSettings.setLoginMethod(settings.value(
+		    group + "/" + LOGIN, "").toString());
+		itemSettings.setPassword(fromBase64(settings.value(
+		    group + "/" + PWD, "").toString()));
+		itemSettings.setTestAccount(settings.value(
+		    group + "/" + TEST_ACCOUNT, "").toBool());
+		itemSettings.setRememberPwd(settings.value(
+		    group + "/" + REMEMBER_PWD, "").toBool());
+		itemSettings.setDbDir(settings.value(
+		    group + "/" + DB_DIR, "").toString());
+		itemSettings.setSyncWithAll(settings.value(
+		    group + "/" + SYNC_WITH_ALL, "").toBool());
+		itemSettings.setP12File(settings.value(
+		    group + "/" + P12FILE, "").toString());
+		itemSettings.setLastMsg(settings.value(
+		    group + "/" + LAST_MSG_ID, "").toLongLong());
+		itemSettings.setLastAttachSavePath(settings.value(
+		    group + "/" + LAST_SAVE_ATTACH, "").toString());
+		itemSettings.setLastAttachAddPath(settings.value(
+		    group + "/" + LAST_ADD_ATTACH, "").toString());
+		itemSettings.setLastCorrespPath(settings.value(
+		    group + "/" + LAST_CORRESPOND, "").toString());
+		itemSettings.setLastZFOExportPath(settings.value(
+		    group + "/" + LAST_ZFO, "").toString());
 
 		/* Associate map with item node. */
 		Q_ASSERT(!itemSettings.userName().isEmpty());
@@ -523,6 +511,7 @@ int AccountModel2::rowCount(const QModelIndex &parent) const
 		rows = 0;
 		break;
 	}
+
 	return rows;
 }
 
@@ -540,21 +529,62 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	int acntTopRow = internalIdTopRow(index.internalId());
+	const QString uName(userName(index));
+	if (uName.isEmpty()) {
+		Q_ASSERT(0);
+		return QVariant();
+	}
+	const AccountModel2::SettingsMap &accountInfo(globAccounts[uName]);
+//	int acntTopRow = internalIdTopRow(index.internalId());
 	enum NodeType type = internalIdNodeType(index.internalId());
 
 	switch (role) {
 	case Qt::DisplayRole:
 		switch (type) {
 		case nodeAccountTop:
+			return accountInfo.accountName();
+			break;
 		case nodeRecentReceived:
+			{
+				QString label(tr("Recent Received"));
+				return label;
+			}
+			break;
 		case nodeRecentSent:
+			return tr("Recent Sent");
+			break;
 		case nodeAll:
+			return tr("All");
+			break;
 		case nodeReceived:
+			return tr("Received");
+			break;
 		case nodeSent:
+			return tr("Sent");
+			break;
 		case nodeReceivedYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) != m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.receivedGroups.size());
+				QString label(cntrs.receivedGroups[row]);
+				Q_ASSERT(!label.isEmpty());
+				return label;
+			}
+			break;
 		case nodeSentYear:
-			return m_userNames[acntTopRow];
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) != m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.sentGroups.size());
+				return cntrs.sentGroups[row];
+			}
 			break;
 		default:
 			Q_ASSERT(0);
@@ -568,12 +598,25 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 		break;
 #endif
 	case Qt::FontRole:
-		return QVariant();
+		switch (type) {
+		case nodeAccountTop:
+			{
+				QFont retFont;
+				retFont.setBold(true);
+				return retFont;
+			}
+			break;
+		default:
+			return QVariant();
+			break;
+		}
 		break;
 	default:
 		return QVariant();
 		break;
 	}
+
+	return QVariant(); /* Is this really necessary? */
 }
 
 QVariant AccountModel2::headerData(int section, Qt::Orientation orientation,
