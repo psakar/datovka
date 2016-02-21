@@ -548,6 +548,14 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 		case nodeRecentReceived:
 			{
 				QString label(tr("Recent Received"));
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				if (cntrs.unreadRecentReceived > 0) {
+					label += QString(" %1").arg(
+					    cntrs.unreadRecentReceived);
+				}
 				return label;
 			}
 			break;
@@ -574,6 +582,13 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 				Q_ASSERT(row < cntrs.receivedGroups.size());
 				QString label(cntrs.receivedGroups[row]);
 				Q_ASSERT(!label.isEmpty());
+				Q_ASSERT(
+				    cntrs.unreadReceivedGroups.find(label) !=
+				    cntrs.unreadReceivedGroups.constEnd());
+				if (cntrs.unreadReceivedGroups[label] > 0) {
+					label += QString(" %1").arg(
+					    cntrs.unreadReceivedGroups[label]);
+				}
 				return label;
 			}
 			break;
@@ -627,6 +642,72 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 				QFont retFont;
 				retFont.setBold(true);
 				return retFont;
+			}
+			break;
+		case nodeRecentReceived:
+			{
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				if (cntrs.unreadRecentReceived > 0) {
+					QFont retFont;
+					retFont.setBold(true);
+					return retFont;
+				}
+			}
+			break;
+		case nodeReceivedYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.receivedGroups.size());
+				const QString &label(cntrs.receivedGroups[row]);
+				Q_ASSERT(!label.isEmpty());
+				Q_ASSERT(
+				    cntrs.unreadReceivedGroups.find(label) !=
+				    cntrs.unreadReceivedGroups.constEnd());
+				if (cntrs.unreadReceivedGroups[label] > 0) {
+					QFont retFont;
+					retFont.setBold(true);
+					return retFont;
+				}
+			}
+			break;
+		default:
+			return QVariant();
+			break;
+		}
+		break;
+
+	case ROLE_PLAIN_DISPLAY:
+		switch (type) {
+		case nodeReceivedYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.receivedGroups.size());
+				return cntrs.receivedGroups[row];
+			}
+			break;
+		case nodeSentYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.sentGroups.size());
+				return cntrs.sentGroups[row];
 			}
 			break;
 		default:
