@@ -922,13 +922,9 @@ QString AccountModel2::userName(const QModelIndex &index) const
 
 QModelIndex AccountModel2::topAcntIndex(const QString &userName) const
 {
-	for (int row = 0; row < m_row2UserNameIdx.size(); ++row) {
-		const int uNameIdx = m_row2UserNameIdx.at(row);
-		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
-
-		if (userName == m_userNames.at(uNameIdx)) {
-			return index(row, 0);
-		}
+	int row = topAcntRow(userName);
+	if (row >= 0) {
+		return index(row, 0);
 	}
 
 	return QModelIndex();
@@ -1188,6 +1184,43 @@ void AccountModel2::removeAllYearNodes(void)
 	}
 }
 
+bool AccountModel2::changePosition(const QString &userName, int shunt)
+{
+	if (0 == shunt) {
+		return false;
+	}
+
+	int row = topAcntRow(userName);
+	if ((row < 0) || (row >= m_row2UserNameIdx.size())) {
+		Q_ASSERT(0);
+		return false;
+	}
+	int newRow = row + shunt;
+	if ((newRow < 0) || (newRow >= m_row2UserNameIdx.size())) {
+		return false;
+	}
+
+	int destChild = newRow;
+
+	if (shunt > 0) {
+		/*
+		 * Because we move one item.
+		 * See QAbstractItemModel::beginMoveRows() documentation.
+		 */
+		destChild += 1;
+	}
+
+	beginMoveRows(QModelIndex(), row, row, QModelIndex(), destChild);
+
+	int auxNameIdx = m_row2UserNameIdx.at(row);
+	m_row2UserNameIdx[row] = m_row2UserNameIdx.at(newRow);
+	m_row2UserNameIdx[newRow] = auxNameIdx;
+
+	endMoveRows();
+
+	return true;
+}
+
 void AccountModel2::removeYearNodes(const QModelIndex &topIndex)
 {
 	Q_ASSERT(topIndex.isValid());
@@ -1330,6 +1363,23 @@ enum AccountModel2::NodeType AccountModel2::parentNodeType(
 		return nodeUnknown;
 		break;
 	}
+}
+
+int AccountModel2::topAcntRow(const QString &userName) const
+{
+	int foundRow = -1;
+
+	for (int row = 0; row < m_row2UserNameIdx.size(); ++row) {
+		const int uNameIdx = m_row2UserNameIdx.at(row);
+		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
+
+		if (userName == m_userNames.at(uNameIdx)) {
+			foundRow = row;
+			break;
+		}
+	}
+
+	return foundRow;
 }
 
 enum AccountModel2::NodeType AccountModel2::nodeTypeTraversed(

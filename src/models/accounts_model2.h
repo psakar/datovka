@@ -363,6 +363,17 @@ public:
 	 */
 	void removeAllYearNodes(void);
 
+	/*!
+	 * @brief Move related data by given number of of positions.
+	 *
+	 * @param[in] userName User name.
+	 * @param[in] shunt    Amount of positions the account should be moved.
+	 *                     Negative values move towards begin positive to
+	 *                     the end.
+	 * @return True on success.
+	 */
+	bool changePosition(const QString &userName, int shunt);
+
 private:
 	/*!
 	 * @brief Delete year-related nodes in model for given account.
@@ -391,6 +402,14 @@ private:
 	 */
 	static
 	enum NodeType parentNodeType(enum NodeType childType, int *parentRow);
+
+	/*!
+	 * @brief Returns the row of the top node related to the account.
+	 *
+	 * @param[in] userName Sought user name.
+	 * @return Top node row or -1 if no such name found.
+	 */
+	int topAcntRow(const QString &userName) const;
 
 	/*!
 	 * @brief Determines node type by traversing node structure.
