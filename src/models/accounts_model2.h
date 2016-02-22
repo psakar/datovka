@@ -268,6 +268,13 @@ public:
 	int addAccount(const SettingsMap &settingsMap, QModelIndex *idx = 0);
 
 	/*!
+	 * @brief Delete account.
+	 *
+	 * @param[in] userName User name.
+	 */
+	void deleteAccount(const QString &userName);
+
+	/*!
 	 * @brief Returns user name for given node.
 	 *
 	 * @param[in] index Data index.

@@ -792,6 +792,8 @@ void AccountModel2::loadFromSettings(const QSettings &settings)
 		    QString()).toString());
 
 		/* Add user name into the model. */
+		m_countersMap[userName] = AccountCounters();
+
 		m_userNames.append(userName);
 		m_row2UserNameIdx.append(m_userNames.size() - 1);
 	}
@@ -893,6 +895,9 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 	beginResetModel();
 
 	globAccounts[userName] = settingsMap;
+
+	m_countersMap[userName] = AccountCounters();
+
 	m_userNames.append(userName);
 	m_row2UserNameIdx.append(m_userNames.size() - 1);
 
@@ -903,6 +908,31 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 	}
 
 	return 0;
+}
+
+void AccountModel2::deleteAccount(const QString &userName)
+{
+	int row = topAcntRow(userName);
+
+	if (row < 0) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	int uNameIdx = m_row2UserNameIdx.at(row);
+	Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
+	Q_ASSERT(userName == m_userNames.at(uNameIdx));
+
+	beginRemoveRows(QModelIndex(), row, row);
+
+	m_userNames[uNameIdx] = QString();
+	m_row2UserNameIdx.removeAt(row);
+
+	m_countersMap.remove(userName);
+
+	globAccounts.remove(userName);
+
+	endRemoveRows();
 }
 
 QString AccountModel2::userName(const QModelIndex &index) const
