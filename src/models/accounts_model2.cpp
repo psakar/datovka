@@ -65,12 +65,12 @@
 /*!
  * @brief Generates model index internal identifier.
  *
- * @param[in] topRow   Number of the row of the top account node.
+ * @param[in] uNameIdx Index into the list of user names.
  * @param[in] nodeType Node type.
  * @return Internal identifier.
  */
-#define internalIdCreate(topRow, nodeType) \
-	((((quintptr) (topRow)) << TYPE_BITS) | (nodeType))
+#define internalIdCreate(uNameIdx, nodeType) \
+	((((quintptr) (uNameIdx)) << TYPE_BITS) | (nodeType))
 
 /*!
  * @brief Change the node type in internal identifier.
@@ -92,9 +92,12 @@
 	((enum NodeType) ((intId) & TYPE_MASK))
 
 /*!
- * @brief Obtain top row from internal identifier.
+ * @brief Obtain index into user name list from internal identifier.
+ *
+ * @param[in] indId Internal identifier.
+ * @return Index into user name list.
  */
-#define internalIdTopRow(intId) \
+#define internalIdUserNameIndex(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
 
 /*!
@@ -401,6 +404,7 @@ AccountModel2::AccountsMap AccountModel2::globAccounts;
 AccountModel2::AccountModel2(QObject *parent)
     : QAbstractItemModel(parent),
     m_userNames(),
+    m_row2UserNameIdx(),
     m_countersMap()
 {
 }
@@ -430,7 +434,11 @@ QModelIndex AccountModel2::index(int row, int column,
 	quintptr internalId = 0;
 	if (nodeAccountTop == type) {
 		/* Set top node row and type. */
-		internalId = internalIdCreate(row, type);
+		Q_ASSERT(row < m_row2UserNameIdx.size());
+		const int uNameIdx = m_row2UserNameIdx.at(row);
+		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
+		Q_ASSERT(!m_userNames.at(uNameIdx).isEmpty());
+		internalId = internalIdCreate(uNameIdx, type);
 	} else {
 		/* Preserve top node row from parent, change type. */
 		internalId = internalIdChangeType(parent.internalId(), type);
@@ -460,7 +468,13 @@ QModelIndex AccountModel2::parent(const QModelIndex &index) const
 	if (parentRow < 0) {
 		Q_ASSERT(nodeAccountTop == type);
 		/* Determine the row of the account top node. */
-		parentRow = internalIdTopRow(internalId);
+		const int uNameIdx = internalIdUserNameIndex(internalId);
+		for (int row = 0; row < m_row2UserNameIdx.size(); ++row) {
+			if (uNameIdx == m_row2UserNameIdx.at(row)) {
+				parentRow = row;
+				break;
+			}
+		}
 	}
 
 	Q_ASSERT(parentRow >= 0);
@@ -478,7 +492,7 @@ int AccountModel2::rowCount(const QModelIndex &parent) const
 
 	if (!parent.isValid()) {
 		/* Root. */
-		return m_userNames.size();
+		return m_row2UserNameIdx.size();
 	}
 
 	int rows = 0;
@@ -536,7 +550,6 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 	const AccountModel2::SettingsMap &accountInfo(globAccounts[uName]);
-//	int acntTopRow = internalIdTopRow(index.internalId());
 	enum NodeType type = internalIdNodeType(index.internalId());
 
 	switch (role) {
@@ -770,15 +783,17 @@ void AccountModel2::loadFromSettings(const QSettings &settings)
 	beginResetModel();
 
 	m_userNames.clear();
+	m_row2UserNameIdx.clear();
 	m_countersMap.clear();
 
 	/* For all credentials. */
 	foreach(const QString &group, credetialList) {
-		const QString userName = settings.value(group + "/" + USER,
-		    QString()).toString();
+		const QString userName(settings.value(group + "/" + USER,
+		    QString()).toString());
 
 		/* Add user name into the model. */
 		m_userNames.append(userName);
+		m_row2UserNameIdx.append(m_userNames.size() - 1);
 	}
 
 	endResetModel();
@@ -788,15 +803,17 @@ void AccountModel2::saveToSettings(QSettings &settings) const
 {
 	QString groupName;
 
-	for (int i = 0; i < m_userNames.size(); ++i) {
-		const QString userName(m_userNames[i]);
+	for (int row = 0; row < m_row2UserNameIdx.size(); ++row) {
+		const int uNameIdx = m_row2UserNameIdx.at(row);
+		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
+		const QString &userName(m_userNames.at(uNameIdx));
 		const SettingsMap &itemSettings(globAccounts[userName]);
 
 		Q_ASSERT(userName == itemSettings.userName());
 
 		groupName = CREDENTIALS;
-		if (i > 0) {
-			groupName.append(QString::number(i + 1));
+		if (row > 0) {
+			groupName.append(QString::number(row + 1));
 		}
 		settings.beginGroup(groupName);
 
@@ -877,11 +894,12 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 
 	globAccounts[userName] = settingsMap;
 	m_userNames.append(userName);
+	m_row2UserNameIdx.append(m_userNames.size() - 1);
 
 	endResetModel();
 
 	if (0 != idx) {
-		*idx = index(m_userNames.size() - 1, 0, QModelIndex());
+		*idx = index(m_row2UserNameIdx.size() - 1, 0, QModelIndex());
 	}
 
 	return 0;
@@ -893,10 +911,10 @@ QString AccountModel2::userName(const QModelIndex &index) const
 		return QString();
 	}
 
-	int topRow = internalIdTopRow(index.internalId());
+	int uNameIdx = internalIdUserNameIndex(index.internalId());
 
-	if (topRow < m_userNames.size()) {
-		return m_userNames[topRow];
+	if (uNameIdx < m_userNames.size()) {
+		return m_userNames.at(uNameIdx);
 	} else {
 		return QString();
 	}
@@ -904,9 +922,12 @@ QString AccountModel2::userName(const QModelIndex &index) const
 
 QModelIndex AccountModel2::topAcntIndex(const QString &userName) const
 {
-	for (int i = 0; i < m_userNames.size(); ++i) {
-		if (userName == m_userNames[i]) {
-			return index(i, 0);
+	for (int row = 0; row < m_row2UserNameIdx.size(); ++row) {
+		const int uNameIdx = m_row2UserNameIdx.at(row);
+		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
+
+		if (userName == m_userNames.at(uNameIdx)) {
+			return index(row, 0);
 		}
 	}
 

@@ -401,10 +401,29 @@ private:
 	static
 	enum NodeType nodeTypeTraversed(const QModelIndex &index);
 
+	/*
+	 * Model indexes hold a value that is effectively the index into this
+	 * list. This value serves for accessing model data. Therefore, the
+	 * ordering of the list must not change during the lifespan of the
+	 * model.
+	 *
+	 * Should an entry be deleted then only the value at the corresponding
+	 * position should be set to a null string.
+	 * Addition of new entries is performed by appending new values.
+	 */
 	QList<QString> m_userNames; /*!<
 	                             * List of user names that are used to
 	                             * access the global accounts.
 	                             */
+	/*
+	 * The index into the mapping list is the actual top account row.
+	 * The value stored in the field is the index into the list of user
+	 * names.
+	 *
+	 * The size of the list is the actual number of account stored in the
+	 * model.
+	 */
+	QList<int> m_row2UserNameIdx; /*!< Mapping from row to user name. */
 
 	/*!
 	 * @brief Holds additional information about the displayed data.
