@@ -27,6 +27,7 @@
 #include <QAbstractItemModel>
 #include <QList>
 #include <QMap>
+#include <QObject>
 #include <QSettings>
 #include <QString>
 #include <QVariant>
@@ -39,75 +40,87 @@
 #define LIM_TOTP "totp"
 
 /*!
+ * @brief Holds account settings.
+ */
+class AcntSettings : public QMap<QString, QVariant> {
+public:
+	/*!
+	 * @brief Constructor.
+	 */
+	AcntSettings(void);
+	AcntSettings(const QMap<QString, QVariant> &map);
+
+	bool isValid(void) const;
+	QString accountName(void) const;
+	void setAccountName(const QString &name);
+	QString userName(void) const;
+	void setUserName(const QString &userName);
+	QString loginMethod(void) const;
+	void setLoginMethod(const QString &method);
+	QString password(void) const;
+	void setPassword(const QString &pwd);
+	bool isTestAccount(void) const;
+	void setTestAccount(bool isTesting);
+	bool rememberPwd(void) const;
+	void setRememberPwd(bool remember);
+	QString dbDir(void) const;
+	void setDbDir(const QString &path);
+	bool syncWithAll(void) const;
+	void setSyncWithAll(bool sync);
+	QString p12File(void) const;
+	void setP12File(const QString &p12);
+	qint64 lastMsg(void) const;
+	void setLastMsg(qint64 dmId);
+	QString lastAttachSavePath(void) const;
+	void setLastAttachSavePath(const QString &path);
+	QString lastAttachAddPath(void) const;
+	void setLastAttachAddPath(const QString &path);
+	QString lastCorrespPath(void) const;
+	void setLastCorrespPath(const QString &path);
+	QString lastZFOExportPath(void) const;
+	void setLastZFOExportPath(const QString &path);
+	bool _createdFromScratch(void) const;
+	void _setCreatedFromScratch(bool fromScratch);
+	QString _passphrase(void) const;
+	void _setPassphrase(const QString &passphrase);
+	bool _pwdExpirDlgShown(void) const;
+	void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
+private:
+	/* Prohibit these methods in public interface. */
+	QVariant operator[](const QString &key);
+	const QVariant operator[](const QString &key) const;
+};
+
+/*!
+ * @brief Associative array mapping user name to settings.
+ */
+class AccountsMap : public QObject, public QMap<QString, AcntSettings> {
+    Q_OBJECT
+
+public:
+	/*!
+	 * @brief Load data from supplied settings.
+	 */
+	void loadFromSettings(const QSettings &settings);
+
+signals:
+	/*!
+	 * @brief Notifies that account data have changed.
+	 *
+	 * @note Currently the signal must be triggered manually.
+	 *
+	 * @param[in] userName User name.
+	 */
+	void accountDataChanged(const QString &userName);
+};
+
+/*!
  * @brief Account hierarchy.
  */
 class AccountModel2: public QAbstractItemModel {
     Q_OBJECT
 
 public:
-	/*!
-	 * @brief Holds account settings.
-	 */
-	class SettingsMap : public QMap<QString, QVariant> {
-	public:
-		/*!
-		 * @brief Constructor.
-		 */
-		SettingsMap(void);
-		SettingsMap(const QMap<QString, QVariant> &map);
-
-		bool isValid(void) const;
-		QString accountName(void) const;
-		void setAccountName(const QString &name);
-		QString userName(void) const;
-		void setUserName(const QString &userName);
-		QString loginMethod(void) const;
-		void setLoginMethod(const QString &method);
-		QString password(void) const;
-		void setPassword(const QString &pwd);
-		bool isTestAccount(void) const;
-		void setTestAccount(bool isTesting);
-		bool rememberPwd(void) const;
-		void setRememberPwd(bool remember);
-		QString dbDir(void) const;
-		void setDbDir(const QString &path);
-		bool syncWithAll(void) const;
-		void setSyncWithAll(bool sync);
-		QString p12File(void) const;
-		void setP12File(const QString &p12);
-		qint64 lastMsg(void) const;
-		void setLastMsg(qint64 dmId);
-		QString lastAttachSavePath(void) const;
-		void setLastAttachSavePath(const QString &path);
-		QString lastAttachAddPath(void) const;
-		void setLastAttachAddPath(const QString &path);
-		QString lastCorrespPath(void) const;
-		void setLastCorrespPath(const QString &path);
-		QString lastZFOExportPath(void) const;
-		void setLastZFOExportPath(const QString &path);
-		bool _createdFromScratch(void) const;
-		void _setCreatedFromScratch(bool fromScratch);
-		QString _passphrase(void) const;
-		void _setPassphrase(const QString &passphrase);
-		bool _pwdExpirDlgShown(void) const;
-		void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
-	private:
-		/* Prohibit these methods in public interface. */
-		QVariant operator[](const QString &key);
-		const QVariant operator[](const QString &key) const;
-	};
-
-	/*!
-	 * @brief Associative array mapping user name to settings.
-	 */
-	class AccountsMap : public QMap<QString, SettingsMap> {
-	public:
-		/*!
-		 * @brief Load data from supplied settings.
-		 */
-		void loadFromSettings(const QSettings &settings);
-	};
-
 	/*!
 	 * @brief Holds account data related to account.
 	 *
@@ -259,13 +272,13 @@ public:
 	/*!
 	 * @brief Add account.
 	 *
-	 * @patam[in]  settingsMap Settings data to be added into the model.
-	 * @param[out] idx         Index of newly added account if specified.
+	 * @patam[in]  acntSettings Settings data to be added into the model.
+	 * @param[out] idx          Index of newly added account if specified.
 	 * @return -2 if account already exists,
 	 *         -1 if account could not be added,
 	 *          0 if account was added.
 	 */
-	int addAccount(const SettingsMap &settingsMap, QModelIndex *idx = 0);
+	int addAccount(const AcntSettings &acntSettings, QModelIndex *idx = 0);
 
 	/*!
 	 * @brief Delete account.
@@ -380,6 +393,14 @@ public:
 	 * @return True on success.
 	 */
 	bool changePosition(const QString &userName, int shunt);
+
+private slots:
+	/*!
+	 * @brief This slot handles changes of account data.
+	 *
+	 * @param[in] userName User name defining the changed account.
+	 */
+	void handleAccountDataChange(const QString &userName);
 
 private:
 	/*!

@@ -139,88 +139,88 @@ bool credentialsLessThan(const QString &s1, const QString &s2)
 	return (a1 != a2) ? (a1 < a2) : (n1 < n2);
 }
 
-AccountModel2::SettingsMap::SettingsMap(void)
+AcntSettings::AcntSettings(void)
     : QMap<QString, QVariant>()
 {
 }
 
-AccountModel2::SettingsMap::SettingsMap(const QMap<QString, QVariant> &map)
+AcntSettings::AcntSettings(const QMap<QString, QVariant> &map)
     : QMap<QString, QVariant>(map)
 {
 }
 
-bool AccountModel2::SettingsMap::isValid(void) const
+bool AcntSettings::isValid(void) const
 {
 	return !QMap<QString, QVariant>::isEmpty() &&
 	    !accountName().isEmpty() && !userName().isEmpty();
 }
 
-QString AccountModel2::SettingsMap::accountName(void) const
+QString AcntSettings::accountName(void) const
 {
 	return QMap<QString, QVariant>::operator[](ACCOUNT_NAME).toString();
 }
 
-void AccountModel2::SettingsMap::setAccountName(const QString &name)
+void AcntSettings::setAccountName(const QString &name)
 {
 	QMap<QString, QVariant>::operator[](ACCOUNT_NAME) = name;
 }
 
-QString AccountModel2::SettingsMap::userName(void) const
+QString AcntSettings::userName(void) const
 {
 	return QMap<QString, QVariant>::operator[](USER).toString();
 }
 
-void AccountModel2::SettingsMap::setUserName(const QString &userName)
+void AcntSettings::setUserName(const QString &userName)
 {
 	QMap<QString, QVariant>::operator[](USER) = userName;
 }
 
-QString AccountModel2::SettingsMap::loginMethod(void) const
+QString AcntSettings::loginMethod(void) const
 {
 	return QMap<QString, QVariant>::operator[](LOGIN).toString();
 }
 
-void AccountModel2::SettingsMap::setLoginMethod(const QString &method)
+void AcntSettings::setLoginMethod(const QString &method)
 {
 	QMap<QString, QVariant>::operator[](LOGIN) = method;
 }
 
-QString AccountModel2::SettingsMap::password(void) const
+QString AcntSettings::password(void) const
 {
 	return QMap<QString, QVariant>::operator[](PWD).toString();
 }
 
-void AccountModel2::SettingsMap::setPassword(const QString &pwd)
+void AcntSettings::setPassword(const QString &pwd)
 {
 	QMap<QString, QVariant>::operator[](PWD) = pwd;
 }
 
-bool AccountModel2::SettingsMap::isTestAccount(void) const
+bool AcntSettings::isTestAccount(void) const
 {
 	return QMap<QString, QVariant>::operator[](TEST_ACCOUNT).toBool();
 }
 
-void AccountModel2::SettingsMap::setTestAccount(bool isTesting)
+void AcntSettings::setTestAccount(bool isTesting)
 {
 	QMap<QString, QVariant>::operator[](TEST_ACCOUNT) = isTesting;
 }
 
-bool AccountModel2::SettingsMap::rememberPwd(void) const
+bool AcntSettings::rememberPwd(void) const
 {
 	return QMap<QString, QVariant>::operator[](REMEMBER_PWD).toBool();
 }
 
-void AccountModel2::SettingsMap::setRememberPwd(bool remember)
+void AcntSettings::setRememberPwd(bool remember)
 {
 	QMap<QString, QVariant>::operator[](REMEMBER_PWD) = remember;
 }
 
-QString AccountModel2::SettingsMap::dbDir(void) const
+QString AcntSettings::dbDir(void) const
 {
 	return QMap<QString, QVariant>::operator[](DB_DIR).toString();
 }
 
-void AccountModel2::SettingsMap::setDbDir(const QString &path)
+void AcntSettings::setDbDir(const QString &path)
 {
 	if (path == globPref.confDir()) {
 		/* Default path is empty. */
@@ -230,114 +230,114 @@ void AccountModel2::SettingsMap::setDbDir(const QString &path)
 	}
 }
 
-bool AccountModel2::SettingsMap::syncWithAll(void) const
+bool AcntSettings::syncWithAll(void) const
 {
 	return QMap<QString, QVariant>::operator[](SYNC_WITH_ALL).toBool();
 }
 
-void AccountModel2::SettingsMap::setSyncWithAll(bool sync)
+void AcntSettings::setSyncWithAll(bool sync)
 {
 	QMap<QString, QVariant>::operator[](SYNC_WITH_ALL) = sync;
 }
 
-QString AccountModel2::SettingsMap::p12File(void) const
+QString AcntSettings::p12File(void) const
 {
 	return QMap<QString, QVariant>::operator[](P12FILE).toString();
 }
 
-void AccountModel2::SettingsMap::setP12File(const QString &p12)
+void AcntSettings::setP12File(const QString &p12)
 {
 	QMap<QString, QVariant>::operator[](P12FILE) = p12;
 }
 
-qint64 AccountModel2::SettingsMap::lastMsg(void) const
+qint64 AcntSettings::lastMsg(void) const
 {
 	return QMap<QString, QVariant>::value(LAST_MSG_ID, -1).toLongLong();
 }
 
-void AccountModel2::SettingsMap::setLastMsg(qint64 dmId)
+void AcntSettings::setLastMsg(qint64 dmId)
 {
 	QMap<QString, QVariant>::insert(LAST_MSG_ID, dmId);
 }
 
-QString AccountModel2::SettingsMap::lastAttachSavePath(void) const
+QString AcntSettings::lastAttachSavePath(void) const
 {
 	return QMap<QString, QVariant>::operator[](LAST_SAVE_ATTACH).toString();
 }
 
-void AccountModel2::SettingsMap::setLastAttachSavePath(const QString &path)
+void AcntSettings::setLastAttachSavePath(const QString &path)
 {
 	QMap<QString, QVariant>::operator[](LAST_SAVE_ATTACH) = path;
 }
 
-QString AccountModel2::SettingsMap::lastAttachAddPath(void) const
+QString AcntSettings::lastAttachAddPath(void) const
 {
 	return QMap<QString, QVariant>::operator[](LAST_ADD_ATTACH).toString();
 }
 
-void AccountModel2::SettingsMap::setLastAttachAddPath(const QString &path)
+void AcntSettings::setLastAttachAddPath(const QString &path)
 {
 	QMap<QString, QVariant>::operator[](LAST_ADD_ATTACH) = path;
 }
 
-QString AccountModel2::SettingsMap::lastCorrespPath(void) const
+QString AcntSettings::lastCorrespPath(void) const
 {
 	return QMap<QString, QVariant>::operator[](LAST_CORRESPOND).toString();
 }
 
-void AccountModel2::SettingsMap::setLastCorrespPath(const QString &path)
+void AcntSettings::setLastCorrespPath(const QString &path)
 {
 	QMap<QString, QVariant>::operator[](LAST_CORRESPOND) = path;
 }
 
-QString AccountModel2::SettingsMap::lastZFOExportPath(void) const
+QString AcntSettings::lastZFOExportPath(void) const
 {
 	return QMap<QString, QVariant>::operator[](LAST_ZFO).toString();
 }
 
-void AccountModel2::SettingsMap::setLastZFOExportPath(const QString &path)
+void AcntSettings::setLastZFOExportPath(const QString &path)
 {
 	QMap<QString, QVariant>::operator[](LAST_ZFO) = path;
 }
 
-bool AccountModel2::SettingsMap::_createdFromScratch(void) const
+bool AcntSettings::_createdFromScratch(void) const
 {
 	return QMap<QString, QVariant>::value(_CREATED_FROM_SCRATCH,
 	    false).toBool();
 }
 
-void AccountModel2::SettingsMap::_setCreatedFromScratch(bool fromScratch)
+void AcntSettings::_setCreatedFromScratch(bool fromScratch)
 {
 	QMap<QString, QVariant>::insert(_CREATED_FROM_SCRATCH, fromScratch);
 }
 
-QString AccountModel2::SettingsMap::_passphrase(void) const
+QString AcntSettings::_passphrase(void) const
 {
 	return QMap<QString, QVariant>::value(_PKEY_PASSPHRASE,
 	    QString()).toString();
 }
 
-void AccountModel2::SettingsMap::_setPassphrase(const QString &passphrase)
+void AcntSettings::_setPassphrase(const QString &passphrase)
 {
 	QMap<QString, QVariant>::insert(_PKEY_PASSPHRASE, passphrase);
 }
 
-bool AccountModel2::SettingsMap::_pwdExpirDlgShown(void) const
+bool AcntSettings::_pwdExpirDlgShown(void) const
 {
 	return QMap<QString, QVariant>::value(_PWD_EXPIR_DLG_SHOWN,
 	    false).toBool();
 }
 
-void AccountModel2::SettingsMap::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
+void AcntSettings::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 {
 	QMap<QString, QVariant>::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
 }
 
-void AccountModel2::AccountsMap::loadFromSettings(const QSettings &settings)
+void AccountsMap::loadFromSettings(const QSettings &settings)
 {
 	QStringList groups = settings.childGroups();
 	QRegExp credRe(CREDENTIALS".*");
-	SettingsMap itemSettings;
+	AcntSettings itemSettings;
 
 	/* Clear present rows. */
 	this->clear();
@@ -399,7 +399,7 @@ void AccountModel2::AccountsMap::loadFromSettings(const QSettings &settings)
 	}
 }
 
-AccountModel2::AccountsMap AccountModel2::globAccounts;
+AccountsMap AccountModel2::globAccounts;
 
 AccountModel2::AccountModel2(QObject *parent)
     : QAbstractItemModel(parent),
@@ -407,6 +407,9 @@ AccountModel2::AccountModel2(QObject *parent)
     m_row2UserNameIdx(),
     m_countersMap()
 {
+	/* Automatically handle signalled changes. */
+	connect(&globAccounts, SIGNAL(accountDataChanged(QString)),
+	    this, SLOT(handleAccountDataChange(QString)));
 }
 
 QModelIndex AccountModel2::index(int row, int column,
@@ -549,7 +552,7 @@ QVariant AccountModel2::data(const QModelIndex &index, int role) const
 		Q_ASSERT(0);
 		return QVariant();
 	}
-	const AccountModel2::SettingsMap &accountInfo(globAccounts[uName]);
+	const AcntSettings &accountInfo(globAccounts[uName]);
 	enum NodeType type = internalIdNodeType(index.internalId());
 
 	switch (role) {
@@ -809,7 +812,7 @@ void AccountModel2::saveToSettings(QSettings &settings) const
 		const int uNameIdx = m_row2UserNameIdx.at(row);
 		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
 		const QString &userName(m_userNames.at(uNameIdx));
-		const SettingsMap &itemSettings(globAccounts[userName]);
+		const AcntSettings &itemSettings(globAccounts[userName]);
 
 		Q_ASSERT(userName == itemSettings.userName());
 
@@ -875,9 +878,9 @@ void AccountModel2::saveToSettings(QSettings &settings) const
 	}
 }
 
-int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
+int AccountModel2::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 {
-	const QString userName(settingsMap.userName());
+	const QString userName(acntSettings.userName());
 
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -894,7 +897,7 @@ int AccountModel2::addAccount(const SettingsMap &settingsMap, QModelIndex *idx)
 
 	beginResetModel();
 
-	globAccounts[userName] = settingsMap;
+	globAccounts[userName] = acntSettings;
 
 	m_countersMap[userName] = AccountCounters();
 
@@ -1249,6 +1252,15 @@ bool AccountModel2::changePosition(const QString &userName, int shunt)
 	endMoveRows();
 
 	return true;
+}
+
+void AccountModel2::handleAccountDataChange(const QString &userName)
+{
+	QModelIndex topIndex(topAcntIndex(userName));
+
+	if (topIndex.isValid()) {
+		emit dataChanged(topIndex, topIndex);
+	}
 }
 
 void AccountModel2::removeYearNodes(const QModelIndex &topIndex)
