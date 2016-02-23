@@ -32,7 +32,6 @@
 #include <QTreeView>
 
 #include "src/common.h"
-#include "src/models/accounts_model.h"
 #include "ui_dlg_change_pwd.h"
 
 

@@ -27,10 +27,9 @@
 #include "dlg_create_account.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
-#include "src/models/accounts_model.h"
 
 
-DlgCreateAccount::DlgCreateAccount(const AccountModel::SettingsMap &accountInfo,
+DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     Action action, QWidget *parent)
     : QDialog(parent),
     m_accountInfo(accountInfo),
@@ -276,7 +275,7 @@ void DlgCreateAccount::saveAccount(void)
 {
 	debugSlotCall();
 
-	AccountModel::SettingsMap itemSettings;
+	AcntSettings itemSettings;
 	const QString userName(m_accountInfo.userName());
 
 	/* set account index, itemTop and map itemSettings for account */
@@ -338,13 +337,14 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		/* TODO -- Update account model according to settings. */
 		AccountModel::globAccounts[userName] = itemSettings;
 		/*
 		 * Catching the following signal is required only when
 		 * ACT_EDIT was enabled.
+		 *
+		 * The account model catches the signal.
 		 */
-		emit changedAccountProperties(userName);
+		emit AccountModel::globAccounts.accountDataChanged(userName);
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:

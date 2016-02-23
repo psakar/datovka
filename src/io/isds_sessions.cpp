@@ -32,6 +32,7 @@
 #include "isds_sessions.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/log/log.h"
+#include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
 

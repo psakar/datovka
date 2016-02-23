@@ -160,15 +160,10 @@ private slots:
 	void datovkaVersionResponce(QNetworkReply* reply);
 
 	/*!
-	 * @brief Updates the account model according to the change properties.
-	 */
-	void updateAccountListEntry(const QString &userName);
-
-	/*!
 	 * @brief Verify whether a connection to ISDS can be establisehd
 	 *     and databox exists for the account.
 	 */
-	void getAccountUserDataboxInfo(AccountModel::SettingsMap accountInfo);
+	void getAccountUserDataboxInfo(AcntSettings accountInfo);
 
 	/*!
 	 * @brief Redraws widgets according to selected account item.
@@ -917,7 +912,7 @@ private:
 	 *
 	 * @note Does not add/remove any nodes, just updates the counts.
 	 */
-	bool updateExistingAccountModelUnread(QModelIndex index);
+	bool updateExistingAccountModelUnread(const QModelIndex &index);
 
 	/*!
 	 * @brief Partially regenerates account model according to the database
@@ -929,7 +924,7 @@ private:
 	 * @note This function adds/removes nodes and does not set the
 	 *     currentIndex back to its original position.
 	 */
-	bool regenerateAccountModelYears(QModelIndex index);
+	bool regenerateAccountModelYears(const QModelIndex &index);
 
 	/*!
 	 * @brief Regenerates account model according to the database content.
@@ -967,22 +962,6 @@ private:
 	QString createDatovkaBanner(const QString &version) const;
 
 	/*!
-	 * @brief Returns user name related to given account item.
-	 *
-	 * @note If accountItem is 0 then currently selected account is
-	 *     processed.
-	 */
-	QString userNameFromItem(const QStandardItem *accountItem = 0) const;
-
-	/*!
-	 * @brief Returns pointer to account item related to given user name.
-	 *
-	 * @param[in] userName User login name.
-	 * @return 0 when no such top item found.
-	 */
-	QStandardItem *itemFromUserName(const QString &userName) const;
-
-	/*!
 	 * @brief Set export paths to selected account item.
 	 */
 	void setAccountStoragePaths(const QString &userName);
@@ -1015,23 +994,20 @@ private:
 	/*!
 	 * @brief connect to ISDS databox from new account
 	 */
-	bool firstConnectToIsds(AccountModel::SettingsMap &accountInfo,
-	    bool showDialog);
+	bool firstConnectToIsds(AcntSettings &accountInfo, bool showDialog);
 
 	/*!
 	 * @brief Login to ISDS server by user name and password only.
 	 */
 	static
-	bool loginMethodUserNamePwd(
-	    AccountModel::SettingsMap &accountInfo,
+	bool loginMethodUserNamePwd(AcntSettings &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString());
 
 	/*!
 	 * @brief Login to ISDS server by user name, password and OTP code.
 	 */
 	static
-	bool loginMethodUserNamePwdOtp(
-	    AccountModel::SettingsMap &accountInfo,
+	bool loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &otp = QString());
 
@@ -1057,15 +1033,14 @@ private:
 	 * @brief Login to ISDS server by certificate only.
 	 */
 	static
-	bool loginMethodCertificateOnly(AccountModel::SettingsMap &accountInfo,
+	bool loginMethodCertificateOnly(AcntSettings &accountInfo,
 	    MainWindow *mw, const QString &key = QString());
 
 	/*!
 	 * @brief Login to ISDS server by certificate, user name and password.
 	 */
 	static
-	bool loginMethodCertificateUserPwd(
-	    AccountModel::SettingsMap &accountInfo,
+	bool loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 	    MainWindow *mw, const QString &pwd = QString(),
 	    const QString &key = QString());
 
@@ -1073,8 +1048,8 @@ private:
 	 * @brief Login to ISDS server by certificate and data box ID.
 	 */
 	static
-	bool loginMethodCertificateIdBox(
-	    AccountModel::SettingsMap &accountInfo, MainWindow *mw);
+	bool loginMethodCertificateIdBox(AcntSettings &accountInfo,
+	    MainWindow *mw);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.

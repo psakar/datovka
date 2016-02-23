@@ -43,6 +43,7 @@
 #include "src/io/message_db.h"
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
+#include "src/models/accounts_model.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"

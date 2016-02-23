@@ -34,7 +34,6 @@
 #include "src/common.h"
 #include "src/gui/datovka.h"
 #include "src/io/message_db_set.h"
-#include "src/models/accounts_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"

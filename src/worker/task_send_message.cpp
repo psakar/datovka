@@ -29,6 +29,7 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
 

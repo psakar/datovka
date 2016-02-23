@@ -30,7 +30,6 @@
 #include <QTimer>
 
 #include "src/common.h"
-#include "src/models/accounts_model.h"
 #include "ui_dlg_ds_search.h"
 
 

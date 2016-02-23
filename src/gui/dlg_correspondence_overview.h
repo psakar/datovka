@@ -32,7 +32,6 @@
 
 #include "ui_dlg_correspondence_overview.h"
 #include "src/io/message_db_set.h"
-#include "src/models/accounts_model.h"
 
 
 class DlgCorrespondenceOverview : public QDialog,
