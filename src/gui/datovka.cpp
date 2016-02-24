@@ -2012,7 +2012,7 @@ void MainWindow::openSelectedAttachment(void)
 	if (!fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Attachment '%1' stored to "
 		    "temporary file '%2'.").arg(attachName).arg(fileName));
-		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Attachment '%1' couldn't be "
@@ -6986,8 +6986,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
 
 	if (!tmpEmailFile.isEmpty()) {
-		QDesktopServices::openUrl(
-		    QUrl(URL_FILE_PREFIX + tmpEmailFile));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(tmpEmailFile));
 	}
 }
 
@@ -7078,8 +7077,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
 
 	if (!tmpEmailFile.isEmpty()) {
-		QDesktopServices::openUrl(
-		    QUrl(URL_FILE_PREFIX + tmpEmailFile));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(tmpEmailFile));
 	}
 }
 
@@ -7137,8 +7135,7 @@ void MainWindow::sendAttachmentsEmail(void)
 	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
 
 	if (!tmpEmailFile.isEmpty()) {
-		QDesktopServices::openUrl(
-		    QUrl(URL_FILE_PREFIX + tmpEmailFile));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(tmpEmailFile));
 	}
 }
 
@@ -7199,7 +7196,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	if (!fileName.isEmpty()) {
 		showStatusTextWithTimeout(tr("Message '%1' stored to "
 		    "temporary file '%2'.").arg(dmId).arg(fileName));
-		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Message '%1' couldn't be "
@@ -7270,7 +7267,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		showStatusTextWithTimeout(tr("Message delivery information "
 		    "'%1' stored to temporary file '%2'.").arg(dmId)
 		    .arg(fileName));
-		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(tr("Message delivery information "

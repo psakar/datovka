@@ -932,7 +932,7 @@ void DlgSendMessage::openAttachmentFile(void)
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
-		QDesktopServices::openUrl(QUrl(URL_FILE_PREFIX + fileName));
+		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		QMessageBox::warning(this,

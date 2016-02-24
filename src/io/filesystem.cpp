@@ -171,6 +171,7 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 	nameCopy.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
 	    ILL_FNAME_REP);
 
+	/* StandardLocation::writableLocation(QStandardPaths::TempLocation) ? */
 	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + nameCopy);
 	if (!fout.open()) {
 		return QString();
@@ -218,6 +219,7 @@ QString confDirPath(const QString &confSubdir)
 	return dirPath;
 
 #else /* !PORTABLE_APPLICATION */
+	/* StandardLocation::writableLocation(QStandardPaths::HomeLocation) ? */
 	QDir homeDir(QDir::homePath());
 
 	if (homeDir.exists(WIN_PREFIX) && !homeDir.exists(confSubdir)) {
