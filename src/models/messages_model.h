@@ -184,7 +184,9 @@ public:
 	DbMsgsTblModel &dummyModel(enum Type type);
 
 private:
-	Type m_type; /*!< Whether this is a model dummy or contains data. */
+	enum Type m_type; /*!<
+	                   * Whether this is a model dummy or contains data.
+	                   */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

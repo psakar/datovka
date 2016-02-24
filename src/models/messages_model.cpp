@@ -67,65 +67,38 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
 		case DB_BOOL_READ_LOCALLY:
-			{
-				/* Show icon for 'read locally'. */
-//				qint64 dmId = _data(
-//				    index.sibling(index.row(), 0),
-//				    Qt::DisplayRole).toLongLong();
-//				if (m_overriddenRL.value(dmId,
-//				        _data(index).toBool())) {
-				if (_data(index).toBool()) {
-					return QIcon(
-					    ICON_14x14_PATH "grey.png");
-				} else {
-					return QIcon(
-					    ICON_14x14_PATH "green.png");
-				}
+			/* Show icon for 'read locally'. */
+			if (_data(index).toBool()) {
+				return QIcon(ICON_14x14_PATH "grey.png");
+			} else {
+				return QIcon(ICON_14x14_PATH "green.png");
 			}
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
-			{
-				/* Show icon for 'is downloaded'. */
-//				qint64 dmId = _data(
-//				    index.sibling(index.row(), 0),
-//				    Qt::DisplayRole).toLongLong();
-//				if (m_overriddenAD.value(dmId, false) ||
-//				    _data(index).toBool()) {
-				if (_data(index).toBool()) {
-					return QIcon(
-					    ICON_14x14_PATH "attachment.png");
-				} else {
-					return QVariant(); /* No icon. */
-				}
+			/* Show icon for 'is downloaded'. */
+			if (_data(index).toBool()) {
+				return QIcon(ICON_14x14_PATH "attachment.png");
+			} else {
+				return QVariant(); /* No icon. */
 			}
 			break;
 		case DB_INT_PROCESSING_STATE:
-			{
-				/* Show icon for 'process status'. */
-//				qint64 dmId = _data(
-//				    index.sibling(index.row(), 0),
-//				    Qt::DisplayRole).toLongLong();
-//				switch (m_overriddenPS.value(dmId,
-//				            _data(index).toInt())) {
-				switch (_data(index).toInt()) {
-				case UNSETTLED:
-					return QIcon(
-					    ICON_14x14_PATH "red.png");
-					break;
-				case IN_PROGRESS:
-					return QIcon(
-					    ICON_14x14_PATH "yellow.png");
-					break;
-				case SETTLED:
-					return QIcon(
-					    ICON_14x14_PATH "grey.png");
-					break;
-				default:
-					Q_ASSERT(0);
-					break;
-				}
-				return QVariant();
+			/* Show icon for 'process status'. */
+			switch (_data(index).toInt()) {
+			case UNSETTLED:
+				return QIcon(ICON_14x14_PATH "red.png");
+				break;
+			case IN_PROGRESS:
+				return QIcon(ICON_14x14_PATH "yellow.png");
+				break;
+			case SETTLED:
+				return QIcon(ICON_14x14_PATH "grey.png");
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
 			}
+			return QVariant();
 			break;
 
 		default:
@@ -138,12 +111,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_COL,
 		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
 			/* In read messages. */
-//			qint64 dmId = _data(
-//			    index.sibling(index.row(), 0),
-//			    Qt::DisplayRole).toLongLong();
-//			if (!m_overriddenRL.value(dmId,
-//			        _data(index.sibling(index.row(),
-//			            READLOC_COL)).toBool())) {
 			if (!_data(index.sibling(index.row(),
 			        READLOC_COL)).toBool()) {
 				/* Unread messages are shown bold. */
@@ -181,9 +148,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toLongLong();
 				qint64 id;
-//				id = m_overriddenRL.value(dmId,
-//				    _data(index,
-//				        Qt::DisplayRole).toBool()) ? 1 : 0;
 				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
 				id = id << 48;
@@ -196,9 +160,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toLongLong();
 				qint64 id;
-//				id = (m_overriddenAD.value(dmId, false) ||
-//				    _data(index,
-//				        Qt::DisplayRole).toBool()) ? 1 : 0;
 				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
 				id = id << 48;
@@ -212,9 +173,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toLongLong();
 				qint64 id;
-//				id = m_overriddenPS.value(dmId,
-//				    _data(index,
-//				        Qt::DisplayRole).toInt());
 				id = _data(index, Qt::DisplayRole).toInt();
 				id = id << 48;
 				id += dmId;
