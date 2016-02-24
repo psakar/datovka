@@ -29,7 +29,6 @@
 #include <QDialog>
 
 #include "src/io/message_db_set.h"
-#include "src/models/accounts_model.h"
 #include "ui_dlg_msg_search.h"
 
 

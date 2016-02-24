@@ -26,6 +26,7 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
+#include "src/models/accounts_model.h"
 #include "src/views/table_home_end_filter.h"
 
 #define COL_USER_NAME 0

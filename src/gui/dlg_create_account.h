@@ -49,9 +49,8 @@ public:
 		ACT_IDBOX
 	};
 
-	/* TODO -- What is the purpose of @acntTopIdx ? */
-	DlgCreateAccount(const AccountModel::SettingsMap &accountInfo,
-	    Action action, QWidget *parent = 0);
+	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
+	    QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -60,14 +59,13 @@ private slots:
 	void checkInputFields(void);
 
 signals:
-	void changedAccountProperties(QString);
-	void getAccountUserDataboxInfo(AccountModel::SettingsMap);
+	void getAccountUserDataboxInfo(AcntSettings);
 
 private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);
 
-	const AccountModel::SettingsMap m_accountInfo;
+	const AcntSettings m_accountInfo;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;

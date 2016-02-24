@@ -286,8 +286,7 @@ void DlgSendMessage::setAccountInfo(int item)
 		}
 	}
 
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[m_userName];
+	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
 	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
 	Q_ASSERT(!m_dbId.isEmpty());
 	m_senderName =

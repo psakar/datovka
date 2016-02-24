@@ -100,6 +100,25 @@ QNetworkAccessManager* nam;
  */
 #define DISABLE_ALL_TABLE 1
 
+/*!
+ * @brief Returns QModelIndex of the currently selected account model node.
+ */
+#define currentAccountModelIndex() \
+	(ui->accountList->selectionModel()->currentIndex())
+
+/*!
+ * @brief Returns QModelIndex of the currently selected message model node.
+ */
+#define currentSingleMessageIndex() \
+	(ui->messageList->selectionModel()->currentIndex())
+
+/*!
+ * @brief Returns QModelIndexList containing first column indexes of selected
+ *     message model rows.
+ */
+#define currentFrstColMessageIndexes() \
+	(ui->messageList->selectionModel()->selectedRows(0))
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -548,12 +567,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(current);
-	const QStandardItem *accountItemTop =
-	    AccountModel::itemTop(accountItem);
-	const QString userName =
-	    accountItemTop->data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(m_accountModel.userName(current));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -573,8 +587,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
-		const AccountModel::SettingsMap &itemSettings =
-		    AccountModel::globAccounts[userName];
+		const AcntSettings &itemSettings(
+		    AccountModel::globAccounts[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
@@ -674,14 +688,16 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
-		msgTblMdl = dbSet->msgsRcvdInYearModel(accountItem->text());
+		msgTblMdl = dbSet->msgsRcvdInYearModel(
+		    current.data(ROLE_PLAIN_DISPLAY).toString());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
-		msgTblMdl = dbSet->msgsSntInYearModel(accountItem->text());
+		msgTblMdl = dbSet->msgsSntInYearModel(
+		    current.data(ROLE_PLAIN_DISPLAY).toString());
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
@@ -946,8 +962,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->messageInfo->setHtml("");
 	ui->messageInfo->setReadOnly(true);
 
-	QModelIndexList firstColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstColumnIdxs(currentFrstColMessageIndexes());
 
 	/* Stop the timer. */
 	m_messageMarker.stop();
@@ -963,8 +978,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	setMessageActionVisibility(firstColumnIdxs.size());
 
 	/* Reply only to received messages. */
-	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
-	    selectionModel()->currentIndex());
+	bool received =
+	    AccountModel::nodeTypeIsReceived(currentAccountModelIndex());
 	ui->actionReply->setEnabled(received && (firstColumnIdxs.size() == 1));
 
 	ui->messageStateCombo->setEnabled(received);
@@ -972,7 +987,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	if (1 == firstColumnIdxs.size()) {
 		const QModelIndex &index = firstColumnIdxs.first();
 
-		MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+		MessageDbSet *dbSet = accountDbSet(
+		    m_accountModel.userName(currentAccountModelIndex()), this);
 		Q_ASSERT(0 != dbSet);
 		qint64 msgId = index.data().toLongLong();
 		/* Remember last selected message. */
@@ -1065,7 +1081,8 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	/* Stop the timer. */
 	m_messageMarker.stop();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 
 	qint64 msgId = index.sibling(index.row(), 0).data().toLongLong();
@@ -1092,8 +1109,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	 * Reload/update account model only for
 	 * affected account.
 	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
+	updateExistingAccountModelUnread(currentAccountModelIndex());
 }
 
 
@@ -1115,8 +1131,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	}
 
 	bool singleSelected = true;
-	bool received = AccountModel::nodeTypeIsReceived(ui->accountList->
-	    selectionModel()->currentIndex());
+	bool received =
+	    AccountModel::nodeTypeIsReceived(currentAccountModelIndex());
 
 	QMenu *menu = new QMenu;
 	QMenu *submenu = 0;
@@ -1128,8 +1144,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	 * TODO -- Save whole selection?
 	 */
 	{
-		QModelIndexList firstMsgColumnIdxs =
-		    ui->messageList->selectionModel()->selectedRows(0);
+		QModelIndexList firstMsgColumnIdxs(
+		    currentFrstColMessageIndexes());
 
 		singleSelected = (1 == firstMsgColumnIdxs.size());
 
@@ -1207,17 +1223,14 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 	 * If we selected a message from last received then store the
 	 * selection to the model.
 	 */
-	QModelIndex acntIdx = ui->accountList->currentIndex();
+	QModelIndex acntIdx(currentAccountModelIndex());
 	m_lastSelectedAccountNodeType = AccountModel::nodeType(acntIdx);
-	if (AccountModel::nodeRecentReceived ==
-	    m_lastSelectedAccountNodeType) {
+	if (AccountModel::nodeRecentReceived == m_lastSelectedAccountNodeType) {
 
 		qDebug() << "Storing recent received selection into the model"
 		    << msgId;
 
-		acntIdx = AccountModel::indexTop(acntIdx);
-		const QString userName =
-		    acntIdx.data(ROLE_ACNT_USER_NAME).toString();
+		const QString userName(m_accountModel.userName(acntIdx));
 		Q_ASSERT(!userName.isEmpty());
 		AccountModel::globAccounts[userName].setLastMsg(msgId);
 	}
@@ -1234,13 +1247,11 @@ void MainWindow::storeExportPath(void)
 {
 	debugFuncCall();
 
-	QModelIndex acntIdx = ui->accountList->currentIndex();
-	acntIdx = AccountModel::indexTop(acntIdx);
-	const QString userName = acntIdx.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
+	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
 	accountInfo.setLastAttachSavePath(m_save_attach_dir);
 	accountInfo.setLastAttachAddPath(m_add_attach_dir);
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
@@ -1282,8 +1293,9 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 	int rowCount = model->rowCount();
 	int row = 0;
 
-	QModelIndex acntIdx = ui->accountList->currentIndex();
-	AccountModel::NodeType acntNodeType = AccountModel::nodeType(acntIdx);
+	QModelIndex acntIdx(currentAccountModelIndex());
+	enum AccountModel::NodeType acntNodeType =
+	    AccountModel::nodeType(acntIdx);
 
 	if (0 == rowCount) {
 		/* Do nothing on empty model. */
@@ -1348,15 +1360,12 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 		{
 			qint64 msgLastId = -1;
 			if (AccountModel::nodeRecentReceived == acntNodeType) {
-				acntIdx = AccountModel::indexTop(acntIdx);
-				const QString userName =
-				    acntIdx.data(ROLE_ACNT_USER_NAME)
-				        .toString();
+				const QString userName(
+				    m_accountModel.userName(acntIdx));
 				Q_ASSERT(!userName.isEmpty());
 
-				msgLastId =
-				    AccountModel::globAccounts[userName]
-				        .lastMsg();
+				msgLastId = AccountModel::globAccounts[userName]
+				    .lastMsg();
 			} else {
 				msgLastId = m_lastStoredMessageId;
 			}
@@ -1454,8 +1463,7 @@ QModelIndex MainWindow::accountYearlyIndex(const QString &userName,
 	debugFuncCall();
 
 	/* first step: search correspond account index from username */
-	QModelIndex acntIdxTop =
-	    m_accountModel.indexFromItem(itemFromUserName(userName));
+	QModelIndex acntIdxTop = m_accountModel.topAcntIndex(userName);
 
 	if (!acntIdxTop.isValid()) {
 		return QModelIndex();
@@ -1667,19 +1675,10 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 		attachmentIndexes = selectionModel->selectedRows(0);
 	}
 
-	QModelIndex messageIndex;
-	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		messageIndex = selectionModel->currentIndex();
-		if (!messageIndex.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
+	QModelIndex messageIndex(currentSingleMessageIndex());
+	if (!messageIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
 	}
 
 	foreach (const QModelIndex &attachmentIndex, attachmentIndexes) {
@@ -1721,10 +1720,8 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 		saveAttachPath = m_save_attach_dir;
 	}
 
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -1792,8 +1789,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 {
 	debugSlotCall();
 
-	QModelIndex messageIndex =
-	    ui->messageList->selectionModel()->currentIndex();
+	QModelIndex messageIndex(currentSingleMessageIndex());
 
 	qint64 dmId = messageIndex.sibling(
 	    messageIndex.row(), 0).data().toLongLong();
@@ -1821,10 +1817,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	bool unspecifiedFailed = false;
 	QList<QString> unsuccessfullFiles;
 
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
-	QModelIndex acntTopIndex = AccountModel::indexTop(selectedAcntIndex);
-	const QString userName =
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -2195,22 +2189,15 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	showStatusTextWithTimeout(tr("Message \"%1\" "
 	    " was downloaded from ISDS server.").arg(dmId));
 
-	QModelIndex acntTopIdx =
-	    m_accountModel.indexFromItem(itemFromUserName(userName));
-	if (!acntTopIdx.isValid()) {
+	const QString currentUserName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (currentUserName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	QModelIndex accountTopIndex =
-	    AccountModel::indexTop(ui->accountList->currentIndex());
-	if (!accountTopIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	/* Do nothing if account index was changed. */
-	if (accountTopIndex != acntTopIdx) {
+	/* Do nothing if account was changed. */
+	if (userName != currentUserName) {
 		return;
 	}
 
@@ -2241,8 +2228,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	ui->messageList->selectionModel()->select(storedMsgSelection,
 	    QItemSelectionModel::ClearAndSelect);
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
@@ -2264,7 +2250,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		        QItemSelection)));
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
@@ -2311,11 +2298,11 @@ void MainWindow::accountMarkReceivedLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 
 	dbSet->smsgdtSetAllReceivedLocallyRead(read);
 
@@ -2367,19 +2354,18 @@ void MainWindow::accountMarkReceivedYearLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 	/*
 	 * Data cannot be read directly from index because to the overloaded
 	 * model functions.
 	 * TODO -- Parameter check.
 	 */
-	dbSet->smsgdtSetReceivedYearLocallyRead(accountItem->text(), read);
+	dbSet->smsgdtSetReceivedYearLocallyRead(
+	    acntIdx.data(ROLE_PLAIN_DISPLAY).toString(), read);
 
 	/*
 	 * Reload/update account model only for
@@ -2430,11 +2416,11 @@ void MainWindow::accountMarkRecentReceivedLocallyRead(bool read)
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 
 	dbSet->smsgdtSetWithin90DaysReceivedLocallyRead(read);
 
@@ -2487,11 +2473,11 @@ void MainWindow::accountMarkReceivedProcessState(
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 
 	dbSet->msgSetAllReceivedProcessState(state);
 
@@ -2554,19 +2540,18 @@ void MainWindow::accountMarkReceivedYearProcessState(
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
-	const QStandardItem *accountItem =
-	    m_accountModel.itemFromIndex(acntIdx);
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 	/*
 	 * Data cannot be read directly from index because to the overloaded
 	 * model functions.
 	 * TODO -- Parameter check.
 	 */
-	dbSet->smsgdtSetReceivedYearProcessState(accountItem->text(), state);
+	dbSet->smsgdtSetReceivedYearProcessState(
+	    acntIdx.data(ROLE_PLAIN_DISPLAY).toString(), state);
 
 	/*
 	 * No need to reload account model.
@@ -2630,11 +2615,11 @@ void MainWindow::accountMarkRecentReceivedProcessState(
 {
 	debugFuncCall();
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
-	Q_ASSERT(0 != dbSet);
+	QModelIndex acntIdx(currentAccountModelIndex());
 
-	QModelIndex acntIdx =
-	    ui->accountList->selectionModel()->currentIndex();
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
+	    this);
+	Q_ASSERT(0 != dbSet);
 
 	dbSet->smsgdtSetWithin90DaysReceivedProcessState(state);
 
@@ -2698,8 +2683,7 @@ void MainWindow::messageItemsSelectedMarkRead(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetReadStatus(firstMsgColumnIdxs, true);
 }
@@ -2714,8 +2698,7 @@ void MainWindow::messageItemsSelectedMarkUnread(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetReadStatus(firstMsgColumnIdxs, false);
 }
@@ -2730,8 +2713,7 @@ void MainWindow::messageItemsSelectedMarkUnsettled(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetProcessStatus(firstMsgColumnIdxs, UNSETTLED);
 }
@@ -2746,8 +2728,7 @@ void MainWindow::messageItemsSelectedMarkInProgress(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetProcessStatus(firstMsgColumnIdxs, IN_PROGRESS);
 }
@@ -2762,8 +2743,7 @@ void MainWindow::messageItemsSelectedMarkSettled(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetProcessStatus(firstMsgColumnIdxs, SETTLED);
 }
@@ -2778,23 +2758,18 @@ void MainWindow::deleteMessage(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
 	}
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-
-	if (!acntTopIdx.isValid()) {
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
-
-	const QString userName =
-	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 
 	QString dlgTitleText, questionText, checkBoxText, detailText;
 
@@ -2839,7 +2814,7 @@ void MainWindow::deleteMessage(void)
 	}
 
 	/* Save current account index */
-	QModelIndex selectedAcntIndex = ui->accountList->currentIndex();
+	QModelIndex selectedAcntIndex(currentAccountModelIndex());
 
 	foreach (const MessageDb::MsgId &id, msgIds) {
 		switch (eraseMessage(userName, id.dmId, id.deliveryTime,
@@ -2884,8 +2859,7 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	bool incoming = true;
 	{
-		QModelIndex acntIdx = ui->accountList->
-		    selectionModel()->currentIndex();
+		QModelIndex acntIdx(currentAccountModelIndex());
 
 		switch (AccountModel::nodeType(acntIdx)) {
 		case AccountModel::nodeRecentReceived:
@@ -3023,8 +2997,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		QModelIndex index = m_accountModel.index(i, 0);
 		bool isConnectActive = true;
 
-		const QString userName =
-		    index.data(ROLE_ACNT_USER_NAME).toString();
+		const QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
 
 		/* Skip those that should omitted. */
@@ -3090,9 +3063,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -3135,10 +3107,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	debugSlotCall();
 
 	enum MessageDirection msgDirection = MSG_RECEIVED;
-	QModelIndex accountTopIndex;
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
@@ -3150,9 +3120,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		    msgDeliveryTime(idx)));
 	}
 
+	QString userName;
 	{
-		QModelIndex accountIndex =
-		    ui->accountList->selectionModel()->currentIndex();
+		QModelIndex accountIndex(currentAccountModelIndex());
 		Q_ASSERT(accountIndex.isValid());
 
 		switch (AccountModel::nodeType(accountIndex)) {
@@ -3170,12 +3140,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 			break;
 		}
 
-		accountTopIndex = AccountModel::indexTop(accountIndex);
+		userName = m_accountModel.userName(accountIndex);
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	const QString userName =
-	    accountTopIndex.data(ROLE_ACNT_USER_NAME).toString();
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -3497,54 +3465,6 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 
 /* ========================================================================= */
 /*
- * Returns user name related to given account item.
- */
-QString MainWindow::userNameFromItem(const QStandardItem *accountItem) const
-/* ========================================================================= */
-{
-	if (0 == accountItem) {
-		accountItem = m_accountModel.itemFromIndex(
-		    ui->accountList->selectionModel()->currentIndex());
-	}
-
-	accountItem = AccountModel::itemTop(accountItem);
-	Q_ASSERT(0 != accountItem);
-
-	const QString userName =
-	    accountItem->data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-
-	return userName;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns pointer to account item related to given user name.
- */
-QStandardItem *MainWindow::itemFromUserName(const QString &userName) const
-/* ========================================================================= */
-{
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return 0;
-	}
-
-	QStandardItem *item;
-	int topItemCount = m_accountModel.rowCount();
-	for (int i = 0; i < topItemCount; ++i) {
-		item = m_accountModel.item(i, 0);
-		if (item->data(ROLE_ACNT_USER_NAME).toString() == userName) {
-			return item;
-		}
-	}
-
-	return 0;
-}
-
-
-/* ========================================================================= */
-/*
  * Get message db set related to given account.
  */
 MessageDbSet * MainWindow::accountDbSet(const QString &userName,
@@ -3560,8 +3480,7 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	}
 
 	/* Get user name and db location. */
-	AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[userName];
+	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 
 	if (!itemSettings.isValid()) {
 		logWarning(
@@ -3859,8 +3778,7 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	const AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[userName];
+	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 
 	if (!itemSettings.lastAttachSavePath().isEmpty()) {
 		m_save_attach_dir = itemSettings.lastAttachSavePath();
@@ -3951,32 +3869,23 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 {
 	debugFuncCall();
 
-	QString username = settings.value("default_account/username", "")
+	QString userName = settings.value("default_account/username", "")
 	   .toString();
-	if (!username.isEmpty()) {
-		int topItemCount = m_accountModel.rowCount();
-		for (int i = 0; i < topItemCount; i++) {
-			const QStandardItem *item = m_accountModel.item(i,0);
-			const QString user =
-			    item->data(ROLE_ACNT_USER_NAME).toString();
-			if (user == username) {
-				QModelIndex index = m_accountModel.
-				    indexFromItem(item);
-				ui->accountList->
-				    setCurrentIndex(index.child(0,0));
-				accountItemCurrentChanged(index.child(0,0));
-				ui->menuDatabox->setEnabled(true);
-				ui->actionDelete_account->setEnabled(true);
-				ui->actionSync_all_accounts->setEnabled(true);
-				ui->actionFind_databox->setEnabled(true);
-				ui->actionMsgAdvancedSearch->setEnabled(true);
-				ui->actionImport_ZFO_file_into_database->
-				    setEnabled(true);
-				break;
-			}
+	if (!userName.isEmpty()) {
+		QModelIndex acntTopIdx = m_accountModel.topAcntIndex(userName);
+		if (acntTopIdx.isValid()) {
+			ui->accountList->setCurrentIndex(
+			    acntTopIdx.child(0, 0));
+			accountItemCurrentChanged(acntTopIdx.child(0, 0));
+			ui->menuDatabox->setEnabled(true);
+			ui->actionDelete_account->setEnabled(true);
+			ui->actionSync_all_accounts->setEnabled(true);
+			ui->actionFind_databox->setEnabled(true);
+			ui->actionMsgAdvancedSearch->setEnabled(true);
+			ui->actionImport_ZFO_file_into_database->
+			    setEnabled(true);
 		}
 	} else {
-
 		defaultUiMainWindowSettings();
 	}
 }
@@ -4370,14 +4279,9 @@ void MainWindow::saveSentReceivedColumnWidth(QSettings &settings) const
 void MainWindow::saveAccountIndex(QSettings &settings) const
 /* ========================================================================= */
 {
-	QModelIndex index = ui->accountList->currentIndex();
-	if (index.isValid()) {
-		const QStandardItem *item =
-		    m_accountModel.itemFromIndex(index);
-		const QStandardItem *itemTop = AccountModel::itemTop(item);
-
-		const QString userName =
-		    itemTop->data(ROLE_ACNT_USER_NAME).toString();
+	QModelIndex acntIndex(currentAccountModelIndex());
+	if (acntIndex.isValid()) {
+		const QString userName(m_accountModel.userName(acntIndex));
 		Q_ASSERT(!userName.isEmpty());
 
 		settings.beginGroup("default_account");
@@ -4391,7 +4295,7 @@ void MainWindow::saveAccountIndex(QSettings &settings) const
 /*
  * Update numbers of unread messages in account model.
  */
-bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
+bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 /* ========================================================================= */
 {
 	/*
@@ -4399,44 +4303,40 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
 	 * referred from multiple nodes.
 	 */
 
-	QStandardItem *topItem;
 	QList<QString> yearList;
 	int unreadMsgs;
 
 	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
 
 	/* Get database id. */
-	topItem = m_accountModel.itemFromIndex(index);
-	Q_ASSERT(0 != topItem);
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
 	/* Received. */
 	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
-	m_accountModel.updateRecentUnread(topItem,
+	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    yearList.value(j));
-		m_accountModel.updateYear(topItem,
+		m_accountModel.updateYear(userName,
 		    AccountModel::nodeReceivedYear, yearList.value(j),
 		    unreadMsgs);
 	}
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
-	m_accountModel.updateRecentUnread(topItem,
+	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
 		//qDebug() << "Sent" << yearList.value(j);
 		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
 		//    yearList.value(j));
-		m_accountModel.updateYear(topItem, AccountModel::nodeSentYear,
+		m_accountModel.updateYear(userName, AccountModel::nodeSentYear,
 		    yearList.value(j), 0);
 	}
 	return true;
@@ -4448,51 +4348,47 @@ bool MainWindow::updateExistingAccountModelUnread(QModelIndex index)
  * Partially regenerates account model according to the database
  *     content.
  */
-bool MainWindow::regenerateAccountModelYears(QModelIndex index)
+bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	QStandardItem *topItem;
 	QList<QString> yearList;
 	int unreadMsgs;
 
 	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
 
 	/* Get database id. */
-	topItem = m_accountModel.itemFromIndex(index);
-	Q_ASSERT(0 != topItem);
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
 	/* Received. */
 	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
-	m_accountModel.updateRecentUnread(topItem,
+	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
-	QList< QPair<QString, int> > yearlyUnreadList;
+	QList< QPair<QString, unsigned> > yearlyUnreadList;
 	foreach (const QString &year, yearList) {
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    year);
-		yearlyUnreadList.append(QPair<QString, int>(year, unreadMsgs));
+		yearlyUnreadList.append(QPair<QString, unsigned>(year, unreadMsgs));
 	}
-	m_accountModel.updateYearNodes(topItem, AccountModel::nodeReceivedYear,
+	m_accountModel.updateYearNodes(userName, AccountModel::nodeReceivedYear,
 	    yearlyUnreadList);
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
-	m_accountModel.updateRecentUnread(topItem,
+	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	yearlyUnreadList.clear();
 	foreach (const QString &year, yearList) {
 		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
 		//    year);
-		yearlyUnreadList.append(QPair<QString, int>(year, 0));
+		yearlyUnreadList.append(QPair<QString, unsigned>(year, 0));
 	}
-	m_accountModel.updateYearNodes(topItem, AccountModel::nodeSentYear,
+	m_accountModel.updateYearNodes(userName, AccountModel::nodeSentYear,
 	    yearlyUnreadList);
 	return true;
 }
@@ -4507,7 +4403,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 {
 	debugFuncCall();
 
-	QStandardItem *itemTop;
+	QModelIndex topIndex;
 	QList<QString> yearList;
 	int unreadMsgs;
 
@@ -4517,10 +4413,9 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 
 	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
 		/* Get database ID. */
-		itemTop = m_accountModel.item(i, 0);
-		Q_ASSERT(0 != itemTop);
-		const QString userName =
-		    itemTop->data(ROLE_ACNT_USER_NAME).toString();
+		topIndex = m_accountModel.index(i, 0);
+		Q_ASSERT(topIndex.isValid());
+		const QString userName(m_accountModel.userName(topIndex));
 		Q_ASSERT(!userName.isEmpty());
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		if (0 == dbSet) {
@@ -4533,26 +4428,26 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		/* Received. */
 		unreadMsgs = dbSet->msgsUnreadWithin90Days(
 		    MessageDb::TYPE_RECEIVED);
-		m_accountModel.updateRecentUnread(itemTop,
+		m_accountModel.updateRecentUnread(userName,
 		    AccountModel::nodeRecentReceived, unreadMsgs);
 		yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED,
 		    DESCENDING);
 		foreach (const QString &year, yearList) {
 			unreadMsgs = dbSet->msgsUnreadInYear(
 			    MessageDb::TYPE_RECEIVED, year);
-			m_accountModel.appendYear(itemTop,
+			m_accountModel.appendYear(userName,
 			    AccountModel::nodeReceivedYear, year, unreadMsgs);
 		}
 		/* Sent. */
 		//unreadMsgs = dbSet->msgsUnreadWithin90Days(
 		//    MessageDb::TYPE_SENT);
-		m_accountModel.updateRecentUnread(itemTop,
+		m_accountModel.updateRecentUnread(userName,
 		    AccountModel::nodeRecentSent, 0);
 		yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 		foreach (const QString &year, yearList) {
 			//unreadMsgs = dbSet->msgsUnreadInYear(
 			//    MessageDb::TYPE_SENT, year);
-			m_accountModel.appendYear(itemTop,
+			m_accountModel.appendYear(userName,
 			    AccountModel::nodeSentYear, year, 0);
 		}
 	}
@@ -4658,15 +4553,15 @@ void MainWindow::openSendMessageDialog(int action)
 	QDateTime deliveryTime;
 
 	/* get username of selected account */
-	const QString userName(userNameFromItem());
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	/* if not reply, get pointers to database for other accounts */
 	if (DlgSendMessage::ACT_REPLY != action) {
 		for (int i=0; i < ui->accountList->model()->rowCount(); i++) {
 			QModelIndex index = m_accountModel.index(i, 0);
-			const QString uName =
-			    index.data(ROLE_ACNT_USER_NAME).toString();
+			const QString uName(m_accountModel.userName(index));
 			Q_ASSERT(!uName.isEmpty());
 			MessageDbSet *dbSet = accountDbSet(uName, this);
 			Q_ASSERT(0 != dbSet);
@@ -4685,7 +4580,7 @@ void MainWindow::openSendMessageDialog(int action)
 		    ui->messageList->model();
 		Q_ASSERT(0 != tableModel);
 		QModelIndex index = tableModel->index(
-		    ui->messageList->currentIndex().row(), 0);
+		    currentSingleMessageIndex().row(), 0);
 		msgId = tableModel->itemData(index).first().toLongLong();
 		deliveryTime = msgDeliveryTime(index);
 	}
@@ -4734,12 +4629,12 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *newAccountDialog = new DlgCreateAccount(
-	   AccountModel::SettingsMap(), DlgCreateAccount::ACT_ADDNEW, this);
+	QDialog *newAccountDialog = new DlgCreateAccount(AcntSettings(),
+	    DlgCreateAccount::ACT_ADDNEW, this);
 
 	connect(newAccountDialog,
-	    SIGNAL(getAccountUserDataboxInfo(AccountModel::SettingsMap)),
-	    this, SLOT(getAccountUserDataboxInfo(AccountModel::SettingsMap)));
+	    SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
+	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -4761,27 +4656,23 @@ void MainWindow::deleteSelectedAccount(void)
 {
 	debugSlotCall();
 
-	const QModelIndex index = ui->accountList->currentIndex();
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-	int currentTopRow = itemTop->row();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 
-	if (currentTopRow < 0) {
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
-
-	const QString userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
-	const QString accountName =
-	    AccountModel::globAccounts[userName].accountName();
+	const QString accountName(
+	    AccountModel::globAccounts[userName].accountName());
 
-	QString dlgTitleText = tr("Remove account ") + itemTop->text();
+	QString dlgTitleText = tr("Remove account ") + accountName;
 	QString questionText = tr("Do you want to remove account") + " '" +
-	    itemTop->text() + "' (" + userName + ")?";
+	    accountName + "' (" + userName + ")?";
 	QString checkBoxText = tr("Delete also message database from storage");
 	QString detailText = tr(
 	    "Warning: If you delete the message database then all locally "
@@ -4791,37 +4682,33 @@ void MainWindow::deleteSelectedAccount(void)
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
 	    questionText, checkBoxText, detailText, this);
 	int retVal = yesNoCheckDlg->exec();
+	yesNoCheckDlg->deleteLater();
 
-	switch (retVal) {
-	case YesNoCheckboxDialog::YesChecked:
-		/* Delete account and its message db set. */
-		if (itemTop->hasChildren()) {
-			itemTop->removeRows(0, itemTop->rowCount());
-		}
+	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
+	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
+		/* Delete account from model. */
+		m_accountModel.deleteAccount(userName);
 		globAccountDbPtr->deleteAccountInfo(userName + "___True");
-		ui->accountList->model()->removeRow(currentTopRow);
+	}
+
+	if (YesNoCheckboxDialog::YesChecked == retVal) {
 		if (globMessageDbsPtr->deleteDbSet(dbSet)) {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
-			    "together with message database file.").arg(accountName));
+			    "together with message database file.")
+			    .arg(accountName));
 		} else {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
-			    "but its message database was not deleted.").arg(accountName));
+			    "but its message database was not deleted.")
+			    .arg(accountName));
 		}
-		saveSettings();
-		break;
-	case YesNoCheckboxDialog::YesUnchecked:
-		/* Delete account and remove its items from the treeview */
-		if (itemTop->hasChildren()) {
-			itemTop->removeRows(0, itemTop->rowCount());
-		}
-		globAccountDbPtr->deleteAccountInfo(userName + "___True");
-		ui->accountList->model()->removeRow(currentTopRow);
+	} else if (YesNoCheckboxDialog::YesUnchecked == retVal) {
 		showStatusTextWithTimeout(tr("Account '%1' was deleted.")
 		    .arg(accountName));
+	}
+
+	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
+	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
 		saveSettings();
-		break;
-	default:
-		break;
 	}
 
 	if (ui->accountList->model()->rowCount() < 1) {
@@ -4839,11 +4726,8 @@ void MainWindow::changeAccountPassword(void)
 {
 	debugSlotCall();
 
-	QModelIndex index = ui->accountList->currentIndex();
-	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
-
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
@@ -4856,8 +4740,7 @@ void MainWindow::changeAccountPassword(void)
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
 	Q_ASSERT(!dbId.isEmpty());
 
-	const AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
+	const AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
 
 	showStatusTextWithTimeout(tr("Change password of account "
 	    "\"%1\".").arg(accountInfo.accountName()));
@@ -4876,10 +4759,8 @@ void MainWindow::manageAccountProperties(void)
 {
 	debugSlotCall();
 
-	QModelIndex index = ui->accountList->currentIndex();
-	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
@@ -4889,16 +4770,14 @@ void MainWindow::manageAccountProperties(void)
 	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
 	    this);
 
-	connect(editAccountDialog, SIGNAL(changedAccountProperties(QString)),
-	    this, SLOT(updateAccountListEntry(QString)));
-
 	if (QDialog::Accepted == editAccountDialog->exec()) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
 		saveSettings();
 	}
-}
 
+	editAccountDialog->deleteLater();
+}
 
 /* ========================================================================= */
 /*
@@ -4909,27 +4788,15 @@ void MainWindow::moveSelectedAccountUp(void)
 {
 	debugSlotCall();
 
-	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
-	    (ui->accountList->model());
-	QModelIndex index = ui->accountList->currentIndex();
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	int currentTopRow = itemTop->row();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
 
-	if (currentTopRow == 0) {
-		return;
+	if (m_accountModel.changePosition(userName, -1)) {
+		showStatusTextWithTimeout(tr("Account was moved up."));
 	}
-
-	int newRow = currentTopRow-1;
-	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow);
-	itemModel->insertRow(newRow, list);
-	//ui->accountList->expandAll();
-	index = itemModel->indexFromItem(itemTop);
-	ui->accountList->setCurrentIndex(index.child(0,0));
-
-	showStatusTextWithTimeout(tr("Account was moved up."));
-
 }
+
 
 /* ========================================================================= */
 /*
@@ -4940,26 +4807,13 @@ void MainWindow::moveSelectedAccountDown(void)
 {
 	debugSlotCall();
 
-	QStandardItemModel *itemModel = qobject_cast<QStandardItemModel *>
-	    (ui->accountList->model());
-	QModelIndex index = ui->accountList->currentIndex();
-	const QStandardItem *item = m_accountModel.itemFromIndex(index);
-	const QStandardItem *itemTop = AccountModel::itemTop(item);
-	int currentTopRow = itemTop->row();
-	int topItemCount = m_accountModel.rowCount()-1;
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
 
-	if (currentTopRow == topItemCount) {
-		return;
+	if (m_accountModel.changePosition(userName, 1)) {
+		showStatusTextWithTimeout(tr("Account was moved down."));
 	}
-
-	int newRow = currentTopRow+1;
-	QList<QStandardItem *> list = itemModel->takeRow(currentTopRow) ;
-	itemModel->insertRow(newRow, list);
-	//ui->accountList->expandAll();
-	index = itemModel->indexFromItem(itemTop);
-	ui->accountList->setCurrentIndex(index.child(0,0));
-
-	showStatusTextWithTimeout(tr("Account was moved down."));
 }
 
 
@@ -4972,14 +4826,10 @@ void MainWindow::changeDataDirectory(void)
 {
 	debugSlotCall();
 
-	const QModelIndex index = ui->accountList->currentIndex();
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	QStandardItem *itemTop = AccountModel::itemTop(item);
-
-	const QString userName = itemTop->data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
-	const AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[userName];
+	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
@@ -5010,16 +4860,12 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 {
 	debugSlotCall();
 
-	const QModelIndex index = ui->accountList->currentIndex();
-	QStandardItem *item = m_accountModel.itemFromIndex(index);
-	item = AccountModel::itemTop(item);
-
-	const QString userName = item->data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	/* Get current settings. */
-	AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[userName];
+	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
@@ -5114,11 +4960,8 @@ void MainWindow::findDatabox(void)
 {
 	debugSlotCall();
 
-	QModelIndex index = ui->accountList->currentIndex();
-	Q_ASSERT(index.isValid());
-	index = AccountModel::indexTop(index);
-
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	if (!isdsSessions.isConnectedToIsds(userName)) {
@@ -5265,7 +5108,7 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	debugSlotCall();
 
 	(void) oldSize;
-	QModelIndex current = ui->accountList->currentIndex();
+	QModelIndex current(currentAccountModelIndex());
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeRecentReceived:
@@ -5448,32 +5291,25 @@ void MainWindow::refreshAccountList(const QString &userName)
 {
 	debugFuncCall();
 
-	QModelIndex selectedIdx(ui->accountList->currentIndex());
-	QModelIndex selectedTopIdx(AccountModel::indexTop(selectedIdx));
+	QModelIndex selectedIdx(currentAccountModelIndex());
+	const QString selectedUserName(m_accountModel.userName(selectedIdx));
+	/* There may be no account selected. */
 
-	QModelIndex acntTopIdx(
-	    m_accountModel.indexFromItem(itemFromUserName(userName)));
-
-	if (!acntTopIdx.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	AccountModel::NodeType nodeType = AccountModel::nodeUnknown;
+	enum AccountModel::NodeType nodeType = AccountModel::nodeUnknown;
 	MessageDb::MessageType msgType;
 	QString year;
 	qint64 dmId = -1;
 
-	if (selectedTopIdx == acntTopIdx) {
+	if (selectedUserName == userName) {
 		/* Currently selected is the one being processed. */
 		nodeType = AccountModel::nodeType(selectedIdx);
 		switch (nodeType) {
 		case AccountModel::nodeReceivedYear:
-			year = selectedIdx.data().toString();
+			year = selectedIdx.data(ROLE_PLAIN_DISPLAY).toString();
 			msgType = MessageDb::TYPE_RECEIVED;
 			break;
 		case AccountModel::nodeSentYear:
-			year = selectedIdx.data().toString();
+			year = selectedIdx.data(ROLE_PLAIN_DISPLAY).toString();
 			msgType = MessageDb::TYPE_SENT;
 			break;
 		default:
@@ -5482,8 +5318,8 @@ void MainWindow::refreshAccountList(const QString &userName)
 		}
 
 		if (nodeType != AccountModel::nodeUnknown) {
-			QModelIndexList firstMsgColumnIdxs =
-			    ui->messageList->selectionModel()->selectedRows(0);
+			QModelIndexList firstMsgColumnIdxs(
+			    currentFrstColMessageIndexes());
 			if (firstMsgColumnIdxs.size() == 1) {
 				QModelIndex msgIdx(firstMsgColumnIdxs.first());
 				if (msgIdx.isValid()) {
@@ -5495,7 +5331,7 @@ void MainWindow::refreshAccountList(const QString &userName)
 	}
 
 	/* Redraw views' content. */
-	regenerateAccountModelYears(acntTopIdx);
+	regenerateAccountModelYears(m_accountModel.topAcntIndex(userName));
 
 	/*
 	 * Force repaint.
@@ -5704,8 +5540,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 	int accountCount = ui->accountList->model()->rowCount();
 	for (int i = 0; i < accountCount; i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName =
-		    index.data(ROLE_ACNT_USER_NAME).toString();
+		const QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
 		currentAccountList.append(userName);
 	}
@@ -5754,7 +5589,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 			continue;
 		}
 
-		AccountModel::SettingsMap itemSettings;
+		AcntSettings itemSettings;
 		itemSettings.setTestAccount(dbTestingFlag);
 		itemSettings.setAccountName(dbUserName);
 		itemSettings.setUserName(dbUserName);
@@ -5763,7 +5598,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 		itemSettings.setRememberPwd(false);
 		itemSettings.setSyncWithAll(false);
 		itemSettings.setDbDir(m_on_import_database_dir_activate);
-		m_accountModel.addAccount(dbUserName, itemSettings);
+		m_accountModel.addAccount(itemSettings);
 		errMsg = tr("Account with name '%1' has been "
 		    "created (user name '%1').").arg(dbUserName)
 		    + " " +
@@ -5778,6 +5613,8 @@ void MainWindow::createAccountFromDatabaseFileList(
 		    tr("File") + ": " + filePathList.at(i) +
 		    "\n\n" + errMsg,
 		    QMessageBox::Ok);
+
+		refreshAccountList(dbUserName);
 
 		saveSettings();
 	}
@@ -5796,11 +5633,8 @@ int MainWindow::authenticateMessageFromZFO(void)
 {
 	debugFuncCall();
 
-	QModelIndex acntTopIdx = ui->accountList->currentIndex();
-	acntTopIdx = AccountModel::indexTop(acntTopIdx);
-
-	const QString userName =
-	    acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	QString fileName = QFileDialog::getOpenFileName(this,
@@ -5900,20 +5734,16 @@ void MainWindow::verifySelectedMessage(void)
 	debugSlotCall();
 
 	/* First column. */
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
 	}
 
-	QString userName;
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	qint64 dmId = -1;
 	QDateTime deliveryTime;
 	{
-		QModelIndex acntTopIdx = ui->accountList->currentIndex();
-		acntTopIdx = AccountModel::indexTop(acntTopIdx);
-		userName = acntTopIdx.data(ROLE_ACNT_USER_NAME).toString();
-
 		QModelIndex msgIdx = firstMsgColumnIdxs.first();
 		dmId = msgIdx.sibling(msgIdx.row(), 0).data().toLongLong();
 		deliveryTime = msgDeliveryTime(msgIdx);
@@ -6034,10 +5864,8 @@ void MainWindow::exportCorrespondenceOverview(void)
 {
 	debugSlotCall();
 
-	QModelIndex index = ui->accountList->currentIndex();
-	index = AccountModel::indexTop(index);
-
-	const QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -6223,7 +6051,7 @@ QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
 
-		QString userName = index.data(ROLE_ACNT_USER_NAME).toString();
+		QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
 
 		if ((!activeOnly) ||
@@ -6514,8 +6342,8 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 
 	enum MessageDirection msgDirect = MSG_RECEIVED;
 
-	QModelIndex index = ui->accountList->selectionModel()->currentIndex();
-	switch (AccountModel::nodeType(index)) {
+	QModelIndex acntIndex(currentAccountModelIndex());
+	switch (AccountModel::nodeType(acntIndex)) {
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
@@ -6530,7 +6358,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 		break;
 	}
 
-	const QString userName = userNameFromItem();
+	const QString userName(m_accountModel.userName(acntIndex));
 	Q_ASSERT(!userName.isEmpty());
 	if (!isdsSessions.isConnectedToIsds(userName)) {
 		if (!connectToIsds(userName, this)) {
@@ -6961,16 +6789,13 @@ void MainWindow::exportSelectedMessagesAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
@@ -6992,16 +6817,13 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
@@ -7024,16 +6846,13 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
@@ -7056,16 +6875,13 @@ void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
@@ -7087,8 +6903,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
@@ -7112,10 +6927,8 @@ void MainWindow::sendMessagesZfoEmail(void)
 
 	createEmailMessage(emailMessage, subject, boundary);
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
@@ -7182,8 +6995,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (0 == firstMsgColumnIdxs.size()) {
 		return;
 	}
@@ -7207,10 +7019,8 @@ void MainWindow::sendAllAttachmentsEmail(void)
 
 	createEmailMessage(emailMessage, subject, boundary);
 
-	QModelIndex acntTopIndex(
-	    AccountModel::indexTop(ui->accountList->currentIndex()));
 	const QString userName(
-	    acntTopIndex.data(ROLE_ACNT_USER_NAME).toString());
+	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
@@ -7290,13 +7100,7 @@ void MainWindow::sendAttachmentsEmail(void)
 
 	qint64 dmId = -1;
 	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		QModelIndex messageIndex = selectionModel->currentIndex();
+		QModelIndex messageIndex(currentSingleMessageIndex());
 		if (!messageIndex.isValid()) {
 			Q_ASSERT(0);
 			return;
@@ -7348,8 +7152,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	debugSlotCall();
 
 	/* First column. */
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
 	}
@@ -7364,7 +7167,8 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
@@ -7418,8 +7222,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	debugSlotCall();
 
 	/* First column. */
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
 	}
@@ -7434,7 +7237,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
@@ -7489,8 +7293,7 @@ void MainWindow::showSignatureDetails(void)
 	debugSlotCall();
 
 	/* First column. */
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
 		return;
 	}
@@ -7507,7 +7310,8 @@ void MainWindow::showSignatureDetails(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -7731,8 +7535,7 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 /*
 * Login to ISDS server by username and password only.
 */
-bool MainWindow::loginMethodUserNamePwd(
-    AccountModel::SettingsMap &accountInfo,
+bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
     MainWindow *mw, const QString &pwd)
 /* ========================================================================= */
 {
@@ -7889,8 +7692,7 @@ bool MainWindow::p12CertificateToPem(const QString &p12Path,
 /*
 * Login to ISDS server by user certificate only.
 */
-bool MainWindow::loginMethodCertificateOnly(
-    AccountModel::SettingsMap &accountInfo,
+bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
     MainWindow *mw, const QString &key)
 /* ========================================================================= */
 {
@@ -8030,8 +7832,7 @@ bool MainWindow::loginMethodCertificateOnly(
 /*
 * Login to ISDS server by user certificate, username and password.
 */
-bool MainWindow::loginMethodCertificateUserPwd(
-    AccountModel::SettingsMap &accountInfo,
+bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
     MainWindow *mw, const QString &pwd, const QString &key)
 /* ========================================================================= */
 {
@@ -8173,8 +7974,8 @@ bool MainWindow::loginMethodCertificateUserPwd(
 /*
 * Login to ISDS server by user certificate and databox ID.
 */
-bool MainWindow::loginMethodCertificateIdBox(
-    AccountModel::SettingsMap &accountInfo, MainWindow *mw)
+bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
+    MainWindow *mw)
 /* ========================================================================= */
 {
 #if 0 /* This function is unused */
@@ -8295,8 +8096,7 @@ bool MainWindow::loginMethodCertificateIdBox(
 /*
 * Login to ISDS server by username, password and OTP code.
 */
-bool MainWindow::loginMethodUserNamePwdOtp(
-    AccountModel::SettingsMap &accountInfo,
+bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
     MainWindow *mw, const QString &pwd, const QString &otp)
 /* ========================================================================= */
 {
@@ -8525,8 +8325,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	}
 
 	/* Check password expiration. */
-	AccountModel::SettingsMap &accountInfo =
-	    AccountModel::globAccounts[userName];
+	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
 
 	if (!accountInfo.isValid()) {
 		logWarning("Account for user name '%s' is invalid.\n",
@@ -8659,8 +8458,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 /*
  * First connect to databox from new account
  */
-bool MainWindow::firstConnectToIsds(AccountModel::SettingsMap &accountInfo,
-    bool showDialog)
+bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo, bool showDialog)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -8753,33 +8551,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 /* ========================================================================= */
 /*
- * Updates the account model according to the change properties.
- */
-void MainWindow::updateAccountListEntry(const QString &userName)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	int row = ui->accountList->model()->rowCount();
-	QModelIndex index;
-	for (int i = 0; i < row; i++) {
-		index = ui->accountList->model()->index(i,0);
-		if (userName == index.data(ROLE_ACNT_USER_NAME).toString()) {
-			QStandardItem *accountItem =
-			    m_accountModel.itemFromIndex(index);
-			accountItem->setText(
-			    AccountModel::globAccounts[userName].accountName());
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Verify if is a connection to ISDS and databox exists for a new account
  */
-void MainWindow::getAccountUserDataboxInfo(
-    AccountModel::SettingsMap accountInfo)
+void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -8815,15 +8589,19 @@ void MainWindow::getAccountUserDataboxInfo(
 		}
 	}
 
-	QModelIndex index = m_accountModel.addAccount(accountInfo.accountName(),
-	    accountInfo);
+	QModelIndex index;
+	m_accountModel.addAccount(accountInfo, &index);
+
+	refreshAccountList(accountInfo.userName());
 
 	qDebug() << "Changing selection" << index;
 	/* get current account model */
-	ui->accountList->selectionModel()->setCurrentIndex(index,
-	    QItemSelectionModel::ClearAndSelect);
-	/* Expand the tree. */
-	ui->accountList->expand(index);
+	if (index.isValid()) {
+		ui->accountList->selectionModel()->setCurrentIndex(index,
+		    QItemSelectionModel::ClearAndSelect);
+		/* Expand the tree. */
+		ui->accountList->expand(index);
+	}
 }
 
 
@@ -8853,8 +8631,7 @@ void MainWindow::msgSetSelectedMessageProcessState(int stateIndex)
 		break;
 	}
 
-	QModelIndexList firstMsgColumnIdxs =
-	    ui->messageList->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	messageItemsSetProcessStatus(firstMsgColumnIdxs, procSt);
 }
@@ -8871,12 +8648,12 @@ void MainWindow::messageItemsSetReadStatus(
 	debugFuncCall();
 
 	/* Works only for received messages. */
-	if (!AccountModel::nodeTypeIsReceived(ui->accountList->
-	        selectionModel()->currentIndex())) {
+	if (!AccountModel::nodeTypeIsReceived(currentAccountModelIndex())) {
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 
 	QItemSelection storedMsgSelection =
@@ -8912,8 +8689,7 @@ void MainWindow::messageItemsSetReadStatus(
 	 * Reload/update account model only for
 	 * affected account.
 	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
+	updateExistingAccountModelUnread(currentAccountModelIndex());
 }
 
 
@@ -8928,12 +8704,12 @@ void MainWindow::messageItemsSetProcessStatus(
 	debugFuncCall();
 
 	/* Works only for received messages. */
-	if (!AccountModel::nodeTypeIsReceived(ui->accountList->
-	        selectionModel()->currentIndex())) {
+	if (!AccountModel::nodeTypeIsReceived(currentAccountModelIndex())) {
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userNameFromItem(), this);
+	MessageDbSet *dbSet = accountDbSet(
+	   m_accountModel.userName(currentAccountModelIndex()), this);
 	Q_ASSERT(0 != dbSet);
 
 	QItemSelection storedMsgSelection =
@@ -8969,8 +8745,7 @@ void MainWindow::messageItemsSetProcessStatus(
 	 * Reload/update account model only for
 	 * affected account.
 	 */
-	updateExistingAccountModelUnread(ui->accountList->
-	    selectionModel()->currentIndex());
+	updateExistingAccountModelUnread(currentAccountModelIndex());
 }
 
 
@@ -9006,24 +8781,21 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	QList< QPair<QString, MessageDbSet *> > messageDbList;
 
 	/* get pointer to database for current accounts */
-	QModelIndex currIndex = ui->accountList->currentIndex();
-	currIndex = AccountModel::indexTop(currIndex);
-	const QString userName =
-	    currIndex.data(ROLE_ACNT_USER_NAME).toString();
-	Q_ASSERT(!userName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	const QString currentUserName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!currentUserName.isEmpty());
+	MessageDbSet *dbSet = accountDbSet(currentUserName, this);
 	Q_ASSERT(0 != dbSet);
-	userNameAndMsgDbSet.first = userName;
+	userNameAndMsgDbSet.first = currentUserName;
 	userNameAndMsgDbSet.second = dbSet;
 	messageDbList.append(userNameAndMsgDbSet);
 
 	/* get pointer to database for other accounts */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		if (currIndex != index) {
-			const QString userName =
-			    index.data(ROLE_ACNT_USER_NAME).toString();
-			Q_ASSERT(!userName.isEmpty());
+		const QString userName(m_accountModel.userName(index));
+		Q_ASSERT(!userName.isEmpty());
+		if (currentUserName != userName) {
 			MessageDbSet *dbSet = accountDbSet(userName, this);
 			userNameAndMsgDbSet.first = userName;
 			userNameAndMsgDbSet.second = dbSet;
@@ -9031,7 +8803,7 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 		}
 	}
 
-	dlgMsgSearch = new DlgMsgSearch(messageDbList, userName, this,
+	dlgMsgSearch = new DlgMsgSearch(messageDbList, currentUserName, this,
 	    Qt::Window);
 	connect(dlgMsgSearch, SIGNAL(focusSelectedMsg(QString, qint64, QString, int)),
 	    this, SLOT(messageItemFromSearchSelection(QString, qint64, QString, int)));
@@ -9128,7 +8900,6 @@ void MainWindow::prepareMsgTmstmpExpir(
 {
 	debugSlotCall();
 
-	QModelIndex index;
 	QString userName;
 	bool includeSubdir = false;
 	QString importDir;
@@ -9141,9 +8912,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 	switch (action) {
 	case TimestampExpirDialog::CHECK_TIMESTAMP_CURRENT:
 		/* Process the selected account. */
-		index = ui->accountList->currentIndex();
-		index = AccountModel::indexTop(index);
-		userName = index.data(ROLE_ACNT_USER_NAME).toString();
+		userName = m_accountModel.userName(currentAccountModelIndex());
 		Q_ASSERT(!userName.isEmpty());
 		showStatusTextPermanently(tr("Checking time stamps in "
 		    "account '%1'...").arg(
@@ -9153,8 +8922,8 @@ void MainWindow::prepareMsgTmstmpExpir(
 
 	case TimestampExpirDialog::CHECK_TIMESTAMP_ALL:
 		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
-			index = m_accountModel.index(i, 0);
-			userName = index.data(ROLE_ACNT_USER_NAME).toString();
+			QModelIndex index = m_accountModel.index(i, 0);
+			userName = m_accountModel.userName(index);
 			Q_ASSERT(!userName.isEmpty());
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...").arg(
@@ -9544,7 +9313,8 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	m_on_import_database_dir_activate =
 	    QFileInfo(files.at(0)).absoluteDir().absolutePath();
 
-	doMsgsImportFromDatabase(files, userNameFromItem());
+	doMsgsImportFromDatabase(files,
+	    m_accountModel.userName(currentAccountModelIndex()));
 }
 
 
@@ -9802,7 +9572,8 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 	msgBox.setDefaultButton(QMessageBox::No);
 	if (QMessageBox::Yes == msgBox.exec()) {
-		splitMsgDbByYears(userNameFromItem());
+		splitMsgDbByYears(
+		    m_accountModel.userName(currentAccountModelIndex()));
 	}
 }
 
@@ -9878,8 +9649,7 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 	    "database file was returned back.");
 
 	/* get current db file location */
-	AccountModel::SettingsMap &itemSettings =
-	    AccountModel::globAccounts[userName];
+	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		dbDir = globPref.confDir();
