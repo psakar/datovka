@@ -4092,6 +4092,15 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionAuthenticate_message_file->setEnabled(false);
 	ui->actionExport_correspondence_overview->setEnabled(false);
 	ui->actionCheck_message_timestamp_expiration->setEnabled(false);
+
+	// Top tool bar
+	//ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionGet_messages->setEnabled(false);
+	ui->actionSend_message->setEnabled(false);
+	ui->actionReply->setEnabled(false);
+	ui->actionAuthenticate_message->setEnabled(false);
+	//ui->actionMsgAdvancedSearch->setEnabled(false);
+	ui->actionAccount_properties->setEnabled(false);
 }
 
 
