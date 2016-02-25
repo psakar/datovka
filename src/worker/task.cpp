@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <cinttypes>
+
 #include "src/crypto/crypto_funcs.h"
 #include "src/io/account_db.h" /* globAccountDbPtr */
 #include "src/io/dbs.h"
@@ -56,11 +58,11 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 		if (messageDb->msgsInsertUpdateDeliveryInfoRaw(dmID,
 		    QByteArray((char*)msg->raw, msg->raw_length))) {
 			logDebugLv0NL(
-			    "Raw delivery info of message '%d' was updated.",
+			    "Raw delivery info of message '%" PRId64 "' was updated.",
 			    dmID);
 		} else {
 			logErrorNL(
-			    "Raw delivery info of message '%d' update failed.",
+			    "Raw delivery info of message '%" PRId64 "' update failed.",
 			    dmID);
 		}
 	}
@@ -154,11 +156,12 @@ qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
 	    msgDirect)) {
-		logDebugLv0NL("Stored envelope of message '%d' into database.",
+		logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
 		    dmId);
 		return Q_SUCCESS;
 	} else {
-		logErrorNL("Storing envelope of message '%d' failed.", dmId);
+		logErrorNL("Storing envelope of message '%" PRId64 "' failed.",
+		    dmId);
 		return Q_GLOBAL_ERROR;
 	}
 }
@@ -211,10 +214,12 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	if (signedMsg) {
 		if (messageDb->msgsInsertUpdateMessageRaw(dmID,
 		        QByteArray((char*) msg->raw, msg->raw_length), 0)) {
-			logDebugLv0NL("Raw data of message '%d' were updated.",
+			logDebugLv0NL(
+			    "Raw data of message '%" PRId64 "' were updated.",
 			    dmID);
 		} else {
-			logErrorNL("Updating raw data of message '%d' failed.",
+			logErrorNL(
+			    "Updating raw data of message '%" PRId64 "' failed.",
 			    dmID);
 		}
 	}
@@ -222,9 +227,11 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
 	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel)) {
-		logDebugLv0NL("Envelope of message '%d' updated.", dmID);
+		logDebugLv0NL("Envelope of message '%" PRId64 "' updated.",
+		    dmID);
 	} else {
-		logErrorNL("Updating envelope of message '%d' failed.", dmID);
+		logErrorNL("Updating envelope of message '%" PRId64 "' failed.",
+		    dmID);
 	}
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 50);
@@ -233,8 +240,9 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		/* Verify message signature. */
 		int ret = raw_msg_verify_signature(msg->raw,
 		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
-		logDebugLv0NL("Verification of message '%d' returned: %d.",
-		    dmID, ret);
+		logDebugLv0NL(
+		   "Verification of message '%" PRId64 "' returned: %d.",
+		   dmID, ret);
 		if (1 == ret) {
 			messageDb->msgsSetVerified(dmID, true);
 			/* TODO -- handle return error. */
@@ -256,9 +264,11 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		    hash->length).toBase64();
 		if (messageDb->msgsInsertUpdateMessageHash(dmID,
 		        hashValueBase64, convertHashAlg(hash->algorithm))) {
-			logDebugLv0NL("Hash of message '%d' stored.", dmID);
+			logDebugLv0NL("Hash of message '%" PRId64 "' stored.",
+			    dmID);
 		} else {
-			logErrorNL("Storing hash of message '%s' failed.",
+			logErrorNL(
+			    "Storing hash of message '%" PRId64 "' failed.",
 			    dmID);
 		}
 	}
@@ -370,11 +380,13 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
 	    msgDirect)) {
-		logDebugLv0NL("Updated envelope of message '%d' in database.",
+		logDebugLv0NL(
+		    "Updated envelope of message '%" PRId64 "' in database.",
 		    dmId);
 		return Q_SUCCESS;
 	} else {
-		logErrorNL("Updating envelope of message '%d' failed.", dmId);
+		logErrorNL("Updating envelope of message '%" PRId64 "' failed.",
+		    dmId);
 		return Q_GLOBAL_ERROR;
 	}
 }

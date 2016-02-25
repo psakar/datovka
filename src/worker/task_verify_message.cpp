@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <cstdlib>
 #include <cstring>
 #include <QThread>
@@ -151,7 +152,8 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	isds_error status = isds_download_message_hash(session,
 	    QString::number(dmId).toUtf8().constData(), &hashIsds);
 	if (IE_SUCCESS != status) {
-		logErrorNL("Error downloading hash of message '%d'.", dmId);
+		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
+		    dmId);
 		error = isds_error(status);
 		longError = isds_long_message(session);
 		isds_hash_free(&hashIsds);
@@ -163,7 +165,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	struct isds_hash *hashLocal = localMessageHash(messageDb, dmId);
 	if (NULL == hashLocal) {
 		logErrorNL(
-		    "Error obtaining hash of message '%d' from local database.",
+		    "Error obtaining hash of message '%" PRId64 "' from local database.",
 		    dmId);
 		isds_hash_free(&hashIsds);
 		return VERIFY_SQL_ERR;

@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <QThread>
 
 #include "src/io/dbs.h"
@@ -73,7 +74,7 @@ void TaskDownloadMessage::run(void)
 	/* ### Worker task begin. ### */
 
 	logDebugLv1NL("%s", "-----------------------------------------------");
-	logDebugLv1NL("Downloading %s message '%d' for account '%s'.",
+	logDebugLv1NL("Downloading %s message '%" PRId64 "' for account '%s'.",
 	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent", m_mId.dmId,
 	    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
@@ -82,11 +83,12 @@ void TaskDownloadMessage::run(void)
 	    *m_dbSet, m_isdsError, m_isdsLongError, PL_DOWNLOAD_MESSAGE);
 
 	if (DM_SUCCESS == m_result) {
-		logDebugLv1NL("Done downloading message '%d' for account '%s'.",
+		logDebugLv1NL(
+		    "Done downloading message '%" PRId64 "' for account '%s'.",
 		    m_mId.dmId,
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	} else {
-		logErrorNL("Downloading message '%d' for account '%s' failed.",
+		logErrorNL("Downloading message '%" PRId64 "' for account '%s' failed.",
 		    m_mId.dmId,
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	}
@@ -172,7 +174,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 {
 	debugFuncCall();
 
-	logDebugLv0NL("Trying to download complete message '%d'", mId.dmId);
+	logDebugLv0NL("Trying to download complete message '%" PRId64 "'",
+	    mId.dmId);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
@@ -265,10 +268,12 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	/* Download and save delivery info and message events */
 	if (DM_SUCCESS == downloadDeliveryInfo(userName, mId.dmId, signedMsg,
 	        dbSet, error, longError)) {
-		logDebugLv0NL("Delivery info of message '%d' processed.",
+		logDebugLv0NL(
+		    "Delivery info of message '%" PRId64 "' processed.",
 		    mId.dmId);
 	} else {
-		logErrorNL("Processing delivery info of message '%d' failed.",
+		logErrorNL(
+		    "Processing delivery info of message '%" PRId64 "' failed.",
 		    mId.dmId);
 	}
 
@@ -282,11 +287,12 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		/*  Mark this message as downloaded in ISDS */
 		if (DM_SUCCESS == markMessageAsDownloaded(userName, mId.dmId,
 		        error, longError)) {
-			logDebugLv0NL("Message '%d' marked as downloaded.",
+			logDebugLv0NL(
+			    "Message '%" PRId64 "' marked as downloaded.",
 			    mId.dmId);
 		} else {
 			logErrorNL(
-			    "Marking message '%d' as downloaded failed.",
+			    "Marking message '%" PRId64 "' as downloaded failed.",
 			    mId.dmId);
 		}
 	}
@@ -333,11 +339,11 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	if (messageDb.updateMessageAuthorInfo(dmId,
 	        convertSenderTypeToString((int) *sender_type), sender_name)) {
 		logDebugLv0NL(
-		    "Author information of message '%d' were updated.",
+		    "Author information of message '%" PRId64 "' were updated.",
 		    dmId);
 	} else {
 		logErrorNL(
-		    "Updating author information of message '%d' failed.",
+		    "Updating author information of message '%" PRId64 "' failed.",
 		    dmId);
 	}
 

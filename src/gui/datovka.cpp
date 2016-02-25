@@ -21,7 +21,7 @@
  * the two.
  */
 
-
+#include <cinttypes>
 #include <cstdlib> /* exit(3) */
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -1844,7 +1844,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%d'.", dmId);
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
 			return;
 		}
 
@@ -2879,8 +2879,9 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	if (delFromIsds && !isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
-		logErrorNL("%s",
-		    "Couldn't connect to ISDS when erasing message.");
+		logErrorNL(
+		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
+		    dmId);
 		return false;
 	}
 
@@ -2899,13 +2900,14 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	switch (result) {
 	case TaskEraseMessage::NOT_DELETED:
-		logErrorNL("Message '%d' couldn't be deleted.", dmId);
+		logErrorNL("Message '%" PRId64 "' couldn't be deleted.", dmId);
 		showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
 		    .arg(dmId));
 		return false;
 		break;
 	case TaskEraseMessage::DELETED_ISDS:
-		logWarning("Message '%d' deleted only from ISDS.\n", dmId);
+		logWarning("Message '%" PRId64 "' deleted only from ISDS.\n",
+		    dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted only from ISDS.").arg(dmId));
 		return false;
@@ -2913,13 +2915,14 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 	case TaskEraseMessage::DELETED_LOCAL:
 		if (delFromIsds) {
 			logWarning(
-			    "Message '%d' deleted only from local database.\n",
+			    "Message '%" PRId64 "' deleted only from local database.\n",
 			    dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted only from local database.")
 			    .arg(dmId));
 		} else {
-			logInfo("Message '%d' deleted from local database.\n",
+			logInfo(
+			    "Message '%" PRId64 "' deleted from local database.\n",
 			    dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted from local database.")
@@ -2928,7 +2931,8 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		return true;
 		break;
 	case TaskEraseMessage::DELETED_ISDS_LOCAL:
-		logInfo("Message '%d' deleted from ISDS and local database.\n",
+		logInfo(
+		    "Message '%" PRId64 "' deleted from ISDS and local database.\n",
 		    dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted from ISDS and local database.")
@@ -6275,7 +6279,7 @@ void MainWindow::exportMessageAsZFO(const QString &attachPath,
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%d'.", dmId);
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
 			return;
 		}
 
@@ -6463,7 +6467,7 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%d'.", dmId);
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
 			return;
 		}
 
@@ -6561,7 +6565,7 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%d'.", dmId);
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
 			return;
 		}
 
@@ -6655,7 +6659,7 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%d'.", dmId);
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
 			return;
 		}
 
@@ -6965,7 +6969,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 			if (0 == messageDb) {
 				Q_ASSERT(0);
 				logErrorNL("Could not access database of "
-				    "freshly downloaded message '%d'.", dmId);
+				    "freshly downloaded message '%" PRId64 "'.", dmId);
 				return;
 			}
 
@@ -7057,7 +7061,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			if (0 == messageDb) {
 				Q_ASSERT(0);
 				logErrorNL("Could not access database of "
-				    "freshly downloaded message '%d'.", dmId);
+				    "freshly downloaded message '%" PRId64 "'.", dmId);
 				return;
 			}
 

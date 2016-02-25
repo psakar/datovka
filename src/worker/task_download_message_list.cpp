@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <QThread>
 
 #include "src/io/dbs.h"
@@ -458,11 +459,11 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 	        convertHexToDecIndex(*envel->dmMessageStatus) : 0)) {
 		/* Updated message envelope delivery info in db. */
 		logDebugLv0NL(
-		    "Delivery information of message '%d' were updated.",
+		    "Delivery information of message '%" PRId64 "' were updated.",
 		    dmID);
 	} else {
 		logErrorNL(
-		    "Updating delivery information of message '%d' failed.",
+		    "Updating delivery information of message '%" PRId64 "' failed.",
 		    dmID);
 	}
 

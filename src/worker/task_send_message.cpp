@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <cstdlib>
 #include <cstring>
 #include <QThread>
@@ -499,8 +500,9 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		        senderName, message->envelope->dbIDRecipient,
 		        recipientName, recipientAddress,
 		        envelope->dmAnnotation)) {
-			logErrorNL("Cannot insert newly sent message '%d' "
-			    "into database.", dmId);
+			logErrorNL(
+			    "Cannot insert newly sent message '%" PRId64 "' into database.",
+			    dmId);
 			ret = SM_DB_INS_ERR;
 			goto fail;
 		}

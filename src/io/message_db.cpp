@@ -21,7 +21,7 @@
  * the two.
  */
 
-
+#include <cinttypes>
 #include <QAbstractTableModel>
 #include <QDateTime>
 #include <QDebug>
@@ -5146,7 +5146,8 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	Q_ASSERT(rawBytes.size() > 0);
 
 	if (ignoreMissingCrlCheck) {
-		logWarning("CRL check is not performed for message %d.\n",
+		logWarning(
+		    "CRL check is not performed for message '%" PRId64 "'.\n",
 		    dmId);
 	}
 	time_t utcTime = dateTime.toTime_t();

@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <QThread>
 
 #include "src/io/isds_sessions.h"
@@ -108,14 +109,15 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		    QString::number(dmId).toUtf8().constData(), incoming);
 
 		if (IE_SUCCESS == status) {
-			logDebugLv1NL("Message '%d' was deleted from ISDS.",
+			logDebugLv1NL(
+			    "Message '%" PRId64 "' was deleted from ISDS.",
 			    dmId);
 		} else {
 			error = isds_strerror(status);
 			longError = isds_long_message(session);
 
 			logErrorNL(
-			    "Erasing message from ISDS '%d' returned status '%d': '%s'",
+			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",
 			    dmId, status, error.toUtf8().constData());
 		}
 	}
@@ -125,11 +127,13 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 	}
 
 	if (messageDb->msgsDeleteMessageData(dmId)) {
-		logDebugLv1NL("Message '%d' was deleted from local database.",
+		logDebugLv1NL(
+		    "Message '%" PRId64 "' was deleted from local database.",
 		    dmId);
 		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS_LOCAL : DELETED_LOCAL;
 	} else {
-		logErrorNL("Could not delete message '%d' from local database.",
+		logErrorNL(
+		    "Could not delete message '%" PRId64 "' from local database.",
 		    dmId);
 		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS : NOT_DELETED;
 	}
