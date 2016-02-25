@@ -233,8 +233,8 @@ win32 {
 		mingw32built/include/
 
 	LIBS = \
-		e:/Git/qdatovka/mingw32built/bin/libisds-5.dll \
-		e:/Git/qdatovka/mingw32built/bin/libeay32.dll
+		$${_PRO_FILE_PWD_}/mingw32built/bin/libisds-5.dll \
+		$${_PRO_FILE_PWD_}/mingw32built/bin/libeay32.dll
 
 	SOURCES += src/compat/compat_win.c
 
