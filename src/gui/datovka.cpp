@@ -2794,6 +2794,7 @@ void MainWindow::deleteMessage(void)
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
 	    questionText, checkBoxText, detailText, this);
 	int retVal = yesNoCheckDlg->exec();
+	yesNoCheckDlg->deleteLater();
 	bool delMsgIsds = false;
 
 	if (retVal == YesNoCheckboxDialog::YesChecked) {
@@ -2817,9 +2818,8 @@ void MainWindow::deleteMessage(void)
 	QModelIndex selectedAcntIndex(currentAccountModelIndex());
 
 	foreach (const MessageDb::MsgId &id, msgIds) {
-		switch (eraseMessage(userName, id.dmId, id.deliveryTime,
-		            delMsgIsds)) {
-		case Q_SUCCESS:
+		if (eraseMessage(userName, id.dmId, id.deliveryTime,
+		        delMsgIsds)) {
 			/*
 			 * Hiding selected line in the message model actually
 			 * does not help. The model contains all the old data
@@ -2833,9 +2833,6 @@ void MainWindow::deleteMessage(void)
 			 * TODO -- Remove the year on account list if last
 			 * message was removed.
 			 */
-			break;
-		default:
-			break;
 		}
 	}
 }
@@ -2846,7 +2843,7 @@ void MainWindow::deleteMessage(void)
  * Delete message from long term storage in ISDS and
  * local database - based on action parameter.
 */
-qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
+bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
     const QDateTime &deliveryTime, bool delFromIsds)
 /* ========================================================================= */
 {
@@ -2855,7 +2852,10 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	bool incoming = true;
 	{
@@ -2877,12 +2877,11 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		}
 	}
 
-	if (delFromIsds) {
-		if (!isdsSessions.isConnectedToIsds(userName)) {
-			if (!connectToIsds(userName, this)) {
-				return Q_ISDS_ERROR;
-			}
-		}
+	if (delFromIsds && !isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		logErrorNL("%s",
+		    "Couldn't connect to ISDS when erasing message.");
+		return false;
 	}
 
 	QString errorStr, longErrorStr;
@@ -2900,40 +2899,48 @@ qdatovka_error MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	switch (result) {
 	case TaskEraseMessage::NOT_DELETED:
-		showStatusTextWithTimeout(
-		    tr("Message \"%1\" was not deleted.").arg(dmId));
-		return Q_ISDS_ERROR;
+		logErrorNL("Message '%d' couldn't be deleted.", dmId);
+		showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
+		    .arg(dmId));
+		return false;
 		break;
 	case TaskEraseMessage::DELETED_ISDS:
+		logWarning("Message '%d' deleted only from ISDS.\n", dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted only from ISDS.").arg(dmId));
-		return Q_SQL_ERROR;
+		return false;
 		break;
 	case TaskEraseMessage::DELETED_LOCAL:
 		if (delFromIsds) {
+			logWarning(
+			    "Message '%d' deleted only from local database.\n",
+			    dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted only from local database.")
 			    .arg(dmId));
-			return Q_ISDS_ERROR;
 		} else {
+			logInfo("Message '%d' deleted from local database.\n",
+			    dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted from local database.")
 			    .arg(dmId));
-			return Q_SUCCESS;
 		}
+		return true;
 		break;
 	case TaskEraseMessage::DELETED_ISDS_LOCAL:
+		logInfo("Message '%d' deleted from ISDS and local database.\n",
+		    dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted from ISDS and local database.")
 		    .arg(dmId));
-		return Q_SUCCESS;
+		return true;
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return Q_ISDS_ERROR;
+	return false;
 }
 
 

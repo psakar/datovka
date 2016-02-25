@@ -969,9 +969,11 @@ private:
 	/*!
 	 * @brief Delete message from long term storage in ISDS and
 	 * local database - based on delFromIsds parameter.
+	 *
+	 * @return True if message has been removed from local database.
 	 */
-	qdatovka_error eraseMessage(const QString &userName, qint64 dmId,
-	    const QDateTime &deliveryTime, bool delFromIsds);
+	bool eraseMessage(const QString &userName, qint64 dmId,
+	     const QDateTime &deliveryTime, bool delFromIsds);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.
