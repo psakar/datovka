@@ -3891,6 +3891,8 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 			ui->menuDatabox->setEnabled(true);
 			ui->actionDelete_account->setEnabled(true);
 			ui->actionSync_all_accounts->setEnabled(true);
+			ui->actionGet_messages->setEnabled(true);
+			ui->actionSend_message->setEnabled(true);
 			ui->actionFind_databox->setEnabled(true);
 			ui->actionMsgAdvancedSearch->setEnabled(true);
 			ui->actionImport_ZFO_file_into_database->
@@ -4160,6 +4162,8 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionAccount_properties->setEnabled(action);
 	ui->actionChange_password->setEnabled(action);
 	ui->actionSync_all_accounts->setEnabled(action);
+	ui->actionGet_messages->setEnabled(action);
+	//ui->actionSend_message->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
 	ui->actionMsgAdvancedSearch->setEnabled(action);
@@ -5361,7 +5365,10 @@ void MainWindow::refreshAccountList(const QString &userName)
 	}
 
 	/* Redraw views' content. */
-	regenerateAccountModelYears(m_accountModel.topAcntIndex(userName));
+	const QModelIndex topAcntIdx(m_accountModel.topAcntIndex(userName));
+	if (topAcntIdx.isValid()) {
+		regenerateAccountModelYears(topAcntIdx);
+	}
 
 	/*
 	 * Force repaint.
