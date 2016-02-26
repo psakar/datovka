@@ -4732,6 +4732,7 @@ void MainWindow::deleteSelectedAccount(void)
 	}
 
 	if (ui->accountList->model()->rowCount() < 1) {
+		accountItemCurrentChanged(QModelIndex());
 		defaultUiMainWindowSettings();
 	}
 }
