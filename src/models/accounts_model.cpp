@@ -569,7 +569,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				const AccountCounters &cntrs(
 				    m_countersMap[uName]);
 				if (cntrs.unreadRecentReceived > 0) {
-					label += QString(" %1").arg(
+					label += QString(" (%1)").arg(
 					    cntrs.unreadRecentReceived);
 				}
 				return label;
@@ -602,7 +602,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				    cntrs.unreadReceivedGroups.find(label) !=
 				    cntrs.unreadReceivedGroups.constEnd());
 				if (cntrs.unreadReceivedGroups[label] > 0) {
-					label += QString(" %1").arg(
+					label += QString(" (%1)").arg(
 					    cntrs.unreadReceivedGroups[label]);
 				}
 				return label;
