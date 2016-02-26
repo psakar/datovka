@@ -69,7 +69,7 @@ public:
 	 */
 	virtual
 	QVariant data(const QModelIndex &index,
-	    int role = Qt::DisplayRole) const = 0;
+	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE = 0;
 
 	/*!
 	 * @brief Sets header data for the given role and section.
