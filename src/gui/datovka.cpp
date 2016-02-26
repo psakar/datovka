@@ -4382,7 +4382,10 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	/* Received. */
 	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
@@ -5311,6 +5314,12 @@ void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
+
+	if (userName.isEmpty()) {
+		logWarning("%s\n",
+		    "Cannot refresh account list on empty user name.");
+		return;
+	}
 
 	QModelIndex selectedIdx(currentAccountModelIndex());
 	const QString selectedUserName(m_accountModel.userName(selectedIdx));
