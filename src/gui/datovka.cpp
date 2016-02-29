@@ -989,7 +989,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 		MessageDbSet *dbSet = accountDbSet(
 		    m_accountModel.userName(currentAccountModelIndex()), this);
-		Q_ASSERT(0 != dbSet);
+		if (0 == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
 		qint64 msgId = index.data().toLongLong();
 		/* Remember last selected message. */
 		messageItemStoreSelection(msgId);
@@ -1083,7 +1086,10 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 
 	MessageDbSet *dbSet = accountDbSet(
 	    m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	qint64 msgId = index.sibling(index.row(), 0).data().toLongLong();
 	QDateTime deliveryTime = msgDeliveryTime(index);
@@ -1725,10 +1731,16 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -1822,7 +1834,10 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
@@ -2252,7 +2267,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 	MessageDbSet *dbSet = accountDbSet(
 	    m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
@@ -2302,7 +2320,10 @@ void MainWindow::accountMarkReceivedLocallyRead(bool read)
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	dbSet->smsgdtSetAllReceivedLocallyRead(read);
 
@@ -2358,7 +2379,10 @@ void MainWindow::accountMarkReceivedYearLocallyRead(bool read)
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	/*
 	 * Data cannot be read directly from index because to the overloaded
 	 * model functions.
@@ -2420,7 +2444,10 @@ void MainWindow::accountMarkRecentReceivedLocallyRead(bool read)
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	dbSet->smsgdtSetWithin90DaysReceivedLocallyRead(read);
 
@@ -2477,7 +2504,10 @@ void MainWindow::accountMarkReceivedProcessState(
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	dbSet->msgSetAllReceivedProcessState(state);
 
@@ -2544,7 +2574,10 @@ void MainWindow::accountMarkReceivedYearProcessState(
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	/*
 	 * Data cannot be read directly from index because to the overloaded
 	 * model functions.
@@ -2619,7 +2652,10 @@ void MainWindow::accountMarkRecentReceivedProcessState(
 
 	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
 	    this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	dbSet->smsgdtSetWithin90DaysReceivedProcessState(state);
 
@@ -3152,7 +3188,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
@@ -3349,7 +3388,10 @@ lastPart:
 	    info));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return QString();
+	}
 	QStringList dbFilePaths = dbSet->fileNames();
 	if ((dbFilePaths.size() == 1) &&
 	    (MessageDb::memoryLocation == dbFilePaths.first())) {
@@ -4329,7 +4371,10 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	/* Received. */
 	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
@@ -4584,12 +4629,18 @@ void MainWindow::openSendMessageDialog(int action)
 			const QString uName(m_accountModel.userName(index));
 			Q_ASSERT(!uName.isEmpty());
 			MessageDbSet *dbSet = accountDbSet(uName, this);
-			Q_ASSERT(0 != dbSet);
+			if (0 == dbSet) {
+				Q_ASSERT(0);
+				return;
+			}
 			messageDbList.append(Task::AccountDescr(uName, dbSet));
 		}
 	} else {
 		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
+		if (0 == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
 		messageDbList.append(Task::AccountDescr(userName, dbSet));
 	}
 
@@ -4685,7 +4736,10 @@ void MainWindow::deleteSelectedAccount(void)
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	const QString accountName(
 	    AccountModel::globAccounts[userName].accountName());
@@ -4888,7 +4942,10 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Move account database into new directory */
 	if ("move" == action) {
@@ -5780,7 +5837,10 @@ void MainWindow::verifySelectedMessage(void)
 	Q_ASSERT(deliveryTime.isValid());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
@@ -5895,7 +5955,10 @@ void MainWindow::exportCorrespondenceOverview(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
@@ -6083,12 +6146,13 @@ QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
 		if ((!activeOnly) ||
 		    isdsSessions.isConnectedToIsds(userName) ||
 		    connectToIsds(userName, this)) {
-			MessageDbSet *messageDbSet = accountDbSet(userName,
-			    this);
-			Q_ASSERT(0 != messageDbSet);
+			MessageDbSet *dbSet = accountDbSet(userName, this);
+			if (0 == dbSet) {
+				Q_ASSERT(0);
+				continue;
+			}
 
-			accountList.append(
-			    Task::AccountDescr(userName, messageDbSet));
+			accountList.append(Task::AccountDescr(userName, dbSet));
 		}
 	}
 
@@ -6274,7 +6338,10 @@ void MainWindow::exportMessageAsZFO(const QString &attachPath,
 	/* Delivery time can be invalid. */
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 	MessageDb::FilenameEntry entry =
@@ -6392,7 +6459,10 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	bool ret = false;
 	TaskDownloadMessage *task;
@@ -6461,7 +6531,10 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 	/* Delivery time can be invalid. */
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 	MessageDb::FilenameEntry entry =
@@ -6559,7 +6632,10 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 	/* Delivery time can be invalid. */
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 	MessageDb::FilenameEntry entry =
@@ -6653,7 +6729,10 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	/* Delivery time can be invalid. */
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 	MessageDb::FilenameEntry entry =
@@ -6959,7 +7038,10 @@ void MainWindow::sendMessagesZfoEmail(void)
 	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
@@ -7050,7 +7132,10 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	QDateTime deliveryTime(msgDeliveryTime(firstMsgColumnIdxs.first()));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
@@ -7191,7 +7276,10 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	MessageDbSet *dbSet = accountDbSet(
 	    m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
@@ -7261,7 +7349,10 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	MessageDbSet *dbSet = accountDbSet(
 	    m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
@@ -8651,7 +8742,10 @@ void MainWindow::messageItemsSetReadStatus(
 
 	MessageDbSet *dbSet = accountDbSet(
 	    m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
@@ -8707,7 +8801,10 @@ void MainWindow::messageItemsSetProcessStatus(
 
 	MessageDbSet *dbSet = accountDbSet(
 	   m_accountModel.userName(currentAccountModelIndex()), this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
@@ -8782,7 +8879,10 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!currentUserName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(currentUserName, this);
-	Q_ASSERT(0 != dbSet);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 	userNameAndMsgDbSet.first = currentUserName;
 	userNameAndMsgDbSet.second = dbSet;
 	messageDbList.append(userNameAndMsgDbSet);
@@ -8794,6 +8894,10 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 		Q_ASSERT(!userName.isEmpty());
 		if (currentUserName != userName) {
 			MessageDbSet *dbSet = accountDbSet(userName, this);
+			if (0 == dbSet) {
+				Q_ASSERT(0);
+				continue;
+			}
 			userNameAndMsgDbSet.first = userName;
 			userNameAndMsgDbSet.second = dbSet;
 			messageDbList.append(userNameAndMsgDbSet);
@@ -9065,7 +9169,10 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 	} else {
 		MessageDbSet *dbSet = accountDbSet(userName, this);
-		Q_ASSERT(0 != dbSet);
+		if (0 == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
 
 		QList<MessageDb::MsgId> msgIdList = dbSet->getAllMessageIDsFromDB();
 		msgCnt = msgIdList.count();
