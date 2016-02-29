@@ -3074,10 +3074,25 @@ void MainWindow::synchroniseAllAccounts(void)
 			continue;
 		}
 
+		bool downloadReceivedMessages =
+		    globPref.auto_download_whole_messages;
+		if (downloadReceivedMessages) {
+			/* Method connectToIsds() acquires account information. */
+			const QString acndDbKey(userName + "___True");
+			UserEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+			const QString key("userPrivils");
+			if (userEntry.hasValue(key)) {
+				int privils = userEntry.value(key).toInt();
+				if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
+					downloadReceivedMessages = false;
+				}
+			}
+		}
+
 		TaskDownloadMessageList *task;
 
 		task = new (std::nothrow) TaskDownloadMessageList(userName,
-		    dbSet, MSG_RECEIVED, globPref.auto_download_whole_messages);
+		    dbSet, MSG_RECEIVED, downloadReceivedMessages);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task);
 
@@ -3131,10 +3146,26 @@ void MainWindow::synchroniseSelectedAccount(void)
 		return;
 	}
 
+	/* Method connectToIsds() acquires account information. */
+
+	bool downloadReceivedMessages = globPref.auto_download_whole_messages;
+	if (downloadReceivedMessages) {
+		/* Method connectToIsds() acquires account information. */
+		const QString acndDbKey(userName + "___True");
+		UserEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+		const QString key("userPrivils");
+		if (userEntry.hasValue(key)) {
+			int privils = userEntry.value(key).toInt();
+			if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
+				downloadReceivedMessages = false;
+			}
+		}
+	}
+
 	TaskDownloadMessageList *task;
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_RECEIVED, globPref.auto_download_whole_messages);
+	    MSG_RECEIVED, downloadReceivedMessages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
