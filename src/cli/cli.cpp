@@ -1775,14 +1775,13 @@ int runService(const QString &lParam,
 			otp = loginMap["otpcode"].toString();
 		}
 
-		if (!isdsSessions.isConnectedToIsds(username)) {
-			if (!MainWindow::connectToIsds(username,0,pwd,otp)) {
-				errmsg = "Missing session for " + username +
-				   " or connection fails";
-				qDebug() << errmsg;
-				printErrToStdErr(CLI_CONNECT_ERR, errmsg);
-				return ret;
-			}
+		if (!isdsSessions.isConnectedToIsds(username) &&
+		    !MainWindow::connectToIsds(username, 0, pwd, otp)) {
+			errmsg = "Missing session for " + username +
+			   " or connection fails";
+			qDebug() << errmsg;
+			printErrToStdErr(CLI_CONNECT_ERR, errmsg);
+			return ret;
 		}
 		qDebug() << CLI_PREFIX << "User" << username
 		    << "has been logged into databox";

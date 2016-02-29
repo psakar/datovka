@@ -32,7 +32,6 @@
 #include <QTreeView>
 
 #include "src/common.h"
-#include "src/gui/datovka.h"
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
@@ -51,7 +50,7 @@ public:
 
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    Action action, qint64 msgId, const QDateTime &deliveryTime,
-	    const QString &userName, MainWindow *mv, QWidget *parent = 0);
+	    const QString &userName, class MainWindow *mv, QWidget *parent = 0);
 
 signals:
 	void doActionAfterSentMsgSignal(const QString, const QString);
@@ -98,7 +97,7 @@ private:
 	QString m_pdzCredit;
 	QString m_dmType;
 	QString m_dmSenderRefNumber;
-	MainWindow *m_mv;
+	class MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
 	bool m_isLogged;
 

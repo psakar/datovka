@@ -3006,7 +3006,6 @@ void MainWindow::synchroniseAllAccounts(void)
 	for (int i = 0; i < accountCount; ++i) {
 
 		QModelIndex index = m_accountModel.index(i, 0);
-		bool isConnectActive = true;
 
 		const QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
@@ -3017,33 +3016,29 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
-		if (!isdsSessions.isConnectedToIsds(userName)) {
-			isConnectActive = connectToIsds(userName, this);
+		if (!isdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName, this)) {
+			continue;
 		}
 
-		if (isConnectActive) {
-			MessageDbSet *dbSet = accountDbSet(userName, this);
-			if (0 == dbSet) {
-				continue;
-			}
-
-			TaskDownloadMessageList *task;
-
-			task = new (std::nothrow) TaskDownloadMessageList(
-			    userName, dbSet, MSG_RECEIVED,
-			    globPref.auto_download_whole_messages);
-			task->setAutoDelete(true);
-			globWorkPool.assignLo(task);
-
-			task = new (std::nothrow) TaskDownloadMessageList(
-			    userName, dbSet, MSG_SENT,
-			    globPref.auto_download_whole_messages);
-			task->setAutoDelete(true);
-			globWorkPool.assignLo(task);
-
-			appended = true;
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (0 == dbSet) {
+			continue;
 		}
 
+		TaskDownloadMessageList *task;
+
+		task = new (std::nothrow) TaskDownloadMessageList(userName,
+		    dbSet, MSG_RECEIVED, globPref.auto_download_whole_messages);
+		task->setAutoDelete(true);
+		globWorkPool.assignLo(task);
+
+		task = new (std::nothrow) TaskDownloadMessageList(userName,
+		    dbSet, MSG_SENT, globPref.auto_download_whole_messages);
+		task->setAutoDelete(true);
+		globWorkPool.assignLo(task);
+
+		appended = true;
 	}
 
 	if (!appended) {
@@ -3083,10 +3078,9 @@ void MainWindow::synchroniseSelectedAccount(void)
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return;
 	}
 
 	TaskDownloadMessageList *task;
@@ -3160,10 +3154,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return;
 	}
 
 	foreach (const MessageDb::MsgId &id, msgIds) {
@@ -4758,10 +4751,9 @@ void MainWindow::changeAccountPassword(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return;
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -4992,10 +4984,9 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return;
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -5681,10 +5672,9 @@ int MainWindow::authenticateMessageFromZFO(void)
 		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 	}
 
 	showStatusTextPermanently(tr("Verifying the ZFO file \"%1\"")
@@ -5792,14 +5782,13 @@ void MainWindow::verifySelectedMessage(void)
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	Q_ASSERT(0 != dbSet);
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			showStatusTextWithTimeout(tr("Message verification failed."));
-			QMessageBox::critical(this, tr("Verification error"),
-			    tr("An undefined error occurred!\nTry again."),
-			    QMessageBox::Ok);
-			return;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::critical(this, tr("Verification error"),
+		    tr("An undefined error occurred!\nTry again."),
+		    QMessageBox::Ok);
+		return;
 	}
 
 	TaskVerifyMessage *task;
@@ -6397,10 +6386,9 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 
 	const QString userName(m_accountModel.userName(acntIndex));
 	Q_ASSERT(!userName.isEmpty());
-	if (!isdsSessions.isConnectedToIsds(userName)) {
-		if (!connectToIsds(userName, this)) {
-			return false;
-		}
+	if (!isdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName, this)) {
+		return false;
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);

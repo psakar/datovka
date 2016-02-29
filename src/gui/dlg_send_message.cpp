@@ -29,6 +29,7 @@
 #include <QMimeDatabase>
 
 #include "dlg_send_message.h"
+#include "src/gui/datovka.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
@@ -61,7 +62,7 @@
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
     Action action, qint64 msgId, const QDateTime &deliveryTime,
-    const QString &userName, MainWindow *mv, QWidget *parent)
+    const QString &userName, class MainWindow *mv, QWidget *parent)
     : QDialog(parent),
     m_messageDbSetList(messageDbSetList),
     m_msgID(msgId),
@@ -268,10 +269,9 @@ void DlgSendMessage::setAccountInfo(int item)
 
 	m_isLogged = true;
 
-	if (!isdsSessions.isConnectedToIsds(m_userName)) {
-		if (!m_mv->connectToIsds(m_userName, m_mv)) {
-			m_isLogged = false;
-		}
+	if (!isdsSessions.isConnectedToIsds(m_userName) &&
+	    !MainWindow::connectToIsds(m_userName, m_mv)) {
+		m_isLogged = false;
 	}
 	session = isdsSessions.session(m_userName);
 	if (NULL == session) {
