@@ -1000,7 +1000,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 		QDateTime deliveryTime = msgDeliveryTime(index);
 		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
 		    false);
-		Q_ASSERT(0 != messageDb);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			return;
+		}
 
 		/* Mark message locally read. */
 		if (!messageDb->smsgdtLocallyRead(msgId)) {
@@ -1095,7 +1098,10 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	QDateTime deliveryTime = msgDeliveryTime(index);
 
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Get message state from database and toggle the value. */
 	bool isRead = messageDb->smsgdtLocallyRead(msgId);
@@ -1840,7 +1846,10 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -2273,7 +2282,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Generate and show message information. */
 	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
@@ -6343,7 +6355,10 @@ void MainWindow::exportMessageAsZFO(const QString &attachPath,
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -6536,7 +6551,10 @@ void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -6637,7 +6655,10 @@ void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -6734,7 +6755,10 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
@@ -7043,7 +7067,10 @@ void MainWindow::sendMessagesZfoEmail(void)
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
@@ -7137,7 +7164,10 @@ void MainWindow::sendAllAttachmentsEmail(void)
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
@@ -7281,7 +7311,10 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
 	if (base64.isEmpty()) {
@@ -7354,7 +7387,10 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
 	if (base64.isEmpty()) {
@@ -8762,7 +8798,10 @@ void MainWindow::messageItemsSetReadStatus(
 
 		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
 		    false);
-		Q_ASSERT(0 != messageDb);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			continue;
+		}
 
 		messageDb->smsgdtSetLocallyRead(dmId, read);
 
@@ -8821,7 +8860,10 @@ void MainWindow::messageItemsSetProcessStatus(
 
 		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
 		    false);
-		Q_ASSERT(0 != messageDb);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			continue;
+		}
 
 		messageDb->msgSetProcessState(dmId, state, false);
 
@@ -9179,7 +9221,10 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
 			MessageDb *messageDb = dbSet->accessMessageDb(mId.deliveryTime, false);
-			Q_ASSERT(0 != messageDb);
+			if (0 == messageDb) {
+				Q_ASSERT(0);
+				continue;
+			}
 
 			tstData = messageDb->msgsTimestampRaw(mId.dmId);
 			if (tstData.isEmpty()) {
