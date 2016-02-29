@@ -8399,9 +8399,10 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 
 	if (!loginRet) {
 		/* Break on error. */
-		return loginRet;
+		return false;
 	}
 
+	/* Get account information if possible. */
 	if (!getOwnerInfoFromLogin(userName)) {
 		logWarning("Owner information for account '%s' (login %s) "
 		    "could not be acquired.\n",
@@ -8420,33 +8421,6 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-
-	/* Get account information if possible. */
-	/*
-	 * TODO -- Is '___True' somehow related to the testing state
-	 * of an account?
-	 *
-	 * TODO -- The account information should be updated periodically.
-	 * Currently they are only acquired when they are missing.
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-	if (dbId.isEmpty()) {
-		// Acquire user information.
-		qWarning() << "Missing user entry for" << userName
-		    << "in account db.";
-
-		if (!getOwnerInfoFromLogin(userName)) {
-			return false;
-		}
-
-		if (!getUserInfoFromLogin(userName)) {
-			return false;
-		}
-
-		dbId = globAccountDbPtr->dbId(userName + "___True");
-	}
-	Q_ASSERT(!dbId.isEmpty());
-	 */
 
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
@@ -8479,12 +8453,13 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 					QDialog *changePwd = new DlgChangePwd(
 					    dbId, userName, mw);
 					changePwd->exec();
+					changePwd->deleteLater();
 				}
 			}
 		}
 	}
 
-	return loginRet;
+	return true;
 }
 
 
