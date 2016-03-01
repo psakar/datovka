@@ -375,8 +375,13 @@ private slots:
 
 	/*!
 	 * @brief Downloads new messages from server for selected account.
+	 *
+	 * @param[in] userName Account user name. If empty string is supplied,
+	 *                     then selected account will be determined from
+	 *                     the account list.
+	 * @return True if some actions have been planned.
 	 */
-	void synchroniseSelectedAccount(void);
+	bool synchroniseSelectedAccount(QString userName = QString());
 
 	/*!
 	 * @brief Downloads the attachments for the selected message.

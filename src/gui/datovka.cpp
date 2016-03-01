@@ -3036,11 +3036,6 @@ void MainWindow::synchroniseAllAccounts(void)
 {
 	debugSlotCall();
 
-	/*
-	 * TODO -- The actual work (function) which the worker performs should
-	 * be defined somewhere outside of the worker object.
-	 */
-
 	showStatusTextPermanently(
 	    tr("Synchronise all accounts with ISDS server."));
 
@@ -3069,39 +3064,9 @@ void MainWindow::synchroniseAllAccounts(void)
 			continue;
 		}
 
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (0 == dbSet) {
-			continue;
+		if (synchroniseSelectedAccount(userName)) {
+			appended = true;
 		}
-
-		bool downloadReceivedMessages =
-		    globPref.auto_download_whole_messages;
-		if (downloadReceivedMessages) {
-			/* Method connectToIsds() acquires account information. */
-			const QString acndDbKey(userName + "___True");
-			UserEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
-			const QString key("userPrivils");
-			if (userEntry.hasValue(key)) {
-				int privils = userEntry.value(key).toInt();
-				if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
-					downloadReceivedMessages = false;
-				}
-			}
-		}
-
-		TaskDownloadMessageList *task;
-
-		task = new (std::nothrow) TaskDownloadMessageList(userName,
-		    dbSet, MSG_RECEIVED, downloadReceivedMessages);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
-
-		task = new (std::nothrow) TaskDownloadMessageList(userName,
-		    dbSet, MSG_SENT, globPref.auto_download_whole_messages);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
-
-		appended = true;
 	}
 
 	if (!appended) {
@@ -3111,11 +3076,6 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 		return;
 	}
-
-	if (globWorkPool.working()) {
-		ui->actionSync_all_accounts->setEnabled(false);
-		ui->actionGet_messages->setEnabled(false);
-	}
 }
 
 
@@ -3123,7 +3083,7 @@ void MainWindow::synchroniseAllAccounts(void)
 /*
 * Download sent/received message list for current (selected) account
 */
-void MainWindow::synchroniseSelectedAccount(void)
+bool MainWindow::synchroniseSelectedAccount(QString userName)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -3132,18 +3092,19 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
+	if (userName.isEmpty()) {
+		userName = m_accountModel.userName(currentAccountModelIndex());
+		Q_ASSERT(!userName.isEmpty());
+	}
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
-		return;
+		return false;
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
-		return;
+		return false;
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -3178,6 +3139,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 		ui->actionSync_all_accounts->setEnabled(false);
 		ui->actionGet_messages->setEnabled(false);
 	}
+
+	return true;
 }
 
 
