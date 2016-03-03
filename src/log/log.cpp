@@ -713,8 +713,11 @@ void GlobLog::logPrefixVlogMl(int source, uint8_t level,
 				/*
 				 * Windows buffers stderr, explicit flush is
 				 * needed.
+				 *
+				 * Also flush everything to files so there is
+				 * nothing lost.
 				 */
-				if (stderr == of) {
+				if (stdout != of) {
 					fflush(of);
 				}
 			}
