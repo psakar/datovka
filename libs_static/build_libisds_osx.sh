@@ -24,6 +24,7 @@ fi
 
 
 SRCDIR="${SCRIPT_LOCATION}/srcs"
+PATCHDIR="${SCRIPT_LOCATION}/patches"
 WORKDIR="${SCRIPT_LOCATION}/work"
 BUILTDIR="${SCRIPT_LOCATION}/built_osx${SDK_VER}"
 
@@ -45,7 +46,7 @@ LIBTOOL_ARCHIVE="${_LIBTOOL_ARCHIVE}"
 
 LIBICONV_ARCHIVE="${_LIBICONV_ARCHIVE}"
 LIBXML2_ARCHIVE="${_LIBXML2_ARCHIVE}"
-GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}"
+#GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}" # Disable NLS.
 
 # Libcurl is already available in the system.
 USE_SYSTEM_CURL="yes"
@@ -53,6 +54,7 @@ LIBCURL_ARCHIVE="${_LIBCURL_ARCHIVE}"
 OPENSSL_ARCHIVE="${_OPENSSL_ARCHIVE}"
 
 LIBISDS_ARCHIVE="${_LIBISDS_ARCHIVE}"
+LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 #LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #LIBISDS_BRANCH="feature-openssl" # Use master.
 
@@ -259,7 +261,8 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 
 	# no-asm
 	# darwin-i386-cc
-	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 --prefix="${BUILTDIR}"
+	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 \
+	    --prefix="${BUILTDIR}"
 	# Patch Makefile
 	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
 	make ${MAKEOPTS} && make install_sw || exit 1
@@ -282,6 +285,19 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libisds*
 
+	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
+		# Apply patches.
+		for f in ${LIBISDS_ARCHIVE_PATCHES}; do
+			PATCHFILE="${PATCHDIR}/${f}"
+			if [ ! -f "${PATCHFILE}" ]; then
+				echo "Missing ${PATCHFILE}" >&2
+				exit 1
+			fi
+			cp "${PATCHFILE}" ./
+			patch -p1 < ${f}
+		done
+	fi
+
 	CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
@@ -291,6 +307,7 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-nls"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
@@ -323,6 +340,7 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --disable-nls"
 
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
 	./configure ${CONFOPTS} \

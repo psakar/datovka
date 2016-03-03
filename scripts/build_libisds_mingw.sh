@@ -84,8 +84,14 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/expat*
 
-	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}"
 	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -101,8 +107,14 @@ if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libtool*
 
-	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}"
 	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -118,9 +130,15 @@ if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libiconv*
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+
 	# --disable-static
-	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}"
 	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -136,9 +154,17 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/libxml2*
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --without-python"
+	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
+
 	# --disable-static
-	./configure --without-python --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-iconv="${BUILTDIR}"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}"
 	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -154,9 +180,19 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/gettext*
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
 	# --disable-static
-	./configure --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-libxml2-prefix="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include" LDFLAGS="-L${BUILTDIR}/lib"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
+	    CPPFLAGS="-I${BUILTDIR}/include" \
+	    LDFLAGS="-L${BUILTDIR}/lib"
 	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
 fi
 
 
@@ -172,13 +208,25 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	tar -xzf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-ipv6"
+	CONFOPTS="${CONFOPTS} --with-winssl"
+	CONFOPTS="${CONFOPTS} --without-axtls"
+	CONFOPTS="${CONFOPTS} --without-zsh-functions-dir"
+	CONFOPTS="${CONFOPTS} --disable-ldap"
+	CONFOPTS="${CONFOPTS} --disable-ldaps"
+	CONFOPTS="${CONFOPTS} --disable-rtsp"
+	#CONFOPTS="${CONFOPTS} --disable-sspi"
+
 	# --disable-static
-	WITHS="--enable-ipv6 --with-winssl"
-	WITHOUTS="--without-axtls --without-zsh-functions-dir --disable-ldap --disable-ldaps --disable-rtsp"
-	#WITHOUTS="${WITHOUTS} --disable-sspi"
-	./configure CPPFLAGS="-DWINVER=${WIN_VER}" ${WITHOUTS} ${WITHS} --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
+	    CPPFLAGS="-DWINVER=${WIN_VER}"
 	#make ${MAKEOPTS} && make install || exit 1
 	make ${MAKEOPTS}; make install
+
+	unset CONFOPTS
 fi
 
 
@@ -195,7 +243,8 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	cd "${WORKDIR}"/openssl*
 
 	# no-asm
-	./Configure mingw enable-static-engine shared no-krb5 --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
+	./Configure mingw enable-static-engine shared no-krb5 \
+	    --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
 	make ${MAKEOPTS} && make install_sw || exit 1
 
 	cp libeay32.dll "${BUILTDIR}/bin/"
@@ -232,15 +281,28 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 		done
 	fi
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-debug"
+	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
+	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
 	LINTL=""
 	NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 		LINTL="-lintl"
 		NLS=""
 	fi
+	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	# --disable-static
-	./configure --enable-debug --enable-openssl-backend "${NLS}" --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
+	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
+	    LDFLAGS="-L${BUILTDIR}/lib"
 	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
@@ -248,6 +310,8 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC} -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib ${LINTL} -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
 	cd ..
 	make install
+
+	unset CONFOPTS
 elif [ ! -z "${LIBISDS_GIT}" ]; then
 	# libisds with OpenSSL back-end
 	rm -rf "${WORKDIR}"/libisds*
@@ -258,10 +322,26 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 		git checkout "${LIBISDS_BRANCH}"
 	fi
 
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --enable-debug"
+	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
+	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+
+	LINTL=""
+	NLS="--disable-nls"
+	CONFOPTS="${CONFOPTS} ${NLS}"
+
 	cat configure.ac | sed -e 's/AC_FUNC_MALLOC//g' > nomalloc_configure.ac
 	mv nomalloc_configure.ac configure.ac
 	autoheader && libtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
-	./configure --enable-debug --enable-openssl-backend "${NLS}" --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
+	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
+	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
+	    LDFLAGS="-L${BUILTDIR}/lib"
 	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
@@ -269,6 +349,8 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC} -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib ${LINTL} -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
 	cd ..
 	make install
+
+	unset CONFOPTS
 fi
 
 #../libtool --tag=CC --mode=link i686-pc-mingw32-gcc -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
