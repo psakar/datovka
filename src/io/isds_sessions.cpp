@@ -132,7 +132,16 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 	isds_set_log_callback(logCallback, NULL);
 
 	/* Logging. */
+#if !defined(Q_OS_WIN)
 	isds_set_logging(ILF_ALL, ILL_ALL);
+#else /* defined(Q_OS_WIN) */
+	/*
+	 * There is a issue related to logging when using libisds compiled
+	 * with MinGW. See https://gitlab.labs.nic.cz/labs/qdatovka/issues/233
+	 * for more details.
+	 */
+	isds_set_logging(ILF_ALL & ~ILF_ISDS, ILL_INFO);
+#endif /* !defined(Q_OS_WIN) */
 }
 
 
