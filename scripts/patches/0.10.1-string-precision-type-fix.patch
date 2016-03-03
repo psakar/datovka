@@ -1,0 +1,51 @@
+diff -Naur 001/src/isds.c 002/src/isds.c
+--- 001/src/isds.c	2016-03-02 16:33:17.000000000 +0100
++++ 002/src/isds.c	2016-03-02 16:31:18.000000000 +0100
+@@ -10035,7 +10035,7 @@
+ 
+     isds_log(ILF_ISDS, ILL_DEBUG,
+             _("Delivery info content:\n%.*s\nEnd of delivery info\n"),
+-            xml_stream_length, xml_stream);
++            (unsigned) xml_stream_length, xml_stream);
+ 
+     /* Convert delivery info XML stream into XPath context */
+     message_doc = xmlParseMemory(xml_stream, xml_stream_length);
+@@ -10515,7 +10515,7 @@
+ 
+     isds_log(ILF_ISDS, ILL_DEBUG,
+         _("Loading message:\n%.*s\nEnd of message\n"),
+-        xml_stream_length, xml_stream);
++        (unsigned) xml_stream_length, xml_stream);
+ 
+     /* Convert messages XML stream into XPath context */
+     message_doc = xmlParseMemory(xml_stream, xml_stream_length);
+diff -Naur 001/src/soap.c 002/src/soap.c
+--- 001/src/soap.c	2016-03-02 16:33:23.000000000 +0100
++++ 002/src/soap.c	2016-03-02 16:31:26.000000000 +0100
+@@ -900,7 +900,7 @@
+     if (!use_get) {
+         isds_log(ILF_HTTP, ILL_DEBUG,
+                 _("POST body length: %zu, content follows:\n"), request_length);
+-        isds_log(ILF_HTTP, ILL_DEBUG, "%.*s\n", request_length, request);
++        isds_log(ILF_HTTP, ILL_DEBUG, "%.*s\n", (unsigned) request_length, request);
+         isds_log(ILF_HTTP, ILL_DEBUG, _("End of POST body\n"));
+     }
+     
+@@ -945,7 +945,7 @@
+     isds_log(ILF_HTTP, ILL_DEBUG,
+             _("Response body length: %zu, content follows:\n"),
+             body.length);
+-    isds_log(ILF_HTTP, ILL_DEBUG, "%.*s\n", body.length, body.data);
++    isds_log(ILF_HTTP, ILL_DEBUG, "%.*s\n", (unsigned) body.length, body.data);
+     isds_log(ILF_HTTP, ILL_DEBUG, _("End of response body\n"));
+ 
+ 
+@@ -1340,7 +1340,7 @@
+ 
+     isds_log(ILF_SOAP, ILL_DEBUG,
+             _("SOAP response received:\n%.*s\nEnd of SOAP response\n"),
+-            response_length, http_response);
++            (unsigned) response_length, http_response);
+ 
+ 
+     /* Check for SOAP version */

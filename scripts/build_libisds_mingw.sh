@@ -9,8 +9,22 @@ WIN_VER="0x0501" #https://msdn.microsoft.com/en-us/library/windows/desktop/aa383
 MAKEOPTS="-j 4"
 
 SRCDIR="${SCRIPT_LOCATION}/srcs"
+PATCHDIR="${SCRIPT_LOCATION}/patches"
 WORKDIR="${SCRIPT_LOCATION}/work"
 BUILTDIR="${SCRIPT_LOCATION}/built"
+
+
+X86_MINGV_HOST=i586-mingw32msvc
+#X86_MINGV_HOST=i686-w64-mingw32 # Generated usable debugging information.
+#X86_MINGV_HOST=i686-pc-mingw32
+X86_MINGW_PREFIX=${X86_MINGV_HOST}-
+X86_MINGW_CC=${X86_MINGV_HOST}-gcc
+X86_MINGW_LD=${X86_MINGV_HOST}-ld
+X86_MINGW_STRIP=${X86_MINGV_HOST}-strip
+X86_MINGW_RANLIB=${X86_MINGV_HOST}-ranlib
+
+BUILTDIR="${BUILTDIR}-${X86_MINGV_HOST}"
+
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
@@ -24,13 +38,6 @@ if [ ! -d "${BUILTDIR}" ]; then
 	mkdir "${BUILTDIR}"
 fi
 
-X86_MINGV_HOST=i586-mingw32msvc
-#X86_MINGV_HOST=i686-pc-mingw32
-X86_MINGW_PREFIX=${X86_MINGV_HOST}-
-X86_MINGW_CC=${X86_MINGV_HOST}-gcc
-X86_MINGW_LD=${X86_MINGV_HOST}-ld
-X86_MINGW_STRIP=${X86_MINGV_HOST}-strip
-X86_MINGW_RANLIB=${X86_MINGV_HOST}-ranlib
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
 EXPAT_ARCHIVE="${_EXPAT_ARCHIVE}"
@@ -38,12 +45,13 @@ LIBTOOL_ARCHIVE="${_LIBTOOL_ARCHIVE}"
 
 LIBICONV_ARCHIVE="${_LIBICONV_ARCHIVE}"
 LIBXML2_ARCHIVE="${_LIBXML2_ARCHIVE}"
-GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}"
+#GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}" # Disable NLS.
 
 LIBCURL_ARCHIVE="${_LIBCURL_ARCHIVE}"
 OPENSSL_ARCHIVE="${_OPENSSL_ARCHIVE}"
 
 LIBISDS_ARCHIVE="${_LIBISDS_ARCHIVE}"
+LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 #LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #LIBISDS_BRANCH="feature-openssl" # Use master.
 
@@ -211,13 +219,33 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/libisds*
 
+	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
+		# Apply patches.
+		for f in ${LIBISDS_ARCHIVE_PATCHES}; do
+			PATCHFILE="${PATCHDIR}/${f}"
+			if [ ! -f "${PATCHFILE}" ]; then
+				echo "Missing ${PATCHFILE}" >&2
+				exit 1
+			fi
+			cp "${PATCHFILE}" ./
+			patch -p1 < ${f}
+		done
+	fi
+
+	LINTL=""
+	NLS="--disable-nls"
+	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
+		LINTL="-lintl"
+		NLS=""
+	fi
+
 	# --disable-static
-	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
+	./configure --enable-debug --enable-openssl-backend "${NLS}" --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
 	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
 	#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
-	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC}  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
+	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC} -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib ${LINTL} -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
 	cd ..
 	make install
 elif [ ! -z "${LIBISDS_GIT}" ]; then
@@ -233,12 +261,12 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	cat configure.ac | sed -e 's/AC_FUNC_MALLOC//g' > nomalloc_configure.ac
 	mv nomalloc_configure.ac configure.ac
 	autoheader && libtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
-	./configure --enable-debug --enable-openssl-backend --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
+	./configure --enable-debug --enable-openssl-backend "${NLS}" --disable-fatalwarnings --prefix="${BUILTDIR}" --host="${X86_MINGV_HOST}" --with-xml-prefix="${BUILTDIR}" --with-libcurl="${BUILTDIR}" --with-libiconv-prefix="${BUILTDIR}" CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" LDFLAGS="-L${BUILTDIR}/lib"
 	make ${MAKEOPTS}
 	cd src
 	#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
 	#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
-	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC}  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
+	../libtool -v --tag=CC --mode=link ${X86_MINGW_CC} -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib ${LINTL} -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo  libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
 	cd ..
 	make install
 fi
