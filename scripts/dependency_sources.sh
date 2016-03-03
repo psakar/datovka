@@ -8,7 +8,7 @@ _LIBXML2_ARCHIVE="libxml2-2.9.3.tar.gz"
 _GETTEXT_ARCHIVE="gettext-0.19.7.tar.xz"
 
 _LIBCURL_ARCHIVE="curl-7.47.1.tar.gz"
-_OPENSSL_ARCHIVE="openssl-1.0.2f.tar.gz"
+_OPENSSL_ARCHIVE="openssl-1.0.2g.tar.gz"
 
 _LIBISDS_ARCHIVE="libisds-0.10.1.tar.xz" # 10.2 is available but we have not tested it
 _LIBISDS_ARCHIVE_PATCHES="0.10.1-string-precision-type-fix.patch"
