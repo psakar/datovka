@@ -1,3 +1,16 @@
+4.5.2 / 2016-03-04
+ * NLS of bundled libisds (OS X, Windows) has been disabled.
+ * The logging of libisds actions has been restricted on Windows because there
+   are discrepancies from standard-defined behaviour of some functions on
+   Windows.
+ * Improved behaviour when message download fails. The error dialogue is only
+   shown when an explicit message download fails. A message in the notification
+   area appears when the download has been triggered by downloading message
+   list. This should reduce the amount of error dialogues generated.
+ * Improved behaviour when downloading messages on accounts with restricted
+   privileges. Received messages are not automatically downloaded when the
+   user has no privileges to do that.
+
 4.5.1 / 2016-02-26
  * Fixed bug in action logging causing the application to crash occasionally.
  * Fixed bug where message line was not deleted when deleting from ISDS failed.
