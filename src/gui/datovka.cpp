@@ -161,10 +161,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
-	        QString)),
+	        QString, bool)),
 	    this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
-	        QString)));
+	        QString, bool)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
@@ -2092,7 +2092,7 @@ void MainWindow::workersFinished(void)
 
 void MainWindow::collectDownloadMessageStatus(const QString &usrName,
     qint64 msgId, const QDateTime &deliveryTime, int result,
-    const QString &errDesc)
+    const QString &errDesc, bool listScheduled)
 {
 	debugSlotCall();
 
@@ -2108,25 +2108,30 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 		}
 	} else {
 		/* Notify the user. */
-		QMessageBox msgBox(this);
+		if (!listScheduled) {
+			QMessageBox msgBox(this);
 
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "complete message \"%1\" from ISDS server.").arg(msgId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message error"));
-		msgBox.setText(tr("It was not possible to download a complete "
-		    "message \"%1\" from server Datové schránky.").arg(msgId));
-		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			showStatusTextWithTimeout(tr("It was not possible download "
+			    "complete message \"%1\" from ISDS server.").arg(msgId));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(tr("Download message error"));
+			msgBox.setText(tr("It was not possible to download a complete "
+			    "message \"%1\" from server Datové schránky.").arg(msgId));
+			if (!errDesc.isEmpty()) {
+				msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			} else {
+				msgBox.setInformativeText(tr("A connection error "
+				    "occurred or the message has already been deleted "
+				    "from the server."));
+			}
+
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
 		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occurred or the message has already been deleted "
-			    "from the server."));
+			showStatusTextWithTimeout(
+			    tr("Couldn't download message '%1'.").arg(msgId));
 		}
-
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
 	}
 }
 
@@ -3118,6 +3123,9 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		if (userEntry.hasValue(key)) {
 			int privils = userEntry.value(key).toInt();
 			if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
+				logInfo(
+				    "User '%s' has no privileges to download received messages. Won't try downloading messages.\n",
+				    userName.toUtf8().constData());
 				downloadReceivedMessages = false;
 			}
 		}
@@ -3209,7 +3217,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		TaskDownloadMessage *task;
 
 		task = new (std::nothrow) TaskDownloadMessage(
-		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
+		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime,
+		    false);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
@@ -6477,7 +6486,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	TaskDownloadMessage *task;
 
 	task = new (std::nothrow) TaskDownloadMessage(
-	    userName, dbSet, msgDirect, dmId, deliveryTime);
+	    userName, dbSet, msgDirect, dmId, deliveryTime, false);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
