@@ -49,15 +49,17 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in]     userName  Account identifier (user login name).
-	 * @param[in,out] dbSet     Non-null pointer to database container.
-	 * @param[in]     msgDirect Received or sent list.
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in]     dTime     Delivery time.
+	 * @param[in]     userName      Account identifier (user login name).
+	 * @param[in,out] dbSet         Non-null pointer to database container.
+	 * @param[in]     msgDirect     Received or sent list.
+	 * @param[in]     dmId          Message identifier.
+	 * @param[in]     dTime         Delivery time.
+	 * @param[in]     listScheduled True if the task has been scheduled
+	 *                              from TaskDownloadMessageList.
 	 */
 	explicit TaskDownloadMessage(const QString &userName,
 	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
-	    qint64 dmId, const QDateTime &dTime);
+	    qint64 dmId, const QDateTime &dTime, bool listScheduled);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -153,6 +155,10 @@ private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received message. */
+	bool m_listScheduled; /*<
+	                       * Whether the task has been scheduled from
+	                       * download message list task.
+	                       */
 };
 
 #endif /* _TASK_DOWNLOAD_MESSAGE_H_ */

@@ -137,7 +137,8 @@ private slots:
 	 * @brief Performs action depending on message download outcome.
 	 */
 	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
-	    const QDateTime &deliveryTime, int result, const QString &errDesc);
+	    const QDateTime &deliveryTime, int result, const QString &errDesc,
+	    bool listScheduled);
 
 	/*!
 	 * @brief Performs action depending on message list download outcome.
@@ -375,8 +376,13 @@ private slots:
 
 	/*!
 	 * @brief Downloads new messages from server for selected account.
+	 *
+	 * @param[in] userName Account user name. If empty string is supplied,
+	 *                     then selected account will be determined from
+	 *                     the account list.
+	 * @return True if some actions have been planned.
 	 */
-	void synchroniseSelectedAccount(void);
+	bool synchroniseSelectedAccount(QString userName = QString());
 
 	/*!
 	 * @brief Downloads the attachments for the selected message.

@@ -161,10 +161,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Worker-related processing signals. */
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
-	        QString)),
+	        QString, bool)),
 	    this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
-	        QString)));
+	        QString, bool)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
@@ -2092,7 +2092,7 @@ void MainWindow::workersFinished(void)
 
 void MainWindow::collectDownloadMessageStatus(const QString &usrName,
     qint64 msgId, const QDateTime &deliveryTime, int result,
-    const QString &errDesc)
+    const QString &errDesc, bool listScheduled)
 {
 	debugSlotCall();
 
@@ -2108,25 +2108,30 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 		}
 	} else {
 		/* Notify the user. */
-		QMessageBox msgBox(this);
+		if (!listScheduled) {
+			QMessageBox msgBox(this);
 
-		showStatusTextWithTimeout(tr("It was not possible download "
-		    "complete message \"%1\" from ISDS server.").arg(msgId));
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message error"));
-		msgBox.setText(tr("It was not possible to download a complete "
-		    "message \"%1\" from server Datové schránky.").arg(msgId));
-		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			showStatusTextWithTimeout(tr("It was not possible download "
+			    "complete message \"%1\" from ISDS server.").arg(msgId));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(tr("Download message error"));
+			msgBox.setText(tr("It was not possible to download a complete "
+			    "message \"%1\" from server Datové schránky.").arg(msgId));
+			if (!errDesc.isEmpty()) {
+				msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			} else {
+				msgBox.setInformativeText(tr("A connection error "
+				    "occurred or the message has already been deleted "
+				    "from the server."));
+			}
+
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
 		} else {
-			msgBox.setInformativeText(tr("A connection error "
-			    "occurred or the message has already been deleted "
-			    "from the server."));
+			showStatusTextWithTimeout(
+			    tr("Couldn't download message '%1'.").arg(msgId));
 		}
-
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
 	}
 }
 
@@ -3036,11 +3041,6 @@ void MainWindow::synchroniseAllAccounts(void)
 {
 	debugSlotCall();
 
-	/*
-	 * TODO -- The actual work (function) which the worker performs should
-	 * be defined somewhere outside of the worker object.
-	 */
-
 	showStatusTextPermanently(
 	    tr("Synchronise all accounts with ISDS server."));
 
@@ -3069,24 +3069,9 @@ void MainWindow::synchroniseAllAccounts(void)
 			continue;
 		}
 
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (0 == dbSet) {
-			continue;
+		if (synchroniseSelectedAccount(userName)) {
+			appended = true;
 		}
-
-		TaskDownloadMessageList *task;
-
-		task = new (std::nothrow) TaskDownloadMessageList(userName,
-		    dbSet, MSG_RECEIVED, globPref.auto_download_whole_messages);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
-
-		task = new (std::nothrow) TaskDownloadMessageList(userName,
-		    dbSet, MSG_SENT, globPref.auto_download_whole_messages);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
-
-		appended = true;
 	}
 
 	if (!appended) {
@@ -3096,11 +3081,6 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 		return;
 	}
-
-	if (globWorkPool.working()) {
-		ui->actionSync_all_accounts->setEnabled(false);
-		ui->actionGet_messages->setEnabled(false);
-	}
 }
 
 
@@ -3108,7 +3088,7 @@ void MainWindow::synchroniseAllAccounts(void)
 /*
 * Download sent/received message list for current (selected) account
 */
-void MainWindow::synchroniseSelectedAccount(void)
+bool MainWindow::synchroniseSelectedAccount(QString userName)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -3117,24 +3097,44 @@ void MainWindow::synchroniseSelectedAccount(void)
 	 * TODO -- Save/restore the position of selected account and message.
 	 */
 
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
+	if (userName.isEmpty()) {
+		userName = m_accountModel.userName(currentAccountModelIndex());
+		Q_ASSERT(!userName.isEmpty());
+	}
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
-		return;
+		return false;
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
-		return;
+		return false;
+	}
+
+	/* Method connectToIsds() acquires account information. */
+
+	bool downloadReceivedMessages = globPref.auto_download_whole_messages;
+	if (downloadReceivedMessages) {
+		/* Method connectToIsds() acquires account information. */
+		const QString acndDbKey(userName + "___True");
+		UserEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+		const QString key("userPrivils");
+		if (userEntry.hasValue(key)) {
+			int privils = userEntry.value(key).toInt();
+			if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
+				logInfo(
+				    "User '%s' has no privileges to download received messages. Won't try downloading messages.\n",
+				    userName.toUtf8().constData());
+				downloadReceivedMessages = false;
+			}
+		}
 	}
 
 	TaskDownloadMessageList *task;
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_RECEIVED, globPref.auto_download_whole_messages);
+	    MSG_RECEIVED, downloadReceivedMessages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
@@ -3147,6 +3147,8 @@ void MainWindow::synchroniseSelectedAccount(void)
 		ui->actionSync_all_accounts->setEnabled(false);
 		ui->actionGet_messages->setEnabled(false);
 	}
+
+	return true;
 }
 
 
@@ -3215,7 +3217,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		TaskDownloadMessage *task;
 
 		task = new (std::nothrow) TaskDownloadMessage(
-		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime);
+		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime,
+		    false);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
@@ -6483,7 +6486,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	TaskDownloadMessage *task;
 
 	task = new (std::nothrow) TaskDownloadMessage(
-	    userName, dbSet, msgDirect, dmId, deliveryTime);
+	    userName, dbSet, msgDirect, dmId, deliveryTime, false);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
