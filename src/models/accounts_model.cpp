@@ -895,7 +895,7 @@ int AccountModel::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 
 	Q_ASSERT(!m_userNames.contains(userName));
 
-	beginResetModel();
+	beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
 	globAccounts[userName] = acntSettings;
 
@@ -904,7 +904,7 @@ int AccountModel::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 	m_userNames.append(userName);
 	m_row2UserNameIdx.append(m_userNames.size() - 1);
 
-	endResetModel();
+	endInsertRows();
 
 	if (0 != idx) {
 		*idx = index(m_row2UserNameIdx.size() - 1, 0, QModelIndex());
