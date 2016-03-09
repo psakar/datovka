@@ -360,7 +360,7 @@ bool MessageDbSet::deleteLocation(void)
 static
 QString secondaryKeySingleFile(const QDateTime &time)
 {
-	(void) time; /* Unused parameter. */
+	Q_UNUSED(time);
 
 	return QString(SINGLE_FILE_SEC_KEY);
 }

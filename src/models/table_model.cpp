@@ -146,8 +146,7 @@ QVariant TblModel::_data(int row, int col, int role) const
 QVariant TblModel::_headerData(int section, Qt::Orientation orientation,
     int role) const
 {
-	/* Unused. */
-	(void) orientation;
+	Q_UNUSED(orientation);
 
 	return m_headerData[section][role];
 }

@@ -2407,8 +2407,8 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 {
 	QSqlQuery query(m_db);
 
-	(void) dmDeliveryTime; /* TODO - not used */
-	(void) dmAcceptanceTime; /* TODO - not used */
+	Q_UNUSED(dmDeliveryTime); /* TODO */
+	Q_UNUSED(dmAcceptanceTime); /* TODO */
 
 	int i = 0;
 	bool isMultiSelect = false;

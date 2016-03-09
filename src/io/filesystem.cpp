@@ -47,8 +47,7 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
     QString dmAnnotation, QString dmSender)
 {
-	/* Unused. */
-	(void) dmDeliveryTime;
+	Q_UNUSED(dmDeliveryTime);
 
 	if (format.isEmpty()) {
 		format = DEFAULT_TMP_FORMAT;

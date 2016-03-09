@@ -535,8 +535,7 @@ int AccountModel::rowCount(const QModelIndex &parent) const
 
 int AccountModel::columnCount(const QModelIndex &parent) const
 {
-	/* Unused */
-	(void) parent;
+	Q_UNUSED(parent);
 
 	return 1;
 }

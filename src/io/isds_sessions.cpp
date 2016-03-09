@@ -88,8 +88,8 @@ void logCallback(isds_log_facility facility, isds_log_level level,
     const char *message, int length, void *data)
 /* ========================================================================= */
 {
-	(void) data;
-	(void) length;
+	Q_UNUSED(data);
+	Q_UNUSED(length);
 	const char *logFac = logFacilityName(facility);
 
 	switch (level) {

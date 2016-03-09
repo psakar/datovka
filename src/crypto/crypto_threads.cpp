@@ -119,8 +119,8 @@ void crypto_cleanup_threads(void)
 void openssl_mutex_cb(int mode, int n, const char *file, int line)
 /* ========================================================================= */
 {
-	(void) file;
-	(void) line;
+	Q_UNUSED(file);
+	Q_UNUSED(line);
 
 	Q_ASSERT(!openssl_mutexes.isEmpty());
 	Q_ASSERT(n < openssl_mutexes.size());

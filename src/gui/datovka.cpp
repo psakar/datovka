@@ -537,7 +537,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 {
 	debugSlotCall();
 
-	(void) previous; /* Unused. */
+	Q_UNUSED(previous);
 
 	QString html;
 	QAbstractTableModel *msgTblMdl = 0;
@@ -935,8 +935,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 {
 	debugSlotCall();
 
-	(void) selected; /* Unused. */
-	(void) deselected; /* Unused. */
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
 
 	/*
 	 * Disconnect slot from model as we want to prevent a signal to be
@@ -1590,9 +1590,8 @@ void MainWindow::attachmentItemsSelectionChanged(
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) selected;
-	(void) deselected;
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
 
 	QModelIndexList selectedIndexes;
 	{
@@ -1662,7 +1661,7 @@ void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	(void) index;
+	Q_UNUSED(index);
 	openSelectedAttachment();
 }
 
@@ -2096,8 +2095,7 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) deliveryTime;
+	Q_UNUSED(deliveryTime);
 
 	if (TaskDownloadMessage::DM_SUCCESS == result) {
 		/* Refresh account and attachment list. */
@@ -2180,12 +2178,11 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) userName;
-	(void) transactId;
-	(void) resultDesc;
-	(void) isPDZ;
-	(void) dmId;
+	Q_UNUSED(userName);
+	Q_UNUSED(transactId);
+	Q_UNUSED(resultDesc);
+	Q_UNUSED(isPDZ);
+	Q_UNUSED(dmId);
 
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		showStatusTextWithTimeout(tr(
@@ -4696,8 +4693,7 @@ void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) userName;
+	Q_UNUSED(userName);
 
 	if (!globPref.use_global_paths) {
 		m_add_attach_dir = lastDir;
@@ -5198,7 +5194,7 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 {
 	debugSlotCall();
 
-	(void) oldSize;
+	Q_UNUSED(oldSize);
 	QModelIndex current(currentAccountModelIndex());
 
 	switch (AccountModel::nodeType(current)) {
@@ -8237,8 +8233,8 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 	return checkConnectionError(status, accountInfo.accountName(),
 	    showDialog, isdsMsg);
 #else
-	(void) accountInfo;
-	(void) mw;
+	Q_UNUSED(accountInfo);
+	Q_UNUSED(mw);
 	return false;
 #endif
 }
@@ -8967,7 +8963,7 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 void MainWindow::msgAdvancedDlgFinished(int result)
 /* ========================================================================= */
 {
-	(void) result;
+	Q_UNUSED(result);
 
 	debugSlotCall();
 

@@ -462,7 +462,7 @@ void DlgMsgSearch::appendMsgsToTable(
 void DlgMsgSearch::getSelectedMsg(int row, int column)
 /* ========================================================================= */
 {
-	(void) column;
+	Q_UNUSED(column);
 	emit focusSelectedMsg(
 	    this->resultsTableWidget->item(row, COL_USER_NAME)->text(),
 	    this->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),

@@ -94,7 +94,7 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 void DlgCorrespondenceOverview::msgStateChanged(int state)
 /* ========================================================================= */
 {
-	(void) state; /* Unused. */
+	Q_UNUSED(state);
 
 	if ((!this->sentCheckBox->isChecked()) &&
 	    (!this->receivedCheckBox->isChecked())) {
@@ -112,7 +112,7 @@ void DlgCorrespondenceOverview::msgStateChanged(int state)
 void DlgCorrespondenceOverview::dateCalendarsChange(const QDate &date)
 /* ========================================================================= */
 {
-	(void) date; // not used
+	Q_UNUSED(date);
 
 	this->toCalendarWidget->setMinimumDate(
 	    this->fromCalendarWidget->selectedDate());

@@ -363,8 +363,7 @@ void DlgSendMessage::tableItemDoubleClicked(QTableWidgetItem *item)
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) item;
+	Q_UNUSED(item);
 
 	openAttachmentFile();
 }
@@ -378,10 +377,9 @@ void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
     const QModelIndex &bottomRight, const QVector<int> &roles)
 /* ========================================================================= */
 {
-	/* Unused. */
-	(void) topLeft;
-	(void) bottomRight;
-	(void) roles;
+	Q_UNUSED(topLeft);
+	Q_UNUSED(bottomRight);
+	Q_UNUSED(roles);
 
 	debugSlotCall();
 
@@ -399,9 +397,8 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) selected;
-	(void) deselected;
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
 
 	QModelIndexList selectedIndexes;
 	{
@@ -1190,8 +1187,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 {
 	debugSlotCall();
 
-	/* Unused. */
-	(void) userName;
+	Q_UNUSED(userName);
 
 	if (m_transactIds.end() == m_transactIds.find(transactId)) {
 		/* Nothing found. */

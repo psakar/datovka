@@ -175,7 +175,7 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
-	(void) index;
+	Q_UNUSED(index);
 
 	openSelectedAttachment();
 }

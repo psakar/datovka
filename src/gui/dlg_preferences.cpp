@@ -204,7 +204,7 @@ void DlgPreferences::setActiveTimerSetup(int state)
 
 void DlgPreferences::setActiveCheckBox(int state)
 {
-	(void) state;
+	Q_UNUSED(state);
 	/* TODO - this choice must be disabled */
 //	this->send_stats_with_version_checks->setEnabled(Qt::Checked == state);
 }
