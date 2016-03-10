@@ -278,6 +278,7 @@ SOURCES += src/cli/cli.cpp \
     src/io/message_db_set_container.cpp \
     src/io/message_db_set_delegated.cpp \
     src/io/message_db_single.cpp \
+    src/io/sqlite/table.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -344,6 +345,7 @@ HEADERS += src/cli/cli.h \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
+    src/io/sqlite/table.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
