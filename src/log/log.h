@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -310,6 +310,23 @@ private:
 
 extern GlobLog globLog; /*!< Global log facility. */
 
+/*!
+ * @brief Logging macro used for internal purposes.
+ *
+ * @param[in] logVerbThresh Logging verbosity threshold.
+ * @param[in] logSrc        Logging source.
+ * @param[in] logUrg        Logging urgency.
+ * @param[in] format        Format of the messages, follows printf syntax.
+ * @param[in] ...           Variadic arguments.
+ */
+#define _internalLogNL(logVerbThresh, logSrc, logUrg, format, ...) \
+	if (globLog.logVerbosity() > (logVerbThresh)) { \
+		globLog.log((logSrc), (logUrg), \
+		    format " (%s:%d, %s())\n", \
+		    __VA_ARGS__, __FILE__, __LINE__, __func__); \
+	} else { \
+		globLog.log((logSrc), (logUrg), format "\n", __VA_ARGS__); \
+	}
 
 /*!
  * @brief A macro which logs a function name followed with given debugging
@@ -326,14 +343,7 @@ extern GlobLog globLog; /*!< Global log facility. */
 #if DEBUG
 #define logDebugNL(verbThresh, format, ...) \
 	if (globLog.debugVerbosity() > verbThresh) { \
-		if (globLog.logVerbosity() > 0) { \
-			globLog.log(LOGSRC_DEF, LOG_DEBUG, \
-			    format " (%s:%d, %s())\n", \
-			    __VA_ARGS__, __FILE__, __LINE__, __func__); \
-		} else { \
-			globLog.log(LOGSRC_DEF, LOG_DEBUG, \
-			    format "\n", __VA_ARGS__); \
-		} \
+		_internalLogNL(0, LOGSRC_DEF, LOG_DEBUG, format, __VA_ARGS__); \
 	}
 #else /* !DEBUG */
 #define logDebugNL(verbThresh, format, ...) \
@@ -444,6 +454,14 @@ extern GlobLog globLog; /*!< Global log facility. */
 		globLog.log(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
 	} while (0)
 
+/*!
+ * @brief Logs info message. Automatic newline is added.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logInfoNL(format, ...) \
+	_internalLogNL(0, LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line information message.
@@ -467,6 +485,15 @@ extern GlobLog globLog; /*!< Global log facility. */
 	do { \
 		globLog.log(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
+
+/*!
+ * @brief Logs warning message. Automatic newline is added.
+ *
+ * @param[in] format Format of the message, follows printf syntax.
+ * @param[in] ...    Variadic arguments.
+ */
+#define logWarningNL(format, ...) \
+	_internalLogNL(0, LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line warning message.
@@ -499,15 +526,7 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] ...    Variadic arguments.
  */
 #define logErrorNL(format, ...) \
-	if (globLog.logVerbosity() > 0) { \
-		globLog.log(LOGSRC_DEF, LOG_ERR, \
-		    format " (%s:%d, %s())\n", \
-		    __VA_ARGS__, __FILE__, __LINE__, __func__); \
-	} else { \
-		globLog.log(LOGSRC_DEF, LOG_ERR, \
-		    format "\n", __VA_ARGS__); \
-	} \
-
+	_internalLogNL(0, LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line error message.
