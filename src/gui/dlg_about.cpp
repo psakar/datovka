@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #if defined(__APPLE__) || defined(__clang__)
 #  define __USE_C99_MATH
 #  define _Bool bool
@@ -29,40 +28,29 @@
 #  include <cstdbool>
 #endif /* __APPLE__ */
 
-
 #include <cstdlib>
 #include <isds.h>
 #include <openssl/crypto.h> /* SSLeay_version(3) */
 #include <QFile>
 
-#include "dlg_about.h"
+#include "src/gui/dlg_about.h"
 #include "src/io/filesystem.h"
 
-
-aboutDialog::aboutDialog(QWidget *parent) :
-    QDialog(parent)
+DlgAbout::DlgAbout(QWidget *parent)
+    : QDialog(parent)
 {
 	setupUi(this);
-	initAboutDialog();
-}
 
-/* ========================================================================= */
-/*
- * Init dialog
- */
-void aboutDialog::initAboutDialog(void)
-/* ========================================================================= */
-{
 #ifdef PORTABLE_APPLICATION
 	this->labelDatovka->setText(this->labelDatovka->text() + " - " +
 	    tr("Portable version"));
 #endif /* PORTABLE_APPLICATION */
 	this->labelVersionNum->setText(VERSION);
 
-	QString copyright =
-	    "Copyright © 2014–2016 CZ.NIC, z. s. p. o. "
-	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;";
-	this->labelCopy->setText(copyright);
+	const QString copyrightHtml(
+	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
+	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;");
+	this->labelCopy->setText(copyrightHtml);
 	this->labelCopy->setTextFormat(Qt::RichText);
 	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelCopy->setOpenExternalLinks(true);
@@ -74,63 +62,46 @@ void aboutDialog::initAboutDialog(void)
 	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelUrl->setOpenExternalLinks(true);
 
-	char * isdsVer = isds_version();
-	QString isdsVerStr("libisds ");
-	isdsVerStr += isdsVer;
-	free(isdsVer); isdsVer = NULL;
-
 	QString librariesStr("<b>");
 	librariesStr += QObject::tr("Depends on libraries:");
 	librariesStr += "</b><br/>";
-	librariesStr += QString("Qt ") + qVersion() + "<br/>";
-	librariesStr += isdsVerStr + "<br/>" + SSLeay_version(SSLEAY_VERSION);
 	this->labelLibs->setAlignment(Qt::AlignHCenter);
 	this->labelLibs->setTextFormat(Qt::RichText);
 	this->labelLibs->setWordWrap(true);
-	this->labelLibs->setText(librariesStr);
-	
+	this->labelLibs->setText(librariesStr +
+	    libraryDependencies().join("<br/>"));
 
 	connect(this->pushButtonLicence, SIGNAL(clicked()), this,
 	    SLOT(showLicence()));
 	connect(this->pushButtonCredits, SIGNAL(clicked()), this,
 	    SLOT(showCredits()));
 
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(closeDialog(void)));
-
+	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(close()));
 }
 
-/* ========================================================================= */
-/*
- * Show licence in textEdit
- */
-void aboutDialog::showLicence(void)
-/* ========================================================================= */
+QStringList DlgAbout::libraryDependencies(void)
+{
+	QStringList libs;
+
+	libs.append(QStringLiteral("Qt ") + qVersion());
+
+	char *isdsVer = isds_version();
+	libs.append(QStringLiteral("libisds ") + isdsVer);
+	free(isdsVer); isdsVer = NULL;
+
+	libs.append(SSLeay_version(SSLEAY_VERSION));
+
+	return libs;
+}
+
+void DlgAbout::showLicence(void)
 {
 	this->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_LICENCE));
 }
 
-
-/* ========================================================================= */
-/*
- * Show credits info in textEdit
- */
-void aboutDialog::showCredits(void)
-/* ========================================================================= */
+void DlgAbout::showCredits(void)
 {
 	this->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_CREDITS));
 }
-
-
-/* ========================================================================= */
-/*
- * Close dialog
- */
-void aboutDialog::closeDialog(void)
-/* ========================================================================= */
-{
-	close();
-}
-

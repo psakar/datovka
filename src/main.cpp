@@ -36,6 +36,7 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/gui/datovka.h"
+#include "src/gui/dlg_about.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
@@ -416,7 +417,8 @@ int main(int argc, char *argv[])
 
 	/* TODO -- Make the following assignments configurable. */
 	QCoreApplication::setApplicationName("Datovka");
-	QCoreApplication::setApplicationVersion(VERSION);
+	QCoreApplication::setApplicationVersion(VERSION " -- [" +
+	    DlgAbout::libraryDependencies().join("; ") + "]");
 
 	qInstallMessageHandler(globalLogOutput);
 

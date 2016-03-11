@@ -5541,8 +5541,9 @@ void MainWindow::aboutApplication(void)
 {
 	debugSlotCall();
 
-	QDialog *abDialog = new aboutDialog(this);
-	abDialog->exec();
+	QDialog *da = new DlgAbout(this);
+	da->exec();
+	da->deleteLater();
 }
 
 

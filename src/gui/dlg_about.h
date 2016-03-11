@@ -21,30 +21,48 @@
  * the two.
  */
 
-
 #ifndef _DLG_ABOUT_H_
 #define _DLG_ABOUT_H_
 
-
 #include <QDialog>
+#include <QStringList>
+
 #include "src/common.h"
 #include "ui_dlg_about.h"
 
-
-class aboutDialog : public QDialog, public Ui::AboutDialog
-{
+/*!
+ * @brief About dialogue.
+ */
+class DlgAbout : public QDialog, public Ui::AboutDialog {
 	Q_OBJECT
 
 public:
-	aboutDialog(QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent object.
+	 */
+	explicit DlgAbout(QWidget *parent = 0);
 
-private:
-	void initAboutDialog(void);
+	/*!
+	 * @brief Obtain list of strings containing libraries which the
+	 *     application depends on.
+	 *
+	 * @return List of strings containing library descriptions.
+	 */
+	static
+	QStringList libraryDependencies(void);
+
 private slots:
+	/*!
+	 * @brief Loads the license file into the text field.
+	 */
 	void showLicence(void);
-	void showCredits(void);
-	void closeDialog(void);
-};
 
+	/*!
+	 * @brief Displays credits information in the text field.
+	 */
+	void showCredits(void);
+};
 
 #endif /* _DLG_ABOUT_H_ */
