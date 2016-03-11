@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ WorkerPool::WorkerPool(unsigned threads, QObject *parent)
     m_singleTask(0),
     m_tasksHi(),
     m_tasksLo(),
+    m_dequeuedRunning(),
     m_singleState(FINISHED)
 {
 	for (unsigned i = 0; i < threads; ++i) {
@@ -223,15 +224,14 @@ void WorkerPool::run(WorkerPool *pool)
 				pool->m_singleState = EXECUTING;
 			} else if (!pool->m_tasksHi.isEmpty()) {
 				task = pool->m_tasksHi.dequeue();
+				pool->m_dequeuedRunning.insert(task);
 			} else if (!pool->m_tasksLo.isEmpty()) {
 				task = pool->m_tasksLo.dequeue();
+				pool->m_dequeuedRunning.insert(task);
 			}
 		}
 
 		if (0 == task) {
-			if (0 == pool->m_running) {
-				emit pool->finished();
-			}
 			pool->m_wake.wait(&pool->m_lock);
 			continue;
 		}
@@ -241,7 +241,8 @@ void WorkerPool::run(WorkerPool *pool)
 		pool->m_lock.unlock();
 		task->run();
 		if (task->autoDelete()) {
-			delete task;
+			QRunnable *deletedTask = task;
+			delete deletedTask;
 		}
 		pool->m_lock.lock();
 
@@ -249,6 +250,20 @@ void WorkerPool::run(WorkerPool *pool)
 		if (task == pool->m_singleTask) {
 			Q_ASSERT(EXECUTING == pool->m_singleState);
 			pool->m_singleState = FINISHED;
+		} else {
+			Q_ASSERT(pool->m_dequeuedRunning.contains(task));
+			pool->m_dequeuedRunning.remove(task);
+		}
+		if (pool->m_dequeuedRunning.isEmpty() &&
+		    pool->m_tasksHi.isEmpty() &&
+		    pool->m_tasksLo.isEmpty()) {
+			if (task == pool->m_singleTask) {
+				Q_ASSERT(0 == pool->m_running);
+				emit pool->finished();
+			} else {
+				Q_ASSERT(1 >= pool->m_running);
+				emit pool->assignedFinished();
+			}
 		}
 
 		pool->m_wake.wakeAll();

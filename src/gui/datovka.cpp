@@ -180,8 +180,8 @@ MainWindow::MainWindow(QWidget *parent)
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
-	connect(&globWorkPool, SIGNAL(finished()),
-	    this, SLOT(workersFinished()));
+	connect(&globWorkPool, SIGNAL(assignedFinished()),
+	    this, SLOT(backgroundWorkersFinished()));
 
 	/* Account list. */
 	ui->accountList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -2060,12 +2060,7 @@ void MainWindow::processSingleInstanceMessages(const QString &message)
 	}
 }
 
-/* ========================================================================= */
-/*
- * Workers finished.
- */
-void MainWindow::workersFinished(void)
-/* ========================================================================= */
+void MainWindow::backgroundWorkersFinished(void)
 {
 	debugSlotCall();
 
@@ -3103,9 +3098,28 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		return false;
 	}
 
+	bool wasEnabled = ui->actionSync_all_accounts->isEnabled();
+
+	{
+		/*
+		 * Disabling buttons is not as easy as it is handled by
+		 * the event loop. The event loop is forced to process all
+		 * pending events to minimise the probability that the actions
+		 * remain enabled accidentally.
+		 *
+		 * TODO -- The checking for live ISDS connection must be guarded for simultaneous access.
+		 */
+		QCoreApplication::processEvents();
+		ui->actionSync_all_accounts->setEnabled(false);
+		ui->actionGet_messages->setEnabled(false);
+		QCoreApplication::processEvents();
+	}
+
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
+		ui->actionSync_all_accounts->setEnabled(wasEnabled);
+		ui->actionGet_messages->setEnabled(wasEnabled);
 		return false;
 	}
 
@@ -3139,11 +3153,6 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	    MSG_SENT, globPref.auto_download_whole_messages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
-
-	if (globWorkPool.working()) {
-		ui->actionSync_all_accounts->setEnabled(false);
-		ui->actionGet_messages->setEnabled(false);
-	}
 
 	return true;
 }
@@ -3209,6 +3218,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
+	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionGet_messages->setEnabled(false);
+
 	foreach (const MessageDb::MsgId &id, msgIds) {
 		/* Using prepend() just to outrun other jobs. */
 		TaskDownloadMessage *task;
@@ -3219,9 +3231,6 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
-
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
 }
 
 

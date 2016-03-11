@@ -129,9 +129,10 @@ private slots:
 	void processSingleInstanceMessages(const QString &message);
 
 	/*!
-	 * @brief Workers finished.
+	 * @brief Fired when workers performing tasks on background have
+	 *     finished.
 	 */
-	void workersFinished(void);
+	void backgroundWorkersFinished(void);
 
 	/*!
 	 * @brief Performs action depending on message download outcome.

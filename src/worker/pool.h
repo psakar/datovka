@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <QQueue>
 #include <QObject>
 #include <QRunnable>
+#include <QSet>
 #include <QThread>
 #include <QVector>
 #include <QWaitCondition>
@@ -159,9 +160,14 @@ public:
 
 signals:
 	/*!
-	 * @brief Emitted when all jobs finished and queue is empty.
+	 * @brief Emitted when all jobs finished and queues are empty.
 	 */
 	void finished(void);
+
+	/*!
+	 * @brief Emitted when all enqueued jobs finished and queues are empty.
+	 */
+	void assignedFinished(void);
 
 protected:
 	/*!
@@ -198,6 +204,11 @@ private:
 	QRunnable *m_singleTask; /*!< Single task. */
 	QQueue<QRunnable *> m_tasksHi; /*!< Queue of high priority tasks. */
 	QQueue<QRunnable *> m_tasksLo; /*!< Queue of low priority tasks. */
+
+	QSet<QRunnable *> m_dequeuedRunning; /*!<
+	                                      * Set of running tasks except
+	                                      * the single task.
+	                                      */
 
 	/*
 	 * Single task has the highest priority. The runSingle() method
