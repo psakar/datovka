@@ -342,9 +342,12 @@ extern GlobLog globLog; /*!< Global log facility. */
  */
 #if DEBUG
 #define logDebugNL(verbThresh, format, ...) \
-	if (globLog.debugVerbosity() > verbThresh) { \
-		_internalLogNL(0, LOGSRC_DEF, LOG_DEBUG, format, __VA_ARGS__); \
-	}
+	do { \
+		if (globLog.debugVerbosity() > (verbThresh)) { \
+			_internalLogNL(0, LOGSRC_DEF, LOG_DEBUG, \
+			    format, __VA_ARGS__); \
+		} \
+	} while (0)
 #else /* !DEBUG */
 #define logDebugNL(verbThresh, format, ...) \
 	(void) 0
@@ -398,9 +401,12 @@ extern GlobLog globLog; /*!< Global log facility. */
  * @param[in] ...    Variadic arguments.
  */
 #define logDebugMl(verbThresh, format, ...) \
-	if (globLog.debugVerbosity() > verbThresh) { \
-		globLog.logMl(LOGSRC_DEF, LOG_DEBUG, format, __VA_ARGS__); \
-	}
+	do { \
+		if (globLog.debugVerbosity() > verbThresh) { \
+			globLog.logMl(LOGSRC_DEF, LOG_DEBUG, \
+			    format, __VA_ARGS__); \
+		} \
+	} while (0)
 
 
 /*!
