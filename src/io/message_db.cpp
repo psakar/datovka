@@ -4584,7 +4584,7 @@ bool MessageDb::checkDb(bool quick)
 	if (quick) {
 		queryStr = "PRAGMA quick_check";
 	} else {
-		queryStr = "PRAGMAintegrity_check";
+		queryStr = "PRAGMA integrity_check";
 	}
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
