@@ -28,6 +28,8 @@
 #include <QSqlDatabase>
 #include <QString>
 
+#define DB2 "db2"
+
 /*!
  * @brief Database prototype.
  */
@@ -53,24 +55,106 @@ public:
 	 */
 	QString fileName(void) const;
 
+	/*!
+	 * @brief Open database file.
+	 *
+	 * @param[in] fileName      File name.
+	 * @param[in] forceInMemory True if the message should be stored in
+	 *                          memory only.
+	 * @param[in] tables        List of table prototypes that should be
+	 *                          created if missing.
+	 * @return True on success, false on any error.
+	 */
+	bool openDb(const QString &fileName, bool forceInMemory,
+	    const QList<class SQLiteTbl *> &tables);
+
+	/*!
+	 * @brief Close database file.
+	 */
+	void closeDb(void);
+
+	/*!
+	 * @brief Begin a transaction.
+	 *
+	 * @return True on success.
+	 */
+	bool beginTransaction(void);
+
+	/*!
+	 * @brief End transaction.
+	 */
+	bool commitTransaction(void);
+
+	/*!
+	 * @brief Begin named transaction.
+	 *
+	 * @param[in] savePointName  Name of the save point.
+	 * @return True on success.
+	 */
+	bool savePoint(const QString &savePointName);
+
+	/*!
+	 * @brief End named transaction.
+	 *
+	 * @param[in] savePointName  Name of the save point.
+	 * @return True on success.
+	 */
+	bool releaseSavePoint(const QString &savePointName);
+
+	/*!
+	 * @brief Roll back transaction.
+	 *
+	 * @param[in] savePointName  Name of the save point.
+	 * @return True on success.
+	 *
+	 * @note If no save-point name is supplied then a complete roll-back is
+	 *     performed.
+	 */
+	bool rollbackTransaction(const QString &savePointName = QString());
+
 	static
 	const QString memoryLocation; /*!< Specifies memory location. */
 
 protected:
 	/*!
-	 * @brief Open database file.
+	 * @brief Perform a db integrity check.
 	 *
-	 * @param[in] fileName File name or memory location.
-	 * @param[in] tables   List of table prototypes that should be created
-	 *                     if missing.
-	 * @return True on success, false on any error.
+	 * @return False if check fails.
 	 */
-	bool openDb(const QString &fileName,
-	    const QList<class SQLiteTbl *> &tables);
+	bool checkDb(bool quick);
+
+	/*!
+	 * @brief Attaches a database file to opened database.
+	 *
+	 * @param[in,out] query          Query to work with.
+	 * @param[in]     attachFileName File containing database to be
+	 *                               attached.
+	 * @return False on error.
+	 */
+	static
+	bool attachDb2(class QSqlQuery &query, const QString &attachFileName);
+
+	/*!
+	 * @brief Detaches attached database file from opened database.
+	 *
+	 * @param[in,out] query Query to work with.
+	 * @return False on error.
+	 */
+	static
+	bool detachDb2(class QSqlQuery &query);
 
 	QSqlDatabase m_db; /*!< Database. */
 
 private:
+	/*!
+	 * @brief Create empty tables if tables do not already exist.
+	 *
+	 * @param[in] tables List of table prototypes that should be created
+	 *                   if missing.
+	 * @return True on success.
+	 */
+	bool createEmptyMissingTables(const QList<class SQLiteTbl *> &tables);
+
 	static
 	const QString dbDriverType; /*!< Database driver name. */
 };

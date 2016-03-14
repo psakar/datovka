@@ -44,13 +44,14 @@ SQLiteTbl::SQLiteTbl(const QString &name,
 
 bool SQLiteTbl::existsInDb(const QSqlDatabase &db) const
 {
-	Q_ASSERT(db.isValid());
 	if (!db.isValid()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(db.isOpen());
 	if (!db.isOpen()) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Database seems not to be open.");
 		return false;
 	}
 
@@ -80,13 +81,14 @@ bool SQLiteTbl::existsInDb(const QSqlDatabase &db) const
 
 bool SQLiteTbl::createEmpty(QSqlDatabase &db) const
 {
-	Q_ASSERT(db.isValid());
 	if (!db.isValid()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(db.isOpen());
 	if (!db.isOpen()) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Database seems not to be open.");
 		return false;
 	}
 
