@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QObject>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>

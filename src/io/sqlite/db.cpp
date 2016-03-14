@@ -40,7 +40,6 @@ SQLiteDb::SQLiteDb(const QString &connectionName)
 
 SQLiteDb::~SQLiteDb(void)
 {
-	logInfoNL("%s", "DB close.");
 	m_db.close();
 }
 

@@ -3129,7 +3129,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	if (downloadReceivedMessages) {
 		/* Method connectToIsds() acquires account information. */
 		const QString acndDbKey(userName + "___True");
-		UserEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+		DbEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
 		const QString key("userPrivils");
 		if (userEntry.hasValue(key)) {
 			int privils = userEntry.value(key).toInt();
@@ -3244,8 +3244,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	Q_ASSERT(!userName.isEmpty());
 
 	QString html;
-	UserEntry userEntry;
-	AccountEntry accountEntry;
+	DbEntry userEntry;
+	DbEntry accountEntry;
 
 	html.append(indentDivStart);
 	html.append("<h3>");
