@@ -794,15 +794,6 @@ QString MessageDbSet::constructDbFileName(const QString &locDir,
 	    key + QString("___") + (testing ? "1" : "0") + DB_SUFFIX;
 }
 
-const QString MessageDbSet::dbDriverType("QSQLITE");
-
-bool MessageDbSet::dbDriverSupport(void)
-{
-	QStringList driversList = QSqlDatabase::drivers();
-
-	return driversList.contains(dbDriverType, Qt::CaseSensitive);
-}
-
 MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
     bool create)
 {
@@ -838,7 +829,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 		connectionName = m_connectionPrefix + "_" + connectionName;
 	}
 
-	db = new(std::nothrow) MessageDb(dbDriverType, connectionName);
+	db = new(std::nothrow) MessageDb(connectionName);
 	if (NULL == db) {
 		Q_ASSERT(0);
 		return NULL;
@@ -909,7 +900,7 @@ int MessageDbSet::checkGivenDbFile(const QString &filePath, int flags)
 	}
 
 	if (checkIntegity || checkQuick) {
-		MessageDb db(dbDriverType, "someKey");
+		MessageDb db("someKey");
 		if (!db.openDb(filePath, false)) {
 			return MDS_ERR_DATA;
 		}

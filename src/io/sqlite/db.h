@@ -69,11 +69,6 @@ public:
 	    const QList<class SQLiteTbl *> &tables);
 
 	/*!
-	 * @brief Close database file.
-	 */
-	void closeDb(void);
-
-	/*!
 	 * @brief Begin a transaction.
 	 *
 	 * @return True on success.
@@ -114,10 +109,25 @@ public:
 
 	static
 	const QString memoryLocation; /*!< Specifies memory location. */
+	static
+	const QString dbDriverType; /*!< Database driver name. */
+
+	/*!
+	 * @brief Check whether required SQL driver is present.
+	 *
+	 * @return True if database driver is present.
+	 */
+	static
+	bool dbDriverSupport(void);
 
 protected:
 	/*!
-	 * @brief Perform a db integrity check.
+	 * @brief Close database file.
+	 */
+	void closeDb(void);
+
+	/*!
+	 * @brief Perform a database integrity check.
 	 *
 	 * @return False if check fails.
 	 */
@@ -154,9 +164,6 @@ private:
 	 * @return True on success.
 	 */
 	bool createEmptyMissingTables(const QList<class SQLiteTbl *> &tables);
-
-	static
-	const QString dbDriverType; /*!< Database driver name. */
 };
 
 #endif /* _SQLITE_DB_H_ */

@@ -41,8 +41,8 @@
 #include "src/io/db_tables.h"
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
-#include "src/io/message_db.h"
 #include "src/io/message_db_set_container.h"
+#include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/proxy.h"
@@ -529,9 +529,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (!MessageDbSet::dbDriverSupport()) {
+	if (!SQLiteDb::dbDriverSupport()) {
 		logError("Cannot load database driver '%s'.\n",
-		    MessageDbSet::dbDriverType.toUtf8().constData());
+		    SQLiteDb::dbDriverType.toUtf8().constData());
 		/* TODO -- throw a dialog notifying the user. */
 		return EXIT_FAILURE;
 	}

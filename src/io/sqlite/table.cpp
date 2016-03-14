@@ -93,9 +93,6 @@ bool SQLiteTbl::createEmpty(QSqlDatabase &db) const
 		return false;
 	}
 
-	logInfoNL("Creating non-existent new table '%s'.",
-	    tabName.toUtf8().constData());
-
 	QSqlQuery query(db);
 	QString queryStr = "CREATE TABLE IF NOT EXISTS " + tabName + " (\n";
 	for (int i = 0; i < knownAttrs.size(); ++i) {
@@ -120,6 +117,8 @@ bool SQLiteTbl::createEmpty(QSqlDatabase &db) const
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
+		logErrorNL("Creation of non-existent new table '%s' failed.",
+		   tabName.toUtf8().constData());
 		return false;
 	}
 

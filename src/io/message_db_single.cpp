@@ -52,7 +52,7 @@ MessageDbSingle *MessageDbSingle::createNew(const QString &filePath,
 
 	QString connectionName(connectionPrefix + "_SINGLE_FILE");
 
-	db = new(std::nothrow) MessageDb(dbDriverType, connectionName);
+	db = new(std::nothrow) MessageDb(connectionName);
 	if (NULL == db) {
 		Q_ASSERT(0);
 		return NULL;
@@ -73,15 +73,6 @@ MessageDbSingle *MessageDbSingle::createNew(const QString &filePath,
 	dbSingle->m_db = db;
 
 	return dbSingle;
-}
-
-const QString MessageDbSingle::dbDriverType("QSQLITE");
-
-bool MessageDbSingle::dbDriverSupport(void)
-{
-	QStringList driversList = QSqlDatabase::drivers();
-
-	return driversList.contains(dbDriverType, Qt::CaseSensitive);
 }
 
 /* Methods delegated from MessageDb and made public via this class. */

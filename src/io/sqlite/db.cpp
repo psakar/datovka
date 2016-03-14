@@ -77,11 +77,6 @@ bool SQLiteDb::openDb(const QString &fileName, bool forceInMemory,
 	return ret;
 }
 
-void SQLiteDb::closeDb(void)
-{
-	m_db.close();
-}
-
 bool SQLiteDb::beginTransaction(void)
 {
 	QSqlQuery query(m_db);
@@ -202,6 +197,53 @@ bool SQLiteDb::rollbackTransaction(const QString &savePointName)
 		return true;
 
 	}
+}
+
+bool SQLiteDb::dbDriverSupport(void)
+{
+	QStringList driversList = QSqlDatabase::drivers();
+
+	return driversList.contains(dbDriverType, Qt::CaseSensitive);
+}
+
+void SQLiteDb::closeDb(void)
+{
+	m_db.close();
+}
+
+bool SQLiteDb::checkDb(bool quick)
+{
+	QSqlQuery query(m_db);
+	bool ret = false;
+
+	QString queryStr;
+	if (quick) {
+		queryStr = "PRAGMA quick_check";
+	} else {
+		queryStr = "PRAGMA integrity_check";
+	}
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			ret = query.value(0).toBool();
+		} else {
+			ret = false;
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return ret;
+
+fail:
+	return false;
 }
 
 bool SQLiteDb::attachDb2(QSqlQuery &query, const QString &attachFileName)
