@@ -225,7 +225,7 @@ public:
 	 *
 	 * @param[in] connectionName Connection name.
 	 */
-	MessageDb(const QString &connectionName);
+	explicit MessageDb(const QString &connectionName);
 
 	/*!
 	 * @brief Generate information for reply dialogue.
