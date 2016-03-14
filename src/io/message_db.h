@@ -34,10 +34,10 @@
 #include <QObject>
 #include <QPair>
 #include <QStringList>
-#include <QSqlDatabase>
 #include <QString>
 #include <QVector>
 
+#include "src/io/sqlite/db.h"
 #include "src/models/files_model.h"
 #include "src/models/messages_model.h"
 
@@ -54,7 +54,7 @@ enum Sorting {
 /*!
  * @brief Encapsulates message database.
  */
-class MessageDb : public QObject {
+class MessageDb : public SQLiteDb {
 
 public:
 	/*!
@@ -220,58 +220,12 @@ public:
 		}
 	};
 
-	MessageDb(const QString &dbDriverType, const QString &connectionName,
-	    QObject *parent = 0);
-	virtual ~MessageDb(void);
-
-	static
-	const QString memoryLocation;
-
 	/*!
-	 * @brief Get file name.
+	 * @brief Constructor.
 	 *
-	 * @return Database file name.
+	 * @param[in] connectionName Connection name.
 	 */
-	QString fileName(void) const;
-
-	/*!
-	 * @brief Begin a transaction.
-	 *
-	 * @return True on success.
-	 */
-	bool beginTransaction(void);
-
-	/*!
-	 * @brief End transaction.
-	 */
-	bool commitTransaction(void);
-
-	/*!
-	 * @brief Begin named transaction.
-	 *
-	 * @param[in] savePointName  Name of the save point.
-	 * @return True on success.
-	 */
-	bool savePoint(const QString &savePointName);
-
-	/*!
-	 * @brief End named transaction.
-	 *
-	 * @param[in] savePointName  Name of the save point.
-	 * @return True on success.
-	 */
-	bool releaseSavePoint(const QString &savePointName);
-
-	/*!
-	 * @brief Roll back transaction.
-	 *
-	 * @param[in] savePointName  Name of the save point.
-	 * @return True on success.
-	 *
-	 * @note If no save-point name is supplied then a complete roll-back is
-	 *     performed.
-	 */
-	bool rollbackTransaction(const QString &savePointName = QString());
+	MessageDb(const QString &connectionName);
 
 	/*!
 	 * @brief Generate information for reply dialogue.
@@ -698,25 +652,6 @@ public:
 
 protected: /* These function are used from within a database container. */
 	/*!
-	 * @brief Attaches a database file to opened database.
-	 *
-	 * @param[in,out] query          Query to work with.
-	 * @param[in]     attachFileName File containing database to be attached.
-	 * @return False on error.
-	 */
-	static
-	bool attachDb2(QSqlQuery &query, const QString &attachFileName);
-
-	/*!
-	 * @brief Detaches attached database file from opened database.
-	 *
-	 * @param[in,out] query Query to work with.
-	 * @return False on error.
-	 */
-	static
-	bool detachDb2(QSqlQuery &query);
-
-	/*!
 	 * @brief Return all received messages model.
 	 *
 	 * @return Pointer to model, 0 on failure.
@@ -959,11 +894,6 @@ protected: /* These function are used from within a database container. */
 	bool openDb(const QString &fileName, bool createMissing = true);
 
 	/*!
-	 * @brief Close database file.
-	 */
-	void closeDb(void);
-
-	/*!
 	 * @brief Copy db.
 	 *
 	 * @param[in] newFileName  New location name.
@@ -989,14 +919,6 @@ protected: /* These function are used from within a database container. */
 	bool reopenDb(const QString &newFileName);
 
 	/*!
-	 * @brief Perform a db integrity check.
-	 *
-	 * @return False if check fails.
-	 */
-	bool checkDb(bool quick);
-
-protected:
-	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
 	 * @param[in,out] query Query already assigned to a database.
@@ -1012,7 +934,6 @@ protected:
 	 */
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
-	QSqlDatabase m_db; /*!< Message database. */
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 
 private:
@@ -1036,11 +957,12 @@ private:
 	bool addDmtypeColumn(void);
 
 	/*!
-	 * @brief Create empty tables if tables do not already exist.
+	 * @brief Returns list of tables.
 	 *
-	 * @return True on success.
+	 * @return List of pointers to tables.
 	 */
-	bool createEmptyMissingTables(void);
+	static
+	QList<class SQLiteTbl *> listOfTables(void);
 
 	/*!
 	 * @brief This method ensures that the process_state table

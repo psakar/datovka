@@ -89,6 +89,8 @@ private:
 	/* Prohibit these methods in public interface. */
 	QVariant operator[](const QString &key);
 	const QVariant operator[](const QString &key) const;
+
+	typedef QMap<QString, QVariant> m_parentType;
 };
 
 /* Meta object features are not supported for nested classes. */

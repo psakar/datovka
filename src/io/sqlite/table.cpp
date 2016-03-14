@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QObject>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
@@ -44,13 +45,14 @@ SQLiteTbl::SQLiteTbl(const QString &name,
 
 bool SQLiteTbl::existsInDb(const QSqlDatabase &db) const
 {
-	Q_ASSERT(db.isValid());
 	if (!db.isValid()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(db.isOpen());
 	if (!db.isOpen()) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Database seems not to be open.");
 		return false;
 	}
 
@@ -80,18 +82,16 @@ bool SQLiteTbl::existsInDb(const QSqlDatabase &db) const
 
 bool SQLiteTbl::createEmpty(QSqlDatabase &db) const
 {
-	Q_ASSERT(db.isValid());
 	if (!db.isValid()) {
+		Q_ASSERT(0);
 		return false;
 	}
 
-	Q_ASSERT(db.isOpen());
 	if (!db.isOpen()) {
+		Q_ASSERT(0);
+		logErrorNL("%s", "Database seems not to be open.");
 		return false;
 	}
-
-	logInfoNL("Creating non-existent new table '%s'.",
-	    tabName.toUtf8().constData());
 
 	QSqlQuery query(db);
 	QString queryStr = "CREATE TABLE IF NOT EXISTS " + tabName + " (\n";
@@ -117,6 +117,8 @@ bool SQLiteTbl::createEmpty(QSqlDatabase &db) const
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
+		logErrorNL("Creation of non-existent new table '%s' failed.",
+		   tabName.toUtf8().constData());
 		return false;
 	}
 

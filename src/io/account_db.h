@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,26 +21,31 @@
  * the two.
  */
 
-
 #ifndef _ACCOUNT_DB_H_
 #define _ACCOUNT_DB_H_
 
-
 #include <QMap>
-#include <QObject>
-#include <QSqlDatabase>
 #include <QString>
 #include <QVariant>
 
+#include "src/io/sqlite/db.h"
 
 /*!
- * @brief Account information.
+ * @brief Information obtained from database. It is structured only by the
+ *      queried keys.
  */
-class AccountEntry : private QMap<QString, QVariant> {
+class DbEntry : private QMap<QString, QVariant> {
 
 public:
-	AccountEntry(void);
-	~AccountEntry(void);
+	/*!
+	 * @brief Constructor.
+	 */
+	DbEntry(void);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DbEntry(void);
 
 	/*!
 	 * @brief Set value.
@@ -72,103 +77,85 @@ public:
 private:
 	typedef QMap<QString, QVariant> m_parentType;
 };
-
-
-/*!
- * @brief User information.
- */
-class UserEntry : private QMap<QString, QVariant> {
-
-public:
-	UserEntry(void);
-	~UserEntry(void);
-
-	/*!
-	 * @brief Set value.
-	 *
-	 * @param[in] key   Key string.
-	 * @param[in] value Value to be stored.
-	 */
-	bool setValue(const QString &key, const QVariant &value);
-
-	/*!
-	 * @brief Check whether value is stored.
-	 *
-	 * @param[in] key Key string.
-	 * @return True if key found, False else.
-	 */
-	bool hasValue(const QString &key) const;
-
-	/*!
-	 * @brief Return stored value.
-	 *
-	 * @param[in] key          Key string.
-	 * @param[in] defaultValue Value to be returned if key not found.
-	 * @return Found value associated to key or defaultValue if such entry
-	 *     found.
-	 */
-	const QVariant value(const QString &key,
-	    const QVariant &defaultValue = QVariant()) const;
-
-private:
-	typedef QMap<QString, QVariant> m_parentType;
-};
-
-
 
 /*!
  * @brief Encapsulates account database.
  */
-class AccountDb : public QObject {
+class AccountDb : public SQLiteDb {
 
 public:
-	AccountDb(const QString &connectionName, QObject *parent = 0);
-	~AccountDb(void);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] connectionName Connection name.
+	 */
+	explicit AccountDb(const QString &connectionName);
 
 	/*!
 	 * @brief Open database file.
+	 *
+	 * @param[in] fileName      File name.
+	 * @return True on success, false on any error.
 	 */
 	bool openDb(const QString &fileName);
 
 	/*!
 	 * @brief Return account entry.
 	 *
-	 * @note Key is in format 'login___True'.
+	 * @param[in] key Key value in format 'login___True'.
+	 * @return Associated entries or empty container on error.
 	 */
-	AccountEntry accountEntry(const QString &key) const;
+	DbEntry accountEntry(const QString &key) const;
 
 	/*!
 	 * @brief Return user entry.
 	 *
-	 * @note Key is in format 'login___True'.
+	 * @param[in] key Key value in format 'login___True'.
+	 * @return Associated entries or empty container on error.
 	 */
-	UserEntry userEntry(const QString &key) const;
+	DbEntry userEntry(const QString &key) const;
 
 	/*!
 	 * @brief Return data box identifier.
+	 *
+	 * @param[in] key          Key value.
+	 * @param[in] defaultValue Value to be returned when nothing found.
+	 * @return Data-box identifier.
 	 */
 	const QString dbId(const QString &key,
 	    const QString &defaultValue = QString()) const;
 
 	/*!
 	 * @brief Return sender name guess.
+	 *
+	 * @param[in] key          Key value.
+	 * @param[in] defaultValue Value to be returned when nothing found.
+	 * @return Sender name.
 	 */
 	const QString senderNameGuess(const QString &key,
 	    const QString &defaultValue = QString()) const;
 
-
 	/*!
 	 * @brief Return pwd expiration info from db.
+	 *
+	 * @param[in] key Key value.
+	 * @return Expiration information.
 	 */
 	const QString getPwdExpirFromDb(const QString &key) const;
 
  	/*!
-	 * @brief Set pwd expiration to password_expiration_date table
+	 * @brief Set password expiration information.
+	 *
+	 * @param[in] key  Key value.
+	 * @param[in] date Expiration date.
+	 * @return True on success.
 	 */
 	bool setPwdExpirIntoDb(const QString &key, const QString &date);
 
 	/*!
-	 * @brief Insert account info into db
+	 * @brief Insert account info into database.
+	 *
+	 * @return True on success.
 	 */
 	bool insertAccountIntoDb(const QString &key, const QString &dbID,
 	    const QString &dbType, int ic, const QString &pnFirstName,
@@ -184,7 +171,9 @@ public:
 	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing);
 
 	/*!
-	 * @brief Insert user info into db
+	 * @brief Insert user info into database.
+	 *
+	 * @return True on success.
 	 */
 	bool insertUserIntoDb(const QString &key,
 	    const QString &userType, int userPrivils,
@@ -200,30 +189,28 @@ public:
 	    const QString &caState);
 
 	/*!
-	 * @brief delete account info from db
+	 * @brief delete account info from database.
+	 *
+	 * @param[in] key Key value.
+	 * @return True on success.
 	 */
 	bool deleteAccountInfo(const QString &key);
 
+	/*!
+	 * @brief Get data box information.
+	 *
+	 * @param[in] key Key value.
+	 */
 	QList<QString> getUserDataboxInfo(const QString &key) const;
 
-	static
-	const QString memoryLocation;
-
-	/*!
-	 * @brief Database driver name.
-	 */
-	static
-	const QString dbDriverType;
-
 private:
-	QSqlDatabase m_db; /*!< Account database. */
-
 	/*!
-	 * @brief Create empty tables if tables do not already exist.
+	 * @brief Returns list of tables.
 	 *
-	 * @return True on success.
+	 * @return List of pointers to tables.
 	 */
-	bool createEmptyMissingTables(void);
+	static
+	QList<class SQLiteTbl *> listOfTables(void);
 };
 
 

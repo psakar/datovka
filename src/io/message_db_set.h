@@ -296,20 +296,6 @@ public:
 	    const QString &primaryKey, const QString &secondaryKey,
 	    bool testing, enum Organisation organisation);
 
-	/*!
-	 * @brief Database driver name.
-	 */
-	static
-	const QString dbDriverType;
-
-	/*!
-	 * @brief Check whether required SQL driver is present.
-	 *
-	 * @return True if database driver is present.
-	 */
-	static
-	bool dbDriverSupport(void);
-
 private:
 	/*!
 	 * @brief Creates a database set.

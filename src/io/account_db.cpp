@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,48 +21,29 @@
  * the two.
  */
 
-
-#include <QDir>
-#include <QMap>
-#include <QObject>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <QString>
-#include <QVariant>
 
-#include "account_db.h"
+#include "src/io/account_db.h"
 #include "src/io/db_tables.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
-
-/* ========================================================================= */
-AccountEntry::AccountEntry(void)
-/* ========================================================================= */
+DbEntry::DbEntry(void)
     : QMap<QString, QVariant>()
 {
 }
 
-
-/* ========================================================================= */
-AccountEntry::~AccountEntry(void)
-/* ========================================================================= */
+DbEntry::~DbEntry(void)
 {
 }
 
-
-/* ========================================================================= */
-/*
- * Set value.
- */
-bool AccountEntry::setValue(const QString &key, const QVariant &value)
-/* ========================================================================= */
+bool DbEntry::setValue(const QString &key, const QVariant &value)
 {
 	/* Don't insert if key is not known. */
-	if (accntinfTbl.attrProps.find(key) ==
-	    accntinfTbl.attrProps.end()) {
+	if (!accntinfTbl.attrProps.contains(key)) {
 		return false;
 	}
 
@@ -71,149 +52,33 @@ bool AccountEntry::setValue(const QString &key, const QVariant &value)
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Check whether value is stored.
- */
-bool AccountEntry::hasValue(const QString &key) const
-/* ========================================================================= */
+bool DbEntry::hasValue(const QString &key) const
 {
-	return this->find(key) != this->end();
+	return this->contains(key);
 }
 
-
-/* ========================================================================= */
-/*
- * Return stored value.
- */
-const QVariant AccountEntry::value(const QString &key,
+const QVariant DbEntry::value(const QString &key,
     const QVariant &defaultValue) const
-/* ========================================================================= */
 {
 	return m_parentType::value(key, defaultValue);
 }
 
-
-
-
-
-
-
-/* ========================================================================= */
-UserEntry::UserEntry(void)
-/* ========================================================================= */
-    : QMap<QString, QVariant>()
+AccountDb::AccountDb(const QString &connectionName)
+    : SQLiteDb(connectionName)
 {
 }
 
-
-/* ========================================================================= */
-UserEntry::~UserEntry(void)
-/* ========================================================================= */
-{
-}
-
-
-/* ========================================================================= */
-/*
- * Set value.
- */
-bool UserEntry::setValue(const QString &key, const QVariant &value)
-/* ========================================================================= */
-{
-	/* Don't insert if key is not known. */
-	if (userinfTbl.attrProps.find(key) ==
-	    userinfTbl.attrProps.end()) {
-		return false;
-	}
-
-	this->insert(key, value);
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Check whether value is stored.
- */
-bool UserEntry::hasValue(const QString &key) const
-/* ========================================================================= */
-{
-	return this->find(key) != this->end();
-}
-
-
-/* ========================================================================= */
-/*
- * Return stored value.
- */
-const QVariant UserEntry::value(const QString &key,
-    const QVariant &defaultValue) const
-/* ========================================================================= */
-{
-	return m_parentType::value(key, defaultValue);
-}
-
-
-
-/* ========================================================================= */
-AccountDb::AccountDb(const QString &connectionName, QObject *parent)
-/* ========================================================================= */
-    : QObject(parent)
-{
-	m_db = QSqlDatabase::addDatabase(dbDriverType, connectionName);
-}
-
-
-/* ========================================================================= */
-AccountDb::~AccountDb(void)
-/* ========================================================================= */
-{
-	m_db.close();
-}
-
-
-/* ========================================================================= */
-/*
- * Open database file.
- */
 bool AccountDb::openDb(const QString &fileName)
-/* ========================================================================= */
 {
-	bool ret;
-
-	if (globPref.store_additional_data_on_disk) {
-		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
-	} else {
-		m_db.setDatabaseName(memoryLocation);
-	}
-
-	/* TODO -- generate warning when no database is present. */
-
-	ret = m_db.open();
-
-	if (ret) {
-		/* Ensure database contains all tables. */
-		ret = createEmptyMissingTables();
-	}
-
-	if (!ret) {
-		m_db.close();
-	}
-
-	return ret;
+	return SQLiteDb::openDb(fileName,
+	    !globPref.store_additional_data_on_disk, listOfTables());
 }
 
-
-/* ========================================================================= */
-AccountEntry AccountDb::accountEntry(const QString &key) const
-/* ========================================================================= */
+DbEntry AccountDb::accountEntry(const QString &key) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	AccountEntry entry;
+	DbEntry aEntry;
 
 	if (!m_db.isOpen()) {
 		logErrorNL("%s", "Account database seems not to be open.");
@@ -238,7 +103,7 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 			QVariant value = query.value(rec.indexOf(
 			    accntinfTbl.knownAttrs[i].first));
 			if (!value.isNull() && value.isValid()) {
-				entry.setValue(accntinfTbl.knownAttrs[i].first,
+				aEntry.setValue(accntinfTbl.knownAttrs[i].first,
 				    value);
 			}
 		}
@@ -248,20 +113,17 @@ AccountEntry AccountDb::accountEntry(const QString &key) const
 		goto fail;
 	}
 
-	return entry;
+	return aEntry;
 
 fail:
-	return AccountEntry();
+	return DbEntry();
 }
 
-
-/* ========================================================================= */
-UserEntry AccountDb::userEntry(const QString &key) const
-/* ========================================================================= */
+DbEntry AccountDb::userEntry(const QString &key) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	UserEntry entry;
+	DbEntry uEntry;
 
 	if (!m_db.isOpen()) {
 		logErrorNL("%s", "Account database seems not to be open.");
@@ -286,7 +148,7 @@ UserEntry AccountDb::userEntry(const QString &key) const
 			QVariant value = query.value(rec.indexOf(
 			    userinfTbl.knownAttrs[i].first));
 			if (!value.isNull() && value.isValid()) {
-				entry.setValue(userinfTbl.knownAttrs[i].first,
+				uEntry.setValue(userinfTbl.knownAttrs[i].first,
 				    value);
 			}
 		}
@@ -296,10 +158,10 @@ UserEntry AccountDb::userEntry(const QString &key) const
 		goto fail;
 	}
 
-	return entry;
+	return uEntry;
 
 fail:
-	return UserEntry();
+	return DbEntry();
 }
 
 
@@ -340,14 +202,8 @@ fail:
 	return defaultValue;
 }
 
-
-/* ========================================================================= */
-/*
- * Return sender name guess.
- */
 const QString AccountDb::senderNameGuess(const QString &key,
     const QString &defaultValue) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -403,13 +259,7 @@ fail:
 	return defaultValue;
 }
 
-
-/* ========================================================================= */
-/*
- * Get pwd expiration info from password_expiration_date table
- */
 const QString AccountDb::getPwdExpirFromDb(const QString &key) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -444,13 +294,7 @@ fail:
 	return QString();
 }
 
-
-/* ========================================================================= */
-/*
- * Set pwd expiration to password_expiration_date table
- */
 bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -510,11 +354,6 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert account into db
- */
 bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
     const QString &dbType, int ic, const QString &pnFirstName,
     const QString &pnMiddleName, const QString &pnLastName,
@@ -525,7 +364,6 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
     const QString &adZipCode,const QString &adState,const QString &nationality,
     const QString &identifier, const QString &registryCode,
     int dbState, bool dbEffectiveOVM, bool dbOpenAddressing)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -636,11 +474,6 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert user info into db
- */
 bool AccountDb::insertUserIntoDb(const QString &key,
     const QString &userType, int userPrivils,
     const QString &pnFirstName, const QString &pnMiddleName,
@@ -651,7 +484,6 @@ bool AccountDb::insertUserIntoDb(const QString &key,
     const QString &biDate,
     int ic, const QString &firmName, const QString &caStreet,
     const QString &caCity, const QString &caZipCode, const QString &caState)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -752,13 +584,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Delete account records from db
- */
 bool AccountDb::deleteAccountInfo(const QString &key)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -800,14 +626,7 @@ fail:
 	return false;
 }
 
-
-
-/* ========================================================================= */
-/*
- * Get DbEffectiveOVM from db.
- */
 QList<QString> AccountDb::getUserDataboxInfo(const QString &key) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -849,45 +668,15 @@ fail:
 	return QList<QString>();
 }
 
-
-const QString AccountDb::memoryLocation(":memory:");
-
-const QString AccountDb::dbDriverType("QSQLITE");
-
-
-/* ========================================================================= */
-/*
- * Create empty tables if tables do not already exist.
- */
-bool AccountDb::createEmptyMissingTables(void)
-/* ========================================================================= */
+QList<class SQLiteTbl *> AccountDb::listOfTables(void)
 {
-	bool ret;
-
-	if (!accntinfTbl.existsInDb(m_db)) {
-		ret = accntinfTbl.createEmpty(m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
+	static QList<class SQLiteTbl *> tables;
+	if (tables.isEmpty()) {
+		tables.append(&accntinfTbl);
+		tables.append(&userinfTbl);
+		tables.append(&pwdexpdtTbl);
 	}
-	if (!userinfTbl.existsInDb(m_db)) {
-		ret = userinfTbl.createEmpty(m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!pwdexpdtTbl.existsInDb(m_db)) {
-		ret = pwdexpdtTbl.createEmpty(m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-
-	return true;
-
-fail:
-	return false;
+	return tables;
 }
-
 
 AccountDb *globAccountDbPtr = 0;

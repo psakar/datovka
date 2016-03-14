@@ -71,198 +71,12 @@ static
 const QVector<QString> fileItemIdsNoData = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "0"};
 
-/* ========================================================================= */
-MessageDb::MessageDb(const QString &dbDriverType,
-    const QString &connectionName, QObject *parent)
-/* ========================================================================= */
-    : QObject(parent),
+MessageDb::MessageDb(const QString &connectionName)
+    : SQLiteDb(connectionName),
     m_sqlMsgsModel(),
     m_sqlFilesModel()
 {
-	m_db = QSqlDatabase::addDatabase(dbDriverType, connectionName);
 }
-
-
-/* ========================================================================= */
-MessageDb::~MessageDb(void)
-/* ========================================================================= */
-{
-	m_db.close();
-}
-
-
-const QString MessageDb::memoryLocation(":memory:");
-
-
-/* ========================================================================= */
-/*
- * Get file name.
- */
-QString MessageDb::fileName(void) const
-/* ========================================================================= */
-{
-	return m_db.databaseName();
-}
-
-
-/* ========================================================================= */
-/*
- * Begin a transaction.
- */
-bool MessageDb::beginTransaction(void)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr("BEGIN DEFERRED TRANSACTION");
-	if (!query.prepare(queryStr)) {
-		return false;
-	}
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * End a transaction.
- */
-bool MessageDb::commitTransaction(void)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr("COMMIT TRANSACTION");
-	if (!query.prepare(queryStr)) {
-		return false;
-	}
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * Begin named transaction.
- */
-bool MessageDb::savePoint(const QString &savePointName)
-/* ========================================================================= */
-{
-	if (savePointName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	QSqlQuery query(m_db);
-	QString queryStr("SAVEPOINT :name");
-	if (!query.prepare(queryStr)) {
-		return false;
-	}
-	query.bindValue(":name", savePointName);
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * End named transaction.
- */
-bool MessageDb::releaseSavePoint(const QString &savePointName)
-/* ========================================================================= */
-{
-	if (savePointName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	QSqlQuery query(m_db);
-	QString queryStr("RELEASE SAVEPOINT :name");
-	if (!query.prepare(queryStr)) {
-		return false;
-	}
-	query.bindValue(":name", savePointName);
-	return query.exec();
-}
-
-
-/* ========================================================================= */
-/*
- * Roll back transaction.
- */
-bool MessageDb::rollbackTransaction(const QString &savePointName)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-
-	if (savePointName.isEmpty()) {
-
-		QString queryStr("ROLLBACK TRANSACTION");
-		if (!query.prepare(queryStr)) {
-			return false;
-		}
-		return query.exec();
-
-	} else {
-
-		QString queryStr("ROLLBACK TRANSACTION TO SAVEPOINT :name");
-		if (!query.prepare(queryStr)) {
-			return false;
-		}
-		query.bindValue(":name", savePointName);
-		return query.exec();
-
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Attaches a database file to opened database.
- */
-bool MessageDb::attachDb2(QSqlQuery &query, const QString &attachFileName)
-/* ========================================================================= */
-{
-	QString queryStr("ATTACH DATABASE :fileName AS " DB2);
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":fileName", attachFileName);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Detaches attached database file from opened database.
- */
-bool MessageDb::detachDb2(QSqlQuery &query)
-/* ========================================================================= */
-{
-	QString queryStr = "DETACH DATABASE " DB2;
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
 
 /* ========================================================================= */
 /*
@@ -4374,34 +4188,14 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Open database file.
- */
 bool MessageDb::openDb(const QString &fileName, bool createMissing)
-/* ========================================================================= */
 {
 	bool ret;
 
-	if (m_db.isOpen()) {
-		m_db.close();
-	}
+	ret = SQLiteDb::openDb(fileName, !globPref.store_messages_on_disk,
+	    createMissing ? listOfTables() : QList<class SQLiteTbl *>());
 
-	if (globPref.store_messages_on_disk) {
-		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
-	} else {
-		m_db.setDatabaseName(memoryLocation);
-	}
-
-	ret = m_db.open();
-
-	if (createMissing && ret) {
-		/* Ensure database contains all tables. */
-		ret = createEmptyMissingTables();
-	}
-
-	if (ret) {
+	if (ret && createMissing) {
 		ret = ensurePrimaryKeyInProcessStateTable();
 	}
 
@@ -4411,18 +4205,6 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 
 	return ret;
 }
-
-
-/* ========================================================================= */
-/*
- * Close database file.
- */
-void MessageDb::closeDb(void)
-/* ========================================================================= */
-{
-	m_db.close();
-}
-
 
 /* ========================================================================= */
 /*
@@ -4567,47 +4349,6 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	}
 
 	return reopen_ret;
-}
-
-
-/* ========================================================================= */
-/*
- * Perform a db integrity check.
- */
-bool MessageDb::checkDb(bool quick)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	bool ret = false;
-
-	QString queryStr;
-	if (quick) {
-		queryStr = "PRAGMA quick_check";
-	} else {
-		queryStr = "PRAGMA integrity_check";
-	}
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			ret = query.value(0).toBool();
-		} else {
-			ret = false;
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return ret;
-
-fail:
-	return false;
 }
 
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
@@ -4822,83 +4563,23 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Create empty tables if tables do not already exist.
- */
-bool MessageDb::createEmptyMissingTables(void)
-/* ========================================================================= */
+QList<class SQLiteTbl *> MessageDb::listOfTables(void)
 {
-	bool ret;
-
-	if (!msgsTbl.existsInDb(this->m_db)) {
-		ret = msgsTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
+	static QList<class SQLiteTbl *> tables;
+	if (tables.isEmpty()) {
+		tables.append(&msgsTbl);
+		tables.append(&flsTbl);
+		tables.append(&hshsTbl);
+		tables.append(&evntsTbl);
+		tables.append(&prcstTbl);
+		tables.append(&rwmsgdtTbl);
+		tables.append(&rwdlvrinfdtTbl);
+		tables.append(&smsgdtTbl);
+		tables.append(&crtdtTbl);
+		tables.append(&msgcrtdtTbl);
 	}
-	if (!flsTbl.existsInDb(this->m_db)) {
-		ret = flsTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!hshsTbl.existsInDb(this->m_db)) {
-		ret = hshsTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!evntsTbl.existsInDb(this->m_db)) {
-		ret = evntsTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!rwmsgdtTbl.existsInDb(this->m_db)) {
-		ret = rwmsgdtTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!rwdlvrinfdtTbl.existsInDb(this->m_db)) {
-		ret = rwdlvrinfdtTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!smsgdtTbl.existsInDb(this->m_db)) {
-		ret = smsgdtTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!crtdtTbl.existsInDb(this->m_db)) {
-		ret = crtdtTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!msgcrtdtTbl.existsInDb(this->m_db)) {
-		ret = msgcrtdtTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-	if (!prcstTbl.existsInDb(this->m_db)) {
-		ret = prcstTbl.createEmpty(this->m_db);
-		if (!ret) {
-			goto fail; /* TODO -- Proper recovery? */
-		}
-	}
-
-	return true;
-
-fail:
-	return false;
+	return tables;
 }
-
 
 /* ========================================================================= */
 /*

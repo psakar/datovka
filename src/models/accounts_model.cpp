@@ -151,186 +151,183 @@ AcntSettings::AcntSettings(const QMap<QString, QVariant> &map)
 
 bool AcntSettings::isValid(void) const
 {
-	return !QMap<QString, QVariant>::isEmpty() &&
+	return !m_parentType::isEmpty() &&
 	    !accountName().isEmpty() && !userName().isEmpty();
 }
 
 QString AcntSettings::accountName(void) const
 {
-	return QMap<QString, QVariant>::operator[](ACCOUNT_NAME).toString();
+	return m_parentType::operator[](ACCOUNT_NAME).toString();
 }
 
 void AcntSettings::setAccountName(const QString &name)
 {
-	QMap<QString, QVariant>::operator[](ACCOUNT_NAME) = name;
+	m_parentType::operator[](ACCOUNT_NAME) = name;
 }
 
 QString AcntSettings::userName(void) const
 {
-	return QMap<QString, QVariant>::operator[](USER).toString();
+	return m_parentType::operator[](USER).toString();
 }
 
 void AcntSettings::setUserName(const QString &userName)
 {
-	QMap<QString, QVariant>::operator[](USER) = userName;
+	m_parentType::operator[](USER) = userName;
 }
 
 QString AcntSettings::loginMethod(void) const
 {
-	return QMap<QString, QVariant>::operator[](LOGIN).toString();
+	return m_parentType::operator[](LOGIN).toString();
 }
 
 void AcntSettings::setLoginMethod(const QString &method)
 {
-	QMap<QString, QVariant>::operator[](LOGIN) = method;
+	m_parentType::operator[](LOGIN) = method;
 }
 
 QString AcntSettings::password(void) const
 {
-	return QMap<QString, QVariant>::operator[](PWD).toString();
+	return m_parentType::operator[](PWD).toString();
 }
 
 void AcntSettings::setPassword(const QString &pwd)
 {
-	QMap<QString, QVariant>::operator[](PWD) = pwd;
+	m_parentType::operator[](PWD) = pwd;
 }
 
 bool AcntSettings::isTestAccount(void) const
 {
-	return QMap<QString, QVariant>::operator[](TEST_ACCOUNT).toBool();
+	return m_parentType::operator[](TEST_ACCOUNT).toBool();
 }
 
 void AcntSettings::setTestAccount(bool isTesting)
 {
-	QMap<QString, QVariant>::operator[](TEST_ACCOUNT) = isTesting;
+	m_parentType::operator[](TEST_ACCOUNT) = isTesting;
 }
 
 bool AcntSettings::rememberPwd(void) const
 {
-	return QMap<QString, QVariant>::operator[](REMEMBER_PWD).toBool();
+	return m_parentType::operator[](REMEMBER_PWD).toBool();
 }
 
 void AcntSettings::setRememberPwd(bool remember)
 {
-	QMap<QString, QVariant>::operator[](REMEMBER_PWD) = remember;
+	m_parentType::operator[](REMEMBER_PWD) = remember;
 }
 
 QString AcntSettings::dbDir(void) const
 {
-	return QMap<QString, QVariant>::operator[](DB_DIR).toString();
+	return m_parentType::operator[](DB_DIR).toString();
 }
 
 void AcntSettings::setDbDir(const QString &path)
 {
 	if (path == globPref.confDir()) {
 		/* Default path is empty. */
-		QMap<QString, QVariant>::operator[](DB_DIR) = QString();
+		m_parentType::operator[](DB_DIR) = QString();
 	} else {
-		QMap<QString, QVariant>::operator[](DB_DIR) = path;
+		m_parentType::operator[](DB_DIR) = path;
 	}
 }
 
 bool AcntSettings::syncWithAll(void) const
 {
-	return QMap<QString, QVariant>::operator[](SYNC_WITH_ALL).toBool();
+	return m_parentType::operator[](SYNC_WITH_ALL).toBool();
 }
 
 void AcntSettings::setSyncWithAll(bool sync)
 {
-	QMap<QString, QVariant>::operator[](SYNC_WITH_ALL) = sync;
+	m_parentType::operator[](SYNC_WITH_ALL) = sync;
 }
 
 QString AcntSettings::p12File(void) const
 {
-	return QMap<QString, QVariant>::operator[](P12FILE).toString();
+	return m_parentType::operator[](P12FILE).toString();
 }
 
 void AcntSettings::setP12File(const QString &p12)
 {
-	QMap<QString, QVariant>::operator[](P12FILE) = p12;
+	m_parentType::operator[](P12FILE) = p12;
 }
 
 qint64 AcntSettings::lastMsg(void) const
 {
-	return QMap<QString, QVariant>::value(LAST_MSG_ID, -1).toLongLong();
+	return m_parentType::value(LAST_MSG_ID, -1).toLongLong();
 }
 
 void AcntSettings::setLastMsg(qint64 dmId)
 {
-	QMap<QString, QVariant>::insert(LAST_MSG_ID, dmId);
+	m_parentType::insert(LAST_MSG_ID, dmId);
 }
 
 QString AcntSettings::lastAttachSavePath(void) const
 {
-	return QMap<QString, QVariant>::operator[](LAST_SAVE_ATTACH).toString();
+	return m_parentType::operator[](LAST_SAVE_ATTACH).toString();
 }
 
 void AcntSettings::setLastAttachSavePath(const QString &path)
 {
-	QMap<QString, QVariant>::operator[](LAST_SAVE_ATTACH) = path;
+	m_parentType::operator[](LAST_SAVE_ATTACH) = path;
 }
 
 QString AcntSettings::lastAttachAddPath(void) const
 {
-	return QMap<QString, QVariant>::operator[](LAST_ADD_ATTACH).toString();
+	return m_parentType::operator[](LAST_ADD_ATTACH).toString();
 }
 
 void AcntSettings::setLastAttachAddPath(const QString &path)
 {
-	QMap<QString, QVariant>::operator[](LAST_ADD_ATTACH) = path;
+	m_parentType::operator[](LAST_ADD_ATTACH) = path;
 }
 
 QString AcntSettings::lastCorrespPath(void) const
 {
-	return QMap<QString, QVariant>::operator[](LAST_CORRESPOND).toString();
+	return m_parentType::operator[](LAST_CORRESPOND).toString();
 }
 
 void AcntSettings::setLastCorrespPath(const QString &path)
 {
-	QMap<QString, QVariant>::operator[](LAST_CORRESPOND) = path;
+	m_parentType::operator[](LAST_CORRESPOND) = path;
 }
 
 QString AcntSettings::lastZFOExportPath(void) const
 {
-	return QMap<QString, QVariant>::operator[](LAST_ZFO).toString();
+	return m_parentType::operator[](LAST_ZFO).toString();
 }
 
 void AcntSettings::setLastZFOExportPath(const QString &path)
 {
-	QMap<QString, QVariant>::operator[](LAST_ZFO) = path;
+	m_parentType::operator[](LAST_ZFO) = path;
 }
 
 bool AcntSettings::_createdFromScratch(void) const
 {
-	return QMap<QString, QVariant>::value(_CREATED_FROM_SCRATCH,
-	    false).toBool();
+	return m_parentType::value(_CREATED_FROM_SCRATCH, false).toBool();
 }
 
 void AcntSettings::_setCreatedFromScratch(bool fromScratch)
 {
-	QMap<QString, QVariant>::insert(_CREATED_FROM_SCRATCH, fromScratch);
+	m_parentType::insert(_CREATED_FROM_SCRATCH, fromScratch);
 }
 
 QString AcntSettings::_passphrase(void) const
 {
-	return QMap<QString, QVariant>::value(_PKEY_PASSPHRASE,
-	    QString()).toString();
+	return m_parentType::value(_PKEY_PASSPHRASE, QString()).toString();
 }
 
 void AcntSettings::_setPassphrase(const QString &passphrase)
 {
-	QMap<QString, QVariant>::insert(_PKEY_PASSPHRASE, passphrase);
+	m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
 }
 
 bool AcntSettings::_pwdExpirDlgShown(void) const
 {
-	return QMap<QString, QVariant>::value(_PWD_EXPIR_DLG_SHOWN,
-	    false).toBool();
+	return m_parentType::value(_PWD_EXPIR_DLG_SHOWN, false).toBool();
 }
 
 void AcntSettings::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 {
-	QMap<QString, QVariant>::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
+	m_parentType::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
 }
 
 void AccountsMap::loadFromSettings(const QSettings &settings)

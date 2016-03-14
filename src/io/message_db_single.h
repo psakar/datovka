@@ -52,20 +52,6 @@ public:
 	MessageDbSingle *createNew(const QString &filePath,
 	    const QString &connectionPrefix);
 
-	/*!
-	 * @brief Database driver name.
-	 */
-	static
-	const QString dbDriverType;
-
-	/*!
-	 * @brief Check whether required SQL driver is present.
-	 *
-	 * @return True if database driver is present.
-	 */
-	static
-	bool dbDriverSupport(void);
-
 private:
 	/*!
 	 * @brief Constructor.
