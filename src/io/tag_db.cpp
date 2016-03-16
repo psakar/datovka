@@ -57,7 +57,7 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 
 	if (query.exec() && query.isActive()) {
 		query.first();
-		if (!query.isValid()) {
+		if (query.isValid()) {
 			return false;
 		}
 	}
@@ -96,6 +96,7 @@ bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
+
 	query.bindValue(":tag_name", tagName);
 	query.bindValue(":tag_color", tagColor);
 	query.bindValue(":id", id);
@@ -105,6 +106,7 @@ bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
+
 	return true;
 }
 
