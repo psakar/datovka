@@ -51,6 +51,33 @@ public:
 	 */
 	bool openDb(const QString &fileName);
 
+	/*!
+	 * @brief Insert new tag into database file.
+	 *
+	 * @param[in] tagName       text label of tag.
+	 * @param[in] tagColor      color of tag in HEX format.
+	 * @return True on success, false on any error.
+	 */
+	bool insertTag(const QString &tagName, const QString &tagColor);
+
+	/*!
+	 * @brief Update tag in database file.
+	 *
+	 * @param[in] id            id of tag.
+	 * @param[in] tagName       text label of tag.
+	 * @param[in] tagColor      color of tag in HEX format.
+	 * @return True on success, false on any error.
+	 */
+	bool updateTag(int id, const QString &tagName, const QString &tagColor);
+
+	/*!
+	 * @brief Delete tag from database file.
+	 *
+	 * @param[in] id    id of tag.
+	 * @return True on success, false on any error.
+	 */
+	bool deleteTag(int id);
+
 private:
 	/*!
 	 * @brief Returns list of tables.

@@ -41,6 +41,108 @@ bool TagDb::openDb(const QString &fileName)
 }
 
 
+bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "SELECT id FROM tag WHERE tag_name = :tag_name";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":tag_name", tagName);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (!query.isValid()) {
+			return false;
+		}
+	}
+
+	queryStr = "INSERT INTO tag (tag_name, tag_color) "
+	    "VALUES (:tag_name, :tag_color)";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":tag_name", tagName);
+	query.bindValue(":tag_color", tagColor);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+
+bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "UPDATE tag SET tag_name = :tag_name, "
+	    "tag_color = :tag_color WHERE id = :id";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":tag_name", tagName);
+	query.bindValue(":tag_color", tagColor);
+	query.bindValue(":id", id);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	return true;
+}
+
+
+bool TagDb::deleteTag(int id)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM message_tags WHERE tag_id = :id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":id", id);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	queryStr = "DELETE FROM tag WHERE id = :id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":id", id);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+
 QList<class SQLiteTbl *> TagDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;
