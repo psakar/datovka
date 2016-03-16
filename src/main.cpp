@@ -42,6 +42,7 @@
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
+#include "src/io/tag_db.h"
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
@@ -578,6 +579,19 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 	}
+
+	TagDb globTagDb("tagDb");
+	globTagDbPtr = &globTagDb;
+
+	{
+		/* Open tags database. */
+		if (!globTagDbPtr->openDb(globPref.tagDbPath())) {
+			logErrorNL("Error opening tag db '%s'.",
+			    globPref.tagDbPath().toUtf8().constData());
+			return EXIT_FAILURE;
+		}
+	}
+
 
 	int ret = EXIT_SUCCESS;
 

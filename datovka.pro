@@ -310,7 +310,8 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_import_zfo.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
-    src/worker/task_verify_message.cpp
+    src/worker/task_verify_message.cpp \
+    src/io/tag_db.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -378,7 +379,8 @@ HEADERS += src/cli/cli.h \
     src/worker/task_import_zfo.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
-    src/worker/task_verify_message.h
+    src/worker/task_verify_message.h \
+    src/io/tag_db.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
