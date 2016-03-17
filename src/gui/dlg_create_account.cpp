@@ -99,6 +99,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->accountLineEdit->setText(m_accountInfo.accountName());
 		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->usernameLineEdit->setEnabled(false);
+		this->testAccountCheckBox->setEnabled(false);
 		break;
 	case ACT_PWD:
 		this->setWindowTitle(tr("Enter password for account") + " "
@@ -108,8 +109,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->usernameLineEdit->setText(m_accountInfo.userName());
-		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
+		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
@@ -120,8 +121,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->usernameLineEdit->setText(m_accountInfo.userName());
-		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
+		this->testAccountCheckBox->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
@@ -132,8 +133,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->infoLabel->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->usernameLineEdit->setText(m_accountInfo.userName());
-		this->testAccountCheckBox->setEnabled(false);
 		this->usernameLineEdit->setEnabled(false);
+		this->testAccountCheckBox->setEnabled(false);
 		break;
 	case ACT_IDBOX:
 		this->setWindowTitle(tr("Enter ID of your databox for account")
@@ -260,6 +261,7 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->rememberPswcheckBox->setEnabled(true);
 	}
 	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
+	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
 
 	m_loginmethod = itemindex;
 	checkInputFields();
