@@ -51,7 +51,6 @@ TagsDialog::TagsDialog(QWidget *parent)
 	ui->tagTableWidget->setColumnHidden(1, true);
 
 	fillTagsToListView();
-
 }
 
 
@@ -77,6 +76,8 @@ void TagsDialog::addTag(void)
 	tagDialog->exec();
 
 	delete tagDialog;
+
+	fillTagsToListView();
 }
 
 
@@ -87,7 +88,14 @@ void TagsDialog::addTag(void)
 void TagsDialog::updateTag(void)
 /* ========================================================================= */
 {
-	int row = ui->tagTableWidget->currentIndex().row();
+	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
+
+	qDebug() <<  currentIndex;
+
+	if (!currentIndex.isValid()) {
+		return;
+	}
+	int row = currentIndex.row();
 	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
 
 	TagItem tagItem = globTagDbPtr->getTagData(id);
@@ -97,6 +105,8 @@ void TagsDialog::updateTag(void)
 	tagDialog->exec();
 
 	delete tagDialog;
+
+	fillTagsToListView();
 }
 
 
@@ -107,10 +117,19 @@ void TagsDialog::updateTag(void)
 void TagsDialog::deleteTag(void)
 /* ========================================================================= */
 {
-	int row = ui->tagTableWidget->currentIndex().row();
+	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
+
+	qDebug() <<  currentIndex;
+
+	if (!currentIndex.isValid()) {
+		return;
+	}
+	int row = currentIndex.row();
 	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
 
 	globTagDbPtr->deleteTag(id);
+
+	fillTagsToListView();
 }
 
 
@@ -123,6 +142,7 @@ void TagsDialog::fillTagsToListView(void)
 {
 	QList<TagItem> tagList = globTagDbPtr->getAllTags();
 
+	ui->tagTableWidget->clearContents();
 	ui->tagTableWidget->setRowCount(0);
 
 	for (int i = 0; i < tagList.count(); ++i) {
