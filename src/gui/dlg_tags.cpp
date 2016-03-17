@@ -58,7 +58,7 @@ TagsDialog::TagsDialog(QWidget *parent)
 /*
  * Destructor.
  */
-TagsDialog::~TagsDialog()
+TagsDialog::~TagsDialog(void)
 /* ========================================================================= */
 {
 	delete ui;
@@ -98,10 +98,10 @@ void TagsDialog::updateTag(void)
 	int row = currentIndex.row();
 	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
 
-	TagItem tagItem = globTagDbPtr->getTagData(id);
+	TagItem tagItem(globTagDbPtr->getTagData(id));
 
-	QDialog *tagDialog = new TagDialog(id, tagItem.tagName,
-	    tagItem.tagColor, this);
+	QDialog *tagDialog = new TagDialog(id, tagItem.name, tagItem.colour,
+	    this);
 	tagDialog->exec();
 
 	delete tagDialog;
@@ -145,16 +145,16 @@ void TagsDialog::fillTagsToListView(void)
 	ui->tagTableWidget->clearContents();
 	ui->tagTableWidget->setRowCount(0);
 
-	for (int i = 0; i < tagList.count(); ++i) {
+	foreach (const TagItem &tagItem, tagList) {
 
 		int row = ui->tagTableWidget->rowCount();
 		ui->tagTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(tagList.at(i).tagName);
-		item->setForeground(QColor("#"+ tagList.at(i).tagColor));
+		item->setText(tagItem.name);
+		item->setForeground(QColor("#"+ tagItem.colour));
 		ui->tagTableWidget->setItem(row, 0 , item);
 		item = new QTableWidgetItem;
-		item->setText(QString::number(tagList.at(i).id));
+		item->setText(QString::number(tagItem.id));
 		ui->tagTableWidget->setItem(row, 1 ,item);
 	}
 

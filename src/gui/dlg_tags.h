@@ -31,14 +31,6 @@ namespace Ui {
 	class TagsDialog;
 }
 
-class TagItem {
-	public:
-		int id;
-		QString tagName;
-		QString tagColor;
-};
-
-
 class TagsDialog : public QDialog
 {
 	Q_OBJECT
@@ -47,7 +39,7 @@ public:
 
 	explicit TagsDialog(QWidget *parent = 0);
 
-	~TagsDialog();
+	~TagsDialog(void);
 
 private slots:
 

@@ -29,7 +29,40 @@
 #include <QVariant>
 
 #include "src/io/sqlite/db.h"
-#include "src/gui/dlg_tags.h"
+
+/*!
+ * @brief Describes tag information.
+ */
+class TagItem {
+
+public:
+	/*!
+	 * @brief Constructor of invalid tag item.
+	 */
+	TagItem(void);
+	/*!
+	 * @brief Constructs a tag item from supplied parameters.
+	 *
+	 * @param[in] i Tag identifier.
+	 * @param[in] n Tag name.
+	 * @param[in] c Tag colour in hex format without the leading hashtag.
+	 */
+	TagItem(int i, const QString &n, const QString &c);
+
+	/*!
+	 * @brief Check for validity.
+	 *
+	 * @return True if tag contains valid data.
+	 */
+	bool isValid(void) const;
+
+	int id; /*!< Tag identifier. */
+	QString name; /*!< Name of the rag. */
+	QString colour; /*!<
+	                 * Colour of the tag in hex format without the leading
+	                 * hashtag.
+	                 */
+};
 
 /*!
  * @brief Encapsulates tag database.

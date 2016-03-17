@@ -26,9 +26,28 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-#include "src/io/tag_db.h"
 #include "src/io/db_tables.h"
+#include "src/io/tag_db.h"
 #include "src/log/log.h"
+
+TagItem::TagItem(void)
+    : id(-1),
+    name(),
+    colour()
+{
+}
+
+TagItem::TagItem(int i, const QString &n, const QString &c)
+    : id(i),
+    name(n),
+    colour(c)
+{
+}
+
+bool TagItem::isValid(void) const
+{
+	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
+}
 
 TagDb::TagDb(const QString &connectionName)
     : SQLiteDb(connectionName)
@@ -39,7 +58,6 @@ bool TagDb::openDb(const QString &fileName)
 {
 	return SQLiteDb::openDb(fileName, false, listOfTables());
 }
-
 
 bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 {
@@ -83,7 +101,6 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 	return true;
 }
 
-
 bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);
@@ -109,7 +126,6 @@ bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 
 	return true;
 }
-
 
 bool TagDb::deleteTag(int id)
 {
@@ -144,11 +160,9 @@ bool TagDb::deleteTag(int id)
 	return true;
 }
 
-
 TagItem TagDb::getTagData(int id)
 {
 	QSqlQuery query(m_db);
-	TagItem tagItem;
 
 	QString queryStr = "SELECT tag_name, tag_color FROM tag WHERE id = :id";
 	if (!query.prepare(queryStr)) {
@@ -159,28 +173,22 @@ TagItem TagDb::getTagData(int id)
 	query.bindValue(":id", id);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		tagItem.id = id;
-		tagItem.tagName = query.value(0).toString();
-		tagItem.tagColor = query.value(1).toString();
-		return tagItem;
+		return TagItem(id, query.value(0).toString(),
+		    query.value(1).toString());
 	} else {
 		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: "
-		    "%s.",
+		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 
 fail:
-	return tagItem;
-
+	return TagItem();
 }
-
 
 QList<TagItem> TagDb::getAllTags(void)
 {
 	QSqlQuery query(m_db);
-	TagItem tagItem;
 	QList<TagItem> tagList;
 
 	QString queryStr = "SELECT * FROM tag ORDER BY tag_name ASC";
@@ -193,10 +201,9 @@ QList<TagItem> TagDb::getAllTags(void)
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			tagItem.id = query.value(0).toInt();
-			tagItem.tagName = query.value(1).toString();
-			tagItem.tagColor = query.value(2).toString();
-			tagList.append(tagItem);
+			tagList.append(TagItem(query.value(0).toInt(),
+			    query.value(1).toString(),
+			    query.value(2).toString()));
 			query.next();
 		}
 	} else {
@@ -208,9 +215,7 @@ QList<TagItem> TagDb::getAllTags(void)
 	return tagList;
 fail:
 	return QList<TagItem>();
-
 }
-
 
 
 QList<class SQLiteTbl *> TagDb::listOfTables(void)
