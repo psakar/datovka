@@ -48,6 +48,8 @@ TagsDialog::TagsDialog(QWidget *parent)
 	connect(ui->pushButtonDelete, SIGNAL(clicked()), this,
 	    SLOT(deleteTag()));
 
+	ui->tagTableWidget->setColumnHidden(1, true);
+
 	fillTagsToListView();
 
 }
@@ -85,12 +87,13 @@ void TagsDialog::addTag(void)
 void TagsDialog::updateTag(void)
 /* ========================================================================= */
 {
-	/* TODO - get id and data of tag from database */
-	int id = ui->tagListWidget->currentIndex().row();
-	QString tagName;
-	QString tagColor;
+	int row = ui->tagTableWidget->currentIndex().row();
+	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
 
-	QDialog *tagDialog = new TagDialog(id, tagName, tagColor, this);
+	TagItem tagItem = globTagDbPtr->getTagData(id);
+
+	QDialog *tagDialog = new TagDialog(id, tagItem.tagName,
+	    tagItem.tagColor, this);
 	tagDialog->exec();
 
 	delete tagDialog;
@@ -104,8 +107,9 @@ void TagsDialog::updateTag(void)
 void TagsDialog::deleteTag(void)
 /* ========================================================================= */
 {
-	/* TODO - get database id of tag */
-	int id = ui->tagListWidget->currentIndex().row();
+	int row = ui->tagTableWidget->currentIndex().row();
+	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
+
 	globTagDbPtr->deleteTag(id);
 }
 
@@ -117,4 +121,25 @@ void TagsDialog::deleteTag(void)
 void TagsDialog::fillTagsToListView(void)
 /* ========================================================================= */
 {
+	QList<TagItem> tagList = globTagDbPtr->getAllTags();
+
+	ui->tagTableWidget->setRowCount(0);
+
+	for (int i = 0; i < tagList.count(); ++i) {
+
+		int row = ui->tagTableWidget->rowCount();
+		ui->tagTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(tagList.at(i).tagName);
+		item->setForeground(QColor("#"+ tagList.at(i).tagColor));
+		ui->tagTableWidget->setItem(row, 0 , item);
+		item = new QTableWidgetItem;
+		item->setText(QString::number(tagList.at(i).id));
+		ui->tagTableWidget->setItem(row, 1 ,item);
+	}
+
+	if (ui->tagTableWidget->rowCount() > 0) {
+		ui->tagTableWidget->selectColumn(0);
+		ui->tagTableWidget->selectRow(0);
+	}
 }

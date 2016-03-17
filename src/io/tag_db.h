@@ -29,6 +29,7 @@
 #include <QVariant>
 
 #include "src/io/sqlite/db.h"
+#include "src/gui/dlg_tags.h"
 
 /*!
  * @brief Encapsulates tag database.
@@ -77,6 +78,21 @@ public:
 	 * @return True on success, false on any error.
 	 */
 	bool deleteTag(int id);
+
+	/*!
+	 * @brief Get tag data from database file.
+	 *
+	 * @param[in] id    id of tag.
+	 * @return tag struct with data.
+	 */
+	TagItem getTagData(int id);
+
+	/*!
+	 * @brief Get all tags from database file.
+	 *
+	 * @return Llist of TagItem.
+	 */
+	QList<TagItem> getAllTags(void);
 
 private:
 	/*!

@@ -145,6 +145,74 @@ bool TagDb::deleteTag(int id)
 }
 
 
+TagItem TagDb::getTagData(int id)
+{
+	QSqlQuery query(m_db);
+	TagItem tagItem;
+
+	QString queryStr = "SELECT tag_name, tag_color FROM tag WHERE id = :id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":id", id);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		tagItem.id = id;
+		tagItem.tagName = query.value(0).toString();
+		tagItem.tagColor = query.value(1).toString();
+		return tagItem;
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return tagItem;
+
+}
+
+
+QList<TagItem> TagDb::getAllTags(void)
+{
+	QSqlQuery query(m_db);
+	TagItem tagItem;
+	QList<TagItem> tagList;
+
+	QString queryStr = "SELECT * FROM tag ORDER BY tag_name ASC";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			tagItem.id = query.value(0).toInt();
+			tagItem.tagName = query.value(1).toString();
+			tagItem.tagColor = query.value(2).toString();
+			tagList.append(tagItem);
+			query.next();
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return tagList;
+fail:
+	return QList<TagItem>();
+
+}
+
+
+
 QList<class SQLiteTbl *> TagDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;
