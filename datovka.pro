@@ -264,6 +264,8 @@ SOURCES += src/cli/cli.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_send_message.cpp \
     src/gui/dlg_signature_detail.cpp \
+    src/gui/dlg_tag.cpp \
+    src/gui/dlg_tags.cpp \
     src/gui/dlg_timestamp_expir.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
@@ -280,6 +282,7 @@ SOURCES += src/cli/cli.cpp \
     src/io/message_db_single.cpp \
     src/io/sqlite/db.cpp \
     src/io/sqlite/table.cpp \
+    src/io/tag_db.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -310,10 +313,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_import_zfo.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
-    src/worker/task_verify_message.cpp \
-    src/io/tag_db.cpp \
-    src/gui/dlg_tags.cpp \
-    src/gui/dlg_tag.cpp
+    src/worker/task_verify_message.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -336,6 +336,8 @@ HEADERS += src/cli/cli.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_send_message.h \
     src/gui/dlg_signature_detail.h \
+    src/gui/dlg_tag.h \
+    src/gui/dlg_tags.h \
     src/gui/dlg_timestamp_expir.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
@@ -351,6 +353,7 @@ HEADERS += src/cli/cli.h \
     src/io/message_db_single.h \
     src/io/sqlite/db.h \
     src/io/sqlite/table.h \
+    src/io/tag_db.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
@@ -381,10 +384,7 @@ HEADERS += src/cli/cli.h \
     src/worker/task_import_zfo.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
-    src/worker/task_verify_message.h \
-    src/io/tag_db.h \
-    src/gui/dlg_tags.h \
-    src/gui/dlg_tag.h
+    src/worker/task_verify_message.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
@@ -402,11 +402,11 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \
     src/gui/ui/dlg_signature_detail.ui \
+    src/gui/ui/dlg_tag.ui \
+    src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui \
-    src/gui/ui/dlg_tags.ui \
-    src/gui/ui/dlg_tag.ui
+    src/gui/ui/dlg_yes_no_checkbox.ui
 
 RESOURCES += \
     res/resources.qrc
