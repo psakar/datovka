@@ -311,7 +311,9 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
     src/worker/task_verify_message.cpp \
-    src/io/tag_db.cpp
+    src/io/tag_db.cpp \
+    src/gui/dlg_tags.cpp \
+    src/gui/dlg_tag.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -380,7 +382,9 @@ HEADERS += src/cli/cli.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
     src/worker/task_verify_message.h \
-    src/io/tag_db.h
+    src/io/tag_db.h \
+    src/gui/dlg_tags.h \
+    src/gui/dlg_tag.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
@@ -400,7 +404,9 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_signature_detail.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui
+    src/gui/ui/dlg_yes_no_checkbox.ui \
+    src/gui/ui/dlg_tags.ui \
+    src/gui/ui/dlg_tag.ui
 
 RESOURCES += \
     res/resources.qrc

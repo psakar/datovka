@@ -686,6 +686,11 @@ private slots:
 	void doActionAfterSentMsgSlot(const QString &userName,
 	    const QString &lastDir);
 
+	/*!
+	 * @brief Open tag dialog.
+	 */
+	void showTagDlg(void);
+
 private:
 
 	QTimer m_timerSyncAccounts;
@@ -1230,6 +1235,7 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
+
 };
 
 

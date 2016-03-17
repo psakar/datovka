@@ -63,6 +63,7 @@
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/gui/dlg_import_zfo_result.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
+#include "src/gui/dlg_tags.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -4085,6 +4086,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()),
 	    this, SLOT(showMsgAdvancedSearchDlg()));
+	    /* Separator. */
+	connect(ui->actionTag_settings, SIGNAL(triggered()),
+	    this, SLOT(showTagDlg()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()),
@@ -10316,4 +10320,13 @@ void MainWindow::setMenuActionIcons(void)
 
 	/* Actions that are not shown in the top menu. */
 	ui->actionEmail_selected_attachments->isEnabled();
+}
+
+
+void MainWindow::showTagDlg(void) {
+
+	debugSlotCall();
+
+	QDialog *tagsDialog = new TagsDialog(this);
+	tagsDialog->exec();
 }
