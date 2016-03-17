@@ -277,6 +277,7 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 				exit 1
 			fi
 			cp "${PATCHFILE}" ./
+			echo "Applying ${f}"
 			patch -p1 < ${f}
 		done
 	fi

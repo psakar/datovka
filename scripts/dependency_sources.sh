@@ -11,6 +11,9 @@ _LIBCURL_ARCHIVE="curl-7.47.1.tar.gz"
 _OPENSSL_ARCHIVE="openssl-1.0.2g.tar.gz"
 
 _LIBISDS_ARCHIVE="libisds-0.10.1.tar.xz" # 10.2 is available but we have not tested it
-_LIBISDS_ARCHIVE_PATCHES="0.10.1-string-precision-type-fix.patch"
+_LIBISDS_ARCHIVE_PATCHES=" \
+	001-0.10.1-string-precision-type-fix.patch \
+	002-0.10.1-replace-positional-arguments.patch \
+	"
 _LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #_LIBISDS_BRANCH="feature-openssl" # Use master.
