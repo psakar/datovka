@@ -71,6 +71,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
+#include "src/io/tag_db.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/message_emitter.h"
@@ -2880,6 +2881,12 @@ void MainWindow::deleteMessage(void)
 			 * TODO -- Remove the year on account list if last
 			 * message was removed.
 			 */
+
+			/* Delete all tag records from message_tags table.
+			 * Tag in the tag table are kept.
+			 */
+			globTagDbPtr->deleteAllMsgTagRecords(id.dmId);
+
 		}
 	}
 }

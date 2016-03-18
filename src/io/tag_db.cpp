@@ -30,36 +30,72 @@
 #include "src/io/tag_db.h"
 #include "src/log/log.h"
 
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
 TagItem::TagItem(void)
+/* ========================================================================= */
     : id(-1),
     name(),
     colour()
 {
 }
 
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
 TagItem::TagItem(int i, const QString &n, const QString &c)
+/* ========================================================================= */
     : id(i),
     name(n),
     colour(c)
 {
 }
 
+
+/* ========================================================================= */
+/*
+ * Are valid tag data.
+ */
 bool TagItem::isValid(void) const
+/* ========================================================================= */
 {
 	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
 }
 
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
 TagDb::TagDb(const QString &connectionName)
+/* ========================================================================= */
     : SQLiteDb(connectionName)
 {
 }
 
+
+/* ========================================================================= */
+/*
+ * Open tag database.
+ */
 bool TagDb::openDb(const QString &fileName)
+/* ========================================================================= */
 {
 	return SQLiteDb::openDb(fileName, false, listOfTables());
 }
 
+
+/* ========================================================================= */
+/*
+ * Insert a new tag into tag table if not exists (tagName).
+ */
 bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
+/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -101,7 +137,13 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 	return true;
 }
 
+
+/* ========================================================================= */
+/*
+ * Update tag in tag table.
+ */
 bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
+/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -127,7 +169,13 @@ bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 	return true;
 }
 
+
+/* ========================================================================= */
+/*
+ * Delete tag from table.
+ */
 bool TagDb::deleteTag(int id)
+/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -160,7 +208,13 @@ bool TagDb::deleteTag(int id)
 	return true;
 }
 
+
+/* ========================================================================= */
+/*
+ * Get tag data from table.
+ */
 TagItem TagDb::getTagData(int id)
+/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -186,7 +240,13 @@ fail:
 	return TagItem();
 }
 
+
+/* ========================================================================= */
+/*
+ * Get all tags from table.
+ */
 QList<TagItem> TagDb::getAllTags(void)
+/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QList<TagItem> tagList;
@@ -218,7 +278,38 @@ fail:
 }
 
 
+/* ========================================================================= */
+/*
+ * Delete all tag records for message ID in the message_tags table.
+ */
+bool TagDb::deleteAllMsgTagRecords(qint64 msgId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM message_tags WHERE message_id = :msgId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":msgId", msgId);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * List of pointers to tables.
+ */
 QList<class SQLiteTbl *> TagDb::listOfTables(void)
+/* ========================================================================= */
 {
 	static QList<class SQLiteTbl *> tables;
 	if (tables.isEmpty()) {
@@ -228,4 +319,5 @@ QList<class SQLiteTbl *> TagDb::listOfTables(void)
 	return tables;
 }
 
+/* Global poninter to tag database */
 TagDb *globTagDbPtr = 0;

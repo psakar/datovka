@@ -110,7 +110,7 @@ void TagDialog::setNewColor(void)
 	    tr("Choose tag color"));
 
 	if (color.isValid()) {
-		m_tagColor = color.name();
+		m_tagColor = color.name().toLower();
 		setPreviewButtonColor();
 	}
 }
