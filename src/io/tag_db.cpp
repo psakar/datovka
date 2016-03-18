@@ -280,9 +280,9 @@ fail:
 
 /* ========================================================================= */
 /*
- * Delete all tag records for message ID in the message_tags table.
+ * Delete all tags for message ID in the message_tags table.
  */
-bool TagDb::deleteAllMsgTagRecords(qint64 msgId)
+bool TagDb::removeAllTagsFromMsg(qint64 msgId)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -300,6 +300,65 @@ bool TagDb::deleteAllMsgTagRecords(qint64 msgId)
 		return false;
 	}
 
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Assign existing tag to message.
+ */
+bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "INSERT INTO message_tags (message_id, tag_id) "
+	    "VALUES (:msgId, :tagId)";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":msgId", msgId);
+	query.bindValue(":tagId", tagId);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Remove tag from message.
+ */
+bool TagDb::removeTagFromMsg(int tagId, qint64 msgId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM message_tags WHERE "
+	    "message_id = :msgId AND tag_id = :tagId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":msgId", msgId);
+	query.bindValue(":tagId", tagId);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
 	return true;
 }
 

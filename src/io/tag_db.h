@@ -128,13 +128,31 @@ public:
 	QList<TagItem> getAllTags(void);
 
 	/*!
-	 * @brief Delete all tag records for message ID
+	 * @brief Delete all tags for message ID
 	 *        in message_tags table.
 	 *
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool deleteAllMsgTagRecords(qint64 msgId);
+	bool removeAllTagsFromMsg(qint64 msgId);
+
+	/*!
+	 * @brief Assign existing tag to message.
+	 *
+	 * @param[in] tagId    id of tag.
+	 * @param[in] msgId    id of message.
+	 * @return True on success, false on any error.
+	 */
+	bool assignTagToMsg(int tagId, qint64 msgId);
+
+	/*!
+	 * @brief Remove tag from message.
+	 *
+	 * @param[in] tagId    id of tag.
+	 * @param[in] msgId    id of message.
+	 * @return True on success, false on any error.
+	 */
+	bool removeTagFromMsg(int tagId, qint64 msgId);
 
 
 private:

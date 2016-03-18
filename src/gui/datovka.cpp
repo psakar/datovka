@@ -2882,11 +2882,10 @@ void MainWindow::deleteMessage(void)
 			 * message was removed.
 			 */
 
-			/* Delete all tag records from message_tags table.
+			/* Delete all tags from message_tags table.
 			 * Tag in the tag table are kept.
 			 */
-			globTagDbPtr->deleteAllMsgTagRecords(id.dmId);
-
+			globTagDbPtr->removeAllTagsFromMsg(id.dmId);
 		}
 	}
 }
