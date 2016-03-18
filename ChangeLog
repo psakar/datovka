@@ -1,3 +1,17 @@
+4.5.3 / 2016-03-18
+ * Fixed problems with HOTP authorisation on Windows. There have been problems
+   with the bundled libisds. MinGW does not handle POSIX extensions of
+   printf formatting strings properly. Patch for libisds has been added.
+ * Fixed a non-working PRAGMA statement when asking for a database integrity
+   check.
+ * The --version command-line argument now also prints the version of
+   libraries which Datovka depends on.
+ * Automatic background downloads didn't cause the deactivation of download
+   buttons that could still be triggered. Triggering those buttons in this
+   situation could cause the application to crash.
+ * Adding new account caused the account tree to collapse. This has been
+   fixed.
+
 4.5.2 / 2016-03-04
  * NLS of bundled libisds (OS X, Windows) has been disabled.
  * The logging of libisds actions has been restricted on Windows because there
