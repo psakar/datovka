@@ -37,7 +37,9 @@ class TagsDialog : public QDialog
 
 public:
 
-	explicit TagsDialog(QWidget *parent = 0);
+	TagsDialog(QWidget *parent = 0);
+
+	TagsDialog(QList<qint64> msgIdList, QWidget *parent = 0);
 
 	~TagsDialog(void);
 
@@ -49,8 +51,11 @@ private slots:
 
 private:
 
+	void initTagsDialog(void);
+
 	void fillTagsToListView(void);
 
+	QList<qint64> m_msgIdList;
 	Ui::TagsDialog *ui;
 };
 

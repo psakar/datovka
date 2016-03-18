@@ -1211,6 +1211,13 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
+	menu->addAction(ui->actionTag_settings);
+
+	menu->addSeparator();
+
+	menu->addAction(ui->actionEmail_all_attachments);
+
+
 	menu->addAction(ui->actionDelete_message_from_db);
 
 	menu->exec(QCursor::pos());
@@ -10333,6 +10340,21 @@ void MainWindow::showTagDlg(void) {
 
 	debugSlotCall();
 
-	QDialog *tagsDialog = new TagsDialog(this);
-	tagsDialog->exec();
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+
+	QList<qint64> msgIdList;
+
+	/* TODO - not complete code */
+
+	bool tagSettings = true;
+
+	if (tagSettings) {
+		QDialog *tagDialog = new TagsDialog(msgIdList, this);
+		tagDialog->exec();
+	} else {
+		QDialog *tagDialog = new TagsDialog(this);
+		tagDialog->exec();
+	}
+
+
 }

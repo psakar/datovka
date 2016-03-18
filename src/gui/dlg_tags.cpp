@@ -37,10 +37,35 @@
 TagsDialog::TagsDialog(QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
+      m_msgIdList(QList<qint64>()),
       ui(new Ui::TagsDialog)
 {
 	ui->setupUi(this);
+	initTagsDialog();
+}
 
+
+/* ========================================================================= */
+/*
+ * Constructor.
+ */
+TagsDialog::TagsDialog(QList<qint64> msgIdList, QWidget *parent)
+/* ========================================================================= */
+    : QDialog(parent),
+      m_msgIdList(msgIdList),
+      ui(new Ui::TagsDialog)
+{
+	ui->setupUi(this);
+	initTagsDialog();
+}
+
+/* ========================================================================= */
+/*
+ * Initialize dialog.
+ */
+void TagsDialog::initTagsDialog(void)
+/* ========================================================================= */
+{
 	connect(ui->pushButtonAdd, SIGNAL(clicked()), this,
 	    SLOT(addTag()));
 	connect(ui->pushButtonUpdate, SIGNAL(clicked()), this,
