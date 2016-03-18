@@ -26,7 +26,8 @@
 #define DLG_TAG_H
 
 #define NEWTAG_ID -1
-#define NEWTAG_COLOR "FFFFFF"
+/* default colour: 6 chars, hex format, RGB, lower characters */
+#define NEWTAG_COLOR "ffffff"
 
 #include <QDialog>
 
