@@ -51,24 +51,62 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QPushButton" name="pushButtonAdd">
-         <property name="text">
-          <string>Add</string>
+        <widget class="QGroupBox" name="tagOperGroup">
+         <property name="title">
+          <string>Tag operations</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="pushButtonAdd">
+            <property name="text">
+             <string>Add</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonUpdate">
+            <property name="text">
+             <string>Update</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonDelete">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButtonUpdate">
-         <property name="text">
-          <string>Update</string>
+        <widget class="QGroupBox" name="tagAssignGroup">
+         <property name="title">
+          <string>Tag assignment</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButtonDelete">
-         <property name="text">
-          <string>Delete</string>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QPushButton" name="pushButtonAssign">
+            <property name="text">
+             <string>Assign</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonRemove">
+            <property name="text">
+             <string>Remove</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>

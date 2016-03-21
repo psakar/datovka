@@ -1211,7 +1211,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
-	menu->addAction(ui->actionTag_settings);
+	menu->addAction(QIcon(ICON_3PARTY_PATH "label_16.png"),
+	    tr("Add tag"), this, SLOT(addOrDeleteMsgTags()));
 
 	menu->addSeparator();
 
@@ -10336,25 +10337,37 @@ void MainWindow::setMenuActionIcons(void)
 }
 
 
-void MainWindow::showTagDlg(void) {
-
+/* ========================================================================= */
+/*
+ * Slot: Show tags manager dialog for tags settings.
+ */
+void MainWindow::showTagDlg(void)
+/* ========================================================================= */
+ {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+	QDialog *tagDialog = new TagsDialog(this);
+	tagDialog->exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Add/detele tags to/from selected messages.
+ */
+void MainWindow::addOrDeleteMsgTags(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
 
 	QList<qint64> msgIdList;
 
-	/* TODO - not complete code */
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
-	bool tagSettings = true;
-
-	if (tagSettings) {
-		QDialog *tagDialog = new TagsDialog(msgIdList, this);
-		tagDialog->exec();
-	} else {
-		QDialog *tagDialog = new TagsDialog(this);
-		tagDialog->exec();
+	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
+		msgIdList.append(idx.data().toLongLong());
 	}
 
-
+	QDialog *tagDialog = new TagsDialog(msgIdList, this);
+	tagDialog->exec();
 }

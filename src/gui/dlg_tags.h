@@ -39,7 +39,7 @@ public:
 
 	TagsDialog(QWidget *parent = 0);
 
-	TagsDialog(QList<qint64> msgIdList, QWidget *parent = 0);
+	TagsDialog(QList<qint64> & msgIdList, QWidget *parent = 0);
 
 	~TagsDialog(void);
 
@@ -49,11 +49,13 @@ private slots:
 	void updateTag(void);
 	void deleteTag(void);
 
+	void assignSelectedTagsToMsgs(void);
+	void removeSelectedTagsFromMsgs(void);
+
 private:
 
-	void initTagsDialog(void);
-
 	void fillTagsToListView(void);
+	void initTagsDialog(void);
 
 	QList<qint64> m_msgIdList;
 	Ui::TagsDialog *ui;

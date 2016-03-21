@@ -49,7 +49,7 @@ TagsDialog::TagsDialog(QWidget *parent)
 /*
  * Constructor.
  */
-TagsDialog::TagsDialog(QList<qint64> msgIdList, QWidget *parent)
+TagsDialog::TagsDialog(QList<qint64> & msgIdList, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
       m_msgIdList(msgIdList),
@@ -57,25 +57,6 @@ TagsDialog::TagsDialog(QList<qint64> msgIdList, QWidget *parent)
 {
 	ui->setupUi(this);
 	initTagsDialog();
-}
-
-/* ========================================================================= */
-/*
- * Initialize dialog.
- */
-void TagsDialog::initTagsDialog(void)
-/* ========================================================================= */
-{
-	connect(ui->pushButtonAdd, SIGNAL(clicked()), this,
-	    SLOT(addTag()));
-	connect(ui->pushButtonUpdate, SIGNAL(clicked()), this,
-	    SLOT(updateTag()));
-	connect(ui->pushButtonDelete, SIGNAL(clicked()), this,
-	    SLOT(deleteTag()));
-
-	ui->tagTableWidget->setColumnHidden(1, true);
-
-	fillTagsToListView();
 }
 
 
@@ -162,6 +143,29 @@ void TagsDialog::deleteTag(void)
 /*
  * Fill tags to list view.
  */
+void TagsDialog::assignSelectedTagsToMsgs(void)
+/* ========================================================================= */
+{
+
+
+}
+
+
+/* ========================================================================= */
+/*
+ * Fill tags to list view.
+ */
+void TagsDialog::removeSelectedTagsFromMsgs(void)
+/* ========================================================================= */
+{
+
+}
+
+
+/* ========================================================================= */
+/*
+ * Fill tags to list view.
+ */
 void TagsDialog::fillTagsToListView(void)
 /* ========================================================================= */
 {
@@ -187,4 +191,40 @@ void TagsDialog::fillTagsToListView(void)
 		ui->tagTableWidget->selectColumn(0);
 		ui->tagTableWidget->selectRow(0);
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Initialize dialog.
+ */
+void TagsDialog::initTagsDialog(void)
+/* ========================================================================= */
+{
+
+	ui->tagAssignGroup->setEnabled(false);
+	ui->tagAssignGroup->setVisible(false);
+
+	connect(ui->pushButtonAdd, SIGNAL(clicked()), this,
+	    SLOT(addTag()));
+	connect(ui->pushButtonUpdate, SIGNAL(clicked()), this,
+	    SLOT(updateTag()));
+	connect(ui->pushButtonDelete, SIGNAL(clicked()), this,
+	    SLOT(deleteTag()));
+
+	ui->tagTableWidget->setColumnHidden(1, true);
+
+	/* any messages was selected */
+	if (!m_msgIdList.isEmpty()) {
+
+		connect(ui->pushButtonAssign, SIGNAL(clicked()), this,
+		    SLOT(assignSelectedTagsToMsgs()));
+		connect(ui->pushButtonRemove, SIGNAL(clicked()), this,
+		    SLOT(removeSelectedTagsFromMsgs()));
+
+		ui->tagAssignGroup->setVisible(true);
+		ui->tagAssignGroup->setEnabled(true);
+	}
+
+	fillTagsToListView();
 }

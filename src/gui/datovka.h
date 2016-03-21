@@ -687,9 +687,14 @@ private slots:
 	    const QString &lastDir);
 
 	/*!
-	 * @brief Open tag dialog.
+	 * @brief Show tags manager dialog for tags settings.
 	 */
 	void showTagDlg(void);
+
+	/*!
+	 * @brief Add/detele tags to/from selected messages.
+	 */
+	void addOrDeleteMsgTags(void);
 
 private:
 
