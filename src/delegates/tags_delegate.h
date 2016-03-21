@@ -63,8 +63,8 @@ public:
 	    const QModelIndex &index) const Q_DECL_OVERRIDE;
 
 	/*
-	 * The mode data are read-only. There is no implementation of createEditor()
-	 * destroyEditor(), setEditorData() and setModelData().
+	 * The model data are read-only. There is no implementation of
+	 * createEditor(), destroyEditor(), setEditorData() and setModelData().
 	 */
 
 };

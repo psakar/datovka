@@ -21,11 +21,35 @@
  * the two.
  */
 
-#include <QDebug>
+#include <QDebug> /* TODO -- Remove this include. */
 #include <QPainter>
 
 #include "src/delegates/tag_item.h"
 #include "src/log/log.h"
+
+/*!
+ * @brief Adjust foreground colour according to the supplied label colour.
+ *
+ * @param[in] fgColour  Foreground colour.
+ * @param[in] tagColour Tag rectangle colour.
+ * @return Colour adjusted to the background colour.
+ */
+QColor adjustForegroundColour(const QColor &fgColour, const QColor &tagColour)
+{
+	Q_UNUSED(fgColour);
+
+	int r = tagColour.red();
+	int g = tagColour.green();
+	int b = tagColour.blue();
+
+#if 0
+	int colour = (r << 16) + (g << 8) + b;
+	return (colour > (0xffffff / 2)) ? Qt::black : Qt::white;
+#else
+	int yiq = ((299 * r) + (587 * g) + (114 * b)) / 1000;
+	return (yiq >= 128) ? Qt::black : Qt::white;
+#endif
+}
 
 TagItem::TagItem(void)
     : id(-1),
@@ -84,7 +108,8 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 	painter->drawPath(path);
 
 	/* TODO -- Obtain foreground colour. */
-	painter->setPen(QPen(QColor("#000000"), 1));
+	painter->setPen(
+	    QPen(adjustForegroundColour(Qt::black, rectColour), 1));
 	painter->drawText(drawnRect, Qt::AlignCenter, name);
 
 	painter->restore();
