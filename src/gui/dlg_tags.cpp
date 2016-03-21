@@ -146,8 +146,20 @@ void TagsDialog::deleteTag(void)
 void TagsDialog::assignSelectedTagsToMsgs(void)
 /* ========================================================================= */
 {
+	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
 
+	qDebug() <<  currentIndex;
 
+	if (!currentIndex.isValid()) {
+		return;
+	}
+
+	int row = currentIndex.row();
+	int tagId = ui->tagTableWidget->item(row, 1)->text().toInt();
+
+	foreach (const qint64 &msgId, m_msgIdList) {
+		globTagDbPtr->assignTagToMsg(tagId, msgId);
+	}
 }
 
 
@@ -158,7 +170,20 @@ void TagsDialog::assignSelectedTagsToMsgs(void)
 void TagsDialog::removeSelectedTagsFromMsgs(void)
 /* ========================================================================= */
 {
+	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
 
+	qDebug() <<  currentIndex;
+
+	if (!currentIndex.isValid()) {
+		return;
+	}
+
+	int row = currentIndex.row();
+	int tagId = ui->tagTableWidget->item(row, 1)->text().toInt();
+
+	foreach (const qint64 &msgId, m_msgIdList) {
+		globTagDbPtr->removeTagFromMsg(tagId, msgId);
+	}
 }
 
 

@@ -313,7 +313,26 @@ bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
-	QString queryStr = "INSERT INTO message_tags (message_id, tag_id) "
+	QString queryStr = "SELECT id FROM message_tags WHERE "
+	    "message_id = :msgId AND tag_id = :tagId";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":msgId", msgId);
+	query.bindValue(":tagId", tagId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			return false;
+		}
+	}
+
+	queryStr = "INSERT INTO message_tags (message_id, tag_id) "
 	    "VALUES (:msgId, :tagId)";
 
 	if (!query.prepare(queryStr)) {
