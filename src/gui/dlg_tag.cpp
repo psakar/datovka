@@ -93,7 +93,7 @@ void TagDialog::initTagDialog(void)
 	setPreviewButtonColor();
 
 	connect(ui->changeColorPushButton, SIGNAL(clicked()), this,
-	    SLOT(setNewColor()));
+	    SLOT(chooseNewColor()));
 	connect(ui->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(saveTag()));
 }
@@ -103,7 +103,7 @@ void TagDialog::initTagDialog(void)
 /*
  * Change/choose a new color of tag.
  */
-void TagDialog::setNewColor(void)
+void TagDialog::chooseNewColor(void)
 /* ========================================================================= */
 {
 	QColor color = QColorDialog::getColor(QColor(m_tagColor), this,

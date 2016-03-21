@@ -94,19 +94,11 @@ void TagsDialog::addTag(void)
 void TagsDialog::updateTag(void)
 /* ========================================================================= */
 {
-	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
+	int tagId = getTagIdFromCurrentIndex();
 
-	qDebug() <<  currentIndex;
+	TagItem tagItem(globTagDbPtr->getTagData(tagId));
 
-	if (!currentIndex.isValid()) {
-		return;
-	}
-	int row = currentIndex.row();
-	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
-
-	TagItem tagItem(globTagDbPtr->getTagData(id));
-
-	QDialog *tagDialog = new TagDialog(id, tagItem.name, tagItem.colour,
+	QDialog *tagDialog = new TagDialog(tagId, tagItem.name, tagItem.colour,
 	    this);
 	tagDialog->exec();
 
@@ -123,17 +115,7 @@ void TagsDialog::updateTag(void)
 void TagsDialog::deleteTag(void)
 /* ========================================================================= */
 {
-	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
-
-	qDebug() <<  currentIndex;
-
-	if (!currentIndex.isValid()) {
-		return;
-	}
-	int row = currentIndex.row();
-	int id = ui->tagTableWidget->item(row, 1)->text().toInt();
-
-	globTagDbPtr->deleteTag(id);
+	globTagDbPtr->deleteTag(getTagIdFromCurrentIndex());
 
 	fillTagsToListView();
 }
@@ -141,21 +123,12 @@ void TagsDialog::deleteTag(void)
 
 /* ========================================================================= */
 /*
- * Fill tags to list view.
+ * Assign selected tag to messages.
  */
 void TagsDialog::assignSelectedTagsToMsgs(void)
 /* ========================================================================= */
 {
-	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
-
-	qDebug() <<  currentIndex;
-
-	if (!currentIndex.isValid()) {
-		return;
-	}
-
-	int row = currentIndex.row();
-	int tagId = ui->tagTableWidget->item(row, 1)->text().toInt();
+	int tagId = getTagIdFromCurrentIndex();
 
 	foreach (const qint64 &msgId, m_msgIdList) {
 		globTagDbPtr->assignTagToMsg(tagId, msgId);
@@ -165,21 +138,12 @@ void TagsDialog::assignSelectedTagsToMsgs(void)
 
 /* ========================================================================= */
 /*
- * Fill tags to list view.
+ * Remove selected tag from messages.
  */
 void TagsDialog::removeSelectedTagsFromMsgs(void)
 /* ========================================================================= */
 {
-	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
-
-	qDebug() <<  currentIndex;
-
-	if (!currentIndex.isValid()) {
-		return;
-	}
-
-	int row = currentIndex.row();
-	int tagId = ui->tagTableWidget->item(row, 1)->text().toInt();
+	int tagId = getTagIdFromCurrentIndex();
 
 	foreach (const qint64 &msgId, m_msgIdList) {
 		globTagDbPtr->removeTagFromMsg(tagId, msgId);
@@ -226,7 +190,6 @@ void TagsDialog::fillTagsToListView(void)
 void TagsDialog::initTagsDialog(void)
 /* ========================================================================= */
 {
-
 	ui->tagAssignGroup->setEnabled(false);
 	ui->tagAssignGroup->setVisible(false);
 
@@ -252,4 +215,22 @@ void TagsDialog::initTagsDialog(void)
 	}
 
 	fillTagsToListView();
+}
+
+
+/* ========================================================================= */
+/*
+ * Get tag id from selected item (current index).
+ */
+int TagsDialog::getTagIdFromCurrentIndex(void)
+/* ========================================================================= */
+{
+	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
+
+	if (!currentIndex.isValid()) {
+		return WRONG_TAG_ID;
+	}
+
+	int row = currentIndex.row();
+	return ui->tagTableWidget->item(row, 1)->text().toInt();
 }

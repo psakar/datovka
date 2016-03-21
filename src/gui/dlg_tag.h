@@ -42,21 +42,32 @@ class TagDialog : public QDialog
 public:
 
 	TagDialog(QWidget *parent = 0);
-
 	TagDialog(int tagId = NEWTAG_ID, QString tagName = QString(),
 	    QString tagColor = NEWTAG_COLOR, QWidget *parent = 0);
-
 	~TagDialog();
 
 private slots:
 
+	/*!
+	 * @brief Insert or update tag data into database.
+	 */
 	void saveTag(void);
-	void setNewColor(void);
+
+	/*!
+	 * @brief Choose or change tag color.
+	 */
+	void chooseNewColor(void);
 
 private:
 
+	/*!
+	 * @brief Init new tag dialog.
+	 */
 	void initTagDialog(void);
 
+	/*!
+	 * @brief Set actual tag color on the preview button.
+	 */
 	void setPreviewButtonColor(void);
 
 	int m_tagid;

@@ -27,6 +27,8 @@
 
 #include <QDialog>
 
+#define WRONG_TAG_ID -1
+
 namespace Ui {
 	class TagsDialog;
 }
@@ -38,24 +40,55 @@ class TagsDialog : public QDialog
 public:
 
 	TagsDialog(QWidget *parent = 0);
-
 	TagsDialog(QList<qint64> & msgIdList, QWidget *parent = 0);
-
 	~TagsDialog(void);
 
 private slots:
 
+	/*!
+	 * @brief Add tag (insert into database).
+	 */
 	void addTag(void);
+
+	/*!
+	 * @brief Update tag (update data in database).
+	 */
 	void updateTag(void);
+
+	/*!
+	 * @brief Delete tag (delete tag data from database).
+	 */
 	void deleteTag(void);
 
+	/*!
+	 * @brief Assign selected tag(s) to messages (insert into database).
+	 */
 	void assignSelectedTagsToMsgs(void);
+
+	/*!
+	 * @brief Remove selected tag(s) from messages
+	 *        (delete records from database).
+	 */
 	void removeSelectedTagsFromMsgs(void);
 
 private:
 
+	/*!
+	 * @brief Fill all tags to tableview from database.
+	 */
 	void fillTagsToListView(void);
+
+	/*!
+	 * @brief Init tags dialog.
+	 */
 	void initTagsDialog(void);
+
+	/*!
+	 * @brief Get tag id from selected item (current index).
+	 *
+	 * @return Tag id if success else -1.
+	 */
+	int getTagIdFromCurrentIndex(void);
 
 	QList<qint64> m_msgIdList;
 	Ui::TagsDialog *ui;
