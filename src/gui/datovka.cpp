@@ -46,6 +46,7 @@
 #include "datovka.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/delegates/tags_delegate.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -199,6 +200,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
+
+	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
 	loadSettings();

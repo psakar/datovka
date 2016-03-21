@@ -248,6 +248,8 @@ SOURCES += src/cli/cli.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
+    src/delegates/tag_item.cpp \
+    src/delegates/tags_delegate.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -320,6 +322,8 @@ HEADERS += src/cli/cli.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
     src/crypto/crypto_threads.h \
+    src/delegates/tag_item.h \
+    src/delegates/tags_delegate.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \

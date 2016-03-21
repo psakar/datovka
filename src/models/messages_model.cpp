@@ -29,6 +29,15 @@
 #include "src/io/dbs.h"
 #include "src/models/messages_model.h"
 
+const int DbMsgsTblModel::rcvdMsgsColCnt(8);
+const int DbMsgsTblModel::sntMsgsColCnt(7);
+
+/*
+ * Specifies number of bits to be used for message id when combining with other
+ * data.
+ */
+#define MSG_ID_WIDTH 48
+
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
     m_type(type)
@@ -136,7 +145,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				qint64 id;
 				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
-				id = id << 48;
+				id = id << MSG_ID_WIDTH;
 				id += _data(index.sibling(index.row(), 0),
 				    Qt::DisplayRole).toLongLong();
 				return id;
@@ -150,7 +159,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				qint64 id;
 				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
-				id = id << 48;
+				id = id << MSG_ID_WIDTH;
 				id += dmId;
 				return id;
 			}
@@ -162,7 +171,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				qint64 id;
 				id = _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
-				id = id << 48;
+				id = id << MSG_ID_WIDTH;
 				id += dmId;
 				return id;
 			}
@@ -174,7 +183,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				    Qt::DisplayRole).toLongLong();
 				qint64 id;
 				id = _data(index, Qt::DisplayRole).toInt();
-				id = id << 48;
+				id = id << MSG_ID_WIDTH;
 				id += dmId;
 				return id;
 			}
@@ -399,7 +408,7 @@ bool DbMsgsTblModel::setSntHeader(void)
 
 bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 {
-	if (columnCount() != 8) {
+	if (columnCount() != rcvdMsgsColCnt) {
 		/* Not a read messages model. */
 		return false;
 	}
@@ -420,7 +429,7 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 
 bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 {
-	if (columnCount() != 8) {
+	if (columnCount() != rcvdMsgsColCnt) {
 		/* Not a read messages model. */
 		return false;
 	}
@@ -442,7 +451,7 @@ bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
     enum MessageProcessState forceState)
 {
-	if (columnCount() != 8) {
+	if (columnCount() != rcvdMsgsColCnt) {
 		/* Not a read messages model. */
 		return false;
 	}

@@ -48,6 +48,7 @@ public:
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
+		/* 2 stands for sender or recipient name. */
 		DELIVERY_COL = 3, /* Delivery time column. */
 		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
@@ -187,6 +188,17 @@ private:
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */
+
+	static
+	const int rcvdMsgsColCnt; /*<
+	                           * Number of columns when displaying received
+	                           * messages.
+	                           */
+	static
+	const int sntMsgsColCnt; /*!<
+	                          * Number of columns when displaying sent
+	                          * messages.
+	                          */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */
