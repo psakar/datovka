@@ -203,6 +203,14 @@ public:
 	static
 	DbMsgsTblModel &dummyModel(enum Type type);
 
+	/*!
+	 * @brief Fills the model with tag information.
+	 *
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool fillTagsCollumn(int col);
+
 private:
 	/* Make these methods private so nobody is likely to mess with them. */
 	virtual

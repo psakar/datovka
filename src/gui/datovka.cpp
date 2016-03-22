@@ -158,6 +158,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setUpUi();
 
+	if (0 != globTagDbPtr) {
+		m_msgTblAppendedCols.append(tr("Tags"));
+	}
+
 	/* Single instance emitter. */
 	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
 	    this, SLOT(processSingleInstanceMessages(QString)));
@@ -713,6 +717,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	default:
 		Q_ASSERT(0);
 		break;
+	}
+
+	if (0 != msgTblMdl) {
+		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
+		Q_ASSERT(0 != mdl);
+		mdl->fillTagsCollumn(-1);
+		/* TODO -- Add some labels. */
 	}
 
 	/* Enable/disable split database by year submenu */
