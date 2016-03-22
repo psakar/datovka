@@ -147,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
     isMainWindow(false),
+    m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
     mui_clearFilterLineButton(0),
@@ -644,14 +645,16 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel();
+		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
+		    m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		msgTblMdl = dbSet->msgsSntWithin90DaysModel();
+		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -672,7 +675,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsRcvdModel();
+		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -687,14 +690,15 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsSntModel();
+		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = dbSet->msgsRcvdInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString());
+		    current.data(ROLE_PLAIN_DISPLAY).toString(),
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -702,7 +706,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = dbSet->msgsSntInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString());
+		    current.data(ROLE_PLAIN_DISPLAY).toString(),
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:

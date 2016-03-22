@@ -654,30 +654,35 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsRcvdModel(void);
+	QAbstractTableModel *msgsRcvdModel(const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsRcvdWithin90DaysModel(void);
+	QAbstractTableModel *msgsRcvdWithin90DaysModel(
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return received messages within given year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] year         Year number.
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsRcvdInYearModel(const QString &year);
+	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -721,30 +726,35 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all sent messages model.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsSntModel(void);
+	QAbstractTableModel *msgsSntModel(const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsSntWithin90DaysModel(void);
+	QAbstractTableModel *msgsSntWithin90DaysModel(
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within given year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] year         Year number.
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel * msgsSntInYearModel(const QString &year);
+	QAbstractTableModel *msgsSntInYearModel(const QString &year,
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -921,18 +931,22 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query Query already assigned to a database.
+	 * @param[in,out] query        Query already assigned to a database.
+	 * @param[in]     appendedCols List of names for added empty columns.
 	 * @return True on success.
 	 */
-	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query);
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query,
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query Query already assigned to a database.
+	 * @param[in,out] query        Query already assigned to a database.
+	 * @param[in]     appendedCols List of names for added empty columns.
 	 * @return True on success.
 	 */
-	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query,
+	    const QStringList &appendedCols);
 
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 

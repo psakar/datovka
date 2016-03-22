@@ -120,7 +120,6 @@ public:
 	 */
 	bool removeTagFromMsg(int tagId, qint64 msgId);
 
-
 private:
 	/*!
 	 * @brief Returns list of tables.
@@ -130,7 +129,6 @@ private:
 	static
 	QList<class SQLiteTbl *> listOfTables(void);
 };
-
 
 /*!
  * @brief Global tag database.

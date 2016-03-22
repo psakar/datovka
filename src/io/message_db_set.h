@@ -339,30 +339,35 @@ public: /* Database function that have been delegate to the container. */
 	/*!
 	 * @brief Return all received messages model.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsRcvdModel(void);
+	QAbstractTableModel *msgsRcvdModel(const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsRcvdWithin90DaysModel(void);
+	QAbstractTableModel *msgsRcvdWithin90DaysModel(
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return received messages within given year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] year         Year number.
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsRcvdInYearModel(const QString &year);
+	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -406,30 +411,35 @@ public: /* Database function that have been delegate to the container. */
 	/*!
 	 * @brief Return all sent messages model.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsSntModel(void);
+	QAbstractTableModel *msgsSntModel(const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
 	 *
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsSntWithin90DaysModel(void);
+	QAbstractTableModel *msgsSntWithin90DaysModel(
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within given year.
 	 *
-	 * @param[in] year  Year number.
+	 * @param[in] year         Year number.
+	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return Pointer to model, 0 on failure.
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsSntInYearModel(const QString &year);
+	QAbstractTableModel *msgsSntInYearModel(const QString &year,
+	    const QStringList &appendedCols);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -555,18 +565,18 @@ private:
 	 */
 	QStringList _yrly_secKeysIn90Days(void) const;
 
-	inline QAbstractTableModel *_sf_msgsRcvdModel(void);
-	inline QAbstractTableModel *_yrly_msgsRcvdModel(void);
+	inline QAbstractTableModel *_sf_msgsRcvdModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdModel(const QStringList &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(void);
+	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(const QStringList &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QStringList &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1);
-	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(void);
+	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(const QStringList &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year);
-	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year);
+	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year, const QStringList &appendedCols);
 
 	inline QStringList _sf_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
 	inline QStringList _yrly_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
@@ -580,18 +590,18 @@ private:
 	inline int _sf_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 	inline int _yrly_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 
-	inline QAbstractTableModel *_sf_msgsSntModel(void);
-	inline QAbstractTableModel *_yrly_msgsSntModel(void);
+	inline QAbstractTableModel *_sf_msgsSntModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntModel(const QStringList &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(void);
+	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(const QStringList &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QStringList &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1);
-	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(void);
+	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(const QStringList &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year);
-	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year);
+	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year, const QStringList &appendedCols);
 
 	inline bool _sf_smsgdtSetAllReceivedLocallyRead(bool read);
 	inline bool _yrly_smsgdtSetAllReceivedLocallyRead(bool read);

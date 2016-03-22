@@ -1217,6 +1217,8 @@ private:
 	QString m_import_zfo_path;
 	bool isMainWindow;
 
+	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
 	QLineEdit *mui_filterLine; /*!< Search filter line object. */
