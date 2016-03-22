@@ -154,14 +154,14 @@ void TagItemList::paint(class QPainter *painter, const QRect &rect,
 
 QSize TagItemList::sizeHint(const QRect &rect, const QFont &font) const
 {
-	QSize size;
+	int width = 0;
 
 	foreach (const TagItem &tag, *this) {
-		size += tag.sizeHint(rect, font);
-		size += QSize(0, 2 * MARGIN);
+		width += tag.sizeHint(rect, font).width();
+		width += 2 * MARGIN;
 	}
 
-	return size;
+	return QSize(width, 1);
 }
 #else
 #define myStarCount 2
