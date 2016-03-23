@@ -576,6 +576,7 @@ int main(int argc, char *argv[])
 		Qt::Alignment align = Qt::AlignCenter;
 		splash->showMessage(QObject::tr("Application is loading..."),
 		align, Qt::white);
+		app.processEvents();
 	}
 
 	/* Localise description in tables. */
