@@ -23,6 +23,7 @@
 
 #include <QDebug> /* TODO -- Remove this include. */
 #include <QPainter>
+#include <QRegExp>
 
 #include "src/delegates/tag_item.h"
 #include "src/log/log.h"
@@ -51,17 +52,19 @@ QColor adjustForegroundColour(const QColor &fgColour, const QColor &tagColour)
 #endif
 }
 
+#define DFLT_COLOUR "ffffff"
+
 TagItem::TagItem(void)
     : id(-1),
     name(),
-    colour()
+    colour(DFLT_COLOUR)
 {
 }
 
 TagItem::TagItem(int i, const QString &n, const QString &c)
     : id(i),
     name(n),
-    colour(c)
+    colour(isValidColour(c) ? c : DFLT_COLOUR)
 {
 }
 
@@ -131,6 +134,13 @@ QSize TagItem::sizeHint(const QRect &rect, const QFont &font) const
 	//}
 
 	return QSize(width, 1);
+}
+
+bool TagItem::isValidColour(const QString &colourStr)
+{
+	QRegExp re("^[a-f0-9]{6,6}$");
+
+	return re.exactMatch(colourStr);
 }
 
 #if 1

@@ -39,6 +39,8 @@ class TagItem {
 public:
 	/*!
 	 * @brief Constructor of invalid tag item.
+	 *
+	 * @note Identifier is -1, has empty name, colour is 'ffffff';
 	 */
 	TagItem(void);
 
@@ -53,6 +55,8 @@ public:
 
 	/*!
 	 * @brief Check for validity.
+	 *
+	 * @note Invalid tag has id equal to -1, empty name and bogus colour.
 	 *
 	 * @return True if tag contains valid data.
 	 */
@@ -78,6 +82,15 @@ public:
 	 * @return Size of the element.
 	 */
 	QSize sizeHint(const QRect &rect, const QFont &font) const;
+
+	/*!
+	 * @brief Returns true if colour is valid.
+	 *
+	 * @param[in] colourStr Colour string.
+	 * @return True if colour string is valid.
+	 */
+	static
+	bool isValidColour(const QString &colourStr);
 
 	int id; /*!< Tag identifier. */
 	QString name; /*!< Name of the rag. */
