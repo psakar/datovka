@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include <QStrint>
+#include <QString>
 
 #include "src/gui/dlg_tag.h"
 #include "src/gui/dlg_tags.h"

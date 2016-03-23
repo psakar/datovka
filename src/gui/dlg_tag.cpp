@@ -54,8 +54,6 @@ DlgTag::DlgTag(int tagId, const QString &tagName, const QString &tagColour,
 void DlgTag::initDlg(void)
 {
 	this->currentColor->setEnabled(false);
-	/* FIXME -- Use the hash tag only when displaying the colour. */
-	m_tagColour = "#" + m_tagColour;
 	this->tagNamelineEdit->setText(m_tagName);
 	setPreviewButtonColor();
 
@@ -67,11 +65,11 @@ void DlgTag::initDlg(void)
 
 void DlgTag::chooseNewColor(void)
 {
-	QColor color = QColorDialog::getColor(QColor(m_tagColor), this,
+	QColor color = QColorDialog::getColor(QColor("#" + m_tagColour), this,
 	    tr("Choose tag colour"));
 
 	if (color.isValid()) {
-		m_tagColor = color.name().toLower();
+		m_tagColour = color.name().toLower().replace("#", "");
 		setPreviewButtonColor();
 	}
 }
@@ -91,10 +89,10 @@ void DlgTag::saveTag(void)
 	}
 
 	if (m_tagid != NEWTAG_ID) {
-		globTagDbPtr->
-		    updateTag(m_tagid, m_tagName, m_tagColor.replace("#", ""));
+		Q_ASSERT(TagItem::isValidColour(m_tagColour));
+		globTagDbPtr->updateTag(m_tagid, m_tagName, m_tagColour);
 	} else {
-		if (!globTagDbPtr->insertTag(m_tagName, m_tagColor.replace("#", ""))) {
+		if (!globTagDbPtr->insertTag(m_tagName, m_tagColour)) {
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Tag error"));
@@ -109,7 +107,7 @@ void DlgTag::saveTag(void)
 void DlgTag::setPreviewButtonColor(void)
 {
 	QPalette pal = this->currentColor->palette();
-	pal.setColor(QPalette::Button, QColor(m_tagColor));
+	pal.setColor(QPalette::Button, QColor("#" + m_tagColour));
 	const QString style = "border-style: outset; background-color: ";
-	this->currentColor->setStyleSheet(style + m_tagColor);
+	this->currentColor->setStyleSheet(style + "#" + m_tagColour);
 }
