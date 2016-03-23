@@ -22,29 +22,42 @@
  */
 
 
-#ifndef DLG_TAG_H
-#define DLG_TAG_H
+#ifndef _DLG_TAG_H_
+#define _DLG_TAG_H_
+
+#include <QDialog>
+#include <QString>
+
+#include "ui_dlg_tag.h"
 
 #define NEWTAG_ID -1
 /* default colour: 6 chars, hex format, RGB, lower characters */
 #define NEWTAG_COLOR "ffffff"
 
-#include <QDialog>
-
-namespace Ui {
-	class TagDialog;
-}
-
-class TagDialog : public QDialog
-{
-	Q_OBJECT
+/*!
+ * @brief Create new tag dialogue.
+ */
+class DlgTag : public QDialog, public Ui::TagDialog {
+    Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgTag(QWidget *parent = 0);
 
-	TagDialog(QWidget *parent = 0);
-	TagDialog(int tagId = NEWTAG_ID, QString tagName = QString(),
-	    QString tagColor = NEWTAG_COLOR, QWidget *parent = 0);
-	~TagDialog();
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] tagId     New tag identifier.
+	 * @param[in] tagName   New tag name.
+	 * @param[in] newColour New tag colour.
+	 * @param[in] parent    Parent widget.
+	 */
+	explicit DlgTag(int tagId = NEWTAG_ID, const QString &tagName = QString(),
+	    const QString &tagColour = NEWTAG_COLOR, QWidget *parent = 0);
 
 private slots:
 
@@ -54,26 +67,25 @@ private slots:
 	void saveTag(void);
 
 	/*!
-	 * @brief Choose or change tag color.
+	 * @brief Choose or change tag colour.
 	 */
 	void chooseNewColor(void);
 
 private:
 
 	/*!
-	 * @brief Init new tag dialog.
+	 * @brief Initialises new tag dialogue.
 	 */
-	void initTagDialog(void);
+	void initDlg(void);
 
 	/*!
-	 * @brief Set actual tag color on the preview button.
+	 * @brief Set actual tag colour on the preview button.
 	 */
 	void setPreviewButtonColor(void);
 
-	int m_tagid;
-	QString m_tagName;
-	QString m_tagColor;
-	Ui::TagDialog *ui;
+	int m_tagid; /*!< Tag identifier. */
+	QString m_tagName; /*!< Tag name. */
+	QString m_tagColour; /*!< Tag colour. */
 };
 
-#endif // DLG_TAG_H
+#endif /* _DLG_TAG_H_ */

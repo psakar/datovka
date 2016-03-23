@@ -10365,8 +10365,9 @@ void MainWindow::showTagDlg(void)
  {
 	debugSlotCall();
 
-	QDialog *tagDialog = new TagsDialog(this);
-	tagDialog->exec();
+	QDialog *tagsDlg = new DlgTags(this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
 }
 
 
@@ -10387,6 +10388,11 @@ void MainWindow::addOrDeleteMsgTags(void)
 		msgIdList.append(idx.data().toLongLong());
 	}
 
-	QDialog *tagDialog = new TagsDialog(msgIdList, this);
-	tagDialog->exec();
+	/*
+	 * FIXME -- The tags dialogue as it now exixts is not suitable for
+	 * adding tags to messages. */
+
+	QDialog *tagsDlg = new DlgTags(msgIdList, this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
 }

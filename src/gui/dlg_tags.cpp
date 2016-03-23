@@ -21,112 +21,62 @@
  * the two.
  */
 
-#include <QDialog>
-#include <QDebug>
+#include <QStrint>
 
-#include "dlg_tags.h"
-#include "dlg_tag.h"
-#include "ui_dlg_tags.h"
+#include "src/gui/dlg_tag.h"
+#include "src/gui/dlg_tags.h"
 #include "src/io/tag_db.h"
 
 
-/* ========================================================================= */
-/*
- * Constructor.
- */
-TagsDialog::TagsDialog(QWidget *parent)
-/* ========================================================================= */
+DlgTags::DlgTags(QWidget *parent)
     : QDialog(parent),
-      m_msgIdList(QList<qint64>()),
-      ui(new Ui::TagsDialog)
+    m_msgIdList()
 {
-	ui->setupUi(this);
-	initTagsDialog();
+	setupUi(this);
+
+	initDlg();
 }
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
-TagsDialog::TagsDialog(QList<qint64> & msgIdList, QWidget *parent)
-/* ========================================================================= */
+DlgTags::DlgTags(const QList<qint64> &msgIdList, QWidget *parent)
     : QDialog(parent),
-      m_msgIdList(msgIdList),
-      ui(new Ui::TagsDialog)
+    m_msgIdList(msgIdList)
 {
-	ui->setupUi(this);
-	initTagsDialog();
+	setupUi(this);
+
+	initDlg();
 }
 
-
-/* ========================================================================= */
-/*
- * Destructor.
- */
-TagsDialog::~TagsDialog(void)
-/* ========================================================================= */
+void DlgTags::addTag(void)
 {
-	delete ui;
-}
-
-
-/* ========================================================================= */
-/*
- * Add a new tag.
- */
-void TagsDialog::addTag(void)
-/* ========================================================================= */
-{
-	QDialog *tagDialog = new TagDialog(this);
-	tagDialog->exec();
-
-	delete tagDialog;
+	QDialog *tagDlg = new DlgTag(this);
+	tagDlg->exec();
+	tagDlg->deleteLater();
 
 	fillTagsToListView();
 }
 
-
-/* ========================================================================= */
-/*
- * Update selected tag.
- */
-void TagsDialog::updateTag(void)
-/* ========================================================================= */
+void DlgTags::updateTag(void)
 {
 	int tagId = getTagIdFromCurrentIndex();
 
 	TagItem tagItem(globTagDbPtr->getTagData(tagId));
 
-	QDialog *tagDialog = new TagDialog(tagId, tagItem.name, tagItem.colour,
+	QDialog *tagDlg = new DlgTag(tagId, tagItem.name, tagItem.colour,
 	    this);
-	tagDialog->exec();
-
-	delete tagDialog;
+	tagDlg->exec();
+	tagDlg->deleteLater();
 
 	fillTagsToListView();
 }
 
-
-/* ========================================================================= */
-/*
- * Delete tag.
- */
-void TagsDialog::deleteTag(void)
-/* ========================================================================= */
+void DlgTags::deleteTag(void)
 {
 	globTagDbPtr->deleteTag(getTagIdFromCurrentIndex());
 
 	fillTagsToListView();
 }
 
-
-/* ========================================================================= */
-/*
- * Assign selected tag to messages.
- */
-void TagsDialog::assignSelectedTagsToMsgs(void)
-/* ========================================================================= */
+void DlgTags::assignSelectedTagsToMsgs(void)
 {
 	int tagId = getTagIdFromCurrentIndex();
 
@@ -135,13 +85,7 @@ void TagsDialog::assignSelectedTagsToMsgs(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Remove selected tag from messages.
- */
-void TagsDialog::removeSelectedTagsFromMsgs(void)
-/* ========================================================================= */
+void DlgTags::removeSelectedTagsFromMsgs(void)
 {
 	int tagId = getTagIdFromCurrentIndex();
 
@@ -150,87 +94,69 @@ void TagsDialog::removeSelectedTagsFromMsgs(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Fill tags to list view.
- */
-void TagsDialog::fillTagsToListView(void)
-/* ========================================================================= */
+void DlgTags::fillTagsToListView(void)
 {
 	QList<TagItem> tagList = globTagDbPtr->getAllTags();
 
-	ui->tagTableWidget->clearContents();
-	ui->tagTableWidget->setRowCount(0);
+	this->tagTableWidget->clearContents();
+	this->tagTableWidget->setRowCount(0);
 
 	foreach (const TagItem &tagItem, tagList) {
 
-		int row = ui->tagTableWidget->rowCount();
-		ui->tagTableWidget->insertRow(row);
+		int row = this->tagTableWidget->rowCount();
+		this->tagTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(tagItem.name);
 		item->setForeground(QColor("#"+ tagItem.colour));
-		ui->tagTableWidget->setItem(row, 0 , item);
+		this->tagTableWidget->setItem(row, 0 , item);
 		item = new QTableWidgetItem;
 		item->setText(QString::number(tagItem.id));
-		ui->tagTableWidget->setItem(row, 1 ,item);
+		this->tagTableWidget->setItem(row, 1 ,item);
 	}
 
-	if (ui->tagTableWidget->rowCount() > 0) {
-		ui->tagTableWidget->selectColumn(0);
-		ui->tagTableWidget->selectRow(0);
+	if (this->tagTableWidget->rowCount() > 0) {
+		this->tagTableWidget->selectColumn(0);
+		this->tagTableWidget->selectRow(0);
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Initialize dialog.
- */
-void TagsDialog::initTagsDialog(void)
-/* ========================================================================= */
+void DlgTags::initDlg(void)
 {
-	ui->tagAssignGroup->setEnabled(false);
-	ui->tagAssignGroup->setVisible(false);
+	this->tagAssignGroup->setEnabled(false);
+	this->tagAssignGroup->setVisible(false);
 
-	connect(ui->pushButtonAdd, SIGNAL(clicked()), this,
+	connect(this->pushButtonAdd, SIGNAL(clicked()), this,
 	    SLOT(addTag()));
-	connect(ui->pushButtonUpdate, SIGNAL(clicked()), this,
+	connect(this->pushButtonUpdate, SIGNAL(clicked()), this,
 	    SLOT(updateTag()));
-	connect(ui->pushButtonDelete, SIGNAL(clicked()), this,
+	connect(this->pushButtonDelete, SIGNAL(clicked()), this,
 	    SLOT(deleteTag()));
 
-	ui->tagTableWidget->setColumnHidden(1, true);
+	this->tagTableWidget->setColumnHidden(1, true);
 
 	/* any messages was selected */
 	if (!m_msgIdList.isEmpty()) {
 
-		connect(ui->pushButtonAssign, SIGNAL(clicked()), this,
+		connect(this->pushButtonAssign, SIGNAL(clicked()), this,
 		    SLOT(assignSelectedTagsToMsgs()));
-		connect(ui->pushButtonRemove, SIGNAL(clicked()), this,
+		connect(this->pushButtonRemove, SIGNAL(clicked()), this,
 		    SLOT(removeSelectedTagsFromMsgs()));
 
-		ui->tagAssignGroup->setVisible(true);
-		ui->tagAssignGroup->setEnabled(true);
+		this->tagAssignGroup->setVisible(true);
+		this->tagAssignGroup->setEnabled(true);
 	}
 
 	fillTagsToListView();
 }
 
-
-/* ========================================================================= */
-/*
- * Get tag id from selected item (current index).
- */
-int TagsDialog::getTagIdFromCurrentIndex(void)
-/* ========================================================================= */
+int DlgTags::getTagIdFromCurrentIndex(void)
 {
-	QModelIndex currentIndex = ui->tagTableWidget->currentIndex();
+	QModelIndex currentIndex = this->tagTableWidget->currentIndex();
 
 	if (!currentIndex.isValid()) {
 		return WRONG_TAG_ID;
 	}
 
 	int row = currentIndex.row();
-	return ui->tagTableWidget->item(row, 1)->text().toInt();
+	return this->tagTableWidget->item(row, 1)->text().toInt();
 }

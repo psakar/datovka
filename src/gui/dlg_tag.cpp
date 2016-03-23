@@ -21,93 +21,54 @@
  * the two.
  */
 
-
 #include <QColorDialog>
-#include <QDebug>
 #include <QMessageBox>
 
-#include "dlg_tag.h"
-#include "ui_dlg_tag.h"
+#include "src/gui/dlg_tag.h"
 #include "src/io/tag_db.h"
 
-
-/* ========================================================================= */
-/*
- * Constructor for new tag.
- */
-TagDialog::TagDialog(QWidget *parent)
-/* ========================================================================= */
-    :
-    QDialog(parent),
+DlgTag::DlgTag(QWidget *parent)
+    : QDialog(parent),
     m_tagid(NEWTAG_ID),
     m_tagName(QString()),
-    m_tagColor(NEWTAG_COLOR),
-    ui(new Ui::TagDialog)
+    m_tagColour(NEWTAG_COLOR)
 {
-	ui->setupUi(this);
-	initTagDialog();
+	setupUi(this);
+
+	initDlg();
 
 }
 
-
-/* ========================================================================= */
-/*
- * Constructor for existing tag.
- */
-TagDialog::TagDialog(int tagId, QString tagName, QString tagColor,
+DlgTag::DlgTag(int tagId, const QString &tagName, const QString &tagColour,
     QWidget *parent)
-/* ========================================================================= */
-    :
-    QDialog(parent),
+    : QDialog(parent),
     m_tagid(tagId),
     m_tagName(tagName),
-    m_tagColor(tagColor),
-    ui(new Ui::TagDialog)
+    m_tagColour(tagColour)
 {
-	ui->setupUi(this);
-	initTagDialog();
+	setupUi(this);
+
+	initDlg();
 }
 
-
-/* ========================================================================= */
-/*
- * Destructor.
- */
-TagDialog::~TagDialog()
-/* ========================================================================= */
+void DlgTag::initDlg(void)
 {
-	delete ui;
-}
-
-
-/* ========================================================================= */
-/*
- * Initialize dialog.
- */
-void TagDialog::initTagDialog(void)
-/* ========================================================================= */
-{
-	ui->currentColor->setEnabled(false);
-	m_tagColor = "#" + m_tagColor;
-	ui->tagNamelineEdit->setText(m_tagName);
+	this->currentColor->setEnabled(false);
+	/* FIXME -- Use the hash tag only when displaying the colour. */
+	m_tagColour = "#" + m_tagColour;
+	this->tagNamelineEdit->setText(m_tagName);
 	setPreviewButtonColor();
 
-	connect(ui->changeColorPushButton, SIGNAL(clicked()), this,
+	connect(this->changeColorPushButton, SIGNAL(clicked()), this,
 	    SLOT(chooseNewColor()));
-	connect(ui->buttonBox, SIGNAL(accepted()), this,
+	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(saveTag()));
 }
 
-
-/* ========================================================================= */
-/*
- * Change/choose a new color of tag.
- */
-void TagDialog::chooseNewColor(void)
-/* ========================================================================= */
+void DlgTag::chooseNewColor(void)
 {
 	QColor color = QColorDialog::getColor(QColor(m_tagColor), this,
-	    tr("Choose tag color"));
+	    tr("Choose tag colour"));
 
 	if (color.isValid()) {
 		m_tagColor = color.name().toLower();
@@ -115,15 +76,9 @@ void TagDialog::chooseNewColor(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Insert/update tag in database.
- */
-void TagDialog::saveTag(void)
-/* ========================================================================= */
+void DlgTag::saveTag(void)
 {
-	m_tagName = ui->tagNamelineEdit->text();
+	m_tagName = this->tagNamelineEdit->text();
 
 	if (m_tagName.isEmpty()) {
 		QMessageBox msgBox;
@@ -144,23 +99,17 @@ void TagDialog::saveTag(void)
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Tag error"));
 			msgBox.setText(tr("Tag with name '%1'' already "
-			   "exists in databaze.").arg(m_tagName));
+			   "exists in database.").arg(m_tagName));
 			msgBox.setInformativeText(tr("Tag wasn't created again."));
 			msgBox.exec();
 		}
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Set current tag color to preview button.
- */
-void TagDialog::setPreviewButtonColor(void)
-/* ========================================================================= */
+void DlgTag::setPreviewButtonColor(void)
 {
-	QPalette pal = ui->currentColor->palette();
+	QPalette pal = this->currentColor->palette();
 	pal.setColor(QPalette::Button, QColor(m_tagColor));
 	const QString style = "border-style: outset; background-color: ";
-	ui->currentColor->setStyleSheet(style + m_tagColor);
+	this->currentColor->setStyleSheet(style + m_tagColor);
 }

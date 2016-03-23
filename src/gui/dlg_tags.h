@@ -22,29 +22,39 @@
  */
 
 
-#ifndef DLG_TAGS_H
-#define DLG_TAGS_H
+#ifndef _DLG_TAGS_H_
+#define _DLG_TAGS_H_
 
 #include <QDialog>
+#include <QList>
 
-#define WRONG_TAG_ID -1
+#include "ui_dlg_tags.h"
 
-namespace Ui {
-	class TagsDialog;
-}
+#define WRONG_TAG_ID -1 /** TODO -- Remove. */
 
-class TagsDialog : public QDialog
-{
-	Q_OBJECT
+/*!
+ * @brief Tags management dialogue.
+ */
+class DlgTags : public QDialog , public Ui::TagsDialog {
+    Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgTags(QWidget *parent = 0);
 
-	TagsDialog(QWidget *parent = 0);
-	TagsDialog(QList<qint64> & msgIdList, QWidget *parent = 0);
-	~TagsDialog(void);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] msgIdList List of message ids.
+	 * @param[in] parent    Parent widget.
+	 */
+	explicit DlgTags(const QList<qint64> &msgIdList, QWidget *parent = 0);
 
 private slots:
-
 	/*!
 	 * @brief Add tag (insert into database).
 	 */
@@ -72,16 +82,15 @@ private slots:
 	void removeSelectedTagsFromMsgs(void);
 
 private:
-
 	/*!
-	 * @brief Fill all tags to tableview from database.
+	 * @brief Fill all tags to table view from database.
 	 */
 	void fillTagsToListView(void);
 
 	/*!
-	 * @brief Init tags dialog.
+	 * @brief Initialises the dialogue.
 	 */
-	void initTagsDialog(void);
+	void initDlg(void);
 
 	/*!
 	 * @brief Get tag id from selected item (current index).
@@ -90,8 +99,7 @@ private:
 	 */
 	int getTagIdFromCurrentIndex(void);
 
-	QList<qint64> m_msgIdList;
-	Ui::TagsDialog *ui;
+	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 };
 
-#endif // DLG_TAGS_H
+#endif /* _DLG_TAGS_H_ */
