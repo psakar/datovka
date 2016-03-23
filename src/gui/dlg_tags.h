@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _DLG_TAGS_H_
 #define _DLG_TAGS_H_
 

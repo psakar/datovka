@@ -48,7 +48,8 @@ public:
 	 * @return Number of rows.
 	 */
 	virtual
-	int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
+	int rowCount(const QModelIndex &parent = QModelIndex()) const
+	    Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Returns number of columns (for the children of given parent).
