@@ -33,7 +33,11 @@ TagsDelegate::TagsDelegate(QWidget *parent)
 void TagsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
-	if (index.data().canConvert<TagItemList>()) {
+	if (index.data().canConvert<TagItem>()) {
+		TagItem tagItem = qvariant_cast<TagItem>(index.data());
+		tagItem.paint(painter, option.rect, option.font,
+		    option.palette);
+	} else if (index.data().canConvert<TagItemList>()) {
 		TagItemList tagList = qvariant_cast<TagItemList>(index.data());
 		tagList.paint(painter, option.rect, option.font,
 		    option.palette);
@@ -45,7 +49,9 @@ void TagsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 QSize TagsDelegate::TagsDelegate::sizeHint(const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
-	if (index.data().canConvert<TagItemList>()) {
+	if (index.data().canConvert<TagItem>()) {
+		return QSize(100, 30); /* FIXME -- Size hint. */
+	} else if (index.data().canConvert<TagItemList>()) {
 		TagItemList tagList = qvariant_cast<TagItemList>(index.data());
 		return tagList.sizeHint(option.rect, option.font);
 	} else {

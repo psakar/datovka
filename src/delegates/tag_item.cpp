@@ -143,6 +143,16 @@ bool TagItem::isValidColour(const QString &colourStr)
 	return re.exactMatch(colourStr);
 }
 
+TagItemList::TagItemList(void)
+    : QList<TagItem>()
+{
+}
+
+TagItemList::TagItemList(const QList<TagItem> &tagList)
+    : QList<TagItem>(tagList)
+{
+}
+
 #if 1
 void TagItemList::paint(class QPainter *painter, const QRect &rect,
     const QFont &font, const QPalette &palette) const

@@ -76,6 +76,13 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation,
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Set model data.
+	 *
+	 * @param[in] tagList Tag list.
+	 */
+	void setTagList(const TagItemList &tagList);
+
 private:
 	TagItemList m_tagList; /*!< Tags ordered according to tag name. */
 };

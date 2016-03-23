@@ -104,6 +104,18 @@ class TagItemList : public QList<TagItem> {
 
 public:
 	/*!
+	 * @brief Constructor.
+	 */
+	TagItemList(void);
+
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] tagList List of tag items.
+	 */
+	TagItemList(const QList<TagItem> &tagList);
+
+	/*!
 	 * @brief Paint all list elements.
 	 */
 	void paint(class QPainter *painter, const QRect &rect,

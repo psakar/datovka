@@ -23,14 +23,19 @@
 
 #include <QString>
 
+#include "src/delegates/tags_delegate.h"
 #include "src/gui/dlg_tag.h"
 #include "src/gui/dlg_tags.h"
 #include "src/io/tag_db.h"
+#include "src/models/tags_model.h"
 
+#define WRONG_TAG_ID -1 /** TODO -- Remove. */
 
 DlgTags::DlgTags(QWidget *parent)
     : QDialog(parent),
-    m_msgIdList()
+    m_msgIdList(),
+    m_tagsDelegate(0),
+    m_tagsModel(0)
 {
 	setupUi(this);
 
@@ -39,11 +44,23 @@ DlgTags::DlgTags(QWidget *parent)
 
 DlgTags::DlgTags(const QList<qint64> &msgIdList, QWidget *parent)
     : QDialog(parent),
-    m_msgIdList(msgIdList)
+    m_msgIdList(msgIdList),
+    m_tagsDelegate(0),
+    m_tagsModel(0)
 {
 	setupUi(this);
 
 	initDlg();
+}
+
+DlgTags::~DlgTags(void)
+{
+	if (0 != m_tagsDelegate) {
+		delete m_tagsDelegate;
+	}
+	if (0 != m_tagsModel) {
+		delete m_tagsModel;
+	}
 }
 
 void DlgTags::addTag(void)
@@ -95,32 +112,19 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 
 void DlgTags::fillTagsToListView(void)
 {
-	QList<TagItem> tagList = globTagDbPtr->getAllTags();
+	TagItemList tagList(globTagDbPtr->getAllTags());
 
-	this->tagTableWidget->clearContents();
-	this->tagTableWidget->setRowCount(0);
-
-	foreach (const TagItem &tagItem, tagList) {
-
-		int row = this->tagTableWidget->rowCount();
-		this->tagTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(tagItem.name);
-		item->setForeground(QColor("#"+ tagItem.colour));
-		this->tagTableWidget->setItem(row, 0 , item);
-		item = new QTableWidgetItem;
-		item->setText(QString::number(tagItem.id));
-		this->tagTableWidget->setItem(row, 1 ,item);
-	}
-
-	if (this->tagTableWidget->rowCount() > 0) {
-		this->tagTableWidget->selectColumn(0);
-		this->tagTableWidget->selectRow(0);
-	}
+	m_tagsModel->setTagList(tagList);
 }
 
 void DlgTags::initDlg(void)
 {
+	m_tagsDelegate = new TagsDelegate(this);
+	m_tagsModel = new TagsModel(this);
+
+	tagListView->setItemDelegate(m_tagsDelegate);
+	tagListView->setModel(m_tagsModel);
+
 	this->tagAssignGroup->setEnabled(false);
 	this->tagAssignGroup->setVisible(false);
 
@@ -130,8 +134,6 @@ void DlgTags::initDlg(void)
 	    SLOT(updateTag()));
 	connect(this->pushButtonDelete, SIGNAL(clicked()), this,
 	    SLOT(deleteTag()));
-
-	this->tagTableWidget->setColumnHidden(1, true);
 
 	/* any messages was selected */
 	if (!m_msgIdList.isEmpty()) {
@@ -150,12 +152,17 @@ void DlgTags::initDlg(void)
 
 int DlgTags::getTagIdFromCurrentIndex(void)
 {
-	QModelIndex currentIndex = this->tagTableWidget->currentIndex();
+	QModelIndex idx(tagListView->selectionModel()->currentIndex());
 
-	if (!currentIndex.isValid()) {
+	if (!idx.isValid()) {
 		return WRONG_TAG_ID;
 	}
 
-	int row = currentIndex.row();
-	return this->tagTableWidget->item(row, 1)->text().toInt();
+	if (!idx.data().canConvert<TagItem>()) {
+		return WRONG_TAG_ID;
+	}
+
+	TagItem tagItem(qvariant_cast<TagItem>(idx.data()));
+
+	return tagItem.id;
 }

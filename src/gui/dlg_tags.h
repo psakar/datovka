@@ -29,8 +29,6 @@
 
 #include "ui_dlg_tags.h"
 
-#define WRONG_TAG_ID -1 /** TODO -- Remove. */
-
 /*!
  * @brief Tags management dialogue.
  */
@@ -52,6 +50,11 @@ public:
 	 * @param[in] parent    Parent widget.
 	 */
 	explicit DlgTags(const QList<qint64> &msgIdList, QWidget *parent = 0);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgTags(void);
 
 private slots:
 	/*!
@@ -99,6 +102,8 @@ private:
 	int getTagIdFromCurrentIndex(void);
 
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
+	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
+	class TagsModel *m_tagsModel; /*!< Tags model. */
 };
 
 #endif /* _DLG_TAGS_H_ */

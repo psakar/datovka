@@ -66,3 +66,12 @@ QVariant TagsModel::headerData(int section, Qt::Orientation orientation,
 		return QVariant();
 	}
 }
+
+void TagsModel::setTagList(const TagItemList &tagList)
+{
+	beginResetModel();
+
+	m_tagList = tagList;
+
+	endResetModel();
+}
