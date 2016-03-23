@@ -94,6 +94,14 @@ public:
 	QList<TagItem> getAllTags(void);
 
 	/*!
+	 * @brief Get all tags related to given message.
+	 *
+	 * @param[in] dmgId Message identifier.
+	 * @return List of tags related to message.
+	 */
+	TagItemList getMessageTags(quint64 msgId);
+
+	/*!
 	 * @brief Delete all tags for message ID
 	 *        in message_tags table.
 	 *
@@ -134,6 +142,5 @@ private:
  * @brief Global tag database.
  */
 extern TagDb *globTagDbPtr;
-
 
 #endif /* _TAG_DB_H_ */

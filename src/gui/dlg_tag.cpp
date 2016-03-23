@@ -60,11 +60,11 @@ void DlgTag::initDlg(void)
 
 void DlgTag::chooseNewColor(void)
 {
-	QColor color = QColorDialog::getColor(QColor("#" + m_tagItem.colour),
+	QColor colour = QColorDialog::getColor(QColor("#" + m_tagItem.colour),
 	    this, tr("Choose tag colour"));
 
-	if (color.isValid()) {
-		QString colourName = color.name().toLower().replace("#", "");
+	if (colour.isValid()) {
+		QString colourName = colour.name().toLower().replace("#", "");
 		if (TagItem::isValidColour(colourName)) {
 			m_tagItem.colour = colourName;
 		}
@@ -86,9 +86,9 @@ void DlgTag::saveTag(void)
 		return;
 	}
 
+	Q_ASSERT(TagItem::isValidColour(m_tagItem.colour));
+
 	if (m_tagItem.id >= 0) {
-		Q_ASSERT(TagItem::isValidColour(m_tagItem.colour));
-		/* TODO -- The tag may already exist in database. */
 		globTagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
 	} else {
 		if (!globTagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {

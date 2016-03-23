@@ -26,6 +26,7 @@
 
 #include "src/common.h"
 #include "src/delegates/tag_item.h"
+#include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/models/messages_model.h"
@@ -546,6 +547,11 @@ DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
 
 bool DbMsgsTblModel::fillTagsCollumn(int col)
 {
+	if (0 == globTagDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
 	if (col >= 0) {
 		if (col > columnCount()) {
 			return false;
@@ -557,23 +563,27 @@ bool DbMsgsTblModel::fillTagsCollumn(int col)
 		}
 	}
 
-	/* TODO -- Database query missing. */
-	static TagItemList tagList;
-	if (tagList.isEmpty()) {
-		tagList.append(TagItem(0, "one", "ff0000"));
-		tagList.append(TagItem(0, "two", "00ff00"));
-		tagList.append(TagItem(0, "three", "0000ff"));
-		tagList.append(TagItem(0, "four", "ef4444"));
-		tagList.append(TagItem(0, "five", "faa31b"));
-		tagList.append(TagItem(0, "six", "fff000"));
-		tagList.append(TagItem(0, "seven", "82c341"));
-		tagList.append(TagItem(0, "eight", "009f75"));
-		tagList.append(TagItem(0, "nine", "88c6ed"));
-		tagList.append(TagItem(0, "ten", "394ba0"));
-		tagList.append(TagItem(0, "eleven", "d54799"));
-	}
+//	static TagItemList tagList;
+//	if (tagList.isEmpty()) {
+//		tagList.append(TagItem(0, "one", "ff0000"));
+//		tagList.append(TagItem(0, "two", "00ff00"));
+//		tagList.append(TagItem(0, "three", "0000ff"));
+//		tagList.append(TagItem(0, "four", "ef4444"));
+//		tagList.append(TagItem(0, "five", "faa31b"));
+//		tagList.append(TagItem(0, "six", "fff000"));
+//		tagList.append(TagItem(0, "seven", "82c341"));
+//		tagList.append(TagItem(0, "eight", "009f75"));
+//		tagList.append(TagItem(0, "nine", "88c6ed"));
+//		tagList.append(TagItem(0, "ten", "394ba0"));
+//		tagList.append(TagItem(0, "eleven", "d54799"));
+//	}
 	for (int row = 0; row < rowCount(); ++row) {
-		m_data[row][col] = QVariant::fromValue(tagList);
+//		m_data[row][col] = QVariant::fromValue(tagList);
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		m_data[row][col] = QVariant::fromValue(
+		    globTagDbPtr->getMessageTags(dmId));
+		emit dataChanged(TblModel::index(row, col),
+		    TblModel::index(row, col));
 	}
 
 	return true;
