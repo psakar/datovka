@@ -28,11 +28,8 @@
 #include <QDialog>
 #include <QString>
 
+#include "src/delegates/tag_item.h"
 #include "ui_dlg_tag.h"
-
-#define NEWTAG_ID -1
-/* default colour: 6 chars, hex format, RGB, lower characters */
-#define NEWTAG_COLOR "ffffff"
 
 /*!
  * @brief Create new tag dialogue.
@@ -51,13 +48,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] tagId     New tag identifier.
-	 * @param[in] tagName   New tag name.
-	 * @param[in] newColour New tag colour.
-	 * @param[in] parent    Parent widget.
+	 * @param[in] tag    Tag.
+	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgTag(int tagId = NEWTAG_ID, const QString &tagName = QString(),
-	    const QString &tagColour = NEWTAG_COLOR, QWidget *parent = 0);
+	explicit DlgTag(const TagItem &tag, QWidget *parent = 0);
 
 private slots:
 
@@ -83,9 +77,7 @@ private:
 	 */
 	void setPreviewButtonColor(void);
 
-	int m_tagid; /*!< Tag identifier. */
-	QString m_tagName; /*!< Tag name. */
-	QString m_tagColour; /*!< Tag colour. */
+	TagItem m_tagItem; /*!< Created tag. */
 };
 
 #endif /* _DLG_TAG_H_ */

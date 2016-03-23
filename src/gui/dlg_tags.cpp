@@ -61,8 +61,7 @@ void DlgTags::updateTag(void)
 
 	TagItem tagItem(globTagDbPtr->getTagData(tagId));
 
-	QDialog *tagDlg = new DlgTag(tagId, tagItem.name, tagItem.colour,
-	    this);
+	QDialog *tagDlg = new DlgTag(tagItem, this);
 	tagDlg->exec();
 	tagDlg->deleteLater();
 

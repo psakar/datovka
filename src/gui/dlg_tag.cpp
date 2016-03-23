@@ -29,9 +29,7 @@
 
 DlgTag::DlgTag(QWidget *parent)
     : QDialog(parent),
-    m_tagid(NEWTAG_ID),
-    m_tagName(QString()),
-    m_tagColour(NEWTAG_COLOR)
+    m_tagItem()
 {
 	setupUi(this);
 
@@ -39,12 +37,9 @@ DlgTag::DlgTag(QWidget *parent)
 
 }
 
-DlgTag::DlgTag(int tagId, const QString &tagName, const QString &tagColour,
-    QWidget *parent)
+DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
     : QDialog(parent),
-    m_tagid(tagId),
-    m_tagName(tagName),
-    m_tagColour(tagColour)
+    m_tagItem(tag)
 {
 	setupUi(this);
 
@@ -54,7 +49,7 @@ DlgTag::DlgTag(int tagId, const QString &tagName, const QString &tagColour,
 void DlgTag::initDlg(void)
 {
 	this->currentColor->setEnabled(false);
-	this->tagNamelineEdit->setText(m_tagName);
+	this->tagNamelineEdit->setText(m_tagItem.name);
 	setPreviewButtonColor();
 
 	connect(this->changeColorPushButton, SIGNAL(clicked()), this,
@@ -65,39 +60,43 @@ void DlgTag::initDlg(void)
 
 void DlgTag::chooseNewColor(void)
 {
-	QColor color = QColorDialog::getColor(QColor("#" + m_tagColour), this,
-	    tr("Choose tag colour"));
+	QColor color = QColorDialog::getColor(QColor("#" + m_tagItem.colour),
+	    this, tr("Choose tag colour"));
 
 	if (color.isValid()) {
-		m_tagColour = color.name().toLower().replace("#", "");
+		QString colourName = color.name().toLower().replace("#", "");
+		if (TagItem::isValidColour(colourName)) {
+			m_tagItem.colour = colourName;
+		}
 		setPreviewButtonColor();
 	}
 }
 
 void DlgTag::saveTag(void)
 {
-	m_tagName = this->tagNamelineEdit->text();
+	m_tagItem.name = this->tagNamelineEdit->text();
 
-	if (m_tagName.isEmpty()) {
+	if (m_tagItem.name.isEmpty()) {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Critical);
 		msgBox.setWindowTitle(tr("Tag error"));
-		msgBox.setText(tr("Tag name is empty.").arg(m_tagName));
+		msgBox.setText(tr("Tag name is empty."));
 		msgBox.setInformativeText(tr("Tag wasn't created."));
 		msgBox.exec();
 		return;
 	}
 
-	if (m_tagid != NEWTAG_ID) {
-		Q_ASSERT(TagItem::isValidColour(m_tagColour));
-		globTagDbPtr->updateTag(m_tagid, m_tagName, m_tagColour);
+	if (m_tagItem.id >= 0) {
+		Q_ASSERT(TagItem::isValidColour(m_tagItem.colour));
+		/* TODO -- The tag may already exist in database. */
+		globTagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
 	} else {
-		if (!globTagDbPtr->insertTag(m_tagName, m_tagColour)) {
+		if (!globTagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Tag error"));
 			msgBox.setText(tr("Tag with name '%1'' already "
-			   "exists in database.").arg(m_tagName));
+			   "exists in database.").arg(m_tagItem.name));
 			msgBox.setInformativeText(tr("Tag wasn't created again."));
 			msgBox.exec();
 		}
@@ -107,7 +106,7 @@ void DlgTag::saveTag(void)
 void DlgTag::setPreviewButtonColor(void)
 {
 	QPalette pal = this->currentColor->palette();
-	pal.setColor(QPalette::Button, QColor("#" + m_tagColour));
+	pal.setColor(QPalette::Button, QColor("#" + m_tagItem.colour));
 	const QString style = "border-style: outset; background-color: ";
-	this->currentColor->setStyleSheet(style + "#" + m_tagColour);
+	this->currentColor->setStyleSheet(style + "#" + m_tagItem.colour);
 }
