@@ -59,6 +59,9 @@
 #define DEBUG_OPT "debug"
 #define DEBUG_VERBOSITY_OPT "debug-verbosity"
 
+#define RUN_MODE_GUI 0
+#define RUN_MODE_CLI 1
+#define RUN_MODE_ZFO 2
 
 /* ========================================================================= */
 static
@@ -441,6 +444,30 @@ int main(int argc, char *argv[])
 	}
 
 	QStringList cmdLineFileNames = parser.positionalArguments();
+	QStringList inOptions = parser.optionNames();
+	QStringList serList;
+
+	// check if any CLI service was set from command line
+	for (int i = 0; i < inOptions.count(); ++i) {
+		for (int j = 0; j < serviceList.count(); ++j) {
+			if (inOptions.at(i) == serviceList.at(j)) {
+				serList.append(inOptions.at(i));
+				break;
+			}
+		}
+	}
+
+	short runMode = RUN_MODE_GUI;
+	QSplashScreen * splash = new QSplashScreen;
+
+	if (!serList.isEmpty()) {
+		runMode = RUN_MODE_CLI;
+	} else if (!cmdLineFileNames.isEmpty()) {
+		runMode = RUN_MODE_ZFO;
+	} else {
+		splash->setPixmap(QPixmap(":/splash/datovka-splash.png"));
+		splash->show();
+	}
 
 	/* Ensure only one instance with given configuration file. */
 	SingleInstance singleInstance(globPref.loadConfPath());
@@ -544,6 +571,13 @@ int main(int argc, char *argv[])
 
 	loadLocalisation(app);
 
+	/* set splash action text */
+	if (runMode == RUN_MODE_GUI) {
+		Qt::Alignment align = Qt::AlignCenter;
+		splash->showMessage(QObject::tr("Application is loading..."),
+		align, Qt::white);
+	}
+
 	/* Localise description in tables. */
 	accntinfTbl.reloadLocalisedDescription();
 	userinfTbl.reloadLocalisedDescription();
@@ -616,33 +650,23 @@ int main(int argc, char *argv[])
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
 
-	QStringList inOptions = parser.optionNames();
-	QStringList serList;
-
-	// check if any CLI service was set from command line
-	for (int i = 0; i < inOptions.count(); ++i) {
-		for (int j = 0; j < serviceList.count(); ++j) {
-			if (inOptions.at(i) == serviceList.at(j)) {
-				serList.append(inOptions.at(i));
-				break;
-			}
-		}
-	}
-
-	// if any CLI service was set run CLI
-	if (!serList.isEmpty()) {
+	if (runMode == RUN_MODE_CLI) {
+		delete splash;
 		ret = doCLI(serList, parser);
-	} else if (cmdLineFileNames.isEmpty()) {
-		MainWindow mainwin;
-		mainwin.show();
-		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
-	} else {
+	} else if (runMode == RUN_MODE_ZFO) {
+		delete splash;
 		foreach (const QString &fileName, cmdLineFileNames) {
 			ret = showZfo(fileName);
 			if (0 != ret) {
 				break;
 			}
 		}
+	} else {
+		MainWindow mainwin;
+		mainwin.show();
+		splash->finish(&mainwin);
+		delete splash;
+		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
 	/* Wait until all threads finished. */
