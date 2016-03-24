@@ -76,16 +76,16 @@ bool TagItem::isValid(void) const
 #define PADDING 5 /* Horizontal padding in pixels. */
 #define MARGIN 2 /* Vertical and horizontal margin. */
 
-int TagItem::paint(class QPainter *painter, const QRect &rect,
-    const QFont &font, const QPalette &palette) const
+int TagItem::paint(class QPainter *painter,
+    const QStyleOptionViewItem &option) const
 {
-	Q_UNUSED(palette);
-
 	Q_ASSERT(0 != painter);
+
+	const QRect &rect(option.rect);
 
 	painter->save();
 
-	int width = sizeHint(rect, font).width();
+	int width = sizeHint(option).width();
 	int height = rect.height() - (2 * MARGIN);
 
 	QRectF drawnRect(0, MARGIN, width - (2 * MARGIN), height);
@@ -93,6 +93,10 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 	QPainterPath path;
 	int rounding = (int) (0.15 * height);
 	path.addRoundedRect(drawnRect, rounding, rounding, Qt::AbsoluteSize);
+
+	if (option.state & QStyle::State_Selected) {
+		painter->fillRect(option.rect, option.palette.highlight());
+	}
 
 	painter->setRenderHint(QPainter::Antialiasing, true);
 	painter->translate(rect.x(), rect.y());
@@ -122,9 +126,9 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 	return width;
 }
 
-QSize TagItem::sizeHint(const QRect &rect, const QFont &font) const
+QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
 {
-	Q_UNUSED(rect);
+	const QFont &font(option.font);
 
 	int width = QFontMetrics(font).width(name);
 	width += 2 * PADDING;
@@ -153,8 +157,8 @@ TagItemList::TagItemList(const QList<TagItem> &tagList)
 {
 }
 
-void TagItemList::paint(class QPainter *painter, const QRect &rect,
-    const QFont &font, const QPalette &palette) const
+void TagItemList::paint(class QPainter *painter,
+    const QStyleOptionViewItem &option) const
 {
 	if (0 == painter) {
 		Q_ASSERT(0);
@@ -164,19 +168,19 @@ void TagItemList::paint(class QPainter *painter, const QRect &rect,
 	painter->save();
 
 	foreach (const TagItem &tag, *this) {
-		int width = tag.paint(painter, rect, font, palette);
+		int width = tag.paint(painter, option);
 		painter->translate(width, 0);
 	}
 
 	painter->restore();
 }
 
-QSize TagItemList::sizeHint(const QRect &rect, const QFont &font) const
+QSize TagItemList::sizeHint(const QStyleOptionViewItem &option) const
 {
 	int width = 0;
 
 	foreach (const TagItem &tag, *this) {
-		width += tag.sizeHint(rect, font).width();
+		width += tag.sizeHint(option).width();
 	}
 	width += MARGIN;
 

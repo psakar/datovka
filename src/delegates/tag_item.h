@@ -26,10 +26,9 @@
 
 #include <QList>
 #include <QMetaType>
-#include <QPalette>
-#include <QRect>
 #include <QSize>
 #include <QString>
+#include <QStyleOptionViewItem>
 
 /*!
  * @brief Describes tag information.
@@ -66,22 +65,19 @@ public:
 	 * @brief Paint tag rectangle.
 	 *
 	 * @param[in,out] painter Painter.
-	 * @param[in]     rect    Rectangle to be used.
-	 * @param[in]     font    Font to be used.
-	 * @param[in]     palette Palette to be used.
+	 * @param[in]     option  Drawing options.
 	 * @return Width of the drawn rectangle (including margin);
 	 */
-	int paint(class QPainter *painter, const QRect &rect,
-	    const QFont &font, const QPalette &palette) const;
+	int paint(class QPainter *painter,
+	    const QStyleOptionViewItem &option) const;
 
 	/*!
 	 * @brief Gives size hint for the tag rectangle.
 	 *
-	 * @param[in] rect Rectangle to be drawn into.
-	 * @param[in] font Font to be used.
+	 * @param[in] option Drawing options.
 	 * @return Size of the element.
 	 */
-	QSize sizeHint(const QRect &rect, const QFont &font) const;
+	QSize sizeHint(const QStyleOptionViewItem &option) const;
 
 	/*!
 	 * @brief Returns true if colour is valid.
@@ -117,18 +113,20 @@ public:
 
 	/*!
 	 * @brief Paint all list elements.
+	 *
+	 * @param[in,out] painter Painter.
+	 * @param[in]     option  Drawing options.
 	 */
-	void paint(class QPainter *painter, const QRect &rect,
-	    const QFont &font, const QPalette &palette) const;
+	void paint(class QPainter *painter,
+	    const QStyleOptionViewItem &option) const;
 
 	/*!
 	 * @brief Gives size hint for the tag rectangles.
 	 *
-	 * @param[in] rect Rectangle to be drawn into.
-	 * @param[in] font Font to be used.
+	 * @param[in] option Drawing options.
 	 * @return Size of the element.
 	 */
-	QSize sizeHint(const QRect &rect, const QFont &font) const;
+	QSize sizeHint(const QStyleOptionViewItem &option) const;
 };
 
 Q_DECLARE_METATYPE(TagItem)

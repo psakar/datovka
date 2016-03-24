@@ -125,6 +125,9 @@ void DlgTags::initDlg(void)
 	tagListView->setItemDelegate(m_tagsDelegate);
 	tagListView->setModel(m_tagsModel);
 
+	tagListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	tagListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 	this->tagAssignGroup->setEnabled(false);
 	this->tagAssignGroup->setVisible(false);
 
