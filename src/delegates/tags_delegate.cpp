@@ -50,7 +50,8 @@ QSize TagsDelegate::TagsDelegate::sizeHint(const QStyleOptionViewItem &option,
     const QModelIndex &index) const
 {
 	if (index.data().canConvert<TagItem>()) {
-		return QSize(100, 30); /* FIXME -- Size hint. */
+		TagItem tagItem = qvariant_cast<TagItem>(index.data());
+		return tagItem.sizeHint(option.rect, option.font);
 	} else if (index.data().canConvert<TagItemList>()) {
 		TagItemList tagList = qvariant_cast<TagItemList>(index.data());
 		return tagList.sizeHint(option.rect, option.font);

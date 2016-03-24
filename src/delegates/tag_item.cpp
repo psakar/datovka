@@ -74,7 +74,7 @@ bool TagItem::isValid(void) const
 }
 
 #define PADDING 5 /* Horizontal padding in pixels. */
-#define MARGIN 2 /* Vertical margin. */
+#define MARGIN 2 /* Vertical and horizontal margin. */
 
 int TagItem::paint(class QPainter *painter, const QRect &rect,
     const QFont &font, const QPalette &palette) const
@@ -88,7 +88,7 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 	int width = sizeHint(rect, font).width();
 	int height = rect.height() - (2 * MARGIN);
 
-	QRectF drawnRect(0, MARGIN, width, height);
+	QRectF drawnRect(0, MARGIN, width - (2 * MARGIN), height);
 
 	QPainterPath path;
 	int rounding = (int) (0.15 * height);
@@ -105,6 +105,8 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 		Q_ASSERT(rectColour.isValid());
 	}
 
+	painter->translate(MARGIN, 0);
+
 	QPen pen(rectColour, 1);
 	painter->setPen(pen);
 	painter->fillPath(path, rectColour);
@@ -117,7 +119,7 @@ int TagItem::paint(class QPainter *painter, const QRect &rect,
 
 	painter->restore();
 
-	return width + (2 * MARGIN);
+	return width;
 }
 
 QSize TagItem::sizeHint(const QRect &rect, const QFont &font) const
@@ -126,14 +128,12 @@ QSize TagItem::sizeHint(const QRect &rect, const QFont &font) const
 
 	int width = QFontMetrics(font).width(name);
 	width += 2 * PADDING;
+	width += 2 * MARGIN;
 
-	//int height = rect.height();
-	//height -= 2 * MARGIN;
-	//if (height < 0 ) {
-	//	height = 1;
-	//}
+	int height = QFontMetrics(font).height();
+	height += 2 * PADDING;
 
-	return QSize(width, 1);
+	return QSize(width, height);
 }
 
 bool TagItem::isValidColour(const QString &colourStr)
@@ -153,7 +153,6 @@ TagItemList::TagItemList(const QList<TagItem> &tagList)
 {
 }
 
-#if 1
 void TagItemList::paint(class QPainter *painter, const QRect &rect,
     const QFont &font, const QPalette &palette) const
 {
@@ -178,57 +177,9 @@ QSize TagItemList::sizeHint(const QRect &rect, const QFont &font) const
 
 	foreach (const TagItem &tag, *this) {
 		width += tag.sizeHint(rect, font).width();
-		width += 2 * MARGIN;
 	}
+	width += MARGIN;
 
+	/* Don't care about vertical dimensions here. */
 	return QSize(width, 1);
 }
-#else
-#define myStarCount 2
-#define myMaxStarCount 5
-#define PaintingScaleFactor 10
-
-void TagItemList::paint(class QPainter *painter, const QRect &rect,
-    const QFont &font, const QPalette &palette) const
-{
-//
-	Q_UNUSED(font);
-	painter->save();
-
-	QPolygonF starPolygon;
-	{
-		starPolygon << QPointF(1.0, 0.5);
-	    for (int i = 1; i < 5; ++i)
-        	starPolygon << QPointF(0.5 + 0.5 * std::cos(0.8 * i * 3.14),
-                	               0.5 + 0.5 * std::sin(0.8 * i * 3.14));
-	}
-
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->setPen(Qt::NoPen);
-
-    painter->setBrush(palette.foreground());
-
-    int yOffset = (rect.height() - PaintingScaleFactor) / 2;
-    painter->translate(rect.x(), rect.y() + yOffset);
-    painter->scale(PaintingScaleFactor, PaintingScaleFactor);
-
-    for (int i = 0; i < myMaxStarCount; ++i) {
-        if (i < myStarCount) {
-            painter->drawPolygon(starPolygon, Qt::WindingFill);
-        }
-        painter->translate(1.0, 0.0);
-    }
-
-    painter->restore();
-//
-}
-
-QSize TagItemList::sizeHint(const QRect &rect, const QFont &font) const
-{
-//
-	Q_UNUSED(rect);
-	Q_UNUSED(font);
-	return PaintingScaleFactor * QSize(myMaxStarCount, 1);
-//
-}
-#endif
