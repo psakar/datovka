@@ -83,6 +83,11 @@ private slots:
 	 */
 	void removeSelectedTagsFromMsgs(void);
 
+	/*!
+	 * @brief Active/deactive tag buttons when selection model is changed.
+	 */
+	void handleSelectionChanged(QItemSelection current);
+
 private:
 	/*!
 	 * @brief Fill all tags to table view from database.
@@ -95,11 +100,11 @@ private:
 	void initDlg(void);
 
 	/*!
-	 * @brief Get tag id from selected item (current index).
+	 * @brief Get tag id from index.
 	 *
 	 * @return Tag id if success else -1.
 	 */
-	int getTagIdFromCurrentIndex(void);
+	int getTagIdFromIndex(const QModelIndex &idx);
 
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */

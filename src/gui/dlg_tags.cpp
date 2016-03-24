@@ -63,6 +63,7 @@ DlgTags::~DlgTags(void)
 	}
 }
 
+
 void DlgTags::addTag(void)
 {
 	QDialog *tagDlg = new DlgTag(this);
@@ -72,11 +73,11 @@ void DlgTags::addTag(void)
 	fillTagsToListView();
 }
 
+
 void DlgTags::updateTag(void)
 {
-	int tagId = getTagIdFromCurrentIndex();
-
-	TagItem tagItem(globTagDbPtr->getTagData(tagId));
+	TagItem tagItem(globTagDbPtr->getTagData(
+	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
 	QDialog *tagDlg = new DlgTag(tagItem, this);
 	tagDlg->exec();
@@ -87,26 +88,55 @@ void DlgTags::updateTag(void)
 
 void DlgTags::deleteTag(void)
 {
-	globTagDbPtr->deleteTag(getTagIdFromCurrentIndex());
+	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+
+	foreach (const QModelIndex &idx, slctIdxs) {
+		globTagDbPtr->deleteTag(getTagIdFromIndex(idx));
+	}
 
 	fillTagsToListView();
 }
 
 void DlgTags::assignSelectedTagsToMsgs(void)
 {
-	int tagId = getTagIdFromCurrentIndex();
+	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
 	foreach (const qint64 &msgId, m_msgIdList) {
-		globTagDbPtr->assignTagToMsg(tagId, msgId);
+		foreach (const QModelIndex &idx, slctIdxs) {
+			globTagDbPtr->assignTagToMsg(getTagIdFromIndex(idx),
+			    msgId);
+		}
 	}
 }
 
 void DlgTags::removeSelectedTagsFromMsgs(void)
 {
-	int tagId = getTagIdFromCurrentIndex();
+	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
 	foreach (const qint64 &msgId, m_msgIdList) {
-		globTagDbPtr->removeTagFromMsg(tagId, msgId);
+		foreach (const QModelIndex &idx, slctIdxs) {
+			globTagDbPtr->removeTagFromMsg(getTagIdFromIndex(idx),
+			    msgId);
+		}
+	}
+}
+
+void DlgTags::handleSelectionChanged(QItemSelection current)
+{
+	Q_UNUSED(current);
+
+	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+
+	if (slctIdxs.isEmpty()) {
+		this->pushButtonUpdate->setEnabled(false);
+		this->pushButtonDelete->setEnabled(false);
+	} else {
+		if (slctIdxs.count() > 1) {
+			this->pushButtonUpdate->setEnabled(false);
+		} else {
+			this->pushButtonUpdate->setEnabled(true);
+		}
+		this->pushButtonDelete->setEnabled(true);
 	}
 }
 
@@ -128,6 +158,9 @@ void DlgTags::initDlg(void)
 	tagListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	tagListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
+	this->pushButtonUpdate->setEnabled(false);
+	this->pushButtonDelete->setEnabled(false);
+
 	this->tagAssignGroup->setEnabled(false);
 	this->tagAssignGroup->setVisible(false);
 
@@ -137,6 +170,10 @@ void DlgTags::initDlg(void)
 	    SLOT(updateTag()));
 	connect(this->pushButtonDelete, SIGNAL(clicked()), this,
 	    SLOT(deleteTag()));
+	connect(tagListView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
+	    SLOT(handleSelectionChanged(QItemSelection)));
+
 
 	/* any messages was selected */
 	if (!m_msgIdList.isEmpty()) {
@@ -153,10 +190,8 @@ void DlgTags::initDlg(void)
 	fillTagsToListView();
 }
 
-int DlgTags::getTagIdFromCurrentIndex(void)
+int DlgTags::getTagIdFromIndex(const QModelIndex &idx)
 {
-	QModelIndex idx(tagListView->selectionModel()->currentIndex());
-
 	if (!idx.isValid()) {
 		return WRONG_TAG_ID;
 	}
