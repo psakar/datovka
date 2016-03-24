@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>325</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,6 +81,13 @@
            <widget class="QPushButton" name="pushButtonRemove">
             <property name="text">
              <string>Remove</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonRemoveAll">
+            <property name="text">
+             <string>Remove all</string>
             </property>
            </widget>
           </item>

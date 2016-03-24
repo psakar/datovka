@@ -79,9 +79,15 @@ private slots:
 
 	/*!
 	 * @brief Remove selected tag(s) from messages
-	 *        (delete records from database).
+	 *        (delete message tag records from database).
 	 */
 	void removeSelectedTagsFromMsgs(void);
+
+	/*!
+	 * @brief Remove all tags from messages
+	 *        (delete message tag records from database).
+	 */
+	void removeAllTagsFromMsgs(void);
 
 	/*!
 	 * @brief Active/deactive tag buttons when selection model is changed.
@@ -105,6 +111,12 @@ private:
 	 * @return Tag id if success else -1.
 	 */
 	int getTagIdFromIndex(const QModelIndex &idx);
+
+	/*!
+	 * @brief Choose (select) all tags in the listview
+	 *        which are assigned in selected messages.
+	 */
+	void selectAllAssingedTagsFromMsgs(void);
 
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
