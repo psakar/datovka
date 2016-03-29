@@ -209,7 +209,16 @@ public:
 	 * @param[in] col Negative number specifying the column to write into.
 	 * @return True on success.
 	 */
-	bool fillTagsCollumn(int col);
+	bool fillTagsColumn(int col);
+
+	/*!
+	 * @brief Reload tags in given rows.
+	 *
+	 * @param[in] dmIds List of message ids for which to load tags.
+	 * @param[in] col   Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool refillTagsColumn(const QList<qint64> &dmIds, int col);
 
 private:
 	/* Make these methods private so nobody is likely to mess with them. */

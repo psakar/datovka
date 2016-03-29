@@ -722,7 +722,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->fillTagsCollumn(-1);
+		mdl->fillTagsColumn(-1);
 		/* TODO -- Add some labels. */
 	}
 
@@ -10390,9 +10390,15 @@ void MainWindow::addOrDeleteMsgTags(void)
 
 	/*
 	 * FIXME -- The tags dialogue as it now exixts is not suitable for
-	 * adding tags to messages. */
+	 * adding tags to messages.
+	 */
 
 	QDialog *tagsDlg = new DlgTags(msgIdList, this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
+
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	Q_ASSERT(0 != messageModel);
+	messageModel->refillTagsColumn(msgIdList, -1);
 }

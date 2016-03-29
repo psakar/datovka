@@ -545,7 +545,7 @@ DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
 	return dummy;
 }
 
-bool DbMsgsTblModel::fillTagsCollumn(int col)
+bool DbMsgsTblModel::fillTagsColumn(int col)
 {
 	if (0 == globTagDbPtr) {
 		return false;
@@ -563,27 +563,44 @@ bool DbMsgsTblModel::fillTagsCollumn(int col)
 		}
 	}
 
-//	static TagItemList tagList;
-//	if (tagList.isEmpty()) {
-//		tagList.append(TagItem(0, "one", "ff0000"));
-//		tagList.append(TagItem(0, "two", "00ff00"));
-//		tagList.append(TagItem(0, "three", "0000ff"));
-//		tagList.append(TagItem(0, "four", "ef4444"));
-//		tagList.append(TagItem(0, "five", "faa31b"));
-//		tagList.append(TagItem(0, "six", "fff000"));
-//		tagList.append(TagItem(0, "seven", "82c341"));
-//		tagList.append(TagItem(0, "eight", "009f75"));
-//		tagList.append(TagItem(0, "nine", "88c6ed"));
-//		tagList.append(TagItem(0, "ten", "394ba0"));
-//		tagList.append(TagItem(0, "eleven", "d54799"));
-//	}
 	for (int row = 0; row < rowCount(); ++row) {
-//		m_data[row][col] = QVariant::fromValue(tagList);
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		m_data[row][col] = QVariant::fromValue(
 		    globTagDbPtr->getMessageTags(dmId));
-		emit dataChanged(TblModel::index(row, col),
-		    TblModel::index(row, col));
+	}
+
+	emit dataChanged(TblModel::index(0, col),
+	    TblModel::index(rowCount() - 1, col));
+
+	return true;
+}
+
+bool DbMsgsTblModel::refillTagsColumn(const QList<qint64> &dmIds, int col)
+{
+	if (0 == globTagDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
+	if (col >= 0) {
+		if (col > columnCount()) {
+			return false;
+		}
+	} else {
+		col += columnCount();
+		if (col < 0) {
+			return false;
+		}
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		if (dmIds.contains(dmId)) {
+			m_data[row][col] = QVariant::fromValue(
+			    globTagDbPtr->getMessageTags(dmId));
+			emit dataChanged(TblModel::index(row, col),
+			    TblModel::index(row, col));
+		}
 	}
 
 	return true;
