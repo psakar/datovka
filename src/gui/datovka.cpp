@@ -5157,6 +5157,10 @@ void MainWindow::filterMessages(const QString &text)
 	QList<int> columnList;
 	columnList.append(1);
 	columnList.append(2);
+	if (0 != globTagDbPtr) {
+		columnList.append(7); /* Tags in sent messages. */
+		columnList.append(8); /* Tags in received messages. */
+	}
 	m_messageListProxyModel.setFilterKeyColumns(columnList);
 
 	/* Set filter field background colour. */

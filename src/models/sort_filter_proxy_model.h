@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _SORT_FILTER_PROXY_MODEL_H_
 #define _SORT_FILTER_PROXY_MODEL_H_
 
@@ -30,22 +29,11 @@
 class SortFilterProxyModel : public QSortFilterProxyModel {
 	Q_OBJECT
 
-private:
-	/*!
-	 * @brief Return the column where the key is used to filter the
-	 *     content.
-	 *
-	 * @return Column number.
-	 *
-	 * @note The method is private so it cannot be used.
-	 */
-	int filterKeyColumn(void) const;
-
 public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] parent  Parent object.
+	 * @param[in] parent Parent object.
 	 */
 	explicit SortFilterProxyModel(QObject *parent = 0);
 
@@ -59,8 +47,8 @@ public:
 	/*!
 	 * @brief Set columns which are used for filtering.
 	 *
-	 * @param[in] columns  Column list. If list contains -1 or is empty
-	 *                     then all columns are used for filtering.
+	 * @param[in] columns Column list. If list contains -1 or is empty
+	 *                    then all columns are used for filtering.
 	 */
 	void setFilterKeyColumns(const QList<int> &columns);
 
@@ -77,14 +65,32 @@ protected:
 	 *     given source row and source parent should be included in the
 	 *     model; otherwise returns false.
 	 *
-	 * @param[in] sourceRow     Row number.
-	 * @param[in] sourceParent  Parent index.
+	 * @param[in] sourceRow    Row number.
+	 * @param[in] sourceParent Parent index.
 	 * @return Whether the row indicated should be included in the model.
 	 */
+	virtual
 	bool filterAcceptsRow(int sourceRow,
-	    const QModelIndex &sourceParent) const;
+	    const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
  
 private:
+	/*!
+	 * @brief Return the column where the key is used to filter the content.
+	 *
+	 * @note The method is private so it cannot be used.
+	 *
+	 * @return Column number.
+	 */
+	int filterKeyColumn(void) const;
+
+	/*!
+	 * @brief Returns true if the item should be included in the model.
+	 *
+	 * @param[in] sourceIdx Source index.
+	 * @return Whether the item meets the criteria.
+	 */
+	bool filterAcceptsItem(const QModelIndex &sourceIdx) const;
+
 	QList<int> m_filterColumns; /*!< Columns used for filtering. */
 };
 
