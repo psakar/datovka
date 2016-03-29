@@ -55,6 +55,7 @@ signals:
 private:
 	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
 	const QString m_userName;
+	int itemFillCnt;
 
 	void initSearchWindow(void);
 	int howManyFieldsAreFill(void);

@@ -1499,3 +1499,52 @@ QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
 
 	return QList<MessageDb::SoughtMsg>();
 }
+
+
+MessageDb::SoughtMsg MessageDbSet::_sf_msgsGetMsgDataFromId(
+    const qint64 msgId) const
+{
+	if (this->size() == 0) {
+		return MessageDb::SoughtMsg();
+	}
+	Q_ASSERT(this->size() == 1);
+	return this->first()->msgsGetMsgDataFromId(msgId);
+}
+
+MessageDb::SoughtMsg MessageDbSet::_yrly_msgsGetMsgDataFromId(
+    const qint64 msgId) const
+{
+	MessageDb::SoughtMsg msgData;
+
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return MessageDb::SoughtMsg();
+		}
+
+		 msgData = db->msgsGetMsgDataFromId(msgId);
+	}
+
+	return msgData;
+}
+
+
+MessageDb::SoughtMsg MessageDbSet::msgsGetMsgDataFromId(
+    const qint64 msgId) const
+{
+	switch (m_organisation) {
+	case DO_SINGLE_FILE:
+		return _sf_msgsGetMsgDataFromId(msgId);
+		break;
+	case DO_YEARLY:
+		return _yrly_msgsGetMsgDataFromId(msgId);
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return MessageDb::SoughtMsg();
+}

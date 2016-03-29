@@ -2541,6 +2541,54 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 /* ========================================================================= */
 /*
+ * Get message envelope data from id.
+ */
+MessageDb::SoughtMsg MessageDb::msgsGetMsgDataFromId(const qint64 msgId) const
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "SELECT "
+	    "m.dmID, m.dmDeliveryTime, "
+	    "m.dmAnnotation, m.dmSender, m.dmRecipient, "
+	    "s.message_type "
+	    "FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE m.dmID = :dmID";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":dmID", msgId);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			return SoughtMsg(
+			    query.value(0).toLongLong(),
+			    dateTimeFromDbFormat(query.value(1).toString()),
+			    query.value(5).toInt(),
+			    query.value(2).toString(),
+			    query.value(3).toString(),
+			    query.value(4).toString());
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return SoughtMsg();
+}
+
+
+/* ========================================================================= */
+/*
  * Update message envelope delivery information.
  */
 bool MessageDb::msgsUpdateMessageState(qint64 dmId,

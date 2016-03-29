@@ -886,6 +886,13 @@ protected: /* These function are used from within a database container. */
 	    enum MessageDirection msgDirect) const;
 
 	/*!
+	 * @brief Get message envelope data from id.
+	 *
+	 * @return message data for message id.
+	 */
+	SoughtMsg msgsGetMsgDataFromId(const qint64 msgId) const;
+
+	/*!
 	 * @brief Test if imported message is relevent to account db.
 	 *
 	 * @param[in] dmId  Message identifier.

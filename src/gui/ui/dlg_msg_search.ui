@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>609</width>
-    <height>615</height>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -288,6 +288,20 @@
         </item>
         <item>
          <widget class="QLineEdit" name="toHandsLineEdit"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="h4">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Tag text:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="tagLineEdit"/>
         </item>
        </layout>
       </item>

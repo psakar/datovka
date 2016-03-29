@@ -556,6 +556,14 @@ public: /* Database function that have been delegate to the container. */
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
 	    enum MessageDirection msgDirect) const;
 
+	/*!
+	 * @brief Get message envelope data from id.
+	 *
+	 * @return message data for message id.
+	 */
+	MessageDb::SoughtMsg msgsGetMsgDataFromId(
+	    const qint64 msgId) const;
+
 private:
 	/*!
 	 * @brief Return list of seconday keys that may be involed in last 90
@@ -644,6 +652,9 @@ private:
 	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
 	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
+
+	inline MessageDb::SoughtMsg _sf_msgsGetMsgDataFromId(const qint64 msgId) const;
+	inline MessageDb::SoughtMsg _yrly_msgsGetMsgDataFromId(const qint64 msgId) const;
 };
 
 #endif /* _MESSAGE_DB_SET_H_ */

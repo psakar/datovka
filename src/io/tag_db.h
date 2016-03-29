@@ -128,6 +128,14 @@ public:
 	 */
 	bool removeTagFromMsg(int tagId, qint64 msgId);
 
+	/*!
+	 * @brief Get message IDs related from tag contain search text.
+	 *
+	 * @param[in] text    search text of tag name.
+	 * @return List of message IDs related to tag text.
+	 */
+	QList<qint64> getMsgIdsContainSearchTagText(const QString &text);
+
 private:
 	/*!
 	 * @brief Returns list of tables.

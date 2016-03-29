@@ -321,6 +321,41 @@ bool TagDb::removeTagFromMsg(int tagId, qint64 msgId)
 	return true;
 }
 
+QList<qint64> TagDb::getMsgIdsContainSearchTagText(const QString &text)
+{
+	QSqlQuery query(m_db);
+	QList<qint64> msgIdList;
+
+	/* TODO - removed duplication if (ucet1.sent == ucet2.received) */
+
+	QString queryStr = "SELECT m.message_id FROM message_tags AS m "
+	    "LEFT JOIN tag AS t ON (m.tag_id = t.id) "
+	    "WHERE t.tag_name LIKE '%'||:text||'%'";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":text", text);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIdList.append(query.value(0).toLongLong());
+			query.next();
+		}
+		return msgIdList;
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+fail:
+	return QList<qint64>();
+}
+
+
 QList<class SQLiteTbl *> TagDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;

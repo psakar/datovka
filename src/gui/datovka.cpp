@@ -5243,7 +5243,7 @@ void MainWindow::setSentColumnWidths(void)
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	//debugSlotCall();
 
 	Q_UNUSED(oldSize);
 	QModelIndex current(currentAccountModelIndex());
