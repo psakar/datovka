@@ -44,8 +44,7 @@ DlgMsgSearch::DlgMsgSearch(
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
     m_messageDbSetList(messageDbSetList),
-    m_userName(userName),
-    itemFillCnt(0)
+    m_userName(userName)
 {
 	setupUi(this);
 	initSearchWindow();
@@ -257,11 +256,11 @@ finish:
 	/* only 3 fields can be set together */
 	bool isNotFillManyFileds = true;
 
-	itemFillCnt = howManyFieldsAreFill();
-	if (itemFillCnt > 3) {
+	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	if (itemsWithoutTag > 3) {
 		isNotFillManyFileds = false;
 		this->tooMuchFields->show();
-	} else if (itemFillCnt < 1 &&  this->tagLineEdit->text().isEmpty()) {
+	} else if (itemsWithoutTag < 1 &&  this->tagLineEdit->text().isEmpty()) {
 		isNotFillManyFileds = false;
 	}
 
@@ -274,11 +273,14 @@ finish:
 /*
  * Detect, how many search fileds are filled
  */
-int DlgMsgSearch::howManyFieldsAreFill(void)
+int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
 /* ========================================================================= */
 {
 	int cnt = 0;
 
+	if (!this->messageIdLineEdit->text().isEmpty()) {
+		cnt++;
+	}
 	if (!this->subjectLineEdit->text().isEmpty()) {
 		cnt++;
 	}
@@ -373,12 +375,15 @@ void DlgMsgSearch::searchMessages(void)
 	}
 
 	/*
-	 * current account or all account will be used for search request
+	 * selected account or all accounts will be used for search request
 	*/
 	int dbCount = 1;
 	if (this->searchAllAcntCheckBox->isChecked()) {
 		dbCount = m_messageDbSetList.count();
 	}
+
+	/* how many dialog fields without tag item are filled */
+	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
 
 	/* over all accounts */
 	for (int i = 0; i < dbCount; ++i) {
@@ -386,27 +391,31 @@ void DlgMsgSearch::searchMessages(void)
 		msgEnvlpResultList.clear();
 		msgListForTableView.clear();
 
-		/* get messages data where search items are applied */
-		msgEnvlpResultList = m_messageDbSetList.at(i).second->
-		    msgsAdvancedSearchMessageEnvelope(
-		    this->messageIdLineEdit->text().isEmpty() ? -1 :
-		        this->messageIdLineEdit->text().toLongLong(),
-		    this->subjectLineEdit->text(),
-		    this->senderDbIdLineEdit->text(),
-		    this->senderNameLineEdit->text(),
-		    this->addressLineEdit->text(),
-		    this->recipientDbIdLineEdit->text(),
-		    this->recipientNameLineEdit->text(),
-		    this->senderRefNumLineEdit->text(),
-		    this->senderFileMarkLineEdit->text(),
-		    this->recipientRefNumLineEdit->text(),
-		    this->recipientFileMarkLineEdit->text(),
-		    this->toHandsLineEdit->text(),
-		    QString(), QString(), msgType);
+		/* when at least one field is filled without tag */
+		if (itemsWithoutTag > 0) {
+			/* get messages data where search items are applied */
+			msgEnvlpResultList = m_messageDbSetList.at(i).second->
+			    msgsAdvancedSearchMessageEnvelope(
+			    this->messageIdLineEdit->text().isEmpty() ? -1 :
+			        this->messageIdLineEdit->text().toLongLong(),
+			    this->subjectLineEdit->text(),
+			    this->senderDbIdLineEdit->text(),
+			    this->senderNameLineEdit->text(),
+			    this->addressLineEdit->text(),
+			    this->recipientDbIdLineEdit->text(),
+			    this->recipientNameLineEdit->text(),
+			    this->senderRefNumLineEdit->text(),
+			    this->senderFileMarkLineEdit->text(),
+			    this->recipientRefNumLineEdit->text(),
+			    this->recipientFileMarkLineEdit->text(),
+			    this->toHandsLineEdit->text(),
+			    QString(), QString(), msgType);
+		}
 
 		/*
-		 * tag input was filled and tag list and msg envelope list
-		 * results are not empty, so we must penetration both list,
+		 * tag input was filled, and another fileds were filled,
+		 * tag list and msg envelope search list results are not empty,
+		 * so we must penetration both list (prunik) and
 		 * choose relevant records and show it (msgListForView).
 		 */
 		if (applyTag && (!tagMsgIdList.isEmpty()) &&
@@ -430,11 +439,12 @@ void DlgMsgSearch::searchMessages(void)
 				    msgListForTableView);
 			}
 
-		/* tag input was filled and msg envelope result list is empty
-		 * but some items were set, we show nothing
+		/* tag input was filled and another fileds were filled but
+		 * msg envelope search result list is empty,
+		 * we don't do nothing
 		 */
 		} else if (applyTag && msgEnvlpResultList.isEmpty() &&
-		    (itemFillCnt > 0)) {
+		    (itemsWithoutTag > 0)) {
 
 		/* tag input was not filled and msg envelope list is not empty,
 		 * we show result for msg envelope list only
@@ -489,8 +499,8 @@ void DlgMsgSearch::appendMsgsToTable(
 			        msgData.mId.deliveryTime);
 			Q_ASSERT(0 != messageDb);
 
-			//item->setToolTip(messageDb->descriptionHtml(
-			//    msgData.mId.dmId, 0, true, false, true));
+			item->setToolTip(messageDb->descriptionHtml(
+			    msgData.mId.dmId, 0, true, false, true));
 		}
 		this->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
 		this->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,

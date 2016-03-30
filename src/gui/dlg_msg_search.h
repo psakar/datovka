@@ -55,10 +55,9 @@ signals:
 private:
 	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
 	const QString m_userName;
-	int itemFillCnt;
 
 	void initSearchWindow(void);
-	int howManyFieldsAreFill(void);
+	int howManyFieldsAreFilledWithoutTag(void);
 	void appendMsgsToTable(
 	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
