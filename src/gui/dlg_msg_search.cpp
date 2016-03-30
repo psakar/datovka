@@ -260,6 +260,8 @@ finish:
 	if (itemFillCnt > 3) {
 		isNotFillManyFileds = false;
 		this->tooMuchFields->show();
+	} else if (itemFillCnt < 1) {
+		isNotFillManyFileds = false;
 	}
 
 	this->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
