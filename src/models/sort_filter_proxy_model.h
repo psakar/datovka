@@ -72,6 +72,19 @@ protected:
 	virtual
 	bool filterAcceptsRow(int sourceRow,
 	    const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns true if the value of the item referred to by the
+	 *     given left index is less than the value of the item referred to
+	 *     by the given right index, otherwise returns false.
+	 *
+	 * @param[in] sourceLeft  Left index.
+	 * @param[in] sourceRight Right index.
+	 * @return Whether the left index precedes the right index.
+	 */
+	virtual
+	bool lessThan(const QModelIndex &sourceLeft,
+	    const QModelIndex &sourceRight) const Q_DECL_OVERRIDE;
  
 private:
 	/*!

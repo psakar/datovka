@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QString>
+
 #include "src/delegates/tag_item.h"
 #include "src/models/sort_filter_proxy_model.h"
 
@@ -78,6 +80,54 @@ bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
 		}
 	}
 	return false;
+}
+
+bool SortFilterProxyModel::lessThan(const QModelIndex &sourceLeft,
+    const QModelIndex &sourceRight) const
+{
+	QVariant leftData(sourceModel()->data(sourceLeft, filterRole()));
+	QVariant rightData(sourceModel()->data(sourceRight, filterRole()));
+
+	if (leftData.canConvert<TagItem>()) {
+		Q_ASSERT(rightData.canConvert<TagItem>());
+		TagItem leftTagItem(qvariant_cast<TagItem>(leftData));
+		TagItem rightTagItem(qvariant_cast<TagItem>(rightData));
+		return QString::localeAwareCompare(leftTagItem.name,
+		    rightTagItem.name) < 0;
+	} else if (leftData.canConvert<TagItemList>()) {
+		Q_ASSERT(rightData.canConvert<TagItemList>());
+		TagItemList leftTagList(qvariant_cast<TagItemList>(leftData));
+		TagItemList rightTagList(qvariant_cast<TagItemList>(rightData));
+
+		forever {
+			bool leftEmpty = leftTagList.isEmpty();
+			bool rightEmpty = rightTagList.isEmpty();
+
+			if (leftEmpty && rightEmpty) {
+				return false;
+			} else if (leftEmpty && !rightEmpty) {
+				return true;
+			} else if (!leftEmpty && rightEmpty) {
+				return false;
+			}
+
+			/* None of the lists are empty. */
+			int ret = QString::localeAwareCompare(
+			    leftTagList.first().name,
+			    rightTagList.first().name);
+			if (ret < 0) {
+				return true;
+			} else if (ret > 0) {
+				return false;
+			}
+
+			/* Both tags have equal names. */
+			leftTagList.removeFirst();
+			rightTagList.removeFirst();
+		}
+	} else {
+		return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
+	}
 }
 
 bool SortFilterProxyModel::filterAcceptsItem(const QModelIndex &sourceIdx) const
