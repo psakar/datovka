@@ -177,6 +177,7 @@ void DlgMsgSearch::checkInputFields(void)
 		this->addressLineEdit->setEnabled(false);
 		this->toHandsLineEdit->setEnabled(false);
 		this->tagLineEdit->setEnabled(false);
+		this->tagLineEdit->clear();
 		goto finish;
 	} else {
 		this->subjectLineEdit->setEnabled(true);
@@ -260,7 +261,7 @@ finish:
 	if (itemFillCnt > 3) {
 		isNotFillManyFileds = false;
 		this->tooMuchFields->show();
-	} else if (itemFillCnt < 1) {
+	} else if (itemFillCnt < 1 &&  this->tagLineEdit->text().isEmpty()) {
 		isNotFillManyFileds = false;
 	}
 
