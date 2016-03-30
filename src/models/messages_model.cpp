@@ -163,50 +163,25 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
 		case DB_BOOLEAN:
+		case DB_BOOL_READ_LOCALLY:
+		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			{
-				qint64 id;
-				id = _data(index, Qt::DisplayRole).toBool() ?
+				qint64 id =
+				    _data(index, Qt::DisplayRole).toBool() ?
 				    1 : 0;
 				id = id << MSG_ID_WIDTH;
 				id += _data(index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong();
-				return id;
-			}
-			break;
-		case DB_BOOL_READ_LOCALLY:
-			{
-				qint64 dmId = _data(
-				    index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong();
-				qint64 id;
-				id = _data(index, Qt::DisplayRole).toBool() ?
-				    1 : 0;
-				id = id << MSG_ID_WIDTH;
-				id += dmId;
-				return id;
-			}
-		case DB_BOOL_ATTACHMENT_DOWNLOADED:
-			{
-				qint64 dmId = _data(
-				    index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong();
-				qint64 id;
-				id = _data(index, Qt::DisplayRole).toBool() ?
-				    1 : 0;
-				id = id << MSG_ID_WIDTH;
-				id += dmId;
+				    Qt::DisplayRole).toLongLong(); /* dmId */
 				return id;
 			}
 			break;
 		case DB_INT_PROCESSING_STATE:
 			{
-				qint64 dmId = _data(
-				    index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong();
-				qint64 id;
-				id = _data(index, Qt::DisplayRole).toInt();
+				qint64 id =
+				    _data(index, Qt::DisplayRole).toInt();
 				id = id << MSG_ID_WIDTH;
-				id += dmId;
+				id += _data(index.sibling(index.row(), 0),
+				    Qt::DisplayRole).toLongLong(); /* dmId */
 				return id;
 			}
 			break;
