@@ -432,8 +432,12 @@ bool DbMsgsTblModel::setRcvdHeader(const QStringList &appendedCols)
 	}
 
 	for (int i = 0; i < appendedCols.size(); ++i) {
+		/* Description. */
 		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
 		    appendedCols.at(i), Qt::DisplayRole);
+		/* Data type. */
+		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
+		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	return true;
@@ -467,8 +471,12 @@ bool DbMsgsTblModel::setSntHeader(const QStringList &appendedCols)
 	}
 
 	for (int i = 0; i < appendedCols.size(); ++i) {
+		/* Description. */
 		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
 		    appendedCols.at(i), Qt::DisplayRole);
+		/* Data type. */
+		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
+		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
 	return true;
