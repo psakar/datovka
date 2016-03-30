@@ -1499,7 +1499,8 @@ QModelIndex MainWindow::accountYearlyIndex(const QString &userName,
 	/* third step: obtain index with given year */
 	int childRow = 0;
 	QModelIndex yearIdx = typeIdx.child(childRow, 0);
-	while (yearIdx.isValid() && (yearIdx.data().toString() != year)) {
+	while (yearIdx.isValid() &&
+	   (yearIdx.data(ROLE_PLAIN_DISPLAY).toString() != year)) {
 		yearIdx = yearIdx.sibling(++childRow, 0);
 	}
 
