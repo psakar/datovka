@@ -43,11 +43,6 @@ public:
 	DbEntry(void);
 
 	/*!
-	 * @brief Destructor.
-	 */
-	~DbEntry(void);
-
-	/*!
 	 * @brief Set value.
 	 *
 	 * @param[in] key   Key string.
