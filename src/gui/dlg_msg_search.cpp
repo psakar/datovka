@@ -337,23 +337,32 @@ void DlgMsgSearch::setFirtsColumnActive(void)
 
 /* ========================================================================= */
 /*
- * Search message
+ * Search messages
  */
 void DlgMsgSearch::searchMessages(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	enum MessageDirection msgType = MSG_ALL;
-
-	MessageDb::SoughtMsg msgData;
-	QList<MessageDb::SoughtMsg> msgEnvlpResultList;
-	QList<qint64> tagMsgIdList;
-	QList<MessageDb::SoughtMsg> msgListForTableView;
-
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
 
+	MessageDb::SoughtMsg msgData;
+
+	/* holds search result data from message envelope table */
+	QList<MessageDb::SoughtMsg> msgEnvlpResultList;
+
+	/*
+	 * holds all message ids of from message_tags table
+	 * where input search text like with tag name
+	 */
+	QList<qint64> tagMsgIdList;
+
+	/* holds messages (data) which will add to result widget */
+	QList<MessageDb::SoughtMsg> msgListForTableView;
+
+	/* message types where search process will be applied */
+	enum MessageDirection msgType = MSG_ALL;
 	if (this->searchReceivedMsgCheckBox->isChecked() &&
 	    this->searchSentMsgCheckBox->isChecked()) {
 		msgType = MSG_ALL;
@@ -364,8 +373,8 @@ void DlgMsgSearch::searchMessages(void)
 	}
 
 	/*
-	 * tag input was filled, get message ids from message_tags table
-	 * where input search text like with tag name.
+	 * if tag input was filled, get message ids from message_tags table
+	 * where input search text like with tag name
 	*/
 	bool applyTag = false;
 	if (!this->tagLineEdit->text().isEmpty()) {
@@ -374,26 +383,27 @@ void DlgMsgSearch::searchMessages(void)
 		applyTag = true;
 	}
 
-	/*
-	 * selected account or all accounts will be used for search request
-	*/
+	/* selected account or all accounts will be used for search request */
 	int dbCount = 1;
 	if (this->searchAllAcntCheckBox->isChecked()) {
 		dbCount = m_messageDbSetList.count();
 	}
 
-	/* how many dialog fields without tag item are filled */
+	/* how many fields without tag item are filled in the search dialog */
 	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
 
-	/* over all accounts */
+	/* over selected account or all accounts do */
 	for (int i = 0; i < dbCount; ++i) {
 
 		msgEnvlpResultList.clear();
 		msgListForTableView.clear();
 
-		/* when at least one field is filled without tag */
+		/* when at least one field is filled (without tag) */
 		if (itemsWithoutTag > 0) {
-			/* get messages data where search items are applied */
+			/*
+			 * get messages envelope data
+			 * where search items are applied
+			 */
 			msgEnvlpResultList = m_messageDbSetList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    this->messageIdLineEdit->text().isEmpty() ? -1 :
@@ -412,11 +422,14 @@ void DlgMsgSearch::searchMessages(void)
 			    QString(), QString(), msgType);
 		}
 
+		/* Results processing section - 4 scenarios */
+
 		/*
-		 * tag input was filled, and another fileds were filled,
+		 * First scenario:
+		 * tag input was filled and another envelope fileds were filled,
 		 * tag list and msg envelope search list results are not empty,
 		 * so we must penetration both list (prunik) and
-		 * choose relevant records and show it (msgListForView).
+		 * choose relevant records and show it (fill msgListForView).
 		 */
 		if (applyTag && (!tagMsgIdList.isEmpty()) &&
 		    (!msgEnvlpResultList.isEmpty())) {
@@ -439,27 +452,36 @@ void DlgMsgSearch::searchMessages(void)
 				    msgListForTableView);
 			}
 
-		/* tag input was filled and another fileds were filled but
-		 * msg envelope search result list is empty,
-		 * we don't do nothing
+		/*
+		 * Second scenario:
+		 * tag input was filled and another envelope fileds were filled
+		 * but msg envelope search result list is empty = no match,
+		 * we show (do) nothing
 		 */
 		} else if (applyTag && msgEnvlpResultList.isEmpty() &&
 		    (itemsWithoutTag > 0)) {
 
-		/* tag input was not filled and msg envelope list is not empty,
+		/*
+		 * Third scenario:
+		 * tag input was not filled and msg envelope list is not empty,
 		 * we show result for msg envelope list only
 		  */
 		} else if (!applyTag && !msgEnvlpResultList.isEmpty()) {
 			appendMsgsToTable(m_messageDbSetList.at(i),
 			    msgEnvlpResultList);
 
-		/* tag input was filled and tag list are not empty ,
-		 * we show result for tag results (msgListForView).
+		/*
+		 * Last scenario:
+		 * only tag input was filled and tag list are not empty,
+		 * we show result for tag results only (fill msgListForView).
 		 */
 		} else if (applyTag && (!tagMsgIdList.isEmpty())) {
+
 			foreach (const qint64 msgId, tagMsgIdList) {
+
 				msgData = m_messageDbSetList.at(i).second->
-				     msgsGetMsgDataFromId(msgId);
+				    msgsGetMsgDataFromId(msgId);
+
 				if (msgData.mId.dmId != -1) {
 					msgListForTableView.append(msgData);
 				}

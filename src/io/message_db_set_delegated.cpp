@@ -1500,7 +1500,6 @@ QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
 	return QList<MessageDb::SoughtMsg>();
 }
 
-
 MessageDb::SoughtMsg MessageDbSet::_sf_msgsGetMsgDataFromId(
     const qint64 msgId) const
 {
@@ -1523,13 +1522,14 @@ MessageDb::SoughtMsg MessageDbSet::_yrly_msgsGetMsgDataFromId(
 			Q_ASSERT(0);
 			return MessageDb::SoughtMsg();
 		}
-
-		 msgData = db->msgsGetMsgDataFromId(msgId);
+		msgData = db->msgsGetMsgDataFromId(msgId);
+		if (msgData.mId.dmId != -1) {
+			return msgData;
+		}
 	}
 
-	return msgData;
+	return MessageDb::SoughtMsg();
 }
-
 
 MessageDb::SoughtMsg MessageDbSet::msgsGetMsgDataFromId(
     const qint64 msgId) const
