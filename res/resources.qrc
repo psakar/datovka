@@ -159,5 +159,6 @@
         <file>icons/3party/block_32.png</file>
         <file>icons/3party/address_32.png</file>
         <file>datovka.png</file>
+        <file>splash/datovka-splash.png</file>
     </qresource>
 </RCC>
