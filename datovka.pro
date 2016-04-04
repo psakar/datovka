@@ -248,6 +248,8 @@ SOURCES += src/cli/cli.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
+    src/delegates/tag_item.cpp \
+    src/delegates/tags_delegate.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -264,6 +266,8 @@ SOURCES += src/cli/cli.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_send_message.cpp \
     src/gui/dlg_signature_detail.cpp \
+    src/gui/dlg_tag.cpp \
+    src/gui/dlg_tags.cpp \
     src/gui/dlg_timestamp_expir.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
@@ -280,6 +284,7 @@ SOURCES += src/cli/cli.cpp \
     src/io/message_db_single.cpp \
     src/io/sqlite/db.cpp \
     src/io/sqlite/table.cpp \
+    src/io/tag_db.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -288,6 +293,7 @@ SOURCES += src/cli/cli.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/models/table_model.cpp \
+    src/models/tags_model.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
     src/single/single_instance.cpp \
@@ -317,6 +323,8 @@ HEADERS += src/cli/cli.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
     src/crypto/crypto_threads.h \
+    src/delegates/tag_item.h \
+    src/delegates/tags_delegate.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -333,6 +341,8 @@ HEADERS += src/cli/cli.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_send_message.h \
     src/gui/dlg_signature_detail.h \
+    src/gui/dlg_tag.h \
+    src/gui/dlg_tags.h \
     src/gui/dlg_timestamp_expir.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
@@ -348,6 +358,7 @@ HEADERS += src/cli/cli.h \
     src/io/message_db_single.h \
     src/io/sqlite/db.h \
     src/io/sqlite/table.h \
+    src/io/tag_db.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
@@ -356,6 +367,7 @@ HEADERS += src/cli/cli.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \
     src/models/table_model.h \
+    src/models/tags_model.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
     src/single/single_instance.h \
@@ -396,6 +408,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \
     src/gui/ui/dlg_signature_detail.ui \
+    src/gui/ui/dlg_tag.ui \
+    src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/gui/ui/dlg_yes_no_checkbox.ui

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,53 +21,34 @@
  * the two.
  */
 
+#include <QString>
 
+#include "src/delegates/tag_item.h"
 #include "src/models/sort_filter_proxy_model.h"
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
 SortFilterProxyModel::SortFilterProxyModel(QObject *parent)
-/* ========================================================================= */
     : QSortFilterProxyModel(parent)
 {
 }
 
-
-/* ========================================================================= */
-/*
- * Set the column where the key is used for filtering.
- */
 void SortFilterProxyModel::setFilterKeyColumn(int column)
-/* ========================================================================= */
 {
 	m_filterColumns.clear();
 	m_filterColumns.append(column);
 }
 
-
-/* ========================================================================= */
-/*
- * Set columns which are used for filtering.
- */
 void SortFilterProxyModel::setFilterKeyColumns(const QList<int> &columns)
-/* ========================================================================= */
 {
 	m_filterColumns = columns;
 }
 
+QList<int> SortFilterProxyModel::filterKeyColumns(void)
+{
+	return m_filterColumns;
+}
 
-/* ========================================================================= */
-/*
- * Returns true if the item in the row indicated by the
- *     given source row and source parent should be included in the
- *     model; otherwise returns false.
- */
 bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
     const QModelIndex &sourceParent) const
-/* ========================================================================= */
 {
 	/*
 	 * Adapted from
@@ -81,12 +62,9 @@ bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
 	if (m_filterColumns.isEmpty() || m_filterColumns.contains(-1)) {
 		int columnCnt = columnCount();
 		for (int column = 0; column < columnCnt; ++column) {
-			QModelIndex sourceIndex =
-			    sourceModel()->index(sourceRow, column,
-			    sourceParent);
-			QString key = sourceModel()->data(sourceIndex,
-			    filterRole()).toString();
-			if (key.contains(filterRegExp())) {
+			QModelIndex sourceIndex(sourceModel()->index(sourceRow,
+			    column, sourceParent));
+			if (filterAcceptsItem(sourceIndex)) {
 				return true;
 			}
 		}
@@ -94,27 +72,85 @@ bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
 	}
 
 	foreach (int column, m_filterColumns) {
-		QModelIndex sourceIndex =
-		    sourceModel()->index(sourceRow, column, sourceParent);
-		if (!sourceIndex.isValid()) { /* The column may not exist. */
-			return true;
-		}
-		QString key = sourceModel()->data(sourceIndex,
-		    filterRole()).toString();
-		if (key.contains(filterRegExp())) {
+		QModelIndex sourceIndex(
+		    sourceModel()->index(sourceRow, column, sourceParent));
+		/* The column may not exist. */
+		if (filterAcceptsItem(sourceIndex)) {
 			return true;
 		}
 	}
 	return false;
+}
 
-#if 0
-	QModelIndex sourceIndex = sourceModel()->index(sourceRow,
-	    filterKeyColumn(), sourceParent);
-	if (!sourceIndex.isValid()) { /* The column may not exist. */
-		return true;
+bool SortFilterProxyModel::lessThan(const QModelIndex &sourceLeft,
+    const QModelIndex &sourceRight) const
+{
+	QVariant leftData(sourceModel()->data(sourceLeft, filterRole()));
+	QVariant rightData(sourceModel()->data(sourceRight, filterRole()));
+
+	if (leftData.canConvert<TagItem>()) {
+		Q_ASSERT(rightData.canConvert<TagItem>());
+		TagItem leftTagItem(qvariant_cast<TagItem>(leftData));
+		TagItem rightTagItem(qvariant_cast<TagItem>(rightData));
+		return QString::localeAwareCompare(leftTagItem.name,
+		    rightTagItem.name) < 0;
+	} else if (leftData.canConvert<TagItemList>()) {
+		Q_ASSERT(rightData.canConvert<TagItemList>());
+		TagItemList leftTagList(qvariant_cast<TagItemList>(leftData));
+		TagItemList rightTagList(qvariant_cast<TagItemList>(rightData));
+
+		forever {
+			bool leftEmpty = leftTagList.isEmpty();
+			bool rightEmpty = rightTagList.isEmpty();
+
+			if (leftEmpty && rightEmpty) {
+				return false;
+			} else if (leftEmpty && !rightEmpty) {
+				return true;
+			} else if (!leftEmpty && rightEmpty) {
+				return false;
+			}
+
+			/* None of the lists are empty. */
+			int ret = QString::localeAwareCompare(
+			    leftTagList.first().name,
+			    rightTagList.first().name);
+			if (ret < 0) {
+				return true;
+			} else if (ret > 0) {
+				return false;
+			}
+
+			/* Both tags have equal names. */
+			leftTagList.removeFirst();
+			rightTagList.removeFirst();
+		}
+	} else {
+		return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
 	}
-	QString key = sourceModel()->data(sourceIndex,
-	    filterRole()).toString();
-	return key.contains(filterRegExp());
-#endif
+}
+
+bool SortFilterProxyModel::filterAcceptsItem(const QModelIndex &sourceIdx) const
+{
+	if (!sourceIdx.isValid()) {
+		return false;
+	}
+
+	const QVariant data(sourceModel()->data(sourceIdx, filterRole()));
+
+	if (data.canConvert<TagItem>()) {
+		TagItem tagItem = qvariant_cast<TagItem>(data);
+		return tagItem.name.contains(filterRegExp());
+	} else if (data.canConvert<TagItemList>()) {
+		TagItemList tagList = qvariant_cast<TagItemList>(data);
+		foreach (const TagItem &tagItem, tagList) {
+			if (tagItem.name.contains(filterRegExp())) {
+				return true;
+			}
+		}
+		return false;
+	} else {
+		QString key(data.toString());
+		return key.contains(filterRegExp());
+	}
 }

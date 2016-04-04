@@ -36,16 +36,9 @@ DbEntry::DbEntry(void)
 {
 }
 
-DbEntry::~DbEntry(void)
-{
-}
-
 bool DbEntry::setValue(const QString &key, const QVariant &value)
 {
-	/* Don't insert if key is not known. */
-	if (!accntinfTbl.attrProps.contains(key)) {
-		return false;
-	}
+	/* Don't perform any check against database table. */
 
 	this->insert(key, value);
 

@@ -46,6 +46,7 @@
 #include "datovka.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/delegates/tags_delegate.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -63,6 +64,7 @@
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/gui/dlg_import_zfo_result.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
+#include "src/gui/dlg_tags.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
@@ -70,6 +72,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
+#include "src/io/tag_db.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/worker/message_emitter.h"
@@ -144,6 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
     isMainWindow(false),
+    m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
     mui_clearFilterLineButton(0),
@@ -153,6 +157,10 @@ MainWindow::MainWindow(QWidget *parent)
     mui_statusProgressBar(0)
 {
 	setUpUi();
+
+	if (0 != globTagDbPtr) {
+		m_msgTblAppendedCols.append(tr("Tags"));
+	}
 
 	/* Single instance emitter. */
 	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
@@ -197,6 +205,8 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
+
+	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
 	loadSettings();
@@ -639,14 +649,16 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel();
+		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
+		    m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		msgTblMdl = dbSet->msgsSntWithin90DaysModel();
+		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -667,7 +679,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsRcvdModel();
+		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -682,14 +694,15 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsSntModel();
+		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = dbSet->msgsRcvdInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString());
+		    current.data(ROLE_PLAIN_DISPLAY).toString(),
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -697,12 +710,20 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	case AccountModel::nodeSentYear:
 		/* TODO -- Parameter check. */
 		msgTblMdl = dbSet->msgsSntInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString());
+		    current.data(ROLE_PLAIN_DISPLAY).toString(),
+		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
+	}
+
+	if (0 != msgTblMdl) {
+		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
+		Q_ASSERT(0 != mdl);
+		mdl->fillTagsColumn(-1);
+		/* TODO -- Add some labels. */
 	}
 
 	/* Enable/disable split database by year submenu */
@@ -1209,6 +1230,14 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
+	menu->addAction(QIcon(ICON_3PARTY_PATH "label_16.png"),
+	    tr("Add tag"), this, SLOT(addOrDeleteMsgTags()));
+
+	menu->addSeparator();
+
+	menu->addAction(ui->actionEmail_all_attachments);
+
+
 	menu->addAction(ui->actionDelete_message_from_db);
 
 	menu->exec(QCursor::pos());
@@ -2879,6 +2908,11 @@ void MainWindow::deleteMessage(void)
 			 * TODO -- Remove the year on account list if last
 			 * message was removed.
 			 */
+
+			/* Delete all tags from message_tags table.
+			 * Tag in the tag table are kept.
+			 */
+			globTagDbPtr->removeAllTagsFromMsg(id.dmId);
 		}
 	}
 }
@@ -4085,6 +4119,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()),
 	    this, SLOT(showMsgAdvancedSearchDlg()));
+	    /* Separator. */
+	connect(ui->actionTag_settings, SIGNAL(triggered()),
+	    this, SLOT(showTagDlg()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()),
@@ -5120,6 +5157,10 @@ void MainWindow::filterMessages(const QString &text)
 	QList<int> columnList;
 	columnList.append(1);
 	columnList.append(2);
+	if (0 != globTagDbPtr) {
+		columnList.append(7); /* Tags in sent messages. */
+		columnList.append(8); /* Tags in received messages. */
+	}
 	m_messageListProxyModel.setFilterKeyColumns(columnList);
 
 	/* Set filter field background colour. */
@@ -5202,7 +5243,7 @@ void MainWindow::setSentColumnWidths(void)
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	//debugSlotCall();
 
 	Q_UNUSED(oldSize);
 	QModelIndex current(currentAccountModelIndex());
@@ -10316,4 +10357,52 @@ void MainWindow::setMenuActionIcons(void)
 
 	/* Actions that are not shown in the top menu. */
 	ui->actionEmail_selected_attachments->isEnabled();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Show tags manager dialog for tags settings.
+ */
+void MainWindow::showTagDlg(void)
+/* ========================================================================= */
+ {
+	debugSlotCall();
+
+	QDialog *tagsDlg = new DlgTags(this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Add/detele tags to/from selected messages.
+ */
+void MainWindow::addOrDeleteMsgTags(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QList<qint64> msgIdList;
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+
+	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
+		msgIdList.append(idx.data().toLongLong());
+	}
+
+	/*
+	 * FIXME -- The tags dialogue as it now exixts is not suitable for
+	 * adding tags to messages.
+	 */
+
+	QDialog *tagsDlg = new DlgTags(msgIdList, this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
+
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	Q_ASSERT(0 != messageModel);
+	messageModel->refillTagsColumn(msgIdList, -1);
 }

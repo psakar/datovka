@@ -686,6 +686,16 @@ private slots:
 	void doActionAfterSentMsgSlot(const QString &userName,
 	    const QString &lastDir);
 
+	/*!
+	 * @brief Show tags manager dialog for tags settings.
+	 */
+	void showTagDlg(void);
+
+	/*!
+	 * @brief Add/detele tags to/from selected messages.
+	 */
+	void addOrDeleteMsgTags(void);
+
 private:
 
 	QTimer m_timerSyncAccounts;
@@ -1207,6 +1217,8 @@ private:
 	QString m_import_zfo_path;
 	bool isMainWindow;
 
+	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
 	QLineEdit *mui_filterLine; /*!< Search filter line object. */
@@ -1230,6 +1242,7 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
+
 };
 
 

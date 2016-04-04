@@ -41,7 +41,12 @@ enum EntryType {
 	DB_BOOL_READ_LOCALLY, /* Boolean. */
 	DB_BOOL_ATTACHMENT_DOWNLOADED, /* Boolean. */
 	DB_DATETIME,
-	DB_DATE
+	DB_DATE,
+	DB_APPENDED_VARIANT /*
+	                     * This actually is not a database type. This value
+	                     * describes all types which were added beyond
+	                     * an SQL query.
+	                     */
 };
 
 /*!

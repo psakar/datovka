@@ -607,3 +607,73 @@ SQLiteTbl prcstTbl(PrcstTbl::tabName, PrcstTbl::knownAttrs,
     PrcstTbl::attrProps, PrcstTbl::colConstraints,
     PrcstTbl::tblConstraint);
 
+
+namespace TagTbl {
+	const QString tabName("tag");
+
+	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
+	{"id", DB_INTEGER}, /* NOT NULL */
+	{"tag_name", DB_TEXT}, /* NOT NULL */
+	{"tag_color", DB_TEXT},
+	/*
+	 * PRIMARY KEY (id),
+	 * UNIQUE (tag_name)
+	 */
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"id", "NOT NULL"},
+	    {"tag_name", "NOT NULL"}
+	};
+
+	const QString &tblConstraint(
+	    ",\n"
+	    "        PRIMARY KEY (id),\n"
+	    "        UNIQUE (tag_name)"
+	);
+
+	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
+	{"id",       {DB_INTEGER, ""}},
+	{"tag_name", {DB_TEXT, ""}},
+	{"tag_color", {DB_TEXT, ""}}
+	};
+} /* namespace TagTbl */
+SQLiteTbl tagTbl(TagTbl::tabName, TagTbl::knownAttrs,
+    TagTbl::attrProps, TagTbl::colConstraints,
+    TagTbl::tblConstraint);
+
+
+namespace MsgTagsTbl {
+	const QString tabName("message_tags");
+
+	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
+	{"id", DB_INTEGER}, /* NOT NULL */
+	{"message_id", DB_INTEGER}, /* NOT NULL */
+	{"tag_id", DB_INTEGER} /* NOT NULL */
+	/*
+	 * PRIMARY KEY (id),
+	 * FOREIGN KEY(tag_id) REFERENCES tag ("id")
+	 */
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"id", "NOT NULL"},
+	    {"message_id", "NOT NULL"},
+	    {"tag_id", "NOT NULL"}
+	};
+
+	const QString &tblConstraint(
+	    ",\n"
+	    "        PRIMARY KEY (id),\n"
+	    "        FOREIGN KEY(tag_id) REFERENCES tag (id)"
+	);
+
+	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
+	{"id",           {DB_INTEGER, ""}},
+	{"message_id",   {DB_INTEGER, ""}},
+	{"tag_id",       {DB_INTEGER, ""}}
+	};
+} /* namespace MsgTagsTbl */
+SQLiteTbl msgtagsTbl(MsgTagsTbl::tabName, MsgTagsTbl::knownAttrs,
+    MsgTagsTbl::attrProps, MsgTagsTbl::colConstraints,
+    MsgTagsTbl::tblConstraint);

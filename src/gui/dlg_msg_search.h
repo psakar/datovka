@@ -57,7 +57,7 @@ private:
 	const QString m_userName;
 
 	void initSearchWindow(void);
-	int howManyFieldsAreFill(void);
+	int howManyFieldsAreFilledWithoutTag(void);
 	void appendMsgsToTable(
 	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);

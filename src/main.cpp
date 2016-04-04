@@ -42,6 +42,7 @@
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
+#include "src/io/tag_db.h"
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
@@ -565,19 +566,40 @@ int main(int argc, char *argv[])
 	 *
 	 * TODO -- Solve the problem of this globally accessible structures.
 	 */
-	AccountDb globAccountDb("accountDb");
-	globAccountDbPtr = &globAccountDb;
-	DbContainer globMessageDbs("GLOBALDBS");
-	globMessageDbsPtr = &globMessageDbs;
-
 	{
+		globAccountDbPtr = new (std::nothrow) AccountDb("accountDb");
+		if (0 == globAccountDbPtr) {
+			logErrorNL("%s", "Cannot allocate account db.");
+			return EXIT_FAILURE;
+		}
 		/* Open accounts database. */
 		if (!globAccountDbPtr->openDb(globPref.accountDbPath())) {
 			logErrorNL("Error opening account db '%s'.",
 			    globPref.accountDbPath().toUtf8().constData());
 			return EXIT_FAILURE;
 		}
+
+		/* Create message DB container. */
+		globMessageDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
+		if (0 == globMessageDbsPtr) {
+			logErrorNL("%s",
+			    "Cannot allocate message db container.");
+			return EXIT_FAILURE;
+		}
+
+		globTagDbPtr = new (std::nothrow) TagDb("tagDb");
+		if (0 == globTagDbPtr) {
+			logErrorNL("%s", "Cannot allocate tag db.");
+			return EXIT_FAILURE;
+		}
+		/* Open tags database. */
+		if (!globTagDbPtr->openDb(globPref.tagDbPath())) {
+			logErrorNL("Error opening tag db '%s'.",
+			    globPref.tagDbPath().toUtf8().constData());
+			return EXIT_FAILURE;
+		}
 	}
+
 
 	int ret = EXIT_SUCCESS;
 
@@ -641,6 +663,19 @@ int main(int argc, char *argv[])
 	 * on exit.
 	 */
 	//crypto_cleanup_threads();
+
+	if (0 != globTagDbPtr) {
+		delete globTagDbPtr;
+		globTagDbPtr = 0;
+	}
+	if (0 != globMessageDbsPtr) {
+		delete globMessageDbsPtr;
+		globMessageDbsPtr = 0;
+	}
+	if (0 != globAccountDbPtr) {
+		delete globAccountDbPtr;
+		globAccountDbPtr = 0;
+	}
 
 	return ret;
 }

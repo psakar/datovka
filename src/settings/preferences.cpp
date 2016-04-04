@@ -39,12 +39,14 @@ GlobPreferences dlftlGlobPref;
 #define DFLT_CONF_FILE "dsgui.conf"
 /*! Account database file name. */
 #define ACCOUNT_DB_FILE "messages.shelf.db"
+#define TAG_DB_FILE "tag.db"
 
 GlobPreferences::GlobPreferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
     loadFromConf(DFLT_CONF_FILE),
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
+    tagDbFile(TAG_DB_FILE),
     auto_download_whole_messages(false),
     default_download_signed(true),
     //store_passwords_on_disk(false),
@@ -444,3 +446,9 @@ QString GlobPreferences::accountDbPath(void) const
 {
 	return confDir() + QDir::separator() + accountDbFile;
 }
+
+QString GlobPreferences::tagDbPath(void) const
+{
+	return confDir() + QDir::separator() + tagDbFile;
+}
+

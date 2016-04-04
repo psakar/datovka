@@ -62,6 +62,7 @@ public:
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
+	const QString tagDbFile; /*!< Tag db file. */
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
@@ -135,6 +136,13 @@ public:
 	 * @return Whole path to account database file.
 	 */
 	QString accountDbPath(void) const;
+
+	/*!
+	 * @brief Returns whole tag db path.
+	 *
+	 * @return Whole path to tag database file.
+	 */
+	QString tagDbPath(void) const;
 };
 
 /*!

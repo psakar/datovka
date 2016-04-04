@@ -48,6 +48,7 @@ public:
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
+		/* 2 stands for sender or recipient name. */
 		DELIVERY_COL = 3, /* Delivery time column. */
 		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
@@ -61,9 +62,10 @@ public:
 	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
-		WORKING = 0, /*!< Ordinary model created from SQL query. */
-		DUMMY_RECEIVED, /*!< Empty received dummy. */
-		DUMMY_SENT /*!< Empty sent dummy. */
+		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query. */
+		WORKING_SNT, /*!< Ordinary model created from SQL query. */
+		DUMMY_RCVD, /*!< Empty received dummy. */
+		DUMMY_SNT /*!< Empty sent dummy. */
 	};
 
 	/*!
@@ -72,7 +74,8 @@ public:
 	 * @param[in] type   Type of the table model.
 	 * @param[in] parent Parent object.
 	 */
-	DbMsgsTblModel(enum Type type = WORKING, QObject *parent = 0);
+	explicit DbMsgsTblModel(enum Type type = WORKING_RCVD,
+	    QObject *parent = 0);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -96,6 +99,23 @@ public:
 	virtual
 	QVariant headerData(int section, Qt::Orientation orientation,
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Sets the content of the model according to the supplied query.
+	 *
+	 * @param[in,out] qyery SQL query result.
+	 * @param[in]     type  Working received or sent.
+	 */
+	void setQuery(QSqlQuery &query, enum Type type);
+
+	/*!
+	 * @brief Appends data from the supplied query to the model.
+	 *
+	 * @param[in,out] query SQL query result.
+	 * @param[in]     type  Working received or sent.
+	 * @return True on success.
+	 */
+	bool appendQueryData(QSqlQuery &query, enum Type type);
 
 	/*!
 	 * @brief Sets the type of the model.
@@ -128,14 +148,14 @@ public:
 	 *
 	 * @return False on error.
 	 */
-	bool setRcvdHeader(void);
+	bool setRcvdHeader(const QStringList &appendedCols);
 
 	/*!
 	 * @Brief Set header data for sent model.
 	 *
 	 * @return False on error.
 	 */
-	bool setSntHeader(void);
+	bool setSntHeader(const QStringList &appendedCols);
 
 	/*!
 	 * @brief Override message as being read.
@@ -183,10 +203,44 @@ public:
 	static
 	DbMsgsTblModel &dummyModel(enum Type type);
 
+	/*!
+	 * @brief Fills the model with tag information.
+	 *
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool fillTagsColumn(int col);
+
+	/*!
+	 * @brief Reload tags in given rows.
+	 *
+	 * @param[in] dmIds List of message ids for which to load tags.
+	 * @param[in] col   Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool refillTagsColumn(const QList<qint64> &dmIds, int col);
+
 private:
+	/* Make these methods private so nobody is likely to mess with them. */
+	virtual
+	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
+	virtual
+	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
+
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */
+
+	static
+	const int rcvdMsgsColCnt; /*<
+	                           * Number of columns when displaying received
+	                           * messages (without added columns).
+	                           */
+	static
+	const int sntMsgsColCnt; /*!<
+	                          * Number of columns when displaying sent
+	                          * messages (without added columns).
+	                          */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

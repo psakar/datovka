@@ -373,7 +373,7 @@ sent reply on this message</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -462,6 +462,8 @@ sent reply on this message</string>
     <addaction name="actionCheck_message_timestamp_expiration"/>
     <addaction name="separator"/>
     <addaction name="actionMsgAdvancedSearch"/>
+    <addaction name="separator"/>
+    <addaction name="actionTag_settings"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -1130,6 +1132,15 @@ sent reply on this message</string>
    </property>
    <property name="toolTip">
     <string>Creates an e-mail containing selected attachments</string>
+   </property>
+  </action>
+  <action name="actionTag_settings">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tag manager</string>
    </property>
   </action>
  </widget>

@@ -47,4 +47,10 @@ extern SQLiteTbl smsgdtTbl; /*!< Table 'supplementary_message_data'. */
 extern SQLiteTbl crtdtTbl; /*!< Table 'certificate_data'. */
 extern SQLiteTbl msgcrtdtTbl; /*!< Table 'message_certificate_data'. */
 
+/*
+ * Tag database.
+ */
+extern SQLiteTbl tagTbl; /*!< Table 'tag'. */
+extern SQLiteTbl msgtagsTbl; /*!< Table 'message_tags'. */
+
 #endif /* _DB_TABLES_H_ */

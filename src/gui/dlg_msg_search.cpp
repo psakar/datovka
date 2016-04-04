@@ -25,6 +25,7 @@
 #include "dlg_msg_search.h"
 #include "src/common.h"
 #include "src/io/message_db.h"
+#include "src/io/tag_db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/views/table_home_end_filter.h"
@@ -122,6 +123,8 @@ void DlgMsgSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->recipientFileMarkLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+	connect(this->tagLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchMessages()));
 	connect(this->resultsTableWidget,
@@ -146,9 +149,9 @@ void DlgMsgSearch::initSearchWindow(void)
 void DlgMsgSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-	debugSlotCall();
+	//debugSlotCall();
 
-	bool messageType = true;
+	bool isAnyMsgTypeChecked = true;
 
 	this->searchPushButton->setEnabled(false);
 	this->tooMuchFields->hide();
@@ -156,7 +159,7 @@ void DlgMsgSearch::checkInputFields(void)
 	/* is any message type checked? */
 	if (!this->searchReceivedMsgCheckBox->isChecked() &&
 	    !this->searchSentMsgCheckBox->isChecked()) {
-		messageType = false;
+		isAnyMsgTypeChecked = false;
 	}
 
 	/* search via message ID */
@@ -172,6 +175,8 @@ void DlgMsgSearch::checkInputFields(void)
 		this->recipientFileMarkLineEdit->setEnabled(false);
 		this->addressLineEdit->setEnabled(false);
 		this->toHandsLineEdit->setEnabled(false);
+		this->tagLineEdit->setEnabled(false);
+		this->tagLineEdit->clear();
 		goto finish;
 	} else {
 		this->subjectLineEdit->setEnabled(true);
@@ -185,6 +190,7 @@ void DlgMsgSearch::checkInputFields(void)
 		this->recipientFileMarkLineEdit->setEnabled(true);
 		this->addressLineEdit->setEnabled(true);
 		this->toHandsLineEdit->setEnabled(true);
+		this->tagLineEdit->setEnabled(true);
 	}
 
 	/* search via sender databox ID */
@@ -212,64 +218,54 @@ void DlgMsgSearch::checkInputFields(void)
 	}
 
 finish:
-	/* search by message ID */
+	/* search by message ID only */
 	if (!this->messageIdLineEdit->text().isEmpty()) {
 		/* test if message ID is number */
 		QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
 		/* test if message is fill and message ID > 3 chars */
-		if (messageType &&
+		if (isAnyMsgTypeChecked &&
 		    (re.exactMatch(this->messageIdLineEdit->text())) &&
 		    this->messageIdLineEdit->text().size() > 2) {
 			this->searchPushButton->setEnabled(true);
-			return;
 		} else {
 			this->searchPushButton->setEnabled(false);
-			return;
+
 		}
+		return;
 	}
 
-	bool isDbIdCorrect = false;
+	/* search by text of tags */
+	bool isTagCorrect = true;
+	if (!(this->tagLineEdit->text().isEmpty()) &&
+	    (this->tagLineEdit->text().length() <= 2)) {
+		isTagCorrect = false;
+	}
+
+	bool isDbIdCorrect = true;
+	/* databox ID must have 7 chars */
 	if (!this->senderDbIdLineEdit->text().isEmpty() &&
-	    !this->recipientDbIdLineEdit->text().isEmpty()) {
-		if (this->senderDbIdLineEdit->text().size()==7 &&
-		    this->recipientDbIdLineEdit->text().size() == 7) {
-			isDbIdCorrect = true;
-		}
-	} else if (!this->senderDbIdLineEdit->text().isEmpty()) {
-		/* databox ID must have 7 chars */
-		if (this->senderDbIdLineEdit->text().size() == 7) {
-			isDbIdCorrect = true;
-		}
-	} else if (!this->recipientDbIdLineEdit->text().isEmpty()) {
-		/* databox ID must have 7 chars */
-		if (messageType &&
-		    this->recipientDbIdLineEdit->text().size() == 7) {
-			isDbIdCorrect = true;
-		}
-	} else {
-		if (messageType) {
-			int fields = howManyFieldsAreFill();
-			if ((fields > 0) && (fields < 4)) {
-				this->searchPushButton->setEnabled(true);
-			} else {
-				this->searchPushButton->setEnabled(false);
-				if (fields != 0) {
-					this->tooMuchFields->show();
-				}
-			}
-		} else {
-			this->searchPushButton->setEnabled(false);
-		}
-		return;
+	    this->senderDbIdLineEdit->text().size() != 7) {
+			isDbIdCorrect = false;
+	}
+	/* databox ID must have 7 chars */
+	if (!this->recipientDbIdLineEdit->text().isEmpty() &&
+	    this->recipientDbIdLineEdit->text().size() != 7) {
+			isDbIdCorrect = false;
 	}
 
-	if (messageType && isDbIdCorrect) {
-		this->searchPushButton->setEnabled(true);
-		return;
-	} else {
-		this->searchPushButton->setEnabled(false);
-		return;
+	/* only 3 fields can be set together */
+	bool isNotFillManyFileds = true;
+
+	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	if (itemsWithoutTag > 3) {
+		isNotFillManyFileds = false;
+		this->tooMuchFields->show();
+	} else if (itemsWithoutTag < 1 &&  this->tagLineEdit->text().isEmpty()) {
+		isNotFillManyFileds = false;
 	}
+
+	this->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
+	    isDbIdCorrect && isTagCorrect && isNotFillManyFileds);
 }
 
 
@@ -277,11 +273,14 @@ finish:
 /*
  * Detect, how many search fileds are filled
  */
-int DlgMsgSearch::howManyFieldsAreFill(void)
+int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
 /* ========================================================================= */
 {
 	int cnt = 0;
 
+	if (!this->messageIdLineEdit->text().isEmpty()) {
+		cnt++;
+	}
 	if (!this->subjectLineEdit->text().isEmpty()) {
 		cnt++;
 	}
@@ -338,19 +337,32 @@ void DlgMsgSearch::setFirtsColumnActive(void)
 
 /* ========================================================================= */
 /*
- * Search message
+ * Search messages
  */
 void DlgMsgSearch::searchMessages(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	enum MessageDirection msgType = MSG_ALL;
-	QList<MessageDb::SoughtMsg> msgList;
-
 	this->resultsTableWidget->setRowCount(0);
 	this->resultsTableWidget->setEnabled(false);
 
+	MessageDb::SoughtMsg msgData;
+
+	/* holds search result data from message envelope table */
+	QList<MessageDb::SoughtMsg> msgEnvlpResultList;
+
+	/*
+	 * holds all message ids of from message_tags table
+	 * where input search text like with tag name
+	 */
+	QList<qint64> tagMsgIdList;
+
+	/* holds messages (data) which will add to result widget */
+	QList<MessageDb::SoughtMsg> msgListForTableView;
+
+	/* message types where search process will be applied */
+	enum MessageDirection msgType = MSG_ALL;
 	if (this->searchReceivedMsgCheckBox->isChecked() &&
 	    this->searchSentMsgCheckBox->isChecked()) {
 		msgType = MSG_ALL;
@@ -360,29 +372,39 @@ void DlgMsgSearch::searchMessages(void)
 		msgType = MSG_SENT;
 	}
 
-	if (!this->searchAllAcntCheckBox->isChecked()) {
-		msgList = m_messageDbSetList.at(0).second->
-		    msgsAdvancedSearchMessageEnvelope(
-		    this->messageIdLineEdit->text().isEmpty() ? -1 :
-		        this->messageIdLineEdit->text().toLongLong(),
-		    this->subjectLineEdit->text(),
-		    this->senderDbIdLineEdit->text(),
-		    this->senderNameLineEdit->text(),
-		    this->addressLineEdit->text(),
-		    this->recipientDbIdLineEdit->text(),
-		    this->recipientNameLineEdit->text(),
-		    this->senderRefNumLineEdit->text(),
-		    this->senderFileMarkLineEdit->text(),
-		    this->recipientRefNumLineEdit->text(),
-		    this->recipientFileMarkLineEdit->text(),
-		    this->toHandsLineEdit->text(),
-		    QString(), QString(), msgType);
-		if (!msgList.isEmpty()) {
-			appendMsgsToTable(m_messageDbSetList.at(0), msgList);
-		}
-	} else {
-		for (int i = 0; i < m_messageDbSetList.count(); ++i) {
-			msgList = m_messageDbSetList.at(i).second->
+	/*
+	 * if tag input was filled, get message ids from message_tags table
+	 * where input search text like with tag name
+	*/
+	bool applyTag = false;
+	if (!this->tagLineEdit->text().isEmpty()) {
+		tagMsgIdList = globTagDbPtr->getMsgIdsContainSearchTagText(
+		    this->tagLineEdit->text());
+		applyTag = true;
+	}
+
+	/* selected account or all accounts will be used for search request */
+	int dbCount = 1;
+	if (this->searchAllAcntCheckBox->isChecked()) {
+		dbCount = m_messageDbSetList.count();
+	}
+
+	/* how many fields without tag item are filled in the search dialog */
+	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+
+	/* over selected account or all accounts do */
+	for (int i = 0; i < dbCount; ++i) {
+
+		msgEnvlpResultList.clear();
+		msgListForTableView.clear();
+
+		/* when at least one field is filled (without tag) */
+		if (itemsWithoutTag > 0) {
+			/*
+			 * get messages envelope data
+			 * where search items are applied
+			 */
+			msgEnvlpResultList = m_messageDbSetList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    this->messageIdLineEdit->text().isEmpty() ? -1 :
 			        this->messageIdLineEdit->text().toLongLong(),
@@ -398,9 +420,76 @@ void DlgMsgSearch::searchMessages(void)
 			    this->recipientFileMarkLineEdit->text(),
 			    this->toHandsLineEdit->text(),
 			    QString(), QString(), msgType);
-			if (!msgList.isEmpty()) {
+		}
+
+		/* Results processing section - 4 scenarios */
+
+		/*
+		 * First scenario:
+		 * tag input was filled and another envelope fileds were filled,
+		 * tag list and msg envelope search list results are not empty,
+		 * so we must penetration both list (prunik) and
+		 * choose relevant records and show it (fill msgListForView).
+		 */
+		if (applyTag && (!tagMsgIdList.isEmpty()) &&
+		    (!msgEnvlpResultList.isEmpty())) {
+
+			foreach (const qint64 msgId, tagMsgIdList) {
+				foreach (const MessageDb::SoughtMsg msg,
+				    msgEnvlpResultList) {
+					if (msg.mId.dmId == msgId) {
+						msgData =
+						    m_messageDbSetList.at(i).
+						    second->msgsGetMsgDataFromId(msgId);
+						if (msgData.mId.dmId != -1) {
+							msgListForTableView.append(msgData);
+						}
+					}
+				}
+			}
+			if (!msgListForTableView.isEmpty()) {
 				appendMsgsToTable(m_messageDbSetList.at(i),
-				    msgList);
+				    msgListForTableView);
+			}
+
+		/*
+		 * Second scenario:
+		 * tag input was filled and another envelope fileds were filled
+		 * but msg envelope search result list is empty = no match,
+		 * we show (do) nothing
+		 */
+		} else if (applyTag && msgEnvlpResultList.isEmpty() &&
+		    (itemsWithoutTag > 0)) {
+
+		/*
+		 * Third scenario:
+		 * tag input was not filled and msg envelope list is not empty,
+		 * we show result for msg envelope list only
+		  */
+		} else if (!applyTag && !msgEnvlpResultList.isEmpty()) {
+			appendMsgsToTable(m_messageDbSetList.at(i),
+			    msgEnvlpResultList);
+
+		/*
+		 * Last scenario:
+		 * only tag input was filled and tag list are not empty,
+		 * we show result for tag results only (fill msgListForView).
+		 */
+		} else if (applyTag && (!tagMsgIdList.isEmpty())) {
+
+			foreach (const qint64 msgId, tagMsgIdList) {
+
+				msgData = m_messageDbSetList.at(i).second->
+				    msgsGetMsgDataFromId(msgId);
+
+				if (msgData.mId.dmId != -1) {
+					msgListForTableView.append(msgData);
+				}
+			}
+
+			if (!msgListForTableView.isEmpty()) {
+				appendMsgsToTable(m_messageDbSetList.at(i),
+				    msgListForTableView);
 			}
 		}
 	}
@@ -440,7 +529,8 @@ void DlgMsgSearch::appendMsgsToTable(
 		    new QTableWidgetItem(
 		        MessageDbSet::yearFromDateTime(
 		            msgData.mId.deliveryTime)));
-		this->resultsTableWidget->setItem(row, COL_MESSAGE_TYPE, new QTableWidgetItem(QString::number(msgData.type)));
+		this->resultsTableWidget->setItem(row, COL_MESSAGE_TYPE,
+		    new QTableWidgetItem(QString::number(msgData.type)));
 		this->resultsTableWidget->setItem(row, COL_ANNOTATION,
 		    new QTableWidgetItem(msgData.dmAnnotation));
 		this->resultsTableWidget->setItem(row, COL_SENDER,
