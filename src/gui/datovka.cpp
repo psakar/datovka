@@ -4257,7 +4257,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionChange_password->setEnabled(action);
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionGet_messages->setEnabled(action);
-	//ui->actionSend_message->setEnabled(action);
+	ui->actionSend_message->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
 	ui->actionMsgAdvancedSearch->setEnabled(action);
