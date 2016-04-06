@@ -127,6 +127,8 @@ void DlgDsSearch::initSearchWindow(void)
 	    SLOT(insertDsItems()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchDataBox()));
+	connect(this->resultsTableWidget, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->resultsTableWidget->
@@ -556,7 +558,7 @@ bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
 
 /* ========================================================================= */
 /*
- * Insert selected item into recipient list of the sent message dialog
+ * Insert selected contacts into recipient list of the sent message dialog.
  */
 void DlgDsSearch::insertDsItems(void)
 /* ========================================================================= */
@@ -564,33 +566,64 @@ void DlgDsSearch::insertDsItems(void)
 	if (ACT_ADDNEW == m_action) {
 		Q_ASSERT(0 != m_recipientTableWidget);
 		for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-			if ((!this->resultsTableWidget->item(
-			          i,0)->checkState()) ||
-			    isInRecipientTable(this->resultsTableWidget->item(
-			        i,1)->text())) {
-				continue;
+			if (this->resultsTableWidget->item(i,0)->checkState()) {
+				insertContactToRecipentTable(i);
 			}
-			/* For all checked non-duplicated. */
-			int row = m_recipientTableWidget->rowCount();
-			m_recipientTableWidget->insertRow(row);
-			QTableWidgetItem *item = new QTableWidgetItem;
-			item->setText(this->resultsTableWidget->
-			    item(i,1)->text());
-			this->m_recipientTableWidget->setItem(row,0,item);
-			item = new QTableWidgetItem;
-			item->setText(this->resultsTableWidget->
-			    item(i,2)->text());
-			this->m_recipientTableWidget->setItem(row,1,item);
-			item = new QTableWidgetItem;
-			item->setText(this->resultsTableWidget->
-			    item(i,3)->text() + " " +
-			    this->resultsTableWidget->item(i,4)->text());
-			this->m_recipientTableWidget->setItem(row,2,item);
-			item = new QTableWidgetItem;			
-			item->setText(m_dbEffectiveOVM ? tr("no") :
-			    this->resultsTableWidget->item(i,5)->text());
-			item->setTextAlignment(Qt::AlignCenter);
-			this->m_recipientTableWidget->setItem(row,3,item);
 		}
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Doubleclick of selected contact.
+ */
+void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
+/* ========================================================================= */
+{
+	if (ACT_ADDNEW == m_action) {
+
+		if (!index.isValid()) {
+			this->close();
+			return;
+		}
+
+		insertContactToRecipentTable(index.row());
+
+		this->close();
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert contact into recipient list of the sent message dialog.
+ */
+void DlgDsSearch::insertContactToRecipentTable(int selRow)
+/* ========================================================================= */
+{
+	if (!isInRecipientTable(
+	    this->resultsTableWidget->item(selRow, 1)->text())) {
+
+		int row = m_recipientTableWidget->rowCount();
+		m_recipientTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(this->resultsTableWidget->
+		    item(selRow, 1)->text());
+		this->m_recipientTableWidget->setItem(row,0,item);
+		item = new QTableWidgetItem;
+		item->setText(this->resultsTableWidget->
+		    item(selRow, 2)->text());
+		this->m_recipientTableWidget->setItem(row,1,item);
+		item = new QTableWidgetItem;
+		item->setText(this->resultsTableWidget->
+		    item(selRow, 3)->text() + " " +
+		    this->resultsTableWidget->item(selRow, 4)->text());
+		this->m_recipientTableWidget->setItem(row, 2, item);
+		item = new QTableWidgetItem;
+		item->setText(m_dbEffectiveOVM ? tr("no") :
+		    this->resultsTableWidget->item(selRow, 5)->text());
+		item->setTextAlignment(Qt::AlignCenter);
+		this->m_recipientTableWidget->setItem(row, 3, item);
 	}
 }
