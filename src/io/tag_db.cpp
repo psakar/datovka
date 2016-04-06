@@ -83,8 +83,7 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 	return true;
 }
 
-bool TagDb::updateTag(const int id,
-    const QString &tagName, const QString &tagColor)
+bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);
 
@@ -110,7 +109,7 @@ bool TagDb::updateTag(const int id,
 	return true;
 }
 
-bool TagDb::deleteTag(const int id)
+bool TagDb::deleteTag(int id)
 {
 	QSqlQuery query(m_db);
 
@@ -143,7 +142,7 @@ bool TagDb::deleteTag(const int id)
 	return true;
 }
 
-TagItem TagDb::getTagData(const int id)
+TagItem TagDb::getTagData(int id)
 {
 	QSqlQuery query(m_db);
 
@@ -200,7 +199,7 @@ fail:
 	return QList<TagItem>();
 }
 
-TagItemList TagDb::getMessageTags(const QString &userName, const quint64 msgId)
+TagItemList TagDb::getMessageTags(const QString &userName, quint64 msgId)
 {
 	QSqlQuery query(m_db);
 	TagItemList tagList;
@@ -238,7 +237,7 @@ fail:
 	return TagItemList();
 }
 
-bool TagDb::removeAllTagsFromMsg(const QString &userName, const qint64 msgId)
+bool TagDb::removeAllTagsFromMsg(const QString &userName, qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
@@ -262,8 +261,7 @@ bool TagDb::removeAllTagsFromMsg(const QString &userName, const qint64 msgId)
 	return true;
 }
 
-bool TagDb::assignTagToMsg(const QString &userName, const int tagId,
-    const qint64 msgId)
+bool TagDb::assignTagToMsg(const QString &userName, int tagId, qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
@@ -308,8 +306,7 @@ bool TagDb::assignTagToMsg(const QString &userName, const int tagId,
 	return true;
 }
 
-bool TagDb::removeTagFromMsg(const QString &userName, const int tagId,
-    const qint64 msgId)
+bool TagDb::removeTagFromMsg(const QString &userName, int tagId, qint64 msgId)
 {
 	QSqlQuery query(m_db);
 

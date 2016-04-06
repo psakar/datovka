@@ -68,8 +68,7 @@ public:
 	 * @param[in] tagColor      color of tag in HEX format.
 	 * @return True on success, false on any error.
 	 */
-	bool updateTag(const int id, const QString &tagName,
-	    const QString &tagColor);
+	bool updateTag(int id, const QString &tagName, const QString &tagColor);
 
 	/*!
 	 * @brief Delete tag from database file.
@@ -77,7 +76,7 @@ public:
 	 * @param[in] id    id of tag.
 	 * @return True on success, false on any error.
 	 */
-	bool deleteTag(const int id);
+	bool deleteTag(int id);
 
 	/*!
 	 * @brief Get tag data from database file.
@@ -85,7 +84,7 @@ public:
 	 * @param[in] id    id of tag.
 	 * @return tag struct with data.
 	 */
-	TagItem getTagData(const int id);
+	TagItem getTagData(int id);
 
 	/*!
 	 * @brief Get all tags from database file.
@@ -112,7 +111,7 @@ public:
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool removeAllTagsFromMsg(const QString &userName, const qint64 msgId);
+	bool removeAllTagsFromMsg(const QString &userName, qint64 msgId);
 
 	/*!
 	 * @brief Assign existing tag to message.
@@ -122,8 +121,7 @@ public:
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool assignTagToMsg(const QString &userName, const int tagId,
-	    const qint64 msgId);
+	bool assignTagToMsg(const QString &userName, int tagId, qint64 msgId);
 
 	/*!
 	 * @brief Remove tag from message.
@@ -133,8 +131,7 @@ public:
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool removeTagFromMsg(const QString &userName, const int tagId,
-	    const qint64 msgId);
+	bool removeTagFromMsg(const QString &userName, int tagId, qint64 msgId);
 
 	/*!
 	 * @brief Remove tag from all messages in account specified by username.
