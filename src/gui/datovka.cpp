@@ -204,8 +204,9 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
+	connect(ui->messageList, SIGNAL(doubleClicked(QModelIndex)), this,
+	    SLOT(viewSelectedMessage()));
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
-
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
@@ -1243,6 +1244,83 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->exec(QCursor::pos());
 }
 
+void MainWindow::viewSelectedMessage(void)
+{
+	debugSlotCall();
+
+	QModelIndex msgIndex;
+
+	{
+		QModelIndexList msgIndexes;
+
+		QItemSelectionModel *selectionModel =
+		    ui->messageList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		msgIndexes = selectionModel->selectedRows(0);
+
+		if (msgIndexes.size() != 1) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		msgIndex = msgIndexes[0];
+	}
+
+	if (!msgIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	qint64 dmId = msgIndex.data().toLongLong();
+	Q_ASSERT(dmId >= 0);
+	QDateTime deliveryTime(msgDeliveryTime(msgIndex));
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QByteArray msgRaw(messageDb->msgsMessageRaw(dmId));
+	if (msgRaw.isEmpty()) {
+
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
+			return;
+		}
+
+		msgRaw = messageDb->msgsMessageRaw(dmId);
+		if (msgRaw.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	/* Generate dialog showing message content. */
+	QDialog *dlgViewZfo = new DlgViewZfo(msgRaw, this);
+	dlgViewZfo->exec();
+	dlgViewZfo->deleteLater();
+}
 
 /* ========================================================================= */
 /*
@@ -5987,8 +6065,9 @@ void MainWindow::viewMessageFromZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 
 	/* Generate dialog showing message content. */
-	QDialog *viewDialog = new DlgViewZfo(fileName, this);
-	viewDialog->exec();
+	QDialog *dlgViewZfo = new DlgViewZfo(fileName, this);
+	dlgViewZfo->exec();
+	dlgViewZfo->deleteLater();
 }
 
 

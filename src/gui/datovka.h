@@ -197,6 +197,11 @@ private slots:
 	void messageItemRightClicked(const QPoint &point);
 
 	/*!
+	 * @brief Handle message double click.
+	 */
+	void viewSelectedMessage(void);
+
+	/*!
 	 * @brief Saves message selection.
 	 */
 	void messageItemStoreSelection(qint64 msgId);
