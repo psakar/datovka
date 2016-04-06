@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(attachmentItemRightClicked(QPoint)));
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
-	    SLOT(attachmentItemDoubleClicked(QModelIndex)));
+	    SLOT(openSelectedAttachment()));
 	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
@@ -1679,20 +1679,6 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionEmail_selected_attachments);
 
 	menu->exec(QCursor::pos());
-}
-
-
-/* ========================================================================= */
-/*
- * Handle attachment double click.
- */
-void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	Q_UNUSED(index);
-	openSelectedAttachment();
 }
 
 

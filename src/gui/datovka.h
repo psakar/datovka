@@ -236,11 +236,6 @@ private slots:
 	void attachmentItemRightClicked(const QPoint &point);
 
 	/*!
-	 * @brief Handle attachment double click.
-	 */
-	void attachmentItemDoubleClicked(const QModelIndex &index);
-
-	/*!
 	 * @brief Saves selected attachments to file.
 	 */
 	void saveSelectedAttachmentsToFile(void);
