@@ -46,10 +46,12 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] userName  Account user name.
 	 * @param[in] msgIdList List of message ids.
 	 * @param[in] parent    Parent widget.
 	 */
-	explicit DlgTags(const QList<qint64> &msgIdList, QWidget *parent = 0);
+	explicit DlgTags(const QString &userName,
+	    const QList<qint64> &msgIdList, QWidget *parent = 0);
 
 	/*!
 	 * @brief Destructor.
@@ -90,9 +92,9 @@ private slots:
 	void removeAllTagsFromMsgs(void);
 
 	/*!
-	 * @brief Active/deactive tag buttons when selection model is changed.
+	 * @brief Activate/deactivate tag buttons on selection change.
 	 */
-	void handleSelectionChanged(QItemSelection current);
+	void handleSelectionChanged(void);
 
 private:
 	/*!
@@ -118,6 +120,7 @@ private:
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
 
+	QString m_userName; /*!< Account username. */
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */

@@ -96,37 +96,50 @@ public:
 	/*!
 	 * @brief Get all tags related to given message.
 	 *
+	 * @param[in] userName account identifier.
 	 * @param[in] dmgId Message identifier.
 	 * @return List of tags related to message.
 	 */
-	TagItemList getMessageTags(quint64 msgId);
+	TagItemList getMessageTags(const QString &userName,
+	    const quint64 msgId);
 
 	/*!
 	 * @brief Delete all tags for message ID
 	 *        in message_tags table.
 	 *
+	 * @param[in] userName account identifier.
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool removeAllTagsFromMsg(qint64 msgId);
+	bool removeAllTagsFromMsg(const QString &userName, qint64 msgId);
 
 	/*!
 	 * @brief Assign existing tag to message.
 	 *
+	 * @param[in] userName account identifier.
 	 * @param[in] tagId    id of tag.
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool assignTagToMsg(int tagId, qint64 msgId);
+	bool assignTagToMsg(const QString &userName, int tagId, qint64 msgId);
 
 	/*!
 	 * @brief Remove tag from message.
 	 *
+	 * @param[in] userName account identifier.
 	 * @param[in] tagId    id of tag.
 	 * @param[in] msgId    id of message.
 	 * @return True on success, false on any error.
 	 */
-	bool removeTagFromMsg(int tagId, qint64 msgId);
+	bool removeTagFromMsg(const QString &userName, int tagId, qint64 msgId);
+
+	/*!
+	 * @brief Remove tag from all messages in account specified by username.
+	 *
+	 * @param[in] userName account identifier.
+	 * @return True on success, false on any error.
+	 */
+	bool removeAllMsgTagsFromAccount(const QString &userName);
 
 	/*!
 	 * @brief Get message IDs related from tag contain search text.

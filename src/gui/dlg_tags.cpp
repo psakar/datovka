@@ -34,6 +34,7 @@
 
 DlgTags::DlgTags(QWidget *parent)
     : QDialog(parent),
+    m_userName(),
     m_msgIdList(),
     m_tagsDelegate(0),
     m_tagsModel(0)
@@ -42,8 +43,10 @@ DlgTags::DlgTags(QWidget *parent)
 	initDlg();
 }
 
-DlgTags::DlgTags(const QList<qint64> &msgIdList, QWidget *parent)
+DlgTags::DlgTags(const QString &userName, const QList<qint64> &msgIdList,
+    QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
     m_msgIdList(msgIdList),
     m_tagsDelegate(0),
     m_tagsModel(0)
@@ -99,10 +102,12 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
 		foreach (const QModelIndex &idx, slctIdxs) {
-			globTagDbPtr->assignTagToMsg(getTagIdFromIndex(idx),
-			    msgId);
+			globTagDbPtr->assignTagToMsg(m_userName,
+			    getTagIdFromIndex(idx), msgId);
 		}
 	}
 }
@@ -111,25 +116,27 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
 		foreach (const QModelIndex &idx, slctIdxs) {
-			globTagDbPtr->removeTagFromMsg(getTagIdFromIndex(idx),
-			    msgId);
+			globTagDbPtr->removeTagFromMsg(m_userName,
+			    getTagIdFromIndex(idx), msgId);
 		}
 	}
 }
 
 void DlgTags::removeAllTagsFromMsgs(void)
 {
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
-		globTagDbPtr->removeAllTagsFromMsg(msgId);
+		globTagDbPtr->removeAllTagsFromMsg(m_userName, msgId);
 	}
 }
 
-void DlgTags::handleSelectionChanged(QItemSelection current)
+void DlgTags::handleSelectionChanged(void)
 {
-	Q_UNUSED(current);
-
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
@@ -183,7 +190,7 @@ void DlgTags::initDlg(void)
 	    SLOT(deleteTag()));
 	connect(tagListView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-	    SLOT(handleSelectionChanged(QItemSelection)));
+	    SLOT(handleSelectionChanged()));
 
 
 	/* any messages was selected */
@@ -226,7 +233,7 @@ void DlgTags::selectAllAssingedTagsFromMsgs(void)
 		const qint64 id = getTagIdFromIndex(idx);
 		foreach (const qint64 &msgId, m_msgIdList) {
 			const TagItemList tags =
-			    globTagDbPtr->getMessageTags(msgId);
+			    globTagDbPtr->getMessageTags(m_userName, msgId);
 			foreach (const TagItem &tag, tags) {
 				if (tag.id == id) {
 					tagListView->selectionModel()->select(

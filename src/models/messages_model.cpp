@@ -528,9 +528,13 @@ DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
 	return dummy;
 }
 
-bool DbMsgsTblModel::fillTagsColumn(int col)
+bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 {
 	if (0 == globTagDbPtr) {
+		return false;
+	}
+
+	if (userName.isEmpty()) {
 		return false;
 	}
 
@@ -549,7 +553,7 @@ bool DbMsgsTblModel::fillTagsColumn(int col)
 	for (int row = 0; row < rowCount(); ++row) {
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		m_data[row][col] = QVariant::fromValue(
-		    globTagDbPtr->getMessageTags(dmId));
+		    globTagDbPtr->getMessageTags(userName, dmId));
 	}
 
 	emit dataChanged(TblModel::index(0, col),
@@ -558,9 +562,14 @@ bool DbMsgsTblModel::fillTagsColumn(int col)
 	return true;
 }
 
-bool DbMsgsTblModel::refillTagsColumn(const QList<qint64> &dmIds, int col)
+bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
+    const QList<qint64> &dmIds, int col)
 {
 	if (0 == globTagDbPtr) {
+		return false;
+	}
+
+	if (userName.isEmpty()) {
 		return false;
 	}
 
@@ -580,7 +589,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QList<qint64> &dmIds, int col)
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		if (dmIds.contains(dmId)) {
 			m_data[row][col] = QVariant::fromValue(
-			    globTagDbPtr->getMessageTags(dmId));
+			    globTagDbPtr->getMessageTags(userName, dmId));
 			emit dataChanged(TblModel::index(row, col),
 			    TblModel::index(row, col));
 		}
