@@ -83,7 +83,8 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 	return true;
 }
 
-bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
+bool TagDb::updateTag(const int id,
+    const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);
 
@@ -109,7 +110,7 @@ bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 	return true;
 }
 
-bool TagDb::deleteTag(int id)
+bool TagDb::deleteTag(const int id)
 {
 	QSqlQuery query(m_db);
 
@@ -142,7 +143,7 @@ bool TagDb::deleteTag(int id)
 	return true;
 }
 
-TagItem TagDb::getTagData(int id)
+TagItem TagDb::getTagData(const int id)
 {
 	QSqlQuery query(m_db);
 
@@ -199,7 +200,7 @@ fail:
 	return QList<TagItem>();
 }
 
-TagItemList TagDb::getMessageTags(quint64 msgId)
+TagItemList TagDb::getMessageTags(const QString &userName, const quint64 msgId)
 {
 	QSqlQuery query(m_db);
 	TagItemList tagList;
@@ -208,7 +209,7 @@ TagItemList TagDb::getMessageTags(quint64 msgId)
 	    "FROM tag AS t "
 	    "LEFT JOIN message_tags AS m "
 	    "ON (t.id = m.tag_id) "
-	    "WHERE m.message_id  = :msgId "
+	    "WHERE m.message_id  = :msgId AND m.username = :username "
 	    "ORDER BY t.tag_name ASC";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -216,6 +217,8 @@ TagItemList TagDb::getMessageTags(quint64 msgId)
 		goto fail;
 	}
 	query.bindValue(":msgId", msgId);
+	query.bindValue(":username", userName);
+
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
@@ -235,17 +238,21 @@ fail:
 	return TagItemList();
 }
 
-bool TagDb::removeAllTagsFromMsg(qint64 msgId)
+bool TagDb::removeAllTagsFromMsg(const QString &userName, const qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
-	QString queryStr = "DELETE FROM message_tags WHERE message_id = :msgId";
+	QString queryStr = "DELETE FROM message_tags WHERE "
+	    "username = :username AND message_id = :msgId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		return false;
 	}
+
 	query.bindValue(":msgId", msgId);
+	query.bindValue(":username", userName);
+
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -255,12 +262,13 @@ bool TagDb::removeAllTagsFromMsg(qint64 msgId)
 	return true;
 }
 
-bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
+bool TagDb::assignTagToMsg(const QString &userName, const int tagId,
+    const qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
 	QString queryStr = "SELECT id FROM message_tags WHERE "
-	    "message_id = :msgId AND tag_id = :tagId";
+	    "message_id = :msgId AND tag_id = :tagId AND username = :username";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -270,6 +278,7 @@ bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
 
 	query.bindValue(":msgId", msgId);
 	query.bindValue(":tagId", tagId);
+	query.bindValue(":username", userName);
 
 	if (query.exec() && query.isActive()) {
 		query.first();
@@ -278,8 +287,8 @@ bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
 		}
 	}
 
-	queryStr = "INSERT INTO message_tags (message_id, tag_id) "
-	    "VALUES (:msgId, :tagId)";
+	queryStr = "INSERT INTO message_tags (username, message_id, tag_id) "
+	    "VALUES (:username, :msgId, :tagId)";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -289,6 +298,7 @@ bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
 
 	query.bindValue(":msgId", msgId);
 	query.bindValue(":tagId", tagId);
+	query.bindValue(":username", userName);
 
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -298,12 +308,13 @@ bool TagDb::assignTagToMsg(int tagId, qint64 msgId)
 	return true;
 }
 
-bool TagDb::removeTagFromMsg(int tagId, qint64 msgId)
+bool TagDb::removeTagFromMsg(const QString &userName, const int tagId,
+    const qint64 msgId)
 {
 	QSqlQuery query(m_db);
 
 	QString queryStr = "DELETE FROM message_tags WHERE "
-	    "message_id = :msgId AND tag_id = :tagId";
+	    "message_id = :msgId AND tag_id = :tagId AND username = :username";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -312,6 +323,28 @@ bool TagDb::removeTagFromMsg(int tagId, qint64 msgId)
 
 	query.bindValue(":msgId", msgId);
 	query.bindValue(":tagId", tagId);
+	query.bindValue(":username", userName);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	return true;
+}
+
+bool TagDb::removeAllMsgTagsFromAccount(const QString &userName)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM message_tags WHERE username = :username";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":username", userName);
 
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",

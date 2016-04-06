@@ -722,7 +722,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->fillTagsColumn(-1);
+		mdl->fillTagsColumn(userName, -1);
 		/* TODO -- Add some labels. */
 	}
 
@@ -2912,7 +2912,7 @@ void MainWindow::deleteMessage(void)
 			/* Delete all tags from message_tags table.
 			 * Tag in the tag table are kept.
 			 */
-			globTagDbPtr->removeAllTagsFromMsg(id.dmId);
+			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
 		}
 	}
 }
@@ -4837,6 +4837,8 @@ void MainWindow::deleteSelectedAccount(void)
 		showStatusTextWithTimeout(tr("Account '%1' was deleted.")
 		    .arg(accountName));
 	}
+
+	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
 
 	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
 	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
@@ -10397,12 +10399,15 @@ void MainWindow::addOrDeleteMsgTags(void)
 	 * adding tags to messages.
 	 */
 
-	QDialog *tagsDlg = new DlgTags(msgIdList, this);
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	QDialog *tagsDlg = new DlgTags(userName, msgIdList, this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
 
 	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
-	messageModel->refillTagsColumn(msgIdList, -1);
+	messageModel->refillTagsColumn(userName, msgIdList, -1);
 }

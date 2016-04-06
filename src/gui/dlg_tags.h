@@ -46,10 +46,12 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] userName  Account username.
 	 * @param[in] msgIdList List of message ids.
 	 * @param[in] parent    Parent widget.
 	 */
-	explicit DlgTags(const QList<qint64> &msgIdList, QWidget *parent = 0);
+	explicit DlgTags(const QString &userName,
+	    const QList<qint64> &msgIdList, QWidget *parent = 0);
 
 	/*!
 	 * @brief Destructor.
@@ -118,6 +120,7 @@ private:
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
 
+	QString m_userName; /*!< Account username. */
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */
