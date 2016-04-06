@@ -30,7 +30,6 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/models/messages_model.h"
-#include "src/models/accounts_model.h"
 
 const int DbMsgsTblModel::rcvdMsgsColCnt(8);
 const int DbMsgsTblModel::sntMsgsColCnt(7);
@@ -535,6 +534,10 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 		return false;
 	}
 
+	if (userName.isEmpty()) {
+		return false;
+	}
+
 	/* Check indexes into column. */
 	if (col >= 0) {
 		if (col > columnCount()) {
@@ -563,6 +566,10 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
     const QList<qint64> &dmIds, int col)
 {
 	if (0 == globTagDbPtr) {
+		return false;
+	}
+
+	if (userName.isEmpty()) {
 		return false;
 	}
 

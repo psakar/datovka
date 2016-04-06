@@ -206,8 +206,9 @@ public:
 	/*!
 	 * @brief Fills the model with tag information.
 	 *
-	 * @param[in] userName Account username.
-	 * @param[in] col Negative number specifying the column to write into.
+	 * @param[in] userName Account user name.
+	 * @param[in] col      Negative number specifying the column to write
+	 *                     into.
 	 * @return True on success.
 	 */
 	bool fillTagsColumn(const QString &userName, int col);
@@ -215,9 +216,10 @@ public:
 	/*!
 	 * @brief Reload tags in given rows.
 	 *
-	 * @param[in] userName Account username.
-	 * @param[in] dmIds List of message ids for which to load tags.
-	 * @param[in] col   Negative number specifying the column to write into.
+	 * @param[in] userName Account user name.
+	 * @param[in] dmIds    List of message ids for which to load tags.
+	 * @param[in] col      Negative number specifying the column to write
+	 *                     into.
 	 * @return True on success.
 	 */
 	bool refillTagsColumn(const QString &userName,
