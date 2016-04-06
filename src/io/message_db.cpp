@@ -60,6 +60,9 @@ const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmToHands", "dmLegalTitleLaw", "dmLegalTitleYear", "dmLegalTitleSect",
     "dmLegalTitlePar", "dmLegalTitlePoint"};
 
+const QVector<QString> MessageDb::msgDeliveryBoolAttribs = {"dmPersonalDelivery",
+    "dmAllowSubstDelivery"};
+
 const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
     "dmAcceptanceTime", "dmMessageStatus"};
 
@@ -964,9 +967,9 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 
 	queryStr = "SELECT "
 	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
-	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
+	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient, "
+	    "dmSenderType "
+	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -988,8 +991,17 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		/* Information about message author. */
 		html += strongAccountInfoLine(QObject::tr("Sender"),
 		    query.value(2).toString());
+
 		html += strongAccountInfoLine(QObject::tr("Sender Databox ID"),
 		    query.value(6).toString());
+
+		QString dmSenderType =
+		     convertSenderDbTypesToString(query.value(8).toInt());
+		if (dmSenderType != "") {
+			html += strongAccountInfoLine(
+			    QObject::tr("Databox type"), dmSenderType);
+		}
+
 		html += strongAccountInfoLine(QObject::tr("Sender Address"),
 		    query.value(3).toString());
 		/* Custom data. */
@@ -1055,6 +1067,35 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
+	queryStr = "SELECT ";
+	for (int i = 0; i < (msgDeliveryBoolAttribs.size() - 1); ++i) {
+		queryStr += msgDeliveryBoolAttribs[i] + ", ";
+	}
+	queryStr += msgDeliveryBoolAttribs.last();
+	queryStr += " FROM messages WHERE "
+	    "dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		for (int i = 0; i < msgDeliveryBoolAttribs.size(); ++i) {
+			html += strongAccountInfoLine(
+			    msgsTbl.attrProps[msgDeliveryBoolAttribs[i]].desc,
+			    (query.value(i).toBool()) ? QObject::tr("Yes")
+			: QObject::tr("No"));
+		}
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
 
 	html += "<h3>" + QObject::tr("Status") + "</h3>";
 	/* Status. */

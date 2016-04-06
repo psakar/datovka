@@ -225,6 +225,11 @@ QString convertEventTypeToString(int value);
 QString convertUserPrivilsToString(int userPrivils);
 
 /*!
+ * @brief Return sender databox type as string from number representation.
+ */
+QString convertSenderDbTypesToString(int value);
+
+/*!
  * @brief Convert state box to text
  */
 QString getdbStateText(int value);
