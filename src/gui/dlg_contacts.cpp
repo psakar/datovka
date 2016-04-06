@@ -75,6 +75,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	    SLOT(clearContactText()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(insertDsItems()));
+	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -209,38 +211,7 @@ void DlgContacts::insertDsItems(void)
 {
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
 		if (this->contactTableWidget->item(i,0)->checkState()) {
-			if (!isInRecipientTable(
-			    this->contactTableWidget->item(i,1)->text())) {
-				int row = m_recipientTableWidget.rowCount();
-				m_recipientTableWidget.insertRow(row);
-				QTableWidgetItem *item = new QTableWidgetItem;
-				item->setText(this->contactTableWidget->
-				    item(i,1)->text());
-				this->m_recipientTableWidget.setItem(row, 0,
-				    item);
-				item = new QTableWidgetItem;
-				item->setText(this->contactTableWidget->
-				    item(i,2)->text());
-				this->m_recipientTableWidget.setItem(row, 1,
-				    item);
-				item = new QTableWidgetItem;
-				item->setText(this->contactTableWidget->
-				    item(i,3)->text());
-				this->m_recipientTableWidget.setItem(row, 2,
-				    item);
-
-				item = new QTableWidgetItem;
-				if (!m_dbEffectiveOVM) {
-					item->setText(getUserInfoFromIsds(
-					    m_userName,
-					    this->contactTableWidget->item(i,1)
-					    ->text()));
-				} else {
-					item->setText(tr("no"));
-				}
-				item->setTextAlignment(Qt::AlignCenter);
-				this->m_recipientTableWidget.setItem(row,3,item);
-			}
+			insertContactToRecipentTable(i);
 		}
 	}
 }
@@ -287,4 +258,52 @@ QString DlgContacts::getUserInfoFromIsds(const QString &userName,
 	isds_list_free(&box);
 
 	return str;
+}
+
+void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
+{
+	if (!index.isValid()) {
+		this->close();
+		return;
+	}
+
+	insertContactToRecipentTable(index.row());
+
+	this->close();
+}
+
+
+void DlgContacts::insertContactToRecipentTable(int selRow)
+{
+	if (!isInRecipientTable(
+	    this->contactTableWidget->item(selRow, 1)->text())) {
+		int row = m_recipientTableWidget.rowCount();
+		m_recipientTableWidget.insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText(this->contactTableWidget->
+		    item(selRow, 1)->text());
+		this->m_recipientTableWidget.setItem(row, 0,
+		    item);
+		item = new QTableWidgetItem;
+		item->setText(this->contactTableWidget->
+		    item(selRow, 2)->text());
+		this->m_recipientTableWidget.setItem(row, 1,
+		    item);
+		item = new QTableWidgetItem;
+		item->setText(this->contactTableWidget->
+		    item(selRow, 3)->text());
+		this->m_recipientTableWidget.setItem(row, 2,
+		    item);
+		item = new QTableWidgetItem;
+		if (!m_dbEffectiveOVM) {
+			item->setText(getUserInfoFromIsds(
+			    m_userName,
+			    this->contactTableWidget->item(selRow ,1)
+			    ->text()));
+		} else {
+			item->setText(tr("no"));
+		}
+		item->setTextAlignment(Qt::AlignCenter);
+		this->m_recipientTableWidget.setItem(row, 3, item);
+	}
 }
