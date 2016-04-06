@@ -648,7 +648,7 @@ namespace MsgTagsTbl {
 
 	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
 	{"id", DB_INTEGER}, /* NOT NULL */
-	{"username", DB_TEXT}, /* NOT NULL */
+	{"user_name", DB_TEXT}, /* NOT NULL */
 	{"message_id", DB_INTEGER}, /* NOT NULL */
 	{"tag_id", DB_INTEGER} /* NOT NULL */
 	/*
@@ -659,7 +659,7 @@ namespace MsgTagsTbl {
 
 	const QMap<QString, QString> colConstraints = {
 	    {"id", "NOT NULL"},
-	    {"username", "NOT NULL"},
+	    {"user_name", "NOT NULL"},
 	    {"message_id", "NOT NULL"},
 	    {"tag_id", "NOT NULL"}
 	};
@@ -672,7 +672,7 @@ namespace MsgTagsTbl {
 
 	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
 	{"id",           {DB_INTEGER, ""}},
-	{"username",     {DB_TEXT, ""}},
+	{"user_name",     {DB_TEXT, ""}},
 	{"message_id",   {DB_INTEGER, ""}},
 	{"tag_id",       {DB_INTEGER, ""}}
 	};
