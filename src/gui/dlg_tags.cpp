@@ -34,7 +34,7 @@
 
 DlgTags::DlgTags(QWidget *parent)
     : QDialog(parent),
-    m_userName(QString()),
+    m_userName(),
     m_msgIdList(),
     m_tagsDelegate(0),
     m_tagsModel(0)
@@ -102,6 +102,8 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
 		foreach (const QModelIndex &idx, slctIdxs) {
 			globTagDbPtr->assignTagToMsg(m_userName,
@@ -114,6 +116,8 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
 		foreach (const QModelIndex &idx, slctIdxs) {
 			globTagDbPtr->removeTagFromMsg(m_userName,
@@ -124,15 +128,15 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 
 void DlgTags::removeAllTagsFromMsgs(void)
 {
+	Q_ASSERT(!m_userName.isEmpty());
+
 	foreach (const qint64 &msgId, m_msgIdList) {
 		globTagDbPtr->removeAllTagsFromMsg(m_userName, msgId);
 	}
 }
 
-void DlgTags::handleSelectionChanged(QItemSelection current)
+void DlgTags::handleSelectionChanged(void)
 {
-	Q_UNUSED(current);
-
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
@@ -186,7 +190,7 @@ void DlgTags::initDlg(void)
 	    SLOT(deleteTag()));
 	connect(tagListView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-	    SLOT(handleSelectionChanged(QItemSelection)));
+	    SLOT(handleSelectionChanged()));
 
 
 	/* any messages was selected */

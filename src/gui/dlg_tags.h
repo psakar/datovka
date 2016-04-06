@@ -46,7 +46,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName  Account username.
+	 * @param[in] userName  Account user name.
 	 * @param[in] msgIdList List of message ids.
 	 * @param[in] parent    Parent widget.
 	 */
@@ -92,9 +92,9 @@ private slots:
 	void removeAllTagsFromMsgs(void);
 
 	/*!
-	 * @brief Active/deactive tag buttons when selection model is changed.
+	 * @brief Activate/deactivate tag buttons on selection change.
 	 */
-	void handleSelectionChanged(QItemSelection current);
+	void handleSelectionChanged(void);
 
 private:
 	/*!
