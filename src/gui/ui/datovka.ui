@@ -1140,7 +1140,7 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
    </property>
    <property name="text">
-    <string>Tag manager</string>
+    <string>Edit tags</string>
    </property>
   </action>
  </widget>

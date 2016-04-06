@@ -1231,7 +1231,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
 	menu->addAction(QIcon(ICON_3PARTY_PATH "label_16.png"),
-	    tr("Add tag"), this, SLOT(addOrDeleteMsgTags()));
+	    ui->actionTag_settings->text(), this, SLOT(addOrDeleteMsgTags()));
 
 	menu->addSeparator();
 
@@ -10351,6 +10351,8 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(":/icons/3party/search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionMsgAdvancedSearch->setIcon(ico);
 	}
+	    /* Separator. */
+	ui->actionTag_settings->isEnabled();
 
 	/* Help. */
 	ui->actionAbout_Datovka->isEnabled();
