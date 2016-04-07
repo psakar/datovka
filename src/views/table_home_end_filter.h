@@ -36,6 +36,8 @@ class TableHomeEndFilter : public QObject {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent object.
 	 */
 	explicit TableHomeEndFilter(QObject *parent = 0);
 
@@ -55,7 +57,8 @@ public:
 	 * @param[in]     event  Caught event.
 	 * @return False when filter applied.
 	 */
-	virtual bool eventFilter(QObject *object, QEvent *event);
+	virtual
+	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
 };
 
 #endif /* _TABLE_HOME_END_FILTER_H_ */

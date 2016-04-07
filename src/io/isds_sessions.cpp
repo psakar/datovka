@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -937,14 +937,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Create a isds message from zfo file.
- */
-struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
-    const QString &fileName, int zfoType)
-/* ========================================================================= */
+struct isds_message *loadZfoData(struct isds_ctx *isdsSession,
+    const QByteArray &rawMsgData, int zfoType)
 {
 	isds_error status;
 	isds_raw_type raw_type;
@@ -952,35 +946,25 @@ struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
 
 	Q_ASSERT(NULL != isdsSession);
 
-	QFile file(fileName);
-	QByteArray content;
-
-	if (!file.open(QIODevice::ReadOnly)) {
-		qWarning() << "Cannot open file" << fileName;
-		goto fail;
-	}
-
-	content = file.readAll();
-	file.close();
-
-	status = isds_guess_raw_type(isdsSession, &raw_type, content.data(),
-	    content.size());
+	status = isds_guess_raw_type(isdsSession, &raw_type, rawMsgData.data(),
+	    rawMsgData.size());
 	if (IE_SUCCESS != status) {
-		qWarning() << "Cannot guess content type of file" << fileName;
+		logErrorNL("%s", "Cannot guess message content type.");
 		goto fail;
 	}
 
 	if (zfoType == ImportZFODialog::IMPORT_MESSAGE_ZFO) {
 		status = isds_load_message(isdsSession, raw_type,
-		    content.data(), content.size(), &message, BUFFER_COPY);
+		    rawMsgData.data(), rawMsgData.size(), &message,
+		    BUFFER_COPY);
 	} else {
 		status = isds_load_delivery_info(isdsSession, raw_type,
-		    content.data(), content.size(), &message, BUFFER_COPY);
+		    rawMsgData.data(), rawMsgData.size(), &message,
+		    BUFFER_COPY);
 	}
 
 	if (IE_SUCCESS != status) {
-		qWarning() << "Error while loading data from file"
-		    << fileName;
+		logErrorNL("%s", "Cannot load message content.");
 		goto fail;
 	}
 
@@ -991,4 +975,29 @@ fail:
 		isds_message_free(&message);
 	}
 	return NULL;
+}
+
+struct isds_message *loadZfoFile(struct isds_ctx *isdsSession,
+    const QString &fileName, int zfoType)
+{
+	QFile file(fileName);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		logErrorNL("Cannot open file '%s'.",
+		    fileName.toUtf8().constData());
+		return NULL;
+	}
+
+	QByteArray content(file.readAll());
+	file.close();
+
+	struct isds_message *message =
+	    loadZfoData(isdsSession, content, zfoType);
+	if (NULL == message) {
+		logErrorNL("Error while loading data from file '%s'.",
+		    fileName.toUtf8().constData());
+		return NULL;
+	}
+
+	return message;
 }

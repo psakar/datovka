@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +39,19 @@ class DlgViewZfo : public QDialog, public Ui::ViewZfo {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] zfoFileName Path to the ZFO file.
+	 * @param[in] parent      Pointer to parent object.
 	 */
-	DlgViewZfo(const QString &zfoFileName, QWidget *parent = 0);
+	explicit DlgViewZfo(const QString &zfoFileName, QWidget *parent = 0);
+
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] zfoData Raw ZFO data.
+	 * @param[in] parent      Pointer to parent object.
+	 */
+	explicit DlgViewZfo(const QByteArray &zfoData, QWidget *parent = 0);
 
 	/*!
 	 * @brief Destructor.
@@ -54,13 +65,10 @@ public:
 private slots:
 	/*!
 	 * @brief Generates menu to selected message item.
+	 *
+	 * @param[in] point Right-click position.
 	 */
 	void attachmentItemRightClicked(const QPoint &point);
-
-	/*!
-	 * @brief Handle attachment double click.
-	 */
-	void attachmentItemDoubleClicked(const QModelIndex &index);
 
 	/*!
 	 * @brief Saves selected attachment to file.
@@ -84,9 +92,23 @@ private slots:
 
 private:
 	/*!
+	 * @brief Loads ZFO data.
+	 *
+	 * @param[in] zfoData Raw ZFO data.
+	 */
+	void parseZfoData(const QByteArray &zfoData);
+
+	/*!
 	 * @brief Loads ZFO file.
+	 *
+	 * @param[in] zfoFileName Path to the ZFO file.
 	 */
 	void parseZfoFile(const QString &zfoFileName);
+
+	/*!
+	 * @brief Performs dialogue set-up after the message has been loaded.
+	 */
+	void setUpDialogue(void);
 
 	/*!
 	 * @brief Returns selected attachment index.
@@ -159,7 +181,7 @@ private:
 	 *     m_message->envelope->timestamp_length
 	 */
 
-	int m_zfoType;
+	int m_zfoType; /*!< Type of message (enum ImportZFODialog::ZFOtype). */
 	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 };
 

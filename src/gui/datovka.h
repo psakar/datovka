@@ -197,6 +197,11 @@ private slots:
 	void messageItemRightClicked(const QPoint &point);
 
 	/*!
+	 * @brief Handle message double click.
+	 */
+	void viewSelectedMessage(void);
+
+	/*!
 	 * @brief Saves message selection.
 	 */
 	void messageItemStoreSelection(qint64 msgId);
@@ -234,11 +239,6 @@ private slots:
 	 *     (And redraws widgets.)
 	 */
 	void attachmentItemRightClicked(const QPoint &point);
-
-	/*!
-	 * @brief Handle attachment double click.
-	 */
-	void attachmentItemDoubleClicked(const QModelIndex &index);
 
 	/*!
 	 * @brief Saves selected attachments to file.
@@ -704,6 +704,14 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Used to view selected message via event filter.
+	 *
+	 * @param[in] mwPtr Pointer to main window.
+	 */
+	static
+	void viewSelectedMessageViaFilter(QObject *mwPtr);
 
 	/*!
 	 * @brief Export message into ZFO file dialogue.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,23 +43,17 @@
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
 DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
-/* ========================================================================= */
     : QDialog(parent),
     m_message(NULL),
     m_attachmentModel(this)
 {
 	setupUi(this);
 
-	/* TODO -- Load message ZFO. */
+	/* Load message ZFO. */
 	parseZfoFile(zfoFileName);
 
-	if(NULL == m_message) {
+	if (NULL == m_message) {
 		/* Just show error message. */
 		this->attachmentTable->hide();
 		envelopeTextEdit->setHtml(
@@ -71,77 +65,44 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 		return;
 	}
 
-	/* TODO -- Adjust splitter sizes. */
-
-	if (ImportZFODialog::IMPORT_DELIVERY_ZFO == m_zfoType) {
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
-		    deliveryDescriptionHtml(
-		        m_message->raw, m_message->raw_length,
-		        m_message->envelope->timestamp,
-		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
-
-	} else {
-		this->attachmentTable->setEnabled(true);
-		this->attachmentTable->show();
-		m_attachmentModel.setMessage(m_message);
-		envelopeTextEdit->setHtml(
-		    messageDescriptionHtml(m_attachmentModel.rowCount(),
-		        m_message->raw, m_message->raw_length,
-		        m_message->envelope->timestamp,
-		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
-
-		/* Attachment list. */
-		attachmentTable->setModel(&m_attachmentModel);
-		/* First three columns contain hidden data. */
-		attachmentTable->setColumnHidden(DbFlsTblModel::ATTACHID_COL,
-		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
-		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
-		    true);
-		attachmentTable->resizeColumnToContents(
-		    DbFlsTblModel::FNAME_COL);
-
-		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
-		    this, SLOT(attachmentItemRightClicked(QPoint)));
-		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
-		    this, SLOT(attachmentItemDoubleClicked(QModelIndex)));
-
-		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
-	}
-
-	/* Signature details. */
-	connect(signaturePushButton, SIGNAL(clicked()), this,
-	    SLOT(showSignatureDetails()));
+	setUpDialogue();
 }
 
+DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
+    : QDialog(parent),
+    m_message(NULL),
+    m_attachmentModel(this)
+{
+	setupUi(this);
 
-/* ========================================================================= */
-/*
- * Destructor.
- */
+	/* Load raw message. */
+	parseZfoData(zfoData);
+
+	if (NULL == m_message) {
+		/* Just show error message. */
+		this->attachmentTable->hide();
+		envelopeTextEdit->setHtml(
+		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
+		    tr("Cannot parse the content of message."));
+		envelopeTextEdit->setReadOnly(true);
+		signaturePushButton->setEnabled(false);
+		return;
+	}
+
+	setUpDialogue();
+}
+
 DlgViewZfo::~DlgViewZfo(void)
-/* ========================================================================= */
 {
 	if (NULL != m_message) {
 		isds_message_free(&m_message);
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Generates menu to selected message item.
- */
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
-/* ========================================================================= */
 {
 	QModelIndex index = attachmentTable->indexAt(point);
-	QMenu *menu = new QMenu;
+	QMenu *menu = new QMenu(this);
 
 	/* Detects selection of multiple attachments. */
 	QModelIndexList indexes = selectedAttachmentIndexes();
@@ -167,60 +128,7 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	menu->exec(QCursor::pos());
 }
 
-
-/* ========================================================================= */
-/*
- * Handle attachment double click.
- */
-void DlgViewZfo::attachmentItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	Q_UNUSED(index);
-
-	openSelectedAttachment();
-}
-
-
-/* ========================================================================= */
-/*
- * Loads ZFO file.
- */
-void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
-/* ========================================================================= */
-{
-	/* Logging purposes. */
-	struct isds_ctx *dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		logError("%s\n", "Cannot create dummy ISDS session.");
-		goto fail;
-	}
-
-	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
-	Q_ASSERT(NULL == m_message);
-	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-	if (NULL == m_message) {
-		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
-		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-		if (NULL == m_message) {
-			logError("Cannot parse file '%s'.\n",
-			    zfoFileName.toUtf8().constData());
-			goto fail;
-		}
-	}
-
-fail:
-	if (NULL != dummy_session) {
-		isds_ctx_free(&dummy_session);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Saves selected attachment to file.
- */
 void DlgViewZfo::saveSelectedAttachmentToFile(void)
-/* ========================================================================= */
 {
 	QModelIndex selectedIndex = selectedAttachmentIndex();
 
@@ -260,13 +168,7 @@ void DlgViewZfo::saveSelectedAttachmentToFile(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Saves selected attachments to directory.
- */
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
-/* ========================================================================= */
 {
 	QModelIndexList selectedIndexes = selectedAttachmentIndexes();
 
@@ -340,13 +242,7 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Open attachment in default application.
- */
 void DlgViewZfo::openSelectedAttachment(void)
-/* ========================================================================= */
 {
 	QModelIndex selectedIndex = selectedAttachmentIndex();
 
@@ -387,13 +283,7 @@ void DlgViewZfo::openSelectedAttachment(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * View signature details.
- */
 void DlgViewZfo::showSignatureDetails(void)
-/* ========================================================================= */
 {
 	Q_ASSERT(NULL != m_message);
 	Q_ASSERT(NULL != m_message->envelope);
@@ -403,17 +293,146 @@ void DlgViewZfo::showSignatureDetails(void)
 	    m_message->envelope->timestamp,
 	    m_message->envelope->timestamp_length, this);
 	signature_detail->exec();
+	signature_detail->deleteLater();
 }
 
+void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
+{
+	/* Logging purposes. */
+	struct isds_ctx *dummy_session = isds_ctx_create();
+	if (NULL == dummy_session) {
+		logError("%s\n", "Cannot create dummy ISDS session.");
+		goto fail;
+	}
 
-/* ========================================================================= */
-/*
- * Generate description from supplied message.
- */
+	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	Q_ASSERT(NULL == m_message);
+	m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
+	if (NULL == m_message) {
+		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
+		if (NULL == m_message) {
+			logError("%s\n", "Cannot parse message data.");
+			goto fail;
+		}
+	}
+
+fail:
+	if (NULL != dummy_session) {
+		isds_ctx_free(&dummy_session);
+	}
+}
+
+void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
+{
+	/* Logging purposes. */
+	struct isds_ctx *dummy_session = isds_ctx_create();
+	if (NULL == dummy_session) {
+		logError("%s\n", "Cannot create dummy ISDS session.");
+		goto fail;
+	}
+
+	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	Q_ASSERT(NULL == m_message);
+	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
+	if (NULL == m_message) {
+		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
+		if (NULL == m_message) {
+			logError("Cannot parse file '%s'.\n",
+			    zfoFileName.toUtf8().constData());
+			goto fail;
+		}
+	}
+
+fail:
+	if (NULL != dummy_session) {
+		isds_ctx_free(&dummy_session);
+	}
+}
+
+void DlgViewZfo::setUpDialogue(void)
+{
+	/* TODO -- Adjust splitter sizes. */
+
+	if (ImportZFODialog::IMPORT_DELIVERY_ZFO == m_zfoType) {
+		this->attachmentTable->hide();
+		envelopeTextEdit->setHtml(
+		    deliveryDescriptionHtml(
+		        m_message->raw, m_message->raw_length,
+		        m_message->envelope->timestamp,
+		        m_message->envelope->timestamp_length));
+		envelopeTextEdit->setReadOnly(true);
+
+	} else {
+		this->attachmentTable->setEnabled(true);
+		this->attachmentTable->show();
+		m_attachmentModel.setMessage(m_message);
+		envelopeTextEdit->setHtml(
+		    messageDescriptionHtml(m_attachmentModel.rowCount(),
+		        m_message->raw, m_message->raw_length,
+		        m_message->envelope->timestamp,
+		        m_message->envelope->timestamp_length));
+		envelopeTextEdit->setReadOnly(true);
+
+		/* Attachment list. */
+		attachmentTable->setModel(&m_attachmentModel);
+		/* First three columns contain hidden data. */
+		attachmentTable->setColumnHidden(DbFlsTblModel::ATTACHID_COL,
+		    true);
+		attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
+		    true);
+		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
+		    true);
+		attachmentTable->resizeColumnToContents(
+		    DbFlsTblModel::FNAME_COL);
+
+		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
+		    this, SLOT(attachmentItemRightClicked(QPoint)));
+		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
+		    this, SLOT(openSelectedAttachment()));
+
+		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
+	}
+
+	/* Signature details. */
+	connect(signaturePushButton, SIGNAL(clicked()), this,
+	    SLOT(showSignatureDetails()));
+}
+
+QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
+{
+	if (0 == attachmentTable->selectionModel()) {
+		Q_ASSERT(0);
+		return QModelIndex();
+	}
+
+	QModelIndex selectedIndex =
+	    attachmentTable->selectionModel()->currentIndex();
+
+	if (!selectedIndex.isValid()) {
+		Q_ASSERT(0);
+		return QModelIndex();
+	}
+
+	return selectedIndex.sibling(selectedIndex.row(),
+	    DbFlsTblModel::FNAME_COL);
+}
+
+QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
+{
+	if (0 == attachmentTable->selectionModel()) {
+		Q_ASSERT(0);
+		return QModelIndexList();
+	}
+
+	return attachmentTable->selectionModel()->selectedRows(0);
+}
+
 QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
     const void *msgDER, size_t msgSize, const void *tstDER,
     size_t tstSize) const
-/* ========================================================================= */
 {
 	if (NULL == m_message) {
 		Q_ASSERT(0);
@@ -440,15 +459,8 @@ QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,
 	return html;
 }
 
-
-
-/* ========================================================================= */
-/*
- * Generate description from supplied delivery info.
- */
 QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
     size_t msgSize, const void *tstDER, size_t tstSize) const
-/* ========================================================================= */
 {
 	if (NULL == m_message) {
 		Q_ASSERT(0);
@@ -486,10 +498,8 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 	return html;
 }
 
-/* ========================================================================= */
 bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
     const struct isds_envelope *envelope)
-/* ========================================================================= */
 {
 	if (NULL == envelope) {
 		Q_ASSERT(0);
@@ -542,10 +552,8 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 	return true;
 }
 
-/* ========================================================================= */
 bool DlgViewZfo::signatureFooterDescription(QString &html,
     const void *msgDER, size_t msgSize, const void *tstDER, size_t tstSize)
-/* ========================================================================= */
 {
 	html += "<h3>" + tr("Signature") + "</h3>";
 
@@ -584,44 +592,4 @@ bool DlgViewZfo::signatureFooterDescription(QString &html,
 	html += strongAccountInfoLine(tr("Time stamp"), resultStr);
 
 	return true;
-}
-
-/* ========================================================================= */
-/*
- * Returns selected attachment index.
- */
-QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
-/* ========================================================================= */
-{
-	if (0 == attachmentTable->selectionModel()) {
-		Q_ASSERT(0);
-		return QModelIndex();
-	}
-
-	QModelIndex selectedIndex =
-	    attachmentTable->selectionModel()->currentIndex();
-
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return QModelIndex();
-	}
-
-	return selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::FNAME_COL);
-}
-
-
-/* ========================================================================= */
-/*
- * Returns all selected indexes.
- */
-QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
-/* ========================================================================= */
-{
-	if (0 == attachmentTable->selectionModel()) {
-		Q_ASSERT(0);
-		return QModelIndexList();
-	}
-
-	return attachmentTable->selectionModel()->selectedRows(0);
 }

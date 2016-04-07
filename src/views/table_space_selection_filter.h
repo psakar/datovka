@@ -36,6 +36,8 @@ class TableSpaceSelectionFilter : public QObject {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent object.
 	 */
 	TableSpaceSelectionFilter(QObject *parent = 0);
 
@@ -54,7 +56,8 @@ public:
 	 * @param[in]     event  Caught event.
 	 * @return True when filter applied.
 	 */
-	virtual bool eventFilter(QObject *object, QEvent *event);
+	virtual
+	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
 };
 
 #endif /* _TABLE_SPACE_SELECTION_FILTER_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,15 +191,30 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
     const QString &ic, const QString &firmName, const QString &caStreet,
     const QString &caCity, const QString &caZipCode, const QString &caState);
 
+/*!
+ * @brief Creates a isds message from supplied raw CMS data.
+ *
+ * @param[in,out] isdsSession Pointer to session context.
+ * @param[in]     rawMsgData  Raw message data.
+ * @param[in]     zfoType     Message or delivery info
+ *                            (enum ImportZFODialog::ZFOtype).
+ * @return Pointer to newly allocated message, NULL on error. Use
+ *     isds_message_free() to delete.
+ */
+struct isds_message *loadZfoData(struct isds_ctx *isdsSession,
+    const QByteArray &rawMsgData, int zfoType);
 
 /*!
  * @brief Create a isds message from zfo file.
  *
- * @param[in] isdsSession Pointer to session context.
- * @param[in] fName       File name.
- * @return Pointer to message structure, NULL on error.
+ * @param[in,out] isdsSession Pointer to session context.
+ * @param[in]     fName       File name.
+ * @param[in]     zfoType     Message or delivery info
+ *                            (enum ImportZFODialog::ZFOtype).
+ * @return Pointer to newly allocated message, NULL on error. Use
+ *     isds_message_free() to delete.
  */
-struct isds_message * loadZfoFile(struct isds_ctx *isdsSession,
+struct isds_message *loadZfoFile(struct isds_ctx *isdsSession,
     const QString &fName, int zfoType);
 
 

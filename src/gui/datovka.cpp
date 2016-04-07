@@ -75,6 +75,7 @@
 #include "src/io/tag_db.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
@@ -204,8 +205,17 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui->messageList->setSelectionBehavior(QAbstractItemView::SelectRows);
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
+	connect(ui->messageList, SIGNAL(doubleClicked(QModelIndex)), this,
+	    SLOT(viewSelectedMessage()));
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
-
+	{
+		TableKeyPressFilter *filter = new TableKeyPressFilter(this);
+		filter->registerAction(Qt::Key_Return,
+		    &viewSelectedMessageViaFilter, this);
+		filter->registerAction(Qt::Key_Enter, /* On keypad. */
+		    &viewSelectedMessageViaFilter, this);
+		ui->messageList->installEventFilter(filter);
+	}
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
@@ -251,7 +261,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(attachmentItemRightClicked(QPoint)));
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
-	    SLOT(attachmentItemDoubleClicked(QModelIndex)));
+	    SLOT(openSelectedAttachment()));
 	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
@@ -1243,6 +1253,83 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->exec(QCursor::pos());
 }
 
+void MainWindow::viewSelectedMessage(void)
+{
+	debugSlotCall();
+
+	QModelIndex msgIndex;
+
+	{
+		QModelIndexList msgIndexes;
+
+		QItemSelectionModel *selectionModel =
+		    ui->messageList->selectionModel();
+		if (0 == selectionModel) {
+			Q_ASSERT(0);
+			return;
+		}
+		msgIndexes = selectionModel->selectedRows(0);
+
+		if (msgIndexes.size() != 1) {
+			/* Do nothing when multiple messages selected. */
+			return;
+		}
+
+		msgIndex = msgIndexes.first();
+	}
+
+	if (!msgIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	qint64 dmId = msgIndex.data().toLongLong();
+	Q_ASSERT(dmId >= 0);
+	QDateTime deliveryTime(msgDeliveryTime(msgIndex));
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QByteArray msgRaw(messageDb->msgsMessageRaw(dmId));
+	if (msgRaw.isEmpty()) {
+
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
+			return;
+		}
+
+		msgRaw = messageDb->msgsMessageRaw(dmId);
+		if (msgRaw.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	/* Generate dialog showing message content. */
+	QDialog *dlgViewZfo = new DlgViewZfo(msgRaw, this);
+	dlgViewZfo->exec();
+	dlgViewZfo->deleteLater();
+}
 
 /* ========================================================================= */
 /*
@@ -1679,20 +1766,6 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionEmail_selected_attachments);
 
 	menu->exec(QCursor::pos());
-}
-
-
-/* ========================================================================= */
-/*
- * Handle attachment double click.
- */
-void MainWindow::attachmentItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	Q_UNUSED(index);
-	openSelectedAttachment();
 }
 
 
@@ -6001,8 +6074,9 @@ void MainWindow::viewMessageFromZFO(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 
 	/* Generate dialog showing message content. */
-	QDialog *viewDialog = new DlgViewZfo(fileName, this);
-	viewDialog->exec();
+	QDialog *dlgViewZfo = new DlgViewZfo(fileName, this);
+	dlgViewZfo->exec();
+	dlgViewZfo->deleteLater();
 }
 
 
@@ -6386,6 +6460,20 @@ void MainWindow::goHome(void)
 	QDesktopServices::openUrl(QUrl(DATOVKA_HOMEPAGE_URL, QUrl::TolerantMode));
 }
 
+void MainWindow::viewSelectedMessageViaFilter(QObject *mwPtr)
+{
+	if (0 == mwPtr) {
+		return;
+	}
+
+	MainWindow *mw = dynamic_cast<MainWindow *>(mwPtr);
+	if (0 == mw) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	mw->viewSelectedMessage();
+}
 
 /* ========================================================================= */
 /*
