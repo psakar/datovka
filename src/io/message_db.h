@@ -961,6 +961,8 @@ private:
 	static
 	const QVector<QString> msgPrintedAttribs;
 	static
+	const QVector<QString> msgDeliveryBoolAttribs;
+	static
 	const QVector<QString> msgStatus;
 	static
 	const QVector<QString> fileItemIds;

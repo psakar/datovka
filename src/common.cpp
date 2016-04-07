@@ -382,6 +382,28 @@ const QString & convertUserTypeToString(int value)
 
 /* ========================================================================= */
 /*
+ * Return sender databox type as string from number representation.
+ */
+QString convertSenderDbTypesToString(int value)
+/* ========================================================================= */
+{
+	/* System ISDS */
+	if (value == DBTYPE_SYSTEM) return QObject::tr("System ISDS");
+	/* OVM */
+	else if (value == DBTYPE_OVM) return QObject::tr("Public authority");
+	/* PO */
+	else if (value == DBTYPE_PO) return QObject::tr("Legal person");
+	/* PFO (OSVC) */
+	else if (value == DBTYPE_PFO) return QObject::tr("Self-employed person");
+	/* FO */
+	else if (value == DBTYPE_FO) return QObject::tr("Natural person");
+	/* unknown */
+	else return "";
+}
+
+
+/* ========================================================================= */
+/*
  * Convert type of databox to int
  */
 int convertDbTypeToInt(QString value)
