@@ -75,6 +75,7 @@
 #include "src/io/tag_db.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
@@ -207,6 +208,14 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageList, SIGNAL(doubleClicked(QModelIndex)), this,
 	    SLOT(viewSelectedMessage()));
 	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
+	{
+		TableKeyPressFilter *filter = new TableKeyPressFilter(this);
+		filter->registerAction(Qt::Key_Return,
+		    &viewSelectedMessageViaFilter, this);
+		filter->registerAction(Qt::Key_Enter, /* On keypad. */
+		    &viewSelectedMessageViaFilter, this);
+		ui->messageList->installEventFilter(filter);
+	}
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
@@ -1262,11 +1271,11 @@ void MainWindow::viewSelectedMessage(void)
 		msgIndexes = selectionModel->selectedRows(0);
 
 		if (msgIndexes.size() != 1) {
-			Q_ASSERT(0);
+			/* Do nothing when multiple messages selected. */
 			return;
 		}
 
-		msgIndex = msgIndexes[0];
+		msgIndex = msgIndexes.first();
 	}
 
 	if (!msgIndex.isValid()) {
@@ -6451,6 +6460,20 @@ void MainWindow::goHome(void)
 	QDesktopServices::openUrl(QUrl(DATOVKA_HOMEPAGE_URL, QUrl::TolerantMode));
 }
 
+void MainWindow::viewSelectedMessageViaFilter(QObject *mwPtr)
+{
+	if (0 == mwPtr) {
+		return;
+	}
+
+	MainWindow *mw = dynamic_cast<MainWindow *>(mwPtr);
+	if (0 == mw) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	mw->viewSelectedMessage();
+}
 
 /* ========================================================================= */
 /*

@@ -706,6 +706,14 @@ private:
 	void showStatusTextPermanently(const QString &qStr);
 
 	/*!
+	 * @brief Used to view selected message via event filter.
+	 *
+	 * @param[in] mwPtr Pointer to main window.
+	 */
+	static
+	void viewSelectedMessageViaFilter(QObject *mwPtr);
+
+	/*!
 	 * @brief Export message into ZFO file dialogue.
 	 */
 	void exportMessageAsZFO(const QString &attachPath,
