@@ -55,9 +55,11 @@ private slots:
 	void enableOkButton(void);
 	void insertDsItems(void);
 	void setFirtsColumnActive(void);
+	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
 	bool isInRecipientTable(const QString &idDs) const;
+	void insertContactToRecipentTable(int selRow);
 
 	QTableWidget &m_recipientTableWidget;
 	const MessageDbSet &m_dbSet;
