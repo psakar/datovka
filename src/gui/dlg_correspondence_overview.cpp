@@ -343,7 +343,12 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 	}
 
 	QTextStream f(&fout);
-	/* Generate CSV header. */
+	/*
+	 * Always use UTF-8 for this HTML file as this encoding is hard-wired
+	 * into its header.
+	 */
+	f.setCodec("UTF-8");
+	/* Generate HTML header. */
 	f << "<!DOCTYPE html\n"
 	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
 	    "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"

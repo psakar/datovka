@@ -7257,6 +7257,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 
 	finishEmailMessage(emailMessage, boundary);
 
+	/* Email is encoded using UTF-8. */
 	QString tmpEmailFile = writeTemporaryFile(
 	    TMP_ATTACHMENT_PREFIX "mail.eml", emailMessage.toUtf8());
 
