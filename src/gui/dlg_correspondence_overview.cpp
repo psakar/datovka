@@ -521,10 +521,10 @@ void DlgCorrespondenceOverview::exportData(void)
 				            overviewFileName)),
 				    QMessageBox::Ok);
 				tmpMsg += "<b>0</b> " + tr("correspondence "
-				"overview file was exported to CVS.") +"<br/>";
+				"overview file was exported to CSV.") +"<br/>";
 			} else {
 				tmpMsg += "<b>1</b> " + tr("correspondence "
-				"overview file was exported to CVS.") +"<br/>";
+				"overview file was exported to CSV.") +"<br/>";
 			}
 		}
 	} else {
