@@ -1083,9 +1083,56 @@ bool AccountModel::appendYear(const QString &userName,
 	return true;
 }
 
+/*!
+ * @brief Get position of the newly inserted year element.
+ *
+ * @param[in] yearList  List of years.
+ * @param[in] addedYear Year To be added.
+ * @param[in] sorting   Sorting.
+ * @return Position of new element, -1 on any error.
+ */
+static
+int addedYearPosistion(const QList<QString> &yearList, const QString &addedYear,
+    enum AccountModel::Sorting sorting)
+{
+	int pos;
+
+	if (yearList.isEmpty()) {
+		return 0;
+	}
+
+	switch (sorting) {
+	case AccountModel::UNSORTED:
+		/* Just append. */
+		return yearList.size();
+		break;
+	case AccountModel::ASCENDING:
+		for (pos = 0; pos < yearList.size(); ++pos) {
+			if (addedYear < yearList.at(pos)) {
+				return pos;
+			}
+		}
+		return yearList.size();
+		break;
+	case AccountModel::DESCENDING:
+		for (pos = 0; pos < yearList.size(); ++pos) {
+			if (addedYear > yearList.at(pos)) {
+				return pos;
+			}
+		}
+		return yearList.size();
+		break;
+	default:
+		Q_ASSERT(0);
+		return -1;
+		break;
+	}
+}
+
 bool AccountModel::updateYearNodes(const QString &userName,
     enum AccountModel::NodeType nodeType,
-    const QList< QPair<QString, unsigned> > &yearlyUnreadList)
+    const QList< QPair<QString, unsigned> > &yearlyUnreadList,
+    enum AccountModel::Sorting sorting)
 {
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -1121,25 +1168,55 @@ bool AccountModel::updateYearNodes(const QString &userName,
 	Q_ASSERT(0 != unreadGroups);
 	Q_ASSERT(childTopIndex.isValid());
 
-	/* Delete old. */
+	/*
+	 * Delete model elements that don't exist in new list or update
+	 * existing entries.
+	 */
 	int rows = groups->size();
-	if (rows > 0) {
-		beginRemoveRows(childTopIndex, 0, rows - 1);
-		groups->clear();
-		unreadGroups->clear();
-		endRemoveRows();
+	int row = 0;
+	typedef QPair<QString, unsigned> Pair;
+	while (row < rows) {
+		bool found = false;
+		unsigned unreadCnt = 0;
+		foreach (const Pair &pair, yearlyUnreadList) {
+			if (pair.first == groups->at(row)) {
+				found = true;
+				unreadCnt = pair.second;
+				break;
+			}
+		}
+		if (!found) {
+			/* Remove row, don't increment row. */
+			beginRemoveRows(childTopIndex, row, row);
+			unreadGroups->remove(groups->at(row));
+			groups->removeAt(row);
+			endRemoveRows();
+
+			--rows;
+		} else {
+			/* Update unread, increment row. */
+			(*unreadGroups)[groups->at(row)] = unreadCnt;
+			QModelIndex childIndex(childTopIndex.child(row, 0));
+			emit dataChanged(childIndex, childIndex);
+
+			++row;
+		}
 	}
 
-	/* Add new. */
-	rows = yearlyUnreadList.size();
-	if (rows > 0) {
-		beginInsertRows(childTopIndex, 0, rows - 1);
-		typedef QPair<QString, unsigned> Pair;
-		foreach (const Pair &pair, yearlyUnreadList) {
-			groups->append(pair.first);
+	/* Add missing elements. */
+	foreach (const Pair &pair, yearlyUnreadList) {
+		if (!groups->contains(pair.first)) {
+			int newRow = addedYearPosistion(*groups, pair.first,
+			    sorting);
+			if (newRow < 0) {
+				Q_ASSERT(0);
+				return false;
+			}
+			beginInsertRows(childTopIndex, newRow, newRow);
+			groups->insert(newRow, pair.first);
 			(*unreadGroups)[pair.first] = pair.second;
+			endInsertRows();
 		}
-		endInsertRows();
 	}
 
 	return true;

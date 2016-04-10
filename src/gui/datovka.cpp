@@ -4573,7 +4573,7 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 		yearlyUnreadList.append(QPair<QString, unsigned>(year, unreadMsgs));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeReceivedYear,
-	    yearlyUnreadList);
+	    yearlyUnreadList, AccountModel::DESCENDING);
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
 	m_accountModel.updateRecentUnread(userName,
@@ -4586,7 +4586,7 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 		yearlyUnreadList.append(QPair<QString, unsigned>(year, 0));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeSentYear,
-	    yearlyUnreadList);
+	    yearlyUnreadList, AccountModel::DESCENDING);
 	return true;
 }
 

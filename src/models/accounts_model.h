@@ -180,6 +180,15 @@ public:
 	};
 
 	/*!
+	 * @brief Sorting of yearly nodes.
+	 */
+	enum Sorting {
+		UNSORTED = 0,
+		ASCENDING,
+		DESCENDING
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Pointer to parent object.
@@ -365,10 +374,12 @@ public:
 	 * @param[in] nodeType         May be nodeReceivedYear or nodeSentYear.
 	 * @param[in] yearlyUnreadList List of paired years and unread messages
 	 *                             numbers.
+	 * @param[in] sorting          Sorting.
 	 * @return True on success.
 	 */
 	bool updateYearNodes(const QString &userName, enum NodeType nodeType,
-	    const QList< QPair<QString, unsigned> > &yearlyUnreadList);
+	    const QList< QPair<QString, unsigned> > &yearlyUnreadList,
+	    enum Sorting sorting);
 
 	/*!
 	 * @brief Update existing year node in account.
