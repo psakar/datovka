@@ -175,7 +175,9 @@ macx {
 	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
 	CONFIG += c++11
 	isEmpty(SDK_VER) {
-		SDK_VER = 10.7
+		# There is no way how to pass this variable into lrelease so
+		# it must be set manually.
+		SDK_VER = 10.11
 	}
 	QMAKE_MAC_SDK = macosx$${SDK_VER}
 	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
