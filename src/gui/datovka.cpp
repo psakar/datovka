@@ -334,7 +334,18 @@ void MainWindow::setWindowsAfterInit(void)
 	if (ui->accountList->model()->rowCount() <= 0) {
 		addNewAccount();
 	} else {
-		if (globPref.download_at_start) {
+		if (globPref.download_at_start &&
+		    ui->actionSync_all_accounts->isEnabled()) {
+			/*
+			 * Calling account synchronisation as slot bound to
+			 * different events is repeatedly causing problems.
+			 * Here we try to minimise the probability that the
+			 * synchronisation  action is triggered for the second
+			 * time after the application start-up.
+			 *
+			 * TODO -- The checking for live ISDS connection must
+			 * be guarded for simultaneous access.
+			 */
 			synchroniseAllAccounts();
 		}
 	}
@@ -3212,7 +3223,8 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		 * pending events to minimise the probability that the actions
 		 * remain enabled accidentally.
 		 *
-		 * TODO -- The checking for live ISDS connection must be guarded for simultaneous access.
+		 * TODO -- The checking for live ISDS connection must be
+		 * guarded for simultaneous access.
 		 */
 		QCoreApplication::processEvents();
 		ui->actionSync_all_accounts->setEnabled(false);
