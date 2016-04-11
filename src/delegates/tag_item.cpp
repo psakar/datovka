@@ -35,6 +35,7 @@
  * @param[in] tagColour Tag rectangle colour.
  * @return Colour adjusted to the background colour.
  */
+static
 QColor adjustForegroundColour(const QColor &fgColour, const QColor &tagColour)
 {
 	Q_UNUSED(fgColour);
