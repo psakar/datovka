@@ -1245,9 +1245,6 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 
 	menu->addSeparator();
 
-	menu->addAction(ui->actionEmail_all_attachments);
-
-
 	menu->addAction(ui->actionDelete_message_from_db);
 
 	menu->exec(QCursor::pos());
