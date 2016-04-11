@@ -91,7 +91,7 @@ if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	# expat
 	rm -rf "${WORKDIR}"/expat*
 	cd "${WORKDIR}"
-	tar -xzf "${ARCHIVE}"
+	tar -xjf "${ARCHIVE}"
 	cd "${WORKDIR}"/expat*
 
 	CONFOPTS=""
@@ -226,7 +226,7 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	# libcurl
 	rm -rf "${WORKDIR}"/curl*
 	cd "${WORKDIR}"
-	tar -xzf "${ARCHIVE}"
+	tar -xjf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
 
 	CONFOPTS=""
