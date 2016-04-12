@@ -1,4 +1,4 @@
-4.6.0 /
+4.6.0 / 2016-04-12
  * Added support for tags. These can be locally assigned to the messages.
  * Message information are shown in separate window when double-clicking the
    message in message list or when hitting the Return/Enter key.
