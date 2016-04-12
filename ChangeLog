@@ -1,3 +1,14 @@
+4.6.0 /
+ * Added support for tags. These can be locally assigned to the messages.
+ * Message information are shown in separate window when double-clicking the
+   message in message list or when hitting the Return/Enter key.
+ * When composing a message, the recipient can be added to the recipient list
+   by double clicking it in the recently-used recipient list.
+ * Information about personal delivery are shown in message description field.
+ * Fixed encoding issue when exporting correspondence overview in HTML.
+ * Fixed a bug causing the create message button not to activate when first
+   account was created.
+
 4.5.3 / 2016-03-18
  * Fixed problems with HOTP authorisation on Windows. There have been problems
    with the bundled libisds. MinGW does not handle POSIX extensions of
