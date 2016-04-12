@@ -65,7 +65,7 @@ void DlgTag::chooseNewColor(void)
 
 	if (colour.isValid()) {
 		QString colourName = colour.name().toLower().replace("#", "");
-		if (TagItem::isValidColour(colourName)) {
+		if (TagItem::isValidColourStr(colourName)) {
 			m_tagItem.colour = colourName;
 		}
 		setPreviewButtonColor();
@@ -86,7 +86,7 @@ void DlgTag::saveTag(void)
 		return;
 	}
 
-	Q_ASSERT(TagItem::isValidColour(m_tagItem.colour));
+	Q_ASSERT(TagItem::isValidColourStr(m_tagItem.colour));
 
 	if (m_tagItem.id >= 0) {
 		globTagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);

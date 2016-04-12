@@ -28,31 +28,6 @@
 #include "src/delegates/tag_item.h"
 #include "src/log/log.h"
 
-/*!
- * @brief Adjust foreground colour according to the supplied label colour.
- *
- * @param[in] fgColour  Foreground colour.
- * @param[in] tagColour Tag rectangle colour.
- * @return Colour adjusted to the background colour.
- */
-static
-QColor adjustForegroundColour(const QColor &fgColour, const QColor &tagColour)
-{
-	Q_UNUSED(fgColour);
-
-	int r = tagColour.red();
-	int g = tagColour.green();
-	int b = tagColour.blue();
-
-#if 0
-	int colour = (r << 16) + (g << 8) + b;
-	return (colour > (0xffffff / 2)) ? Qt::black : Qt::white;
-#else
-	int yiq = ((299 * r) + (587 * g) + (114 * b)) / 1000;
-	return (yiq >= 128) ? Qt::black : Qt::white;
-#endif
-}
-
 #define DFLT_COLOUR "ffffff"
 
 TagItem::TagItem(void)
@@ -65,7 +40,7 @@ TagItem::TagItem(void)
 TagItem::TagItem(int i, const QString &n, const QString &c)
     : id(i),
     name(n),
-    colour(isValidColour(c) ? c : DFLT_COLOUR)
+    colour(isValidColourStr(c) ? c : DFLT_COLOUR)
 {
 }
 
@@ -141,11 +116,29 @@ QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
 	return QSize(width, height);
 }
 
-bool TagItem::isValidColour(const QString &colourStr)
+bool TagItem::isValidColourStr(const QString &colourStr)
 {
 	QRegExp re("^[a-f0-9]{6,6}$");
 
 	return re.exactMatch(colourStr);
+}
+
+QColor TagItem::adjustForegroundColour(const QColor &fgColour,
+    const QColor &tagColour)
+{
+	Q_UNUSED(fgColour);
+
+	int r = tagColour.red();
+	int g = tagColour.green();
+	int b = tagColour.blue();
+
+#if 0
+	int colour = (r << 16) + (g << 8) + b;
+	return (colour > (0xffffff / 2)) ? Qt::black : Qt::white;
+#else
+	int yiq = ((299 * r) + (587 * g) + (114 * b)) / 1000;
+	return (yiq >= 128) ? Qt::black : Qt::white;
+#endif
 }
 
 TagItemList::TagItemList(void)

@@ -80,13 +80,25 @@ public:
 	QSize sizeHint(const QStyleOptionViewItem &option) const;
 
 	/*!
-	 * @brief Returns true if colour is valid.
+	 * @brief Returns true if colour string is valid.
 	 *
 	 * @param[in] colourStr Colour string.
 	 * @return True if colour string is valid.
 	 */
 	static
-	bool isValidColour(const QString &colourStr);
+	bool isValidColourStr(const QString &colourStr);
+
+	/*!
+	 * @brief Adjust foreground colour according to the supplied label
+	 *     colour.
+	 *
+	 * @param[in] fgColour  Foreground colour.
+	 * @param[in] tagColour Tag rectangle colour.
+	 * @return Colour adjusted to the background colour.
+	 */
+	static
+	QColor adjustForegroundColour(const QColor &fgColour,
+	    const QColor &tagColour);
 
 	int id; /*!< Tag identifier. */
 	QString name; /*!< Name of the rag. */
