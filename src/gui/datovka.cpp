@@ -2996,6 +2996,9 @@ void MainWindow::deleteMessage(void)
 			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
 		}
 	}
+
+	/* Refresh account list. */
+	refreshAccountList(userName);
 }
 
 

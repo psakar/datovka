@@ -5,6 +5,8 @@
  * When composing a message, the recipient can be added to the recipient list
    by double clicking it in the recently-used recipient list.
  * Information about personal delivery are shown in message description field.
+ * Fixed problem where account entry has not been updated after message
+   deletion.
  * Fixed encoding issue when exporting correspondence overview in HTML.
  * Fixed a bug causing the create message button not to activate when first
    account was created.
