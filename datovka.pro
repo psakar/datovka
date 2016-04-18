@@ -170,9 +170,17 @@ isEqual(STATIC, 1) {
 macx {
 	ICON = res/datovka.icns
 
-	# See https://bugreports.qt-project.org/browse/QTBUG-28097
+	OSX_MIN="10.6" # Qt 5.5.1 and earlier.
+	isEqual(QT_MAJOR_VERSION, 5) {
+		greaterThan(QT_MINOR_VERSION, 5) {
+			OSX_MIN="10.7" # Qt 5.6.0.
+		}
+	}
+
+	# See https://bugreports.qt.io/browse/QTBUG-28097
 	# for further details.
-	QMAKE_CXXFLAGS += -mmacosx-version-min=10.7 -stdlib=libc+
+	QMAKE_CXXFLAGS += -mmacosx-version-min=$$OSX_MIN
+	QMAKE_CXXFLAGS += -stdlib=libc++
 	CONFIG += c++11
 	isEmpty(SDK_VER) {
 		# There is no way how to pass this variable into lrelease so
@@ -180,7 +188,7 @@ macx {
 		SDK_VER = 10.11
 	}
 	QMAKE_MAC_SDK = macosx$${SDK_VER}
-	QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
+	QMAKE_MACOSX_DEPLOYMENT_TARGET = $$OSX_MIN
 
 	QMAKE_INFO_PLIST = deployment/datovka.plist
 	SED_EXT = -e
