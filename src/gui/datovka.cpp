@@ -391,7 +391,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));
-		if (vstr > QCoreApplication::applicationVersion()) {
+		if (vstr > VERSION) {
 			showStatusTextWithTimeout(
 			    tr("New version of Datovka is available:") +
 			    " " + vstr);
@@ -399,8 +399,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			int res = QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is %1").
-			        arg(QCoreApplication::applicationVersion())
+			    tr("Current version is %1").arg(VERSION)
 			    + "\n" +
 			    tr("New version is %1").arg(vstr) +
 			    + "\n\n" +
@@ -415,8 +414,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is \"%1\"").
-			        arg(QCoreApplication::applicationVersion())
+			    tr("Current version is \"%1\"").arg(VERSION)
 			    + "\n" +
 			    tr("New version is \"%1\"").arg(vstr)
 			    + "\n\n" +
@@ -592,8 +590,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
 		ui->messageStackedWidget->setCurrentIndex(0);
-		ui->accountTextInfo->setHtml(createDatovkaBanner(
-		    QCoreApplication::applicationVersion()));
+		ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
 		ui->accountTextInfo->setReadOnly(true);
 		return;
 	}
@@ -10265,8 +10262,7 @@ void MainWindow::setUpUi(void)
 
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
-	ui->accountTextInfo->setHtml(createDatovkaBanner(
-	    QCoreApplication::applicationVersion()));
+	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
 	ui->accountTextInfo->setReadOnly(true);
 }
 
