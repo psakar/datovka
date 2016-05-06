@@ -54,6 +54,7 @@ void DlgCreateAccount::initAccountDialog(void)
 	this->loginmethodComboBox->addItem(tr("Certificate + Password"));
 	this->loginmethodComboBox->addItem(tr("Password + Secure code"));
 	this->loginmethodComboBox->addItem(tr("Password + Secure SMS"));
+	this->loginmethodComboBox->addItem("MojeID");
 	this->certificateLabel->setEnabled(false);
 	this->accountButtonBox->button(
 	    QDialogButtonBox::Ok)->setEnabled(false);
@@ -100,6 +101,8 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->usernameLineEdit->setEnabled(false);
 		this->testAccountCheckBox->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
+		this->accountLineEdit->setEnabled(true);
 		break;
 	case ACT_PWD:
 		this->setWindowTitle(tr("Enter password for account") + " "
@@ -163,8 +166,10 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		itemindex = USER_CERTIFICATE;
 	} else if (LIM_HOTP == login_method) {
 		itemindex = HOTP;
-	} else {
+	} else if (LIM_TOTP == login_method) {
 		itemindex = TOTP;
+	} else {
+		itemindex = MOJEID;
 	}
 
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
@@ -215,7 +220,12 @@ void DlgCreateAccount::checkInputFields(void)
 /* ========================================================================= */
 {
 	bool buttonEnabled;
-	if (m_loginmethod == CERTIFICATE) {
+	if (m_loginmethod == MOJEID) {
+		buttonEnabled = true;
+		if (m_action == ACT_EDIT) {
+			this->accountLineEdit->setEnabled(true);
+		}
+	} else if (m_loginmethod == CERTIFICATE) {
 		buttonEnabled = !this->accountLineEdit->text().isEmpty()
 		    && !this->usernameLineEdit->text().isEmpty()
 		    && !m_certPath.isEmpty();
@@ -241,7 +251,21 @@ void DlgCreateAccount::checkInputFields(void)
 void DlgCreateAccount::setActiveButton(int itemindex)
 /* ========================================================================= */
 {
-	if (itemindex == CERTIFICATE) {
+
+	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
+	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
+	this->accountLineEdit->setEnabled(true);
+
+	if (itemindex == MOJEID) {
+		this->certificateLabel->setEnabled(false);
+		this->addCertificateButton->setEnabled(false);
+		this->passwordLabel->setEnabled(false);
+		this->passwordLineEdit->setEnabled(false);
+		this->rememberPswcheckBox->setEnabled(false);
+		this->usernameLineEdit->setEnabled(false);
+		this->accountLineEdit->setEnabled(false);
+		this->testAccountCheckBox->setEnabled(false);
+	} else if (itemindex == CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(false);
@@ -260,8 +284,6 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLineEdit->setEnabled((true));
 		this->rememberPswcheckBox->setEnabled(true);
 	}
-	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
-	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
 
 	m_loginmethod = itemindex;
 	checkInputFields();
@@ -283,6 +305,10 @@ void DlgCreateAccount::saveAccount(void)
 	/* set account index, itemTop and map itemSettings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
+		if (this->loginmethodComboBox->currentIndex() == MOJEID) {
+			emit loginToWebDatovka(this->synchroCheckBox->isChecked());
+			return;
+		}
 		break;
 	case ACT_EDIT:
 	case ACT_PWD:

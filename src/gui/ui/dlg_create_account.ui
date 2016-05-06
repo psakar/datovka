@@ -2,16 +2,8 @@
 <ui version="4.0">
  <class>CreateAccount</class>
  <widget class="QDialog" name="CreateAccount">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>400</width>
-    <height>322</height>
-   </rect>
-  </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -19,7 +11,7 @@
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>322</height>
+    <height>16777215</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -41,53 +33,60 @@
     </widget>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QFormLayout" name="formLayout">
      <property name="fieldGrowthPolicy">
       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
      </property>
      <item row="0" column="0">
+      <widget class="QLabel" name="loginmethodLabel">
+       <property name="text">
+        <string>Login method:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="loginmethodComboBox">
+       <property name="toolTip">
+        <string>Select authorization method for login into your databox</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
       <widget class="QLabel" name="accountLabel">
        <property name="text">
         <string>Custom account name:</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
+     <item row="2" column="1">
       <widget class="QLineEdit" name="accountLineEdit">
        <property name="toolTip">
         <string>You can give a descriptive name to your account.</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
+     <item row="3" column="0" colspan="2">
       <widget class="Line" name="Line_0">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="usernameLabel">
        <property name="text">
         <string>Username:</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="4" column="1">
       <widget class="QLineEdit" name="usernameLineEdit">
        <property name="toolTip">
         <string>Enter your username</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="5" column="0">
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -100,7 +99,7 @@
        </property>
       </spacer>
      </item>
-     <item row="3" column="1">
+     <item row="5" column="1">
       <widget class="QCheckBox" name="testAccountCheckBox">
        <property name="toolTip">
         <string>If the credentials you entered are for a test account,
@@ -112,35 +111,21 @@ select this option. For normal account
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="loginmethodLabel">
-       <property name="text">
-        <string>Login method:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QComboBox" name="loginmethodComboBox">
-       <property name="toolTip">
-        <string>Select authorization method for login into your databox</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
+     <item row="7" column="0" colspan="2">
       <widget class="Line" name="line_1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
+     <item row="8" column="0">
       <widget class="QLabel" name="passwordLabel">
        <property name="text">
         <string>Password:</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="8" column="1">
       <widget class="QLineEdit" name="passwordLineEdit">
        <property name="toolTip">
         <string>Enter your password</string>
@@ -150,7 +135,7 @@ select this option. For normal account
        </property>
       </widget>
      </item>
-     <item row="8" column="0">
+     <item row="10" column="0">
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -163,7 +148,7 @@ select this option. For normal account
        </property>
       </spacer>
      </item>
-     <item row="8" column="1">
+     <item row="10" column="1">
       <widget class="QCheckBox" name="rememberPswcheckBox">
        <property name="toolTip">
         <string>The password will be saved in a readable form in the 
@@ -176,21 +161,14 @@ your account security.</string>
        </property>
       </widget>
      </item>
-     <item row="9" column="0">
+     <item row="12" column="0">
       <widget class="QLabel" name="certificateLabel">
        <property name="text">
         <string>Certificate file:</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="2">
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
+     <item row="12" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QPushButton" name="addCertificateButton">
@@ -220,6 +198,27 @@ your account security.</string>
         </spacer>
        </item>
       </layout>
+     </item>
+     <item row="13" column="0" colspan="2">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0" colspan="2">
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

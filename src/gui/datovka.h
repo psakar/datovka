@@ -46,6 +46,7 @@
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
 #include "src/single/single_instance.h"
+#include "src/web/json.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
 
@@ -122,6 +123,10 @@ protected:
 
 
 private slots:
+
+
+	/* TODO - add comments */
+	void wdGetAccountList(bool syncWithAll);
 
 	/*!
 	 * @brief Processes messages from single instance emitter.
@@ -700,6 +705,9 @@ private:
 
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
+
+	bool wdGetMessageList(const QString &userName);
+	bool wdSyncAccount(const QString &userName);
 
 	void showStatusTextWithTimeout(const QString &qStr);
 

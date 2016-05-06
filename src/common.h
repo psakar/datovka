@@ -66,7 +66,8 @@ typedef enum {
 	CERTIFICATE = 1,
 	USER_CERTIFICATE = 2,
 	HOTP = 3,
-	TOTP = 4
+	TOTP = 4,
+	MOJEID = 5
 } LoginMethodsIndex;
 
 /* return values of Datovka message state */

@@ -391,7 +391,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));
-		if (vstr > VERSION) {
+		if (vstr > QCoreApplication::applicationVersion()) {
 			showStatusTextWithTimeout(
 			    tr("New version of Datovka is available:") +
 			    " " + vstr);
@@ -399,7 +399,8 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			int res = QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is %1").arg(VERSION)
+			    tr("Current version is %1").
+			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
 			    tr("New version is %1").arg(vstr) +
 			    + "\n\n" +
@@ -414,7 +415,8 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is \"%1\"").arg(VERSION)
+			    tr("Current version is \"%1\"").
+			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
 			    tr("New version is \"%1\"").arg(vstr)
 			    + "\n\n" +
@@ -590,7 +592,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
 		ui->messageStackedWidget->setCurrentIndex(0);
-		ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+		ui->accountTextInfo->setHtml(createDatovkaBanner(
+		    QCoreApplication::applicationVersion()));
 		ui->accountTextInfo->setReadOnly(true);
 		return;
 	}
@@ -3171,6 +3174,13 @@ void MainWindow::synchroniseAllAccounts(void)
 			continue;
 		}
 
+		// webdatovka sync
+		if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+			synchroniseSelectedAccount(userName);
+			continue;
+		}
+
+
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
 		if (!isdsSessions.isConnectedToIsds(userName) &&
 		    !connectToIsds(userName, this)) {
@@ -3209,6 +3219,12 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		userName = m_accountModel.userName(currentAccountModelIndex());
 		Q_ASSERT(!userName.isEmpty());
 	}
+
+	// webdatovka sync
+	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return wdSyncAccount(userName);
+	}
+
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		return false;
@@ -4846,6 +4862,9 @@ void MainWindow::addNewAccount(void)
 	connect(newAccountDialog,
 	    SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
+	connect(newAccountDialog,
+	    SIGNAL(loginToWebDatovka(bool)),
+	    this, SLOT(wdGetAccountList(bool)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -10262,7 +10281,8 @@ void MainWindow::setUpUi(void)
 
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
-	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+	ui->accountTextInfo->setHtml(createDatovkaBanner(
+	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 }
 
@@ -10509,4 +10529,197 @@ void MainWindow::addOrDeleteMsgTags(void)
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Download all accounts from webdatovka.
+ */
+void MainWindow::wdGetAccountList(bool syncWithAll)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QString errStr;
+	QList<JsonLayer::AccountInfo> accountList;
+
+
+	jsonlayer.getAccountList(accountList, errStr);
+
+	if (!errStr.isEmpty()) {
+		qDebug() << "ERROR:" << errStr;
+		return;
+	}
+
+	if (accountList.isEmpty()) {
+		return;
+	}
+
+	for (int i = 0; i < accountList.count(); ++i) {
+		QModelIndex index;
+		AcntSettings aSet;
+		aSet.setUserName(accountList.at(i).key);
+		aSet.setAccountName(accountList.at(i)._acntName);
+		aSet.setLoginMethod(LIM_MOJEID);
+		aSet.setSyncWithAll(syncWithAll);
+		m_accountModel.addAccount(aSet, &index);
+		refreshAccountList(accountList.at(i).key);
+
+		globAccountDbPtr->insertAccountIntoDb(
+		    accountList.at(i).key + "___True",
+		    accountList.at(i).dbID,
+		    accountList.at(i).dbType,
+		    accountList.at(i).ic.toInt(),
+		    accountList.at(i).pnFirstName,
+		    accountList.at(i).pnMiddleName,
+		    accountList.at(i).pnLastName,
+		    accountList.at(i).pnLastNameAtBirth,
+		    accountList.at(i).firmName,
+		    accountList.at(i).biDate,
+		    accountList.at(i).biCity,
+		    accountList.at(i).biCounty,
+		    accountList.at(i).biState,
+		    accountList.at(i).adCity,
+		    accountList.at(i).adStreet,
+		    accountList.at(i).adNumberInStreet,
+		    accountList.at(i).adNumberInMunicipality,
+		    accountList.at(i).adZipCode,
+		    accountList.at(i).adState,
+		    accountList.at(i).nationality,
+		    accountList.at(i).identifier,
+		    accountList.at(i).registryCode,
+		    accountList.at(i).dbState,
+		    accountList.at(i).dbEffectiveOVM,
+		    accountList.at(i).dbOpenAddressing
+		);
+	}
+}
+
+/* ========================================================================= */
+/*
+ * Func: Download all messsages for selected account from webdatovka.
+ */
+bool MainWindow::wdGetMessageList(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QString errStr;
+
+	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return false;
+	}
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QString aID  = userName.split("-").at(1);
+	int accoutID = aID.toInt();
+
+	QList<JsonLayer::MsgEnvelope> messageList;
+
+	//int limit = MESSAGE_LIST_LIMIT;
+	int limit = 5;
+
+	/* get received message list: webdatovka received = 1 */
+	jsonlayer.getMessageList(accoutID, 1, limit, 0, messageList, errStr);
+	if (!errStr.isEmpty()) {
+		qDebug() << "ERROR:" << errStr;
+		return false;
+	}
+
+	QByteArray zfoData;
+	for (int i = 0; i < messageList.count(); ++i) {
+
+		zfoData = jsonlayer.downloadMessage(messageList.at(i).id,
+		    errStr);
+
+		if (zfoData.isEmpty()) {
+			continue;
+		}
+
+		struct isds_ctx *dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			logError("%s\n", "Cannot create dummy ISDS session.");
+			return false;
+		}
+
+		struct isds_message *message;
+		message = loadZfoData(dummy_session, zfoData,
+		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+		if (NULL == message) {
+			logError("%s\n", "Cannot parse message data.");
+			return false;
+		}
+
+		Task::storeEnvelope(MSG_RECEIVED, *(dbSet), message->envelope);
+		Task::storeMessage(true, MSG_RECEIVED, *(dbSet), message, "");
+	}
+
+	/* get sent message list: webdatovka sent = -1 */
+	messageList.clear();
+	jsonlayer.getMessageList(accoutID, -1, limit, 0, messageList, errStr);
+	if (!errStr.isEmpty()) {
+		qDebug() << "ERROR:" << errStr;
+		return false;
+	}
+
+	for (int i = 0; i < messageList.count(); ++i) {
+
+		zfoData = jsonlayer.downloadMessage(messageList.at(i).id,
+		    errStr);
+
+		if (zfoData.isEmpty()) {
+			continue;
+		}
+
+		struct isds_ctx *dummy_session = isds_ctx_create();
+		if (NULL == dummy_session) {
+			logError("%s\n", "Cannot create dummy ISDS session.");
+			return false;
+		}
+
+		struct isds_message *message;
+		message = loadZfoData(dummy_session, zfoData,
+		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+		if (NULL == message) {
+			logError("%s\n", "Cannot parse message data.");
+			return false;
+		}
+
+		Task::storeEnvelope(MSG_SENT, *(dbSet), message->envelope);
+		Task::storeMessage(true, MSG_SENT, *(dbSet), message, "");
+	}
+
+	return true;
+}
+
+/* ========================================================================= */
+/*
+ * Func: Sync selected account in webdatovka server.
+ */
+bool MainWindow::wdSyncAccount(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return false;
+	}
+
+	QString aID  = userName.split("-").at(1);
+	int accoutID = aID.toInt();
+
+	QString errStr;
+	jsonlayer.syncAccount(accoutID, errStr);
+
+	if (!errStr.isEmpty()) {
+		qDebug() << "ERROR:" << errStr;
+	}
+
+	return wdGetMessageList(userName);
 }

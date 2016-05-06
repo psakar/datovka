@@ -60,6 +60,7 @@ private slots:
 
 signals:
 	void getAccountUserDataboxInfo(AcntSettings);
+	void loginToWebDatovka(bool);
 
 private:
 	void initAccountDialog(void);
