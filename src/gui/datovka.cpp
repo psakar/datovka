@@ -82,6 +82,7 @@
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
+#include "src/worker/task_download_message_list_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
@@ -10605,8 +10606,6 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 {
 	debugFuncCall();
 
-	QString errStr;
-
 	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
 		return false;
 	}
@@ -10619,81 +10618,19 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 
 	QString aID  = userName.split("-").at(1);
 	int accoutID = aID.toInt();
+	int limit = 10;
 
-	QList<JsonLayer::MsgEnvelope> messageList;
+	TaskDownloadMessageListMojeID *task;
 
-	//int limit = MESSAGE_LIST_LIMIT;
-	int limit = 5;
+	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
+	    MSG_RECEIVED, false, limit, accoutID, 0);
+	task->setAutoDelete(true);
+	globWorkPool.assignLo(task);
 
-	/* get received message list: webdatovka received = 1 */
-	jsonlayer.getMessageList(accoutID, 1, limit, 0, messageList, errStr);
-	if (!errStr.isEmpty()) {
-		qDebug() << "ERROR:" << errStr;
-		return false;
-	}
-
-	QByteArray zfoData;
-	for (int i = 0; i < messageList.count(); ++i) {
-
-		zfoData = jsonlayer.downloadMessage(messageList.at(i).id,
-		    errStr);
-
-		if (zfoData.isEmpty()) {
-			continue;
-		}
-
-		struct isds_ctx *dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			logError("%s\n", "Cannot create dummy ISDS session.");
-			return false;
-		}
-
-		struct isds_message *message;
-		message = loadZfoData(dummy_session, zfoData,
-		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-		if (NULL == message) {
-			logError("%s\n", "Cannot parse message data.");
-			return false;
-		}
-
-		Task::storeEnvelope(MSG_RECEIVED, *(dbSet), message->envelope);
-		Task::storeMessage(true, MSG_RECEIVED, *(dbSet), message, "");
-	}
-
-	/* get sent message list: webdatovka sent = -1 */
-	messageList.clear();
-	jsonlayer.getMessageList(accoutID, -1, limit, 0, messageList, errStr);
-	if (!errStr.isEmpty()) {
-		qDebug() << "ERROR:" << errStr;
-		return false;
-	}
-
-	for (int i = 0; i < messageList.count(); ++i) {
-
-		zfoData = jsonlayer.downloadMessage(messageList.at(i).id,
-		    errStr);
-
-		if (zfoData.isEmpty()) {
-			continue;
-		}
-
-		struct isds_ctx *dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			logError("%s\n", "Cannot create dummy ISDS session.");
-			return false;
-		}
-
-		struct isds_message *message;
-		message = loadZfoData(dummy_session, zfoData,
-		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-		if (NULL == message) {
-			logError("%s\n", "Cannot parse message data.");
-			return false;
-		}
-
-		Task::storeEnvelope(MSG_SENT, *(dbSet), message->envelope);
-		Task::storeMessage(true, MSG_SENT, *(dbSet), message, "");
-	}
+	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
+	    MSG_SENT, false, limit, accoutID, 0);
+	task->setAutoDelete(true);
+	globWorkPool.assignLo(task);
 
 	return true;
 }
