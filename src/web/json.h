@@ -95,6 +95,16 @@ public:
 		QString caState;
 	};
 
+	/*!
+	 * @brief Holds information about an tag properties.
+	 */
+	struct Tag {
+	public:
+		int id;
+		QString name;
+		QString color;
+	};
+
 	class MsgEnvelope {
 	public:
 		int id;
@@ -168,6 +178,8 @@ public:
 
 	QByteArray downloadFile(int fileId, QString &errStr);
 
+	bool getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr);
+
 private:
 
 	bool isLoggedToWebDatovka(void);
@@ -185,6 +197,9 @@ private:
 
 	bool parseUserInfo(const QByteArray &content,
 	    JsonLayer::UserInfo &userInfo, QString &errStr);
+
+	bool parseTagList(const QByteArray &content,
+	    QList<JsonLayer::Tag> &tagList, QString &errStr);
 };
 
 extern JsonLayer jsonlayer;

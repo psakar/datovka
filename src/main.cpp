@@ -633,6 +633,18 @@ int main(int argc, char *argv[])
 			    globPref.tagDbPath().toUtf8().constData());
 			return EXIT_FAILURE;
 		}
+
+		globWebDatovkaTagDbPtr = new (std::nothrow) TagDb("tagDbWebDatovka");
+		if (0 == globWebDatovkaTagDbPtr) {
+			logErrorNL("%s", "Cannot allocate webdatovka tag db.");
+			return EXIT_FAILURE;
+		}
+		/* Open tags database. */
+		if (!globWebDatovkaTagDbPtr->openDb(globPref.tagWebDatovkaDbPath())) {
+			logErrorNL("Error opening webdatovka tag db '%s'.",
+			    globPref.tagWebDatovkaDbPath().toUtf8().constData());
+			return EXIT_FAILURE;
+		}
 	}
 
 
@@ -693,6 +705,12 @@ int main(int argc, char *argv[])
 		delete globTagDbPtr;
 		globTagDbPtr = 0;
 	}
+
+	if (0 != globWebDatovkaTagDbPtr) {
+		delete globWebDatovkaTagDbPtr;
+		globWebDatovkaTagDbPtr = 0;
+	}
+
 	if (0 != globMessageDbsPtr) {
 		delete globMessageDbsPtr;
 		globMessageDbsPtr = 0;

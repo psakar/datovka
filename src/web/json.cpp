@@ -242,7 +242,7 @@ bool JsonLayer::getUserInfo(int accountID,
 	QVariantMap vMap;
 	vMap.insert("account", accountID);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "accountinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "userinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
 
 	if (reply.isEmpty()) {
 		return false;
@@ -329,6 +329,27 @@ QByteArray JsonLayer::downloadFile(int fileId, QString &errStr)
 	    + "downloadfile/" + QString::number(fileId)), reply);
 
 	return reply;
+}
+
+
+bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "listtags"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		return false;
+	}
+
+	return parseTagList(reply, tagList, errStr);
 }
 
 
@@ -432,8 +453,7 @@ bool JsonLayer::parseMessageList(const QByteArray &content,
 */
 		QJsonArray tagArray = obj["tags"].toArray();
 		foreach (const QJsonValue &value, tagArray) {
-			QJsonObject tag = value.toObject();
-			mEvnelope._tagList.append(tag["id"].toInt());
+			mEvnelope._tagList.append(value.toInt());
 		}
 
 		messageList.append(mEvnelope);
@@ -466,6 +486,33 @@ bool JsonLayer::parseAccountInfo(const QByteArray &content,
 		return false;
 	}
 
+	QJsonObject account = jsonObject["account"].toObject();
+	accountInfo.key = account["id"].toString();
+	accountInfo.dbID = account["dbID"].toString();
+	accountInfo.dbType = account["dbType"].toString();
+	accountInfo.ic = account["ic"].toString();
+	accountInfo.pnFirstName = account["pnFirstName"].toString();
+	accountInfo.pnMiddleName = account["pnMiddleName"].toString();
+	accountInfo.pnLastName = account["pnLastName"].toString();
+	accountInfo.pnLastNameAtBirth = account["pnLastNameAtBirth"].toString();
+	accountInfo.firmName = account["firmName"].toString();
+	accountInfo.biDate = account["biDate"].toString();
+	accountInfo.biCity = account["biCity"].toString();
+	accountInfo.biCounty = account["biCounty"].toString();
+	accountInfo.biState = account["biState"].toString();
+	accountInfo.adCity = account["adCity"].toString();
+	accountInfo.adStreet = account["adStreet"].toString();
+	accountInfo.adNumberInStreet = account["adNumberInStreet"].toString();
+	accountInfo.adNumberInMunicipality = account["adNumberInMunicipality"].toString();
+	accountInfo.adZipCode = account["adZipCode"].toString();
+	accountInfo.adState = account["adState"].toString();
+	accountInfo.nationality = account["nationality"].toString();
+	accountInfo.identifier = account["identifier"].toString();
+	accountInfo.registryCode = account["registryCode"].toString();
+	accountInfo.dbState = account["dbState"].toInt();
+	accountInfo.dbEffectiveOVM = account["dbEffectiveOVM"].toBool();
+	accountInfo.dbOpenAddressing = account["dbOpenAddressing"].toBool();
+
 	return true;
 }
 
@@ -478,6 +525,56 @@ bool JsonLayer::parseUserInfo(const QByteArray &content,
 	if (!jsonObject["success"].toBool()) {
 		errStr = jsonObject["errmsg"].toString();
 		return false;
+	}
+
+	QJsonObject user = jsonObject["user"].toObject();
+	userInfo.key = user["id"].toString();
+	userInfo.pnFirstName = user["pnFirstName"].toString();
+	userInfo.pnMiddleName = user["pnMiddleName"].toString();
+	userInfo.pnLastName = user["pnLastName"].toString();
+	userInfo.pnFirstName = user["pnFirstName"].toString();
+	userInfo.pnMiddleName = user["pnMiddleName"].toString();
+	userInfo.pnLastName = user["pnLastName"].toString();
+	userInfo.pnLastNameAtBirth = user["pnLastNameAtBirth"].toString();
+	userInfo.adCity = user["adCity"].toString();
+	userInfo.adStreet = user["adStreet"].toString();
+	userInfo.adNumberInStreet = user["adNumberInStreet"].toString();
+	userInfo.adNumberInMunicipality = user["adNumberInMunicipality"].toString();
+	userInfo.adZipCode = user["adZipCode"].toString();
+	userInfo.adState = user["adState"].toString();
+	userInfo.biDate = user["biDate"].toString();
+	userInfo.userType = user["userType"].toString();
+	userInfo.userPrivils = user["userPrivils"].toInt();
+	userInfo.ic = user["ic"].toInt();
+	userInfo.firmName = user["firmName"].toString();
+	userInfo.caStreet = user["caStreet"].toString();
+	userInfo.caCity = user["caCity"].toString();
+	userInfo.caZipCode = user["caZipCode"].toString();
+	userInfo.caState = user["caState"].toString();
+
+	return true;
+}
+
+
+bool JsonLayer::parseTagList(const QByteArray &content,
+    QList<JsonLayer::Tag> &tagList, QString &errStr)
+{
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	QJsonArray tagArray = jsonObject["tags"].toArray();
+
+	foreach (const QJsonValue &value, tagArray) {
+		QJsonObject obj = value.toObject();
+		Tag tag;
+		tag.id = obj["id"].toInt();
+		tag.name = obj["name"].toString();
+		tag.color = obj["color"].toString();
+		tagList.append(tag);
 	}
 
 	return true;

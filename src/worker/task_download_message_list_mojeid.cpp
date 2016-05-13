@@ -34,6 +34,7 @@
 #include "src/worker/task_download_message.h"
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/web/json.h"
+#include "src/io/tag_db.h"
 
 TaskDownloadMessageListMojeID::TaskDownloadMessageListMojeID(
     const QString &userName, MessageDbSet *dbSet,
@@ -201,6 +202,14 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		Task::storeEnvelope(msgDirect, dbSet, message->envelope);
 		Task::storeMessage(true, msgDirect, dbSet, message,
 		    progressLabel);
+
+		qint64 dmID = QString(message->envelope->dmID).toLongLong();
+		globWebDatovkaTagDbPtr->removeAllTagsFromMsg(userName, dmID);
+
+		for (int t = 0; t < messageList.at(i)._tagList.count(); ++t) {
+			globWebDatovkaTagDbPtr->assignTagToMsg(userName,
+			    messageList.at(i)._tagList.at(t), dmID);
+		}
 	}
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);

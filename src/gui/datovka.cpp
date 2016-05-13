@@ -10611,6 +10611,17 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 		return false;
 	}
 
+	QString errStr;
+	QList<JsonLayer::Tag> tagList;
+
+	globWebDatovkaTagDbPtr->deleteAllTags();
+	if (jsonlayer.getTagList(tagList, errStr)) {
+		foreach (const JsonLayer::Tag &tag, tagList) {
+			globWebDatovkaTagDbPtr->insertUpdateWebDatovkaTag(tag.id,
+			    tag.name, tag.color);
+		}
+	}
+
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
@@ -10619,7 +10630,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 
 	QString aID  = userName.split("-").at(1);
 	int accoutID = aID.toInt();
-	int limit = 10;
+	int limit = 1;
 
 	TaskDownloadMessageListMojeID *task;
 
