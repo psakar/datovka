@@ -83,6 +83,7 @@
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"
+#include "src/worker/task_download_message_mojeid.h"
 #include "src/worker/task_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
@@ -3348,23 +3349,38 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName, this)) {
-		return;
-	}
+	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		foreach (const MessageDb::MsgId &id, msgIds) {
+			/* Using prepend() just to outrun other jobs. */
+			TaskDownloadMessageMojeId *task;
 
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
+			task = new (std::nothrow) TaskDownloadMessageMojeId(
+			    userName, dbSet, msgDirection,
+			    /* TODO - webdatovka message id here */
+			    id.dmId);
+			task->setAutoDelete(true);
+			globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		}
+	} else {
 
-	foreach (const MessageDb::MsgId &id, msgIds) {
-		/* Using prepend() just to outrun other jobs. */
-		TaskDownloadMessage *task;
+		if (!isdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName, this)) {
+			return;
+		}
 
-		task = new (std::nothrow) TaskDownloadMessage(
-		    userName, dbSet, msgDirection, id.dmId, id.deliveryTime,
-		    false);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		ui->actionSync_all_accounts->setEnabled(false);
+		ui->actionGet_messages->setEnabled(false);
+
+		foreach (const MessageDb::MsgId &id, msgIds) {
+			/* Using prepend() just to outrun other jobs. */
+			TaskDownloadMessage *task;
+
+			task = new (std::nothrow) TaskDownloadMessage(
+			    userName, dbSet, msgDirection, id.dmId, id.deliveryTime,
+			    false);
+			task->setAutoDelete(true);
+			globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		}
 	}
 }
 

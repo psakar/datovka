@@ -200,8 +200,8 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		}
 
 		Task::storeEnvelope(msgDirect, dbSet, message->envelope);
-		Task::storeMessage(true, msgDirect, dbSet, message,
-		    progressLabel);
+		//Task::storeMessage(true, msgDirect, dbSet, message,
+		//    progressLabel);
 
 		qint64 dmID = QString(message->envelope->dmID).toLongLong();
 		globWebDatovkaTagDbPtr->removeAllTagsFromMsg(userName, dmID);
