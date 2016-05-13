@@ -206,6 +206,52 @@ bool JsonLayer::getAccountList(QList<JsonLayer::AccountInfo> &accountList,
 }
 
 
+bool JsonLayer::getAccountInfo(int accountID,
+    JsonLayer::AccountInfo &accountInfo, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("account", accountID);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "accountinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		return false;
+	}
+
+	return parseAccountInfo(reply, accountInfo, errStr);
+}
+
+
+bool JsonLayer::getUserInfo(int accountID,
+    JsonLayer::UserInfo &userInfo, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("account", accountID);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "accountinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		return false;
+	}
+
+	return parseUserInfo(reply, userInfo, errStr);
+}
+
+
 bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
     int offset, QList<MsgEnvelope> &messageList, QString &errStr)
 {
@@ -398,6 +444,34 @@ bool JsonLayer::parseMessageList(const QByteArray &content,
 
 
 bool JsonLayer::parseSyncAccount(const QByteArray &content, QString &errStr)
+{
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::parseAccountInfo(const QByteArray &content,
+    JsonLayer::AccountInfo &accountInfo, QString &errStr)
+{
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::parseUserInfo(const QByteArray &content,
+    JsonLayer::UserInfo &userInfo, QString &errStr)
 {
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
 	QJsonObject jsonObject = jsonResponse.object();

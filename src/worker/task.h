@@ -46,6 +46,7 @@
 #define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
 #define PL_IMPORT_ZFO_MSG "ImportZfoMessage"
 #define PL_SEND_MESSAGE "SendMessage"
+#define PL_SYNC_ACCOUNT "SyncAccount"
 
 /*!
  * @brief This class contains generic functions that can be used in derived

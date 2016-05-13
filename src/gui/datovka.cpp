@@ -83,6 +83,7 @@
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"
+#include "src/worker/task_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
@@ -10651,12 +10652,11 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 	QString aID  = userName.split("-").at(1);
 	int accoutID = aID.toInt();
 
-	QString errStr;
-	jsonlayer.syncAccount(accoutID, errStr);
+	TaskSyncAccount *task;
 
-	if (!errStr.isEmpty()) {
-		qDebug() << "ERROR:" << errStr;
-	}
+	task = new (std::nothrow) TaskSyncAccount(accoutID);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
 
 	return wdGetMessageList(userName);
 }

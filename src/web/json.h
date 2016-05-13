@@ -153,6 +153,12 @@ public:
 	bool getAccountList(QList<JsonLayer::AccountInfo> &accountList,
 	    QString &errStr);
 
+	bool getAccountInfo(int accountID,
+	    JsonLayer::AccountInfo &accountInfo, QString &errStr);
+
+	bool getUserInfo(int accountID,
+	    JsonLayer::UserInfo &userInfo, QString &errStr);
+
 	bool getMessageList(int accountID, int messageType, int limit,
 	    int offset, QList<MsgEnvelope> &messageList, QString &errStr);
 
@@ -173,6 +179,12 @@ private:
 	    QList<MsgEnvelope> &messageList, QString &errStr);
 
 	bool parseSyncAccount(const QByteArray &content, QString &errStr);
+
+	bool parseAccountInfo(const QByteArray &content,
+	    JsonLayer::AccountInfo &accountInfo, QString &errStr);
+
+	bool parseUserInfo(const QByteArray &content,
+	    JsonLayer::UserInfo &userInfo, QString &errStr);
 };
 
 extern JsonLayer jsonlayer;
