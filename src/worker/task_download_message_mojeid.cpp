@@ -141,10 +141,10 @@ enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessag
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 60);
 
-	Task::storeEnvelope(msgDirect, dbSet, message->envelope);
+	Task::storeEnvelope(msgDirect, dbSet, message->envelope, QString::number(id));
 	emit globMsgProcEmitter.progressChange(progressLabel, 80);
 
-	Task::storeMessage(true, msgDirect, dbSet, message, progressLabel);
+	Task::storeMessage(true, msgDirect, dbSet, message, progressLabel, QString::number(id));
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	logDebugLv0NL("Done with %s().", __func__);

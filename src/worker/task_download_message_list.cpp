@@ -259,7 +259,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 		/* message is not in db (-1) */
 		if (-1 == dmDbMsgStatus) {
-			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
+			Task::storeEnvelope(msgDirect, dbSet, item->envelope,
+			    NULL);
 
 			if (downloadWhole) {
 				QString errMsg;
@@ -283,7 +284,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
 				Task::updateEnvelope(msgDirect, *messageDb,
-				    item->envelope);
+				    item->envelope, NULL);
 			}
 
 			if (MSG_SENT == msgDirect) {
@@ -452,7 +453,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		 * we get proper data from ISDS rather than storing potentially
 		 * guessed values.
 		 */
-		Task::updateEnvelope(msgDirect, *messageDb, envel);
+		Task::updateEnvelope(msgDirect, *messageDb, envel, NULL);
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    envel->dmMessageStatus ?

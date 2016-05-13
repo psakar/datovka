@@ -108,11 +108,13 @@ public:
 	 * @param[in]     msgDirect Received or sent message.
 	 * @param[in,out] dbSet     Database container.
 	 * @param[in]     envel     Message envelope.
+	 * @param[in]     msgId     Message webdatovka id or NULL.
 	 * @return Error state.
 	 */
 	static
 	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
+	    MessageDbSet &dbSet, const struct isds_envelope *envel,
+	    QString msgId);
 
 	/*!
 	 * @brief Store message into database.
@@ -129,7 +131,7 @@ public:
 	qdatovka_error storeMessage(bool signedMsg,
 	    enum MessageDirection msgDirect,
 	    MessageDbSet &dbSet, const struct isds_message *msg,
-	    const QString &progressLabel);
+	    const QString &progressLabel, QString msgId);
 
 	/*!
 	 * @brief Store attachments into database.
@@ -149,11 +151,13 @@ public:
 	 * @param[in]     msgDirect Received or sent message.
 	 * @param[in,out] messageDb Database.
 	 * @param[in]     envel     Message envelope.
+	 * @param[in]     msgId     Message webdatovka id or NULL.
 	 * @return True on success.
 	 */
 	static
 	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
+	    MessageDb &messageDb, const struct isds_envelope *envel,
+	    QString msgId);
 
 private:
 //	/*!

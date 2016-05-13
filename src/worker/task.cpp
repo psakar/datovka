@@ -83,7 +83,8 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 }
 
 qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, const struct isds_envelope *envel)
+    MessageDbSet &dbSet, const struct isds_envelope *envel,
+    QString msgId)
 {
 	debugFuncCall();
 
@@ -106,10 +107,13 @@ qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 
+	if (msgId.isEmpty()) {
+		msgId = "tRecord";
+	}
+
 	/* insert message envelope in db */
 	if (messageDb->msgsInsertMessageEnvelope(dmId,
-	    /* TODO - set correctly next two values */
-	    "tRecord",
+	    msgId,
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,
@@ -168,7 +172,7 @@ qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
 
 qdatovka_error Task::storeMessage(bool signedMsg,
     enum MessageDirection msgDirect, MessageDbSet &dbSet,
-    const struct isds_message *msg, const QString &progressLabel)
+    const struct isds_message *msg, const QString &progressLabel, QString msgId)
 {
 	debugFuncCall();
 
@@ -226,7 +230,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
-	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel)) {
+	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel, msgId)) {
 		logDebugLv0NL("Envelope of message '%" PRId64 "' updated.",
 		    dmID);
 	} else {
@@ -312,7 +316,7 @@ qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
 }
 
 qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
-    MessageDb &messageDb, const struct isds_envelope *envel)
+    MessageDb &messageDb, const struct isds_envelope *envel, QString msgId)
 {
 	debugFuncCall();
 
@@ -330,10 +334,13 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 		}
 	}
 
+	if (msgId.isEmpty()) {
+		msgId = "tReturnedMessage";
+	}
+
 	/* Update message envelope in db. */
 	if (messageDb.msgsUpdateMessageEnvelope(dmId,
-	    /* TODO - set correctly next two values */
-	    "tReturnedMessage",
+	    msgId,
 	    envel->dbIDSender,
 	    envel->dmSender,
 	    envel->dmSenderAddress,

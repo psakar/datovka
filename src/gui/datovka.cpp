@@ -3352,12 +3352,12 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
 		foreach (const MessageDb::MsgId &id, msgIds) {
 			/* Using prepend() just to outrun other jobs. */
+			MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
+			int mId = messageDb->getWebDatokaId(id.dmId);
 			TaskDownloadMessageMojeId *task;
 
 			task = new (std::nothrow) TaskDownloadMessageMojeId(
-			    userName, dbSet, msgDirection,
-			    /* TODO - webdatovka message id here */
-			    id.dmId);
+			    userName, dbSet, msgDirection, mId);
 			task->setAutoDelete(true);
 			globWorkPool.assignLo(task, WorkerPool::PREPEND);
 		}
@@ -10646,17 +10646,17 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 
 	QString aID  = userName.split("-").at(1);
 	int accoutID = aID.toInt();
-	int limit = 1;
+	int limit = MESSAGE_LIST_LIMIT;
 
 	TaskDownloadMessageListMojeID *task;
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_RECEIVED, false, limit, accoutID, 0);
+	    MSG_RECEIVED, globPref.auto_download_whole_messages, limit, accoutID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_SENT, false, limit, accoutID, 0);
+	    MSG_SENT, globPref.auto_download_whole_messages, limit, accoutID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
