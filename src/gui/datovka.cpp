@@ -5220,6 +5220,11 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	if (!isdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return;
@@ -6009,6 +6014,12 @@ void MainWindow::verifySelectedMessage(void)
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	qint64 dmId = -1;
 	QDateTime deliveryTime;
 	{
@@ -10689,4 +10700,23 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 	globWorkPool.assignHi(task);
 
 	return wdGetMessageList(userName);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Func: Show dialog for webdatovka account, that action is not implemented.
+ */
+void MainWindow::showWebDatovkaInfoDialog(const QString &userName,
+    const QString &txt)
+/* ========================================================================= */
+{
+	Q_UNUSED(txt);
+
+	showStatusTextWithTimeout(tr("This action is not supported for MojeID account."));
+	QMessageBox::critical(this, userName + ": " +tr("action is not supported"),
+	    tr("This action is not supported for MojeID account '%1'").arg(
+	    AccountModel::globAccounts[userName].accountName()),
+	    QMessageBox::Ok);
 }

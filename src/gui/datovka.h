@@ -1189,6 +1189,13 @@ private:
 	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
 	    const QString &userName);
 
+	/*!
+	 * @brief Show dialog for webdatovka account
+	 *        that action is not implemented.
+	 * @param[in] userName - account username.
+	 * @param[in] txt        additional info text.
+	 */
+	void showWebDatovkaInfoDialog(const QString &userName, const QString &txt);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
