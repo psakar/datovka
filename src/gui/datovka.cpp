@@ -10538,11 +10538,27 @@ void MainWindow::addOrDeleteMsgTags(void)
 	debugSlotCall();
 
 	QList<qint64> msgIdList;
+	QList<int> msgIdWebDatovkaList;
+
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 
 	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
 		msgIdList.append(idx.data().toLongLong());
+		if (isWebDatovkaAccount(userName)) {
+			QDateTime deliveryTime(msgDeliveryTime(idx));
+			MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+			int mId = messageDb->getWebDatokaId(idx.data().toLongLong());
+			msgIdWebDatovkaList.append(mId);
+		}
 	}
 
 	/*
@@ -10550,10 +10566,8 @@ void MainWindow::addOrDeleteMsgTags(void)
 	 * adding tags to messages.
 	 */
 
-	const QString userName =
-	    m_accountModel.userName(currentAccountModelIndex());
-
-	QDialog *tagsDlg = new DlgTags(userName, msgIdList, this);
+	QDialog *tagsDlg = new DlgTags(userName, msgIdList, msgIdWebDatovkaList,
+	    this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
 

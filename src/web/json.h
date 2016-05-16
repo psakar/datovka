@@ -180,15 +180,19 @@ public:
 
 	bool getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr);
 
-	bool createTag(JsonLayer::Tag &tag, QString &errStr);
+	int createTag(const QString &name, const QString &color,
+	    QString &errStr);
 
-	bool updateTag(const JsonLayer::Tag &tag, QString &errStr);
+	bool updateTag(int tagId, const QString &name,
+	    const QString &color, QString &errStr);
 
 	bool deleteTag(int tagId, QString &errStr);
 
 	bool assignTag(int tagId, int msgId, QString &errStr);
 
 	bool removeTag(int tagId, int msgId, QString &errStr);
+
+	bool removeAllTags(int msgId, QString &errStr);
 
 private:
 
