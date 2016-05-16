@@ -43,7 +43,6 @@
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
-#define DB_MOJEID_NAME_PREFIX "mojeid-"
 
 enum Sorting {
 	UNSORTED = 0,

@@ -533,7 +533,7 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 {
 	TagDb *tagDb = 0;
 
-	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (isWebDatovkaAccount(userName)) {
 		tagDb = globWebDatovkaTagDbPtr;
 	} else {
 		tagDb = globTagDbPtr;
@@ -576,7 +576,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 {
 	TagDb *tagDb = 0;
 
-	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (isWebDatovkaAccount(userName)) {
 		tagDb = globWebDatovkaTagDbPtr;
 	} else {
 		tagDb = globTagDbPtr;

@@ -28,6 +28,7 @@
 #include <QList>
 
 #include "ui_dlg_tags.h"
+#include "src/io/tag_db.h"
 
 /*!
  * @brief Tags management dialogue.
@@ -39,9 +40,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] parent Parent widget.
+	 * @param[in] userName  Account user name.
+	 * @param[in] parent    Parent widget.
 	 */
-	explicit DlgTags(QWidget *parent = 0);
+	explicit DlgTags(const QString &userName, QWidget *parent = 0);
 
 	/*!
 	 * @brief Constructor.
@@ -124,6 +126,7 @@ private:
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */
+	TagDb *m_TagDbPtr; /*!< Tag db pointer. */
 };
 
 #endif /* _DLG_TAGS_H_ */

@@ -89,6 +89,8 @@ public:
 	virtual
 	void run(void) = 0;
 
+protected:
+
 	/*!
 	 * @brief Store message delivery information into database.
 	 *

@@ -3178,7 +3178,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		// webdatovka sync
-		if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		if (isWebDatovkaAccount(userName)) {
 			synchroniseSelectedAccount(userName);
 			continue;
 		}
@@ -3224,7 +3224,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	}
 
 	// webdatovka sync
-	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (isWebDatovkaAccount(userName)) {
 		return wdSyncAccount(userName);
 	}
 
@@ -3349,7 +3349,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (isWebDatovkaAccount(userName)) {
 		foreach (const MessageDb::MsgId &id, msgIds) {
 			/* Using prepend() just to outrun other jobs. */
 			MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
@@ -10508,7 +10508,10 @@ void MainWindow::showTagDlg(void)
  {
 	debugSlotCall();
 
-	QDialog *tagsDlg = new DlgTags(this);
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	QDialog *tagsDlg = new DlgTags(userName, this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
 }
@@ -10623,7 +10626,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 {
 	debugFuncCall();
 
-	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (!isWebDatovkaAccount(userName)) {
 		return false;
 	}
 
@@ -10672,7 +10675,7 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 {
 	debugFuncCall();
 
-	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+	if (!isWebDatovkaAccount(userName)) {
 		return false;
 	}
 

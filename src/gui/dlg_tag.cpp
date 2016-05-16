@@ -27,8 +27,9 @@
 #include "src/gui/dlg_tag.h"
 #include "src/io/tag_db.h"
 
-DlgTag::DlgTag(QWidget *parent)
+DlgTag::DlgTag(bool isWebDatovkaAccount, QWidget *parent)
     : QDialog(parent),
+    m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem()
 {
 	setupUi(this);
@@ -37,8 +38,9 @@ DlgTag::DlgTag(QWidget *parent)
 
 }
 
-DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
+DlgTag::DlgTag(bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent)
     : QDialog(parent),
+    m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem(tag)
 {
 	setupUi(this);
@@ -48,6 +50,12 @@ DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
 
 void DlgTag::initDlg(void)
 {
+	if (m_isWebDatovkaAccount) {
+		m_TagDbPtr = globWebDatovkaTagDbPtr;
+	} else {
+		m_TagDbPtr = globTagDbPtr;
+	}
+
 	this->currentColor->setEnabled(false);
 	this->tagNamelineEdit->setText(m_tagItem.name);
 	setPreviewButtonColor();
@@ -89,9 +97,9 @@ void DlgTag::saveTag(void)
 	Q_ASSERT(TagItem::isValidColourStr(m_tagItem.colour));
 
 	if (m_tagItem.id >= 0) {
-		globTagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
+		m_TagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
 	} else {
-		if (!globTagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
+		if (!m_TagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Tag error"));

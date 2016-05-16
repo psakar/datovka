@@ -59,6 +59,7 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
+#define DB_MOJEID_NAME_PREFIX "mojeid-"
 
 /* return values of Datovka login methods */
 typedef enum {
@@ -249,5 +250,10 @@ QString toBase64(const QString &plain);
  * @brief Computes the size of real (decoded from base64) data.
  */
 int base64RealSize(const QByteArray &b64);
+
+/*!
+ * @brief Test if selected account is WebDatovka (MojeId) account.
+ */
+bool isWebDatovkaAccount(const QString &userName);
 
 #endif /* _COMMON_H_ */
