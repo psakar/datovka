@@ -180,6 +180,16 @@ public:
 
 	bool getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr);
 
+	bool createTag(JsonLayer::Tag &tag, QString &errStr);
+
+	bool updateTag(const JsonLayer::Tag &tag, QString &errStr);
+
+	bool deleteTag(int tagId, QString &errStr);
+
+	bool assignTag(int tagId, int msgId, QString &errStr);
+
+	bool removeTag(int tagId, int msgId, QString &errStr);
+
 private:
 
 	bool isLoggedToWebDatovka(void);

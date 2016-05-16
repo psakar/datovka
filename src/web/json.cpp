@@ -77,7 +77,6 @@ bool JsonLayer::isLoggedToWebDatovka(void)
 }
 
 
-
 bool JsonLayer::pingServer(QString &errStr)
 {
 	QByteArray reply;
@@ -245,6 +244,7 @@ bool JsonLayer::getUserInfo(int accountID,
 	    + "userinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
 
 	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
 		return false;
 	}
 
@@ -271,6 +271,7 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 	    + "messageslist"), QJsonDocument::fromVariant(vMap).toJson(), reply);
 
 	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
 		return false;
 	}
 
@@ -293,6 +294,7 @@ bool JsonLayer::syncAccount(int accountID, QString &errStr)
 	    + "synchronize"), QJsonDocument::fromVariant(vMap).toJson(), reply);
 
 	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
 		return false;
 	}
 
@@ -346,10 +348,175 @@ bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
 	    + "listtags"), QJsonDocument::fromVariant(vMap).toJson(), reply);
 
 	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
 		return false;
 	}
 
 	return parseTagList(reply, tagList, errStr);
+}
+
+
+bool JsonLayer::createTag(JsonLayer::Tag &tag, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("name", tag.name);
+	vMap.insert("color", tag.color);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "newtag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+	if (!jsonObject["nameExists"].toBool()) {
+		return false;
+	}
+	tag.id = jsonObject["id"].toInt();
+
+	return true;
+}
+
+
+bool JsonLayer::updateTag(const JsonLayer::Tag &tag, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("id", tag.id);
+	vMap.insert("name", tag.name);
+	vMap.insert("color", tag.color);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "edittag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+	if (!jsonObject["nameExists"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::deleteTag(int tagId, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("id", tagId);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "deletetag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::assignTag(int tagId, int msgId, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("id", tagId);
+	vMap.insert("msgid", msgId);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "tagmsg/add"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("id", tagId);
+	vMap.insert("msgid", msgId);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "tagmsg/remove"), QJsonDocument::fromVariant(vMap).toJson(),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
 }
 
 
