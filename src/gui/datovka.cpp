@@ -55,6 +55,7 @@
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -5220,14 +5221,11 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (isWebDatovkaAccount(userName)) {
-		showWebDatovkaInfoDialog(userName, "");
-		return;
-	}
-
-	if (!isdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName, this)) {
-		return;
+	if (!isWebDatovkaAccount(userName)) {
+		if (!isdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName, this)) {
+			return;
+		}
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -5245,9 +5243,16 @@ void MainWindow::findDatabox(void)
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
-	dsSearch->exec();
+	if (isWebDatovkaAccount(userName)) {
+		QDialog *dsSearch =
+		    new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_BLANK, 0,
+		    dbType, dbEffectiveOVM, this, userName);
+		dsSearch->exec();
+	} else {
+		QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
+		    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
+		dsSearch->exec();
+	}
 }
 
 

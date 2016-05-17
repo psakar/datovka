@@ -111,7 +111,7 @@ public:
 	 */
 	struct Recipient {
 	public:
-		int id;
+		QString id;
 		QString name;
 		QString address;
 		int type;
@@ -207,7 +207,7 @@ public:
 
 	bool removeAllTags(int msgId, QString &errStr);
 
-	bool searchRecipient(const QString &word, int position,
+	bool searchRecipient(int accountID, const QString &word, int position,
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 

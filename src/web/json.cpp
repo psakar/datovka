@@ -544,7 +544,7 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 }
 
 
-bool JsonLayer::searchRecipient(const QString &word, int position,
+bool JsonLayer::searchRecipient(int accountID, const QString &word, int position,
     QList<JsonLayer::Recipient> &resultList, bool &hasMore,
     QString &errStr)
 {
@@ -556,7 +556,8 @@ bool JsonLayer::searchRecipient(const QString &word, int position,
 	}
 
 	QVariantMap vMap;
-	vMap.insert("word", word);
+	vMap.insert("account", accountID);
+	vMap.insert("needle", word);
 	vMap.insert("position", position);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "searchrecipient"), QJsonDocument::fromVariant(vMap).toJson(),
@@ -817,7 +818,7 @@ bool JsonLayer::parseSearchRecipient(const QByteArray &content,
 	foreach (const QJsonValue &value, recipientArray) {
 		QJsonObject obj = value.toObject();
 		Recipient rec;
-		rec.id = obj["id"].toInt();
+		rec.id = obj["id"].toString();
 		rec.name = obj["name"].toString();
 		rec.address = obj["address"].toString();
 		rec.type = obj["type"].toInt();
