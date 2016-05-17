@@ -214,9 +214,6 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 		qDebug() << reqName << ":" << reqValue;
 	}
 	qDebug() << "--------------------Content------------------------";
-	//qDebug() << outData;
-	qDebug() << "===================================================";
-	qDebug() << "";
 #endif
 
 	switch (statusCode) {
@@ -224,7 +221,6 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 	case 200: /* HTTP status 200 OK */
 		{
 			outData = reply->readAll();
-
 		}
 		break;
 

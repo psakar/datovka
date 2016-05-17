@@ -118,7 +118,9 @@ void DlgTag::saveTag(void)
 
 	} else {
 		if (m_isWebDatovkaAccount) {
-			int tagId = jsLayer.createTag(m_tagItem.name, m_tagItem.colour, errStr);
+
+			int tagId = jsLayer.createTag(m_tagItem.name,
+			    m_tagItem.colour, errStr);
 			if (tagId <= 0) {
 				msgBox.setWindowTitle(tr("Tag insert error"));
 				msgBox.setText(tr("Tag with name '%1'' wasn't' "

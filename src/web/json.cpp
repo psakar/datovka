@@ -87,7 +87,7 @@ bool JsonLayer::pingServer(QString &errStr)
 	}
 
 	netmanager.createGetRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "ping/"), reply);
+	    + "ping"), reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -383,9 +383,6 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 		errStr = jsonObject["errmsg"].toString();
 		return -1;
 	}
-	if (!jsonObject["nameExists"].toBool()) {
-		return -1;
-	}
 	return jsonObject["id"].toInt();
 }
 
@@ -415,10 +412,6 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
 	if (!jsonObject["success"].toBool()) {
-		errStr = jsonObject["errmsg"].toString();
-		return false;
-	}
-	if (!jsonObject["nameExists"].toBool()) {
 		errStr = jsonObject["errmsg"].toString();
 		return false;
 	}
@@ -548,6 +541,33 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 	}
 
 	return true;
+}
+
+
+bool JsonLayer::searchRecipient(const QString &word, int position,
+    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
+    QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QVariantMap vMap;
+	vMap.insert("word", word);
+	vMap.insert("position", position);
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "searchrecipient"), QJsonDocument::fromVariant(vMap).toJson(),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	return parseSearchRecipient(reply, resultList, hasMore, errStr);
 }
 
 
@@ -773,6 +793,36 @@ bool JsonLayer::parseTagList(const QByteArray &content,
 		tag.name = obj["name"].toString();
 		tag.color = obj["color"].toString();
 		tagList.append(tag);
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::parseSearchRecipient(const QByteArray &content,
+    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
+    QString &errStr)
+{
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	hasMore = jsonObject["hasMore"].toBool();
+
+	QJsonArray recipientArray = jsonObject["results"].toArray();
+
+	foreach (const QJsonValue &value, recipientArray) {
+		QJsonObject obj = value.toObject();
+		Recipient rec;
+		rec.id = obj["id"].toInt();
+		rec.name = obj["name"].toString();
+		rec.address = obj["address"].toString();
+		rec.type = obj["type"].toInt();
+		rec.effectiveOVM = obj["effectiveOVM"].toBool();
+		resultList.append(rec);
 	}
 
 	return true;

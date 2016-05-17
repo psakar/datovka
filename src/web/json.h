@@ -105,6 +105,19 @@ public:
 		QString color;
 	};
 
+
+	/*!
+	 * @brief Holds data about recipient
+	 */
+	struct Recipient {
+	public:
+		int id;
+		QString name;
+		QString address;
+		int type;
+		bool effectiveOVM;
+	};
+
 	class MsgEnvelope {
 	public:
 		int id;
@@ -194,6 +207,10 @@ public:
 
 	bool removeAllTags(int msgId, QString &errStr);
 
+	bool searchRecipient(const QString &word, int position,
+	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
+	    QString &errStr);
+
 private:
 
 	bool isLoggedToWebDatovka(void);
@@ -214,6 +231,10 @@ private:
 
 	bool parseTagList(const QByteArray &content,
 	    QList<JsonLayer::Tag> &tagList, QString &errStr);
+
+	bool parseSearchRecipient(const QByteArray &content,
+	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
+	    QString &errStr);
 };
 
 extern JsonLayer jsonlayer;
