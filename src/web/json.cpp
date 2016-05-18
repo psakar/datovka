@@ -109,10 +109,12 @@ bool JsonLayer::createAccount(const QString &name, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("name", name);
+	QJsonObject rootObj;
+	rootObj["name"] = name;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "newaccount"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "newaccount"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
@@ -140,12 +142,13 @@ bool JsonLayer::renameAccount(int accountID, const QString &newName,
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
-	vMap.insert("name", newName);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+	rootObj["name"] = newName;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "renameaccount"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
@@ -168,10 +171,12 @@ bool JsonLayer::deleteAccount(int accountID, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "deleteaccount"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "deleteaccount"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
@@ -216,10 +221,13 @@ bool JsonLayer::getAccountInfo(int accountID,
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "accountinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "accountinfo"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		return false;
@@ -239,10 +247,13 @@ bool JsonLayer::getUserInfo(int accountID,
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "userinfo"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "userinfo"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -263,14 +274,15 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
-	vMap.insert("folder", messageType);
-	vMap.insert("offset", offset);
-	vMap.insert("limit", limit);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+	rootObj["folder"] = messageType;
+	rootObj["offset"] = offset;
+	rootObj["limit"] = limit;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "messageslist"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -291,10 +303,13 @@ bool JsonLayer::syncAccount(int accountID, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "synchronize"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "synchronize"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -346,9 +361,11 @@ bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
+	QJsonObject rootObj;
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "listtags"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "listtags"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -369,12 +386,13 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 		return -1;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("name", name);
-	vMap.insert("color", color);
+	QJsonObject rootObj;
+	rootObj["name"] = name;
+	rootObj["color"] = color;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "newtag"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -402,13 +420,14 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("id", tagId);
-	vMap.insert("name", name);
-	vMap.insert("color", color);
+	QJsonObject rootObj;
+	rootObj["id"] = tagId;
+	rootObj["name"] = name;
+	rootObj["color"] = color;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "edittag"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -436,10 +455,12 @@ bool JsonLayer::deleteTag(int tagId, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("id", tagId);
+	QJsonObject rootObj;
+	rootObj["id"] = tagId;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "deletetag"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "deletetag"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -467,12 +488,13 @@ bool JsonLayer::assignTag(int tagId, int msgId, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("id", tagId);
-	vMap.insert("msgid", msgId);
+	QJsonObject rootObj;
+	rootObj["id"] = tagId;
+	rootObj["msgid"] = msgId;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "tagmsg/add"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -500,12 +522,13 @@ bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("id", tagId);
-	vMap.insert("msgid", msgId);
+	QJsonObject rootObj;
+	rootObj["id"] = tagId;
+	rootObj["msgid"] = msgId;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "tagmsg/remove"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -533,10 +556,12 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("msgid", msgId);
+	QJsonObject rootObj;
+	rootObj["msgid"] = msgId;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/removeall"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "tagmsg/removeall"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -566,13 +591,14 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 		return false;
 	}
 
-	QVariantMap vMap;
-	vMap.insert("account", accountID);
-	vMap.insert("needle", word);
-	vMap.insert("position", position);
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+	rootObj["needle"] = word;
+	rootObj["position"] = position;
+
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
 	    + "searchrecipient"),
-	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
