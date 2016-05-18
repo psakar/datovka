@@ -105,20 +105,29 @@ public:
 		QString color;
 	};
 
-
 	/*!
 	 * @brief Holds data about recipient
 	 */
 	struct Recipient {
 	public:
-		QString id;
-		QString name;
-		QString address;
-		int type;
+		QString recipientDbId;
+		QString recipientName;
+		QString recipientAddress;
+		int dbType;
 		bool effectiveOVM;
+		QString toHands;
 	};
 
-	class MsgEnvelope {
+	/*!
+	 * @brief Holds file data
+	 */
+	struct File {
+	public:
+		QString fName;
+		QByteArray fContent;
+	};
+
+	class Envelope {
 	public:
 		int id;
 		qint64 dmID;
@@ -157,6 +166,17 @@ public:
 		QList<int> _tagList;
 	};
 
+
+	/*!
+	 * @brief Holds send result data/ error
+	 */
+	struct SendResult {
+	public:
+		QString dbID;
+		QString msg;
+	};
+
+
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
@@ -183,7 +203,8 @@ public:
 	    JsonLayer::UserInfo &userInfo, QString &errStr);
 
 	bool getMessageList(int accountID, int messageType, int limit,
-	    int offset, QList<MsgEnvelope> &messageList, QString &errStr);
+	    int offset, QList<JsonLayer::Envelope> &messageList,
+	    QString &errStr);
 
 	bool syncAccount(int accountID, QString &errStr);
 
@@ -211,6 +232,12 @@ public:
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 
+	bool sendMessage(int accountID,
+	    const QList<JsonLayer::Recipient> &recipientList,
+	    const JsonLayer::Envelope &envelope,
+	    const QList<JsonLayer::File> &fileList,
+	    QList<JsonLayer::SendResult> &resultList, QString &errStr);
+
 private:
 
 	bool isLoggedToWebDatovka(void);
@@ -219,7 +246,7 @@ private:
 	    QList<JsonLayer::AccountInfo> &accountList, QString &errStr);
 
 	bool parseMessageList(const QByteArray &content,
-	    QList<MsgEnvelope> &messageList, QString &errStr);
+	    QList<JsonLayer::Envelope> &messageList, QString &errStr);
 
 	bool parseSyncAccount(const QByteArray &content, QString &errStr);
 

@@ -157,13 +157,13 @@ void DlgDsSearchMojeId::searchDataBox(void)
 		item->setCheckState(Qt::Unchecked);
 		this->resultsTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(recipient.id);
+		item->setText(recipient.recipientDbId);
 		this->resultsTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(recipient.name);
+		item->setText(recipient.recipientName);
 		this->resultsTableWidget->setItem(row,2,item);
 		item = new QTableWidgetItem;
-		item->setText(recipient.address);
+		item->setText(recipient.recipientAddress);
 		this->resultsTableWidget->setItem(row,3,item);
 	}
 

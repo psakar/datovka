@@ -144,7 +144,8 @@ bool JsonLayer::renameAccount(int accountID, const QString &newName,
 	vMap.insert("account", accountID);
 	vMap.insert("name", newName);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "renameaccount"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "renameaccount"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
 	    reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
@@ -253,7 +254,7 @@ bool JsonLayer::getUserInfo(int accountID,
 
 
 bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
-    int offset, QList<MsgEnvelope> &messageList, QString &errStr)
+    int offset, QList<JsonLayer::Envelope> &messageList, QString &errStr)
 {
 	QByteArray reply;
 
@@ -268,7 +269,9 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 	vMap.insert("offset", offset);
 	vMap.insert("limit", limit);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "messageslist"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "messageslist"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -370,7 +373,9 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 	vMap.insert("name", name);
 	vMap.insert("color", color);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "newtag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "newtag"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -402,7 +407,9 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 	vMap.insert("name", name);
 	vMap.insert("color", color);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "edittag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "edittag"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -432,7 +439,8 @@ bool JsonLayer::deleteTag(int tagId, QString &errStr)
 	QVariantMap vMap;
 	vMap.insert("id", tagId);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "deletetag"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "deletetag"), QJsonDocument::fromVariant(vMap).toJson(),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -463,7 +471,9 @@ bool JsonLayer::assignTag(int tagId, int msgId, QString &errStr)
 	vMap.insert("id", tagId);
 	vMap.insert("msgid", msgId);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/add"), QJsonDocument::fromVariant(vMap).toJson(), reply);
+	    + "tagmsg/add"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
+	    reply);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -494,7 +504,8 @@ bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
 	vMap.insert("id", tagId);
 	vMap.insert("msgid", msgId);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/remove"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "tagmsg/remove"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -560,7 +571,8 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 	vMap.insert("needle", word);
 	vMap.insert("position", position);
 	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "searchrecipient"), QJsonDocument::fromVariant(vMap).toJson(),
+	    + "searchrecipient"),
+	    QJsonDocument::fromVariant(vMap).toJson(QJsonDocument::Compact),
 	    reply);
 
 	if (reply.isEmpty()) {
@@ -569,6 +581,89 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 	}
 
 	return parseSearchRecipient(reply, resultList, hasMore, errStr);
+}
+
+
+bool JsonLayer::sendMessage(int accountID,
+    const QList<JsonLayer::Recipient> &recipientList,
+    const JsonLayer::Envelope &envelope,
+    const QList<JsonLayer::File> &fileList,
+    QList<JsonLayer::SendResult> &resultList, QString &errStr)
+{
+	QByteArray reply;
+
+	if (!isLoggedToWebDatovka()) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QJsonArray recipienList;
+	foreach (const JsonLayer::Recipient &recipient, recipientList) {
+		QJsonObject recData;
+		recData["db_id_recipient"] = recipient.recipientDbId;
+		recData["name"] = recipient.recipientName;
+		recData["address"] = recipient.recipientAddress;
+		recData["dm_to_hands"] = recipient.toHands;
+		recData["effective_ovm"] = recipient.effectiveOVM;
+		recData["db_type"] = recipient.dbType;
+		recipienList.append(recData);
+	}
+
+	QJsonObject msgEnvelope;
+	msgEnvelope["dm_annotation"] = envelope.dmAnnotation;
+	msgEnvelope["dm_recipient_ident"] = envelope.dmRecipientIdent;
+	msgEnvelope["dm_recipient_ref_number"] = envelope.dmRecipientRefNumber;
+	msgEnvelope["dm_sender_ident"] = envelope.dmSenderIdent;
+	msgEnvelope["dm_sender_ref_number"] = envelope.dmSenderRefNumber;
+	msgEnvelope["dm_legal_title_law"] = envelope.dmLegalTitleLaw;
+	msgEnvelope["dm_legal_title_par"] = envelope.dmLegalTitlePar;
+	msgEnvelope["dm_legal_title_point"] = envelope.dmLegalTitlePoint;
+	msgEnvelope["dm_legal_title_sect"] = envelope.dmLegalTitleSect;
+	msgEnvelope["dm_legal_title_year"] = envelope.dmLegalTitleYear;
+	msgEnvelope["dm_personal_delivery"] = envelope.dmPersonalDelivery;
+	msgEnvelope["dm_allow_subst_delivery"] = envelope.dmAllowSubstDelivery;
+
+	QJsonArray files;
+	foreach (const JsonLayer::File &file, fileList) {
+		QJsonObject fileData;
+		fileData["file_name"] = file.fName;
+		fileData["file_content"] = QString(file.fContent.toBase64());
+		files.append(fileData);
+	}
+
+	QJsonObject rootObj;
+	rootObj["account"] = accountID;
+	rootObj["recipients"] = recipienList;
+	rootObj["envelope"] = msgEnvelope;
+	rootObj["files"] = files;
+
+	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
+	    + "sendmessage"),
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	QJsonArray errorArray = jsonObject["errors"].toArray();
+	foreach (const QJsonValue &value, errorArray) {
+		QJsonObject obj = value.toObject();
+		JsonLayer::SendResult result;
+		result.dbID = obj["dbID"].toString();
+		result.msg = obj["msg"].toString();
+		resultList.append(result);
+	}
+
+	return true;
 }
 
 
@@ -617,7 +712,7 @@ bool JsonLayer::parseAccountList(const QByteArray &content,
 
 
 bool JsonLayer::parseMessageList(const QByteArray &content,
-    QList<MsgEnvelope> &messageList, QString &errStr)
+    QList<JsonLayer::Envelope> &messageList, QString &errStr)
 {
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -630,7 +725,7 @@ bool JsonLayer::parseMessageList(const QByteArray &content,
 
 	foreach (const QJsonValue &value, messageArray) {
 		QJsonObject obj = value.toObject();
-		MsgEnvelope mEvnelope;
+		Envelope mEvnelope;
 		mEvnelope._tagList.clear();
 		mEvnelope.id = obj["id"].toInt();
 		mEvnelope.dmDeliveryTime = obj["date"].toString();
@@ -818,11 +913,12 @@ bool JsonLayer::parseSearchRecipient(const QByteArray &content,
 	foreach (const QJsonValue &value, recipientArray) {
 		QJsonObject obj = value.toObject();
 		Recipient rec;
-		rec.id = obj["id"].toString();
-		rec.name = obj["name"].toString();
-		rec.address = obj["address"].toString();
-		rec.type = obj["type"].toInt();
+		rec.recipientDbId = obj["id"].toString();
+		rec.recipientName = obj["name"].toString();
+		rec.recipientAddress = obj["address"].toString();
+		rec.dbType = obj["type"].toInt();
 		rec.effectiveOVM = obj["effectiveOVM"].toBool();
+		rec.toHands = "";
 		resultList.append(rec);
 	}
 

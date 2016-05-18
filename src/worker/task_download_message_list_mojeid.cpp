@@ -141,7 +141,7 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 10);
 
-	QList<JsonLayer::MsgEnvelope> messageList;
+	QList<JsonLayer::Envelope> messageList;
 
 	/* webdatovka message types */
 	int msgType = 1;
