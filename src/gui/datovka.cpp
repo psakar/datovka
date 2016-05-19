@@ -193,6 +193,10 @@ MainWindow::MainWindow(QWidget *parent)
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageMojeIdFinished(int, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(int, QStringList,  QString)));
+
 	connect(&globWorkPool, SIGNAL(assignedFinished()),
 	    this, SLOT(backgroundWorkersFinished()));
 
@@ -10678,19 +10682,19 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	}
 
 	QString aID  = userName.split("-").at(1);
-	int accoutID = aID.toInt();
+	int accountID = aID.toInt();
 	int limit = MESSAGE_LIST_LIMIT;
 	//int limit = 2;
 
 	TaskDownloadMessageListMojeID *task;
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_RECEIVED, globPref.auto_download_whole_messages, limit, accoutID, 0);
+	    MSG_RECEIVED, globPref.auto_download_whole_messages, limit, accountID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_SENT, globPref.auto_download_whole_messages, limit, accoutID, 0);
+	    MSG_SENT, globPref.auto_download_whole_messages, limit, accountID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
@@ -10739,4 +10743,40 @@ void MainWindow::showWebDatovkaInfoDialog(const QString &userName,
 	    tr("This action is not supported for MojeID account '%1'").arg(
 	    AccountModel::globAccounts[userName].accountName()),
 	    QMessageBox::Ok);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Performs action depending on webdatovka message send outcome.
+ */
+void MainWindow::sendMessageMojeIdAction(int accountID,
+    const QStringList &result, const QString &error)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	const QString userName =
+	     DB_MOJEID_NAME_PREFIX + QString::number(accountID);
+
+	if (!error.isEmpty()) {
+		qDebug() << error;
+		return;
+	}
+
+	if (result.isEmpty()) {
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (0 == dbSet) {
+			return;
+		}
+
+		int limit = MESSAGE_LIST_LIMIT;
+		TaskDownloadMessageListMojeID *task;
+
+		task = new (std::nothrow) TaskDownloadMessageListMojeID(
+		    userName, dbSet, MSG_SENT,
+		    globPref.auto_download_whole_messages, limit, accountID, 0);
+		task->setAutoDelete(true);
+		globWorkPool.assignLo(task);
+	}
 }

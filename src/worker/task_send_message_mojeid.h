@@ -51,13 +51,11 @@ public:
 	 * @param[in]      recipientList   List of recipients.
 	 * @param[in]      envelope        Envelope data.
 	 * @param[in]      fileList        List of attachments.
-	 * @param[in, out] resultList      ResultList.
 	 */
 	explicit TaskSendMessageMojeId(
 	    int accountID, const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
-	    const QList<JsonLayer::File> &fileList,
-	    QList<JsonLayer::SendResult> &resultList);
+	    const QList<JsonLayer::File> &fileList);
 
 	/*!
 	 * @brief Performs actual message sending.
@@ -79,8 +77,9 @@ private:
 	 * @param[in]      recipientList   List of recipients.
 	 * @param[in]      envelope        Envelope data.
 	 * @param[in]      fileList        List of attachments.
-	 * @param[in, out] resultList      ResultList.
 	 * @param[in]      progressLabel   Progress-bar label.
+	 * @param[out]     resultList      ResultList.
+	 * @param[out]     error           Error message.
 	 * @return Error state.
 	 */
 	static
@@ -88,14 +87,16 @@ private:
 	    int accountID, const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
-	    QList<JsonLayer::SendResult> &resultList,
-	    const QString &progressLabel);
+	    const QString &progressLabel,
+	    QStringList &resultList,
+	    QString &error);
 
 	const int m_accountID; /*!< Account id of webdatovka. */
 	const QList<JsonLayer::Recipient> m_recipientList; /*!< List of recipients. */
 	const JsonLayer::Envelope m_envelope; /*!< Envelope data. */
 	const QList<JsonLayer::File> m_fileList; /*!< List of attachments. */
-	QList<JsonLayer::SendResult> m_resultList; /*!< ResultList. */
+	QStringList m_resultList; /*!< ResultList. */
+	QString m_error;
 };
 
 #endif /* _TASK_SEND_MESSAGE_MOJEID_H_ */

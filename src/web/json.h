@@ -166,17 +166,6 @@ public:
 		QList<int> _tagList;
 	};
 
-
-	/*!
-	 * @brief Holds send result data/ error
-	 */
-	struct SendResult {
-	public:
-		QString dbID;
-		QString msg;
-	};
-
-
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
@@ -236,7 +225,7 @@ public:
 	    const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
-	    QList<JsonLayer::SendResult> &resultList, QString &errStr);
+	    QStringList &resultList, QString &errStr);
 
 private:
 

@@ -205,6 +205,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageMojeIdFinished(int, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(int, QStringList,  QString)));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -1322,5 +1325,62 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 		item = new QTableWidgetItem;
 		item->setText("n/a");
 		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Performs action depending on webdatovka message send outcome.
+ */
+void DlgSendMessage::sendMessageMojeIdAction(int accountID,
+    const QStringList &result, const QString &error)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	const QString userName =
+	     DB_MOJEID_NAME_PREFIX + QString::number(accountID);
+
+	if (!error.isEmpty()) {
+		qDebug() << error;
+		return;
+	}
+
+	QString detailText;
+
+	if (result.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message sent"));
+		msgBox.setText("<b>" +
+		    tr("Message has successfully been sent to all recipients.") +
+		    "</b>");
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		this->accept(); /* Set return code to accepted. */
+		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+	} else {
+		for (int i = 0; i < result.count(); ++i) {
+			QString msg = result.at(i);
+			detailText += msg.replace("§", ": ");
+		}
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message sending error"));
+		msgBox.setText("<b>" +
+		    tr("Message has NOT been sent to all recipients.") +
+		    "</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") + "</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			this->close(); /* Set return code to closed. */
+			emit doActionAfterSentMsgSignal(m_userName,
+			    m_lastAttAddPath);
+		}
 	}
 }

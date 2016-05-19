@@ -30,14 +30,14 @@
 
 TaskSendMessageMojeId::TaskSendMessageMojeId(
     int accountID, const QList<JsonLayer::Recipient> &recipientList,
-    const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList,
-    QList<JsonLayer::SendResult> &resultList)
+    const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList)
     :
     m_accountID(accountID),
     m_recipientList(recipientList),
     m_envelope(envelope),
     m_fileList(fileList),
-    m_resultList(resultList)
+    m_resultList(QStringList()),
+    m_error(QString())
 {
 }
 
@@ -50,7 +50,10 @@ void TaskSendMessageMojeId::run(void)
 	/* ### Worker task begin. ### */
 
 	sendMessage(m_accountID, m_recipientList, m_envelope,
-	    m_fileList, m_resultList, PL_SEND_MESSAGE);
+	    m_fileList, PL_SEND_MESSAGE, m_resultList, m_error);
+
+	emit globMsgProcEmitter.sendMessageMojeIdFinished(m_accountID,
+	    m_resultList, m_error);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -63,10 +66,9 @@ void TaskSendMessageMojeId::run(void)
 enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
     int accountID, const QList<JsonLayer::Recipient> &recipientList,
     const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList,
-    QList<JsonLayer::SendResult> &resultList, const QString &progressLabel)
+    const QString &progressLabel, QStringList &resultList,
+    QString &errStr)
 {
-	QString errStr;
-
 	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
 	JsonLayer ljsonlayer;

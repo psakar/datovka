@@ -72,6 +72,8 @@ private slots:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
+	void sendMessageMojeIdAction(int accountID,
+	    const QStringList &result, const QString &error);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
 	void tableItemDoubleClicked(QTableWidgetItem *item);

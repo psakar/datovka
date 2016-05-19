@@ -86,7 +86,7 @@ signals:
 	 */
 	void progressChange(const QString &label, int value);
 
-	/*
+	/*!
 	 * @brief Emitted when send message finishes.
 	 *
 	 * @param[in] userName      Account identifier (user login name).
@@ -103,6 +103,16 @@ signals:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
+
+	/*!
+	 * @brief Emitted when mojeid send message finishes.
+	 *
+	 * @param[in] int           Account id from webdatovka.
+	 * @param[in] resultList    ResultList from webdatovka.
+	 * @param[in] error         Error message from netmanager.
+	 */
+	void sendMessageMojeIdFinished(int accountID,
+	    QStringList &resultList, QString &errStr);
 };
 
 /*!

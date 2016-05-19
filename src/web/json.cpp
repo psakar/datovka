@@ -614,7 +614,7 @@ bool JsonLayer::sendMessage(int accountID,
     const QList<JsonLayer::Recipient> &recipientList,
     const JsonLayer::Envelope &envelope,
     const QList<JsonLayer::File> &fileList,
-    QList<JsonLayer::SendResult> &resultList, QString &errStr)
+    QStringList &resultList, QString &errStr)
 {
 	QByteArray reply;
 
@@ -680,12 +680,11 @@ bool JsonLayer::sendMessage(int accountID,
 		return false;
 	}
 
+	QString result;
 	QJsonArray errorArray = jsonObject["errors"].toArray();
 	foreach (const QJsonValue &value, errorArray) {
 		QJsonObject obj = value.toObject();
-		JsonLayer::SendResult result;
-		result.dbID = obj["dbID"].toString();
-		result.msg = obj["msg"].toString();
+		result = obj["dbID"].toString() + "§" + obj["msg"].toString();
 		resultList.append(result);
 	}
 

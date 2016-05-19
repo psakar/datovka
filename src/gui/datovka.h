@@ -162,6 +162,12 @@ private slots:
 	    bool isPDZ, qint64 dmId);
 
 	/*!
+	 * @brief Performs action depending on webdatovka message send outcome.
+	 */
+	void sendMessageMojeIdAction(int accountID,
+	    const QStringList &result, const QString &error);
+
+	/*!
 	 * @brief Version response slot.
 	 */
 	void datovkaVersionResponce(QNetworkReply* reply);
