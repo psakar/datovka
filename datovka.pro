@@ -328,7 +328,8 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_download_user_info_mojeid.cpp \
     src/worker/task_get_account_list_mojeid.cpp \
     src/worker/task_download_message_mojeid.cpp \
-    src/gui/dlg_search_mojeid.cpp
+    src/gui/dlg_search_mojeid.cpp \
+    src/worker/task_send_message_mojeid.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -413,7 +414,8 @@ HEADERS += src/cli/cli.h \
     src/worker/task_download_user_info_mojeid.h \
     src/worker/task_get_account_list_mojeid.h \
     src/worker/task_download_message_mojeid.h \
-    src/gui/dlg_search_mojeid.h
+    src/gui/dlg_search_mojeid.h \
+    src/worker/task_send_message_mojeid.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \

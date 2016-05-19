@@ -23,51 +23,57 @@
 
 #include <QThread>
 
-#include "src/io/account_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_get_account_list_mojeid.h"
-#include "src/web/json.h"
+#include "src/worker/task_send_message_mojeid.h"
 
-TaskGetAccountListMojeId::TaskGetAccountListMojeId(void)
-    : m_success(false),
-    m_isdsError()
+
+TaskSendMessageMojeId::TaskSendMessageMojeId(
+    int accountID, const QList<JsonLayer::Recipient> &recipientList,
+    const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList,
+    QList<JsonLayer::SendResult> &resultList)
+    :
+    m_accountID(accountID),
+    m_recipientList(recipientList),
+    m_envelope(envelope),
+    m_fileList(fileList),
+    m_resultList(resultList)
 {
 }
 
-void TaskGetAccountListMojeId::run(void)
-{
 
-	logDebugLv0NL("Starting download account list task in thread '%p'",
+void TaskSendMessageMojeId::run(void)
+{
+	logDebugLv0NL("Starting send message task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_success = getAccountList(m_isdsError);
+	sendMessage(m_accountID, m_recipientList, m_envelope,
+	    m_fileList, m_resultList, PL_SEND_MESSAGE);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download account list task finished in thread '%p'",
+	logDebugLv0NL("Send message task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
 
-bool TaskGetAccountListMojeId::getAccountList(QString &error)
+enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
+    int accountID, const QList<JsonLayer::Recipient> &recipientList,
+    const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList,
+    QList<JsonLayer::SendResult> &resultList, const QString &progressLabel)
 {
-	QList<JsonLayer::AccountInfo> accountList;
+	QString errStr;
 
-	JsonLayer ljsonLayer;
-	ljsonLayer.getAccountList(accountList, error);
+	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
-	if (!error.isEmpty()) {
-		qDebug() << "ERROR:" << error;
-		return false;
-	}
+	JsonLayer ljsonlayer;
+	ljsonlayer.sendMessage(accountID, recipientList, envelope,
+	    fileList, resultList, errStr);
 
-	if (accountList.isEmpty()) {
-		return false;
-	}
+	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
-	return true;
+	return SM_SUCCESS;
 }
