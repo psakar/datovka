@@ -57,6 +57,8 @@ bool TaskGetAccountListMojeId::getAccountList(QString &error)
 {
 	QList<JsonLayer::AccountInfo> accountList;
 
+	emit globMsgProcEmitter.progressChange(PL_GET_ACCOUNT_LIST, -1);
+
 	JsonLayer ljsonLayer;
 	ljsonLayer.getAccountList(accountList, error);
 

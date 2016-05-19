@@ -69,7 +69,7 @@ enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
     const QString &progressLabel, QStringList &resultList,
     QString &errStr)
 {
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+	emit globMsgProcEmitter.progressChange(progressLabel, -1);
 
 	JsonLayer ljsonlayer;
 	ljsonlayer.sendMessage(accountID, recipientList, envelope,

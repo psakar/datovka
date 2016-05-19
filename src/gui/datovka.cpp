@@ -492,8 +492,15 @@ void MainWindow::clearStatusBar(void)
 void MainWindow::updateProgressBar(const QString &label, int value)
  /* ========================================================================= */
 {
+	if (value == -1) {
+		mui_statusProgressBar->setMaximum(0);
+		mui_statusProgressBar->setMinimum(0);
+	} else {
+		mui_statusProgressBar->setMaximum(100);
+		mui_statusProgressBar->setMinimum(0);
+		mui_statusProgressBar->setValue(value);
+	}
 	mui_statusProgressBar->setFormat(label);
-	mui_statusProgressBar->setValue(value);
 	mui_statusProgressBar->repaint();
 }
 
