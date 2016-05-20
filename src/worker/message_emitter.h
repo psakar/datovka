@@ -112,7 +112,7 @@ signals:
 	 * @param[in] error         Error message from netmanager.
 	 */
 	void sendMessageMojeIdFinished(int accountID,
-	    QStringList &resultList, QString &errStr);
+	    const QStringList &resultList, const QString &errStr);
 };
 
 /*!
