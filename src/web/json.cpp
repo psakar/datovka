@@ -630,8 +630,8 @@ bool JsonLayer::sendMessage(int accountID,
 		recData["name"] = recipient.recipientName;
 		recData["address"] = recipient.recipientAddress;
 		recData["dm_to_hands"] = recipient.toHands;
-		recData["effective_ovm"] = recipient.effectiveOVM;
-		recData["db_type"] = recipient.dbType;
+		//recData["effective_ovm"] = recipient.effectiveOVM;
+		//recData["db_type"] = recipient.dbType;
 		recipienList.append(recData);
 	}
 

@@ -35,6 +35,7 @@
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
+#include "src/web/json.h"
 #include "ui_dlg_send_message.h"
 
 
@@ -102,6 +103,7 @@ private:
 	class MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
 	bool m_isLogged;
+	bool m_isWebDatovkaAccount;
 
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds;
@@ -115,6 +117,8 @@ private:
 
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
+	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
+	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
 
 	static
 	QString getPDZCreditFromISDS(const QString &userName,

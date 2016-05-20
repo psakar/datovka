@@ -274,13 +274,10 @@ void DlgDsSearchMojeId::insertContactToRecipentTable(int selRow)
 		    item(selRow, 2)->text());
 		this->m_recipientTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 3)->text() + " " +
-		    this->resultsTableWidget->item(selRow, 4)->text());
+		item->setText(this->resultsTableWidget->item(selRow, 3)->text());
 		this->m_recipientTableWidget->setItem(row, 2, item);
 		item = new QTableWidgetItem;
-		item->setText(m_dbEffectiveOVM ? tr("no") :
-		    this->resultsTableWidget->item(selRow, 5)->text());
+		item->setText("");
 		item->setTextAlignment(Qt::AlignCenter);
 		this->m_recipientTableWidget->setItem(row, 3, item);
 	}
