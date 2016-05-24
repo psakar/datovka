@@ -35,7 +35,7 @@
 #include "src/web/net.h"
 #include "src/web/json.h"
 
-QNetworkCookie cookie;
+QList<QNetworkCookie> cookieList;
 NetManager netmanager;
 
 static
@@ -70,26 +70,14 @@ NetManager::~NetManager(void)
 
 /* ========================================================================= */
 /*
- * Func: Create POST request.
+ * Func: Create POST request for WebDatovka.
  */
-bool NetManager::createPostRequest(const QUrl &url, const QByteArray &data,
-   QByteArray &outData)
+bool NetManager::createPostRequestWebDatovka(const QUrl &url,
+   const QByteArray &data, QByteArray &outData)
 /* ========================================================================= */
 {
 	qDebug("%s()", __func__);
 
-/*
-	QFile f(COOKIE_FILE_NAME);
-	QList<QNetworkCookie> list;
-	f.open(QIODevice::ReadOnly);
-	QDataStream s(&f);
-	QByteArray c;
-	while(!s.atEnd()){
-		s >> c;
-		list.append(QNetworkCookie::parseCookies(c));
-	}
-	f.close();
-*/
 	QByteArray appName(APP_NAME);
 	QNetworkRequest request(url);
 	request.setRawHeader("Host", url.host().toUtf8());
@@ -98,9 +86,10 @@ bool NetManager::createPostRequest(const QUrl &url, const QByteArray &data,
 	request.setRawHeader("Connection", "keep-alive");
 	request.setRawHeader("Content-Type", "application/json");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
-	if (!cookie.name().isEmpty()) {
+
+	if (!cookieList.isEmpty()) {
 		QVariant var;
-		var.setValue(cookie);
+		var.setValue(cookieList);
 		request.setHeader(QNetworkRequest::CookieHeader, var);
 	}
 
@@ -114,9 +103,10 @@ bool NetManager::createPostRequest(const QUrl &url, const QByteArray &data,
 
 /* ========================================================================= */
 /*
- * Func: Create GET request.
+ * Func: Create POST request for MojeID.
  */
-bool NetManager::createGetRequest(const QUrl &url, QByteArray &outData)
+bool NetManager::createPostRequestMojeId(const QUrl &url,
+   const QByteArray &data, QByteArray &outData)
 /* ========================================================================= */
 {
 	qDebug("%s()", __func__);
@@ -125,20 +115,66 @@ bool NetManager::createGetRequest(const QUrl &url, QByteArray &outData)
 	QNetworkRequest request(url);
 	request.setRawHeader("Host", url.host().toUtf8());
 	request.setRawHeader("User-Agent", appName);
-	request.setRawHeader("Accept", "text/html,application/xhtml+xml,application/xml");
+	request.setRawHeader("Accept",
+	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
+	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
 
-	if (!cookie.name().isEmpty()) {
+	if (!cookieList.isEmpty()) {
 		QVariant var;
-		var.setValue(cookie);
+		var.setValue(cookieList);
 		request.setHeader(QNetworkRequest::CookieHeader, var);
 	}
 
+#if 1
+	printRequest(request, data);
+#endif
+
+	return sendRequest(request, data, outData, true);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Create GET request for WebDatovka.
+ */
+bool NetManager::createGetRequestWebDatovka(const QUrl &url, QByteArray &outData)
+/* ========================================================================= */
+{
+	qDebug("%s()", __func__);
+
+	QByteArray appName(APP_NAME);
+	QNetworkRequest request(url);
+	request.setRawHeader("Host", url.host().toUtf8());
+	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Accept",
+	    "text/html,application/xhtml+xml,application/xml");
+	request.setRawHeader("Connection", "keep-alive");
+
+	if (!cookieList.isEmpty()) {
+		QVariant var;
+		var.setValue(cookieList);
+		request.setHeader(QNetworkRequest::CookieHeader, var);
+	}
 #if 1
 	printRequest(request, QByteArray());
 #endif
 
 	return sendRequest(request, QByteArray(), outData, false);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Create GET request for MojeId.
+ */
+bool NetManager::createGetRequestMojeId(const QUrl &url, QByteArray &outData)
+/* ========================================================================= */
+{
+	qDebug("%s()", __func__);
+
+	return createGetRequestWebDatovka(url, outData);
 }
 
 
@@ -213,8 +249,18 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 		QByteArray reqValue = reply->rawHeader(reqName);
 		qDebug() << reqName << ":" << reqValue;
 	}
-	qDebug() << "--------------------Content------------------------";
+	qDebug() << "----------------------------------------------------";
 #endif
+
+	QVariant variantCookies = reply->header(QNetworkRequest::SetCookieHeader);
+	QList<QNetworkCookie> list =
+	    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
+
+	for (int i = 0; i < list.size(); ++i) {
+		if (!cookieList.contains(list.at(i))) {
+			cookieList.append(list.at(i));
+		}
+	}
 
 	switch (statusCode) {
 
@@ -226,22 +272,7 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 
 	case 302: /* HTTP status 302 Found */
 		{
-			QVariant variantCookies =
-			    reply->header(QNetworkRequest::SetCookieHeader);
-			QList<QNetworkCookie> list =
-			    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
-
-			//QFile f(COOKIE_FILE_NAME);
-			//f.open(QIODevice::ReadWrite);
-			for (int i = 0; i < list.size(); ++i) {
-				if (list.at(i).name() == COOKIE_SESSION_ID) {
-					cookie = list.at(i);
-				}
-				//QDataStream s(&f);
-				//s << list.at(i).toRawForm();
-			}
-			//f.close();
-			//qurl = QUrl::fromPercentEncoding(reply->rawHeader("Location"));
+			outData = reply->readAll();
 		}
 		break;
 

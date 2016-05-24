@@ -44,32 +44,54 @@ JsonLayer::~JsonLayer(void)
 }
 
 /* TODO - mojeID login sekvence - only for testing */
-void JsonLayer::mojeIDtest(void)
+QByteArray JsonLayer::mojeIDtest(void)
 {
 	QByteArray reply;
+#if 1
+	QUrl url0(MOJEID_BASE_URL0);
+	netmanager.createGetRequestMojeId(url0, reply);
 
-	QUrl url(MOJEID_BASE_URL);
-	netmanager.createPostRequest(url, QByteArray("this_is_mojeid_form=1"),
+	QUrl url1(MOJEID_BASE_URL1);
+	netmanager.createPostRequestMojeId(url1, QByteArray("this_is_mojeid_form=1"),
 	   reply);
 
 	QUrl url2(MOJEID_BASE_URL2);
-	netmanager.createPostRequest(url2, QByteArray(), reply);
+	netmanager.createPostRequestMojeId(url2, QByteArray("openid.pape.preferred_auth_policies=&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0&openid.ns=http://specs.openid.net/auth/2.0&openid.realm=https://mojeid.cz/consumer/&openid.return_to=https://mojeid.cz/consumer/?janrain_nonce=2016-05-06T10%3A48%3A04Z3BEl1X&openid.ax.mode=fetch_request&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.ns.ax=http://openid.net/srv/ax/1.0&openid.assoc_handle={HMAC-SHA1}{5727d097}{XFt3tg==}&openid.mode=checkid_setup&openid.identity=http://specs.openid.net/auth/2.0/identifier_select"), reply);
 
 	QUrl url3(MOJEID_BASE_URL3);
-	netmanager.createPostRequest(url3, QByteArray(), reply);
+	netmanager.createGetRequestMojeId(url3, reply);
+
+	QString str = "csrfmiddlewaretoken=";
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_CSRFTOKEN) {
+			str += cookieList.at(i).value();
+		}
+	}
+
+	str += "&token=2HPsgEbAtuKX";
+	str += "&username=xxxxx";
+	str += "&password=yyyyyy";
+	str += "&allow=Přihlásit+se";
+
+	QByteArray dat;
+	dat.append(str);
+
+	netmanager.createPostRequestMojeId(url3, dat, reply);
+#endif
+	return reply;
 }
 
 bool JsonLayer::loginToWebDatovka(void) {
 
 	QUrl url(WEBDATOVKA_LOGIN_URL);
 	QByteArray reply;
-	return netmanager.createGetRequest(url, reply);
+	return netmanager.createGetRequestWebDatovka(url, reply);
 }
 
 
 bool JsonLayer::isLoggedToWebDatovka(void)
 {
-	if (cookie.name().isEmpty()) {
+	if (cookieList.isEmpty()) {
 		return loginToWebDatovka();
 	}
 
@@ -86,8 +108,8 @@ bool JsonLayer::pingServer(QString &errStr)
 		return false;
 	}
 
-	netmanager.createGetRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "ping"), reply);
+	netmanager.createGetRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "ping"), reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -112,8 +134,8 @@ bool JsonLayer::createAccount(const QString &name, QString &errStr)
 	QJsonObject rootObj;
 	rootObj["name"] = name;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "newaccount"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newaccount"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -146,8 +168,8 @@ bool JsonLayer::renameAccount(int accountID, const QString &newName,
 	rootObj["account"] = accountID;
 	rootObj["name"] = newName;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "renameaccount"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "renameaccount"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -174,8 +196,8 @@ bool JsonLayer::deleteAccount(int accountID, QString &errStr)
 	QJsonObject rootObj;
 	rootObj["account"] = accountID;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "deleteaccount"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deleteaccount"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -200,8 +222,8 @@ bool JsonLayer::getAccountList(QList<JsonLayer::AccountInfo> &accountList,
 		return false;
 	}
 
-	netmanager.createGetRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "getsettings"), reply);
+	netmanager.createGetRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "getsettings"), reply);
 
 	if (reply.isEmpty()) {
 		return false;
@@ -224,8 +246,8 @@ bool JsonLayer::getAccountInfo(int accountID,
 	QJsonObject rootObj;
 	rootObj["account"] = accountID;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "accountinfo"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "accountinfo"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -250,8 +272,8 @@ bool JsonLayer::getUserInfo(int accountID,
 	QJsonObject rootObj;
 	rootObj["account"] = accountID;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "userinfo"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "userinfo"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -280,8 +302,8 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 	rootObj["offset"] = offset;
 	rootObj["limit"] = limit;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "messageslist"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "messageslist"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -306,8 +328,8 @@ bool JsonLayer::syncAccount(int accountID, QString &errStr)
 	QJsonObject rootObj;
 	rootObj["account"] = accountID;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "synchronize"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "synchronize"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -329,8 +351,9 @@ QByteArray JsonLayer::downloadMessage(int msgId, QString &errStr)
 		return QByteArray();
 	}
 
-	netmanager.createGetRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "downloadsigned/" + QString::number(msgId)), reply);
+	netmanager.createGetRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadsigned/"
+	    + QString::number(msgId)), reply);
 
 	return reply;
 }
@@ -345,8 +368,9 @@ QByteArray JsonLayer::downloadFile(int fileId, QString &errStr)
 		return QByteArray();
 	}
 
-	netmanager.createGetRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "downloadfile/" + QString::number(fileId)), reply);
+	netmanager.createGetRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadfile/"
+	    + QString::number(fileId)), reply);
 
 	return reply;
 }
@@ -362,8 +386,8 @@ bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
 	}
 
 	QJsonObject rootObj;
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "listtags"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "listtags"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -390,8 +414,8 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 	rootObj["name"] = name;
 	rootObj["color"] = color;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "newtag"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newtag"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -425,8 +449,8 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 	rootObj["name"] = name;
 	rootObj["color"] = color;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "edittag"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "edittag"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -458,8 +482,8 @@ bool JsonLayer::deleteTag(int tagId, QString &errStr)
 	QJsonObject rootObj;
 	rootObj["id"] = tagId;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "deletetag"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletetag"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -492,8 +516,8 @@ bool JsonLayer::assignTag(int tagId, int msgId, QString &errStr)
 	rootObj["id"] = tagId;
 	rootObj["msgid"] = msgId;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/add"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/add"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -526,8 +550,8 @@ bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
 	rootObj["id"] = tagId;
 	rootObj["msgid"] = msgId;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/remove"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/remove"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -559,8 +583,8 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 	QJsonObject rootObj;
 	rootObj["msgid"] = msgId;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "tagmsg/removeall"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/removeall"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -596,8 +620,8 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 	rootObj["needle"] = word;
 	rootObj["position"] = position;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "searchrecipient"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "searchrecipient"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -663,8 +687,8 @@ bool JsonLayer::sendMessage(int accountID,
 	rootObj["envelope"] = msgEnvelope;
 	rootObj["files"] = files;
 
-	netmanager.createPostRequest(QUrl(QString(WEBDATOVKA_SERVICE_URL)
-	    + "sendmessage"),
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "sendmessage"),
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 

@@ -44,24 +44,45 @@ public:
 public:
 
 	/*!
-	 * @brief Create GET request.
-	 *
-	 * @param[in] url - url of request.
-	 * @param[out] outData -reply data.
-	 * @return true if success.
-	 */
-	bool createGetRequest(const QUrl &url,
-	    QByteArray &outData);
-
-	/*!
-	 * @brief Create POST request.
+	 * @brief Create POST request for WebDatovka.
 	 *
 	 * @param[in] url - url of request.
 	 * @param[in] data - request content data.
 	 * @param[out] outData -reply data.
 	 * @return true if success.
 	 */
-	bool createPostRequest(const QUrl &url, const QByteArray &data,
+	bool createPostRequestWebDatovka(const QUrl &url,
+	    const QByteArray &data, QByteArray &outData);
+
+	/*!
+	 * @brief Create POST request for MojeID.
+	 *
+	 * @param[in] url - url of request.
+	 * @param[in] data - request content data.
+	 * @param[out] outData -reply data.
+	 * @return true if success.
+	 */
+	bool createPostRequestMojeId(const QUrl &url,
+	    const QByteArray &data, QByteArray &outData);
+
+	/*!
+	 * @brief Create GET request for WebDatovka.
+	 *
+	 * @param[in] url - url of request.
+	 * @param[out] outData -reply data.
+	 * @return true if success.
+	 */
+	bool createGetRequestWebDatovka(const QUrl &url,
+	    QByteArray &outData);
+
+	/*!
+	 * @brief Create GET request for MojeID.
+	 *
+	 * @param[in] url - url of request.
+	 * @param[out] outData -reply data.
+	 * @return true if success.
+	 */
+	bool createGetRequestMojeId(const QUrl &url,
 	    QByteArray &outData);
 
 private:
@@ -88,7 +109,7 @@ private:
 	bool getResponse(QNetworkReply *reply, QByteArray &outData);
 };
 
-extern QNetworkCookie cookie;
+extern QList<QNetworkCookie> cookieList;
 extern NetManager netmanager;
 
 #endif /* _NET_H_ */

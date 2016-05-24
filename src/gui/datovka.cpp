@@ -10606,7 +10606,6 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 	QString errStr;
 	QList<JsonLayer::AccountInfo> accountList;
 
-
 	jsonlayer.getAccountList(accountList, errStr);
 
 	if (!errStr.isEmpty()) {
@@ -10716,6 +10715,9 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
+
+	/* Only for mojeID login testing, will be removed later */
+	//QByteArray reply = jsonlayer.mojeIDtest();
 
 	if (!isWebDatovkaAccount(userName)) {
 		return false;

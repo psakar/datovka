@@ -169,7 +169,7 @@ public:
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
-	void mojeIDtest(void);
+	QByteArray mojeIDtest(void);
 
 	bool loginToWebDatovka(void);
 
