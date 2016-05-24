@@ -82,7 +82,7 @@ private slots:
 	void setAccountInfo(int item);
 
 private:
-	QTimer *pingTimer;
+	//QTimer *pingTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
 	qint64 m_msgID;
 	QDateTime m_deliveryTime;

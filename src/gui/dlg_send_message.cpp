@@ -206,11 +206,11 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 
-	pingTimer = new QTimer(this);
-	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+	//pingTimer = new QTimer(this);
+	//pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
 
-	connect(pingTimer, SIGNAL(timeout()), this,
-	    SLOT(pingIsdsServer()));
+	//connect(pingTimer, SIGNAL(timeout()), this,
+	//    SLOT(pingIsdsServer()));
 
 	this->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
