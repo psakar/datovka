@@ -46,6 +46,7 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_credit_info.h"
+#include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
@@ -64,6 +65,7 @@ DlgSendMessage::DlgSendMessage(
     Action action, qint64 msgId, const QDateTime &deliveryTime,
     const QString &userName, class MainWindow *mv, QWidget *parent)
     : QDialog(parent),
+    m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
     m_msgID(msgId),
     m_deliveryTime(deliveryTime),
@@ -206,11 +208,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 
-	//pingTimer = new QTimer(this);
-	//pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
-
-	//connect(pingTimer, SIGNAL(timeout()), this,
-	//    SLOT(pingIsdsServer()));
+	connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
+	    SLOT(pingIsdsServer()));
+	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
 	this->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
@@ -269,10 +269,22 @@ void DlgSendMessage::setAccountInfo(int item)
 
 	m_isLogged = true;
 
-	if (!isdsSessions.isConnectedToIsds(m_userName) &&
-	    !MainWindow::connectToIsds(m_userName, m_mv)) {
+	m_keepAliveTimer.stop();
+	{
+		TaskKeepAlive *task;
+		task = new (std::nothrow) TaskKeepAlive(m_userName);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		m_isLogged = task->m_isAlive;
+
+		delete task;
+	}
+	if (!m_isLogged && !MainWindow::connectToIsds(m_userName, m_mv)) {
 		m_isLogged = false;
 	}
+	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+
 	session = isdsSessions.session(m_userName);
 	if (NULL == session) {
 		logErrorNL("%s", "Missing ISDS session.");
@@ -644,11 +656,11 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 void DlgSendMessage::pingIsdsServer(void)
 /* ========================================================================= */
 {
-	if (isdsSessions.isConnectedToIsds(m_userName)) {
-		logInfo("%s\n", "Connection to ISDS is alive :)");
-	} else {
-		logWarning("%s\n", "Connection to ISDS is dead :(");
-	}
+	TaskKeepAlive *task;
+
+	task = new (std::nothrow) TaskKeepAlive(m_userName);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
 }
 
 

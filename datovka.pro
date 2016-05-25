@@ -325,6 +325,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_download_user_info.cpp \
     src/worker/task_erase_message.cpp \
     src/worker/task_import_zfo.cpp \
+    src/worker/task_keep_alive.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
     src/worker/task_verify_message.cpp
@@ -400,6 +401,7 @@ HEADERS += src/cli/cli.h \
     src/worker/task_download_user_info.h \
     src/worker/task_erase_message.h \
     src/worker/task_import_zfo.h \
+    src/worker/task_keep_alive.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
     src/worker/task_verify_message.h
