@@ -280,8 +280,8 @@ void DlgSendMessage::setAccountInfo(int item)
 
 		delete task;
 	}
-	if (!m_isLogged && !MainWindow::connectToIsds(m_userName, m_mv)) {
-		m_isLogged = false;
+	if (!m_isLogged) {
+		m_isLogged = MainWindow::connectToIsds(m_userName, m_mv);
 	}
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
