@@ -3461,10 +3461,15 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 	html.append(indentDivStart);
 	html.append("<h3>");
-	if (AccountModel::globAccounts[userName].isTestAccount()) {
-		html.append(tr("Test account"));
+
+	if (isWebDatovkaAccount(userName)) {
+		html.append(tr("Webdatovka account (mojeID)"));
 	} else {
-		html.append(tr("Standard account"));
+		if (AccountModel::globAccounts[userName].isTestAccount()) {
+			html.append(tr("Test account"));
+		} else {
+			html.append(tr("Standard account"));
+		}
 	}
 	html.append("</h3>");
 
