@@ -71,8 +71,7 @@ enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
 {
 	emit globMsgProcEmitter.progressChange(progressLabel, -1);
 
-	JsonLayer ljsonlayer;
-	ljsonlayer.sendMessage(accountID, recipientList, envelope,
+	jsonlayer.sendMessage(accountID, recipientList, envelope,
 	    fileList, resultList, errStr);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);

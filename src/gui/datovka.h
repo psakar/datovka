@@ -114,6 +114,9 @@ public:
 	static
 	bool getUserInfoFromLogin(const QString &userName);
 
+	static
+	bool loginToMojeId(void);
+
 protected:
 	/*!
 	 * Check if some worker is working on the background and show
@@ -144,6 +147,14 @@ private slots:
 	 */
 	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
 	    const QDateTime &deliveryTime, int result, const QString &errDesc,
+	    bool listScheduled);
+
+	/*!
+	 * @brief Performs action depending on message download outcome
+	 *        for webdatovka.
+	 */
+	void collectDownloadMessageMojeId(const QString &usrName,
+	    qint64 msgId, int result, const QString &errDesc,
 	    bool listScheduled);
 
 	/*!

@@ -397,3 +397,106 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 		return Q_GLOBAL_ERROR;
 	}
 }
+
+
+qdatovka_error Task::storeEnvelopeWebDatovka(enum MessageDirection msgDirect,
+    MessageDbSet &dbSet, JsonLayer::Envelope envel, bool isNew)
+{
+	debugFuncCall();
+
+	QDateTime dTime = fromIsoDatetimetoDateTime(envel.dmDeliveryTime);
+
+	/* Allow invalid delivery time. */
+	MessageDb *messageDb = dbSet.accessMessageDb(dTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	if (isNew) {
+		/* insert message envelope in db */
+		if (messageDb->msgsInsertMessageEnvelope(envel.dmID,
+		    QString::number(envel.id),
+		    envel.dbIDSender,
+		    envel.dmSender,
+		    envel.dmSenderAddress,
+		    envel.dmSenderType,
+		    envel.dmRecipient,
+		    envel.dmRecipientAddress,
+		    envel.dmAmbiguousRecipient,
+		    envel.dmSenderOrgUnit,
+		    envel.dmSenderOrgUnitNum,
+		    envel.dbIDRecipient,
+		    envel.dmRecipientOrgUnit,
+		    envel.dmRecipientOrgUnitNum,
+		    envel.dmToHands,
+		    envel.dmAnnotation,
+		    envel.dmRecipientRefNumber,
+		    envel.dmSenderRefNumber,
+		    envel.dmRecipientIdent,
+		    envel.dmSenderIdent,
+		    envel.dmLegalTitleLaw,
+		    envel.dmLegalTitleYear,
+		    envel.dmLegalTitleSect,
+		    envel.dmLegalTitlePar,
+		    envel.dmLegalTitlePoint,
+		    envel.dmPersonalDelivery,
+		    envel.dmAllowSubstDelivery,
+		    QByteArray(),
+		    fromIsoDatetimetoDbformat(envel.dmDeliveryTime),
+		    fromIsoDatetimetoDbformat(envel.dmAcceptanceTime),
+		    envel.dmMessageStatus,
+		    envel.dmAttachmentSize,
+		    envel.dmType,
+		    msgDirect)) {
+			logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
+			    envel.dmID);
+			return Q_SUCCESS;
+		} else {
+			logErrorNL("Storing envelope of message '%" PRId64 "' failed.",
+			    envel.dmID);
+			return Q_GLOBAL_ERROR;
+		}
+	} else {
+		/* Update message envelope in db. */
+		if (messageDb->msgsUpdateMessageEnvelope(envel.dmID,
+		    QString::number(envel.id),
+		    envel.dbIDSender,
+		    envel.dmSender,
+		    envel.dmSenderAddress,
+		    envel.dmSenderType,
+		    envel.dmRecipient,
+		    envel.dmRecipientAddress,
+		    envel.dmAmbiguousRecipient,
+		    envel.dmSenderOrgUnit,
+		    envel.dmSenderOrgUnitNum,
+		    envel.dbIDRecipient,
+		    envel.dmRecipientOrgUnit,
+		    envel.dmRecipientOrgUnitNum,
+		    envel.dmToHands,
+		    envel.dmAnnotation,
+		    envel.dmRecipientRefNumber,
+		    envel.dmSenderRefNumber,
+		    envel.dmRecipientIdent,
+		    envel.dmSenderIdent,
+		    envel.dmLegalTitleLaw,
+		    envel.dmLegalTitleYear,
+		    envel.dmLegalTitleSect,
+		    envel.dmLegalTitlePar,
+		    envel.dmLegalTitlePoint,
+		    envel.dmPersonalDelivery,
+		    envel.dmAllowSubstDelivery,
+		    QByteArray(),
+		    fromIsoDatetimetoDbformat(envel.dmDeliveryTime),
+		    fromIsoDatetimetoDbformat(envel.dmAcceptanceTime),
+		    envel.dmMessageStatus,
+		    envel.dmAttachmentSize,
+		    envel.dmType,
+		    msgDirect)) {
+			logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
+			    envel.dmID);
+			return Q_SUCCESS;
+		} else {
+			logErrorNL("Storing envelope of message '%" PRId64 "' failed.",
+			    envel.dmID);
+			return Q_GLOBAL_ERROR;
+		}
+	}
+}

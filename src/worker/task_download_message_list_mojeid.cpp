@@ -26,13 +26,10 @@
 
 #include "src/io/dbs.h"
 #include "src/log/log.h"
-#include "src/io/isds_sessions.h"
-#include "src/models/accounts_model.h"
-#include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/task_download_message_list_mojeid.h"
-#include "src/worker/task_download_message.h"
-#include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
+#include "src/worker/task_download_message_mojeid.h"
 #include "src/web/json.h"
 #include "src/io/tag_db.h"
 
@@ -125,12 +122,11 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 {
 	debugFuncCall();
 
-	Q_UNUSED(downloadWhole);
-
 	#define USE_TRANSACTIONS 1
 
 	int newcnt = 0;
 	int allcnt = 0;
+	qint64 dmID = -1;
 
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -149,11 +145,13 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		msgType = -1;
 	}
 
-	JsonLayer lJsonlayer;
-	lJsonlayer.getMessageList(accountID, msgType, dmLimit, dmOffset,
-	    messageList, error);
-	if (!error.isEmpty()) {
-		qDebug() << "ERROR:" << error;
+	if (!jsonlayer.getMessageList(accountID, msgType, dmLimit, dmOffset,
+	    messageList, error)) {
+		if (!error.isEmpty()) {
+			qDebug() << "ERROR:" << error;
+		} else {
+			qDebug() << "ERROR: get-mesasge-list fails";
+		}
 		return DL_NET_ERROR;
 	}
 
@@ -169,7 +167,22 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		delta = 80.0 / allcnt;
 	}
 
-	QByteArray zfoData;
+	/* Obtain invalid message database if has a separate file. */
+	MessageDb *invalidDb = NULL;
+	{
+		QString invSecKey(dbSet.secondaryKey(QDateTime()));
+		QString valSecKey(dbSet.secondaryKey(
+		    QDateTime::currentDateTime()));
+		if (invSecKey != valSecKey) {
+			/* Invalid database file may not exist. */
+			invalidDb = dbSet.accessMessageDb(QDateTime(), false);
+		}
+	}
+
+#ifdef USE_TRANSACTIONS
+	QSet<MessageDb *> usedDbs;
+#endif /* USE_TRANSACTIONS */
+
 	for (int i = 0; i < allcnt; ++i) {
 
 		newcnt++;
@@ -178,37 +191,80 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		emit globMsgProcEmitter.progressChange(progressLabel,
 		    (int) (20 + diff));
 
-		zfoData = lJsonlayer.downloadMessage(messageList.at(i).id,
-		    error);
+		dmID = messageList.at(i).dmID;
 
-		if (zfoData.isEmpty()) {
-			continue;
+		/*
+		 * Time may be invalid (e.g. messages which failed during
+		 * virus scan).
+		 */
+		QDateTime deliveryTime =
+		    fromIsoDatetimetoDateTime(messageList.at(i).dmDeliveryTime);
+
+		/* Delivery time may be invalid. */
+		if ((0 != invalidDb) && deliveryTime.isValid()) {
+			/* Try deleting possible invalid entry. */
+			invalidDb->msgsDeleteMessageData(dmID);
+		}
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+		Q_ASSERT(0 != messageDb);
+
+
+#ifdef USE_TRANSACTIONS
+		if (!usedDbs.contains(messageDb)) {
+			usedDbs.insert(messageDb);
+			messageDb->beginTransaction();
+		}
+#endif /* USE_TRANSACTIONS */
+
+		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmID);
+
+		/* message is not in db (-1) */
+		if (-1 == dmDbMsgStatus) {
+
+			/* download and save complete message */
+			if (downloadWhole) {
+
+				TaskDownloadMessageMojeId *task;
+				task = new (std::nothrow) TaskDownloadMessageMojeId(
+				    userName, &dbSet, msgDirect,
+				    messageList.at(i).id,
+				    messageList.at(i).dmID,
+				    true);
+				task->setAutoDelete(true);
+				globWorkPool.assignLo(task, WorkerPool::PREPEND);
+
+			/* store message envelope only */
+			} else {
+				Task::storeEnvelopeWebDatovka(msgDirect, dbSet,
+				    messageList.at(i), true);
+			}
+
+			newcnt++;
+
+		/* Message is in db (dmDbMsgStatus <> -1). */
+		} else {
+			/* Update envelope if message status has changed. */
+			if (messageList.at(i).dmMessageStatus != dmDbMsgStatus) {
+				Task::storeEnvelopeWebDatovka(msgDirect,
+				    dbSet, messageList.at(i), false);
+			}
+
+			/* download and save complete message */
+			if (downloadWhole && !messageDb->msgsStoredWhole(dmID)) {
+
+				TaskDownloadMessageMojeId *task;
+				task = new (std::nothrow) TaskDownloadMessageMojeId(
+				    userName, &dbSet, msgDirect,
+				    messageList.at(i).id,
+				    messageList.at(i).dmID,
+				    true);
+				task->setAutoDelete(true);
+				globWorkPool.assignLo(task, WorkerPool::PREPEND);
+
+			}
 		}
 
-		struct isds_ctx *dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			logError("%s\n", "Cannot create dummy ISDS session.");
-			return DL_ERR;
-		}
-
-		struct isds_message *message;
-		message = loadZfoData(dummy_session, zfoData,
-		    ImportZFODialog::IMPORT_MESSAGE_ZFO);
-		if (NULL == message) {
-			logError("%s\n", "Cannot parse message data.");
-			return DL_ERR;
-		}
-
-		Task::storeEnvelope(msgDirect, dbSet, message->envelope,
-		    QString::number(messageList.at(i).id));
-
-
-		if (downloadWhole) {
-			Task::storeMessage(true, msgDirect, dbSet, message,
-			    progressLabel, QString::number(messageList.at(i).id));
-		}
-
-		qint64 dmID = QString(message->envelope->dmID).toLongLong();
+		messageDb->smsgdtSetLocallyRead(dmID, messageList.at(i)._read);
 		globWebDatovkaTagDbPtr->removeAllTagsFromMsg(userName, dmID);
 
 		for (int t = 0; t < messageList.at(i)._tagList.count(); ++t) {
@@ -216,6 +272,13 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 			    messageList.at(i)._tagList.at(t), dmID);
 		}
 	}
+
+#ifdef USE_TRANSACTIONS
+	/* Commit on all opened databases. */
+	foreach (MessageDb *db, usedDbs) {
+		db->commitTransaction();
+	}
+#endif /* USE_TRANSACTIONS */
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 

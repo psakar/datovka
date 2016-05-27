@@ -57,11 +57,10 @@ void TaskDownloadOwnerInfoMojeId::run(void)
 bool TaskDownloadOwnerInfoMojeId::downloadOwnerInfo(int id, QString &error)
 {
 	JsonLayer::AccountInfo aInfo;
-	JsonLayer lJsonlayer;
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, -1);
 
-	if (lJsonlayer.getAccountInfo(id, aInfo, error)) {
+	if (jsonlayer.getAccountInfo(id, aInfo, error)) {
 		return globAccountDbPtr->insertAccountIntoDb(
 		    aInfo.key + "___True",
 		    aInfo.dbID,

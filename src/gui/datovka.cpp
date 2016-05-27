@@ -70,6 +70,7 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/wd_sessions.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
@@ -177,6 +178,12 @@ MainWindow::MainWindow(QWidget *parent)
 	        QString, bool)),
 	    this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
+	        QString, bool)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageFinishedMojeId(QString, qint64, int,
+	        QString, bool)),
+	    this,
+	    SLOT(collectDownloadMessageMojeId(QString, qint64, int,
 	        QString, bool)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
@@ -2254,6 +2261,48 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 	}
 }
 
+void MainWindow::collectDownloadMessageMojeId(const QString &usrName,
+    qint64 msgId, int result, const QString &errDesc, bool listScheduled)
+{
+	debugSlotCall();
+
+	if (TaskDownloadMessageMojeId::DM_SUCCESS == result) {
+		/* Refresh account and attachment list. */
+		refreshAccountList(usrName);
+
+		if (0 <= msgId) {
+			postDownloadSelectedMessageAttachments(usrName, msgId);
+		}
+	} else {
+		/* Notify the user. */
+		if (!listScheduled) {
+			QMessageBox msgBox(this);
+
+			showStatusTextWithTimeout(tr("It was not possible download "
+			    "complete message \"%1\" from webdatovka server.").arg(msgId));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(tr("Download message error"));
+			msgBox.setText(tr("It was not possible to download a complete "
+			    "message \"%1\" from webdatovka server.").arg(msgId));
+			if (!errDesc.isEmpty()) {
+				msgBox.setInformativeText(tr("Webdatovka: ") + errDesc);
+			} else {
+				msgBox.setInformativeText(tr("A connection error "
+				    "occurred or the message has already been deleted "
+				    "from the server."));
+			}
+
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+		} else {
+			showStatusTextWithTimeout(
+			    tr("Couldn't download message '%1'.").arg(msgId));
+		}
+	}
+}
+
+
 void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
     int direction, int result, const QString &errDesc,
     bool add, int rt, int rn, int st, int sn)
@@ -3369,7 +3418,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 			TaskDownloadMessageMojeId *task;
 
 			task = new (std::nothrow) TaskDownloadMessageMojeId(
-			    userName, dbSet, msgDirection, mId);
+			    userName, dbSet, msgDirection, mId, id.dmId, false);
 			task->setAutoDelete(true);
 			globWorkPool.assignLo(task, WorkerPool::PREPEND);
 		}
@@ -10603,8 +10652,14 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 {
 	debugSlotCall();
 
+	/* TODO - login via mojeID firstly */
+//	if (!loginToMojeId()) {
+//		/* TODO - show messagebox */
+//		return;
+//	}
+
 	QString errStr;
-	QList<JsonLayer::AccountInfo> accountList;
+	QList<JsonLayer::AccountData> accountList;
 
 	jsonlayer.getAccountList(accountList, errStr);
 
@@ -10620,40 +10675,67 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 	for (int i = 0; i < accountList.count(); ++i) {
 		QModelIndex index;
 		AcntSettings aSet;
-		aSet.setUserName(accountList.at(i).key);
-		aSet.setAccountName(accountList.at(i)._acntName);
+		const QString userName = DB_MOJEID_NAME_PREFIX +
+		    QString::number(accountList.at(i).id);
+		aSet.setUserName(userName);
+		aSet.setAccountName(accountList.at(i).name);
 		aSet.setLoginMethod(LIM_MOJEID);
 		aSet.setSyncWithAll(syncWithAll);
 		m_accountModel.addAccount(aSet, &index);
-		refreshAccountList(accountList.at(i).key);
+		refreshAccountList(userName);
 
 		globAccountDbPtr->insertAccountIntoDb(
-		    accountList.at(i).key + "___True",
-		    accountList.at(i).dbID,
-		    accountList.at(i).dbType,
-		    accountList.at(i).ic.toInt(),
-		    accountList.at(i).pnFirstName,
-		    accountList.at(i).pnMiddleName,
-		    accountList.at(i).pnLastName,
-		    accountList.at(i).pnLastNameAtBirth,
-		    accountList.at(i).firmName,
-		    accountList.at(i).biDate,
-		    accountList.at(i).biCity,
-		    accountList.at(i).biCounty,
-		    accountList.at(i).biState,
-		    accountList.at(i).adCity,
-		    accountList.at(i).adStreet,
-		    accountList.at(i).adNumberInStreet,
-		    accountList.at(i).adNumberInMunicipality,
-		    accountList.at(i).adZipCode,
-		    accountList.at(i).adState,
-		    accountList.at(i).nationality,
-		    accountList.at(i).identifier,
-		    accountList.at(i).registryCode,
-		    accountList.at(i).dbState,
-		    accountList.at(i).dbEffectiveOVM,
-		    accountList.at(i).dbOpenAddressing
+		    userName + "___True",
+		    accountList.at(i).ownerInfo.dbID,
+		    accountList.at(i).ownerInfo.dbType,
+		    accountList.at(i).ownerInfo.ic.toInt(),
+		    accountList.at(i).ownerInfo.pnFirstName,
+		    accountList.at(i).ownerInfo.pnMiddleName,
+		    accountList.at(i).ownerInfo.pnLastName,
+		    accountList.at(i).ownerInfo.pnLastNameAtBirth,
+		    accountList.at(i).ownerInfo.firmName,
+		    accountList.at(i).ownerInfo.biDate,
+		    accountList.at(i).ownerInfo.biCity,
+		    accountList.at(i).ownerInfo.biCounty,
+		    accountList.at(i).ownerInfo.biState,
+		    accountList.at(i).ownerInfo.adCity,
+		    accountList.at(i).ownerInfo.adStreet,
+		    accountList.at(i).ownerInfo.adNumberInStreet,
+		    accountList.at(i).ownerInfo.adNumberInMunicipality,
+		    accountList.at(i).ownerInfo.adZipCode,
+		    accountList.at(i).ownerInfo.adState,
+		    accountList.at(i).ownerInfo.nationality,
+		    accountList.at(i).ownerInfo.identifier,
+		    accountList.at(i).ownerInfo.registryCode,
+		    accountList.at(i).ownerInfo.dbState,
+		    accountList.at(i).ownerInfo.dbEffectiveOVM,
+		    accountList.at(i).ownerInfo.dbOpenAddressing
 		);
+
+		globAccountDbPtr->insertUserIntoDb(
+		    userName + "___True",
+		    accountList.at(i).userInfo.userType,
+		    accountList.at(i).userInfo.userPrivils,
+		    accountList.at(i).userInfo.pnFirstName,
+		    accountList.at(i).userInfo.pnMiddleName,
+		    accountList.at(i).userInfo.pnLastName,
+		    accountList.at(i).userInfo.pnLastNameAtBirth,
+		    accountList.at(i).userInfo.adCity,
+		    accountList.at(i).userInfo.adStreet,
+		    accountList.at(i).userInfo.adNumberInStreet,
+		    accountList.at(i).userInfo.adNumberInMunicipality,
+		    accountList.at(i).userInfo.adZipCode,
+		    accountList.at(i).userInfo.adState,
+		    accountList.at(i).userInfo.biDate,
+		    accountList.at(i).userInfo.ic,
+		    accountList.at(i).userInfo.firmName,
+		    accountList.at(i).userInfo.caStreet,
+		    accountList.at(i).userInfo.caCity,
+		    accountList.at(i).userInfo.caZipCode,
+		    accountList.at(i).userInfo.caState
+		);
+
+		wdSessions.createCleanSession(userName);
 	}
 }
 
@@ -10689,18 +10771,20 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 
 	QString aID  = userName.split("-").at(1);
 	int accountID = aID.toInt();
-	int limit = MESSAGE_LIST_LIMIT;
-	//int limit = 2;
 
 	TaskDownloadMessageListMojeID *task;
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_RECEIVED, globPref.auto_download_whole_messages, limit, accountID, 0);
+	    MSG_RECEIVED, globPref.auto_download_whole_messages,
+	    MESSAGE_LIST_LIMIT,
+	    accountID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
-	    MSG_SENT, globPref.auto_download_whole_messages, limit, accountID, 0);
+	    MSG_SENT, globPref.auto_download_whole_messages,
+	    MESSAGE_LIST_LIMIT,
+	    accountID, 0);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
@@ -10721,6 +10805,11 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	if (!isWebDatovkaAccount(userName)) {
 		return false;
+	}
+
+	/* Try connecting to webdatovka, just to generate log-in dialogue. */
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		loginToMojeId();
 	}
 
 	QString aID  = userName.split("-").at(1);
@@ -10779,13 +10868,28 @@ void MainWindow::sendMessageMojeIdAction(int accountID,
 			return;
 		}
 
-		int limit = MESSAGE_LIST_LIMIT;
 		TaskDownloadMessageListMojeID *task;
 
 		task = new (std::nothrow) TaskDownloadMessageListMojeID(
 		    userName, dbSet, MSG_SENT,
-		    globPref.auto_download_whole_messages, limit, accountID, 0);
+		    globPref.auto_download_whole_messages, MESSAGE_LIST_LIMIT,
+		    accountID, 0);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task);
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Login to MojeID.
+ */
+bool MainWindow::loginToMojeId(void)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	jsonlayer.startLoginToWebDatovka();
+
+	return true;
 }

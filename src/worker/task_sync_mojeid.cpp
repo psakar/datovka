@@ -58,6 +58,5 @@ bool TaskSyncAccount::syncAccount(int id, QString &error)
 {
 	emit globMsgProcEmitter.progressChange(PL_SYNC_ACCOUNT, -1);
 
-	JsonLayer lJsonlayer;
-	return lJsonlayer.syncAccount(id, error);
+	return jsonlayer.syncAccount(id, error);
 }

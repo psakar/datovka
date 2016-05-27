@@ -30,6 +30,8 @@
 #include "src/common.h" // qdatovka_error, enum MessageDirection
 #include "src/io/message_db.h" // MessageDb::MsgId
 #include "src/io/message_db_set.h"
+#include "src/web/json.h"
+
 
 /*!
  * @brief Maximum length of message list to be downloaded.
@@ -161,6 +163,19 @@ protected:
 	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
 	    MessageDb &messageDb, const struct isds_envelope *envel,
 	    QString msgId);
+
+	/*!
+	 * @brief Store envelope into database.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] dbSet     Database container.
+	 * @param[in]     envel     Message envelope.
+	 * @param[in]     isNew     true = insert into db, false = update in db.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error storeEnvelopeWebDatovka(enum MessageDirection msgDirect,
+	    MessageDbSet &dbSet, JsonLayer::Envelope envel, bool isNew);
 
 private:
 //	/*!

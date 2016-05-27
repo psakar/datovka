@@ -56,11 +56,10 @@ void TaskDownloadUserInfoMojeId::run(void)
 bool TaskDownloadUserInfoMojeId::downloadUserInfo(int id, QString &error)
 {
 	JsonLayer::UserInfo uInfo;
-	JsonLayer lJsonlayer;
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, -1);
 
-	if (lJsonlayer.getUserInfo(id, uInfo, error)) {
+	if (jsonlayer.getUserInfo(id, uInfo, error)) {
 		return globAccountDbPtr->insertUserIntoDb(
 		    uInfo.key + "___True",
 		    uInfo.userType,

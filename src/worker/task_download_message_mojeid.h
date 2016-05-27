@@ -52,10 +52,14 @@ public:
 	 * @param[in]     userName      Account identifier (user login name).
 	 * @param[in,out] dbSet         Non-null pointer to database container.
 	 * @param[in]     msgDirect     Received or sent list.
-	 * @param[in]     id          Message identifier.
+	 * @param[in]     id            Message webdatovka identifier.
+	 * @param[in]     dmId          Message isds identifier.
+	 * @param[in]     listScheduled True if the task has been scheduled
+	 *                              from TaskDownloadMessageList.
 	 */
 	explicit TaskDownloadMessageMojeId(const QString &userName,
-	    MessageDbSet *dbSet, enum MessageDirection msgDirect, int id);
+	    MessageDbSet *dbSet, enum MessageDirection msgDirect, int id,
+	    qint64 dmId, bool listScheduled);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -82,7 +86,8 @@ public:
 
 	enum Result m_result; /*!< Return state. */
 	QString m_error; /*!< Error description. */
-	int m_id; /*!< Message identifier. */
+	int m_id; /*!< Message webdatovka identifier. */
+
 
 private:
 	/*!
@@ -94,6 +99,11 @@ private:
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	enum MessageDirection m_msgDirect; /*!< Sent or received message. */
+	qint64 m_dmId; /*!< Message isds ID. */
+	bool m_listScheduled; /*<
+	                       * Whether the task has been scheduled from
+	                       * download message list task.
+	                       */
 };
 
 #endif /* _TASK_DOWNLOAD_MESSAGE_MOJEID_H_ */

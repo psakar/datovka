@@ -263,7 +263,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			    NULL);
 
 			if (downloadWhole) {
-				QString errMsg;
 
 				TaskDownloadMessage *task;
 
@@ -293,7 +292,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 * only if those message state is 1 or 2.
 				 */
 				if (downloadWhole && (dmDbMsgStatus <= 2)) {
-					QString errMsg;
 
 					TaskDownloadMessage *task;
 
@@ -315,7 +313,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			/* Message is in db, but the content is missing. */
 			if (downloadWhole &&
 			    !messageDb->msgsStoredWhole(dmId)) {
-				QString errMsg;
 
 				TaskDownloadMessage *task;
 

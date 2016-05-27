@@ -36,9 +36,9 @@ class JsonLayer : public QObject {
 public:
 
 	/*!
-	 * @brief Holds information about an account.
+	 * @brief Holds information about owner and his databox.
 	 */
-	struct AccountInfo {
+	struct OwnerInfo {
 	public:
 		QString key;
 		QString dbID;
@@ -65,7 +65,6 @@ public:
 		int dbState;
 		bool dbEffectiveOVM;
 		bool dbOpenAddressing;
-		QString _acntName;
 	};
 
 	/*!
@@ -166,10 +165,23 @@ public:
 		QList<int> _tagList;
 	};
 
+	/*!
+	 * @brief Holds account data and user info from webdatovka.
+	 */
+	struct AccountData {
+	public:
+		int id;
+		QString name;
+		JsonLayer::OwnerInfo ownerInfo;
+		JsonLayer::UserInfo userInfo;
+	};
+
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
 	QByteArray mojeIDtest(void);
+
+	QString startLoginToWebDatovka(void);
 
 	bool loginToWebDatovka(void);
 
@@ -182,14 +194,8 @@ public:
 
 	bool deleteAccount(int accountID, QString &errStr);
 
-	bool getAccountList(QList<JsonLayer::AccountInfo> &accountList,
+	bool getAccountList(QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
-
-	bool getAccountInfo(int accountID,
-	    JsonLayer::AccountInfo &accountInfo, QString &errStr);
-
-	bool getUserInfo(int accountID,
-	    JsonLayer::UserInfo &userInfo, QString &errStr);
 
 	bool getMessageList(int accountID, int messageType, int limit,
 	    int offset, QList<JsonLayer::Envelope> &messageList,
@@ -232,18 +238,12 @@ private:
 	bool isLoggedToWebDatovka(void);
 
 	bool parseAccountList(const QByteArray &content,
-	    QList<JsonLayer::AccountInfo> &accountList, QString &errStr);
+	    QList<JsonLayer::AccountData> &accountList, QString &errStr);
 
 	bool parseMessageList(const QByteArray &content,
 	    QList<JsonLayer::Envelope> &messageList, QString &errStr);
 
 	bool parseSyncAccount(const QByteArray &content, QString &errStr);
-
-	bool parseAccountInfo(const QByteArray &content,
-	    JsonLayer::AccountInfo &accountInfo, QString &errStr);
-
-	bool parseUserInfo(const QByteArray &content,
-	    JsonLayer::UserInfo &userInfo, QString &errStr);
 
 	bool parseTagList(const QByteArray &content,
 	    QList<JsonLayer::Tag> &tagList, QString &errStr);

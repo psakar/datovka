@@ -55,12 +55,11 @@ void TaskGetAccountListMojeId::run(void)
 
 bool TaskGetAccountListMojeId::getAccountList(QString &error)
 {
-	QList<JsonLayer::AccountInfo> accountList;
+	QList<JsonLayer::AccountData> accountList;
 
 	emit globMsgProcEmitter.progressChange(PL_GET_ACCOUNT_LIST, -1);
 
-	JsonLayer ljsonLayer;
-	ljsonLayer.getAccountList(accountList, error);
+	jsonlayer.getAccountList(accountList, error);
 
 	if (!error.isEmpty()) {
 		qDebug() << "ERROR:" << error;

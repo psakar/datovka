@@ -26,27 +26,23 @@
 
 #include "src/io/dbs.h"
 #include "src/log/log.h"
-#include "src/models/accounts_model.h"
+#include "src/io/isds_sessions.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_message_mojeid.h"
-
-
-#include "src/io/dbs.h"
-#include "src/log/log.h"
-#include "src/io/isds_sessions.h"
-#include "src/models/accounts_model.h"
-#include "src/worker/message_emitter.h"
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/web/json.h"
 
 TaskDownloadMessageMojeId::TaskDownloadMessageMojeId(const QString &userName,
-    MessageDbSet *dbSet, enum MessageDirection msgDirect, int id)
+    MessageDbSet *dbSet, enum MessageDirection msgDirect, int id,
+    qint64 dmId, bool listScheduled)
     : m_result(DM_ERR),
     m_error(),
     m_id(id),
     m_userName(userName),
     m_dbSet(dbSet),
-    m_msgDirect(msgDirect)
+    m_msgDirect(msgDirect),
+    m_dmId(dmId),
+    m_listScheduled(listScheduled)
 {
 	Q_ASSERT(0 != dbSet);
 }
@@ -93,8 +89,8 @@ void TaskDownloadMessageMojeId::run(void)
 		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
 	}
 
-	//emit globMsgProcEmitter.downloadMessageFinished(m_userName, m_id,
-	//    m_msgDirect, m_result, m_error, m_listScheduled);
+	emit globMsgProcEmitter.downloadMessageFinishedMojeId(m_userName,
+	    m_dmId, m_result, m_error, m_listScheduled);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -114,8 +110,7 @@ enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessag
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
-	JsonLayer lJsonlayer;
-	QByteArray zfoData = lJsonlayer.downloadMessage(id, error);
+	QByteArray zfoData = jsonlayer.downloadMessage(id, error);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 
@@ -141,10 +136,12 @@ enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessag
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 60);
 
-	Task::storeEnvelope(msgDirect, dbSet, message->envelope, QString::number(id));
+	Task::storeEnvelope(msgDirect, dbSet, message->envelope,
+	    QString::number(id));
 	emit globMsgProcEmitter.progressChange(progressLabel, 80);
 
-	Task::storeMessage(true, msgDirect, dbSet, message, progressLabel, QString::number(id));
+	Task::storeMessage(true, msgDirect, dbSet, message,
+	    progressLabel, QString::number(id));
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	logDebugLv0NL("Done with %s().", __func__);
