@@ -31,6 +31,7 @@
 #include "src/common.h"
 #include "src/web/json.h"
 #include "src/web/net.h"
+#include "src/io/wd_sessions.h"
 
 JsonLayer jsonlayer;
 
@@ -85,43 +86,56 @@ QByteArray JsonLayer::mojeIDtest(void)
 QString JsonLayer::startLoginToWebDatovka(void) {
 
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
 	netmanager.createGetRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "mojeid/login"), reply);
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "mojeid/login"),  sessionid,
+	    reply);
 
 	return QString();
 }
 
 
-bool JsonLayer::loginToWebDatovka(void) {
+QNetworkCookie JsonLayer::loginToWebDatovka(void) {
 
 	QUrl url(WEBDATOVKA_LOGIN_URL);
 	QByteArray reply;
-	return netmanager.createGetRequestWebDatovka(url, reply);
+	QNetworkCookie sessionid;
+
+	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+
+	return cookieList.at(2);
 }
 
 
-bool JsonLayer::isLoggedToWebDatovka(void)
+bool JsonLayer::isLoggedToWebDatovka(const QString &userName,
+    QNetworkCookie &sessionid)
 {
-	if (cookieList.isEmpty()) {
-		return loginToWebDatovka();
+	sessionid = wdSessions.sessionCookie(userName);
+	if (sessionid.value().isEmpty()) {
+		sessionid = loginToWebDatovka();
+		if (sessionid.name().isEmpty()) {
+				return false;
+		}
+		wdSessions.setSessionCookie(userName, sessionid);
 	}
 
 	return true;
 }
 
 
-bool JsonLayer::pingServer(QString &errStr)
+bool JsonLayer::pingServer(const QString &userName, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
 
 	netmanager.createGetRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "ping"), reply);
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "ping"), sessionid, reply);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -134,11 +148,13 @@ bool JsonLayer::pingServer(QString &errStr)
 }
 
 
-bool JsonLayer::createAccount(const QString &name, QString &errStr)
+bool JsonLayer::createAccount(const QString &userName,const QString &name,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -147,7 +163,7 @@ bool JsonLayer::createAccount(const QString &name, QString &errStr)
 	rootObj["name"] = name;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newaccount"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newaccount"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -166,12 +182,13 @@ bool JsonLayer::createAccount(const QString &name, QString &errStr)
 }
 
 
-bool JsonLayer::renameAccount(int accountID, const QString &newName,
-    QString &errStr)
+bool JsonLayer::renameAccount(const QString &userName,int accountID,
+    const QString &newName, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -181,7 +198,7 @@ bool JsonLayer::renameAccount(int accountID, const QString &newName,
 	rootObj["name"] = newName;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "renameaccount"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "renameaccount"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -196,11 +213,13 @@ bool JsonLayer::renameAccount(int accountID, const QString &newName,
 }
 
 
-bool JsonLayer::deleteAccount(int accountID, QString &errStr)
+bool JsonLayer::deleteAccount(const QString &userName, int accountID,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -209,7 +228,7 @@ bool JsonLayer::deleteAccount(int accountID, QString &errStr)
 	rootObj["account"] = accountID;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deleteaccount"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deleteaccount"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -224,18 +243,14 @@ bool JsonLayer::deleteAccount(int accountID, QString &errStr)
 }
 
 
-bool JsonLayer::getAccountList(QList<JsonLayer::AccountData> &accountList,
-    QString &errStr)
+bool JsonLayer::getAccountList(const QNetworkCookie &sessionid,
+    QList<JsonLayer::AccountData> &accountList, QString &errStr)
 {
 	QByteArray reply;
 
-	if (!isLoggedToWebDatovka()) {
-		errStr = tr("User is not logged to mojeID");
-		return false;
-	}
-
 	netmanager.createGetRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "accountlist"), reply);
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "accountlist"), sessionid,
+	    reply);
 
 	if (reply.isEmpty()) {
 		return false;
@@ -245,12 +260,14 @@ bool JsonLayer::getAccountList(QList<JsonLayer::AccountData> &accountList,
 }
 
 
-bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
-    int offset, QList<JsonLayer::Envelope> &messageList, QString &errStr)
+bool JsonLayer::getMessageList(const QString &userName, int accountID,
+    int messageType, int limit, int offset,
+    QList<JsonLayer::Envelope> &messageList, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -262,7 +279,7 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 	rootObj["limit"] = limit;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "msgenvelopelist"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "msgenvelopelist"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -275,11 +292,13 @@ bool JsonLayer::getMessageList(int accountID, int messageType, int limit,
 }
 
 
-bool JsonLayer::syncAccount(int accountID, QString &errStr)
+bool JsonLayer::syncAccount(const QString &userName, int accountID,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -288,7 +307,7 @@ bool JsonLayer::syncAccount(int accountID, QString &errStr)
 	rootObj["account"] = accountID;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "synchronize"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "synchronize"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -301,52 +320,58 @@ bool JsonLayer::syncAccount(int accountID, QString &errStr)
 }
 
 
-QByteArray JsonLayer::downloadMessage(int msgId, QString &errStr)
+QByteArray JsonLayer::downloadMessage(const QString &userName, int msgId,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return QByteArray();
 	}
 
 	netmanager.createGetRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadsigned/"
-	    + QString::number(msgId)), reply);
+	    + QString::number(msgId)), sessionid, reply);
 
 	return reply;
 }
 
 
-QByteArray JsonLayer::downloadFile(int fileId, QString &errStr)
+QByteArray JsonLayer::downloadFile(const QString &userName, int fileId,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return QByteArray();
 	}
 
 	netmanager.createGetRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadfile/"
-	    + QString::number(fileId)), reply);
+	    + QString::number(fileId)), sessionid, reply);
 
 	return reply;
 }
 
 
-bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
+bool JsonLayer::getTagList(const QString &userName,
+    QList<JsonLayer::Tag> &tagList, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
 
 	QJsonObject rootObj;
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "listtags"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "listtags"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -359,14 +384,15 @@ bool JsonLayer::getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr)
 }
 
 
-int JsonLayer::createTag(const QString &name, const QString &color,
-    QString &errStr)
+int JsonLayer::createTag(const QString &userName, const QString &name,
+    const QString &color, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
-		return -1;
+		return false;
 	}
 
 	QJsonObject rootObj;
@@ -374,7 +400,7 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 	rootObj["color"] = color;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newtag"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newtag"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -393,12 +419,13 @@ int JsonLayer::createTag(const QString &name, const QString &color,
 }
 
 
-bool JsonLayer::updateTag(int tagId, const QString &name,
+bool JsonLayer::updateTag(const QString &userName, int tagId, const QString &name,
     const QString &color, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -409,7 +436,7 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 	rootObj["color"] = color;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "edittag"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "edittag"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -429,11 +456,12 @@ bool JsonLayer::updateTag(int tagId, const QString &name,
 }
 
 
-bool JsonLayer::deleteTag(int tagId, QString &errStr)
+bool JsonLayer::deleteTag(const QString &userName, int tagId, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -442,7 +470,7 @@ bool JsonLayer::deleteTag(int tagId, QString &errStr)
 	rootObj["id"] = tagId;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletetag"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletetag"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -462,45 +490,13 @@ bool JsonLayer::deleteTag(int tagId, QString &errStr)
 }
 
 
-bool JsonLayer::assignTag(int tagId, int msgId, QString &errStr)
+bool JsonLayer::assignTag(const QString &userName, int tagId, int msgId,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
-		errStr = tr("User is not logged to mojeID");
-		return false;
-	}
-
-	QJsonObject rootObj;
-	rootObj["id"] = tagId;
-	rootObj["msgid"] = msgId;
-
-	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/add"),
-	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
-	    reply);
-
-	if (reply.isEmpty()) {
-		errStr = tr("Reply content missing");
-		return false;
-	}
-
-	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
-	QJsonObject jsonObject = jsonResponse.object();
-	if (!jsonObject["success"].toBool()) {
-		errStr = jsonObject["errmsg"].toString();
-		return false;
-	}
-
-	return true;
-}
-
-
-bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
-{
-	QByteArray reply;
-
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -510,7 +506,7 @@ bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
 	rootObj["msgid"] = msgId;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/remove"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/add"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -530,11 +526,49 @@ bool JsonLayer::removeTag(int tagId, int msgId, QString &errStr)
 }
 
 
-bool JsonLayer::removeAllTags(int msgId, QString &errStr)
+bool JsonLayer::removeTag(const QString &userName, int tagId, int msgId,
+    QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QJsonObject rootObj;
+	rootObj["id"] = tagId;
+	rootObj["msgid"] = msgId;
+
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/remove"), sessionid,
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::removeAllTags(const QString &userName, int msgId,
+    QString &errStr)
+{
+	QByteArray reply;
+	QNetworkCookie sessionid;
+
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -543,7 +577,7 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 	rootObj["msgid"] = msgId;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/removeall"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/removeall"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -563,13 +597,15 @@ bool JsonLayer::removeAllTags(int msgId, QString &errStr)
 }
 
 
-bool JsonLayer::searchRecipient(int accountID, const QString &word, int position,
+bool JsonLayer::searchRecipient(const QString &userName, int accountID,
+    const QString &word, int position,
     QList<JsonLayer::Recipient> &resultList, bool &hasMore,
     QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -580,7 +616,7 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 	rootObj["position"] = position;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "searchrecipient"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "searchrecipient"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
@@ -593,15 +629,16 @@ bool JsonLayer::searchRecipient(int accountID, const QString &word, int position
 }
 
 
-bool JsonLayer::sendMessage(int accountID,
+bool JsonLayer::sendMessage(const QString &userName, int accountID,
     const QList<JsonLayer::Recipient> &recipientList,
     const JsonLayer::Envelope &envelope,
     const QList<JsonLayer::File> &fileList,
     QStringList &resultList, QString &errStr)
 {
 	QByteArray reply;
+	QNetworkCookie sessionid;
 
-	if (!isLoggedToWebDatovka()) {
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
 		errStr = tr("User is not logged to mojeID");
 		return false;
 	}
@@ -647,7 +684,7 @@ bool JsonLayer::sendMessage(int accountID,
 	rootObj["files"] = files;
 
 	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "sendmessage"),
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "sendmessage"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 

@@ -73,7 +73,7 @@ NetManager::~NetManager(void)
  * Func: Create POST request for WebDatovka.
  */
 bool NetManager::createPostRequestWebDatovka(const QUrl &url,
-   const QByteArray &data, QByteArray &outData)
+   const QNetworkCookie &sessionid, const QByteArray &data, QByteArray &outData)
 /* ========================================================================= */
 {
 	qDebug("%s()", __func__);
@@ -87,11 +87,9 @@ bool NetManager::createPostRequestWebDatovka(const QUrl &url,
 	request.setRawHeader("Content-Type", "application/json");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
 
-	if (!cookieList.isEmpty()) {
-		QVariant var;
-		var.setValue(cookieList);
-		request.setHeader(QNetworkRequest::CookieHeader, var);
-	}
+	QVariant var;
+	var.setValue(sessionid);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
 
 #if 1
 	printRequest(request, data);
@@ -139,7 +137,8 @@ bool NetManager::createPostRequestMojeId(const QUrl &url,
 /*
  * Func: Create GET request for WebDatovka.
  */
-bool NetManager::createGetRequestWebDatovka(const QUrl &url, QByteArray &outData)
+bool NetManager::createGetRequestWebDatovka(const QUrl &url,
+    const QNetworkCookie &sessionid, QByteArray &outData)
 /* ========================================================================= */
 {
 	qDebug("%s()", __func__);
@@ -152,11 +151,10 @@ bool NetManager::createGetRequestWebDatovka(const QUrl &url, QByteArray &outData
 	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
 
-	if (!cookieList.isEmpty()) {
-		QVariant var;
-		var.setValue(cookieList);
-		request.setHeader(QNetworkRequest::CookieHeader, var);
-	}
+	QVariant var;
+	var.setValue(sessionid);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
+
 #if 1
 	printRequest(request, QByteArray());
 #endif
@@ -174,7 +172,19 @@ bool NetManager::createGetRequestMojeId(const QUrl &url, QByteArray &outData)
 {
 	qDebug("%s()", __func__);
 
-	return createGetRequestWebDatovka(url, outData);
+	QByteArray appName(APP_NAME);
+	QNetworkRequest request(url);
+	request.setRawHeader("Host", url.host().toUtf8());
+	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Accept",
+	    "text/html,application/xhtml+xml,application/xml");
+	request.setRawHeader("Connection", "keep-alive");
+
+#if 1
+	printRequest(request, QByteArray());
+#endif
+
+	return sendRequest(request, QByteArray(), outData, false);
 }
 
 

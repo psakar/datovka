@@ -42,19 +42,22 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] userName     Account user name.
 	 * @param[in] isWebDatovka is Webdatovka account.
 	 * @param[in] parent       Parent widget.
 	 */
-	explicit DlgTag(bool isWebDatovkaAccount, QWidget *parent = 0);
+	explicit DlgTag(const QString &userName,
+	    bool isWebDatovkaAccount, QWidget *parent = 0);
 
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] userName     Account user name.
 	 * @param[in] isWebDatovka is Webdatovka account.
 	 * @param[in] tag          Tag.
 	 * @param[in] parent       Parent widget.
 	 */
-	explicit DlgTag(bool isWebDatovkaAccount,
+	explicit DlgTag(const QString &userName, bool isWebDatovkaAccount,
 	    const TagItem &tag, QWidget *parent = 0);
 
 private slots:
@@ -81,6 +84,7 @@ private:
 	 */
 	void setPreviewButtonColor(void);
 
+	QString m_userName; /*!< Account username. */
 	bool m_isWebDatovkaAccount; /*!< is WebDatovka account. */
 	TagItem m_tagItem; /*!< Created tag. */
 	TagDb *m_TagDbPtr; /*!< Tag db pointer. */

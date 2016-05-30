@@ -28,10 +28,11 @@
 #include "src/worker/task_send_message_mojeid.h"
 
 
-TaskSendMessageMojeId::TaskSendMessageMojeId(
+TaskSendMessageMojeId::TaskSendMessageMojeId(const QString &userName,
     int accountID, const QList<JsonLayer::Recipient> &recipientList,
     const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList)
     :
+    m_userName(userName),
     m_accountID(accountID),
     m_recipientList(recipientList),
     m_envelope(envelope),
@@ -49,7 +50,7 @@ void TaskSendMessageMojeId::run(void)
 
 	/* ### Worker task begin. ### */
 
-	sendMessage(m_accountID, m_recipientList, m_envelope,
+	sendMessage(m_userName, m_accountID, m_recipientList, m_envelope,
 	    m_fileList, PL_SEND_MESSAGE, m_resultList, m_error);
 
 	emit globMsgProcEmitter.sendMessageMojeIdFinished(m_accountID,
@@ -64,6 +65,7 @@ void TaskSendMessageMojeId::run(void)
 }
 
 enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
+    const QString &userName,
     int accountID, const QList<JsonLayer::Recipient> &recipientList,
     const JsonLayer::Envelope &envelope, const QList<JsonLayer::File> &fileList,
     const QString &progressLabel, QStringList &resultList,
@@ -71,7 +73,7 @@ enum TaskSendMessageMojeId::Result TaskSendMessageMojeId::sendMessage(
 {
 	emit globMsgProcEmitter.progressChange(progressLabel, -1);
 
-	jsonlayer.sendMessage(accountID, recipientList, envelope,
+	jsonlayer.sendMessage(userName, accountID, recipientList, envelope,
 	    fileList, resultList, errStr);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);

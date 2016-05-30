@@ -52,7 +52,8 @@ public:
 	 * @return true if success.
 	 */
 	bool createPostRequestWebDatovka(const QUrl &url,
-	    const QByteArray &data, QByteArray &outData);
+	    const QNetworkCookie &sessionid, const QByteArray &data,
+	    QByteArray &outData);
 
 	/*!
 	 * @brief Create POST request for MojeID.
@@ -73,7 +74,7 @@ public:
 	 * @return true if success.
 	 */
 	bool createGetRequestWebDatovka(const QUrl &url,
-	    QByteArray &outData);
+	    const QNetworkCookie &sessionid, QByteArray &outData);
 
 	/*!
 	 * @brief Create GET request for MojeID.

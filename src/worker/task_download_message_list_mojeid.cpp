@@ -145,8 +145,8 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 		msgType = -1;
 	}
 
-	if (!jsonlayer.getMessageList(accountID, msgType, dmLimit, dmOffset,
-	    messageList, error)) {
+	if (!jsonlayer.getMessageList(userName, accountID, msgType, dmLimit,
+	    dmOffset, messageList, error)) {
 		if (!error.isEmpty()) {
 			qDebug() << "ERROR:" << error;
 		} else {

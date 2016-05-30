@@ -56,10 +56,11 @@ void TaskGetAccountListMojeId::run(void)
 bool TaskGetAccountListMojeId::getAccountList(QString &error)
 {
 	QList<JsonLayer::AccountData> accountList;
+	QNetworkCookie sessionid;
 
 	emit globMsgProcEmitter.progressChange(PL_GET_ACCOUNT_LIST, -1);
 
-	jsonlayer.getAccountList(accountList, error);
+	jsonlayer.getAccountList(sessionid, accountList, error);
 
 	if (!error.isEmpty()) {
 		qDebug() << "ERROR:" << error;

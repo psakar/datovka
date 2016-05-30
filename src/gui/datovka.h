@@ -1283,6 +1283,8 @@ private:
 	 */
 	void setMenuActionIcons(void);
 
+	bool updateMojeIdAccount(const QString &userName,
+	    const JsonLayer::AccountData &aData, bool syncWithAll, bool addNew);
 };
 
 

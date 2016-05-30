@@ -77,12 +77,13 @@ public:
 	 * @param[in,out] dbSet         Database container.
 	 * @param[out]    error         Error description.
 	 * @param[in]     progressLabel Progress-bar label.
+	 * @param[in]     userName      Account identifier (user login name)
 	 * @return Error state.
 	 */
 	static
 	enum Result downloadMessage(int id,
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
-	    QString &error, const QString &progressLabel);
+	    QString &error, const QString &progressLabel, const QString &userName);
 
 	enum Result m_result; /*!< Return state. */
 	QString m_error; /*!< Error description. */

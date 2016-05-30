@@ -26,6 +26,7 @@
 
 #include <QByteArray>
 #include <QObject>
+#include <QNetworkCookie>
 
 #include "src/models/accounts_model.h"
 #include "src/io/message_db.h"
@@ -183,51 +184,64 @@ public:
 
 	QString startLoginToWebDatovka(void);
 
-	bool loginToWebDatovka(void);
+	QNetworkCookie loginToWebDatovka(void);
 
-	bool pingServer(QString &errStr);
+	bool pingServer(const QString &userName, QString &errStr);
 
-	bool createAccount(const QString &name, QString &errStr);
+	bool createAccount(const QString &userName,
+	    const QString &name, QString &errStr);
 
-	bool renameAccount(int accountID, const QString &newName,
+	bool renameAccount(const QString &userName,
+	    int accountID, const QString &newName, QString &errStr);
+
+	bool deleteAccount(const QString &userName,
+	    int accountID, QString &errStr);
+
+	bool getAccountList(const QNetworkCookie &sessionid,
+	    QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
 
-	bool deleteAccount(int accountID, QString &errStr);
-
-	bool getAccountList(QList<JsonLayer::AccountData> &accountList,
-	    QString &errStr);
-
-	bool getMessageList(int accountID, int messageType, int limit,
+	bool getMessageList(const QString &userName,
+	    int accountID, int messageType, int limit,
 	    int offset, QList<JsonLayer::Envelope> &messageList,
 	    QString &errStr);
 
-	bool syncAccount(int accountID, QString &errStr);
+	bool syncAccount(const QString &userName,
+	    int accountID, QString &errStr);
 
-	QByteArray downloadMessage(int msgId, QString &errStr);
+	QByteArray downloadMessage(const QString &userName,
+	    int msgId, QString &errStr);
 
-	QByteArray downloadFile(int fileId, QString &errStr);
+	QByteArray downloadFile(const QString &userName,
+	    int fileId, QString &errStr);
 
-	bool getTagList(QList<JsonLayer::Tag> &tagList, QString &errStr);
+	bool getTagList(const QString &userName,
+	    QList<JsonLayer::Tag> &tagList, QString &errStr);
 
-	int createTag(const QString &name, const QString &color,
-	    QString &errStr);
+	int createTag(const QString &userName,
+	    const QString &name, const QString &color, QString &errStr);
 
-	bool updateTag(int tagId, const QString &name,
-	    const QString &color, QString &errStr);
+	bool updateTag(const QString &userName, int tagId,
+	    const QString &name, const QString &color, QString &errStr);
 
-	bool deleteTag(int tagId, QString &errStr);
+	bool deleteTag(const QString &userName,
+	    int tagId, QString &errStr);
 
-	bool assignTag(int tagId, int msgId, QString &errStr);
+	bool assignTag(const QString &userName,
+	    int tagId, int msgId, QString &errStr);
 
-	bool removeTag(int tagId, int msgId, QString &errStr);
+	bool removeTag(const QString &userName,
+	    int tagId, int msgId, QString &errStr);
 
-	bool removeAllTags(int msgId, QString &errStr);
+	bool removeAllTags(const QString &userName,
+	    int msgId, QString &errStr);
 
-	bool searchRecipient(int accountID, const QString &word, int position,
+	bool searchRecipient(const QString &userName,
+	    int accountID, const QString &word, int position,
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 
-	bool sendMessage(int accountID,
+	bool sendMessage(const QString &userName, int accountID,
 	    const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
@@ -235,7 +249,8 @@ public:
 
 private:
 
-	bool isLoggedToWebDatovka(void);
+	bool isLoggedToWebDatovka(const QString &userName,
+	    QNetworkCookie &sessionid);
 
 	bool parseAccountList(const QByteArray &content,
 	    QList<JsonLayer::AccountData> &accountList, QString &errStr);

@@ -36,9 +36,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in]     userName      Account identifier (user login name)
 	 * @param[in] id Account identifier.
 	 */
-	explicit TaskSyncAccount(int id);
+	explicit TaskSyncAccount(const QString &userName, int id);
 
 	/*!
 	 * @brief Performs action.
@@ -59,13 +60,15 @@ private:
 	/*!
 	 * @brief Sync account.
 	 *
+	 * @param[in]     userName      Account identifier (user login name)
 	 * @param[in]     id     Account identifier.
 	 * @param[out]    error        Error description.
 	 * @return True on success.
 	 */
 	static
-	bool syncAccount(int id, QString &error);
+	bool syncAccount(const QString &userName, int id, QString &error);
 
+	const QString m_userName; /*!< Account identifier (user login name). */
 	int m_id; /*!< Account identifier. */
 };
 

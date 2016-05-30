@@ -76,7 +76,7 @@ void TaskDownloadMessageMojeId::run(void)
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
 	m_result = downloadMessage(m_id, m_msgDirect, *m_dbSet,
-	    m_error, PL_DOWNLOAD_MESSAGE);
+	    m_error, PL_DOWNLOAD_MESSAGE, m_userName);
 
 	if (DM_SUCCESS == m_result) {
 		logDebugLv1NL(
@@ -102,7 +102,7 @@ void TaskDownloadMessageMojeId::run(void)
 
 enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessage(
     int id, enum MessageDirection msgDirect, MessageDbSet &dbSet, QString &error,
-    const QString &progressLabel)
+    const QString &progressLabel, const QString &userName)
 {
 	debugFuncCall();
 
@@ -110,7 +110,7 @@ enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessag
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 0);
 
-	QByteArray zfoData = jsonlayer.downloadMessage(id, error);
+	QByteArray zfoData = jsonlayer.downloadMessage(userName, id, error);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 30);
 

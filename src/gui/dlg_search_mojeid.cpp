@@ -142,7 +142,7 @@ void DlgDsSearchMojeId::searchDataBox(void)
 	int accoutID = aID.toInt();
 
 	JsonLayer jsonLayer;
-	jsonLayer.searchRecipient(accoutID, this->keywordLineEdit->text(),
+	jsonLayer.searchRecipient(m_userName, accoutID, this->keywordLineEdit->text(),
 	    m_limit, rList, hasMore, errStr);
 
 	if (rList.isEmpty()) {

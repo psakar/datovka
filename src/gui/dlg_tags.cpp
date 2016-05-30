@@ -72,7 +72,7 @@ DlgTags::~DlgTags(void)
 
 void DlgTags::addTag(void)
 {
-	QDialog *tagDlg = new DlgTag(m_isWebDatovkaAccount, this);
+	QDialog *tagDlg = new DlgTag(m_userName, m_isWebDatovkaAccount, this);
 	tagDlg->exec();
 	tagDlg->deleteLater();
 
@@ -84,7 +84,8 @@ void DlgTags::updateTag(void)
 	TagItem tagItem(m_TagDbPtr->getTagData(
 	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
-	QDialog *tagDlg = new DlgTag(m_isWebDatovkaAccount, tagItem, this);
+	QDialog *tagDlg = new DlgTag(m_userName, m_isWebDatovkaAccount,
+	    tagItem, this);
 	tagDlg->exec();
 	tagDlg->deleteLater();
 
@@ -98,7 +99,8 @@ void DlgTags::deleteTag(void)
 	foreach (const QModelIndex &idx, slctIdxs) {
 
 		if (m_isWebDatovkaAccount) {
-			if (!m_jsonsLayer.deleteTag(getTagIdFromIndex(idx), m_errStr)) {
+			if (!m_jsonsLayer.deleteTag(m_userName,
+			    getTagIdFromIndex(idx), m_errStr)) {
 				continue;
 			}
 		}
@@ -120,12 +122,14 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 		}
 		for (int i = 0; i < m_msgIdList.count(); ++i) {
 			foreach (const QModelIndex &idx, slctIdxs) {
-				if (!m_jsonsLayer.assignTag(getTagIdFromIndex(idx),
+				if (!m_jsonsLayer.assignTag(m_userName,
+				    getTagIdFromIndex(idx),
 				    m_msgIdWebDatovkaList.at(i), m_errStr)) {
 					continue;
 				}
 				m_TagDbPtr->assignTagToMsg(m_userName,
-				    getTagIdFromIndex(idx), m_msgIdList.at(i));
+				    getTagIdFromIndex(idx),
+				    m_msgIdList.at(i));
 			}
 
 		}
@@ -151,7 +155,8 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 		}
 		for (int i = 0; i < m_msgIdList.count(); ++i) {
 			foreach (const QModelIndex &idx, slctIdxs) {
-				if (!m_jsonsLayer.removeTag(getTagIdFromIndex(idx),
+				if (!m_jsonsLayer.removeTag(m_userName,
+				    getTagIdFromIndex(idx),
 				    m_msgIdWebDatovkaList.at(i), m_errStr)) {
 					continue;
 				}
@@ -179,7 +184,8 @@ void DlgTags::removeAllTagsFromMsgs(void)
 			return;
 		}
 		for (int i = 0; i < m_msgIdList.count(); ++i) {
-			if (!m_jsonsLayer.removeAllTags(m_msgIdWebDatovkaList.at(i), m_errStr)) {
+			if (!m_jsonsLayer.removeAllTags(m_userName,
+			   m_msgIdWebDatovkaList.at(i), m_errStr)) {
 				continue;
 			}
 			m_TagDbPtr->removeAllTagsFromMsg(m_userName,

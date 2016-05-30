@@ -30,9 +30,10 @@
 #include "src/worker/task_sync_mojeid.h"
 #include "src/web/json.h"
 
-TaskSyncAccount::TaskSyncAccount(int id)
+TaskSyncAccount::TaskSyncAccount(const QString &userName, int id)
     : m_success(false),
     m_isdsError(),
+    m_userName(userName),
     m_id(id)
 {
 }
@@ -44,7 +45,7 @@ void TaskSyncAccount::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_success = syncAccount(m_id, m_isdsError);
+	m_success = syncAccount(m_userName, m_id, m_isdsError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -54,9 +55,9 @@ void TaskSyncAccount::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-bool TaskSyncAccount::syncAccount(int id, QString &error)
+bool TaskSyncAccount::syncAccount(const QString &userName, int id, QString &error)
 {
 	emit globMsgProcEmitter.progressChange(PL_SYNC_ACCOUNT, -1);
 
-	return jsonlayer.syncAccount(id, error);
+	return jsonlayer.syncAccount(userName, id, error);
 }

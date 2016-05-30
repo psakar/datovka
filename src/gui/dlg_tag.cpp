@@ -28,8 +28,9 @@
 #include "src/io/tag_db.h"
 #include "src/web/json.h"
 
-DlgTag::DlgTag(bool isWebDatovkaAccount, QWidget *parent)
+DlgTag::DlgTag(const QString &userName, bool isWebDatovkaAccount, QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
     m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem()
 {
@@ -39,8 +40,10 @@ DlgTag::DlgTag(bool isWebDatovkaAccount, QWidget *parent)
 
 }
 
-DlgTag::DlgTag(bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent)
+DlgTag::DlgTag(const QString &userName,
+    bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
     m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem(tag)
 {
@@ -105,7 +108,8 @@ void DlgTag::saveTag(void)
 	if (m_tagItem.id >= 0) {
 
 		if (m_isWebDatovkaAccount) {
-			if (!jsLayer.updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour, errStr)) {
+			if (!jsLayer.updateTag(m_userName, m_tagItem.id,
+			   m_tagItem.name, m_tagItem.colour, errStr)) {
 				msgBox.setWindowTitle(tr("Tag update error"));
 				msgBox.setText(tr("Tag with name '%1'' wasn't "
 				   "updated in the WebDatovka database.").arg(m_tagItem.name));
@@ -119,8 +123,8 @@ void DlgTag::saveTag(void)
 	} else {
 		if (m_isWebDatovkaAccount) {
 
-			int tagId = jsLayer.createTag(m_tagItem.name,
-			    m_tagItem.colour, errStr);
+			int tagId = jsLayer.createTag(m_userName,
+			    m_tagItem.name, m_tagItem.colour, errStr);
 			if (tagId <= 0) {
 				msgBox.setWindowTitle(tr("Tag insert error"));
 				msgBox.setText(tr("Tag with name '%1'' wasn't' "

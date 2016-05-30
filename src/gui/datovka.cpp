@@ -10657,16 +10657,13 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 {
 	debugSlotCall();
 
-	/* TODO - login via mojeID firstly */
-//	if (!loginToMojeId()) {
-//		/* TODO - show messagebox */
-//		return;
-//	}
+	//QNetworkCookie sessionid = loginToMojeId();
 
 	QString errStr;
 	QList<JsonLayer::AccountData> accountList;
+	QNetworkCookie sessionid = jsonlayer.loginToWebDatovka();
 
-	jsonlayer.getAccountList(accountList, errStr);
+	jsonlayer.getAccountList(sessionid, accountList, errStr);
 
 	if (!errStr.isEmpty()) {
 		qDebug() << "ERROR:" << errStr;
@@ -10678,69 +10675,18 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 	}
 
 	for (int i = 0; i < accountList.count(); ++i) {
-		QModelIndex index;
-		AcntSettings aSet;
 		const QString userName = DB_MOJEID_NAME_PREFIX +
 		    QString::number(accountList.at(i).id);
-		aSet.setUserName(userName);
-		aSet.setAccountName(accountList.at(i).name);
-		aSet.setLoginMethod(LIM_MOJEID);
-		aSet.setSyncWithAll(syncWithAll);
-		m_accountModel.addAccount(aSet, &index);
-		refreshAccountList(userName);
-
-		globAccountDbPtr->insertAccountIntoDb(
-		    userName + "___True",
-		    accountList.at(i).ownerInfo.dbID,
-		    accountList.at(i).ownerInfo.dbType,
-		    accountList.at(i).ownerInfo.ic.toInt(),
-		    accountList.at(i).ownerInfo.pnFirstName,
-		    accountList.at(i).ownerInfo.pnMiddleName,
-		    accountList.at(i).ownerInfo.pnLastName,
-		    accountList.at(i).ownerInfo.pnLastNameAtBirth,
-		    accountList.at(i).ownerInfo.firmName,
-		    accountList.at(i).ownerInfo.biDate,
-		    accountList.at(i).ownerInfo.biCity,
-		    accountList.at(i).ownerInfo.biCounty,
-		    accountList.at(i).ownerInfo.biState,
-		    accountList.at(i).ownerInfo.adCity,
-		    accountList.at(i).ownerInfo.adStreet,
-		    accountList.at(i).ownerInfo.adNumberInStreet,
-		    accountList.at(i).ownerInfo.adNumberInMunicipality,
-		    accountList.at(i).ownerInfo.adZipCode,
-		    accountList.at(i).ownerInfo.adState,
-		    accountList.at(i).ownerInfo.nationality,
-		    accountList.at(i).ownerInfo.identifier,
-		    accountList.at(i).ownerInfo.registryCode,
-		    accountList.at(i).ownerInfo.dbState,
-		    accountList.at(i).ownerInfo.dbEffectiveOVM,
-		    accountList.at(i).ownerInfo.dbOpenAddressing
-		);
-
-		globAccountDbPtr->insertUserIntoDb(
-		    userName + "___True",
-		    accountList.at(i).userInfo.userType,
-		    accountList.at(i).userInfo.userPrivils,
-		    accountList.at(i).userInfo.pnFirstName,
-		    accountList.at(i).userInfo.pnMiddleName,
-		    accountList.at(i).userInfo.pnLastName,
-		    accountList.at(i).userInfo.pnLastNameAtBirth,
-		    accountList.at(i).userInfo.adCity,
-		    accountList.at(i).userInfo.adStreet,
-		    accountList.at(i).userInfo.adNumberInStreet,
-		    accountList.at(i).userInfo.adNumberInMunicipality,
-		    accountList.at(i).userInfo.adZipCode,
-		    accountList.at(i).userInfo.adState,
-		    accountList.at(i).userInfo.biDate,
-		    accountList.at(i).userInfo.ic,
-		    accountList.at(i).userInfo.firmName,
-		    accountList.at(i).userInfo.caStreet,
-		    accountList.at(i).userInfo.caCity,
-		    accountList.at(i).userInfo.caZipCode,
-		    accountList.at(i).userInfo.caState
-		);
+		if (!m_accountModel.globAccounts.contains(userName)) {
+			updateMojeIdAccount(userName, accountList.at(i),
+			    syncWithAll, true);
+		} else {
+			updateMojeIdAccount(userName, accountList.at(i),
+			    syncWithAll, false);
+		}
 
 		wdSessions.createCleanSession(userName);
+		wdSessions.setSessionCookie(userName, sessionid);
 	}
 }
 
@@ -10760,7 +10706,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	QString errStr;
 	QList<JsonLayer::Tag> tagList;
 
-	if (jsonlayer.getTagList(tagList, errStr)) {
+	if (jsonlayer.getTagList(userName, tagList, errStr)) {
 		globWebDatovkaTagDbPtr->deleteAllTags();
 		foreach (const JsonLayer::Tag &tag, tagList) {
 			globWebDatovkaTagDbPtr->insertUpdateWebDatovkaTag(tag.id,
@@ -10822,7 +10768,7 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	TaskSyncAccount *task;
 
-	task = new (std::nothrow) TaskSyncAccount(accoutID);
+	task = new (std::nothrow) TaskSyncAccount(userName, accoutID);
 	task->setAutoDelete(true);
 	globWorkPool.assignHi(task);
 
@@ -10895,6 +10841,84 @@ bool MainWindow::loginToMojeId(void)
 	debugFuncCall();
 
 	jsonlayer.startLoginToWebDatovka();
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Func:
+ */
+bool MainWindow::updateMojeIdAccount(const QString &userName,
+    const JsonLayer::AccountData &aData, bool syncWithAll, bool addNew)
+/* ========================================================================= */
+{
+	QModelIndex index;
+
+	if (addNew) {
+		AcntSettings aSet;
+		aSet.setUserName(userName);
+		aSet.setAccountName(aData.name);
+		aSet.setLoginMethod(LIM_MOJEID);
+		aSet.setSyncWithAll(syncWithAll);
+		m_accountModel.addAccount(aSet, &index);
+	} else {
+		m_accountModel.globAccounts[userName].setAccountName(aData.name);
+	}
+
+	refreshAccountList(userName);
+
+	globAccountDbPtr->insertAccountIntoDb(
+	    userName + "___True",
+	    aData.ownerInfo.dbID,
+	    aData.ownerInfo.dbType,
+	    aData.ownerInfo.ic.toInt(),
+	    aData.ownerInfo.pnFirstName,
+	    aData.ownerInfo.pnMiddleName,
+	    aData.ownerInfo.pnLastName,
+	    aData.ownerInfo.pnLastNameAtBirth,
+	    aData.ownerInfo.firmName,
+	    aData.ownerInfo.biDate,
+	    aData.ownerInfo.biCity,
+	    aData.ownerInfo.biCounty,
+	    aData.ownerInfo.biState,
+	    aData.ownerInfo.adCity,
+	    aData.ownerInfo.adStreet,
+	    aData.ownerInfo.adNumberInStreet,
+	    aData.ownerInfo.adNumberInMunicipality,
+	    aData.ownerInfo.adZipCode,
+	    aData.ownerInfo.adState,
+	    aData.ownerInfo.nationality,
+	    aData.ownerInfo.identifier,
+	    aData.ownerInfo.registryCode,
+	    aData.ownerInfo.dbState,
+	    aData.ownerInfo.dbEffectiveOVM,
+	    aData.ownerInfo.dbOpenAddressing
+	);
+
+	globAccountDbPtr->insertUserIntoDb(
+	    userName + "___True",
+	    aData.userInfo.userType,
+	    aData.userInfo.userPrivils,
+	    aData.userInfo.pnFirstName,
+	    aData.userInfo.pnMiddleName,
+	    aData.userInfo.pnLastName,
+	    aData.userInfo.pnLastNameAtBirth,
+	    aData.userInfo.adCity,
+	    aData.userInfo.adStreet,
+	    aData.userInfo.adNumberInStreet,
+	    aData.userInfo.adNumberInMunicipality,
+	    aData.userInfo.adZipCode,
+	    aData.userInfo.adState,
+	    aData.userInfo.biDate,
+	    aData.userInfo.ic,
+	    aData.userInfo.firmName,
+	    aData.userInfo.caStreet,
+	    aData.userInfo.caCity,
+	    aData.userInfo.caZipCode,
+	    aData.userInfo.caState
+	);
 
 	return true;
 }

@@ -47,12 +47,13 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in]  userName Account identifier (user login name).
 	 * @param[in]      accountID       Account ID of webdatovka.
 	 * @param[in]      recipientList   List of recipients.
 	 * @param[in]      envelope        Envelope data.
 	 * @param[in]      fileList        List of attachments.
 	 */
-	explicit TaskSendMessageMojeId(
+	explicit TaskSendMessageMojeId(const QString &userName,
 	    int accountID, const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList);
@@ -73,6 +74,7 @@ private:
 	/*!
 	 * @brief Sends a single message to ISDS fro given account.
 	 *
+	 * @param[in]  userName Account identifier (user login name).
 	 * @param[in]      accountID       Account ID of webdatovka.
 	 * @param[in]      recipientList   List of recipients.
 	 * @param[in]      envelope        Envelope data.
@@ -83,7 +85,7 @@ private:
 	 * @return Error state.
 	 */
 	static
-	enum Result sendMessage(
+	enum Result sendMessage(const QString &userName,
 	    int accountID, const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
@@ -91,6 +93,7 @@ private:
 	    QStringList &resultList,
 	    QString &error);
 
+	const QString m_userName; /*!< Account identifier (user login name). */
 	const int m_accountID; /*!< Account id of webdatovka. */
 	const QList<JsonLayer::Recipient> m_recipientList; /*!< List of recipients. */
 	const JsonLayer::Envelope m_envelope; /*!< Envelope data. */

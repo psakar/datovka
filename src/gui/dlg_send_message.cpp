@@ -1189,7 +1189,7 @@ void DlgSendMessage::sendMessage(void)
 		buildFileListWebDatovka(fileList);
 
 		TaskSendMessageMojeId *task;
-		task = new (std::nothrow) TaskSendMessageMojeId(accountID,
+		task = new (std::nothrow) TaskSendMessageMojeId(m_userName, accountID,
 		    recipientList, envelope, fileList);
 		task->setAutoDelete(true);
 		globWorkPool.assignHi(task);
