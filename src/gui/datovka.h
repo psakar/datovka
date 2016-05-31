@@ -114,8 +114,11 @@ public:
 	static
 	bool getUserInfoFromLogin(const QString &userName);
 
-	static
-	bool loginToMojeId(void);
+	/*!
+	 * @brief Get account list from Webdatovka.
+	 */
+	bool wdGetAccountList(const QNetworkCookie &sessionid,
+	    bool syncWithAll);
 
 protected:
 	/*!
@@ -127,9 +130,10 @@ protected:
 
 private slots:
 
-
-	/* TODO - add comments */
-	void wdGetAccountList(bool syncWithAll);
+	/*!
+	 * @brief Login to mojeID.
+	 */
+	void loginToMojeId(bool syncWithAll);
 
 	/*!
 	 * @brief Processes messages from single instance emitter.

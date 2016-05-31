@@ -88,6 +88,7 @@
 #include "src/worker/task_download_message_list_mojeid.h"
 #include "src/worker/task_download_message_mojeid.h"
 #include "src/worker/task_sync_mojeid.h"
+#include "src/worker/task_tag_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
@@ -4949,7 +4950,7 @@ void MainWindow::addNewAccount(void)
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 	connect(newAccountDialog,
 	    SIGNAL(loginToWebDatovka(bool)),
-	    this, SLOT(wdGetAccountList(bool)));
+	    this, SLOT(loginToMojeId(bool)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -10687,28 +10688,26 @@ void MainWindow::addOrDeleteMsgTags(void)
 
 /* ========================================================================= */
 /*
- * Slot: Download all accounts from webdatovka.
+ * Func: Download all accounts from webdatovka.
  */
-void MainWindow::wdGetAccountList(bool syncWithAll)
+bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
+    bool syncWithAll)
 /* ========================================================================= */
 {
-	debugSlotCall();
-
-	//QNetworkCookie sessionid = loginToMojeId();
+	debugFuncCall();
 
 	QString errStr;
 	QList<JsonLayer::AccountData> accountList;
-	QNetworkCookie sessionid = jsonlayer.loginToWebDatovka();
 
 	jsonlayer.getAccountList(sessionid, accountList, errStr);
 
 	if (!errStr.isEmpty()) {
 		qDebug() << "ERROR:" << errStr;
-		return;
+		return false;
 	}
 
 	if (accountList.isEmpty()) {
-		return;
+		return false;
 	}
 
 	for (int i = 0; i < accountList.count(); ++i) {
@@ -10727,6 +10726,8 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 		wdSessions.createCleanSession(userName);
 		wdSessions.setSessionCookie(userName, sessionid);
 	}
+
+	return true;
 }
 
 /* ========================================================================= */
@@ -10742,18 +10743,11 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 		return false;
 	}
 
-	QString errStr;
-	QList<JsonLayer::Tag> tagList;
+	TaskTagSyncAccount *tagtask;
 
-	if (jsonlayer.getTagList(userName, tagList, errStr)) {
-		globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName))->deleteAllTags();
-		foreach (const JsonLayer::Tag &tag, tagList) {
-			globWebDatovkaTagDbPtr->accessTagDb(
-			    getWebDatovkaTagDbPrefix(userName))->
-			    insertUpdateWebDatovkaTag(tag.id, tag.name, tag.color);
-		}
-	}
+	tagtask = new (std::nothrow) TaskTagSyncAccount(userName);
+	tagtask->setAutoDelete(true);
+	globWorkPool.assignHi(tagtask);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -10800,7 +10794,7 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	/* Try connecting to webdatovka, just to generate log-in dialogue. */
 	if (!wdSessions.isConnectedToWebdatovka(userName)) {
-		wdGetAccountList(true);
+		loginToMojeId(true);
 	}
 
 	int accountID = getWebDatovkaAccountId(userName);
@@ -10872,16 +10866,16 @@ void MainWindow::sendMessageMojeIdAction(int accountID,
 
 /* ========================================================================= */
 /*
- * Func: Login to MojeID.
+ * Slot: Login to MojeID.
  */
-bool MainWindow::loginToMojeId(void)
+void MainWindow::loginToMojeId(bool syncWithAll)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
-	jsonlayer.loginToWebDatovka();
+	QNetworkCookie sessionid = jsonlayer.loginToWebDatovka();
 
-	return true;
+	wdGetAccountList(sessionid, syncWithAll);
 }
 
 
