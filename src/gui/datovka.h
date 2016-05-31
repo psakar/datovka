@@ -1212,7 +1212,7 @@ private:
 	 * @param[in] userName - account username.
 	 * @param[in] txt        additional info text.
 	 */
-	void showWebDatovkaInfoDialog(const QString &userName, const QString &txt);
+	void showWebDatovkaInfoDialog(const QString &userName, QString txt);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

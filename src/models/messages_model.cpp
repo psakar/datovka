@@ -535,7 +535,8 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 	TagDb *tagDb = 0;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		tagDb = globWebDatovkaTagDbPtr->
+		     accessTagDb(getWebDatovkaTagDbPrefix(userName));
 	} else {
 		tagDb = globTagDbPtr;
 	}
@@ -578,7 +579,8 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 	TagDb *tagDb = 0;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		tagDb = globWebDatovkaTagDbPtr->
+		    accessTagDb(getWebDatovkaTagDbPrefix(userName));
 	} else {
 		tagDb = globTagDbPtr;
 	}

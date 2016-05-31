@@ -5025,7 +5025,8 @@ void MainWindow::deleteSelectedAccount(void)
 	}
 
 	if (isWebDatovkaAccount(userName)) {
-		globWebDatovkaTagDbPtr->accessTagDb(userName)
+		globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName))
 		    ->removeAllMsgTagsFromAccount(userName);
 	} else {
 		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
@@ -10601,7 +10602,14 @@ void MainWindow::showTagDlg(void)
 	TagDb *tagDb = NULL;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+				"if you want to modify tags."));
+			return;
+		}
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
 	} else {
 		tagDb = globTagDbPtr;
 	}
@@ -10653,7 +10661,14 @@ void MainWindow::addOrDeleteMsgTags(void)
 	TagDb *tagDb = NULL;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to modify tags."));
+			return;
+		}
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
 	} else {
 		tagDb = globTagDbPtr;
 	}
@@ -10697,8 +10712,10 @@ void MainWindow::wdGetAccountList(bool syncWithAll)
 	}
 
 	for (int i = 0; i < accountList.count(); ++i) {
-		const QString userName = DB_MOJEID_NAME_PREFIX +
-		    QString::number(accountList.at(i).id);
+		const QString userName = getWebDatovkaUsername(
+		    "1",
+		    //QString::number(accountList.at(i).userId),
+		    QString::number(accountList.at(i).accountId));
 		if (!m_accountModel.globAccounts.contains(userName)) {
 			updateMojeIdAccount(userName, accountList.at(i),
 			    syncWithAll, true);
@@ -10729,10 +10746,12 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	QList<JsonLayer::Tag> tagList;
 
 	if (jsonlayer.getTagList(userName, tagList, errStr)) {
-		globWebDatovkaTagDbPtr->accessTagDb(userName)->deleteAllTags();
+		globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName))->deleteAllTags();
 		foreach (const JsonLayer::Tag &tag, tagList) {
-			globWebDatovkaTagDbPtr->accessTagDb(userName)->insertUpdateWebDatovkaTag(tag.id,
-			    tag.name, tag.color);
+			globWebDatovkaTagDbPtr->accessTagDb(
+			    getWebDatovkaTagDbPrefix(userName))->
+			    insertUpdateWebDatovkaTag(tag.id, tag.name, tag.color);
 		}
 	}
 
@@ -10742,8 +10761,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 		return false;
 	}
 
-	QString aID  = userName.split("-").at(1);
-	int accountID = aID.toInt();
+	int accountID = getWebDatovkaAccountId(userName);
 
 	TaskDownloadMessageListMojeID *task;
 
@@ -10782,15 +10800,14 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	/* Try connecting to webdatovka, just to generate log-in dialogue. */
 	if (!wdSessions.isConnectedToWebdatovka(userName)) {
-		loginToMojeId();
+		wdGetAccountList(true);
 	}
 
-	QString aID  = userName.split("-").at(1);
-	int accoutID = aID.toInt();
+	int accountID = getWebDatovkaAccountId(userName);
 
 	TaskSyncAccount *task;
 
-	task = new (std::nothrow) TaskSyncAccount(userName, accoutID);
+	task = new (std::nothrow) TaskSyncAccount(userName, accountID);
 	task->setAutoDelete(true);
 	globWorkPool.assignHi(task);
 
@@ -10803,17 +10820,17 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 /*
  * Func: Show dialog for webdatovka account, that action is not implemented.
  */
-void MainWindow::showWebDatovkaInfoDialog(const QString &userName,
-    const QString &txt)
+void MainWindow::showWebDatovkaInfoDialog(const QString &userName, QString txt)
 /* ========================================================================= */
 {
-	Q_UNUSED(txt);
-
-	showStatusTextWithTimeout(tr("This action is not supported for MojeID account."));
-	QMessageBox::critical(this, userName + ": " +tr("action is not supported"),
-	    tr("This action is not supported for MojeID account '%1'").arg(
-	    AccountModel::globAccounts[userName].accountName()),
-	    QMessageBox::Ok);
+	if (txt.isEmpty()) {
+		txt = tr("This action is not supported for MojeID account "
+		"'%1'").arg(AccountModel::globAccounts[userName].accountName());
+	}
+	showStatusTextWithTimeout(txt);
+	QMessageBox::warning(this,
+	    AccountModel::globAccounts[userName].accountName() + " : " + userName,
+	    txt, QMessageBox::Ok);
 }
 
 
@@ -10862,7 +10879,7 @@ bool MainWindow::loginToMojeId(void)
 {
 	debugFuncCall();
 
-	jsonlayer.startLoginToWebDatovka();
+	jsonlayer.loginToWebDatovka();
 
 	return true;
 }

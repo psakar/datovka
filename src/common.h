@@ -256,4 +256,23 @@ int base64RealSize(const QByteArray &b64);
  */
 bool isWebDatovkaAccount(const QString &userName);
 
+/*!
+ * @brief Get/create WebDatovka (MojeId) username.
+ */
+QString getWebDatovkaUsername(const QString &userId, const QString &accountId);
+
+/*!
+ * Get account id from username of WebDatovka account.
+ */
+int getWebDatovkaAccountId(const QString &userName);
+
+/*!
+ * Get user id from username of WebDatovka account.
+ */
+int getWebDatovkaUserId(const QString &userName);
+
+/*!
+ * Get name prefix of tag database from username (WebDatovka).
+ */
+QString getWebDatovkaTagDbPrefix(const QString &userName);
 #endif /* _COMMON_H_ */

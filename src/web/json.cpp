@@ -727,7 +727,8 @@ bool JsonLayer::parseAccountList(const QByteArray &content,
 	foreach (const QJsonValue &value, jsonArray) {
 		QJsonObject obj = value.toObject();
 		JsonLayer::AccountData aData;
-		aData.id = obj["id"].toInt();
+		aData.userId = obj["userid"].toInt();
+		aData.accountId = obj["id"].toInt();
 		aData.name = obj["name"].toString();
 		QJsonObject owner = obj["owner"].toObject();
 		QJsonObject user = obj["user"].toObject();

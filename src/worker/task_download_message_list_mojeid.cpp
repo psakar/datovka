@@ -265,7 +265,8 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 			}
 		}
 
-		TagDb *tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		TagDb *tagDb = globWebDatovkaTagDbPtr->
+		    accessTagDb(getWebDatovkaTagDbPrefix(userName));
 		Q_ASSERT(0 != tagDb);
 
 		messageDb->smsgdtSetLocallyRead(dmID, messageList.at(i)._read);

@@ -171,7 +171,8 @@ public:
 	 */
 	struct AccountData {
 	public:
-		int id;
+		int userId;
+		int accountId;
 		QString name;
 		JsonLayer::OwnerInfo ownerInfo;
 		JsonLayer::UserInfo userInfo;

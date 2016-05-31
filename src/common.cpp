@@ -520,3 +520,56 @@ bool isWebDatovkaAccount(const QString &userName)
 	}
 	return false;
 }
+
+/* ========================================================================= */
+/*
+ * Get/create WebDatovka (MojeId) username.
+ */
+QString getWebDatovkaUsername(const QString &userId, const QString &accountId)
+/* ========================================================================= */
+{
+	return DB_MOJEID_NAME_PREFIX + userId + "-" + accountId;
+}
+
+/* ========================================================================= */
+/*
+ * Get account id from username of WebDatovka account.
+ */
+int getWebDatovkaAccountId(const QString &userName)
+/* ========================================================================= */
+{
+	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return -1;
+	}
+
+	const QString aID = userName.split("-").at(2);
+	return aID.toInt();
+}
+
+/* ========================================================================= */
+/*
+ * Get user id from username of WebDatovka account.
+ */
+int getWebDatovkaUserId(const QString &userName)
+/* ========================================================================= */
+{
+	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return -1;
+	}
+	const QString uID = userName.split("-").at(1);
+	return uID.toInt();
+}
+
+/* ========================================================================= */
+/*
+ * Get name prefix of tag database from username (WebDatovka).
+ */
+QString getWebDatovkaTagDbPrefix(const QString &userName)
+/* ========================================================================= */
+{
+	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
+		return QString();
+	}
+
+	return DB_MOJEID_NAME_PREFIX + userName.split("-").at(1);
+}
