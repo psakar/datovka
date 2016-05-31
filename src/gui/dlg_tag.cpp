@@ -25,12 +25,13 @@
 #include <QMessageBox>
 
 #include "src/gui/dlg_tag.h"
-#include "src/io/tag_db.h"
 #include "src/web/json.h"
 
-DlgTag::DlgTag(const QString &userName, bool isWebDatovkaAccount, QWidget *parent)
+DlgTag::DlgTag(const QString &userName, TagDb *tagDb,
+    bool isWebDatovkaAccount, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
+    m_tagDbPtr(tagDb),
     m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem()
 {
@@ -40,10 +41,11 @@ DlgTag::DlgTag(const QString &userName, bool isWebDatovkaAccount, QWidget *paren
 
 }
 
-DlgTag::DlgTag(const QString &userName,
+DlgTag::DlgTag(const QString &userName, TagDb *tagDb,
     bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
+    m_tagDbPtr(tagDb),
     m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem(tag)
 {
@@ -54,12 +56,6 @@ DlgTag::DlgTag(const QString &userName,
 
 void DlgTag::initDlg(void)
 {
-	if (m_isWebDatovkaAccount) {
-		m_TagDbPtr = globWebDatovkaTagDbPtr;
-	} else {
-		m_TagDbPtr = globTagDbPtr;
-	}
-
 	this->currentColor->setEnabled(false);
 	this->tagNamelineEdit->setText(m_tagItem.name);
 	setPreviewButtonColor();
@@ -112,13 +108,15 @@ void DlgTag::saveTag(void)
 			   m_tagItem.name, m_tagItem.colour, errStr)) {
 				msgBox.setWindowTitle(tr("Tag update error"));
 				msgBox.setText(tr("Tag with name '%1'' wasn't "
-				   "updated in the WebDatovka database.").arg(m_tagItem.name));
+				    "updated in the WebDatovka database.").arg(
+				    m_tagItem.name));
 				msgBox.setInformativeText(errStr);
 				msgBox.exec();
 				return;
 			}
 		}
-		m_TagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
+		m_tagDbPtr->updateTag(m_tagItem.id, m_tagItem.name,
+		    m_tagItem.colour);
 
 	} else {
 		if (m_isWebDatovkaAccount) {
@@ -127,25 +125,30 @@ void DlgTag::saveTag(void)
 			    m_tagItem.name, m_tagItem.colour, errStr);
 			if (tagId <= 0) {
 				msgBox.setWindowTitle(tr("Tag insert error"));
-				msgBox.setText(tr("Tag with name '%1'' wasn't' "
-				   "created in WebDatovka database.").arg(m_tagItem.name));
+				msgBox.setText(tr("Tag with name '%1'' wasn't'"
+				    " created in WebDatovka database.").arg(
+				    m_tagItem.name));
 				msgBox.setInformativeText(errStr);
 				msgBox.exec();
 				return;
 			}
-			if (!m_TagDbPtr->insertUpdateWebDatovkaTag(tagId, m_tagItem.name, m_tagItem.colour)) {
+			if (!m_tagDbPtr->insertUpdateWebDatovkaTag(tagId,
+			    m_tagItem.name, m_tagItem.colour)) {
 				msgBox.setWindowTitle(tr("Tag error"));
 				msgBox.setText(tr("Tag with name '%1'' already "
 				   "exists in database.").arg(m_tagItem.name));
-				msgBox.setInformativeText(tr("Tag wasn't created again."));
+				msgBox.setInformativeText(
+				    tr("Tag wasn't created again."));
 				msgBox.exec();
 			}
 		} else {
-			if (!m_TagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
+			if (!m_tagDbPtr->insertTag(m_tagItem.name,
+			    m_tagItem.colour)) {
 				msgBox.setWindowTitle(tr("Tag error"));
 				msgBox.setText(tr("Tag with name '%1'' already "
-				   "exists in database.").arg(m_tagItem.name));
-				msgBox.setInformativeText(tr("Tag wasn't created again."));
+				    "exists in database.").arg(m_tagItem.name));
+				msgBox.setInformativeText(
+				    tr("Tag wasn't created again."));
 				msgBox.exec();
 			}
 		}

@@ -43,6 +43,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/io/tag_db_container.h"
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
@@ -634,15 +635,10 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		globWebDatovkaTagDbPtr = new (std::nothrow) TagDb("tagDbWebDatovka");
+		/* Create tag DB container. */
+		globWebDatovkaTagDbPtr = new (std::nothrow) TagDbContainer("tagDbWebDatovka");
 		if (0 == globWebDatovkaTagDbPtr) {
-			logErrorNL("%s", "Cannot allocate webdatovka tag db.");
-			return EXIT_FAILURE;
-		}
-		/* Open tags database. */
-		if (!globWebDatovkaTagDbPtr->openDb(globPref.tagWebDatovkaDbPath())) {
-			logErrorNL("Error opening webdatovka tag db '%s'.",
-			    globPref.tagWebDatovkaDbPath().toUtf8().constData());
+			logErrorNL("%s", "Cannot allocate webdatovka tag db container.");
 			return EXIT_FAILURE;
 		}
 	}

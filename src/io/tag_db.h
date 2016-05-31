@@ -182,9 +182,4 @@ private:
  */
 extern TagDb *globTagDbPtr;
 
-/*!
- * @brief Global webdatovka tag database.
- */
-extern TagDb *globWebDatovkaTagDbPtr;
-
 #endif /* _TAG_DB_H_ */

@@ -447,4 +447,3 @@ QList<class SQLiteTbl *> TagDb::listOfTables(void)
 }
 
 TagDb *globTagDbPtr = 0;
-TagDb *globWebDatovkaTagDbPtr = 0;

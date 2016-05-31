@@ -32,6 +32,7 @@
 #include "src/worker/task_download_message_mojeid.h"
 #include "src/web/json.h"
 #include "src/io/tag_db.h"
+#include "src/io/tag_db_container.h"
 
 TaskDownloadMessageListMojeID::TaskDownloadMessageListMojeID(
     const QString &userName, MessageDbSet *dbSet,
@@ -264,11 +265,14 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 			}
 		}
 
+		TagDb *tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+		Q_ASSERT(0 != tagDb);
+
 		messageDb->smsgdtSetLocallyRead(dmID, messageList.at(i)._read);
-		globWebDatovkaTagDbPtr->removeAllTagsFromMsg(userName, dmID);
+		tagDb->removeAllTagsFromMsg(userName, dmID);
 
 		for (int t = 0; t < messageList.at(i)._tagList.count(); ++t) {
-			globWebDatovkaTagDbPtr->assignTagToMsg(userName,
+			tagDb->assignTagToMsg(userName,
 			    messageList.at(i)._tagList.at(t), dmID);
 		}
 	}

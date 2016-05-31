@@ -29,6 +29,7 @@
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/tag_db_container.h"
 #include "src/models/messages_model.h"
 #include "src/io/message_db.h"
 
@@ -534,7 +535,7 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 	TagDb *tagDb = 0;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr;
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
 	} else {
 		tagDb = globTagDbPtr;
 	}
@@ -577,7 +578,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 	TagDb *tagDb = 0;
 
 	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr;
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
 	} else {
 		tagDb = globTagDbPtr;
 	}

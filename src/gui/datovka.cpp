@@ -75,6 +75,7 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/io/tag_db_container.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -5023,7 +5024,12 @@ void MainWindow::deleteSelectedAccount(void)
 		    .arg(accountName));
 	}
 
-	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	if (isWebDatovkaAccount(userName)) {
+		globWebDatovkaTagDbPtr->accessTagDb(userName)
+		    ->removeAllMsgTagsFromAccount(userName);
+	} else {
+		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	}
 
 	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
 	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
@@ -10592,7 +10598,15 @@ void MainWindow::showTagDlg(void)
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
 
-	QDialog *tagsDlg = new DlgTags(userName, this);
+	TagDb *tagDb = NULL;
+
+	if (isWebDatovkaAccount(userName)) {
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+	} else {
+		tagDb = globTagDbPtr;
+	}
+
+	QDialog *tagsDlg = new DlgTags(userName, tagDb, this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
 }
@@ -10636,8 +10650,16 @@ void MainWindow::addOrDeleteMsgTags(void)
 	 * adding tags to messages.
 	 */
 
-	QDialog *tagsDlg = new DlgTags(userName, msgIdList, msgIdWebDatovkaList,
-	    this);
+	TagDb *tagDb = NULL;
+
+	if (isWebDatovkaAccount(userName)) {
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(userName);
+	} else {
+		tagDb = globTagDbPtr;
+	}
+
+	QDialog *tagsDlg = new DlgTags(userName, tagDb, msgIdList,
+	    msgIdWebDatovkaList, this);
 	tagsDlg->exec();
 	tagsDlg->deleteLater();
 
@@ -10707,9 +10729,9 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	QList<JsonLayer::Tag> tagList;
 
 	if (jsonlayer.getTagList(userName, tagList, errStr)) {
-		globWebDatovkaTagDbPtr->deleteAllTags();
+		globWebDatovkaTagDbPtr->accessTagDb(userName)->deleteAllTags();
 		foreach (const JsonLayer::Tag &tag, tagList) {
-			globWebDatovkaTagDbPtr->insertUpdateWebDatovkaTag(tag.id,
+			globWebDatovkaTagDbPtr->accessTagDb(userName)->insertUpdateWebDatovkaTag(tag.id,
 			    tag.name, tag.color);
 		}
 	}

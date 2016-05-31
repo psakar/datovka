@@ -44,7 +44,8 @@ public:
 	 * @param[in] userName  Account user name.
 	 * @param[in] parent    Parent widget.
 	 */
-	explicit DlgTags(const QString &userName, QWidget *parent = 0);
+	explicit DlgTags(const QString &userName, TagDb *tagDb,
+	    QWidget *parent = 0);
 
 	/*!
 	 * @brief Constructor.
@@ -54,7 +55,8 @@ public:
 	 * @param[in] msgIdWebDatovkaList List of message ids.
 	 * @param[in] parent              Parent widget.
 	 */
-	explicit DlgTags(const QString &userName,const QList<qint64> &msgIdList,
+	explicit DlgTags(const QString &userName, TagDb *tagDb,
+	    const QList<qint64> &msgIdList,
 	    const QList<int> &msgIdWebDatovkaList, QWidget *parent = 0);
 
 	/*!
@@ -125,11 +127,11 @@ private:
 	void selectAllAssingedTagsFromMsgs(void);
 
 	QString m_userName; /*!< Account username. */
+	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
 	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	QList<int> m_msgIdWebDatovkaList; /*!< List of message identifiers of WebDatovka. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */
-	TagDb *m_TagDbPtr; /*!< Tag db pointer. */
 	bool m_isWebDatovkaAccount; /*!< is WebDatovka account. */
 	QString m_errStr;
 	JsonLayer m_jsonsLayer;
