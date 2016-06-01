@@ -126,6 +126,13 @@ signals:
 	 */
 	void sendMessageMojeIdFinished(int accountID,
 	    const QStringList &resultList, const QString &errStr);
+
+	/*!
+	 * @brief This signal is emitted when account is changed.
+	 *
+	 * @param[in] account username.
+	 */
+	void refreshAccountList(const QString &userName);
 };
 
 /*!

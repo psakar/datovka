@@ -136,6 +136,11 @@ private slots:
 	void loginToMojeId(bool syncWithAll);
 
 	/*!
+	 * @brief Refresh AccountList.
+	 */
+	void refreshAccountList(const QString &userName);
+
+	/*!
 	 * @brief Processes messages from single instance emitter.
 	 */
 	void processSingleInstanceMessages(const QString &message);
@@ -779,11 +784,6 @@ private:
 	    int rt, int rn, int st, int sn);
 
 	/*!
-	 * @brief Refresh AccountList.
-	 */
-	void refreshAccountList(const QString &userName);
-
-	/*!
 	 * @brief Set tablewidget when message download worker is done.
 	 */
 	void postDownloadSelectedMessageAttachments(const QString &userName,
@@ -1286,9 +1286,6 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
-
-	bool updateMojeIdAccount(const QString &userName,
-	    const JsonLayer::AccountData &aData, bool syncWithAll, bool addNew);
 };
 
 

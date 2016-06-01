@@ -104,6 +104,10 @@ QNetworkCookie JsonLayer::loginToWebDatovka(void) {
 
 	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
 
+	if (cookieList.isEmpty() || cookieList.count() < 3) {
+		return QNetworkCookie();
+	}
+
 	return cookieList.at(2);
 }
 

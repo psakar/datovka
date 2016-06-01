@@ -38,7 +38,7 @@ TaskTagSyncAccount::TaskTagSyncAccount(const QString &userName)
 
 void TaskTagSyncAccount::run(void)
 {
-	logDebugLv0NL("Starting account sync in thread '%p'",
+	logDebugLv0NL("Starting tag sync in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
@@ -49,7 +49,7 @@ void TaskTagSyncAccount::run(void)
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Account sync task finished in thread '%p'",
+	logDebugLv0NL("Tag sync task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
 }
 

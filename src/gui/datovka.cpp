@@ -94,6 +94,7 @@
 #include "src/worker/task_download_user_info.h"
 #include "src/worker/task_import_zfo.h"
 #include "src/worker/task_verify_message.h"
+#include "src/worker/task_get_account_list_mojeid.h"
 #include "ui_datovka.h"
 
 
@@ -205,6 +206,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(sendMessageMojeIdFinished(int, QStringList, QString)), this,
 	    SLOT(sendMessageMojeIdAction(int, QStringList,  QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(refreshAccountList(QString)), this,
+	    SLOT(refreshAccountList(QString)));
 
 	connect(&globWorkPool, SIGNAL(assignedFinished()),
 	    this, SLOT(backgroundWorkersFinished()));
@@ -2322,16 +2326,16 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 
 		QString errorMessage = (MSG_RECEIVED == direction) ?
 		    tr("It was not possible download received message list from"
-		        " ISDS server.") :
+		        " server.") :
 		    tr("It was not possible download sent message list from"
-		        " ISDS server.");
+		        " server.");
 
 		showStatusTextWithTimeout(errorMessage);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(tr("Download message list error"));
 		msgBox.setText(errorMessage);
 		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			msgBox.setInformativeText(tr("Server: ") + errDesc);
 		} else {
 			msgBox.setInformativeText(
 			    tr("A connection error occurred."));
@@ -2385,7 +2389,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	debugFuncCall();
 
 	showStatusTextWithTimeout(tr("Message \"%1\" "
-	    " was downloaded from ISDS server.").arg(dmId));
+	    " was downloaded from server.").arg(dmId));
 
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
@@ -5631,7 +5635,7 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	if (userName.isEmpty()) {
 		logWarning("%s\n",
@@ -6744,30 +6748,47 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 
 	const QString userName(m_accountModel.userName(acntIndex));
 	Q_ASSERT(!userName.isEmpty());
-	if (!isdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName, this)) {
-		return false;
-	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
-
 	bool ret = false;
-	TaskDownloadMessage *task;
 
-	task = new (std::nothrow) TaskDownloadMessage(
-	    userName, dbSet, msgDirect, dmId, deliveryTime, false);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
-	if (ret) {
-		deliveryTime = task->m_mId.deliveryTime;
+	if (isWebDatovkaAccount(userName)) {
+
+		MessageDb *messageDb =
+		    dbSet->accessMessageDb(deliveryTime, false);
+		int mId = messageDb->getWebDatokaId(dmId);
+		TaskDownloadMessageMojeId *task;
+
+		task = new (std::nothrow) TaskDownloadMessageMojeId(
+		    userName, dbSet, msgDirect, mId, dmId, false);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+		ret = TaskDownloadMessageMojeId::DM_SUCCESS == task->m_result;
+		delete task;
+
+	} else {
+
+		if (!isdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName, this)) {
+			return false;
+		}
+		TaskDownloadMessage *task;
+
+		task = new (std::nothrow) TaskDownloadMessage(
+		    userName, dbSet, msgDirect, dmId, deliveryTime, false);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+		ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
+		if (ret) {
+			deliveryTime = task->m_mId.deliveryTime;
+		}
+
+		delete task;
 	}
-
-	delete task;
 
 	return ret;
 }
@@ -10696,38 +10717,21 @@ bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
 {
 	debugFuncCall();
 
-	QString errStr;
-	QList<JsonLayer::AccountData> accountList;
+	TaskGetAccountListMojeId *task;
 
-	jsonlayer.getAccountList(sessionid, accountList, errStr);
+	task = new (std::nothrow) TaskGetAccountListMojeId(sessionid,
+	    syncWithAll, &m_accountModel);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+	bool ret = task->m_success;
 
-	if (!errStr.isEmpty()) {
-		qDebug() << "ERROR:" << errStr;
-		return false;
+	if (!ret) {
+		qDebug() << "ACCOUNT_LIST_ERROR: " << task->m_error;
 	}
 
-	if (accountList.isEmpty()) {
-		return false;
-	}
+	delete task;
 
-	for (int i = 0; i < accountList.count(); ++i) {
-		const QString userName = getWebDatovkaUsername(
-		    "1",
-		    //QString::number(accountList.at(i).userId),
-		    QString::number(accountList.at(i).accountId));
-		if (!m_accountModel.globAccounts.contains(userName)) {
-			updateMojeIdAccount(userName, accountList.at(i),
-			    syncWithAll, true);
-		} else {
-			updateMojeIdAccount(userName, accountList.at(i),
-			    syncWithAll, false);
-		}
-
-		wdSessions.createCleanSession(userName);
-		wdSessions.setSessionCookie(userName, sessionid);
-	}
-
-	return true;
+	return ret;
 }
 
 /* ========================================================================= */
@@ -10744,7 +10748,6 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	}
 
 	TaskTagSyncAccount *tagtask;
-
 	tagtask = new (std::nothrow) TaskTagSyncAccount(userName);
 	tagtask->setAutoDelete(true);
 	globWorkPool.assignHi(tagtask);
@@ -10758,7 +10761,6 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	int accountID = getWebDatovkaAccountId(userName);
 
 	TaskDownloadMessageListMojeID *task;
-
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
 	    MSG_RECEIVED, globPref.auto_download_whole_messages,
 	    MESSAGE_LIST_LIMIT,
@@ -10785,14 +10787,10 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 {
 	debugFuncCall();
 
-	/* Only for mojeID login testing, will be removed later */
-	//QByteArray reply = jsonlayer.mojeIDtest();
-
 	if (!isWebDatovkaAccount(userName)) {
 		return false;
 	}
 
-	/* Try connecting to webdatovka, just to generate log-in dialogue. */
 	if (!wdSessions.isConnectedToWebdatovka(userName)) {
 		loginToMojeId(true);
 	}
@@ -10807,7 +10805,6 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	return wdGetMessageList(userName);
 }
-
 
 
 /* ========================================================================= */
@@ -10876,82 +10873,4 @@ void MainWindow::loginToMojeId(bool syncWithAll)
 	QNetworkCookie sessionid = jsonlayer.loginToWebDatovka();
 
 	wdGetAccountList(sessionid, syncWithAll);
-}
-
-
-/* ========================================================================= */
-/*
- * Func:
- */
-bool MainWindow::updateMojeIdAccount(const QString &userName,
-    const JsonLayer::AccountData &aData, bool syncWithAll, bool addNew)
-/* ========================================================================= */
-{
-	QModelIndex index;
-
-	if (addNew) {
-		AcntSettings aSet;
-		aSet.setUserName(userName);
-		aSet.setAccountName(aData.name);
-		aSet.setLoginMethod(LIM_MOJEID);
-		aSet.setSyncWithAll(syncWithAll);
-		m_accountModel.addAccount(aSet, &index);
-	} else {
-		m_accountModel.globAccounts[userName].setAccountName(aData.name);
-	}
-
-	refreshAccountList(userName);
-
-	globAccountDbPtr->insertAccountIntoDb(
-	    userName + "___True",
-	    aData.ownerInfo.dbID,
-	    aData.ownerInfo.dbType,
-	    aData.ownerInfo.ic.toInt(),
-	    aData.ownerInfo.pnFirstName,
-	    aData.ownerInfo.pnMiddleName,
-	    aData.ownerInfo.pnLastName,
-	    aData.ownerInfo.pnLastNameAtBirth,
-	    aData.ownerInfo.firmName,
-	    aData.ownerInfo.biDate,
-	    aData.ownerInfo.biCity,
-	    aData.ownerInfo.biCounty,
-	    aData.ownerInfo.biState,
-	    aData.ownerInfo.adCity,
-	    aData.ownerInfo.adStreet,
-	    aData.ownerInfo.adNumberInStreet,
-	    aData.ownerInfo.adNumberInMunicipality,
-	    aData.ownerInfo.adZipCode,
-	    aData.ownerInfo.adState,
-	    aData.ownerInfo.nationality,
-	    aData.ownerInfo.identifier,
-	    aData.ownerInfo.registryCode,
-	    aData.ownerInfo.dbState,
-	    aData.ownerInfo.dbEffectiveOVM,
-	    aData.ownerInfo.dbOpenAddressing
-	);
-
-	globAccountDbPtr->insertUserIntoDb(
-	    userName + "___True",
-	    aData.userInfo.userType,
-	    aData.userInfo.userPrivils,
-	    aData.userInfo.pnFirstName,
-	    aData.userInfo.pnMiddleName,
-	    aData.userInfo.pnLastName,
-	    aData.userInfo.pnLastNameAtBirth,
-	    aData.userInfo.adCity,
-	    aData.userInfo.adStreet,
-	    aData.userInfo.adNumberInStreet,
-	    aData.userInfo.adNumberInMunicipality,
-	    aData.userInfo.adZipCode,
-	    aData.userInfo.adState,
-	    aData.userInfo.biDate,
-	    aData.userInfo.ic,
-	    aData.userInfo.firmName,
-	    aData.userInfo.caStreet,
-	    aData.userInfo.caCity,
-	    aData.userInfo.caZipCode,
-	    aData.userInfo.caState
-	);
-
-	return true;
 }

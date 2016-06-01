@@ -29,14 +29,19 @@
 #include "src/worker/task.h"
 
 /*!
- * @brief Task describing download owner information.
+ * @brief Task describing download account list and its information data.
  */
 class TaskGetAccountListMojeId : public Task {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in]   sessionid     Session cookie from mojeid.
+	 * @param[in]   syncWithAll   If will be synchronized with all accounts.
+	 * @param[in]   accountModel  Pointer to account model.
 	 */
-	explicit TaskGetAccountListMojeId(void);
+	explicit TaskGetAccountListMojeId(const QNetworkCookie &sessionid,
+	    bool syncWithAll, AccountModel *accountModel);
 
 	/*!
 	 * @brief Performs action.
@@ -45,7 +50,10 @@ public:
 	void run(void);
 
 	bool m_success; /*!< True on success. */
-	QString m_isdsError; /*!< Error description. */
+	QString m_error; /*!< Error description. */
+	const QNetworkCookie m_sessionid;/*!< Session cookie from mojeid. */
+	bool m_syncWithAll; /*!< If will be synchronized with all accounts. */
+	AccountModel *m_accountModel; /*!< Pointer to account model. */
 
 private:
 	/*!
@@ -55,13 +63,28 @@ private:
 	TaskGetAccountListMojeId &operator=(const TaskGetAccountListMojeId &);
 
 	/*!
-	 * @brief Download owner information.
+	 * @brief Download account list,
 	 *
-	 * @param[out]    error        Error description.
+	 * @param[in]   sessionid     Session cookie from mojeid.
+	 * @param[in]   syncWithAll   If will be synchronized with all accounts.
+	 * @param[in]   accountModel  Pointer to account model.
+	 * @param[out]  error          Error description.
 	 * @return True on success.
 	 */
 	static
-	bool getAccountList(QString &error);
+	bool getAccountList(const QNetworkCookie &sessionid,
+	    bool syncWithAll, AccountModel *accountModel, QString &error);
+
+	/*!
+	 * @brief Insert/update owner and user information.
+	 *
+	 * @param[in]    userName      Account username.
+	 * @param[in]    aData         Account data.
+	 * @return True on success.
+	 */
+	static
+	bool updateMojeIdAccountData(const QString &userName,
+	    const JsonLayer::AccountData &aData);
 };
 
 #endif /* _TASK_GET_ACCOUNT_LIST_H_ */
