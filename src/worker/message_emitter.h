@@ -120,11 +120,11 @@ signals:
 	/*!
 	 * @brief Emitted when mojeid send message finishes.
 	 *
-	 * @param[in] int           Account id from webdatovka.
+	 * @param[in] userName      Account username.
 	 * @param[in] resultList    ResultList from webdatovka.
 	 * @param[in] error         Error message from netmanager.
 	 */
-	void sendMessageMojeIdFinished(int accountID,
+	void sendMessageMojeIdFinished(const QString &userName,
 	    const QStringList &resultList, const QString &errStr);
 
 	/*!

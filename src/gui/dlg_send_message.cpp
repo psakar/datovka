@@ -213,8 +213,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 	connect(&globMsgProcEmitter,
-	    SIGNAL(sendMessageMojeIdFinished(int, QStringList, QString)), this,
-	    SLOT(sendMessageMojeIdAction(int, QStringList,  QString)));
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
 
 	pingTimer = new QTimer(this);
 	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
@@ -1443,13 +1443,11 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 /*
  * Slot: Performs action depending on webdatovka message send outcome.
  */
-void DlgSendMessage::sendMessageMojeIdAction(int accountID,
+void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
     const QStringList &result, const QString &error)
 /* ========================================================================= */
 {
 	debugSlotCall();
-
-	Q_UNUSED(accountID);
 
 	if (!error.isEmpty()) {
 		qDebug() << error;
@@ -1469,7 +1467,7 @@ void DlgSendMessage::sendMessageMojeIdAction(int accountID,
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
 		this->accept(); /* Set return code to accepted. */
-		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
 	} else {
 		for (int i = 0; i < result.count(); ++i) {
 			QString msg = result.at(i);
@@ -1488,7 +1486,7 @@ void DlgSendMessage::sendMessageMojeIdAction(int accountID,
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
-			emit doActionAfterSentMsgSignal(m_userName,
+			emit doActionAfterSentMsgSignal(userName,
 			    m_lastAttAddPath);
 		}
 	}

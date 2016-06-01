@@ -204,8 +204,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 	connect(&globMsgProcEmitter,
-	    SIGNAL(sendMessageMojeIdFinished(int, QStringList, QString)), this,
-	    SLOT(sendMessageMojeIdAction(int, QStringList,  QString)));
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(refreshAccountList(QString)), this,
 	    SLOT(refreshAccountList(QString)));
@@ -10864,14 +10864,11 @@ void MainWindow::showWebDatovkaInfoDialog(const QString &userName, QString txt)
 /*
  * Slot: Performs action depending on webdatovka message send outcome.
  */
-void MainWindow::sendMessageMojeIdAction(int accountID,
+void MainWindow::sendMessageMojeIdAction(const QString &userName,
     const QStringList &result, const QString &error)
 /* ========================================================================= */
 {
 	debugSlotCall();
-
-	const QString userName =
-	     DB_MOJEID_NAME_PREFIX + QString::number(accountID);
 
 	if (!error.isEmpty()) {
 		qDebug() << error;
@@ -10889,7 +10886,7 @@ void MainWindow::sendMessageMojeIdAction(int accountID,
 		task = new (std::nothrow) TaskDownloadMessageListMojeID(
 		    userName, dbSet, MSG_SENT,
 		    globPref.auto_download_whole_messages, MESSAGE_LIST_LIMIT,
-		    accountID, 0);
+		    getWebDatovkaAccountId(userName), 0);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task);
 	}

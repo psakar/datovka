@@ -53,7 +53,7 @@ void TaskSendMessageMojeId::run(void)
 	sendMessage(m_userName, m_accountID, m_recipientList, m_envelope,
 	    m_fileList, PL_SEND_MESSAGE, m_resultList, m_error);
 
-	emit globMsgProcEmitter.sendMessageMojeIdFinished(m_accountID,
+	emit globMsgProcEmitter.sendMessageMojeIdFinished(m_userName,
 	    m_resultList, m_error);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);

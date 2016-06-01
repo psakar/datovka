@@ -184,7 +184,7 @@ private slots:
 	/*!
 	 * @brief Performs action depending on webdatovka message send outcome.
 	 */
-	void sendMessageMojeIdAction(int accountID,
+	void sendMessageMojeIdAction(const QString &userName,
 	    const QStringList &result, const QString &error);
 
 	/*!
