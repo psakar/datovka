@@ -6257,6 +6257,14 @@ void MainWindow::showImportZFOActionDialog(void)
 {
 	debugSlotCall();
 
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	QDialog *importZfo = new ImportZFODialog(this);
 	connect(importZfo,
 	    SIGNAL(returnZFOAction(enum ImportZFODialog::ZFOtype,
@@ -7251,6 +7259,12 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
 			Q_ASSERT(0);
@@ -7279,6 +7293,12 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
 
 	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
 		if (!frstIdx.isValid()) {
@@ -7662,6 +7682,15 @@ void MainWindow::openDeliveryInfoExternally(void)
 {
 	debugSlotCall();
 
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	/* First column. */
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
@@ -7678,8 +7707,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
+	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -9730,6 +9758,14 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 {
 	debugSlotCall();
 
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(tr("Import of mesages from database"));
@@ -9760,8 +9796,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	m_on_import_database_dir_activate =
 	    QFileInfo(files.at(0)).absoluteDir().absolutePath();
 
-	doMsgsImportFromDatabase(files,
-	    m_accountModel.userName(currentAccountModelIndex()));
+	doMsgsImportFromDatabase(files, userName);
 }
 
 
