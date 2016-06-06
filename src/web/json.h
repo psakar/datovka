@@ -113,8 +113,6 @@ public:
 		QString recipientDbId;
 		QString recipientName;
 		QString recipientAddress;
-		int dbType;
-		bool effectiveOVM;
 		QString toHands;
 	};
 
@@ -242,12 +240,17 @@ public:
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 
-	bool sendMessage(const QString &userName, int accountID,
+	bool sendMessageAsJson(const QString &userName, int accountID,
 	    const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
 	    QStringList &resultList, QString &errStr);
 
+	bool sendMessage(const QString &userName, int accountID,
+	    const QList<JsonLayer::Recipient> &recipientList,
+	    const JsonLayer::Envelope &envelope,
+	    const QList<JsonLayer::File> &fileList,
+	    QStringList &resultList, QString &errStr);
 private:
 
 	bool isLoggedToWebDatovka(const QString &userName,

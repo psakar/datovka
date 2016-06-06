@@ -101,6 +101,42 @@ bool NetManager::createPostRequestWebDatovka(const QUrl &url,
 
 /* ========================================================================= */
 /*
+ * Func: Create POST request for file sending to WebDatovka.
+ */
+bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
+    const QNetworkCookie &sessionid, int &draftId, const QString &filename,
+    const QByteArray &filedata, QByteArray &outData)
+/* ========================================================================= */
+{
+	qDebug("%s()", __func__);
+
+	QByteArray appName(APP_NAME);
+	QNetworkRequest request(url);
+	request.setRawHeader("Host", url.host().toUtf8());
+	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Accept", "application/json");
+	request.setRawHeader("Draft-Id", QByteArray::number(draftId));
+	QByteArray dispos;
+	dispos.append("form-data;");
+	dispos.append("filename=\"" + filename.toUtf8() + "\"");
+	request.setRawHeader("Content-Disposition", dispos);
+	request.setRawHeader("Connection", "keep-alive");
+	request.setRawHeader("Content-Length", QByteArray::number(filedata.size()));
+
+	QVariant var;
+	var.setValue(sessionid);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
+
+#if 1
+	printRequest(request, QByteArray());
+#endif
+
+	return sendRequest(request, filedata, outData, true);
+}
+
+
+/* ========================================================================= */
+/*
  * Func: Create POST request for MojeID.
  */
 bool NetManager::createPostRequestMojeId(const QUrl &url,
@@ -262,16 +298,6 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 	qDebug() << "----------------------------------------------------";
 #endif
 
-	QVariant variantCookies = reply->header(QNetworkRequest::SetCookieHeader);
-	QList<QNetworkCookie> list =
-	    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
-
-	for (int i = 0; i < list.size(); ++i) {
-		if (!cookieList.contains(list.at(i))) {
-			cookieList.append(list.at(i));
-		}
-	}
-
 	switch (statusCode) {
 
 	case 200: /* HTTP status 200 OK */
@@ -282,6 +308,16 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 
 	case 302: /* HTTP status 302 Found */
 		{
+			QVariant variantCookies =
+			    reply->header(QNetworkRequest::SetCookieHeader);
+			QList<QNetworkCookie> list =
+			    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
+
+			for (int i = 0; i < list.size(); ++i) {
+				if (!cookieList.contains(list.at(i))) {
+					cookieList.append(list.at(i));
+				}
+			}
 			outData = reply->readAll();
 		}
 		break;

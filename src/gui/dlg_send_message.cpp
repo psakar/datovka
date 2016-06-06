@@ -1177,9 +1177,6 @@ void DlgSendMessage::sendMessage(void)
 			    this->recipientTableWidget->item(row, RTW_NAME)->text();
 			recipient.recipientAddress =
 			    this->recipientTableWidget->item(row, RTW_ADDR)->text();
-			/* TODO - set correctly these two atributes */
-			//recipient.effectiveOVM = true;
-			//recipient.dbType = 40;
 			recipientList.append(recipient);
 		}
 

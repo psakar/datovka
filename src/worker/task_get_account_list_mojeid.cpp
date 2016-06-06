@@ -78,9 +78,7 @@ bool TaskGetAccountListMojeId::getAccountList(const QNetworkCookie &sessionid,
 
 	for (int i = 0; i < accountList.count(); ++i) {
 		const QString userName = getWebDatovkaUsername(
-		/* TODO - uncommented */
-		    "1",
-		    //QString::number(accountList.at(i).userId),
+		    QString::number(accountList.at(i).userId),
 		    QString::number(accountList.at(i).accountId));
 		if (!accountModel->globAccounts.contains(userName)) {
 

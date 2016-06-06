@@ -56,6 +56,21 @@ public:
 	    QByteArray &outData);
 
 	/*!
+	 * @brief Create POST request for file sending to WebDatovka.
+	 *
+	 * @param[in] url - url of request.
+	 * @param[in] draftId - draftId.
+	 * @param[in] filename - file name.
+	 * @param[in] filedata - file content data.
+	 * @param[out] outData -reply data.
+	 * @return true if success.
+	 */
+	bool createPostRequestWebDatovkaSendFile(const QUrl &url,
+	    const QNetworkCookie &sessionid, int &draftId,
+	    const QString &filename, const QByteArray &filedata,
+	    QByteArray &outData);
+
+	/*!
 	 * @brief Create POST request for MojeID.
 	 *
 	 * @param[in] url - url of request.
