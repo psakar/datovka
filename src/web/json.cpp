@@ -104,11 +104,18 @@ QNetworkCookie JsonLayer::loginToWebDatovka(void) {
 
 	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
 
-	if (cookieList.isEmpty() || cookieList.count() < 3) {
+	if (cookieList.isEmpty()) {
 		return QNetworkCookie();
 	}
 
-	return cookieList.at(2);
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			sessionid = cookieList.at(i);
+		}
+	}
+
+
+	return sessionid;
 }
 
 
@@ -833,66 +840,134 @@ bool JsonLayer::parseAccountList(const QByteArray &content,
 		return false;
 	}
 
+	int userId = jsonObject["userId"].toInt();
 	QJsonArray jsonArray = jsonObject["accountsList"].toArray();
 
 	foreach (const QJsonValue &value, jsonArray) {
 		QJsonObject obj = value.toObject();
 		JsonLayer::AccountData aData;
-		aData.userId = obj["userid"].toInt();
+		aData.userId = userId;
 		aData.accountId = obj["id"].toInt();
 		aData.name = obj["name"].toString();
 		QJsonObject owner = obj["owner"].toObject();
 		QJsonObject user = obj["user"].toObject();
 
-		aData.ownerInfo.key = owner["id"].toString();
-		aData.ownerInfo.dbID = owner["dbID"].toString();
-		aData.ownerInfo.dbType = owner["dbType"].toString();
-		aData.ownerInfo.ic = owner["ic"].toString();
-		aData.ownerInfo.pnFirstName = owner["pnFirstName"].toString();
-		aData.ownerInfo.pnMiddleName = owner["pnMiddleName"].toString();
-		aData.ownerInfo.pnLastName = owner["pnLastName"].toString();
-		aData.ownerInfo.pnLastNameAtBirth = owner["pnLastNameAtBirth"].toString();
-		aData.ownerInfo.firmName = owner["firmName"].toString();
-		aData.ownerInfo.biDate = owner["biDate"].toString();
-		aData.ownerInfo.biCity = owner["biCity"].toString();
-		aData.ownerInfo.biCounty = owner["biCounty"].toString();
-		aData.ownerInfo.biState = owner["biState"].toString();
-		aData.ownerInfo.adCity = owner["adCity"].toString();
-		aData.ownerInfo.adStreet = owner["adStreet"].toString();
-		aData.ownerInfo.adNumberInStreet = owner["adNumberInStreet"].toString();
-		aData.ownerInfo.adNumberInMunicipality = owner["adNumberInMunicipality"].toString();
-		aData.ownerInfo.adZipCode = owner["adZipCode"].toString();
-		aData.ownerInfo.adState = owner["adState"].toString();
-		aData.ownerInfo.nationality = owner["nationality"].toString();
-		aData.ownerInfo.identifier = owner["identifier"].toString();
-		aData.ownerInfo.registryCode = owner["registryCode"].toString();
-		aData.ownerInfo.dbState = owner["dbState"].toInt();
-		aData.ownerInfo.dbEffectiveOVM = owner["dbEffectiveOVM"].toBool();
-		aData.ownerInfo.dbOpenAddressing = owner["dbOpenAddressing"].toBool();
+		aData.ownerInfo.key = obj["id"].toString();
+		aData.ownerInfo.dbID = owner["db_id"].toString();
+		aData.ownerInfo.dbType = owner["db_type"].toString();
+		aData.ownerInfo.ic = owner["ic_db"].toString().isEmpty() ?
+		    NULL : owner["ic_db"].toString();
+		aData.ownerInfo.pnFirstName =
+		    owner["pn_first_name"].toString().isEmpty() ?
+		    NULL : owner["pn_first_name"].toString();
+		aData.ownerInfo.pnMiddleName =
+		    owner["pn_middle_name"].toString().isEmpty() ?
+		    NULL : owner["pn_middle_name"].toString();
+		aData.ownerInfo.pnLastName =
+		    owner["pn_last_name"].toString().isEmpty() ?
+		    NULL : owner["pn_last_name"].toString();
+		aData.ownerInfo.pnLastNameAtBirth =
+		    owner["pn_last_name_at_birth"].toString().isEmpty() ?
+		    NULL : owner["pn_last_name_at_birth"].toString();
+		aData.ownerInfo.firmName =
+		    owner["firm_name"].toString().isEmpty() ?
+		    NULL : owner["firm_name"].toString();
+		aData.ownerInfo.biDate =
+		    owner["bi_date"].toString().isEmpty() ?
+		    NULL : owner["bi_date"].toString();
+		aData.ownerInfo.biCity =
+		    owner["bi_city"].toString().isEmpty() ?
+		    NULL : owner["bi_city"].toString();
+		aData.ownerInfo.biCounty =
+		    owner["bi_county"].toString().isEmpty() ?
+		    NULL : owner["bi_county"].toString();
+		aData.ownerInfo.biState =
+		    owner["bi_state"].toString().isEmpty() ?
+		    NULL : owner["bi_state"].toString();
+		aData.ownerInfo.adCity =
+		    owner["ad_city"].toString().isEmpty() ?
+		    NULL : owner["ad_city"].toString();
+		aData.ownerInfo.adStreet =
+		    owner["ad_street"].toString().isEmpty() ?
+		    NULL : owner["ad_street"].toString();
+		aData.ownerInfo.adNumberInStreet =
+		    owner["ad_number_in_street"].toString().isEmpty() ?
+		    NULL : owner["ad_number_in_street"].toString();
+		aData.ownerInfo.adNumberInMunicipality =
+		    owner["ad_number_in_municipality"].toString().isEmpty() ?
+		    NULL : owner["ad_number_in_municipality"].toString();
+		aData.ownerInfo.adZipCode =
+		    owner["ad_zip_code"].toString().isEmpty() ?
+		    NULL : owner["ad_zip_code"].toString();
+		aData.ownerInfo.adState =
+		    owner["ad_state"].toString().isEmpty() ?
+		    NULL : owner["ad_state"].toString();
+		aData.ownerInfo.nationality =
+		    owner["nationality"].toString().isEmpty() ?
+		    NULL : owner["nationality"].toString();
+		aData.ownerInfo.identifier =
+		    owner["identifier"].toString().isEmpty() ?
+		    NULL : owner["identifier"].toString();
+		aData.ownerInfo.registryCode =
+		    owner["registry_code"].toString().isEmpty() ?
+		    NULL : owner["registry_code"].toString();
+		aData.ownerInfo.dbState = owner["db_state"].toInt();
+		aData.ownerInfo.dbEffectiveOVM =
+		    owner["db_effective_ovm"].toBool();
+		aData.ownerInfo.dbOpenAddressing =
+		    owner["db_open_addressing"].toBool();
 
-		aData.userInfo.key = user["id"].toString();
-		aData.userInfo.pnFirstName = user["pnFirstName"].toString();
-		aData.userInfo.pnMiddleName = user["pnMiddleName"].toString();
-		aData.userInfo.pnLastName = user["pnLastName"].toString();
-		aData.userInfo.pnFirstName = user["pnFirstName"].toString();
-		aData.userInfo.pnMiddleName = user["pnMiddleName"].toString();
-		aData.userInfo.pnLastName = user["pnLastName"].toString();
-		aData.userInfo.pnLastNameAtBirth = user["pnLastNameAtBirth"].toString();
-		aData.userInfo.adCity = user["adCity"].toString();
-		aData.userInfo.adStreet = user["adStreet"].toString();
-		aData.userInfo.adNumberInStreet = user["adNumberInStreet"].toString();
-		aData.userInfo.adNumberInMunicipality = user["adNumberInMunicipality"].toString();
-		aData.userInfo.adZipCode = user["adZipCode"].toString();
-		aData.userInfo.adState = user["adState"].toString();
-		aData.userInfo.biDate = user["biDate"].toString();
-		aData.userInfo.userType = user["userType"].toString();
-		aData.userInfo.userPrivils = user["userPrivils"].toInt();
-		aData.userInfo.ic = user["ic"].toInt();
-		aData.userInfo.firmName = user["firmName"].toString();
-		aData.userInfo.caStreet = user["caStreet"].toString();
-		aData.userInfo.caCity = user["caCity"].toString();
-		aData.userInfo.caZipCode = user["caZipCode"].toString();
-		aData.userInfo.caState = user["caState"].toString();
+		aData.userInfo.key = obj["user_id"].toString();
+		aData.userInfo.pnFirstName =
+		    user["pn_first_name"].toString().isEmpty() ?
+		    NULL : user["pn_first_name"].toString();
+		aData.userInfo.pnMiddleName =
+		    user["pn_middle_name"].toString().isEmpty() ?
+		    NULL : user["pn_middle_name"].toString();
+		aData.userInfo.pnLastName =
+		    user["pn_last_name"].toString().isEmpty() ?
+		    NULL : user["pn_last_name"].toString();
+		aData.userInfo.pnLastNameAtBirth =
+		    user["pn_last_name_at_birth"].toString().isEmpty() ?
+		    NULL : user["pn_last_name_at_birth"].toString();
+		aData.userInfo.adCity = user["ad_city"].toString().isEmpty() ?
+		    NULL : user["ad_city"].toString();
+		aData.userInfo.adStreet =
+		    user["ad_street"].toString().isEmpty() ?
+		    NULL : user["ad_street"].toString();
+		aData.userInfo.adNumberInStreet =
+		    user["ad_number_in_street"].toString().isEmpty() ?
+		    NULL : user["ad_number_in_street"].toString();
+		aData.userInfo.adNumberInMunicipality =
+		    user["ad_number_in_municipality"].toString().isEmpty() ?
+		    NULL : user["ad_number_in_municipality"].toString();
+		aData.userInfo.adZipCode =
+		    user["ad_zip_code"].toString().isEmpty() ?
+		    NULL : user["ad_zip_code"].toString();
+		aData.userInfo.adState =
+		    user["ad_state"].toString().isEmpty() ?
+		    NULL : user["ad_state"].toString();
+		aData.userInfo.biDate = user["bi_date"].toString().isEmpty() ?
+		    NULL : user["bi_date"].toString();
+		aData.userInfo.userType =
+		    user["user_type"].toString().isEmpty() ?
+		    NULL : user["user_type"].toString();
+		aData.userInfo.userPrivils = user["user_privils"].toInt();
+		aData.userInfo.ic = user["ic_db"].toInt();
+		aData.userInfo.firmName =
+		    user["firm_name"].toString().isEmpty() ?
+		    NULL : user["firm_name"].toString();
+		aData.userInfo.caStreet =
+		    user["ca_street"].toString().isEmpty() ?
+		    NULL : user["ca_street"].toString();
+		aData.userInfo.caCity = user["ca_city"].toString().isEmpty() ?
+		    NULL : user["ca_city"].toString();
+		aData.userInfo.caZipCode =
+		    user["ca_zip_code"].toString().isEmpty() ?
+		    NULL : user["ca_zip_code"].toString();
+		aData.userInfo.caState =
+		    user["ca_state"].toString().isEmpty() ?
+		    NULL : user["ca_state"].toString();
 
 		accountList.append(aData);
 	}
