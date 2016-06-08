@@ -14,6 +14,7 @@ _LIBISDS_ARCHIVE="libisds-0.10.1.tar.xz" # 10.2 is available but we have not tes
 _LIBISDS_ARCHIVE_PATCHES=" \
 	001-0.10.1-string-precision-type-fix.patch \
 	002-0.10.1-replace-positional-arguments.patch \
+	003-0.10.1-publish-ovmid-fix.patch \
 	"
 _LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #_LIBISDS_BRANCH="feature-openssl" # Use master.

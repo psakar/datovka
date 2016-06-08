@@ -1,0 +1,12 @@
+diff -Naur 001/src/isds.c 002/src/isds.c
+--- 001/src/isds.c	2016-04-11 11:50:31.000000000 +0200
++++ 002/src/isds.c	2016-06-08 11:57:00.000000000 +0200
+@@ -8649,7 +8649,7 @@
+     /* ???: Should we require value for dbEffectiveOVM sender?
+      * ISDS has default as true */
+     INSERT_BOOLEAN(envelope, "dmOVM", outgoing_message->envelope->dmOVM);
+-    INSERT_BOOLEAN(envelope, "dmOVM",
++    INSERT_BOOLEAN(envelope, "dmPublishOwnID",
+             outgoing_message->envelope->dmPublishOwnID);
+ 
+ 
