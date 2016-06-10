@@ -118,7 +118,7 @@ bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
 	request.setRawHeader("Draft-Id", QByteArray::number(draftId));
 	QByteArray dispos;
 	dispos.append("form-data;");
-	dispos.append("filename=\"" + filename.toUtf8() + "\"");
+	dispos.append("filename*=UTF-8''" + QUrl::toPercentEncoding(filename));
 	request.setRawHeader("Content-Disposition", dispos);
 	request.setRawHeader("Connection", "keep-alive");
 	request.setRawHeader("Content-Length", QByteArray::number(filedata.size()));
@@ -155,12 +155,17 @@ bool NetManager::createPostRequestMojeId(const QUrl &url,
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
 
-	if (!cookieList.isEmpty()) {
-		QVariant var;
-		var.setValue(cookieList);
-		request.setHeader(QNetworkRequest::CookieHeader, var);
+	QVariant var;
+	var.setValue(cookieList);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
+/*
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_MOJEID) {
+			var.setValue(cookieList.at(i));
+			request.setHeader(QNetworkRequest::CookieHeader, var);
+		}
 	}
-
+*/
 #if 1
 	printRequest(request, data);
 #endif
@@ -215,6 +220,14 @@ bool NetManager::createGetRequestMojeId(const QUrl &url, QByteArray &outData)
 	request.setRawHeader("Accept",
 	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
+
+	QVariant var;
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_MOJEID) {
+			var.setValue(cookieList.at(i));
+			request.setHeader(QNetworkRequest::CookieHeader, var);
+		}
+	}
 
 #if 1
 	printRequest(request, QByteArray());
@@ -298,27 +311,30 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 	qDebug() << "----------------------------------------------------";
 #endif
 
+	QVariant variantCookies =
+	    reply->header(QNetworkRequest::SetCookieHeader);
+	QList<QNetworkCookie> list =
+	    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
+
+	for (int i = 0; i < list.size(); ++i) {
+		if (!cookieList.contains(list.at(i))) {
+			cookieList.append(list.at(i));
+		}
+	}
+
 	switch (statusCode) {
 
 	case 200: /* HTTP status 200 OK */
 		{
 			outData = reply->readAll();
+			qDebug() << outData;
 		}
 		break;
 
 	case 302: /* HTTP status 302 Found */
 		{
-			QVariant variantCookies =
-			    reply->header(QNetworkRequest::SetCookieHeader);
-			QList<QNetworkCookie> list =
-			    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
-
-			for (int i = 0; i < list.size(); ++i) {
-				if (!cookieList.contains(list.at(i))) {
-					cookieList.append(list.at(i));
-				}
-			}
 			outData = reply->readAll();
+			qDebug() << outData;
 		}
 		break;
 

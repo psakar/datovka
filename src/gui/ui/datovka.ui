@@ -383,6 +383,7 @@ sent reply on this message</string>
     <addaction name="actionSync_all_accounts"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_account"/>
+    <addaction name="actionAdd_mojeID_account"/>
     <addaction name="actionDelete_account"/>
     <addaction name="separator"/>
     <addaction name="actionImport_database_directory"/>
@@ -1141,6 +1142,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Edit tags</string>
+   </property>
+  </action>
+  <action name="actionAdd_mojeID_account">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/mojeid.png</normaloff>:/mojeid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add mojeID account</string>
    </property>
   </action>
  </widget>

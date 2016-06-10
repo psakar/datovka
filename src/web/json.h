@@ -179,11 +179,13 @@ public:
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
-	QByteArray mojeIDtest(void);
 
-	QString startLoginToWebDatovka(void);
+	QNetworkCookie fakeLoginWebDatovka(void);
 
-	QNetworkCookie loginToWebDatovka(void);
+	QNetworkCookie loginToMojeID(const QString &username,
+	    const QString &pwd, const QString &otp);
+
+	QNetworkCookie startLoginToWebDatovka(void);
 
 	bool pingServer(const QString &userName, QString &errStr);
 

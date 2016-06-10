@@ -133,7 +133,7 @@ private slots:
 	/*!
 	 * @brief Login to mojeID.
 	 */
-	void loginToMojeId(bool syncWithAll);
+	void loginToMojeId(void);
 
 	/*!
 	 * @brief Refresh AccountList.
@@ -462,6 +462,11 @@ private slots:
 	void addNewAccount(void);
 
 	/*!
+	 * @brief Add mojeID account action and dialog.
+	 */
+	void addNewMojeIDAccount(void);
+
+	/*!
 	 * @brief Deletion confirmation dialog.
 	 */
 	void deleteSelectedAccount(void);
@@ -726,6 +731,10 @@ private slots:
 	 * @brief Add/detele tags to/from selected messages.
 	 */
 	void addOrDeleteMsgTags(void);
+
+
+	void callMojeId(QString userName, QString pwd, QString otp,
+	   bool syncALL);
 
 private:
 

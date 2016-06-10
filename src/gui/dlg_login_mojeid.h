@@ -22,54 +22,35 @@
  */
 
 
-#ifndef _DLG_CREATE_ACCOUNT_H_
-#define _DLG_CREATE_ACCOUNT_H_
-
+#ifndef _DLG_LOGIN_MOJEID_H_
+#define _DLG_LOGIN_MOJEID_H_
 
 #include <QDialog>
-#include <QFileDialog>
-#include <QTreeView>
 
 #include "src/common.h"
-#include "ui_dlg_create_account.h"
-#include "src/models/accounts_model.h"
-#include "src/io/account_db.h"
+#include "ui_dlg_login_mojeid.h"
 
-
-class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
+class DlgLoginToMojeId : public QDialog, public Ui::LoginToMojeId {
 	Q_OBJECT
 
 public:
-	enum Action {
-		ACT_ADDNEW,
-		ACT_EDIT,
-		ACT_PWD,
-		ACT_CERT,
-		ACT_CERTPWD,
-		ACT_IDBOX
-	};
 
-	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
-	    QWidget *parent = 0);
+	DlgLoginToMojeId(QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
 	void addCertificateFromFile(void);
-	void saveAccount(void);
+	void sendData(void);
 	void checkInputFields(void);
 
 signals:
-	void getAccountUserDataboxInfo(AcntSettings);
+	void callMojeId(QString, QString, QString, bool);
 
 private:
 	void initAccountDialog(void);
-	void setCurrentAccountData(void);
 
-	const AcntSettings m_accountInfo;
-	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;
 };
 
-
-#endif /* _DLG_CREATE_ACCOUNT_H_ */
+#endif /* _DLG_LOGIN_MOJEID_H_ */

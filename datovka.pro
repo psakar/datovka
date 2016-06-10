@@ -330,7 +330,8 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_send_message_mojeid.cpp \
     src/io/wd_sessions.cpp \
     src/io/tag_db_container.cpp \
-    src/worker/task_tag_sync_mojeid.cpp
+    src/worker/task_tag_sync_mojeid.cpp \
+    src/gui/dlg_login_mojeid.cpp
 
 HEADERS += src/cli/cli.h \
     src/common.h \
@@ -417,7 +418,8 @@ HEADERS += src/cli/cli.h \
     src/worker/task_send_message_mojeid.h \
     src/io/wd_sessions.h \
     src/io/tag_db_container.h \
-    src/worker/task_tag_sync_mojeid.h
+    src/worker/task_tag_sync_mojeid.h \
+    src/gui/dlg_login_mojeid.h
 
 FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
@@ -440,7 +442,8 @@ FORMS += src/gui/ui/datovka.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/gui/ui/dlg_yes_no_checkbox.ui \
-    src/gui/ui/dlg_search_mojeid.ui
+    src/gui/ui/dlg_search_mojeid.ui \
+    src/gui/ui/dlg_login_mojeid.ui
 
 RESOURCES += \
     res/resources.qrc

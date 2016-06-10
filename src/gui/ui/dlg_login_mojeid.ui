@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CreateAccount</class>
- <widget class="QDialog" name="CreateAccount">
+ <class>LoginToMojeId</class>
+ <widget class="QDialog" name="LoginToMojeId">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>413</width>
     <height>322</height>
    </rect>
   </property>
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Create a new account</string>
+   <string>Add a new mojeID account(s)</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
@@ -31,63 +31,28 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="infoLabel">
-     <property name="text">
-      <string>Please enter credentials for your Data Box.</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QFormLayout" name="formLayout">
-     <property name="fieldGrowthPolicy">
-      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-     </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="accountLabel">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Custom account name:</string>
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../../res/resources.qrc">:/mojeid.png</pixmap>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="accountLineEdit">
-       <property name="toolTip">
-        <string>You can give a descriptive name to your account.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="Line" name="Line_0">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="usernameLabel">
+     <item>
+      <widget class="QLabel" name="infoLabel">
        <property name="text">
-        <string>Username:</string>
+        <string>Please select login method and enter credentials for mojeID.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="usernameLineEdit">
-       <property name="toolTip">
-        <string>Enter your username</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -100,29 +65,62 @@
        </property>
       </spacer>
      </item>
-     <item row="3" column="1">
-      <widget class="QCheckBox" name="testAccountCheckBox">
-       <property name="toolTip">
-        <string>If the credentials you entered are for a test account,
-select this option. For normal account
-(created at a Czech Point) leave this unchecked.</string>
-       </property>
-       <property name="text">
-        <string>This is a test account</string>
+    </layout>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+     </property>
+     <item row="1" column="0" colspan="2">
+      <widget class="Line" name="Line_0">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="loginmethodLabel">
        <property name="text">
         <string>Login method:</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="2" column="1">
       <widget class="QComboBox" name="loginmethodComboBox">
        <property name="toolTip">
         <string>Select authorization method for login into your databox</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="usernameLabel">
+       <property name="text">
+        <string>Username:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="usernameLineEdit">
+       <property name="toolTip">
+        <string>Enter your username</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="passwordLabel">
+       <property name="text">
+        <string>Password:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="passwordLineEdit">
+       <property name="toolTip">
+        <string>Enter your password</string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
@@ -133,64 +131,14 @@ select this option. For normal account
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="passwordLabel">
-       <property name="text">
-        <string>Password:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="QLineEdit" name="passwordLineEdit">
-       <property name="toolTip">
-        <string>Enter your password</string>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
-     </item>
      <item row="8" column="0">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="8" column="1">
-      <widget class="QCheckBox" name="rememberPswcheckBox">
-       <property name="toolTip">
-        <string>The password will be saved in a readable form in the 
-configuration file of Datovka in your home directory.
-Do not use this unless you are pretty sure about
-your account security.</string>
-       </property>
-       <property name="text">
-        <string>Remember password</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
       <widget class="QLabel" name="certificateLabel">
        <property name="text">
         <string>Certificate file:</string>
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="2">
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
+     <item row="8" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
         <widget class="QPushButton" name="addCertificateButton">
@@ -221,7 +169,31 @@ your account security.</string>
        </item>
       </layout>
      </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="otpLineEdit"/>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Security code (OTP):</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="synchroCheckBox">
@@ -230,7 +202,7 @@ your account security.</string>
 process of all accounts on the background</string>
      </property>
      <property name="text">
-      <string>Synchronise account when &quot;Synchronise all&quot; is activated</string>
+      <string>Synchronise account(s) when &quot;Synchronise all&quot; is activated</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -256,7 +228,7 @@ process of all accounts on the background</string>
   <connection>
    <sender>accountButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CreateAccount</receiver>
+   <receiver>LoginToMojeId</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -272,7 +244,7 @@ process of all accounts on the background</string>
   <connection>
    <sender>accountButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CreateAccount</receiver>
+   <receiver>LoginToMojeId</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

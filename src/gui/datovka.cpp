@@ -51,6 +51,7 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_login_mojeid.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
@@ -976,6 +977,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionImport_ZFO_file_into_database);
 	} else {
 		menu->addAction(ui->actionAdd_account);
+		menu->addAction(ui->actionAdd_mojeID_account);
 	}
 
 	menu->exec(QCursor::pos());
@@ -4203,6 +4205,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionAdd_account, SIGNAL(triggered()),
 	    this, SLOT(addNewAccount()));
+	connect(ui->actionAdd_mojeID_account, SIGNAL(triggered()),
+	    this, SLOT(addNewMojeIDAccount()));
 	connect(ui->actionDelete_account, SIGNAL(triggered()),
 	    this, SLOT(deleteSelectedAccount()));
 	    /* Separator. */
@@ -4952,9 +4956,6 @@ void MainWindow::addNewAccount(void)
 	connect(newAccountDialog,
 	    SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
-	connect(newAccountDialog,
-	    SIGNAL(loginToWebDatovka(bool)),
-	    this, SLOT(loginToMojeId(bool)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -4964,6 +4965,19 @@ void MainWindow::addNewAccount(void)
 			saveSettings();
 		}
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Add mojeID account action and dialog.
+ */
+void MainWindow::addNewMojeIDAccount(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	loginToMojeId();
 }
 
 
@@ -10508,6 +10522,7 @@ void MainWindow::setMenuActionIcons(void)
 	}
 	    /* Separator. */
 	ui->actionAdd_account->isEnabled();
+	ui->actionAdd_mojeID_account->isEnabled();
 	ui->actionDelete_account->isEnabled();
 	    /* Separator. */
 	ui->actionImport_database_directory->isEnabled();
@@ -10827,7 +10842,7 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 	}
 
 	if (!wdSessions.isConnectedToWebdatovka(userName)) {
-		loginToMojeId(true);
+		loginToMojeId();
 	}
 
 	int accountID = getWebDatovkaAccountId(userName);
@@ -10897,12 +10912,53 @@ void MainWindow::sendMessageMojeIdAction(const QString &userName,
 /*
  * Slot: Login to MojeID.
  */
-void MainWindow::loginToMojeId(bool syncWithAll)
+void MainWindow::loginToMojeId(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QNetworkCookie sessionid = jsonlayer.loginToWebDatovka();
+	QNetworkCookie sessionid;
 
-	wdGetAccountList(sessionid, syncWithAll);
+#if 1
+	sessionid = jsonlayer.fakeLoginWebDatovka();
+	wdGetAccountList(sessionid, true);
+
+	if (ui->accountList->model()->rowCount() > 0) {
+		activeAccountMenuAndButtons(true);
+	}
+
+	return;
+#endif
+
+	sessionid = jsonlayer.startLoginToWebDatovka();
+
+	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(this);
+
+	connect(mojeIDLoginDialog,
+	    SIGNAL(callMojeId(QString, QString, QString, bool)),
+	    this,
+	    SLOT(callMojeId(QString, QString, QString, bool)));
+
+	mojeIDLoginDialog->exec();
 }
+
+/* ========================================================================= */
+/*
+ *
+ */
+void MainWindow::callMojeId(QString userName, QString pwd, QString otp,
+    bool syncALL)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QNetworkCookie sessionid = jsonlayer.loginToMojeID(userName, pwd, otp);
+
+	wdGetAccountList(sessionid, syncALL);
+
+	if (ui->accountList->model()->rowCount() > 0) {
+		activeAccountMenuAndButtons(true);
+	}
+
+}
+

@@ -27,11 +27,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #include "src/common.h"
 #include "src/web/json.h"
 #include "src/web/net.h"
 #include "src/io/wd_sessions.h"
+#include "src/gui/dlg_login_mojeid.h"
 
 JsonLayer jsonlayer;
 
@@ -44,23 +47,43 @@ JsonLayer::~JsonLayer(void)
 {
 }
 
-/* TODO - mojeID login sekvence - only for testing */
-QByteArray JsonLayer::mojeIDtest(void)
+QNetworkCookie JsonLayer::fakeLoginWebDatovka(void)
 {
+	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
 	QByteArray reply;
-#if 1
-	QUrl url0(MOJEID_BASE_URL0);
-	netmanager.createGetRequestMojeId(url0, reply);
+	QNetworkCookie sessionid;
+	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
 
-	QUrl url1(MOJEID_BASE_URL1);
-	netmanager.createPostRequestMojeId(url1, QByteArray("this_is_mojeid_form=1"),
-	   reply);
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			sessionid = cookieList.at(i);
+		}
+	}
 
-	QUrl url2(MOJEID_BASE_URL2);
-	netmanager.createPostRequestMojeId(url2, QByteArray("openid.pape.preferred_auth_policies=&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0&openid.ns=http://specs.openid.net/auth/2.0&openid.realm=https://mojeid.cz/consumer/&openid.return_to=https://mojeid.cz/consumer/?janrain_nonce=2016-05-06T10%3A48%3A04Z3BEl1X&openid.ax.mode=fetch_request&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.ns.ax=http://openid.net/srv/ax/1.0&openid.assoc_handle={HMAC-SHA1}{5727d097}{XFt3tg==}&openid.mode=checkid_setup&openid.identity=http://specs.openid.net/auth/2.0/identifier_select"), reply);
+	return sessionid;
+}
 
-	QUrl url3(MOJEID_BASE_URL3);
-	netmanager.createGetRequestMojeId(url3, reply);
+
+QNetworkCookie JsonLayer::loginToMojeID(const QString &username,
+    const QString &pwd, const QString &otp)
+{
+	Q_UNUSED(otp);
+
+	QByteArray reply;
+	QNetworkCookie sessionid;
+
+	QUrl url;
+	url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+	netmanager.createGetRequestMojeId(url, reply);
+
+	QString r(reply);
+	QRegularExpression exp("<input +type=\"hidden\" +name=\"token\" +value=\"([^\"]*)\"");
+	QString token;
+
+	QRegularExpressionMatch * match = new QRegularExpressionMatch();
+	if (r.contains(exp, match)) {
+		token = match->captured(1);
+	}
 
 	QString str = "csrfmiddlewaretoken=";
 	for (int i = 0; i < cookieList.size(); ++i) {
@@ -69,40 +92,15 @@ QByteArray JsonLayer::mojeIDtest(void)
 		}
 	}
 
-	str += "&token=zzzzzzz";
-	str += "&username=xxxxx";
-	str += "&password=yyyyyy";
+	str += "&token=" + token;
+	str += "&username=" + username;
+	str += "&password=" + pwd;
 	str += "&allow=Přihlásit+se";
 
 	QByteArray dat;
 	dat.append(str);
 
-	netmanager.createPostRequestMojeId(url3, dat, reply);
-#endif
-	return reply;
-}
-
-
-QString JsonLayer::startLoginToWebDatovka(void) {
-
-	QByteArray reply;
-	QNetworkCookie sessionid;
-
-	netmanager.createGetRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "mojeid/login"),  sessionid,
-	    reply);
-
-	return QString();
-}
-
-
-QNetworkCookie JsonLayer::loginToWebDatovka(void) {
-
-	QUrl url(WEBDATOVKA_LOGIN_URL);
-	QByteArray reply;
-	QNetworkCookie sessionid;
-
-	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+	netmanager.createPostRequestMojeId(url, dat, reply);
 
 	if (cookieList.isEmpty()) {
 		return QNetworkCookie();
@@ -114,6 +112,44 @@ QNetworkCookie JsonLayer::loginToWebDatovka(void) {
 		}
 	}
 
+	return sessionid;
+}
+
+
+QNetworkCookie JsonLayer::startLoginToWebDatovka(void)
+{
+	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
+	QByteArray reply;
+	QNetworkCookie sessionid;
+	QByteArray postData;
+
+	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	url.setUrl(jsonObject["url"].toString());
+	if (!url.isValid()) {
+		return sessionid;
+	}
+	QJsonObject postdata = jsonObject["postdata"].toObject();
+	QVariantMap map = postdata.toVariantMap();
+
+	QVariantMap::iterator i;
+	for (i = map.begin(); i != map.end(); ++i) {
+		postData.append(i.key()).append("=").append(i.value().toString()).append("&");
+	}
+
+	netmanager.createPostRequestMojeId(url, postData, reply);
+
+	if (cookieList.isEmpty()) {
+		return QNetworkCookie();
+	}
+
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			sessionid = cookieList.at(i);
+		}
+	}
 
 	return sessionid;
 }
@@ -124,7 +160,7 @@ bool JsonLayer::isLoggedToWebDatovka(const QString &userName,
 {
 	sessionid = wdSessions.sessionCookie(userName);
 	if (sessionid.value().isEmpty()) {
-		sessionid = loginToWebDatovka();
+		sessionid = startLoginToWebDatovka();
 		if (sessionid.name().isEmpty()) {
 				return false;
 		}

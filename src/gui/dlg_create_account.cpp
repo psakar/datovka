@@ -54,7 +54,6 @@ void DlgCreateAccount::initAccountDialog(void)
 	this->loginmethodComboBox->addItem(tr("Certificate + Password"));
 	this->loginmethodComboBox->addItem(tr("Password + Secure code"));
 	this->loginmethodComboBox->addItem(tr("Password + Secure SMS"));
-	this->loginmethodComboBox->addItem("MojeID");
 	this->certificateLabel->setEnabled(false);
 	this->accountButtonBox->button(
 	    QDialogButtonBox::Ok)->setEnabled(false);
@@ -101,8 +100,6 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		this->usernameLineEdit->setText(m_accountInfo.userName());
 		this->usernameLineEdit->setEnabled(false);
 		this->testAccountCheckBox->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		this->accountLineEdit->setEnabled(true);
 		break;
 	case ACT_PWD:
 		this->setWindowTitle(tr("Enter password for account") + " "
@@ -170,6 +167,7 @@ void DlgCreateAccount::setCurrentAccountData(void)
 		itemindex = TOTP;
 	} else {
 		itemindex = MOJEID;
+		this->loginmethodComboBox->addItem(tr("mojeID"));
 	}
 
 	this->loginmethodComboBox->setCurrentIndex(itemindex);
@@ -251,10 +249,7 @@ void DlgCreateAccount::checkInputFields(void)
 void DlgCreateAccount::setActiveButton(int itemindex)
 /* ========================================================================= */
 {
-
-	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
-	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
-	this->accountLineEdit->setEnabled(true);
+	this->loginmethodComboBox->setEnabled(true);
 
 	if (itemindex == MOJEID) {
 		this->certificateLabel->setEnabled(false);
@@ -265,6 +260,7 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->usernameLineEdit->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->testAccountCheckBox->setEnabled(false);
+		this->loginmethodComboBox->setEnabled(false);
 	} else if (itemindex == CERTIFICATE) {
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
@@ -284,6 +280,8 @@ void DlgCreateAccount::setActiveButton(int itemindex)
 		this->passwordLineEdit->setEnabled((true));
 		this->rememberPswcheckBox->setEnabled(true);
 	}
+	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
+	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
 
 	m_loginmethod = itemindex;
 	checkInputFields();
@@ -305,10 +303,6 @@ void DlgCreateAccount::saveAccount(void)
 	/* set account index, itemTop and map itemSettings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
-		if (this->loginmethodComboBox->currentIndex() == MOJEID) {
-			emit loginToWebDatovka(this->synchroCheckBox->isChecked());
-			return;
-		}
 		break;
 	case ACT_EDIT:
 	case ACT_PWD:
