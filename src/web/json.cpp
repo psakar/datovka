@@ -64,48 +64,70 @@ QNetworkCookie JsonLayer::fakeLoginWebDatovka(void)
 }
 
 
-QNetworkCookie JsonLayer::loginToMojeID(const QString &username,
+QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
+   const QString &token, const QString &username,
     const QString &pwd, const QString &otp)
 {
 	Q_UNUSED(otp);
 
 	QByteArray reply;
 	QNetworkCookie sessionid;
-
+	QUrl lUrl(lastUrl);
 	QUrl url;
+
+	// STEP 4: send credential to mojeID endpoint (POST).
+	//         We send login data, csrfmiddlewaretoken
+	//         and mojeid token as content.
 	url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
-	netmanager.createGetRequestMojeId(url, reply);
-
-	QString r(reply);
-	QRegularExpression exp("<input +type=\"hidden\" +name=\"token\" +value=\"([^\"]*)\"");
-	QString token;
-
-	QRegularExpressionMatch * match = new QRegularExpressionMatch();
-	if (r.contains(exp, match)) {
-		token = match->captured(1);
-	}
-
 	QString str = "csrfmiddlewaretoken=";
 	for (int i = 0; i < cookieList.size(); ++i) {
 		if (cookieList.at(i).name() == COOKIE_CSRFTOKEN) {
 			str += cookieList.at(i).value();
 		}
 	}
-
 	str += "&token=" + token;
 	str += "&username=" + username;
 	str += "&password=" + pwd;
-	str += "&allow=Přihlásit+se";
-
+	str += "&allow=prihlasit+se";
 	QByteArray dat;
 	dat.append(str);
+	netmanager.createPostRequestMojeId(url, lUrl, dat, reply);
+	lUrl = url;
 
-	netmanager.createPostRequestMojeId(url, dat, reply);
+	// STEP 5: send confiramtion to mojeID endpoint (POST).
+	//         We send new csrfmiddlewaretoken
+	//         and mojeid token and other values as content.
+	url.setUrl("https://mojeid.fred.nic.cz/endpoint/confirmation/");
+	str = "csrfmiddlewaretoken=";
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_CSRFTOKEN) {
+			str += cookieList.at(i).value();
+		}
+	}
+	str += "&token=" + token;
+	str += "&username=" + username;
+	str += "&first_name=first_name";
+	str += "&last_name=last_name";
+	str += "&email_default=email_default";
+	str += "&allow=OK";
+	dat.clear();
+	dat.append(str);
+	netmanager.createPostRequestMojeId(url, lUrl, dat, reply);
+	lUrl = url;
 
-	if (cookieList.isEmpty()) {
-		return QNetworkCookie();
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			sessionid = cookieList.at(i);
+		}
 	}
 
+	// STEP 6: redirect mojeID responce to webdatovka (GET).
+	//         We send mojeid parametrs in get url.
+	url.setUrl(netmanager.newUrl);
+	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+
+	// Now, you are logged to webdatovka and you have sessionid cookie.
+	// Next requests/operations only via new sessionid.
 	for (int i = 0; i < cookieList.size(); ++i) {
 		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
 			sessionid = cookieList.at(i);
@@ -116,42 +138,56 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &username,
 }
 
 
-QNetworkCookie JsonLayer::startLoginToWebDatovka(void)
+bool JsonLayer::startLoginToWebDatovka(QUrl &lastUrl, QString &token)
 {
-	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
 	QByteArray reply;
 	QNetworkCookie sessionid;
 	QByteArray postData;
 
+	// STEP 1: call webdatovka for start login procedure (GET).
+	//         We should obtain url for redirect
+	//         and openconnect parameter list (postdata).
+	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
 	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
-
+	lastUrl = url;
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
 	url.setUrl(jsonObject["url"].toString());
 	if (!url.isValid()) {
-		return sessionid;
+		return false;
 	}
+
+	// Create formdata string from json
 	QJsonObject postdata = jsonObject["postdata"].toObject();
 	QVariantMap map = postdata.toVariantMap();
-
 	QVariantMap::iterator i;
 	for (i = map.begin(); i != map.end(); ++i) {
 		postData.append(i.key()).append("=").append(i.value().toString()).append("&");
 	}
 
-	netmanager.createPostRequestMojeId(url, postData, reply);
+	// STEP 2: call mojeID for starting of login procedure (POST).
+	//         We send openconnect parameter list as postdata.
+	netmanager.createPostRequestMojeId(url, lastUrl, postData, reply);
+	lastUrl = url;
 
-	if (cookieList.isEmpty()) {
-		return QNetworkCookie();
+	// STEP 3: redirect to mojeID on login endpoint.
+	//         We should obtain html page. From page we must get token.
+	url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+	netmanager.createGetRequestMojeId(url, lastUrl, reply);
+	lastUrl = url;
+
+	QString html(reply);
+	QRegularExpression exp("<input +type=\"hidden\" +name=\"token\" +value=\"([^\"]*)\"");
+	// Save token string from webpage
+	QRegularExpressionMatch * match = new QRegularExpressionMatch();
+	if (html.contains(exp, match)) {
+		token = match->captured(1);
 	}
 
-	for (int i = 0; i < cookieList.size(); ++i) {
-		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
-			sessionid = cookieList.at(i);
-		}
-	}
+	return true;
 
-	return sessionid;
+	// Here will be shown mojeid login dialog
+	// for enter mojeID credential
 }
 
 
@@ -160,11 +196,7 @@ bool JsonLayer::isLoggedToWebDatovka(const QString &userName,
 {
 	sessionid = wdSessions.sessionCookie(userName);
 	if (sessionid.value().isEmpty()) {
-		sessionid = startLoginToWebDatovka();
-		if (sessionid.name().isEmpty()) {
-				return false;
-		}
-		wdSessions.setSessionCookie(userName, sessionid);
+		return false;
 	}
 
 	return true;
@@ -229,7 +261,7 @@ bool JsonLayer::createAccount(const QString &userName,const QString &name,
 }
 
 
-bool JsonLayer::renameAccount(const QString &userName,int accountID,
+bool JsonLayer::renameAccount(const QString &userName, int accountID,
     const QString &newName, QString &errStr)
 {
 	QByteArray reply;
@@ -291,7 +323,7 @@ bool JsonLayer::deleteAccount(const QString &userName, int accountID,
 
 
 bool JsonLayer::getAccountList(const QNetworkCookie &sessionid,
-    QList<JsonLayer::AccountData> &accountList, QString &errStr)
+    QList<JsonLayer::AccountData> &accountList,  QString &errStr)
 {
 	QByteArray reply;
 

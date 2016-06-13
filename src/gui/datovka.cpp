@@ -10917,48 +10917,39 @@ void MainWindow::loginToMojeId(void)
 {
 	debugSlotCall();
 
-	QNetworkCookie sessionid;
+	QUrl lastUrl;
+	QString token;
 
-#if 1
-	sessionid = jsonlayer.fakeLoginWebDatovka();
-	wdGetAccountList(sessionid, true);
+	jsonlayer.startLoginToWebDatovka(lastUrl, token);
 
-	if (ui->accountList->model()->rowCount() > 0) {
-		activeAccountMenuAndButtons(true);
-	}
-
-	return;
-#endif
-
-	sessionid = jsonlayer.startLoginToWebDatovka();
-
-	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(this);
+	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(lastUrl.toString(),
+	    token, this);
 
 	connect(mojeIDLoginDialog,
-	    SIGNAL(callMojeId(QString, QString, QString, bool)),
+	    SIGNAL(callMojeId(QString, QString, QString, QString, QString, bool)),
 	    this,
-	    SLOT(callMojeId(QString, QString, QString, bool)));
+	    SLOT(callMojeId(QString, QString, QString, QString, QString, bool)));
 
 	mojeIDLoginDialog->exec();
 }
+
 
 /* ========================================================================= */
 /*
  *
  */
-void MainWindow::callMojeId(QString userName, QString pwd, QString otp,
-    bool syncALL)
+void MainWindow::callMojeId(const QString &lastUrl, const QString &token,
+    QString userName, QString pwd, QString otp, bool syncALL)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QNetworkCookie sessionid = jsonlayer.loginToMojeID(userName, pwd, otp);
+	QNetworkCookie sessionid = jsonlayer.loginToMojeID(lastUrl,
+	    token, userName, pwd, otp);
 
 	wdGetAccountList(sessionid, syncALL);
 
 	if (ui->accountList->model()->rowCount() > 0) {
 		activeAccountMenuAndButtons(true);
 	}
-
 }
-

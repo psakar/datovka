@@ -733,8 +733,8 @@ private slots:
 	void addOrDeleteMsgTags(void);
 
 
-	void callMojeId(QString userName, QString pwd, QString otp,
-	   bool syncALL);
+	void callMojeId(const QString &lastUrl, const QString &token,
+	    QString userName, QString pwd, QString otp, bool syncALL);
 
 private:
 

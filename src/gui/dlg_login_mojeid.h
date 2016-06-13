@@ -35,7 +35,8 @@ class DlgLoginToMojeId : public QDialog, public Ui::LoginToMojeId {
 
 public:
 
-	DlgLoginToMojeId(QWidget *parent = 0);
+	DlgLoginToMojeId(const QString &lastUrl, const QString &token,
+	    QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);
@@ -44,13 +45,15 @@ private slots:
 	void checkInputFields(void);
 
 signals:
-	void callMojeId(QString, QString, QString, bool);
+	void callMojeId(QString, QString, QString, QString, QString, bool);
 
 private:
 	void initAccountDialog(void);
 
 	int m_loginmethod;
 	QString m_certPath;
+	QString m_lastUrl;
+	QString m_token;
 };
 
 #endif /* _DLG_LOGIN_MOJEID_H_ */

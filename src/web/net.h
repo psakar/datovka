@@ -43,6 +43,8 @@ public:
 
 public:
 
+	QString newUrl;
+
 	/*!
 	 * @brief Create POST request for WebDatovka.
 	 *
@@ -78,7 +80,7 @@ public:
 	 * @param[out] outData -reply data.
 	 * @return true if success.
 	 */
-	bool createPostRequestMojeId(const QUrl &url,
+	bool createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
 	    const QByteArray &data, QByteArray &outData);
 
 	/*!
@@ -98,7 +100,7 @@ public:
 	 * @param[out] outData -reply data.
 	 * @return true if success.
 	 */
-	bool createGetRequestMojeId(const QUrl &url,
+	bool createGetRequestMojeId(const QUrl &url, const QUrl &prevUrl,
 	    QByteArray &outData);
 
 private:

@@ -26,10 +26,13 @@
 #include "dlg_login_mojeid.h"
 #include "src/log/log.h"
 
-DlgLoginToMojeId::DlgLoginToMojeId(QWidget *parent)
+DlgLoginToMojeId::DlgLoginToMojeId(const QString &lastUrl, const QString &token,
+    QWidget *parent)
     : QDialog(parent),
     m_loginmethod(0),
-    m_certPath("")
+    m_certPath(""),
+    m_lastUrl(lastUrl),
+    m_token(token)
 {
 	setupUi(this);
 	initAccountDialog();
@@ -151,7 +154,7 @@ void DlgLoginToMojeId::sendData(void)
 {
 	debugSlotCall();
 
-	emit callMojeId(this->usernameLineEdit->text(),
+	emit callMojeId(m_lastUrl, m_token, this->usernameLineEdit->text(),
 	    this->passwordLineEdit->text(), this->otpLineEdit->text(),
 	    this->synchroCheckBox->isChecked());
 }

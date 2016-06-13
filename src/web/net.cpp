@@ -87,10 +87,11 @@ bool NetManager::createPostRequestWebDatovka(const QUrl &url,
 	request.setRawHeader("Content-Type", "application/json");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
 
-	QVariant var;
-	var.setValue(sessionid);
-	request.setHeader(QNetworkRequest::CookieHeader, var);
-
+	if (!sessionid.name().isEmpty()) {
+		QVariant var;
+		var.setValue(sessionid);
+		request.setHeader(QNetworkRequest::CookieHeader, var);
+	}
 #if 1
 	printRequest(request, data);
 #endif
@@ -123,9 +124,11 @@ bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
 	request.setRawHeader("Connection", "keep-alive");
 	request.setRawHeader("Content-Length", QByteArray::number(filedata.size()));
 
-	QVariant var;
-	var.setValue(sessionid);
-	request.setHeader(QNetworkRequest::CookieHeader, var);
+	if (!sessionid.name().isEmpty()) {
+		QVariant var;
+		var.setValue(sessionid);
+		request.setHeader(QNetworkRequest::CookieHeader, var);
+	}
 
 #if 1
 	printRequest(request, QByteArray());
@@ -139,7 +142,7 @@ bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
 /*
  * Func: Create POST request for MojeID.
  */
-bool NetManager::createPostRequestMojeId(const QUrl &url,
+bool NetManager::createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
    const QByteArray &data, QByteArray &outData)
 /* ========================================================================= */
 {
@@ -149,12 +152,19 @@ bool NetManager::createPostRequestMojeId(const QUrl &url,
 	QNetworkRequest request(url);
 	request.setRawHeader("Host", url.host().toUtf8());
 	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Referer", prevUrl.toString().toUtf8());
 	request.setRawHeader("Accept",
 	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
-
+/*
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			cookieList.removeOne(cookieList.at(i));
+		}
+	}
+*/
 	QVariant var;
 	var.setValue(cookieList);
 	request.setHeader(QNetworkRequest::CookieHeader, var);
@@ -192,9 +202,11 @@ bool NetManager::createGetRequestWebDatovka(const QUrl &url,
 	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
 
-	QVariant var;
-	var.setValue(sessionid);
-	request.setHeader(QNetworkRequest::CookieHeader, var);
+	if (!sessionid.name().isEmpty()) {
+		QVariant var;
+		var.setValue(sessionid);
+		request.setHeader(QNetworkRequest::CookieHeader, var);
+	}
 
 #if 1
 	printRequest(request, QByteArray());
@@ -208,7 +220,8 @@ bool NetManager::createGetRequestWebDatovka(const QUrl &url,
 /*
  * Func: Create GET request for MojeId.
  */
-bool NetManager::createGetRequestMojeId(const QUrl &url, QByteArray &outData)
+bool NetManager::createGetRequestMojeId(const QUrl &url, const QUrl &prevUrl,
+    QByteArray &outData)
 /* ========================================================================= */
 {
 	qDebug("%s()", __func__);
@@ -217,6 +230,7 @@ bool NetManager::createGetRequestMojeId(const QUrl &url, QByteArray &outData)
 	QNetworkRequest request(url);
 	request.setRawHeader("Host", url.host().toUtf8());
 	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Referer", prevUrl.toString().toUtf8());
 	request.setRawHeader("Accept",
 	    "text/html,application/xhtml+xml,application/xml");
 	request.setRawHeader("Connection", "keep-alive");
@@ -316,8 +330,18 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 	QList<QNetworkCookie> list =
 	    qvariant_cast<QList<QNetworkCookie> >(variantCookies);
 
+	bool up = false;
 	for (int i = 0; i < list.size(); ++i) {
-		if (!cookieList.contains(list.at(i))) {
+		up = false;
+		for (int j = 0; j < cookieList.count(); ++j) {
+			if (cookieList.at(j).name() == list.at(i).name()) {
+				cookieList.removeOne(cookieList.at(j));
+				cookieList.append(list.at(i));
+				up = true;
+				break;
+			}
+		}
+		if (!up) {
 			cookieList.append(list.at(i));
 		}
 	}
@@ -335,6 +359,11 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 		{
 			outData = reply->readAll();
 			qDebug() << outData;
+			QVariant possibleRedirectUrl =
+			    reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+			newUrl = possibleRedirectUrl.toString();
+			qDebug() << possibleRedirectUrl;
+
 		}
 		break;
 

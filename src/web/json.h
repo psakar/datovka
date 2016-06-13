@@ -27,6 +27,7 @@
 #include <QByteArray>
 #include <QObject>
 #include <QNetworkCookie>
+#include <QUrl>
 
 #include "src/models/accounts_model.h"
 #include "src/io/message_db.h"
@@ -179,13 +180,13 @@ public:
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
-
 	QNetworkCookie fakeLoginWebDatovka(void);
 
-	QNetworkCookie loginToMojeID(const QString &username,
+	QNetworkCookie loginToMojeID(const QString &lastUrl,
+	    const QString &token, const QString &username,
 	    const QString &pwd, const QString &otp);
 
-	QNetworkCookie startLoginToWebDatovka(void);
+	bool startLoginToWebDatovka(QUrl &lastUrl, QString &token);
 
 	bool pingServer(const QString &userName, QString &errStr);
 
@@ -259,7 +260,8 @@ private:
 	    QNetworkCookie &sessionid);
 
 	bool parseAccountList(const QByteArray &content,
-	    QList<JsonLayer::AccountData> &accountList, QString &errStr);
+	    QList<JsonLayer::AccountData> &accountList,
+	    QString &errStr);
 
 	bool parseMessageList(const QByteArray &content,
 	    QList<JsonLayer::Envelope> &messageList, QString &errStr);
