@@ -395,7 +395,14 @@ bool JsonLayer::syncAccount(const QString &userName, int accountID,
 		return false;
 	}
 
-	return parseSyncAccount(reply, errStr);
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -705,89 +712,6 @@ bool JsonLayer::searchRecipient(const QString &userName, int accountID,
 	}
 
 	return parseSearchRecipient(reply, resultList, hasMore, errStr);
-}
-
-
-bool JsonLayer::sendMessageAsJson(const QString &userName, int accountID,
-    const QList<JsonLayer::Recipient> &recipientList,
-    const JsonLayer::Envelope &envelope,
-    const QList<JsonLayer::File> &fileList,
-    QStringList &resultList, QString &errStr)
-{
-	QByteArray reply;
-	QNetworkCookie sessionid;
-
-	if (!isLoggedToWebDatovka(userName, sessionid)) {
-		errStr = tr("User is not logged to mojeID");
-		return false;
-	}
-
-	QJsonArray recipienList;
-	foreach (const JsonLayer::Recipient &recipient, recipientList) {
-		QJsonObject recData;
-		recData["db_id_recipient"] = recipient.recipientDbId;
-		recData["name"] = recipient.recipientName;
-		recData["address"] = recipient.recipientAddress;
-		recData["dm_to_hands"] = recipient.toHands;
-		recipienList.append(recData);
-	}
-
-	QJsonObject msgEnvelope;
-	msgEnvelope["dm_annotation"] = envelope.dmAnnotation;
-	msgEnvelope["dm_recipient_ident"] = envelope.dmRecipientIdent;
-	msgEnvelope["dm_recipient_ref_number"] = envelope.dmRecipientRefNumber;
-	msgEnvelope["dm_sender_ident"] = envelope.dmSenderIdent;
-	msgEnvelope["dm_sender_ref_number"] = envelope.dmSenderRefNumber;
-	msgEnvelope["dm_legal_title_law"] = envelope.dmLegalTitleLaw;
-	msgEnvelope["dm_legal_title_par"] = envelope.dmLegalTitlePar;
-	msgEnvelope["dm_legal_title_point"] = envelope.dmLegalTitlePoint;
-	msgEnvelope["dm_legal_title_sect"] = envelope.dmLegalTitleSect;
-	msgEnvelope["dm_legal_title_year"] = envelope.dmLegalTitleYear;
-	msgEnvelope["dm_personal_delivery"] = envelope.dmPersonalDelivery;
-	msgEnvelope["dm_allow_subst_delivery"] = envelope.dmAllowSubstDelivery;
-	msgEnvelope["dm_publish_own_id"] = envelope.dmPublishOwnID;
-	msgEnvelope["dm_ovm"] = envelope.dmOVM;
-
-	QJsonArray files;
-	foreach (const JsonLayer::File &file, fileList) {
-		QJsonObject fileData;
-		fileData["file_name"] = file.fName;
-		fileData["file_content"] = QString(file.fContent.toBase64());
-		files.append(fileData);
-	}
-
-	QJsonObject rootObj;
-	rootObj["account"] = accountID;
-	rootObj["recipients"] = recipienList;
-	rootObj["envelope"] = msgEnvelope;
-	rootObj["files"] = files;
-
-	netmanager.createPostRequestWebDatovka(
-	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "sendmessage"), sessionid,
-	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
-	    reply);
-
-	if (reply.isEmpty()) {
-		errStr = tr("Reply content missing");
-		return false;
-	}
-
-	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
-	QJsonObject jsonObject = jsonResponse.object();
-	if (!jsonObject["success"].toBool()) {
-		errStr = jsonObject["errmsg"].toString();
-		return false;
-	}
-
-	QString result;
-	QJsonArray errorArray = jsonObject["errors"].toArray();
-	foreach (const QJsonValue &value, errorArray) {
-		QJsonObject obj = value.toObject();
-		result = obj["dbID"].toString() + "§" + obj["msg"].toString();
-		resultList.append(result);
-	}
-
-	return true;
 }
 
 
@@ -1126,19 +1050,6 @@ bool JsonLayer::parseMessageList(const QByteArray &content,
 		}
 
 		messageList.append(mEvnelope);
-	}
-
-	return true;
-}
-
-
-bool JsonLayer::parseSyncAccount(const QByteArray &content, QString &errStr)
-{
-	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
-	QJsonObject jsonObject = jsonResponse.object();
-	if (!jsonObject["success"].toBool()) {
-		errStr = jsonObject["errmsg"].toString();
-		return false;
 	}
 
 	return true;

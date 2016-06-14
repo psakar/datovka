@@ -126,6 +126,9 @@ public:
 		QByteArray fContent;
 	};
 
+	/*!
+	 * @brief Holds message envelope data from webdatovka.
+	 */
 	class Envelope {
 	public:
 		int id;
@@ -182,75 +185,251 @@ public:
 	JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
+	/*!
+	 * @brief Fake login to Webdatovka - will be removed.
+	 *
+	 * @return sessionid from webdatovka.
+	 */
 	QNetworkCookie fakeLoginWebDatovka(void);
 
+	/*!
+	 * @brief Second part of login to Webdatovka.
+	 *
+	 * @param[in] lastUrl  - last url of login sequence.
+	 * @param[in] token    - html security token.
+	 * @param[in] username - mojeID username.
+	 * @param[in] pwd      - mojeID password.
+	 * @return sessionid cookie from webdatovka or NULL.
+	 */
 	QNetworkCookie loginToMojeID(const QString &lastUrl,
 	    const QString &token, const QString &username,
 	    const QString &pwd, const QString &otp);
 
+	/*!
+	 * @brief First part of login to Webdatovka.
+	 *
+	 * @param[out] lastUrl - last url of login sequence.
+	 * @param[out] token   - html security token.
+	 * @return true if first part was successed.
+	 */
 	bool startLoginToWebDatovka(QUrl &lastUrl, QString &token);
 
+	/*!
+	 * @brief Ping to Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool pingServer(const QString &userName, QString &errStr);
 
+	/*!
+	 * @brief Add account into Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] name     - name of account.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool createAccount(const QString &userName,
 	    const QString &name, QString &errStr);
 
+	/*!
+	 * @brief Update account name in Webdatovka.
+	 *
+	 * @param[in] userName  - account username.
+	 * @param[in] accountID - webdatovka id of account.
+	 * @param[in] newName   - new name of account.
+	 * @param[out] errStr   - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool renameAccount(const QString &userName,
 	    int accountID, const QString &newName, QString &errStr);
 
+	/*!
+	 * @brief Delete account from Webdatovka.
+	 *
+	 * @param[in] userName  - account username.
+	 * @param[in] accountID - webdatovka id of account.
+	 * @param[out] errStr   - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool deleteAccount(const QString &userName,
 	    int accountID, QString &errStr);
 
+	/*!
+	 * @brief Download all accounts from Webdatovka for one mojeID identity.
+	 *
+	 * @param[in] sessionid    - sessionid cookie of Webdatovka.
+	 * @param[out] accountList - list of accounts.
+	 * @param[out] errStr      - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool getAccountList(const QNetworkCookie &sessionid,
 	    QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
 
+	/*!
+	 * @brief Download current message list (envelopes) from Webdatovka.
+	 *
+	 * @param[in] userName     - account username.
+	 * @param[in] accountID    - webdatovka id of account.
+	 * @param[in] messageType  - webadatovka message type (sent = -1, received = 1);
+	 * @param[in] limit        - how many records mat be returned.
+	 * @param[in] offset       - default is 0.
+	 * @param[out] messageList - list of message envelopes.
+	 * @param[out] errStr      - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool getMessageList(const QString &userName,
 	    int accountID, int messageType, int limit,
 	    int offset, QList<JsonLayer::Envelope> &messageList,
 	    QString &errStr);
 
+	/*!
+	 * @brief Synchronize one account with isds via Webdatovka.
+	 *
+	 * @param[in] userName  - account username.
+	 * @param[in] accountID - webdatovka id of account.
+	 * @param[out] errStr   - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool syncAccount(const QString &userName,
 	    int accountID, QString &errStr);
 
+	/*!
+	 * @brief Download complete message from Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return message zfo binary data or NULL.
+	 */
 	QByteArray downloadMessage(const QString &userName,
 	    int msgId, QString &errStr);
 
+	/*!
+	 * @brief Download one file of message from Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] fileId   - webdatovka file id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return file binary data or NULL.
+	 */
 	QByteArray downloadFile(const QString &userName,
 	    int fileId, QString &errStr);
 
+	/*!
+	 * @brief Download tag list from Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[out] tagList - list of tag attributes.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool getTagList(const QString &userName,
 	    QList<JsonLayer::Tag> &tagList, QString &errStr);
 
+	/*!
+	 * @brief Create tag in Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] name     - tag name.
+	 * @param[in] color    - tag color.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true webdatovka id of new tag if success else -1.
+	 */
 	int createTag(const QString &userName,
 	    const QString &name, const QString &color, QString &errStr);
 
+	/*!
+	 * @brief Update tag data into Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] tagId    - webdatovka tag id.
+	 * @param[in] name     - tag name.
+	 * @param[in] color    - tag color.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool updateTag(const QString &userName, int tagId,
 	    const QString &name, const QString &color, QString &errStr);
 
+	/*!
+	 * @brief Delete tag from Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] tagId    - webdatovka tag id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool deleteTag(const QString &userName,
 	    int tagId, QString &errStr);
 
+	/*!
+	 * @brief Assign tag to message in Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] tagId    - webdatovka tag id.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool assignTag(const QString &userName,
 	    int tagId, int msgId, QString &errStr);
 
+	/*!
+	 * @brief Remove tag assigment from message in Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] tagId    - webdatovka tag id.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool removeTag(const QString &userName,
 	    int tagId, int msgId, QString &errStr);
 
+	/*!
+	 * @brief Remove all tags from message in Webdatovka for username.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool removeAllTags(const QString &userName,
 	    int msgId, QString &errStr);
 
+	/*!
+	 * @brief Search recipients via Webdatovka.
+	 *
+	 * @param[in] userName      - account username.
+	 * @param[in] accountID     - webdatovka id of account.
+	 * @param[in] word          - word for search.
+	 * @param[in] position      - result list part, firstly is 0.
+	 * @param[out] resultList   - list of recipients, where message was sent.
+	 * @param[out] hasMore      - another list part of recipents is available.
+	 * @param[out] errStr       - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool searchRecipient(const QString &userName,
 	    int accountID, const QString &word, int position,
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 
-	bool sendMessageAsJson(const QString &userName, int accountID,
-	    const QList<JsonLayer::Recipient> &recipientList,
-	    const JsonLayer::Envelope &envelope,
-	    const QList<JsonLayer::File> &fileList,
-	    QStringList &resultList, QString &errStr);
-
+	/*!
+	 * @brief Send message to recipients via Webdatovka.
+	 *
+	 * @param[in] userName      - account username.
+	 * @param[in] accountID     - webdatovka id of account.
+	 * @param[in] recipientList - another recipents are available.
+	 * @param[in] envelope      - message envelope data.
+	 * @param[in] fileList      - list of files (attachments).
+	 * @param[out] resultList   - list of recipients, where message was sent.
+	 * @param[out] errStr       - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool sendMessage(const QString &userName, int accountID,
 	    const QList<JsonLayer::Recipient> &recipientList,
 	    const JsonLayer::Envelope &envelope,
@@ -258,26 +437,65 @@ public:
 	    QStringList &resultList, QString &errStr);
 private:
 
+	/*!
+	 * @brief Test if user is logged to Webdatovka.
+	 *
+	 * @param[in] userName   - account username.
+	 * @param[out] sessionid - sessionid cookie for GET/POST reguests.
+	 * @return true if user is logged.
+	 */
 	bool isLoggedToWebDatovka(const QString &userName,
 	    QNetworkCookie &sessionid);
 
+	/*!
+	 * @brief Parse account list.
+	 *
+	 * @param[in] content      - reply content.
+	 * @param[out] accountList - list of accounts.
+	 * @param[out] errStr      - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool parseAccountList(const QByteArray &content,
 	    QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
 
+	/*!
+	 * @brief Parse message list.
+	 *
+	 * @param[in] content      - reply content.
+	 * @param[out] messageList - list of message envelopes.
+	 * @param[out] errStr      - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool parseMessageList(const QByteArray &content,
 	    QList<JsonLayer::Envelope> &messageList, QString &errStr);
 
-	bool parseSyncAccount(const QByteArray &content, QString &errStr);
-
+	/*!
+	 * @brief Parse tag list.
+	 *
+	 * @param[in] content  - reply content.
+	 * @param[out] tagList - list of tag attributes.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool parseTagList(const QByteArray &content,
 	    QList<JsonLayer::Tag> &tagList, QString &errStr);
 
+	/*!
+	 * @brief Parse recipient records.
+	 *
+	 * @param[in] content     - reply content.
+	 * @param[out] resultList - list of recipients.
+	 * @param[out] hasMore    - another recipents are available.
+	 * @param[out] errStr     - contains an error string if unssucces.
+	 * @return true if success.
+	 */
 	bool parseSearchRecipient(const QByteArray &content,
 	    QList<JsonLayer::Recipient> &resultList, bool &hasMore,
 	    QString &errStr);
 };
 
+/* global jsonlazyer object */
 extern JsonLayer jsonlayer;
 
 #endif /* _JSON_H_ */
