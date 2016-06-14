@@ -745,6 +745,8 @@ bool JsonLayer::sendMessageAsJson(const QString &userName, int accountID,
 	msgEnvelope["dm_legal_title_year"] = envelope.dmLegalTitleYear;
 	msgEnvelope["dm_personal_delivery"] = envelope.dmPersonalDelivery;
 	msgEnvelope["dm_allow_subst_delivery"] = envelope.dmAllowSubstDelivery;
+	msgEnvelope["dm_publish_own_id"] = envelope.dmPublishOwnID;
+	msgEnvelope["dm_ovm"] = envelope.dmOVM;
 
 	QJsonArray files;
 	foreach (const JsonLayer::File &file, fileList) {
@@ -815,17 +817,38 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 
 	QJsonObject msgEnvelope;
 	msgEnvelope["dm_annotation"] = envelope.dmAnnotation;
-	msgEnvelope["dm_recipient_ident"] = envelope.dmRecipientIdent;
-	msgEnvelope["dm_recipient_ref_number"] = envelope.dmRecipientRefNumber;
-	msgEnvelope["dm_sender_ident"] = envelope.dmSenderIdent;
-	msgEnvelope["dm_sender_ref_number"] = envelope.dmSenderRefNumber;
-	msgEnvelope["dm_legal_title_law"] = envelope.dmLegalTitleLaw;
-	msgEnvelope["dm_legal_title_par"] = envelope.dmLegalTitlePar;
-	msgEnvelope["dm_legal_title_point"] = envelope.dmLegalTitlePoint;
-	msgEnvelope["dm_legal_title_sect"] = envelope.dmLegalTitleSect;
-	msgEnvelope["dm_legal_title_year"] = envelope.dmLegalTitleYear;
+	if (!envelope.dmRecipientIdent.isEmpty()) {
+		msgEnvelope["dm_recipient_ident"] = envelope.dmRecipientIdent;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_recipient_ref_number"] =
+		    envelope.dmRecipientRefNumber;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_sender_ident"] = envelope.dmSenderIdent;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_sender_ref_number"] = envelope.dmSenderRefNumber;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_legal_title_law"] = envelope.dmLegalTitleLaw;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_legal_title_par"] = envelope.dmLegalTitlePar;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_legal_title_point"] = envelope.dmLegalTitlePoint;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_legal_title_sect"] = envelope.dmLegalTitleSect;
+	}
+	if (!envelope.dmRecipientRefNumber.isEmpty()) {
+		msgEnvelope["dm_legal_title_year"] = envelope.dmLegalTitleYear;
+	}
 	msgEnvelope["dm_personal_delivery"] = envelope.dmPersonalDelivery;
 	msgEnvelope["dm_allow_subst_delivery"] = envelope.dmAllowSubstDelivery;
+	msgEnvelope["dm_publish_own_id"] = envelope.dmPublishOwnID;
+	msgEnvelope["dm_ovm"] = envelope.dmOVM;
 	msgEnvelope["account"] = accountID;
 	msgEnvelope["rcpt"] = recipienList;
 
@@ -850,8 +873,9 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 	/* TODO - check returned bool */
 	foreach (const JsonLayer::File &file, fileList) {
 		netmanager.createPostRequestWebDatovkaSendFile(
-		    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "uploadfile"),
-		    sessionid, draftId, file.fName, file.fContent, reply);
+		    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "uploadonefile"),
+		    sessionid, draftId, file.fName,
+		    QByteArray::fromBase64(file.fContent), reply);
 
 		if (reply.isEmpty()) {
 			errStr = tr("Reply content missing");

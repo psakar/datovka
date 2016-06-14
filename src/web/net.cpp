@@ -60,8 +60,6 @@ void printRequest(QNetworkRequest request, QByteArray requestContent)
 NetManager::NetManager(QObject *parent)
     : QObject(parent)
 {
-//	QFile f(COOKIE_FILE_NAME);
-//	f.remove();
 }
 
 NetManager::~NetManager(void)
@@ -70,7 +68,7 @@ NetManager::~NetManager(void)
 
 /* ========================================================================= */
 /*
- * Func: Create POST request for WebDatovka.
+ * Func: Create POST request to WebDatovka.
  */
 bool NetManager::createPostRequestWebDatovka(const QUrl &url,
    const QNetworkCookie &sessionid, const QByteArray &data, QByteArray &outData)
@@ -92,9 +90,6 @@ bool NetManager::createPostRequestWebDatovka(const QUrl &url,
 		var.setValue(sessionid);
 		request.setHeader(QNetworkRequest::CookieHeader, var);
 	}
-#if 1
-	printRequest(request, data);
-#endif
 
 	return sendRequest(request, data, outData, true);
 }
@@ -122,6 +117,7 @@ bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
 	dispos.append("filename*=UTF-8''" + QUrl::toPercentEncoding(filename));
 	request.setRawHeader("Content-Disposition", dispos);
 	request.setRawHeader("Connection", "keep-alive");
+	request.setRawHeader("Content-type", "application/octet-stream");
 	request.setRawHeader("Content-Length", QByteArray::number(filedata.size()));
 
 	if (!sessionid.name().isEmpty()) {
@@ -130,63 +126,13 @@ bool NetManager::createPostRequestWebDatovkaSendFile(const QUrl &url,
 		request.setHeader(QNetworkRequest::CookieHeader, var);
 	}
 
-#if 1
-	printRequest(request, QByteArray());
-#endif
-
 	return sendRequest(request, filedata, outData, true);
 }
 
 
 /* ========================================================================= */
 /*
- * Func: Create POST request for MojeID.
- */
-bool NetManager::createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
-   const QByteArray &data, QByteArray &outData)
-/* ========================================================================= */
-{
-	qDebug("%s()", __func__);
-
-	QByteArray appName(APP_NAME);
-	QNetworkRequest request(url);
-	request.setRawHeader("Host", url.host().toUtf8());
-	request.setRawHeader("User-Agent", appName);
-	request.setRawHeader("Referer", prevUrl.toString().toUtf8());
-	request.setRawHeader("Accept",
-	    "text/html,application/xhtml+xml,application/xml");
-	request.setRawHeader("Connection", "keep-alive");
-	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
-/*
-	for (int i = 0; i < cookieList.size(); ++i) {
-		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
-			cookieList.removeOne(cookieList.at(i));
-		}
-	}
-*/
-	QVariant var;
-	var.setValue(cookieList);
-	request.setHeader(QNetworkRequest::CookieHeader, var);
-/*
-	for (int i = 0; i < cookieList.size(); ++i) {
-		if (cookieList.at(i).name() == COOKIE_SESSION_MOJEID) {
-			var.setValue(cookieList.at(i));
-			request.setHeader(QNetworkRequest::CookieHeader, var);
-		}
-	}
-*/
-#if 1
-	printRequest(request, data);
-#endif
-
-	return sendRequest(request, data, outData, true);
-}
-
-
-/* ========================================================================= */
-/*
- * Func: Create GET request for WebDatovka.
+ * Func: Create GET request to WebDatovka.
  */
 bool NetManager::createGetRequestWebDatovka(const QUrl &url,
     const QNetworkCookie &sessionid, QByteArray &outData)
@@ -208,17 +154,42 @@ bool NetManager::createGetRequestWebDatovka(const QUrl &url,
 		request.setHeader(QNetworkRequest::CookieHeader, var);
 	}
 
-#if 1
-	printRequest(request, QByteArray());
-#endif
-
 	return sendRequest(request, QByteArray(), outData, false);
 }
 
 
 /* ========================================================================= */
 /*
- * Func: Create GET request for MojeId.
+ * Func: Create POST request to MojeID.
+ */
+bool NetManager::createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
+   const QByteArray &data, QByteArray &outData)
+/* ========================================================================= */
+{
+	qDebug("%s()", __func__);
+
+	QByteArray appName(APP_NAME);
+	QNetworkRequest request(url);
+	request.setRawHeader("Host", url.host().toUtf8());
+	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Referer", prevUrl.toString().toUtf8());
+	request.setRawHeader("Accept",
+	    "text/html,application/xhtml+xml,application/xml");
+	request.setRawHeader("Connection", "keep-alive");
+	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
+
+	QVariant var;
+	var.setValue(cookieList);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
+
+	return sendRequest(request, data, outData, true);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Create GET request to MojeId.
  */
 bool NetManager::createGetRequestMojeId(const QUrl &url, const QUrl &prevUrl,
     QByteArray &outData)
@@ -243,10 +214,6 @@ bool NetManager::createGetRequestMojeId(const QUrl &url, const QUrl &prevUrl,
 		}
 	}
 
-#if 1
-	printRequest(request, QByteArray());
-#endif
-
 	return sendRequest(request, QByteArray(), outData, false);
 }
 
@@ -264,6 +231,10 @@ bool NetManager::sendRequest(QNetworkRequest &request,
 	bool ret = true;
 	QNetworkReply *reply = NULL;
 	QNetworkAccessManager *nam = new QNetworkAccessManager;
+
+#if 1
+	printRequest(request, data);
+#endif
 
 	if (postRqst) {
 		reply = nam->post(request, data);
@@ -325,6 +296,7 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 	qDebug() << "----------------------------------------------------";
 #endif
 
+	/* Process and store cookies */
 	QVariant variantCookies =
 	    reply->header(QNetworkRequest::SetCookieHeader);
 	QList<QNetworkCookie> list =
@@ -346,33 +318,29 @@ bool NetManager::getResponse(QNetworkReply *reply, QByteArray &outData)
 		}
 	}
 
-	switch (statusCode) {
 
+	switch (statusCode) {
 	case 200: /* HTTP status 200 OK */
 		{
 			outData = reply->readAll();
-			qDebug() << outData;
 		}
 		break;
 
 	case 302: /* HTTP status 302 Found */
 		{
 			outData = reply->readAll();
-			qDebug() << outData;
 			QVariant possibleRedirectUrl =
 			    reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 			newUrl = possibleRedirectUrl.toString();
-			qDebug() << possibleRedirectUrl;
-
 		}
 		break;
 
-	case 401: /* HTTP status 401 Unauthorized */
-	case 503: /* HTTP status 503 Service Temporarily Unavailable */
 	default: /* Any error occurred */
 		outData = QByteArray();
 		break;
 	}
-
+#if 1
+	qDebug() << outData;
+#endif
 	return ret;
 }

@@ -161,6 +161,8 @@ public:
 		int dmMessageStatus;
 		int dmAttachmentSize;
 		QString dmType;
+		bool dmPublishOwnID;
+		bool dmOVM;
 		bool _read;
 		QList<int> _tagList;
 	};

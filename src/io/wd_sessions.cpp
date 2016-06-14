@@ -67,6 +67,9 @@ bool GlobWDSessions::isConnectedToWebdatovka(const QString &userName)
 		if (m_wdSessions.value(userName).name().isEmpty()) {
 			return false;
 		}
+		if (m_wdSessions.value(userName).value().isEmpty()) {
+			return false;
+		}
 	}
 	return true;
 }

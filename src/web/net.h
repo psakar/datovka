@@ -46,11 +46,12 @@ public:
 	QString newUrl;
 
 	/*!
-	 * @brief Create POST request for WebDatovka.
+	 * @brief Create POST request to WebDatovka.
 	 *
-	 * @param[in] url - url of request.
-	 * @param[in] data - request content data.
-	 * @param[out] outData -reply data.
+	 * @param[in] url       - url of request.
+	 * @param[in] sessionid - cookie of request.
+	 * @param[in] data      - request content data.
+	 * @param[out] outData  - reply data.
 	 * @return true if success.
 	 */
 	bool createPostRequestWebDatovka(const QUrl &url,
@@ -60,11 +61,12 @@ public:
 	/*!
 	 * @brief Create POST request for file sending to WebDatovka.
 	 *
-	 * @param[in] url - url of request.
-	 * @param[in] draftId - draftId.
-	 * @param[in] filename - file name.
-	 * @param[in] filedata - file content data.
-	 * @param[out] outData -reply data.
+	 * @param[in] url       - url of request.
+	 * @param[in] sessionid - cookie of request.
+	 * @param[in] draftId   - draftId.
+	 * @param[in] filename  - file name.
+	 * @param[in] filedata  - file content data.
+	 * @param[out] outData  - reply data.
 	 * @return true if success.
 	 */
 	bool createPostRequestWebDatovkaSendFile(const QUrl &url,
@@ -73,31 +75,34 @@ public:
 	    QByteArray &outData);
 
 	/*!
-	 * @brief Create POST request for MojeID.
+	 * @brief Create GET request to WebDatovka.
 	 *
-	 * @param[in] url - url of request.
-	 * @param[in] data - request content data.
-	 * @param[out] outData -reply data.
-	 * @return true if success.
-	 */
-	bool createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
-	    const QByteArray &data, QByteArray &outData);
-
-	/*!
-	 * @brief Create GET request for WebDatovka.
-	 *
-	 * @param[in] url - url of request.
-	 * @param[out] outData -reply data.
+	 * @param[in] url       - url of request.
+	 * @param[in] sessionid - cookie of request.
+	 * @param[out] outData  -reply data.
 	 * @return true if success.
 	 */
 	bool createGetRequestWebDatovka(const QUrl &url,
 	    const QNetworkCookie &sessionid, QByteArray &outData);
 
 	/*!
-	 * @brief Create GET request for MojeID.
+	 * @brief Create POST request to MojeID.
 	 *
-	 * @param[in] url - url of request.
-	 * @param[out] outData -reply data.
+	 * @param[in] url      - current url of request.
+	 * @param[in] prevUrl  - previous url.
+	 * @param[in] data     - request content data.
+	 * @param[out] outData - reply data.
+	 * @return true if success.
+	 */
+	bool createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
+	    const QByteArray &data, QByteArray &outData);
+
+	/*!
+	 * @brief Create GET request to MojeID.
+	 *
+	 * @param[in] url      - current url of request.
+	 * @param[in] prevUrl  - previous url.
+	 * @param[out] outData - reply data.
 	 * @return true if success.
 	 */
 	bool createGetRequestMojeId(const QUrl &url, const QUrl &prevUrl,
@@ -108,10 +113,10 @@ private:
 	/*!
 	 * @brief Send request and run eventloop.
 	 *
-	 * @param[in] request hold request data.
-	 * @param[in] data hold content data (may be NULL).
-	 * @param[out] outData - reply data.
-	 * @param[in] postRqst - it is POST request (TRUE).
+	 * @param[in] request   - hold request data.
+	 * @param[in] data      - hold content data (may be NULL).
+	 * @param[out] outData  - reply data.
+	 * @param[in] postRqst  - it is POST request (POST = TRUE).
 	 * @return true if success.
 	 */
 	bool sendRequest(QNetworkRequest &request, const QByteArray &data,
@@ -120,8 +125,8 @@ private:
 	/*!
 	 * @brief Parse response.
 	 *
-	 * @param[in] reply pointer on the reply data.
-	 * @param[out] outData -reply data.
+	 * @param[in] reply    - pointer on the reply data.
+	 * @param[out] outData - reply data.
 	 * @return true if success.
 	 */
 	bool getResponse(QNetworkReply *reply, QByteArray &outData);

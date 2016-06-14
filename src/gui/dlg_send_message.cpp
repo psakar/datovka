@@ -39,6 +39,7 @@
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/wd_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
@@ -297,6 +298,9 @@ void DlgSendMessage::setAccountInfo(int item)
 			m_isLogged = false;
 		}
 	} else {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			m_mv->loginToMojeId();
+		}
 		m_isLogged = true;
 	}
 
@@ -1122,6 +1126,8 @@ bool DlgSendMessage::buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) cons
 	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
 	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
 	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
+	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
+	envelope.dmOVM = m_dbEffectiveOVM;
 
 	/* Only OVM can change. */
 	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
@@ -1163,8 +1169,7 @@ void DlgSendMessage::sendMessage(void)
 	if (m_isWebDatovkaAccount) {
 
 		/* Get account ID */
-		QString aID  = m_userName.split("-").at(1);
-		int accountID = aID.toInt();
+		int accountID = getWebDatovkaAccountId(m_userName);
 
 		/* Create recipient list. */
 		JsonLayer::Recipient recipient;
@@ -1446,10 +1451,7 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 {
 	debugSlotCall();
 
-	if (!error.isEmpty()) {
-		qDebug() << error;
-		return;
-	}
+	Q_UNUSED(error);
 
 	QString detailText;
 

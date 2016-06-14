@@ -128,13 +128,14 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 
-private slots:
+public slots:
 
 	/*!
 	 * @brief Login to mojeID.
 	 */
 	void loginToMojeId(void);
 
+private slots:
 	/*!
 	 * @brief Refresh AccountList.
 	 */
