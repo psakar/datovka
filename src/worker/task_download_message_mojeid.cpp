@@ -81,12 +81,12 @@ void TaskDownloadMessageMojeId::run(void)
 	if (DM_SUCCESS == m_result) {
 		logDebugLv1NL(
 		    "Done downloading message '%" PRId64 "' for account '%s'.",
-		    m_id,
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    m_id, AccountModel::globAccounts[m_userName].
+		    accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message '%" PRId64 "' for account '%s' failed.",
-		    m_id,
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    m_id, AccountModel::globAccounts[m_userName].
+		    accountName().toUtf8().constData());
 	}
 
 	emit globMsgProcEmitter.downloadMessageFinishedMojeId(m_userName,

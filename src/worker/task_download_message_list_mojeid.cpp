@@ -97,10 +97,12 @@ void TaskDownloadMessageListMojeID::run(void)
 
 	if (DL_SUCCESS == m_result) {
 		logDebugLv1NL("Done downloading message list for account '%s'.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    AccountModel::globAccounts[m_userName].
+		    accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message list for account '%s' failed.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    AccountModel::globAccounts[m_userName].
+		    accountName().toUtf8().constData());
 	}
 
 	emit globMsgProcEmitter.downloadMessageListFinished(m_userName,

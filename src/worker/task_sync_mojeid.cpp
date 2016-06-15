@@ -55,7 +55,8 @@ void TaskSyncAccount::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-bool TaskSyncAccount::syncAccount(const QString &userName, int id, QString &error)
+bool TaskSyncAccount::syncAccount(const QString &userName, int id,
+    QString &error)
 {
 	emit globMsgProcEmitter.progressChange(PL_SYNC_ACCOUNT, -1);
 

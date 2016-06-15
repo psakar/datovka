@@ -2979,7 +2979,7 @@ void MainWindow::messageItemsSelectedMarkSettled(void)
 
 /* ========================================================================= */
 /*
- * Delete selected message from local database and ISDS.
+ * Delete selected message from local database and ISDS/Webdatovka.
  */
 void MainWindow::deleteMessage(void)
 /* ========================================================================= */
@@ -3145,9 +3145,12 @@ void MainWindow::deleteMessageWebdatovka(const QString &userName)
 
 	QString errStr;
 	foreach (const MessageDb::MsgId &id, msgIds) {
-		MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
-		if (!jsonlayer.deleteMessage(userName, messageDb->getWebDatokaId(id.dmId), errStr)) {
-			qDebug() << "DELETE MSG:" << id.dmId  << errStr;
+		MessageDb *messageDb =
+		    dbSet->accessMessageDb(id.deliveryTime, false);
+		if (!jsonlayer.deleteMessage(userName,
+		    messageDb->getWebDatokaId(id.dmId), errStr)) {
+			qDebug() << "WD_DELETE_MESSAGE_ERROR:" << id.dmId
+			    << errStr;
 			continue;
 		}
 		if (eraseMessage(userName, id.dmId, id.deliveryTime, false)) {
@@ -10864,7 +10867,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 
 /* ========================================================================= */
 /*
- * Func: Download all accounts from webdatovka.
+ * Func: Download and update all accounts from webdatovka.
  */
 bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
     bool syncWithAll)
@@ -10872,8 +10875,8 @@ bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
 {
 	debugFuncCall();
 
+	/* list of accounts task */
 	TaskGetAccountListMojeId *task;
-
 	task = new (std::nothrow) TaskGetAccountListMojeId(sessionid,
 	    syncWithAll, &m_accountModel);
 	task->setAutoDelete(false);
@@ -10881,13 +10884,14 @@ bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
 	bool ret = task->m_success;
 
 	if (!ret) {
-		qDebug() << "ACCOUNT_LIST_ERROR: " << task->m_error;
+		qDebug() << "WD_ACCOUNT_LIST_ERROR: " << task->m_error;
 	}
 
 	delete task;
 
 	return ret;
 }
+
 
 /* ========================================================================= */
 /*
@@ -10902,10 +10906,13 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 		return false;
 	}
 
+	/* list of tags task */
 	TaskTagSyncAccount *tagtask;
 	tagtask = new (std::nothrow) TaskTagSyncAccount(userName);
 	tagtask->setAutoDelete(true);
 	globWorkPool.assignHi(tagtask);
+
+	int accountID = getWebDatovkaAccountId(userName);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -10913,8 +10920,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 		return false;
 	}
 
-	int accountID = getWebDatovkaAccountId(userName);
-
+	/* list of received messages task */
 	TaskDownloadMessageListMojeID *task;
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
 	    MSG_RECEIVED, globPref.auto_download_whole_messages,
@@ -10923,6 +10929,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
+	/* list of sent messages task */
 	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
 	    MSG_SENT, globPref.auto_download_whole_messages,
 	    MESSAGE_LIST_LIMIT,
@@ -10932,6 +10939,7 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 
 	return true;
 }
+
 
 /* ========================================================================= */
 /*
@@ -10952,8 +10960,8 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 	int accountID = getWebDatovkaAccountId(userName);
 
+	/* sync account task */
 	TaskSyncAccount *task;
-
 	task = new (std::nothrow) TaskSyncAccount(userName, accountID);
 	task->setAutoDelete(true);
 	globWorkPool.assignHi(task);
@@ -10964,19 +10972,21 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 
 /* ========================================================================= */
 /*
- * Func: Show dialog for webdatovka account, that action is not implemented.
+ * Func: Show dialog for webdatovka account, that action is not supported.
  */
 void MainWindow::showWebDatovkaInfoDialog(const QString &userName, QString txt)
 /* ========================================================================= */
 {
+	debugFuncCall();
+
 	if (txt.isEmpty()) {
 		txt = tr("This action is not supported for MojeID account "
 		"'%1'").arg(AccountModel::globAccounts[userName].accountName());
 	}
 	showStatusTextWithTimeout(txt);
 	QMessageBox::warning(this,
-	    AccountModel::globAccounts[userName].accountName() + " : " + userName,
-	    txt, QMessageBox::Ok);
+	    AccountModel::globAccounts[userName].accountName() + " : "
+	    + userName, txt, QMessageBox::Ok);
 }
 
 
@@ -11002,7 +11012,6 @@ void MainWindow::sendMessageMojeIdAction(const QString &userName,
 		}
 
 		TaskDownloadMessageListMojeID *task;
-
 		task = new (std::nothrow) TaskDownloadMessageListMojeID(
 		    userName, dbSet, MSG_SENT,
 		    globPref.auto_download_whole_messages, MESSAGE_LIST_LIMIT,
@@ -11015,7 +11024,7 @@ void MainWindow::sendMessageMojeIdAction(const QString &userName,
 
 /* ========================================================================= */
 /*
- * Slot: Login to MojeID.
+ * Slot: Login to MojeID - first step.
  */
 void MainWindow::loginToMojeId(void)
 /* ========================================================================= */
@@ -11030,10 +11039,9 @@ void MainWindow::loginToMojeId(void)
 	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(lastUrl.toString(),
 	    token, this);
 
-	connect(mojeIDLoginDialog,
-	    SIGNAL(callMojeId(QString, QString, QString, QString, QString, bool)),
-	    this,
-	    SLOT(callMojeId(QString, QString, QString, QString, QString, bool)));
+	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString,
+	    QString, QString, QString, bool)), this, SLOT(callMojeId(QString,
+	    QString, QString, QString, QString, bool)));
 
 	mojeIDLoginDialog->exec();
 }
@@ -11041,7 +11049,7 @@ void MainWindow::loginToMojeId(void)
 
 /* ========================================================================= */
 /*
- *
+ * Slot: Login to MojeID - second step.
  */
 void MainWindow::callMojeId(const QString &lastUrl, const QString &token,
     QString userName, QString pwd, QString otp, bool syncALL)
