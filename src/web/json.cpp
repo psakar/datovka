@@ -857,7 +857,7 @@ bool JsonLayer::deleteMessage(const QString &userName, int msgId,
 	}
 
 	QJsonObject rootObj;
-	rootObj["msg_id "] = msgId;
+	rootObj["id "] = msgId;
 
 	netmanager.createPostRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletemessage"), sessionid,
