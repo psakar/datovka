@@ -142,6 +142,9 @@ enum TaskDownloadMessageMojeId::Result TaskDownloadMessageMojeId::downloadMessag
 
 	Task::storeMessage(true, msgDirect, dbSet, message,
 	    progressLabel, QString::number(id));
+
+	jsonlayer.markMessageAsRead(userName, id, error);
+
 	emit globMsgProcEmitter.progressChange(progressLabel, 100);
 
 	logDebugLv0NL("Done with %s().", __func__);

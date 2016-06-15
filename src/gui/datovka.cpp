@@ -2986,16 +2986,21 @@ void MainWindow::deleteMessage(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	if (firstMsgColumnIdxs.isEmpty()) {
-		return;
-	}
-
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
+		return;
+	}
+
+	if (isWebDatovkaAccount(userName)) {
+		deleteMessageWebdatovka(userName);
+		return;
+	}
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+
+	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
 	}
 
@@ -3016,7 +3021,7 @@ void MainWindow::deleteMessage(void)
 		checkBoxText =
 		    tr("Delete these messages also from server ISDS");
 		detailText = tr("Warning: If you delete selected messages "
-		    "from ISDS then these message will be lost forever.");
+		    "from ISDS then these messages will be lost forever.");
 	}
 
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
@@ -3066,6 +3071,106 @@ void MainWindow::deleteMessage(void)
 			 * Tag in the tag table are kept.
 			 */
 			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
+		}
+	}
+
+	/* Refresh account list. */
+	refreshAccountList(userName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Delete selected message from local database and Webdatovka.
+ */
+void MainWindow::deleteMessageWebdatovka(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		showWebDatovkaInfoDialog(userName,
+		    tr("You have to be logged into the Webdatovka "
+			"if you want to delete message(s)."));
+		return;
+	}
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+	if (firstMsgColumnIdxs.isEmpty()) {
+		return;
+	}
+
+	QString dlgTitleText, questionText, detailText;
+	int msgIdxCnt = firstMsgColumnIdxs.size();
+
+	if (1 == msgIdxCnt) {
+		qint64 dmId = firstMsgColumnIdxs.first().data().toLongLong();
+		dlgTitleText = tr("Delete message %1").arg(dmId);
+		questionText = tr("Do you want to delete "
+		    "message '%1'?").arg(dmId);
+		detailText = tr("Warning: If you delete the message "
+		    "from Webdatovka then this message will be lost forever.");
+	} else {
+		dlgTitleText = tr("Delete messages");
+		questionText = tr("Do you want to delete selected messages?");
+		detailText = tr("Warning: If you delete selected messages "
+		    "from Webdatovka then these messages will be lost forever.");
+	}
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(dlgTitleText);
+	msgBox.setText(questionText);
+	msgBox.setInformativeText(detailText);
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::No == msgBox.exec()) {
+		return;
+	}
+
+	QList<MessageDb::MsgId> msgIds;
+	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
+		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
+		    msgDeliveryTime(idx)));
+	}
+
+	/* Save current account index */
+	QModelIndex selectedAcntIndex(currentAccountModelIndex());
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QString errStr;
+	foreach (const MessageDb::MsgId &id, msgIds) {
+		MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
+		if (!jsonlayer.deleteMessage(userName, messageDb->getWebDatokaId(id.dmId), errStr)) {
+			qDebug() << "DELETE MSG:" << id.dmId  << errStr;
+			continue;
+		}
+		if (eraseMessage(userName, id.dmId, id.deliveryTime, false)) {
+			/*
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
+			 */
+			if (selectedAcntIndex.isValid()) {
+				accountItemCurrentChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
+
+			/* Delete all tags from message_tags table.
+			 * Tag in the tag table are kept.
+			 */
+			TagDb *tagDb =
+			    globWebDatovkaTagDbPtr->accessTagDb(userName);
+			tagDb->removeAllTagsFromMsg(userName, id.dmId);
 		}
 	}
 

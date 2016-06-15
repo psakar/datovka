@@ -435,6 +435,28 @@ public:
 	    const JsonLayer::Envelope &envelope,
 	    const QList<JsonLayer::File> &fileList,
 	    QStringList &resultList, QString &errStr);
+
+	/*!
+	 * @brief Delete message from Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
+	bool deleteMessage(const QString &userName, int msgI, QString &errStr);
+
+	/*!
+	 * @brief Mark messages as read in Webdatovka.
+	 *
+	 * @param[in] userName - account username.
+	 * @param[in] msgId    - webdatovka message id.
+	 * @param[out] errStr  - contains an error string if unssucces.
+	 * @return true if success.
+	 */
+	bool markMessageAsRead(const QString &userName, int msgId,
+	    QString &errStr);
+
 private:
 
 	/*!

@@ -845,6 +845,74 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 }
 
 
+bool JsonLayer::deleteMessage(const QString &userName, int msgId,
+    QString &errStr)
+{
+	QByteArray reply;
+	QNetworkCookie sessionid;
+
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QJsonObject rootObj;
+	rootObj["msg_id "] = msgId;
+
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletemessage"), sessionid,
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
+
+
+bool JsonLayer::markMessageAsRead(const QString &userName, int msgId,
+    QString &errStr)
+{
+	QByteArray reply;
+	QNetworkCookie sessionid;
+
+	if (!isLoggedToWebDatovka(userName, sessionid)) {
+		errStr = tr("User is not logged to mojeID");
+		return false;
+	}
+
+	QJsonObject rootObj;
+	rootObj["msg_id"] = msgId;
+
+	netmanager.createPostRequestWebDatovka(
+	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "markasread"), sessionid,
+	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
+	    reply);
+
+	if (reply.isEmpty()) {
+		errStr = tr("Reply content missing");
+		return false;
+	}
+
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	}
+
+	return true;
+}
 
 bool JsonLayer::parseAccountList(const QByteArray &content,
     QList<JsonLayer::AccountData> &accountList, QString &errStr)

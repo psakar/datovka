@@ -403,6 +403,11 @@ private slots:
 	void deleteMessage(void);
 
 	/*!
+	 * @brief Delete selected message(s) from local database and Webdatovka.
+	 */
+	void deleteMessageWebdatovka(const QString &userName);
+
+	/*!
 	 * @brief Downloads new messages from server for all accounts.
 	 */
 	void synchroniseAllAccounts(void);
