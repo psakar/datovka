@@ -11052,6 +11052,10 @@ void MainWindow::callMojeId(const QString &lastUrl, const QString &token,
 	QNetworkCookie sessionid = jsonlayer.loginToMojeID(lastUrl,
 	    token, userName, pwd, otp);
 
+	if (!sessionid.name().isEmpty()) {
+		mui_statusOnlineLabel->setText(tr("Mode: online"));
+	}
+
 	wdGetAccountList(sessionid, syncALL);
 
 	if (ui->accountList->model()->rowCount() > 0) {
