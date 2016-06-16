@@ -5101,6 +5101,19 @@ void MainWindow::deleteSelectedAccount(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 
+	deleteAccount(userName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Delete account.
+ */
+void MainWindow::deleteAccount(const QString &userName)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
@@ -10894,11 +10907,13 @@ bool MainWindow::wdGetAccountList(const QString &userName,
 	}
 
 	QMessageBox msgBox(this);
-	bool addAsNewAcnt = false;
 	QString msgBoxText = task->m_error;
+	TaskGetAccountListMojeId::Result retVal = task->m_return;
 	QString delAcntName = "\n";
 
-	switch (task->m_return) {
+	delete task;
+
+	switch (retVal) {
 	case TaskGetAccountListMojeId::ACNTLIST_WEBDAT_ERR:
 		showStatusTextWithTimeout(msgBoxText);
 		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
@@ -10912,10 +10927,12 @@ bool MainWindow::wdGetAccountList(const QString &userName,
 		    QMessageBox::Ok);
 		break;
 	case TaskGetAccountListMojeId::ACNTLIST_WRONGUSER:
-		msgBoxText = tr("You are login into wrong mojeID identity "
-		    "without Webdatovka account(s).");
+		msgBoxText = tr("You are login into wrong mojeID identity.");
 		showStatusTextWithTimeout(msgBoxText);
-		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		QMessageBox::warning(this, msgBoxTitle,
+		    msgBoxText + " " + tr("Please enter correct mojeID "
+		    "login for account '%1'.").
+		    arg(AccountModel::globAccounts[userName].accountName()),
 		    QMessageBox::Ok);
 		break;
 	case TaskGetAccountListMojeId::ACNTLIST_WU_HAS_ACNT:
@@ -10924,12 +10941,14 @@ bool MainWindow::wdGetAccountList(const QString &userName,
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(msgBoxTitle);
 		msgBox.setText(msgBoxText + " " +
-		    tr("New mojeID identity has any account(s)."));
+		    tr("New mojeID identity has some account(s)."));
 		msgBox.setInformativeText(tr("Do you want to add account(s) "
 		    "for this mojeID identity to Datovka?"));
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
-		addAsNewAcnt = QMessageBox::Yes == msgBox.exec();
+		if (QMessageBox::Yes == msgBox.exec()) {
+			ret = wdGetAccountList(QString(), sessionid, syncWithAll);
+		}
 		break;
 	case TaskGetAccountListMojeId::ACNTLIST_DELETE_ACNT:
 		foreach (const QString &username, deletedAccounts) {
@@ -10949,19 +10968,15 @@ bool MainWindow::wdGetAccountList(const QString &userName,
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (QMessageBox::Yes == msgBox.exec()) {
-			/* TODO - delete accounts  */
+			foreach (const QString &username, deletedAccounts) {
+				deleteAccount(username);
+			}
 		}
 		ret = true;
 		break;
 	default:
 		ret = true;
 		break;
-	}
-
-	delete task;
-
-	if (addAsNewAcnt) {
-		ret = wdGetAccountList(QString(), sessionid, syncWithAll);
 	}
 
 	return ret;

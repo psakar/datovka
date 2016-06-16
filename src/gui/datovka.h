@@ -478,6 +478,11 @@ private slots:
 	void deleteSelectedAccount(void);
 
 	/*!
+	 * @brief Delete account.
+	 */
+	void deleteAccount(const QString &userName);
+
+	/*!
 	 * @brief Show import database directory dialog.
 	 */
 	void showImportDatabaseDialog(void);
