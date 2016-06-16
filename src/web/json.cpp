@@ -322,7 +322,7 @@ bool JsonLayer::deleteAccount(const QString &userName, int accountID,
 }
 
 
-bool JsonLayer::getAccountList(const QNetworkCookie &sessionid,
+bool JsonLayer::getAccountList(const QNetworkCookie &sessionid, int &userId,
     QList<JsonLayer::AccountData> &accountList,  QString &errStr)
 {
 	QByteArray reply;
@@ -335,7 +335,7 @@ bool JsonLayer::getAccountList(const QNetworkCookie &sessionid,
 		return false;
 	}
 
-	return parseAccountList(reply, accountList, errStr);
+	return parseAccountList(reply, userId, accountList, errStr);
 }
 
 
@@ -857,7 +857,9 @@ bool JsonLayer::deleteMessage(const QString &userName, int msgId,
 	}
 
 	QJsonObject rootObj;
-	rootObj["id "] = msgId;
+	QJsonArray array;
+	array.append(msgId);
+	rootObj["msg_id"] = array;
 
 	netmanager.createPostRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletemessage"), sessionid,
@@ -892,7 +894,9 @@ bool JsonLayer::markMessageAsRead(const QString &userName, int msgId,
 	}
 
 	QJsonObject rootObj;
-	rootObj["msg_id"] = msgId;
+	QJsonArray array;
+	array.append(msgId);
+	rootObj["msg_id"] = array;
 
 	netmanager.createPostRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "markasread"), sessionid,
@@ -914,7 +918,7 @@ bool JsonLayer::markMessageAsRead(const QString &userName, int msgId,
 	return true;
 }
 
-bool JsonLayer::parseAccountList(const QByteArray &content,
+bool JsonLayer::parseAccountList(const QByteArray &content, int &userId,
     QList<JsonLayer::AccountData> &accountList, QString &errStr)
 {
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(content);
@@ -924,7 +928,7 @@ bool JsonLayer::parseAccountList(const QByteArray &content,
 		return false;
 	}
 
-	int userId = jsonObject["userId"].toInt();
+	userId = jsonObject["userId"].toInt();
 	QJsonArray jsonArray = jsonObject["accountsList"].toArray();
 
 	foreach (const QJsonValue &value, jsonArray) {

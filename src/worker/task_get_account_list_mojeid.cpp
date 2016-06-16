@@ -31,14 +31,16 @@
 #include "src/web/json.h"
 #include "src/io/wd_sessions.h"
 
-TaskGetAccountListMojeId::TaskGetAccountListMojeId(
-   const QNetworkCookie &sessionid, bool syncWithAll,
-   AccountModel *accountModel)
-    : m_success(false),
+TaskGetAccountListMojeId::TaskGetAccountListMojeId(const QString &userName,
+    const QNetworkCookie &sessionid, bool syncWithAll,
+    AccountModel *accountModel, QStringList &deletedAccounts)
+    : m_return(ACNTLIST_SUCCESS),
     m_error(),
+    m_userName(userName),
     m_sessionid(sessionid),
     m_syncWithAll(syncWithAll),
-    m_accountModel(accountModel)
+    m_accountModel(accountModel),
+    m_deletedAccounts(deletedAccounts)
 {
 }
 
@@ -50,8 +52,8 @@ void TaskGetAccountListMojeId::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_success = getAccountList(m_sessionid, m_syncWithAll, m_accountModel,
-	    m_error);
+	m_return = getAccountList(m_userName, m_sessionid, m_syncWithAll,
+	    m_accountModel, m_error, m_deletedAccounts);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -61,46 +63,85 @@ void TaskGetAccountListMojeId::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-bool TaskGetAccountListMojeId::getAccountList(const QNetworkCookie &sessionid,
-    bool syncWithAll, AccountModel *accountModel, QString &error)
+enum TaskGetAccountListMojeId::Result TaskGetAccountListMojeId::getAccountList(
+    const QString &userName, const QNetworkCookie &sessionid,
+    bool syncWithAll, AccountModel *accountModel, QString &error,
+    QStringList &deletedAccounts)
 {
+	int newUserId = 0;
+	int userId = 0;
+	QString localUserName = userName;
 	QList<JsonLayer::AccountData> accountList;
+	QModelIndex index;
 
 	emit globMsgProcEmitter.progressChange(PL_GET_ACCOUNT_LIST, -1);
 
-	jsonlayer.getAccountList(sessionid, accountList, error);
-
-	if (accountList.isEmpty()) {
-		return false;
+	if (!jsonlayer.getAccountList(sessionid, newUserId, accountList, error)) {
+		return ACNTLIST_WEBDAT_ERR;
 	}
 
-	QModelIndex index;
+	/* test, if we are logged for relevant userId (account) */
+	if (!localUserName.isEmpty()) {
+		userId = getWebDatovkaUserId(localUserName);
+		if (userId != newUserId) {
+			if (accountList.isEmpty()) {
+				return ACNTLIST_WRONGUSER;
+			} else {
+				return ACNTLIST_WU_HAS_ACNT;
+			}
+		}
+		deletedAccounts.clear();
 
+		/* how many accounts are relevant to given userId */
+		AccountsMap::iterator i;
+		for (i = accountModel->globAccounts.begin();
+		    i != accountModel->globAccounts.end(); ++i) {
+			if (isWebDatovkaAccount(i->userName())) {
+				if (newUserId == getWebDatovkaUserId(i->userName())) {
+					deletedAccounts.append(i->userName());
+				}
+			}
+		}
+	}
+
+	/* if account list is empty, do nothing */
+	if (accountList.isEmpty()) {
+		return ACNTLIST_NONEXIST;
+	}
+
+	/* do action with account list (add/update account) */
 	for (int i = 0; i < accountList.count(); ++i) {
-		const QString userName = getWebDatovkaUsername(
+		localUserName = getWebDatovkaUsername(
 		    QString::number(accountList.at(i).userId),
 		    QString::number(accountList.at(i).accountId));
-		if (!accountModel->globAccounts.contains(userName)) {
-
+		if (!accountModel->globAccounts.contains(localUserName)) {
 			AcntSettings aSet;
-			aSet.setUserName(userName);
+			aSet.setUserName(localUserName);
 			aSet.setAccountName(accountList.at(i).name);
 			aSet.setLoginMethod(LIM_MOJEID);
 			aSet.setSyncWithAll(syncWithAll);
 			accountModel->addAccount(aSet, &index);
 		} else {
-			accountModel->globAccounts[userName].setAccountName(
+			deletedAccounts.removeOne(localUserName);
+			accountModel->globAccounts[localUserName].setAccountName(
 			    accountList.at(i).name);
 		}
 
-		updateMojeIdAccountData(userName, accountList.at(i));
+		updateMojeIdAccountData(localUserName, accountList.at(i));
 
-		wdSessions.createCleanSession(userName);
-		wdSessions.setSessionCookie(userName, sessionid);
-		emit globMsgProcEmitter.refreshAccountList(userName);
+		wdSessions.createCleanSession(localUserName);
+		wdSessions.setSessionCookie(localUserName, sessionid);
+		emit globMsgProcEmitter.refreshAccountList(localUserName);
 	}
 
-	return true;
+	/* if relevantAccounts are not empty
+	 * so any account(s) was/were removed from Webdatovka.
+	 */
+	if (!deletedAccounts.isEmpty()) {
+		return ACNTLIST_DELETE_ACNT;
+	}
+
+	return ACNTLIST_SUCCESS;
 }
 
 bool TaskGetAccountListMojeId::updateMojeIdAccountData(const QString &userName,

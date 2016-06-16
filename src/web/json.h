@@ -261,11 +261,12 @@ public:
 	 * @brief Download all accounts from Webdatovka for one mojeID identity.
 	 *
 	 * @param[in] sessionid    - sessionid cookie of Webdatovka.
+	 * @param[out] userId      - mojeID user id.
 	 * @param[out] accountList - list of accounts.
 	 * @param[out] errStr      - contains an error string if unssucces.
 	 * @return true if success.
 	 */
-	bool getAccountList(const QNetworkCookie &sessionid,
+	bool getAccountList(const QNetworkCookie &sessionid, int &userId,
 	    QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
 
@@ -473,11 +474,12 @@ private:
 	 * @brief Parse account list.
 	 *
 	 * @param[in] content      - reply content.
+	 * @param[out] userId      - mojeID user id.
 	 * @param[out] accountList - list of accounts.
 	 * @param[out] errStr      - contains an error string if unssucces.
 	 * @return true if success.
 	 */
-	bool parseAccountList(const QByteArray &content,
+	bool parseAccountList(const QByteArray &content, int &userId,
 	    QList<JsonLayer::AccountData> &accountList,
 	    QString &errStr);
 

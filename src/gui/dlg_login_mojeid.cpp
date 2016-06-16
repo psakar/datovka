@@ -26,11 +26,12 @@
 #include "dlg_login_mojeid.h"
 #include "src/log/log.h"
 
-DlgLoginToMojeId::DlgLoginToMojeId(const QString &lastUrl, const QString &token,
-    QWidget *parent)
+DlgLoginToMojeId::DlgLoginToMojeId(const QString &userName,
+    const QString &lastUrl, const QString &token, QWidget *parent)
     : QDialog(parent),
     m_loginmethod(0),
     m_certPath(""),
+    m_userName(userName),
     m_lastUrl(lastUrl),
     m_token(token)
 {
@@ -64,6 +65,11 @@ void DlgLoginToMojeId::initAccountDialog(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->passwordLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+
+	if (!m_userName.isEmpty()) {
+		this->synchroCheckBox->setEnabled(false);
+		this->setWindowTitle(tr("Login to account: %1").arg(m_userName));
+	}
 }
 
 
@@ -154,7 +160,8 @@ void DlgLoginToMojeId::sendData(void)
 {
 	debugSlotCall();
 
-	emit callMojeId(m_lastUrl, m_token, this->usernameLineEdit->text(),
+	emit callMojeId(m_userName, m_lastUrl,
+	    m_token, this->usernameLineEdit->text(),
 	    this->passwordLineEdit->text(), this->otpLineEdit->text(),
 	    this->synchroCheckBox->isChecked());
 }

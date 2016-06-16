@@ -33,15 +33,31 @@
  */
 class TaskGetAccountListMojeId : public Task {
 public:
+
+	/*!
+	 * @Brief Return state describing what happened.
+	 */
+	enum Result {
+		ACNTLIST_SUCCESS, /*!< Action was successful. */
+		ACNTLIST_NONEXIST, /*!< There aren't any accounts for mojeID. */
+		ACNTLIST_WRONGUSER, /*!< UserID is not match with exists account userId. */
+		ACNTLIST_WU_HAS_ACNT, /*!< UserID is not match with exists userId but new userId has any account */
+		ACNTLIST_WEBDAT_ERR, /*!< Other webdatovka error. */
+		ACNTLIST_DELETE_ACNT /*!< Any account was deleted in webdatovka. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in]   sessionid     Session cookie from mojeid.
-	 * @param[in]   syncWithAll   If will be synchronized with all accounts.
-	 * @param[in]   accountModel  Pointer to account model.
+	 * @param[in]   userName        Username of account.
+	 * @param[in]   sessionid       Session cookie from mojeid.
+	 * @param[in]   syncWithAll     If will be synchronized with all accounts.
+	 * @param[in]   accountModel    Pointer to account model.
+	 * @param[out]  deletedAccounts Deleted account usernames.
 	 */
-	explicit TaskGetAccountListMojeId(const QNetworkCookie &sessionid,
-	    bool syncWithAll, AccountModel *accountModel);
+	explicit TaskGetAccountListMojeId(const QString &userName,
+	    const QNetworkCookie &sessionid, bool syncWithAll,
+	    AccountModel *accountModel, QStringList &deletedAccounts);
 
 	/*!
 	 * @brief Performs action.
@@ -49,11 +65,13 @@ public:
 	virtual
 	void run(void);
 
-	bool m_success; /*!< True on success. */
+	enum Result m_return; /*!< Retrun error code. */
 	QString m_error; /*!< Error description. */
+	QString m_userName; /*!< Account username or NULL. */
 	const QNetworkCookie m_sessionid;/*!< Session cookie from mojeid. */
 	bool m_syncWithAll; /*!< If will be synchronized with all accounts. */
 	AccountModel *m_accountModel; /*!< Pointer to account model. */
+	QStringList m_deletedAccounts; /*!< List of deleted accounts */
 
 private:
 	/*!
@@ -65,15 +83,19 @@ private:
 	/*!
 	 * @brief Download account list,
 	 *
-	 * @param[in]   sessionid     Session cookie from mojeid.
-	 * @param[in]   syncWithAll   If will be synchronized with all accounts.
-	 * @param[in]   accountModel  Pointer to account model.
-	 * @param[out]  error          Error description.
-	 * @return True on success.
+	 * @param[in]   userName        Username of account.
+	 * @param[in]   sessionid       Session cookie from mojeid.
+	 * @param[in]   syncWithAll     If will be synchronized with all accounts.
+	 * @param[in]   accountModel    Pointer to account model.
+	 * @param[out]  error           Error description.
+	 * @param[out]  deletedAccounts Deleted account usernames.
+	 * @return Action result.
 	 */
 	static
-	bool getAccountList(const QNetworkCookie &sessionid,
-	    bool syncWithAll, AccountModel *accountModel, QString &error);
+	enum Result getAccountList(const QString &userName,
+	    const QNetworkCookie &sessionid, bool syncWithAll,
+	    AccountModel *accountModel, QString &error,
+	    QStringList &deletedAccounts);
 
 	/*!
 	 * @brief Insert/update owner and user information.

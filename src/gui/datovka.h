@@ -117,8 +117,8 @@ public:
 	/*!
 	 * @brief Get account list from Webdatovka.
 	 */
-	bool wdGetAccountList(const QNetworkCookie &sessionid,
-	    bool syncWithAll);
+	bool wdGetAccountList(const QString &userName,
+	    const QNetworkCookie &sessionid, bool syncWithAll);
 
 protected:
 	/*!
@@ -133,7 +133,7 @@ public slots:
 	/*!
 	 * @brief Login to mojeID.
 	 */
-	void loginToMojeId(void);
+	void loginToMojeId(const QString &userName);
 
 private slots:
 	/*!
@@ -739,8 +739,9 @@ private slots:
 	void addOrDeleteMsgTags(void);
 
 
-	void callMojeId(const QString &lastUrl, const QString &token,
-	    QString userName, QString pwd, QString otp, bool syncALL);
+	void callMojeId(const QString &user, const QString &lastUrl,
+	    const QString &token, QString userName, QString pwd, QString otp,
+	    bool syncALL);
 
 private:
 

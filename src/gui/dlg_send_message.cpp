@@ -267,10 +267,6 @@ void DlgSendMessage::setAccountInfo(int item)
 	/* Get user name for selected account. */
 	const QString userName = this->fromComboBox->itemData(item).toString();
 
-	if (isWebDatovkaAccount(userName)) {
-		m_isWebDatovkaAccount = true;
-	}
-
 	if (!userName.isEmpty()) {
 		/* if account was changed, remove all recipients */
 		if (m_userName != userName) {
@@ -280,6 +276,10 @@ void DlgSendMessage::setAccountInfo(int item)
 			}
 		}
 		m_userName = userName;
+	}
+
+	if (isWebDatovkaAccount(m_userName)) {
+		m_isWebDatovkaAccount = true;
 	}
 
 	if (!m_isWebDatovkaAccount) {
@@ -298,8 +298,8 @@ void DlgSendMessage::setAccountInfo(int item)
 			m_isLogged = false;
 		}
 	} else {
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			m_mv->loginToMojeId();
+		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
+			m_mv->loginToMojeId(m_userName);
 		}
 		m_isLogged = true;
 	}

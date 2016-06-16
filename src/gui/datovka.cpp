@@ -5085,7 +5085,7 @@ void MainWindow::addNewMojeIDAccount(void)
 {
 	debugSlotCall();
 
-	loginToMojeId();
+	loginToMojeId(QString());
 }
 
 
@@ -10869,25 +10869,100 @@ void MainWindow::addOrDeleteMsgTags(void)
 /*
  * Func: Download and update all accounts from webdatovka.
  */
-bool MainWindow::wdGetAccountList(const QNetworkCookie &sessionid,
-    bool syncWithAll)
+bool MainWindow::wdGetAccountList(const QString &userName,
+    const QNetworkCookie &sessionid, bool syncWithAll)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
+	bool ret = false;
+	QStringList deletedAccounts;
+	deletedAccounts.clear();
+
 	/* list of accounts task */
 	TaskGetAccountListMojeId *task;
-	task = new (std::nothrow) TaskGetAccountListMojeId(sessionid,
-	    syncWithAll, &m_accountModel);
+	task = new (std::nothrow) TaskGetAccountListMojeId(userName, sessionid,
+	    syncWithAll, &m_accountModel, deletedAccounts);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
-	bool ret = task->m_success;
 
-	if (!ret) {
-		qDebug() << "WD_ACCOUNT_LIST_ERROR: " << task->m_error;
+	QString msgBoxTitle = tr("Add account(s) error");
+	if (!userName.isEmpty()) {
+		msgBoxTitle =
+		    AccountModel::globAccounts[userName].accountName() + " : "
+		    + userName;
+	}
+
+	QMessageBox msgBox(this);
+	bool addAsNewAcnt = false;
+	QString msgBoxText = task->m_error;
+	QString delAcntName = "\n";
+
+	switch (task->m_return) {
+	case TaskGetAccountListMojeId::ACNTLIST_WEBDAT_ERR:
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_NONEXIST:
+		msgBoxText = tr("There aren't any Webdatovka accounts for this "
+		    "mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_WRONGUSER:
+		msgBoxText = tr("You are login into wrong mojeID identity "
+		    "without Webdatovka account(s).");
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_WU_HAS_ACNT:
+		msgBoxText = tr("You are login into wrong mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(msgBoxTitle);
+		msgBox.setText(msgBoxText + " " +
+		    tr("New mojeID identity has any account(s)."));
+		msgBox.setInformativeText(tr("Do you want to add account(s) "
+		    "for this mojeID identity to Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		addAsNewAcnt = QMessageBox::Yes == msgBox.exec();
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_DELETE_ACNT:
+		foreach (const QString &username, deletedAccounts) {
+			delAcntName.append("\n");
+			delAcntName.append(AccountModel::globAccounts[username]
+			    .accountName());
+			delAcntName.append(" (" + username + ")");
+		}
+		msgBoxText = tr("Some account(s) were removed from Webdatovka "
+		   "for this mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(msgBoxTitle);
+		msgBox.setText(msgBoxText + delAcntName);
+		msgBox.setInformativeText(tr("Do you want to also "
+		    "remove these accounts from Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			/* TODO - delete accounts  */
+		}
+		ret = true;
+		break;
+	default:
+		ret = true;
+		break;
 	}
 
 	delete task;
+
+	if (addAsNewAcnt) {
+		ret = wdGetAccountList(QString(), sessionid, syncWithAll);
+	}
 
 	return ret;
 }
@@ -10955,7 +11030,11 @@ bool MainWindow::wdSyncAccount(const QString &userName)
 	}
 
 	if (!wdSessions.isConnectedToWebdatovka(userName)) {
-		loginToMojeId();
+		loginToMojeId(userName);
+	}
+
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		return false;
 	}
 
 	int accountID = getWebDatovkaAccountId(userName);
@@ -11026,7 +11105,7 @@ void MainWindow::sendMessageMojeIdAction(const QString &userName,
 /*
  * Slot: Login to MojeID - first step.
  */
-void MainWindow::loginToMojeId(void)
+void MainWindow::loginToMojeId(const QString &userName)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -11036,12 +11115,12 @@ void MainWindow::loginToMojeId(void)
 
 	jsonlayer.startLoginToWebDatovka(lastUrl, token);
 
-	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(lastUrl.toString(),
-	    token, this);
+	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(userName,
+	    lastUrl.toString(), token, this);
 
-	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString,
+	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString, QString,
 	    QString, QString, QString, bool)), this, SLOT(callMojeId(QString,
-	    QString, QString, QString, QString, bool)));
+	    QString, QString, QString, QString, QString, bool)));
 
 	mojeIDLoginDialog->exec();
 }
@@ -11051,7 +11130,8 @@ void MainWindow::loginToMojeId(void)
 /*
  * Slot: Login to MojeID - second step.
  */
-void MainWindow::callMojeId(const QString &lastUrl, const QString &token,
+void MainWindow::callMojeId(const QString &user,
+    const QString &lastUrl, const QString &token,
     QString userName, QString pwd, QString otp, bool syncALL)
 /* ========================================================================= */
 {
@@ -11064,7 +11144,7 @@ void MainWindow::callMojeId(const QString &lastUrl, const QString &token,
 		mui_statusOnlineLabel->setText(tr("Mode: online"));
 	}
 
-	wdGetAccountList(sessionid, syncALL);
+	wdGetAccountList(user, sessionid, syncALL);
 
 	if (ui->accountList->model()->rowCount() > 0) {
 		activeAccountMenuAndButtons(true);
