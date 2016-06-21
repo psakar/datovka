@@ -745,7 +745,7 @@ private slots:
 
 	void callMojeId(const QString &user, const QString &lastUrl,
 	    const QString &token, QString userName, QString pwd, QString otp,
-	    bool syncALL);
+	    bool syncALL, const QString &certPath);
 
 private:
 

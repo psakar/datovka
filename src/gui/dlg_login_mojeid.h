@@ -46,7 +46,7 @@ private slots:
 
 signals:
 	void callMojeId(QString, QString, QString,
-	    QString, QString, QString, bool);
+	    QString, QString, QString, bool, QString);
 
 private:
 	void initAccountDialog(void);

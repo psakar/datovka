@@ -31,6 +31,7 @@
 #include <QNetworkCookieJar>
 #include <QNetworkRequest>
 #include <QVariant>
+#include <QSslConfiguration>
 
 #include "src/web/net.h"
 #include "src/web/json.h"
@@ -178,6 +179,42 @@ bool NetManager::createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
 	request.setRawHeader("Connection", "keep-alive");
 	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
+
+	QVariant var;
+	var.setValue(cookieList);
+	request.setHeader(QNetworkRequest::CookieHeader, var);
+
+	return sendRequest(request, data, outData, true);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Create POST request to MojeID with client certificate.
+ */
+bool NetManager::createPostRequestMojeIdCert(const QUrl &url, const QUrl &prevUrl,
+    const QByteArray &data, const QSslCertificate &cert,
+    const QSslKey &key, QByteArray &outData)
+/* ========================================================================= */
+{
+	qDebug("%s()", __func__);
+
+	QByteArray appName(APP_NAME);
+	QNetworkRequest request(url);
+	request.setRawHeader("Host", url.host().toUtf8());
+	request.setRawHeader("User-Agent", appName);
+	request.setRawHeader("Referer", prevUrl.toString().toUtf8());
+	request.setRawHeader("Accept",
+	    "text/html,application/xhtml+xml,application/xml");
+	request.setRawHeader("Connection", "keep-alive");
+	request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.setRawHeader("Content-Length", QByteArray::number(data.size()));
+
+	QSslConfiguration sslConf = QSslConfiguration::defaultConfiguration();
+	sslConf.setProtocol(QSsl::TlsV1_2);
+	sslConf.setLocalCertificate(cert);
+	sslConf.setPrivateKey(key);
+	request.setSslConfiguration(sslConf);
 
 	QVariant var;
 	var.setValue(cookieList);

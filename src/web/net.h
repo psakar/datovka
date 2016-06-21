@@ -30,6 +30,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QNetworkCookie>
+#include <QSslCertificate>
+#include <QSslKey>
 #include <QUrl>
 
 #include "src/web/net_consts.h"
@@ -90,12 +92,27 @@ public:
 	 *
 	 * @param[in] url      - current url of request.
 	 * @param[in] prevUrl  - previous url.
-	 * @param[in] data     - request content data.
+	 * @param[in] data     - request content data (cookie, credentials).
 	 * @param[out] outData - reply data.
 	 * @return true if success.
 	 */
 	bool createPostRequestMojeId(const QUrl &url, const QUrl &prevUrl,
 	    const QByteArray &data, QByteArray &outData);
+
+	/*!
+	 * @brief Create POST request to MojeID with client certificate.
+	 *
+	 * @param[in] url      - current url of request.
+	 * @param[in] prevUrl  - previous url.
+	 * @param[in] data     - request content data (cookie, credentials).
+	 * @param[in] cert     - certificate data.
+	 * @param[in] key      - private key data.
+	 * @param[out] outData - reply data.
+	 * @return true if success.
+	 */
+	bool createPostRequestMojeIdCert(const QUrl &url, const QUrl &prevUrl,
+	    const QByteArray &data, const QSslCertificate &cert,
+	    const QSslKey &key, QByteArray &outData);
 
 	/*!
 	 * @brief Create GET request to MojeID.

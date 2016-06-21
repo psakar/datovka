@@ -219,11 +219,12 @@ public:
 	 * @param[in] username - mojeID username.
 	 * @param[in] pwd      - mojeID password.
 	 * @param[in] otp      - OTP password (optional).
+	 * @param[in] certPath - path to certificate file.
 	 * @return sessionid cookie from webdatovka or NULL.
 	 */
 	QNetworkCookie loginToMojeID(const QString &lastUrl,
 	    const QString &token, const QString &username,
-	    const QString &pwd, const QString &otp);
+	    const QString &pwd, const QString &otp, const QString &certPath);
 
 	/*!
 	 * @brief Ping to Webdatovka.

@@ -175,5 +175,5 @@ void DlgLoginToMojeId::sendData(void)
 	emit callMojeId(m_userName, m_lastUrl,
 	    m_token, this->usernameLineEdit->text(),
 	    this->passwordLineEdit->text(), this->otpLineEdit->text(),
-	    this->synchroCheckBox->isChecked());
+	    this->synchroCheckBox->isChecked(), m_certPath);
 }

@@ -40,5 +40,6 @@
 #define MOJEID_URL_CERTIFICATE "https://mojeid.fred.nic.cz/endpoint/certificate/"
 #define MOJEID_URL_OTP "https://mojeid.fred.nic.cz/endpoint/otp/"
 #define MOJEID_URL_CONFIRM "https://mojeid.fred.nic.cz/endpoint/confirmation/"
+#define MOJEID_URL_SSLLOGIN "https://mojeid.fred.nic.cz/endpoint/ssllogin/"
 
 #endif // NET_CONST_H

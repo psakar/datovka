@@ -11132,8 +11132,9 @@ void MainWindow::loginToMojeId(const QString &userName)
 	    lastUrl.toString(), this);
 
 	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString, QString,
-	    QString, QString, QString, bool)), this, SLOT(callMojeId(QString,
-	    QString, QString, QString, QString, QString, bool)));
+	    QString, QString, QString, bool, QString)),
+	    this, SLOT(callMojeId(QString,
+	    QString, QString, QString, QString, QString, bool, QString)));
 
 	mojeIDLoginDialog->exec();
 }
@@ -11145,13 +11146,14 @@ void MainWindow::loginToMojeId(const QString &userName)
  */
 void MainWindow::callMojeId(const QString &user,
     const QString &lastUrl, const QString &token,
-    QString userName, QString pwd, QString otp, bool syncALL)
+    QString userName, QString pwd, QString otp, bool syncALL,
+    const QString &certPath)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
 	QNetworkCookie sessionid = jsonlayer.loginToMojeID(lastUrl,
-	    token, userName, pwd, otp);
+	    token, userName, pwd, otp, certPath);
 
 	if (!sessionid.name().isEmpty()) {
 		mui_statusOnlineLabel->setText(tr("Mode: online"));

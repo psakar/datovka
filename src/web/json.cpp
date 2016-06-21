@@ -29,6 +29,7 @@
 #include <QJsonArray>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QInputDialog>
 
 #include "src/common.h"
 #include "src/web/json.h"
@@ -130,7 +131,7 @@ bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token)
 
 QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
    const QString &token, const QString &username,
-    const QString &pwd, const QString &otp)
+    const QString &pwd, const QString &otp, const QString &certPath)
 {
 	QByteArray reply;
 	QNetworkCookie sessionid;
@@ -159,10 +160,54 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 		str += "&otp_token=" + otp;
 	}
 	str += "&allow=prihlasit+se";
-	QByteArray dat;
-	dat.append(str);
-	netmanager.createPostRequestMojeId(url, lUrl, dat, reply);
+	QByteArray data;
+	data.append(str);
+	netmanager.createPostRequestMojeId(url, lUrl, data, reply);
 	lUrl = url;
+
+	if (lUrl.toString() == MOJEID_URL_CERTIFICATE) {
+
+		url.setUrl(MOJEID_URL_SSLLOGIN);
+
+		QFile certFile(certPath);
+		if (!certFile.open(QIODevice::ReadOnly)) {
+			qDebug() << "Error: cannot open certificate from"
+			    << certPath;
+			return QNetworkCookie();
+		}
+
+		bool ok;
+		const QString passPhrase = QInputDialog::getText(0,
+		    tr("Certificate password"),
+		    tr("Enter certificate password:"),
+		    QLineEdit::Password, NULL, &ok);
+
+		QFileInfo finfo(certFile);
+		QString ext = finfo.suffix().toLower();
+		if (ext == "pem") {
+			QByteArray certData = certFile.readAll();
+			QSslCertificate cert(certData, QSsl::Pem);
+			QSslKey key(certData, QSsl::Rsa, QSsl::Pem,
+			    QSsl::PrivateKey, passPhrase.toUtf8());
+			netmanager.createPostRequestMojeIdCert(url, lUrl,
+			    data, cert, key, reply);
+		// is PKCS12 format
+		} else if (ext == "p12" || ext == "pfx") {
+			QSslCertificate cert;
+			QSslKey key;
+			QList<QSslCertificate> importedCerts;
+			if (QSslCertificate::importPkcs12(&certFile, &key,
+			    &cert, &importedCerts, passPhrase.toUtf8())) {
+				netmanager.createPostRequestMojeIdCert(url,
+				    lUrl, data, cert, key, reply);
+			} else {
+				qDebug() << "Error: cannot parse client "
+				    "certificate from" << certPath;
+				return QNetworkCookie();
+			}
+		}
+		lUrl = url;
+	}
 
 	// STEP 5: send confiramtion to mojeID endpoint (POST).
 	//         We send new csrfmiddlewaretoken
@@ -180,9 +225,9 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	str += "&last_name=last_name";
 	str += "&email_default=email_default";
 	str += "&allow=OK";
-	dat.clear();
-	dat.append(str);
-	netmanager.createPostRequestMojeId(url, lUrl, dat, reply);
+	data.clear();
+	data.append(str);
+	netmanager.createPostRequestMojeId(url, lUrl, data, reply);
 	lUrl = url;
 
 	for (int i = 0; i < cookieList.size(); ++i) {
