@@ -36,7 +36,7 @@ class DlgLoginToMojeId : public QDialog, public Ui::LoginToMojeId {
 public:
 
 	DlgLoginToMojeId(const QString &userName, const QString &lastUrl,
-	    const QString &token, QWidget *parent = 0);
+	    QWidget *parent = 0);
 
 private slots:
 	void setActiveButton(int);

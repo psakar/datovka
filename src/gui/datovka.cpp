@@ -11126,12 +11126,10 @@ void MainWindow::loginToMojeId(const QString &userName)
 	debugSlotCall();
 
 	QUrl lastUrl;
-	QString token;
-
-	jsonlayer.startLoginToWebDatovka(lastUrl, token);
+	jsonlayer.startLoginToWebDatovka(lastUrl);
 
 	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(userName,
-	    lastUrl.toString(), token, this);
+	    lastUrl.toString(), this);
 
 	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString, QString,
 	    QString, QString, QString, bool)), this, SLOT(callMojeId(QString,

@@ -193,26 +193,37 @@ public:
 	QNetworkCookie fakeLoginWebDatovka(void);
 
 	/*!
-	 * @brief Second part of login to Webdatovka.
+	 * @brief First part of login to Webdatovka.
+	 *        Call webdatovka to obtain openconnect data.
+	 *
+	 * @param[out] lastUrl - last url of login sequence.
+	 * @return true if first part was successed.
+	 */
+	bool startLoginToWebDatovka(QUrl &lastUrl);
+
+	/*!
+	 * @brief Middle part of login to Webdatovka.
+	 *
+	 * @param[in] method      - selected login method.
+	 * @param[in/out] lastUrl - last url of login sequence.
+	 * @param[out] token      - html security token.
+	 * @return true if middle part was successed.
+	 */
+	bool loginMethodChanged(int method, QString &lastUrl, QString &token);
+
+	/*!
+	 * @brief Last part of login to Webdatovka.
 	 *
 	 * @param[in] lastUrl  - last url of login sequence.
 	 * @param[in] token    - html security token.
 	 * @param[in] username - mojeID username.
 	 * @param[in] pwd      - mojeID password.
+	 * @param[in] otp      - OTP password (optional).
 	 * @return sessionid cookie from webdatovka or NULL.
 	 */
 	QNetworkCookie loginToMojeID(const QString &lastUrl,
 	    const QString &token, const QString &username,
 	    const QString &pwd, const QString &otp);
-
-	/*!
-	 * @brief First part of login to Webdatovka.
-	 *
-	 * @param[out] lastUrl - last url of login sequence.
-	 * @param[out] token   - html security token.
-	 * @return true if first part was successed.
-	 */
-	bool startLoginToWebDatovka(QUrl &lastUrl, QString &token);
 
 	/*!
 	 * @brief Ping to Webdatovka.

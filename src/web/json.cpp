@@ -64,21 +64,91 @@ QNetworkCookie JsonLayer::fakeLoginWebDatovka(void)
 }
 
 
+bool JsonLayer::startLoginToWebDatovka(QUrl &lastUrl)
+{
+	QByteArray reply;
+	QNetworkCookie sessionid;
+	QByteArray postData;
+
+	// STEP 1: call webdatovka for start login procedure (GET).
+	//         We should obtain url for redirect
+	//         and openconnect parameter list (postdata).
+	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
+	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+	lastUrl = url;
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	url.setUrl(jsonObject["url"].toString());
+	if (!url.isValid()) {
+		return false;
+	}
+
+	// Create formdata string from json
+	QJsonObject postdata = jsonObject["postdata"].toObject();
+	QVariantMap map = postdata.toVariantMap();
+	QVariantMap::iterator i;
+	for (i = map.begin(); i != map.end(); ++i) {
+		postData.append(i.key()).append("=").append(i.value().toString()).append("&");
+	}
+
+	// STEP 2: Call mojeID for starting of login procedure (POST).
+	//         We send openconnect parameter list as postdata.
+	netmanager.createPostRequestMojeId(url, lastUrl, postData, reply);
+	lastUrl = url;
+
+	return true;
+}
+
+
+bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token) {
+
+	QByteArray reply;
+	QUrl url;
+	if (method == USER_NAME) {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+	} else if (method == CERTIFICATE) {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/certificate/");
+	} else {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/otp/");
+	}
+
+	// STEP 3: Call to mojeID on new login endpoint (GET).
+	//          We should obtain html page. From page we must get token.
+	netmanager.createGetRequestMojeId(url, QUrl(lastUrl), reply);
+	lastUrl = url.toString();
+
+	QString html(reply);
+	QRegularExpression exp("<input +type=\"hidden\" +name=\"token\" +value=\"([^\"]*)\"");
+	// Save new token string from webpage
+	QRegularExpressionMatch * match = new QRegularExpressionMatch();
+	if (html.contains(exp, match)) {
+		token = match->captured(1);
+	}
+
+	return true;
+}
+
+
 QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
    const QString &token, const QString &username,
     const QString &pwd, const QString &otp)
 {
-	Q_UNUSED(otp);
-
 	QByteArray reply;
 	QNetworkCookie sessionid;
 	QUrl lUrl(lastUrl);
 	QUrl url;
 
-	// STEP 4: send credential to mojeID endpoint (POST).
+	// STEP 4: Send credential to mojeID endpoint (POST).
 	//         We send login data, csrfmiddlewaretoken
-	//         and mojeid token as content.
-	url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+	//         and mojeid token as content. OTP or certificate data optionaly.
+	if (!otp.isEmpty()) {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/otp/");
+	} else if (false) {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/certificate/");
+	} else {
+		url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+	}
+
 	QString str = "csrfmiddlewaretoken=";
 	for (int i = 0; i < cookieList.size(); ++i) {
 		if (cookieList.at(i).name() == COOKIE_CSRFTOKEN) {
@@ -88,6 +158,9 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	str += "&token=" + token;
 	str += "&username=" + username;
 	str += "&password=" + pwd;
+	if (!otp.isEmpty()) {
+		str += "&otp_token=" + otp;
+	}
 	str += "&allow=prihlasit+se";
 	QByteArray dat;
 	dat.append(str);
@@ -106,6 +179,9 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	}
 	str += "&token=" + token;
 	str += "&username=" + username;
+	if (!otp.isEmpty()) {
+		str += "&otp_token=" + otp;
+	}
 	str += "&first_name=first_name";
 	str += "&last_name=last_name";
 	str += "&email_default=email_default";
@@ -135,59 +211,6 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	}
 
 	return sessionid;
-}
-
-
-bool JsonLayer::startLoginToWebDatovka(QUrl &lastUrl, QString &token)
-{
-	QByteArray reply;
-	QNetworkCookie sessionid;
-	QByteArray postData;
-
-	// STEP 1: call webdatovka for start login procedure (GET).
-	//         We should obtain url for redirect
-	//         and openconnect parameter list (postdata).
-	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
-	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
-	lastUrl = url;
-	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
-	QJsonObject jsonObject = jsonResponse.object();
-	url.setUrl(jsonObject["url"].toString());
-	if (!url.isValid()) {
-		return false;
-	}
-
-	// Create formdata string from json
-	QJsonObject postdata = jsonObject["postdata"].toObject();
-	QVariantMap map = postdata.toVariantMap();
-	QVariantMap::iterator i;
-	for (i = map.begin(); i != map.end(); ++i) {
-		postData.append(i.key()).append("=").append(i.value().toString()).append("&");
-	}
-
-	// STEP 2: call mojeID for starting of login procedure (POST).
-	//         We send openconnect parameter list as postdata.
-	netmanager.createPostRequestMojeId(url, lastUrl, postData, reply);
-	lastUrl = url;
-
-	// STEP 3: redirect to mojeID on login endpoint.
-	//         We should obtain html page. From page we must get token.
-	url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
-	netmanager.createGetRequestMojeId(url, lastUrl, reply);
-	lastUrl = url;
-
-	QString html(reply);
-	QRegularExpression exp("<input +type=\"hidden\" +name=\"token\" +value=\"([^\"]*)\"");
-	// Save token string from webpage
-	QRegularExpressionMatch * match = new QRegularExpressionMatch();
-	if (html.contains(exp, match)) {
-		token = match->captured(1);
-	}
-
-	return true;
-
-	// Here will be shown mojeid login dialog
-	// for enter mojeID credential
 }
 
 

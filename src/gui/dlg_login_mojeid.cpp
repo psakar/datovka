@@ -25,15 +25,16 @@
 
 #include "dlg_login_mojeid.h"
 #include "src/log/log.h"
+#include "src/web/json.h"
 
 DlgLoginToMojeId::DlgLoginToMojeId(const QString &userName,
-    const QString &lastUrl, const QString &token, QWidget *parent)
+    const QString &lastUrl, QWidget *parent)
     : QDialog(parent),
     m_loginmethod(0),
     m_certPath(""),
     m_userName(userName),
     m_lastUrl(lastUrl),
-    m_token(token)
+    m_token(QString())
 {
 	setupUi(this);
 	initAccountDialog();
@@ -65,11 +66,16 @@ void DlgLoginToMojeId::initAccountDialog(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->passwordLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+	connect(this->otpLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
 
 	if (!m_userName.isEmpty()) {
 		this->synchroCheckBox->setEnabled(false);
 		this->setWindowTitle(tr("Login to account: %1").arg(m_userName));
 	}
+
+	/* USERNAME+PWD is set as default login method in the Webdatovka */
+	jsonlayer.loginMethodChanged(USER_NAME, m_lastUrl, m_token);
 }
 
 
@@ -111,6 +117,9 @@ void DlgLoginToMojeId::checkInputFields(void)
 		    && !this->passwordLineEdit->text().isEmpty()
 		    && !this->otpLineEdit->text().isEmpty();
 	}
+
+	jsonlayer.loginMethodChanged(m_loginmethod, m_lastUrl, m_token);
+
 	this->accountButtonBox->button(QDialogButtonBox::Ok)->
 	    setEnabled(buttonEnabled);
 }
