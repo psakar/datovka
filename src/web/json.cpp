@@ -100,16 +100,16 @@ bool JsonLayer::startLoginToWebDatovka(QUrl &lastUrl)
 }
 
 
-bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token) {
-
+bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token)
+{
 	QByteArray reply;
 	QUrl url;
 	if (method == USER_NAME) {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
+		url.setUrl(MOJEID_URL_PASSWORD);
 	} else if (method == CERTIFICATE) {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/certificate/");
+		url.setUrl(MOJEID_URL_CERTIFICATE);
 	} else {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/otp/");
+		url.setUrl(MOJEID_URL_OTP);
 	}
 
 	// STEP 3: Call to mojeID on new login endpoint (GET).
@@ -128,7 +128,6 @@ bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token)
 	return true;
 }
 
-
 QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
    const QString &token, const QString &username,
     const QString &pwd, const QString &otp)
@@ -141,13 +140,7 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	// STEP 4: Send credential to mojeID endpoint (POST).
 	//         We send login data, csrfmiddlewaretoken
 	//         and mojeid token as content. OTP or certificate data optionaly.
-	if (!otp.isEmpty()) {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/otp/");
-	} else if (false) {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/certificate/");
-	} else {
-		url.setUrl("https://mojeid.fred.nic.cz/endpoint/password/");
-	}
+	url.setUrl(MOJEID_URL_CERTIFICATE);
 
 	QString str = "csrfmiddlewaretoken=";
 	for (int i = 0; i < cookieList.size(); ++i) {
@@ -157,8 +150,12 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	}
 	str += "&token=" + token;
 	str += "&username=" + username;
-	str += "&password=" + pwd;
+	if (!pwd.isEmpty()) {
+		url.setUrl(MOJEID_URL_PASSWORD);
+		str += "&password=" + pwd;
+	}
 	if (!otp.isEmpty()) {
+		url.setUrl(MOJEID_URL_OTP);
 		str += "&otp_token=" + otp;
 	}
 	str += "&allow=prihlasit+se";
@@ -170,7 +167,7 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	// STEP 5: send confiramtion to mojeID endpoint (POST).
 	//         We send new csrfmiddlewaretoken
 	//         and mojeid token and other values as content.
-	url.setUrl("https://mojeid.fred.nic.cz/endpoint/confirmation/");
+	url.setUrl(MOJEID_URL_CONFIRM);
 	str = "csrfmiddlewaretoken=";
 	for (int i = 0; i < cookieList.size(); ++i) {
 		if (cookieList.at(i).name() == COOKIE_CSRFTOKEN) {
@@ -179,9 +176,6 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	}
 	str += "&token=" + token;
 	str += "&username=" + username;
-	if (!otp.isEmpty()) {
-		str += "&otp_token=" + otp;
-	}
 	str += "&first_name=first_name";
 	str += "&last_name=last_name";
 	str += "&email_default=email_default";

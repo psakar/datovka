@@ -29,10 +29,16 @@
 /* HTTP request timeout, default 30s */
 #define NET_REQUEST_TIMEOUT 30000
 
+/* Cookie names which we use */
 #define COOKIE_SESSION_ID "sessionid"
 #define COOKIE_SESSION_MOJEID "mojeidsession"
 #define COOKIE_CSRFTOKEN "csrftoken"
 
+/* URL of endpoints and services */
 #define WEBDATOVKA_SERVICE_URL "https://datovka.labs.nic.cz/development/"
+#define MOJEID_URL_PASSWORD "https://mojeid.fred.nic.cz/endpoint/password/"
+#define MOJEID_URL_CERTIFICATE "https://mojeid.fred.nic.cz/endpoint/certificate/"
+#define MOJEID_URL_OTP "https://mojeid.fred.nic.cz/endpoint/otp/"
+#define MOJEID_URL_CONFIRM "https://mojeid.fred.nic.cz/endpoint/confirmation/"
 
 #endif // NET_CONST_H

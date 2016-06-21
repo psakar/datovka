@@ -118,8 +118,6 @@ void DlgLoginToMojeId::checkInputFields(void)
 		    && !this->otpLineEdit->text().isEmpty();
 	}
 
-	jsonlayer.loginMethodChanged(m_loginmethod, m_lastUrl, m_token);
-
 	this->accountButtonBox->button(QDialogButtonBox::Ok)->
 	    setEnabled(buttonEnabled);
 }
@@ -132,22 +130,24 @@ void DlgLoginToMojeId::checkInputFields(void)
 void DlgLoginToMojeId::setActiveButton(int itemindex)
 /* ========================================================================= */
 {
+	this->usernameLineEdit->setEnabled(true);
+
 	if (itemindex == CERTIFICATE) {
-		this->usernameLineEdit->setEnabled(false);
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
 		this->passwordLabel->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		this->otpLineEdit->setEnabled(false);
+		this->otpLineEdit->clear();
+		this->passwordLineEdit->clear();
 	} else if (itemindex == USER_NAME) {
-		this->usernameLineEdit->setEnabled(true);
 		this->certificateLabel->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLabel->setEnabled((true));
 		this->passwordLineEdit->setEnabled((true));
 		this->otpLineEdit->setEnabled(false);
+		this->otpLineEdit->clear();
 	} else {
-		this->usernameLineEdit->setEnabled(true);
 		this->certificateLabel->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLabel->setEnabled((true));
@@ -156,6 +156,9 @@ void DlgLoginToMojeId::setActiveButton(int itemindex)
 	}
 
 	m_loginmethod = itemindex;
+
+	jsonlayer.loginMethodChanged(m_loginmethod, m_lastUrl, m_token);
+
 	checkInputFields();
 }
 
