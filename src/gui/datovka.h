@@ -1238,6 +1238,15 @@ private:
 	 */
 	void showWebDatovkaInfoDialog(const QString &userName, QString txt);
 
+	/*!
+	 * @brief Test if exists another mojeID account with same userId
+	 *        when we delete any mojeID acccount.
+	 *
+	 * @param[in] userName - account username.
+	 * @return true if any account exists
+	 */
+	bool existsAnotherMojeIdAccountWithSameUserId(const QString &userName);
+
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

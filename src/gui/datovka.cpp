@@ -5164,10 +5164,14 @@ void MainWindow::deleteAccount(const QString &userName)
 		    .arg(accountName));
 	}
 
-	if (isWebDatovkaAccount(userName)) {
-		globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName))
-		    ->removeAllMsgTagsFromAccount(userName);
+	if (isWebDatovkaAccount(userName)) {	
+		TagDb *tagDbWd = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
+		if (!existsAnotherMojeIdAccountWithSameUserId(userName)) {
+			globWebDatovkaTagDbPtr->deleteDb(tagDbWd);
+		} else {
+			tagDbWd->removeAllMsgTagsFromAccount(userName);
+		}
 	} else {
 		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
 	}
@@ -11164,4 +11168,30 @@ void MainWindow::callMojeId(const QString &user,
 	if (ui->accountList->model()->rowCount() > 0) {
 		activeAccountMenuAndButtons(true);
 	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Test if exists another mojeID account with same userId
+ *       when we delete any mojeID acccount.
+ */
+bool MainWindow::existsAnotherMojeIdAccountWithSameUserId(
+    const QString &userName)
+/* ========================================================================= */
+{
+	AccountsMap::iterator i;
+	int cnt = 0;
+	int userId = getWebDatovkaUserId(userName);
+
+	for (i = m_accountModel.globAccounts.begin();
+	    i != m_accountModel.globAccounts.end(); ++i) {
+		if (isWebDatovkaAccount(i->userName())) {
+			if (userId == getWebDatovkaUserId(i->userName())) {
+				cnt++;
+			}
+		}
+	}
+
+	return (cnt > 1);
 }
