@@ -214,17 +214,20 @@ public:
 	/*!
 	 * @brief Last part of login to Webdatovka.
 	 *
-	 * @param[in] lastUrl  - last url of login sequence.
-	 * @param[in] token    - html security token.
-	 * @param[in] username - mojeID username.
-	 * @param[in] pwd      - mojeID password.
-	 * @param[in] otp      - OTP password (optional).
-	 * @param[in] certPath - path to certificate file.
-	 * @return sessionid cookie from webdatovka or NULL.
+	 * @param[in] lastUrl    - last url of login sequence.
+	 * @param[in] token      - html security token.
+	 * @param[in] username   - mojeID username.
+	 * @param[in] pwd        - mojeID password.
+	 * @param[in] otp        - OTP password (optional).
+	 * @param[in] certPath   - path to certificate file.
+	 * @param[out] errStr    - contains an error string if unssucces.
+	 * @param[out] sessionid - contains webdatovka sessionid.
+	 * @return true if login success.
 	 */
-	QNetworkCookie loginToMojeID(const QString &lastUrl,
+	bool loginToMojeID(const QString &lastUrl,
 	    const QString &token, const QString &username,
-	    const QString &pwd, const QString &otp, const QString &certPath);
+	    const QString &pwd, const QString &otp, const QString &certPath,
+	    QString &errStr, QNetworkCookie &sessionid);
 
 	/*!
 	 * @brief Ping to Webdatovka.

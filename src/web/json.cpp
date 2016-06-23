@@ -129,12 +129,12 @@ bool JsonLayer::loginMethodChanged(int method, QString &lastUrl, QString &token)
 	return true;
 }
 
-QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
+bool JsonLayer::loginToMojeID(const QString &lastUrl,
    const QString &token, const QString &username,
-    const QString &pwd, const QString &otp, const QString &certPath)
+    const QString &pwd, const QString &otp, const QString &certPath,
+    QString &errStr, QNetworkCookie &sessionid)
 {
 	QByteArray reply;
-	QNetworkCookie sessionid;
 	QUrl lUrl(lastUrl);
 	QUrl url;
 
@@ -171,9 +171,8 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 
 		QFile certFile(certPath);
 		if (!certFile.open(QIODevice::ReadOnly)) {
-			qDebug() << "Error: cannot open certificate from"
-			    << certPath;
-			return QNetworkCookie();
+			errStr = tr("Cannot open client certificate from path '%1'").arg(certPath);
+			return false;
 		}
 
 		bool ok;
@@ -201,9 +200,8 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 				netmanager.createPostRequestMojeIdCert(url,
 				    lUrl, data, cert, key, reply);
 			} else {
-				qDebug() << "Error: cannot parse client "
-				    "certificate from" << certPath;
-				return QNetworkCookie();
+				errStr = tr("Cannot parse client certificate from path '%1'").arg(certPath);
+				return false;
 			}
 		}
 		lUrl = url;
@@ -241,15 +239,23 @@ QNetworkCookie JsonLayer::loginToMojeID(const QString &lastUrl,
 	url.setUrl(netmanager.newUrl);
 	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
 
-	// Now, you are logged to webdatovka and you have sessionid cookie.
-	// Next requests/operations only via new sessionid.
-	for (int i = 0; i < cookieList.size(); ++i) {
-		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
-			sessionid = cookieList.at(i);
+	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
+	QJsonObject jsonObject = jsonResponse.object();
+	if (!jsonObject["success"].toBool()) {
+		errStr = jsonObject["errmsg"].toString();
+		return false;
+	} else {
+		errStr = jsonObject["warning"].toString();
+		// Now, you are logged to webdatovka and you have sessionid cookie.
+		// Next requests/operations only via new sessionid.
+		for (int i = 0; i < cookieList.size(); ++i) {
+			if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+				sessionid = cookieList.at(i);
+			}
 		}
 	}
 
-	return sessionid;
+	return true;
 }
 
 

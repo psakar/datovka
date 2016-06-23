@@ -11201,10 +11201,17 @@ void MainWindow::callMojeId(const QString &user,
 {
 	debugSlotCall();
 
-	QNetworkCookie sessionid = jsonlayer.loginToMojeID(lastUrl,
-	    token, userName, pwd, otp, certPath);
+	QString error;
 
-	if (!sessionid.name().isEmpty()) {
+	QNetworkCookie sessionid;
+
+	if (!jsonlayer.loginToMojeID(lastUrl, token, userName, pwd, otp,
+	    certPath, error, sessionid)) {
+		showStatusTextWithTimeout(error);
+		QMessageBox::critical(this, tr("Login problem"),
+		    error, QMessageBox::Ok);
+		return;
+	} else {
 		mui_statusOnlineLabel->setText(tr("Mode: online"));
 	}
 
