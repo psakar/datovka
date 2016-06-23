@@ -486,6 +486,14 @@ private:
 	    QNetworkCookie &sessionid);
 
 	/*!
+	 * @brief Update sessionid cookie.
+	 *
+	 * @param[in] userName  - account username.
+	 * @return true if success.
+	 */
+	bool updateSessionId(const QString &userName);
+
+	/*!
 	 * @brief Parse account list.
 	 *
 	 * @param[in] content      - reply content.

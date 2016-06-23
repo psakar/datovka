@@ -271,6 +271,20 @@ bool JsonLayer::isLoggedToWebDatovka(const QString &userName,
 }
 
 
+bool JsonLayer::updateSessionId(const QString &userName)
+{
+	QNetworkCookie sessionid;
+
+	for (int i = 0; i < cookieList.size(); ++i) {
+		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
+			sessionid = cookieList.at(i);
+		}
+	}
+
+	return wdSessions.setSessionCookie(userName, sessionid);
+}
+
+
 bool JsonLayer::pingServer(const QString &userName, QString &errStr)
 {
 	QByteArray reply;
@@ -283,6 +297,8 @@ bool JsonLayer::pingServer(const QString &userName, QString &errStr)
 
 	netmanager.createGetRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "ping"), sessionid, reply);
+
+	updateSessionId(userName);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -313,6 +329,8 @@ bool JsonLayer::createAccount(const QString &userName,const QString &name,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newaccount"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -349,6 +367,9 @@ bool JsonLayer::renameAccount(const QString &userName, int accountID,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
+
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
 	if (!jsonObject["success"].toBool()) {
@@ -378,6 +399,8 @@ bool JsonLayer::deleteAccount(const QString &userName, int accountID,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deleteaccount"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
@@ -430,6 +453,8 @@ bool JsonLayer::getMessageList(const QString &userName, int accountID,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -457,6 +482,8 @@ bool JsonLayer::syncAccount(const QString &userName, int accountID,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "synchronize"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -489,6 +516,8 @@ QByteArray JsonLayer::downloadMessage(const QString &userName, int msgId,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadsigned/"
 	    + QString::number(msgId)), sessionid, reply);
 
+	updateSessionId(userName);
+
 	return reply;
 }
 
@@ -507,6 +536,8 @@ QByteArray JsonLayer::downloadFile(const QString &userName, int fileId,
 	netmanager.createGetRequestWebDatovka(
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "downloadfile/"
 	    + QString::number(fileId)), sessionid, reply);
+
+	updateSessionId(userName);
 
 	return reply;
 }
@@ -528,6 +559,8 @@ bool JsonLayer::getTagList(const QString &userName,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "listtags"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -557,6 +590,8 @@ int JsonLayer::createTag(const QString &userName, const QString &name,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "newtag"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -594,6 +629,8 @@ bool JsonLayer::updateTag(const QString &userName, int tagId, const QString &nam
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -627,6 +664,8 @@ bool JsonLayer::deleteTag(const QString &userName, int tagId, QString &errStr)
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "deletetag"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -664,6 +703,8 @@ bool JsonLayer::assignTag(const QString &userName, int tagId, int msgId,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -700,6 +741,8 @@ bool JsonLayer::removeTag(const QString &userName, int tagId, int msgId,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -734,6 +777,8 @@ bool JsonLayer::removeAllTags(const QString &userName, int msgId,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "tagmsg/removeall"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -773,6 +818,8 @@ bool JsonLayer::searchRecipient(const QString &userName, int accountID,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "searchrecipient"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -849,6 +896,8 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 	    QJsonDocument(msgEnvelope).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -869,6 +918,8 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 		    sessionid, draftId, file.fName,
 		    QByteArray::fromBase64(file.fContent), reply);
 
+		updateSessionId(userName);
+
 		if (reply.isEmpty()) {
 			errStr = tr("Reply content missing");
 			return false;
@@ -888,6 +939,8 @@ bool JsonLayer::sendMessage(const QString &userName, int accountID,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "senddraft"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
@@ -934,6 +987,8 @@ bool JsonLayer::deleteMessage(const QString &userName, int msgId,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
 
+	updateSessionId(userName);
+
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
 		return false;
@@ -970,6 +1025,8 @@ bool JsonLayer::markMessageAsRead(const QString &userName, int msgId,
 	    QUrl(QString(WEBDATOVKA_SERVICE_URL) + "markasread"), sessionid,
 	    QJsonDocument(rootObj).toJson(QJsonDocument::Compact),
 	    reply);
+
+	updateSessionId(userName);
 
 	if (reply.isEmpty()) {
 		errStr = tr("Reply content missing");
