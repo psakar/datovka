@@ -3591,13 +3591,15 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("<h3>");
 
 	if (isWebDatovkaAccount(userName)) {
-		html.append(tr("Webdatovka account (mojeID)"));
+		html.append(tr("MojeID account"));
+		html.append("<br/><img src=\":/mojeid2.png\" alt=\"mojeID\">");
 	} else {
 		if (AccountModel::globAccounts[userName].isTestAccount()) {
 			html.append(tr("Test account"));
 		} else {
 			html.append(tr("Standard account"));
 		}
+		html.append("<br/><img src=\":/dschranka.png\" alt=\"ISDS\">");
 	}
 	html.append("</h3>");
 

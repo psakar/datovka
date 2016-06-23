@@ -161,5 +161,7 @@
         <file>datovka.png</file>
         <file>splash/datovka-splash.png</file>
         <file>mojeid.png</file>
+        <file>mojeid2.png</file>
+        <file>dschranka.png</file>
     </qresource>
 </RCC>
