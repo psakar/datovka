@@ -3527,6 +3527,18 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	}
 
 	if (isWebDatovkaAccount(userName)) {
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to download complete message."));
+			return;
+		}
+
 		foreach (const MessageDb::MsgId &id, msgIds) {
 			/* Using prepend() just to outrun other jobs. */
 			MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
@@ -5442,6 +5454,17 @@ void MainWindow::findDatabox(void)
 		    !connectToIsds(userName, this)) {
 			return;
 		}
+	} else {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to find databox."));
+			return;
+		}
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -6904,6 +6927,17 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 	bool ret = false;
 
 	if (isWebDatovkaAccount(userName)) {
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to download complete message."));
+			return ret;
+		}
 
 		MessageDb *messageDb =
 		    dbSet->accessMessageDb(deliveryTime, false);
@@ -10800,9 +10834,13 @@ void MainWindow::showTagDlg(void)
 
 	if (isWebDatovkaAccount(userName)) {
 		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
 			showWebDatovkaInfoDialog(userName,
 			    tr("You have to be logged into the WebDatovka "
-				"if you want to modify tags."));
+			        "if you want to find modify tags."));
 			return;
 		}
 		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
@@ -10859,11 +10897,16 @@ void MainWindow::addOrDeleteMsgTags(void)
 
 	if (isWebDatovkaAccount(userName)) {
 		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
 			showWebDatovkaInfoDialog(userName,
 			    tr("You have to be logged into the WebDatovka "
 			        "if you want to modify tags."));
 			return;
 		}
+
 		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
 		    getWebDatovkaTagDbPrefix(userName));
 	} else {

@@ -138,12 +138,11 @@ void DlgDsSearchMojeId::searchDataBox(void)
 	bool hasMore = false;
 	QString errStr;
 
-	QString aID  = m_userName.split("-").at(1);
-	int accoutID = aID.toInt();
+	int accountID = getWebDatovkaAccountId(m_userName);
 
 	JsonLayer jsonLayer;
-	jsonLayer.searchRecipient(m_userName, accoutID, this->keywordLineEdit->text(),
-	    m_limit, rList, hasMore, errStr);
+	jsonLayer.searchRecipient(m_userName, accountID,
+	    this->keywordLineEdit->text(), m_limit, rList, hasMore, errStr);
 
 	if (rList.isEmpty()) {
 		return;
