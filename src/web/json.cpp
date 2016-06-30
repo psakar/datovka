@@ -75,7 +75,7 @@ bool JsonLayer::startLoginToWebDatovka(QUrl &lastUrl)
 	//         We should obtain url for redirect
 	//         and openconnect parameter list (postdata).
 	QUrl url(QString(WEBDATOVKA_SERVICE_URL) + "desktoplogin");
-	netmanager.createGetRequestWebDatovka(url, sessionid, reply);
+	netmanager.createPostRequestWebDatovka(url, sessionid, postData, reply);
 	lastUrl = url;
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
