@@ -1,3 +1,11 @@
+4.6.1 /
+ * Fixed issue when the sending of a new message lasted too long. In such case
+   the application could occasionally crash.
+ * Patched bundled libisds to fix wrong sender identification. This fix
+   affects only Windows and OS X users. Linux users should update to latest
+   libisds version (0.10.4).
+ * Fixed version string shown in notification dialogue.
+
 4.6.0 / 2016-04-12
  * Added support for tags. These can be locally assigned to the messages.
  * Message information are shown in separate window when double-clicking the
