@@ -440,6 +440,7 @@ sent reply on this message</string>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_PDF"/>
     <addaction name="actionExport_message_envelope_as_PDF"/>
+    <addaction name="actionExport_envelope_and_attachments"/>
     <addaction name="separator"/>
     <addaction name="actionEmail_ZFOs"/>
     <addaction name="actionEmail_all_attachments"/>
@@ -1141,6 +1142,11 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Edit tags</string>
+   </property>
+  </action>
+  <action name="actionExport_envelope_and_attachments">
+   <property name="text">
+    <string>Export envelope and attachments</string>
    </property>
   </action>
  </widget>

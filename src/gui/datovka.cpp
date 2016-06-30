@@ -1226,6 +1226,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionExport_delivery_info_as_ZFO);
 	menu->addAction(ui->actionExport_delivery_info_as_PDF);
 	menu->addAction(ui->actionExport_message_envelope_as_PDF);
+	menu->addAction(ui->actionExport_envelope_and_attachments);
 	menu->addSeparator();
 	menu->addAction(ui->actionEmail_ZFOs);
 	menu->addAction(ui->actionEmail_all_attachments);
@@ -4170,6 +4171,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(exportSelectedDeliveryInfosAsPDF()));
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessageEnvelopesAsPDF()));
+	connect(ui->actionExport_envelope_and_attachments, SIGNAL(triggered()),
+	    this, SLOT(exportSelectedMessageEnvelopeAttachments()));
 	    /* Separator. */
 	connect(ui->actionEmail_ZFOs, SIGNAL(triggered()),
 	    this, SLOT(sendMessagesZfoEmail()));
@@ -4306,6 +4309,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected > 0);
 	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected > 0);
+	ui->actionExport_envelope_and_attachments->setEnabled(numSelected > 0);
 	    /* Separator. */
 	ui->actionEmail_ZFOs->setEnabled(numSelected > 0);
 	ui->actionEmail_all_attachments->setEnabled(numSelected > 0);
@@ -6991,6 +6995,147 @@ void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
 	    "PDF was successful.").arg(dmId));
 }
 
+
+/* ========================================================================= */
+/*
+ * Export selected message envelope as PDF and attachment files
+ */
+void MainWindow::exportMessageEnvelopeAttachments(const QString &attachPath,
+    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+    bool askLocation)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	QString newAttachPath;
+
+	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(dmId >= 0);
+	/* Delivery time can be invalid. */
+
+	QDir dir(attachPath);
+	dir.mkdir(QString::number(dmId));
+
+	newAttachPath = attachPath + QDir::separator() + QString::number(dmId);
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
+
+	QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
+	QString fileName = fileNameFromFormat(globPref.message_filename_format,
+	    dmId, dbId, userName, "", entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+
+	if (newAttachPath.isEmpty()) {
+		fileName = m_on_export_zfo_activate + QDir::separator() +
+		    fileName + ".pdf";
+	} else {
+		fileName = newAttachPath + QDir::separator() + fileName + ".pdf";
+	}
+
+	if (askLocation) {
+		fileName = QFileDialog::getSaveFileName(this,
+		    tr("Save message envelope as PDF file"), fileName,
+		    tr("PDF file (*.pdf)"));
+	}
+
+	if (fileName.isEmpty()) {
+		showStatusTextWithTimeout(tr("Export of message "
+		    "envelope \"%1\" to PDF was not successful!").arg(dmId));
+		return;
+	}
+
+	/* remember path for settings if attachPath was not set */
+	if (newAttachPath.isEmpty()) {
+		m_on_export_zfo_activate =
+		    QFileInfo(fileName).absoluteDir().absolutePath();
+		storeExportPath();
+	}
+
+	QList<QString> accountData =
+	    globAccountDbPtr->getUserDataboxInfo(userName + "___True");
+
+	if (accountData.isEmpty()) {
+		showStatusTextWithTimeout(tr("Export of message "
+		    "envelope \"%1\" to PDF was not successful!").arg(dmId));
+		return;
+	}
+
+	QTextDocument doc;
+	doc.setHtml(messageDb->descriptionHtml(dmId, 0) +
+	    messageDb->fileListHtmlToPdf(dmId));
+
+	showStatusTextPermanently(tr("Printing of message envelope \"%1\" to "
+	    "PDF. Please wait...").arg(dmId));
+
+	QPrinter printer;
+	printer.setOutputFileName(fileName);
+	printer.setOutputFormat(QPrinter::PdfFormat);
+	doc.print(&printer);
+
+	showStatusTextWithTimeout(tr("Export of message envelope \"%1\" to "
+	    "PDF was successful.").arg(dmId));
+
+	QList<MessageDb::FileData> attachList =
+	    messageDb->getFilesFromMessage(dmId);
+	if (attachList.isEmpty()) {
+
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
+			return;
+		}
+
+		attachList = messageDb->getFilesFromMessage(dmId);
+		if (attachList.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	foreach (const MessageDb::FileData &attach, attachList) {
+		QString fileName(attach.dmFileDescr);
+		if (fileName.isEmpty()) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		fileName = fileNameFromFormat(
+		    globPref.attachment_filename_format,
+		    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
+		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+
+		fileName = newAttachPath + QDir::separator() + fileName;
+
+		QByteArray data(
+		    QByteArray::fromBase64(attach.dmEncodedContent));
+
+		if (WF_SUCCESS !=
+		    writeFile(nonconflictingFileName(fileName), data)) {
+			continue;
+		}
+	}
+}
+
+
 /*!
  * @brief Creates email header and message body.
  */
@@ -7176,6 +7321,46 @@ void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 		    deliveryTime, true);
 	}
 }
+
+
+void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
+{
+	debugSlotCall();
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+	if (0 == firstMsgColumnIdxs.size()) {
+		return;
+	}
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Export ZFO"), m_on_export_zfo_activate,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (newDir.isEmpty()) {
+		return;
+	}
+
+	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
+		if (!frstIdx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		qint64 dmId = frstIdx.data().toLongLong();
+		Q_ASSERT(dmId >= 0);
+		QDateTime deliveryTime(msgDeliveryTime(frstIdx));
+
+		exportMessageEnvelopeAttachments(newDir, userName, dmId,
+		    deliveryTime, false);
+	}
+}
+
+
+
 
 void MainWindow::sendMessagesZfoEmail(void)
 {
@@ -10410,6 +10595,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_PDF->isEnabled();
 	ui->actionExport_message_envelope_as_PDF->isEnabled();
+	ui->actionExport_envelope_and_attachments->isEnabled();
 	    /* Separator. */
 	ui->actionEmail_ZFOs->isEnabled();
 	ui->actionEmail_all_attachments->isEnabled();

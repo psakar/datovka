@@ -496,6 +496,11 @@ private slots:
 	void exportSelectedMessageEnvelopesAsPDF(void);
 
 	/*!
+	 * @brief Export selected message envelope as PDF and attachment files.
+	 */
+	void exportSelectedMessageEnvelopeAttachments(void);
+
+	/*!
 	 * @brief Sends selected messages as ZFO into default e-mail client.
 	 */
 	void sendMessagesZfoEmail(void);
@@ -740,6 +745,13 @@ private:
 	 * @brief Export selected message envelope as PDF file dialogue.
 	 */
 	void exportMessageEnvelopeAsPDF(const QString &attachPath,
+	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    bool askLocation);
+
+	/*!
+	 * @brief Export selected message envelope as PDF and attachment files.
+	 */
+	void exportMessageEnvelopeAttachments(const QString &attachPath,
 	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
 	    bool askLocation);
 
