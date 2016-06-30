@@ -1,4 +1,6 @@
-4.6.1 /
+4.6.1 / 2016-06-30
+ * Message envelope can be exported to a PDF file along with other message
+   attachments.
  * Fixed issue when the sending of a new message lasted too long. In such case
    the application could occasionally crash.
  * Patched bundled libisds to fix wrong sender identification. This fix
