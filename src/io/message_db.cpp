@@ -1500,6 +1500,50 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Return message file list HTML to be used to generate a PDF.
+ */
+QString MessageDb::fileListHtmlToPdf(qint64 dmId) const
+/* ========================================================================= */
+{
+	QString html;
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT _dmFileDescr FROM files WHERE message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		/* Attachments info */
+		html += "<br/>";
+		html += "<h3>" + QObject::tr("List of attachments") + "</h3>";
+		int i = 1;
+		while (query.isValid()) {
+			html += strongAccountInfoLine(QString::number(i),
+			query.value(0).toString());
+			query.next();
+			i++;
+		}
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return html;
+
+fail:
+	return QString();
+}
+
+
+/* ========================================================================= */
+/*
  * Return message delivery info HTML to PDF
  */
 QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const

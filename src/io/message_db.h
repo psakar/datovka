@@ -300,6 +300,15 @@ public:
 	    const QString &dbType) const;
 
 	/*!
+	 * @brief Return message file list HTML to be used to generate a PDF.
+	 *
+	 * @param[in] dmId    Message identifier.
+	 * @return HTML formatted string generated from message file db.
+	 *     Empty string is returned on error.
+	 */
+	QString fileListHtmlToPdf(qint64 dmId) const;
+
+	/*!
 	 * @brief Return message delivery info HTML to be used to generate
 	 *     a PDF.
 	 *
