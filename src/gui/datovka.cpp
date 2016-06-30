@@ -7013,6 +7013,8 @@ void MainWindow::exportMessageEnvelopeAttachments(const QString &attachPath,
 	Q_ASSERT(dmId >= 0);
 	/* Delivery time can be invalid. */
 
+	QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
 	QDir dir(attachPath);
 	dir.mkdir(QString::number(dmId));
 
@@ -7028,10 +7030,56 @@ void MainWindow::exportMessageEnvelopeAttachments(const QString &attachPath,
 		Q_ASSERT(0);
 		return;
 	}
+
+	QList<MessageDb::FileData> attachList =
+	    messageDb->getFilesFromMessage(dmId);
+	if (attachList.isEmpty()) {
+
+		if (!messageMissingOfferDownload(dmId, deliveryTime,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL("Could not access database of "
+			    "freshly downloaded message '%" PRId64 "'.", dmId);
+			return;
+		}
+
+		attachList = messageDb->getFilesFromMessage(dmId);
+		if (attachList.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
 
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	foreach (const MessageDb::FileData &attach, attachList) {
+		QString fileName(attach.dmFileDescr);
+		if (fileName.isEmpty()) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		fileName = fileNameFromFormat(
+		    globPref.attachment_filename_format,
+		    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
+		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+
+		fileName = newAttachPath + QDir::separator() + fileName;
+
+		QByteArray data(
+		    QByteArray::fromBase64(attach.dmEncodedContent));
+
+		if (WF_SUCCESS !=
+		    writeFile(nonconflictingFileName(fileName), data)) {
+			continue;
+		}
+	}
 
 	QString fileName = fileNameFromFormat(globPref.message_filename_format,
 	    dmId, dbId, userName, "", entry.dmDeliveryTime,
@@ -7086,53 +7134,6 @@ void MainWindow::exportMessageEnvelopeAttachments(const QString &attachPath,
 
 	showStatusTextWithTimeout(tr("Export of message envelope \"%1\" to "
 	    "PDF was successful.").arg(dmId));
-
-	QList<MessageDb::FileData> attachList =
-	    messageDb->getFilesFromMessage(dmId);
-	if (attachList.isEmpty()) {
-
-		if (!messageMissingOfferDownload(dmId, deliveryTime,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL("Could not access database of "
-			    "freshly downloaded message '%" PRId64 "'.", dmId);
-			return;
-		}
-
-		attachList = messageDb->getFilesFromMessage(dmId);
-		if (attachList.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	foreach (const MessageDb::FileData &attach, attachList) {
-		QString fileName(attach.dmFileDescr);
-		if (fileName.isEmpty()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		fileName = fileNameFromFormat(
-		    globPref.attachment_filename_format,
-		    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
-		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-		fileName = newAttachPath + QDir::separator() + fileName;
-
-		QByteArray data(
-		    QByteArray::fromBase64(attach.dmEncodedContent));
-
-		if (WF_SUCCESS !=
-		    writeFile(nonconflictingFileName(fileName), data)) {
-			continue;
-		}
-	}
 }
 
 

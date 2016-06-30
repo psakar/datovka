@@ -1522,7 +1522,6 @@ QString MessageDb::fileListHtmlToPdf(qint64 dmId) const
 		/* Attachments info */
 		html += "<br/>";
 		html += "<h3>" + QObject::tr("List of attachments") + "</h3>";
-		//html += messageTableInfoStartPdf();
 		int i = 1;
 		while (query.isValid()) {
 			html += strongAccountInfoLine(QString::number(i),
@@ -1530,7 +1529,6 @@ QString MessageDb::fileListHtmlToPdf(qint64 dmId) const
 			query.next();
 			i++;
 		}
-		//html += messageTableInfoEndPdf();
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
