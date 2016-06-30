@@ -1226,7 +1226,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionExport_delivery_info_as_ZFO);
 	menu->addAction(ui->actionExport_delivery_info_as_PDF);
 	menu->addAction(ui->actionExport_message_envelope_as_PDF);
-	menu->addAction(ui->actionExport_envelope_and_attachments);
+	menu->addAction(ui->actionExport_envelope_PDF_and_attachments);
 	menu->addSeparator();
 	menu->addAction(ui->actionEmail_ZFOs);
 	menu->addAction(ui->actionEmail_all_attachments);
@@ -4171,7 +4171,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(exportSelectedDeliveryInfosAsPDF()));
 	connect(ui->actionExport_message_envelope_as_PDF, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessageEnvelopesAsPDF()));
-	connect(ui->actionExport_envelope_and_attachments, SIGNAL(triggered()),
+	connect(ui->actionExport_envelope_PDF_and_attachments, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessageEnvelopeAttachments()));
 	    /* Separator. */
 	connect(ui->actionEmail_ZFOs, SIGNAL(triggered()),
@@ -4309,7 +4309,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_PDF->setEnabled(numSelected > 0);
 	ui->actionExport_message_envelope_as_PDF->setEnabled(numSelected > 0);
-	ui->actionExport_envelope_and_attachments->setEnabled(numSelected > 0);
+	ui->actionExport_envelope_PDF_and_attachments->setEnabled(numSelected > 0);
 	    /* Separator. */
 	ui->actionEmail_ZFOs->setEnabled(numSelected > 0);
 	ui->actionEmail_all_attachments->setEnabled(numSelected > 0);
@@ -10596,7 +10596,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_PDF->isEnabled();
 	ui->actionExport_message_envelope_as_PDF->isEnabled();
-	ui->actionExport_envelope_and_attachments->isEnabled();
+	ui->actionExport_envelope_PDF_and_attachments->isEnabled();
 	    /* Separator. */
 	ui->actionEmail_ZFOs->isEnabled();
 	ui->actionEmail_all_attachments->isEnabled();
