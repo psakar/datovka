@@ -138,6 +138,9 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 	QUrl lUrl(lastUrl);
 	QUrl url;
 
+	errStr = tr("Login to mojeID failed. You must choose correct "
+	    "login method and enter correct login data. Try again.");
+
 	// STEP 4: Send credential to mojeID endpoint (POST).
 	//         We send login data, csrfmiddlewaretoken
 	//         and mojeid token as content. OTP or certificate data optionaly.
@@ -228,6 +231,8 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 	netmanager.createPostRequestMojeId(url, lUrl, data, reply);
 	lUrl = url;
 
+	/* TODO - repeat login proccess if confirmation failed */
+
 	for (int i = 0; i < cookieList.size(); ++i) {
 		if (cookieList.at(i).name() == COOKIE_SESSION_ID) {
 			sessionid = cookieList.at(i);
@@ -242,10 +247,13 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 	QJsonDocument jsonResponse = QJsonDocument::fromJson(reply);
 	QJsonObject jsonObject = jsonResponse.object();
 	if (!jsonObject["success"].toBool()) {
-		errStr = jsonObject["errmsg"].toString();
-		return false;
+		if (!jsonObject["errmsg"].toString().isEmpty()) {
+			errStr = jsonObject["errmsg"].toString();
+		}
 	} else {
-		errStr = jsonObject["warning"].toString();
+		if (!jsonObject["warning"].toString().isEmpty()) {
+			errStr = jsonObject["warning"].toString();
+		}
 		// Now, you are logged to webdatovka and you have sessionid cookie.
 		// Next requests/operations only via new sessionid.
 		for (int i = 0; i < cookieList.size(); ++i) {
@@ -253,9 +261,10 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 				sessionid = cookieList.at(i);
 			}
 		}
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 
