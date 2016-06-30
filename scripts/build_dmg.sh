@@ -7,7 +7,7 @@ APP_NAME="datovka"
 
 APP_DIR="${SRC_ROOT}/${APP_NAME}.app"
 DMG_TITLE="${APP_NAME} installer"
-SIZE="50M"
+SIZE="150M"
 DMG_TMP_FILE="${SRC_ROOT}/pack.temp.dmg"
 DMG_FINAL_NAME="${SRC_ROOT}/${APP_NAME}-installer.dmg"
 
@@ -49,7 +49,7 @@ DEVICE=$( \
 
 
 # Let things settle down.
-sleep 10
+sleep 15
 
 
 VOLUME_DIR="/Volumes/${DMG_TITLE}"
@@ -114,7 +114,7 @@ echo '
            set position of item "'${APP_NAME}'" of container window to {100, 100}
            set position of item "Applications" of container window to {375, 100}
            update without registering applications
-           delay 5
+           delay 15
            close
      end tell
    end tell
