@@ -10,11 +10,8 @@ _GETTEXT_ARCHIVE="gettext-0.19.8.tar.xz"
 _LIBCURL_ARCHIVE="curl-7.49.1.tar.bz2"
 _OPENSSL_ARCHIVE="openssl-1.0.2h.tar.gz"
 
-_LIBISDS_ARCHIVE="libisds-0.10.1.tar.xz" # 10.4 is available but we have not tested it
+_LIBISDS_ARCHIVE="libisds-0.10.4.tar.xz"
 _LIBISDS_ARCHIVE_PATCHES=" \
-	001-0.10.1-string-precision-type-fix.patch \
-	002-0.10.1-replace-positional-arguments.patch \
-	003-0.10.1-publish-ovmid-fix.patch \
 	"
 _LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #_LIBISDS_BRANCH="feature-openssl" # Use master.
