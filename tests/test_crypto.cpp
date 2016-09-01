@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,15 +24,16 @@
 #include <cstdlib>
 #include <QtTest/QtTest>
 
-#include "helper.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/log/log.h"
+#include "tests/helper.h"
+#include "tests/test_crypto.h"
 
-class derFileContent {
+class DerFileContent {
 public:
-	explicit derFileContent(const QString &path);
-	~derFileContent(void);
+	explicit DerFileContent(const QString &path);
+	~DerFileContent(void);
 
 	void loadContent(void);
 	void unloadContent(void);
@@ -43,7 +44,7 @@ public:
 	struct x509_crt *x509_crt; /*!< Signing certificate. */
 };
 
-derFileContent::derFileContent(const QString &path)
+DerFileContent::DerFileContent(const QString &path)
     : fPath(path),
     der(NULL),
     der_size(0),
@@ -51,18 +52,18 @@ derFileContent::derFileContent(const QString &path)
 {
 }
 
-derFileContent::~derFileContent(void)
+DerFileContent::~DerFileContent(void)
 {
 	unloadContent();
 }
 
-void derFileContent::loadContent(void)
+void DerFileContent::loadContent(void)
 {
 	der = internal_read_file(fPath.toUtf8().constData(), &der_size, "r");
 	x509_crt = raw_cms_signing_cert(der, der_size);
 }
 
-void derFileContent::unloadContent(void)
+void DerFileContent::unloadContent(void)
 {
 	free(der); der = NULL; der_size = 0;
 	if (x509_crt != NULL) {
@@ -104,9 +105,9 @@ private:
 
 	void cryptoAddCrl(bool expectFail);
 
-	derFileContent ddz; /*!< Data message. */
-	derFileContent bin; /*!< Binary data message. */
-	derFileContent tst; /*!< Time stamp. */
+	DerFileContent ddz; /*!< Data message. */
+	DerFileContent bin; /*!< Binary data message. */
+	DerFileContent tst; /*!< Time stamp. */
 
 	const QString p12FilePath; /*!< Unencrypted PKCS 12 file. */
 	const QString p12EncryptedFilePath; /* !< Encrypted PKCS 12 file. */
@@ -397,5 +398,10 @@ void TestCrypto::cryptoAddCrl(bool expectFail)
 	free(der); der = NULL;
 }
 
-QTEST_MAIN(TestCrypto)
+QObject *newTestCrypto(void)
+{
+	return new (std::nothrow) TestCrypto();
+}
+
+//QTEST_MAIN(TestCrypto)
 #include "test_crypto.moc"

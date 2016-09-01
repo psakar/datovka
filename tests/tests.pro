@@ -35,13 +35,17 @@ macx {
 		/opt/local/lib
 }
 
+# MOC files are generated only directly from *.cpp files when using testlib.
+# Adding a custom compiler rule does not help.
+
 SOURCES = \
 	$${top_srcdir}src/crypto/crypto.c \
 	$${top_srcdir}src/crypto/crypto_threads.cpp \
 	$${top_srcdir}src/log/log.cpp \
 	$${top_srcdir}src/log/log_c.cpp \
-	helper.c \
-	test_crypto.cpp
+	$${top_srcdir}/tests/helper.c \
+	$${top_srcdir}/tests/test_crypto.cpp \
+	$${top_srcdir}/tests/tests.cpp
 
 HEADERS = \
 	$${top_srcdir}src/crypto/crypto.h \
@@ -50,4 +54,5 @@ HEADERS = \
 	$${top_srcdir}src/log/log_c.h \
 	$${top_srcdir}src/log/log_common.h \
 	$${top_srcdir}src/log/log.h \
-	helper.h
+	$${top_srcdir}/tests/helper.h \
+	$${top_srcdir}/tests/test_crypto.h \
