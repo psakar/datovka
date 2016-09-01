@@ -21,6 +21,20 @@ INCLUDEPATH += \
 LIBS += \
 	-lcrypto
 
+macx {
+	QMAKE_CXXFLAGS += -arch i386
+
+	QMAKE_CXXFLAGS += -stdlib=libc++
+	CONFIG += c++11
+
+	INCLUDEPATH += \
+		/usr/local/include \
+		/opt/local/include
+	LIBPATH += \
+		/usr/local/lib \
+		/opt/local/lib
+}
+
 SOURCES = \
 	$${top_srcdir}src/crypto/crypto.c \
 	$${top_srcdir}src/crypto/crypto_threads.cpp \
