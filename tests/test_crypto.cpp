@@ -232,6 +232,9 @@ void TestCrypto::crtAlgorithmInfo(void)
 	         sa_name == QStringLiteral("sha256WithRSAEncryption"),
 	         "Could not obtain signature algorithm name.");
 
+	free(sa_id); sa_id = NULL;
+	free(sa_name); sa_name = NULL;
+
 	ret = x509_crt_algorithm_info(tst.x509_crt, &sa_id, &sa_name);
 	QVERIFY2(ret == 0, "Could not obtain signature algorithm details.");
 	QVERIFY2(sa_id != NULL &&
