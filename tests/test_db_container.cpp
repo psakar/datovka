@@ -21,38 +21,38 @@
  * the two.
  */
 
-#include <QTest>
+#include <QtTest/QtTest>
 
-#include "tests/test_crypto.h"
+#include "src/io/message_db_set_container.h"
 #include "tests/test_db_container.h"
 
-static
-int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
+class TestDbContainer: public QObject {
+	Q_OBJECT
+
+private slots:
+	void initTestCase(void);
+
+	void cleanupTestCase(void);
+};
+
+void TestDbContainer::initTestCase(void)
 {
-	int status;
+	/* Pointer must be null before initialisation. */
+	QVERIFY(globMessageDbsPtr == NULL);
 
-	if (testClassObj == NULL) {
-		return 1;
-	}
-
-	status = QTest::qExec(testClassObj, argc, argv);
-
-	delete testClassObj;
-
-	return status;
+	globMessageDbsPtr = new (std::nothrow) DbContainer(QStringLiteral("GLOBALDBS"));
+	QVERIFY(globMessageDbsPtr != NULL);
 }
 
-int main(int argc, char *argv[])
+void TestDbContainer::cleanupTestCase(void)
 {
-	int status = 0;
-
-#if defined (TEST_CRYPTO)
-	status |= testThisClassAndDelete(newTestCrypto(), argc, argv);
-#endif /* defined (TEST_CRYPTO) */
-
-#if defined (TEST_DB_CONTAINER)
-	status |= testThisClassAndDelete(newTestDbContainer(), argc, argv);
-#endif /* defined (TEST_DB_CONTAINER) */
-
-	return status;
+	delete globMessageDbsPtr; globMessageDbsPtr = NULL;
 }
+
+QObject *newTestDbContainer(void)
+{
+	return new (std::nothrow) TestDbContainer();
+}
+
+//QTEST_MAIN(TestDbContainer)
+#include "test_db_container.moc"

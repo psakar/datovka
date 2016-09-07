@@ -21,38 +21,8 @@
  * the two.
  */
 
-#include <QTest>
+#pragma once
 
-#include "tests/test_crypto.h"
-#include "tests/test_db_container.h"
+#include <QObject>
 
-static
-int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
-{
-	int status;
-
-	if (testClassObj == NULL) {
-		return 1;
-	}
-
-	status = QTest::qExec(testClassObj, argc, argv);
-
-	delete testClassObj;
-
-	return status;
-}
-
-int main(int argc, char *argv[])
-{
-	int status = 0;
-
-#if defined (TEST_CRYPTO)
-	status |= testThisClassAndDelete(newTestCrypto(), argc, argv);
-#endif /* defined (TEST_CRYPTO) */
-
-#if defined (TEST_DB_CONTAINER)
-	status |= testThisClassAndDelete(newTestDbContainer(), argc, argv);
-#endif /* defined (TEST_DB_CONTAINER) */
-
-	return status;
-}
+QObject *newTestDbContainer(void);

@@ -1,6 +1,7 @@
 
-QT += core gui network sql
-QT += printsupport
+QT += core
+QT += gui
+QT += network
 QT += testlib
 
 TEMPLATE = app
@@ -17,9 +18,6 @@ QMAKE_CXXFLAGS = \
 
 INCLUDEPATH += \
 	$${top_srcdir}
-
-LIBS += \
-	-lcrypto
 
 macx {
 	QMAKE_CXXFLAGS += -arch i386
@@ -39,20 +37,16 @@ macx {
 # Adding a custom compiler rule does not help.
 
 SOURCES = \
-	$${top_srcdir}src/crypto/crypto.c \
-	$${top_srcdir}src/crypto/crypto_threads.cpp \
 	$${top_srcdir}src/log/log.cpp \
 	$${top_srcdir}src/log/log_c.cpp \
 	$${top_srcdir}/tests/helper.c \
-	$${top_srcdir}/tests/test_crypto.cpp \
 	$${top_srcdir}/tests/tests.cpp
 
 HEADERS = \
-	$${top_srcdir}src/crypto/crypto.h \
-	$${top_srcdir}src/crypto/crypto_funcs.h \
-	$${top_srcdir}src/crypto/crypto_threads.h \
 	$${top_srcdir}src/log/log_c.h \
 	$${top_srcdir}src/log/log_common.h \
 	$${top_srcdir}src/log/log.h \
-	$${top_srcdir}/tests/helper.h \
-	$${top_srcdir}/tests/test_crypto.h \
+	$${top_srcdir}/tests/helper.h
+
+include(test_crypto.pri)
+include(test_db_container.pri)

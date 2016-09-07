@@ -15,17 +15,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "helper.h"
+#include "tests/helper.h"
 
 
 static
-char * fread_file(FILE *fstream, size_t *length);
-
-
-/* ========================================================================= */
-static
-char * fread_file(FILE *fstream, size_t *length)
-/* ========================================================================= */
+char *fread_file(FILE *fstream, size_t *length)
 {
 	char *buf = NULL;
 	size_t alloc = BUFSIZ;
@@ -119,10 +113,7 @@ char * fread_file(FILE *fstream, size_t *length)
 	}
 }
 
-
-/* ========================================================================= */
-char * internal_read_file(const char *fname, size_t *length, const char *mode)
-/* ========================================================================= */
+char *internal_read_file(const char *fname, size_t *length, const char *mode)
 {
 	FILE *stream = fopen (fname, mode);
 	char *out;
