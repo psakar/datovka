@@ -39,14 +39,23 @@ macx {
 SOURCES = \
 	$${top_srcdir}src/log/log.cpp \
 	$${top_srcdir}src/log/log_c.cpp \
-	$${top_srcdir}/tests/helper.c \
-	$${top_srcdir}/tests/tests.cpp
+	$${top_srcdir}tests/helper.c \
+	$${top_srcdir}tests/tests.cpp
 
 HEADERS = \
 	$${top_srcdir}src/log/log_c.h \
 	$${top_srcdir}src/log/log_common.h \
 	$${top_srcdir}src/log/log.h \
-	$${top_srcdir}/tests/helper.h
+	$${top_srcdir}tests/helper.h
 
 include(test_crypto.pri)
 include(test_db_container.pri)
+
+# Replace possible double slashes with a single slash. Also remove duplicated
+# entries.
+TMP = ""
+for(src, SOURCES): TMP += $$replace(src, //, /)
+SOURCES = $$unique(TMP)
+TMP = ""
+for(hdr, HEADERS): TMP += $$replace(hdr, //, /)
+HEADERS = $$unique(TMP)
