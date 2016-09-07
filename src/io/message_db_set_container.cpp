@@ -116,17 +116,4 @@ bool DbContainer::deleteDbSet(MessageDbSet *dbSet)
 const QString DbContainer::dbDriverType("QSQLITE");
 
 
-/* ========================================================================= */
-/*
- * Creates the database name from supplied information.
- */
-QString DbContainer::constructDbFileName(const QString &primaryKey,
-    const QString &locDir, bool testing)
-/* ========================================================================= */
-{
-	return locDir + QDir::separator() +
-	    primaryKey + "___" + (testing ? "1" : "0") + ".db";
-}
-
-
 DbContainer *globMessageDbsPtr;

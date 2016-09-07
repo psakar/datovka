@@ -74,18 +74,6 @@ private:
 	const QString dbDriverType;
 
 	const QString m_connectionPrefix; /*!< Database connection prefix. */
-
-	/*!
-	 * @brief Creates the database name from supplied information.
-	 *
-	 * @param[in] primaryKey ISDS user name.
-	 * @param[in] locDir     Directory where to store the file.
-	 * @param[in] testing    Whether it is a testing account.
-	 * @return Path to database file.
-	 */
-	static
-	QString constructDbFileName(const QString &primaryKey,
-	    const QString &locDir, bool testing);
 };
 
 
