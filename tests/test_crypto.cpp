@@ -71,7 +71,7 @@ void DerFileContent::unloadContent(void)
 	}
 }
 
-class TestCrypto: public QObject {
+class TestCrypto : public QObject {
 	Q_OBJECT
 
 public:
