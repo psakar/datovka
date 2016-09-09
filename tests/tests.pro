@@ -50,6 +50,7 @@ HEADERS = \
 
 include(test_crypto.pri)
 include(test_db_container.pri)
+include(test_message_db_set.pri)
 
 # Replace possible double slashes with a single slash. Also remove duplicated
 # entries.
