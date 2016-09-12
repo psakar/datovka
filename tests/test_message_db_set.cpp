@@ -64,6 +64,24 @@ private slots:
 
 	void writeEnvelope(void);
 
+	void openEmptyLocation(void);
+
+	void reopenLocation(void);
+
+	void cleanup01(void);
+
+	void accessExistent01(void);
+
+	void copyToLocation(void);
+
+	void deleteLocation(void);
+
+	void cleanup02(void);
+
+	void accessExistent02(void);
+
+	void moveToLocation(void);
+
 private:
 	static inline
 	QStringList dbFileNameList(const QDir &dbDir)
@@ -75,6 +93,8 @@ private:
 	void dateTimeToTimeval(struct timeval &tv, const QDateTime &dateTime);
 
 	void cleanup(bool deleteFiles);
+
+	void accessExistent(void);
 
 	const QString m_connectionPrefix; /*!< SQL connection prefix. */
 
@@ -130,6 +150,11 @@ void TestMessageDbSet::initTestCase(void)
 	    m_connectionPrefix, MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(m_dbSet02 == NULL);
 	QVERIFY(!m_dbDirSrc.exists());
+}
+
+void TestMessageDbSet::cleanupTestCase(void)
+{
+	cleanup(true);
 }
 
 void TestMessageDbSet::accessEmpty(void)
@@ -254,9 +279,276 @@ void TestMessageDbSet::writeEnvelope(void)
 	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
 }
 
-void TestMessageDbSet::cleanupTestCase(void)
+void TestMessageDbSet::openEmptyLocation(void)
 {
-	cleanup(true);
+	bool ret;
+
+	QVERIFY(!m_dbDirDst.exists());
+
+	/* Opening existent location must fail because organised wrongly. */
+	ret = m_dbSet01->openLocation(m_dbLocationPathSrc,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+
+	/* Opening non-existent location. */
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	/* Create the directory. */
+	m_dbDirDst.mkpath(".");
+	QVERIFY(m_dbDirDst.exists());
+
+	/* Opening existent but empty location must fail. */
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet01->openLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+}
+
+void TestMessageDbSet::reopenLocation(void)
+{
+	bool ret;
+
+	m_dbDirDst.removeRecursively();
+	QVERIFY(!m_dbDirDst.exists());
+
+	/* Reopening database in non-existent location must fail. */
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(!ret);
+
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(!ret);
+
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(!ret);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(!ret);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(!ret);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(!ret);
+
+	m_dbDirDst.mkpath(".");
+	QVERIFY(m_dbDirDst.exists());
+
+	/* Must exist parameter is ignored. */
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	/* Create a new file. */
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 1);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_EMPTY_CURRENT);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 2);
+
+	/* All possible targets must be deleted. */
+	ret = m_dbSet01->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_SINGLE_FILE, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 1);
+
+	ret = m_dbSet02->reopenLocation(m_dbLocationPathDst,
+	    MessageDbSet::DO_YEARLY, MessageDbSet::CM_CREATE_ON_DEMAND);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+}
+
+void TestMessageDbSet::cleanup01(void)
+{
+	cleanup(false);
+}
+
+void TestMessageDbSet::accessExistent01(void)
+{
+	accessExistent();
+}
+
+void TestMessageDbSet::copyToLocation(void)
+{
+	bool ret;
+
+	m_dbDirDst.removeRecursively();
+	QVERIFY(!m_dbDirDst.exists());
+
+	QVERIFY(m_dbSet01 != NULL);
+	QVERIFY(m_dbSet02 != NULL);
+
+	/* Copy to non-existent location must fail. */
+	ret = m_dbSet01->copyToLocation(m_dbLocationPathDst);
+	QVERIFY(!ret);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(!m_dbDirDst.exists());
+
+	ret = m_dbSet02->copyToLocation(m_dbLocationPathDst);
+	QVERIFY(!ret);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(!m_dbDirDst.exists());
+
+	m_dbDirDst.mkpath(".");
+	QVERIFY(m_dbDirDst.exists());
+
+	/* Copy to existent location. */
+	ret = m_dbSet01->copyToLocation(m_dbLocationPathDst);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 1);
+
+	ret = m_dbSet02->copyToLocation(m_dbLocationPathDst);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 3);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 4);
+}
+
+void TestMessageDbSet::deleteLocation(void)
+{
+	bool ret;
+
+	QVERIFY(m_dbDirDst.exists());
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 4);
+
+	ret = m_dbSet01->deleteLocation();
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 3);
+
+	ret = m_dbSet02->deleteLocation();
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	/* Repeated deletion must fail. */
+	ret = m_dbSet01->deleteLocation();
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+
+	ret = m_dbSet02->deleteLocation();
+	QVERIFY(!ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 0);
+}
+
+void TestMessageDbSet::cleanup02(void)
+{
+	cleanup(false);
+}
+
+void TestMessageDbSet::accessExistent02(void)
+{
+	accessExistent();
+}
+
+void TestMessageDbSet::moveToLocation(void)
+{
+	bool ret;
+
+	m_dbDirDst.removeRecursively();
+	QVERIFY(!m_dbDirDst.exists());
+
+	QVERIFY(m_dbSet01 != NULL);
+	QVERIFY(m_dbSet02 != NULL);
+
+	/* Copy to non-existent location must fail. */
+	ret = m_dbSet01->moveToLocation(m_dbLocationPathDst);
+	QVERIFY(!ret);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(!m_dbDirDst.exists());
+
+	ret = m_dbSet02->moveToLocation(m_dbLocationPathDst);
+	QVERIFY(!ret);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+	QVERIFY(!m_dbDirDst.exists());
+
+	m_dbDirDst.mkpath(".");
+	QVERIFY(m_dbDirDst.exists());
+
+	/* Copy to existent location. */
+	ret = m_dbSet01->moveToLocation(m_dbLocationPathDst);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 3);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 1);
+
+	ret = m_dbSet02->moveToLocation(m_dbLocationPathDst);
+	QVERIFY(ret);
+	QVERIFY(m_dbSet02->fileNames().size() == 3);
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 0);
+	QVERIFY(dbFileNameList(m_dbDirDst).size() == 4);
 }
 
 void TestMessageDbSet::dateTimeToTimeval(struct timeval &tv,
@@ -278,6 +570,27 @@ void TestMessageDbSet::cleanup(bool deleteFiles)
 		QVERIFY(m_dbDirDst.removeRecursively());
 		QVERIFY(!m_dbDirDst.exists());
 	}
+}
+
+void TestMessageDbSet::accessExistent(void)
+{
+	QVERIFY(m_dbDirSrc.exists());
+	QVERIFY(dbFileNameList(m_dbDirSrc).size() == 4);
+
+	QVERIFY(m_dbSet01 == NULL);
+	QVERIFY(m_dbSet02 == NULL);
+
+	m_dbSet01 = MessageDbSet::createNew(m_dbLocationPathSrc,
+	    m_dbId01.primaryKey, m_dbId01.testing, m_dbId01.organisation,
+	    m_connectionPrefix, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(m_dbSet01 != NULL);
+	QVERIFY(m_dbSet01->fileNames().size() == 1);
+
+	m_dbSet02 = MessageDbSet::createNew(m_dbLocationPathSrc,
+	    m_dbId02.primaryKey, m_dbId02.testing, m_dbId02.organisation,
+	    m_connectionPrefix, MessageDbSet::CM_MUST_EXIST);
+	QVERIFY(m_dbSet02 != NULL);
+	QVERIFY(m_dbSet02->fileNames().size() == 3);
 }
 
 QObject *newTestMessageDbSet(void)
