@@ -61,8 +61,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 	QStringList matchingFiles;
 
 	/* New location must exist. */
-	QDir dir(newLocDir);
-	if (!dir.exists()) {
+	if (!QDir(newLocDir).exists()) {
 		logErrorNL("Directory '%s' does not exist.\n",
 		    newLocDir.toUtf8().constData());
 		return false;
@@ -174,6 +173,12 @@ bool MessageDbSet::copyToLocation(const QString &newLocDir)
 		return false;
 	}
 
+	if (!QDir(newLocDir).exists()) {
+		logErrorNL("Directory '%s' does not exist.\n",
+		    newLocDir.toUtf8().constData());
+		return false;
+	}
+
 	bool sucessfullyCopied = true;
 	QList< QPair<QString, MessageDb *> > oldLocations;
 	QList<QString> newLocations;
@@ -218,6 +223,12 @@ bool MessageDbSet::copyToLocation(const QString &newLocDir)
 bool MessageDbSet::moveToLocation(const QString &newLocDir)
 {
 	if (m_organisation == DO_UNKNOWN) {
+		return false;
+	}
+
+	if (!QDir(newLocDir).exists()) {
+		logErrorNL("Directory '%s' does not exist.\n",
+		    newLocDir.toUtf8().constData());
 		return false;
 	}
 
@@ -272,6 +283,12 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
     enum Organisation organisation, enum CreationManner manner)
 {
 	if (m_organisation == DO_UNKNOWN) {
+		return false;
+	}
+
+	if (!QDir(newLocDir).exists()) {
+		logErrorNL("Directory '%s' does not exist.\n",
+		    newLocDir.toUtf8().constData());
 		return false;
 	}
 
