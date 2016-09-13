@@ -52,7 +52,7 @@ public:
 		DELIVERY_COL = 3, /* Delivery time column. */
 		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
-		ATTDOWN_COL = 6, /* Attachment downloaded. */
+		ATTDOWN_COL = 6, /* Attachments downloaded. */
 		PROCSNG_COL = 7 /* Processing state. */
 	};
 

@@ -284,7 +284,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded'. */
 		case DB_INT_PROCESSING_STATE: /* 'process status'. */
 			/* Tool tip. */
-			return _headerData(section, orientation, Qt::EditRole);
+			return _headerData(section, orientation, Qt::DisplayRole);
 			break;
 		default:
 			return QVariant();
