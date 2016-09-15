@@ -31,7 +31,7 @@
 /* First position is an empty string. */
 #define POS_BNAME 1
 #define POS_UNAME 2
-#define POS_PWD 4
+#define POS_PWD 3
 #define POS_LIST_MIN 4
 
 void LoginCredentials::clearAll(void)
@@ -109,18 +109,23 @@ QString LoginCredentials::readLine(const QString &filePath, unsigned lineNum)
 	if (!file.open(QIODevice::ReadOnly)) {
 		return line;
 	}
-	QTextStream fileStream(&file);
 
-	unsigned readLine = 0;
+	{
+		QTextStream fileStream(&file);
 
-	while (!file.atEnd() && readLine < lineNum) {
-		++readLine;
-		if (readLine == lineNum) {
-			line = fileStream.readLine();
-		} else {
-			fileStream.readLine();
+		unsigned readLine = 0;
+
+		while (!fileStream.atEnd() && readLine < lineNum) {
+			++readLine;
+			if (readLine == lineNum) {
+				line = fileStream.readLine();
+			} else {
+				fileStream.readLine();
+			}
 		}
 	}
+
+	file.close();
 
 	return line;
 }
