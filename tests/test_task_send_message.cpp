@@ -21,9 +21,12 @@
  * the two.
  */
 
+#include <QDateTime>
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/io/account_db.h"
+#include "src/io/isds_sessions.h"
 #include "src/settings/preferences.h"
 #include "src/worker/task_send_message.h"
 #include "tests/helper_qt.h"
@@ -45,6 +48,9 @@ private slots:
 	void sendMessage(void);
 
 private:
+	static
+	IsdsMessage buildMessage(const QString &recipBox);
+
 	const bool m_testing; /*!< Testing account. */
 	const enum MessageDbSet::Organisation m_organisation; /*!< Database organisation. */
 
@@ -57,11 +63,18 @@ private:
 
 	/* Log-in using user name and password. */
 	LoginCredentials m_sender; /*!< Sender credentials. */
+	LoginCredentials m_recipient; /*!< Recipient credentials. */
 
 	MessageDbSet *m_dbSet; /*!< Databases. */
 
 	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
 };
+
+#define printCredentials(cred) \
+	fprintf(stderr, "Credentials '" #cred "': '%s', '%s', '%s'\n", \
+	    (cred).boxName.toUtf8().constData(), \
+	    (cred).userName.toUtf8().constData(), \
+	    (cred).pwd.toUtf8().constData())
 
 TestTaskSendMessage::TestTaskSendMessage(void)
     : m_testing(true),
@@ -71,6 +84,7 @@ TestTaskSendMessage::TestTaskSendMessage(void)
     m_testDir(m_testPath),
     m_credFName(QLatin1String(CREDENTIALS_FNAME)),
     m_sender(),
+    m_recipient(),
     m_dbSet(NULL),
     m_confSubDirBackup(globPref.confSubdir)
 {
@@ -97,11 +111,22 @@ void TestTaskSendMessage::initTestCase(void)
 	m_testDir.mkpath(".");
 	QVERIFY(m_testDir.exists());
 
+	/* Load credentials. */
 	ret = m_sender.loadLoginCredentials(m_credFName, 1);
 	if (!ret) {
 		QSKIP("Failed to load login credentials. Skipping remaining tests.");
 	}
 	QVERIFY(ret);
+	QVERIFY(!m_sender.userName.isEmpty());
+	QVERIFY(!m_sender.pwd.isEmpty());
+
+	ret = m_recipient.loadLoginCredentials(m_credFName, 2);
+	if (!ret) {
+		QSKIP("Failed to load login credentials. Skipping remaining tests.");
+	}
+	QVERIFY(ret);
+	QVERIFY(!m_recipient.userName.isEmpty());
+	QVERIFY(!m_recipient.pwd.isEmpty());
 
 	/* Access message database. */
 	m_dbSet = MessageDbSet::createNew(m_testPath, m_sender.userName,
@@ -111,11 +136,47 @@ void TestTaskSendMessage::initTestCase(void)
 		QSKIP("Failed to open message database.");
 	}
 	QVERIFY(m_dbSet != NULL);
+
+	/*
+	 * Create accounts database and open it. It is required by the task.
+	 */
+	QVERIFY(globAccountDbPtr == NULL);
+	globAccountDbPtr = new (::std::nothrow) AccountDb("accountDb");
+	if (globAccountDbPtr == NULL) {
+		QSKIP("Cannot create accounts database.");
+	}
+	QVERIFY(globAccountDbPtr != NULL);
+	ret = globAccountDbPtr->openDb(m_testPath + QDir::separator() + "messages.shelf.db");
+	if (!ret) {
+		QSKIP("Cannot open account database.");
+	}
+	QVERIFY(ret);
+
+	/* Log into ISDS. */
+	struct isds_ctx *ctx = isdsSessions.session(m_sender.userName);
+	if (!isdsSessions.holdsSession(m_sender.userName)) {
+		QVERIFY(ctx == NULL);
+		ctx = isdsSessions.createCleanSession(m_sender.userName,
+		    globPref.isds_download_timeout_ms);
+	}
+	if (ctx == NULL) {
+		QSKIP("Cannot obtain communication context.");
+	}
+	QVERIFY(ctx != NULL);
+	isds_error err = isdsLoginUserName(ctx, m_sender.userName,
+	    m_sender.pwd, m_testing);
+	if (err != IE_SUCCESS) {
+		QSKIP("Error connection into ISDS.");
+	}
+	QVERIFY(err == IE_SUCCESS);
 }
 
 void TestTaskSendMessage::cleanupTestCase(void)
 {
 	delete m_dbSet; m_dbSet = NULL;
+
+	/* Delete account database. */
+	delete globAccountDbPtr; globAccountDbPtr = NULL;
 
 	/* The configuration directory should be non-existent. */
 	QVERIFY(!QDir(globPref.confDir()).exists());
@@ -123,12 +184,70 @@ void TestTaskSendMessage::cleanupTestCase(void)
 
 void TestTaskSendMessage::sendMessage(void)
 {
-	QVERIFY(true);
+	TaskSendMessage *task;
+
+	QVERIFY(!m_sender.userName.isEmpty());
+
+	QVERIFY(m_dbSet != NULL);
+
+	QVERIFY(isdsSessions.isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = isdsSessions.session(m_sender.userName);
+	QVERIFY(ctx != NULL);
+	QVERIFY(isdsSessions.isConnectedToIsds(m_sender.userName));
+
+	QString transactionId(QLatin1String("some_id"));
+	QString recipientName(QLatin1String("recipient name"));
+	QString recipientAddress(QLatin1String("recipient address"));
+	bool isPDZ = false;
+
+	/* Sending empty message must fail. */
+	task = new (::std::nothrow) TaskSendMessage(m_sender.userName,
+	    m_dbSet, transactionId, IsdsMessage(), recipientName,
+	    recipientAddress, isPDZ);
+	QVERIFY(task != NULL);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_resultData.result == TaskSendMessage::SM_ERR);
+
+	delete task; task = NULL;
+
+	/* Sending message should succeed. */
+	task = new (::std::nothrow) TaskSendMessage(m_sender.userName,
+	    m_dbSet, transactionId, buildMessage(m_recipient.boxName),
+	    recipientName, recipientAddress, isPDZ);
+	QVERIFY(task != NULL);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_resultData.result == TaskSendMessage::SM_SUCCESS);
+
+	delete task; task = NULL;
+}
+
+IsdsMessage TestTaskSendMessage::buildMessage(const QString &recipBox)
+{
+	IsdsMessage msg;
+
+	QString dateTime(QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+
+	msg.envelope.dbIDRecipient = recipBox;
+	msg.envelope.dmAnnotation = QLatin1String("sending-test-") + dateTime;
+
+	IsdsDocument document;
+	document.dmFileDescr = QLatin1String("priloha.txt");
+	document.data = QString("Priloha vygenerovana %1.").arg(dateTime).toUtf8();
+
+	msg.documents.append(document);
+
+	return msg;
 }
 
 QObject *newTestTaskSendMessage(void)
 {
-	return new (std::nothrow) TestTaskSendMessage();
+	return new (::std::nothrow) TestTaskSendMessage();
 }
 
 //QTEST_MAIN(TestTaskSendMessage)
