@@ -25,4 +25,4 @@
 
 #include <QObject>
 
-QObject *newTestTaskDownloads(void);
+QObject *newTestTaskDownloads(const qint64 &receivedMsgId);

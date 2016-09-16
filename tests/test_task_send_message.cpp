@@ -36,7 +36,7 @@ class TestTaskSendMessage : public QObject {
 	Q_OBJECT
 
 public:
-	TestTaskSendMessage(void);
+	explicit TestTaskSendMessage(qint64 &sentMsgId);
 
 	~TestTaskSendMessage(void);
 
@@ -68,6 +68,8 @@ private:
 	MessageDbSet *m_senderDbSet; /*!< Databases. */
 
 	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
+
+	qint64 &m_sentMsgId; /*!< Identifier ow newly sent message. */
 };
 
 #define printCredentials(cred) \
@@ -76,7 +78,7 @@ private:
 	    (cred).userName.toUtf8().constData(), \
 	    (cred).pwd.toUtf8().constData())
 
-TestTaskSendMessage::TestTaskSendMessage(void)
+TestTaskSendMessage::TestTaskSendMessage(qint64 &sentMsgId)
     : m_testing(true),
     m_organisation(MessageDbSet::DO_YEARLY),
     m_connectionPrefix(QLatin1String("GLOBALDBS")),
@@ -86,7 +88,8 @@ TestTaskSendMessage::TestTaskSendMessage(void)
     m_sender(),
     m_recipient(),
     m_senderDbSet(NULL),
-    m_confSubDirBackup(globPref.confSubdir)
+    m_confSubDirBackup(globPref.confSubdir),
+    m_sentMsgId(sentMsgId)
 {
 	/* Set configuration subdirectory to some value. */
 	globPref.confSubdir = QLatin1String(".datovka_test");
@@ -181,7 +184,7 @@ void TestTaskSendMessage::cleanupTestCase(void)
 	/* The configuration directory should be non-existent. */
 	QVERIFY(!QDir(globPref.confDir()).exists());
 
-	/* Delete tesing directory. */
+	/* Delete testing directory. */
 	m_testDir.removeRecursively();
 	QVERIFY(!m_testDir.exists());
 }
@@ -228,6 +231,9 @@ void TestTaskSendMessage::sendMessage(void)
 
 	QVERIFY(task->m_resultData.result == TaskSendMessage::SM_SUCCESS);
 
+	QVERIFY(task->m_resultData.dmId != 0);
+	m_sentMsgId = task->m_resultData.dmId;
+
 	delete task; task = NULL;
 }
 
@@ -249,9 +255,9 @@ IsdsMessage TestTaskSendMessage::buildMessage(const QString &recipBox)
 	return msg;
 }
 
-QObject *newTestTaskSendMessage(void)
+QObject *newTestTaskSendMessage(qint64 &sentMsgId)
 {
-	return new (::std::nothrow) TestTaskSendMessage();
+	return new (::std::nothrow) TestTaskSendMessage(sentMsgId);
 }
 
 //QTEST_MAIN(TestTaskSendMessage)

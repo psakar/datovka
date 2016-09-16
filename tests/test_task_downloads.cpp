@@ -21,11 +21,14 @@
  * the two.
  */
 
+#include <QDateTime>
+#include <QDir>
 #include <QtTest/QtTest>
 
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/preferences.h"
+#include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "tests/helper_qt.h"
 #include "tests/test_task_downloads.h"
@@ -34,7 +37,7 @@ class TestTaskDownloads : public QObject {
 	Q_OBJECT
 
 public:
-	TestTaskDownloads(void);
+	explicit TestTaskDownloads(const qint64 &receivedMsgId);
 
 	~TestTaskDownloads(void);
 
@@ -43,7 +46,11 @@ private slots:
 
 	void cleanupTestCase(void);
 
-	void dowloadMessageList(void);
+	void downloadMessageList(void);
+
+	void getDeliveryTime(void);
+
+	void downloadMessage(void);
 
 private:
 	const bool m_testing; /*!< Testing account. */
@@ -63,9 +70,12 @@ private:
 	MessageDbSet *m_recipientDbSet; /*!< Databases. */
 
 	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
+
+	const qint64 &m_receivedMsgId; /*!< Identifier ow newly received message. */
+	QDateTime m_deliveryTime; /*!< Message delivery time. */
 };
 
-TestTaskDownloads::TestTaskDownloads(void)
+TestTaskDownloads::TestTaskDownloads(const qint64 &receivedMsgId)
     : m_testing(true),
     m_organisation(MessageDbSet::DO_YEARLY),
     m_connectionPrefix(QLatin1String("GLOBALDBS")),
@@ -75,7 +85,9 @@ TestTaskDownloads::TestTaskDownloads(void)
     m_sender(),
     m_recipient(),
     m_recipientDbSet(NULL),
-    m_confSubDirBackup(globPref.confSubdir)
+    m_confSubDirBackup(globPref.confSubdir),
+    m_receivedMsgId(receivedMsgId),
+    m_deliveryTime()
 {
 	/* Set configuration subdirectory to some value. */
 	globPref.confSubdir = QLatin1String(".datovka_test");
@@ -170,12 +182,12 @@ void TestTaskDownloads::cleanupTestCase(void)
 	/* The configuration directory should be non-existent. */
 	QVERIFY(!QDir(globPref.confDir()).exists());
 
-	/* Delete tesing directory. */
-//	m_testDir.removeRecursively();
-//	QVERIFY(!m_testDir.exists());
+	/* Delete testing directory. */
+	m_testDir.removeRecursively();
+	QVERIFY(!m_testDir.exists());
 }
 
-void TestTaskDownloads::dowloadMessageList(void)
+void TestTaskDownloads::downloadMessageList(void)
 {
 	TaskDownloadMessageList *task;
 
@@ -202,9 +214,73 @@ void TestTaskDownloads::dowloadMessageList(void)
 	delete task; task = NULL;
 }
 
-QObject *newTestTaskDownloads(void)
+void TestTaskDownloads::getDeliveryTime(void)
 {
-	return new (::std::nothrow) TestTaskDownloads();
+	if (m_receivedMsgId == 0) {
+		QSKIP("No specific message to download.");
+	}
+
+	QVERIFY(!m_recipient.userName.isEmpty());
+
+	QVERIFY(m_recipientDbSet != NULL);
+
+	MessageDb::MsgId msgId(m_recipientDbSet->msgsMsgId(m_receivedMsgId));
+	QVERIFY(msgId.isValid());
+
+	m_deliveryTime = msgId.deliveryTime;
+	QVERIFY(m_deliveryTime.isValid());
+}
+
+void TestTaskDownloads::downloadMessage(void)
+{
+	TaskDownloadMessage *task;
+
+	if (m_receivedMsgId == 0 || !m_deliveryTime.isValid()) {
+		QSKIP("No specific message to download or delivery time invalid.");
+	}
+	QVERIFY(m_receivedMsgId != 0);
+
+	QVERIFY(!m_recipient.userName.isEmpty());
+
+	QVERIFY(m_recipientDbSet != NULL);
+
+	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = isdsSessions.session(m_recipient.userName);
+	QVERIFY(ctx != NULL);
+	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
+
+	/* Should fail, is a received message. */
+	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
+	    m_recipientDbSet, MSG_SENT, m_receivedMsgId, m_deliveryTime,
+	    false);
+
+	QVERIFY(task != NULL);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskDownloadMessage::DM_ISDS_ERROR);
+
+	delete task; task = NULL;
+
+	/* Must succeed. */
+	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
+	    m_recipientDbSet, MSG_RECEIVED, m_receivedMsgId, m_deliveryTime,
+	    false);
+
+	QVERIFY(task != NULL);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskDownloadMessage::DM_SUCCESS);
+
+	delete task; task = NULL;
+}
+
+QObject *newTestTaskDownloads(const qint64 &receivedMsgId)
+{
+	return new (::std::nothrow) TestTaskDownloads(receivedMsgId);
 }
 
 //QTEST_MAIN(TestTaskDownloads)

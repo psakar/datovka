@@ -48,6 +48,7 @@ int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	int status = 0;
+	qint64 msgId = 0;
 
 #if defined (TEST_CRYPTO)
 	status |= testThisClassAndDelete(newTestCrypto(), argc, argv);
@@ -62,11 +63,11 @@ int main(int argc, char *argv[])
 #endif /* defined (TEST_MESSAGE_DB_SET) */
 
 #if defined (TEST_TASK_SEND_MESSAGE)
-	status |= testThisClassAndDelete(newTestTaskSendMessage(), argc, argv);
+	status |= testThisClassAndDelete(newTestTaskSendMessage(msgId), argc, argv);
 #endif /* defined (TEST_TASK_SEND_MESSAGE) */
 
 #if defined TEST_TASK_DOWNLOADS
-	status |= testThisClassAndDelete(newTestTaskDownloads(), argc, argv);
+	status |= testThisClassAndDelete(newTestTaskDownloads(msgId), argc, argv);
 #endif /* defined TEST_TASK_DOWNLOADS */
 
 	return status;

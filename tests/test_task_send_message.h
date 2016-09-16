@@ -25,4 +25,4 @@
 
 #include <QObject>
 
-QObject *newTestTaskSendMessage(void);
+QObject *newTestTaskSendMessage(qint64 &sentMsgId);

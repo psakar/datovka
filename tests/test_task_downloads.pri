@@ -23,6 +23,7 @@ SOURCES += \
 	$${top_srcdir}src/io/isds_sessions.cpp \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
+	$${top_srcdir}src/io/message_db_set_delegated.cpp \
 	$${top_srcdir}src/io/sqlite/db.cpp \
 	$${top_srcdir}src/io/sqlite/table.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
