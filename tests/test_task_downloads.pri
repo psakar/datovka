@@ -3,7 +3,7 @@ QT += sql
 QT += widgets
 
 DEFINES += \
-	TEST_TASK_SEND_MESSAGE=1
+	TEST_TASK_DOWNLOADS=1
 
 INCLUDEPATH += \
 	/usr/include/libxml2
@@ -32,9 +32,11 @@ SOURCES += \
 	$${top_srcdir}src/models/table_model.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
 	$${top_srcdir}src/worker/message_emitter.cpp \
+	$${top_srcdir}src/worker/pool.cpp \
 	$${top_srcdir}src/worker/task.cpp \
-	$${top_srcdir}src/worker/task_send_message.cpp \
-	$${top_srcdir}tests/test_task_send_message.cpp
+	$${top_srcdir}src/worker/task_download_message.cpp \
+	$${top_srcdir}src/worker/task_download_message_list.cpp \
+	$${top_srcdir}tests/test_task_downloads.cpp
 
 HEADERS += \
 	$${top_srcdir}src/common.h \
@@ -57,6 +59,8 @@ HEADERS += \
 	$${top_srcdir}src/models/table_model.h \
 	$${top_srcdir}src/settings/preferences.h \
 	$${top_srcdir}src/worker/message_emitter.h \
+	$${top_srcdir}src/worker/pool.h \
 	$${top_srcdir}src/worker/task.h \
-	$${top_srcdir}src/worker/task_send_message.h \
-	$${top_srcdir}tests/test_task_send_message.h
+	$${top_srcdir}src/worker/task_download_message.h \
+	$${top_srcdir}src/worker/task_download_message_list.h \
+	$${top_srcdir}tests/test_task_downloads.h

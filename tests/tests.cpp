@@ -26,6 +26,7 @@
 #include "tests/test_crypto.h"
 #include "tests/test_db_container.h"
 #include "tests/test_message_db_set.h"
+#include "tests/test_task_downloads.h"
 #include "tests/test_task_send_message.h"
 
 static
@@ -63,6 +64,10 @@ int main(int argc, char *argv[])
 #if defined (TEST_TASK_SEND_MESSAGE)
 	status |= testThisClassAndDelete(newTestTaskSendMessage(), argc, argv);
 #endif /* defined (TEST_TASK_SEND_MESSAGE) */
+
+#if defined TEST_TASK_DOWNLOADS
+	status |= testThisClassAndDelete(newTestTaskDownloads(), argc, argv);
+#endif /* defined TEST_TASK_DOWNLOADS */
 
 	return status;
 }
