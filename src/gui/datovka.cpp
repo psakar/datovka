@@ -10746,11 +10746,48 @@ void MainWindow::vacuumMsgDbSlot(void)
 	    m_accountModel.userName(currentAccountModelIndex());
 
 	MessageDbSet *msgDbSet = accountDbSet(userName, this);
-
 	if (0 == msgDbSet) {
 		return;
 	}
 
-	/* This will block the UI. */
-	bool ret = msgDbSet->vacuum();
+	qint64 dbSizeInBytes = 0;
+	QStringList dbFilePaths = msgDbSet->fileNames();
+	foreach (const QString &path, dbFilePaths) {
+		QFile dbFile(path);
+		if (dbFile.open(QIODevice::ReadOnly)){
+			if (dbSizeInBytes < dbFile.size()) {
+				dbSizeInBytes = dbFile.size();
+			}
+			dbFile.close();
+		}
+	}
+
+	if (dbSizeInBytes == 0) {
+		return;
+	}
+
+	QString size = QString::number(dbSizeInBytes) + " B";
+	if (dbSizeInBytes > 1000000000) {
+		size = QString::number(dbSizeInBytes / 1000000000) + " GB";
+	} else if (dbSizeInBytes > 1000000) {
+		size = QString::number(dbSizeInBytes / 1000000) + " MB";
+	} else if (dbSizeInBytes > 1000) {
+		size = QString::number(dbSizeInBytes / 1000) + " KB";
+	}
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(tr("Clean message database"));
+	msgBox.setText(tr("Performs a message database clean-up for the "
+	    "selected account. This action will block the entire application. "
+	    "The action may take several minutes to be completed. "
+	    "Furthermore, it requires more than %1 of free disk space to "
+	    "successfully proceed.").arg(size));
+	msgBox.setInformativeText(tr("Do you want to continue?"));
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::Yes == msgBox.exec()) {
+		/* This will block the UI. */
+		msgDbSet->vacuum();
+	}
 }
