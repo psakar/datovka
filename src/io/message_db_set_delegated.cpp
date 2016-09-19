@@ -29,6 +29,23 @@
 #include "message_db_set.h"
 #include "src/log/log.h"
 
+bool MessageDbSet::vacuum(void)
+{
+	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
+	     i != this->end(); ++i) {
+		MessageDb *db = i.value();
+		if (NULL == db) {
+			Q_ASSERT(0);
+			return false;
+		}
+		if (!db->vacuum()) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /*!
  * @brief Converts year to secondary key string.
  */

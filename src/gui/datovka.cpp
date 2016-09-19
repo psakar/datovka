@@ -4148,7 +4148,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(showImportZFOActionDialog()));
 	    /* Separator. */
 	connect(ui->actionVacuum_message_database, SIGNAL(triggered()),
-	    this, SLOT(vaccumMsgDbSlot()));
+	    this, SLOT(vacuumMsgDbSlot()));
 	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
 	    this, SLOT(splitMsgDbByYearsSlot()));
 
@@ -10737,7 +10737,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 /*
  * Slot: Vacuum message database.
  */
-void MainWindow::vaccumMsgDbSlot(void)
+void MainWindow::vacuumMsgDbSlot(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -10750,4 +10750,7 @@ void MainWindow::vaccumMsgDbSlot(void)
 	if (0 == msgDbSet) {
 		return;
 	}
+
+	/* This will block the UI. */
+	bool ret = msgDbSet->vacuum();
 }

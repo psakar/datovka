@@ -246,6 +246,28 @@ fail:
 	return false;
 }
 
+bool SQLiteDb::vacuum(void)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr("VACUUM");
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL command: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
 bool SQLiteDb::attachDb2(QSqlQuery &query, const QString &attachFileName)
 {
 	QString queryStr("ATTACH DATABASE :fileName AS " DB2);

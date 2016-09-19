@@ -697,14 +697,14 @@ private slots:
 	void showTagDlg(void);
 
 	/*!
-	 * @brief Add/detele tags to/from selected messages.
+	 * @brief Add/delete tags to/from selected messages.
 	 */
 	void addOrDeleteMsgTags(void);
 
 	/*!
-	 * @brief Vacumm message database.
+	 * @brief Vacuum message database.
 	 */
-	void vaccumMsgDbSlot(void);
+	void vacuumMsgDbSlot(void);
 
 private:
 

@@ -134,6 +134,13 @@ protected:
 	bool checkDb(bool quick);
 
 	/*!
+	 * @brief Performs database clean-up (VACUUM).
+	 *
+	 * @return False on error.
+	 */
+	bool vacuum(void);
+
+	/*!
 	 * @brief Attaches a database file to opened database.
 	 *
 	 * @param[in,out] query          Query to work with.

@@ -337,6 +337,11 @@ private:
 
 public: /* Database function that have been delegate to the container. */
 	/*!
+	 * @brief Call vacuum on all managed databases.
+	 */
+	bool vacuum(void);
+
+	/*!
 	 * @brief Return all received messages model.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
