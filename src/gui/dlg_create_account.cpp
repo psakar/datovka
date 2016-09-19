@@ -290,7 +290,7 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
 		Q_ASSERT(!userName.isEmpty());
-		Q_ASSERT(userName == this->usernameLineEdit->text());
+		Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
 		itemSettings = AccountModel::globAccounts[userName];
 		break;
 	default:
@@ -299,10 +299,10 @@ void DlgCreateAccount::saveAccount(void)
 	}
 
 	/* set account items */
-	itemSettings.setAccountName(this->accountLineEdit->text());
-	itemSettings.setUserName(this->usernameLineEdit->text());
+	itemSettings.setAccountName(this->accountLineEdit->text().trimmed());
+	itemSettings.setUserName(this->usernameLineEdit->text().trimmed());
 	itemSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
-	itemSettings.setPassword(this->passwordLineEdit->text());
+	itemSettings.setPassword(this->passwordLineEdit->text().trimmed());
 	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
 	itemSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
