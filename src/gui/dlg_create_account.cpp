@@ -24,7 +24,7 @@
 
 #include <QMessageBox>
 
-#include "dlg_create_account.h"
+#include "src/gui/dlg_create_account.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
 
@@ -41,6 +41,10 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	initAccountDialog();
 }
 
+AcntSettings DlgCreateAccount::getSubmittedData(void) const
+{
+	return m_accountInfo;
+}
 
 /* ========================================================================= */
 /*
@@ -277,10 +281,10 @@ void DlgCreateAccount::saveAccount(void)
 {
 	debugSlotCall();
 
-	AcntSettings itemSettings;
+	AcntSettings newAccountSettings;
 	const QString userName(m_accountInfo.userName());
 
-	/* set account index, itemTop and map itemSettings for account */
+	/* set account index, itemTop and account settings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
 		break;
@@ -291,7 +295,7 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_IDBOX:
 		Q_ASSERT(!userName.isEmpty());
 		Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
-		itemSettings = AccountModel::globAccounts[userName];
+		newAccountSettings = AccountModel::globAccounts[userName];
 		break;
 	default:
 		Q_ASSERT(0);
@@ -299,38 +303,41 @@ void DlgCreateAccount::saveAccount(void)
 	}
 
 	/* set account items */
-	itemSettings.setAccountName(this->accountLineEdit->text().trimmed());
-	itemSettings.setUserName(this->usernameLineEdit->text().trimmed());
-	itemSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
-	itemSettings.setPassword(this->passwordLineEdit->text().trimmed());
-	itemSettings.setTestAccount(this->testAccountCheckBox->isChecked());
-	itemSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
+	newAccountSettings.setAccountName(this->accountLineEdit->text().trimmed());
+	newAccountSettings.setUserName(this->usernameLineEdit->text().trimmed());
+	newAccountSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
+	newAccountSettings.setPassword(this->passwordLineEdit->text().trimmed());
+	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
+	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
 	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		itemSettings.setLoginMethod(LIM_USERNAME);
-		itemSettings.setP12File("");
+		newAccountSettings.setLoginMethod(LIM_USERNAME);
+		newAccountSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		itemSettings.setLoginMethod(LIM_CERT);
-		itemSettings.setPassword("");
-		itemSettings.setP12File(
+		newAccountSettings.setLoginMethod(LIM_CERT);
+		newAccountSettings.setPassword("");
+		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
 	} else if (this->loginmethodComboBox->currentIndex() ==
 	           USER_CERTIFICATE) {
-		itemSettings.setLoginMethod(LIM_USER_CERT);
-		itemSettings.setP12File(
+		newAccountSettings.setLoginMethod(LIM_USER_CERT);
+		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
 	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		itemSettings.setLoginMethod(LIM_HOTP);
-		itemSettings.setP12File("");
+		newAccountSettings.setLoginMethod(LIM_HOTP);
+		newAccountSettings.setP12File("");
 	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
-		itemSettings.setLoginMethod(LIM_TOTP);
-		itemSettings.setP12File("");
+		newAccountSettings.setLoginMethod(LIM_TOTP);
+		newAccountSettings.setP12File("");
 	} else {
 		Q_ASSERT(0);
 	}
 
 	/* Only for newly created account. */
-	itemSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
+	newAccountSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
+
+	/* Save the stored settings. */
+	m_accountInfo = newAccountSettings;
 
 	/* create new account / save current account */
 	switch (m_action) {
@@ -339,7 +346,13 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		AccountModel::globAccounts[userName] = itemSettings;
+		/*
+		 * This assignment represents hidden functionality. Either this
+		 * must be clearly documented or it must be removed.
+		 *
+		 * FIXME -- Do something!
+		 */
+		AccountModel::globAccounts[userName] = newAccountSettings;
 		/*
 		 * Catching the following signal is required only when
 		 * ACT_EDIT was enabled.
@@ -350,7 +363,7 @@ void DlgCreateAccount::saveAccount(void)
 		/* TODO -- Save/update related account DB entry? */
 		break;
 	case ACT_ADDNEW:
-		emit getAccountUserDataboxInfo(itemSettings);
+		emit getAccountUserDataboxInfo(newAccountSettings);
 		break;
 	default:
 		Q_ASSERT(0);

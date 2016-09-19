@@ -31,9 +31,9 @@
 #include <QTreeView>
 
 #include "src/common.h"
-#include "ui_dlg_create_account.h"
 #include "src/models/accounts_model.h"
-#include "src/io/account_db.h"
+//#include "src/io/account_db.h"
+#include "ui_dlg_create_account.h"
 
 
 class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
@@ -52,6 +52,14 @@ public:
 	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
 	    QWidget *parent = 0);
 
+	/*!
+	 * @brief Obtains account data as the have been submitted by the user.
+	 *
+	 * @return Returns data that have been submitted by the user when he
+	 *     pressed the Accept/OK button.
+	 */
+	AcntSettings getSubmittedData(void) const;
+
 private slots:
 	void setActiveButton(int);
 	void addCertificateFromFile(void);
@@ -65,7 +73,7 @@ private:
 	void initAccountDialog(void);
 	void setCurrentAccountData(void);
 
-	const AcntSettings m_accountInfo;
+	AcntSettings m_accountInfo;
 	const Action m_action;
 	int m_loginmethod;
 	QString m_certPath;
