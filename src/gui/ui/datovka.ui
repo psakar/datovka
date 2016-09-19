@@ -417,6 +417,7 @@ sent reply on this message</string>
     <addaction name="actionImport_messages_from_database"/>
     <addaction name="actionImport_ZFO_file_into_database"/>
     <addaction name="separator"/>
+    <addaction name="actionVacuum_message_database"/>
     <addaction name="actionSplit_database_by_years"/>
    </widget>
    <widget class="QMenu" name="menuMessage">
@@ -1153,6 +1154,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Edit tags</string>
+   </property>
+  </action>
+  <action name="actionVacuum_message_database">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/trash_16.png</normaloff>:/icons/3party/trash_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Vacuum message database</string>
    </property>
   </action>
  </widget>

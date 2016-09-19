@@ -701,6 +701,11 @@ private slots:
 	 */
 	void addOrDeleteMsgTags(void);
 
+	/*!
+	 * @brief Vacumm message database.
+	 */
+	void vaccumMsgDbSlot(void);
+
 private:
 
 	QTimer m_timerSyncAccounts;

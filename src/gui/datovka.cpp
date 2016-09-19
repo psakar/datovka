@@ -4147,6 +4147,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()),
 	    this, SLOT(showImportZFOActionDialog()));
 	    /* Separator. */
+	connect(ui->actionVacuum_message_database, SIGNAL(triggered()),
+	    this, SLOT(vaccumMsgDbSlot()));
 	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
 	    this, SLOT(splitMsgDbByYearsSlot()));
 
@@ -10589,6 +10591,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionImport_messages_from_database->isEnabled();
 	ui->actionImport_ZFO_file_into_database->isEnabled();
 	    /* Separator. */
+	ui->actionVacuum_message_database->isEnabled();
 	ui->actionSplit_database_by_years->isEnabled();
 
 	/* Message menu. */
@@ -10727,4 +10730,24 @@ void MainWindow::addOrDeleteMsgTags(void)
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Vacuum message database.
+ */
+void MainWindow::vaccumMsgDbSlot(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	MessageDbSet *msgDbSet = accountDbSet(userName, this);
+
+	if (0 == msgDbSet) {
+		return;
+	}
 }
