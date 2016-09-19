@@ -4850,22 +4850,23 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *newAccountDialog = new DlgCreateAccount(AcntSettings(),
+	QDialog *accountDlg = new DlgCreateAccount(AcntSettings(),
 	    DlgCreateAccount::ACT_ADDNEW, this);
 
-	connect(newAccountDialog,
-	    SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
+	connect(accountDlg, SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
-	if (QDialog::Accepted == newAccountDialog->exec()) {
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
+
+	if (QDialog::Accepted == dlgRet) {
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
 			saveSettings();
 		}
 	}
-	newAccountDialog->deleteLater();
 }
 
 
@@ -4994,17 +4995,18 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *editAccountDialog = new DlgCreateAccount(
+	QDialog *accountDlg = new DlgCreateAccount(
 	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
 	    this);
 
-	if (QDialog::Accepted == editAccountDialog->exec()) {
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
+
+	if (QDialog::Accepted == dlgRet) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
 		saveSettings();
 	}
-
-	editAccountDialog->deleteLater();
 }
 
 /* ========================================================================= */
@@ -8061,10 +8063,10 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 	if (0 != mw) {
 		// when pwd is not stored in settings then open account dialog
 		if (usedPwd.isEmpty()) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
-			int dlgRet = editAccountDialog->exec();
-			editAccountDialog->deleteLater();
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_PWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
 			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 			} else {
@@ -8086,10 +8088,10 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 
 		// if authentication error, show account dialog
 		while (status == IE_NOT_LOGGED_IN || status == IE_PARTIAL_SUCCESS) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_EDIT, mw);
-			int dlgRet = editAccountDialog->exec();
-			editAccountDialog->deleteLater();
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_EDIT, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
 			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 				status = isdsLoginUserName(isdsSessions.session(userName),
@@ -8219,10 +8221,10 @@ bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
 
 	if (certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_CERT, mw);
-			int dlgRet = editAccountDialog->exec();
-			editAccountDialog->deleteLater();
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_CERT, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
 			if (QDialog::Accepted == dlgRet) {
 				certPath = accountInfo.p12File();
 				mw->saveSettings();
@@ -8362,10 +8364,10 @@ bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 
 	if (usedPwd.isEmpty() || certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_CERTPWD, mw);
-			int dlgRet = editAccountDialog->exec();
-			editAccountDialog->deleteLater();
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_CERTPWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
 			if (QDialog::Accepted == dlgRet) {
 				certPath = accountInfo.p12File();
 				usedPwd = accountInfo.password();
@@ -8505,10 +8507,10 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 	QString certPath = accountInfo.p12File();
 	QString idBox;
 
-	QDialog *editAccountDialog = new DlgCreateAccount(userName,
+	QDialog *accountDlg = new DlgCreateAccount(userName,
 	    DlgCreateAccount::ACT_IDBOX, this);
-	int dlgRet = editAccountDialog->exec();
-	editAccountDialog->deleteLater();
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
 	if (QDialog::Accepted == dlgRet) {
 		certPath = accountInfo.p12File();
 		idBox = accountInfo.userName();
@@ -8628,10 +8630,10 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 	QString usedPwd = accountInfo.password();
 	if (usedPwd.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
-			int dlgRet = editAccountDialog->exec();
-			editAccountDialog->deleteLater();
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_PWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
 			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
