@@ -4816,6 +4816,7 @@ void MainWindow::openSendMessageDialog(int action)
 	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
 	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
 
+	sendMsgDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	sendMsgDialog->show();
 
 }
@@ -9315,6 +9316,7 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	    this, SLOT(messageItemFromSearchSelection(QString, qint64, QString, int)));
 	connect(dlgMsgSearch, SIGNAL(finished(int)),
 	    this, SLOT(msgAdvancedDlgFinished(int)));
+	dlgMsgSearch->setAttribute(Qt::WA_DeleteOnClose, true);
 	dlgMsgSearch->show();
 	m_searchDlgActive = true;
 }
