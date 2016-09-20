@@ -328,6 +328,7 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_keep_alive.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
+    src/worker/task_vacuum_db_set.cpp \
     src/worker/task_verify_message.cpp
 
 HEADERS += src/cli/cli.h \
@@ -404,6 +405,7 @@ HEADERS += src/cli/cli.h \
     src/worker/task_keep_alive.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
+    src/worker/task_vacuum_db_set.h \
     src/worker/task_verify_message.h
 
 FORMS += src/gui/ui/datovka.ui \

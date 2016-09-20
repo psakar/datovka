@@ -86,6 +86,7 @@
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
 #include "src/worker/task_import_zfo.h"
+#include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -10771,27 +10772,46 @@ void MainWindow::vacuumMsgDbSlot(void)
 	}
 
 	QString size = QString::number(dbSizeInBytes) + " B";
-	if (dbSizeInBytes > 1000000000) {
+	if (dbSizeInBytes >= 1000000000) {
 		size = QString::number(dbSizeInBytes / 1000000000) + " GB";
-	} else if (dbSizeInBytes > 1000000) {
+	} else if (dbSizeInBytes >= 1000000) {
 		size = QString::number(dbSizeInBytes / 1000000) + " MB";
-	} else if (dbSizeInBytes > 1000) {
+	} else if (dbSizeInBytes >= 1000) {
 		size = QString::number(dbSizeInBytes / 1000) + " KB";
 	}
 
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Question);
-	msgBox.setWindowTitle(tr("Clean message database"));
-	msgBox.setText(tr("Performs a message database clean-up for the "
-	    "selected account. This action will block the entire application. "
-	    "The action may take several minutes to be completed. "
-	    "Furthermore, it requires more than %1 of free disk space to "
-	    "successfully proceed.").arg(size));
-	msgBox.setInformativeText(tr("Do you want to continue?"));
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::No);
-	if (QMessageBox::Yes == msgBox.exec()) {
-		/* This will block the UI. */
-		msgDbSet->vacuum();
+	{
+		QMessageBox msgBox(this);
+		msgBox.setIcon(QMessageBox::Question);
+		msgBox.setWindowTitle(tr("Clean message database"));
+		msgBox.setText(tr("Performs a message database clean-up for the selected account. "
+		    "This action will block the entire application. "
+		    "The action may take several minutes to be completed. "
+		    "Furthermore, it requires more than %1 of free disk space to successfully proceed.").arg(size));
+		msgBox.setInformativeText(tr("Do you want to continue?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes != msgBox.exec()) {
+			return;
+		}
 	}
+
+	TaskVacuumDbSet *task = new (::std::nothrow) TaskVacuumDbSet(msgDbSet);
+	task->setAutoDelete(false);
+	/* This will block the GUI. */
+	globWorkPool.runSingle(task);
+
+	if (task->m_success) {
+		QMessageBox::information(this,
+		    tr("Database clean-up successful"),
+		    tr("The database clean-up has finished successfully."),
+		    QMessageBox::Ok);
+	} else {
+		QMessageBox::warning(this,
+		    tr("Database clean-up failure"),
+		    tr("The database clean-up failed with error message: %1").arg(task->m_error),
+		    QMessageBox::Ok);
+	}
+
+	delete task;
 }
