@@ -104,7 +104,7 @@ qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
 #warning "Compiling against version < Qt-5.4."
 qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
 {
-	Q_ASSERT(0 != dbSet);
+	Q_ASSERT(!storagePlace.isEmpty());
 
 	/* TODO */
 
