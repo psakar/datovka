@@ -522,6 +522,7 @@ void MainWindow::applicationPreferences(void)
 
 	QDialog *dlgPrefs = new DlgPreferences(this);
 	dlgPrefs->exec();
+	dlgPrefs->deleteLater();
 
 	// set actual download timer value from settings if is enable
 	if (globPref.download_on_background) {
@@ -553,6 +554,7 @@ void MainWindow::proxySettings(void)
 		/* Dialog accepted, store all settings. */
 		saveSettings();
 	}
+	dlgProxy->deleteLater();
 }
 
 
@@ -948,6 +950,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	}
 
 	menu->exec(QCursor::pos());
+	menu->deleteLater();
 }
 
 /*!
@@ -1257,6 +1260,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionDelete_message_from_db);
 
 	menu->exec(QCursor::pos());
+	menu->deleteLater();
 }
 
 void MainWindow::viewSelectedMessage(void)
@@ -1772,6 +1776,7 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionEmail_selected_attachments);
 
 	menu->exec(QCursor::pos());
+	menu->deleteLater();
 }
 
 
@@ -4811,6 +4816,7 @@ void MainWindow::openSendMessageDialog(int action)
 	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
 	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
 
+	sendMsgDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	sendMsgDialog->show();
 
 }
@@ -4844,16 +4850,18 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *newAccountDialog = new DlgCreateAccount(AcntSettings(),
+	QDialog *accountDlg = new DlgCreateAccount(AcntSettings(),
 	    DlgCreateAccount::ACT_ADDNEW, this);
 
-	connect(newAccountDialog,
-	    SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
+	connect(accountDlg, SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
-	if (QDialog::Accepted == newAccountDialog->exec()) {
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
+
+	if (QDialog::Accepted == dlgRet) {
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
 			saveSettings();
@@ -4967,6 +4975,7 @@ void MainWindow::changeAccountPassword(void)
 
 	QDialog *changePwd = new DlgChangePwd(dbId, userName, this);
 	changePwd->exec();
+	changePwd->deleteLater();
 }
 
 
@@ -4986,17 +4995,18 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *editAccountDialog = new DlgCreateAccount(
+	QDialog *accountDlg = new DlgCreateAccount(
 	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
 	    this);
 
-	if (QDialog::Accepted == editAccountDialog->exec()) {
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
+
+	if (QDialog::Accepted == dlgRet) {
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
 		saveSettings();
 	}
-
-	editAccountDialog->deleteLater();
 }
 
 /* ========================================================================= */
@@ -5066,6 +5076,7 @@ void MainWindow::changeDataDirectory(void)
 	    this, SLOT(receiveNewDataPath(QString, QString, QString)));
 
 	change_directory->exec();
+	change_directory->deleteLater();
 }
 
 
@@ -5210,6 +5221,7 @@ void MainWindow::findDatabox(void)
 	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
 	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
 	dsSearch->exec();
+	dsSearch->deleteLater();
 }
 
 
@@ -5689,6 +5701,7 @@ void MainWindow::showImportDatabaseDialog(void)
 	    SIGNAL(returnAction(bool)), this,
 	    SLOT(prepareCreateAccountFromDatabaseFile(bool)));
 	prepareCreateAccount->exec();
+	prepareCreateAccount->deleteLater();
 }
 
 
@@ -6118,6 +6131,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 	    *dbSet, userName, m_export_correspond_dir, dbId, this);
 
 	correspondence_overview->exec();
+	correspondence_overview->deleteLater();
 	storeExportPath();
 }
 
@@ -6139,6 +6153,7 @@ void MainWindow::showImportZFOActionDialog(void)
 	    SLOT(createZFOListForImport(enum ImportZFODialog::ZFOtype,
 	        enum ImportZFODialog::ZFOaction, bool)));
 	importZfo->exec();
+	importZfo->deleteLater();
 }
 
 
@@ -6444,6 +6459,7 @@ void MainWindow::showImportZfoResultDialogue(int filesCnt,
 	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
 	    errorFilesList, successFilesList, existFilesList, this);
 	importZfoResult->exec();
+	importZfoResult->deleteLater();
 }
 
 
@@ -7806,6 +7822,7 @@ void MainWindow::showSignatureDetails(void)
 	QDialog *signature_detail = new DlgSignatureDetail(*dbSet, dmId,
 	    deliveryTime, this);
 	signature_detail->exec();
+	signature_detail->deleteLater();
 }
 
 
@@ -8046,9 +8063,11 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 	if (0 != mw) {
 		// when pwd is not stored in settings then open account dialog
 		if (usedPwd.isEmpty()) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
-			if (QDialog::Accepted == editAccountDialog->exec()) {
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_PWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
+			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 			} else {
 				accountInfo.setRememberPwd(false);
@@ -8069,9 +8088,11 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 
 		// if authentication error, show account dialog
 		while (status == IE_NOT_LOGGED_IN || status == IE_PARTIAL_SUCCESS) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_EDIT, mw);
-			if (QDialog::Accepted == editAccountDialog->exec()) {
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_EDIT, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
+			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 				status = isdsLoginUserName(isdsSessions.session(userName),
 				    userName, usedPwd, accountInfo.isTestAccount());
@@ -8200,9 +8221,11 @@ bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
 
 	if (certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_CERT, mw);
-			if (QDialog::Accepted == editAccountDialog->exec()) {
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_CERT, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
+			if (QDialog::Accepted == dlgRet) {
 				certPath = accountInfo.p12File();
 				mw->saveSettings();
 			} else {
@@ -8341,9 +8364,11 @@ bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 
 	if (usedPwd.isEmpty() || certPath.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_CERTPWD, mw);
-			if (QDialog::Accepted == editAccountDialog->exec()) {
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_CERTPWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
+			if (QDialog::Accepted == dlgRet) {
 				certPath = accountInfo.p12File();
 				usedPwd = accountInfo.password();
 			} else {
@@ -8482,9 +8507,11 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 	QString certPath = accountInfo.p12File();
 	QString idBox;
 
-	QDialog *editAccountDialog = new DlgCreateAccount(userName,
+	QDialog *accountDlg = new DlgCreateAccount(userName,
 	    DlgCreateAccount::ACT_IDBOX, this);
-	if (QDialog::Accepted == editAccountDialog->exec()) {
+	int dlgRet = accountDlg->exec();
+	accountDlg->deleteLater();
+	if (QDialog::Accepted == dlgRet) {
 		certPath = accountInfo.p12File();
 		idBox = accountInfo.userName();
 		saveSettings();
@@ -8603,9 +8630,11 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 	QString usedPwd = accountInfo.password();
 	if (usedPwd.isEmpty()) {
 		if (0 != mw) {
-			QDialog *editAccountDialog = new DlgCreateAccount(
-			    accountInfo, DlgCreateAccount::ACT_PWD, mw);
-			if (QDialog::Accepted == editAccountDialog->exec()) {
+			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
+			    DlgCreateAccount::ACT_PWD, mw);
+			int dlgRet = accountDlg->exec();
+			accountDlg->deleteLater();
+			if (QDialog::Accepted == dlgRet) {
 				usedPwd = accountInfo.password();
 				mw->saveSettings();
 			} else if (!pwd.isEmpty()) {
@@ -9289,6 +9318,7 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	    this, SLOT(messageItemFromSearchSelection(QString, qint64, QString, int)));
 	connect(dlgMsgSearch, SIGNAL(finished(int)),
 	    this, SLOT(msgAdvancedDlgFinished(int)));
+	dlgMsgSearch->setAttribute(Qt::WA_DeleteOnClose, true);
 	dlgMsgSearch->show();
 	m_searchDlgActive = true;
 }
@@ -9367,6 +9397,7 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
 	    this,
 	    SLOT(prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction)));
 	timestampExpirDialog->exec();
+	timestampExpirDialog->deleteLater();
 }
 
 
