@@ -64,20 +64,21 @@ private:
 	QString storagePlace(MessageDbSet *dbSet);
 
 	/*!
-	 * @brief Returns amount of available free space in directory.
+	 * @brief Check whether free space in directory available.
 	 *
 	 * @param storagePlace Full path to database directory.
-	 * @return Amount of available free space, -1 on error.
+	 * @param spaceSize Size of space requested.
+	 * @return True if requested amount of space is available.
 	 */
 	static
-	qint64 storageSpace(const QString &storagePlace);
+	bool haveStorageSpace(const QString &storagePlace, qint64 spaceSize);
 
 	/*!
 	 * @brief Calls VACUUM on all databases in database container.
 	 *
 	 * @param[in,out] dbSet Non-null pointer to database container.
 	 * @param[out]    error Error string to be set in case of an error.
-	 * @return True on success, False on error.
+	 * @return True on success, false on error.
 	 */
 	static
 	bool vacuumDbSet(MessageDbSet *dbSet, QString &error);

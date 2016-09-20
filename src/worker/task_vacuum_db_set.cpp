@@ -25,6 +25,9 @@
 #include <QObject>
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 #include <QStorageInfo>
+#else /* < Qt-5.4 */
+#warning "Compiling against version < Qt-5.4." /* Doesn't have QStorageInfo. */
+#include <QTemporaryFile>
 #endif /* >= Qt-5.4 */
 #include <QThread>
 
@@ -87,28 +90,49 @@ QString TaskVacuumDbSet::storagePlace(MessageDbSet *dbSet)
 }
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
-qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
+bool TaskVacuumDbSet::haveStorageSpace(const QString &storagePlace,
+    qint64 spaceSize)
 {
 	Q_ASSERT(!storagePlace.isEmpty());
+	Q_ASSERT(spaceSize > 0);
 
 	QStorageInfo sInfo(storagePlace);
 	if (!sInfo.isValid()) {
 		logErrorNL("Cannot obtain storage info about '%s'.",
 		    storagePlace.toUtf8().constData());
-		return -1;
+		return false;
 	}
 
-	return sInfo.bytesAvailable();
+	return sInfo.bytesAvailable() > spaceSize;
 }
 #else /* < Qt-5.4 */
-#warning "Compiling against version < Qt-5.4."
-qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
+bool TaskVacuumDbSet::haveStorageSpace(const QString &storagePlace,
+    qint64 spaceSize)
 {
 	Q_ASSERT(!storagePlace.isEmpty());
+	Q_ASSERT(spaceSize > 0);
 
-	/* TODO */
+	/*
+	 * Try creating a file of given file to check whether enough space
+	 * available.
+	 */
 
-	return -1;
+	QTemporaryFile tmpFile(storagePlace + QDir::separator() + QLatin1String("XXXXXX"));
+	tmpFile.open();
+	tmpFile.setAutoRemove(true);
+	if (!tmpFile.exists()) {
+		logErrorNL("Cannot create temporary file '%s' to check available space.",
+		    tmpFile.fileName().toUtf8().constData());
+		return false;
+	}
+
+	if (!tmpFile.resize(spaceSize)) {
+		logErrorNL("Cannot acquire requested space in location '%s'.",
+		    storagePlace.toUtf8().constData());
+		return false;
+	}
+
+	return true;
 }
 #endif /* >= Qt-5.4 */
 
@@ -117,7 +141,7 @@ bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 	Q_ASSERT(0 != dbSet);
 
 	qint64 maxDbSize = dbSet->underlyingFileSize(MessageDbSet::SC_LARGEST);
-	if (maxDbSize == 0) {
+	if (maxDbSize <= 0) {
 		/* Nothing to do. */
 		return true;
 	}
@@ -132,7 +156,7 @@ bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 	}
 
 	/* Test for available space. */
-	if (maxDbSize > storageSpace(dbDir)) {
+	if (!haveStorageSpace(dbDir, maxDbSize)) {
 		error = QObject::tr("Not enough space on device where '%1' resides.").arg(dbDir);
 		return false;
 	}
