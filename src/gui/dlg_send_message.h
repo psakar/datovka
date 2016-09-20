@@ -106,7 +106,7 @@ private:
 	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
 
 	void initNewMessageDialog(void);
-	void calculateAndShowTotalAttachSize(void);
+	bool calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
