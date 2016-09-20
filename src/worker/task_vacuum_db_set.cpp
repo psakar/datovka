@@ -21,7 +21,11 @@
  * the two.
  */
 
+#include <QtGlobal> /* QT_VERSION */
 #include <QObject>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+#include <QStorageInfo>
+#endif /* >= Qt-5.4 */
 #include <QThread>
 
 #include "src/log/log.h"
@@ -57,6 +61,57 @@ void TaskVacuumDbSet::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
+QString TaskVacuumDbSet::storagePlace(MessageDbSet *dbSet)
+{
+	Q_ASSERT(0 != dbSet);
+
+	QString place;
+
+	const QStringList fileNames(dbSet->fileNames());
+	foreach (const QString &fileName, fileNames) {
+		const QFileInfo fInfo(fileName);
+		if (!fInfo.isFile()) {
+			return QString();
+		}
+		if (!place.isEmpty()) {
+			QString otherPlace(fInfo.absoluteDir().absolutePath());
+			if (place != otherPlace) {
+				return QString();
+			}
+		} else {
+			place = fInfo.absoluteDir().absolutePath();
+		}
+	}
+
+	return place;
+}
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
+{
+	Q_ASSERT(!storagePlace.isEmpty());
+
+	QStorageInfo sInfo(storagePlace);
+	if (!sInfo.isValid()) {
+		logErrorNL("Cannot obtain storage info about '%s'.",
+		    storagePlace.toUtf8().constData());
+		return -1;
+	}
+
+	return sInfo.bytesAvailable();
+}
+#else /* < Qt-5.4 */
+#warning "Compiling against version < Qt-5.4."
+qint64 TaskVacuumDbSet::storageSpace(const QString &storagePlace)
+{
+	Q_ASSERT(0 != dbSet);
+
+	/* TODO */
+
+	return -1;
+}
+#endif /* >= Qt-5.4 */
+
 bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 {
 	Q_ASSERT(0 != dbSet);
@@ -67,7 +122,20 @@ bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 		return true;
 	}
 
-	/* TODO -- Test available free space. */
+	/* Small adjustment. */
+	maxDbSize += (qint64)(maxDbSize * 0.02);
+
+	const QString dbDir(storagePlace(dbSet));
+	if (dbDir.isEmpty()) {
+		error = QObject::tr("Could not determine database directory");
+		return false;
+	}
+
+	/* Test for available space. */
+	if (maxDbSize > storageSpace(dbDir)) {
+		error = QObject::tr("Not enough space on device where '%1' resides.").arg(dbDir);
+		return false;
+	}
 
 	bool ret = dbSet->vacuum();
 	if (!ret) {

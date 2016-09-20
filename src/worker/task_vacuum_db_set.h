@@ -34,7 +34,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in,out] dbSet        Non-null pointer to database container.
+	 * @param[in,out] dbSet Non-null pointer to database container.
 	 */
 	explicit TaskVacuumDbSet(MessageDbSet *dbSet);
 
@@ -54,6 +54,31 @@ private:
 	TaskVacuumDbSet(const TaskVacuumDbSet &);
 	TaskVacuumDbSet &operator=(const TaskVacuumDbSet &);
 
+	/*!
+	 * @brief Returns full path to database file directory.
+	 *
+	 * @param dbSet Non-null pointer to database container.
+	 * @return Null string on error.
+	 */
+	static
+	QString storagePlace(MessageDbSet *dbSet);
+
+	/*!
+	 * @brief Returns amount of available free space in directory.
+	 *
+	 * @param storagePlace Full path to database directory.
+	 * @return Amount of available free space, -1 on error.
+	 */
+	static
+	qint64 storageSpace(const QString &storagePlace);
+
+	/*!
+	 * @brief Calls VACUUM on all databases in database container.
+	 *
+	 * @param[in,out] dbSet Non-null pointer to database container.
+	 * @param[out]    error Error string to be set in case of an error.
+	 * @return True on success, False on error.
+	 */
 	static
 	bool vacuumDbSet(MessageDbSet *dbSet, QString &error);
 
