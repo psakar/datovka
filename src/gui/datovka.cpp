@@ -10750,18 +10750,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 		return;
 	}
 
-	qint64 dbSizeInBytes = 0;
-	QStringList dbFilePaths = msgDbSet->fileNames();
-	foreach (const QString &path, dbFilePaths) {
-		QFile dbFile(path);
-		if (dbFile.open(QIODevice::ReadOnly)){
-			if (dbSizeInBytes < dbFile.size()) {
-				dbSizeInBytes = dbFile.size();
-			}
-			dbFile.close();
-		}
-	}
-
+	qint64 dbSizeInBytes = msgDbSet->underlyingFileSize(MessageDbSet::SC_LARGEST);
 	if (dbSizeInBytes == 0) {
 		return;
 	}
