@@ -10742,6 +10742,21 @@ void MainWindow::vacuumMsgDbSlot(void)
 {
 	debugSlotCall();
 
+	if (!globPref.store_messages_on_disk) {
+		showStatusTextWithTimeout(tr("Vacuum cannot be performed on databases in memory."));
+
+		QMessageBox msgBox(this);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Database operation error"));
+		msgBox.setText(tr("Database clean-up cannot be performed on database in memory."));
+		msgBox.setInformativeText(tr("Cannot call VACUUM on database in memory."));
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	}
+
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
 
