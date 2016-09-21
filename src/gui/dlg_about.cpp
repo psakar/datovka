@@ -41,35 +41,39 @@ DlgAbout::DlgAbout(QWidget *parent)
 {
 	setupUi(this);
 
+	this->labelVersion->setText(
+	    "<span style=\"font-size:15pt;\"><b>Datovka"
 #ifdef PORTABLE_APPLICATION
-	this->labelDatovka->setText(this->labelDatovka->text() + " - " +
-	    tr("Portable version"));
+	    " - " + tr("Portable version") +
 #endif /* PORTABLE_APPLICATION */
-	this->labelVersionNum->setText(VERSION);
+	    "</b></span>"
+	    "<br/><br/>"
+	    "<b>" + tr("Version") + ": " VERSION "</b>"
+	    "<br/>"
+	    + tr("Free client for Czech eGov data boxes."));
+	this->labelVersion->setAlignment(Qt::AlignHCenter);
+	this->labelVersion->setTextFormat(Qt::RichText);
+	this->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	const QString copyrightHtml(
 	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
-	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;");
+	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;"
+	    "<br/>"
+	    "&lt;<a href=\"" DATOVKA_HOMEPAGE_URL "\">" DATOVKA_HOMEPAGE_URL "</a>&gt;");
 	this->labelCopy->setText(copyrightHtml);
 	this->labelCopy->setTextFormat(Qt::RichText);
 	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelCopy->setOpenExternalLinks(true);
 
-	QString url = "&lt;<a href=\"" DATOVKA_HOMEPAGE_URL "\">"
-	    DATOVKA_HOMEPAGE_URL "</a>&gt;";
-	this->labelUrl->setText(url);
-	this->labelUrl->setTextFormat(Qt::RichText);
-	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	this->labelUrl->setOpenExternalLinks(true);
-
 	QString librariesStr("<b>");
 	librariesStr += QObject::tr("Depends on libraries:");
 	librariesStr += "</b><br/>";
-	this->labelLibs->setAlignment(Qt::AlignHCenter);
-	this->labelLibs->setTextFormat(Qt::RichText);
-	this->labelLibs->setWordWrap(true);
 	this->labelLibs->setText(librariesStr +
 	    libraryDependencies().join("<br/>"));
+	this->labelLibs->setTextFormat(Qt::RichText);
+	this->labelLibs->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	this->labelLibs->setAlignment(Qt::AlignHCenter);
+	this->labelLibs->setWordWrap(true);
 
 	connect(this->pushButtonLicence, SIGNAL(clicked()), this,
 	    SLOT(showLicence()));
