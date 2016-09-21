@@ -41,28 +41,29 @@ DlgAbout::DlgAbout(QWidget *parent)
 {
 	setupUi(this);
 
+	this->labelVersion->setText(
+	    "<span style=\"font-size:15pt;\"><b>Datovka"
 #ifdef PORTABLE_APPLICATION
-	this->labelDatovka->setText(this->labelDatovka->text() + " - " +
-	    tr("Portable version"));
-	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	    " - " + tr("Portable version") +
 #endif /* PORTABLE_APPLICATION */
-	this->labelVersion->setText(this->labelVersion->text() + " " VERSION);
+	    "</b></span>"
+	    "<br/><br/>"
+	    "<b>" + tr("Version") + ": " VERSION "</b>"
+	    "<br/>"
+	    + tr("Free client for Czech eGov data boxes."));
+	this->labelVersion->setAlignment(Qt::AlignHCenter);
+	this->labelVersion->setTextFormat(Qt::RichText);
 	this->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	const QString copyrightHtml(
 	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
-	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;");
+	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;"
+	    "<br/>"
+	    "&lt;<a href=\"" DATOVKA_HOMEPAGE_URL "\">" DATOVKA_HOMEPAGE_URL "</a>&gt;");
 	this->labelCopy->setText(copyrightHtml);
 	this->labelCopy->setTextFormat(Qt::RichText);
 	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
 	this->labelCopy->setOpenExternalLinks(true);
-
-	QString url = "&lt;<a href=\"" DATOVKA_HOMEPAGE_URL "\">"
-	    DATOVKA_HOMEPAGE_URL "</a>&gt;";
-	this->labelUrl->setText(url);
-	this->labelUrl->setTextFormat(Qt::RichText);
-	this->labelUrl->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	this->labelUrl->setOpenExternalLinks(true);
 
 	QString librariesStr("<b>");
 	librariesStr += QObject::tr("Depends on libraries:");
