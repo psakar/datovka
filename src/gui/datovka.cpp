@@ -10796,10 +10796,17 @@ void MainWindow::vacuumMsgDbSlot(void)
 		}
 	}
 
+	showStatusTextPermanently(tr("Performing database clean-up."));
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	TaskVacuumDbSet *task = new (::std::nothrow) TaskVacuumDbSet(msgDbSet);
 	task->setAutoDelete(false);
-	/* This will block the GUI. */
+	/* This will block the GUI and all workers. */
 	globWorkPool.runSingle(task);
+
+	showStatusTextWithTimeout(tr("Database clean-up finished."));
+	QApplication::restoreOverrideCursor();
 
 	if (task->m_success) {
 		QMessageBox::information(this,
