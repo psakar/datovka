@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,14 +162,10 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	/* Download sent/received message list from ISDS for current account */
 	if (MSG_SENT == msgDirect) {
 		status = isds_get_list_of_sent_messages(session,
-		    NULL, NULL, NULL,
-		    dmStatusFilter,
-		    0, dmLimit, &messageList);
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
 	} else if (MSG_RECEIVED == msgDirect) {
 		status = isds_get_list_of_received_messages(session,
-		    NULL, NULL, NULL,
-		    dmStatusFilter,
-		    0, dmLimit, &messageList);
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
 	}
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 20);
@@ -222,10 +218,9 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 		diff += delta;
 		emit globMsgProcEmitter.progressChange(progressLabel,
-		    (int) (20 + diff));
+		    (int)(20 + diff));
 
-
-		const isds_message *item = (isds_message *) box->data;
+		const isds_message *item = (isds_message *)box->data;
 
 		if (NULL == item->envelope) {
 			/* TODO - free allocated stuff */
@@ -280,15 +275,14 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			     *item->envelope->dmMessageStatus);
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
-
 				/* Update envelope */
 				Task::updateEnvelope(msgDirect, *messageDb,
 				    item->envelope);
 
 				/*
 				 * Download whole message again if exists in db
-				 * or
-				 * is required by downloadWhole in the settings
+				 * (and status has changed) or is required by
+				 * downloadWhole in the settings.
 				 */
 				if (downloadWhole || messageDb->msgsStoredWhole(dmId)) {
 					TaskDownloadMessage *task;
