@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,14 +162,10 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	/* Download sent/received message list from ISDS for current account */
 	if (MSG_SENT == msgDirect) {
 		status = isds_get_list_of_sent_messages(session,
-		    NULL, NULL, NULL,
-		    dmStatusFilter,
-		    0, dmLimit, &messageList);
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
 	} else if (MSG_RECEIVED == msgDirect) {
 		status = isds_get_list_of_received_messages(session,
-		    NULL, NULL, NULL,
-		    dmStatusFilter,
-		    0, dmLimit, &messageList);
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
 	}
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 20);
@@ -222,10 +218,9 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 		diff += delta;
 		emit globMsgProcEmitter.progressChange(progressLabel,
-		    (int) (20 + diff));
+		    (int)(20 + diff));
 
-
-		const isds_message *item = (isds_message *) box->data;
+		const isds_message *item = (isds_message *)box->data;
 
 		if (NULL == item->envelope) {
 			/* TODO - free allocated stuff */
@@ -257,15 +252,12 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
 
-		/* message is not in db (-1) */
+		/* Message is NOT in db (-1), -> insert */
 		if (-1 == dmDbMsgStatus) {
+
 			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
-
 			if (downloadWhole) {
-				QString errMsg;
-
 				TaskDownloadMessage *task;
-
 				task = new (std::nothrow) TaskDownloadMessage(
 				    userName, &dbSet, msgDirect, dmId,
 				    deliveryTime, true);
@@ -275,27 +267,25 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			newMsgIdList.append(dmId);
 			newcnt++;
 
-		/* Message is in db (dmDbMsgStatus <> -1). */
+		/* Message is in db (dmDbMsgStatus <> -1), -> update */
 		} else {
-			/* Update envelope if message status has changed. */
+
+			/* Update message and envelope only if status has changed. */
 			const int dmNewMsgStatus = convertHexToDecIndex(
 			     *item->envelope->dmMessageStatus);
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
+				/* Update envelope */
 				Task::updateEnvelope(msgDirect, *messageDb,
 				    item->envelope);
-			}
 
-			if (MSG_SENT == msgDirect) {
 				/*
-				 * Sent messages content will be downloaded
-				 * only if those message state is 1 or 2.
+				 * Download whole message again if exists in db
+				 * (and status has changed) or is required by
+				 * downloadWhole in the settings.
 				 */
-				if (downloadWhole && (dmDbMsgStatus <= 2)) {
-					QString errMsg;
-
+				if (downloadWhole || messageDb->msgsStoredWhole(dmId)) {
 					TaskDownloadMessage *task;
-
 					task = new (std::nothrow) TaskDownloadMessage(
 					    userName, &dbSet, msgDirect, dmId,
 					    deliveryTime, true);
@@ -304,25 +294,12 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 					    WorkerPool::PREPEND);
 				}
 
-				if (dmDbMsgStatus != dmNewMsgStatus) {
+				/* Update delivery info of sent message */
+				if (MSG_SENT == msgDirect) {
 					downloadMessageState(msgDirect,
 					    userName, dmId, true, dbSet,
 					    error, longError);
 				}
-			}
-
-			/* Message is in db, but the content is missing. */
-			if (downloadWhole &&
-			    !messageDb->msgsStoredWhole(dmId)) {
-				QString errMsg;
-
-				TaskDownloadMessage *task;
-
-				task = new (std::nothrow) TaskDownloadMessage(
-				    userName, &dbSet, msgDirect, dmId,
-				    deliveryTime, true);
-				task->setAutoDelete(true);
-				globWorkPool.assignLo(task, WorkerPool::PREPEND);
 			}
 		}
 
