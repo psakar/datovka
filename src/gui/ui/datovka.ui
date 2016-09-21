@@ -1080,6 +1080,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Time stamp expiration check</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionHomepage">
    <property name="icon">
@@ -1155,6 +1158,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Edit tags</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionVacuum_message_database">
    <property name="icon">
@@ -1163,6 +1169,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Vacuum message database</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
