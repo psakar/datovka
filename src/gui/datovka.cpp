@@ -86,6 +86,7 @@
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
 #include "src/worker/task_import_zfo.h"
+#include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
 #include "ui_datovka.h"
 
@@ -4147,6 +4148,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionImport_ZFO_file_into_database, SIGNAL(triggered()),
 	    this, SLOT(showImportZFOActionDialog()));
 	    /* Separator. */
+	connect(ui->actionVacuum_message_database, SIGNAL(triggered()),
+	    this, SLOT(vacuumMsgDbSlot()));
 	connect(ui->actionSplit_database_by_years, SIGNAL(triggered()),
 	    this, SLOT(splitMsgDbByYearsSlot()));
 
@@ -10589,6 +10592,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionImport_messages_from_database->isEnabled();
 	ui->actionImport_ZFO_file_into_database->isEnabled();
 	    /* Separator. */
+	ui->actionVacuum_message_database->isEnabled();
 	ui->actionSplit_database_by_years->isEnabled();
 
 	/* Message menu. */
@@ -10727,4 +10731,94 @@ void MainWindow::addOrDeleteMsgTags(void)
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Vacuum message database.
+ */
+void MainWindow::vacuumMsgDbSlot(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	if (!globPref.store_messages_on_disk) {
+		showStatusTextWithTimeout(tr("Vacuum cannot be performed on databases in memory."));
+
+		QMessageBox msgBox(this);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Database operation error"));
+		msgBox.setText(tr("Database clean-up cannot be performed on database in memory."));
+		msgBox.setInformativeText(tr("Cannot call VACUUM on database in memory."));
+
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	}
+
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	MessageDbSet *msgDbSet = accountDbSet(userName, this);
+	if (0 == msgDbSet) {
+		return;
+	}
+
+	qint64 dbSizeInBytes = msgDbSet->underlyingFileSize(MessageDbSet::SC_LARGEST);
+	if (dbSizeInBytes == 0) {
+		return;
+	}
+
+	QString size = QString::number(dbSizeInBytes) + " B";
+	if (dbSizeInBytes >= 1000000000) {
+		size = QString::number(dbSizeInBytes / 1000000000) + " GB";
+	} else if (dbSizeInBytes >= 1000000) {
+		size = QString::number(dbSizeInBytes / 1000000) + " MB";
+	} else if (dbSizeInBytes >= 1000) {
+		size = QString::number(dbSizeInBytes / 1000) + " KB";
+	}
+
+	{
+		QMessageBox msgBox(this);
+		msgBox.setIcon(QMessageBox::Question);
+		msgBox.setWindowTitle(tr("Clean message database"));
+		msgBox.setText(tr("Performs a message database clean-up for the selected account. "
+		    "This action will block the entire application. "
+		    "The action may take several minutes to be completed. "
+		    "Furthermore, it requires more than %1 of free disk space to successfully proceed.").arg(size));
+		msgBox.setInformativeText(tr("Do you want to continue?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes != msgBox.exec()) {
+			return;
+		}
+	}
+
+	showStatusTextPermanently(tr("Performing database clean-up."));
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
+	TaskVacuumDbSet *task = new (::std::nothrow) TaskVacuumDbSet(msgDbSet);
+	task->setAutoDelete(false);
+	/* This will block the GUI and all workers. */
+	globWorkPool.runSingle(task);
+
+	showStatusTextWithTimeout(tr("Database clean-up finished."));
+	QApplication::restoreOverrideCursor();
+
+	if (task->m_success) {
+		QMessageBox::information(this,
+		    tr("Database clean-up successful"),
+		    tr("The database clean-up has finished successfully."),
+		    QMessageBox::Ok);
+	} else {
+		QMessageBox::warning(this,
+		    tr("Database clean-up failure"),
+		    tr("The database clean-up failed with error message: %1").arg(task->m_error),
+		    QMessageBox::Ok);
+	}
+
+	delete task;
 }

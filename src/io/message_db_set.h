@@ -90,6 +90,14 @@ public:
 		                     */
 	};
 
+	/*!
+	 *  When gathering database file sizes.
+	 */
+	enum SizeComputation {
+		SC_SUM, /*!< Compute the sum of all available database files. */
+		SC_LARGEST /*!< Return the size of the largest database file. */
+	};
+
 	/* Constructor is private. */
 
 	/*!
@@ -189,6 +197,14 @@ public:
 	 * @return Database organisation.
 	 */
 	Organisation organisation(void) const;
+
+	/*!
+	 * @brief Returns the size of the underlying database files.
+	 *
+	 * @param sc Determines the way how to compute the database size.
+	 * @return Database size. May return 0 on error or when no such file exists.
+	 */
+	qint64 underlyingFileSize(enum SizeComputation sc) const;
 
 	/*!
 	 * @brief Returns the year identifier from supplied time.
@@ -336,6 +352,11 @@ private:
 	enum Organisation m_organisation; /*!< How the database is organised. */
 
 public: /* Database function that have been delegate to the container. */
+	/*!
+	 * @brief Call vacuum on all managed databases.
+	 */
+	bool vacuum(void);
+
 	/*!
 	 * @brief Return all received messages model.
 	 *

@@ -432,6 +432,34 @@ MessageDbSet::Organisation MessageDbSet::organisation(void) const
 	return m_organisation;
 }
 
+qint64 MessageDbSet::underlyingFileSize(
+    enum MessageDbSet::SizeComputation sc) const
+{
+	qint64 dbSize = 0;
+
+	QMap<QString, MessageDb *>::const_iterator i;
+	for (i = this->begin(); i != this->end(); ++i) {
+		const QString fileName(i.value()->fileName());
+		if (fileName == MessageDb::memoryLocation) {
+			continue;
+		}
+		const QFileInfo fileInfo(fileName);
+		if (fileInfo.exists()) {
+			if (sc == SC_SUM) {
+				dbSize += fileInfo.size();
+			} else if (sc == SC_LARGEST) {
+				if (dbSize < fileInfo.size()) {
+					dbSize = fileInfo.size();
+				}
+			} else {
+				Q_ASSERT(0);
+			}
+		}
+	}
+
+	return dbSize;
+}
+
 QStringList MessageDbSet::fileNames(void) const
 {
 	QStringList fileList;
