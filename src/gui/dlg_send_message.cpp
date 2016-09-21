@@ -678,6 +678,8 @@ void DlgSendMessage::addAttachmentFile(void)
 		fileNames = dialog.selectedFiles();
 		if (!globPref.use_global_paths) {
 			m_lastAttAddPath = dialog.directory().absolutePath();
+			emit doActionAfterSentMsgSignal(m_userName,
+			    m_lastAttAddPath);
 		}
 	}
 
@@ -1270,7 +1272,6 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
 		this->accept(); /* Set return code to accepted. */
-		emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
 	} else {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Warning);
@@ -1285,10 +1286,10 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
-			emit doActionAfterSentMsgSignal(m_userName,
-			    m_lastAttAddPath);
 		}
 	}
+
+	emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
 }
 
 /* ========================================================================= */
