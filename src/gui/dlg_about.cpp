@@ -44,8 +44,10 @@ DlgAbout::DlgAbout(QWidget *parent)
 #ifdef PORTABLE_APPLICATION
 	this->labelDatovka->setText(this->labelDatovka->text() + " - " +
 	    tr("Portable version"));
+	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
 #endif /* PORTABLE_APPLICATION */
-	this->labelVersionNum->setText(VERSION);
+	this->labelVersion->setText(this->labelVersion->text() + " " VERSION);
+	this->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	const QString copyrightHtml(
 	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
@@ -65,11 +67,12 @@ DlgAbout::DlgAbout(QWidget *parent)
 	QString librariesStr("<b>");
 	librariesStr += QObject::tr("Depends on libraries:");
 	librariesStr += "</b><br/>";
-	this->labelLibs->setAlignment(Qt::AlignHCenter);
-	this->labelLibs->setTextFormat(Qt::RichText);
-	this->labelLibs->setWordWrap(true);
 	this->labelLibs->setText(librariesStr +
 	    libraryDependencies().join("<br/>"));
+	this->labelLibs->setTextFormat(Qt::RichText);
+	this->labelLibs->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	this->labelLibs->setAlignment(Qt::AlignHCenter);
+	this->labelLibs->setWordWrap(true);
 
 	connect(this->pushButtonLicence, SIGNAL(clicked()), this,
 	    SLOT(showLicence()));

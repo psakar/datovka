@@ -72,21 +72,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="labelVersionNum">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
