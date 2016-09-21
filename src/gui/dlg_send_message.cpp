@@ -393,9 +393,7 @@ void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
 	Q_UNUSED(bottomRight);
 	Q_UNUSED(roles);
 
-	debugSlotCall();
-
-	calculateAndShowTotalAttachSize();
+	checkInputFields();
 }
 
 
@@ -684,18 +682,6 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 
 	foreach (const QString &fileName, fileNames) {
-
-//		int fileSize = QFile(fileName).size();
-//		if (fileSize > MAX_ATTACHMENT_SIZE_BYTES) {
-//			QMessageBox::warning(this, tr("Wrong file size"),
-//			    tr("File '%1' could not be added into attachment "
-//			    "because its size is bigger than %2 MB.").
-//			    arg(fileName).
-//			    arg(QString::number(MAX_ATTACHMENT_SIZE_MB)),
-//			    QMessageBox::Ok);
-//			continue;
-//		}
-
 		int fileSize = this->attachmentTableWidget->addFile(fileName);
 		if (fileSize <= 0) {
 			continue;
@@ -781,8 +767,6 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /* ========================================================================= */
 {
-	debugSlotCall();
-
 	QModelIndexList firstMsgColumnIdxs =
 	   this->attachmentTableWidget->selectionModel()->selectedRows(0);
 
@@ -795,7 +779,7 @@ void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 		this->attachmentTableWidget->removeRow(row);
 	}
 
-	calculateAndShowTotalAttachSize();
+	checkInputFields();
 }
 
 
@@ -803,7 +787,7 @@ void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /*
  * Calculate total attachment size when an item was added/removed in the table.
  */
-void DlgSendMessage::calculateAndShowTotalAttachSize(void)
+bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 /* ========================================================================= */
 {
 	int aSize = 0;
@@ -818,6 +802,16 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
 
+	if (this->attachmentTableWidget->rowCount() > MAX_ATTACHMENT_FILES) {
+		this->attachmentSizeInfo->
+		     setStyleSheet("QLabel { color: red }");
+		this->attachmentSizeInfo->setText(
+		    tr("Warning: The permitted amount (%1) of attachments has "
+		    "been exceeded.").arg(QString::number(MAX_ATTACHMENT_FILES)));
+		return false;
+	}
+
+
 	if (aSize > 0) {
 		if (aSize >= 1024) {
 			this->attachmentSizeInfo->setText(
@@ -831,6 +825,7 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 				        "is larger than %1 MB!").
 				    arg(QString::number(
 				        MAX_ATTACHMENT_SIZE_MB)));
+				return false;
 			}
 		} else {
 			this->attachmentSizeInfo->setText(
@@ -840,6 +835,8 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 		this->attachmentSizeInfo->setText(
 		    tr("Total size of attachments is %1 B").arg(aSize));
 	}
+
+	return true;
 }
 
 
@@ -850,7 +847,8 @@ void DlgSendMessage::calculateAndShowTotalAttachSize(void)
 void DlgSendMessage::checkInputFields(void)
 /* ========================================================================= */
 {
-	bool buttonEnabled = !this->subjectText->text().isEmpty()
+	bool buttonEnabled = calculateAndShowTotalAttachSize()
+		    && !this->subjectText->text().isEmpty()
 		    && (this->recipientTableWidget->rowCount() > 0)
 		    && (this->attachmentTableWidget->rowCount() > 0);
 
