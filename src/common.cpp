@@ -137,7 +137,7 @@ const QString msgStatusToText(int status)
 		return QObject::tr("10 days have passed since the delivery of "
 		    "the public message which has not been accepted by "
 		    "logging-in (assumption of delivery by fiction in nonOVM "
-		    "DS); this state cannot occur for commertial messages.");
+		    "DS); this state cannot occur for commercial messages.");
 		break;
 	case 6:
 		/*
@@ -145,7 +145,7 @@ const QString msgStatusToText(int status)
 		 * zprava byla dorucena.",
 		 */
 		return QObject::tr("A person authorised to read this message "
-		    "has logged-in -- delivered message has been accepted.");
+		    "has logged in -- delivered message has been accepted.");
 		break;
 	case 7:
 		/* Zprava byla prectena (na portale nebo akci ESS). */
