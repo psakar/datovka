@@ -106,8 +106,7 @@ const QString msgStatusToText(int status)
 	switch (status) {
 	case 1:
 		/* Zprava byla podana (vznikla v ISDS). */
-		return QObject::tr("Message bas submitted "
-		    "(originates at ISDS )");
+		return QObject::tr("Message has been submitted (has been created in ISDS)");
 		break;
 	case 2:
 		/*
