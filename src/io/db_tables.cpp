@@ -271,7 +271,7 @@ namespace MsgsTbl {
 	{"dmRecipientOrgUnit",    {DB_TEXT, ""}},
 	{"dmRecipientOrgUnitNum", {DB_TEXT, ""}},
 	{"dmToHands",             {DB_TEXT, QObject::tr("To hands")}},
-	{"dmAnnotation",          {DB_TEXT, QObject::tr("Title")}},
+	{"dmAnnotation",          {DB_TEXT, QObject::tr("Subject")}},
 	{"dmRecipientRefNumber",  {DB_TEXT, QObject::tr("Your reference number")}},
 	{"dmSenderRefNumber",     {DB_TEXT, QObject::tr("Our reference number")}},
 	{"dmRecipientIdent",      {DB_TEXT, QObject::tr("Your file mark")}},
