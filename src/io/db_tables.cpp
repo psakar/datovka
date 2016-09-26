@@ -278,7 +278,7 @@ namespace MsgsTbl {
 	{"dmSenderIdent",         {DB_TEXT, QObject::tr("Our file mark")}},
 	{"dmLegalTitleLaw",       {DB_TEXT, QObject::tr("Law")}},
 	{"dmLegalTitleYear",      {DB_TEXT, QObject::tr("Year")}},
-	{"dmLegalTitleSect",      {DB_TEXT, QObject::tr("Selection")}},
+	{"dmLegalTitleSect",      {DB_TEXT, QObject::tr("Section")}},
 	{"dmLegalTitlePar",       {DB_TEXT, QObject::tr("Paragraph")}},
 	{"dmLegalTitlePoint",     {DB_TEXT, QObject::tr("Letter")}},
 	{"dmPersonalDelivery",    {DB_BOOLEAN, QObject::tr("Personal delivery")}},
