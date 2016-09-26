@@ -113,8 +113,7 @@ const QString msgStatusToText(int status)
 		/*
 		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
 		 */
-		return QObject::tr("Data message and papers signed with "
-		    "time-stamp.");
+		return QObject::tr("Data message and including its attachments signed with time-stamp.");
 		break;
 	case 3:
 		/*
