@@ -125,7 +125,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		    fileName, organisation);
 
 		if (secondaryKey.isNull()) {
-			logErrorNL("Failed obtaining secondary key from file name '%s'.",
+			logErrorNL("Failed to obtain secondary key from file name '%s'.",
 			    fileName.toUtf8().constData());
 			return false;
 		}
@@ -144,7 +144,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 
 			db = _accessMessageDb(secondaryKey, false);
 			if (db == NULL) {
-				logErrorNL("Failed opening database file '%s'.",
+				logErrorNL("Failed to open database file '%s'.",
 				    fileName.toUtf8().constData());
 				/* TODO -- How can be this operation aborted? */
 			}
@@ -158,7 +158,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		if (db == NULL) {
 			QString fileName(constructDbFileName(m_locDir,
 			    m_primaryKey, secKey, m_testing, m_organisation));
-			logErrorNL("Failed opening database file '%s'.",
+			logErrorNL("Failed to open database file '%s'.",
 			    fileName.toUtf8().constData());
 			return false;
 		}
@@ -323,7 +323,7 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 		if (db == NULL) {
 			QString fileName(constructDbFileName(m_locDir,
 			    m_primaryKey, secKey, m_testing, m_organisation));
-			logErrorNL("Failed opening database file '%s'.",
+			logErrorNL("Failed to open database file '%s'.",
 			    fileName.toUtf8().constData());
 			return false;
 		}
@@ -354,7 +354,7 @@ bool MessageDbSet::deleteLocation(void)
 		    fileName.toUtf8().constData());
 
 		if (!QFile::remove(fileName)) {
-			logErrorNL("Failed deleting database file '%s'.",
+			logErrorNL("Failed to delete database file '%s'.",
 			    fileName.toUtf8().constData());
 			sucessfullyDeleted = false;
 		}
@@ -530,7 +530,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			    fileName, organisation);
 
 			if (secondaryKey.isNull()) {
-				logErrorNL("Failed obtaining secondary key from file name '%s'.",
+				logErrorNL("Failed to obtain secondary key from file name '%s'.",
 				    fileName.toUtf8().constData());
 				return NULL;
 			}
@@ -572,7 +572,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 
 			db = dbSet->_accessMessageDb(secondaryKey, false);
 			if (db == NULL) {
-				logErrorNL("Failed opening database file '%s'.",
+				logErrorNL("Failed to open database file '%s'.",
 				    fileName.toUtf8().constData());
 				delete dbSet;
 				return NULL;
@@ -589,7 +589,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			QString fileName(constructDbFileName(dbSet->m_locDir,
 			    dbSet->m_primaryKey, secKey, dbSet->m_testing,
 			    dbSet->m_organisation));
-			logErrorNL("Failed opening database file '%s'.",
+			logErrorNL("Failed to open database file '%s'.",
 			    fileName.toUtf8().constData());
 			delete dbSet;
 			return NULL;

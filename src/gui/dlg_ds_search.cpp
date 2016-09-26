@@ -213,10 +213,8 @@ void DlgDsSearch::checkInputFields(void)
 	case 2:
 		this->iCLineEdit->setEnabled(true);
 		this->labelName->setText(tr("Name:"));
-		this->labelName->setToolTip(tr("Enter PFO last name or "
-		    "firm name."));
-		this->nameLineEdit->setToolTip(tr("Enter PFO last name or "
-		    "firm name."));
+		this->labelName->setToolTip(tr("Enter PFO last name or company name."));
+		this->nameLineEdit->setToolTip(tr("Enter PFO last name or company name."));
 		if (m_showInfoLabel) {
 			this->infoLabel->show();
 		} else {

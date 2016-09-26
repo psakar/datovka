@@ -106,15 +106,13 @@ const QString msgStatusToText(int status)
 	switch (status) {
 	case 1:
 		/* Zprava byla podana (vznikla v ISDS). */
-		return QObject::tr("Message bas submitted "
-		    "(originates at ISDS )");
+		return QObject::tr("Message has been submitted (has been created in ISDS)");
 		break;
 	case 2:
 		/*
 		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
 		 */
-		return QObject::tr("Data message and papers signed with "
-		    "time-stamp.");
+		return QObject::tr("Data message and including its attachments signed with time-stamp.");
 		break;
 	case 3:
 		/*
@@ -138,7 +136,7 @@ const QString msgStatusToText(int status)
 		return QObject::tr("10 days have passed since the delivery of "
 		    "the public message which has not been accepted by "
 		    "logging-in (assumption of delivery by fiction in nonOVM "
-		    "DS); this state cannot occur for commertial messages.");
+		    "DS); this state cannot occur for commercial messages.");
 		break;
 	case 6:
 		/*
@@ -146,7 +144,7 @@ const QString msgStatusToText(int status)
 		 * zprava byla dorucena.",
 		 */
 		return QObject::tr("A person authorised to read this message "
-		    "has logged-in -- delivered message has been accepted.");
+		    "has logged in -- delivered message has been accepted.");
 		break;
 	case 7:
 		/* Zprava byla prectena (na portale nebo akci ESS). */
@@ -452,22 +450,36 @@ QString convertEventTypeToString(int value)
 QString getdbStateText(int value)
 /* ========================================================================= */
 {
-	if (value == DBSTATE_ACCESSIBLE)
-		return QObject::tr("DS je přístupná, lze do ní dodávat zprávy, "
-		    "na Portále lze vyhledat");
-	else if (value == DBSTATE_TEMP_UNACCESSIBLE)
-		return QObject::tr("DS je dočasně znepřístupněna (na vlastní "
-		"žádost), může být později opět zpřístupněna");
-	else if (value == DBSTATE_NOT_YET_ACCESSIBLE)
-		return QObject::tr("DS je dosud neaktivní, dosud se do ní nikdo"
-		" nepřihlásil z Portálu a nelze ji zpřístupnit pouze na "
-		"základě doručení přístupových údajů");
-	else if (value == DBSTATE_PERM_UNACCESSIBLE)
-		return QObject::tr("DS je trvale znepřístupněna, čeká na smazání"
-		" (může být opět zpřístupněna)");
-	else if (value == DBSTATE_REMOVED)
-		return QObject::tr("DS je smazána (přesto existuje v ISDS)");
-	else return QObject::tr("Došlo k chybě při zjišťování stavu");
+	switch (value) {
+	case DBSTATE_ACCESSIBLE:
+		/* Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat. */
+		return QObject::tr(
+		    "The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.");
+		break;
+	case DBSTATE_TEMP_UNACCESSIBLE:
+		/* Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna. */
+		return QObject::tr(
+		    "The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.");
+		break;
+	case DBSTATE_NOT_YET_ACCESSIBLE:
+		/* Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky. */
+		return QObject::tr(
+		    "The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.");
+		break;
+	case DBSTATE_PERM_UNACCESSIBLE:
+		/* Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna). */
+		return QObject::tr(
+		    "The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).");
+		break;
+	case DBSTATE_REMOVED:
+		/* Datová schránka je smazána (přesto existuje v ISDS). */
+		return QObject::tr(
+		    "The data box has been deleted (none the less it exists in ISDS).");
+		break;
+	default:
+		return QObject::tr("An error occurred while checking the status.");
+		break;
+	}
 }
 
 
