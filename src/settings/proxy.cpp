@@ -34,12 +34,14 @@ ProxiesSettings globProxSet;
 static const
 ProxiesSettings dfltGlobProxSet;
 
-const QString ProxiesSettings::noProxyStr("None");
-const QString ProxiesSettings::autoProxyStr("-1");
+#define NO_PORT -1
+
+const QString ProxiesSettings::noProxyStr(QLatin1String("None"));
+const QString ProxiesSettings::autoProxyStr(QLatin1String("-1"));
 
 ProxiesSettings::ProxySettings::ProxySettings(void)
-    : hostName("-1"),
-    port(-1),
+    : hostName(noProxyStr),
+    port(NO_PORT),
     userName(),
     password()
 {
@@ -59,10 +61,10 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 	auxStr = settings.value("connection/https_proxy").toString();
 	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
 		https.hostName = noProxyStr;
-		https.port = -1;
+		https.port = NO_PORT;
 	} else if (autoProxyStr == auxStr) {
 		https.hostName = autoProxyStr;
-		https.port = -1;
+		https.port = NO_PORT;
 	} else {
 		if (auxStr.contains(":")) {
 			https.hostName = auxStr.section(":", 0, -2);
@@ -70,11 +72,11 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 			    auxStr.section(":", -1, -1).toInt(&ok, 10);
 			if (!ok) {
 				https.hostName = noProxyStr;
-				https.port = -1;
+				https.port = NO_PORT;
 			}
 		} else {
 			https.hostName = noProxyStr;
-			https.port = -1;
+			https.port = NO_PORT;
 		}
 	}
 	https.userName =
@@ -85,10 +87,10 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 	auxStr = settings.value("connection/http_proxy").toString();
 	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
 		http.hostName = noProxyStr;
-		http.port = -1;
+		http.port = NO_PORT;
 	} else if (autoProxyStr == auxStr) {
 		http.hostName = autoProxyStr;
-		http.port = -1;
+		http.port = NO_PORT;
 	} else {
 		if (auxStr.contains(":")) {
 			http.hostName = auxStr.section(":", 0, -2);
@@ -96,11 +98,11 @@ void ProxiesSettings::loadFromSettings(const QSettings &settings)
 			    auxStr.section(":", -1, -1).toInt(&ok, 10);
 			if (!ok) {
 				http.hostName = noProxyStr;
-				http.port = -1;
+				http.port = NO_PORT;
 			}
 		} else {
 			http.hostName = noProxyStr;
-			http.port = -1;
+			http.port = NO_PORT;
 		}
 	}
 	http.userName =
@@ -150,7 +152,7 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 	ProxySettings settings;
 
 	settings.hostName = noProxyStr;
-	settings.port = -1;
+	settings.port = NO_PORT;
 
 	/* TODO -- Try to contact the proxy to check whether it works? */
 
