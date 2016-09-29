@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,19 @@
 
 class ProxiesSettings {
 public:
+	/*!
+	 * @brief Connection type.
+	 */
+	enum Type {
+		HTTP,
+		HTTPS
+	};
+
+	static
+	const QByteArray httpProxyEnvVar; /*!< http_proxy environment variable at application start-up. */
+	static
+	const QByteArray httpsProxyEnvVar; /*!< https_proxy environment variable at application start-up. */
+
 	static
 	const QString noProxyStr; /*!< Use no proxy. */
 	static
