@@ -34,13 +34,15 @@ ProxiesSettings globProxSet;
 static const
 ProxiesSettings dfltGlobProxSet;
 
+#define NO_PROXY "None"
+
 #define NO_PORT -1
 
-const QString ProxiesSettings::noProxyStr(QLatin1String("None"));
+const QString ProxiesSettings::noProxyStr(QLatin1String(NO_PROXY));
 const QString ProxiesSettings::autoProxyStr(QLatin1String("-1"));
 
 ProxiesSettings::ProxySettings::ProxySettings(void)
-    : hostName(noProxyStr),
+    : hostName(QLatin1String(NO_PROXY)), /* static initialisation order fiasco */
     port(NO_PORT),
     userName(),
     password()
@@ -145,6 +147,22 @@ void ProxiesSettings::saveToSettings(QSettings &settings) const
 	}
 
 	settings.endGroup();
+}
+
+bool ProxiesSettings::setProxyEnvVars(void)
+{
+	/* Currently force some values. */
+
+	qDebug() << "old http_proxy:" << qgetenv("http_proxy");
+	qDebug() << "old https_proxy:" << qgetenv("https_proxy");
+
+	qputenv("http_proxy", QByteArray("http://k:aaaa@127.0.0.1:3128"));
+	qputenv("https_proxy", QByteArray("http://k:aaaba@127.0.0.1:3128"));
+
+	qDebug() << "new http_proxy:" << qgetenv("http_proxy");
+	qDebug() << "new https_proxy:" << qgetenv("https_proxy");
+
+	return true;
 }
 
 ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)

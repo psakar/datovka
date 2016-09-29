@@ -520,6 +520,9 @@ int main(int argc, char *argv[])
 			    QSettings::IniFormat);
 			settings.setIniCodec("UTF-8");
 			globProxSet.loadFromSettings(settings);
+
+			/* TODO */
+			ProxiesSettings::setProxyEnvVars();
 		}
 
 		/* Start downloading the CRL files. */

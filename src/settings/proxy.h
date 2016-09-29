@@ -69,6 +69,20 @@ public:
 	 */
 	void saveToSettings(QSettings &settings) const;
 
+	/*
+	 * Libcurl automatically uses the variables http_proxy and https_proxy
+	 * if they are set. Therefore, this application should automatically
+	 * default to proxy usage if those variables are set.
+	 */
+
+	/*!
+	 * @brief Sets environmental variables according to proxy settings.
+	 *
+	 * @return False on any error.
+	 */
+	static
+	bool setProxyEnvVars(void);
+
 	/*!
 	 * @brief Detect HTTP proxy.
 	 *
