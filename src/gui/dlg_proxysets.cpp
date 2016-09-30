@@ -44,19 +44,15 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	    this, SLOT(showHttpProxyPassword(int)));
 
 	{
-		ProxiesSettings::ProxySettings proxy =
-		    ProxiesSettings::detectHttpProxy();
-		if (!proxy.hostName.isEmpty() &&
-		    (ProxiesSettings::ProxySettings::NO_PROXY != proxy.usage)) {
-			this->httpProxyDetectionLabel->setText(
-			    tr("Proxy has been detected") + ": " +
-			    proxy.hostName + ":" +
-			    QString::number(proxy.port, 10));
-		} else {
-			this->httpProxyDetectionLabel->setText(
-			    tr("No proxy detected, direct connection "
-			        "will be used."));
+		QString proxyMsg(
+		    tr("No proxy detected, direct connection will be used."));
+
+		QByteArray proxyVal(ProxiesSettings::detectEnvironment(ProxiesSettings::HTTP));
+		if (!proxyVal.isEmpty()) {
+			proxyMsg =
+			    tr("Proxy has been detected") + ": " + proxyVal;
 		}
+		this->httpProxyDetectionLabel->setText(proxyMsg);
 	}
 
 	connect(this->httpsNoProxyRadioButton, SIGNAL(toggled(bool)),
@@ -68,8 +64,17 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	connect(this->httpsAuthenticationCheckbox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showHttpsProxyPassword(int)));
 
-	this->httpsProxyDetectionLabel->setText(
-	    tr("No proxy detected, direct connection will be used."));
+	{
+		QString proxyMsg(
+		    tr("No proxy detected, direct connection will be used."));
+
+		QByteArray proxyVal(ProxiesSettings::detectEnvironment(ProxiesSettings::HTTPS));
+		if (!proxyVal.isEmpty()) {
+			proxyMsg =
+			    tr("Proxy has been detected") + ": " + proxyVal;
+		}
+		this->httpsProxyDetectionLabel->setText(proxyMsg);
+	}
 
 	loadProxyDialog(globProxSet);
 }
