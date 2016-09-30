@@ -133,14 +133,6 @@ public:
 	 * @return Proxy settings.
 	 */
 	ProxySettings proxySettings(enum Type type) const;
-
-	/*!
-	 * @brief Detect HTTP proxy.
-	 *
-	 * @return Host and port number.
-	 */
-	static
-	ProxySettings detectHttpProxy(void);
 };
 
 /*!
