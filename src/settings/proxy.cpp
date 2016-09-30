@@ -343,6 +343,10 @@ bool ProxiesSettings::setProxyEnvVars(void) const
 	ret = setProxyEnvVar(HTTP, http) && ret;
 	ret = setProxyEnvVar(HTTPS, https) && ret;
 
+	if (!ret) {
+		logErrorNL("%s", "Setting proxy environment variables failed.");
+	}
+
 	return ret;
 }
 
