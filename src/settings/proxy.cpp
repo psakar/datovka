@@ -219,16 +219,6 @@ void ProxiesSettings::saveToSettings(QSettings &settings) const
 	settings.endGroup();
 }
 
-/*!
- * @brief Detects proxy settings from environment.
- *
- * @note Takes values from stored environmental values or from system.
- *
- * @param[in] type Whether to obtain HPPT or HTTPS settings.
- * @returns Values as they would be stored in a http(s)_proxy variable (e.g.
- *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
- *     '172.0.0.1:3128').
- */
 QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 {
 	QByteArray proxyEnvVar((type == HTTP) ?
@@ -277,6 +267,63 @@ QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 	return proxyEnvVar;
 }
 
+bool ProxiesSettings::addUserPwdIfMissing(QByteArray &envVal,
+    const QString &user, const QString &pwd)
+{
+	int aux;
+
+	if (envVal.count('@') > 0) {
+		return false;
+	}
+
+	if (user.isEmpty() || pwd.isEmpty()) {
+		return false;
+	}
+
+	aux = envVal.indexOf("://");
+	if (aux >= 0) {
+		aux += 3; /* Insert past protocol info. */
+	} else {
+		aux = 0; /* Insert at the beginning. */
+	}
+	Q_ASSERT(aux >= 0);
+
+	envVal.insert(aux, user.toUtf8() + ":" + pwd.toUtf8() + "@");
+
+	return true;
+}
+
+/*!
+ * @brief Returns user and password adjusted detected value.
+ *
+ * @param[in] type Whether to read HTTP or HTTPS proxy settings,
+ * @param[in] proxy Proxy settings structure.
+ * @return Adjusted value.
+ */
+static
+QByteArray adjustedDetectedEnvironment(enum ProxiesSettings::Type type,
+    const ProxiesSettings::ProxySettings &proxy)
+{
+	QByteArray val(ProxiesSettings::detectEnvironment(type));
+
+	/* Contains user name and password. */
+	if (val.count('@') > 0) {
+		return val;
+	}
+
+	if (!proxy.userName.isEmpty() && !proxy.password.isEmpty()) {
+		bool ret = ProxiesSettings::addUserPwdIfMissing(val,
+		    proxy.userName, proxy.password);
+		if (ret) {
+			logWarningNL(
+			    "Could not add user name and password into proxy value '%s'.",
+			    val.constData());
+		}
+	}
+
+	return val;
+}
+
 /*!
  * @brief Sets proxy environmental variable.
  *
@@ -315,7 +362,7 @@ bool setProxyEnvVar(enum ProxiesSettings::Type type,
 		/* Leave new empty. */
 		break;
 	case ProxiesSettings::ProxySettings::AUTO_PROXY:
-		proxyNew = ProxiesSettings::detectEnvironment(type);
+		proxyNew = adjustedDetectedEnvironment(type, proxy);
 		break;
 	case ProxiesSettings::ProxySettings::DEFINED_PROXY:
 		proxyNew = proxy.toEnvVal();
@@ -445,7 +492,8 @@ ProxiesSettings::ProxySettings ProxiesSettings::proxySettings(
 		returnedVal.usage = ProxySettings::NO_PROXY;
 		break;
 	case ProxySettings::AUTO_PROXY:
-		returnedVal = fromEnvVal(detectEnvironment(type),
+		returnedVal = fromEnvVal(
+		    adjustedDetectedEnvironment(type, *proxy),
 		    ProxySettings::AUTO_PROXY);
 		break;
 	case ProxySettings::DEFINED_PROXY:

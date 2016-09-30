@@ -121,6 +121,18 @@ public:
 	QByteArray detectEnvironment(enum Type type);
 
 	/*!
+	 * @brief Adds user and password, if not specified in environment value.
+	 *
+	 * @param[in,out] envVal Environment value.
+	 * @param[in]     user User name.
+	 * @param[in]     pwd User password.
+	 * @return True if added, false else.
+	 */
+	static
+	bool addUserPwdIfMissing(QByteArray &envVal, const QString &user,
+	    const QString &pwd);
+
+	/*!
 	 * @brief Sets environmental variables according to proxy settings.
 	 *
 	 * @return False on any error.
