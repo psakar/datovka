@@ -297,6 +297,12 @@ void DlgProxysets::saveChanges(void) const
 	}
 	globProxSet.https.userName = this->httpsUnameEdit->text();
 	globProxSet.https.password = this->httpsPwdEdit->text();
+
+	/*
+	 * Apply to global variables, although, restart may be needed if
+	 * already connected.
+	 */
+	globProxSet.setProxyEnvVars();
 }
 
 
