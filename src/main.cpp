@@ -513,18 +513,18 @@ int main(int argc, char *argv[])
 		confFileFixBackSlashes(globPref.loadConfPath());
 	}
 
+	/* Set up proxy. */
 	{
-		/* Obey proxy settings. */
-		{
-			QSettings settings(globPref.loadConfPath(),
-			    QSettings::IniFormat);
-			settings.setIniCodec("UTF-8");
-			globProxSet.loadFromSettings(settings);
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		/* Load proxy settings. */
+		globProxSet.loadFromSettings(settings);
+		/* Apply settings onto the environment because of libcurl. */
+		globProxSet.setProxyEnvVars();
+	}
 
-			/* TODO */
-			globProxSet.setProxyEnvVars();
-		}
-
+	{
 		/* Start downloading the CRL files. */
 		QList<QUrl> urlList;
 		FileDownloader fDown(true);
@@ -646,7 +646,6 @@ int main(int argc, char *argv[])
 		QSettings settings(globPref.loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globProxSet.loadFromSettings(settings);
 		AccountModel::globAccounts.loadFromSettings(settings);
 	}
 
