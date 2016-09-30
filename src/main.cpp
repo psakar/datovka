@@ -522,7 +522,7 @@ int main(int argc, char *argv[])
 			globProxSet.loadFromSettings(settings);
 
 			/* TODO */
-			ProxiesSettings::setProxyEnvVars();
+			globProxSet.setProxyEnvVars();
 		}
 
 		/* Start downloading the CRL files. */

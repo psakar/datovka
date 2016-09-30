@@ -50,6 +50,31 @@ ProxiesSettings::ProxySettings::ProxySettings(void)
 {
 }
 
+QByteArray ProxiesSettings::ProxySettings::toEnvVal(void) const
+{
+	QByteArray val;
+
+	switch (usage) {
+	case NO_PROXY:
+	case AUTO_PROXY:
+		break;
+	case DEFINED_PROXY:
+		if (!userName.isEmpty() && !password.isEmpty()) {
+			val = userName.toUtf8() + ":" + password.toUtf8() + "@";
+		}
+		if (!hostName.isEmpty() && port >= 0 && port <= 65535) {
+			val += hostName.toUtf8() + ":" +
+			    QByteArray::number(port, 10);
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return val;
+}
+
 ProxiesSettings::ProxiesSettings(void)
     : https(),
     http()
@@ -194,22 +219,6 @@ void ProxiesSettings::saveToSettings(QSettings &settings) const
 	settings.endGroup();
 }
 
-bool ProxiesSettings::setProxyEnvVars(void)
-{
-	/* Currently force some values. */
-
-	qDebug() << "old " HTTP_PROXY_VARMAME ":" << qgetenv(HTTP_PROXY_VARMAME);
-	qDebug() << "old " HTTPS_PROXY_VARMAME ":" << qgetenv(HTTPS_PROXY_VARMAME);
-
-	qputenv(HTTP_PROXY_VARMAME, QByteArray("http://k:aaaa@127.0.0.1:3128"));
-	qputenv(HTTPS_PROXY_VARMAME, QByteArray("http://k:aaaa@127.0.0.1:3128"));
-
-	qDebug() << "new " HTTP_PROXY_VARMAME ":" << qgetenv(HTTP_PROXY_VARMAME);
-	qDebug() << "new " HTTPS_PROXY_VARMAME ":" << qgetenv(HTTPS_PROXY_VARMAME);
-
-	return true;
-}
-
 /*!
  * @brief Detects proxy settings from environment.
  *
@@ -220,8 +229,7 @@ bool ProxiesSettings::setProxyEnvVars(void)
  *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
  *     '172.0.0.1:3128').
  */
-static
-QByteArray detectEnvironment(enum ProxiesSettings::Type type)
+QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 {
 	QByteArray proxyEnvVar((type == ProxiesSettings::HTTP) ?
 	    ProxiesSettings::httpProxyEnvVar :
@@ -268,6 +276,74 @@ QByteArray detectEnvironment(enum ProxiesSettings::Type type)
 	/* TODO -- Try contacting the proxy to check whether it works. */
 
 	return proxyEnvVar;
+}
+
+/*!
+ * @brief Sets proxy environmental variable.
+ *
+ * @param[in] type Whether to obtain HPPT or HTTPS settings.
+ * @param[in] proxy Proxy settings structure.
+ * @return True on success.
+ */
+static
+bool setProxyEnvVar(enum ProxiesSettings::Type type,
+    const ProxiesSettings::ProxySettings &proxy)
+{
+	const char *proxyVarName = NULL;
+	const QByteArray *proxyStartUp = 0;
+	switch (type) {
+	case ProxiesSettings::HTTP:
+		proxyVarName = HTTP_PROXY_VARMAME;
+		proxyStartUp = &ProxiesSettings::httpProxyEnvVar;
+		break;
+	case ProxiesSettings::HTTPS:
+		proxyVarName = HTTPS_PROXY_VARMAME;
+		proxyStartUp = &ProxiesSettings::httpsProxyEnvVar;
+		break;
+	default:
+		Q_ASSERT(0);
+		return false;
+		break;
+	}
+	Q_ASSERT(proxyVarName != NULL);
+	Q_ASSERT(proxyStartUp != 0);
+
+	QByteArray proxyOld(qgetenv(proxyVarName));
+
+	QByteArray proxyNew;
+	switch (proxy.usage) {
+	case ProxiesSettings::ProxySettings::NO_PROXY:
+		/* Leave new empty. */
+		break;
+	case ProxiesSettings::ProxySettings::AUTO_PROXY:
+		proxyNew = ProxiesSettings::detectEnvironment(type);
+		break;
+	case ProxiesSettings::ProxySettings::DEFINED_PROXY:
+		proxyNew = proxy.toEnvVal();
+		break;
+	default:
+		Q_ASSERT(0);
+		return false;
+		break;
+	}
+
+	logInfoNL("Changing %s (system '%s'): old '%s' -> new '%s'",
+	    proxyVarName, proxyStartUp->constData(), proxyOld.constData(),
+	    proxyNew.constData());
+
+	qputenv(proxyVarName, proxyNew);
+
+	return true;
+}
+
+bool ProxiesSettings::setProxyEnvVars(void) const
+{
+	bool ret = true;
+
+	ret = setProxyEnvVar(HTTP, http) && ret;
+	ret = setProxyEnvVar(HTTPS, https) && ret;
+
+	return ret;
 }
 
 /*!

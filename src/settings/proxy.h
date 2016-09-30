@@ -65,6 +65,17 @@ public:
 
 		QString hostName; /*!< Proxy host. */
 		int port; /*!< Proxy port. */
+
+		/*!
+		 * @brief Converts value to value as would be stored in
+		 *     environment variable value.
+		 *
+		 * @return Values as they would be stored in a http(s)_proxy
+		 *     variable without protocol specification (e.g.
+		 *     'b:bb@192.168.1.1:3128', '172.0.0.1:3128') if contains
+		 *     DEFINED_PROXY data, no data else.
+		 */
+		QByteArray toEnvVal(void) const;
 	};
 
 	/*!
@@ -91,17 +102,30 @@ public:
 
 	/*
 	 * Libcurl automatically uses the variables http_proxy and https_proxy
-	 * if they are set. Therefore, this application should automatically
-	 * default to proxy usage if those variables are set.
+	 * if they are set. Therefore, if no proxy is forced from the
+	 * configuration file, then these two environmental variables are going
+	 * to be cleared inside this application.
 	 */
+
+	/*!
+	 * @brief Detects proxy settings from environment.
+	 *
+	 * @note Takes values from stored environmental values or from system.
+	 *
+	 * @param[in] type Whether to obtain HPPT or HTTPS settings.
+	 * @returns Values as they would be stored in a http(s)_proxy variable (e.g.
+	 *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
+	 *     '172.0.0.1:3128').
+	 */
+	static
+	QByteArray detectEnvironment(enum Type type);
 
 	/*!
 	 * @brief Sets environmental variables according to proxy settings.
 	 *
 	 * @return False on any error.
 	 */
-	static
-	bool setProxyEnvVars(void);
+	bool setProxyEnvVars(void) const;
 
 	/*!
 	 * @brief Detect HTTP proxy.
