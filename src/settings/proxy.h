@@ -128,12 +128,19 @@ public:
 	bool setProxyEnvVars(void) const;
 
 	/*!
+	 * @brief Returns proxy settings as they are configures.
+	 *
+	 * @return Proxy settings.
+	 */
+	ProxySettings proxySettings(enum Type type) const;
+
+	/*!
 	 * @brief Detect HTTP proxy.
 	 *
 	 * @return Host and port number.
 	 */
 	static
-	ProxiesSettings::ProxySettings detectHttpProxy(void);
+	ProxySettings detectHttpProxy(void);
 };
 
 /*!

@@ -231,9 +231,8 @@ void ProxiesSettings::saveToSettings(QSettings &settings) const
  */
 QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 {
-	QByteArray proxyEnvVar((type == ProxiesSettings::HTTP) ?
-	    ProxiesSettings::httpProxyEnvVar :
-	    ProxiesSettings::httpsProxyEnvVar);
+	QByteArray proxyEnvVar((type == HTTP) ?
+	    httpProxyEnvVar : httpsProxyEnvVar);
 
 	/* http(s)_proxy environment variable takes precedence if is a valid URL. */
 	if (!proxyEnvVar.isEmpty()) {
@@ -246,7 +245,7 @@ QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 	proxyEnvVar.clear();
 
 #if !defined(Q_OS_UNIX) || defined(Q_OS_MAC)
-	QNetworkProxyQuery npq(QUrl((type == ProxiesSettings::HTTP) ?
+	QNetworkProxyQuery npq(QUrl((type == HTTP) ?
 	    QLatin1String("http://www.nic.cz") :
 	    QLatin1String("https://www.nic.cz")));
 
@@ -254,7 +253,7 @@ QByteArray ProxiesSettings::detectEnvironment(enum ProxiesSettings::Type type)
 	    QNetworkProxyFactory::systemProxyForQuery(npq));
 
 	if (1 < listOfProxies.size()) {
-		logWarning("%s/n", (type == ProxiesSettings::HTTP) ?
+		logWarning("%s/n", (type == HTTP) ?
 		    "Multiple HTTP proxies detected. Using first." :
 		    "Multiple HTTPS proxies detected. Using first.");
 	}
@@ -418,6 +417,47 @@ ProxiesSettings::ProxySettings fromEnvVal(QByteArray proxyEnv,
 	settings.usage = usage;
 
 	return settings;
+}
+
+ProxiesSettings::ProxySettings ProxiesSettings::proxySettings(
+    enum ProxiesSettings::Type type) const
+{
+	const ProxiesSettings::ProxySettings *proxy = 0;
+
+	switch (type) {
+	case HTTP:
+		proxy = &http;
+		break;
+	case HTTPS:
+		proxy = &https;
+		break;
+	default:
+		Q_ASSERT(0);
+		return ProxiesSettings::ProxySettings();
+		break;
+	}
+	Q_ASSERT(proxy != 0);
+
+	ProxiesSettings::ProxySettings returnedVal;
+
+	switch (proxy->usage) {
+	case ProxySettings::NO_PROXY:
+		returnedVal.usage = ProxySettings::NO_PROXY;
+		break;
+	case ProxySettings::AUTO_PROXY:
+		returnedVal = fromEnvVal(detectEnvironment(type),
+		    ProxySettings::AUTO_PROXY);
+		break;
+	case ProxySettings::DEFINED_PROXY:
+		returnedVal = *proxy;
+		break;
+	default:
+		Q_ASSERT(0);
+		return ProxiesSettings::ProxySettings();
+		break;
+	}
+
+	return returnedVal;
 }
 
 ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
