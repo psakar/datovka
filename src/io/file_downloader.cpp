@@ -102,8 +102,8 @@ bool FileDownloader::setUpHttpProxyAccordingToGlobals(
 	ProxiesSettings::ProxySettings proxySettings;
 	QNetworkProxy proxy;
 
-	if (ProxiesSettings::autoProxyStr ==
-	    globProxSet.http.hostName) {
+	if (ProxiesSettings::ProxySettings::NO_PROXY ==
+	    globProxSet.http.usage) {
 		proxySettings = ProxiesSettings::detectHttpProxy();
 
 		/*
@@ -129,7 +129,7 @@ bool FileDownloader::setUpHttpProxyAccordingToGlobals(
 	}
 
 	/* If something detected or set up. */
-	if (ProxiesSettings::noProxyStr != proxySettings.hostName) {
+	if (ProxiesSettings::ProxySettings::NO_PROXY != proxySettings.usage) {
 		proxy.setHostName(proxySettings.hostName);
 		proxy.setPort(proxySettings.port);
 //		proxy.setType(QNetworkProxy::DefaultProxy);

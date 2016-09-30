@@ -42,22 +42,29 @@ public:
 	static
 	const QByteArray httpsProxyEnvVar; /*!< https_proxy environment variable at application start-up. */
 
-	static
-	const QString noProxyStr; /*!< Use no proxy. */
-	static
-	const QString autoProxyStr; /*!< Automatic proxy detection. */
-
 	class ProxySettings {
 	public:
+		/*!
+		 * @brief Proxy usage.
+		 */
+		enum Usage {
+			NO_PROXY, /*!< Disable proxy. */
+			AUTO_PROXY, /*!< Automatic proxy detection. */
+			DEFINED_PROXY /*!< Use defined values. */
+		};
+
 		/*!
 		 * @brief Constructor.
 		 */
 		ProxySettings(void);
 
-		QString hostName;
-		int port;
-		QString userName;
-		QString password;
+		enum Usage usage; /*!< How to interpret the proxy data.  */
+
+		QString userName; /*!< Proxy user name. */
+		QString password; /*!< Proxy password. */
+
+		QString hostName; /*!< Proxy host. */
+		int port; /*!< Proxy port. */
 	};
 
 	/*!

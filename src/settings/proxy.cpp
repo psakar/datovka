@@ -33,21 +33,20 @@
 
 ProxiesSettings globProxSet;
 
-#define NO_PROXY "None"
+#define NO_PROXY_STR "None"
+#define AUTO_PROXY_STR "-1"
 
 #define NO_PORT -1
 
 const QByteArray ProxiesSettings::httpProxyEnvVar(qgetenv(HTTP_PROXY_VARMAME));
 const QByteArray ProxiesSettings::httpsProxyEnvVar(qgetenv(HTTPS_PROXY_VARMAME));
 
-const QString ProxiesSettings::noProxyStr(QLatin1String(NO_PROXY));
-const QString ProxiesSettings::autoProxyStr(QLatin1String("-1"));
-
 ProxiesSettings::ProxySettings::ProxySettings(void)
-    : hostName(QLatin1String(NO_PROXY)), /* static initialisation order fiasco */
-    port(NO_PORT),
+    : usage(NO_PROXY), /* Default is no proxy. */
     userName(),
-    password()
+    password(),
+    hostName(QLatin1String(NO_PROXY_STR)),
+    port(NO_PORT)
 {
 }
 
@@ -57,98 +56,140 @@ ProxiesSettings::ProxiesSettings(void)
 {
 }
 
+/*!
+ * @brief Set up configuration strings.
+ *
+ * @param[in] type Whether to use HTTP or HTTPS settings.
+ * @param[in] full Whether to prefix settings group name.
+ * @param[out] connProxy Proxy entry name.
+ * @param[out] connProxyUser Proxy user name entry.
+ * @param[out] connProxyPwd Proxy password entry.
+ */
+static
+void settingsStringSetUp(enum ProxiesSettings::Type type, bool full,
+    QString &connProxy, QString &connProxyUser, QString &connProxyPwd)
+{
+	QString prefix;
+	if (full) {
+		prefix = QLatin1String("connection/");
+	}
+
+	switch (type) {
+	case ProxiesSettings::HTTP:
+		connProxy = prefix + QLatin1String("http_proxy");
+		connProxyUser = prefix + QLatin1String("http_proxy_username");
+		connProxyPwd = prefix + QLatin1String("http_proxy_password");
+		break;
+	case ProxiesSettings::HTTPS:
+		connProxy = prefix + QLatin1String("https_proxy");
+		connProxyUser = prefix + QLatin1String("https_proxy_username");
+		connProxyPwd = prefix + QLatin1String("https_proxy_password");
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+}
+
+/*!
+ * @brief Reads proxy configuration from settings,
+ *
+ * @param[in] settings Settings structure.
+ * @param[in] type Whether to read HTTP or HTTPS proxy settings,
+ * @return Proxy settings structure.
+ */
+static
+ProxiesSettings::ProxySettings loadProxySettings(const QSettings &settings,
+    enum ProxiesSettings::Type type)
+{
+	QString connProxy, connProxyUser, connProxyPwd;
+	settingsStringSetUp(type, true, connProxy, connProxyUser, connProxyPwd);
+
+	ProxiesSettings::ProxySettings proxy;
+
+	QString auxStr = settings.value(connProxy).toString();
+	if (auxStr.isEmpty() || (auxStr == QLatin1String(NO_PROXY_STR))) {
+		/* Defaults. */
+		proxy.usage = ProxiesSettings::ProxySettings::NO_PROXY;
+	} else if (auxStr == QLatin1String(AUTO_PROXY_STR)) {
+		proxy.usage = ProxiesSettings::ProxySettings::AUTO_PROXY;
+	} else if (auxStr.contains(":")) {
+		QString hostName(auxStr.section(":", 0, -2));
+		bool ok;
+		int port = auxStr.section(":", -1, -1).toInt(&ok, 10);
+		if (ok) {
+			proxy.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
+			proxy.hostName = hostName;
+			proxy.port = port;
+		}
+	} else {
+		/* Some bogus -> defaults. */
+		proxy.usage = ProxiesSettings::ProxySettings::NO_PROXY;
+	}
+
+	proxy.userName = settings.value(connProxyUser).toString();
+	proxy.password = fromBase64(settings.value(connProxyPwd).toString());
+
+	return proxy;
+}
+
 void ProxiesSettings::loadFromSettings(const QSettings &settings)
 {
-	QString auxStr;
-	bool ok;
+	http = loadProxySettings(settings, HTTP);
+	https = loadProxySettings(settings, HTTPS);
+}
 
-	auxStr = settings.value("connection/https_proxy").toString();
-	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
-		/* Defaults. */
-		https.hostName = noProxyStr;
-		https.port = NO_PORT;
-	} else if (autoProxyStr == auxStr) {
-		https.hostName = autoProxyStr;
-		https.port = NO_PORT;
-	} else {
-		if (auxStr.contains(":")) {
-			https.hostName = auxStr.section(":", 0, -2);
-			https.port =
-			    auxStr.section(":", -1, -1).toInt(&ok, 10);
-			if (!ok) {
-				https.hostName = noProxyStr;
-				https.port = NO_PORT;
-			}
-		} else {
-			https.hostName = noProxyStr;
-			https.port = NO_PORT;
-		}
-	}
-	https.userName =
-	    settings.value("connection/https_proxy_username").toString();
-	https.password = fromBase64(
-	    settings.value("connection/https_proxy_password").toString());
+/*!
+ * @brief Writes proxy configuration to settings.
+ *
+ * @param[out] settings Settings structure.
+ * @param[in] type Whether to read HTTP or HTTPS proxy settings,
+ * @param[in] proxy Proxy settings structure.
+ */
+static
+void saveProxySettings(QSettings &settings, enum ProxiesSettings::Type type,
+    const ProxiesSettings::ProxySettings &proxy)
+{
+	QString connProxy, connProxyUser, connProxyPwd;
+	settingsStringSetUp(type, false, connProxy, connProxyUser,
+	    connProxyPwd);
 
-	auxStr = settings.value("connection/http_proxy").toString();
-	if (auxStr.isEmpty() || (noProxyStr == auxStr)) {
-		/* Defaults. */
-		http.hostName = noProxyStr;
-		http.port = NO_PORT;
-	} else if (autoProxyStr == auxStr) {
-		http.hostName = autoProxyStr;
-		http.port = NO_PORT;
-	} else {
-		if (auxStr.contains(":")) {
-			http.hostName = auxStr.section(":", 0, -2);
-			http.port =
-			    auxStr.section(":", -1, -1).toInt(&ok, 10);
-			if (!ok) {
-				http.hostName = noProxyStr;
-				http.port = NO_PORT;
-			}
-		} else {
-			http.hostName = noProxyStr;
-			http.port = NO_PORT;
+	switch (proxy.usage) {
+	case ProxiesSettings::ProxySettings::NO_PROXY:
+		/* No proxy is default. */
+		//settings.setValue(connProxy, QLatin1String(NO_PROXY_STR));
+		return;
+		break;
+	case ProxiesSettings::ProxySettings::AUTO_PROXY:
+		settings.setValue(connProxy, QLatin1String(AUTO_PROXY_STR));
+		break;
+	case ProxiesSettings::ProxySettings::DEFINED_PROXY:
+		if (proxy.hostName.isEmpty() ||
+		    proxy.port < 0 || proxy.port > 65535) {
+			/* Default to no proxy. */
+			return;
 		}
+		settings.setValue(connProxy, proxy.hostName + ":" + QString::number(proxy.port, 10));
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
 	}
-	http.userName =
-	    settings.value("connection/http_proxy_username").toString();
-	http.password = fromBase64(
-	    settings.value("connection/http_proxy_password").toString());
+
+	if (!proxy.userName.isEmpty()) {
+		settings.setValue(connProxyUser, proxy.userName);
+	}
+	if (!proxy.password.isEmpty()) {
+		settings.setValue(connProxyPwd, toBase64(proxy.password));
+	}
 }
 
 void ProxiesSettings::saveToSettings(QSettings &settings) const
 {
-	QString auxStr;
-
 	settings.beginGroup("connection");
 
-	auxStr = https.hostName;
-	if (https.port >= 0) {
-		auxStr += ":" + QString::number(https.port, 10);
-	}
-	settings.setValue("https_proxy", auxStr);
-	if (!https.userName.isEmpty()) {
-		settings.setValue("https_proxy_username",
-		    https.userName);
-	}
-	if (!https.password.isEmpty()) {
-		settings.setValue("https_proxy_password",
-		    toBase64(https.password));
-	}
-
-	auxStr = http.hostName;
-	if (http.port >= 0) {
-		auxStr += ":" + QString::number(http.port, 10);
-	}
-	settings.setValue("http_proxy", auxStr);
-	if (!http.userName.isEmpty()) {
-		settings.setValue("http_proxy_username", http.userName);
-	}
-	if (!http.password.isEmpty()) {
-		settings.setValue("http_proxy_password",
-		    toBase64(http.password));
-	}
+	saveProxySettings(settings, HTTP, http);
+	saveProxySettings(settings, HTTPS, https);
 
 	settings.endGroup();
 }
@@ -161,7 +202,7 @@ bool ProxiesSettings::setProxyEnvVars(void)
 	qDebug() << "old " HTTPS_PROXY_VARMAME ":" << qgetenv(HTTPS_PROXY_VARMAME);
 
 	qputenv(HTTP_PROXY_VARMAME, QByteArray("http://k:aaaa@127.0.0.1:3128"));
-	qputenv(HTTPS_PROXY_VARMAME, QByteArray("http://k:aaaba@127.0.0.1:3128"));
+	qputenv(HTTPS_PROXY_VARMAME, QByteArray("http://k:aaaa@127.0.0.1:3128"));
 
 	qDebug() << "new " HTTP_PROXY_VARMAME ":" << qgetenv(HTTP_PROXY_VARMAME);
 	qDebug() << "new " HTTPS_PROXY_VARMAME ":" << qgetenv(HTTPS_PROXY_VARMAME);
@@ -169,6 +210,16 @@ bool ProxiesSettings::setProxyEnvVars(void)
 	return true;
 }
 
+/*!
+ * @brief Detects proxy settings from environment.
+ *
+ * @note Takes values from stored environmental values or from system.
+ *
+ * @param[in] type Whether to obtain HPPT or HTTPS settings.
+ * @returns Values as they would be stored in a http(s)_proxy variable (e.g.
+ *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
+ *     '172.0.0.1:3128').
+ */
 static
 QByteArray detectEnvironment(enum ProxiesSettings::Type type)
 {
@@ -219,8 +270,19 @@ QByteArray detectEnvironment(enum ProxiesSettings::Type type)
 	return proxyEnvVar;
 }
 
+/*!
+ * @brief Creates a proxy settings stricture from values returned when
+ *     detecting environment.
+ *
+ * @param[in] Values as they would be stored in a http(s)_proxy variable (e.g.
+ *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
+ *     '172.0.0.1:3128').
+ * @param[in] usage Specifies the type of the returned value.
+ * @return Proxy settings structure.
+ */
 static
-ProxiesSettings::ProxySettings fromEnvironment(QByteArray proxyEnv)
+ProxiesSettings::ProxySettings fromEnvVal(QByteArray proxyEnv,
+    ProxiesSettings::ProxySettings::Usage usage)
 {
 	ProxiesSettings::ProxySettings settings; /* noProxyStr, NO_PORT */
 
@@ -273,6 +335,8 @@ ProxiesSettings::ProxySettings fromEnvironment(QByteArray proxyEnv)
 		return ProxiesSettings::ProxySettings();
 	}
 
+	settings.usage = usage;
+
 	return settings;
 }
 
@@ -280,8 +344,7 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 {
 	ProxySettings settings;
 
-	settings.hostName = noProxyStr;
-	settings.port = NO_PORT;
+	settings.usage = ProxySettings::NO_PROXY;
 
 	/* TODO -- Try to contact the proxy to check whether it works? */
 
@@ -294,10 +357,11 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 		    proxyUrl.toString().toUtf8().constData(),
 		    proxyUrl.userName().toUtf8().constData(),
 		    proxyUrl.password().toUtf8().constData());
-		settings.hostName = proxyUrl.host();
-		settings.port = proxyUrl.port();
+		settings.usage = ProxySettings::AUTO_PROXY;
 		settings.userName = proxyUrl.userName();
 		settings.password = proxyUrl.password();
+		settings.hostName = proxyUrl.host();
+		settings.port = proxyUrl.port();
 		return settings;
 	}
 #else
@@ -312,10 +376,11 @@ ProxiesSettings::ProxySettings ProxiesSettings::detectHttpProxy(void)
 
 	foreach (QNetworkProxy p, listOfProxies) {
 		if (!p.hostName().isEmpty()) {
-			settings.hostName = p.hostName();
-			settings.port = p.port();
+			settings.usage = ProxySettings::AUTO_PROXY;
 			settings.userName = p.user();
 			settings.password = p.password();
+			settings.hostName = p.hostName();
+			settings.port = p.port();
 			return settings;
 		}
 	}
