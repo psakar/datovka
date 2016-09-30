@@ -189,7 +189,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 	this->httpsUnameEdit->setText(globProxSet.https.userName);
 	this->httpsPwdEdit->setText(globProxSet.https.password);
 
-#if 1
+#if 0
 	/* Currently ignore HTTPS proxy settings. */
 	this->httpsNoProxyRadioButton->setChecked(true);
 	this->httpsNoProxyRadioButton->setEnabled(false);
