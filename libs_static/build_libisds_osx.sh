@@ -46,7 +46,7 @@ LIBTOOL_ARCHIVE="${_LIBTOOL_ARCHIVE}"
 
 LIBICONV_ARCHIVE="${_LIBICONV_ARCHIVE}"
 LIBXML2_ARCHIVE="${_LIBXML2_ARCHIVE}"
-#GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}" # Disable NLS.
+GETTEXT_ARCHIVE="${_GETTEXT_ARCHIVE}" # Enable NLS.
 
 # Libcurl is already available in the system.
 USE_SYSTEM_CURL="yes"
@@ -307,7 +307,12 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --disable-nls"
+
+	NLS="--disable-nls"
+	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
+		NLS=""
+	fi
+	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
@@ -340,7 +345,9 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --disable-nls"
+
+	NLS="--disable-nls"
+	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
 	./configure ${CONFOPTS} \
