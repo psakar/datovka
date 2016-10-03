@@ -1,4 +1,20 @@
 x.y.z / yyyy-mm-dd
+ * Added support for HTTPS proxy.
+ * Bundled libisds is compiled against gettext again. This should resolve
+   issues with error message encoding.
+ * Fixed some errors in English and Czech localisation.
+ * Text in about dialogue has been made selectable.
+ * Added vacuum action. The user can explicitly clean up the associated
+   database files.
+ * Limited number of attachments in message to 900 files because of ISDS
+   regulations.
+ * Fixed a bug that caused that delivery info data have not been updated in
+   the database,
+ * Telling Qt to delete dialogues which have been raised from main window and
+   closed. This should save some memory.
+ * Fixed a bug. User names which have been entered when creating a new account
+   have not been checked for white space characters which caused some
+   confusion in naming of database files.
  * Fixed bug that was preventing tool-tips to be displayed on icon headers in
    message list table.
  * Added unit test for database containers.
