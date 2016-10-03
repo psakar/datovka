@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,22 +29,53 @@
 
 class ProxiesSettings {
 public:
+	/*!
+	 * @brief Connection type.
+	 */
+	enum Type {
+		HTTP,
+		HTTPS
+	};
+
 	static
-	const QString noProxyStr; /*!< Use no proxy. */
+	const QByteArray httpProxyEnvVar; /*!< http_proxy environment variable at application start-up. */
 	static
-	const QString autoProxyStr; /*!< Automatic proxy detection. */
+	const QByteArray httpsProxyEnvVar; /*!< https_proxy environment variable at application start-up. */
 
 	class ProxySettings {
 	public:
+		/*!
+		 * @brief Proxy usage.
+		 */
+		enum Usage {
+			NO_PROXY, /*!< Disable proxy. */
+			AUTO_PROXY, /*!< Automatic proxy detection. */
+			DEFINED_PROXY /*!< Use defined values. */
+		};
+
 		/*!
 		 * @brief Constructor.
 		 */
 		ProxySettings(void);
 
-		QString hostName;
-		int port;
-		QString userName;
-		QString password;
+		enum Usage usage; /*!< How to interpret the proxy data.  */
+
+		QString userName; /*!< Proxy user name. */
+		QString password; /*!< Proxy password. */
+
+		QString hostName; /*!< Proxy host. */
+		int port; /*!< Proxy port. */
+
+		/*!
+		 * @brief Converts value to value as would be stored in
+		 *     environment variable value.
+		 *
+		 * @return Values as they would be stored in a http(s)_proxy
+		 *     variable without protocol specification (e.g.
+		 *     'b:bb@192.168.1.1:3128', '172.0.0.1:3128') if contains
+		 *     DEFINED_PROXY data, no data else.
+		 */
+		QByteArray toEnvVal(void) const;
 	};
 
 	/*!
@@ -69,13 +100,51 @@ public:
 	 */
 	void saveToSettings(QSettings &settings) const;
 
+	/*
+	 * Libcurl automatically uses the variables http_proxy and https_proxy
+	 * if they are set. Therefore, if no proxy is forced from the
+	 * configuration file, then these two environmental variables are going
+	 * to be cleared inside this application.
+	 */
+
 	/*!
-	 * @brief Detect HTTP proxy.
+	 * @brief Detects proxy settings from environment.
 	 *
-	 * @return Host and port number.
+	 * @note Takes values from stored environmental values or from system.
+	 *
+	 * @param[in] type Whether to obtain HPPT or HTTPS settings.
+	 * @returns Values as they would be stored in a http(s)_proxy variable (e.g.
+	 *     'http://a:aaa@127.0.0.1:3128', 'b:bb@192.168.1.1:3128',
+	 *     '172.0.0.1:3128').
 	 */
 	static
-	ProxiesSettings::ProxySettings detectHttpProxy(void);
+	QByteArray detectEnvironment(enum Type type);
+
+	/*!
+	 * @brief Adds user and password, if not specified in environment value.
+	 *
+	 * @param[in,out] envVal Environment value.
+	 * @param[in]     user User name.
+	 * @param[in]     pwd User password.
+	 * @return True if added, false else.
+	 */
+	static
+	bool addUserPwdIfMissing(QByteArray &envVal, const QString &user,
+	    const QString &pwd);
+
+	/*!
+	 * @brief Sets environmental variables according to proxy settings.
+	 *
+	 * @return False on any error.
+	 */
+	bool setProxyEnvVars(void) const;
+
+	/*!
+	 * @brief Returns proxy settings as they are configures.
+	 *
+	 * @return Proxy settings.
+	 */
+	ProxySettings proxySettings(enum Type type) const;
 };
 
 /*!

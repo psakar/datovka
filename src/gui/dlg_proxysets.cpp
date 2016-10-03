@@ -44,19 +44,15 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	    this, SLOT(showHttpProxyPassword(int)));
 
 	{
-		ProxiesSettings::ProxySettings proxy =
-		    ProxiesSettings::detectHttpProxy();
-		if (!proxy.hostName.isEmpty() &&
-		    (ProxiesSettings::noProxyStr != proxy.hostName)) {
-			this->httpProxyDetectionLabel->setText(
-			    tr("Proxy has been detected") + ": " +
-			    proxy.hostName + ":" +
-			    QString::number(proxy.port, 10));
-		} else {
-			this->httpProxyDetectionLabel->setText(
-			    tr("No proxy detected, direct connection "
-			        "will be used."));
+		QString proxyMsg(
+		    tr("No proxy detected, direct connection will be used."));
+
+		QByteArray proxyVal(ProxiesSettings::detectEnvironment(ProxiesSettings::HTTP));
+		if (!proxyVal.isEmpty()) {
+			proxyMsg =
+			    tr("Proxy has been detected") + ": " + proxyVal;
 		}
+		this->httpProxyDetectionLabel->setText(proxyMsg);
 	}
 
 	connect(this->httpsNoProxyRadioButton, SIGNAL(toggled(bool)),
@@ -68,8 +64,17 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	connect(this->httpsAuthenticationCheckbox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showHttpsProxyPassword(int)));
 
-	this->httpsProxyDetectionLabel->setText(
-	    tr("No proxy detected, direct connection will be used."));
+	{
+		QString proxyMsg(
+		    tr("No proxy detected, direct connection will be used."));
+
+		QByteArray proxyVal(ProxiesSettings::detectEnvironment(ProxiesSettings::HTTPS));
+		if (!proxyVal.isEmpty()) {
+			proxyMsg =
+			    tr("Proxy has been detected") + ": " + proxyVal;
+		}
+		this->httpsProxyDetectionLabel->setText(proxyMsg);
+	}
 
 	loadProxyDialog(globProxSet);
 }
@@ -79,7 +84,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 	this->httpProxyAuth->setHidden(true);
 	this->httpAuthenticationCheckbox->setCheckState(Qt::Unchecked);
 
-	if (ProxiesSettings::autoProxyStr == proxySettings.http.hostName) {
+	if (ProxiesSettings::ProxySettings::AUTO_PROXY == proxySettings.http.usage) {
 		this->httpNoProxyRadioButton->setChecked(false);
 		this->httpAutoProxyRadioButton->setChecked(true);
 		this->httpProxyDetectionLabel->setEnabled(true);
@@ -93,8 +98,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 		this->httpPwdLabel->setEnabled(true);
 		this->httpUnameEdit->setEnabled(true);
 		this->httpPwdEdit->setEnabled(true);
-	} else if (ProxiesSettings::noProxyStr ==
-	           proxySettings.http.hostName) {
+	} else if (ProxiesSettings::ProxySettings::NO_PROXY == proxySettings.http.usage) {
 		this->httpNoProxyRadioButton->setChecked(true);
 		this->httpAutoProxyRadioButton->setChecked(false);
 		this->httpProxyDetectionLabel->setEnabled(false);
@@ -134,7 +138,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 	this->httpsProxyAuth->setHidden(true);
 	this->httpsAuthenticationCheckbox->setCheckState(Qt::Unchecked);
 
-	if (ProxiesSettings::autoProxyStr == proxySettings.https.hostName) {
+	if (ProxiesSettings::ProxySettings::AUTO_PROXY == proxySettings.https.usage) {
 		this->httpsNoProxyRadioButton->setChecked(false);
 		this->httpsAutoProxyRadioButton->setChecked(true);
 		this->httpsProxyDetectionLabel->setEnabled(true);
@@ -148,8 +152,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 		this->httpsPwdLabel->setEnabled(true);
 		this->httpsUnameEdit->setEnabled(true);
 		this->httpsPwdEdit->setEnabled(true);
-	} else if (ProxiesSettings::noProxyStr ==
-	           proxySettings.https.hostName) {
+	} else if (ProxiesSettings::ProxySettings::NO_PROXY == proxySettings.https.usage) {
 		this->httpsNoProxyRadioButton->setChecked(true);
 		this->httpsAutoProxyRadioButton->setChecked(false);
 		this->httpsProxyDetectionLabel->setEnabled(false);
@@ -186,7 +189,7 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 	this->httpsUnameEdit->setText(globProxSet.https.userName);
 	this->httpsPwdEdit->setText(globProxSet.https.password);
 
-#if 1
+#if 0
 	/* Currently ignore HTTPS proxy settings. */
 	this->httpsNoProxyRadioButton->setChecked(true);
 	this->httpsNoProxyRadioButton->setEnabled(false);
@@ -256,12 +259,15 @@ void DlgProxysets::saveChanges(void) const
 	/* TODO -- Checks and notification about incorrect values. */
 
 	if (this->httpNoProxyRadioButton->isChecked()) {
-		globProxSet.http.hostName = ProxiesSettings::noProxyStr;
+		globProxSet.http.usage = ProxiesSettings::ProxySettings::NO_PROXY;
+		globProxSet.http.hostName.clear();
 		globProxSet.http.port = -1;
 	} else if (this->httpAutoProxyRadioButton->isChecked()) {
-		globProxSet.http.hostName = ProxiesSettings::autoProxyStr;
+		globProxSet.http.usage = ProxiesSettings::ProxySettings::AUTO_PROXY;
+		globProxSet.http.hostName.clear();
 		globProxSet.http.port = -1;
 	} else {
+		globProxSet.http.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
 		globProxSet.http.hostName = this->httpHostnameLineEdit->text();
 		globProxSet.http.port =
 		    this->httpPortLineEdit->text().toInt(&ok, 10);
@@ -273,14 +279,16 @@ void DlgProxysets::saveChanges(void) const
 	globProxSet.http.password = this->httpPwdEdit->text();
 
 	if (this->httpsNoProxyRadioButton->isChecked()) {
-		globProxSet.https.hostName = ProxiesSettings::noProxyStr;
+		globProxSet.https.usage = ProxiesSettings::ProxySettings::NO_PROXY;
+		globProxSet.https.hostName.clear();
 		globProxSet.https.port = -1;
 	} else if (this->httpsAutoProxyRadioButton->isChecked()) {
-		globProxSet.https.hostName = ProxiesSettings::autoProxyStr;
+		globProxSet.https.usage = ProxiesSettings::ProxySettings::AUTO_PROXY;
+		globProxSet.https.hostName.clear();
 		globProxSet.https.port = -1;
 	} else {
-		globProxSet.https.hostName =
-		    this->httpsHostnameLineEdit->text();
+		globProxSet.https.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
+		globProxSet.https.hostName = this->httpsHostnameLineEdit->text();
 		globProxSet.https.port =
 		    this->httpsPortLineEdit->text().toInt(&ok, 10);
 		if (!ok) {
@@ -289,6 +297,12 @@ void DlgProxysets::saveChanges(void) const
 	}
 	globProxSet.https.userName = this->httpsUnameEdit->text();
 	globProxSet.https.password = this->httpsPwdEdit->text();
+
+	/*
+	 * Apply to global variables, although, restart may be needed if
+	 * already connected.
+	 */
+	globProxSet.setProxyEnvVars();
 }
 
 

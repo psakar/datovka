@@ -102,34 +102,11 @@ bool FileDownloader::setUpHttpProxyAccordingToGlobals(
 	ProxiesSettings::ProxySettings proxySettings;
 	QNetworkProxy proxy;
 
-	if (ProxiesSettings::autoProxyStr ==
-	    globProxSet.http.hostName) {
-		proxySettings = ProxiesSettings::detectHttpProxy();
-
-		/*
-		 * TODO -- Is it better to handle
-		 * proxyAuthenticationRequired() ?
-		 */
-
-		/*
-		 * Add user name and password if those were not
-		 * detected but were supplied by the user.
-		 */
-		if (proxySettings.userName.isEmpty()) {
-			proxySettings.userName =
-			    globProxSet.http.userName;
-		}
-		if (proxySettings.password.isEmpty()) {
-			proxySettings.password =
-			    globProxSet.http.password;
-		}
-	} else if (!globProxSet.http.hostName.isEmpty() &&
-	           (globProxSet.http.port >= 0)) {
-		proxySettings = globProxSet.http;
-	}
+	/* Use proxy according to configuration. */
+	proxySettings = globProxSet.proxySettings(ProxiesSettings::HTTP);
 
 	/* If something detected or set up. */
-	if (ProxiesSettings::noProxyStr != proxySettings.hostName) {
+	if (ProxiesSettings::ProxySettings::NO_PROXY != proxySettings.usage) {
 		proxy.setHostName(proxySettings.hostName);
 		proxy.setPort(proxySettings.port);
 //		proxy.setType(QNetworkProxy::DefaultProxy);
