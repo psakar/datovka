@@ -4,6 +4,8 @@ SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+adjust_sources "osx"
+
 OSX_MIN_VER=10.7
 MAKEOPTS="-j 2"
 
@@ -347,6 +349,9 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
 	NLS="--disable-nls"
+	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
+		NLS=""
+	fi
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok

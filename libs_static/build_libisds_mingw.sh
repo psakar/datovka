@@ -5,6 +5,8 @@ SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
 
 . "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
 
+adjust_sources "mingw"
+
 WIN_VER="0x0501" #https://msdn.microsoft.com/en-us/library/windows/desktop/aa383745%28v=vs.85%29.aspx
 MAKEOPTS="-j 4"
 
@@ -25,7 +27,6 @@ X86_MINGW_RANLIB=${X86_MINGV_HOST}-ranlib
 
 BUILTDIR="${BUILTDIR}-${X86_MINGV_HOST}"
 
-
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
 fi
@@ -37,7 +38,6 @@ fi
 if [ ! -d "${BUILTDIR}" ]; then
 	mkdir "${BUILTDIR}"
 fi
-
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
 EXPAT_ARCHIVE="${_EXPAT_ARCHIVE}"
@@ -337,6 +337,10 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 
 	LINTL=""
 	NLS="--disable-nls"
+	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
+		LINTL="-lintl"
+		NLS=""
+	fi
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	cat configure.ac | sed -e 's/AC_FUNC_MALLOC//g' > nomalloc_configure.ac
