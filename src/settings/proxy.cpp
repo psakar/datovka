@@ -306,6 +306,11 @@ QByteArray adjustedDetectedEnvironment(enum ProxiesSettings::Type type,
 {
 	QByteArray val(ProxiesSettings::detectEnvironment(type));
 
+	/* Don't do anything with empty settings, */
+	if (val.isEmpty()) {
+		return val;
+	}
+
 	/* Contains user name and password. */
 	if (val.count('@') > 0) {
 		return val;
