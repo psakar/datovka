@@ -59,10 +59,13 @@ QByteArray ProxiesSettings::ProxySettings::toEnvVal(void) const
 	case AUTO_PROXY:
 		break;
 	case DEFINED_PROXY:
-		if (!userName.isEmpty() && !password.isEmpty()) {
-			val = userName.toUtf8() + ":" + password.toUtf8() + "@";
-		}
 		if (!hostName.isEmpty() && port >= 0 && port <= 65535) {
+			if (!userName.isEmpty() && !password.isEmpty()) {
+				/* Only when a proxy is set. */
+				val = userName.toUtf8() + ":" +
+				    password.toUtf8() + "@";
+			}
+
 			val += hostName.toUtf8() + ":" +
 			    QByteArray::number(port, 10);
 		}
