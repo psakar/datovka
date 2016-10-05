@@ -42,7 +42,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	bool m_success; /*!< True if successfully finished. */
 	QString m_error; /*!< Error description. */

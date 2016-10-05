@@ -61,7 +61,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	enum Result m_result; /*!< Verification outcome. */
 	QString m_isdsError; /*!< Error description. */

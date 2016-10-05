@@ -72,7 +72,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Determines the type of the ZFO file.

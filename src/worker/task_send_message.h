@@ -201,7 +201,7 @@ public:
 	 * @brief Performs actual message sending.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	ResultData m_resultData; /*!< Return state data. */
 

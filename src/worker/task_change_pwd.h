@@ -65,7 +65,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	int m_isdsRetError; /*!< Returned error code. */
 	QString m_isdsError; /*!< Error description. */

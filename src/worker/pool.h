@@ -59,7 +59,7 @@ protected:
 	 * @brief Runs the worker code.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	friend class WorkerPool;
 

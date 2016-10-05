@@ -46,7 +46,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	long m_heller; /*!< Credit in hundredths of crowns. */
 
