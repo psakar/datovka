@@ -125,6 +125,13 @@ private:
 	 */
 	void setContent(const AcntSettings &acntData);
 
+	/*!
+	 * @brief Constructs account data from dialogue content.
+	 *
+	 * @return Account settings according to the dialogue state.
+	 */
+	AcntSettings getContent(void) const;
+
 	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
 	const Action m_action; /*!< Actual action the dialogue should be configured to. */
 	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */

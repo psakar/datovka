@@ -128,63 +128,8 @@ void DlgCreateAccount::saveAccount(void)
 {
 	debugSlotCall();
 
-	AcntSettings newAccountSettings;
-	const QString userName(m_accountInfo.userName());
-
-	/* set account index, itemTop and account settings for account */
-	switch (m_action) {
-	case ACT_ADDNEW:
-		break;
-	case ACT_EDIT:
-	case ACT_PWD:
-	case ACT_CERT:
-	case ACT_CERTPWD:
-	case ACT_IDBOX:
-		Q_ASSERT(!userName.isEmpty());
-		Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
-		newAccountSettings = AccountModel::globAccounts[userName];
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
-
-	/* set account items */
-	newAccountSettings.setAccountName(this->accountLineEdit->text().trimmed());
-	newAccountSettings.setUserName(this->usernameLineEdit->text().trimmed());
-	newAccountSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
-	newAccountSettings.setPassword(this->passwordLineEdit->text().trimmed());
-	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
-	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
-
-	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		newAccountSettings.setLoginMethod(LIM_USERNAME);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_CERT);
-		newAccountSettings.setPassword("");
-		newAccountSettings.setP12File(
-		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() ==
-	           USER_CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_USER_CERT);
-		newAccountSettings.setP12File(
-		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		newAccountSettings.setLoginMethod(LIM_HOTP);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
-		newAccountSettings.setLoginMethod(LIM_TOTP);
-		newAccountSettings.setP12File("");
-	} else {
-		Q_ASSERT(0);
-	}
-
-	/* Only for newly created account. */
-	newAccountSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
-
-	/* Save the stored settings. */
-	m_accountInfo = newAccountSettings;
+	/* Store the submitted settings. */
+	m_accountInfo = getContent();
 
 	/* create new account / save current account */
 	switch (m_action) {
@@ -193,24 +138,29 @@ void DlgCreateAccount::saveAccount(void)
 	case ACT_CERT:
 	case ACT_CERTPWD:
 	case ACT_IDBOX:
-		/*
-		 * This assignment represents hidden functionality. Either this
-		 * must be clearly documented or it must be removed.
-		 *
-		 * FIXME -- Do something!
-		 */
-		AccountModel::globAccounts[userName] = newAccountSettings;
-		/*
-		 * Catching the following signal is required only when
-		 * ACT_EDIT was enabled.
-		 *
-		 * The account model catches the signal.
-		 */
-		emit AccountModel::globAccounts.accountDataChanged(userName);
-		/* TODO -- Save/update related account DB entry? */
+		{
+			const QString userName(m_accountInfo.userName());
+			Q_ASSERT(!userName.isEmpty());
+			/*
+			 * This assignment represents hidden functionality.
+			 * Either this must be clearly documented or it must
+			 * be removed.
+			 *
+			 * FIXME -- Do something!
+			 */
+			AccountModel::globAccounts[userName] = m_accountInfo;
+			/*
+			 * Catching the following signal is required only when
+			 * ACT_EDIT was enabled.
+			 *
+			 * The account model catches the signal.
+			 */
+			emit AccountModel::globAccounts.accountDataChanged(userName);
+			/* TODO -- Save/update related account DB entry? */
+		}
 		break;
 	case ACT_ADDNEW:
-		emit newAccountSubmitted(newAccountSettings);
+		emit newAccountSubmitted(m_accountInfo);
 		break;
 	default:
 		Q_ASSERT(0);
@@ -245,8 +195,6 @@ void DlgCreateAccount::initialiseDialogue(void)
 
 void DlgCreateAccount::setContent(const AcntSettings &acntData)
 {
-	int itemindex;
-
 	if (acntData.userName().isEmpty()) {
 		Q_ASSERT(0);
 		return;
@@ -303,21 +251,22 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	this->usernameLineEdit->setEnabled(false);
 	this->testAccountCheckBox->setEnabled(false);
 
-	const QString login_method = acntData.loginMethod();
-	if (LIM_USERNAME == login_method) {
-		itemindex = USER_NAME;
-	} else if (LIM_CERT == login_method) {
-		itemindex = CERTIFICATE;
-	} else if (LIM_USER_CERT == login_method) {
-		itemindex = USER_CERTIFICATE;
-	} else if (LIM_HOTP == login_method) {
-		itemindex = HOTP;
+	int itemIdx;
+	const QString loginMethod(acntData.loginMethod());
+	if (LIM_USERNAME == loginMethod) {
+		itemIdx = USER_NAME;
+	} else if (LIM_CERT == loginMethod) {
+		itemIdx = CERTIFICATE;
+	} else if (LIM_USER_CERT == loginMethod) {
+		itemIdx = USER_CERTIFICATE;
+	} else if (LIM_HOTP == loginMethod) {
+		itemIdx = HOTP;
 	} else {
-		itemindex = TOTP;
+		itemIdx = TOTP;
 	}
 
-	this->loginmethodComboBox->setCurrentIndex(itemindex);
-	activateContent(itemindex);
+	this->loginmethodComboBox->setCurrentIndex(itemIdx);
+	activateContent(itemIdx);
 
 	this->passwordLineEdit->setText(acntData.password());
 	this->testAccountCheckBox->setChecked(acntData.isTestAccount());
@@ -333,4 +282,66 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	}
 
 	checkInputFields();
+}
+
+AcntSettings DlgCreateAccount::getContent(void) const
+{
+	AcntSettings newAccountSettings;
+
+	/* set account index, itemTop and account settings for account */
+	switch (m_action) {
+	case ACT_ADDNEW:
+		break;
+	case ACT_EDIT:
+	case ACT_PWD:
+	case ACT_CERT:
+	case ACT_CERTPWD:
+	case ACT_IDBOX:
+		{
+			const QString userName(m_accountInfo.userName());
+			Q_ASSERT(!userName.isEmpty());
+			Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
+			newAccountSettings = AccountModel::globAccounts[userName];
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	/* set account items */
+	newAccountSettings.setAccountName(this->accountLineEdit->text().trimmed());
+	newAccountSettings.setUserName(this->usernameLineEdit->text().trimmed());
+	newAccountSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
+	newAccountSettings.setPassword(this->passwordLineEdit->text().trimmed());
+	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
+	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
+
+	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
+		newAccountSettings.setLoginMethod(LIM_USERNAME);
+		newAccountSettings.setP12File("");
+	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
+		newAccountSettings.setLoginMethod(LIM_CERT);
+		newAccountSettings.setPassword("");
+		newAccountSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
+	} else if (this->loginmethodComboBox->currentIndex() ==
+	           USER_CERTIFICATE) {
+		newAccountSettings.setLoginMethod(LIM_USER_CERT);
+		newAccountSettings.setP12File(
+		    QDir::fromNativeSeparators(m_certPath));
+	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
+		newAccountSettings.setLoginMethod(LIM_HOTP);
+		newAccountSettings.setP12File("");
+	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
+		newAccountSettings.setLoginMethod(LIM_TOTP);
+		newAccountSettings.setP12File("");
+	} else {
+		Q_ASSERT(0);
+	}
+
+	/* Only for newly created account. */
+	newAccountSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
+
+	return newAccountSettings;
 }
