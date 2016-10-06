@@ -25,21 +25,33 @@
 #ifndef _DLG_CREATE_ACCOUNT_H_
 #define _DLG_CREATE_ACCOUNT_H_
 
-
 #include <QDialog>
 #include <QFileDialog>
 #include <QTreeView>
 
-#include "src/common.h"
 #include "src/models/accounts_model.h"
-//#include "src/io/account_db.h"
 #include "ui_dlg_create_account.h"
 
-
+/*!
+ * @brief Account properties dialogue.
+ */
 class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 	Q_OBJECT
-
 public:
+	/*!
+	 * Login method order as they are listed in the dialogue.
+	 */
+	enum LoginMethodIndex {
+		USER_NAME = 0,
+		CERTIFICATE = 1,
+		USER_CERTIFICATE = 2,
+		HOTP = 3,
+		TOTP = 4
+	};
+
+	/*!
+	 * @brief Specifies the action to be performed.
+	 */
 	enum Action {
 		ACT_ADDNEW,
 		ACT_EDIT,
@@ -49,14 +61,21 @@ public:
 		ACT_IDBOX
 	};
 
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] accountInfo Account settings.
+	 * @param[in] action Specifies which parts of dialogue to be enabled.
+	 * @param[in] parent Parent object.
+	 */
 	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
 	    QWidget *parent = 0);
 
 	/*!
 	 * @brief Obtains account data as the have been submitted by the user.
 	 *
-	 * @return Returns data that have been submitted by the user when he
-	 *     pressed the Accept/OK button.
+	 * @return Data that have been submitted by the user when he pressed
+	 *     the Accept/OK button.
 	 */
 	AcntSettings getSubmittedData(void) const;
 
@@ -78,6 +97,5 @@ private:
 	int m_loginmethod;
 	QString m_certPath;
 };
-
 
 #endif /* _DLG_CREATE_ACCOUNT_H_ */

@@ -21,13 +21,12 @@
  * the two.
  */
 
-
 #include <QMessageBox>
 
+#include "src/common.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
-
 
 DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     Action action, QWidget *parent)
