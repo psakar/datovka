@@ -252,61 +252,42 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		return;
 	}
 
-	QString windowTitle, accountName;
+	QString windowTitle(this->windowTitle());
 
 	switch (m_action) {
 	case ACT_EDIT:
 		windowTitle = tr("Update account") + " " +
 		    acntData.accountName();
-		this->accountLineEdit->setText(acntData.accountName());
-		this->usernameLineEdit->setText(acntData.userName());
-		this->usernameLineEdit->setEnabled(false);
-		this->testAccountCheckBox->setEnabled(false);
 		break;
 	case ACT_PWD:
 		windowTitle = tr("Enter password for account") + " "
 		    + acntData.accountName();
-		this->accountLineEdit->setText(acntData.accountName());
-		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
+		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(acntData.userName());
-		this->usernameLineEdit->setEnabled(false);
-		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
 		windowTitle = tr("Set certificate for account") + " "
 		    + acntData.accountName();
-		this->accountLineEdit->setText(acntData.accountName());
-		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
+		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(acntData.userName());
-		this->usernameLineEdit->setEnabled(false);
-		this->testAccountCheckBox->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		windowTitle = tr("Enter password/certificate for account")
 		    + " " + acntData.accountName();
-		this->accountLineEdit->setText(acntData.accountName());
-		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
+		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(acntData.userName());
-		this->usernameLineEdit->setEnabled(false);
-		this->testAccountCheckBox->setEnabled(false);
 		break;
 	case ACT_IDBOX:
 		windowTitle = tr("Enter ID of your databox for account")
 		    + " " + acntData.accountName();
-		this->accountLineEdit->setText(acntData.accountName());
-		this->accountLineEdit->setEnabled(false);
 		this->infoLabel->setEnabled(false);
+		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		this->usernameLineEdit->setText(acntData.userName());
-		this->testAccountCheckBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		this->usernameLabel->setText(tr("Databox ID:"));
@@ -317,6 +298,10 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	}
 
 	this->setWindowTitle(windowTitle);
+	this->accountLineEdit->setText(acntData.accountName());
+	this->usernameLineEdit->setText(acntData.userName());
+	this->usernameLineEdit->setEnabled(false);
+	this->testAccountCheckBox->setEnabled(false);
 
 	const QString login_method = acntData.loginMethod();
 	if (LIM_USERNAME == login_method) {
