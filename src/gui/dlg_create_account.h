@@ -80,22 +80,55 @@ public:
 	AcntSettings getSubmittedData(void) const;
 
 private slots:
-	void setActiveButton(int);
-	void addCertificateFromFile(void);
-	void saveAccount(void);
+	/*!
+	 * @brief Activates parts of the dialogue depending on the login method.
+	 *
+	 * @param[in] loginMethodIdx Index of the login method to use.
+	 */
+	void activateContent(int loginMethodIdx);
+
+	/*!
+	 * @brief Checks input sanity, also activates the save/store button.
+	 */
 	void checkInputFields(void);
 
+	/*!
+	 * @brief Opens a dialogue in order to select a certificate file.
+	 */
+	void addCertificateFile(void);
+
+	/*!
+	 * @brief Saves current account information.
+	 */
+	void saveAccount(void);
+
 signals:
-	void getAccountUserDataboxInfo(AcntSettings);
+	/*!
+	 * @brief Signal is executed when data about new account have been
+	 *     submitted.
+	 *
+	 * @param newAccount New account settings.
+	 */
+	void newAccountSubmitted(AcntSettings newAccount);
 
 private:
-	void initAccountDialog(void);
-	void setCurrentAccountData(void);
+	/*!
+	 * @brief Initialises remaining bits of dialogue that haven't been
+	 *     specified in the dialogue UI.
+	 */
+	void initialiseDialogue(void);
 
-	AcntSettings m_accountInfo;
-	const Action m_action;
-	int m_loginmethod;
-	QString m_certPath;
+	/*!
+	 * @brief Sets dialogue content from supplied account data.
+	 *
+	 * @param[in] acntData Account data to use when setting content.
+	 */
+	void setContent(const AcntSettings &acntData);
+
+	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
+	const Action m_action; /*!< Actual action the dialogue should be configured to. */
+	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
+	QString m_certPath; /*!< Path to certificate. */
 };
 
 #endif /* _DLG_CREATE_ACCOUNT_H_ */

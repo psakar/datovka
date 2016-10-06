@@ -4856,7 +4856,7 @@ void MainWindow::addNewAccount(void)
 	QDialog *accountDlg = new DlgCreateAccount(AcntSettings(),
 	    DlgCreateAccount::ACT_ADDNEW, this);
 
-	connect(accountDlg, SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
+	connect(accountDlg, SIGNAL(newAccountSubmitted(AcntSettings)),
 	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
