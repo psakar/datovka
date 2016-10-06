@@ -16,13 +16,24 @@
  * http://scan.coverity.com/projects/3079
  */
 
+/*
+ * It looks like the coverity_model.c file applies to all defects found in
+ * C sources whereas a coverity_model.cpp file applies only to defects found in
+ * C++ sources. However there is no possibility to upload both, .c and .cpp,
+ * files into the web interface of Coverity.
+ *
+ * Further investigation is needed to find out whether there is a possibility
+ * to create a single modelling file that would apply to all C and C++ sources
+ * within a single mixed (C/C++) project.
+ */
+
 #define NULL ((void *)0)
 
 char *sanitised_tz_val(const char *tz_val)
 {
 	char *ret = NULL;
 	if (NULL != tz_val) {
-		ret = strdup();
+		ret = tz_val;
 	}
 	__coverity_tainted_string_sanitize_content__(ret);
 	return ret;
