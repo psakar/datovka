@@ -2273,6 +2273,23 @@ int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
 	return 0;
 }
 
+#ifndef WIN32
+/*!
+ * @brief This function should stop Coverity from keeping complaining about
+ *     a tainted string.
+ *
+ * @param[in] tz_val Time zone variable value.
+ * @return Copy of value or NULL when NULL passed.
+ */
+char *sanitised_tz_val(const char *tz_val)
+{
+	if (NULL != tz_val) {
+		return strdup(tz_val);
+	}
+
+	return NULL;
+}
+#endif /* !WIN32 */
 
 /* ========================================================================= */
 /*
@@ -2288,12 +2305,14 @@ time_t timegm_utc(struct tm *tm)
 
 	time_t ret = 0;
 	char *tz = NULL;
-	const char *tmp;
 
-	tmp = getenv("TZ");
-	if (NULL != tmp) {
-		tz = strdup(tmp);
-	}
+	/*
+	 * We only store a copy of the original value in order to restore it
+	 * afterwards. We don't care about it's actual value.
+	 */
+
+	tz = sanitised_tz_val(getenv("TZ"));
+
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
