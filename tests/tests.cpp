@@ -26,6 +26,8 @@
 #include "tests/test_crypto.h"
 #include "tests/test_db_container.h"
 #include "tests/test_message_db_set.h"
+#include "tests/test_task_downloads.h"
+#include "tests/test_task_send_message.h"
 
 static
 int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
@@ -46,6 +48,7 @@ int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 	int status = 0;
+	qint64 msgId = 0;
 
 #if defined (TEST_CRYPTO)
 	status |= testThisClassAndDelete(newTestCrypto(), argc, argv);
@@ -58,6 +61,14 @@ int main(int argc, char *argv[])
 #if defined (TEST_MESSAGE_DB_SET)
 	status |= testThisClassAndDelete(newTestMessageDbSet(), argc, argv);
 #endif /* defined (TEST_MESSAGE_DB_SET) */
+
+#if defined (TEST_TASK_SEND_MESSAGE)
+	status |= testThisClassAndDelete(newTestTaskSendMessage(msgId), argc, argv);
+#endif /* defined (TEST_TASK_SEND_MESSAGE) */
+
+#if defined TEST_TASK_DOWNLOADS
+	status |= testThisClassAndDelete(newTestTaskDownloads(msgId), argc, argv);
+#endif /* defined TEST_TASK_DOWNLOADS */
 
 	return status;
 }
