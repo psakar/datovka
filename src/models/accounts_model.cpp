@@ -27,30 +27,6 @@
 #include "src/common.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
-#include "src/settings/preferences.h"
-
-#define CREDENTIALS "credentials"
-
-#define ACCOUNT_NAME "name"
-#define USER "username"
-#define LOGIN "login_method"
-#define PWD "password"
-#define TEST_ACCOUNT "test_account"
-#define REMEMBER_PWD "remember_password"
-#define DB_DIR "database_dir"
-#define SYNC_WITH_ALL "sync_with_all"
-#define P12FILE "p12file"
-#define LAST_MSG_ID "last_message_id"
-#define LAST_SAVE_ATTACH "last_save_attach_path"
-#define LAST_ADD_ATTACH "last_add_attach_path"
-#define LAST_CORRESPOND "last_export_corresp_path"
-#define LAST_ZFO "last_export_zfo_path"
-
-/* The following are not stored into the configuration file. */
-/* Only set on new accounts. */
-#define _CREATED_FROM_SCRATCH "_created_from_cratch"
-#define _PKEY_PASSPHRASE "_pkey_passphrase"
-#define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
 
 /*
  * For index navigation QModellIndex::internalId() is used. The value encodes
@@ -99,302 +75,6 @@
  */
 #define internalIdUserNameIndex(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
-
-/*!
- * @brief Used for sorting credentials.
- *
- * @param[in] s1  credentials[0-9]*
- * @param[in] s2  credentials[0-9]*
- * @return True if s1 comes before s2.
- *
- * @note The number is taken by its value rather like a string of characters.
- * cred < cred1 < cred2 < ... < cred10 < ... < cred100 < ...
- */
-static
-bool credentialsLessThan(const QString &s1, const QString &s2)
-{
-	QRegExp trailingNumRe("(.*[^0-9]+)*([0-9]+)");
-	QString a1, a2;
-	int n1, n2;
-	int pos;
-
-	pos = trailingNumRe.indexIn(s1);
-	if (pos > -1) {
-		a1 = trailingNumRe.cap(1);
-		n1 = trailingNumRe.cap(2).toInt();
-	} else {
-		a1 = s1;
-		n1 = -1;
-	}
-
-	pos = trailingNumRe.indexIn(s2);
-	if (pos > -1) {
-		a2 = trailingNumRe.cap(1);
-		n2 = trailingNumRe.cap(2).toInt();
-	} else {
-		a2 = s2;
-		n2 = -1;
-	}
-
-	return (a1 != a2) ? (a1 < a2) : (n1 < n2);
-}
-
-AcntSettings::AcntSettings(void)
-    : QMap<QString, QVariant>()
-{
-}
-
-AcntSettings::AcntSettings(const QMap<QString, QVariant> &map)
-    : QMap<QString, QVariant>(map)
-{
-}
-
-bool AcntSettings::isValid(void) const
-{
-	return !m_parentType::isEmpty() &&
-	    !accountName().isEmpty() && !userName().isEmpty();
-}
-
-QString AcntSettings::accountName(void) const
-{
-	return m_parentType::operator[](ACCOUNT_NAME).toString();
-}
-
-void AcntSettings::setAccountName(const QString &name)
-{
-	m_parentType::operator[](ACCOUNT_NAME) = name;
-}
-
-QString AcntSettings::userName(void) const
-{
-	return m_parentType::operator[](USER).toString();
-}
-
-void AcntSettings::setUserName(const QString &userName)
-{
-	m_parentType::operator[](USER) = userName;
-}
-
-QString AcntSettings::loginMethod(void) const
-{
-	return m_parentType::operator[](LOGIN).toString();
-}
-
-void AcntSettings::setLoginMethod(const QString &method)
-{
-	m_parentType::operator[](LOGIN) = method;
-}
-
-QString AcntSettings::password(void) const
-{
-	return m_parentType::operator[](PWD).toString();
-}
-
-void AcntSettings::setPassword(const QString &pwd)
-{
-	m_parentType::operator[](PWD) = pwd;
-}
-
-bool AcntSettings::isTestAccount(void) const
-{
-	return m_parentType::operator[](TEST_ACCOUNT).toBool();
-}
-
-void AcntSettings::setTestAccount(bool isTesting)
-{
-	m_parentType::operator[](TEST_ACCOUNT) = isTesting;
-}
-
-bool AcntSettings::rememberPwd(void) const
-{
-	return m_parentType::operator[](REMEMBER_PWD).toBool();
-}
-
-void AcntSettings::setRememberPwd(bool remember)
-{
-	m_parentType::operator[](REMEMBER_PWD) = remember;
-}
-
-QString AcntSettings::dbDir(void) const
-{
-	return m_parentType::operator[](DB_DIR).toString();
-}
-
-void AcntSettings::setDbDir(const QString &path)
-{
-	if (path == globPref.confDir()) {
-		/* Default path is empty. */
-		m_parentType::operator[](DB_DIR) = QString();
-	} else {
-		m_parentType::operator[](DB_DIR) = path;
-	}
-}
-
-bool AcntSettings::syncWithAll(void) const
-{
-	return m_parentType::operator[](SYNC_WITH_ALL).toBool();
-}
-
-void AcntSettings::setSyncWithAll(bool sync)
-{
-	m_parentType::operator[](SYNC_WITH_ALL) = sync;
-}
-
-QString AcntSettings::p12File(void) const
-{
-	return m_parentType::operator[](P12FILE).toString();
-}
-
-void AcntSettings::setP12File(const QString &p12)
-{
-	m_parentType::operator[](P12FILE) = p12;
-}
-
-qint64 AcntSettings::lastMsg(void) const
-{
-	return m_parentType::value(LAST_MSG_ID, -1).toLongLong();
-}
-
-void AcntSettings::setLastMsg(qint64 dmId)
-{
-	m_parentType::insert(LAST_MSG_ID, dmId);
-}
-
-QString AcntSettings::lastAttachSavePath(void) const
-{
-	return m_parentType::operator[](LAST_SAVE_ATTACH).toString();
-}
-
-void AcntSettings::setLastAttachSavePath(const QString &path)
-{
-	m_parentType::operator[](LAST_SAVE_ATTACH) = path;
-}
-
-QString AcntSettings::lastAttachAddPath(void) const
-{
-	return m_parentType::operator[](LAST_ADD_ATTACH).toString();
-}
-
-void AcntSettings::setLastAttachAddPath(const QString &path)
-{
-	m_parentType::operator[](LAST_ADD_ATTACH) = path;
-}
-
-QString AcntSettings::lastCorrespPath(void) const
-{
-	return m_parentType::operator[](LAST_CORRESPOND).toString();
-}
-
-void AcntSettings::setLastCorrespPath(const QString &path)
-{
-	m_parentType::operator[](LAST_CORRESPOND) = path;
-}
-
-QString AcntSettings::lastZFOExportPath(void) const
-{
-	return m_parentType::operator[](LAST_ZFO).toString();
-}
-
-void AcntSettings::setLastZFOExportPath(const QString &path)
-{
-	m_parentType::operator[](LAST_ZFO) = path;
-}
-
-bool AcntSettings::_createdFromScratch(void) const
-{
-	return m_parentType::value(_CREATED_FROM_SCRATCH, false).toBool();
-}
-
-void AcntSettings::_setCreatedFromScratch(bool fromScratch)
-{
-	m_parentType::insert(_CREATED_FROM_SCRATCH, fromScratch);
-}
-
-QString AcntSettings::_passphrase(void) const
-{
-	return m_parentType::value(_PKEY_PASSPHRASE, QString()).toString();
-}
-
-void AcntSettings::_setPassphrase(const QString &passphrase)
-{
-	m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
-}
-
-bool AcntSettings::_pwdExpirDlgShown(void) const
-{
-	return m_parentType::value(_PWD_EXPIR_DLG_SHOWN, false).toBool();
-}
-
-void AcntSettings::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
-{
-	m_parentType::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
-}
-
-void AccountsMap::loadFromSettings(const QSettings &settings)
-{
-	QStringList groups = settings.childGroups();
-	QRegExp credRe(CREDENTIALS".*");
-	AcntSettings itemSettings;
-
-	/* Clear present rows. */
-	this->clear();
-
-	QStringList credetialList;
-	/* Get list of credentials. */
-	for (int i = 0; i < groups.size(); ++i) {
-		/* Matches regular expression. */
-		if (credRe.exactMatch(groups.at(i))) {
-			credetialList.append(groups.at(i));
-		}
-	}
-
-	/* Sort the credentials list. */
-	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
-
-	/* For all credentials. */
-	foreach(QString group, credetialList) {
-		itemSettings.clear();
-		/*
-		 * String containing comma character are loaded as
-		 * a string list.
-		 *
-		 * FIXME -- Any white-space characters trailing
-		 * the comma are lost.
-		 */
-		itemSettings.setAccountName(settings.value(
-		    group + "/" + ACCOUNT_NAME, "").toStringList().join(", "));
-		itemSettings.setUserName(settings.value(
-		    group + "/" + USER, "").toString());
-		itemSettings.setLoginMethod(settings.value(
-		    group + "/" + LOGIN, "").toString());
-		itemSettings.setPassword(fromBase64(settings.value(
-		    group + "/" + PWD, "").toString()));
-		itemSettings.setTestAccount(settings.value(
-		    group + "/" + TEST_ACCOUNT, "").toBool());
-		itemSettings.setRememberPwd(settings.value(
-		    group + "/" + REMEMBER_PWD, "").toBool());
-		itemSettings.setDbDir(settings.value(
-		    group + "/" + DB_DIR, "").toString());
-		itemSettings.setSyncWithAll(settings.value(
-		    group + "/" + SYNC_WITH_ALL, "").toBool());
-		itemSettings.setP12File(settings.value(
-		    group + "/" + P12FILE, "").toString());
-		itemSettings.setLastMsg(settings.value(
-		    group + "/" + LAST_MSG_ID, "").toLongLong());
-		itemSettings.setLastAttachSavePath(settings.value(
-		    group + "/" + LAST_SAVE_ATTACH, "").toString());
-		itemSettings.setLastAttachAddPath(settings.value(
-		    group + "/" + LAST_ADD_ATTACH, "").toString());
-		itemSettings.setLastCorrespPath(settings.value(
-		    group + "/" + LAST_CORRESPOND, "").toString());
-		itemSettings.setLastZFOExportPath(settings.value(
-		    group + "/" + LAST_ZFO, "").toString());
-
-		/* Associate map with item node. */
-		Q_ASSERT(!itemSettings.userName().isEmpty());
-		this->operator[](itemSettings.userName()) = itemSettings;
-	}
-}
 
 AccountsMap AccountModel::globAccounts;
 
@@ -762,7 +442,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 	globAccounts.loadFromSettings(settings);
 
 	QStringList groups = settings.childGroups();
-	QRegExp credRe(CREDENTIALS".*");
+	QRegExp credRe(CredNames::creds + ".*");
 
 	/* Clear present rows. */
 	this->removeRows(0, this->rowCount());
@@ -777,7 +457,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 	}
 
 	/* Sort the credentials list. */
-	qSort(credetialList.begin(), credetialList.end(), credentialsLessThan);
+	qSort(credetialList.begin(), credetialList.end(),
+	    AcntSettings::credentialsLessThan);
 
 	beginResetModel();
 
@@ -787,7 +468,7 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 
 	/* For all credentials. */
 	foreach(const QString &group, credetialList) {
-		const QString userName(settings.value(group + "/" + USER,
+		const QString userName(settings.value(group + "/" + CredNames::userName,
 		    QString()).toString());
 
 		/* Add user name into the model. */
@@ -812,65 +493,12 @@ void AccountModel::saveToSettings(QSettings &settings) const
 
 		Q_ASSERT(userName == itemSettings.userName());
 
-		groupName = CREDENTIALS;
+		groupName = CredNames::creds;
 		if (row > 0) {
 			groupName.append(QString::number(row + 1));
 		}
-		settings.beginGroup(groupName);
 
-		settings.setValue(ACCOUNT_NAME, itemSettings.accountName());
-		settings.setValue(USER, itemSettings.userName());
-		settings.setValue(LOGIN, itemSettings.loginMethod());
-		settings.setValue(TEST_ACCOUNT, itemSettings.isTestAccount());
-		settings.setValue(REMEMBER_PWD, itemSettings.rememberPwd());
-		if (itemSettings.rememberPwd()) {
-			if (!itemSettings.password().isEmpty()) {
-				settings.setValue(PWD,
-				    toBase64(itemSettings.password()));
-			}
-		}
-
-		if (!itemSettings.dbDir().isEmpty()) {
-			if (itemSettings.dbDir() != globPref.confDir()) {
-				settings.setValue(DB_DIR,
-				    itemSettings.dbDir());
-			}
-		}
-		if (!itemSettings.p12File().isEmpty()) {
-			settings.setValue(P12FILE, itemSettings.p12File());
-		}
-
-		settings.setValue(SYNC_WITH_ALL, itemSettings.syncWithAll());
-
-		if (0 <= itemSettings.lastMsg()) {
-			settings.setValue(LAST_MSG_ID, itemSettings.lastMsg());
-		}
-
-		/* Save last attachments save path. */
-		if (!itemSettings.lastAttachSavePath().isEmpty()) {
-			settings.setValue(LAST_SAVE_ATTACH,
-			    itemSettings.lastAttachSavePath());
-		}
-
-		/* Save last attachments add path. */
-		if (!itemSettings.lastAttachAddPath().isEmpty()) {
-			settings.setValue(LAST_ADD_ATTACH,
-			    itemSettings.lastAttachAddPath());
-		}
-
-		/* Save last correspondence export path. */
-		if (!itemSettings.lastCorrespPath().isEmpty()) {
-			settings.setValue(LAST_CORRESPOND,
-			    itemSettings.lastCorrespPath());
-		}
-
-		/* save last ZFO export path */
-		if (!itemSettings.lastZFOExportPath().isEmpty()) {
-			settings.setValue(LAST_ZFO,
-			    itemSettings.lastZFOExportPath());
-		}
-
-		settings.endGroup();
+		itemSettings.saveToSettings(settings, groupName);
 	}
 }
 

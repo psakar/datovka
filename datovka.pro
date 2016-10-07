@@ -304,6 +304,7 @@ SOURCES += src/cli/cli.cpp \
     src/models/sort_filter_proxy_model.cpp \
     src/models/table_model.cpp \
     src/models/tags_model.cpp \
+    src/settings/accounts.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
     src/single/single_instance.cpp \
@@ -381,6 +382,7 @@ HEADERS += src/cli/cli.h \
     src/models/sort_filter_proxy_model.h \
     src/models/table_model.h \
     src/models/tags_model.h \
+    src/settings/accounts.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
     src/single/single_instance.h \
