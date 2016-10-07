@@ -162,12 +162,6 @@ private slots:
 	void datovkaVersionResponce(QNetworkReply* reply);
 
 	/*!
-	 * @brief Verify whether a connection to ISDS can be establisehd
-	 *     and databox exists for the account.
-	 */
-	void getAccountUserDataboxInfo(AcntSettings accountInfo);
-
-	/*!
 	 * @brief Redraws widgets according to selected account item.
 	 */
 	void accountItemCurrentChanged(const QModelIndex &current,
@@ -714,6 +708,12 @@ private:
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
+
+	/*!
+	 * @brief Verify whether a connection to ISDS can be establisehd
+	 *     and databox exists for the account.
+	 */
+	void getAccountUserDataboxInfo(AcntSettings accountInfo);
 
 	/*!
 	 * @brief Used to view selected message via event filter.

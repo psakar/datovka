@@ -133,6 +133,9 @@ void DlgCreateAccount::saveAccount(void)
 
 	/* create new account / save current account */
 	switch (m_action) {
+	case ACT_ADDNEW:
+		/* Don't do anything. */
+		break;
 	case ACT_EDIT:
 	case ACT_PWD:
 	case ACT_CERT:
@@ -158,9 +161,6 @@ void DlgCreateAccount::saveAccount(void)
 			emit AccountModel::globAccounts.accountDataChanged(userName);
 			/* TODO -- Save/update related account DB entry? */
 		}
-		break;
-	case ACT_ADDNEW:
-		emit newAccountSubmitted(m_accountInfo);
 		break;
 	default:
 		Q_ASSERT(0);

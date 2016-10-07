@@ -4853,23 +4853,24 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *accountDlg = new DlgCreateAccount(AcntSettings(),
+	DlgCreateAccount *accountDlg = new DlgCreateAccount(AcntSettings(),
 	    DlgCreateAccount::ACT_ADDNEW, this);
-
-	connect(accountDlg, SIGNAL(newAccountSubmitted(AcntSettings)),
-	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
 	int dlgRet = accountDlg->exec();
-	accountDlg->deleteLater();
 
 	if (QDialog::Accepted == dlgRet) {
+		AcntSettings newAcntSettings(accountDlg->getSubmittedData());
+		getAccountUserDataboxInfo(newAcntSettings);
+
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
 			saveSettings();
 		}
 	}
+
+	accountDlg->deleteLater();
 }
 
 

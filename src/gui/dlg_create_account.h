@@ -102,15 +102,6 @@ private slots:
 	 */
 	void saveAccount(void);
 
-signals:
-	/*!
-	 * @brief Signal is executed when data about new account have been
-	 *     submitted.
-	 *
-	 * @param newAccount New account settings.
-	 */
-	void newAccountSubmitted(AcntSettings newAccount);
-
 private:
 	/*!
 	 * @brief Initialises remaining bits of dialogue that haven't been
