@@ -25,21 +25,33 @@
 #ifndef _DLG_CREATE_ACCOUNT_H_
 #define _DLG_CREATE_ACCOUNT_H_
 
-
 #include <QDialog>
 #include <QFileDialog>
 #include <QTreeView>
 
-#include "src/common.h"
-#include "ui_dlg_create_account.h"
 #include "src/models/accounts_model.h"
-#include "src/io/account_db.h"
+#include "ui_dlg_create_account.h"
 
-
+/*!
+ * @brief Account properties dialogue.
+ */
 class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
 	Q_OBJECT
-
 public:
+	/*!
+	 * Login method order as they are listed in the dialogue.
+	 */
+	enum LoginMethodIndex {
+		USER_NAME = 0,
+		CERTIFICATE = 1,
+		USER_CERTIFICATE = 2,
+		HOTP = 3,
+		TOTP = 4
+	};
+
+	/*!
+	 * @brief Specifies the action to be performed.
+	 */
 	enum Action {
 		ACT_ADDNEW,
 		ACT_EDIT,
@@ -49,27 +61,72 @@ public:
 		ACT_IDBOX
 	};
 
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] accountInfo Account settings.
+	 * @param[in] action Specifies which parts of dialogue to be enabled.
+	 * @param[in] parent Parent object.
+	 */
 	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
 	    QWidget *parent = 0);
 
+	/*!
+	 * @brief Obtains account data as the have been submitted by the user.
+	 *
+	 * @return Data that have been submitted by the user when he pressed
+	 *     the Accept/OK button.
+	 */
+	AcntSettings getSubmittedData(void) const;
+
 private slots:
-	void setActiveButton(int);
-	void addCertificateFromFile(void);
-	void saveAccount(void);
+	/*!
+	 * @brief Activates parts of the dialogue depending on the login method.
+	 *
+	 * @param[in] loginMethodIdx Index of the login method to use.
+	 */
+	void activateContent(int loginMethodIdx);
+
+	/*!
+	 * @brief Checks input sanity, also activates the save/store button.
+	 */
 	void checkInputFields(void);
 
-signals:
-	void getAccountUserDataboxInfo(AcntSettings);
+	/*!
+	 * @brief Opens a dialogue in order to select a certificate file.
+	 */
+	void addCertificateFile(void);
+
+	/*!
+	 * @brief Saves current account information.
+	 */
+	void saveAccount(void);
 
 private:
-	void initAccountDialog(void);
-	void setCurrentAccountData(void);
+	/*!
+	 * @brief Initialises remaining bits of dialogue that haven't been
+	 *     specified in the dialogue UI.
+	 */
+	void initialiseDialogue(void);
 
-	const AcntSettings m_accountInfo;
-	const Action m_action;
-	int m_loginmethod;
-	QString m_certPath;
+	/*!
+	 * @brief Sets dialogue content from supplied account data.
+	 *
+	 * @param[in] acntData Account data to use when setting content.
+	 */
+	void setContent(const AcntSettings &acntData);
+
+	/*!
+	 * @brief Constructs account data from dialogue content.
+	 *
+	 * @return Account settings according to the dialogue state.
+	 */
+	AcntSettings getContent(void) const;
+
+	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
+	const Action m_action; /*!< Actual action the dialogue should be configured to. */
+	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
+	QString m_certPath; /*!< Path to certificate. */
 };
-
 
 #endif /* _DLG_CREATE_ACCOUNT_H_ */

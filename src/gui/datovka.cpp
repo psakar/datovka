@@ -4853,23 +4853,24 @@ void MainWindow::addNewAccount(void)
 {
 	debugSlotCall();
 
-	QDialog *accountDlg = new DlgCreateAccount(AcntSettings(),
+	DlgCreateAccount *accountDlg = new DlgCreateAccount(AcntSettings(),
 	    DlgCreateAccount::ACT_ADDNEW, this);
-
-	connect(accountDlg, SIGNAL(getAccountUserDataboxInfo(AcntSettings)),
-	    this, SLOT(getAccountUserDataboxInfo(AcntSettings)));
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
 	int dlgRet = accountDlg->exec();
-	accountDlg->deleteLater();
 
 	if (QDialog::Accepted == dlgRet) {
+		AcntSettings newAcntSettings(accountDlg->getSubmittedData());
+		getAccountUserDataboxInfo(newAcntSettings);
+
 		if (ui->accountList->model()->rowCount() > 0) {
 			activeAccountMenuAndButtons(true);
 			saveSettings();
 		}
 	}
+
+	accountDlg->deleteLater();
 }
 
 
@@ -8089,27 +8090,33 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 		ret = checkConnectionError(status, accountInfo.accountName(),
 		    isdsMsg, mw);
 
+		AcntSettings editedAcntSettings(accountInfo);
+
 		// if authentication error, show account dialog
 		while (status == IE_NOT_LOGGED_IN || status == IE_PARTIAL_SUCCESS) {
 			QDialog *accountDlg = new DlgCreateAccount(accountInfo,
 			    DlgCreateAccount::ACT_EDIT, mw);
 			int dlgRet = accountDlg->exec();
-			accountDlg->deleteLater();
+			accountDlg->deleteLater(); /* ! */
 			if (QDialog::Accepted == dlgRet) {
-				usedPwd = accountInfo.password();
+				editedAcntSettings =
+				    dynamic_cast<DlgCreateAccount *>(
+				        accountDlg)->getSubmittedData(); /* ! */
+
+				usedPwd = editedAcntSettings.password();
 				status = isdsLoginUserName(isdsSessions.session(userName),
-				    userName, usedPwd, accountInfo.isTestAccount());
+				    userName, usedPwd, editedAcntSettings.isTestAccount());
 				isdsMsg = isdsLongMessage(isdsSessions.session(userName));
 				ret = checkConnectionError(status,
-				    accountInfo.accountName(), isdsMsg, mw);
+				    editedAcntSettings.accountName(), isdsMsg, mw);
 			} else {
-				// info: we dont reset pwd in this time.
-				//accountInfo.setRememberPwd(false);
-				//accountInfo.setPassword("");
+				// info: we don't reset pwd this time.
+				//editedAcntSettings.setRememberPwd(false);
+				//editedAcntSettings.setPassword("");
 				mw->showStatusTextWithTimeout(
 				    tr("It was not possible to connect to "
 				    "your databox from account \"%1\".")
-				    .arg(accountInfo.accountName()));
+				    .arg(editedAcntSettings.accountName()));
 				return false;
 			}
 		}
