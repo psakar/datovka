@@ -286,6 +286,7 @@ SOURCES += src/cli/cli.cpp \
     src/io/dbs.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
+    src/io/isds_login.cpp \
     src/io/isds_sessions.cpp \
     src/io/message_db.cpp \
     src/io/message_db_set.cpp \
@@ -365,6 +366,7 @@ HEADERS += src/cli/cli.h \
     src/io/dbs.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
+    src/io/isds_login.h \
     src/io/isds_sessions.h \
     src/io/message_db.h \
     src/io/message_db_set.h \
