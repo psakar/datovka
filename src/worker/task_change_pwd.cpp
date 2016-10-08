@@ -148,7 +148,7 @@ int TaskChangePwd::changePassword(const QString &userName,
 	    newPwd.toUtf8().constData(), otp, &reference);
 
 	if (IE_SUCCESS != ret) {
-		error = isds_strerror(ret);
+		error = isdsStrError(ret);
 		longError = isds_long_message(session);
 	}
 

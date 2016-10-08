@@ -92,6 +92,6 @@ int TaskSearchOwner::isdsSearch(const QString &userName,
 	ret = isds_FindDataBox(session, info, results);
 
 	logDebugLv1NL("Find databox returned '%d': '%s'.",
-	    ret, isds_strerror(ret));
+	    ret, isdsStrError(ret).toUtf8().constData());
 	return ret;
 }

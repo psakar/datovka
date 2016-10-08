@@ -113,7 +113,7 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 			    "Message '%" PRId64 "' was deleted from ISDS.",
 			    dmId);
 		} else {
-			error = isds_strerror(status);
+			error = isdsStrError(status);
 			longError = isds_long_message(session);
 
 			logErrorNL(

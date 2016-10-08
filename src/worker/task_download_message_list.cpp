@@ -366,7 +366,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 		longError = isdsLongMessage(session);
 		logErrorNL(
 		    "Downloading message state returned status %d: '%s'.",
-		    status, isds_strerror(status));
+		    status, isdsStrError(status).toUtf8().constData());
 		res = DL_ISDS_ERROR;
 		goto fail;
 	}

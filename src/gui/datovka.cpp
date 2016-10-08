@@ -7844,7 +7844,7 @@ void MainWindow::showConnectionErrorMessageBox(int status,
 	    ": " + tr("Error during a connection to ISDS server!");
 
 	if (isdsMsg.isEmpty()) {
-		isdsMsg = isds_strerror((isds_error)status);
+		isdsMsg = isdsStrError((isds_error)status);
 	}
 
 
@@ -8026,8 +8026,8 @@ bool MainWindow::checkConnectionError(int status, const QString &accountName,
 		break;
 	default:
 		logError("Account '%s'; %d %s\n",
-		    accountName.toUtf8().constData(),
-		    status, isds_strerror((isds_error) status));
+		    accountName.toUtf8().constData(), status,
+		    isdsStrError((isds_error) status).toUtf8().constData());
 		if (0 != mw) {
 			mw->showConnectionErrorMessageBox(status, accountName,
 			    isdsMsg);

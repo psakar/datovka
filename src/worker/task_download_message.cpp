@@ -143,7 +143,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 	if (IE_SUCCESS != status) {
 		logErrorNL(
 		    "Downloading delivery information returned status %d: '%s'.",
-		    status, isds_strerror(status));
+		    status, isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
 		longError = isds_long_message(session);
 		res = DM_ISDS_ERROR;
@@ -332,7 +332,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	if (IE_SUCCESS != status) {
 		logErrorNL(
 		    "Downloading author information returned status %d: '%s'.",
-		    status, isds_strerror(status));
+		    status, isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
 		longError = isds_long_message(session);
 		return DM_ISDS_ERROR;
