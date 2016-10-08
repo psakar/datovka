@@ -24,10 +24,84 @@
 #ifndef _ISDS_LOGIN_H_
 #define _ISDS_LOGIN_H_
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+#include <QPair>
+#include <QString>
+
+#include "src/io/isds_sessions.h"
+#include "src/settings/accounts.h"
+
 /*!
  * @brief Encapsulated ISDS log-in operations.
  */
 class IsdsLogin {
+	Q_DECLARE_TR_FUNCTIONS(IsdsLogin)
+public:
+	/*!
+	 * @brief Error code.
+	 */
+	enum ErrorCode {
+		EC_OK, /*!< Already logged in or successfully logged in. */
+		EC_NO_PWD, /*!< Password is missing. */
+		EC_NOT_IMPL, /*!< Login method not implemented. */
+		EC_NOT_LOGGED_IN, /*!< Login failed. */
+		EC_PARTIAL_SUCCESS, /*!< Additional data required. */
+		EC_ISDS_ERR, /*!< Generic ISDS error. */
+		EC_ERR /*!< Generic error code. */
+	};
+
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param isdsSessions Reference to container holding ISDS sessions.
+	 * @paran acntSettings Reference to account properties structure.
+	 */
+	explicit IsdsLogin(IsdsSessions &isdsSessions,
+	    AcntSettings &acntSettings);
+
+	/*!
+	 * @brief Performs a login operation.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode logIn(void);
+
+	/*!
+	 * @brief Return ISDS error message.
+	 */
+	const QString &isdsErrMsg(void) const;
+
+	/*!
+	 * @brief Returns a error description suitable for dialogues.
+	 *
+	 * @return Pair with error description, first element contains a title,
+	 *     second element is a more verbose description.
+	 */
+	QPair<QString, QString> dialogueErrMsg(void) const;
+
+private:
+	/*!
+	 * @brief Performs a log-in using only a user name and a password.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode userNamePwd(void);
+
+	/*!
+	 * @brief preforms a simplification of the obtained ISDS error code.
+	 *
+	 * @param[in] isdsErr ISDS error code.
+	 * @return Error code.
+	 */
+	static
+	enum ErrorCode isdsErrorToCode(int isdsErr);
+
+	IsdsSessions &m_isdsSessions; /*!< Reference to ISDS sessions. */
+	AcntSettings &m_acntSettings; /*!< Reference to account properties. */
+
+	int m_isdsErr; /*!< ISDS error. */
+	QString m_isdsErrStr; /*!< ISDS error string. */
+	QString m_isdsLongErrMsg; /*!< ISDS error message. */
 };
 
 #endif /* _ISDS_LOGIN_H_ */
