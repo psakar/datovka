@@ -70,14 +70,14 @@ long TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 {
 	long credit = 0;
 
-	if (!isdsSessions.isConnectedToIsds(userName)) {
+	if (!globIsdsSessions.isConnectedToIsds(userName)) {
 		return -1;
 	}
 
 	isds_error status;
 	struct isds_list *history = NULL;
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return -1;

@@ -446,7 +446,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	QString isdsError, isdsLongError;
 
-	session = isdsSessions.session(userName);
+	session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		logErrorNL("%s", "Missing ISDS session.");

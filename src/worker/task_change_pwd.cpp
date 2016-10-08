@@ -135,7 +135,7 @@ int TaskChangePwd::changePassword(const QString &userName,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return IE_ERROR;

@@ -65,7 +65,7 @@ void TaskDownloadPasswordInfo::run(void)
 bool TaskDownloadPasswordInfo::downloadPasswordInfoFromISDS(
     const QString &userName, QString &error, QString &longError)
 {
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return false;

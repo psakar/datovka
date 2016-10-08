@@ -40,18 +40,18 @@
 /* TODO -- Check whether session is active. */
 
 /* Global ISDS context container instance. */
-class GlobIsdsSessions;
-extern GlobIsdsSessions isdsSessions;
+class IsdsSessions;
+extern IsdsSessions globIsdsSessions;
 
 
 /*!
  * @brief Holds the ISDS context structures.
  */
-class GlobIsdsSessions {
+class IsdsSessions {
 
 public:
-	GlobIsdsSessions(void);
-	~GlobIsdsSessions(void);
+	IsdsSessions(void);
+	~IsdsSessions(void);
 
 	/*!
 	 * @brief Returns true is active session exists.

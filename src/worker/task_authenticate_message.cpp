@@ -96,7 +96,7 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 		return AUTH_DATA_ERROR;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return AUTH_ERR;

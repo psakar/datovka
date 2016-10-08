@@ -36,7 +36,7 @@
 #include "src/settings/preferences.h"
 
 
-GlobIsdsSessions isdsSessions;
+IsdsSessions globIsdsSessions;
 
 
 /* ========================================================================= */
@@ -115,7 +115,7 @@ void logCallback(isds_log_facility facility, isds_log_level level,
 
 
 /* ========================================================================= */
-GlobIsdsSessions::GlobIsdsSessions(void)
+IsdsSessions::IsdsSessions(void)
 /* ========================================================================= */
     : m_sessions()
 {
@@ -146,7 +146,7 @@ GlobIsdsSessions::GlobIsdsSessions(void)
 
 
 /* ========================================================================= */
-GlobIsdsSessions::~GlobIsdsSessions(void)
+IsdsSessions::~IsdsSessions(void)
 /* ========================================================================= */
 {
 	isds_error status;
@@ -175,7 +175,7 @@ GlobIsdsSessions::~GlobIsdsSessions(void)
 
 
 /* ========================================================================= */
-bool GlobIsdsSessions::holdsSession(const QString &userName) const
+bool IsdsSessions::holdsSession(const QString &userName) const
 /* ========================================================================= */
 {
 	return 0 != m_sessions.value(userName, 0);
@@ -186,7 +186,7 @@ bool GlobIsdsSessions::holdsSession(const QString &userName) const
 /*
  * Is connect to databox given by account index
  */
-bool GlobIsdsSessions::isConnectedToIsds(const QString &userName)
+bool IsdsSessions::isConnectedToIsds(const QString &userName)
 /* ========================================================================= */
 {
 	isds_error ping_status;
@@ -210,7 +210,7 @@ bool GlobIsdsSessions::isConnectedToIsds(const QString &userName)
 /*
  * Creates new session.
  */
-struct isds_ctx * GlobIsdsSessions::createCleanSession(const QString &userName,
+struct isds_ctx *IsdsSessions::createCleanSession(const QString &userName,
     unsigned int connectionTimeoutMs)
 /* ========================================================================= */
 {
@@ -255,7 +255,7 @@ fail:
  * Set time-out in milliseconds to session associated to
  *     user name.
  */
-bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
+bool IsdsSessions::setSessionTimeout(const QString &userName,
     unsigned int timeoutMs)
 /* ========================================================================= */
 {
@@ -283,7 +283,7 @@ bool GlobIsdsSessions::setSessionTimeout(const QString &userName,
 /*
  * Returns associated session.
  */
-struct isds_ctx * GlobIsdsSessions::session(const QString &userName) const
+struct isds_ctx * IsdsSessions::session(const QString &userName) const
 /* ========================================================================= */
 {
 	return m_sessions.value(userName, NULL);

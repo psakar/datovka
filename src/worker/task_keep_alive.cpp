@@ -46,7 +46,7 @@ void TaskKeepAlive::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_isAlive = isdsSessions.isConnectedToIsds(m_userName);
+	m_isAlive = globIsdsSessions.isConnectedToIsds(m_userName);
 	if (m_isAlive) {
 		logInfo("%s\n", "Connection to ISDS is alive :)");
 	} else {

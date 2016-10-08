@@ -152,7 +152,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 10);
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DL_ERR;
@@ -341,7 +341,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 
 	isds_error status = IE_ERROR;
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DL_ERR;

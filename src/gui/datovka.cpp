@@ -3045,7 +3045,7 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		}
 	}
 
-	if (delFromIsds && !isdsSessions.isConnectedToIsds(userName) &&
+	if (delFromIsds && !globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		logErrorNL(
 		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
@@ -3179,7 +3179,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
-		if (!isdsSessions.isConnectedToIsds(userName) &&
+		if (!globIsdsSessions.isConnectedToIsds(userName) &&
 		    !connectToIsds(userName, this)) {
 			continue;
 		}
@@ -3240,7 +3240,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		ui->actionSync_all_accounts->setEnabled(wasEnabled);
 		ui->actionGet_messages->setEnabled(wasEnabled);
@@ -3337,7 +3337,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return;
 	}
@@ -4963,7 +4963,7 @@ void MainWindow::changeAccountPassword(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return;
 	}
@@ -5202,7 +5202,7 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return;
 	}
@@ -5897,7 +5897,7 @@ int MainWindow::authenticateMessageFromZFO(void)
 		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 	}
@@ -6010,7 +6010,7 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
@@ -6315,7 +6315,7 @@ QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
 		Q_ASSERT(!userName.isEmpty());
 
 		if ((!activeOnly) ||
-		    isdsSessions.isConnectedToIsds(userName) ||
+		    globIsdsSessions.isConnectedToIsds(userName) ||
 		    connectToIsds(userName, this)) {
 			MessageDbSet *dbSet = accountDbSet(userName, this);
 			if (0 == dbSet) {
@@ -6642,7 +6642,7 @@ bool MainWindow::downloadCompleteMessage(qint64 dmId,
 
 	const QString userName(m_accountModel.userName(acntIndex));
 	Q_ASSERT(!userName.isEmpty());
-	if (!isdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName, this)) {
 		return false;
 	}
@@ -8056,8 +8056,8 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 		return false;
 	}
 
-	if (!isdsSessions.holdsSession(userName)) {
-		isdsSessions.createCleanSession(userName,
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -8084,9 +8084,9 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 			}
 		}
 		// login to ISDS
-		status = isdsLoginUserName(isdsSessions.session(userName),
+		status = isdsLoginUserName(globIsdsSessions.session(userName),
 		    userName, usedPwd, accountInfo.isTestAccount());
-		isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+		isdsMsg = isdsLongMessage(globIsdsSessions.session(userName));
 		ret = checkConnectionError(status, accountInfo.accountName(),
 		    isdsMsg, mw);
 
@@ -8104,9 +8104,9 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 				        accountDlg)->getSubmittedData(); /* ! */
 
 				usedPwd = editedAcntSettings.password();
-				status = isdsLoginUserName(isdsSessions.session(userName),
+				status = isdsLoginUserName(globIsdsSessions.session(userName),
 				    userName, usedPwd, editedAcntSettings.isTestAccount());
-				isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+				isdsMsg = isdsLongMessage(globIsdsSessions.session(userName));
 				ret = checkConnectionError(status,
 				    editedAcntSettings.accountName(), isdsMsg, mw);
 			} else {
@@ -8132,13 +8132,13 @@ bool MainWindow::loginMethodUserNamePwd(AcntSettings &accountInfo,
 			    accountInfo.accountName().toUtf8().constData());
 			return false;
 		}
-		status = isdsLoginUserName(isdsSessions.session(userName),
+		status = isdsLoginUserName(globIsdsSessions.session(userName),
 		    userName, usedPwd, accountInfo.isTestAccount());
 		ret = (IE_SUCCESS == status);
 	}
 
 	/* Set longer time-out. */
-	isdsSessions.setSessionTimeout(userName,
+	globIsdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
 
 	return ret;
@@ -8222,8 +8222,8 @@ bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
 		return false;
 	}
 
-	if (!isdsSessions.holdsSession(userName)) {
-		isdsSessions.createCleanSession(userName,
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -8319,7 +8319,7 @@ bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
 		return false;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	Q_ASSERT(0 != session);
 
 	status = isdsLoginSystemCert(session,
@@ -8340,7 +8340,7 @@ bool MainWindow::loginMethodCertificateOnly(AcntSettings &accountInfo,
 	}
 
 	/* Set longer time-out. */
-	isdsSessions.setSessionTimeout(userName,
+	globIsdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
 
 	return ret;
@@ -8364,8 +8364,8 @@ bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 		return false;
 	}
 
-	if (!isdsSessions.holdsSession(userName)) {
-		isdsSessions.createCleanSession(userName,
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -8464,14 +8464,14 @@ bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 		return false;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	Q_ASSERT(0 != session);
 
 	status = isdsLoginUserCertPwd(session,
 	    userName, usedPwd, certPath, passphrase,
 	    accountInfo.isTestAccount());
 
-	QString isdsMsg = isdsLongMessage(isdsSessions.session(userName));
+	QString isdsMsg = isdsLongMessage(globIsdsSessions.session(userName));
 
 	if (IE_SUCCESS == status) {
 		/* Store the certificate password. */
@@ -8483,7 +8483,7 @@ bool MainWindow::loginMethodCertificateUserPwd(AcntSettings &accountInfo,
 		 */
 	}
 
-	isdsSessions.setSessionTimeout(userName,
+	globIsdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	return checkConnectionError(status, accountInfo.accountName(),
@@ -8509,8 +8509,8 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 		return false;
 	}
 
-	if (!isdsSessions.holdsSession(userName)) {
-		isdsSessions.createCleanSession(userName,
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -8584,7 +8584,7 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 		return false;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	Q_ASSERT(0 != session);
 
 	status = isdsLoginUserCert(session,
@@ -8600,7 +8600,7 @@ bool MainWindow::loginMethodCertificateIdBox(AcntSettings &accountInfo,
 		 */
 	}
 
-	isdsSessions.setSessionTimeout(userName,
+	globIsdsSessions.setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms); /* Set longer time-out. */
 
 	QString isdsMsg = isdsLongMessage(session);
@@ -8632,8 +8632,8 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 		return false;
 	}
 
-	if (!isdsSessions.holdsSession(userName)) {
-		isdsSessions.createCleanSession(userName,
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
 		    ISDS_CONNECT_TIMEOUT_MS);
 	}
 
@@ -8703,7 +8703,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 			return false;
 		}
 
-		struct isds_ctx *session = isdsSessions.session(userName);
+		struct isds_ctx *session = globIsdsSessions.session(userName);
 		Q_ASSERT(0 != session);
 
 		status = isdsLoginUserOtp(session,
@@ -8712,7 +8712,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 
 		isdsMsg = isdsLongMessage(session);
 
-		isdsSessions.setSessionTimeout(userName,
+		globIsdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
 		if (IE_PARTIAL_SUCCESS == status) {
@@ -8783,7 +8783,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 			otpCode = otp;
 		}
 
-		struct isds_ctx *session = isdsSessions.session(userName);
+		struct isds_ctx *session = globIsdsSessions.session(userName);
 		Q_ASSERT(0 != session);
 
 		/* sent security code to ISDS */
@@ -8793,7 +8793,7 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 
 		isdsMsg = isdsLongMessage(session);
 
-		isdsSessions.setSessionTimeout(userName,
+		globIsdsSessions.setSessionTimeout(userName,
 		    globPref.isds_download_timeout_ms); /* Set time-out. */
 
 		/* OTP login notification */
@@ -9058,7 +9058,7 @@ void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 {
 	debugSlotCall();
 
-	if (!isdsSessions.isConnectedToIsds(accountInfo.userName())) {
+	if (!globIsdsSessions.isConnectedToIsds(accountInfo.userName())) {
 		if (!firstConnectToIsds(accountInfo, true)) {
 			QString msgBoxTitle = tr("New account error") +
 			    ": " + accountInfo.accountName();

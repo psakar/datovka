@@ -83,7 +83,7 @@ int TaskSearchOwner::isdsSearch(const QString &userName,
 		return IE_ERROR;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return IE_ERROR;

@@ -285,7 +285,7 @@ void DlgSendMessage::setAccountInfo(int item)
 	}
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
-	session = isdsSessions.session(m_userName);
+	session = globIsdsSessions.session(m_userName);
 	if (NULL == session) {
 		logErrorNL("%s", "Missing ISDS session.");
 		m_isLogged = false;

@@ -682,7 +682,7 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	int status = TaskSearchOwner::isdsSearch(username, ownerInfo, &boxes);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
-	session = isdsSessions.session(username);
+	session = globIsdsSessions.session(username);
 	if (NULL == session) {
 		errmsg = "Error while create find databox request";
 		isds_PersonName_free(&personName);
@@ -1125,7 +1125,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		struct isds_ctx *session =
-		    isdsSessions.session(map["username"].toString());
+		    globIsdsSessions.session(map["username"].toString());
 		if (NULL == session) {
 			Q_ASSERT(0);
 			ret = CLI_ERROR;
@@ -1775,7 +1775,7 @@ int runService(const QString &lParam,
 			otp = loginMap["otpcode"].toString();
 		}
 
-		if (!isdsSessions.isConnectedToIsds(username) &&
+		if (!globIsdsSessions.isConnectedToIsds(username) &&
 		    !MainWindow::connectToIsds(username, 0, pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";

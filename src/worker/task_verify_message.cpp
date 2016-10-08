@@ -142,7 +142,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		return VERIFY_ERR;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return VERIFY_ERR;
