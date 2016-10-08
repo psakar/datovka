@@ -149,7 +149,7 @@ int TaskChangePwd::changePassword(const QString &userName,
 
 	if (IE_SUCCESS != ret) {
 		error = isdsStrError(ret);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 	}
 
 	if (NULL != reference) {

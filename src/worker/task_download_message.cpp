@@ -145,7 +145,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 		    "Downloading delivery information returned status %d: '%s'.",
 		    status, isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		res = DM_ISDS_ERROR;
 		goto fail;
 	}
@@ -223,7 +223,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	if ((IE_SUCCESS != status) ||
 	    (NULL == message) || (NULL == message->envelope)) {
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		logErrorNL("Downloading message returned status %d: '%s' '%s'.",
 		    status, error.toUtf8().constData(),
 		    longError.toUtf8().constData());
@@ -334,7 +334,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 		    "Downloading author information returned status %d: '%s'.",
 		    status, isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		return DM_ISDS_ERROR;
 	}
 
@@ -368,7 +368,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::markMessageAsDownloaded(
 
 	if (IE_SUCCESS != status) {
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		return DM_ISDS_ERROR;
 	}
 	return DM_SUCCESS;

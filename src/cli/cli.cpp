@@ -1133,7 +1133,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		status = isds_send_message(session, sent_message);
-		QString err = isds_long_message(session);
+		QString err = isdsLongMessage(session);
 
 		if (IE_SUCCESS == status) {
 			/* Store new message into database. */

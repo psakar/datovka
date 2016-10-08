@@ -114,7 +114,7 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 			    dmId);
 		} else {
 			error = isdsStrError(status);
-			longError = isds_long_message(session);
+			longError = isdsLongMessage(session);
 
 			logErrorNL(
 			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",

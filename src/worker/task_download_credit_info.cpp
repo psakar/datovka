@@ -91,7 +91,7 @@ long TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 	if (IE_SUCCESS != status) {
 		logErrorNL(
 		    "Downloading credit information returned '%d': '%s'.",
-		    status, isds_long_message(session));
+		    status, isdsLongMessage(session).toUtf8().constData());
 		return -1;
 	}
 
