@@ -8916,6 +8916,25 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 				accountDlg->deleteLater();
 			}
 			break;
+		case IsdsLogin::EC_NO_CRT_PWD:
+			{
+				/* Erase passphrase. */
+				settingsCopy._setPassphrase(QString());
+
+				accountDlg = new DlgCreateAccount(settingsCopy,
+				    DlgCreateAccount::ACT_CERTPWD, mw);
+				int dlgRet = accountDlg->exec();
+				if (QDialog::Accepted == dlgRet) {
+					settingsCopy = accountDlg->getSubmittedData();
+				} else {
+					mw->showStatusTextWithTimeout(tr(
+					    "It was not possible to connect to your databox from account \"%1\".")
+					    .arg(settingsCopy.accountName()));
+					return false;
+				}
+				accountDlg->deleteLater();
+			}
+			break;
 		case IsdsLogin::EC_NO_CRT_PPHR:
 			{
 				/* Ask the user for password. */
