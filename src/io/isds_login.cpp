@@ -70,6 +70,8 @@ enum IsdsLogin::ErrorCode IsdsLogin::logIn(void)
 		return userNamePwd();
 	} else if (m_acntSettings.loginMethod() == LIM_CERT) {
 		return certOnly();
+	} else if (m_acntSettings.loginMethod() == LIM_USER_CERT) {
+		return certUsrPwd();
 	} else {
 		logErrorNL("%s", "Log-in method not implemented.");
 		return EC_NOT_IMPL;
@@ -320,6 +322,69 @@ enum IsdsLogin::ErrorCode IsdsLogin::certOnly(void)
 
 	m_isdsErr = isdsLoginSystemCert(m_isdsSessions.session(userName),
 	    certPath, passphrase, m_acntSettings.isTestAccount());
+	m_isdsErrStr = isdsStrError((isds_error)m_isdsErr);
+	m_isdsLongErrMsg = isdsLongMessage(m_isdsSessions.session(userName));
+
+	return isdsErrorToCode(m_isdsErr);
+}
+
+enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
+{
+	Q_ASSERT(m_acntSettings.loginMethod() == LIM_USER_CERT);
+
+	const QString userName(m_acntSettings.userName());
+	Q_ASSERT(!userName.isEmpty());
+
+	const QString pwd(m_acntSettings.password());
+	QString certPath(m_acntSettings.p12File());
+	if (pwd.isEmpty() || certPath.isEmpty()) {
+		logWarningNL(
+		    "Missing user passsword or certificate for user name '%s'.",
+		    userName.toUtf8().constData());
+		return EC_NO_CRT_PWD;
+	}
+
+	const QString passphrase(m_acntSettings._passphrase());
+	/*
+	 * Don't test for isEmpty()!
+	 * See difference between isNull() and isEmpty().
+	 */
+	if (passphrase.isNull()) {
+		logWarningNL(
+		    "Missing certificate pass-phrase for user name '%s'.",
+		    userName.toUtf8().constData());
+		return EC_NO_CRT_PPHR;
+	}
+
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        userName)) {
+			certPath = createdPemPath;
+		} else {
+			 /*
+			  * The certificate file cannot be decoded by using
+			  * the supplied password.
+			  */
+			logErrorNL("%s\n", "Cannot decode certificate.");
+			return EC_NO_CRT; /* TODO -- Better error specification. */
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the pass-phrase. */
+	} else {
+		/*
+		 * The certificate file suffix does not match one of the
+		 * supported file formats. Supported suffixes are: p12, pem.
+		 */
+		logError("%s\n", "Certificate format not supported.");
+		return EC_NO_CRT; /* TODO -- Better error specification. */
+	}
+
+	isdsLoginUserCertPwd(m_isdsSessions.session(userName),
+	    userName, pwd, certPath, passphrase,
+	    m_acntSettings.isTestAccount());
 	m_isdsErrStr = isdsStrError((isds_error)m_isdsErr);
 	m_isdsLongErrMsg = isdsLongMessage(m_isdsSessions.session(userName));
 

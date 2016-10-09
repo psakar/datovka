@@ -42,8 +42,9 @@ public:
 	 */
 	enum ErrorCode {
 		EC_OK, /*!< Already logged in or successfully logged in. */
-		EC_NO_PWD, /*!< Password is missing. */
-		EC_NO_CRT, /*! No certificate. */
+		EC_NO_PWD, /*!< User password is missing. */
+		EC_NO_CRT, /*!< No certificate. */
+		EC_NO_CRT_PWD, /*!< User password or certificate is missing. */
 		EC_NO_CRT_PPHR, /*!< No certificate pass-phrase supplied. */
 		EC_NOT_IMPL, /*!< Login method not implemented. */
 		EC_NOT_LOGGED_IN, /*!< Login failed. */
@@ -83,18 +84,27 @@ public:
 
 private:
 	/*!
-	 * @brief Performs a log-in using only a user name and a password.
+	 * @brief Performs a log-in operation using only a user name and a
+	 *     password.
 	 *
 	 * @return Error code.
 	 */
 	enum ErrorCode userNamePwd(void);
 
 	/*!
-	 * @brief Performs a log-in using certificate only.
+	 * @brief Performs a log-in operation using certificate only.
 	 *
 	 * @return Error code.
 	 */
 	enum ErrorCode certOnly(void);
+
+	/*!
+	 * @brief Performs a log-in operation using a password and a
+	 *     certificate.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode certUsrPwd(void);
 
 	/*!
 	 * @brief preforms a simplification of the obtained ISDS error code.
