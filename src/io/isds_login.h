@@ -43,6 +43,8 @@ public:
 	enum ErrorCode {
 		EC_OK, /*!< Already logged in or successfully logged in. */
 		EC_NO_PWD, /*!< Password is missing. */
+		EC_NO_CRT, /*! No certificate. */
+		EC_NO_CRT_PPHR, /*!< No certificate pass-phrase supplied. */
 		EC_NOT_IMPL, /*!< Login method not implemented. */
 		EC_NOT_LOGGED_IN, /*!< Login failed. */
 		EC_PARTIAL_SUCCESS, /*!< Additional data required. */
@@ -88,6 +90,13 @@ private:
 	enum ErrorCode userNamePwd(void);
 
 	/*!
+	 * @brief Performs a log-in using certificate only.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode certOnly(void);
+
+	/*!
 	 * @brief preforms a simplification of the obtained ISDS error code.
 	 *
 	 * @param[in] isdsErr ISDS error code.
@@ -95,6 +104,24 @@ private:
 	 */
 	static
 	enum ErrorCode isdsErrorToCode(int isdsErr);
+
+	/*!
+	 * @brief Converts PKCS #12 certificate into PEM format.
+	 *
+	 * @note The function creates a new PEM file stored in
+	 *     the configuration directory. The path is returned via
+	 *     the second parameter.
+	 *
+	 * @param[in]  p12Path   Path to PKCS #12 certificate file.
+	 * @param[in]  certPwd   Password protecting the certificate.
+	 * @param[out] pemPath   Returned path to created PEM file.
+	 * @param[in]  userName  Account user name, user to name PEM file.
+	 * @return True on success, false on error
+	 *     (e.g. file does not exist, password error, ...)
+	 */
+	static
+	bool p12CertificateToPem(const QString &p12Path,
+	    const QString &certPwd, QString &pemPath, const QString &userName);
 
 	IsdsSessions &m_isdsSessions; /*!< Reference to ISDS sessions. */
 	AcntSettings &m_acntSettings; /*!< Reference to account properties. */
