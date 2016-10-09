@@ -22,6 +22,7 @@
  */
 
 #include "src/io/isds_login.h"
+#include "src/log/log.h"
 
 IsdsLogin::IsdsLogin(IsdsSessions &isdsSessions, AcntSettings &acntSettings)
     : m_isdsSessions(isdsSessions),
@@ -38,22 +39,30 @@ enum IsdsLogin::ErrorCode IsdsLogin::logIn(void)
 	m_isdsErrStr.clear();
 	m_isdsLongErrMsg.clear();
 
-	const QString userName(m_acntSettings.userName());
-	if (userName.isEmpty()) {
+	if (!m_acntSettings.isValid()) {
+		logErrorNL("%s", "Invalid account.");
 		return EC_ERR;
 	}
 
+	const QString userName(m_acntSettings.userName());
+	Q_ASSERT(!userName.isEmpty());
+
 	if (!m_isdsSessions.holdsSession(userName)) {
+		logErrorNL("Non-existent session for user name '%s'.",
+		    userName.toUtf8().constData());
 		return EC_ERR;
 	}
 
 	if (m_isdsSessions.isConnectedToIsds(userName)) {
+		logErrorNL("User '%s' not connected into ISDS.",
+		    userName.toUtf8().constData());
 		return EC_OK;
 	}
 
 	if (m_acntSettings.loginMethod() == LIM_USERNAME) {
 		return userNamePwd();
 	} else {
+		logErrorNL("%s", "Log-in method not implemented.");
 		return EC_NOT_IMPL;
 	}
 
