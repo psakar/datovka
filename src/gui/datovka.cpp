@@ -68,6 +68,7 @@
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/isds_login.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
@@ -8833,7 +8834,168 @@ bool MainWindow::loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
 	    isdsMsg, mw);
 }
 
+#if 1
+bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
+    const QString &pwd, const QString &otpKey)
+{
+	AcntSettings settingsCopy(AccountModel::globAccounts[userName]);
 
+	/* Create clean session if session doesn't exist. */
+	if (!globIsdsSessions.holdsSession(userName)) {
+		globIsdsSessions.createCleanSession(userName,
+		    ISDS_CONNECT_TIMEOUT_MS);
+	}
+
+	enum IsdsLogin::ErrorCode errCode;
+	IsdsLogin loginCtx(globIsdsSessions, settingsCopy);
+
+	if (!mw) {
+		/* TODO */
+		return false;
+	}
+
+	do {
+		errCode = loginCtx.logIn();
+		DlgCreateAccount *accountDlg = 0;
+
+		switch (errCode) {
+		case IsdsLogin::IsdsLogin::EC_OK:
+			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
+			break;
+		case IsdsLogin::EC_NOT_LOGGED_IN:
+		case IsdsLogin::EC_ISDS_ERR:
+			{
+				const QPair<QString, QString> pair(
+				    loginCtx.dialogueErrMsg());
+				QMessageBox::critical(mw, pair.first,
+				    pair.second, QMessageBox::Ok);
+			}
+			mw->showStatusTextWithTimeout(tr(
+			    "It was not possible to connect to your data box from account \"%1\".")
+			    .arg(settingsCopy.accountName()));
+			break;
+		default:
+			break;
+		}
+
+		switch (errCode) {
+		case IsdsLogin::EC_NO_PWD:
+			{
+				accountDlg = new DlgCreateAccount(settingsCopy,
+				    DlgCreateAccount::ACT_PWD, mw);
+				int dlgRet = accountDlg->exec();
+				if (QDialog::Accepted == dlgRet) {
+					settingsCopy = accountDlg->getSubmittedData();
+				} else {
+					settingsCopy.setRememberPwd(false);
+					settingsCopy.setPassword(QString());
+					mw->showStatusTextWithTimeout(tr(
+					    "It was not possible to connect to your data box from account \"%1\".")
+					    .arg(settingsCopy.accountName()));
+					return false;
+				}
+				accountDlg->deleteLater();
+			}
+			break;
+		case IsdsLogin::EC_NOT_LOGGED_IN:
+			{
+				accountDlg = new DlgCreateAccount(settingsCopy,
+				    DlgCreateAccount::ACT_EDIT, mw);
+				int dlgRet = accountDlg->exec();
+				if (QDialog::Accepted == dlgRet) {
+					settingsCopy = accountDlg->getSubmittedData();
+				} else {
+					/* Don't clear password here. */
+					mw->showStatusTextWithTimeout(tr(
+					    "It was not possible to connect to your data box from account \"%1\".")
+					    .arg(settingsCopy.accountName()));
+					return false;
+				}
+				accountDlg->deleteLater();
+			}
+			break;
+		default:
+			break;
+		}
+	} while (errCode != IsdsLogin::EC_OK);
+
+	if (errCode != IsdsLogin::EC_OK) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	/* Logged in. */
+	AccountModel::globAccounts[userName] = settingsCopy;
+	/*
+	 * Catching the following signal is required only when ACT_EDIT was
+	 * enabled.
+	 *
+	 * The account model catches the signal.
+	 */
+	emit AccountModel::globAccounts.accountDataChanged(userName);
+	mw->saveSettings();
+
+	/* Get account information if possible. */
+	if (!getOwnerInfoFromLogin(userName)) {
+		logWarningNL("Owner information for account '%s' (login %s) could not be acquired.",
+		    settingsCopy.accountName().toUtf8().constData(),
+		    userName.toUtf8().constData());
+	}
+	if (!getUserInfoFromLogin(userName)) {
+		logWarningNL("User information for account '%s' (login %s) could not be acquired.",
+		    settingsCopy.accountName().toUtf8().constData(),
+		    userName.toUtf8().constData());
+	}
+	if (!getPasswordInfoFromLogin(userName)) {
+		logWarningNL("Password information for account '%s' (login %s) could not be acquired.",
+		    settingsCopy.accountName().toUtf8().constData(),
+		    userName.toUtf8().constData());
+	}
+
+	if (!settingsCopy._pwdExpirDlgShown()) {
+		/* Notify only once. */
+		settingsCopy._setPwdExpirDlgShown(true);
+
+		QString dbDateTimeString = globAccountDbPtr->getPwdExpirFromDb(
+		    userName + "___True");
+		const QDateTime dbDateTime = QDateTime::fromString(
+		    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
+		const QDate dbDate = dbDateTime.date();
+
+		if (dbDate.isValid()) {
+			qint64 daysTo = QDate::currentDate().daysTo(dbDate);
+			if (daysTo < PWD_EXPIRATION_NOTIFICATION_DAYS) {
+				logWarning("Password of account '%lu' expires "
+				    "in %lu days.\n",
+				    settingsCopy.accountName().toUtf8().constData(),
+				    daysTo);
+				if ((0 != mw) && (QMessageBox::Yes ==
+				    mw->showDialogueAboutPwdExpir(
+				        settingsCopy.accountName(),
+				        userName, daysTo,
+				        dbDateTime))) {
+					mw->showStatusTextWithTimeout(
+					    tr("Change password of account "
+					        "\"%1\".")
+					    .arg(settingsCopy.accountName()));
+					QString dbId = globAccountDbPtr->dbId(
+					    userName + "___True");
+					QDialog *changePwd = new DlgChangePwd(
+					    dbId, userName, mw);
+					changePwd->exec();
+					changePwd->deleteLater();
+				}
+			}
+		}
+	}
+
+	/* Set longer time-out. */
+	globIsdsSessions.setSessionTimeout(userName,
+	    globPref.isds_download_timeout_ms);
+
+	return true;
+}
+#else
 /* ========================================================================= */
 /*
  * Connect to databox from exist account
@@ -8952,7 +9114,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 
 	return true;
 }
-
+#endif
 
 /* ========================================================================= */
 /*
