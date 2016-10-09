@@ -382,7 +382,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 		return EC_NO_CRT; /* TODO -- Better error specification. */
 	}
 
-	isdsLoginUserCertPwd(m_isdsSessions.session(userName),
+	m_isdsErr = isdsLoginUserCertPwd(m_isdsSessions.session(userName),
 	    userName, pwd, certPath, passphrase,
 	    m_acntSettings.isTestAccount());
 	m_isdsErrStr = isdsStrError((isds_error)m_isdsErr);
