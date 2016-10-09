@@ -8897,6 +8897,47 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 				accountDlg->deleteLater();
 			}
 			break;
+		case IsdsLogin::EC_NO_CRT:
+			{
+				/* Erase passphrase. */
+				settingsCopy._setPassphrase(QString());
+
+				accountDlg = new DlgCreateAccount(settingsCopy,
+				    DlgCreateAccount::ACT_CERT, mw);
+				int dlgRet = accountDlg->exec();
+				if (QDialog::Accepted == dlgRet) {
+					settingsCopy = accountDlg->getSubmittedData();
+				} else {
+					mw->showStatusTextWithTimeout(tr(
+					    "It was not possible to connect to your databox from account \"%1\".")
+					    .arg(settingsCopy.accountName()));
+					return false;
+				}
+				accountDlg->deleteLater();
+			}
+			break;
+		case IsdsLogin::EC_NO_CRT_PPHR:
+			{
+				/* Ask the user for password. */
+				bool ok;
+				QString enteredText = QInputDialog::getText(
+				    mw, tr("Password required"),
+				    tr("Account: %1\n"
+				        "User name: %2\n"
+				        "Certificate file: %3\n"
+				        "Enter password to unlock certificate file:")
+				        .arg(settingsCopy.accountName())
+				        .arg(userName)
+				        .arg(settingsCopy.p12File()),
+				    QLineEdit::Password, QString(), &ok);
+				if (ok) {
+					settingsCopy._setPassphrase(enteredText);
+				} else {
+					/* Aborted. */
+					return false;
+				}
+			}
+			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
 			{
 				accountDlg = new DlgCreateAccount(settingsCopy,
