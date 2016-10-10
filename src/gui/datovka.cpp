@@ -8865,6 +8865,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
 			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
+		case IsdsLogin::EC_PARTIAL_SUCCESS_AGAIN:
 		case IsdsLogin::EC_ISDS_ERR:
 			{
 				const QPair<QString, QString> pair(
@@ -8901,7 +8902,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			break;
 		case IsdsLogin::EC_NO_CRT:
 			{
-				/* Erase passphrase. */
+				/* Erase pass-phrase. */
 				settingsCopy._setPassphrase(QString());
 
 				accountDlg = new DlgCreateAccount(settingsCopy,
@@ -8920,7 +8921,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			break;
 		case IsdsLogin::EC_NO_CRT_PWD:
 			{
-				/* Erase passphrase. */
+				/* Erase pass-phrase. */
 				settingsCopy._setPassphrase(QString());
 
 				accountDlg = new DlgCreateAccount(settingsCopy,
@@ -8960,6 +8961,8 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			}
 			break;
 		case IsdsLogin::EC_NO_OTP:
+		case IsdsLogin::EC_PARTIAL_SUCCESS:
+		case IsdsLogin::EC_PARTIAL_SUCCESS_AGAIN:
 			{
 				QString msgTitle(tr("Enter OTP security code"));
 				QString msgBody(
@@ -8986,6 +8989,30 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 				} while (otpCode.isEmpty());
 
 				settingsCopy._setOtp(otpCode);
+			}
+			break;
+		case IsdsLogin::EC_NEED_TOTP_ACK:
+			{
+				QMessageBox::StandardButton reply =
+				    QMessageBox::question(mw,
+				        tr("SMS code for account ") + settingsCopy.accountName(),
+				        tr("Account \"%1\" requires authentication via security code for connection to data box.")
+				            .arg(settingsCopy.accountName()) +
+				        "<br/>" +
+				        tr("Security code will be sent to you via a Premium SMS.") +
+				        "<br/><br/>" +
+				        tr("Do you want to send a Premium SMS with a security code into your mobile phone?"),
+				        QMessageBox::Yes | QMessageBox::No,
+				        QMessageBox::Yes);
+
+				if (reply == QMessageBox::No) {
+					mw->showStatusTextWithTimeout(tr(
+					    "It was not possible to connect to your data box from account \"%1\".")
+					    .arg(settingsCopy.accountName()));
+					return false;
+				}
+
+				settingsCopy._setOtp(""); /* Must be empty. */
 			}
 			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
