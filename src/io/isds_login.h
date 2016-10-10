@@ -175,6 +175,19 @@ private:
 	bool p12CertificateToPem(const QString &p12Path,
 	    const QString &certPwd, QString &pemPath, const QString &userName);
 
+	/*!
+	 * @brief Performs a certificate format conversion if necessary.
+	 *
+	 * @param[in,out] certPath Path to certificate. Value is changed when
+	 *                         conversion is preformed.
+	 * @param[in]     passphrase Certificate password.
+	 * @Param[in]     userName Account user name.
+	 * @return False on error.
+	 */
+	static
+	bool convertAndCheckCert(QString &certPath, const QString &passphrase,
+	    const QString &userName);
+
 	IsdsSessions &m_isdsSessions; /*!< Reference to ISDS sessions. */
 	AcntSettings &m_acntSettings; /*!< Reference to account properties. */
 

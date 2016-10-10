@@ -299,30 +299,8 @@ enum IsdsLogin::ErrorCode IsdsLogin::certOnly(void)
 		return EC_NO_CRT_PPHR;
 	}
 
-	const QString ext(QFileInfo(certPath).suffix().toUpper());
-	if ("P12" == ext) {
-		/* Read PKCS #12 file and convert to PEM. */
-		QString createdPemPath;
-		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
-		        userName)) {
-			certPath = createdPemPath;
-		} else {
-			 /*
-			  * The certificate file cannot be decoded by using
-			  * the supplied password.
-			  */
-			logErrorNL("%s\n", "Cannot decode certificate.");
-			return EC_NO_CRT; /* TODO -- Better error specification. */
-		}
-	} else if ("PEM" == ext) {
-		/* TODO -- Check the pass-phrase. */
-	} else {
-		/*
-		 * The certificate file suffix does not match one of the
-		 * supported file formats. Supported suffixes are: p12, pem.
-		 */
-		logError("%s\n", "Certificate format not supported.");
-		return EC_NO_CRT; /* TODO -- Better error specification. */
+	if (!convertAndCheckCert(certPath, passphrase, userName)) {
+		return EC_NO_CRT;
 	}
 
 	m_isdsErr = isdsLoginSystemCert(m_isdsSessions.session(userName),
@@ -361,30 +339,8 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 		return EC_NO_CRT_PPHR;
 	}
 
-	const QString ext(QFileInfo(certPath).suffix().toUpper());
-	if ("P12" == ext) {
-		/* Read PKCS #12 file and convert to PEM. */
-		QString createdPemPath;
-		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
-		        userName)) {
-			certPath = createdPemPath;
-		} else {
-			 /*
-			  * The certificate file cannot be decoded by using
-			  * the supplied password.
-			  */
-			logErrorNL("%s\n", "Cannot decode certificate.");
-			return EC_NO_CRT; /* TODO -- Better error specification. */
-		}
-	} else if ("PEM" == ext) {
-		/* TODO -- Check the pass-phrase. */
-	} else {
-		/*
-		 * The certificate file suffix does not match one of the
-		 * supported file formats. Supported suffixes are: p12, pem.
-		 */
-		logError("%s\n", "Certificate format not supported.");
-		return EC_NO_CRT; /* TODO -- Better error specification. */
+	if (!convertAndCheckCert(certPath, passphrase, userName)) {
+		return EC_NO_CRT;
 	}
 
 	m_isdsErr = isdsLoginUserCertPwd(m_isdsSessions.session(userName),
@@ -599,6 +555,42 @@ bool IsdsLogin::p12CertificateToPem(const QString &p12Path,
 	pemFile.close();
 
 	pemPath = pemTmpPath;
+
+	return true;
+}
+
+bool IsdsLogin::convertAndCheckCert(QString &certPath,
+    const QString &passphrase, const QString &userName)
+{
+	Q_ASSERT(!certPath.isEmpty());
+	Q_ASSERT(!passphrase.isNull());
+	Q_ASSERT(!userName.isEmpty());
+
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
+	if ("P12" == ext) {
+		/* Read PKCS #12 file and convert to PEM. */
+		QString createdPemPath;
+		if (p12CertificateToPem(certPath, passphrase, createdPemPath,
+		        userName)) {
+			certPath = createdPemPath;
+		} else {
+			 /*
+			  * The certificate file cannot be decoded by using
+			  * the supplied password.
+			  */
+			logErrorNL("%s", "Cannot decode certificate.");
+			return false; /* TODO -- Better error specification. */
+		}
+	} else if ("PEM" == ext) {
+		/* TODO -- Check the pass-phrase. */
+	} else {
+		/*
+		 * The certificate file suffix does not match one of the
+		 * supported file formats. Supported suffixes are: p12, pem.
+		 */
+		logErrorNL("%s", "Certificate format not supported.");
+		return false; /* TODO -- Better error specification. */
+	}
 
 	return true;
 }
