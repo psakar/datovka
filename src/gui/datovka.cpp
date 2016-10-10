@@ -8858,6 +8858,8 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		errCode = loginCtx.logIn();
 		DlgCreateAccount *accountDlg = 0;
 
+		settingsCopy._setOtp(QString()); /* Erase OTP. */
+
 		switch (errCode) {
 		case IsdsLogin::IsdsLogin::EC_OK:
 			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
@@ -8909,7 +8911,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 					settingsCopy = accountDlg->getSubmittedData();
 				} else {
 					mw->showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your databox from account \"%1\".")
+					    "It was not possible to connect to your data box from account \"%1\".")
 					    .arg(settingsCopy.accountName()));
 					return false;
 				}
@@ -8928,7 +8930,7 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 					settingsCopy = accountDlg->getSubmittedData();
 				} else {
 					mw->showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your databox from account \"%1\".")
+					    "It was not possible to connect to your data box from account \"%1\".")
 					    .arg(settingsCopy.accountName()));
 					return false;
 				}
@@ -8955,6 +8957,35 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 					/* Aborted. */
 					return false;
 				}
+			}
+			break;
+		case IsdsLogin::EC_NO_OTP:
+			{
+				QString msgTitle(tr("Enter OTP security code"));
+				QString msgBody(
+				    tr("Account \"%1\" requires authentication via OTP<br/>security code for connection to data box.")
+				        .arg(settingsCopy.accountName()) +
+				    "<br/><br/>" +
+				    tr("Enter OTP security code for account") +
+				    "<br/><b>" +
+				    settingsCopy.accountName() +
+				    " </b>(" + userName + ").");
+				QString otpCode;
+				do {
+					bool ok;
+					otpCode = QInputDialog::getText(mw,
+					    msgTitle, msgBody,
+					    QLineEdit::Normal, otpCode, &ok,
+					    Qt::WindowStaysOnTopHint);
+					if (!ok) {
+						mw->showStatusTextWithTimeout(
+						    tr("It was not possible to connect to your data box from account \"%1\".")
+						        .arg(settingsCopy.accountName()));
+						return false;
+					}
+				} while (otpCode.isEmpty());
+
+				settingsCopy._setOtp(otpCode);
 			}
 			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
