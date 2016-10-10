@@ -259,7 +259,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::userNamePwd(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	const QString pwd(m_acntSettings.password());
-	if (m_acntSettings.password().isEmpty()) {
+	if (pwd.isEmpty()) {
 		logWarningNL("Missing password for user name '%s'.",
 		    userName.toUtf8().constData());
 		return EC_NO_PWD;
@@ -392,7 +392,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::hotp(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	const QString pwd(m_acntSettings.password());
-	if (m_acntSettings.password().isEmpty()) {
+	if (pwd.isEmpty()) {
 		logWarningNL("Missing password for user name '%s'.",
 		    userName.toUtf8().constData());
 		return EC_NO_PWD;
@@ -438,7 +438,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::totp(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	const QString pwd(m_acntSettings.password());
-	if (m_acntSettings.password().isEmpty()) {
+	if (pwd.isEmpty()) {
 		logWarningNL("Missing password for user name '%s'.",
 		    userName.toUtf8().constData());
 		return EC_NO_PWD;
