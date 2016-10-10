@@ -518,7 +518,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::totp(void)
 			return EC_PARTIAL_SUCCESS;
 		}
 		ec = otpLogIn(userName, pwd, otpCode);
-		if (ec != EC_NOT_LOGGED_IN) {
+		if (ec == EC_NOT_LOGGED_IN) {
 			/* Try again. */
 			ec = EC_PARTIAL_SUCCESS_AGAIN;
 		}
