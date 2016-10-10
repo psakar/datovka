@@ -46,9 +46,10 @@ public:
 		EC_NO_CRT, /*!< No certificate. */
 		EC_NO_CRT_PWD, /*!< User password or certificate is missing. */
 		EC_NO_CRT_PPHR, /*!< No certificate pass-phrase supplied. */
+		EC_NO_OTP, /*!< Missing OTP. */
 		EC_NOT_IMPL, /*!< Login method not implemented. */
 		EC_NOT_LOGGED_IN, /*!< Login failed. */
-		EC_PARTIAL_SUCCESS, /*!< Additional data required. */
+		EC_PARTIAL_SUCCESS, /*!< Additional data required (from SMS). */
 		EC_ISDS_ERR, /*!< Generic ISDS error. */
 		EC_ERR /*!< Generic error code. */
 	};
@@ -105,6 +106,13 @@ private:
 	 * @return Error code.
 	 */
 	enum ErrorCode certUsrPwd(void);
+
+	/*!
+	 * @brief Performs a log-in operation using HOTP.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode hotp(void);
 
 	/*!
 	 * @brief preforms a simplification of the obtained ISDS error code.
