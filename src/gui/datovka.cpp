@@ -8864,6 +8864,12 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		case IsdsLogin::IsdsLogin::EC_OK:
 			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
 			break;
+		case IsdsLogin::EC_NOT_IMPL:
+			mw->showStatusTextWithTimeout(tr(
+			    "The log-in method used in account \"%1\" is not implemented.")
+			    .arg(settingsCopy.accountName()));
+			return false;
+			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
 		case IsdsLogin::EC_PARTIAL_SUCCESS_AGAIN:
 		case IsdsLogin::EC_ISDS_ERR:
