@@ -36,7 +36,8 @@ IsdsLogin::IsdsLogin(IsdsSessions &isdsSessions, AcntSettings &acntSettings)
     m_acntSettings(acntSettings),
     m_isdsErr(IE_ERROR),
     m_isdsErrStr(),
-    m_isdsLongErrMsg()
+    m_isdsLongErrMsg(),
+    m_totpState(TS_START)
 {
 }
 
@@ -74,6 +75,8 @@ enum IsdsLogin::ErrorCode IsdsLogin::logIn(void)
 		return certUsrPwd();
 	} else if (m_acntSettings.loginMethod() == LIM_HOTP) {
 		return hotp();
+	} else if (m_acntSettings.loginMethod() == LIM_TOTP) {
+		return totp();
 	} else {
 		logErrorNL("%s", "Log-in method not implemented.");
 		return EC_NOT_IMPL;
@@ -341,7 +344,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 	QString certPath(m_acntSettings.p12File());
 	if (pwd.isEmpty() || certPath.isEmpty()) {
 		logWarningNL(
-		    "Missing user passsword or certificate for user name '%s'.",
+		    "Missing user password or certificate for user name '%s'.",
 		    userName.toUtf8().constData());
 		return EC_NO_CRT_PWD;
 	}
@@ -393,6 +396,38 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 	return isdsErrorToCode(m_isdsErr);
 }
 
+enum IsdsLogin::ErrorCode IsdsLogin::otpLogIn(const QString &userName,
+    const QString &pwd, const QString &otpCode)
+{
+	Q_ASSERT(m_acntSettings.loginMethod() == LIM_HOTP ||
+	    m_acntSettings.loginMethod() == LIM_TOTP);
+	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(!pwd.isEmpty());
+	Q_ASSERT(!otpCode.isNull());
+
+	isds_otp_resolution otpRes = OTP_RESOLUTION_SUCCESS;
+
+	m_isdsErr = isdsLoginUserOtp(m_isdsSessions.session(userName),
+	    userName, pwd, m_acntSettings.isTestAccount(),
+	    m_acntSettings.loginMethod(), otpCode, otpRes);
+	m_isdsErrStr = isdsStrError((isds_error)m_isdsErr);
+	m_isdsLongErrMsg = isdsLongMessage(m_isdsSessions.session(userName));
+
+	if (m_isdsErr == IE_NOT_LOGGED_IN) {
+		switch (otpRes) {
+		case OTP_RESOLUTION_BAD_AUTHENTICATION:
+			logWarningNL(
+			    "OTP security code for user name '%s' has not been accepted.",
+			    userName.toUtf8().constData());
+			break;
+		default:
+			break;
+		}
+	}
+
+	return isdsErrorToCode(m_isdsErr);
+}
+
 enum IsdsLogin::ErrorCode IsdsLogin::hotp(void)
 {
 	Q_ASSERT(m_acntSettings.loginMethod() == LIM_HOTP);
@@ -418,27 +453,82 @@ enum IsdsLogin::ErrorCode IsdsLogin::hotp(void)
 		return EC_NO_OTP;
 	}
 
+	return otpLogIn(userName, pwd, otpCode);
+}
+
+enum IsdsLogin::ErrorCode IsdsLogin::totpRequestSMS(const QString &userName,
+    const QString &pwd)
+{
+	Q_ASSERT(m_acntSettings.loginMethod() == LIM_TOTP);
+	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(!pwd.isEmpty());
+
 	isds_otp_resolution otpRes = OTP_RESOLUTION_SUCCESS;
 
 	m_isdsErr = isdsLoginUserOtp(m_isdsSessions.session(userName),
 	    userName, pwd, m_acntSettings.isTestAccount(),
-	    m_acntSettings.loginMethod(), otpCode, otpRes);
+	    m_acntSettings.loginMethod(), QString(), otpRes);
 	m_isdsErrStr = isdsStrError((isds_error)m_isdsErr);
 	m_isdsLongErrMsg = isdsLongMessage(m_isdsSessions.session(userName));
 
-	if (m_isdsErr == IE_NOT_LOGGED_IN) {
-		switch (otpRes) {
-		case OTP_RESOLUTION_BAD_AUTHENTICATION:
-			logWarningNL(
-			    "OTP security code for user name '%s' was not accepted.",
-			    userName.toUtf8().constData());
-			break;
-		default:
-			break;
-		}
+	return isdsErrorToCode(m_isdsErr);
+}
+
+enum IsdsLogin::ErrorCode IsdsLogin::totp(void)
+{
+	Q_ASSERT(m_acntSettings.loginMethod() == LIM_TOTP);
+
+	const QString userName(m_acntSettings.userName());
+	Q_ASSERT(!userName.isEmpty());
+
+	const QString pwd(m_acntSettings.password());
+	if (m_acntSettings.password().isEmpty()) {
+		logWarningNL("Missing password for user name '%s'.",
+		    userName.toUtf8().constData());
+		return EC_NO_PWD;
 	}
 
-	return isdsErrorToCode(m_isdsErr);
+	const QString otpCode(m_acntSettings._otp());
+
+	enum IsdsLogin::ErrorCode ec;
+
+	switch (m_totpState) {
+	case TS_START:
+		m_totpState = TS_AWAIT_USR_ACK;
+		return EC_NEED_TOTP_ACK;
+		break;
+	case TS_AWAIT_USR_ACK:
+		if (otpCode.isNull() || !otpCode.isEmpty()) {
+			/* Must be empty to proceed. */
+			logWarningNL("%s",
+			    "Require empty OTP to confirm SMS sending.");
+			return EC_NEED_TOTP_ACK;
+		}
+		ec = totpRequestSMS(userName, pwd);
+		if (ec == EC_PARTIAL_SUCCESS) {
+			/* TOTP request successfully sent. */
+			m_totpState = TS_AWAIT_TOTP;
+		}
+		return ec;
+		break;
+	case TS_AWAIT_TOTP:
+		if (otpCode.isNull()) {
+			logWarningNL("Missing OTP code for user name '%s'.",
+			    userName.toUtf8().constData());
+			return EC_PARTIAL_SUCCESS;
+		}
+		ec = otpLogIn(userName, pwd, otpCode);
+		if (ec != EC_NOT_LOGGED_IN) {
+			/* Try again. */
+			ec = EC_PARTIAL_SUCCESS_AGAIN;
+		}
+		return ec;
+		break;
+	default:
+		Q_ASSERT(0);
+		return EC_ERR;
+		break;
+	}
 }
 
 enum IsdsLogin::ErrorCode IsdsLogin::isdsErrorToCode(int isdsErr)

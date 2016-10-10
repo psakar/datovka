@@ -47,10 +47,16 @@ public:
 		EC_NO_CRT_PWD, /*!< User password or certificate is missing. */
 		EC_NO_CRT_PPHR, /*!< No certificate pass-phrase supplied. */
 		EC_NO_OTP, /*!< Missing OTP. */
-		EC_NOT_IMPL, /*!< Login method not implemented. */
+		EC_NEED_TOTP_ACK, /*!<
+		                   * The user has to confirm by setting an
+		                   * empty OTP password that he's willing to
+		                   * receive a SMS with a TOTP.
+		                   */
 		EC_NOT_LOGGED_IN, /*!< Login failed. */
 		EC_PARTIAL_SUCCESS, /*!< Additional data required (from SMS). */
+		EC_PARTIAL_SUCCESS_AGAIN, /*!< Login failed, try entering SMS code again. */
 		EC_ISDS_ERR, /*!< Generic ISDS error. */
+		EC_NOT_IMPL, /*!< Login method not implemented. */
 		EC_ERR /*!< Generic error code. */
 	};
 
@@ -108,11 +114,39 @@ private:
 	enum ErrorCode certUsrPwd(void);
 
 	/*!
+	 * @brief Performs a OTL log-in operation.
+	 *
+	 * @param[in] userName User name.
+	 * @param[in] pwd Password.
+	 * @param[in] otpCode One-time password code.
+	 * @return Error code.
+	 */
+	enum ErrorCode otpLogIn(const QString &userName,
+	    const QString &pwd, const QString &otpCode);
+
+	/*!
 	 * @brief Performs a log-in operation using HOTP.
 	 *
 	 * @return Error code.
 	 */
 	enum ErrorCode hotp(void);
+
+	/*!
+	 * @brief Requests a SMS with TOTP code.
+	 *
+	 * @param[in] userName User name.
+	 * @param[in] pwd Password.
+	 * @return Error code.
+	 */
+	enum ErrorCode totpRequestSMS(const QString &userName,
+	    const QString &pwd);
+
+	/*!
+	 * @brief Performs a log-in operation using TOTP.
+	 *
+	 * @return Error code.
+	 */
+	enum ErrorCode totp(void);
 
 	/*!
 	 * @brief preforms a simplification of the obtained ISDS error code.
@@ -147,6 +181,26 @@ private:
 	int m_isdsErr; /*!< ISDS error. */
 	QString m_isdsErrStr; /*!< ISDS error string. */
 	QString m_isdsLongErrMsg; /*!< ISDS error message. */
+
+	/*!
+	 * @brief Describes the state of a TOTP authentication.
+	 */
+	enum TotpState {
+		TS_START, /*!< Initial state. */
+		TS_AWAIT_USR_ACK, /*!<
+		                   * The user has to pass empty non-null OTP
+		                   * to proceed to next state.
+		                   */
+		TS_AWAIT_TOTP /*!<
+		               * The user has to pass non-null OTP in order to
+		               * finish the authentication process.
+		               */
+	};
+
+	enum TotpState m_totpState; /*!<
+	                             * Is true only when SMS code has been
+	                             * successfully requested.
+	                             */
 };
 
 #endif /* _ISDS_LOGIN_H_ */
