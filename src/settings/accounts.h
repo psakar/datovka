@@ -99,10 +99,13 @@ public:
 	void setLastCorrespPath(const QString &path);
 	QString lastZFOExportPath(void) const;
 	void setLastZFOExportPath(const QString &path);
+
 	bool _createdFromScratch(void) const;
 	void _setCreatedFromScratch(bool fromScratch);
 	QString _passphrase(void) const;
 	void _setPassphrase(const QString &passphrase);
+	QString _otp(void) const;
+	void _setOtp(const QString &otpCode);
 	bool _pwdExpirDlgShown(void) const;
 	void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
 

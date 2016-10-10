@@ -48,6 +48,7 @@ namespace CredNames {
 /* Only set on new accounts. */
 #define _CREATED_FROM_SCRATCH "_created_from_cratch"
 #define _PKEY_PASSPHRASE "_pkey_passphrase"
+#define _OTP_CODE "_otp_code"
 #define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
 
 AcntSettings::AcntSettings(void)
@@ -228,7 +229,25 @@ QString AcntSettings::_passphrase(void) const
 
 void AcntSettings::_setPassphrase(const QString &passphrase)
 {
-	m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
+	if (passphrase.isNull()) {
+		m_parentType::remove(_PKEY_PASSPHRASE);
+	} else {
+		m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
+	}
+}
+
+QString AcntSettings::_otp(void) const
+{
+	return m_parentType::value(_OTP_CODE, QString()).toString();
+}
+
+void AcntSettings::_setOtp(const QString &otpCode)
+{
+	if (otpCode.isNull()) {
+		m_parentType::remove(_OTP_CODE);
+	} else {
+		m_parentType::insert(_OTP_CODE, otpCode);
+	}
 }
 
 bool AcntSettings::_pwdExpirDlgShown(void) const
