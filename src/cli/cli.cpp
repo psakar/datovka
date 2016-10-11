@@ -28,6 +28,7 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
+#include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/pool.h"
@@ -576,7 +577,7 @@ cli_error getUserInfo(const QMap<QString,QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "Downloading info about username"
 	    << username;
 
-	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+	if (IsdsHelper::getUserInfoFromLogin(map["username"].toString())) {
 		return CLI_SUCCESS;
 	}
 
@@ -594,7 +595,7 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "downloading info about owner and its "
 	    "databox for username" <<  username;
 
-	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+	if (IsdsHelper::getOwnerInfoFromLogin(map["username"].toString())) {
 		return CLI_SUCCESS;
 	}
 

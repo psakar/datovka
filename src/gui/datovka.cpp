@@ -68,6 +68,7 @@
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/isds_helper.h"
 #include "src/io/isds_login.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/filesystem.h"
@@ -83,9 +84,6 @@
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
-#include "src/worker/task_download_owner_info.h"
-#include "src/worker/task_download_password_info.h"
-#include "src/worker/task_download_user_info.h"
 #include "src/worker/task_import_zfo.h"
 #include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
@@ -5615,72 +5613,6 @@ void MainWindow::refreshAccountList(const QString &userName)
 
 /* ========================================================================= */
 /*
- * Get data about logged in user and his box.
- */
-bool MainWindow::getOwnerInfoFromLogin(const QString &userName)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	TaskDownloadOwnerInfo *task;
-
-	task = new (std::nothrow) TaskDownloadOwnerInfo(userName);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	bool result = task->m_success;
-	delete task;
-
-	return result;
-}
-
-
-/* ========================================================================= */
-/*
- * Get information about password expiration date.
- */
-bool MainWindow::getPasswordInfoFromLogin(const QString &userName)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	TaskDownloadPasswordInfo *task;
-
-	task = new (std::nothrow) TaskDownloadPasswordInfo(userName);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	bool result = task->m_success;
-	delete task;
-
-	return result;
-}
-
-
-/* ========================================================================= */
-/*
-* Get data about logged in user.
-*/
-bool MainWindow::getUserInfoFromLogin(const QString &userName)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	TaskDownloadUserInfo *task;
-
-	task = new (std::nothrow) TaskDownloadUserInfo(userName);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	bool result = task->m_success;
-	delete task;
-
-	return result;
-}
-
-
-/* ========================================================================= */
-/*
  * About application dialog.
  */
 void MainWindow::aboutApplication(void)
@@ -9060,22 +8992,23 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	mw->saveSettings();
 
 	/* Get account information if possible. */
-	if (!getOwnerInfoFromLogin(userName)) {
+	if (!IsdsHelper::getOwnerInfoFromLogin(userName)) {
 		logWarningNL("Owner information for account '%s' (login %s) could not be acquired.",
 		    settingsCopy.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getUserInfoFromLogin(userName)) {
+	if (!IsdsHelper::getUserInfoFromLogin(userName)) {
 		logWarningNL("User information for account '%s' (login %s) could not be acquired.",
 		    settingsCopy.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getPasswordInfoFromLogin(userName)) {
+	if (!IsdsHelper::getPasswordInfoFromLogin(userName)) {
 		logWarningNL("Password information for account '%s' (login %s) could not be acquired.",
 		    settingsCopy.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
 
+	/* Check password expiration. */
 	if (!settingsCopy._pwdExpirDlgShown()) {
 		/* Notify only once. */
 		settingsCopy._setPwdExpirDlgShown(true);
@@ -9135,7 +9068,6 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		return false;
 	}
 
-	/* Check password expiration. */
 	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
 
 	if (!accountInfo.isValid()) {
@@ -9180,25 +9112,26 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 	}
 
 	/* Get account information if possible. */
-	if (!getOwnerInfoFromLogin(userName)) {
+	if (!IsdsHelper::getOwnerInfoFromLogin(userName)) {
 		logWarning("Owner information for account '%s' (login %s) "
 		    "could not be acquired.\n",
 		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getUserInfoFromLogin(userName)) {
+	if (!IsdsHelper::getUserInfoFromLogin(userName)) {
 		logWarning("User information for account '%s' (login %s) "
 		    "could not be acquired.\n",
 		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
-	if (!getPasswordInfoFromLogin(userName)) {
+	if (!IsdsHelper::getPasswordInfoFromLogin(userName)) {
 		logWarning("Password information for account '%s' (login %s) "
 		    "could not be acquired.\n",
 		    accountInfo.accountName().toUtf8().constData(),
 		    userName.toUtf8().constData());
 	}
 
+	/* Check password expiration. */
 	if (!accountInfo._pwdExpirDlgShown()) {
 		/* Notify only once. */
 		accountInfo._setPwdExpirDlgShown(true);
@@ -9285,13 +9218,15 @@ bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo, bool showDialog)
 	}
 
 	if (ret) {
-		if (!getOwnerInfoFromLogin(accountInfo.userName())) {
+		const QString userName(accountInfo.userName());
+
+		if (!IsdsHelper::getOwnerInfoFromLogin(userName)) {
 			//TODO: return false;
 		}
-		if (!getUserInfoFromLogin(accountInfo.userName())) {
+		if (!IsdsHelper::getUserInfoFromLogin(userName)) {
 			//TODO: return false;
 		}
-		if (!getPasswordInfoFromLogin(accountInfo.userName())) {
+		if (!IsdsHelper::getPasswordInfoFromLogin(userName)) {
 			//TODO: return false;
 		}
 	}
