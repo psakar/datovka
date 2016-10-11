@@ -95,24 +95,6 @@ public:
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
 
-	/*!
-	 * @brief Get data about logged in user and his box.
-	 */
-	static
-	bool getOwnerInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get information about password expiration date.
-	 */
-	static
-	bool getPasswordInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get data about logged in user.
-	 */
-	static
-	bool getUserInfoFromLogin(const QString &userName);
-
 protected:
 	/*!
 	 * Check if some worker is working on the background and show

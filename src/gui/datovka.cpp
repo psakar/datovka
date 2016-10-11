@@ -8796,12 +8796,6 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 		case IsdsLogin::IsdsLogin::EC_OK:
 			mw->mui_statusOnlineLabel->setText(tr("Mode: online"));
 			break;
-		case IsdsLogin::EC_NOT_IMPL:
-			mw->showStatusTextWithTimeout(tr(
-			    "The log-in method used in account \"%1\" is not implemented.")
-			    .arg(settingsCopy.accountName()));
-			return false;
-			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
 		case IsdsLogin::EC_PARTIAL_SUCCESS_AGAIN:
 		case IsdsLogin::EC_ISDS_ERR:
@@ -8814,6 +8808,12 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			mw->showStatusTextWithTimeout(tr(
 			    "It was not possible to connect to your data box from account \"%1\".")
 			    .arg(settingsCopy.accountName()));
+			break;
+		case IsdsLogin::EC_NOT_IMPL:
+			mw->showStatusTextWithTimeout(tr(
+			    "The log-in method used in account \"%1\" is not implemented.")
+			    .arg(settingsCopy.accountName()));
+			return false;
 			break;
 		default:
 			break;
@@ -8971,6 +8971,11 @@ bool MainWindow::connectToIsds(const QString &userName, MainWindow *mw,
 			}
 			break;
 		default:
+			logErrorNL(
+			    "Received log-in error code %d for account '%s'.",
+			    errCode,
+			    settingsCopy.accountName().toUtf8().constData());
+			return false;
 			break;
 		}
 	} while (errCode != IsdsLogin::EC_OK);
