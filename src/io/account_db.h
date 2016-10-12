@@ -138,7 +138,17 @@ public:
 	 */
 	const QString getPwdExpirFromDb(const QString &key) const;
 
- 	/*!
+	/*!
+	 * @brief Checks whether password expires in given period.
+	 *
+	 * @param[in] key Key value.
+	 * @param[in] days Amount of days to check the expiration.
+	 * @return Non-negative value if password expires within given amount
+	 *     of days. Negative value else.
+	 */
+	int pwdExpiresInDays(const QString &key, int days) const;
+
+	/*!
 	 * @brief Set password expiration information.
 	 *
 	 * @param[in] key  Key value.

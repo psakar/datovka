@@ -287,6 +287,29 @@ fail:
 	return QString();
 }
 
+int AccountDb::pwdExpiresInDays(const QString &key, int days) const
+{
+	const QString dbDateTimeString(getPwdExpirFromDb(key));
+	if (dbDateTimeString.isNull()) {
+		return -1;
+	}
+
+	const QDateTime dbDateTime = QDateTime::fromString(
+	    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
+	const QDate dbDate = dbDateTime.date();
+
+	if (!dbDate.isValid()) {
+		return -1;
+	}
+
+	qint64 daysTo = QDate::currentDate().daysTo(dbDate);
+	if (daysTo > days) {
+		return -1;
+	}
+
+	return daysTo;
+}
+
 bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
 {
 	QSqlQuery query(m_db);
