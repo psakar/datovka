@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QDateTime>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>

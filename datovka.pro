@@ -254,7 +254,9 @@ win32 {
 		-lcrypto
 }
 
-SOURCES += src/cli/cli.cpp \
+SOURCES += \
+    src/cli/cli.cpp \
+    src/cli/cli_login.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
@@ -334,7 +336,9 @@ SOURCES += src/cli/cli.cpp \
     src/worker/task_vacuum_db_set.cpp \
     src/worker/task_verify_message.cpp
 
-HEADERS += src/cli/cli.h \
+HEADERS += \
+    src/cli/cli.h \
+    src/cli/cli_login.h \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
@@ -414,7 +418,8 @@ HEADERS += src/cli/cli.h \
     src/worker/task_vacuum_db_set.h \
     src/worker/task_verify_message.h
 
-FORMS += src/gui/ui/datovka.ui \
+FORMS += \
+    src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \
     src/gui/ui/dlg_change_directory.ui \

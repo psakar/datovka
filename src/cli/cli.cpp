@@ -24,6 +24,7 @@
 #include <QTextStream>
 
 #include "src/cli/cli.h"
+#include "src/cli/cli_login.h"
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -1777,7 +1778,8 @@ int runService(const QString &lParam,
 		}
 
 		if (!globIsdsSessions.isConnectedToIsds(username) &&
-		    !MainWindow::connectToIsds(username, 0, pwd, otp)) {
+		    !connectToIsdsCLI(globIsdsSessions,
+			    AccountModel::globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";
 			qDebug() << errmsg;
