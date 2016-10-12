@@ -30,7 +30,7 @@
 #include "src/settings/preferences.h"
 
 /*!
- * @brief Logs into ISDS.
+ * @brief Performs a ISDS log-in operation.
  *
  * @param[in,out] isdsSessions Sessions container reference.
  * @param[in]     acntSettings Account settings reference.
