@@ -168,41 +168,41 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 
 	switch (m_action) {
 	case ACT_EDIT:
-		windowTitle = tr("Update account") + " " +
-		    acntData.accountName();
+		windowTitle = tr("Update account %1")
+		    .arg(acntData.accountName());
 		break;
 	case ACT_PWD:
-		windowTitle = tr("Enter password for account") + " "
-		    + acntData.accountName();
+		windowTitle = tr("Enter password for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
-		windowTitle = tr("Set certificate for account") + " "
-		    + acntData.accountName();
+		windowTitle = tr("Set certificate for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
-		windowTitle = tr("Enter password/certificate for account")
-		    + " " + acntData.accountName();
+		windowTitle = tr("Enter password/certificate for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		break;
 	case ACT_IDBOX:
-		windowTitle = tr("Enter ID of your databox for account")
-		    + " " + acntData.accountName();
+		windowTitle = tr("Enter ID of your data box for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
-		this->usernameLabel->setText(tr("Databox ID:"));
+		this->usernameLabel->setText(tr("Data-box ID:"));
 		break;
 	default:
 		Q_ASSERT(0);
