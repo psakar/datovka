@@ -252,9 +252,15 @@ AcntSettings DlgCreateAccount::getContent(void) const
 {
 	AcntSettings newAccountSettings;
 
-	/* set account index, itemTop and account settings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
+		/*
+		 * Set to true only for newly created account.
+		 * Don't set it to false when account is edited because a
+		 * newly created account can also be edited in case the first
+		 * account creation attempt failed.
+		 */
+		newAccountSettings._setCreatedFromScratch(true);
 		break;
 	case ACT_EDIT:
 	case ACT_PWD:
@@ -303,9 +309,6 @@ AcntSettings DlgCreateAccount::getContent(void) const
 	} else {
 		Q_ASSERT(0);
 	}
-
-	/* Only for newly created account. */
-	newAccountSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
 
 	return newAccountSettings;
 }
