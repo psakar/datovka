@@ -8172,18 +8172,28 @@ void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 		}
 	}
 
+	/* Store account information. */
 	QModelIndex index;
-	m_accountModel.addAccount(accountInfo, &index);
+	int ret = m_accountModel.addAccount(accountInfo, &index);
+	if (ret == 0) {
+		refreshAccountList(accountInfo.userName());
 
-	refreshAccountList(accountInfo.userName());
-
-	qDebug() << "Changing selection" << index;
-	/* get current account model */
-	if (index.isValid()) {
-		ui->accountList->selectionModel()->setCurrentIndex(index,
-		    QItemSelectionModel::ClearAndSelect);
-		/* Expand the tree. */
-		ui->accountList->expand(index);
+		/* get current account model */
+		if (index.isValid()) {
+			logDebugLv0NL("Changing selection to index %d.", index.row());
+			ui->accountList->selectionModel()->setCurrentIndex(index,
+			    QItemSelectionModel::ClearAndSelect);
+			/* Expand the tree. */
+			ui->accountList->expand(index);
+		}
+	} else 	if (ret == -1)  {
+		QMessageBox::warning(this, tr("Adding new account failed"),
+		    tr("Account could not be added because an error occurred."),
+		    QMessageBox::Ok);
+	} else if (ret == -2) {
+		QMessageBox::warning(this, tr("Adding new account failed"),
+		    tr("Account could not be added because account already exists."),
+		    QMessageBox::Ok);
 	}
 }
 
