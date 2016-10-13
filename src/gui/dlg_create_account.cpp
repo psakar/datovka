@@ -130,42 +130,6 @@ void DlgCreateAccount::saveAccount(void)
 
 	/* Store the submitted settings. */
 	m_accountInfo = getContent();
-
-	/* create new account / save current account */
-	switch (m_action) {
-	case ACT_ADDNEW:
-		/* Don't do anything. */
-		break;
-	case ACT_EDIT:
-	case ACT_PWD:
-	case ACT_CERT:
-	case ACT_CERTPWD:
-	case ACT_IDBOX:
-		{
-			const QString userName(m_accountInfo.userName());
-			Q_ASSERT(!userName.isEmpty());
-			/*
-			 * This assignment represents hidden functionality.
-			 * Either this must be clearly documented or it must
-			 * be removed.
-			 *
-			 * FIXME -- Do something!
-			 */
-			AccountModel::globAccounts[userName] = m_accountInfo;
-			/*
-			 * Catching the following signal is required only when
-			 * ACT_EDIT was enabled.
-			 *
-			 * The account model catches the signal.
-			 */
-			emit AccountModel::globAccounts.accountDataChanged(userName);
-			/* TODO -- Save/update related account DB entry? */
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
 }
 
 void DlgCreateAccount::initialiseDialogue(void)

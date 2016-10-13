@@ -4998,18 +4998,23 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *accountDlg = new DlgCreateAccount(
+	DlgCreateAccount *accountDlg = new DlgCreateAccount(
 	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
 	    this);
 
 	int dlgRet = accountDlg->exec();
-	accountDlg->deleteLater();
 
 	if (QDialog::Accepted == dlgRet) {
+		/* Save changes. */
+		AccountModel::globAccounts[userName] = accountDlg->getSubmittedData();
+		emit AccountModel::globAccounts.accountDataChanged(userName);
+
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
 		saveSettings();
 	}
+
+	accountDlg->deleteLater();
 }
 
 /* ========================================================================= */
