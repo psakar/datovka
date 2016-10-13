@@ -301,7 +301,7 @@ AcntSettings DlgCreateAccount::getContent(void) const
 			const QString userName(m_accountInfo.userName());
 			Q_ASSERT(!userName.isEmpty());
 			Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
-			newAccountSettings = AccountModel::globAccounts[userName];
+			newAccountSettings = m_accountInfo;
 		}
 		break;
 	default:
