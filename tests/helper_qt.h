@@ -29,10 +29,35 @@
 
 class LoginCredentials {
 public:
+	/*!
+	 * @brief Specifies the way how the user logs in.
+	 */
+	enum LoginType {
+		LT_UNKNOWN, /*!< Unsupported login type. */
+		LT_UNAME_PWD, /*!< User name and password. */
+		LT_UNAME_CRT, /*!< User name and certificate. */
+		LT_UNAME_PWD_CRT, /*!< User name, password and certificate. */
+		LT_UNAME_PWD_HOTP, /*!< User name, password and HOTP. */
+		LT_UNAME_PWD_TOTP /*!< User name, password and TOTP (SMS). */
+	};
+
+	/*!
+	 * @brief Constructor.
+	 */
+	LoginCredentials(void);
+
 	QString boxName; /*!< Data box name. */
+	enum LoginType loginType; /*!< Type of log-in procedure. */
 	QString userName; /*!< User login. */
 	QString pwd; /*!< Password. */
+	QString crtPath; /*!< Path to certificate. */
+	QString passphrase; /*!< Certificate pass-phrase. */
+	QString hotp; /*!< HOTP */
+	QString totp; /*!< TOTP */
 
+	/*!
+	 * @brief Clear all values.
+	 */
 	void clearAll(void);
 
 	/*!
@@ -48,9 +73,31 @@ public:
 	bool loadLoginCredentials(const QString &filePath, unsigned lineNum);
 
 private:
+	/*!
+	 * @brief Check whether file if present and readable.
+	 *
+	 * @param[in] filePath Path to file.
+	 * @return True if file exists and is readable.
+	 */
 	static
 	bool isReadableFile(const QString &filePath);
 
+	/*!
+	 * @brief Read given line. Line numbering starts from 0.
+	 *
+	 * @param[in] filePath Path to file to be read.
+	 * @param[in] lineNum Line number.
+	 * @preturn Line content or null string if line doe not exist.
+	 */
 	static
 	QString readLine(const QString &filePath, unsigned lineNum);
+
+	/*!
+	 * @brief Convert string login type description to enum value.
+	 *
+	 * @param[in] typeStr Type description string.
+	 * @return Login type.
+	 */
+	static
+	enum LoginType typeFromStr(const QString &typeStr);
 };

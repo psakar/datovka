@@ -30,15 +30,38 @@
 
 /* First position is an empty string. */
 #define POS_BNAME 1
-#define POS_UNAME 2
-#define POS_PWD 3
-#define POS_LIST_MIN 4
+#define POS_TYPE 2
+#define POS_UNAME 3
+#define POS_PWD 4
+
+#define POS_CRT 5
+#define POS_KEY 6
+#define POS_HOTP 7
+
+#define POS_LIST_MIN 5
+
+LoginCredentials::LoginCredentials(void)
+    : boxName(),
+    loginType(LT_UNKNOWN),
+    userName(),
+    pwd(),
+    crtPath(),
+    passphrase(),
+    hotp(),
+    totp()
+{
+}
 
 void LoginCredentials::clearAll(void)
 {
 	boxName.clear();
+	loginType = LT_UNKNOWN;
 	userName.clear();
 	pwd.clear();
+	crtPath.clear();
+	passphrase.clear();
+	hotp.clear();
+	totp.clear();
 }
 
 bool LoginCredentials::loadLoginCredentials(const QString &filePath,
@@ -47,13 +70,13 @@ bool LoginCredentials::loadLoginCredentials(const QString &filePath,
 	/*
 	 * File must be organised in this way:
 	 *
-	 * :user_name_01:password_01:.....
+	 * :box_name_01:login_type_01:user_name_01:password_01:cert_path_01:cert_key_01:hotp_01:totp_01
 	 *
-	 * First character on the line is the separator which is used to tonise
+	 * First character on the line is the separator which is used to split
 	 * the line. Immediately after the separator starts the string with the
-	 * login. Immediately after follows the separator character.
-	 * Immediately after follows the password string. Some other entries may
-	 * also follow.
+	 * box name. Immediately after follows the separator character.
+	 * Immediately after follows the login and password string. Some other
+	 * entries may also follow.
 	 */
 
 	if (lineNum == 0) {
@@ -74,15 +97,42 @@ bool LoginCredentials::loadLoginCredentials(const QString &filePath,
 	QChar separator = line.at(0);
 	QStringList list(line.split(separator));
 
-	if (list.size() < POS_LIST_MIN) {
+	int minSize = POS_LIST_MIN;
+	if (list.size() < minSize) {
 		return false;
 	}
 
 	clearAll();
 
+	switch (typeFromStr(list.at(POS_TYPE))) {
+	case LT_UNAME_PWD:
+		break;
+	case LT_UNAME_CRT:
+	case LT_UNAME_PWD_CRT:
+		minSize += 2;
+		break;
+	case LT_UNAME_PWD_HOTP:
+		minSize += 3;
+		break;
+	case LT_UNKNOWN:
+	default:
+		return false;
+		break;
+	}
+
 	boxName = list.at(POS_BNAME);
+	loginType = typeFromStr(list.at(POS_TYPE));
+	Q_ASSERT(loginType != LT_UNKNOWN);
 	userName = list.at(POS_UNAME);
-	pwd = list.at(POS_PWD);
+	if (loginType != LT_UNAME_CRT) {
+		pwd = list.at(POS_PWD);
+	}
+	if (loginType == LT_UNAME_CRT || loginType == LT_UNAME_PWD_CRT) {
+		crtPath = list.at(POS_CRT);
+		passphrase = list.at(POS_KEY);
+	} else 	if (loginType == LT_UNAME_PWD_HOTP) {
+		hotp = list.at(POS_HOTP);
+	}
 
 	return true;
 }
@@ -128,4 +178,27 @@ QString LoginCredentials::readLine(const QString &filePath, unsigned lineNum)
 	file.close();
 
 	return line;
+}
+
+enum LoginCredentials::LoginType LoginCredentials::typeFromStr(
+    const QString &typeStr)
+{
+	/* Supported values are:
+	 * "USER_PWD"
+	 * "USER_CRT"
+	 * "PWD_CERT"
+	 * "PWD_HOTP"
+	 */
+
+	if (typeStr == QLatin1String("USER_PWD")) {
+		return LT_UNAME_PWD;
+	} else if (typeStr == QLatin1String("USER_CRT")) {
+		return LT_UNAME_CRT;
+	} else if (typeStr == QLatin1String("PWD_CERT")) {
+		return LT_UNAME_PWD_CRT;
+	} else if (typeStr == QLatin1String("PWD_HOTP")) {
+		return LT_UNAME_PWD_HOTP;
+	} else { /* TOTP is not supported. */
+		return LT_UNKNOWN;
+	}
 }
