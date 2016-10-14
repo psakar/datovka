@@ -57,8 +57,7 @@ public:
 		ACT_EDIT,
 		ACT_PWD,
 		ACT_CERT,
-		ACT_CERTPWD,
-		ACT_IDBOX
+		ACT_CERTPWD
 	};
 
 	/*!

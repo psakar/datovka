@@ -194,16 +194,6 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		break;
-	case ACT_IDBOX:
-		windowTitle = tr("Enter ID of your data box for account %1")
-		    .arg(acntData.accountName());
-		this->infoLabel->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		this->addCertificateButton->setEnabled(false);
-		this->passwordLineEdit->setEnabled(false);
-		this->usernameLabel->setText(tr("Data-box ID:"));
-		break;
 	default:
 		Q_ASSERT(0);
 		break;
@@ -266,7 +256,6 @@ AcntSettings DlgCreateAccount::getContent(void) const
 	case ACT_PWD:
 	case ACT_CERT:
 	case ACT_CERTPWD:
-	case ACT_IDBOX:
 		{
 			const QString userName(m_accountInfo.userName());
 			Q_ASSERT(!userName.isEmpty());
