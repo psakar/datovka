@@ -156,10 +156,10 @@ void TestTaskSendMessage::initTestCase(void)
 	QVERIFY(ret);
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = isdsSessions.session(m_sender.userName);
-	if (!isdsSessions.holdsSession(m_sender.userName)) {
+	struct isds_ctx *ctx = globIsdsSessions.session(m_sender.userName);
+	if (!globIsdsSessions.holdsSession(m_sender.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = isdsSessions.createCleanSession(m_sender.userName,
+		ctx = globIsdsSessions.createCleanSession(m_sender.userName,
 		    globPref.isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
@@ -197,10 +197,10 @@ void TestTaskSendMessage::sendMessage(void)
 
 	QVERIFY(m_senderDbSet != NULL);
 
-	QVERIFY(isdsSessions.isConnectedToIsds(m_sender.userName));
-	struct isds_ctx *ctx = isdsSessions.session(m_sender.userName);
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = globIsdsSessions.session(m_sender.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(isdsSessions.isConnectedToIsds(m_sender.userName));
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_sender.userName));
 
 	QString transactionId(QLatin1String("some_id"));
 	QString recipientName(QLatin1String("recipient name"));

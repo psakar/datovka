@@ -154,10 +154,10 @@ void TestTaskDownloads::initTestCase(void)
 	QVERIFY(ret);
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = isdsSessions.session(m_recipient.userName);
-	if (!isdsSessions.holdsSession(m_recipient.userName)) {
+	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
+	if (!globIsdsSessions.holdsSession(m_recipient.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = isdsSessions.createCleanSession(m_recipient.userName,
+		ctx = globIsdsSessions.createCleanSession(m_recipient.userName,
 		    globPref.isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
@@ -195,10 +195,10 @@ void TestTaskDownloads::downloadMessageList(void)
 
 	QVERIFY(m_recipientDbSet != NULL);
 
-	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = isdsSessions.session(m_recipient.userName);
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
 
 	task = new (::std::nothrow) TaskDownloadMessageList(
 	    m_recipient.userName, m_recipientDbSet, MSG_RECEIVED, false,
@@ -244,10 +244,10 @@ void TestTaskDownloads::downloadMessage(void)
 
 	QVERIFY(m_recipientDbSet != NULL);
 
-	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = isdsSessions.session(m_recipient.userName);
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(isdsSessions.isConnectedToIsds(m_recipient.userName));
+	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
 
 	/* Should fail, is a received message. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
