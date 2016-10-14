@@ -25,6 +25,7 @@
 
 #include "tests/test_crypto.h"
 #include "tests/test_db_container.h"
+#include "tests/test_isds_login.h"
 #include "tests/test_message_db_set.h"
 #include "tests/test_task_downloads.h"
 #include "tests/test_task_send_message.h"
@@ -61,6 +62,10 @@ int main(int argc, char *argv[])
 #if defined (TEST_MESSAGE_DB_SET)
 	status |= testThisClassAndDelete(newTestMessageDbSet(), argc, argv);
 #endif /* defined (TEST_MESSAGE_DB_SET) */
+
+#if defined (TEST_ISDS_LOGIN)
+	status |= testThisClassAndDelete(newTestIsdsLogin(), argc, argv);
+#endif /* defined (TEST_ISDS_LOGIN) */
 
 #if defined (TEST_TASK_SEND_MESSAGE)
 	status |= testThisClassAndDelete(newTestTaskSendMessage(msgId), argc, argv);
