@@ -26,7 +26,6 @@
 #include <cstring> /* memset(3) */
 #include <QDebug>
 #include <QFile>
-#include <QInputDialog>
 #include <QObject>
 
 #include "isds_sessions.h"
