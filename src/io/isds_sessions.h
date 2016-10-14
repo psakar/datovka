@@ -36,6 +36,7 @@
 #include <QMap>
 #include <QString>
 
+#include "src/settings/accounts.h"
 
 /* TODO -- Check whether session is active. */
 
@@ -126,7 +127,8 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &otpMethod, const QString &otpCode, isds_otp_resolution &res);
+    enum AcntSettings::LogInMethod otpMethod, const QString &otpCode,
+    isds_otp_resolution &res);
 
 /*!
  * @brief Add items into isds_PersonName structure.

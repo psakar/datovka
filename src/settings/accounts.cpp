@@ -51,6 +51,108 @@ namespace CredNames {
 #define _OTP_CODE "_otp_code"
 #define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
 
+/*!
+ * @brief Login method names as stored in configuration file.
+ */
+namespace MethodNames {
+	static const QString uNamePwd(QLatin1String("username"));
+	static const QString uNameCrt(QLatin1String("certificate"));
+	static const QString uNamePwdCrt(QLatin1String("user_certificate"));
+	static const QString uNamePwdHotp(QLatin1String("hotp"));
+	static const QString uNamePwdTotp(QLatin1String("totp"));
+}
+
+/*!
+ * @brief Converts integer to login method identifier.
+ *
+ * @param[in] num Integer number.
+ * @return Identifier value.
+ */
+static
+enum AcntSettings::LogInMethod methodIntToEnum(int num)
+{
+	switch (num) {
+	case AcntSettings::LIM_UNAME_PWD:
+		return AcntSettings::LIM_UNAME_PWD;
+		break;
+	case AcntSettings::LIM_UNAME_CRT:
+		return AcntSettings::LIM_UNAME_CRT;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_CRT:
+		return AcntSettings::LIM_UNAME_PWD_CRT;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
+		return AcntSettings::LIM_UNAME_PWD_HOTP;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_TOTP:
+		return AcntSettings::LIM_UNAME_PWD_TOTP;
+		break;
+	case AcntSettings::LIM_UNKNOWN:
+	default:
+		return AcntSettings::LIM_UNKNOWN;
+		break;
+	}
+}
+
+/*!
+ * @brief Converts login method string to identifier.
+ *
+ * @param[in] str Identifier string as used in configuration file.
+ * @return Identifier value.
+ */
+static
+enum AcntSettings::LogInMethod methodStrToEnum(const QString &str)
+{
+	if (str == MethodNames::uNamePwd) {
+		return AcntSettings::LIM_UNAME_PWD;
+	} else if (str == MethodNames::uNameCrt) {
+		return AcntSettings::LIM_UNAME_CRT;
+	} else if (str == MethodNames::uNamePwdCrt) {
+		return AcntSettings::LIM_UNAME_PWD_CRT;
+	} else if (str == MethodNames::uNamePwdHotp) {
+		return AcntSettings::LIM_UNAME_PWD_HOTP;
+	} else if (str == MethodNames::uNamePwdTotp) {
+		return AcntSettings::LIM_UNAME_PWD_TOTP;
+	} else {
+		return AcntSettings::LIM_UNKNOWN;
+	}
+}
+
+/*!
+ * @brief Converts login method identifier to string.
+ *
+ * @param[in] val Identifier value as used in the programme.
+ * @return Identifier string as used in configuration file.
+ */
+static
+const QString &methodEnumToStr(enum AcntSettings::LogInMethod val)
+{
+	static const QString nullStr;
+
+	switch (val) {
+	case AcntSettings::LIM_UNAME_PWD:
+		return MethodNames::uNamePwd;
+		break;
+	case AcntSettings::LIM_UNAME_CRT:
+		return MethodNames::uNameCrt;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_CRT:
+		return MethodNames::uNamePwdCrt;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
+		return MethodNames::uNamePwdHotp;
+		break;
+	case AcntSettings::LIM_UNAME_PWD_TOTP:
+		return MethodNames::uNamePwdTotp;
+		break;
+	case AcntSettings::LIM_UNKNOWN:
+	default:
+		Q_ASSERT(0);
+		return nullStr;
+		break;
+	}
+}
+
 AcntSettings::AcntSettings(void)
     : QMap<QString, QVariant>()
 {
@@ -87,14 +189,19 @@ void AcntSettings::setUserName(const QString &userName)
 	m_parentType::operator[](CredNames::userName) = userName;
 }
 
-QString AcntSettings::loginMethod(void) const
+enum AcntSettings::LogInMethod AcntSettings::loginMethod(void) const
 {
-	return m_parentType::operator[](CredNames::lMethod).toString();
+	return methodIntToEnum(
+	    m_parentType::value(CredNames::lMethod, LIM_UNKNOWN).toInt());
 }
 
-void AcntSettings::setLoginMethod(const QString &method)
+void AcntSettings::setLoginMethod(enum LogInMethod method)
 {
-	m_parentType::operator[](CredNames::lMethod) = method;
+	if (method != LIM_UNKNOWN) {
+		m_parentType::insert(CredNames::lMethod, method);
+	} else {
+		m_parentType::remove(CredNames::lMethod);
+	}
 }
 
 QString AcntSettings::password(void) const
@@ -229,10 +336,10 @@ QString AcntSettings::_passphrase(void) const
 
 void AcntSettings::_setPassphrase(const QString &passphrase)
 {
-	if (passphrase.isNull()) {
-		m_parentType::remove(_PKEY_PASSPHRASE);
-	} else {
+	if (!passphrase.isNull()) {
 		m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
+	} else {
+		m_parentType::remove(_PKEY_PASSPHRASE);
 	}
 }
 
@@ -243,10 +350,10 @@ QString AcntSettings::_otp(void) const
 
 void AcntSettings::_setOtp(const QString &otpCode)
 {
-	if (otpCode.isNull()) {
-		m_parentType::remove(_OTP_CODE);
-	} else {
+	if (!otpCode.isNull()) {
 		m_parentType::insert(_OTP_CODE, otpCode);
+	} else {
+		m_parentType::remove(_OTP_CODE);
 	}
 }
 
@@ -277,8 +384,8 @@ void AcntSettings::loadFromSettings(const QSettings &settings,
 	    "").toStringList().join(", "));
 	setUserName(settings.value(prefix + CredNames::userName,
 	    "").toString());
-	setLoginMethod(settings.value(prefix + CredNames::lMethod,
-	    "").toString());
+	setLoginMethod(methodStrToEnum(
+	    settings.value(prefix + CredNames::lMethod, "").toString()));
 	setPassword(fromBase64(settings.value(prefix + CredNames::pwd,
 	    "").toString()));
 	setTestAccount(settings.value(prefix + CredNames::testAcnt,
@@ -312,7 +419,7 @@ void AcntSettings::saveToSettings(QSettings &settings,
 
 	settings.setValue(CredNames::acntName, accountName());
 	settings.setValue(CredNames::userName, userName());
-	settings.setValue(CredNames::lMethod, loginMethod());
+	settings.setValue(CredNames::lMethod, methodEnumToStr(loginMethod()));
 	settings.setValue(CredNames::testAcnt, isTestAccount());
 	settings.setValue(CredNames::rememberPwd, rememberPwd());
 	if (rememberPwd()) {

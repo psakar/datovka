@@ -501,7 +501,8 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &otpMethod, const QString &otpCode, isds_otp_resolution &res)
+    enum AcntSettings::LogInMethod otpMethod, const QString &otpCode,
+    isds_otp_resolution &res)
 /* ========================================================================= */
 {
 	Q_ASSERT(0 != isdsSession);
@@ -521,7 +522,7 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
 	}
 	memset(otp, 0, sizeof(struct isds_otp));
 
-	if (otpMethod == LIM_HOTP) {
+	if (otpMethod == AcntSettings::LIM_UNAME_PWD_HOTP) {
 		otp->method = OTP_HMAC;
 	} else {
 		otp->method = OTP_TIME;

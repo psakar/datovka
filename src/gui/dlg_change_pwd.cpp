@@ -72,13 +72,15 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	this->otpLabel->setEnabled(false);
 	this->smsPushButton->setEnabled(false);
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP) {
+	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP) {
 		this->secCodeLineEdit->setEnabled(true);
 		this->otpLabel->setText(tr("Enter security code:"));
 		this->otpLabel->setEnabled(true);
 	}
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
+	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		this->secCodeLineEdit->setEnabled(true);
 		this->smsPushButton->setEnabled(true);
 		this->otpLabel->setText(tr("Enter SMS code:"));
@@ -157,8 +159,10 @@ void DlgChangePwd::checkInputFields(void)
 
 	Q_ASSERT(!m_userName.isEmpty());
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
-	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
+	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP ||
+	    AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		buttonEnabled = buttonEnabled &&
 		    !this->secCodeLineEdit->text().isEmpty();
 	}
@@ -264,12 +268,14 @@ void DlgChangePwd::changePassword(void)
 	QString errorStr, longErrorStr;
 	TaskChangePwd *task;
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP ||
-	    AccountModel::globAccounts[m_userName].loginMethod() == LIM_TOTP) {
+	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP ||
+	    AccountModel::globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		task = new (std::nothrow) TaskChangePwd(m_userName,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
-		    (AccountModel::globAccounts[m_userName].loginMethod() == LIM_HOTP) ? OTP_HMAC : OTP_TIME,
+		    (AccountModel::globAccounts[m_userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
 		    this->secCodeLineEdit->text());
 	} else {
 		task = new (std::nothrow) TaskChangePwd(m_userName,

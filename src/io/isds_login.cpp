@@ -67,19 +67,26 @@ enum IsdsLogin::ErrorCode IsdsLogin::logIn(void)
 		return EC_OK;
 	}
 
-	if (m_acntSettings.loginMethod() == LIM_USERNAME) {
+	switch (m_acntSettings.loginMethod()) {
+	case AcntSettings::LIM_UNAME_PWD:
 		return userNamePwd();
-	} else if (m_acntSettings.loginMethod() == LIM_CERT) {
+		break;
+	case AcntSettings::LIM_UNAME_CRT:
 		return certOnly();
-	} else if (m_acntSettings.loginMethod() == LIM_USER_CERT) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_CRT:
 		return certUsrPwd();
-	} else if (m_acntSettings.loginMethod() == LIM_HOTP) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
 		return hotp();
-	} else if (m_acntSettings.loginMethod() == LIM_TOTP) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		return totp();
-	} else {
+		break;
+	default:
 		logErrorNL("%s", "Log-in method not implemented.");
 		return EC_NOT_IMPL;
+		break;
 	}
 
 	return EC_ERR;
@@ -253,7 +260,7 @@ QPair<QString, QString> IsdsLogin::dialogueErrMsg(void) const
 
 enum IsdsLogin::ErrorCode IsdsLogin::userNamePwd(void)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_USERNAME);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD);
 
 	const QString userName(m_acntSettings.userName());
 	Q_ASSERT(!userName.isEmpty());
@@ -275,7 +282,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::userNamePwd(void)
 
 enum IsdsLogin::ErrorCode IsdsLogin::certOnly(void)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_CERT);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_CRT);
 
 	const QString userName(m_acntSettings.userName());
 	Q_ASSERT(!userName.isEmpty());
@@ -313,7 +320,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::certOnly(void)
 
 enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_USER_CERT);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_CRT);
 
 	const QString userName(m_acntSettings.userName());
 	Q_ASSERT(!userName.isEmpty());
@@ -355,8 +362,8 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 enum IsdsLogin::ErrorCode IsdsLogin::otpLogIn(const QString &userName,
     const QString &pwd, const QString &otpCode)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_HOTP ||
-	    m_acntSettings.loginMethod() == LIM_TOTP);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP ||
+	    m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_TOTP);
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(!pwd.isEmpty());
 	Q_ASSERT(!otpCode.isNull());
@@ -386,7 +393,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::otpLogIn(const QString &userName,
 
 enum IsdsLogin::ErrorCode IsdsLogin::hotp(void)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_HOTP);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP);
 
 	const QString userName(m_acntSettings.userName());
 	Q_ASSERT(!userName.isEmpty());
@@ -415,7 +422,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::hotp(void)
 enum IsdsLogin::ErrorCode IsdsLogin::totpRequestSMS(const QString &userName,
     const QString &pwd)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_TOTP);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_TOTP);
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(!pwd.isEmpty());
 
@@ -432,7 +439,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::totpRequestSMS(const QString &userName,
 
 enum IsdsLogin::ErrorCode IsdsLogin::totp(void)
 {
-	Q_ASSERT(m_acntSettings.loginMethod() == LIM_TOTP);
+	Q_ASSERT(m_acntSettings.loginMethod() == AcntSettings::LIM_UNAME_PWD_TOTP);
 
 	const QString userName(m_acntSettings.userName());
 	Q_ASSERT(!userName.isEmpty());

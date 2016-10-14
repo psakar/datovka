@@ -5784,7 +5784,7 @@ void MainWindow::createAccountFromDatabaseFileList(
 		itemSettings.setTestAccount(dbTestingFlag);
 		itemSettings.setAccountName(dbUserName);
 		itemSettings.setUserName(dbUserName);
-		itemSettings.setLoginMethod(LIM_USERNAME);
+		itemSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD);
 		itemSettings.setPassword("");
 		itemSettings.setRememberPwd(false);
 		itemSettings.setSyncWithAll(false);

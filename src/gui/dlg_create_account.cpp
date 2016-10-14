@@ -206,17 +206,26 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	this->testAccountCheckBox->setEnabled(false);
 
 	int itemIdx;
-	const QString loginMethod(acntData.loginMethod());
-	if (LIM_USERNAME == loginMethod) {
+	switch (acntData.loginMethod()) {
+	case AcntSettings::LIM_UNAME_PWD:
 		itemIdx = USER_NAME;
-	} else if (LIM_CERT == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_CRT:
 		itemIdx = CERTIFICATE;
-	} else if (LIM_USER_CERT == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_CRT:
 		itemIdx = USER_CERTIFICATE;
-	} else if (LIM_HOTP == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
 		itemIdx = HOTP;
-	} else {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		itemIdx = TOTP;
+		break;
+	default:
+		Q_ASSERT(0);
+		itemIdx = TOTP;
+		break;
 	}
 
 	this->loginmethodComboBox->setCurrentIndex(itemIdx);
@@ -276,27 +285,33 @@ AcntSettings DlgCreateAccount::getContent(void) const
 	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
 	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
-	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		newAccountSettings.setLoginMethod(LIM_USERNAME);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_CERT);
-		newAccountSettings.setPassword("");
+	switch (this->loginmethodComboBox->currentIndex()) {
+	case USER_NAME:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD);
+		newAccountSettings.setP12File(QString());
+		break;
+	case CERTIFICATE:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_CRT);
+		newAccountSettings.setPassword(QString());
 		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() ==
-	           USER_CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_USER_CERT);
+		break;
+	case USER_CERTIFICATE:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_CRT);
 		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		newAccountSettings.setLoginMethod(LIM_HOTP);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
-		newAccountSettings.setLoginMethod(LIM_TOTP);
-		newAccountSettings.setP12File("");
-	} else {
+		break;
+	case HOTP:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_HOTP);
+		newAccountSettings.setP12File(QString());
+		break;
+	case TOTP:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_TOTP);
+		newAccountSettings.setP12File(QString());
+		break;
+	default:
 		Q_ASSERT(0);
+		break;
 	}
 
 	return newAccountSettings;
