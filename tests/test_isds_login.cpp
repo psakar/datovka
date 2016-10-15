@@ -25,47 +25,9 @@
 
 #include "src/common.h"
 #include "src/io/isds_login.h"
+#include "src/settings/accounts.h"
 #include "tests/helper_qt.h"
 #include "tests/test_isds_login.h"
-
-/*!
- * @brief Converts login method test identifiers to program identifiers.
- */
-static
-const QString &loginMethodIdentifier(enum LoginCredentials::LoginType type)
-{
-	static const QString userName(QLatin1String("username"));
-	static const QString certificate(QLatin1String("certificate"));
-	static const QString userCertificate(QLatin1String("user_certificate"));
-	static const QString hotp(QLatin1String("hotp"));
-	static const QString totp(QLatin1String("totp"));
-	static const QString nullStr;
-
-	switch (type) {
-	case LoginCredentials::LT_UNKNOWN:
-		return nullStr;
-		break;
-	case LoginCredentials::LT_UNAME_PWD:
-		return userName;
-		break;
-	case LoginCredentials::LT_UNAME_CRT:
-		return certificate;
-		break;
-	case LoginCredentials::LT_UNAME_PWD_CRT:
-		return userCertificate;
-		break;
-	case LoginCredentials::LT_UNAME_PWD_HOTP:
-		return hotp;
-		break;
-	case LoginCredentials::LT_UNAME_PWD_TOTP:
-		return totp;
-		break;
-	default:
-		Q_ASSERT(0);
-		return nullStr;
-		break;
-	};
-}
 
 class TestIsdsLogin : public QObject {
 	Q_OBJECT
@@ -104,7 +66,7 @@ void TestIsdsLogin::initTestCase(void)
 		QSKIP("Failed to load login credentials. Skipping remaining tests.");
 	}
 	QVERIFY(ret);
-	QVERIFY(m_user01.loginType != LoginCredentials::LT_UNKNOWN);
+	QVERIFY(m_user01.loginType != AcntSettings::LIM_UNKNOWN);
 	QVERIFY(!m_user01.userName.isEmpty());
 	QVERIFY(!m_user01.pwd.isEmpty());
 }
@@ -131,10 +93,6 @@ void TestIsdsLogin::logIn01(void)
 	settings.setAccountName(QLatin1String("Some account name"));
 	settings.setUserName(m_user01.userName);
 	settings.setPassword(m_user01.pwd);
-	fprintf(stderr, "'%s' '%s' '%s'\n",
-	    loginMethodIdentifier(m_user01.loginType).toUtf8().constData(),
-	    settings.userName().toUtf8().constData(),
-	    settings.password().toUtf8().constData());
 
 	/* Have login data but no session. */
 	errCode = isdsLogin.logIn();
@@ -151,7 +109,7 @@ void TestIsdsLogin::logIn01(void)
 	QVERIFY2(errCode == IsdsLogin::EC_NOT_IMPL,
 	    QString("Got error code %1.").arg(errCode).toUtf8().constData());
 
-	settings.setLoginMethod(loginMethodIdentifier(m_user01.loginType));
+	settings.setLoginMethod(m_user01.loginType);
 
 	/* Have all data. */
 	errCode = isdsLogin.logIn();

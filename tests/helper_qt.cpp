@@ -42,7 +42,7 @@
 
 LoginCredentials::LoginCredentials(void)
     : boxName(),
-    loginType(LT_UNKNOWN),
+    loginType(AcntSettings::LIM_UNKNOWN),
     userName(),
     pwd(),
     crtPath(),
@@ -55,7 +55,7 @@ LoginCredentials::LoginCredentials(void)
 void LoginCredentials::clearAll(void)
 {
 	boxName.clear();
-	loginType = LT_UNKNOWN;
+	loginType = AcntSettings::LIM_UNKNOWN;
 	userName.clear();
 	pwd.clear();
 	crtPath.clear();
@@ -105,16 +105,16 @@ bool LoginCredentials::loadLoginCredentials(const QString &filePath,
 	clearAll();
 
 	switch (typeFromStr(list.at(POS_TYPE))) {
-	case LT_UNAME_PWD:
+	case AcntSettings::LIM_UNAME_PWD:
 		break;
-	case LT_UNAME_CRT:
-	case LT_UNAME_PWD_CRT:
+	case AcntSettings::LIM_UNAME_CRT:
+	case AcntSettings::LIM_UNAME_PWD_CRT:
 		minSize += 2;
 		break;
-	case LT_UNAME_PWD_HOTP:
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
 		minSize += 3;
 		break;
-	case LT_UNKNOWN:
+	case AcntSettings::LIM_UNKNOWN:
 	default:
 		return false;
 		break;
@@ -122,15 +122,16 @@ bool LoginCredentials::loadLoginCredentials(const QString &filePath,
 
 	boxName = list.at(POS_BNAME);
 	loginType = typeFromStr(list.at(POS_TYPE));
-	Q_ASSERT(loginType != LT_UNKNOWN);
+	Q_ASSERT(loginType != AcntSettings::LIM_UNKNOWN);
 	userName = list.at(POS_UNAME);
-	if (loginType != LT_UNAME_CRT) {
+	if (loginType != AcntSettings::LIM_UNAME_CRT) {
 		pwd = list.at(POS_PWD);
 	}
-	if (loginType == LT_UNAME_CRT || loginType == LT_UNAME_PWD_CRT) {
+	if (loginType == AcntSettings::LIM_UNAME_CRT ||
+	    loginType == AcntSettings::LIM_UNAME_PWD_CRT) {
 		crtPath = list.at(POS_CRT);
 		passphrase = list.at(POS_KEY);
-	} else 	if (loginType == LT_UNAME_PWD_HOTP) {
+	} else 	if (loginType == AcntSettings::LIM_UNAME_PWD_HOTP) {
 		hotp = list.at(POS_HOTP);
 	}
 
@@ -180,7 +181,7 @@ QString LoginCredentials::readLine(const QString &filePath, unsigned lineNum)
 	return line;
 }
 
-enum LoginCredentials::LoginType LoginCredentials::typeFromStr(
+enum AcntSettings::LogInMethod LoginCredentials::typeFromStr(
     const QString &typeStr)
 {
 	/* Supported values are:
@@ -191,14 +192,14 @@ enum LoginCredentials::LoginType LoginCredentials::typeFromStr(
 	 */
 
 	if (typeStr == QLatin1String("USER_PWD")) {
-		return LT_UNAME_PWD;
+		return AcntSettings::LIM_UNAME_PWD;
 	} else if (typeStr == QLatin1String("USER_CRT")) {
-		return LT_UNAME_CRT;
+		return AcntSettings::LIM_UNAME_CRT;
 	} else if (typeStr == QLatin1String("PWD_CERT")) {
-		return LT_UNAME_PWD_CRT;
+		return AcntSettings::LIM_UNAME_PWD_CRT;
 	} else if (typeStr == QLatin1String("PWD_HOTP")) {
-		return LT_UNAME_PWD_HOTP;
+		return AcntSettings::LIM_UNAME_PWD_HOTP;
 	} else { /* TOTP is not supported. */
-		return LT_UNKNOWN;
+		return AcntSettings::LIM_UNKNOWN;
 	}
 }

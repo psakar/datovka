@@ -25,29 +25,19 @@
 
 #include <QString>
 
+#include "src/settings/accounts.h"
+
 #define CREDENTIALS_FNAME "login_credentials.txt"
 
 class LoginCredentials {
 public:
-	/*!
-	 * @brief Specifies the way how the user logs in.
-	 */
-	enum LoginType {
-		LT_UNKNOWN, /*!< Unsupported login type. */
-		LT_UNAME_PWD, /*!< User name and password. */
-		LT_UNAME_CRT, /*!< User name and certificate. */
-		LT_UNAME_PWD_CRT, /*!< User name, password and certificate. */
-		LT_UNAME_PWD_HOTP, /*!< User name, password and HOTP. */
-		LT_UNAME_PWD_TOTP /*!< User name, password and TOTP (SMS). */
-	};
-
 	/*!
 	 * @brief Constructor.
 	 */
 	LoginCredentials(void);
 
 	QString boxName; /*!< Data box name. */
-	enum LoginType loginType; /*!< Type of log-in procedure. */
+	enum AcntSettings::LogInMethod loginType; /*!< Type of log-in procedure. */
 	QString userName; /*!< User login. */
 	QString pwd; /*!< Password. */
 	QString crtPath; /*!< Path to certificate. */
@@ -99,5 +89,5 @@ private:
 	 * @return Login type.
 	 */
 	static
-	enum LoginType typeFromStr(const QString &typeStr);
+	enum AcntSettings::LogInMethod typeFromStr(const QString &typeStr);
 };
