@@ -40,6 +40,47 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/log/log_c.h"
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+  #define _ASN1_STRING_get0_data(x) \
+	ASN1_STRING_data((x))
+
+  #define _X509_NAME_entry_count(name) \
+	sk_X509_NAME_ENTRY_num((name)->entries)
+
+  #define _X509_NAME_get_entry(name, loc) \
+	sk_X509_NAME_ENTRY_value((name)->entries, (loc))
+
+  #define _X509_get0_tbs_sigalg(x) \
+	((x)->sig_alg)
+
+  #define _X509_get0_notBefore(x) \
+	(((x) && (x)->cert_info && (x)->cert_info->validity) ? (x)->cert_info->validity->notBefore : NULL)
+
+  #define _X509_get0_notAfter(x) \
+	(((x) && (x)->cert_info && (x)->cert_info->validity) ? (x)->cert_info->validity->notAfter : NULL)
+
+#else /* OPENSSL_VERSION_NUMBER >= 0x10100000L */
+
+  #define _ASN1_STRING_get0_data(x) \
+	ASN1_STRING_get0_data((x))
+
+  #define _X509_NAME_entry_count(name) \
+	X509_NAME_entry_count((name))
+
+  #define _X509_NAME_get_entry(name, loc) \
+	X509_NAME_get_entry((name), (loc))
+
+  #define _X509_get0_tbs_sigalg(x) \
+	X509_get0_tbs_sigalg((x))
+
+  #define _X509_get0_notBefore(x) \
+	X509_get0_notBefore((x))
+
+  #define _X509_get0_notAfter(x) \
+	X509_get0_notAfter((x))
+
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
 /*
  * Directory to search for certificate. The name mist end with a slash.
@@ -859,7 +900,6 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 /* ========================================================================= */
 {
 	const X509_NAME *subject;
-	const STACK_OF(X509_NAME_ENTRY) *entries;
 	int num_entries, i;
 	X509_NAME_ENTRY *entry;
 	ASN1_OBJECT *object;
@@ -883,11 +923,10 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 		goto fail;
 	}
 
-	entries = subject->entries;
-	num_entries = sk_X509_NAME_ENTRY_num(entries);
+	num_entries = _X509_NAME_entry_count(subject);
 
 	for (i = 0; i < num_entries; ++i) {
-		entry = sk_X509_NAME_ENTRY_value(entries, i);
+		entry = _X509_NAME_get_entry(subject, i);
 		object = X509_NAME_ENTRY_get_object(entry);
 		/* Reading object->nid doesn't work. */
 		nid = OBJ_obj2nid(object);
@@ -915,7 +954,7 @@ int x509_crt_issuer_info(struct x509_crt *x509_crt,
 		if (NULL != out_str) {
 			*out_str = malloc(ASN1_STRING_length(str) + 1);
 			if (NULL != *out_str) {
-				memcpy(*out_str, ASN1_STRING_data(str),
+				memcpy(*out_str, _ASN1_STRING_get0_data(str),
 				    ASN1_STRING_length(str));
 				(*out_str)[ASN1_STRING_length(str)] = '\0';
 			}
@@ -961,7 +1000,7 @@ int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
 	fprintf(stderr, "<<<\n");
 #endif /* PRINT_CERTS */
 
-	sa = ((X509 *) x509_crt)->sig_alg;
+	sa = _X509_get0_tbs_sigalg((X509 *)x509_crt);
 	alg = sa->algorithm;
 
 	if (NULL != sa_id) {
@@ -1005,9 +1044,7 @@ int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
     time_t *utc_expiration)
 /* ========================================================================= */
 {
-	X509_CINF *cinf;
-	X509_VAL *val;
-	ASN1_TIME *notBefore, *notAfter;
+	const ASN1_TIME *notBefore, *notAfter;
 
 	/* ASN1_TIME is an alias for ASN1_STRING. */
 
@@ -1017,20 +1054,13 @@ int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
 		assert(0);
 		goto fail;
 	}
-	cinf = ((X509 *) x509_crt)->cert_info;
 
-	if (NULL == cinf) {
-		assert(0);
-		goto fail;
-	}
-	val = cinf->validity;
-
-	notBefore = val->notBefore;
+	notBefore = _X509_get0_notBefore((X509 *)x509_crt);
 	if (NULL == notBefore) {
 		assert(0);
 		goto fail;
 	}
-	notAfter = val->notAfter;
+	notAfter = _X509_get0_notAfter((X509 *)x509_crt);
 	if (NULL == notAfter) {
 		assert(0);
 		goto fail;
@@ -2110,9 +2140,7 @@ static
 int x509_check_date(const X509 *x509, time_t utc_time)
 /* ========================================================================= */
 {
-	X509_CINF *cinf;
-	X509_VAL *val;
-	ASN1_TIME *notBefore, *notAfter;
+	const ASN1_TIME *notBefore, *notAfter;
 	time_t tNotBef, tNotAft;
 
 	/* ASN1_TIME is an alias for ASN1_STRING. */
@@ -2123,20 +2151,13 @@ int x509_check_date(const X509 *x509, time_t utc_time)
 		assert(0);
 		goto fail;
 	}
-	cinf = x509->cert_info;
 
-	if (NULL == cinf) {
-		assert(0);
-		goto fail;
-	}
-	val = cinf->validity;
-
-	notBefore = val->notBefore;
+	notBefore = _X509_get0_notBefore(x509);
 	if (NULL == notBefore) {
 		assert(0);
 		goto fail;
 	}
-	notAfter = val->notAfter;
+	notAfter = _X509_get0_notAfter(x509);
 	if (NULL == notAfter) {
 		assert(0);
 		goto fail;
@@ -2168,7 +2189,7 @@ int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
 	time_t ret_time;
 
 //	fprintf(stderr, "TIME %s\n",
-//	    ASN1_STRING_data((ASN1_STRING *) asn1_time));
+//	    _ASN1_STRING_get0_data((const ASN1_STRING *) asn1_time));
 
 	assert(NULL != asn1_time);
 	assert(NULL != utc_time);
