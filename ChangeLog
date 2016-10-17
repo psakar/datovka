@@ -1,4 +1,5 @@
 x.y.z / yyyy-mm-dd
+ * The application can be compiled against OpenSSL 1.1.0.
  * Re-written the log-in sequence. Fixed some bugs related to creating new
    accounts.
  * Added unit test for sending a receiving messages.
