@@ -96,7 +96,7 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 		return AUTH_DATA_ERROR;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return AUTH_ERR;
@@ -110,7 +110,7 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 	} else if (IE_SUCCESS != status) {
 		logErrorNL("%s", "Error authenticating message.");
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		return AUTH_ISDS_ERROR;
 	}
 

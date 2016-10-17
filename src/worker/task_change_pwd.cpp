@@ -135,7 +135,7 @@ int TaskChangePwd::changePassword(const QString &userName,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return IE_ERROR;
@@ -148,8 +148,8 @@ int TaskChangePwd::changePassword(const QString &userName,
 	    newPwd.toUtf8().constData(), otp, &reference);
 
 	if (IE_SUCCESS != ret) {
-		error = isds_strerror(ret);
-		longError = isds_long_message(session);
+		error = isdsStrError(ret);
+		longError = isdsLongMessage(session);
 	}
 
 	if (NULL != reference) {

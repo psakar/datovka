@@ -24,10 +24,12 @@
 #include <QTextStream>
 
 #include "src/cli/cli.h"
+#include "src/cli/cli_login.h"
 #include "src/gui/datovka.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
+#include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/pool.h"
@@ -576,7 +578,7 @@ cli_error getUserInfo(const QMap<QString,QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "Downloading info about username"
 	    << username;
 
-	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+	if (IsdsHelper::getUserInfoFromLogin(map["username"].toString())) {
 		return CLI_SUCCESS;
 	}
 
@@ -594,7 +596,7 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "downloading info about owner and its "
 	    "databox for username" <<  username;
 
-	if (MainWindow::getOwnerInfoFromLogin(map["username"].toString())) {
+	if (IsdsHelper::getOwnerInfoFromLogin(map["username"].toString())) {
 		return CLI_SUCCESS;
 	}
 
@@ -682,7 +684,7 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	int status = TaskSearchOwner::isdsSearch(username, ownerInfo, &boxes);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
-	session = isdsSessions.session(username);
+	session = globIsdsSessions.session(username);
 	if (NULL == session) {
 		errmsg = "Error while create find databox request";
 		isds_PersonName_free(&personName);
@@ -1125,7 +1127,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		struct isds_ctx *session =
-		    isdsSessions.session(map["username"].toString());
+		    globIsdsSessions.session(map["username"].toString());
 		if (NULL == session) {
 			Q_ASSERT(0);
 			ret = CLI_ERROR;
@@ -1133,7 +1135,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		status = isds_send_message(session, sent_message);
-		QString err = isds_long_message(session);
+		QString err = isdsLongMessage(session);
 
 		if (IE_SUCCESS == status) {
 			/* Store new message into database. */
@@ -1775,8 +1777,9 @@ int runService(const QString &lParam,
 			otp = loginMap["otpcode"].toString();
 		}
 
-		if (!isdsSessions.isConnectedToIsds(username) &&
-		    !MainWindow::connectToIsds(username, 0, pwd, otp)) {
+		if (!globIsdsSessions.isConnectedToIsds(username) &&
+		    !connectToIsdsCLI(globIsdsSessions,
+			    AccountModel::globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";
 			qDebug() << errmsg;

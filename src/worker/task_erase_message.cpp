@@ -99,7 +99,7 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 
 	/* First delete message in ISDS. */
 	if (delFromIsds) {
-		struct isds_ctx *session = isdsSessions.session(userName);
+		struct isds_ctx *session = globIsdsSessions.session(userName);
 		if (NULL == session) {
 			Q_ASSERT(0);
 			return NOT_DELETED;
@@ -113,8 +113,8 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 			    "Message '%" PRId64 "' was deleted from ISDS.",
 			    dmId);
 		} else {
-			error = isds_strerror(status);
-			longError = isds_long_message(session);
+			error = isdsStrError(status);
+			longError = isdsLongMessage(session);
 
 			logErrorNL(
 			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",

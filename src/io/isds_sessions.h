@@ -36,22 +36,23 @@
 #include <QMap>
 #include <QString>
 
+#include "src/settings/accounts.h"
 
 /* TODO -- Check whether session is active. */
 
 /* Global ISDS context container instance. */
-class GlobIsdsSessions;
-extern GlobIsdsSessions isdsSessions;
+class IsdsSessions;
+extern IsdsSessions globIsdsSessions;
 
 
 /*!
  * @brief Holds the ISDS context structures.
  */
-class GlobIsdsSessions {
+class IsdsSessions {
 
 public:
-	GlobIsdsSessions(void);
-	~GlobIsdsSessions(void);
+	IsdsSessions(void);
+	~IsdsSessions(void);
 
 	/*!
 	 * @brief Returns true is active session exists.
@@ -126,7 +127,8 @@ isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
  */
 isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession,
-    const QString &otpMethod, const QString &otpCode, isds_otp_resolution &res);
+    enum AcntSettings::LogInMethod otpMethod, const QString &otpCode,
+    isds_otp_resolution &res);
 
 /*!
  * @brief Add items into isds_PersonName structure.
@@ -217,6 +219,23 @@ struct isds_message *loadZfoData(struct isds_ctx *isdsSession,
 struct isds_message *loadZfoFile(struct isds_ctx *isdsSession,
     const QString &fName, int zfoType);
 
+/*!
+ * @brief Wraps isds_strerror().
+ */
+inline
+QString isdsStrError(const isds_error error)
+{
+#ifdef WIN32
+	/* The function returns strings in local encoding. */
+	return QString::fromLocal8Bit(isds_strerror(error));
+	/*
+	 * TODO -- Is there a mechanism how to force the local encoding
+	 * into libisds to be UTF-8?
+	 */
+#else /* !WIN32 */
+	return QString::fromUtf8(isds_strerror(error));
+#endif /* WIN32 */
+}
 
 /*!
  * @brief Wraps the isds_long_message().

@@ -130,42 +130,6 @@ void DlgCreateAccount::saveAccount(void)
 
 	/* Store the submitted settings. */
 	m_accountInfo = getContent();
-
-	/* create new account / save current account */
-	switch (m_action) {
-	case ACT_ADDNEW:
-		/* Don't do anything. */
-		break;
-	case ACT_EDIT:
-	case ACT_PWD:
-	case ACT_CERT:
-	case ACT_CERTPWD:
-	case ACT_IDBOX:
-		{
-			const QString userName(m_accountInfo.userName());
-			Q_ASSERT(!userName.isEmpty());
-			/*
-			 * This assignment represents hidden functionality.
-			 * Either this must be clearly documented or it must
-			 * be removed.
-			 *
-			 * FIXME -- Do something!
-			 */
-			AccountModel::globAccounts[userName] = m_accountInfo;
-			/*
-			 * Catching the following signal is required only when
-			 * ACT_EDIT was enabled.
-			 *
-			 * The account model catches the signal.
-			 */
-			emit AccountModel::globAccounts.accountDataChanged(userName);
-			/* TODO -- Save/update related account DB entry? */
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		break;
-	}
 }
 
 void DlgCreateAccount::initialiseDialogue(void)
@@ -204,41 +168,31 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 
 	switch (m_action) {
 	case ACT_EDIT:
-		windowTitle = tr("Update account") + " " +
-		    acntData.accountName();
+		windowTitle = tr("Update account %1")
+		    .arg(acntData.accountName());
 		break;
 	case ACT_PWD:
-		windowTitle = tr("Enter password for account") + " "
-		    + acntData.accountName();
+		windowTitle = tr("Enter password for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
-		windowTitle = tr("Set certificate for account") + " "
-		    + acntData.accountName();
+		windowTitle = tr("Set certificate for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
 		this->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
-		windowTitle = tr("Enter password/certificate for account")
-		    + " " + acntData.accountName();
+		windowTitle = tr("Enter password/certificate for account %1")
+		    .arg(acntData.accountName());
 		this->infoLabel->setEnabled(false);
 		this->accountLineEdit->setEnabled(false);
 		this->loginmethodComboBox->setEnabled(false);
-		break;
-	case ACT_IDBOX:
-		windowTitle = tr("Enter ID of your databox for account")
-		    + " " + acntData.accountName();
-		this->infoLabel->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		this->addCertificateButton->setEnabled(false);
-		this->passwordLineEdit->setEnabled(false);
-		this->usernameLabel->setText(tr("Databox ID:"));
 		break;
 	default:
 		Q_ASSERT(0);
@@ -252,17 +206,26 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	this->testAccountCheckBox->setEnabled(false);
 
 	int itemIdx;
-	const QString loginMethod(acntData.loginMethod());
-	if (LIM_USERNAME == loginMethod) {
+	switch (acntData.loginMethod()) {
+	case AcntSettings::LIM_UNAME_PWD:
 		itemIdx = USER_NAME;
-	} else if (LIM_CERT == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_CRT:
 		itemIdx = CERTIFICATE;
-	} else if (LIM_USER_CERT == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_CRT:
 		itemIdx = USER_CERTIFICATE;
-	} else if (LIM_HOTP == loginMethod) {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_HOTP:
 		itemIdx = HOTP;
-	} else {
+		break;
+	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		itemIdx = TOTP;
+		break;
+	default:
+		Q_ASSERT(0);
+		itemIdx = TOTP;
+		break;
 	}
 
 	this->loginmethodComboBox->setCurrentIndex(itemIdx);
@@ -288,20 +251,25 @@ AcntSettings DlgCreateAccount::getContent(void) const
 {
 	AcntSettings newAccountSettings;
 
-	/* set account index, itemTop and account settings for account */
 	switch (m_action) {
 	case ACT_ADDNEW:
+		/*
+		 * Set to true only for newly created account.
+		 * Don't set it to false when account is edited because a
+		 * newly created account can also be edited in case the first
+		 * account creation attempt failed.
+		 */
+		newAccountSettings._setCreatedFromScratch(true);
 		break;
 	case ACT_EDIT:
 	case ACT_PWD:
 	case ACT_CERT:
 	case ACT_CERTPWD:
-	case ACT_IDBOX:
 		{
 			const QString userName(m_accountInfo.userName());
 			Q_ASSERT(!userName.isEmpty());
 			Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
-			newAccountSettings = AccountModel::globAccounts[userName];
+			newAccountSettings = m_accountInfo;
 		}
 		break;
 	default:
@@ -317,31 +285,34 @@ AcntSettings DlgCreateAccount::getContent(void) const
 	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
 	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
 
-	if (this->loginmethodComboBox->currentIndex() == USER_NAME) {
-		newAccountSettings.setLoginMethod(LIM_USERNAME);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_CERT);
-		newAccountSettings.setPassword("");
+	switch (this->loginmethodComboBox->currentIndex()) {
+	case USER_NAME:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD);
+		newAccountSettings.setP12File(QString());
+		break;
+	case CERTIFICATE:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_CRT);
+		newAccountSettings.setPassword(QString());
 		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() ==
-	           USER_CERTIFICATE) {
-		newAccountSettings.setLoginMethod(LIM_USER_CERT);
+		break;
+	case USER_CERTIFICATE:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_CRT);
 		newAccountSettings.setP12File(
 		    QDir::fromNativeSeparators(m_certPath));
-	} else if (this->loginmethodComboBox->currentIndex() == HOTP) {
-		newAccountSettings.setLoginMethod(LIM_HOTP);
-		newAccountSettings.setP12File("");
-	} else if (this->loginmethodComboBox->currentIndex() == TOTP) {
-		newAccountSettings.setLoginMethod(LIM_TOTP);
-		newAccountSettings.setP12File("");
-	} else {
+		break;
+	case HOTP:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_HOTP);
+		newAccountSettings.setP12File(QString());
+		break;
+	case TOTP:
+		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD_TOTP);
+		newAccountSettings.setP12File(QString());
+		break;
+	default:
 		Q_ASSERT(0);
+		break;
 	}
-
-	/* Only for newly created account. */
-	newAccountSettings._setCreatedFromScratch(ACT_ADDNEW == m_action);
 
 	return newAccountSettings;
 }

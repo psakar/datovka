@@ -142,7 +142,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		return VERIFY_ERR;
 	}
 
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return VERIFY_ERR;
@@ -155,7 +155,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
 		    dmId);
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		isds_hash_free(&hashIsds);
 		return VERIFY_ISDS_ERR;
 	}

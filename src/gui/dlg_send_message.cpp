@@ -281,11 +281,13 @@ void DlgSendMessage::setAccountInfo(int item)
 		delete task;
 	}
 	if (!m_isLogged) {
-		m_isLogged = MainWindow::connectToIsds(m_userName, m_mv);
+		if (m_mv) {
+			m_isLogged = m_mv->connectToIsds(m_userName);
+		}
 	}
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
-	session = isdsSessions.session(m_userName);
+	session = globIsdsSessions.session(m_userName);
 	if (NULL == session) {
 		logErrorNL("%s", "Missing ISDS session.");
 		m_isLogged = false;

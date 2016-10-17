@@ -48,6 +48,8 @@
 #include "src/single/single_instance.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
+/* Forward declaration as we don;t wan to pull-in all header file content. */
+class IsdsSessions;
 
 namespace Ui {
 	class MainWindow;
@@ -68,20 +70,12 @@ public:
 	bool ensureConfPresence(void);
 
 	/*!
-	 * @brief connect to ISDS databox from exist account
-	 *
-	 * @note If pointer to main windows is specified, then various
-	 *     dialogues may be shown. Passwords are used only when required
-	 *     (i.e. not found in configuration).
+	 * @brief Connects to ISDS and downloads basic information about the
+	 *     user.
 	 *
 	 * @param userName Account login.
-	 * @param mw       Pointer to main window.
-	 * @param pwd      User password.
-	 * @param otpKey   One-time password or certificate key.
 	 */
-	static
-	bool connectToIsds(const QString &userName, MainWindow *mw,
-	    const QString &pwd = QString(), const QString &otpKey = QString());
+	bool connectToIsds(const QString &userName);
 
 	/*!
 	 * @brief Get message db set related to given account.
@@ -94,24 +88,6 @@ public:
 	 */
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
-
-	/*!
-	 * @brief Get data about logged in user and his box.
-	 */
-	static
-	bool getOwnerInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get information about password expiration date.
-	 */
-	static
-	bool getPasswordInfoFromLogin(const QString &userName);
-
-	/*!
-	 * @brief Get data about logged in user.
-	 */
-	static
-	bool getUserInfoFromLogin(const QString &userName);
 
 protected:
 	/*!
@@ -1023,77 +999,18 @@ private:
 	int authenticateMessageFromZFO(void);
 
 	/*!
-	 * @brief Show message info for user if connection to ISDS fails.
+	 * @brief Performs a ISDS log-in operation.
+	 *
+	 * @param[in,out] isdsSessions Sessions container reference.
+	 * @param[in]     acntSettings Account settings reference.
+	 * @return True on successful login.
 	 */
-	void showConnectionErrorMessageBox(int status,
-	    const QString &accountName, QString isdsMsg);
-
-	/*!
-	 * @brief Check if connection to ISDS fails.
-	 */
-	static
-	bool checkConnectionError(int status, const QString &accountName,
-	    const QString &isdsMsg, MainWindow *mw);
+	bool logInGUI(IsdsSessions &isdsSessions, AcntSettings &acntSettings);
 
 	/*!
 	 * @brief connect to ISDS databox from new account
 	 */
-	bool firstConnectToIsds(AcntSettings &accountInfo, bool showDialog);
-
-	/*!
-	 * @brief Login to ISDS server by user name and password only.
-	 */
-	static
-	bool loginMethodUserNamePwd(AcntSettings &accountInfo,
-	    MainWindow *mw, const QString &pwd = QString());
-
-	/*!
-	 * @brief Login to ISDS server by user name, password and OTP code.
-	 */
-	static
-	bool loginMethodUserNamePwdOtp(AcntSettings &accountInfo,
-	    MainWindow *mw, const QString &pwd = QString(),
-	    const QString &otp = QString());
-
-	/*!
-	 * @brief Converts PKCS #12 certificate into PEM format.
-	 *
-	 * @note The function creates a new PEM file stored in
-	 *     the configuration directory. The path is returned via
-	 *     the second parameter.
-	 *
-	 * @param[in]  p12Path   Path to PKCS #12 certificate file.
-	 * @param[in]  certPwd   Password protecting the certificate.
-	 * @param[out] pemPath   Returned path to created PEM file.
-	 * @param[in]  userName  Account user name, user to name PEM file.
-	 * @return True on success, false on error
-	 *     (e.g. file does not exist, password error, ...)
-	 */
-	static
-	bool p12CertificateToPem(const QString &p12Path,
-	    const QString &certPwd, QString &pemPath, const QString &userName);
-
-	/*!
-	 * @brief Login to ISDS server by certificate only.
-	 */
-	static
-	bool loginMethodCertificateOnly(AcntSettings &accountInfo,
-	    MainWindow *mw, const QString &key = QString());
-
-	/*!
-	 * @brief Login to ISDS server by certificate, user name and password.
-	 */
-	static
-	bool loginMethodCertificateUserPwd(AcntSettings &accountInfo,
-	    MainWindow *mw, const QString &pwd = QString(),
-	    const QString &key = QString());
-
-	/*!
-	 * @brief Login to ISDS server by certificate and data box ID.
-	 */
-	static
-	bool loginMethodCertificateIdBox(AcntSettings &accountInfo,
-	    MainWindow *mw);
+	bool firstConnectToIsds(AcntSettings &accountInfo);
 
 	/*!
 	 * @brief Sent and check a new version of Datovka.

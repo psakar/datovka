@@ -64,7 +64,7 @@ void TaskDownloadUserInfo::run(void)
 bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
     QString &error, QString &longError)
 {
-	struct isds_ctx *session = isdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return false;
@@ -80,7 +80,7 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 		    userName.toUtf8().constData(),
 		    status, isds_error(status));
 		error = isds_error(status);
-		longError = isds_long_message(session);
+		longError = isdsLongMessage(session);
 		isds_DbUserInfo_free(&userInfo);
 		return false;
 	}

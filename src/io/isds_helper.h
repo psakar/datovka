@@ -21,40 +21,39 @@
  * the two.
  */
 
-#include <QThread>
+#ifndef _ISDS_HELPER_H_
+#define _ISDS_HELPER_H_
 
-#include "src/io/isds_sessions.h"
-#include "src/log/log.h"
-#include "src/worker/task_keep_alive.h"
+#include <QString>
 
-TaskKeepAlive::TaskKeepAlive(const QString &userName)
-    : m_isAlive(false),
-    m_userName(userName)
-{
-	Q_ASSERT(!m_userName.isEmpty());
+/*!
+ * @brief Contains ISDS helper code used across the application.
+ */
+namespace IsdsHelper {
+
+	/*!
+	  * @brief Download data about logged-in user and his data box.
+	  *
+	  * @param[in] userName Account user name.
+	  * @return True on success.
+	  */
+	bool getOwnerInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Download data about logged-in user.
+	 *
+	 * @param[in] userName Account user name.
+	 * @return True on success.
+	 */
+	bool getUserInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Download information about password expiration date.
+	 *
+	 * @param[in] userName Account user name.
+	 * @return True on success.
+	 */
+	bool getPasswordInfoFromLogin(const QString &userName);
 }
 
-void TaskKeepAlive::run(void)
-{
-	if (m_userName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	logDebugLv0NL("Starting keep-alive task in thread '%p'",
-	    (void *) QThread::currentThreadId());
-
-	/* ### Worker task begin. ### */
-
-	m_isAlive = globIsdsSessions.isConnectedToIsds(m_userName);
-	if (m_isAlive) {
-		logInfo("%s\n", "Connection to ISDS is alive :)");
-	} else {
-		logWarning("%s\n", "Connection to ISDS is dead :(");
-	}
-
-	/* ### Worker task end. ### */
-
-	logDebugLv0NL("Keep-alive task finished in thread '%p'",
-	    (void *) QThread::currentThreadId());
-}
+#endif /* _ISDS_HELPER_H_ */
