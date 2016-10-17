@@ -1,4 +1,7 @@
 x.y.z / yyyy-mm-dd
+ * Re-written the log-in sequence. Fixed some bugs related to creating new
+   accounts.
+ * Added unit test for sending a receiving messages.
  * Added support for HTTPS proxy.
  * Bundled libisds is compiled against gettext again. This should resolve
    issues with error message encoding.
