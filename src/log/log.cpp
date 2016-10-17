@@ -252,7 +252,7 @@ int GlobLog::openFile(const QString &fName, LogMode mode)
 
 	m_mutex.lock();
 
-	if ((openedFiles + LF_FILE) > MAX_LOG_FILES) {
+	if ((openedFiles + LF_FILE) >= MAX_LOG_FILES) {
 		/* Maximal number of facilities reached. */
 		goto fail;
 	}
