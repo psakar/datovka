@@ -151,7 +151,7 @@ QPair<QString, QString> IsdsLogin::dialogueErrMsg(void) const
 		    tr("Please check your internet connection and try again.") +
 		    "<br/><br/>" +
 		    tr("It might be necessary to use a proxy to connect to the server. "
-		        "Also is possible that the ISDS server is inoperative or busy. "
+		        "It is also possible that the ISDS server is inoperative or busy. "
 		        "Try again later.");
 		break;
 
@@ -207,7 +207,7 @@ QPair<QString, QString> IsdsLogin::dialogueErrMsg(void) const
 		    "</b>" + "<br/><br/>" +
 		    tr("Error: ") + m_isdsLongErrMsg +
 		    "<br/><br/>" +
-		    tr("This is maybe caused by a missing certificate for the SSL communication or the application cannot open an SSL socket.") +
+		    tr("This may be caused by a missing certificate for the SSL communication or the application cannot open an SSL socket.") +
 		    "<br/><br/>" +
 		    tr("It is also possible that some libraries (e.g. CURL, SSL) may be missing or may be incorrectly configured.");
 		break;
@@ -220,7 +220,7 @@ QPair<QString, QString> IsdsLogin::dialogueErrMsg(void) const
 		    "</b>" + "<br/><br/>" +
 		    tr("Error: ") + m_isdsLongErrMsg +
 		    "<br/><br/>" +
-		    tr("This is maybe caused by a missing SSL certificate needed for communicating with the server or it was not possible establish a secure connection with the ISDS server.") +
+		    tr("This may be caused by a missing SSL certificate needed for communication with the server or it was not possible to establish a secure connection with the ISDS server.") +
 		    "<br/><br/>" +
 		    tr("It is also possible that the certificate has expired.");
 		break;
@@ -234,7 +234,7 @@ QPair<QString, QString> IsdsLogin::dialogueErrMsg(void) const
 		    "</b>" + "<br/><br/>" +
 		    tr("Error: ") + m_isdsLongErrMsg +
 		    "<br/><br/>" +
-		    tr("This may be caused by an error in SOAP or the XML content for this web service is wrong.") +
+		    tr("This may be caused by an error in SOAP or the XML content for this web service is invalid.") +
 		    "<br/><br/>" +
 		    tr("It is also possible that the ISDS server is inoperative or busy. "
 		        "Try again later.");

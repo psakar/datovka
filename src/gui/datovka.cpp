@@ -8191,7 +8191,7 @@ void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 			/* Expand the tree. */
 			ui->accountList->expand(index);
 		}
-	} else 	if (ret == -1)  {
+	} else if (ret == -1) {
 		QMessageBox::warning(this, tr("Adding new account failed"),
 		    tr("Account could not be added because an error occurred."),
 		    QMessageBox::Ok);
