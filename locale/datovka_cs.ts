@@ -597,6 +597,31 @@ všech účtů na pozadí aplikace</translation>
         <source>Free client for Czech eGov data boxes.</source>
         <translation>Svobodný klient pro Datové schránky.</translation>
     </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="61"/>
+        <source>Additional informations</source>
+        <translation>Další informace</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="62"/>
+        <source>home page</source>
+        <translation>domovská stránka</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="64"/>
+        <source>handbook</source>
+        <translation>příručka</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="66"/>
+        <source>FAQ</source>
+        <translation>FAQ</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="67"/>
+        <source>Support</source>
+        <translation>Podpora</translation>
+    </message>
 </context>
 <context>
     <name>DlgChangeDirectory</name>
@@ -8249,7 +8274,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Velikost souboru</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_about.cpp" line="69"/>
+        <location filename="../src/gui/dlg_about.cpp" line="75"/>
         <source>Depends on libraries:</source>
         <translation>Závisí na knihovnách:</translation>
     </message>

@@ -485,6 +485,31 @@ process of all accounts on the background</source>
         <source>Free client for Czech eGov data boxes.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="61"/>
+        <source>Additional informations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="62"/>
+        <source>home page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="64"/>
+        <source>handbook</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="66"/>
+        <source>FAQ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_about.cpp" line="67"/>
+        <source>Support</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DlgChangeDirectory</name>
@@ -5977,7 +6002,7 @@ of days will be included into the expiration notification summary.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_about.cpp" line="69"/>
+        <location filename="../src/gui/dlg_about.cpp" line="75"/>
         <source>Depends on libraries:</source>
         <translation type="unfinished"></translation>
     </message>
