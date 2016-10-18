@@ -7798,6 +7798,18 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 		case IsdsLogin::IsdsLogin::EC_OK:
 			mui_statusOnlineLabel->setText(tr("Mode: online"));
 			break;
+		case IsdsLogin::EC_NO_CRT_AGAIN:
+		case IsdsLogin::EC_NO_CRT_PWD_AGAIN:
+			{
+				QMessageBox::critical(this,
+				    tr("Invalid certificate data"),
+				    tr("The certificate or the supplied pass-phrase are invalid."),
+				    QMessageBox::Ok);
+			}
+			showStatusTextWithTimeout(tr(
+			    "Bad certificate data for account \"%1\".")
+			    .arg(acntSettings.accountName()));
+			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
 		case IsdsLogin::EC_PARTIAL_SUCCESS_AGAIN:
 		case IsdsLogin::EC_ISDS_ERR:
@@ -7844,6 +7856,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT:
+		case IsdsLogin::EC_NO_CRT_AGAIN:
 			{
 				/* Erase pass-phrase. */
 				acntSettings._setPassphrase(QString());
@@ -7863,6 +7876,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT_PWD:
+		case IsdsLogin::EC_NO_CRT_PWD_AGAIN:
 			{
 				/* Erase pass-phrase. */
 				acntSettings._setPassphrase(QString());
