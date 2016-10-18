@@ -58,13 +58,14 @@ DlgAbout::DlgAbout(QWidget *parent)
 	QString copyrightHtml(
 	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
 	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;");
-	copyrightHtml += "<br/>" +
-	    tr("Additional informations") + ": "
+	copyrightHtml += "<br/>" + tr("Additional informations") + ": "
 	    "<a href=\"" DATOVKA_HOMEPAGE_URL "\">" + tr("home page") + "</a>"
 	    ","
 	    "<a href=\"" DATOVKA_ONLINE_HELP_URL "\">" + tr("handbook") + "</a>"
 	    ","
 	    "<a href=\"" DATOVKA_FAQ_URL "\">" + tr("FAQ") + "</a>";
+	copyrightHtml += "<br/>" + tr("Support") + ": "
+	    "&lt;<a href=\"mailto:" SUPPORT_MAIL "?Subject=[Datovka%20" VERSION "]\">" SUPPORT_MAIL "</a>&gt;";
 	this->labelCopy->setText(copyrightHtml);
 	this->labelCopy->setTextFormat(Qt::RichText);
 	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
