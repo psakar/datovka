@@ -7896,6 +7896,15 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 				        .arg(acntSettings.p12File()),
 				    QLineEdit::Password, QString(), &ok);
 				if (ok) {
+					/*
+					 * We cannot pass null string into the
+					 * login operation a it will return
+					 * immediately. But the dialogue can
+					 * return null string.
+					 */
+					if (enteredText.isNull()) {
+						enteredText = "";
+					}
 					acntSettings._setPassphrase(enteredText);
 				} else {
 					/* Aborted. */
