@@ -46,7 +46,6 @@ public:
 		EC_NO_CRT, /*!< No certificate. */
 		EC_NO_CRT_AGAIN, /*!< Bad certificate, ask again. */
 		EC_NO_CRT_PWD, /*!< User password or certificate is missing. */
-		EC_NO_CRT_PWD_AGAIN, /*!< Bad certificate, ask gain. */
 		EC_NO_CRT_PPHR, /*!< No certificate pass-phrase supplied. */
 		EC_NO_OTP, /*!< Missing OTP. */
 		EC_NEED_TOTP_ACK, /*!<

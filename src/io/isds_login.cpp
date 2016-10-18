@@ -347,7 +347,7 @@ enum IsdsLogin::ErrorCode IsdsLogin::certUsrPwd(void)
 	}
 
 	if (!convertAndCheckCert(certPath, passphrase, userName)) {
-		return EC_NO_CRT_PWD_AGAIN;
+		return EC_NO_CRT_AGAIN;
 	}
 
 	m_isdsErr = isdsLoginUserCertPwd(m_isdsSessions.session(userName),

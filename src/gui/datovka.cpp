@@ -7799,11 +7799,12 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			mui_statusOnlineLabel->setText(tr("Mode: online"));
 			break;
 		case IsdsLogin::EC_NO_CRT_AGAIN:
-		case IsdsLogin::EC_NO_CRT_PWD_AGAIN:
 			{
 				QMessageBox::critical(this,
 				    tr("Invalid certificate data"),
-				    tr("The certificate or the supplied pass-phrase are invalid."),
+				    tr("The certificate or the supplied pass-phrase are invalid.") +
+				    "<br/><br/>" +
+				    tr("Please enter a path to a valid certificate and/or provide a correct key to unlock the certificate."),
 				    QMessageBox::Ok);
 			}
 			showStatusTextWithTimeout(tr(
@@ -7876,7 +7877,6 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT_PWD:
-		case IsdsLogin::EC_NO_CRT_PWD_AGAIN:
 			{
 				/* Erase pass-phrase. */
 				acntSettings._setPassphrase(QString());
