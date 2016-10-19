@@ -40,3 +40,8 @@ echo "Building archive version '${DESIRED_VERSION}' from tag '${DESIRED_TAG}'."
 TARGET_FILE="datovka-${DESIRED_VERSION}.tar.xz"
 rm -f "${TARGET_FILE}"
 git archive --format=tar --prefix=datovka-${DESIRED_VERSION}/ "${DESIRED_TAG}" | xz -9 > "${TARGET_FILE}"
+
+# Create sha256 checksum, if sha256sum exists.
+CHECKSUM=sha256sum
+SUMSUFF=sha256
+command -v "${CHECKSUM}" >/dev/null 2>&1 && "${CHECKSUM}" "${TARGET_FILE}" | sed -e 's/\s.*$//g' > "${TARGET_FILE}.${SUMSUFF}"
