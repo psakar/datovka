@@ -1,4 +1,4 @@
-4.7.0 / 2016-10-18
+4.7.0 / 2016-10-19
  * The application can be compiled against OpenSSL 1.1.0.
  * Re-written the login sequence. Fixed some bugs related to creating new
    accounts.
