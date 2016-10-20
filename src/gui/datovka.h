@@ -421,7 +421,7 @@ private slots:
 	void prepareMsgsImportFromDatabase(void);
 
 	/*!
-	 * @brief Proxy setting dialog.
+	 * @brief Proxy settings dialogue.
 	 */
 	void proxySettings(void);
 
@@ -848,12 +848,12 @@ private:
 	void activeAccountMenuAndButtons(bool action) const;
 
 	/*!
-	 * @brief Load and apply setting from configuration file.
+	 * @brief Load and apply settings from configuration file.
 	 */
 	void loadSettings(void);
 
 	/*!
-	 * @brief Store current setting to configuration file.
+	 * @brief Store current settings to configuration file.
 	 */
 	void saveSettings(void) const;
 

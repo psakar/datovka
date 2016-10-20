@@ -930,7 +930,7 @@ displayed in this account will be selected.</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: toolbar setting will not apllied until you restart the application.</string>
+             <string>Note: toolbar settings will not be applied until you restart the application.</string>
             </property>
            </widget>
           </item>
@@ -1877,7 +1877,7 @@ attachment file name (parameter %f is required).</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: language setting will not apllied until you restart the application.</string>
+             <string>Note: language settings will not be applied until you restart the application.</string>
             </property>
            </widget>
           </item>

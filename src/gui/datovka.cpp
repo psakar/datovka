@@ -542,7 +542,7 @@ void MainWindow::applicationPreferences(void)
 
 /* ========================================================================= */
 /*
- * Proxy setting dialog.
+ * Proxy settings dialogue.
  */
 void MainWindow::proxySettings(void)
 /* ========================================================================= */
@@ -4402,7 +4402,7 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 /* ========================================================================= */
 /*
- * Load and apply setting from configuration file.
+ * Load and apply settings from configuration file.
  */
 void MainWindow::loadSettings(void)
 /* ========================================================================= */
@@ -4675,7 +4675,7 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 
 /* ========================================================================= */
 /*!
- * @brief Store current setting to configuration file.
+ * @brief Store current settings to configuration file.
  */
 void MainWindow::saveSettings(void) const
 /* ========================================================================= */

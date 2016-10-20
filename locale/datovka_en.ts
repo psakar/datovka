@@ -4656,7 +4656,7 @@ displayed in this account will be selected.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="933"/>
-        <source>Note: toolbar setting will not apllied until you restart the application.</source>
+        <source>Note: toolbar settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4965,7 +4965,7 @@ of days will be included into the expiration notification summary.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1880"/>
-        <source>Note: language setting will not apllied until you restart the application.</source>
+        <source>Note: language settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5007,7 +5007,7 @@ of days will be included into the expiration notification summary.</source>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="128"/>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="339"/>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="342"/>
-        <source>Manual proxy setting</source>
+        <source>Manual proxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

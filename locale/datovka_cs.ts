@@ -1781,8 +1781,8 @@ Momentálně není možné zasílat zprávy do této schránky. Hledejte dál.</
         <translation type="vanished">Odeslaní zprávy více příjemcům skončilo s chybou!</translation>
     </message>
     <message>
-        <source>Please check your credentials including the test-environment setting.</source>
-        <translation type="vanished">Prosím, zkontrolujte svoje přihlašovací údaje včetně nastavení testovacích účtů.</translation>
+        <source>Please check your credentials including the test-environment settings.</source>
+        <translation type="vanished">Prosím, zkontrolujte své přihlašovací údaje včetně nastavení testovacích účtů.</translation>
     </message>
     <message>
         <source>It is possible that your password has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
@@ -4360,7 +4360,7 @@ Prosím, stáhněte kompletní zprávu ze serveru Datové schránky a zkuste to 
         <translation>Doručenka zprávy &apos;%1&apos; nemohla být uložena do dočasného souboru.</translation>
     </message>
     <message>
-        <source>Please check your credentials including the test-environment setting and login method.</source>
+        <source>Please check your credentials including the test-environment settings and login method.</source>
         <translation type="vanished">Prosím, zkontrolujte své přihlašovací údaje, včetně nastavení testovacích účtů a metody přihlašování.</translation>
     </message>
     <message>
@@ -5403,7 +5403,7 @@ Zkuste to znova.</translation>
         <translation type="vanished">ISDS vrací: </translation>
     </message>
     <message>
-        <source>Please check your credentials including the test-environment setting.</source>
+        <source>Please check your credentials including the test-environment settings.</source>
         <translation type="vanished">Prosím, zkontrolujte své přihlašovací údaje, včetně nastavení testovacích účtů.</translation>
     </message>
     <message>
@@ -6950,7 +6950,7 @@ platnosti časového razítka bude zpráva zahrnuta do výsledku kontroly.</tran
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="933"/>
-        <source>Note: toolbar setting will not apllied until you restart the application.</source>
+        <source>Note: toolbar settings will not be applied until you restart the application.</source>
         <translation>Poznámka: nastavení panelu nástrojů nebude aktivní dokud nerestartujete aplikaci.</translation>
     </message>
     <message>
@@ -7093,11 +7093,11 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1880"/>
-        <source>Note: language setting will not apllied until you restart the application.</source>
+        <source>Note: language settings will not be applied until you restart the application.</source>
         <translation>Poznámka: nastavení jazyka nebude aktivní dokud nerestartujete aplikaci.</translation>
     </message>
     <message>
-        <source>NOTE: language setting will not apllied until you restart the application.</source>
+        <source>NOTE: language settings will not be applied until you restart the application.</source>
         <translation type="vanished">Poznámka: nastavení jazyka nebude aktivní dokud nerestartujete aplikaci.</translation>
     </message>
 </context>
@@ -7139,7 +7139,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="128"/>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="339"/>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="342"/>
-        <source>Manual proxy setting</source>
+        <source>Manual proxy settings</source>
         <translation>Ruční nastavení proxy</translation>
     </message>
     <message>
@@ -7186,7 +7186,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="236"/>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="462"/>
         <source>Enter your username</source>
-        <translation>Zadejte svoje uživatelské jméno</translation>
+        <translation>Zadejte své uživatelské jméno</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="249"/>
