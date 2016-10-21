@@ -80,9 +80,6 @@
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
-       <attribute name="headerDefaultSectionSize">
-        <number>1</number>
-       </attribute>
        <attribute name="headerMinimumSectionSize">
         <number>100</number>
        </attribute>
@@ -150,9 +147,6 @@
             </attribute>
             <attribute name="verticalHeaderVisible">
              <bool>false</bool>
-            </attribute>
-            <attribute name="verticalHeaderDefaultSectionSize">
-             <number>20</number>
             </attribute>
             <attribute name="verticalHeaderHighlightSections">
              <bool>false</bool>
@@ -346,9 +340,6 @@ sent reply on this message</string>
                 </attribute>
                 <attribute name="verticalHeaderVisible">
                  <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderDefaultSectionSize">
-                 <number>20</number>
                 </attribute>
                 <attribute name="verticalHeaderHighlightSections">
                  <bool>false</bool>

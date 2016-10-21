@@ -505,9 +505,6 @@
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
      </attribute>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>1</number>
-     </attribute>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
       <bool>true</bool>
      </attribute>
@@ -517,14 +514,8 @@
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
-     </attribute>
      <attribute name="verticalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderMinimumSectionSize">
-      <number>18</number>
      </attribute>
      <column>
       <property name="text">
@@ -763,9 +754,6 @@ of postal data messages active.</string>
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
      </attribute>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>1</number>
-     </attribute>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
       <bool>true</bool>
      </attribute>
@@ -775,14 +763,8 @@ of postal data messages active.</string>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
-     </attribute>
      <attribute name="verticalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderMinimumSectionSize">
-      <number>18</number>
      </attribute>
      <column>
       <property name="text">
