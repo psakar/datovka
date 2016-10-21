@@ -21,7 +21,6 @@
  * the two.
  */
 
-#include <QDebug> /* TODO -- Remove this include. */
 #include <QPainter>
 #include <QRegExp>
 
@@ -49,8 +48,8 @@ bool TagItem::isValid(void) const
 	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
 }
 
-#define PADDING 5 /* Horizontal padding in pixels. */
-#define MARGIN 2 /* Vertical and horizontal margin. */
+#define PADDING 2 /* Vertical and horizontal padding in pixels. */
+#define MARGIN 8 /* Vertical and horizontal margin. */
 
 int TagItem::paint(class QPainter *painter,
     const QStyleOptionViewItem &option) const
@@ -61,21 +60,26 @@ int TagItem::paint(class QPainter *painter,
 
 	painter->save();
 
-	int width = sizeHint(option).width();
-	int height = rect.height() - (2 * MARGIN);
+	const QSize hint(sizeHint(option));
+	int border = (rect.height() - hint.height()) / 2;
 
-	QRectF drawnRect(0, MARGIN, width - (2 * MARGIN), height);
+	int width = hint.width();
+	int height = hint.height();
+
+	QRectF drawnRect(0, border, width, height);
 
 	QPainterPath path;
 	int rounding = (int) (0.15 * height);
 	path.addRoundedRect(drawnRect, rounding, rounding, Qt::AbsoluteSize);
 
 	if (option.state & QStyle::State_Selected) {
-		painter->fillRect(option.rect, option.palette.highlight());
+		painter->fillRect(rect, option.palette.highlight());
 	}
 
 	painter->setRenderHint(QPainter::Antialiasing, true);
 	painter->translate(rect.x(), rect.y());
+
+	painter->translate(MARGIN, 0);
 
 	QColor rectColour("#" + colour);
 	if (!rectColour.isValid()) {
@@ -84,8 +88,6 @@ int TagItem::paint(class QPainter *painter,
 		rectColour = QColor("#ffffff");
 		Q_ASSERT(rectColour.isValid());
 	}
-
-	painter->translate(MARGIN, 0);
 
 	QPen pen(rectColour, 1);
 	painter->setPen(pen);
@@ -99,7 +101,7 @@ int TagItem::paint(class QPainter *painter,
 
 	painter->restore();
 
-	return width;
+	return width + MARGIN;
 }
 
 QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
@@ -108,7 +110,6 @@ QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
 
 	int width = QFontMetrics(font).width(name);
 	width += 2 * PADDING;
-	width += 2 * MARGIN;
 
 	int height = QFontMetrics(font).height();
 	height += 2 * PADDING;
@@ -175,6 +176,7 @@ QSize TagItemList::sizeHint(const QStyleOptionViewItem &option) const
 
 	foreach (const TagItem &tag, *this) {
 		width += tag.sizeHint(option).width();
+		width += 2 * MARGIN;
 	}
 	width += MARGIN;
 
