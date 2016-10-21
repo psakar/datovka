@@ -653,6 +653,12 @@ int main(int argc, char *argv[])
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+	// https://blog.qt.io/blog/2016/01/26/high-dpi-support-in-qt-5-6/
+	//logInfoNL("%s", "Enabling high DPI scaling.");
+	//QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif /* >= Qt-5.6 */
+
 	if (runMode == RUN_MODE_CLI) {
 		delete splash;
 		ret = doCLI(serList, parser);
