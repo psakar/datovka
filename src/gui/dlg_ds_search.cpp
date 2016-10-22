@@ -46,6 +46,9 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
     m_showInfoLabel(false)
 {
 	setupUi(this);
+	/* Set default line height for table views/widgets. */
+	resultsTableWidget->setNarrowedLineHeight();
+
 	initSearchWindow();
 }
 

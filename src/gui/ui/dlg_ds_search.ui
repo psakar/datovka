@@ -176,7 +176,7 @@ contain all otherwise matching databoxes.</string>
     </widget>
    </item>
    <item>
-    <widget class="QTableWidget" name="resultsTableWidget">
+    <widget class="LoweredTableWidget" name="resultsTableWidget">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -248,6 +248,13 @@ contain all otherwise matching databoxes.</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LoweredTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>lowered_table_widget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

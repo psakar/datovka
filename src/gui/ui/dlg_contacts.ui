@@ -51,7 +51,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="contactTableWidget">
+    <widget class="LoweredTableWidget" name="contactTableWidget">
      <property name="editTriggers">
       <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
      </property>
@@ -113,6 +113,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LoweredTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>lowered_table_widget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

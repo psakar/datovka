@@ -132,7 +132,7 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <widget class="QTableView" name="messageList">
+           <widget class="LoweredTableView" name="messageList">
             <property name="showGrid">
              <bool>false</bool>
             </property>
@@ -1177,6 +1177,11 @@ sent reply on this message</string>
    <class>AttachmentTableView</class>
    <extends>QTableView</extends>
    <header>attachment_table_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LoweredTableView</class>
+   <extends>QTableView</extends>
+   <header>lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

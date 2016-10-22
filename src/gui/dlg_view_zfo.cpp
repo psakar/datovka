@@ -49,6 +49,8 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
     m_attachmentModel(this)
 {
 	setupUi(this);
+	/* Set default line height for table views/widgets. */
+	attachmentTable->setNarrowedLineHeight();
 
 	/* Load message ZFO. */
 	parseZfoFile(zfoFileName);

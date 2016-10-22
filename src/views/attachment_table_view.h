@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,21 +27,24 @@
 #include <QList>
 #include <QMouseEvent>
 #include <QString>
-#include <QTableView>
 #include <QTemporaryDir>
 #include <QUrl>
+
+#include "src/views/lowered_table_view.h"
 
 /*!
  * @brief Custom attachment table view class with dragging enabled.
  */
-class AttachmentTableView : public QTableView {
+class AttachmentTableView : public LoweredTableView {
 	Q_OBJECT
 
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
 	 */
-	AttachmentTableView(QWidget *parent = 0);
+	explicit AttachmentTableView(QWidget *parent = 0);
 
 protected:
 	/*!

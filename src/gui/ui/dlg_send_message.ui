@@ -492,7 +492,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="recipientTableWidget">
+    <widget class="LoweredTableWidget" name="recipientTableWidget">
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
@@ -887,6 +887,11 @@ of postal data messages active.</string>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>LoweredTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>lowered_table_widget.h</header>
+  </customwidget>
   <customwidget>
    <class>AttachmentTableWidget</class>
    <extends>QTableWidget</extends>

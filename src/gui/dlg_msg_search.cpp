@@ -47,6 +47,9 @@ DlgMsgSearch::DlgMsgSearch(
     m_userName(userName)
 {
 	setupUi(this);
+	/* Set default line height for table views/widgets. */
+	resultsTableWidget->setNarrowedLineHeight();
+
 	initSearchWindow();
 }
 
