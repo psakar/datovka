@@ -25,14 +25,21 @@
 
 #include "src/dimensions/dimensions.h"
 
-qreal Dimensions::margin = 0.2;
-qreal Dimensions::padding = 0.2;
-qreal Dimensions::lineHeight = 1.5;
+qreal Dimensions::m_margin = 0.4;
+qreal Dimensions::m_padding = 0.1;
+qreal Dimensions::m_lineHeight = 1.5;
+
+int Dimensions::margin(const QStyleOptionViewItem &option)
+{
+	return QFontMetrics(option.font).height() * m_margin;
+}
+
+int Dimensions::padding(int height)
+{
+	return height * m_padding;
+}
 
 int Dimensions::tableLineHeight(const QStyleOptionViewItem &option)
 {
-	return QFontMetrics(option.font).height() * lineHeight;
+	return QFontMetrics(option.font).height() * m_lineHeight;
 }
-
-#define REL_PADDING 0.2 /* Horizontal padding as ratio of text height. */
-#define REL_MARGIN 0.2 /* Vertical and horizontal margin as ratio of text height. */

@@ -25,6 +25,7 @@
 #include <QRegExp>
 
 #include "src/delegates/tag_item.h"
+#include "src/dimensions/dimensions.h"
 #include "src/log/log.h"
 
 #define DFLT_COLOUR "ffffff"
@@ -48,9 +49,6 @@ bool TagItem::isValid(void) const
 	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
 }
 
-#define PADDING 2 /* Vertical and horizontal padding in pixels. */
-#define MARGIN 8 /* Vertical and horizontal margin. */
-
 int TagItem::paint(class QPainter *painter,
     const QStyleOptionViewItem &option) const
 {
@@ -69,7 +67,7 @@ int TagItem::paint(class QPainter *painter,
 	QRectF drawnRect(0, border, width, height);
 
 	QPainterPath path;
-	int rounding = (int) (0.15 * height);
+	int rounding = (int)(0.15 * height);
 	path.addRoundedRect(drawnRect, rounding, rounding, Qt::AbsoluteSize);
 
 	if (option.state & QStyle::State_Selected) {
@@ -79,7 +77,9 @@ int TagItem::paint(class QPainter *painter,
 	painter->setRenderHint(QPainter::Antialiasing, true);
 	painter->translate(rect.x(), rect.y());
 
-	painter->translate(MARGIN, 0);
+	const int margin = Dimensions::margin(option);
+
+	painter->translate(margin, 0);
 
 	QColor rectColour("#" + colour);
 	if (!rectColour.isValid()) {
@@ -101,18 +101,20 @@ int TagItem::paint(class QPainter *painter,
 
 	painter->restore();
 
-	return width + MARGIN;
+	return width + margin;
 }
 
 QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
 {
 	const QFont &font(option.font);
 
-	int width = QFontMetrics(font).width(name);
-	width += 2 * PADDING;
-
 	int height = QFontMetrics(font).height();
-	height += 2 * PADDING;
+	const int padding = Dimensions::padding(height);
+
+	int width = QFontMetrics(font).width(name);
+	width += 2 * padding;
+
+	height += 2 * padding;
 
 	return QSize(width, height);
 }
@@ -173,12 +175,13 @@ void TagItemList::paint(class QPainter *painter,
 QSize TagItemList::sizeHint(const QStyleOptionViewItem &option) const
 {
 	int width = 0;
+	const int margin = Dimensions::margin(option);
 
 	foreach (const TagItem &tag, *this) {
 		width += tag.sizeHint(option).width();
-		width += 2 * MARGIN;
+		width += 2 * margin;
 	}
-	width += MARGIN;
+	width += margin;
 
 	/* Don't care about vertical dimensions here. */
 	return QSize(width, 1);

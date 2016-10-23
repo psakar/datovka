@@ -32,14 +32,23 @@
 class Dimensions {
 
 public:
+	/*!
+	 * @brief Returns margin as function of font dimensions.
+	 *
+	 * @param[in] option Style options.
+	 * @return Margin width in pixels.
+	 */
 	static
-	qreal margin; /*!< Text margin as ratio of text height. */
+	int margin(const QStyleOptionViewItem &option);
 
+	/*!
+	 * @brief Returns padding as function of supplied dimensions.
+	 *
+	 * @param[in] height Font height.
+	 * @return Padding width in pixels.
+	 */
 	static
-	qreal padding; /*!< Text padding as ratio of text height. */
-
-	static
-	qreal lineHeight; /*!< Height of line as ration of text height. */
+	int padding(int height);
 
 	/*!
 	 * @brief Return default line height to table views and widgets.
@@ -57,6 +66,15 @@ private:
 	 * @note Prohibit any class instance.
 	 */
 	Dimensions(void);
+
+	static
+	qreal m_margin; /*!< Text margin as ratio of text height. */
+
+	static
+	qreal m_padding; /*!< Text padding as ratio of text height. */
+
+	static
+	qreal m_lineHeight; /*!< Height of line as ration of text height. */
 };
 
 #endif /* _DIMENSIONS_H_ */
