@@ -9558,6 +9558,9 @@ bool MainWindow::splitMsgDbByYears(const QString &userName)
 void MainWindow::setUpUi(void)
 {
 	ui->setupUi(this);
+	/* Set default line height for table views/widgets. */
+	ui->messageList->setNarrowedLineHeight();
+	ui->messageAttachmentList->setNarrowedLineHeight();
 
 	/* Window title. */
 	setWindowTitle(

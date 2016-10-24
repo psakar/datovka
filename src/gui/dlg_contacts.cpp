@@ -44,6 +44,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
     m_userName(userName)
 {
 	setupUi(this);
+	/* Set default line height for table views/widgets. */
+	contactTableWidget->setNarrowedLineHeight();
 
 	this->contactTableWidget->setColumnWidth(0,20);
 	this->contactTableWidget->setColumnWidth(1,60);

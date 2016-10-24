@@ -23,7 +23,8 @@
 
 #include <QFileDialog>
 
-#include "dlg_preferences.h"
+#include "src/dimensions/dimensions.h"
+#include "src/gui/dlg_preferences.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_preferences.h"
 
@@ -31,6 +32,13 @@ DlgPreferences::DlgPreferences(QWidget * parent)
     : QDialog(parent)
 {
 	setupUi(this);
+	{
+		/* Adjust window size according to font size. */
+		QSize newSize = Dimensions::windowSize(this, 46.0, 44.0);
+		if (newSize.isValid()) {
+			this->resize(newSize);
+		}
+	}
 	initPrefDialog();
 }
 

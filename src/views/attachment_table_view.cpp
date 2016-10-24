@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include "src/views/attachment_table_view.h"
 
 AttachmentTableView::AttachmentTableView(QWidget *parent)
-    : QTableView(parent),
+    : LoweredTableView(parent),
     m_dragStartPosition()
 {
 	setDragEnabled(true);

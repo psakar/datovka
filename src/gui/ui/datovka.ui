@@ -80,9 +80,6 @@
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>
        </property>
-       <attribute name="headerDefaultSectionSize">
-        <number>1</number>
-       </attribute>
        <attribute name="headerMinimumSectionSize">
         <number>100</number>
        </attribute>
@@ -135,8 +132,11 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
-           <widget class="QTableView" name="messageList">
+           <widget class="LoweredTableView" name="messageList">
             <property name="showGrid">
+             <bool>false</bool>
+            </property>
+            <property name="wordWrap">
              <bool>false</bool>
             </property>
             <attribute name="horizontalHeaderHighlightSections">
@@ -150,9 +150,6 @@
             </attribute>
             <attribute name="verticalHeaderVisible">
              <bool>false</bool>
-            </attribute>
-            <attribute name="verticalHeaderDefaultSectionSize">
-             <number>20</number>
             </attribute>
             <attribute name="verticalHeaderHighlightSections">
              <bool>false</bool>
@@ -338,6 +335,9 @@ sent reply on this message</string>
                 <property name="showGrid">
                  <bool>false</bool>
                 </property>
+                <property name="wordWrap">
+                 <bool>false</bool>
+                </property>
                 <attribute name="horizontalHeaderHighlightSections">
                  <bool>false</bool>
                 </attribute>
@@ -346,9 +346,6 @@ sent reply on this message</string>
                 </attribute>
                 <attribute name="verticalHeaderVisible">
                  <bool>false</bool>
-                </attribute>
-                <attribute name="verticalHeaderDefaultSectionSize">
-                 <number>20</number>
                 </attribute>
                 <attribute name="verticalHeaderHighlightSections">
                  <bool>false</bool>
@@ -1180,6 +1177,11 @@ sent reply on this message</string>
    <class>AttachmentTableView</class>
    <extends>QTableView</extends>
    <header>attachment_table_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LoweredTableView</class>
+   <extends>QTableView</extends>
+   <header>lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

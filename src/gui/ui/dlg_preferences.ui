@@ -35,9 +35,6 @@
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
      </property>
-     <property name="usesScrollButtons">
-      <bool>false</bool>
-     </property>
      <property name="documentMode">
       <bool>false</bool>
      </property>

@@ -30,6 +30,9 @@
       <property name="showGrid">
        <bool>false</bool>
       </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
       <attribute name="horizontalHeaderHighlightSections">
        <bool>false</bool>
       </attribute>
@@ -38,9 +41,6 @@
       </attribute>
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>18</number>
       </attribute>
       <attribute name="verticalHeaderStretchLastSection">
        <bool>false</bool>

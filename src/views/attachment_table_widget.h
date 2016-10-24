@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2016 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,9 @@
 #include <QDropEvent>
 #include <QList>
 #include <QString>
-#include <QTableWidget>
 #include <QUrl>
+
+#include "src/views/lowered_table_widget.h"
 
 /*
  * Column indexes into attachment table widget.
@@ -44,7 +45,7 @@
 /*!
  * @brief Custom attachment table widget class with dropping enabled.
  */
-class AttachmentTableWidget : public QTableWidget {
+class AttachmentTableWidget : public LoweredTableWidget {
 	Q_OBJECT
 
 public:

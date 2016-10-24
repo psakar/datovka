@@ -86,6 +86,10 @@ DlgSendMessage::DlgSendMessage(
     m_sentMsgResultList()
 {
 	setupUi(this);
+	/* Set default line height for table views/widgets. */
+	recipientTableWidget->setNarrowedLineHeight();
+	attachmentTableWidget->setNarrowedLineHeight();
+
 	initNewMessageDialog();
 }
 

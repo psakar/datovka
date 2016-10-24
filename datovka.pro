@@ -262,6 +262,7 @@ SOURCES += \
     src/crypto/crypto_threads.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
+    src/dimensions/dimensions.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -314,6 +315,8 @@ SOURCES += \
     src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
     src/views/attachment_table_widget.cpp \
+    src/views/lowered_table_view.cpp \
+    src/views/lowered_table_widget.cpp \
     src/views/table_home_end_filter.cpp \
     src/views/table_key_press_filter.cpp \
     src/views/table_space_selection_filter.cpp \
@@ -345,6 +348,7 @@ HEADERS += \
     src/crypto/crypto_threads.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
+    src/dimensions/dimensions.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -396,6 +400,8 @@ HEADERS += \
     src/single/single_instance.h \
     src/views/attachment_table_view.h \
     src/views/attachment_table_widget.h \
+    src/views/lowered_table_view.h \
+    src/views/lowered_table_widget.h \
     src/views/table_home_end_filter.h \
     src/views/table_key_press_filter.h \
     src/views/table_space_selection_filter.h \

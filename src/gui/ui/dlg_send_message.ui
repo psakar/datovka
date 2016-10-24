@@ -492,7 +492,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTableWidget" name="recipientTableWidget">
+    <widget class="LoweredTableWidget" name="recipientTableWidget">
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
@@ -502,11 +502,11 @@
      <property name="sortingEnabled">
       <bool>true</bool>
      </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>1</number>
      </attribute>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
       <bool>true</bool>
@@ -517,14 +517,8 @@
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
-     </attribute>
      <attribute name="verticalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderMinimumSectionSize">
-      <number>18</number>
      </attribute>
      <column>
       <property name="text">
@@ -760,11 +754,11 @@ of postal data messages active.</string>
      <property name="sortingEnabled">
       <bool>true</bool>
      </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="horizontalHeaderMinimumSectionSize">
-      <number>1</number>
      </attribute>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
       <bool>true</bool>
@@ -775,14 +769,8 @@ of postal data messages active.</string>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
-     <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
-     </attribute>
      <attribute name="verticalHeaderHighlightSections">
       <bool>false</bool>
-     </attribute>
-     <attribute name="verticalHeaderMinimumSectionSize">
-      <number>18</number>
      </attribute>
      <column>
       <property name="text">
@@ -899,6 +887,11 @@ of postal data messages active.</string>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>LoweredTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>lowered_table_widget.h</header>
+  </customwidget>
   <customwidget>
    <class>AttachmentTableWidget</class>
    <extends>QTableWidget</extends>
