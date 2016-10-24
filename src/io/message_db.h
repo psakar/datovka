@@ -90,6 +90,24 @@ public:
 		~MsgId(void)
 		{ }
 
+		MsgId &operator=(const MsgId &other) Q_DECL_NOTHROW
+		{
+			dmId = other.dmId;
+			deliveryTime = other.deliveryTime;
+			return *this;
+		}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+		inline
+		MsgId &operator=(MsgId &&other) Q_DECL_NOTHROW
+		{
+			/* qSwap() is obsolete */
+			std::swap(dmId, other.dmId);
+			std::swap(deliveryTime, other.deliveryTime);
+			return *this;
+		}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 		bool isValid(void) const
 		{
 			return (dmId >= 0) && (deliveryTime.isValid());
@@ -110,6 +128,11 @@ public:
 		SoughtMsg(void)
 		    : mId(), type(0), dmAnnotation(), dmSender(), dmRecipient()
 		{ }
+		SoughtMsg(const SoughtMsg &msg)
+		    : mId(msg.mId), type(msg.type),
+		    dmAnnotation(msg.dmAnnotation), dmSender(msg.dmSender),
+		    dmRecipient(msg.dmRecipient)
+		{ }
 		SoughtMsg(const MsgId &id, int t, const QString &annot,
 		    const QString &sen, const QString &rec)
 		    : mId(id), type(t), dmAnnotation(annot),
@@ -123,6 +146,30 @@ public:
 		{ }
 		~SoughtMsg(void)
 		{ }
+
+		SoughtMsg &operator=(const SoughtMsg &other) Q_DECL_NOTHROW
+		{
+			mId = other.mId;
+			type = other.type;
+			dmAnnotation = other.dmAnnotation;
+			dmSender = other.dmSender;
+			dmRecipient = other.dmRecipient;
+			return *this;
+		}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+		inline
+		SoughtMsg &operator=(SoughtMsg &&other) Q_DECL_NOTHROW
+		{
+			/* qSwap() is obsolete */
+			std::swap(mId, other.mId);
+			std::swap(type, other.type);
+			std::swap(dmAnnotation, other.dmAnnotation);
+			std::swap(dmSender, other.dmSender);
+			std::swap(dmRecipient, other.dmRecipient);
+			return *this;
+		}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 		bool isValid(void) const
 		{
