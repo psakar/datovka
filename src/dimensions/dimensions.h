@@ -59,6 +59,18 @@ public:
 	static
 	int tableLineHeight(const QStyleOptionViewItem &option);
 
+	/*!
+	 * @brief Returns size of dialogue specified as the ratio of the
+	 *     detected font height.
+	 *
+	 * @param[in] widget Widget to obtain font metrics from.
+	 * @param[in] wr Width ratio relative to font height.
+	 * @param[in] hr Height ratio relative to font height.
+	 * @return Window dimensions.
+	 */
+	static
+	QSize windowSize(const QWidget *widget, qreal wr, qreal hr);
+
 private:
 	/*!
 	 * @brief Constructor.
@@ -68,13 +80,13 @@ private:
 	Dimensions(void);
 
 	static
-	qreal m_margin; /*!< Text margin as ratio of text height. */
+	const qreal m_margin; /*!< Text margin as ratio of text height. */
 
 	static
-	qreal m_padding; /*!< Text padding as ratio of text height. */
+	const qreal m_padding; /*!< Text padding as ratio of text height. */
 
 	static
-	qreal m_lineHeight; /*!< Height of line as ration of text height. */
+	const qreal m_lineHeight; /*!< Height of line as ration of text height. */
 };
 
 #endif /* _DIMENSIONS_H_ */

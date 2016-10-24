@@ -21,13 +21,16 @@
  * the two.
  */
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QFontMetrics>
+#include <QStyleOption>
 
 #include "src/dimensions/dimensions.h"
 
-qreal Dimensions::m_margin = 0.4;
-qreal Dimensions::m_padding = 0.1;
-qreal Dimensions::m_lineHeight = 1.5;
+const qreal Dimensions::m_margin = 0.4;
+const qreal Dimensions::m_padding = 0.1;
+const qreal Dimensions::m_lineHeight = 1.5;
 
 int Dimensions::margin(const QStyleOptionViewItem &option)
 {
@@ -42,4 +45,30 @@ int Dimensions::padding(int height)
 int Dimensions::tableLineHeight(const QStyleOptionViewItem &option)
 {
 	return QFontMetrics(option.font).height() * m_lineHeight;
+}
+
+QSize Dimensions::windowSize(const QWidget *widget, qreal wr, qreal hr)
+{
+	if (widget == 0 || wr <= 0.0 || hr <= 0.0) {
+		return QSize();
+	}
+
+	QStyleOption option;
+	option.initFrom(widget);
+
+	int fontHeight = option.fontMetrics.height();
+
+	int w = fontHeight * wr;
+	int h = fontHeight * hr;
+
+	/* Reduce window with if it exceeds screen width. */
+	QRect screenRect(QApplication::desktop()->screenGeometry());
+
+	if (screenRect.width() < w) {
+		qreal ratio = (qreal)w / ((qreal)screenRect.width() * 0.8);
+		w /= ratio;
+		h *= ratio;
+	}
+
+	return QSize(w, h);
 }
