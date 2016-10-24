@@ -15,6 +15,7 @@ SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
 	$${top_srcdir}src/delegates/tag_item.cpp \
+	$${top_srcdir}src/dimensions/dimensions.cpp \
 	$${top_srcdir}src/io/db_tables.cpp \
 	$${top_srcdir}src/io/dbs.cpp \
 	$${top_srcdir}src/io/filesystem.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
 	$${top_srcdir}src/delegates/tag_item.h \
+	$${top_srcdir}src/dimensions/dimensions.h \
 	$${top_srcdir}src/io/db_tables.h \
 	$${top_srcdir}src/io/dbs.h \
 	$${top_srcdir}src/io/filesystem.h \
