@@ -80,6 +80,7 @@ DlgSendMessage::DlgSendMessage(
     m_dmType(""),
     m_dmSenderRefNumber(""),
     m_mv(mv),
+    m_dbSet(0),
     m_isLogged(false),
     m_transactIds(),
     m_sentMsgResultList()
@@ -90,6 +91,8 @@ DlgSendMessage::DlgSendMessage(
 	attachmentTableWidget->setNarrowedLineHeight();
 
 	initNewMessageDialog();
+
+	Q_ASSERT(0 != m_dbSet);
 }
 
 /* ========================================================================= */

@@ -4811,24 +4811,34 @@ void MainWindow::openSendMessageDialog(int action)
 	switch (action) {
 	case DlgSendMessage::ACT_NEW:
 		break;
+	case DlgSendMessage::ACT_REPLY:
+	case DlgSendMessage::ACT_NEW_FROM_TMP:
+		Q_ASSERT(firstMsgColumnIdxs.size() == 1);
+		/* No break here. */
 	case DlgSendMessage::ACT_FORWARD:
 		Q_ASSERT(firstMsgColumnIdxs.size() > 0);
 		foreach (const QModelIndex &msgIdx, firstMsgColumnIdxs) {
-			msgIds.append(
-			    MessageDb::MsgId(
-			        msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
-			        msgDeliveryTime(msgIdx)));
-		}
-		break;
-	case DlgSendMessage::ACT_REPLY:
-	case DlgSendMessage::ACT_NEW_FROM_TMP:
-		{
-			Q_ASSERT(firstMsgColumnIdxs.size() == 1);
-			const QModelIndex &msgIdx(firstMsgColumnIdxs.first());
-			msgIds.append(
-			    MessageDb::MsgId(
-			        msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
-			        msgDeliveryTime(msgIdx)));
+			MessageDb::MsgId msgId(
+			    msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
+			    msgDeliveryTime(msgIdx));
+
+			/* Check whether full messages are present. */
+			MessageDbSet *dbSet = accountDbSet(userName, this);
+			Q_ASSERT(0 != dbSet);
+
+			MessageDb *messageDb =
+			    dbSet->accessMessageDb(msgId.deliveryTime, false);
+			if (0 == messageDb) {
+				Q_ASSERT(0);
+				return;
+			}
+
+			if (!messageDb->msgsStoredWhole(msgId.dmId)) {
+				messageMissingOfferDownload(msgId.dmId, msgId.deliveryTime,
+				    tr("Full message not present!"));
+			}
+
+			msgIds.append(msgId);
 		}
 		break;
 	default:
@@ -4848,7 +4858,6 @@ void MainWindow::openSendMessageDialog(int action)
 
 	sendMsgDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	sendMsgDialog->show();
-
 }
 
 
