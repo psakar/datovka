@@ -1214,7 +1214,9 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionDownload_message_signed);
 	if (singleSelected) {
 		menu->addAction(ui->actionReply);
-		menu->addAction(ui->actionForward_message);
+	}
+	menu->addAction(ui->actionForward_message);
+	if (singleSelected) {
 		menu->addAction(ui->actionCreate_message_from_template);
 	}
 	menu->addSeparator();
@@ -4158,6 +4160,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(downloadSelectedMessageAttachments()));
 	connect(ui->actionReply, SIGNAL(triggered()),
 	    this, SLOT(createAndSendMessageReply()));
+	connect(ui->actionForward_message, SIGNAL(triggered()),
+	    this, SLOT(createAndSendMessageWithZfos()));
 	connect(ui->actionCreate_message_from_template, SIGNAL(triggered()),
 	    this, SLOT(createAndSendMessageFromTmpl()));
 	    /* Separator. */
@@ -4305,7 +4309,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 
 	ui->actionDownload_message_signed->setEnabled(numSelected > 0);
 	ui->actionReply->setEnabled(numSelected == 1);
-	ui->actionForward_message->setEnabled(numSelected == 1);
+	ui->actionForward_message->setEnabled(numSelected > 0);
 	ui->actionCreate_message_from_template->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSignature_detail->setEnabled(numSelected == 1);
@@ -4746,6 +4750,11 @@ void MainWindow::createAndSendMessageReply(void)
 	openSendMessageDialog(DlgSendMessage::ACT_REPLY);
 }
 
+void MainWindow::createAndSendMessageWithZfos(void)
+{
+	debugSlotCall();
+	openSendMessageDialog(DlgSendMessage::ACT_FORWARD);
+}
 
 /* ========================================================================= */
 /*
@@ -4768,8 +4777,7 @@ void MainWindow::openSendMessageDialog(int action)
 	debugFuncCall();
 
 	QList<Task::AccountDescr> messageDbList;
-	qint64 msgId = -1;
-	QDateTime deliveryTime;
+	QList<MessageDb::MsgId> msgIds;
 
 	/* get username of selected account */
 	const QString userName(
@@ -4798,21 +4806,39 @@ void MainWindow::openSendMessageDialog(int action)
 		messageDbList.append(Task::AccountDescr(userName, dbSet));
 	}
 
-	/* if is reply or template, ID of selected message is required */
-	if (DlgSendMessage::ACT_REPLY == action ||
-	    DlgSendMessage::ACT_NEW_FROM_TMP == action) {
-		const QAbstractItemModel *tableModel =
-		    ui->messageList->model();
-		Q_ASSERT(0 != tableModel);
-		QModelIndex index = tableModel->index(
-		    currentSingleMessageIndex().row(), 0);
-		msgId = tableModel->itemData(index).first().toLongLong();
-		deliveryTime = msgDeliveryTime(index);
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+
+	switch (action) {
+	case DlgSendMessage::ACT_NEW:
+		break;
+	case DlgSendMessage::ACT_FORWARD:
+		Q_ASSERT(firstMsgColumnIdxs.size() > 0);
+		foreach (const QModelIndex &msgIdx, firstMsgColumnIdxs) {
+			msgIds.append(
+			    MessageDb::MsgId(
+			        msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
+			        msgDeliveryTime(msgIdx)));
+		}
+		break;
+	case DlgSendMessage::ACT_REPLY:
+	case DlgSendMessage::ACT_NEW_FROM_TMP:
+		{
+			Q_ASSERT(firstMsgColumnIdxs.size() == 1);
+			const QModelIndex &msgIdx(firstMsgColumnIdxs.first());
+			msgIds.append(
+			    MessageDb::MsgId(
+			        msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
+			        msgDeliveryTime(msgIdx)));
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		return;
+		break;
 	}
 
 	QDialog *sendMsgDialog = new DlgSendMessage(messageDbList,
-	    (DlgSendMessage::Action) action, msgId, deliveryTime,
-	    userName, this);
+	    (DlgSendMessage::Action) action, msgIds, userName, this);
 
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
@@ -7319,9 +7345,6 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 		    deliveryTime, false);
 	}
 }
-
-
-
 
 void MainWindow::sendMessagesZfoEmail(void)
 {

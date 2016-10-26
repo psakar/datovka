@@ -62,13 +62,12 @@
 
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
-    Action action, qint64 msgId, const QDateTime &deliveryTime,
+    Action action, const QList<MessageDb::MsgId> &msgIds,
     const QString &userName, class MainWindow *mv, QWidget *parent)
     : QDialog(parent),
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
-    m_msgID(msgId),
-    m_deliveryTime(deliveryTime),
+    m_msgIds(msgIds),
     m_dbId(""),
     m_senderName(""),
     m_action(action),
@@ -239,6 +238,8 @@ void DlgSendMessage::initNewMessageDialog(void)
 		this->payRecipient->hide();
 		if (ACT_NEW_FROM_TMP == m_action) {
 			fillDlgFromTmpMsg();
+		} else if (ACT_FORWARD == m_action) {
+			fillDlgAsForward();
 		}
 	}
 
@@ -441,15 +442,23 @@ void DlgSendMessage::fillDlgAsReply(void)
 {
 	debugFuncCall();
 
+	if (m_msgIds.size() != 1) {
+		logWarningNL("%s",
+		    "Expected one message to generate reply from.");
+		return;
+	}
+	const MessageDb::MsgId &msgId(m_msgIds.first());
+
 	bool hideOptionalWidget = true;
 
 	this->fromComboBox->setEnabled(false);
 
-	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
+	MessageDb *messageDb =
+	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(m_msgID);
+	    messageDb->msgsReplyData(msgId.dmId);
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
@@ -521,6 +530,60 @@ void DlgSendMessage::fillDlgAsReply(void)
 	this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 }
 
+void DlgSendMessage::fillDlgAsForward(void)
+{
+	debugFuncCall();
+
+	if (m_msgIds.size() == 0) {
+		logWarningNL("%s",
+		    "Expected at lease one message to generate reply from.");
+		return;
+	}
+
+	/* Fill attachments with messages. */
+	foreach (const MessageDb::MsgId &msgId, m_msgIds) {
+		MessageDb *messageDb =
+		    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (0 == messageDb) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		/* If only a single message if forwarded. */
+		if (m_msgIds.size() == 1) {
+			MessageDb::PartialEnvelopeData envData(
+			    messageDb->msgsReplyData(msgId.dmId));
+
+			this->subjectText->setText("Fwd: " + envData.dmAnnotation);
+		}
+
+		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
+		if (msgBase64.isEmpty()) {
+			continue;
+		}
+
+		int row = this->attachmentTableWidget->rowCount();
+		this->attachmentTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setText("DZ_" + QString::number(msgId.dmId) + ".zfo");
+		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
+		item = new QTableWidgetItem;
+		item->setText("");
+		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
+		item = new QTableWidgetItem;
+		item->setText(tr("unknown"));
+		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
+		item = new QTableWidgetItem;
+		item->setText(QString::number(base64RealSize(msgBase64)));
+		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
+		item = new QTableWidgetItem;
+		item->setText(tr("local database"));
+		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
+		item = new QTableWidgetItem;
+		item->setData(Qt::DisplayRole, msgBase64);
+		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
+	}
+}
 
 /* ========================================================================= */
 /*
@@ -531,13 +594,21 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 {
 	debugFuncCall();
 
+	if (m_msgIds.size() != 1) {
+		logWarningNL("%s",
+		    "Expected one message to generate reply from.");
+		return;
+	}
+	const MessageDb::MsgId &msgId(m_msgIds.first());
+
 	bool hideOptionalWidget = true;
 
-	MessageDb *messageDb = m_dbSet->accessMessageDb(m_deliveryTime, false);
+	MessageDb *messageDb =
+	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
 	Q_ASSERT(0 != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(m_msgID);
+	    messageDb->msgsReplyData(msgId.dmId);
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
@@ -625,7 +696,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	/* fill attachments from template message */
 	QList<MessageDb::FileData> msgFileList =
-	    messageDb->getFilesFromMessage(m_msgID);
+	    messageDb->getFilesFromMessage(msgId.dmId);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
 		int row = this->attachmentTableWidget->rowCount();

@@ -371,6 +371,12 @@ private slots:
 	void createAndSendMessageReply(void);
 
 	/*!
+	 * @nrief Create a message containing as attachment the selected
+	 *     messages on ZFO format.
+	 */
+	void createAndSendMessageWithZfos(void);
+
+	/*!
 	 * @brief Create message from the template (selected message).
 	 */
 	void createAndSendMessageFromTmpl(void);
