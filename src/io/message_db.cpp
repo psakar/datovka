@@ -587,6 +587,34 @@ fail:
 	return PartialEnvelopeData();
 }
 
+int MessageDb::msgMessageType(qint64 dmId) const
+{
+	QSqlQuery query(m_db);
+	QString queryStr;
+
+	queryStr = "SELECT "
+	    "message_type"
+	    " FROM supplementary_message_data WHERE "
+	    "message_id = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+fail:
+	return -1;
+}
 
 /* ========================================================================= */
 /*
@@ -2495,7 +2523,6 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
-		//qDebug() << queryStr;
 		/* prepare query string */
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
@@ -2571,7 +2598,6 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
 
-		//qDebug() << queryStr;
 		/* prepare query string */
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
@@ -2589,8 +2615,6 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 	}
-
-	//qDebug() << queryStr;
 
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {

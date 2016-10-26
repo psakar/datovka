@@ -562,10 +562,24 @@ void DlgSendMessage::fillDlgAsForward(void)
 			continue;
 		}
 
+		QString prefix;
+		switch (messageDb->msgMessageType(msgId.dmId)) {
+		case MessageDb::TYPE_RECEIVED:
+			prefix = "D";
+			break;
+		case MessageDb::TYPE_SENT:
+			prefix = "O";
+			break;
+		default:
+			prefix.clear();
+			break;
+		}
+
 		int row = this->attachmentTableWidget->rowCount();
 		this->attachmentTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText("DZ_" + QString::number(msgId.dmId) + ".zfo");
+		item->setText(
+		    prefix + "DZ_" + QString::number(msgId.dmId) + ".zfo");
 		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
 		item = new QTableWidgetItem;
 		item->setText("");

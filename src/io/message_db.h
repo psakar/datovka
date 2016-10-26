@@ -285,6 +285,14 @@ public:
 	PartialEnvelopeData msgsReplyData(qint64 dmId) const;
 
 	/*!
+	 * @brief Return message type (sent or received).
+	 *
+	 * @param[in] dmId Message id.
+	 * @return Message type value, negative value on error.
+	 */
+	int msgMessageType(qint64 dmId) const;
+
+	/*!
 	 * @brief Returns true if verification attempt was performed.
 	 *
 	 * @param[in] dmId  Message id.
