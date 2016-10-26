@@ -1214,6 +1214,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 	menu->addAction(ui->actionDownload_message_signed);
 	if (singleSelected) {
 		menu->addAction(ui->actionReply);
+		menu->addAction(ui->actionForward_message);
 		menu->addAction(ui->actionCreate_message_from_template);
 	}
 	menu->addSeparator();
@@ -4304,6 +4305,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 
 	ui->actionDownload_message_signed->setEnabled(numSelected > 0);
 	ui->actionReply->setEnabled(numSelected == 1);
+	ui->actionForward_message->setEnabled(numSelected == 1);
 	ui->actionCreate_message_from_template->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSignature_detail->setEnabled(numSelected == 1);
@@ -9740,7 +9742,18 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionReply->setIcon(ico);
 	}
-	ui->actionCreate_message_from_template->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionForward_message->setIcon(ico);
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/16x16/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/32x32/datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionCreate_message_from_template->setIcon(ico);
+	}
 	    /* Separator. */
 	{
 		QIcon ico;

@@ -426,6 +426,7 @@ sent reply on this message</string>
     </property>
     <addaction name="actionDownload_message_signed"/>
     <addaction name="actionReply"/>
+    <addaction name="actionForward_message"/>
     <addaction name="actionCreate_message_from_template"/>
     <addaction name="separator"/>
     <addaction name="actionSignature_detail"/>
@@ -1039,7 +1040,7 @@ sent reply on this message</string>
   <action name="actionCreate_message_from_template">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-message.png</normaloff>:/icons/16x16/datovka-message.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Use message as template</string>
@@ -1166,6 +1167,18 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Vacuum message database</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionForward_message">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Forward message</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
