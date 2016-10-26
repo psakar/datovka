@@ -6657,7 +6657,7 @@ bool MainWindow::messageMissingOfferDownload(qint64 dmId,
 
 	msgBox.setIcon(QMessageBox::Warning);
 	msgBox.setInformativeText(
-	    tr("First you must download the complete message before export.") +
+	    tr("First you must download the complete message to continue with the action.") +
 	    "\n\n" +
 	    tr("Do you want to download the complete message now?"));
 
