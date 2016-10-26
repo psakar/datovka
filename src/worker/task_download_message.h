@@ -52,14 +52,13 @@ public:
 	 * @param[in]     userName      Account identifier (user login name).
 	 * @param[in,out] dbSet         Non-null pointer to database container.
 	 * @param[in]     msgDirect     Received or sent list.
-	 * @param[in]     dmId          Message identifier.
-	 * @param[in]     dTime         Delivery time.
+	 * @param[in]     msgId         Message identifier.
 	 * @param[in]     listScheduled True if the task has been scheduled
 	 *                              from TaskDownloadMessageList.
 	 */
 	explicit TaskDownloadMessage(const QString &userName,
 	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
-	    qint64 dmId, const QDateTime &dTime, bool listScheduled);
+	    const MessageDb::MsgId &msgId, bool listScheduled);
 
 	/*!
 	 * @brief Performs actual message download.
