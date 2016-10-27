@@ -130,6 +130,52 @@ QNetworkAccessManager* nam;
 #define currentFrstColAttachmentIndexes() \
 	(ui->messageAttachmentList->selectionModel()->selectedRows(0))
 
+/*!
+ * @brief Message identifier from index.
+ *
+ * @param[in] msgIdx Index into the message table view.
+ * @return Message identifier.
+ */
+static inline
+qint64 msgIdentifier(const QModelIndex &msgIdx)
+{
+	if (msgIdx.column() == DbMsgsTblModel::DMID_COL) {
+		return msgIdx.data().toLongLong();
+	} else {
+		return msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DMID_COL)
+		    .data().toLongLong();
+	}
+}
+
+/*!
+ * @brief Message time from index.
+ *
+ * @param[in] msgIdx Index into the message table view.
+ * @return Delivery time.
+ */
+static inline
+QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
+{
+	QModelIndex deliveryIdx(
+	    msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DELIVERY_COL));
+	Q_ASSERT(deliveryIdx.isValid());
+
+	return dateTimeFromDbFormat(
+	    deliveryIdx.data(ROLE_PLAIN_DISPLAY).toString());
+}
+
+/*!
+ * @brief Returns a full message identifier from index.
+ *
+ * @param[in] msgIdx Index into the message table view.
+ * @return Full message identifier.
+ */
+static inline
+MessageDb::MsgId msgMsgId(const QModelIndex &msgIdx)
+{
+	return MessageDb::MsgId(msgIdentifier(msgIdx), msgDeliveryTime(msgIdx));
+}
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -960,20 +1006,6 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	menu->deleteLater();
 }
 
-/*!
- * @brief Gets message time from selected index.
- */
-static inline
-QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
-{
-	QModelIndex deliveryIdx(msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DELIVERY_COL));
-	Q_ASSERT(deliveryIdx.isValid());
-
-	QDateTime deliveryTime = dateTimeFromDbFormat(deliveryIdx.data(ROLE_PLAIN_DISPLAY).toString());
-
-	return deliveryTime;
-}
-
 /* ========================================================================= */
 /*
  * Sets contents of widgets according to selected messages.
@@ -1033,89 +1065,88 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 	ui->messageStateCombo->setEnabled(received);
 
-	if (1 == firstColumnIdxs.size()) {
-		const QModelIndex &index = firstColumnIdxs.first();
+	if (1 != firstColumnIdxs.size()) {
+		/* Multiple messages selected - stop here. */
+		return;
+	}
 
-		MessageDbSet *dbSet = accountDbSet(
-		    m_accountModel.userName(currentAccountModelIndex()), this);
-		if (0 == dbSet) {
-			Q_ASSERT(0);
-			return;
+	MessageDbSet *dbSet = accountDbSet(
+	    m_accountModel.userName(currentAccountModelIndex()), this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	MessageDb::MsgId msgId(msgMsgId(firstColumnIdxs.first()));
+
+	/* Remember last selected message. */
+	messageItemStoreSelection(msgId.dmId);
+
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
+	if (0 == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Mark message locally read. */
+	if (!messageDb->smsgdtLocallyRead(msgId.dmId)) {
+		if (globPref.message_mark_as_read_timeout >= 0) {
+			qDebug() << "Starting timer to mark as read for message"
+			    << msgId.dmId;
+			m_messageMarker.setSingleShot(true);
+			m_messageMarker.start(
+			    globPref.message_mark_as_read_timeout);
 		}
-		qint64 msgId = index.data().toLongLong();
-		/* Remember last selected message. */
-		messageItemStoreSelection(msgId);
+	} else {
+		m_messageMarker.stop();
+	}
 
-		QDateTime deliveryTime = msgDeliveryTime(index);
-		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
-		    false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			return;
-		}
+	/* Generate and show message information. */
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId.dmId, 0));
+	ui->messageInfo->setReadOnly(true);
 
-		/* Mark message locally read. */
-		if (!messageDb->smsgdtLocallyRead(msgId)) {
-			if (globPref.message_mark_as_read_timeout >= 0) {
-				qDebug() << "Starting timer to mark as "
-				    "read for message" << msgId;
-				m_messageMarker.setSingleShot(true);
-				m_messageMarker.start(
-				    globPref.message_mark_as_read_timeout);
-			}
+	if (received) {
+		int msgState = messageDb->msgGetProcessState(msgId.dmId);
+
+		/* msgState is -1 if message is not in database */
+		if (msgState >= 0) {
+			ui->messageStateCombo->setCurrentIndex(msgState);
 		} else {
-			m_messageMarker.stop();
-		}
-
-		/* Generate and show message information. */
-		ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId, 0));
-		ui->messageInfo->setReadOnly(true);
-
-		if (received) {
-			int msgState = messageDb->msgGetProcessState(msgId);
-
-			/* msgState is -1 if message is not in database */
-			if (msgState >= 0) {
-				ui->messageStateCombo->setCurrentIndex(
-				    msgState);
-			} else {
-				/* insert message state into database */
-				messageDb->msgSetProcessState(msgId, UNSETTLED,
-				    true);
-				ui->messageStateCombo->setCurrentIndex(
-				    UNSETTLED);
-			}
-		} else {
+			/* insert message state into database */
+			messageDb->msgSetProcessState(msgId.dmId, UNSETTLED,
+			    true);
 			ui->messageStateCombo->setCurrentIndex(UNSETTLED);
 		}
-
-		/* Show files related to message message. */
-		QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId);
-		Q_ASSERT(0 != fileTblMdl);
-		//qDebug() << "Setting files";
-		ui->messageAttachmentList->setModel(fileTblMdl);
-		/* First three columns contain hidden data. */
-		ui->messageAttachmentList->setColumnHidden(
-		    DbFlsTblModel::ATTACHID_COL, true);
-		ui->messageAttachmentList->setColumnHidden(
-		    DbFlsTblModel::MSGID_COL, true);
-		ui->messageAttachmentList->setColumnHidden(
-		    DbFlsTblModel::CONTENT_COL, true);
-
-		if (ui->messageAttachmentList->model()->rowCount() > 0) {
-			ui->actionSave_all_attachments->setEnabled(true);
-		}
-
-		ui->messageAttachmentList->resizeColumnToContents(
-		    DbFlsTblModel::FNAME_COL);
-
-		/* Connect new slot. */
-		connect(ui->messageAttachmentList->selectionModel(),
-		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-		    this,
-		    SLOT(attachmentItemsSelectionChanged(QItemSelection,
-		        QItemSelection)));
+	} else {
+		ui->messageStateCombo->setCurrentIndex(UNSETTLED);
 	}
+
+	/* Show files related to message message. */
+	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId.dmId);
+	Q_ASSERT(0 != fileTblMdl);
+	ui->messageAttachmentList->setModel(fileTblMdl);
+	/* First three columns contain hidden data. */
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::ATTACHID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::MSGID_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::CONTENT_COL, true);
+
+	if (ui->messageAttachmentList->model()->rowCount() > 0) {
+		ui->actionSave_all_attachments->setEnabled(true);
+	}
+
+	ui->messageAttachmentList->resizeColumnToContents(
+	    DbFlsTblModel::FNAME_COL);
+
+	/* Connect new slot. */
+	connect(ui->messageAttachmentList->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this,
+	    SLOT(attachmentItemsSelectionChanged(QItemSelection,
+	        QItemSelection)));
 }
 
 
@@ -1143,18 +1174,18 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 		return;
 	}
 
-	qint64 msgId = index.sibling(index.row(), 0).data().toLongLong();
-	QDateTime deliveryTime = msgDeliveryTime(index);
+	const MessageDb::MsgId msgId(msgMsgId(index));
 
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
 
 	/* Get message state from database and toggle the value. */
-	bool isRead = messageDb->smsgdtLocallyRead(msgId);
-	messageDb->smsgdtSetLocallyRead(msgId, !isRead);
+	bool isRead = messageDb->smsgdtLocallyRead(msgId.dmId);
+	messageDb->smsgdtSetLocallyRead(msgId.dmId, !isRead);
 
 	/*
 	 * Mark message as read without reloading
@@ -1164,7 +1195,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
 
-	messageModel->overrideRead(msgId, !isRead);
+	messageModel->overrideRead(msgId.dmId, !isRead);
 
 	/*
 	 * Reload/update account model only for
@@ -1299,8 +1330,7 @@ void MainWindow::viewSelectedMessage(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb::MsgId msgId(msgIndex.data().toLongLong(),
-	    msgDeliveryTime(msgIndex));
+	MessageDb::MsgId msgId(msgMsgId(msgIndex));
 	Q_ASSERT(msgId.dmId >= 0);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -1781,13 +1811,15 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 		return;
 	}
 
+	const MessageDb::MsgId msgId(msgMsgId(messageIndex));
+
 	foreach (const QModelIndex &attachmentIndex, attachmentIndexes) {
-		saveAttachmentToFile(messageIndex, attachmentIndex);
+		saveAttachmentToFile(msgId, attachmentIndex);
 	}
 }
 
 /* ========================================================================= */
-void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
+void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
    const QModelIndex &attachmentIndex)
 /* ========================================================================= */
 {
@@ -1798,15 +1830,13 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 		return;
 	}
 
-	qint64 dmId = messageIndex.sibling(
-	    messageIndex.row(), 0).data().toLongLong();
-
 	QModelIndex fileNameIndex = attachmentIndex.sibling(
 	    attachmentIndex.row(), DbFlsTblModel::FNAME_COL);
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		    "\"%1\" to files was not successful!").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message \"%1\" to files was not successful!")
+		        .arg(msgId.dmId));
 		return;
 	}
 	QString fileName = fileNameIndex.data().toString();
@@ -1829,19 +1859,19 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 		Q_ASSERT(0);
 		return;
 	}
-	QDateTime deliveryTime = msgDeliveryTime(messageIndex);
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
 	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(dmId);
+	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
 	fileName = fileNameFromFormat(globPref.attachment_filename_format,
-	    dmId, dbId, userName, fileName, entry.dmDeliveryTime,
+	    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	fileName = QFileDialog::getSaveFileName(this,
@@ -1863,8 +1893,9 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 	    DbFlsTblModel::CONTENT_COL);
 	if (!dataIndex.isValid()) {
 		Q_ASSERT(0);
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to files was not successful!").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message \"%1\" to files was not successful!")
+		       .arg(msgId.dmId));
 		return;
 	}
 
@@ -1873,13 +1904,15 @@ void MainWindow::saveAttachmentToFile(const QModelIndex &messageIndex,
 
 	enum WriteFileState ret = writeFile(fileName, data);
 	if (WF_SUCCESS == ret) {
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to file was successful.").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message \"%1\" to file was successful.")
+		        .arg(msgId.dmId));
 	} else {
-		showStatusTextWithTimeout(tr("Saving attachment of message "
-		"\"%1\" to file was not successful!").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message \"%1\" to file was not successful!")
+		        .arg(msgId.dmId));
 		QMessageBox::warning(this,
-		    tr("Error saving attachment of message '%1'.").arg(dmId),
+		    tr("Error saving attachment of message '%1'.").arg(msgId.dmId),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
 	}
@@ -1897,9 +1930,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 	QModelIndex messageIndex(currentSingleMessageIndex());
 
-	MessageDb::MsgId msgId(
-	    messageIndex.sibling(messageIndex.row(), 0).data().toLongLong(),
-	    msgDeliveryTime(messageIndex));
+	MessageDb::MsgId msgId(msgMsgId(messageIndex));
 
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
@@ -2942,8 +2973,7 @@ void MainWindow::deleteMessage(void)
 
 	QList<MessageDb::MsgId> msgIds;
 	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
-		    msgDeliveryTime(idx)));
+		msgIds.append(msgMsgId(idx));
 	}
 
 	/* Save current account index */
@@ -3273,8 +3303,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	QList<MessageDb::MsgId> msgIds;
 	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
-		    msgDeliveryTime(idx)));
+		msgIds.append(msgMsgId(idx));
 	}
 
 	QString userName;
@@ -4787,9 +4816,7 @@ void MainWindow::openSendMessageDialog(int action)
 	case DlgSendMessage::ACT_FORWARD:
 		Q_ASSERT(firstMsgColumnIdxs.size() > 0);
 		foreach (const QModelIndex &msgIdx, firstMsgColumnIdxs) {
-			MessageDb::MsgId msgId(
-			    msgIdx.sibling(msgIdx.row(), 0).data().toLongLong(),
-			    msgDeliveryTime(msgIdx));
+			MessageDb::MsgId msgId(msgMsgId(msgIdx));
 
 			/* Check whether full messages are present. */
 			MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -5937,16 +5964,13 @@ void MainWindow::verifySelectedMessage(void)
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
-	qint64 dmId = -1;
-	QDateTime deliveryTime;
-	{
-		QModelIndex msgIdx = firstMsgColumnIdxs.first();
-		dmId = msgIdx.sibling(msgIdx.row(), 0).data().toLongLong();
-		deliveryTime = msgDeliveryTime(msgIdx);
-	}
+	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
 	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
+	Q_ASSERT(msgId.dmId >= 0);
+	if (!msgId.deliveryTime.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -5963,10 +5987,8 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
-	TaskVerifyMessage *task;
-
-	task = new (std::nothrow) TaskVerifyMessage(userName, dbSet, dmId,
-	    deliveryTime);
+	TaskVerifyMessage *task = new (std::nothrow) TaskVerifyMessage(userName,
+	    dbSet, msgId);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -7212,8 +7234,7 @@ void MainWindow::exportSelectedMessagesAsZFO(void)
 			return;
 		}
 
-		MessageDb::MsgId msgId(frstIdx.data().toLongLong(),
-		    msgDeliveryTime(frstIdx));
+		MessageDb::MsgId msgId(msgMsgId(frstIdx));
 		Q_ASSERT(msgId.dmId >= 0);
 
 		exportMessageAsZFO(QString(), userName, msgId, true);
@@ -7239,8 +7260,7 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 			return;
 		}
 
-		MessageDb::MsgId msgId(frstIdx.data().toLongLong(),
-		    msgDeliveryTime(frstIdx));
+		MessageDb::MsgId msgId(msgMsgId(frstIdx));
 		Q_ASSERT(msgId.dmId >= 0);
 
 		exportDeliveryInfoAsZFO(QString(), QString(),
@@ -7267,8 +7287,7 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 			return;
 		}
 
-		MessageDb::MsgId msgId(frstIdx.data().toLongLong(),
-		    msgDeliveryTime(frstIdx));
+		MessageDb::MsgId msgId(msgMsgId(frstIdx));
 		Q_ASSERT(msgId.dmId >= 0);
 
 		exportDeliveryInfoAsPDF(QString(), QString(),
@@ -7295,8 +7314,7 @@ void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 			return;
 		}
 
-		MessageDb::MsgId msgId(frstIdx.data().toLongLong(),
-		    msgDeliveryTime(frstIdx));
+		MessageDb::MsgId msgId(msgMsgId(frstIdx));
 		Q_ASSERT(msgId.dmId >= 0);
 
 		exportMessageEnvelopeAsPDF(QString(), userName, msgId, true);
@@ -7331,8 +7349,7 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 			return;
 		}
 
-		MessageDb::MsgId msgId(frstIdx.data().toLongLong(),
-		    msgDeliveryTime(frstIdx));
+		MessageDb::MsgId msgId(msgMsgId(frstIdx));
 		Q_ASSERT(msgId.dmId >= 0);
 
 		exportMessageEnvelopeAttachments(newDir, userName, msgId,
@@ -7372,8 +7389,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb::MsgId msgId(firstMsgColumnIdxs.first().data().toLongLong(),
-	    msgDeliveryTime(firstMsgColumnIdxs.first()));
+	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -7474,8 +7490,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb::MsgId msgId(firstMsgColumnIdxs.first().data().toLongLong(),
-	    msgDeliveryTime(firstMsgColumnIdxs.first()));
+	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -7607,13 +7622,12 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	qint64 dmId = msgIdx.data().toLongLong();
-	QDateTime deliveryTime = msgDeliveryTime(msgIdx);
-	Q_ASSERT(deliveryTime.isValid());
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
+	const MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
+	if (msgId.dmId < 0) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (!msgId.deliveryTime.isValid()) {
 		return;
 	}
 
@@ -7623,17 +7637,18 @@ void MainWindow::openSelectedMessageExternally(void)
 		Q_ASSERT(0);
 		return;
 	}
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	QByteArray base64 = messageDb->msgsMessageBase64(dmId);
+	QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
 	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);;
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Cannot export the message ") + dmId);
+		msgBox.setText(tr("Cannot export the message ") + msgId.dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		  tr("First you must download message before its export..."));
@@ -7642,7 +7657,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	}
 
 	QString fileName =
-	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1.zfo").arg(dmId);
+	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1.zfo").arg(msgId.dmId);
 	Q_ASSERT(!fileName.isEmpty());
 
 	if (fileName.isEmpty()) {
@@ -7653,15 +7668,17 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
-		showStatusTextWithTimeout(tr("Message '%1' stored to "
-		    "temporary file '%2'.").arg(dmId).arg(fileName));
+		showStatusTextWithTimeout(
+		    tr("Message '%1' stored to temporary file '%2'.")
+		        .arg(msgId.dmId).arg(fileName));
 		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
-		showStatusTextWithTimeout(tr("Message '%1' couldn't be "
-		    "stored to temporary file.").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Message '%1' couldn't be stored to temporary file.")
+		        .arg(msgId.dmId));
 		QMessageBox::warning(this,
-		    tr("Error opening message '%1'.").arg(dmId),
+		    tr("Error opening message '%1'.").arg(msgId.dmId),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
 	}
@@ -7683,13 +7700,12 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	qint64 dmId = msgIdx.data().toLongLong();
-	QDateTime deliveryTime = msgDeliveryTime(msgIdx);
-	Q_ASSERT(deliveryTime.isValid());
-
-	Q_ASSERT(msgIdx.isValid());
-	if (!msgIdx.isValid()) {
+	const MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
+	if (msgId.dmId < 0) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (!msgId.deliveryTime.isValid()) {
 		return;
 	}
 
@@ -7699,17 +7715,18 @@ void MainWindow::openDeliveryInfoExternally(void)
 		Q_ASSERT(0);
 		return;
 	}
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(dmId);
+	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 	if (base64.isEmpty()) {
 		QMessageBox msgBox(this);
 		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Cannot export the message ") + dmId);
+		msgBox.setText(tr("Cannot export the message ") + msgId.dmId);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setInformativeText(
 		  tr("First you must download message before its export..."));
@@ -7718,7 +7735,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 
 	QString fileName =
-	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1_info.zfo").arg(dmId);
+	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1_info.zfo").arg(msgId.dmId);
 	Q_ASSERT(!fileName.isEmpty());
 
 	if (fileName.isEmpty()) {
@@ -7729,16 +7746,17 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
-		showStatusTextWithTimeout(tr("Message delivery information "
-		    "'%1' stored to temporary file '%2'.").arg(dmId)
-		    .arg(fileName));
+		showStatusTextWithTimeout(
+		    tr("Message delivery information '%1' stored to temporary file '%2'.")
+		        .arg(msgId.dmId).arg(fileName));
 		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
-		showStatusTextWithTimeout(tr("Message delivery information "
-		    "'%1' couldn't be stored to temporary file.").arg(dmId));
+		showStatusTextWithTimeout(
+		    tr("Message delivery information '%1' couldn't be stored to temporary file.")
+		        .arg(msgId.dmId));
 		QMessageBox::warning(this,
-		    tr("Error opening message '%1'.").arg(dmId),
+		    tr("Error opening message '%1'.").arg(msgId.dmId),
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
 	}
@@ -7760,15 +7778,12 @@ void MainWindow::showSignatureDetails(void)
 		return;
 	}
 
-	const QModelIndex &msgIdx = firstMsgColumnIdxs.first();
-	qint64 dmId = msgIdx.data().toLongLong();
-	QDateTime deliveryTime = msgDeliveryTime(msgIdx);
-	if (!deliveryTime.isValid()) {
+	const MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
+	if (msgId.dmId < 0) {
+		Q_ASSERT(0);
 		return;
 	}
-
-	if (!msgIdx.isValid()) {
-		Q_ASSERT(0);
+	if (!msgId.deliveryTime.isValid()) {
 		return;
 	}
 
@@ -7779,8 +7794,7 @@ void MainWindow::showSignatureDetails(void)
 		return;
 	}
 
-	QDialog *signature_detail = new DlgSignatureDetail(*dbSet, dmId,
-	    deliveryTime, this);
+	QDialog *signature_detail = new DlgSignatureDetail(*dbSet, msgId, this);
 	signature_detail->exec();
 	signature_detail->deleteLater();
 }
@@ -8307,24 +8321,23 @@ void MainWindow::messageItemsSetReadStatus(
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
-		qint64 dmId = it->data().toLongLong();
-		QDateTime deliveryTime = msgDeliveryTime(*it);
-		Q_ASSERT(deliveryTime.isValid());
+		const MessageDb::MsgId msgId(msgMsgId(*it));
+		Q_ASSERT(msgId.deliveryTime.isValid());
 
-		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
-		    false);
+		MessageDb *messageDb = dbSet->accessMessageDb(
+		    msgId.deliveryTime, false);
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			continue;
 		}
 
-		messageDb->smsgdtSetLocallyRead(dmId, read);
+		messageDb->smsgdtSetLocallyRead(msgId.dmId, read);
 
 		/*
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideRead(dmId, read);
+		messageModel->overrideRead(msgId.dmId, read);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -8369,24 +8382,23 @@ void MainWindow::messageItemsSetProcessStatus(
 
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
-		qint64 dmId = it->data().toLongLong();
-		QDateTime deliveryTime = msgDeliveryTime(*it);
-		Q_ASSERT(deliveryTime.isValid());
+		const MessageDb::MsgId msgId(msgMsgId(*it));
+		Q_ASSERT(msgId.deliveryTime.isValid());
 
-		MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime,
-		    false);
+		MessageDb *messageDb = dbSet->accessMessageDb(
+		    msgId.deliveryTime, false);
 		if (0 == messageDb) {
 			Q_ASSERT(0);
 			continue;
 		}
 
-		messageDb->msgSetProcessState(dmId, state, false);
+		messageDb->msgSetProcessState(msgId.dmId, state, false);
 
 		/*
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideProcessing(dmId, state);
+		messageModel->overrideProcessing(msgId.dmId, state);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -9859,7 +9871,7 @@ void MainWindow::showTagDlg(void)
 
 /* ========================================================================= */
 /*
- * Slot: Add/detele tags to/from selected messages.
+ * Slot: Add/delete tags to/from selected messages.
  */
 void MainWindow::addOrDeleteMsgTags(void)
 /* ========================================================================= */
@@ -9875,7 +9887,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 	}
 
 	/*
-	 * FIXME -- The tags dialogue as it now exixts is not suitable for
+	 * FIXME -- The tags dialogue as it now exists is not suitable for
 	 * adding tags to messages.
 	 */
 

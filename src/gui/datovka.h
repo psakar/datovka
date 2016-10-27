@@ -758,7 +758,7 @@ private:
 	/*!
 	 * @brief Save attachment identified by indexes to file.
 	 */
-	void saveAttachmentToFile(const QModelIndex &messageIndex,
+	void saveAttachmentToFile(const MessageDb::MsgId &msgId,
 	    const QModelIndex &attachmentIndex);
 
 	/*!

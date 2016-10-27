@@ -39,8 +39,8 @@
 /*
  * Constructor.
  */
-DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet, qint64 dmId,
-    const QDateTime &deliveryTime, QWidget *parent)
+DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet,
+    const MessageDb::MsgId &msgId, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
     m_msgDER(),
@@ -50,15 +50,15 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet, qint64 dmId,
     dSize()
 {
 	/* Obtain raw message and time stamp. */
-	Q_ASSERT(dmId >= 0);
-	Q_ASSERT(deliveryTime.isValid());
-	MessageDb *messageDb = dbSet.constAccessMessageDb(deliveryTime);
+	Q_ASSERT(msgId.dmId >= 0);
+	Q_ASSERT(msgId.deliveryTime.isValid());
+	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 	Q_ASSERT(0 != messageDb);
-	if (messageDb->msgsVerificationAttempted(dmId)) {
-		m_msgDER = messageDb->msgsMessageRaw(dmId);
+	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
+		m_msgDER = messageDb->msgsMessageRaw(msgId.dmId);
 	}
-	m_tstDER = messageDb->msgsTimestampRaw(dmId);
-	m_dbIsVerified = messageDb->msgsVerified(dmId);
+	m_tstDER = messageDb->msgsTimestampRaw(msgId.dmId);
+	m_dbIsVerified = messageDb->msgsVerified(msgId.dmId);
 
 	setupUi(this);
 
