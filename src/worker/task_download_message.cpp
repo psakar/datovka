@@ -33,18 +33,18 @@
 
 TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
     MessageDbSet *dbSet, enum MessageDirection msgDirect,
-    qint64 dmId, const QDateTime &dTime, bool listScheduled)
+    const MessageDb::MsgId &msgId, bool listScheduled)
     : m_result(DM_ERR),
     m_isdsError(),
     m_isdsLongError(),
-    m_mId(dmId, dTime),
+    m_mId(msgId),
     m_userName(userName),
     m_dbSet(dbSet),
     m_msgDirect(msgDirect),
     m_listScheduled(listScheduled)
 {
 	Q_ASSERT(0 != dbSet);
-	Q_ASSERT(0 <= dmId);
+	Q_ASSERT(0 <= msgId.dmId);
 }
 
 void TaskDownloadMessage::run(void)

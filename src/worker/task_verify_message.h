@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include <QString>
 
+#include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
@@ -51,11 +52,10 @@ public:
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
 	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     dmId         Message identifier.
-	 * @param[in]     deliveryTime Message delivery time.
+	 * @param[in]     msgId        Message identifier.
 	 */
 	explicit TaskVerifyMessage(const QString &userName, MessageDbSet *dbSet,
-	    qint64 dmId, const QDateTime &deliveryTime);
+	    const MessageDb::MsgId &msgId);
 
 	/*!
 	 * @brief Performs action.
@@ -79,21 +79,18 @@ private:
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
 	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     dmId         Message identifier.
-	 * @param[in]     deliveryTime Message delivery time.
+	 * @param[in]     msgId        Message identifier.
 	 * @param[out]    error        Error description.
 	 * @param[out]    longError    Long error description.
 	 * @return Verification result.
 	 */
 	static
 	enum Result verifyMessage(const QString &userName, MessageDbSet *dbSet,
-	    qint64 dmId, const QDateTime &deliveryTime, QString &error,
-	    QString &longError);
+	    const MessageDb::MsgId &msgId, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
-	const qint64 m_dmId; /*!< Message identifier. */
-	const QDateTime m_deliveryTime; /*!< Message delivery time. */
+	const MessageDb::MsgId m_msgId; /*!< Message identifier. */
 };
 
 #endif /* _TASK_VERIFY_MESSAGE_H_ */

@@ -29,6 +29,7 @@
 #include <QDialog>
 #include <QSslCertificate>
 
+#include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "ui_dlg_signature_detail.h"
 
@@ -37,8 +38,8 @@ class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
     Q_OBJECT
 
 public:
-	DlgSignatureDetail(const MessageDbSet &dbSet, qint64 dmId,
-	    const QDateTime &deliveryTime, QWidget *parent = 0);
+	DlgSignatureDetail(const MessageDbSet &dbSet,
+	    const MessageDb::MsgId &msgId, QWidget *parent = 0);
 	DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
 

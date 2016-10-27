@@ -371,6 +371,12 @@ private slots:
 	void createAndSendMessageReply(void);
 
 	/*!
+	 * @nrief Create a message containing as attachment the selected
+	 *     messages on ZFO format.
+	 */
+	void createAndSendMessageWithZfos(void);
+
+	/*!
 	 * @brief Create message from the template (selected message).
 	 */
 	void createAndSendMessageFromTmpl(void);
@@ -703,15 +709,14 @@ private:
 	 * @brief Export message into ZFO file dialogue.
 	 */
 	void exportMessageAsZFO(const QString &attachPath,
-	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
-	    bool askLocation);
+	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
 
 	/*!
 	 * @brief Export delivery information as ZFO file dialogue.
 	 */
 	void exportDeliveryInfoAsZFO(const QString &attachPath,
 	    const QString &attachFileName, const QString &formatString,
-	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
+	    const QString &userName, MessageDb::MsgId msgId,
 	    bool askLocation);
 
 	/*!
@@ -719,22 +724,19 @@ private:
 	 */
 	void exportDeliveryInfoAsPDF(const QString &attachPath,
 	    const QString &attachFileName, const QString &formatString,
-	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
-	    bool askLocation);
+	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
 
 	/*!
 	 * @brief Export selected message envelope as PDF file dialogue.
 	 */
 	void exportMessageEnvelopeAsPDF(const QString &attachPath,
-	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
-	    bool askLocation);
+	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
 
 	/*!
 	 * @brief Export selected message envelope as PDF and attachment files.
 	 */
 	void exportMessageEnvelopeAttachments(const QString &attachPath,
-	    const QString &userName, qint64 dmId, QDateTime deliveryTime,
-	    bool askLocation);
+	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
 
 	/*!
 	 * @brief Set info status bar from worker.
@@ -756,7 +758,7 @@ private:
 	/*!
 	 * @brief Save attachment identified by indexes to file.
 	 */
-	void saveAttachmentToFile(const QModelIndex &messageIndex,
+	void saveAttachmentToFile(const MessageDb::MsgId &msgId,
 	    const QModelIndex &attachmentIndex);
 
 	/*!
@@ -1028,9 +1030,11 @@ private:
 	 * without worker and thread.
 	 *
 	 * @note Delivery time may change if invalid given.
+	 *
+	 * @param[in,out] msgId Message identifier.
+	 * @return True on success.
 	 */
-	bool downloadCompleteMessage(qint64 dmId,
-	    QDateTime &deliveryTime);
+	bool downloadCompleteMessage(MessageDb::MsgId &msgId);
 
 	/*!
 	 * @brief Shows notification dialogue and offers downloading of
@@ -1038,10 +1042,11 @@ private:
 	 *
 	 * @note Delivery time may change if invalid given.
 	 *
+	 * @param[in,out] msgId Message identifier.
 	 * @return True on success.
 	 */
-	bool messageMissingOfferDownload(qint64 dmId,
-	    QDateTime &deliveryTime, const QString &title);
+	bool messageMissingOfferDownload(MessageDb::MsgId &msgId,
+	    const QString &title);
 
 	/*!
 	 * @brief Set read status to messages with given indexes.

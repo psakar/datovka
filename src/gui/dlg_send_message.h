@@ -27,16 +27,29 @@
 #include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
+#include <QList>
 #include <QSet>
 #include <QTimer>
 #include <QTreeView>
 
 #include "src/common.h"
+#include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
+/*!
+ * @brief Returns message prefix depending on whether it is sent ore received.
+ *
+ * @param[in] messageDb Message database.
+ * @param[in] dmId Message identifier number.
+ * @return Prefix.
+ *
+ * @todo Move this function somewhere else
+ *     (and clean up the code of the following dialogue.
+ */
+const QString &dzPrefix(MessageDb *messageDb, qint64 dmId);
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT
@@ -45,11 +58,12 @@ public:
 	enum Action {
 		ACT_NEW,
 		ACT_REPLY,
+		ACT_FORWARD,
 		ACT_NEW_FROM_TMP
 	};
 
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
-	    Action action, qint64 msgId, const QDateTime &deliveryTime,
+	    Action action, const QList<MessageDb::MsgId> &msgIds,
 	    const QString &userName, class MainWindow *mv, QWidget *parent = 0);
 
 signals:
@@ -84,11 +98,10 @@ private slots:
 private:
 	QTimer m_keepAliveTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
-	qint64 m_msgID;
-	QDateTime m_deliveryTime;
+	const QList<MessageDb::MsgId> m_msgIds;
 	QString m_dbId;
 	QString m_senderName;
-	Action m_action;
+	const Action m_action;
 	QString m_userName;
 	QString m_dbType;
 	bool m_dbEffectiveOVM;
@@ -108,6 +121,7 @@ private:
 	void initNewMessageDialog(void);
 	bool calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
+	void fillDlgAsForward(void);
 	void fillDlgFromTmpMsg(void);
 	int showInfoAboutPDZ(int pdzCnt);
 

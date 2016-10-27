@@ -27,6 +27,7 @@
 
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/message_db.h"
 #include "src/settings/preferences.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
@@ -251,8 +252,8 @@ void TestTaskDownloads::downloadMessage(void)
 
 	/* Should fail, is a received message. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
-	    m_recipientDbSet, MSG_SENT, m_receivedMsgId, m_deliveryTime,
-	    false);
+	    m_recipientDbSet, MSG_SENT,
+	    MessageDb::MsgId(m_receivedMsgId, m_deliveryTime), false);
 
 	QVERIFY(task != NULL);
 	task->setAutoDelete(false);
@@ -265,8 +266,8 @@ void TestTaskDownloads::downloadMessage(void)
 
 	/* Must succeed. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
-	    m_recipientDbSet, MSG_RECEIVED, m_receivedMsgId, m_deliveryTime,
-	    false);
+	    m_recipientDbSet, MSG_RECEIVED,
+	    MessageDb::MsgId(m_receivedMsgId, m_deliveryTime), false);
 
 	QVERIFY(task != NULL);
 	task->setAutoDelete(false);

@@ -227,19 +227,20 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			return DL_ISDS_ERROR;
 		}
 
-		qint64 dmId = QString(item->envelope->dmID).toLongLong();
 		/*
 		 * Time may be invalid (e.g. messages which failed during
 		 * virus scan).
 		 */
-		QDateTime deliveryTime =
-		    timevalToDateTime(item->envelope->dmDeliveryTime);
+		MessageDb::MsgId msgId(
+		    QString(item->envelope->dmID).toLongLong(),
+		    timevalToDateTime(item->envelope->dmDeliveryTime));
+
 		/* Delivery time may be invalid. */
-		if ((0 != invalidDb) && deliveryTime.isValid()) {
+		if ((0 != invalidDb) && msgId.deliveryTime.isValid()) {
 			/* Try deleting possible invalid entry. */
-			invalidDb->msgsDeleteMessageData(dmId);
+			invalidDb->msgsDeleteMessageData(msgId.dmId);
 		}
-		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
+		MessageDb *messageDb = dbSet.accessMessageDb(msgId.deliveryTime,
 		    true);
 		Q_ASSERT(0 != messageDb);
 
@@ -250,7 +251,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		}
 #endif /* USE_TRANSACTIONS */
 
-		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(dmId);
+		const int dmDbMsgStatus = messageDb->msgsStatusIfExists(
+		    msgId.dmId);
 
 		/* Message is NOT in db (-1), -> insert */
 		if (-1 == dmDbMsgStatus) {
@@ -259,12 +261,11 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			if (downloadWhole) {
 				TaskDownloadMessage *task;
 				task = new (std::nothrow) TaskDownloadMessage(
-				    userName, &dbSet, msgDirect, dmId,
-				    deliveryTime, true);
+				    userName, &dbSet, msgDirect, msgId, true);
 				task->setAutoDelete(true);
 				globWorkPool.assignLo(task, WorkerPool::PREPEND);
 			}
-			newMsgIdList.append(dmId);
+			newMsgIdList.append(msgId.dmId);
 			newcnt++;
 
 		/* Message is in db (dmDbMsgStatus <> -1), -> update */
@@ -284,11 +285,11 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 * (and status has changed) or is required by
 				 * downloadWhole in the settings.
 				 */
-				if (downloadWhole || messageDb->msgsStoredWhole(dmId)) {
+				if (downloadWhole || messageDb->msgsStoredWhole(msgId.dmId)) {
 					TaskDownloadMessage *task;
 					task = new (std::nothrow) TaskDownloadMessage(
-					    userName, &dbSet, msgDirect, dmId,
-					    deliveryTime, true);
+					    userName, &dbSet, msgDirect, msgId,
+					    true);
 					task->setAutoDelete(true);
 					globWorkPool.assignLo(task,
 					    WorkerPool::PREPEND);
@@ -297,7 +298,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				/* Update delivery info of sent message */
 				if (MSG_SENT == msgDirect) {
 					downloadMessageState(msgDirect,
-					    userName, dmId, true, dbSet,
+					    userName, msgId.dmId, true, dbSet,
 					    error, longError);
 				}
 			}
