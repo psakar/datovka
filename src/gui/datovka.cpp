@@ -173,7 +173,26 @@ QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
 static inline
 MessageDb::MsgId msgMsgId(const QModelIndex &msgIdx)
 {
+	Q_ASSERT(msgIdx.isValid());
 	return MessageDb::MsgId(msgIdentifier(msgIdx), msgDeliveryTime(msgIdx));
+}
+
+/*!
+ * @brief returns list of full message identifiers.
+ *
+ * @param[in] msgIdxs List of indexes.
+ * @return List if message identifiers.
+ */
+static inline
+QList<MessageDb::MsgId> msgMsgIds(const QModelIndexList &msgIdxs)
+{
+	QList<MessageDb::MsgId> msgIds;
+	foreach (const QModelIndex &idx, msgIdxs) {
+		MessageDb::MsgId msgId(msgMsgId(idx));
+		Q_ASSERT(msgId.dmId >= 0);
+		msgIds.append(msgId);
+	}
+	return msgIds;
 }
 
 /* ========================================================================= */
@@ -2922,7 +2941,6 @@ void MainWindow::deleteMessage(void)
 	debugSlotCall();
 
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
 	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
 	}
@@ -2971,15 +2989,10 @@ void MainWindow::deleteMessage(void)
 		return;
 	}
 
-	QList<MessageDb::MsgId> msgIds;
-	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(msgMsgId(idx));
-	}
-
 	/* Save current account index */
 	QModelIndex selectedAcntIndex(currentAccountModelIndex());
 
-	foreach (const MessageDb::MsgId &id, msgIds) {
+	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
 		if (eraseMessage(userName, id.dmId, id.deliveryTime,
 		        delMsgIsds)) {
 			/*
@@ -3296,14 +3309,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	enum MessageDirection msgDirection = MSG_RECEIVED;
 
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
 	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
-	}
-
-	QList<MessageDb::MsgId> msgIds;
-	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		msgIds.append(msgMsgId(idx));
 	}
 
 	QString userName;
@@ -3346,8 +3353,8 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 
-	foreach (const MessageDb::MsgId &id, msgIds) {
-		/* Using prepend() just to outrun other jobs. */
+	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
+		/* Using PREPEND in order to outrun other jobs. */
 		TaskDownloadMessage *task;
 
 		task = new (std::nothrow) TaskDownloadMessage(userName, dbSet,
