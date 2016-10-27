@@ -7329,8 +7329,9 @@ void MainWindow::sendMessagesZfoEmail(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7340,14 +7341,13 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
-	QString subject((1 == firstMsgColumnIdxs.size()) ?
+	QString subject((1 == msgIds.size()) ?
 	    tr("Data message") : tr("Data messages"));
 
-	subject += " " + firstMsgColumnIdxs.first().data().toString();
-	if (firstMsgColumnIdxs.size() > 1) {
-		for (int i = 1; i < firstMsgColumnIdxs.size(); ++i) {
-			subject += ", " +
-			    firstMsgColumnIdxs.at(i).data().toString();
+	subject += " " + QString::number(msgIds.first().dmId);
+	if (msgIds.size() > 1) {
+		for (int i = 1; i < msgIds.size(); ++i) {
+			subject += ", " + QString::number(msgIds.at(i).dmId);
 		}
 	}
 
@@ -7357,27 +7357,21 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
-
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
+	foreach (MessageDb::MsgId msgId, msgIds) {
+		Q_ASSERT(msgId.dmId >= 0);
+
+		MessageDb *messageDb = dbSet->accessMessageDb(
+		    msgId.deliveryTime, false);
+		if (0 == messageDb) {
 			Q_ASSERT(0);
 			return;
 		}
-
-		msgId.dmId = frstIdx.data().toLongLong();
 
 		QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
 		if (base64.isEmpty()) {
@@ -7430,8 +7424,9 @@ void MainWindow::sendAllAttachmentsEmail(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7441,14 +7436,13 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
-	QString subject = (1 == firstMsgColumnIdxs.size()) ?
-	    tr("Attachments of message") : tr("Attachments of messages");
+	QString subject((1 == msgIds.size()) ?
+	    tr("Attachments of message") : tr("Attachments of messages"));
 
-	subject += " " + firstMsgColumnIdxs.first().data().toString();
-	if (firstMsgColumnIdxs.size() > 1) {
-		for (int i = 1; i < firstMsgColumnIdxs.size(); ++i) {
-			subject += ", " +
-			    firstMsgColumnIdxs.at(i).data().toString();
+	subject += " " + QString::number(msgIds.first().dmId);
+	if (msgIds.size() > 1) {
+		for (int i = 1; i < msgIds.size(); ++i) {
+			subject += ", " + QString::number(msgIds.at(i).dmId);
 		}
 	}
 
@@ -7458,27 +7452,21 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
-
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
+	foreach (MessageDb::MsgId msgId, msgIds) {
+		Q_ASSERT(msgId.dmId >= 0);
+
+		MessageDb *messageDb = dbSet->accessMessageDb(
+		    msgId.deliveryTime, false);
+		if (0 == messageDb) {
 			Q_ASSERT(0);
 			return;
 		}
-
-		msgId.dmId = frstIdx.data().toLongLong();
 
 		QList<MessageDb::FileData> attachList =
 		    messageDb->getFilesFromMessage(msgId.dmId);
