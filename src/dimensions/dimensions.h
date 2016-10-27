@@ -66,10 +66,22 @@ public:
 	 * @param[in] widget Widget to obtain font metrics from.
 	 * @param[in] wr Width ratio relative to font height.
 	 * @param[in] hr Height ratio relative to font height.
-	 * @return Window dimensions.
+	 * @return Window size.
 	 */
 	static
 	QSize windowSize(const QWidget *widget, qreal wr, qreal hr);
+
+	/*!
+	 * @brief Returns dimensions of window specified as the ratio of the
+	 *     detected font height.
+	 *
+	 * @param[in] widget Widget to obtain font metrics from.
+	 * @param[in] wr Width ratio relative to font height.
+	 * @param[in] hr Height ratio relative to font height.
+	 * @return Window dimensions.
+	 */
+	static
+	QRect windowDimensions(const QWidget *widget, qreal wr, qreal hr);
 
 private:
 	/*!
@@ -87,6 +99,9 @@ private:
 
 	static
 	const qreal m_lineHeight; /*!< Height of line as ration of text height. */
+
+	static
+	const qreal m_screenRatio; /*!< Ratio of screen dimensions to use. */
 };
 
 #endif /* _DIMENSIONS_H_ */

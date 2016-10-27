@@ -47,6 +47,7 @@
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
+#include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -4020,11 +4021,16 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
 	/* Window geometry. */
+	QRect defaultDimensions(Dimensions::windowDimensions(this, 86.0, 84.0));
 
-	int x = settings.value("window_position/x", 0).toInt() + W_OFFS;
-	int y = settings.value("window_position/y", 0).toInt() + H_OFFS;
-	int w = settings.value("window_position/w", 800).toInt();
-	int h = settings.value("window_position/h", 600).toInt();
+	int x = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_X,
+	    defaultDimensions.x()).toInt() + W_OFFS;
+	int y = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_Y,
+	    defaultDimensions.y()).toInt() + H_OFFS;
+	int w = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_W,
+	    defaultDimensions.width()).toInt();
+	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
+	    defaultDimensions.height()).toInt();
 	this->setGeometry(x, y, w, h);
 
 	/* Splitter geometry. */
@@ -4372,18 +4378,18 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 	/* Window geometry. */
 
-	settings.beginGroup("window_position");
+	settings.beginGroup(WIN_POSITION_HEADER);
 
 	value = this->geometry().x() - W_OFFS;
 	value = (value < 0) ? 0 : value;
-	settings.setValue("x", value);
+	settings.setValue(WIN_POSITION_X, value);
 
 	value = this->geometry().y() - H_OFFS;
 	value = (value < 0) ? 0 : value;
-	settings.setValue("y", value);
+	settings.setValue(WIN_POSITION_Y, value);
 
-	settings.setValue("w", this->geometry().width());
-	settings.setValue("h", this->geometry().height());
+	settings.setValue(WIN_POSITION_W, this->geometry().width());
+	settings.setValue(WIN_POSITION_H, this->geometry().height());
 
 	settings.endGroup();
 
