@@ -4010,8 +4010,6 @@ bool MainWindow::ensureConfPresence(void)
 }
 
 
-#define W_OFFS 2
-#define H_OFFS 22
 #define SH_OFFS 50 /* Menu bar + top tool-bar. */
 /* ========================================================================= */
 /*
@@ -4021,12 +4019,12 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
 	/* Window geometry. */
-	QRect defaultDimensions(Dimensions::windowDimensions(this, 86.0, 84.0));
+	QRect defaultDimensions(Dimensions::windowDimensions(this, 76.0, 48.0));
 
 	int x = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_X,
-	    defaultDimensions.x()).toInt() + W_OFFS;
+	    defaultDimensions.x()).toInt();
 	int y = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_Y,
-	    defaultDimensions.y()).toInt() + H_OFFS;
+	    defaultDimensions.y()).toInt();
 	int w = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_W,
 	    defaultDimensions.width()).toInt();
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
@@ -4380,11 +4378,11 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 	settings.beginGroup(WIN_POSITION_HEADER);
 
-	value = this->geometry().x() - W_OFFS;
+	value = this->geometry().x();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_X, value);
 
-	value = this->geometry().y() - H_OFFS;
+	value = this->geometry().y();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_Y, value);
 
@@ -4404,8 +4402,6 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 	settings.endGroup();
 }
-#undef W_OFFS
-#undef H_OFFS
 #undef SH_OFFS
 
 
