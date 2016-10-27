@@ -123,6 +123,13 @@ QNetworkAccessManager* nam;
 #define currentFrstColMessageIndexes() \
 	(ui->messageList->selectionModel()->selectedRows(0))
 
+/*!
+ * @brief Returns QModelIndexList containing first column indexes of selected
+ *     attachment model rows.
+ */
+#define currentFrstColAttachmentIndexes() \
+	(ui->messageAttachmentList->selectionModel()->selectedRows(0))
+
 /* ========================================================================= */
 MainWindow::MainWindow(QWidget *parent)
 /* ========================================================================= */
@@ -1273,15 +1280,7 @@ void MainWindow::viewSelectedMessage(void)
 	QModelIndex msgIndex;
 
 	{
-		QModelIndexList msgIndexes;
-
-		QItemSelectionModel *selectionModel =
-		    ui->messageList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		msgIndexes = selectionModel->selectedRows(0);
+		QModelIndexList msgIndexes(currentFrstColMessageIndexes());
 
 		if (msgIndexes.size() != 1) {
 			/* Do nothing when multiple messages selected. */
@@ -1725,18 +1724,8 @@ void MainWindow::attachmentItemsSelectionChanged(
 	Q_UNUSED(selected);
 	Q_UNUSED(deselected);
 
-	QModelIndexList selectedIndexes;
-	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageAttachmentList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		selectedIndexes = selectionModel->selectedRows(0);
-	}
-
-	setAttachmentActionVisibility(selectedIndexes.size());
+	setAttachmentActionVisibility(
+	    currentFrstColAttachmentIndexes().size());
 }
 
 
@@ -1758,22 +1747,12 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 		}
 	}
 
-	QModelIndexList selectedIndexes;
-	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageAttachmentList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		selectedIndexes = selectionModel->selectedRows(0);
-	}
-
-	Q_ASSERT(selectedIndexes.size() > 0);
+	QModelIndexList attachmentIndexes(currentFrstColAttachmentIndexes());
+	Q_ASSERT(attachmentIndexes.size() > 0);
 
 	QMenu *menu = new QMenu;
 
-	if (selectedIndexes.size() == 1) {
+	if (attachmentIndexes.size() == 1) {
 		menu->addAction(ui->actionOpen_attachment);
 	}
 	menu->addAction(ui->actionSave_selected_attachments);
@@ -1794,16 +1773,7 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 {
 	debugSlotCall();
 
-	QModelIndexList attachmentIndexes;
-	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageAttachmentList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		attachmentIndexes = selectionModel->selectedRows(0);
-	}
+	QModelIndexList attachmentIndexes(currentFrstColAttachmentIndexes());
 
 	QModelIndex messageIndex(currentSingleMessageIndex());
 	if (!messageIndex.isValid()) {
@@ -2104,17 +2074,9 @@ void MainWindow::openSelectedAttachment(void)
 	debugSlotCall();
 
 	QModelIndex selectedIndex;
-
 	{
-		QModelIndexList attachmentIndexes;
-
-		QItemSelectionModel *selectionModel =
-		    ui->messageAttachmentList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		attachmentIndexes = selectionModel->selectedRows(0);
+		QModelIndexList attachmentIndexes(
+		    currentFrstColAttachmentIndexes());
 
 		if (attachmentIndexes.size() != 1) {
 			Q_ASSERT(0);
@@ -7585,16 +7547,7 @@ void MainWindow::sendAttachmentsEmail(void)
 {
 	debugSlotCall();
 
-	QModelIndexList attachmentIndexes;
-	{
-		QItemSelectionModel *selectionModel =
-		    ui->messageAttachmentList->selectionModel();
-		if (0 == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		attachmentIndexes = selectionModel->selectedRows(0);
-	}
+	QModelIndexList attachmentIndexes(currentFrstColAttachmentIndexes());
 
 	qint64 dmId = -1;
 	{
