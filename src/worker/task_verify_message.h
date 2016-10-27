@@ -79,8 +79,7 @@ private:
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
 	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     dmId         Message identifier.
-	 * @param[in]     deliveryTime Message delivery time.
+	 * @param[in]     msgId        Message identifier.
 	 * @param[out]    error        Error description.
 	 * @param[out]    longError    Long error description.
 	 * @return Verification result.

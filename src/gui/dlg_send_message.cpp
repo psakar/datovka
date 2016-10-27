@@ -50,6 +50,28 @@
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
+const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
+{
+	const static QString nothing;
+	const static QString received(QLatin1String("D"));
+	const static QString sent(QLatin1String("0"));
+
+	if (0 == messageDb || dmId < 0) {
+		return nothing;
+	}
+
+	switch (messageDb->msgMessageType(dmId)) {
+	case MessageDb::TYPE_RECEIVED:
+		return received;
+		break;
+	case MessageDb::TYPE_SENT:
+		return sent;
+		break;
+	default:
+		return nothing;
+		break;
+	}
+}
 
 /*
  * Column indexes into recipient table widget.
@@ -565,24 +587,11 @@ void DlgSendMessage::fillDlgAsForward(void)
 			continue;
 		}
 
-		QString prefix;
-		switch (messageDb->msgMessageType(msgId.dmId)) {
-		case MessageDb::TYPE_RECEIVED:
-			prefix = "D";
-			break;
-		case MessageDb::TYPE_SENT:
-			prefix = "O";
-			break;
-		default:
-			prefix.clear();
-			break;
-		}
-
 		int row = this->attachmentTableWidget->rowCount();
 		this->attachmentTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(
-		    prefix + "DZ_" + QString::number(msgId.dmId) + ".zfo");
+		item->setText(dzPrefix(messageDb, msgId.dmId) +
+		    QString("DZ_%1.zfo").arg(msgId.dmId));
 		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
 		item = new QTableWidgetItem;
 		item->setText("");

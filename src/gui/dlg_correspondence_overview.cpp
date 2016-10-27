@@ -593,7 +593,7 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, false)) {
-					qDebug() << "DDZ" << mId.dmId
+					qDebug() << "DZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain data necessary for ZFO "
@@ -625,7 +625,7 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, false)) {
-					qDebug() << "DDZ" << mId.dmId
+					qDebug() << "DZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain data necessary for ZFO "
@@ -664,7 +664,7 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, true)) {
-					qDebug() << "DDZ" << mId.dmId
+					qDebug() << "DZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain deivery info data "
@@ -696,7 +696,7 @@ void DlgCorrespondenceOverview::exportData(void)
 				fileName = exportDir + QDir::separator() +
 				    fileName + ".zfo";
 				if (!exportMessageAsZFO(mId, fileName, true)) {
-					qDebug() << "DDZ" << mId.dmId
+					qDebug() << "DZ" << mId.dmId
 					    << "export error";
 					errorText = tr("Message '%1' does not "
 					    "contain deivery info data "

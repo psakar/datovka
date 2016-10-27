@@ -39,6 +39,17 @@
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
 
+/*!
+ * @brief Returns message prefix depending on whether it is sent ore received.
+ *
+ * @param[in] messageDb Message database.
+ * @param[in] dmId Message identifier number.
+ * @return Prefix.
+ *
+ * @todo Move this function somewhere else
+ *     (and clean up the code of the following dialogue.
+ */
+const QString &dzPrefix(MessageDb *messageDb, qint64 dmId);
 
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT

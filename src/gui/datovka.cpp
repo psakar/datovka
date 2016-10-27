@@ -7398,8 +7398,8 @@ void MainWindow::sendMessagesZfoEmail(void)
 			}
 		}
 
-		QString attachName(QString("DDZ_%1.zfo").arg(msgId.dmId));
-
+		QString attachName(dzPrefix(messageDb, msgId.dmId) +
+		    QString("DZ_%1.zfo").arg(msgId.dmId));
 		if (attachName.isEmpty()) {
 			Q_ASSERT(0);
 			return;
@@ -7612,11 +7612,11 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QString fileName =
-	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1.zfo").arg(msgId.dmId);
-	Q_ASSERT(!fileName.isEmpty());
-
+	QString fileName(TMP_ATTACHMENT_PREFIX +
+	    dzPrefix(messageDb, msgId.dmId) +
+	    QString("DZ_%1.zfo").arg(msgId.dmId));
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
 
@@ -7690,11 +7690,11 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QString fileName =
-	    QString(TMP_ATTACHMENT_PREFIX "DDZ_%1_info.zfo").arg(msgId.dmId);
-	Q_ASSERT(!fileName.isEmpty());
-
+	QString fileName(TMP_ATTACHMENT_PREFIX +
+	    dzPrefix(messageDb, msgId.dmId) +
+	    QString("DZ_%1_info.zfo").arg(msgId.dmId));
 	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
 		return;
 	}
 
