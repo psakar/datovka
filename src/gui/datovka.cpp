@@ -1328,7 +1328,6 @@ void MainWindow::viewSelectedMessage(void)
 	debugSlotCall();
 
 	QModelIndex msgIndex;
-
 	{
 		QModelIndexList msgIndexes(currentFrstColMessageIndexes());
 
@@ -2386,9 +2385,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	ui->messageList->selectionModel()->select(storedMsgSelection,
 	    QItemSelectionModel::ClearAndSelect);
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	if (1 != firstMsgColumnIdxs.size()) {
+	if (1 != currentFrstColMessageIndexes().size()) {
 		return;
 	}
 
@@ -2865,9 +2862,7 @@ void MainWindow::messageItemsSelectedMarkRead(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetReadStatus(firstMsgColumnIdxs, true);
+	messageItemsSetReadStatus(currentFrstColMessageIndexes(), true);
 }
 
 
@@ -2880,9 +2875,7 @@ void MainWindow::messageItemsSelectedMarkUnread(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetReadStatus(firstMsgColumnIdxs, false);
+	messageItemsSetReadStatus(currentFrstColMessageIndexes(), false);
 }
 
 
@@ -2895,9 +2888,7 @@ void MainWindow::messageItemsSelectedMarkUnsettled(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetProcessStatus(firstMsgColumnIdxs, UNSETTLED);
+	messageItemsSetProcessStatus(currentFrstColMessageIndexes(), UNSETTLED);
 }
 
 
@@ -2910,9 +2901,7 @@ void MainWindow::messageItemsSelectedMarkInProgress(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetProcessStatus(firstMsgColumnIdxs, IN_PROGRESS);
+	messageItemsSetProcessStatus(currentFrstColMessageIndexes(), IN_PROGRESS);
 }
 
 
@@ -2925,9 +2914,7 @@ void MainWindow::messageItemsSelectedMarkSettled(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetProcessStatus(firstMsgColumnIdxs, SETTLED);
+	messageItemsSetProcessStatus(currentFrstColMessageIndexes(), SETTLED);
 }
 
 
@@ -8291,9 +8278,7 @@ void MainWindow::msgSetSelectedMessageProcessState(int stateIndex)
 		break;
 	}
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	messageItemsSetProcessStatus(firstMsgColumnIdxs, procSt);
+	messageItemsSetProcessStatus(currentFrstColMessageIndexes(), procSt);
 }
 
 
@@ -8752,7 +8737,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 			return;
 		}
 
-		QList<MessageDb::MsgId> msgIdList = dbSet->getAllMessageIDsFromDB();
+		QList<MessageDb::MsgId> msgIdList(dbSet->getAllMessageIDsFromDB());
 		msgCnt = msgIdList.count();
 
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
@@ -9101,8 +9086,8 @@ void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
 		QString dboxId = globAccountDbPtr->dbId(userName + "___True");
 
 		/* get all messages from source single database */
-		QList<MessageDb::MsgId> msgIdList =
-		    srcDbSingle->getAllMessageIDsFromDB();
+		QList<MessageDb::MsgId> msgIdList(
+		    srcDbSingle->getAllMessageIDsFromDB());
 
 		/* get database set for selected account */
 		MessageDbSet *dstDbSet = accountDbSet(userName, this);
@@ -9887,9 +9872,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 
 	QList<qint64> msgIdList;
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-
-	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
+	foreach (const QModelIndex &idx, currentFrstColMessageIndexes()) {
 		msgIdList.append(idx.data().toLongLong());
 	}
 
