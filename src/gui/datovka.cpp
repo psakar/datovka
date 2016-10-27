@@ -139,6 +139,7 @@ QNetworkAccessManager* nam;
 static inline
 qint64 msgIdentifier(const QModelIndex &msgIdx)
 {
+	Q_ASSERT(msgIdx.isValid());
 	if (msgIdx.column() == DbMsgsTblModel::DMID_COL) {
 		return msgIdx.data().toLongLong();
 	} else {
@@ -188,6 +189,10 @@ QList<MessageDb::MsgId> msgMsgIds(const QModelIndexList &msgIdxs)
 {
 	QList<MessageDb::MsgId> msgIds;
 	foreach (const QModelIndex &idx, msgIdxs) {
+		if (!idx.isValid()) {
+			Q_ASSERT(0);
+			return QList<MessageDb::MsgId>();
+		}
 		MessageDb::MsgId msgId(msgMsgId(idx));
 		Q_ASSERT(msgId.dmId >= 0);
 		msgIds.append(msgId);
@@ -7213,8 +7218,9 @@ void MainWindow::exportSelectedMessagesAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7222,15 +7228,8 @@ void MainWindow::exportSelectedMessagesAsZFO(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		MessageDb::MsgId msgId(msgMsgId(frstIdx));
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-
 		exportMessageAsZFO(QString(), userName, msgId, true);
 	}
 }
@@ -7239,8 +7238,9 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7248,15 +7248,8 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		MessageDb::MsgId msgId(msgMsgId(frstIdx));
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-
 		exportDeliveryInfoAsZFO(QString(), QString(),
 		    globPref.delivery_filename_format, userName, msgId, true);
 	}
@@ -7266,8 +7259,9 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7275,15 +7269,8 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		MessageDb::MsgId msgId(msgMsgId(frstIdx));
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-
 		exportDeliveryInfoAsPDF(QString(), QString(),
 		    globPref.delivery_filename_format, userName, msgId, true);
 	}
@@ -7293,8 +7280,9 @@ void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7302,26 +7290,19 @@ void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		MessageDb::MsgId msgId(msgMsgId(frstIdx));
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-
 		exportMessageEnvelopeAsPDF(QString(), userName, msgId, true);
 	}
 }
-
 
 void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (0 == firstMsgColumnIdxs.size()) {
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
 		return;
 	}
 
@@ -7337,15 +7318,8 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 		return;
 	}
 
-	foreach (const QModelIndex &frstIdx, firstMsgColumnIdxs) {
-		if (!frstIdx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		MessageDb::MsgId msgId(msgMsgId(frstIdx));
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-
 		exportMessageEnvelopeAttachments(newDir, userName, msgId,
 		    false);
 	}
@@ -7366,8 +7340,8 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
-	QString subject = (1 == firstMsgColumnIdxs.size()) ?
-	    tr("Data message") : tr("Data messages");
+	QString subject((1 == firstMsgColumnIdxs.size()) ?
+	    tr("Data message") : tr("Data messages"));
 
 	subject += " " + firstMsgColumnIdxs.first().data().toString();
 	if (firstMsgColumnIdxs.size() > 1) {
