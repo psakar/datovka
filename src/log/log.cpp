@@ -56,6 +56,9 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 
 	switch (type) {
 	case QtDebugMsg:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	case QtInfoMsg:
+#endif /* >= Qt-5.5 */
 	case QtWarningMsg:
 	case QtCriticalMsg:
 		if (globLog.logVerbosity() > 0) {
@@ -543,6 +546,11 @@ uint8_t GlobLog::levelFromType(QtMsgType type)
 	case QtDebugMsg:
 		return LOG_DEBUG;
 		break;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	case QtInfoMsg:
+		return LOG_INFO;
+		break;
+#endif /* >= Qt-5.5 */
 	case QtWarningMsg:
 		return LOG_WARNING;
 		break;
@@ -551,9 +559,11 @@ uint8_t GlobLog::levelFromType(QtMsgType type)
 		break;
 	case QtFatalMsg:
 		return LOG_EMERG; /* System is unusable. */
+		break;
 	default:
 		Q_ASSERT(0);
 		return -1;
+		break;
 	}
 }
 
