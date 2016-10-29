@@ -180,7 +180,7 @@ MessageDb::MsgId msgMsgId(const QModelIndex &msgIdx)
 }
 
 /*!
- * @brief returns list of full message identifiers.
+ * @brief Returns list of full message identifiers.
  *
  * @param[in] msgIdxs List of indexes.
  * @return List if message identifiers.
@@ -199,6 +199,37 @@ QList<MessageDb::MsgId> msgMsgIds(const QModelIndexList &msgIdxs)
 		msgIds.append(msgId);
 	}
 	return msgIds;
+}
+
+/*!
+ * @brief Returns whether we are working with sent or received messages.
+ *
+ * @param[in] acntIdx Account model index.
+ * @param[in] dfltDirect Default direction to be returned.
+ */
+static
+enum MessageDirection messageDirection(const QModelIndex &acntIdx,
+    enum MessageDirection dfltDirect)
+{
+	enum MessageDirection ret = dfltDirect;
+
+	switch (AccountModel::nodeType(acntIdx)) {
+	case AccountModel::nodeRecentReceived:
+	case AccountModel::nodeReceived:
+	case AccountModel::nodeReceivedYear:
+		ret = MSG_RECEIVED;
+		break;
+	case AccountModel::nodeRecentSent:
+	case AccountModel::nodeSent:
+	case AccountModel::nodeSentYear:
+		ret = MSG_SENT;
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return ret;
 }
 
 /* ========================================================================= */
@@ -3032,25 +3063,8 @@ bool MainWindow::eraseMessage(const QString &userName,
 		return false;
 	}
 
-	enum MessageDirection msgDirect = MSG_RECEIVED;
-	{
-		QModelIndex acntIdx(currentAccountModelIndex());
-
-		switch (AccountModel::nodeType(acntIdx)) {
-		case AccountModel::nodeRecentReceived:
-		case AccountModel::nodeReceived:
-		case AccountModel::nodeReceivedYear:
-			msgDirect = MSG_RECEIVED;
-			break;
-		case AccountModel::nodeRecentSent:
-		case AccountModel::nodeSent:
-		case AccountModel::nodeSentYear:
-			msgDirect = MSG_SENT;
-			break;
-		default:
-			break;
-		}
-	}
+	enum MessageDirection msgDirect =
+	    messageDirection(currentAccountModelIndex(), MSG_RECEIVED);
 
 	if (delFromIsds && !globIsdsSessions.isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
@@ -3300,7 +3314,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 {
 	debugSlotCall();
 
-	enum MessageDirection msgDirection = MSG_RECEIVED;
+	enum MessageDirection msgDirect = MSG_RECEIVED;
 
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (firstMsgColumnIdxs.isEmpty()) {
@@ -3312,21 +3326,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		QModelIndex accountIndex(currentAccountModelIndex());
 		Q_ASSERT(accountIndex.isValid());
 
-		switch (AccountModel::nodeType(accountIndex)) {
-		case AccountModel::nodeRecentReceived:
-		case AccountModel::nodeReceived:
-		case AccountModel::nodeReceivedYear:
-			msgDirection = MSG_RECEIVED;
-			break;
-		case AccountModel::nodeRecentSent:
-		case AccountModel::nodeSent:
-		case AccountModel::nodeSentYear:
-			msgDirection = MSG_SENT;
-			break;
-		default:
-			break;
-		}
-
+		msgDirect = messageDirection(accountIndex, MSG_RECEIVED);
 		userName = m_accountModel.userName(accountIndex);
 	}
 
@@ -3352,7 +3352,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		TaskDownloadMessage *task;
 
 		task = new (std::nothrow) TaskDownloadMessage(userName, dbSet,
-		    msgDirection, id, false);
+		    msgDirect, id, false);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
@@ -6593,23 +6593,9 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 
 	/* selection().indexes() ? */
 
-	enum MessageDirection msgDirect = MSG_RECEIVED;
-
 	QModelIndex acntIndex(currentAccountModelIndex());
-	switch (AccountModel::nodeType(acntIndex)) {
-	case AccountModel::nodeRecentReceived:
-	case AccountModel::nodeReceived:
-	case AccountModel::nodeReceivedYear:
-		msgDirect = MSG_RECEIVED;
-		break;
-	case AccountModel::nodeRecentSent:
-	case AccountModel::nodeSent:
-	case AccountModel::nodeSentYear:
-		msgDirect = MSG_SENT;
-		break;
-	default:
-		break;
-	}
+	enum MessageDirection msgDirect =
+	    messageDirection(acntIndex, MSG_RECEIVED);
 
 	const QString userName(m_accountModel.userName(acntIndex));
 	Q_ASSERT(!userName.isEmpty());
