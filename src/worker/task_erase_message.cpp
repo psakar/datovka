@@ -31,7 +31,8 @@
 #include "src/worker/task_erase_message.h"
 
 TaskEraseMessage::TaskEraseMessage(const QString &userName, MessageDbSet *dbSet,
-    qint64 dmId, const QDateTime &deliveryTime, bool incoming, bool delFromIsds)
+    qint64 dmId, const QDateTime &deliveryTime, enum MessageDirection msgDirect,
+    bool delFromIsds)
     : m_result(NOT_DELETED),
     m_isdsError(),
     m_isdsLongError(),
@@ -39,7 +40,7 @@ TaskEraseMessage::TaskEraseMessage(const QString &userName, MessageDbSet *dbSet,
     m_dbSet(dbSet),
     m_dmId(dmId),
     m_deliveryTime(deliveryTime),
-    m_incoming(incoming),
+    m_msgDirect(msgDirect),
     m_delFromIsds(delFromIsds)
 {
 	Q_ASSERT(!m_userName.isEmpty());
@@ -70,7 +71,7 @@ void TaskEraseMessage::run(void)
 	/* ### Worker task begin. ### */
 
 	m_result = eraseMessage(m_userName, m_dbSet, m_dmId, m_deliveryTime,
-	    m_incoming, m_delFromIsds, m_isdsError, m_isdsLongError);
+	    m_msgDirect, m_delFromIsds, m_isdsError, m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -82,8 +83,8 @@ void TaskEraseMessage::run(void)
 
 enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
     const QString &userName, MessageDbSet *dbSet, qint64 dmId,
-    const QDateTime &deliveryTime, bool incoming, bool delFromIsds,
-    QString &error, QString &longError)
+    const QDateTime &deliveryTime, enum MessageDirection msgDirect,
+    bool delFromIsds, QString &error, QString &longError)
 {
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(0 != dbSet);
@@ -106,7 +107,8 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		}
 
 		status = isds_delete_message_from_storage(session,
-		    QString::number(dmId).toUtf8().constData(), incoming);
+		    QString::number(dmId).toUtf8().constData(),
+		    msgDirect == MSG_RECEIVED);
 
 		if (IE_SUCCESS == status) {
 			logDebugLv1NL(

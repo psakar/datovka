@@ -3033,7 +3033,7 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		return false;
 	}
 
-	bool incoming = true;
+	enum MessageDirection msgDirect = MSG_RECEIVED;
 	{
 		QModelIndex acntIdx(currentAccountModelIndex());
 
@@ -3041,12 +3041,12 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 		case AccountModel::nodeRecentReceived:
 		case AccountModel::nodeReceived:
 		case AccountModel::nodeReceivedYear:
-			incoming = true;
+			msgDirect = MSG_RECEIVED;
 			break;
 		case AccountModel::nodeRecentSent:
 		case AccountModel::nodeSent:
 		case AccountModel::nodeSentYear:
-			incoming = false;
+			msgDirect = MSG_SENT;
 			break;
 		default:
 			break;
@@ -3065,7 +3065,7 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 	TaskEraseMessage *task;
 
 	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, dmId,
-	    deliveryTime, incoming, delFromIsds);
+	    deliveryTime, msgDirect, delFromIsds);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
