@@ -31,21 +31,20 @@
 #include "src/worker/task_erase_message.h"
 
 TaskEraseMessage::TaskEraseMessage(const QString &userName, MessageDbSet *dbSet,
-    qint64 dmId, const QDateTime &deliveryTime, enum MessageDirection msgDirect,
+    const MessageDb::MsgId &msgId, enum MessageDirection msgDirect,
     bool delFromIsds)
     : m_result(NOT_DELETED),
     m_isdsError(),
     m_isdsLongError(),
     m_userName(userName),
     m_dbSet(dbSet),
-    m_dmId(dmId),
-    m_deliveryTime(deliveryTime),
+    m_msgId(msgId),
     m_msgDirect(msgDirect),
     m_delFromIsds(delFromIsds)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(0 != m_dbSet);
-	Q_ASSERT(m_dmId >= 0);
+	Q_ASSERT(m_msgId.dmId >= 0);
 }
 
 void TaskEraseMessage::run(void)
@@ -60,7 +59,7 @@ void TaskEraseMessage::run(void)
 		return;
 	}
 
-	if (0 > m_dmId) {
+	if (0 > m_msgId.dmId) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -70,8 +69,8 @@ void TaskEraseMessage::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_result = eraseMessage(m_userName, m_dbSet, m_dmId, m_deliveryTime,
-	    m_msgDirect, m_delFromIsds, m_isdsError, m_isdsLongError);
+	m_result = eraseMessage(m_userName, m_dbSet, m_msgId, m_msgDirect,
+	    m_delFromIsds, m_isdsError, m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -82,17 +81,18 @@ void TaskEraseMessage::run(void)
 }
 
 enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
-    const QString &userName, MessageDbSet *dbSet, qint64 dmId,
-    const QDateTime &deliveryTime, enum MessageDirection msgDirect,
-    bool delFromIsds, QString &error, QString &longError)
+    const QString &userName, MessageDbSet *dbSet, const MessageDb::MsgId &msgId,
+    enum MessageDirection msgDirect, bool delFromIsds, QString &error,
+    QString &longError)
 {
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(0 != dbSet);
-	Q_ASSERT(dmId >= 0);
+	Q_ASSERT(msgId.dmId >= 0);
 
 	isds_error status = IE_SUCCESS;
 
-	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
 		return NOT_DELETED;
@@ -107,20 +107,20 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		}
 
 		status = isds_delete_message_from_storage(session,
-		    QString::number(dmId).toUtf8().constData(),
+		    QString::number(msgId.dmId).toUtf8().constData(),
 		    msgDirect == MSG_RECEIVED);
 
 		if (IE_SUCCESS == status) {
 			logDebugLv1NL(
 			    "Message '%" PRId64 "' was deleted from ISDS.",
-			    dmId);
+			    msgId.dmId);
 		} else {
 			error = isdsStrError(status);
 			longError = isdsLongMessage(session);
 
 			logErrorNL(
 			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",
-			    dmId, status, error.toUtf8().constData());
+			    msgId.dmId, status, error.toUtf8().constData());
 		}
 	}
 
@@ -128,15 +128,15 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		return NOT_DELETED;
 	}
 
-	if (messageDb->msgsDeleteMessageData(dmId)) {
+	if (messageDb->msgsDeleteMessageData(msgId.dmId)) {
 		logDebugLv1NL(
 		    "Message '%" PRId64 "' was deleted from local database.",
-		    dmId);
+		    msgId.dmId);
 		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS_LOCAL : DELETED_LOCAL;
 	} else {
 		logErrorNL(
 		    "Could not delete message '%" PRId64 "' from local database.",
-		    dmId);
+		    msgId.dmId);
 		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS : NOT_DELETED;
 	}
 }

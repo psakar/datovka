@@ -48,14 +48,13 @@ public:
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
 	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     dmId         Message identifier.
-	 * @param[in]     deliveryTime Message delivery time.
+	 * @param[in]     msgId        Message identifier.
 	 * @param[in]     msgDirect    Received or sent.
 	 * @param[in]     delFromIsds  True if also delete from ISDS.
 	 */
 	explicit TaskEraseMessage(const QString &userName, MessageDbSet *dbSet,
-	    qint64 dmId, const QDateTime &deliveryTime,
-	    enum MessageDirection msgDirect, bool delFromIsds);
+	    const MessageDb::MsgId &msgId, enum MessageDirection msgDirect,
+	    bool delFromIsds);
 
 	/*!
 	 * @brief Performs action.
@@ -79,8 +78,7 @@ private:
 	 *
 	 * @param[in]     userName     Account identifier (user login name).
 	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     dmId         Message identifier.
-	 * @param[in]     deliveryTime Message delivery time.
+	 * @param[in]     msgId        Message identifier.
 	 * @param[in]     msgDirect    Received or sent.
 	 * @param[in]     delFromIsds  True if also delete from ISDS.
 	 * @param[out]    error        Error description.
@@ -89,14 +87,12 @@ private:
 	 */
 	static
 	enum Result eraseMessage(const QString &userName, MessageDbSet *dbSet,
-	    qint64 dmId, const QDateTime &deliveryTime,
-	    enum MessageDirection msgDirect, bool delFromIsds, QString &error,
-	    QString &longError);
+	    const MessageDb::MsgId &msgId, enum MessageDirection msgDirect,
+	    bool delFromIsds, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
-	const qint64 m_dmId; /*!< Message identifier. */
-	const QDateTime m_deliveryTime; /*!< Message delivery time. */
+	const MessageDb::MsgId m_msgId; /*!< Message identifier. */
 	enum MessageDirection m_msgDirect; /*!< Received or sent. */
 	const bool m_delFromIsds; /*!< True is also delete from ISDS. */
 };

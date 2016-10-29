@@ -2986,8 +2986,7 @@ void MainWindow::deleteMessage(void)
 	QModelIndex selectedAcntIndex(currentAccountModelIndex());
 
 	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
-		if (eraseMessage(userName, id.dmId, id.deliveryTime,
-		        delMsgIsds)) {
+		if (eraseMessage(userName, id, delMsgIsds)) {
 			/*
 			 * Hiding selected line in the message model actually
 			 * does not help. The model contains all the old data
@@ -3019,8 +3018,8 @@ void MainWindow::deleteMessage(void)
  * Delete message from long term storage in ISDS and
  * local database - based on action parameter.
 */
-bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
-    const QDateTime &deliveryTime, bool delFromIsds)
+bool MainWindow::eraseMessage(const QString &userName,
+    const MessageDb::MsgId &msgId, bool delFromIsds)
 /* ========================================================================= */
 {
 	debugFuncCall();
@@ -3057,15 +3056,15 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 	    !connectToIsds(userName)) {
 		logErrorNL(
 		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
-		    dmId);
+		    msgId.dmId);
 		return false;
 	}
 
 	QString errorStr, longErrorStr;
 	TaskEraseMessage *task;
 
-	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, dmId,
-	    deliveryTime, msgDirect, delFromIsds);
+	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, msgId,
+	    msgDirect, delFromIsds);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -3076,43 +3075,45 @@ bool MainWindow::eraseMessage(const QString &userName, qint64 dmId,
 
 	switch (result) {
 	case TaskEraseMessage::NOT_DELETED:
-		logErrorNL("Message '%" PRId64 "' couldn't be deleted.", dmId);
+		logErrorNL("Message '%" PRId64 "' couldn't be deleted.",
+		    msgId.dmId);
 		showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
-		    .arg(dmId));
+		    .arg(msgId.dmId));
 		return false;
 		break;
 	case TaskEraseMessage::DELETED_ISDS:
 		logWarning("Message '%" PRId64 "' deleted only from ISDS.\n",
-		    dmId);
+		    msgId.dmId);
 		showStatusTextWithTimeout(tr(
-		    "Message \"%1\" was deleted only from ISDS.").arg(dmId));
+		    "Message \"%1\" was deleted only from ISDS.")
+		    .arg(msgId.dmId));
 		return false;
 		break;
 	case TaskEraseMessage::DELETED_LOCAL:
 		if (delFromIsds) {
 			logWarning(
 			    "Message '%" PRId64 "' deleted only from local database.\n",
-			    dmId);
+			    msgId.dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted only from local database.")
-			    .arg(dmId));
+			    .arg(msgId.dmId));
 		} else {
 			logInfo(
 			    "Message '%" PRId64 "' deleted from local database.\n",
-			    dmId);
+			    msgId.dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted from local database.")
-			    .arg(dmId));
+			    .arg(msgId.dmId));
 		}
 		return true;
 		break;
 	case TaskEraseMessage::DELETED_ISDS_LOCAL:
 		logInfo(
 		    "Message '%" PRId64 "' deleted from ISDS and local database.\n",
-		    dmId);
+		    msgId.dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted from ISDS and local database.")
-		    .arg(dmId));
+		    .arg(msgId.dmId));
 		return true;
 		break;
 	default:

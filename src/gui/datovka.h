@@ -992,8 +992,8 @@ private:
 	 *
 	 * @return True if message has been removed from local database.
 	 */
-	bool eraseMessage(const QString &userName, qint64 dmId,
-	     const QDateTime &deliveryTime, bool delFromIsds);
+	bool eraseMessage(const QString &userName,
+	    const MessageDb::MsgId &msgId, bool delFromIsds);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.
