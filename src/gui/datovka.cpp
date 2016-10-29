@@ -206,6 +206,7 @@ QList<MessageDb::MsgId> msgMsgIds(const QModelIndexList &msgIdxs)
  *
  * @param[in] acntIdx Account model index.
  * @param[in] dfltDirect Default direction to be returned.
+ * @return Message direction identifier.
  */
 static
 enum MessageDirection messageDirection(const QModelIndex &acntIdx,
@@ -3314,23 +3315,15 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 {
 	debugSlotCall();
 
-	enum MessageDirection msgDirect = MSG_RECEIVED;
-
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
 	}
 
-	QString userName;
-	{
-		QModelIndex accountIndex(currentAccountModelIndex());
-		Q_ASSERT(accountIndex.isValid());
-
-		msgDirect = messageDirection(accountIndex, MSG_RECEIVED);
-		userName = m_accountModel.userName(accountIndex);
-	}
-
-	/* Try connecting to ISDS, just to generate log-in dialogue. */
+	const QModelIndex acntIdx(currentAccountModelIndex());
+	enum MessageDirection msgDirect =
+	    messageDirection(acntIdx, MSG_RECEIVED);
+	const QString userName(m_accountModel.userName(acntIdx));
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
@@ -3349,10 +3342,9 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
 		/* Using PREPEND in order to outrun other jobs. */
-		TaskDownloadMessage *task;
-
-		task = new (std::nothrow) TaskDownloadMessage(userName, dbSet,
-		    msgDirect, id, false);
+		TaskDownloadMessage *task =
+		    new (std::nothrow) TaskDownloadMessage(userName, dbSet,
+		        msgDirect, id, false);
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
@@ -6593,16 +6585,11 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 
 	/* selection().indexes() ? */
 
-	QModelIndex acntIndex(currentAccountModelIndex());
+	const QModelIndex acntIdx(currentAccountModelIndex());
 	enum MessageDirection msgDirect =
-	    messageDirection(acntIndex, MSG_RECEIVED);
-
-	const QString userName(m_accountModel.userName(acntIndex));
+	    messageDirection(acntIdx, MSG_RECEIVED);
+	const QString userName(m_accountModel.userName(acntIdx));
 	Q_ASSERT(!userName.isEmpty());
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName)) {
-		return false;
-	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -6610,18 +6597,19 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 		return false;
 	}
 
-	bool ret = false;
-	TaskDownloadMessage *task;
+	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	    !connectToIsds(userName)) {
+		return false;
+	}
 
-	task = new (std::nothrow) TaskDownloadMessage(userName, dbSet,
-	    msgDirect, msgId, false);
+	TaskDownloadMessage *task = new (std::nothrow) TaskDownloadMessage(
+	    userName, dbSet, msgDirect, msgId, false);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
-	ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
+	bool ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
 	if (ret) {
 		msgId.deliveryTime = task->m_mId.deliveryTime;
 	}
-
 	delete task;
 
 	return ret;
