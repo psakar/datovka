@@ -22,7 +22,9 @@
  */
 
 #include "src/common.h"
+#include "src/io/db_tables.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/models/files_model.h"
 
@@ -52,6 +54,26 @@ Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 	}
 
 	return defaultFlags;
+}
+
+void DbFlsTblModel::setHeader(void)
+{
+	int i;
+
+	for (i = 0; i < MessageDb::fileItemIds.size(); ++i) {
+		/* Description. */
+		setHeaderData(i, Qt::Horizontal,
+		    flsTbl.attrProps.value(MessageDb::fileItemIds[i]).desc,
+		    Qt::DisplayRole);
+		/* Data type. */
+		setHeaderData(i, Qt::Horizontal,
+		    flsTbl.attrProps.value(MessageDb::fileItemIds[i]).type,
+		    ROLE_MSGS_DB_ENTRY_TYPE);
+	}
+
+	/* Rename last column to file size. */
+	setHeaderData(i - 1, Qt::Horizontal,
+	    QObject::tr("File size"), Qt::DisplayRole);
 }
 
 bool DbFlsTblModel::setMessage(const struct isds_message *message)

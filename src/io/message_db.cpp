@@ -54,6 +54,10 @@
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
+/* Attachment size is computed from actual data. */
+static
+const QVector<QString> fileItemIdsNoData = {"id", "message_id",
+    "dmEncodedContent", "_dmFileDescr", "0"};
 
 const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
@@ -68,11 +72,6 @@ const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
 
 const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
-
-/* Attachment size is computed from actual data. */
-static
-const QVector<QString> fileItemIdsNoData = {"id", "message_id",
-    "dmEncodedContent", "_dmFileDescr", "0"};
 
 MessageDb::MessageDb(const QString &connectionName)
     : SQLiteDb(connectionName),
@@ -1840,20 +1839,7 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	/* First three columns ought to be hidden. */
 
 	m_sqlFilesModel.setQuery(query);
-	for (i = 0; i < fileItemIds.size(); ++i) {
-		/* Description. */
-		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
-		    flsTbl.attrProps.value(fileItemIds[i]).desc,
-		    Qt::DisplayRole);
-		/* Data type. */
-		m_sqlFilesModel.setHeaderData(i, Qt::Horizontal,
-		    flsTbl.attrProps.value(fileItemIds[i]).type,
-		    ROLE_MSGS_DB_ENTRY_TYPE);
-	}
-
-	/* Rename last column to file size. */
-	m_sqlFilesModel.setHeaderData(i - 1, Qt::Horizontal,
-	    QObject::tr("File Size"), Qt::DisplayRole);
+	m_sqlFilesModel.setHeader();
 
 	return &m_sqlFilesModel;
 

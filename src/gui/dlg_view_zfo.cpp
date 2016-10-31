@@ -370,6 +370,7 @@ void DlgViewZfo::setUpDialogue(void)
 		this->attachmentTable->setEnabled(true);
 		this->attachmentTable->show();
 		m_attachmentModel.setMessage(m_message);
+		m_attachmentModel.setHeader();
 		envelopeTextEdit->setHtml(
 		    messageDescriptionHtml(m_attachmentModel.rowCount(),
 		        m_message->raw, m_message->raw_length,

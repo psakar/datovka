@@ -39,7 +39,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	TblModel(QObject *parent = 0);
+	explicit TblModel(QObject *parent = 0);
 
 	/*!
 	 * @brief Returns number of rows under given parent.

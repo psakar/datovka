@@ -57,7 +57,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	DbFlsTblModel(QObject *parent = 0);
+	explicit DbFlsTblModel(QObject *parent = 0);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -77,6 +77,11 @@ public:
 	 */
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Sets default header.
+	 */
+	void setHeader(void);
 
 	/*!
 	 * @brief Sets the content of the model according to the supplied

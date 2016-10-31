@@ -1021,6 +1021,10 @@ protected: /* These function are used from within a database container. */
 
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 
+public:
+	static
+	const QVector<QString> fileItemIds;
+
 private:
 	static
 	const QVector<QString> msgPrintedAttribs;
@@ -1028,8 +1032,6 @@ private:
 	const QVector<QString> msgDeliveryBoolAttribs;
 	static
 	const QVector<QString> msgStatus;
-	static
-	const QVector<QString> fileItemIds;
 
 	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
 
