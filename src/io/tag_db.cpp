@@ -83,6 +83,34 @@ bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 	return true;
 }
 
+bool TagDb::insertUpdateWebDatovkaTag(int id,
+    const QString &tagName, const QString &tagColor)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "INSERT OR REPLACE INTO tag (id, tag_name, tag_color) "
+	    "VALUES (:tag_id, :tag_name, :tag_color)";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":tag_id", id);
+	query.bindValue(":tag_name", tagName);
+	query.bindValue(":tag_color", tagColor);
+
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+
 bool TagDb::updateTag(int id, const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);
@@ -141,6 +169,27 @@ bool TagDb::deleteTag(int id)
 
 	return true;
 }
+
+
+bool TagDb::deleteAllTags(void)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM tag";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
 
 TagItem TagDb::getTagData(int id)
 {

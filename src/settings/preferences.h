@@ -63,6 +63,7 @@ public:
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
 	const QString tagDbFile; /*!< Tag db file. */
+	const QString tagWebDatovkaDbFile;  /*!< Tag webdatovka db file. */
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
@@ -143,6 +144,13 @@ public:
 	 * @return Whole path to tag database file.
 	 */
 	QString tagDbPath(void) const;
+
+	/*!
+	 * @brief Returns whole webdatovka tag db path.
+	 *
+	 * @return Whole path to webdatovka tag database file.
+	 */
+	QString tagWebDatovkaDbPath(void) const;
 };
 
 /*!

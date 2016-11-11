@@ -40,6 +40,7 @@ GlobPreferences dlftlGlobPref;
 /*! Account database file name. */
 #define ACCOUNT_DB_FILE "messages.shelf.db"
 #define TAG_DB_FILE "tag.db"
+#define TAG_WEBDATOVKA_DB_FILE "mojeid-tag.db"
 
 GlobPreferences::GlobPreferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
@@ -47,6 +48,7 @@ GlobPreferences::GlobPreferences(void)
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     tagDbFile(TAG_DB_FILE),
+    tagWebDatovkaDbFile(TAG_WEBDATOVKA_DB_FILE),
     auto_download_whole_messages(false),
     default_download_signed(true),
     //store_passwords_on_disk(false),
@@ -452,3 +454,7 @@ QString GlobPreferences::tagDbPath(void) const
 	return confDir() + QDir::separator() + tagDbFile;
 }
 
+QString GlobPreferences::tagWebDatovkaDbPath(void) const
+{
+	return confDir() + QDir::separator() + tagWebDatovkaDbFile;
+}

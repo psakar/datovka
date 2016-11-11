@@ -30,6 +30,7 @@
 
 #include "src/delegates/tag_item.h"
 #include "ui_dlg_tag.h"
+#include "src/io/tag_db.h"
 
 /*!
  * @brief Create new tag dialogue.
@@ -41,17 +42,23 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] parent Parent widget.
+	 * @param[in] userName     Account user name.
+	 * @param[in] isWebDatovka is Webdatovka account.
+	 * @param[in] parent       Parent widget.
 	 */
-	explicit DlgTag(QWidget *parent = 0);
+	explicit DlgTag(const QString &userName, TagDb *tagDb,
+	    bool isWebDatovkaAccount, QWidget *parent = 0);
 
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] tag    Tag.
-	 * @param[in] parent Parent widget.
+	 * @param[in] userName     Account user name.
+	 * @param[in] isWebDatovka is Webdatovka account.
+	 * @param[in] tag          Tag.
+	 * @param[in] parent       Parent widget.
 	 */
-	explicit DlgTag(const TagItem &tag, QWidget *parent = 0);
+	explicit DlgTag(const QString &userName, TagDb *tagDb,
+	    bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent = 0);
 
 private slots:
 
@@ -77,6 +84,9 @@ private:
 	 */
 	void setPreviewButtonColor(void);
 
+	QString m_userName; /*!< Account username. */
+	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
+	bool m_isWebDatovkaAccount; /*!< is WebDatovka account. */
 	TagItem m_tagItem; /*!< Created tag. */
 };
 

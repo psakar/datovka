@@ -33,11 +33,13 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_search_mojeid.h"
 #include "src/models/accounts_model.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/wd_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
@@ -48,6 +50,7 @@
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
+#include "src/worker/task_send_message_mojeid.h"
 #include "ui_dlg_send_message.h"
 
 const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
@@ -104,6 +107,7 @@ DlgSendMessage::DlgSendMessage(
     m_mv(mv),
     m_dbSet(0),
     m_isLogged(false),
+    m_isWebDatovkaAccount(false),
     m_transactIds(),
     m_sentMsgResultList()
 {
@@ -132,6 +136,10 @@ void DlgSendMessage::on_cancelButton_clicked(void)
 void DlgSendMessage::initNewMessageDialog(void)
 /* ========================================================================= */
 {
+	if (isWebDatovkaAccount(m_userName)) {
+		m_isWebDatovkaAccount = true;
+	}
+
 	this->recipientTableWidget->setColumnWidth(0,70);
 	this->recipientTableWidget->setColumnWidth(1,180);
 	this->recipientTableWidget->setColumnWidth(2,240);
@@ -235,10 +243,16 @@ void DlgSendMessage::initNewMessageDialog(void)
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
 
-	connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
-	    SLOT(pingIsdsServer()));
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+
+	if (!m_isWebDatovkaAccount) {
+		connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
+		    SLOT(pingIsdsServer()));
+	}
 
 	this->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
@@ -295,32 +309,42 @@ void DlgSendMessage::setAccountInfo(int item)
 		m_userName = userName;
 	}
 
-	struct isds_ctx *session = NULL;
-
-	m_isLogged = true;
-
-	m_keepAliveTimer.stop();
-	{
-		TaskKeepAlive *task;
-		task = new (std::nothrow) TaskKeepAlive(m_userName);
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
-
-		m_isLogged = task->m_isAlive;
-
-		delete task;
+	if (isWebDatovkaAccount(m_userName)) {
+		m_isWebDatovkaAccount = true;
 	}
-	if (!m_isLogged) {
-		if (m_mv) {
-			m_isLogged = m_mv->connectToIsds(m_userName);
+
+	if (!m_isWebDatovkaAccount) {
+
+		struct isds_ctx *session = NULL;
+		m_isLogged = true;
+		m_keepAliveTimer.stop();
+		{
+			TaskKeepAlive *task;
+			task = new (std::nothrow) TaskKeepAlive(m_userName);
+			task->setAutoDelete(false);
+			globWorkPool.runSingle(task);
+
+			m_isLogged = task->m_isAlive;
+
+			delete task;
 		}
-	}
-	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+		if (!m_isLogged) {
+			if (m_mv) {
+				m_isLogged = m_mv->connectToIsds(m_userName);
+			}
+		}
+		m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
-	session = globIsdsSessions.session(m_userName);
-	if (NULL == session) {
-		logErrorNL("%s", "Missing ISDS session.");
-		m_isLogged = false;
+		session = globIsdsSessions.session(m_userName);
+		if (NULL == session) {
+			logErrorNL("%s", "Missing ISDS session.");
+			m_isLogged = false;
+		}
+	} else {
+		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
+			m_mv->loginToMojeId(m_userName);
+		}
+		m_isLogged = true;
 	}
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
@@ -347,8 +371,11 @@ void DlgSendMessage::setAccountInfo(int item)
 	} else {
 		m_lastAttAddPath = accountInfo.lastAttachAddPath();
 	}
-	if (m_dbOpenAddressing) {
-		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+
+	if (!m_isWebDatovkaAccount) {
+		if (m_dbOpenAddressing) {
+			m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+		}
 	}
 
 	QString dbOpenAddressingText = "";
@@ -368,7 +395,6 @@ void DlgSendMessage::setAccountInfo(int item)
 	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
 	    dbOpenAddressingText);
 }
-
 
 
 /* ========================================================================= */
@@ -993,9 +1019,16 @@ void DlgSendMessage::deleteRecipientData(void)
 void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
 {
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-	    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_userName);
+	QDialog *dsSearch = NULL;
+	if (!m_isWebDatovkaAccount) {
+		dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
+		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
+		    m_dbOpenAddressing, this, m_userName);
+	} else {
+		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
+		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
+		    this, m_userName);
+	}
 	dsSearch->exec();
 }
 
@@ -1190,6 +1223,54 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 	return true;
 }
 
+
+bool DlgSendMessage::buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const
+{
+	/* Set mandatory fields of envelope. */
+	envelope.dmAnnotation = this->subjectText->text();
+
+	/* Set optional fields. */
+	envelope.dmSenderIdent = this->dmSenderIdent->text();
+	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
+	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
+	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
+	envelope.dmLegalTitleLaw = this->dmLegalTitleLaw->text();
+	envelope.dmLegalTitleYear = this->dmLegalTitleYear->text();
+	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
+	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
+	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
+	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
+	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
+	envelope.dmOVM = m_dbEffectiveOVM;
+
+	/* Only OVM can change. */
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		envelope.dmAllowSubstDelivery = true;
+	} else {
+		envelope.dmAllowSubstDelivery =
+		    this->dmAllowSubstDelivery->isChecked();
+	}
+
+	return true;
+}
+
+
+
+bool DlgSendMessage::buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const
+{
+	/* Load attachments. */
+	for (int i = 0; i < this->attachmentTableWidget->rowCount(); ++i) {
+		JsonLayer::File file;
+		file.fName = this->attachmentTableWidget->item(i, ATW_FILE)->text();
+		file.fContent = this->attachmentTableWidget->item(i, ATW_DATA)->
+		    data(Qt::DisplayRole).toByteArray();
+		fileList.append(file);
+	}
+
+	return true;
+}
+
+
 /* ========================================================================= */
 /*
  * Send message/multiple message.
@@ -1198,6 +1279,39 @@ void DlgSendMessage::sendMessage(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	if (m_isWebDatovkaAccount) {
+
+		/* Get account ID */
+		int accountID = getWebDatovkaAccountId(m_userName);
+
+		/* Create recipient list. */
+		JsonLayer::Recipient recipient;
+		QList<JsonLayer::Recipient> recipientList;
+		for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
+			recipient.recipientDbId =
+			    this->recipientTableWidget->item(row, RTW_ID)->text();
+			recipient.toHands = this->dmToHands->text();
+			recipient.recipientName =
+			    this->recipientTableWidget->item(row, RTW_NAME)->text();
+			recipient.recipientAddress =
+			    this->recipientTableWidget->item(row, RTW_ADDR)->text();
+			recipientList.append(recipient);
+		}
+
+		JsonLayer::Envelope envelope;
+		buildEnvelopeWebDatovka(envelope);
+		QList<JsonLayer::File> fileList;
+		buildFileListWebDatovka(fileList);
+
+		TaskSendMessageMojeId *task;
+		task = new (std::nothrow) TaskSendMessageMojeId(m_userName, accountID,
+		    recipientList, envelope, fileList);
+		task->setAutoDelete(true);
+		globWorkPool.assignHi(task);
+
+		return;
+	}
 
 	QString detailText;
 
@@ -1436,5 +1550,56 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 		item = new QTableWidgetItem;
 		item->setText("n/a");
 		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Performs action depending on webdatovka message send outcome.
+ */
+void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
+    const QStringList &result, const QString &error)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	Q_UNUSED(error);
+
+	QString detailText;
+
+	if (result.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message sent"));
+		msgBox.setText("<b>" +
+		    tr("Message has successfully been sent to all recipients.") +
+		    "</b>");
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		this->accept(); /* Set return code to accepted. */
+		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
+	} else {
+		for (int i = 0; i < result.count(); ++i) {
+			QString msg = result.at(i);
+			detailText += msg.replace("§", ": ");
+		}
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message sending error"));
+		msgBox.setText("<b>" +
+		    tr("Message has NOT been sent to all recipients.") +
+		    "</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") + "</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			this->close(); /* Set return code to closed. */
+			emit doActionAfterSentMsgSignal(userName,
+			    m_lastAttAddPath);
+		}
 	}
 }

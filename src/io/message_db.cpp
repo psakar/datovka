@@ -3516,6 +3516,33 @@ fail:
 
 /* ========================================================================= */
 /*
+ * Get id of message in webdatovka db form ISDS msgId.
+ */
+int MessageDb::getWebDatokaId(qint64 msgId)
+/* ========================================================================= */
+{
+	QSqlQuery query(m_db);
+	QString	queryStr = "SELECT _origin FROM messages WHERE dmID = :dmId";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return -1;
+	}
+	query.bindValue(":dmId", msgId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return -1;
+	}
+}
+
+
+/* ========================================================================= */
+/*
  * Insert raw (DER) delivery info into raw_delivery_info_data table.
  */
 bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,

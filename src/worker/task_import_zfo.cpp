@@ -256,9 +256,9 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 
 	/* Store envelope and message. */
 	if ((Q_SUCCESS != Task::storeEnvelope(direct, *(acnt.messageDbSet),
-	                      message->envelope)) ||
+	                      message->envelope, NULL)) ||
 	    (Q_SUCCESS != Task::storeMessage(true, direct, *(acnt.messageDbSet),
-	                      message, ""))) {
+	                      message, "", NULL))) {
 		resultDesc = QObject::tr("File has not been imported because "
 		    "an error was detected during insertion process.");
 		return TaskImportZfo::IMP_DB_INS_ERR;

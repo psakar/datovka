@@ -41,9 +41,10 @@ static
 const QString dbDateTimeFormat("yyyy-MM-dd HH:mm:ss.zzz");
 static
 const QString dbShortDateTimeFormat("yyyy-MM-dd HH:mm:ss");
-
 static
 const QString dbDateFormat("yyyy-MM-dd");
+static
+const QString dbDateIsoFormat("yyyy-MM-ddThh:mm:ss.zzzZ");
 
 
 /* ========================================================================= */
@@ -140,7 +141,6 @@ QString timevalToDbFormat(const struct timeval *tv)
 	return ret;
 }
 
-
 /* ========================================================================= */
 /*
  * Converts time to QDateTime.
@@ -223,4 +223,27 @@ QString qDateTimeToDbFormat(const QDateTime &dateTime)
 	QString ret = dateTime.toString(dbDateTimeFormat) + "000";
 
 	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts iso datetime to format to be stored in database.
+ */
+QString fromIsoDatetimetoDbformat(const QString &dateTimeStr)
+/* ========================================================================= */
+{
+	QDateTime dateTime = QDateTime::fromString(dateTimeStr, dbDateIsoFormat);
+	return dateTime.toString(dbDateTimeFormat);
+}
+
+
+/* ========================================================================= */
+/*
+ * Converts iso datetime to datetime.
+ */
+QDateTime fromIsoDatetimetoDateTime(const QString &dateTimeStr)
+/* ========================================================================= */
+{
+	return QDateTime::fromString(dateTimeStr, dbDateIsoFormat);
 }
