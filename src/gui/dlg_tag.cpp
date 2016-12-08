@@ -34,7 +34,6 @@ DlgTag::DlgTag(QWidget *parent)
 	setupUi(this);
 
 	initDlg();
-
 }
 
 DlgTag::DlgTag(const TagItem &tag, QWidget *parent)

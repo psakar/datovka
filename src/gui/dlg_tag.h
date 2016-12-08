@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _DLG_TAG_H_
 #define _DLG_TAG_H_
 
@@ -54,7 +53,6 @@ public:
 	explicit DlgTag(const TagItem &tag, QWidget *parent = 0);
 
 private slots:
-
 	/*!
 	 * @brief Insert or update tag data into database.
 	 */
@@ -66,7 +64,6 @@ private slots:
 	void chooseNewColor(void);
 
 private:
-
 	/*!
 	 * @brief Initialises new tag dialogue.
 	 */

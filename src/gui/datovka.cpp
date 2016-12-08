@@ -9784,7 +9784,6 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionEmail_selected_attachments->isEnabled();
 }
 
-
 /* ========================================================================= */
 /*
  * Slot: Show tags manager dialog for tags settings.
@@ -9794,9 +9793,8 @@ void MainWindow::showTagDlg(void)
  {
 	debugSlotCall();
 
-	QDialog *tagsDlg = new DlgTags(this);
-	tagsDlg->exec();
-	tagsDlg->deleteLater();
+	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
+	    QList<qint64>());
 }
 
 
@@ -9815,22 +9813,8 @@ void MainWindow::addOrDeleteMsgTags(void)
 		msgIdList.append(idx.data().toLongLong());
 	}
 
-	/*
-	 * FIXME -- The tags dialogue as it now exists is not suitable for
-	 * adding tags to messages.
-	 */
-
-	const QString userName =
-	    m_accountModel.userName(currentAccountModelIndex());
-
-	QDialog *tagsDlg = new DlgTags(userName, msgIdList, this);
-	tagsDlg->exec();
-	tagsDlg->deleteLater();
-
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-	messageModel->refillTagsColumn(userName, msgIdList, -1);
+	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
+	    msgIdList);
 }
 
 
@@ -9921,4 +9905,50 @@ void MainWindow::vacuumMsgDbSlot(void)
 	}
 
 	delete task;
+}
+
+void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
+{
+	QDialog *tagsDlg = 0;
+
+	if (msgIdList.isEmpty()) {
+		tagsDlg = new DlgTags(this);
+	} else if (!userName.isEmpty() && !msgIdList.isEmpty()) {
+		/*
+		 * FIXME -- The tags dialogue as it now exists is not suitable
+		 * for adding tags to messages.
+		 */
+		tagsDlg = new DlgTags(userName, msgIdList, this);
+	} else {
+		Q_ASSERT(0);
+		return;
+	}
+
+	Q_ASSERT(tagsDlg != 0);
+	int dlgRet = tagsDlg->exec();
+	tagsDlg->deleteLater();
+
+	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
+		/* Nothing to do. */
+		return;
+	}
+
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	Q_ASSERT(0 != messageModel);
+
+	if (dlgRet == DlgTags::TAGS_CHANGED) {
+		/* May affect all rows. */
+		msgIdList.clear();
+		for (int row = 0; row < messageModel->rowCount(); ++row) {
+			msgIdList.append(messageModel->index(row,
+			    DbMsgsTblModel::DMID_COL).data().toLongLong());
+		}
+	}
+
+	if (msgIdList.isEmpty()) {
+		return;
+	}
+
+	messageModel->refillTagsColumn(userName, msgIdList, -1);
 }
