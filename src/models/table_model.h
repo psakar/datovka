@@ -146,6 +146,20 @@ protected:
 	QVariant _headerData(int section, Qt::Orientation orientation,
 	    int role = Qt::DisplayRole) const;
 
+	/*!
+	 * @brief Inflate data container.
+	 */
+	void reserveSpace(void);
+
+	/*!
+	 * @brief Copies query result into vector.
+	 *
+	 * @param[out] vect Vector to write data into.
+	 * @param[in]  query Query to copy data from.
+	 */
+	static
+	void queryToVector(QVector<QVariant> &vect, const QSqlQuery &query);
+
 	/*
 	 * Data are organised using a two-dimensional array.
 	 * The size of the array is incremented using several lines at once.

@@ -75,9 +75,11 @@ QVariant TblModel::headerData(int section, Qt::Orientation orientation,
 
 void TblModel::setQuery(QSqlQuery &query)
 {
+	beginResetModel();
 	m_data.clear();
 	m_rowsAllocated = 0;
 	m_rowCount = 0;
+	endResetModel();
 
 	/* Looks like empty results have column count set. */
 	m_columnCount = query.record().count();
@@ -96,16 +98,11 @@ bool TblModel::appendQueryData(QSqlQuery &query)
 	query.first();
 	while (query.isActive() && query.isValid()) {
 
-		if (m_rowCount == m_rowsAllocated) {
-			m_rowsAllocated += m_rowAllocationIncrement;
-			m_data.resize(m_rowsAllocated);
-		}
+		reserveSpace();
 
 		QVector<QVariant> row(m_columnCount);
 
-		for (int i = 0; i < m_columnCount; ++i) {
-			row[i] = query.value(i);
-		}
+		queryToVector(row, query);
 
 		m_data[m_rowCount++] = row;
 
@@ -149,4 +146,19 @@ QVariant TblModel::_headerData(int section, Qt::Orientation orientation,
 	Q_UNUSED(orientation);
 
 	return m_headerData[section][role];
+}
+
+void TblModel::reserveSpace(void)
+{
+	if (m_rowCount == m_rowsAllocated) {
+		m_rowsAllocated += m_rowAllocationIncrement;
+		m_data.resize(m_rowsAllocated);
+	}
+}
+
+void TblModel::queryToVector(QVector<QVariant> &vect, const QSqlQuery &query)
+{
+	for (int i = 0; i < query.record().count(); ++i) {
+		vect[i] = query.value(i);
+	}
 }

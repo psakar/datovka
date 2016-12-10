@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QSqlRecord>
+
 #include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/io/isds_sessions.h"
@@ -71,9 +73,11 @@ void DbFlsTblModel::setHeader(void)
 		    ROLE_MSGS_DB_ENTRY_TYPE);
 	}
 
-	/* Rename last column to file size. */
-	setHeaderData(i - 1, Qt::Horizontal,
+	/* Columns with missing names. */
+	setHeaderData(FSIZE_COL, Qt::Horizontal,
 	    QObject::tr("File size"), Qt::DisplayRole);
+	setHeaderData(FPATH_COL, Qt::Horizontal,
+	    QObject::tr("File path"), Qt::DisplayRole);
 }
 
 bool DbFlsTblModel::setMessage(const struct isds_message *message)
@@ -90,6 +94,52 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 	m_columnCount = MAX_COL;
 
 	return addMessageData(message);
+}
+
+void DbFlsTblModel::setQuery(QSqlQuery &query)
+{
+	beginResetModel();
+	m_data.clear();
+	m_rowsAllocated = 0;
+	m_rowCount = 0;
+	endResetModel();
+
+	/* Looks like empty results have column count set. */
+	m_columnCount = MAX_COL;
+	if ((query.record().count() + 1) != m_columnCount) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	appendQueryData(query);
+}
+
+bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
+{
+	if ((query.record().count() + 1) != m_columnCount) {
+		return false;
+	}
+
+	beginResetModel();
+
+	query.first();
+	while (query.isActive() && query.isValid()) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		queryToVector(row, query);
+		row[FPATH_COL] = tr("local database");
+
+		m_data[m_rowCount++] = row;
+
+		query.next();
+	}
+
+	endResetModel();
+
+	return true;
 }
 
 bool DbFlsTblModel::addMessageData(const struct isds_message *message)
@@ -116,10 +166,7 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 			return false;
 		}
 
-		if (m_rowCount == m_rowsAllocated) {
-			m_rowsAllocated += m_rowAllocationIncrement;
-			m_data.resize(m_rowsAllocated);
-		}
+		reserveSpace();
 
 		QVector<QVariant> row(m_columnCount);
 

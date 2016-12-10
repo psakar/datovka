@@ -48,8 +48,10 @@ public:
 		MSGID_COL = 1, /* Message identifier. */
 		CONTENT_COL = 2, /* Base64-encoded attachment content. */
 		FNAME_COL = 3, /* Attachment file name. */
-		FSIZE_COL = 4, /* Attachment file size (base64-decoded). */
-		MAX_COL = 5 /* Number of columns. */
+		MIME_COL = 4, /* Mime type description. */
+		FSIZE_COL = 5, /* Attachment file size (base64-decoded). */
+		FPATH_COL = 6, /* Path to origin. */
+		MAX_COL = 7 /* Number of columns. */
 	};
 
 	/*!
@@ -91,6 +93,23 @@ public:
 	 * @return True on success.
 	 */
 	bool setMessage(const struct isds_message *message);
+
+	/*!
+	 * @brief Sets the content of the model according to the supplied query.
+	 *
+	 * @param[in,out] qyery SQL query result.
+	 */
+	virtual
+	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Appends data from the supplied query to the model.
+	 *
+	 * @param[in,out] query SQL query result.
+	 * @return True on success.
+	 */
+	virtual
+	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
 
 private:
 	/*!
