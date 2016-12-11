@@ -111,6 +111,14 @@ public:
 	virtual
 	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Adds attachment file.
+	 *
+	 * @param[in] filePath Path to attachment file.
+	 * @return Size of added file, or -1 on error.
+	 */
+	int addAttachmentFile(const QString &filePath);
+
 private:
 	/*!
 	 * @brief Appends data from the supplied message.

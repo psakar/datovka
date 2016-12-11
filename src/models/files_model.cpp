@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QMimeData>
+#include <QMimeDatabase>
 #include <QSqlRecord>
 
 #include "src/common.h"
@@ -147,6 +149,74 @@ bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
 	endResetModel();
 
 	return true;
+}
+
+/*!
+ * @brief Read file content and encode it into base64.
+ *
+ * @param[in] filePath Path to file.
+ * @return Base64-encoded file content.
+ */
+static
+QByteArray getFileBase64(const QString &filePath)
+ {
+	QFile file(filePath);
+	if (file.exists()) {
+		if (!file.open(QIODevice::ReadOnly)) {
+			logErrorNL("Could not open file '%s'.",
+			    filePath.toUtf8().constData());
+			goto fail;
+		}
+		return file.readAll().toBase64();
+	}
+fail:
+	return QByteArray();
+}
+
+int DbFlsTblModel::addAttachmentFile(const QString &filePath)
+{
+	QFile attFile(filePath);
+
+	int fileSize = attFile.size();
+	if (0 == fileSize) {
+		logWarning("Ignoring file '%s' with zero size.\n",
+		    filePath.toUtf8().constData());
+		return 0;
+	}
+
+	QString fileName(QFileInfo(attFile.fileName()).fileName());
+	QMimeType mimeType(QMimeDatabase().mimeTypeForFile(attFile));
+
+	int rows = rowCount();
+
+	for (int i = 0; i < rows; ++i) {
+		if (_data(i, FPATH_COL).toString() == filePath) {
+			/* Already in table. */
+			logWarning("File '%s' already in table.\n",
+			    filePath.toUtf8().constData());
+			return -1;
+		}
+	}
+
+	beginInsertRows(QModelIndex(), rows, rows);
+
+	reserveSpace();
+
+	QVector<QVariant> rowVect(m_columnCount);
+
+	//rowVect[ATTACHID_COL] = QVariant();
+	//rowVect[MSGID_COL] = QVariant();
+	rowVect[CONTENT_COL] = getFileBase64(filePath);
+	rowVect[FNAME_COL] = fileName;
+	rowVect[MIME_COL] = mimeType.name();
+	rowVect[FSIZE_COL] = fileSize; // QString::number(fileSize)
+	rowVect[FPATH_COL] = filePath;
+
+	m_data[m_rowCount++] = rowVect;
+
+	endInsertRows();
+
+	return fileSize;
 }
 
 bool DbFlsTblModel::addMessageData(const struct isds_message *message)
