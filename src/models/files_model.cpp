@@ -33,6 +33,8 @@
 DbFlsTblModel::DbFlsTblModel(QObject *parent)
     : TblModel(parent)
 {
+	/* Fixed column count. */
+	m_columnCount = MAX_COL;
 }
 
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
@@ -91,7 +93,7 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 	m_rowsAllocated = 0;
 	m_rowCount = 0;
 
-	m_columnCount = MAX_COL;
+	/* m_columnCount = MAX_COL; */
 
 	return addMessageData(message);
 }
@@ -105,7 +107,7 @@ void DbFlsTblModel::setQuery(QSqlQuery &query)
 	endResetModel();
 
 	/* Looks like empty results have column count set. */
-	m_columnCount = MAX_COL;
+	/* m_columnCount = MAX_COL; */
 	if ((query.record().count() + 1) != m_columnCount) {
 		Q_ASSERT(0);
 		return;
