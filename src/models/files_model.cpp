@@ -30,6 +30,8 @@
 #include "src/log/log.h"
 #include "src/models/files_model.h"
 
+#define LOCAL_DATABASE_STR QLatin1String("local database")
+
 DbFlsTblModel::DbFlsTblModel(QObject *parent)
     : TblModel(parent)
 {
@@ -44,6 +46,9 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 		QByteArray b64 = _data(index.sibling(index.row(), CONTENT_COL),
 		    role).toByteArray();
 		return base64RealSize(b64);
+	} else if ((Qt::DisplayRole == role) && (FPATH_COL == index.column())) {
+		const QString path(_data(index).toString());
+		return (path == LOCAL_DATABASE_STR) ? tr("local database") : path;
 	} else {
 		return _data(index, role);
 	}
@@ -132,7 +137,7 @@ bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
 		QVector<QVariant> row(m_columnCount);
 
 		queryToVector(row, query);
-		row[FPATH_COL] = tr("local database");
+		row[FPATH_COL] = LOCAL_DATABASE_STR;
 
 		m_data[m_rowCount++] = row;
 
