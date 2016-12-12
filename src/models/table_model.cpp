@@ -114,6 +114,36 @@ bool TblModel::appendQueryData(QSqlQuery &query)
 	return true;
 }
 
+bool TblModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+	if ((row < 0) || (count < 0) || parent.isValid()) {
+		/* Return if not operating on model root. */
+		return false;
+	}
+
+	if (row >= rowCount()) {
+		return false;
+	}
+
+	if (count > (rowCount() - row)) {
+		/* Adjust the count to fit the model. */
+		count = rowCount() - row;
+	}
+
+	int last = row + count - 1;
+	beginRemoveRows(parent, row, last);
+
+	/* Work in reverse order. */
+	for (int i = last; i >= row; --i) {
+		m_data.removeAt(i);
+		--m_rowCount;
+	}
+
+	endRemoveRows();
+
+	return true;
+}
+
 QVariant TblModel::_data(const QModelIndex &index, int role) const
 {
 	if (role != Qt::DisplayRole) {

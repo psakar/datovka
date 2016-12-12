@@ -45,8 +45,8 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
 	if ((Qt::DisplayRole == role) && (FSIZE_COL == index.column())) {
 		/* Compute attachment size from base64 length. */
-		QByteArray b64 = _data(index.sibling(index.row(), CONTENT_COL),
-		    role).toByteArray();
+		QByteArray b64(_data(index.sibling(index.row(), CONTENT_COL),
+		    role).toByteArray());
 		return base64RealSize(b64);
 	} else if ((Qt::DisplayRole == role) && (FPATH_COL == index.column())) {
 		const QString path(_data(index).toString());

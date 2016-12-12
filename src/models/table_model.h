@@ -114,6 +114,18 @@ public:
 	virtual
 	bool appendQueryData(QSqlQuery &query);
 
+	/*!
+	 * @brief Remove rows.
+	 *
+	 * @param[in] row Starting row.
+	 * @param[in] count Number of rows to be removed.
+	 * @param[in] parent Parent item the row is relative to.
+	 * @return True if the rows were successfully removed.
+	 */
+	virtual
+	bool removeRows(int row, int count,
+	    const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+
 protected:
 	/*!
 	 * @brief Returns raw data stored under the given role.
