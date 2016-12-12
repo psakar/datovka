@@ -219,6 +219,33 @@ int DbFlsTblModel::addAttachmentFile(const QString &filePath)
 	return fileSize;
 }
 
+void DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
+    const QString &fName)
+{
+	if (base64content.isEmpty() || fName.isEmpty()) {
+		return;
+	}
+
+	int rows = rowCount();
+	beginInsertRows(QModelIndex(), rows, rows);
+
+	reserveSpace();
+
+	QVector<QVariant> rowVect(m_columnCount);
+
+	//rowVect[ATTACHID_COL] = QVariant();
+	//rowVect[MSGID_COL] = QVariant();
+	rowVect[CONTENT_COL] = base64content;
+	rowVect[FNAME_COL] = fName;
+	rowVect[MIME_COL] = tr("unknown");
+	rowVect[FSIZE_COL] = base64RealSize(base64content); // QString::number()
+	rowVect[FPATH_COL] = LOCAL_DATABASE_STR;
+
+	m_data[m_rowCount++] = rowVect;
+
+	endInsertRows();
+}
+
 bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 {
 	const struct isds_list *docListItem;

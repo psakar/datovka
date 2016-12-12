@@ -119,6 +119,15 @@ public:
 	 */
 	int addAttachmentFile(const QString &filePath);
 
+	/*!
+	 * @brief Add attachment data line.
+	 *
+	 * @param[in] base64content Base64-encoded attachment content.
+	 * @param[in] fName Attachment name.
+	 */
+	void addAttachmentEntry(const QByteArray &base64content,
+	    const QString &fName);
+
 private:
 	/*!
 	 * @brief Appends data from the supplied message.

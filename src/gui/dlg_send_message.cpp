@@ -578,27 +578,8 @@ void DlgSendMessage::fillDlgAsForward(void)
 			continue;
 		}
 
-//		int row = this->attachmentTableWidget->rowCount();
-//		this->attachmentTableWidget->insertRow(row);
-//		QTableWidgetItem *item = new QTableWidgetItem;
-//		item->setText(dzPrefix(messageDb, msgId.dmId) +
-//		    QString("DZ_%1.zfo").arg(msgId.dmId));
-//		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
-//		item = new QTableWidgetItem;
-//		item->setText("");
-//		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
-//		item = new QTableWidgetItem;
-//		item->setText(tr("unknown"));
-//		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
-//		item = new QTableWidgetItem;
-//		item->setText(QString::number(base64RealSize(msgBase64)));
-//		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
-//		item = new QTableWidgetItem;
-//		item->setText(tr("local database"));
-//		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
-//		item = new QTableWidgetItem;
-//		item->setData(Qt::DisplayRole, msgBase64);
-//		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
+		m_attachmentModel.addAttachmentEntry(msgBase64,
+		    dzPrefix(messageDb, msgId.dmId) + QString("DZ_%1.zfo").arg(msgId.dmId));
 	}
 }
 
@@ -715,29 +696,10 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	QList<MessageDb::FileData> msgFileList =
 	    messageDb->getFilesFromMessage(msgId.dmId);
 
-//	foreach (const MessageDb::FileData &fileData, msgFileList) {
-//		int row = this->attachmentTableWidget->rowCount();
-//		this->attachmentTableWidget->insertRow(row);
-//		QTableWidgetItem *item = new QTableWidgetItem;
-//		item->setText(fileData.dmFileDescr);
-//		this->attachmentTableWidget->setItem(row, ATW_FILE, item);
-//		item = new QTableWidgetItem;
-//		item->setText("");
-//		this->attachmentTableWidget->setItem(row, ATW_TYPE, item);
-//		item = new QTableWidgetItem;
-//		item->setText(tr("unknown"));
-//		this->attachmentTableWidget->setItem(row, ATW_MIME, item);
-//		item = new QTableWidgetItem;
-//		item->setText(QString::number(
-//		    base64RealSize(fileData.dmEncodedContent)));
-//		this->attachmentTableWidget->setItem(row, ATW_SIZE, item);
-//		item = new QTableWidgetItem;
-//		item->setText(tr("local database"));
-//		this->attachmentTableWidget->setItem(row, ATW_PATH, item);
-//		item = new QTableWidgetItem;
-//		item->setData(Qt::DisplayRole, fileData.dmEncodedContent);
-//		this->attachmentTableWidget->setItem(row, ATW_DATA, item);
-//	}
+	foreach (const MessageDb::FileData &fileData, msgFileList) {
+		m_attachmentModel.addAttachmentEntry(fileData.dmEncodedContent,
+		    fileData.dmFileDescr);
+	}
 }
 
 
