@@ -42,6 +42,68 @@ AttachmentTableView::AttachmentTableView(QWidget *parent)
 	setDragEnabled(true);
 }
 
+void AttachmentTableView::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (0 == event) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QMimeData *mimeData = event->mimeData();
+	if (0 == mimeData) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (mimeData->hasUrls()) {
+		event->acceptProposedAction();
+	} else {
+		logInfo("Rejecting drag enter event with mime type '%s'.\n",
+		    mimeData->formats().join(" ").toUtf8().constData());
+	}
+}
+
+void AttachmentTableView::dragMoveEvent(QDragMoveEvent *event)
+{
+	if (0 == event) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	event->acceptProposedAction();
+}
+
+void AttachmentTableView::dropEvent(QDropEvent *event)
+{
+	if (0 == event) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QMimeData *mimeData = event->mimeData();
+	if (0 == mimeData) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (!mimeData->hasUrls()) {
+		return;
+	}
+
+	/* TODO -- Access the model in a more transparent way. */
+	DbFlsTblModel *attachmentModel =
+	    qobject_cast<DbFlsTblModel *>(model());
+	if (0 == attachmentModel) {
+		return;
+	}
+
+	QList<QString> paths = filePaths(mimeData->urls());
+
+	foreach (const QString &filePath, paths) {
+		attachmentModel->addAttachmentFile(filePath);
+	}
+}
+
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 {
 	if (0 == event) {
@@ -203,4 +265,27 @@ QList<QUrl> AttachmentTableView::temporaryFileUrls(
 	}
 
 	return uriList;
+}
+
+QList<QString> AttachmentTableView::filePaths(const QList<QUrl> &uriList)
+{
+	QList<QString> filePaths;
+
+	foreach (const QUrl &uri, uriList) {
+		if (!uri.isValid()) {
+			logErrorNL("Dropped invalid URL '%s'.",
+			    uri.toString().toUtf8().constData());
+			return QList<QString>();
+		}
+
+		if (!uri.isLocalFile()) {
+			logErrorNL("Dropped URL '%s' is not a local file.",
+			    uri.toString().toUtf8().constData());
+			return QList<QString>();
+		}
+
+		filePaths.append(uri.toLocalFile());
+	}
+
+	return filePaths;
 }

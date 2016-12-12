@@ -66,19 +66,19 @@ protected:
 	 * @brief Allows the drop.
 	 */
 	virtual
-	void dragEnterEvent(QDragEnterEvent *event);
+	void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Allow drag move.
 	 */
 	virtual
-	void dragMoveEvent(QDragMoveEvent *event);
+	void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Processes the drop.
 	 */
 	virtual
-	void dropEvent(QDropEvent *event);
+	void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	/*!

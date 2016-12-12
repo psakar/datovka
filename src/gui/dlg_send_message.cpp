@@ -148,6 +148,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
 
+	this->attachmentTableView->setAcceptDrops(true);
+	this->attachmentTableView->setDragEnabled(false);
+
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);
 

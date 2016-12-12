@@ -48,16 +48,34 @@ public:
 
 protected:
 	/*!
+	 * @brief Allows the drop.
+	 */
+	virtual
+	void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Allow drag move.
+	 */
+	virtual
+	void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Processes the drop.
+	 */
+	virtual
+	void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+
+	/*!
 	 * @brief Activates the drag.
 	 */
 	virtual
-	void mouseMoveEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 	/*
 	 * @brief Used for storing the beginning position of the drag.
 	 */
 	virtual
-	void mousePressEvent(QMouseEvent *event);
+	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
 	/*!
@@ -76,6 +94,15 @@ private:
 	 */
 	static
 	QList<QUrl> temporaryFileUrls(const QList<QString> &tmpFileNames);
+
+	/*!
+	 * @brief Convert a list of URLs to a list of absolute file paths.
+	 *
+	 * @param[in] uriList List of file URLs.
+	 * @return List of absolute file paths or empty list on error.
+	 */
+	static
+	QList<QString> filePaths(const QList<QUrl> &uriList);
 
 	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;
 };
