@@ -864,17 +864,17 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /* ========================================================================= */
 {
-//	QModelIndexList firstMsgColumnIdxs =
-//	   this->attachmentTableWidget->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs =
+	   this->attachmentTableView->selectionModel()->selectedRows(0);
 
-//	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
-//		/*
-//		 * Delete rows in reverse order so that we don't mess with
-//		 * indexes.
-//		 */
-//		int row = firstMsgColumnIdxs.at(i).row();
-//		this->attachmentTableWidget->removeRow(row);
-//	}
+	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
+		/*
+		 * Delete rows in reverse order so that we don't mess with
+		 * indexes.
+		 */
+		int row = firstMsgColumnIdxs.at(i).row();
+		m_attachmentModel.removeRow(row);
+	}
 
 	checkInputFields();
 }
