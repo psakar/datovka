@@ -214,25 +214,25 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(&m_attachmentModel,
 	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
 	    SLOT(checkInputFields()));
-//	connect(this->attachmentTableWidget->model(),
-//	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-//	    SLOT(checkInputFields()));
-//	connect(this->attachmentTableWidget->model(),
-//	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
-//	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+	connect(&m_attachmentModel,
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
+	    SLOT(checkInputFields()));
+	connect(&m_attachmentModel,
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
+	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
 	connect(this->attachmentTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
 
 	this->recipientTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-//	this->attachmentTableWidget->
-//	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+	this->attachmentTableView->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	this->recipientTableWidget->installEventFilter(
 	    new TableHomeEndFilter(this));
-//	this->attachmentTableWidget->installEventFilter(
-//	    new TableHomeEndFilter(this));
+	this->attachmentTableView->installEventFilter(
+	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(&globMsgProcEmitter,
@@ -980,7 +980,7 @@ void DlgSendMessage::deleteRecipientData(void)
 
 /* ========================================================================= */
 /*
- * Find recipent in the ISDS.
+ * Find recipient in the ISDS.
  */
 void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
@@ -1048,54 +1048,6 @@ void DlgSendMessage::openAttachmentFile(QModelIndex index)
 		    tr("Cannot write file '%1'.").arg(fileName),
 		    QMessageBox::Ok);
 	}
-
-#if 1
-//	QModelIndex selectedIndex =
-//	    this->attachmentTableWidget->currentIndex();
-
-//	Q_ASSERT(selectedIndex.isValid());
-//	if (!selectedIndex.isValid()) {
-//		return;
-//	}
-
-//	QModelIndex fileNameIndex =
-//	    selectedIndex.sibling(selectedIndex.row(), ATW_FILE);
-//	Q_ASSERT(fileNameIndex.isValid());
-//	if(!fileNameIndex.isValid()) {
-//		return;
-//	}
-//	QString attachName = fileNameIndex.data().toString();
-//	Q_ASSERT(!attachName.isEmpty());
-//	if (attachName.isEmpty()) {
-//		return;
-//	}
-//	attachName.replace(QRegExp("\\s"), "_").replace(
-//	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-//	/* TODO -- Add message id into file name? */
-//	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
-
-	/* Get data from base64. */
-//	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
-//	    ATW_DATA);
-//	Q_ASSERT(dataIndex.isValid());
-//	if (!dataIndex.isValid()) {
-//		return;
-//	}
-
-//	QByteArray data =
-//	    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-//	fileName = writeTemporaryFile(fileName, data);
-//	if (!fileName.isEmpty()) {
-//		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-//		/* TODO -- Handle openUrl() return value. */
-//	} else {
-//		QMessageBox::warning(this,
-//		    tr("Error opening attachment."),
-//		    tr("Cannot write file '%1'.").arg(fileName),
-//		    QMessageBox::Ok);
-//	}
-#endif
 }
 
 
@@ -1139,15 +1091,19 @@ int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
 
 bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 {
-#if 0
 	/* Load attachments. */
-	for (int i = 0; i < this->attachmentTableWidget->rowCount(); ++i) {
+	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
 		IsdsDocument document;
+		QModelIndex index;
 
 		document.isXml = false;
 
-		document.dmFileDescr = this->attachmentTableWidget->
-		    item(i, ATW_FILE)->text();
+		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+		document.dmFileDescr = index.data().toString();
 
 		/*
 		 * First document must have dmFileMetaType set to
@@ -1160,15 +1116,19 @@ bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 		 * be filled up on the ISDS server. It allows sending files
 		 * with special mime types without recognition by application.
 		 */
-		document.dmMimeType = "";
+		document.dmMimeType = QStringLiteral("");
 
+		index =
+		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
 		document.data = QByteArray::fromBase64(
-		    this->attachmentTableWidget->item(i, ATW_DATA)->
-		         data(Qt::DisplayRole).toByteArray());
+		    index.data(Qt::DisplayRole).toByteArray());
 
 		documents.append(document);
 	}
-#endif
 
 	return true;
 }
