@@ -228,6 +228,70 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	return mimeData;
 }
 
+bool DbFlsTblModel::canDropMimeData(const QMimeData *data,
+    Qt::DropAction action, int row, int column,
+    const QModelIndex &parent) const
+{
+	Q_UNUSED(action);
+	Q_UNUSED(row);
+	Q_UNUSED(column);
+	Q_UNUSED(parent);
+
+	if (0 == data) {
+		return false;
+	}
+
+	return data->hasUrls();
+}
+
+/*!
+ * @brief Convert a list of URLs to a list of absolute file paths.
+ *
+ * @param[in] uriList List of file URLs.
+ * @return List of absolute file paths or empty list on error.
+ */
+static
+QStringList filePaths(const QList<QUrl> &uriList)
+{
+	QStringList filePaths;
+
+	foreach (const QUrl &uri, uriList) {
+		if (!uri.isValid()) {
+			logErrorNL("Dropped invalid URL '%s'.",
+			    uri.toString().toUtf8().constData());
+			return QList<QString>();
+		}
+
+		if (!uri.isLocalFile()) {
+			logErrorNL("Dropped URL '%s' is not a local file.",
+			    uri.toString().toUtf8().constData());
+			return QList<QString>();
+		}
+
+		filePaths.append(uri.toLocalFile());
+	}
+
+	return filePaths;
+}
+
+bool DbFlsTblModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
+    int row, int column, const QModelIndex &parent)
+{
+	if (!canDropMimeData(data, action, row, column, parent)) {
+		return false;
+	}
+
+	/* data->hasUrls() already tested */
+
+	QStringList paths(filePaths(data->urls()));
+
+	foreach (const QString &filePath, paths) {
+		addAttachmentFile(filePath);
+	}
+
+	return true;
+}
+
 void DbFlsTblModel::setHeader(void)
 {
 	int i;

@@ -84,11 +84,41 @@ public:
 	/*!
 	 * @brief Returns object containing serialised attachment data.
 	 *
-	 * @param indexes List of indexes.
+	 * @param[in] indexes List of indexes.
 	 * @return Pointer to newly allocated mime data object, 0 on error.
 	 */
 	QMimeData *mimeData(
 	    const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns whether the model accepts drops of given mime data.
+	 *
+	 * @param[in] data Data to be dropped.
+	 * @param[in] action Type of drop action.
+	 * @param[in] row Target row.
+	 * @param[in] column Target column.
+	 * @param[in] parent Parent index.
+	 * @return True if drop is accepted.
+	 */
+	virtual
+	bool canDropMimeData(const QMimeData *data, Qt::DropAction action,
+	    int row, int column,
+	    const QModelIndex &parent) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Handles data supplied by drop operation.
+	 *
+	 * @param[in] data Data to be dropped.
+	 * @param[in] action Type of drop action.
+	 * @param[in] row Target row.
+	 * @param[in] column Target column.
+	 * @param[in] parent Parent index.
+	 * @return True if data are handled by the model.
+	 */
+	virtual
+	bool dropMimeData(const QMimeData *data, Qt::DropAction action,
+	    int row, int column,
+	    const QModelIndex &parent) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Sets default header.

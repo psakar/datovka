@@ -77,15 +77,6 @@ protected:
 	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-	/*!
-	 * @brief Convert a list of URLs to a list of absolute file paths.
-	 *
-	 * @param[in] uriList List of file URLs.
-	 * @return List of absolute file paths or empty list on error.
-	 */
-	static
-	QList<QString> filePaths(const QList<QUrl> &uriList);
-
 	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;
 };
 

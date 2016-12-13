@@ -94,11 +94,7 @@ void AttachmentTableView::dropEvent(QDropEvent *event)
 		return;
 	}
 
-	QList<QString> paths = filePaths(mimeData->urls());
-
-	foreach (const QString &filePath, paths) {
-		attachmentModel->addAttachmentFile(filePath);
-	}
+	attachmentModel->dropMimeData(mimeData, event->dropAction(), -1, -1, QModelIndex());
 }
 
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
@@ -166,27 +162,4 @@ void AttachmentTableView::mousePressEvent(QMouseEvent *event)
 	}
 
 	QTableView::mousePressEvent(event);
-}
-
-QList<QString> AttachmentTableView::filePaths(const QList<QUrl> &uriList)
-{
-	QList<QString> filePaths;
-
-	foreach (const QUrl &uri, uriList) {
-		if (!uri.isValid()) {
-			logErrorNL("Dropped invalid URL '%s'.",
-			    uri.toString().toUtf8().constData());
-			return QList<QString>();
-		}
-
-		if (!uri.isLocalFile()) {
-			logErrorNL("Dropped URL '%s' is not a local file.",
-			    uri.toString().toUtf8().constData());
-			return QList<QString>();
-		}
-
-		filePaths.append(uri.toLocalFile());
-	}
-
-	return filePaths;
 }
