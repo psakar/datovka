@@ -115,7 +115,7 @@ public:
 	 * @brief Adds attachment file.
 	 *
 	 * @param[in] filePath Path to attachment file.
-	 * @return Size of added file, or -1 on error.
+	 * @return Positive size of added file, 0 or -1 on error.
 	 */
 	int addAttachmentFile(const QString &filePath);
 
@@ -124,8 +124,9 @@ public:
 	 *
 	 * @param[in] base64content Base64-encoded attachment content.
 	 * @param[in] fName Attachment name.
+	 * @param True when attachment data successfully added.
 	 */
-	void addAttachmentEntry(const QByteArray &base64content,
+	bool addAttachmentEntry(const QByteArray &base64content,
 	    const QString &fName);
 
 private:
@@ -133,9 +134,29 @@ private:
 	 * @brief Appends data from the supplied message.
 	 *
 	 * @param[in] message Message structure.
-	 * @return True on success.
+	 * @return True when message data successfully added.
 	 */
 	bool addMessageData(const struct isds_message *message);
+
+	/*!
+	 * @brief Append supplied vector.
+	 *
+	 * @param[in] rowVect Vector containing a model row.
+	 * @param[in] insertUnique true if only unique file should be added.
+	 * @return True when attachment data successfully added.
+	 */
+	bool appendVector(const QVector<QVariant> &rowVect, bool insertUnique);
+
+	/*!
+	 * @brief Check whether file name and content combination already
+	 *     exists.
+	 *
+	 * @param[in] base64content Base64-encoded attachment content.
+	 * @param[in] fName Attachment name.
+	 * @return True if content with name exists in model.
+	 */
+	bool nameAndContentPresent(const QVariant &base64content,
+	    const QVariant &fName) const;
 };
 
 #endif /* _FILES_MODEL_H_ */

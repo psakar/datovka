@@ -96,9 +96,11 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 		return false;
 	}
 
+	beginResetModel();
 	m_data.clear();
 	m_rowsAllocated = 0;
 	m_rowCount = 0;
+	endResetModel();
 
 	/* m_columnCount = MAX_COL; */
 
@@ -129,24 +131,19 @@ bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
 		return false;
 	}
 
-	beginResetModel();
-
 	query.first();
 	while (query.isActive() && query.isValid()) {
-
-		reserveSpace();
 
 		QVector<QVariant> row(m_columnCount);
 
 		queryToVector(row, query);
 		row[FPATH_COL] = LOCAL_DATABASE_STR;
 
-		m_data[m_rowCount++] = row;
+		/* Don't check data duplicity! */
+		appendVector(row, false);
 
 		query.next();
 	}
-
-	endResetModel();
 
 	return true;
 }
@@ -187,9 +184,7 @@ int DbFlsTblModel::addAttachmentFile(const QString &filePath)
 	QString fileName(QFileInfo(attFile.fileName()).fileName());
 	QMimeType mimeType(QMimeDatabase().mimeTypeForFile(attFile));
 
-	int rows = rowCount();
-
-	for (int i = 0; i < rows; ++i) {
+	for (int i = 0; i < rowCount(); ++i) {
 		if (_data(i, FPATH_COL).toString() == filePath) {
 			/* Already in table. */
 			logWarning("File '%s' already in table.\n",
@@ -197,10 +192,6 @@ int DbFlsTblModel::addAttachmentFile(const QString &filePath)
 			return -1;
 		}
 	}
-
-	beginInsertRows(QModelIndex(), rows, rows);
-
-	reserveSpace();
 
 	QVector<QVariant> rowVect(m_columnCount);
 
@@ -212,24 +203,20 @@ int DbFlsTblModel::addAttachmentFile(const QString &filePath)
 	rowVect[FSIZE_COL] = fileSize; // QString::number(fileSize)
 	rowVect[FPATH_COL] = filePath;
 
-	m_data[m_rowCount++] = rowVect;
-
-	endInsertRows();
-
-	return fileSize;
+	/* Check data duplicity. */
+	if (appendVector(rowVect, true)) {
+		return fileSize;
+	} else {
+		return -1;
+	}
 }
 
-void DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
+bool DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
     const QString &fName)
 {
 	if (base64content.isEmpty() || fName.isEmpty()) {
-		return;
+		return false;
 	}
-
-	int rows = rowCount();
-	beginInsertRows(QModelIndex(), rows, rows);
-
-	reserveSpace();
 
 	QVector<QVariant> rowVect(m_columnCount);
 
@@ -241,9 +228,8 @@ void DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
 	rowVect[FSIZE_COL] = base64RealSize(base64content); // QString::number()
 	rowVect[FPATH_COL] = LOCAL_DATABASE_STR;
 
-	m_data[m_rowCount++] = rowVect;
-
-	endInsertRows();
+	/* Check data duplicity. */
+	return appendVector(rowVect, true);
 }
 
 bool DbFlsTblModel::addMessageData(const struct isds_message *message)
@@ -255,8 +241,6 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 		Q_ASSERT(0);
 		return false;
 	}
-
-	beginResetModel();
 
 	docListItem = message->documents;
 	if (NULL == docListItem) {
@@ -270,8 +254,6 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 			return false;
 		}
 
-		reserveSpace();
-
 		QVector<QVariant> row(m_columnCount);
 
 		row[CONTENT_COL] = QVariant(
@@ -280,12 +262,53 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 		row[FNAME_COL] = QVariant(QString(doc->dmFileDescr));
 		row[FSIZE_COL] = QVariant(0);
 
-		m_data[m_rowCount++] = row;
+		/* Don't check data duplicity! */
+		appendVector(row, false);
 
 		docListItem = docListItem->next;
 	}
 
+	return true;
+}
+
+bool DbFlsTblModel::appendVector(const QVector<QVariant> &rowVect,
+    bool insertUnique)
+{
+	if (rowVect.size() != m_columnCount) {
+		return false;
+	}
+
+	if (insertUnique && nameAndContentPresent(rowVect.at(CONTENT_COL),
+	        rowVect.at(FNAME_COL))) {
+		/* Fail if data present. */
+		logWarningNL("Same data '%s' already attached.",
+		    rowVect.at(FNAME_COL).toString().toUtf8().constData());
+		return false;
+	}
+
+	int rows = rowCount();
+	beginInsertRows(QModelIndex(), rows, rows);
+
+	reserveSpace();
+
+	m_data[m_rowCount++] = rowVect;
+
 	endResetModel();
 
 	return true;
+}
+
+bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
+    const QVariant &fName) const
+{
+	/* Cannot use foreach (), because contains pre-allocated empty lines. */
+	for (int row = 0; row < rowCount(); ++row) {
+		const QVector<QVariant> &rowEntry = m_data.at(row);
+		if ((rowEntry.at(FNAME_COL) == fName) &&
+		    (rowEntry.at(CONTENT_COL) == base64content)) {
+			return true;
+		}
+	}
+
+	return false;
 }
