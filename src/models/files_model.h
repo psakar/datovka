@@ -80,6 +80,16 @@ public:
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
+	virtual
+	/*!
+	 * @brief Returns object containing serialised attachment data.
+	 *
+	 * @param indexes List of indexes.
+	 * @return Pointer to newly allocated mime data object, 0 on error.
+	 */
+	QMimeData *mimeData(
+	    const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
+
 	/*!
 	 * @brief Sets default header.
 	 */

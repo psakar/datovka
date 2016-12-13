@@ -22,15 +22,12 @@
  */
 
 #include <QApplication>
-#include <QDir>
 #include <QDrag>
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QPixmap>
-#include <QUrl>
 
 #include "src/common.h"
-#include "src/io/filesystem.h"
 #include "src/log/log.h"
 #include "src/models/files_model.h"
 #include "src/views/attachment_table_view.h"
@@ -117,23 +114,10 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	/* Create temporary directory. Automatic remove is on by default. */
-	QTemporaryDir dir(QDir::tempPath() + QDir::separator() + TMP_DIR_NAME);
-	if (!dir.isValid()) {
-		logErrorNL("%s", "Could not create a temporary directory.");
-		return;
-	}
-	/*
-	 * Automatic removal cannot be set because his removes the files
-	 * before actual copying of the file.
-	 *
-	 * TODO -- Represent the copied data in a different way than an URL.
-	 */
-	dir.setAutoRemove(false);
-
-	QList<QString> tmpFileNames = temporaryFiles(dir);
-	if (tmpFileNames.isEmpty()) {
-		logErrorNL("%s", "Could not write temporary files.");
+	/* TODO -- Access the model in a more transparent way. */
+	DbFlsTblModel *attachmentModel =
+	    qobject_cast<DbFlsTblModel *>(model());
+	if (0 == attachmentModel) {
 		return;
 	}
 
@@ -142,14 +126,15 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	QMimeData *mimeData = new (std::nothrow) QMimeData;
-	if (0 != mimeData) {
-		QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
-		mimeData->setUrls(urlList);
-		drag->setMimeData(mimeData);
+	QModelIndexList rowIdxs(this->selectionModel()->selectedRows(0));
+	QMimeData *mimeData = attachmentModel->mimeData(rowIdxs);
+	if (0 == mimeData) {
+		delete drag;
+		return;
 	}
+	drag->setMimeData(mimeData);
 
-	if (tmpFileNames.size() == 1) {
+	if (rowIdxs.size() == 1) {
 		drag->setDragCursor(
 		    QPixmap(ICON_3PARTY_PATH "document_32.png"),
 		    Qt::MoveAction);
@@ -181,90 +166,6 @@ void AttachmentTableView::mousePressEvent(QMouseEvent *event)
 	}
 
 	QTableView::mousePressEvent(event);
-}
-
-QList<QString> AttachmentTableView::temporaryFiles(
-    const QTemporaryDir &tmpDir) const
-{
-	QList<QString> tmpFileList;
-	int fileNumber = 0;
-	const QString tmpPath(tmpDir.path());
-
-	if (tmpPath.isEmpty()) {
-		Q_ASSERT(0);
-		return QList<QString>();
-	}
-
-	QModelIndexList firstMsgColumnIdxs =
-	   this->selectionModel()->selectedRows(0);
-
-	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
-		QString subirPath(tmpPath + QDir::separator() +
-		    QString::number(fileNumber++));
-		{
-			/*
-			 * Create a separate subdirectory because the files
-			 * may have equal names.
-			 */
-			QDir dir(tmpPath);
-			if (!dir.mkpath(subirPath)) {
-				logError("Could not create directory '%s'.",
-				    subirPath.toUtf8().constData());
-				return QList<QString>();
-			}
-		}
-		QString attachAbsPath(subirPath + QDir::separator());
-		{
-			/* Determine full file path. */
-			QModelIndex fileNameIndex = idx.sibling(idx.row(),
-			    DbFlsTblModel::FNAME_COL);
-			if(!fileNameIndex.isValid()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			QString attachFileName(fileNameIndex.data().toString());
-			if (attachFileName.isEmpty()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			attachAbsPath += attachFileName;
-		}
-		QByteArray attachData;
-		{
-			/* Obtain data. */
-			QModelIndex dataIndex = idx.sibling(idx.row(),
-			    DbFlsTblModel::CONTENT_COL);
-			if (!dataIndex.isValid()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			attachData = QByteArray::fromBase64(
-			    dataIndex.data().toByteArray());
-			if (attachData.isEmpty()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-		}
-		if (WF_SUCCESS != writeFile(attachAbsPath, attachData, false)) {
-			return QList<QString>();
-		}
-
-		tmpFileList.append(attachAbsPath);
-	}
-
-	return tmpFileList;
-}
-
-QList<QUrl> AttachmentTableView::temporaryFileUrls(
-    const QList<QString> &tmpFileNames)
-{
-	QList<QUrl> uriList;
-
-	foreach (const QString &fileName, tmpFileNames) {
-		uriList.append(QUrl::fromLocalFile(fileName));
-	}
-
-	return uriList;
 }
 
 QList<QString> AttachmentTableView::filePaths(const QList<QUrl> &uriList)

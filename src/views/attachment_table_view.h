@@ -27,7 +27,6 @@
 #include <QList>
 #include <QMouseEvent>
 #include <QString>
-#include <QTemporaryDir>
 #include <QUrl>
 
 #include "src/views/lowered_table_view.h"
@@ -78,23 +77,6 @@ protected:
 	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
 private:
-	/*!
-	 * @brief Creates temporary files related to selected view items.
-	 *
-	 * @param[in] tmpDir Temporary directory object.
-	 * @return List of absolute file names or empty list on error.
-	 */
-	QList<QString> temporaryFiles(const QTemporaryDir &tmpDir) const;
-
-	/*!
-	 * @brief Converts list of absolute file names to list of URLs.
-	 *
-	 * @param[in] tmpFileNames List of absolute file names.
-	 * @return List of URLs or empty list on error.
-	 */
-	static
-	QList<QUrl> temporaryFileUrls(const QList<QString> &tmpFileNames);
-
 	/*!
 	 * @brief Convert a list of URLs to a list of absolute file paths.
 	 *

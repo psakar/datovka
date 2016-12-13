@@ -21,12 +21,17 @@
  * the two.
  */
 
+#include <QDir>
 #include <QMimeData>
 #include <QMimeDatabase>
+#include <QSet>
+#include <QTemporaryDir>
 #include <QSqlRecord>
+#include <QUrl>
 
 #include "src/common.h"
 #include "src/io/db_tables.h"
+#include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
@@ -65,6 +70,162 @@ Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 	}
 
 	return defaultFlags;
+}
+
+/*!
+ * @brief Generate list containing only one index per line each.
+ *
+ * @param[in] indexes Indexes identifying lines.
+ * @return List of indexes with unique row numbers.
+ */
+static
+const QModelIndexList uniqueLineIndexes(const QModelIndexList &indexes,
+    int dfltCoumn)
+{
+	QSet<int> lines;
+	QModelIndexList uniqueLines;
+
+	foreach (const QModelIndex &index, indexes) {
+		if (lines.contains(index.row())) {
+			continue;
+		}
+		uniqueLines.append(index.sibling(index.row(), dfltCoumn));
+		lines.insert(index.row());
+	}
+
+	return uniqueLines;
+}
+
+/*!
+ * @brief Creates temporary files related to selected view items.
+ *
+ * @param[in] tmpDir Temporary directory object.
+ * @param[in] indexes Indexes identifying lines.
+ * @return List of absolute file names or empty list on error.
+ */
+static
+QStringList temporaryFiles(const QTemporaryDir &tmpDir,
+    const QModelIndexList &indexes)
+{
+	QStringList tmpFileList;
+	int fileNumber = 0;
+	const QString tmpPath(tmpDir.path());
+
+	if (tmpPath.isEmpty()) {
+		Q_ASSERT(0);
+		return QList<QString>();
+	}
+
+	foreach (const QModelIndex &idx, indexes) {
+		QString subirPath(tmpPath + QDir::separator() +
+		    QString::number(fileNumber++));
+		{
+			/*
+			 * Create a separate subdirectory because the files
+			 * may have equal names.
+			 */
+			QDir dir(tmpPath);
+			if (!dir.mkpath(subirPath)) {
+				logError("Could not create directory '%s'.",
+				    subirPath.toUtf8().constData());
+				return QList<QString>();
+			}
+		}
+		QString attachAbsPath(subirPath + QDir::separator());
+		{
+			/* Determine full file path. */
+			QModelIndex fileNameIndex = idx.sibling(idx.row(),
+			    DbFlsTblModel::FNAME_COL);
+			if(!fileNameIndex.isValid()) {
+				Q_ASSERT(0);
+				return QList<QString>();
+			}
+			QString attachFileName(fileNameIndex.data().toString());
+			if (attachFileName.isEmpty()) {
+				Q_ASSERT(0);
+				return QList<QString>();
+			}
+			attachAbsPath += attachFileName;
+		}
+		QByteArray attachData;
+		{
+			/* Obtain data. */
+			QModelIndex dataIndex = idx.sibling(idx.row(),
+			    DbFlsTblModel::CONTENT_COL);
+			if (!dataIndex.isValid()) {
+				Q_ASSERT(0);
+				return QList<QString>();
+			}
+			attachData = QByteArray::fromBase64(
+			    dataIndex.data().toByteArray());
+			if (attachData.isEmpty()) {
+				Q_ASSERT(0);
+				return QList<QString>();
+			}
+		}
+		if (WF_SUCCESS != writeFile(attachAbsPath, attachData, false)) {
+			return QList<QString>();
+		}
+
+		tmpFileList.append(attachAbsPath);
+	}
+
+	return tmpFileList;
+}
+
+/*!
+ * @brief Converts list of absolute file names to list of URLs.
+ *
+ * @param[in] tmpFileNames List of absolute file names.
+ * @return List of URLs or empty list on error.
+ */
+static
+QList<QUrl> temporaryFileUrls(const QStringList &tmpFileNames)
+{
+	QList<QUrl> uriList;
+
+	foreach (const QString &fileName, tmpFileNames) {
+		uriList.append(QUrl::fromLocalFile(fileName));
+	}
+
+	return uriList;
+}
+
+QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
+{
+	QModelIndexList lineIndexes = uniqueLineIndexes(indexes, FNAME_COL);
+	if (lineIndexes.isEmpty()) {
+		return 0;
+	}
+
+	/* Create temporary directory. Automatic remove is on by default. */
+	QTemporaryDir dir(QDir::tempPath() + QDir::separator() + TMP_DIR_NAME);
+	if (!dir.isValid()) {
+		logErrorNL("%s", "Could not create a temporary directory.");
+		return 0;
+	}
+	/*
+	 * Automatic removal cannot be set because his removes the files
+	 * before actual copying of the file.
+	 *
+	 * TODO -- Represent the copied data in a different way than an URL.
+	 */
+	dir.setAutoRemove(false);
+
+	QStringList tmpFileNames(temporaryFiles(dir, lineIndexes));
+	if (tmpFileNames.isEmpty()) {
+		logErrorNL("%s", "Could not write temporary files.");
+		return 0;
+	}
+
+	QMimeData *mimeData = new (std::nothrow) QMimeData;
+	if (0 == mimeData) {
+		return 0;
+	}
+	QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
+	mimeData->setUrls(urlList);
+
+	return mimeData;
 }
 
 void DbFlsTblModel::setHeader(void)
