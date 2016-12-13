@@ -299,8 +299,14 @@ bool DbFlsTblModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 
 	QStringList paths(filePaths(data->urls()));
 
+	if (parent.isValid()) {
+		/* Non-root node; append data. */
+		row = rowCount();
+	}
+
 	foreach (const QString &filePath, paths) {
-		addAttachmentFile(filePath);
+		insertAttachmentFile(filePath, row);
+		row++; /* Move to next row. */
 	}
 
 	return true;
@@ -343,7 +349,7 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 
 	/* m_columnCount = MAX_COL; */
 
-	return addMessageData(message);
+	return appendMessageData(message);
 }
 
 void DbFlsTblModel::setQuery(QSqlQuery &query)
@@ -379,7 +385,7 @@ bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
 		row[FPATH_COL] = LOCAL_DATABASE_STR;
 
 		/* Don't check data duplicity! */
-		appendVector(row, false);
+		insertVector(row, rowCount(), false);
 
 		query.next();
 	}
@@ -409,7 +415,7 @@ fail:
 	return QByteArray();
 }
 
-int DbFlsTblModel::addAttachmentFile(const QString &filePath)
+int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
 {
 	QFile attFile(filePath);
 
@@ -443,14 +449,14 @@ int DbFlsTblModel::addAttachmentFile(const QString &filePath)
 	rowVect[FPATH_COL] = filePath;
 
 	/* Check data duplicity. */
-	if (appendVector(rowVect, true)) {
+	if (insertVector(rowVect, row, true)) {
 		return fileSize;
 	} else {
 		return -1;
 	}
 }
 
-bool DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
+bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
     const QString &fName)
 {
 	if (base64content.isEmpty() || fName.isEmpty()) {
@@ -468,10 +474,10 @@ bool DbFlsTblModel::addAttachmentEntry(const QByteArray &base64content,
 	rowVect[FPATH_COL] = LOCAL_DATABASE_STR;
 
 	/* Check data duplicity. */
-	return appendVector(rowVect, true);
+	return insertVector(rowVect, rowCount(), true);
 }
 
-bool DbFlsTblModel::addMessageData(const struct isds_message *message)
+bool DbFlsTblModel::appendMessageData(const struct isds_message *message)
 {
 	const struct isds_list *docListItem;
 	const struct isds_document *doc;
@@ -502,7 +508,7 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 		row[FSIZE_COL] = QVariant(0);
 
 		/* Don't check data duplicity! */
-		appendVector(row, false);
+		insertVector(row, rowCount(), false);
 
 		docListItem = docListItem->next;
 	}
@@ -510,11 +516,19 @@ bool DbFlsTblModel::addMessageData(const struct isds_message *message)
 	return true;
 }
 
-bool DbFlsTblModel::appendVector(const QVector<QVariant> &rowVect,
-    bool insertUnique)
+bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
+    int row, bool insertUnique)
 {
 	if (rowVect.size() != m_columnCount) {
 		return false;
+	}
+
+	if ((row < 0) || (row > rowCount())) {
+		/*
+		 * -1 is passed when dropping directly on index which may be
+		 *  invalid for root node.
+		 */
+		row = rowCount();
 	}
 
 	if (insertUnique && nameAndContentPresent(rowVect.at(CONTENT_COL),
@@ -525,12 +539,18 @@ bool DbFlsTblModel::appendVector(const QVector<QVariant> &rowVect,
 		return false;
 	}
 
-	int rows = rowCount();
-	beginInsertRows(QModelIndex(), rows, rows);
+	Q_ASSERT((0 <= row) && (row <= rowCount()));
+
+	beginInsertRows(QModelIndex(), row, row);
 
 	reserveSpace();
 
-	m_data[m_rowCount++] = rowVect;
+	if (row == rowCount()) {
+		m_data[m_rowCount++] = rowVect;
+	} else {
+		m_data.insert(row, rowVect);
+		m_rowCount++;
+	}
 
 	endResetModel();
 

@@ -584,7 +584,7 @@ void DlgSendMessage::fillDlgAsForward(void)
 			continue;
 		}
 
-		m_attachmentModel.addAttachmentEntry(msgBase64,
+		m_attachmentModel.appendAttachmentEntry(msgBase64,
 		    dzPrefix(messageDb, msgId.dmId) + QString("DZ_%1.zfo").arg(msgId.dmId));
 	}
 }
@@ -703,8 +703,8 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	    messageDb->getFilesFromMessage(msgId.dmId);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
-		m_attachmentModel.addAttachmentEntry(fileData.dmEncodedContent,
-		    fileData.dmFileDescr);
+		m_attachmentModel.appendAttachmentEntry(
+		    fileData.dmEncodedContent, fileData.dmFileDescr);
 	}
 }
 
@@ -746,7 +746,8 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 
 	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachmentModel.addAttachmentFile(fileName);
+		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
+		    m_attachmentModel.rowCount());
 		if (fileSize <= 0) {
 			/* TODO -- Generate some warning message. */
 			continue;

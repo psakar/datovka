@@ -171,18 +171,19 @@ public:
 	 * @brief Adds attachment file.
 	 *
 	 * @param[in] filePath Path to attachment file.
+	 * @param[in] row Row to insert the data into.
 	 * @return Positive size of added file, 0 or -1 on error.
 	 */
-	int addAttachmentFile(const QString &filePath);
+	int insertAttachmentFile(const QString &filePath, int row);
 
 	/*!
-	 * @brief Add attachment data line.
+	 * @brief Append attachment data line.
 	 *
 	 * @param[in] base64content Base64-encoded attachment content.
 	 * @param[in] fName Attachment name.
 	 * @param True when attachment data successfully added.
 	 */
-	bool addAttachmentEntry(const QByteArray &base64content,
+	bool appendAttachmentEntry(const QByteArray &base64content,
 	    const QString &fName);
 
 private:
@@ -192,16 +193,18 @@ private:
 	 * @param[in] message Message structure.
 	 * @return True when message data successfully added.
 	 */
-	bool addMessageData(const struct isds_message *message);
+	bool appendMessageData(const struct isds_message *message);
 
 	/*!
-	 * @brief Append supplied vector.
+	 * @brief Insert supplied vector.
 	 *
 	 * @param[in] rowVect Vector containing a model row.
+	 * @param[in] row Row to insert the data into.
 	 * @param[in] insertUnique true if only unique file should be added.
 	 * @return True when attachment data successfully added.
 	 */
-	bool appendVector(const QVector<QVariant> &rowVect, bool insertUnique);
+	bool insertVector(const QVector<QVariant> &rowVect, int row,
+	    bool insertUnique);
 
 	/*!
 	 * @brief Check whether file name and content combination already
