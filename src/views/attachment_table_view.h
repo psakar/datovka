@@ -24,10 +24,12 @@
 #ifndef _ATTACHMENT_TABLE_VIEW_H_
 #define _ATTACHMENT_TABLE_VIEW_H_
 
+#if 0
 #include <QList>
 #include <QMouseEvent>
 #include <QString>
 #include <QUrl>
+#endif
 
 #include "src/views/lowered_table_view.h"
 

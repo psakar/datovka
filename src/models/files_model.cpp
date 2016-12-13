@@ -295,8 +295,7 @@ bool DbFlsTblModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 		return false;
 	}
 
-	/* data->hasUrls() already tested */
-
+	/* data->hasUrls() tested in canDropMimeData() */
 	QStringList paths(filePaths(data->urls()));
 
 	if (parent.isValid()) {

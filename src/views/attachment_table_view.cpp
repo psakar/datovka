@@ -21,6 +21,7 @@
  * the two.
  */
 
+#if 0
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
@@ -30,6 +31,7 @@
 #include "src/common.h"
 #include "src/log/log.h"
 #include "src/models/files_model.h"
+#endif
 #include "src/views/attachment_table_view.h"
 
 AttachmentTableView::AttachmentTableView(QWidget *parent)
