@@ -46,35 +46,45 @@ public:
 	explicit AttachmentTableView(QWidget *parent = 0);
 
 protected:
+#if 0
 	/*!
 	 * @brief Allows the drop.
 	 */
 	virtual
 	void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+#endif
 
+#if 0
 	/*!
 	 * @brief Allow drag move.
 	 */
 	virtual
 	void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+#endif
 
+#if 0
 	/*!
 	 * @brief Processes the drop.
 	 */
 	virtual
 	void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+#endif
 
+#if 0
 	/*!
 	 * @brief Activates the drag.
 	 */
 	virtual
 	void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+#endif
 
+#if 0
 	/*
 	 * @brief Used for storing the beginning position of the drag.
 	 */
 	virtual
 	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+#endif
 
 private:
 	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;

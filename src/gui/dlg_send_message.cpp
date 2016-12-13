@@ -150,6 +150,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 
 	this->attachmentTableView->setAcceptDrops(true);
 	this->attachmentTableView->setDragEnabled(false);
+	this->attachmentTableView->setDragDropOverwriteMode(false);
+	this->attachmentTableView->setDropIndicatorShown(true);
+//	this->attachmentTableView->setDefaultDropAction(Qt::MoveAction);
 
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);

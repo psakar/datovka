@@ -39,6 +39,7 @@ AttachmentTableView::AttachmentTableView(QWidget *parent)
 	setDragEnabled(true);
 }
 
+#if 0
 void AttachmentTableView::dragEnterEvent(QDragEnterEvent *event)
 {
 	if (0 == event) {
@@ -59,7 +60,9 @@ void AttachmentTableView::dragEnterEvent(QDragEnterEvent *event)
 		    mimeData->formats().join(" ").toUtf8().constData());
 	}
 }
+#endif
 
+#if 0
 void AttachmentTableView::dragMoveEvent(QDragMoveEvent *event)
 {
 	if (0 == event) {
@@ -69,7 +72,9 @@ void AttachmentTableView::dragMoveEvent(QDragMoveEvent *event)
 
 	event->acceptProposedAction();
 }
+#endif
 
+#if 0
 void AttachmentTableView::dropEvent(QDropEvent *event)
 {
 	if (0 == event) {
@@ -96,7 +101,9 @@ void AttachmentTableView::dropEvent(QDropEvent *event)
 
 	attachmentModel->dropMimeData(mimeData, event->dropAction(), -1, -1, QModelIndex());
 }
+#endif
 
+#if 0
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 {
 	if (0 == event) {
@@ -149,7 +156,9 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 	/* Ignore the return value of the drop action. */
 	drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
+#endif
 
+#if 0
 void AttachmentTableView::mousePressEvent(QMouseEvent *event)
 {
 	if (0 == event) {
@@ -163,3 +172,4 @@ void AttachmentTableView::mousePressEvent(QMouseEvent *event)
 
 	QTableView::mousePressEvent(event);
 }
+#endif
