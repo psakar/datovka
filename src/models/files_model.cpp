@@ -61,15 +61,29 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 	}
 }
 
+Qt::DropActions DbFlsTblModel::DbFlsTblModel::supportedDropActions(void) const
+{
+	/* The model must provide removeRows() to be able to use move action. */
+	return Qt::CopyAction | Qt::MoveAction;
+}
+
 Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = TblModel::flags(index);
 
 	if (index.isValid()) {
-		defaultFlags |= Qt::ItemIsDragEnabled;
+		/* Don't allow drops on items. */
+		defaultFlags |= Qt::ItemIsDragEnabled; // | Qt::ItemIsDropEnabled;
+	} else {
+		defaultFlags |= Qt::ItemIsDropEnabled;
 	}
 
 	return defaultFlags;
+}
+
+QStringList DbFlsTblModel::mimeTypes(void) const
+{
+	return QStringList(QStringLiteral("text/uri-list"));
 }
 
 /*!

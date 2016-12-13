@@ -73,6 +73,14 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
+	 * @brief Returns the drop actions supported by this model.
+	 *
+	 * @return Supported drop actions.
+	 */
+	virtual
+	Qt::DropActions supportedDropActions(void) const Q_DECL_OVERRIDE;
+
+	/*!
 	 * @brief Used to set items draggable.
 	 *
 	 * @param[in] index Index which to obtain flags for.
@@ -80,13 +88,21 @@ public:
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Returns the list of allowed MIME types.
+	 *
+	 * @return List of MIME types.
+	 */
 	virtual
+	QStringList mimeTypes(void) const Q_DECL_OVERRIDE;
+
 	/*!
 	 * @brief Returns object containing serialised attachment data.
 	 *
 	 * @param[in] indexes List of indexes.
 	 * @return Pointer to newly allocated mime data object, 0 on error.
 	 */
+	virtual
 	QMimeData *mimeData(
 	    const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
 
