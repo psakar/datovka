@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QProxyStyle>
 #if 0
 #include <QApplication>
 #include <QDrag>
@@ -34,10 +35,56 @@
 #endif
 #include "src/views/attachment_table_view.h"
 
+/*!
+ * @brief Style used to override default drop indicator.
+ */
+class AttachmentViewStyle : public QProxyStyle {
+public:
+	/*!
+	 * @brief Constructor.
+	 */
+	AttachmentViewStyle(QStyle *style = Q_NULLPTR);
+
+	/*!
+	 * @brief Draws primitive element.
+	 *
+	 * @note Used to draw drop indicator as whole line through the entire
+	 *     row.
+	 */
+	virtual
+	void drawPrimitive(PrimitiveElement element,
+	    const QStyleOption *option, QPainter *painter,
+	    const QWidget *widget = Q_NULLPTR) const Q_DECL_OVERRIDE;
+};
+
+AttachmentViewStyle::AttachmentViewStyle(QStyle *style)
+    : QProxyStyle(style)
+{
+}
+
+void AttachmentViewStyle::drawPrimitive(PrimitiveElement element,
+    const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+{
+	if ((element == QStyle::PE_IndicatorItemViewItemDrop) &&
+	    (!option->rect.isNull())) {
+		QStyleOption opt(*option);
+		opt.rect.setLeft(0);
+		if (widget != Q_NULLPTR) {
+			 opt.rect.setRight(widget->width());
+		}
+		QProxyStyle::drawPrimitive(element, &opt, painter, widget);
+		return;
+	}
+	QProxyStyle::drawPrimitive(element, option, painter, widget);
+}
+
 AttachmentTableView::AttachmentTableView(QWidget *parent)
     : LoweredTableView(parent),
     m_dragStartPosition()
 {
+	/* Override default style. */
+	setStyle(new AttachmentViewStyle(style()));
+
 	setDragEnabled(true);
 }
 
