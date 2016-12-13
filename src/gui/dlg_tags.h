@@ -32,10 +32,19 @@
 /*!
  * @brief Tags management dialogue.
  */
-class DlgTags : public QDialog , public Ui::TagsDialog {
+class DlgTags : public QDialog, public Ui::TagsDialog {
     Q_OBJECT
 
 public:
+	/*!
+	 * Describes the action the dialogue has performed.
+	 */
+	enum ReturnCode {
+		NO_ACTION, /*!< Nothing happened. */
+		ASSIGMENT_CHANGED, /*!< Assignment of tags to messages have changed. */
+		TAGS_CHANGED /*!< Actual tags have been deleted or changed. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
@@ -57,6 +66,15 @@ public:
 	 * @brief Destructor.
 	 */
 	~DlgTags(void);
+
+public slots:
+	/*!
+	 * @brief Shows the dialogue as a modal dialogue.
+	 *
+	 * @return Method returns ReturnCode.
+	 */
+	virtual
+	int exec(void) Q_DECL_OVERRIDE;
 
 private slots:
 	/*!
@@ -120,10 +138,12 @@ private:
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
 
-	QString m_userName; /*!< Account username. */
-	QList<qint64> m_msgIdList; /*!< List of message identifiers. */
+	const QString m_userName; /*!< Account username. */
+	const QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */
+
+	enum ReturnCode m_retCode; /*!< Dialogue return code. */
 };
 
 #endif /* _DLG_TAGS_H_ */

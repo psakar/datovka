@@ -37,7 +37,8 @@ DlgTags::DlgTags(QWidget *parent)
     m_userName(),
     m_msgIdList(),
     m_tagsDelegate(0),
-    m_tagsModel(0)
+    m_tagsModel(0),
+    m_retCode(NO_ACTION)
 {
 	setupUi(this);
 	initDlg();
@@ -49,7 +50,8 @@ DlgTags::DlgTags(const QString &userName, const QList<qint64> &msgIdList,
     m_userName(userName),
     m_msgIdList(msgIdList),
     m_tagsDelegate(0),
-    m_tagsModel(0)
+    m_tagsModel(0),
+    m_retCode(NO_ACTION)
 {
 	setupUi(this);
 	initDlg();
@@ -64,6 +66,13 @@ DlgTags::~DlgTags(void)
 	if (0 != m_tagsModel) {
 		delete m_tagsModel;
 	}
+}
+
+int DlgTags::exec(void)
+{
+	QDialog::exec();
+
+	return m_retCode;
 }
 
 void DlgTags::addTag(void)
@@ -81,8 +90,13 @@ void DlgTags::updateTag(void)
 	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
 	QDialog *tagDlg = new DlgTag(tagItem, this);
-	tagDlg->exec();
+	int retVal = tagDlg->exec();
 	tagDlg->deleteLater();
+
+	if (retVal == QDialog::Accepted) {
+		/* Existing tag has very likely just been changed. */
+		m_retCode = TAGS_CHANGED;
+	}
 
 	fillTagsToListView();
 }
@@ -91,9 +105,17 @@ void DlgTags::deleteTag(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
 
+	if (slctIdxs.isEmpty()) {
+		/* Nothing to do. */
+		return;
+	}
+
 	foreach (const QModelIndex &idx, slctIdxs) {
 		globTagDbPtr->deleteTag(getTagIdFromIndex(idx));
 	}
+
+	/* Existing tags have been removed. */
+	m_retCode = TAGS_CHANGED;
 
 	fillTagsToListView();
 }
@@ -101,6 +123,11 @@ void DlgTags::deleteTag(void)
 void DlgTags::assignSelectedTagsToMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+
+	if (slctIdxs.isEmpty()) {
+		/* Nothing to do. */
+		return;
+	}
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -110,11 +137,21 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 			    getTagIdFromIndex(idx), msgId);
 		}
 	}
+
+	/* Tag assignment was changed. */
+	if (m_retCode != TAGS_CHANGED) {
+		m_retCode = ASSIGMENT_CHANGED;
+	}
 }
 
 void DlgTags::removeSelectedTagsFromMsgs(void)
 {
 	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+
+	if (slctIdxs.isEmpty()) {
+		/* Nothing to do. */
+		return;
+	}
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -124,6 +161,11 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 			    getTagIdFromIndex(idx), msgId);
 		}
 	}
+
+	/* Tag assignment was changed. */
+	if (m_retCode != TAGS_CHANGED) {
+		m_retCode = ASSIGMENT_CHANGED;
+	}
 }
 
 void DlgTags::removeAllTagsFromMsgs(void)
@@ -132,6 +174,11 @@ void DlgTags::removeAllTagsFromMsgs(void)
 
 	foreach (const qint64 &msgId, m_msgIdList) {
 		globTagDbPtr->removeAllTagsFromMsg(m_userName, msgId);
+	}
+
+	/* Tag assignment was changed. */
+	if (m_retCode != TAGS_CHANGED) {
+		m_retCode = ASSIGMENT_CHANGED;
 	}
 }
 

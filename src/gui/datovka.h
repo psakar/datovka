@@ -687,6 +687,18 @@ private:
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 
+	/*!
+	 * @brief Shows tag editing dialogue.
+	 *
+	 * @no If no message identifiers are supplied then just the tags are
+	 *     edited.
+	 *
+	 * @param[in] userName Account login string. Must be supplied when
+	 *                     message identifiers are passed.
+	 * @maram[in] msgIdList Messages whose tags should be edited.
+	 */
+	void modifyTags(const QString &userName, QList<qint64> msgIdList);
+
 	void showStatusTextWithTimeout(const QString &qStr);
 
 	void showStatusTextPermanently(const QString &qStr);
