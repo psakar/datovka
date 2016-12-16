@@ -114,6 +114,59 @@ bool TblModel::appendQueryData(QSqlQuery &query)
 	return true;
 }
 
+bool TblModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
+    int count, const QModelIndex &destinationParent, int destinationChild)
+{
+	if (sourceParent.isValid() || destinationParent.isValid()) {
+		/* Only moves within root node are allowed. */
+		return false;
+	}
+
+	if ((sourceRow < 0) || (sourceRow >= rowCount()) ||
+	    (count < 0) || ((sourceRow + count) > rowCount()) ||
+	    (destinationChild < 0) || (destinationChild > rowCount())) {
+		/* Boundaries or location outside limits. */
+		return false;
+	}
+
+	if (count == 0) {
+		return true;
+	}
+
+	if ((sourceRow <= destinationChild) &&
+	    (destinationChild <= (sourceRow + count))) {
+		/* Destination lies within source. */
+		return true;
+	}
+
+	int newPosition; /* Position after removal. */
+	if (destinationChild < sourceRow) {
+		newPosition = destinationChild;
+	} else if (destinationChild > (sourceRow + count)) {
+		newPosition = destinationChild - count;
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1,
+	    destinationParent, destinationChild);
+
+	QList< QVector<QVariant> > movedData;
+	for (int i = sourceRow; i < (sourceRow + count); ++i) {
+		movedData.append(m_data.takeAt(sourceRow));
+	}
+
+	for (int i = 0; i < count; ++i) {
+		m_data.insert(newPosition + i, movedData.takeAt(0));
+	}
+	Q_ASSERT(movedData.isEmpty());
+
+	endMoveRows();
+
+	return true;
+}
+
 bool TblModel::removeRows(int row, int count, const QModelIndex &parent)
 {
 	if ((row < 0) || (count < 0) || parent.isValid()) {
