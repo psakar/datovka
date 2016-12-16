@@ -186,6 +186,16 @@ public:
 	bool appendAttachmentEntry(const QByteArray &base64content,
 	    const QString &fName);
 
+	/*!
+	 * @brief Generate sorted list containing only one index per line each.
+	 *
+	 * @param[in] indexes Indexes identifying lines.
+	 * @return List of indexes with unique row numbers.
+	 */
+	static
+	QModelIndexList sortedUniqueLineIndexes(const QModelIndexList &indexes,
+	    int dfltCoumn);
+
 private:
 	/*!
 	 * @brief Appends data from the supplied message.

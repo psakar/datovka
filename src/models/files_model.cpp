@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <algorithm> /* std::sort */
 #include <QDir>
 #include <QMimeData>
 #include <QMimeDatabase>
@@ -84,30 +85,6 @@ Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 QStringList DbFlsTblModel::mimeTypes(void) const
 {
 	return QStringList(QStringLiteral("text/uri-list"));
-}
-
-/*!
- * @brief Generate list containing only one index per line each.
- *
- * @param[in] indexes Indexes identifying lines.
- * @return List of indexes with unique row numbers.
- */
-static
-const QModelIndexList uniqueLineIndexes(const QModelIndexList &indexes,
-    int dfltCoumn)
-{
-	QSet<int> lines;
-	QModelIndexList uniqueLines;
-
-	foreach (const QModelIndex &index, indexes) {
-		if (lines.contains(index.row())) {
-			continue;
-		}
-		uniqueLines.append(index.sibling(index.row(), dfltCoumn));
-		lines.insert(index.row());
-	}
-
-	return uniqueLines;
 }
 
 /*!
@@ -207,7 +184,8 @@ QList<QUrl> temporaryFileUrls(const QStringList &tmpFileNames)
 
 QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 {
-	QModelIndexList lineIndexes = uniqueLineIndexes(indexes, FNAME_COL);
+	QModelIndexList lineIndexes = sortedUniqueLineIndexes(indexes,
+	    FNAME_COL);
 	if (lineIndexes.isEmpty()) {
 		return 0;
 	}
@@ -474,6 +452,36 @@ bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
 
 	/* Check data duplicity. */
 	return insertVector(rowVect, rowCount(), true);
+}
+
+/*!
+ * @brief Used for sorting index lists.
+ */
+class IndexRowLess {
+public:
+	bool operator()(const QModelIndex &a, const QModelIndex &b) const
+	{
+		return a < b;
+	}
+};
+
+QModelIndexList DbFlsTblModel::sortedUniqueLineIndexes(
+    const QModelIndexList &indexes, int dfltCoumn)
+{
+	QSet<int> lines;
+	QModelIndexList uniqueLines;
+
+	foreach (const QModelIndex &index, indexes) {
+		if (lines.contains(index.row())) {
+			continue;
+		}
+		uniqueLines.append(index.sibling(index.row(), dfltCoumn));
+		lines.insert(index.row());
+	}
+
+	::std::sort(uniqueLines.begin(), uniqueLines.end(), IndexRowLess());
+
+	return uniqueLines;
 }
 
 bool DbFlsTblModel::appendMessageData(const struct isds_message *message)
