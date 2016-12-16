@@ -21,7 +21,11 @@
  * the two.
  */
 
+#include <QApplication>
+#include <QDropEvent>
 #include <QProxyStyle>
+
+#include "src/models/files_model.h"
 #if 0
 #include <QApplication>
 #include <QDrag>
@@ -33,6 +37,7 @@
 #include "src/log/log.h"
 #include "src/models/files_model.h"
 #endif
+#include "src/log/log.h"
 #include "src/views/attachment_table_view.h"
 
 /*!
@@ -43,7 +48,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	AttachmentViewStyle(QStyle *style = Q_NULLPTR);
+	explicit AttachmentViewStyle(QStyle *style = Q_NULLPTR);
 
 	/*!
 	 * @brief Draws primitive element.
@@ -79,8 +84,7 @@ void AttachmentViewStyle::drawPrimitive(PrimitiveElement element,
 }
 
 AttachmentTableView::AttachmentTableView(QWidget *parent)
-    : LoweredTableView(parent),
-    m_dragStartPosition()
+    : LoweredTableView(parent)
 {
 	/* Override default style. */
 	setStyle(new AttachmentViewStyle(style()));
@@ -123,34 +127,29 @@ void AttachmentTableView::dragMoveEvent(QDragMoveEvent *event)
 }
 #endif
 
-#if 0
 void AttachmentTableView::dropEvent(QDropEvent *event)
 {
-	if (0 == event) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	const QMimeData *mimeData = event->mimeData();
-	if (0 == mimeData) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (!mimeData->hasUrls()) {
-		return;
-	}
+	/*
+	 * Don't know what's happening.
+	 * The default view/mode behaviour is somewhat strange.
+	 * When dragging data originating from the model, if the model
+	 * signals elements added while processing the event then the original
+	 * data are not removed.
+	 */
 
 	/* TODO -- Access the model in a more transparent way. */
-	DbFlsTblModel *attachmentModel =
-	    qobject_cast<DbFlsTblModel *>(model());
-	if (0 == attachmentModel) {
+	DbFlsTblModel *attachmentModel = qobject_cast<DbFlsTblModel *>(model());
+	if (attachmentModel == Q_NULLPTR) {
 		return;
 	}
 
-	attachmentModel->dropMimeData(mimeData, event->dropAction(), -1, -1, QModelIndex());
+	bool dropOriginatesHere = (event->source() == this);
+	if (!dropOriginatesHere) {
+		LoweredTableView::dropEvent(event);
+	} else {
+		shuffleOnDrop(event);
+	}
 }
-#endif
 
 #if 0
 void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
@@ -222,3 +221,159 @@ void AttachmentTableView::mousePressEvent(QMouseEvent *event)
 	QTableView::mousePressEvent(event);
 }
 #endif
+
+void AttachmentTableView::shuffleOnDrop(QDropEvent *event)
+{
+	Q_ASSERT(event->source() == this);
+
+	/* TODO -- Access the model in a more transparent way. */
+	DbFlsTblModel *attachmentModel = qobject_cast<DbFlsTblModel *>(model());
+	if (attachmentModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	int row = -1;
+	int col = -1;
+	QModelIndex dropIndex;
+	if (!dropOn(event, &row, &col, &dropIndex)) {
+		return;
+	}
+
+	if (dropIndex.isValid()) {
+		/* Must be dropped on root. */
+		return;
+	}
+
+	if (row < 0) {
+		/* Dropping on root is treated as dropping on end. */
+		row = attachmentModel->rowCount();
+	}
+
+	const QModelIndexList selectedSorted(
+	    DbFlsTblModel::sortedUniqueLineIndexes(
+	        selectionModel()->selectedIndexes(), 0));
+
+	if (selectedSorted.isEmpty()) {
+		return;
+	}
+
+	int firstRow = selectedSorted.first().row();
+	int count = selectedSorted.size();
+	int lastRow = selectedSorted.last().row();
+	if ((lastRow - firstRow + 1) > count) {
+		/* TODO -- Allow discontinuous selection. */
+		logWarningNL("%s", "Discontinuous selection, aborting.");
+		return;
+	}
+
+	attachmentModel->moveRows(QModelIndex(), firstRow, count,
+	    QModelIndex(), row);
+
+}
+
+bool AttachmentTableView::droppingOnItself(QDropEvent *event,
+    const QModelIndex &index)
+{
+	Qt::DropAction dropAction = event->dropAction();
+	if (dragDropMode() == QAbstractItemView::InternalMove) {
+		dropAction = Qt::MoveAction;
+	}
+	if ((event->source() == this) &&
+	    (event->possibleActions() & Qt::MoveAction) &&
+	    (dropAction == Qt::MoveAction)) {
+		QModelIndexList selectedIdxs = selectedIndexes();
+		QModelIndex child = index;
+		while (child.isValid() && child != rootIndex()) {
+			if (selectedIdxs.contains(child)) {
+				return true;
+			}
+			child = child.parent();
+		}
+	}
+	return false;
+}
+
+bool AttachmentTableView::dropOn(QDropEvent *event, int *dropRow, int *dropCol,
+    QModelIndex *dropIndex)
+{
+	/* Inspired y Qt sources. */
+
+	if (event->isAccepted()) {
+		return false;
+	}
+
+	QModelIndex index;
+	/* rootIndex() (i.e. the viewport) might be a valid index. */
+	if (viewport()->rect().contains(event->pos())) {
+		index = indexAt(event->pos());
+		if (!index.isValid() || !visualRect(index).contains(event->pos())) {
+			index = rootIndex();
+		}
+	}
+
+	/* If we are allowed to do the drop. */
+	if (model()->supportedDropActions() & event->dropAction()) {
+		int row = -1;
+		int col = -1;
+		if (index != rootIndex()) {
+			//dropIndicatorPosition = position(event->pos(), visualRect(index), index);
+			//switch (dropIndicatorPosition) {
+			switch (position(event->pos(), visualRect(index), index)) {
+			case QAbstractItemView::AboveItem:
+				row = index.row();
+				col = index.column();
+				index = index.parent();
+				break;
+			case QAbstractItemView::BelowItem:
+				row = index.row() + 1;
+				col = index.column();
+				index = index.parent();
+				break;
+			case QAbstractItemView::OnItem:
+			case QAbstractItemView::OnViewport:
+				break;
+			}
+		} else {
+			//dropIndicatorPosition = QAbstractItemView::OnViewport;
+		}
+		*dropIndex = index;
+		*dropRow = row;
+		*dropCol = col;
+		if (!droppingOnItself(event, index)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+QAbstractItemView::DropIndicatorPosition AttachmentTableView::position(
+    const QPoint &pos, const QRect &rect, const QModelIndex &index) const
+{
+	QAbstractItemView::DropIndicatorPosition r =
+	    QAbstractItemView::OnViewport;
+	if (!dragDropOverwriteMode()) {
+		const int margin = 2;
+		if (pos.y() - rect.top() < margin) {
+			r = QAbstractItemView::AboveItem;
+		} else if (rect.bottom() - pos.y() < margin) {
+			r = QAbstractItemView::BelowItem;
+		} else if (rect.contains(pos, true)) {
+			r = QAbstractItemView::OnItem;
+		}
+	} else {
+		QRect touchingRect = rect;
+		touchingRect.adjust(-1, -1, 1, 1);
+		if (touchingRect.contains(pos, false)) {
+			r = QAbstractItemView::OnItem;
+		}
+	}
+
+	if ((r == QAbstractItemView::OnItem) &&
+	    (!(model()->flags(index) & Qt::ItemIsDropEnabled))) {
+		r = (pos.y() < rect.center().y()) ?
+		    QAbstractItemView::AboveItem : QAbstractItemView::BelowItem;
+	}
+
+    return r;
+}

@@ -148,11 +148,28 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
 
+#if 0
 	this->attachmentTableView->setAcceptDrops(true);
 	this->attachmentTableView->setDragEnabled(false);
 	this->attachmentTableView->setDragDropOverwriteMode(false);
 	this->attachmentTableView->setDropIndicatorShown(true);
+	this->attachmentTableView->setDragDropMode(QAbstractItemView::InternalMove);
 //	this->attachmentTableView->setDefaultDropAction(Qt::MoveAction);
+#endif
+#if 0
+	this->attachmentTableView->setAcceptDrops(true);
+	this->attachmentTableView->setDragEnabled(true);
+	this->attachmentTableView->setDragDropOverwriteMode(false);
+	this->attachmentTableView->setDropIndicatorShown(true);
+	this->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
+	this->attachmentTableView->setDefaultDropAction(Qt::MoveAction);
+#endif
+	this->attachmentTableView->setAcceptDrops(true);
+	this->attachmentTableView->setDragEnabled(true);
+	this->attachmentTableView->setDragDropOverwriteMode(false);
+	this->attachmentTableView->setDropIndicatorShown(true);
+	this->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
+	this->attachmentTableView->setDefaultDropAction(Qt::CopyAction);
 
 	this->replyLabel->hide();
 	this->replyLabel->setEnabled(false);

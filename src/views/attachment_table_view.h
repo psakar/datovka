@@ -64,13 +64,13 @@ protected:
 	void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
 #endif
 
-#if 0
 	/*!
 	 * @brief Processes the drop.
+	 *
+	 * @param[in,out] event Drag event.
 	 */
 	virtual
 	void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
-#endif
 
 #if 0
 	/*!
@@ -89,7 +89,39 @@ protected:
 #endif
 
 private:
-	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;
+	/*!
+	 * @brief Preforms displayed data reordering according to drop data.
+	 *
+	 * @param[in] event Drop event.
+	 */
+	void shuffleOnDrop(QDropEvent *event);
+
+	/*!
+	 * @brief Return true if this is a move from ourself and \a index is a
+	 *     child of the selection that is being moved.
+	 */
+	bool droppingOnItself(QDropEvent *event, const QModelIndex &index);
+
+	/*!
+	 * @brief If the event hasn't already been accepted, determines the
+	 *     index to drop on.
+	 *
+	 * if (row == -1 && col == -1)
+	 *        // append to this drop index
+	 *    else
+	 *        // place at row, col in drop index
+	 *
+	 *  If it returns \c true a drop can be done, and dropRow, dropCol
+	 *  and dropIndex reflects the position of the drop.
+	 */
+	bool dropOn(QDropEvent *event, int *dropRow, int *dropCol,
+	    QModelIndex *dropIndex);
+
+	/*!
+	 * @brief Determined drop indicator position.
+	 */
+	QAbstractItemView::DropIndicatorPosition position(const QPoint &pos,
+	    const QRect &rect, const QModelIndex &index) const;
 };
 
 #endif /* _ATTACHMENT_TABLE_VIEW_H_ */
