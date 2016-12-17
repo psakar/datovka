@@ -226,6 +226,18 @@ private:
 	 */
 	bool nameAndContentPresent(const QVariant &base64content,
 	    const QVariant &fName) const;
+
+	/*!
+	 * @brief Returns list of file paths for lines given in indexes.
+	 *
+	 * @note FIles are created if no files are held within the model.
+	 *
+	 * @param[in] tmpDirPath Temporary directory path.
+	 * @param[in] indexes Indexes identifying the attachment entries.
+	 * @return List of file paths, empty path list on error.
+	 */
+	QStringList accessibleFiles(const QString &tmpDirPath,
+	    const QModelIndexList &indexes) const;
 };
 
 #endif /* _FILES_MODEL_H_ */

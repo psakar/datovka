@@ -47,18 +47,108 @@ DbFlsTblModel::DbFlsTblModel(QObject *parent)
 	m_columnCount = MAX_COL;
 }
 
+/*!
+ * @brief Check whether file exists and is readable.
+ *
+ * @param[in] filePath Path to file.
+ * @return True if file is readable.
+ */
+static
+bool fileReadable(const QString &filePath)
+{
+	QFileInfo fileInfo(filePath);
+	return fileInfo.exists() && fileInfo.isReadable();
+}
+
+/*!
+ * @brief Read file size.
+ *
+ * @param[in] filePath Path to file.
+ * @return File size or negative number if cannot determine.
+ */
+static
+qint64 getFileSize(const QString &filePath)
+ {
+	QFileInfo fileInfo(filePath);
+	if (fileInfo.exists() && fileInfo.isReadable()) {
+		return fileInfo.size();
+	}
+	return -1;
+}
+
+/*!
+ * @brief Read file content and encode it into base64.
+ *
+ * @param[in] filePath Path to file.
+ * @return Base64-encoded file content.
+ */
+static
+QByteArray getFileBase64(const QString &filePath)
+ {
+	QFile file(filePath);
+	if (file.exists()) {
+		if (!file.open(QIODevice::ReadOnly)) {
+			logErrorNL("Could not open file '%s'.",
+			    filePath.toUtf8().constData());
+			goto fail;
+		}
+		return file.readAll().toBase64();
+	}
+fail:
+	return QByteArray();
+}
+
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
-	if ((Qt::DisplayRole == role) && (FSIZE_COL == index.column())) {
-		/* Compute attachment size from base64 length. */
-		QByteArray b64(_data(index.sibling(index.row(), CONTENT_COL),
-		    role).toByteArray());
-		return base64RealSize(b64);
-	} else if ((Qt::DisplayRole == role) && (FPATH_COL == index.column())) {
-		const QString path(_data(index).toString());
-		return (path == LOCAL_DATABASE_STR) ? tr("local database") : path;
-	} else {
+	if (Qt::DisplayRole != role) {
 		return _data(index, role);
+	}
+
+	switch (index.column()) {
+	case CONTENT_COL:
+		{
+			const QString fPath(_data(index.row(), FPATH_COL,
+			    role).toString());
+
+			if (fPath == LOCAL_DATABASE_STR) {
+				/* Data should be in the model. */
+				return _data(index, role);
+			} else if (fileReadable(fPath)) {
+				/* Read file. */
+				return getFileBase64(fPath);
+			} else {
+				/* This fallback should not be used. */
+				return _data(index, role);
+			}
+		}
+		break;
+	case FSIZE_COL:
+		{
+			const QString fPath(_data(index.row(), FPATH_COL,
+			    role).toString());
+			QByteArray b64(_data(index.row(), CONTENT_COL,
+			    role).toByteArray());
+
+			if (fPath == LOCAL_DATABASE_STR) {
+				/* Get attachment size from base64 length. */
+				return base64RealSize(b64);
+			} else {
+				/* File size. */
+				return getFileSize(fPath);
+			}
+
+		}
+		break;
+	case FPATH_COL:
+		{
+			const QString fPath(_data(index).toString());
+			return (fPath == LOCAL_DATABASE_STR) ?
+			    tr("local database") : fPath;
+		}
+		break;
+	default:
+		return _data(index, role);
+		break;
 	}
 }
 
@@ -88,94 +178,17 @@ QStringList DbFlsTblModel::mimeTypes(void) const
 }
 
 /*!
- * @brief Creates temporary files related to selected view items.
- *
- * @param[in] tmpDir Temporary directory object.
- * @param[in] indexes Indexes identifying lines.
- * @return List of absolute file names or empty list on error.
- */
-static
-QStringList temporaryFiles(const QTemporaryDir &tmpDir,
-    const QModelIndexList &indexes)
-{
-	QStringList tmpFileList;
-	int fileNumber = 0;
-	const QString tmpPath(tmpDir.path());
-
-	if (tmpPath.isEmpty()) {
-		Q_ASSERT(0);
-		return QList<QString>();
-	}
-
-	foreach (const QModelIndex &idx, indexes) {
-		QString subirPath(tmpPath + QDir::separator() +
-		    QString::number(fileNumber++));
-		{
-			/*
-			 * Create a separate subdirectory because the files
-			 * may have equal names.
-			 */
-			QDir dir(tmpPath);
-			if (!dir.mkpath(subirPath)) {
-				logError("Could not create directory '%s'.",
-				    subirPath.toUtf8().constData());
-				return QList<QString>();
-			}
-		}
-		QString attachAbsPath(subirPath + QDir::separator());
-		{
-			/* Determine full file path. */
-			QModelIndex fileNameIndex = idx.sibling(idx.row(),
-			    DbFlsTblModel::FNAME_COL);
-			if(!fileNameIndex.isValid()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			QString attachFileName(fileNameIndex.data().toString());
-			if (attachFileName.isEmpty()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			attachAbsPath += attachFileName;
-		}
-		QByteArray attachData;
-		{
-			/* Obtain data. */
-			QModelIndex dataIndex = idx.sibling(idx.row(),
-			    DbFlsTblModel::CONTENT_COL);
-			if (!dataIndex.isValid()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-			attachData = QByteArray::fromBase64(
-			    dataIndex.data().toByteArray());
-			if (attachData.isEmpty()) {
-				Q_ASSERT(0);
-				return QList<QString>();
-			}
-		}
-		if (WF_SUCCESS != writeFile(attachAbsPath, attachData, false)) {
-			return QList<QString>();
-		}
-
-		tmpFileList.append(attachAbsPath);
-	}
-
-	return tmpFileList;
-}
-
-/*!
  * @brief Converts list of absolute file names to list of URLs.
  *
- * @param[in] tmpFileNames List of absolute file names.
+ * @param[in] fileNames List of absolute file names.
  * @return List of URLs or empty list on error.
  */
 static
-QList<QUrl> temporaryFileUrls(const QStringList &tmpFileNames)
+QList<QUrl> fileUrls(const QStringList &fileNames)
 {
 	QList<QUrl> uriList;
 
-	foreach (const QString &fileName, tmpFileNames) {
+	foreach (const QString &fileName, fileNames) {
 		uriList.append(QUrl::fromLocalFile(fileName));
 	}
 
@@ -204,8 +217,8 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	 */
 	dir.setAutoRemove(false);
 
-	QStringList tmpFileNames(temporaryFiles(dir, lineIndexes));
-	if (tmpFileNames.isEmpty()) {
+	QStringList fileNames(accessibleFiles(dir.path(), lineIndexes));
+	if (fileNames.isEmpty()) {
 		logErrorNL("%s", "Could not write temporary files.");
 		return 0;
 	}
@@ -214,7 +227,7 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	if (0 == mimeData) {
 		return 0;
 	}
-	QList<QUrl> urlList = temporaryFileUrls(tmpFileNames);
+	QList<QUrl> urlList = fileUrls(fileNames);
 	mimeData->setUrls(urlList);
 
 	return mimeData;
@@ -370,27 +383,8 @@ bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
 	return true;
 }
 
-/*!
- * @brief Read file content and encode it into base64.
- *
- * @param[in] filePath Path to file.
- * @return Base64-encoded file content.
- */
-static
-QByteArray getFileBase64(const QString &filePath)
- {
-	QFile file(filePath);
-	if (file.exists()) {
-		if (!file.open(QIODevice::ReadOnly)) {
-			logErrorNL("Could not open file '%s'.",
-			    filePath.toUtf8().constData());
-			goto fail;
-		}
-		return file.readAll().toBase64();
-	}
-fail:
-	return QByteArray();
-}
+/* File content will be held within model. */
+//#define HOLD_FILE_CONTENT
 
 int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
 {
@@ -419,7 +413,11 @@ int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
 
 	//rowVect[ATTACHID_COL] = QVariant();
 	//rowVect[MSGID_COL] = QVariant();
+#if defined HOLD_FILE_CONTENT
 	rowVect[CONTENT_COL] = getFileBase64(filePath);
+#else /* !defined HOLD_FILE_CONTENT */
+	rowVect[CONTENT_COL] = QByteArray();
+#endif /* defined HOLD_FILE_CONTENT */
 	rowVect[FNAME_COL] = fileName;
 	rowVect[MIME_COL] = mimeType.name();
 	rowVect[FSIZE_COL] = fileSize; // QString::number(fileSize)
@@ -577,4 +575,106 @@ bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
 	}
 
 	return false;
+}
+
+/*!
+ * @brief Creates temporary files related to selected view items.
+ *
+ * @param[in] tmpDirPath Temporary directory path.
+ * @param[in] index Index identifying line.
+ * @param[in] fileNumber Number identifying the file.
+ * @return Absolute file name or empty string on error.
+ */
+static
+QString temporaryFile(const QString &tmpDirPath, const QModelIndex &index,
+    int fileNumber)
+{
+	if (tmpDirPath.isEmpty()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	QString subirPath(tmpDirPath + QDir::separator() +
+	    QString::number(fileNumber++));
+	{
+		/*
+		 * Create a separate subdirectory because the files
+		 * may have equal names.
+		 */
+		QDir dir(tmpDirPath);
+		if (!dir.mkpath(subirPath)) {
+			logError("Could not create directory '%s'.",
+			    subirPath.toUtf8().constData());
+			return QString();
+		}
+	}
+	QString attachAbsPath(subirPath + QDir::separator());
+	{
+		/* Determine full file path. */
+		QModelIndex fileNameIndex = index.sibling(index.row(),
+		    DbFlsTblModel::FNAME_COL);
+		if(!fileNameIndex.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+		QString attachFileName(fileNameIndex.data().toString());
+		if (attachFileName.isEmpty()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+		attachAbsPath += attachFileName;
+	}
+	QByteArray attachData;
+	{
+		/* Obtain data. */
+		QModelIndex dataIndex = index.sibling(index.row(),
+		    DbFlsTblModel::CONTENT_COL);
+		if (!dataIndex.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+		attachData = QByteArray::fromBase64(
+		    dataIndex.data().toByteArray());
+		if (attachData.isEmpty()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+	}
+	if (WF_SUCCESS != writeFile(attachAbsPath, attachData, false)) {
+		return QString();
+	}
+
+	return attachAbsPath;
+}
+
+QStringList DbFlsTblModel::accessibleFiles(const QString &tmpDirPath,
+    const QModelIndexList &indexes) const
+{
+	QStringList accessibleFileList;
+	int fileNumber = 0;
+
+	foreach (const QModelIndex &idx, indexes) {
+		fileNumber++;
+		const QString fPath(_data(idx.row(), FPATH_COL,
+		    Qt::DisplayRole).toString());
+
+		QString fileName;
+
+		if (fPath == LOCAL_DATABASE_STR) {
+			fileName = temporaryFile(tmpDirPath, idx, fileNumber);
+		} else if (fileReadable(fPath)) {
+			fileName = fPath;
+		} else {
+			/* This fallback should not be used. */
+			fileName = temporaryFile(tmpDirPath, idx, fileNumber);
+		}
+
+		if (fileName.isEmpty()) {
+			return QStringList();
+		}
+
+		accessibleFileList.append(fileName);
+	}
+
+	return accessibleFileList;
 }
