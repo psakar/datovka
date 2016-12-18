@@ -500,7 +500,6 @@ bool DbFlsTblModel::appendMessageData(const struct isds_message *message)
 		doc = (struct isds_document *) docListItem->data;
 		if (NULL == doc) {
 			Q_ASSERT(0);
-			endResetModel();
 			return false;
 		}
 
@@ -557,7 +556,7 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 		m_rowCount++;
 	}
 
-	endResetModel();
+	endInsertRows();
 
 	return true;
 }
