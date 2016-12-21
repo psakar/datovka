@@ -76,6 +76,7 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -371,7 +372,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(attachmentItemRightClicked(QPoint)));
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
-	    SLOT(openSelectedAttachment()));
+	    SLOT(openSelectedAttachment(QModelIndex)));
 	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
@@ -2159,69 +2160,24 @@ void MainWindow::saveAllAttachmentsToDir(void)
 /*
  * Open attachment in default application.
  */
-void MainWindow::openSelectedAttachment(void)
+void MainWindow::openSelectedAttachment(const QModelIndex &index)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex selectedIndex;
-	{
-		QModelIndexList attachmentIndexes(
-		    currentFrstColAttachmentIndexes());
+	QString attachName;
+	QString tmpPath;
 
-		if (attachmentIndexes.size() != 1) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		selectedIndex = attachmentIndexes[0];
-	}
-
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QModelIndex fileNameIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::FNAME_COL);
-	Q_ASSERT(fileNameIndex.isValid());
-	if(!fileNameIndex.isValid()) {
-		return;
-	}
-	QString attachName = fileNameIndex.data().toString();
-	Q_ASSERT(!attachName.isEmpty());
-	if (attachName.isEmpty()) {
-		return;
-	}
-	attachName.replace(QRegExp("\\s"), "_").replace(
-	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-	/* TODO -- Add message id into file name? */
-	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
-
-	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-	fileName = writeTemporaryFile(fileName, data);
-	if (!fileName.isEmpty()) {
-		showStatusTextWithTimeout(tr("Attachment '%1' stored to "
-		    "temporary file '%2'.").arg(attachName).arg(fileName));
-		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-		/* TODO -- Handle openUrl() return value. */
+	if (AttachmentInteraction::openAttachment(this,
+	        *ui->messageAttachmentList, index,
+	        &attachName, &tmpPath)) {
+		showStatusTextWithTimeout(tr(
+		    "Attachment '%1' stored into temporary file '%2'.")
+		    .arg(attachName).arg(tmpPath));
 	} else {
-		showStatusTextWithTimeout(tr("Attachment '%1' couldn't be "
-		    "stored to temporary file.").arg(attachName));
-		QMessageBox::warning(this,
-		    tr("Error opening attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
+		showStatusTextWithTimeout(tr(
+		    "Attachment '%1' couldn't be stored into temporary file.")
+		    .arg(attachName));
 	}
 }
 

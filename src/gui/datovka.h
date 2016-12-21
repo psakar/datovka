@@ -223,7 +223,7 @@ private slots:
 	/*!
 	 * @brief Open attachment in default application.
 	 */
-	void openSelectedAttachment(void);
+	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 
 	/*!
 	 * @brief Mark all received messages in the current working account.

@@ -21,16 +21,13 @@
  * the two.
  */
 
-
 #include <QDateTime>
-#include <QDesktopServices>
 #include <QDialog>
 #include <QDir>
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QTimeZone>
-#include <QUrl>
 
 #include "src/crypto/crypto_funcs.h"
 #include "src/gui/dlg_import_zfo.h"
@@ -40,6 +37,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
 
@@ -244,45 +242,12 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	}
 }
 
-void DlgViewZfo::openSelectedAttachment(void)
+void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
 {
-	QModelIndex selectedIndex = selectedAttachmentIndex();
+	debugSlotCall();
 
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QString attachName = selectedIndex.data().toString();
-	if (attachName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-	attachName.replace(QRegExp("\\s"), "_").replace(
-	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-	/* TODO -- Add message id into file name? */
-	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
-
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-	fileName = writeTemporaryFile(fileName, data);
-	if (!fileName.isEmpty()) {
-		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-		/* TODO -- Handle openUrl() return value. */
-	} else {
-		QMessageBox::warning(this,
-		    tr("Error opening attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
-	}
+	AttachmentInteraction::openAttachment(this, *this->attachmentTable,
+	    index);
 }
 
 void DlgViewZfo::showSignatureDetails(void)
@@ -394,7 +359,7 @@ void DlgViewZfo::setUpDialogue(void)
 		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
 		    this, SLOT(attachmentItemRightClicked(QPoint)));
 		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
-		    this, SLOT(openSelectedAttachment()));
+		    this, SLOT(openSelectedAttachment(QModelIndex)));
 
 		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
 	}

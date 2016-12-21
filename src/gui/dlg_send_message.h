@@ -83,7 +83,7 @@ private slots:
 	 * @param index Index identifying the line. If invalid index passed then
 	 *              selected item is taken from the selection model.
 	 */
-	void openAttachmentFile(QModelIndex index = QModelIndex());
+	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
 	void findAndAddRecipient(void);

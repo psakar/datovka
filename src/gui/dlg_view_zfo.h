@@ -83,7 +83,7 @@ private slots:
 	/*!
 	 * @brief Open attachment in default application.
 	 */
-	void openSelectedAttachment(void);
+	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 
 	/*!
 	 * @brief View signature details.

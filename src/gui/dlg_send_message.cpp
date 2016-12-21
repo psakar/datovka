@@ -21,8 +21,6 @@
  * the two.
  */
 
-
-#include <QDesktopServices>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
@@ -33,10 +31,10 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/accounts_model.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
-#include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
@@ -219,14 +217,14 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->removeAttachment, SIGNAL(clicked()), this,
 	    SLOT(deleteSelectedAttachmentFiles()));
 	connect(this->openAttachment, SIGNAL(clicked()), this,
-	    SLOT(openAttachmentFile()));
+	    SLOT(openSelectedAttachment()));
 
 	connect(this->recipientTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
 	    SLOT(recItemSelect()));
 
 	connect(this->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
-	    this, SLOT(openAttachmentFile(QModelIndex)));
+	    this, SLOT(openSelectedAttachment(QModelIndex)));
 
 	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
 	    SLOT(addDbIdToRecipientList()));
@@ -977,63 +975,12 @@ void DlgSendMessage::findAndAddRecipient(void)
 	dsSearch->exec();
 }
 
-void DlgSendMessage::openAttachmentFile(QModelIndex index)
+void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	if (index.isValid()) {
-		/* Get file name field. */
-		index = index.sibling(index.row(), DbFlsTblModel::FNAME_COL);
-	} else {
-		/* Obtain selection. */
-		QModelIndexList selectedIndexes(this->attachmentTableView->
-		    selectionModel()->selectedRows(DbFlsTblModel::FNAME_COL));
-		if (selectedIndexes.size() == 1) {
-			index = selectedIndexes[0];
-		} else {
-			return;
-		}
-	}
-
-	if (!index.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
-
-	QString attachName(index.data().toString());
-	if (attachName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-	attachName.replace(QRegExp("\\s"), "_").replace(
-	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-	/* TODO -- Add message id into file name? */
-	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
-
-	QByteArray data;
-	{
-		/* Get data from base64. */
-		QModelIndex dataIndex(
-		    index.sibling(index.row(), DbFlsTblModel::CONTENT_COL));
-		if (!dataIndex.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-		data = QByteArray::fromBase64(dataIndex.data().toByteArray());
-	}
-
-	fileName = writeTemporaryFile(fileName, data);
-	if (!fileName.isEmpty()) {
-		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-		/* TODO -- Handle openUrl() return value. */
-	} else {
-		QMessageBox::warning(this,
-		    tr("Error opening attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
-	}
+	AttachmentInteraction::openAttachment(this, *this->attachmentTableView,
+	    index);
 }
 
 
