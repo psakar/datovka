@@ -37,7 +37,7 @@
  * @return List of indexes.
  */
 #define selectedColumnIndexes(view, column) \
-	((view).selectionModel()->selectedColumns(column))
+	((view).selectionModel()->selectedRows(column))
 
 /*!
  * @brief Returns single line selection index.
