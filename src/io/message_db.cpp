@@ -56,8 +56,8 @@
 
 /* Attachment size is computed from actual data. */
 static
-const QVector<QString> fileItemIdsNoData = {"id", "message_id",
-    "dmEncodedContent", "_dmFileDescr", "0"};
+const QVector<QString> fileItemIdsNoSize = {"id", "message_id",
+    "dmEncodedContent", "_dmFileDescr", "_dmMimeType", "0"};
 
 const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
@@ -71,7 +71,8 @@ const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
     "dmAcceptanceTime", "dmMessageStatus"};
 
 const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
-    "dmEncodedContent", "_dmFileDescr", "LENGTH(dmEncodedContent)"};
+    "dmEncodedContent", "_dmFileDescr", "_dmMimeType",
+    "LENGTH(dmEncodedContent)"};
 
 MessageDb::MessageDb(const QString &connectionName)
     : SQLiteDb(connectionName),
@@ -1818,10 +1819,10 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 	int i;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (i = 0; i < (fileItemIdsNoData.size() - 1); ++i) {
-		queryStr += fileItemIdsNoData[i] + ", ";
+	for (i = 0; i < (fileItemIdsNoSize.size() - 1); ++i) {
+		queryStr += fileItemIdsNoSize[i] + ", ";
 	}
-	queryStr += fileItemIdsNoData.last();
+	queryStr += fileItemIdsNoSize.last();
 	queryStr += " FROM files WHERE "
 	    "message_id = :msgId";
 	if (!query.prepare(queryStr)) {

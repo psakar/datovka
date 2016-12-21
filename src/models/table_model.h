@@ -114,6 +114,33 @@ public:
 	virtual
 	bool appendQueryData(QSqlQuery &query);
 
+	/*!
+	 * @brief Move rows.
+	 *
+	 * @param[in] sourceParent Source parent.
+	 * @param[in] sourceRow Source row.
+	 * @param[in] count Number of rows to be moved.
+	 * @param[in] destinationParent Destination parent.
+	 * @param[in] destinationChild Row to move data into.
+	 * @return If move performed.
+	 */
+	virtual
+	bool moveRows(const QModelIndex &sourceParent, int sourceRow,
+	    int count, const QModelIndex &destinationParent,
+	    int destinationChild) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Remove rows.
+	 *
+	 * @param[in] row Starting row.
+	 * @param[in] count Number of rows to be removed.
+	 * @param[in] parent Parent item the row is relative to.
+	 * @return True if the rows were successfully removed.
+	 */
+	virtual
+	bool removeRows(int row, int count,
+	    const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+
 protected:
 	/*!
 	 * @brief Returns raw data stored under the given role.
@@ -145,6 +172,20 @@ protected:
 	 */
 	QVariant _headerData(int section, Qt::Orientation orientation,
 	    int role = Qt::DisplayRole) const;
+
+	/*!
+	 * @brief Inflate data container.
+	 */
+	void reserveSpace(void);
+
+	/*!
+	 * @brief Copies query result into vector.
+	 *
+	 * @param[out] vect Vector to write data into.
+	 * @param[in]  query Query to copy data from.
+	 */
+	static
+	void queryToVector(QVector<QVariant> &vect, const QSqlQuery &query);
 
 	/*
 	 * Data are organised using a two-dimensional array.

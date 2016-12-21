@@ -35,6 +35,7 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
+#include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_send_message.h"
@@ -75,7 +76,14 @@ private slots:
 	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
 	void deleteSelectedAttachmentFiles(void);
-	void openAttachmentFile(void);
+
+	/*
+	 * @brief Open attachment in default application.
+	 *
+	 * @param index Index identifying the line. If invalid index passed then
+	 *              selected item is taken from the selection model.
+	 */
+	void openAttachmentFile(QModelIndex index = QModelIndex());
 	void addRecipientFromLocalContact(void);
 	void deleteRecipientData(void);
 	void findAndAddRecipient(void);
@@ -88,7 +96,6 @@ private slots:
 	    bool isPDZ, qint64 dmId);
 	void pingIsdsServer(void);
 	void addDbIdToRecipientList(void);
-	void tableItemDoubleClicked(QTableWidgetItem *item);
 	void attachmentDataChanged(const QModelIndex &topLeft,
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
 	void attachmentSelectionChanged(const QItemSelection &selected,
@@ -113,6 +120,7 @@ private:
 	class MainWindow *m_mv;
 	MessageDbSet *m_dbSet;
 	bool m_isLogged;
+	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds;

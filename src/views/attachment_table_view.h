@@ -24,11 +24,12 @@
 #ifndef _ATTACHMENT_TABLE_VIEW_H_
 #define _ATTACHMENT_TABLE_VIEW_H_
 
+#if 0
 #include <QList>
 #include <QMouseEvent>
 #include <QString>
-#include <QTemporaryDir>
 #include <QUrl>
+#endif
 
 #include "src/views/lowered_table_view.h"
 
@@ -47,37 +48,80 @@ public:
 	explicit AttachmentTableView(QWidget *parent = 0);
 
 protected:
+#if 0
+	/*!
+	 * @brief Allows the drop.
+	 */
+	virtual
+	void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+#endif
+
+#if 0
+	/*!
+	 * @brief Allow drag move.
+	 */
+	virtual
+	void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+#endif
+
+	/*!
+	 * @brief Processes the drop.
+	 *
+	 * @param[in,out] event Drag event.
+	 */
+	virtual
+	void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+
+#if 0
 	/*!
 	 * @brief Activates the drag.
 	 */
 	virtual
-	void mouseMoveEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+#endif
 
+#if 0
 	/*
 	 * @brief Used for storing the beginning position of the drag.
 	 */
 	virtual
-	void mousePressEvent(QMouseEvent *event);
+	void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+#endif
 
 private:
 	/*!
-	 * @brief Creates temporary files related to selected view items.
+	 * @brief Preforms displayed data reordering according to drop data.
 	 *
-	 * @param[in] tmpDir Temporary directory object.
-	 * @return List of absolute file names or empty list on error.
+	 * @param[in] event Drop event.
 	 */
-	QList<QString> temporaryFiles(const QTemporaryDir &tmpDir) const;
+	void shuffleOnDrop(QDropEvent *event);
 
 	/*!
-	 * @brief Converts list of absolute file names to list of URLs.
-	 *
-	 * @param[in] tmpFileNames List of absolute file names.
-	 * @return List of URLs or empty list on error.
+	 * @brief Return true if this is a move from ourself and \a index is a
+	 *     child of the selection that is being moved.
 	 */
-	static
-	QList<QUrl> temporaryFileUrls(const QList<QString> &tmpFileNames);
+	bool droppingOnItself(QDropEvent *event, const QModelIndex &index);
 
-	QPoint m_dragStartPosition /*!< Holds the starting drag point. */;
+	/*!
+	 * @brief If the event hasn't already been accepted, determines the
+	 *     index to drop on.
+	 *
+	 * if (row == -1 && col == -1)
+	 *        // append to this drop index
+	 *    else
+	 *        // place at row, col in drop index
+	 *
+	 *  If it returns \c true a drop can be done, and dropRow, dropCol
+	 *  and dropIndex reflects the position of the drop.
+	 */
+	bool dropOn(QDropEvent *event, int *dropRow, int *dropCol,
+	    QModelIndex *dropIndex);
+
+	/*!
+	 * @brief Determined drop indicator position.
+	 */
+	QAbstractItemView::DropIndicatorPosition position(const QPoint &pos,
+	    const QRect &rect, const QModelIndex &index) const;
 };
 
 #endif /* _ATTACHMENT_TABLE_VIEW_H_ */

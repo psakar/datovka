@@ -1190,6 +1190,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	    DbFlsTblModel::MSGID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::CONTENT_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::MIME_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::FPATH_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->actionSave_all_attachments->setEnabled(true);
@@ -2470,6 +2474,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	    DbFlsTblModel::MSGID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::CONTENT_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::MIME_COL, true);
+	ui->messageAttachmentList->setColumnHidden(
+	    DbFlsTblModel::FPATH_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->actionSave_all_attachments->setEnabled(true);

@@ -744,7 +744,7 @@ of postal data messages active.</string>
     </layout>
    </item>
    <item>
-    <widget class="AttachmentTableWidget" name="attachmentTableWidget">
+    <widget class="AttachmentTableView" name="attachmentTableView">
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
@@ -761,7 +761,7 @@ of postal data messages active.</string>
       <bool>false</bool>
      </attribute>
      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-      <bool>true</bool>
+      <bool>false</bool>
      </attribute>
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
@@ -769,51 +769,6 @@ of postal data messages active.</string>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
-     <attribute name="verticalHeaderHighlightSections">
-      <bool>false</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>File</string>
-      </property>
-      <property name="toolTip">
-       <string>File name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Type</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>MimeType</string>
-      </property>
-      <property name="toolTip">
-       <string>MIME type of file</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Size</string>
-      </property>
-      <property name="toolTip">
-       <string>Size of file in bytes</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>FilePath</string>
-      </property>
-      <property name="toolTip">
-       <string>Absolute path of file</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string notr="true">Base64</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>
@@ -888,14 +843,14 @@ of postal data messages active.</string>
  </widget>
  <customwidgets>
   <customwidget>
+   <class>AttachmentTableView</class>
+   <extends>QTableView</extends>
+   <header>attachment_table_view.h</header>
+  </customwidget>
+  <customwidget>
    <class>LoweredTableWidget</class>
    <extends>QTableWidget</extends>
    <header>lowered_table_widget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>AttachmentTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>attachment_table_widget.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -922,7 +877,7 @@ of postal data messages active.</string>
   <tabstop>removeAttachment</tabstop>
   <tabstop>openAttachment</tabstop>
   <tabstop>recipientTableWidget</tabstop>
-  <tabstop>attachmentTableWidget</tabstop>
+  <tabstop>attachmentTableView</tabstop>
  </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>

@@ -314,7 +314,6 @@ SOURCES += \
     src/settings/proxy.cpp \
     src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
-    src/views/attachment_table_widget.cpp \
     src/views/lowered_table_view.cpp \
     src/views/lowered_table_widget.cpp \
     src/views/table_home_end_filter.cpp \
@@ -399,7 +398,6 @@ HEADERS += \
     src/settings/proxy.h \
     src/single/single_instance.h \
     src/views/attachment_table_view.h \
-    src/views/attachment_table_widget.h \
     src/views/lowered_table_view.h \
     src/views/lowered_table_widget.h \
     src/views/table_home_end_filter.h \
