@@ -32,16 +32,6 @@
 #include "src/models/files_model.h"
 
 /*!
- * @brief Returns list of indexes into selected rows.
- *
- * @param[in] view View to ask for selected indexes.
- * @param[in] column Number of column to receive indexes with.
- * @return List of indexes.
- */
-#define selectedColumnIndexes(view, column) \
-	((view).selectionModel()->selectedRows(column))
-
-/*!
  * @brief Returns single line selection index.
  *
  * @param[in] view View to ask for selected indexes.
@@ -53,21 +43,13 @@ QModelIndex selectedSingleIndex(const AttachmentTableView &view, int column)
 {
 	QModelIndex index;
 
-	QModelIndexList indexes(selectedColumnIndexes(view, column));
-	if (indexes.size() == 0) {
-		/*
-		 * Try current index -- right click menu makes
-		 * selectedColumns() return an empty list.
-		 */
-		index = view.selectionModel()->currentIndex();
-		if (index.isValid()) {
-			index = index.sibling(index.row(), column);
-		}
-	} else if (indexes.size() == 1) {
-		index = indexes.at(0);
+	QModelIndexList indexes(
+	    AttachmentInteraction::selectedColumnIndexes(view, column));
+	if (indexes.size() == 1) {
+		return indexes.at(0);
 	}
 
-	return index;
+	return QModelIndex();
 }
 
 bool AttachmentInteraction::openAttachment(QWidget *parent,

@@ -1914,13 +1914,13 @@ QString MainWindow::attachmentFilePath(const QString &userName,
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return QString();
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
 	    false);
-	if (0 == messageDb) {
+	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
 		return QString();
 	}

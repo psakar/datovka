@@ -111,11 +111,6 @@ private:
 	void setUpDialogue(void);
 
 	/*!
-	 * @brief Returns all selected indexes.
-	 */
-	QModelIndexList selectedAttachmentIndexes(void) const;
-
-	/*!
 	 * @brief Generate description from supplied message.
 	 *
 	 * @param[in] attachmentCount Number of attached files.

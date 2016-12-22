@@ -105,11 +105,11 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	QMenu *menu = new QMenu(this);
 
 	/* Detects selection of multiple attachments. */
-	QModelIndexList indexes = selectedAttachmentIndexes();
+	QModelIndexList indexes(
+	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	        DbFlsTblModel::FNAME_COL));
 
 	if (index.isValid()) {
-		//attachmentItemSelectionChanged(index);
-
 		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
 		    tr("Open attachment"), this,
 		    SLOT(openSelectedAttachment()))->
@@ -137,7 +137,9 @@ void DlgViewZfo::saveSelectedAttachmentsToFile(void)
 
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 {
-	QModelIndexList selectedIndexes = selectedAttachmentIndexes();
+	QModelIndexList selectedIndexes(
+	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	        DbFlsTblModel::FNAME_COL));
 
 	if (selectedIndexes.isEmpty()) {
 		Q_ASSERT(0);
@@ -334,16 +336,6 @@ void DlgViewZfo::setUpDialogue(void)
 	/* Signature details. */
 	connect(signaturePushButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
-}
-
-QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const
-{
-	if (0 == attachmentTable->selectionModel()) {
-		Q_ASSERT(0);
-		return QModelIndexList();
-	}
-
-	return attachmentTable->selectionModel()->selectedRows(0);
 }
 
 QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,

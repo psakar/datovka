@@ -48,6 +48,20 @@ private:
 
 public:
 	/*!
+	 * @brief Returns list of indexes into selected rows.
+	 *
+	 * @param[in] view View to ask for selected indexes.
+	 * @param[in] column Number of column to receive indexes with.
+	 * @return List of indexes.
+	 */
+	static inline
+	QModelIndexList selectedColumnIndexes(const AttachmentTableView &view,
+	    int column)
+	{
+		return view.selectionModel()->selectedRows(column);
+	}
+
+	/*!
 	 * @brief Open attachment file in associated application.
 	 *
 	 * @param[in,out] parent Parent widget to call dialogues from.
