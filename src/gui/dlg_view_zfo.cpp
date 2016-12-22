@@ -116,7 +116,7 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 		        setEnabled(indexes.size() == 1);
 		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
 		    tr("Save attachment"), this,
-		    SLOT(saveSelectedAttachmentToFile()))->
+		    SLOT(saveSelectedAttachmentsToFile()))->
 		        setEnabled(indexes.size() == 1);
 		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
 		    tr("Save attachments"), this,
@@ -128,44 +128,11 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	menu->exec(QCursor::pos());
 }
 
-void DlgViewZfo::saveSelectedAttachmentToFile(void)
+void DlgViewZfo::saveSelectedAttachmentsToFile(void)
 {
-	QModelIndex selectedIndex = selectedAttachmentIndex();
+	debugSlotCall();
 
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QString fileName = selectedIndex.data().toString();
-	if (fileName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-	/* TODO -- Remember directory? */
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"), fileName);
-
-	if (fileName.isEmpty()) {
-		return;
-	}
-
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-	if (WF_SUCCESS != writeFile(fileName, data)) {
-		QMessageBox::warning(this,
-		    tr("Error saving attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
-	}
+	AttachmentInteraction::saveAttachmentsToFile(this, *attachmentTable);
 }
 
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
@@ -367,25 +334,6 @@ void DlgViewZfo::setUpDialogue(void)
 	/* Signature details. */
 	connect(signaturePushButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetails()));
-}
-
-QModelIndex DlgViewZfo::selectedAttachmentIndex(void) const
-{
-	if (0 == attachmentTable->selectionModel()) {
-		Q_ASSERT(0);
-		return QModelIndex();
-	}
-
-	QModelIndex selectedIndex =
-	    attachmentTable->selectionModel()->currentIndex();
-
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return QModelIndex();
-	}
-
-	return selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::FNAME_COL);
 }
 
 QModelIndexList DlgViewZfo::selectedAttachmentIndexes(void) const

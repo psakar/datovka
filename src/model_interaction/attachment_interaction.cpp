@@ -22,10 +22,12 @@
  */
 
 #include <QDesktopServices>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QUrl>
 
 #include "src/io/filesystem.h"
+#include "src/io/message_db_set_container.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 
@@ -93,7 +95,6 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 	}
 
 	if (!index.isValid()) {
-		Q_ASSERT(0);
 		return false;
 	}
 	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
@@ -132,12 +133,82 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 		return QDesktopServices::openUrl(
 		    QUrl::fromLocalFile(writtenFileName));
 	} else {
-		if (parent != Q_NULLPTR) {
-			QMessageBox::warning(parent,
-			    tr("Error storing attachment."),
-			    tr("Cannot write file '%1'.").arg(fileName),
-			    QMessageBox::Ok);
-		}
+		QMessageBox::warning(parent,
+		    tr("Error storing attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
 		return false;
+	}
+}
+
+QString AttachmentInteraction::saveAttachmentToFile(QWidget *parent,
+    QModelIndex index, const QString &suggestedFilePath)
+{
+	if (!index.isValid()) {
+		return QString();
+	}
+
+	if (index.column() != DbFlsTblModel::FNAME_COL) {
+		index = index.sibling(index.row(), DbFlsTblModel::FNAME_COL);
+	}
+
+	if (!index.isValid()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
+
+	QString fileName;
+	if (suggestedFilePath.isEmpty()) {
+		fileName = index.data().toString();
+		if (fileName.isEmpty()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+	} else {
+		fileName = suggestedFilePath;
+	}
+
+	fileName = QFileDialog::getSaveFileName(parent, tr("Save attachment"),
+	    fileName);
+	if (fileName.isEmpty()) {
+		return QString();
+	}
+	/* TODO -- Remember directory? */
+
+	QModelIndex dataIndex(index.sibling(index.row(),
+	    DbFlsTblModel::CONTENT_COL));
+	if (!dataIndex.isValid()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	QByteArray data(QByteArray::fromBase64(dataIndex.data().toByteArray()));
+
+	if (WF_SUCCESS != writeFile(fileName, data)) {
+		QMessageBox::warning(parent,
+		    tr("Error saving attachment."),
+		    tr("Cannot write file '%1'.").arg(fileName),
+		    QMessageBox::Ok);
+		return QString();
+	}
+
+	return fileName;
+}
+
+void AttachmentInteraction::saveAttachmentsToFile(QWidget *parent,
+    const AttachmentTableView &view, QModelIndexList indexList)
+{
+	if (indexList.isEmpty()) {
+		indexList = selectedColumnIndexes(view,
+		    DbFlsTblModel::FNAME_COL);
+	}
+
+	if (indexList.isEmpty()) {
+		return;
+	}
+
+	foreach (const QModelIndex &index, indexList) {
+		saveAttachmentToFile(parent, index);
 	}
 }

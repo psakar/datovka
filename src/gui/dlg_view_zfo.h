@@ -73,7 +73,7 @@ private slots:
 	/*!
 	 * @brief Saves selected attachment to file.
 	 */
-	void saveSelectedAttachmentToFile(void);
+	void saveSelectedAttachmentsToFile(void);
 
 	/*!
 	 * @brief Saves selected attachments to directory.
@@ -109,11 +109,6 @@ private:
 	 * @brief Performs dialogue set-up after the message has been loaded.
 	 */
 	void setUpDialogue(void);
-
-	/*!
-	 * @brief Returns selected attachment index.
-	 */
-	QModelIndex selectedAttachmentIndex(void) const;
 
 	/*!
 	 * @brief Returns all selected indexes.

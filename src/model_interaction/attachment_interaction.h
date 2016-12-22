@@ -50,7 +50,7 @@ public:
 	/*!
 	 * @brief Open attachment file in associated application.
 	 *
-	 * @param[in,out] parent Parent widget to call  dialogues from.
+	 * @param[in,out] parent Parent widget to call dialogues from.
 	 * @param[in]     view Table view to determine selection from.
 	 * @param[in]     index Selection index, if invalid then selection is
 	 *                      determined.
@@ -63,6 +63,32 @@ public:
 	bool openAttachment(QWidget *parent, const AttachmentTableView &view,
 	    QModelIndex index = QModelIndex(), QString *attName = Q_NULLPTR,
 	    QString *tmpPath = Q_NULLPTR);
+
+	/*!
+	 * @brief Save attachment to file.
+	 *
+	 * @param[in,out] parent Parent widget to call dialogues from.
+	 * @param[in]     index Selection index, must be valid.
+	 * @param[in]     suggestedFilePath File with path to store data into,
+	 *                                  attachment name is taken if empty.
+	 * @return Path to file where data were stored, empty string on error.
+	 */
+	static
+	QString saveAttachmentToFile(QWidget *parent, QModelIndex index,
+	    const QString &suggestedFilePath = QString());
+
+	/*!
+	 * @brief Save all selected attachments
+	 *
+	 * @param[in,out] parent Parent widget to call dialogues from.
+	 * @param[in]     view Table view to determine selection from.
+	 * @param[in]     indexList Selection indexes, if empty then selection
+	 *                          is determined.
+	 */
+	static
+	void saveAttachmentsToFile(QWidget *parent,
+	    const AttachmentTableView &view,
+	    QModelIndexList indexList = QModelIndexList());
 };
 
 #endif /* _ATTACHMENT_INTERACTION_H_ */
