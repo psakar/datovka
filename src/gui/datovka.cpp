@@ -1872,37 +1872,39 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 		return;
 	}
 
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
 	const MessageDb::MsgId msgId(msgMsgId(messageIndex));
 
 	foreach (const QModelIndex &attachmentIndex, attachmentIndexes) {
-		saveAttachmentToFile(msgId, attachmentIndex);
+		saveAttachmentToFile(userName, msgId, attachmentIndex);
 	}
 }
 
-/* ========================================================================= */
-void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
-   const QModelIndex &attachmentIndex)
-/* ========================================================================= */
+QString MainWindow::attachmentFilePath(const QString &userName,
+    const MessageDb::MsgId &msgId, QModelIndex attIdx)
 {
-	if (!attachmentIndex.isValid()) {
+	if (userName.isEmpty() || !msgId.isValid() || !attIdx.isValid()) {
 		Q_ASSERT(0);
-		showStatusTextWithTimeout(tr("Saving attachment of message to "
-		    "files was not successful!"));
-		return;
+		return QString();
 	}
 
-	QModelIndex fileNameIndex = attachmentIndex.sibling(
-	    attachmentIndex.row(), DbFlsTblModel::FNAME_COL);
-	Q_ASSERT(fileNameIndex.isValid());
-	if(!fileNameIndex.isValid()) {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to files was not successful!")
-		        .arg(msgId.dmId));
-		return;
+	if (attIdx.column() != DbFlsTblModel::FNAME_COL) {
+		attIdx = attIdx.sibling(attIdx.row(), DbFlsTblModel::FNAME_COL);
+		if (!attIdx.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
 	}
-	QString fileName = fileNameIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
-	/* TODO -- Remember directory? */
+	Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
+
+	QString fileName(attIdx.data().toString());
+	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
@@ -1911,20 +1913,16 @@ void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
 		saveAttachPath = m_save_attach_dir;
 	}
 
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
-		return;
+		return QString();
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
 	    false);
 	if (0 == messageDb) {
 		Q_ASSERT(0);
-		return;
+		return QString();
 	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
@@ -1934,48 +1932,46 @@ void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
 	fileName = fileNameFromFormat(globPref.attachment_filename_format,
 	    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"),
-	    saveAttachPath + QDir::separator() + fileName);
-
 	if (fileName.isEmpty()) {
-		return;
+		return QString();
 	}
+	return saveAttachPath + QDir::separator() + fileName;
+}
 
-	if (!globPref.use_global_paths) {
-		m_save_attach_dir =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	/* Get data from base64. */
-	QModelIndex dataIndex = attachmentIndex.sibling(attachmentIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
+void MainWindow::saveAttachmentToFile(const QString &userName,
+    const MessageDb::MsgId &msgId, const QModelIndex &attIdx)
+{
+	if (!attIdx.isValid()) {
 		Q_ASSERT(0);
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to files was not successful!")
-		       .arg(msgId.dmId));
 		return;
 	}
 
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
+	QModelIndex fileNameIndex(attIdx.sibling(attIdx.row(),
+	    DbFlsTblModel::FNAME_COL));
+	Q_ASSERT(fileNameIndex.isValid());
+	if(!fileNameIndex.isValid()) {
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message '%1' to files was not successful!")
+		        .arg(msgId.dmId));
+		return;
+	}
+	QString fileName(attachmentFilePath(userName, msgId, attIdx));
 
-	enum WriteFileState ret = writeFile(fileName, data);
-	if (WF_SUCCESS == ret) {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to file was successful.")
-		        .arg(msgId.dmId));
+	fileName = AttachmentInteraction::saveAttachmentToFile(this, attIdx,
+	    fileName);
+	if (!fileName.isEmpty()) {
+		showStatusTextWithTimeout(tr(
+		    "Saving attachment of message '%1' to file was successful.")
+		    .arg(msgId.dmId));
+		if (!globPref.use_global_paths) {
+			m_save_attach_dir =
+			    QFileInfo(fileName).absoluteDir().absolutePath();
+			storeExportPath();
+		}
 	} else {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to file was not successful!")
-		        .arg(msgId.dmId));
-		QMessageBox::warning(this,
-		    tr("Error saving attachment of message '%1'.").arg(msgId.dmId),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
+		showStatusTextWithTimeout(tr(
+		    "Saving attachment of message '%1' to file was not successful!")
+		    .arg(msgId.dmId));
 	}
 }
 
