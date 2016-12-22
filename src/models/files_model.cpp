@@ -56,6 +56,9 @@ DbFlsTblModel::DbFlsTblModel(QObject *parent)
 static
 bool fileReadable(const QString &filePath)
 {
+	if (filePath.isEmpty()) {
+		return false;
+	}
 	QFileInfo fileInfo(filePath);
 	return fileInfo.exists() && fileInfo.isReadable();
 }
@@ -117,7 +120,10 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 				/* Read file. */
 				return getFileBase64(fPath);
 			} else {
-				/* This fallback should not be used. */
+				/*
+				 * This fallback is used when filling model
+				 * with zfo content.
+				 */
 				return _data(index, role);
 			}
 		}
@@ -132,11 +138,16 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 			if (fPath == LOCAL_DATABASE_STR) {
 				/* Get attachment size from base64 length. */
 				return base64RealSize(b64);
-			} else {
+			} else if (fileReadable(fPath)) {
 				/* File size. */
 				return getFileSize(fPath);
+			} else {
+				/*
+				 * This fallback is used when filling model
+				 * with zfo content.
+				 */
+				return base64RealSize(b64);
 			}
-
 		}
 		break;
 	case FPATH_COL:

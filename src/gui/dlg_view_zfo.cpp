@@ -321,6 +321,10 @@ void DlgViewZfo::setUpDialogue(void)
 		    true);
 		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
 		    true);
+		attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
+		    true);
+		attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
+		    true);
 		attachmentTable->resizeColumnToContents(
 		    DbFlsTblModel::FNAME_COL);
 
