@@ -59,7 +59,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit DbFlsTblModel(QObject *parent = 0);
+	explicit DbFlsTblModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.

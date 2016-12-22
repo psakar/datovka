@@ -52,6 +52,55 @@ QModelIndex selectedSingleIndex(const AttachmentTableView &view, int column)
 	return QModelIndex();
 }
 
+/*!
+ * @brief Creates a temporary file for data stored in attachment.
+ *
+ * @param[in] index Index identifying the attachment data.
+ * @return Path to written temporary file, empty string on error.
+ */
+static
+QString createTemporaryFile(QModelIndex index)
+{
+	if (!index.isValid()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	if (index.column() != DbFlsTblModel::FNAME_COL) {
+		index = index.sibling(index.row(), DbFlsTblModel::FNAME_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+	}
+	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
+
+	QString attachName(index.data().toString());
+	if (attachName.isEmpty()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	attachName.replace(QRegExp("\\s"), "_").replace(
+	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
+	/* TODO -- Add message id into file name? */
+	QString fileName(TMP_ATTACHMENT_PREFIX + attachName);
+
+	QByteArray data;
+	{
+		/* Get data from base64. */
+		QModelIndex dataIndex(
+		    index.sibling(index.row(), DbFlsTblModel::CONTENT_COL));
+		if (!dataIndex.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
+		data = QByteArray::fromBase64(dataIndex.data().toByteArray());
+	}
+
+	return writeTemporaryFile(fileName, data);
+}
+
 bool AttachmentInteraction::openAttachment(QWidget *parent,
     const AttachmentTableView &view, QModelIndex index,
     QString *attName, QString *tmpPath)
@@ -90,34 +139,24 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 		*attName = attachName;
 	}
 
-	attachName.replace(QRegExp("\\s"), "_").replace(
-	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-	/* TODO -- Add message id into file name? */
-	QString fileName(TMP_ATTACHMENT_PREFIX + attachName);
-
-	QByteArray data;
-	{
-		/* Get data from base64. */
-		QModelIndex dataIndex(
-		    index.sibling(index.row(), DbFlsTblModel::CONTENT_COL));
-		if (!dataIndex.isValid()) {
-			Q_ASSERT(0);
-			return false;
-		}
-		data = QByteArray::fromBase64(dataIndex.data().toByteArray());
+	/* Obtain plain file name from model if contains a file name. */
+	QString fileName(
+	    index.sibling(index.row(),
+	        DbFlsTblModel::FPATH_COL).data(ROLE_PLAIN_DISPLAY).toString());
+	if (fileName.isEmpty()) {
+		fileName = createTemporaryFile(index);
 	}
-
-	QString writtenFileName = writeTemporaryFile(fileName, data);
-	if (!writtenFileName.isEmpty()) {
+	if (!fileName.isEmpty()) {
 		if (tmpPath != Q_NULLPTR) {
-			*tmpPath = writtenFileName;
+			*tmpPath = fileName;
 		}
 		return QDesktopServices::openUrl(
-		    QUrl::fromLocalFile(writtenFileName));
+		    QUrl::fromLocalFile(fileName));
 	} else {
 		QMessageBox::warning(parent,
 		    tr("Error storing attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
+		    tr("Cannot write temporary file for attachment '%1'.")
+		        .arg(attachName),
 		    QMessageBox::Ok);
 		return false;
 	}

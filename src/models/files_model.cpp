@@ -103,8 +103,31 @@ fail:
 
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
-	if (Qt::DisplayRole != role) {
+	switch (role) {
+	case Qt::DisplayRole:
+		/* Continue with code. */
+		break;
+	case ROLE_PLAIN_DISPLAY:
+		/* Explicitly asking associated file path. */
+		if (index.column() == FPATH_COL) {
+			const QString fPath(_data(index.row(), FPATH_COL,
+			    Qt::DisplayRole).toString());
+			QByteArray b64(_data(index.row(), CONTENT_COL,
+			    Qt::DisplayRole).toByteArray());
+
+			if ((fPath == LOCAL_DATABASE_STR) && !b64.isEmpty()) {
+				return QVariant(); /* No file present. */
+			} else if (fileReadable(fPath)) {
+				return fPath; /* File present. */
+			} else {
+				return QVariant();
+			}
+		}
+		return QVariant();
+		break;
+	default:
 		return _data(index, role);
+		break;
 	}
 
 	switch (index.column()) {
@@ -211,14 +234,14 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	QModelIndexList lineIndexes = sortedUniqueLineIndexes(indexes,
 	    FNAME_COL);
 	if (lineIndexes.isEmpty()) {
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	/* Create temporary directory. Automatic remove is on by default. */
 	QTemporaryDir dir(QDir::tempPath() + QDir::separator() + TMP_DIR_NAME);
 	if (!dir.isValid()) {
 		logErrorNL("%s", "Could not create a temporary directory.");
-		return 0;
+		return Q_NULLPTR;
 	}
 	/*
 	 * Automatic removal cannot be set because his removes the files
@@ -231,12 +254,12 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	QStringList fileNames(accessibleFiles(dir.path(), lineIndexes));
 	if (fileNames.isEmpty()) {
 		logErrorNL("%s", "Could not write temporary files.");
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	QMimeData *mimeData = new (std::nothrow) QMimeData;
-	if (0 == mimeData) {
-		return 0;
+	if (Q_NULLPTR == mimeData) {
+		return Q_NULLPTR;
 	}
 	QList<QUrl> urlList = fileUrls(fileNames);
 	mimeData->setUrls(urlList);
@@ -253,7 +276,7 @@ bool DbFlsTblModel::canDropMimeData(const QMimeData *data,
 	Q_UNUSED(column);
 	Q_UNUSED(parent);
 
-	if (0 == data) {
+	if (Q_NULLPTR == data) {
 		return false;
 	}
 
