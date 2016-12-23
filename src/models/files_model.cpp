@@ -570,7 +570,7 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 	}
 
 	if (insertUnique && nameAndContentPresent(rowVect.at(CONTENT_COL),
-	        rowVect.at(FNAME_COL))) {
+	        rowVect.at(FNAME_COL), rowVect.at(FPATH_COL))) {
 		/* Fail if data present. */
 		logWarningNL("Same data '%s' already attached.",
 		    rowVect.at(FNAME_COL).toString().toUtf8().constData());
@@ -596,12 +596,13 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 }
 
 bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
-    const QVariant &fName) const
+    const QVariant &fName, const QVariant &fPath) const
 {
 	/* Cannot use foreach (), because contains pre-allocated empty lines. */
 	for (int row = 0; row < rowCount(); ++row) {
 		const QVector<QVariant> &rowEntry = m_data.at(row);
 		if ((rowEntry.at(FNAME_COL) == fName) &&
+		    (rowEntry.at(FPATH_COL) == fPath) &&
 		    (rowEntry.at(CONTENT_COL) == base64content)) {
 			return true;
 		}
