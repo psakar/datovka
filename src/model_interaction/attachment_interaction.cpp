@@ -233,3 +233,122 @@ void AttachmentInteraction::saveAttachmentsToFile(QWidget *parent,
 		saveAttachmentToFile(parent, index);
 	}
 }
+
+/*!
+ * @brief Generates a list of unique (within supplied list) attachment names.
+ *
+ * @param[in] indexList List of indexes referring to selected rows.
+ * @return List of index-name pairs, empty list on error.
+ */
+static
+QList< QPair<QModelIndex, QString> > renameAttachments(
+    const QModelIndexList &indexList)
+{
+	typedef QPair<QModelIndex, QString> ListContent;
+	typedef QList<ListContent> ListType;
+	ListType pairList;
+	QSet<QString> attNames;
+
+	foreach (const QModelIndex &index, indexList) {
+		QString attName;
+		if (index.column() == DbFlsTblModel::FNAME_COL) {
+			attName = index.data().toString();
+		} else {
+			attName = index.sibling(index.row(),
+			    DbFlsTblModel::FNAME_COL).data().toString();
+		}
+		if (attName.isEmpty()) {
+			Q_ASSERT(0);
+			return ListType();
+		}
+
+		if (attNames.contains(attName)) {
+			int cntr = 0;
+			QFileInfo fi(attName);
+
+			const QString baseName(fi.baseName());
+			const QString suffix(fi.completeSuffix());
+
+			do {
+				++cntr;
+				attName = baseName + "_" +
+				    QString::number(cntr) + "." + suffix;
+			} while (attNames.contains(attName));
+			Q_ASSERT(!attName.isEmpty());
+		}
+
+		attNames.insert(attName);
+		pairList.append(ListContent(index, attName));
+	}
+
+	return pairList;
+}
+
+QString AttachmentInteraction::saveAttachmentsToDirecory(QWidget *parent,
+    const AttachmentTableView &view, QModelIndexList indexList,
+    QString suggestedDirPath)
+{
+	if (indexList.isEmpty()) {
+		indexList = selectedColumnIndexes(view,
+		    DbFlsTblModel::FNAME_COL);
+	}
+
+	if (indexList.isEmpty()) {
+		return QString();
+	}
+
+	typedef QPair<QModelIndex, QString> ListContent;
+	typedef QList<ListContent> ListType;
+
+	/* Sorted index list with unique attachment names. */
+	ListType atts(renameAttachments(
+	    DbFlsTblModel::sortedUniqueLineIndexes(indexList,
+	        DbFlsTblModel::FNAME_COL)));
+	if (atts.isEmpty()) {
+		return QString();
+	}
+
+	suggestedDirPath = QFileDialog::getExistingDirectory(parent,
+	    tr("Save attachments"), suggestedDirPath,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	ListType unsuccessfulAtts;
+
+	foreach (const ListContent &att, atts) {
+		const QModelIndex &idx(att.first);
+		QString fileName(att.second);
+
+		fileName = suggestedDirPath + QDir::separator() + fileName;
+
+		QModelIndex contIdx(idx.sibling(idx.row(),
+		    DbFlsTblModel::CONTENT_COL));
+
+		QByteArray content(
+		    QByteArray::fromBase64(contIdx.data().toByteArray()));
+
+		if (WF_SUCCESS != writeFile(fileName, content)) {
+			unsuccessfulAtts.append(att);
+			continue;
+		}
+	}
+
+	if (!unsuccessfulAtts.isEmpty()) {
+		QString warnMsg(
+		    tr("In total %1 attachment files could not be written.").
+		        arg(unsuccessfulAtts.size()));
+		warnMsg += "\n" + tr("These are:") + "\n";
+		int i;
+		for (i = 0; i < (unsuccessfulAtts.size() - 1); ++i) {
+			warnMsg += "    '" + unsuccessfulAtts.at(i).second + "'\n";
+		}
+		warnMsg += "    '" + unsuccessfulAtts.at(i).second + "'.";
+		QMessageBox::warning(parent, tr("Error saving attachments."),
+		    warnMsg, QMessageBox::Ok);
+	}
+
+	if (atts.size() == unsuccessfulAtts.size()) {
+		return QString();
+	}
+
+	return suggestedDirPath;
+}

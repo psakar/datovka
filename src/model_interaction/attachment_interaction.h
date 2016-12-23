@@ -103,6 +103,24 @@ public:
 	void saveAttachmentsToFile(QWidget *parent,
 	    const AttachmentTableView &view,
 	    QModelIndexList indexList = QModelIndexList());
+
+	/*!
+	 * @brief Save selected attachments into a single directory.
+	 *
+	 * @param[in,out] parent Parent widget to call dialogues from.
+	 * @param[in]     view Table view to determine selection from.
+	 * @param[in]     indexList Selection indexes, if empty then selection
+	 *                          is determined.
+	 * @param[in]     suggestedDirPath Suggested directory where data
+	 *                                 should be stored.
+	 * @return Directory where data were stores, empty string if no data
+	 *     stored.
+	 */
+	static
+	QString saveAttachmentsToDirecory(QWidget *parent,
+	    const AttachmentTableView &view,
+	    QModelIndexList indexList = QModelIndexList(),
+	    QString suggestedDirPath = QString());
 };
 
 #endif /* _ATTACHMENT_INTERACTION_H_ */

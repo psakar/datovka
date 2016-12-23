@@ -137,78 +137,12 @@ void DlgViewZfo::saveSelectedAttachmentsToFile(void)
 
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 {
-	QModelIndexList selectedIndexes(
+	debugSlotCall();
+
+	AttachmentInteraction::saveAttachmentsToDirecory(this,
+	    *this->attachmentTable,
 	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
-
-	if (selectedIndexes.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Save attachments"), NULL,
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-	if (newDir.isNull() || newDir.isEmpty()) {
-		return;
-	}
-	/* TODO -- Remember directory? */
-
-	bool unspecifiedFailed = false;
-	QList<QString> unsuccessfullFiles;
-
-	foreach (QModelIndex idx, selectedIndexes) {
-		if (!idx.isValid()) {
-			Q_ASSERT(0);
-			unspecifiedFailed = true;
-			continue;
-		}
-
-		QString fileName = idx.data().toString();
-		if (fileName.isEmpty()) {
-			Q_ASSERT(0);
-			unspecifiedFailed = true;
-			continue;
-		}
-
-		fileName = newDir + QDir::separator() + fileName;
-
-		QModelIndex dataIndex = idx.sibling(idx.row(),
-		    DbFlsTblModel::CONTENT_COL);
-		if (!dataIndex.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		QByteArray data =
-		    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-		if (WF_SUCCESS != writeFile(fileName, data)) {
-			unsuccessfullFiles.append(fileName);
-			continue;
-		}
-	}
-
-	if (unspecifiedFailed) {
-		QMessageBox::warning(this,
-		    tr("Error saving attachments."),
-		    tr("Could not save all attachments."),
-		    QMessageBox::Ok);
-	} else if (!unsuccessfullFiles.isEmpty()) {
-		QString warnMsg =
-		    tr("In total %1 attachment files could not be written.")
-		        .arg(unsuccessfullFiles.size());
-		warnMsg += "\n" +
-		    tr("These are:").arg(unsuccessfullFiles.size()) + "\n";
-		int i;
-		for (i = 0; i < (unsuccessfullFiles.size() - 1); ++i) {
-			warnMsg += "    '" + unsuccessfullFiles.at(i) + "'\n";
-		}
-		warnMsg += "    '" + unsuccessfullFiles.at(i) + "'.";
-		QMessageBox::warning(this, tr("Error saving attachments."),
-		    warnMsg, QMessageBox::Ok);
-	}
 }
 
 void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
