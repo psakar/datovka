@@ -2028,7 +2028,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		return;
 	}
 
-	/* Generate list of indexers into all rows. */
+	/* Generate list of indexes into all rows. */
 	QModelIndexList attIdxs;
 	for (int row = 0; row < attachModel->rowCount(); ++row) {
 		QModelIndex idx(attachModel->index(row,
@@ -2079,7 +2079,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 	}
 
-	QList<QString> unsuccessfullFiles;
+	QList<QString> unsuccessfulAtts;
+	bool existenceWarningDisplayed = false; /* Display only once. */
 
 	foreach (const QModelIndex &attIdx, attIdxs) {
 		Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
@@ -2097,11 +2098,21 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		fileName = attSaveDir + QDir::separator() + fileName;
 
+		bool fileExists = QFileInfo::exists(fileName);
+		if (fileExists) {
+			if (!existenceWarningDisplayed) {
+				QMessageBox::warning(this,
+				    tr("Error saving attachment."),
+				    tr("Some files already exist."),
+				    QMessageBox::Ok);
+				existenceWarningDisplayed = true;
+			}
+		}
 		QString savedFileName(
 		    AttachmentInteraction::saveAttachmentToFile(this, attIdx,
-		    nonconflictingFileName(fileName), false));
+		    fileName, fileExists));
 		if (savedFileName.isEmpty()) {
-			unsuccessfullFiles.append(fileName);
+			unsuccessfulAtts.append(fileName);
 			continue;
 		}
 
@@ -2145,19 +2156,19 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		}
 	}
 
-	if (!unsuccessfullFiles.isEmpty()) {
+	if (!unsuccessfulAtts.isEmpty()) {
 		showStatusTextWithTimeout(
 		    tr("Some attachments of message '%1' were not saved to disk!")
 		        .arg(msgId.dmId));
 		QString warnMsg(
 		    tr("In total %1 attachment files could not be written.")
-		        .arg(unsuccessfullFiles.size()));
+		        .arg(unsuccessfulAtts.size()));
 		warnMsg += "\n" + tr("These are:") + "\n";
 		int i;
-		for (i = 0; i < (unsuccessfullFiles.size() - 1); ++i) {
-			warnMsg += "    '" + unsuccessfullFiles.at(i) + "'\n";
+		for (i = 0; i < (unsuccessfulAtts.size() - 1); ++i) {
+			warnMsg += "    '" + unsuccessfulAtts.at(i) + "'\n";
 		}
-		warnMsg += "    '" + unsuccessfullFiles.at(i) + "'.";
+		warnMsg += "    '" + unsuccessfulAtts.at(i) + "'.";
 		QMessageBox::warning(this,
 		    tr("Error saving attachments of message '%1'.")
 		        .arg(msgId.dmId),

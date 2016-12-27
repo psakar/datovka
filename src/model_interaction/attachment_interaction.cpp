@@ -318,12 +318,31 @@ QString AttachmentInteraction::saveAttachmentsToDirectory(QWidget *parent,
 	}
 
 	ListType unsuccessfulAtts;
+	bool existenceWarningDisplayed = false; /* Display only once. */
 
 	foreach (const ListContent &att, atts) {
 		const QModelIndex &idx(att.first);
 		QString fileName(att.second);
 
 		fileName = suggestedDirPath + QDir::separator() + fileName;
+
+		bool fileExists = QFileInfo::exists(fileName);
+		if (fileExists) {
+			if (!existenceWarningDisplayed) {
+				QMessageBox::warning(parent,
+				    tr("Error saving attachment."),
+				    tr("Some files already exist."),
+				    QMessageBox::Ok);
+				existenceWarningDisplayed = true;
+			}
+			/* Ask for file name. */
+			fileName = QFileDialog::getSaveFileName(parent,
+			    tr("Save attachment"), fileName);
+			if (fileName.isEmpty()) {
+				unsuccessfulAtts.append(att);
+				continue;
+			}
+		}
 
 		QModelIndex contIdx(idx.sibling(idx.row(),
 		    DbFlsTblModel::CONTENT_COL));
