@@ -163,7 +163,7 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 }
 
 QString AttachmentInteraction::saveAttachmentToFile(QWidget *parent,
-    QModelIndex index, const QString &suggestedFilePath)
+    QModelIndex index, const QString &suggestedFilePath, bool askLocation)
 {
 	if (!index.isValid()) {
 		return QString();
@@ -190,8 +190,10 @@ QString AttachmentInteraction::saveAttachmentToFile(QWidget *parent,
 		fileName = suggestedFilePath;
 	}
 
-	fileName = QFileDialog::getSaveFileName(parent, tr("Save attachment"),
-	    fileName);
+	if (askLocation) {
+		fileName = QFileDialog::getSaveFileName(parent,
+		    tr("Save attachment"), fileName);
+	}
 	if (fileName.isEmpty()) {
 		return QString();
 	}

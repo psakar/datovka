@@ -85,11 +85,14 @@ public:
 	 * @param[in]     index Selection index, must be valid.
 	 * @param[in]     suggestedFilePath File with path to store data into,
 	 *                                  attachment name is taken if empty.
+	 * @param[in]     askLocation If true then dialogue asking for file
+	 *                            location will be generated.
 	 * @return Path to file where data were stored, empty string on error.
 	 */
 	static
 	QString saveAttachmentToFile(QWidget *parent, QModelIndex index,
-	    const QString &suggestedFilePath = QString());
+	    const QString &suggestedFilePath = QString(),
+	    bool askLocation = true);
 
 	/*!
 	 * @brief Save all selected attachments
