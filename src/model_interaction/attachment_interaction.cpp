@@ -311,6 +311,9 @@ QString AttachmentInteraction::saveAttachmentsToDirecory(QWidget *parent,
 	suggestedDirPath = QFileDialog::getExistingDirectory(parent,
 	    tr("Save attachments"), suggestedDirPath,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (suggestedDirPath.isEmpty()) {
+		return QString();
+	}
 
 	ListType unsuccessfulAtts;
 
