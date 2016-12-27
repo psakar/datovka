@@ -120,7 +120,7 @@ public:
 	 *     stored.
 	 */
 	static
-	QString saveAttachmentsToDirecory(QWidget *parent,
+	QString saveAttachmentsToDirectory(QWidget *parent,
 	    const AttachmentTableView &view,
 	    QModelIndexList indexList = QModelIndexList(),
 	    QString suggestedDirPath = QString());

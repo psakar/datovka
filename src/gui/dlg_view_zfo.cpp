@@ -139,7 +139,7 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::saveAttachmentsToDirecory(this,
+	AttachmentInteraction::saveAttachmentsToDirectory(this,
 	    *this->attachmentTable,
 	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
 	        DbFlsTblModel::FNAME_COL));

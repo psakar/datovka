@@ -286,7 +286,7 @@ QList< QPair<QModelIndex, QString> > renameAttachments(
 	return pairList;
 }
 
-QString AttachmentInteraction::saveAttachmentsToDirecory(QWidget *parent,
+QString AttachmentInteraction::saveAttachmentsToDirectory(QWidget *parent,
     const AttachmentTableView &view, QModelIndexList indexList,
     QString suggestedDirPath)
 {
