@@ -59,7 +59,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit DbFlsTblModel(QObject *parent = 0);
+	explicit DbFlsTblModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -222,10 +222,11 @@ private:
 	 *
 	 * @param[in] base64content Base64-encoded attachment content.
 	 * @param[in] fName Attachment name.
+	 * @param[in] fPath File path.
 	 * @return True if content with name exists in model.
 	 */
 	bool nameAndContentPresent(const QVariant &base64content,
-	    const QVariant &fName) const;
+	    const QVariant &fName, const QVariant &fPath) const;
 
 	/*!
 	 * @brief Returns list of file paths for lines given in indexes.

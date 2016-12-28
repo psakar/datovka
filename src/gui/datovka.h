@@ -223,7 +223,7 @@ private slots:
 	/*!
 	 * @brief Open attachment in default application.
 	 */
-	void openSelectedAttachment(void);
+	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 
 	/*!
 	 * @brief Mark all received messages in the current working account.
@@ -768,10 +768,16 @@ private:
 	    qint64 dmId);
 
 	/*!
+	 * @brief Generates file path where sto store attachment into.
+	 */
+	QString attachmentFilePath(const QString &userName,
+	    const MessageDb::MsgId &msgId, QModelIndex attIdx);
+
+	/*!
 	 * @brief Save attachment identified by indexes to file.
 	 */
-	void saveAttachmentToFile(const MessageDb::MsgId &msgId,
-	    const QModelIndex &attachmentIndex);
+	void saveAttachmentToFile(const QString &userName,
+	    const MessageDb::MsgId &msgId, const QModelIndex &attIdx);
 
 	/*!
 	 * @brief Return index for yearly entry with given properties.

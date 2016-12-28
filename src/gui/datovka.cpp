@@ -76,6 +76,7 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -371,7 +372,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(attachmentItemRightClicked(QPoint)));
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
-	    SLOT(openSelectedAttachment()));
+	    SLOT(openSelectedAttachment(QModelIndex)));
 	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
 
 	/* It fires when any column was resized. */
@@ -1871,37 +1872,39 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 		return;
 	}
 
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
 	const MessageDb::MsgId msgId(msgMsgId(messageIndex));
 
 	foreach (const QModelIndex &attachmentIndex, attachmentIndexes) {
-		saveAttachmentToFile(msgId, attachmentIndex);
+		saveAttachmentToFile(userName, msgId, attachmentIndex);
 	}
 }
 
-/* ========================================================================= */
-void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
-   const QModelIndex &attachmentIndex)
-/* ========================================================================= */
+QString MainWindow::attachmentFilePath(const QString &userName,
+    const MessageDb::MsgId &msgId, QModelIndex attIdx)
 {
-	if (!attachmentIndex.isValid()) {
+	if (userName.isEmpty() || !msgId.isValid() || !attIdx.isValid()) {
 		Q_ASSERT(0);
-		showStatusTextWithTimeout(tr("Saving attachment of message to "
-		    "files was not successful!"));
-		return;
+		return QString();
 	}
 
-	QModelIndex fileNameIndex = attachmentIndex.sibling(
-	    attachmentIndex.row(), DbFlsTblModel::FNAME_COL);
-	Q_ASSERT(fileNameIndex.isValid());
-	if(!fileNameIndex.isValid()) {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to files was not successful!")
-		        .arg(msgId.dmId));
-		return;
+	if (attIdx.column() != DbFlsTblModel::FNAME_COL) {
+		attIdx = attIdx.sibling(attIdx.row(), DbFlsTblModel::FNAME_COL);
+		if (!attIdx.isValid()) {
+			Q_ASSERT(0);
+			return QString();
+		}
 	}
-	QString fileName = fileNameIndex.data().toString();
-	Q_ASSERT(!fileName.isEmpty());
-	/* TODO -- Remember directory? */
+	Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
+
+	QString fileName(attIdx.data().toString());
+	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
+		return QString();
+	}
 
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
@@ -1910,20 +1913,16 @@ void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
 		saveAttachPath = m_save_attach_dir;
 	}
 
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
-		return;
+		return QString();
 	}
 	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
 	    false);
-	if (0 == messageDb) {
+	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		return;
+		return QString();
 	}
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
@@ -1933,137 +1932,161 @@ void MainWindow::saveAttachmentToFile(const MessageDb::MsgId &msgId,
 	fileName = fileNameFromFormat(globPref.attachment_filename_format,
 	    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	fileName = QFileDialog::getSaveFileName(this,
-	    tr("Save attachment"),
-	    saveAttachPath + QDir::separator() + fileName);
-
 	if (fileName.isEmpty()) {
-		return;
+		return QString();
 	}
+	return saveAttachPath + QDir::separator() + fileName;
+}
 
-	if (!globPref.use_global_paths) {
-		m_save_attach_dir =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	/* Get data from base64. */
-	QModelIndex dataIndex = attachmentIndex.sibling(attachmentIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
+void MainWindow::saveAttachmentToFile(const QString &userName,
+    const MessageDb::MsgId &msgId, const QModelIndex &attIdx)
+{
+	if (!attIdx.isValid()) {
 		Q_ASSERT(0);
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to files was not successful!")
-		       .arg(msgId.dmId));
 		return;
 	}
 
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
+	QModelIndex fileNameIndex(attIdx.sibling(attIdx.row(),
+	    DbFlsTblModel::FNAME_COL));
+	Q_ASSERT(fileNameIndex.isValid());
+	if(!fileNameIndex.isValid()) {
+		showStatusTextWithTimeout(
+		    tr("Saving attachment of message '%1' to files was not successful!")
+		        .arg(msgId.dmId));
+		return;
+	}
+	QString fileName(attachmentFilePath(userName, msgId, attIdx));
 
-	enum WriteFileState ret = writeFile(fileName, data);
-	if (WF_SUCCESS == ret) {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to file was successful.")
-		        .arg(msgId.dmId));
+	QString savedFileName(AttachmentInteraction::saveAttachmentToFile(this,
+	    attIdx, fileName));
+	if (!savedFileName.isEmpty()) {
+		showStatusTextWithTimeout(tr(
+		    "Saving attachment of message '%1' to file was successful.")
+		    .arg(msgId.dmId));
+		if (!globPref.use_global_paths) {
+			m_save_attach_dir =
+			    QFileInfo(fileName).absoluteDir().absolutePath();
+			storeExportPath();
+		}
 	} else {
-		showStatusTextWithTimeout(
-		    tr("Saving attachment of message \"%1\" to file was not successful!")
-		        .arg(msgId.dmId));
-		QMessageBox::warning(this,
-		    tr("Error saving attachment of message '%1'.").arg(msgId.dmId),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
+		showStatusTextWithTimeout(tr(
+		    "Saving attachment of message '%1' to file was not successful!")
+		    .arg(msgId.dmId));
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Save all attachments to dir.
- */
 void MainWindow::saveAllAttachmentsToDir(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex messageIndex(currentSingleMessageIndex());
-
-	MessageDb::MsgId msgId(msgMsgId(messageIndex));
-
-	QString saveAttachPath;
-	if (globPref.use_global_paths) {
-		saveAttachPath = globPref.save_attachments_path;
-	} else {
-		saveAttachPath = m_save_attach_dir;
+	MessageDb::MsgId msgId;
+	{
+		const QModelIndex messageIndex(currentSingleMessageIndex());
+		msgId = msgMsgId(messageIndex);
 	}
 
-	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Save attachments"), saveAttachPath,
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	DbFlsTblModel *attachModel = qobject_cast<DbFlsTblModel *>(
+	    ui->messageAttachmentList->model());
+	/*
+	 * Download missing message.
+	 * TODO -- Make this a separate function and reuse it wherever possible.
+	 */
+	if ((!msgId.deliveryTime.isValid()) ||
+	    (attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
+		const QModelIndex acntIdx(currentAccountModelIndex());
+		const QString userName(m_accountModel.userName(acntIdx));
+		enum MessageDb::MessageType type;
+		if (AccountModel::nodeTypeIsReceived(acntIdx)) {
+			type = MessageDb::TYPE_RECEIVED;
+		} else if (AccountModel::nodeTypeIsSent(acntIdx)) {
+			type = MessageDb::TYPE_SENT;
+		} else {
+			Q_ASSERT(0);
+			return;
+		}
 
-	if (newDir.isEmpty()) {
-		return;
-	}
-
-	if (!globPref.use_global_paths) {
-		m_save_attach_dir = newDir;
-		storeExportPath();
-	}
-
-	bool unspecifiedFailed = false;
-	QList<QString> unsuccessfullFiles;
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QList<MessageDb::FileData> attachList =
-	    messageDb->getFilesFromMessage(msgId.dmId);
-	if (attachList.isEmpty()) {
+		/* No data in attachment model present. */
+		const QModelIndex messageIndex(currentSingleMessageIndex());
+		msgId = msgMsgId(messageIndex);
 
 		if (!messageMissingOfferDownload(msgId,
 		        tr("Message export error!"))) {
 			return;
 		}
 
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		attachList = messageDb->getFilesFromMessage(msgId.dmId);
-		if (attachList.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
+		/* Navigate to message. */
+		messageItemFromSearchSelection(userName, msgId.dmId,
+		    msgId.deliveryTime.toString("yyyy"), type);
+		/* Process all pending events. */
+		QCoreApplication::processEvents();
 	}
 
-	foreach (const MessageDb::FileData &attach, attachList) {
-		QString fileName(attach.dmFileDescr);
+	attachModel = qobject_cast<DbFlsTblModel *>(
+	    ui->messageAttachmentList->model());
+	if ((attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Generate list of indexes into all rows. */
+	QModelIndexList attIdxs;
+	for (int row = 0; row < attachModel->rowCount(); ++row) {
+		QModelIndex idx(attachModel->index(row,
+		    DbFlsTblModel::FNAME_COL));
+		if (!idx.isValid()) {
+			Q_ASSERT(0);
+			return;
+		}
+		attIdxs.append(idx);
+	}
+	Q_ASSERT(attIdxs.size() == attachModel->rowCount());
+
+	QString attSaveDir;
+	if (globPref.use_global_paths) {
+		attSaveDir = globPref.save_attachments_path;
+	} else {
+		attSaveDir = m_save_attach_dir;
+	}
+
+	attSaveDir = QFileDialog::getExistingDirectory(this,
+	    tr("Save attachments"), attSaveDir,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (attSaveDir.isEmpty()) {
+		return;
+	}
+
+	/*
+	 * TODO -- This ridiculous asking for mostly irrelevant data and
+	 * generating of stupendous file names must be reworked.
+	 */
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
+	MessageDb::FilenameEntry entry;
+	{
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (Q_NULLPTR == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
+		MessageDb *messageDb = dbSet->accessMessageDb(
+		    msgId.deliveryTime, false);
+		if (Q_NULLPTR == messageDb) {
+			Q_ASSERT(0);
+			return;
+		}
+		entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
+	}
+
+	QList<QString> unsuccessfulAtts;
+	bool existenceWarningDisplayed = false; /* Display only once. */
+
+	foreach (const QModelIndex &attIdx, attIdxs) {
+		Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
+		const QString attName(attIdx.data().toString());
+		QString fileName(attName);
 		if (fileName.isEmpty()) {
-			unspecifiedFailed = true;
 			Q_ASSERT(0);
 			continue;
 		}
@@ -2073,83 +2096,86 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
 		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-		fileName = newDir + QDir::separator() + fileName;
+		fileName = attSaveDir + QDir::separator() + fileName;
 
-		QByteArray data(
-		    QByteArray::fromBase64(attach.dmEncodedContent));
-
-		if (WF_SUCCESS !=
-		    writeFile(nonconflictingFileName(fileName), data)) {
-			unsuccessfullFiles.append(fileName);
+		bool fileExists = QFileInfo::exists(fileName);
+		if (fileExists) {
+			if (!existenceWarningDisplayed) {
+				QMessageBox::warning(this,
+				    tr("Error saving attachment."),
+				    tr("Some files already exist."),
+				    QMessageBox::Ok);
+				existenceWarningDisplayed = true;
+			}
+		}
+		QString savedFileName(
+		    AttachmentInteraction::saveAttachmentToFile(this, attIdx,
+		    fileName, fileExists));
+		if (savedFileName.isEmpty()) {
+			unsuccessfulAtts.append(fileName);
 			continue;
 		}
 
 		if (globPref.delivery_info_for_every_file) {
 			if (globPref.all_attachments_save_zfo_delinfo) {
-				exportDeliveryInfoAsZFO(newDir, attach.dmFileDescr,
+				exportDeliveryInfoAsZFO(attSaveDir, attName,
 				    globPref.delivery_filename_format_all_attach,
 				    userName, msgId, false);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
-				exportDeliveryInfoAsPDF(newDir, attach.dmFileDescr,
-				  globPref.delivery_filename_format_all_attach,
-				  userName, msgId, false);
+				exportDeliveryInfoAsPDF(attSaveDir, attName,
+				    globPref.delivery_filename_format_all_attach,
+				    userName, msgId, false);
 			}
 		}
 	}
 
+	if ((!globPref.use_global_paths) && (!attSaveDir.isEmpty())) {
+		m_save_attach_dir = attSaveDir;
+		storeExportPath();
+	}
+
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportMessageAsZFO(newDir, userName, msgId, false);
+		exportMessageAsZFO(attSaveDir, userName, msgId, false);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(newDir, userName, msgId, false);
+		exportMessageEnvelopeAsPDF(attSaveDir, userName, msgId, false);
 	}
 
 	if (!globPref.delivery_info_for_every_file) {
 		if (globPref.all_attachments_save_zfo_delinfo) {
-			exportDeliveryInfoAsZFO(newDir, "",
+			exportDeliveryInfoAsZFO(attSaveDir, QString(),
 			    globPref.delivery_filename_format,
 			    userName, msgId, false);
 		}
 		if (globPref.all_attachments_save_pdf_delinfo) {
-			exportDeliveryInfoAsPDF(newDir, "",
+			exportDeliveryInfoAsPDF(attSaveDir, QString(),
 			    globPref.delivery_filename_format,
 			    userName, msgId, false);
 		}
 	}
 
-	if (unspecifiedFailed) {
+	if (!unsuccessfulAtts.isEmpty()) {
 		showStatusTextWithTimeout(
-		    tr("Some attachments of message \"%1\" were not saved to disk!")
-		    .arg(msgId.dmId));
-		QMessageBox::warning(this,
-		    tr("Error saving attachments of message '%1'.")
-		        .arg(msgId.dmId),
-		    tr("Could not save all attachments of message '%1'.")
-		        .arg(msgId.dmId),
-		    QMessageBox::Ok);
-	} else if (!unsuccessfullFiles.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Some attachments of message \"%1\" were not saved to disk!")
+		    tr("Some attachments of message '%1' were not saved to disk!")
 		        .arg(msgId.dmId));
-		QString warnMsg =
+		QString warnMsg(
 		    tr("In total %1 attachment files could not be written.")
-		        .arg(unsuccessfullFiles.size());
-		warnMsg += "\n" +
-		    tr("These are:").arg(unsuccessfullFiles.size()) + "\n";
+		        .arg(unsuccessfulAtts.size()));
+		warnMsg += "\n" + tr("These are:") + "\n";
 		int i;
-		for (i = 0; i < (unsuccessfullFiles.size() - 1); ++i) {
-			warnMsg += "    '" + unsuccessfullFiles.at(i) + "'\n";
+		for (i = 0; i < (unsuccessfulAtts.size() - 1); ++i) {
+			warnMsg += "    '" + unsuccessfulAtts.at(i) + "'\n";
 		}
-		warnMsg += "    '" + unsuccessfullFiles.at(i) + "'.";
+		warnMsg += "    '" + unsuccessfulAtts.at(i) + "'.";
 		QMessageBox::warning(this,
 		    tr("Error saving attachments of message '%1'.")
 		        .arg(msgId.dmId),
 		    warnMsg, QMessageBox::Ok);
 	} else {
 		showStatusTextWithTimeout(
-		    tr("All attachments of message \"%1\" were saved.")
+		    tr("All attachments of message '%1' were saved.")
 		        .arg(msgId.dmId));
 	}
 }
@@ -2159,69 +2185,24 @@ void MainWindow::saveAllAttachmentsToDir(void)
 /*
  * Open attachment in default application.
  */
-void MainWindow::openSelectedAttachment(void)
+void MainWindow::openSelectedAttachment(const QModelIndex &index)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndex selectedIndex;
-	{
-		QModelIndexList attachmentIndexes(
-		    currentFrstColAttachmentIndexes());
+	QString attachName;
+	QString tmpPath;
 
-		if (attachmentIndexes.size() != 1) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		selectedIndex = attachmentIndexes[0];
-	}
-
-	if (!selectedIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QModelIndex fileNameIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::FNAME_COL);
-	Q_ASSERT(fileNameIndex.isValid());
-	if(!fileNameIndex.isValid()) {
-		return;
-	}
-	QString attachName = fileNameIndex.data().toString();
-	Q_ASSERT(!attachName.isEmpty());
-	if (attachName.isEmpty()) {
-		return;
-	}
-	attachName.replace(QRegExp("\\s"), "_").replace(
-	    QRegExp("[^a-zA-Z\\d\\.\\-_]"), "x");
-	/* TODO -- Add message id into file name? */
-	QString fileName = TMP_ATTACHMENT_PREFIX + attachName;
-
-	/* Get data from base64. */
-	QModelIndex dataIndex = selectedIndex.sibling(selectedIndex.row(),
-	    DbFlsTblModel::CONTENT_COL);
-	if (!dataIndex.isValid()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QByteArray data =
-	    QByteArray::fromBase64(dataIndex.data().toByteArray());
-
-	fileName = writeTemporaryFile(fileName, data);
-	if (!fileName.isEmpty()) {
-		showStatusTextWithTimeout(tr("Attachment '%1' stored to "
-		    "temporary file '%2'.").arg(attachName).arg(fileName));
-		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
-		/* TODO -- Handle openUrl() return value. */
+	if (AttachmentInteraction::openAttachment(this,
+	        *ui->messageAttachmentList, index,
+	        &attachName, &tmpPath)) {
+		showStatusTextWithTimeout(tr(
+		    "Attachment '%1' stored into temporary file '%2'.")
+		    .arg(attachName).arg(tmpPath));
 	} else {
-		showStatusTextWithTimeout(tr("Attachment '%1' couldn't be "
-		    "stored to temporary file.").arg(attachName));
-		QMessageBox::warning(this,
-		    tr("Error opening attachment."),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
+		showStatusTextWithTimeout(tr(
+		    "Attachment '%1' couldn't be stored into temporary file.")
+		    .arg(attachName));
 	}
 }
 
@@ -6619,6 +6600,9 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 		msgId.deliveryTime = task->m_mId.deliveryTime;
 	}
 	delete task;
+
+	/* Process all pending events. */
+	QCoreApplication::processEvents();
 
 	return ret;
 }

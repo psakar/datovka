@@ -56,6 +56,9 @@ DbFlsTblModel::DbFlsTblModel(QObject *parent)
 static
 bool fileReadable(const QString &filePath)
 {
+	if (filePath.isEmpty()) {
+		return false;
+	}
 	QFileInfo fileInfo(filePath);
 	return fileInfo.exists() && fileInfo.isReadable();
 }
@@ -100,8 +103,31 @@ fail:
 
 QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
-	if (Qt::DisplayRole != role) {
+	switch (role) {
+	case Qt::DisplayRole:
+		/* Continue with code. */
+		break;
+	case ROLE_PLAIN_DISPLAY:
+		/* Explicitly asking associated file path. */
+		if (index.column() == FPATH_COL) {
+			const QString fPath(_data(index.row(), FPATH_COL,
+			    Qt::DisplayRole).toString());
+			QByteArray b64(_data(index.row(), CONTENT_COL,
+			    Qt::DisplayRole).toByteArray());
+
+			if ((fPath == LOCAL_DATABASE_STR) && !b64.isEmpty()) {
+				return QVariant(); /* No file present. */
+			} else if (fileReadable(fPath)) {
+				return fPath; /* File present. */
+			} else {
+				return QVariant();
+			}
+		}
+		return QVariant();
+		break;
+	default:
 		return _data(index, role);
+		break;
 	}
 
 	switch (index.column()) {
@@ -117,7 +143,10 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 				/* Read file. */
 				return getFileBase64(fPath);
 			} else {
-				/* This fallback should not be used. */
+				/*
+				 * This fallback is used when filling model
+				 * with zfo content.
+				 */
 				return _data(index, role);
 			}
 		}
@@ -132,11 +161,16 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 			if (fPath == LOCAL_DATABASE_STR) {
 				/* Get attachment size from base64 length. */
 				return base64RealSize(b64);
-			} else {
+			} else if (fileReadable(fPath)) {
 				/* File size. */
 				return getFileSize(fPath);
+			} else {
+				/*
+				 * This fallback is used when filling model
+				 * with zfo content.
+				 */
+				return base64RealSize(b64);
 			}
-
 		}
 		break;
 	case FPATH_COL:
@@ -200,14 +234,14 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	QModelIndexList lineIndexes = sortedUniqueLineIndexes(indexes,
 	    FNAME_COL);
 	if (lineIndexes.isEmpty()) {
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	/* Create temporary directory. Automatic remove is on by default. */
 	QTemporaryDir dir(QDir::tempPath() + QDir::separator() + TMP_DIR_NAME);
 	if (!dir.isValid()) {
 		logErrorNL("%s", "Could not create a temporary directory.");
-		return 0;
+		return Q_NULLPTR;
 	}
 	/*
 	 * Automatic removal cannot be set because his removes the files
@@ -220,12 +254,12 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	QStringList fileNames(accessibleFiles(dir.path(), lineIndexes));
 	if (fileNames.isEmpty()) {
 		logErrorNL("%s", "Could not write temporary files.");
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	QMimeData *mimeData = new (std::nothrow) QMimeData;
-	if (0 == mimeData) {
-		return 0;
+	if (Q_NULLPTR == mimeData) {
+		return Q_NULLPTR;
 	}
 	QList<QUrl> urlList = fileUrls(fileNames);
 	mimeData->setUrls(urlList);
@@ -242,7 +276,7 @@ bool DbFlsTblModel::canDropMimeData(const QMimeData *data,
 	Q_UNUSED(column);
 	Q_UNUSED(parent);
 
-	if (0 == data) {
+	if (Q_NULLPTR == data) {
 		return false;
 	}
 
@@ -536,7 +570,7 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 	}
 
 	if (insertUnique && nameAndContentPresent(rowVect.at(CONTENT_COL),
-	        rowVect.at(FNAME_COL))) {
+	        rowVect.at(FNAME_COL), rowVect.at(FPATH_COL))) {
 		/* Fail if data present. */
 		logWarningNL("Same data '%s' already attached.",
 		    rowVect.at(FNAME_COL).toString().toUtf8().constData());
@@ -562,12 +596,13 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 }
 
 bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
-    const QVariant &fName) const
+    const QVariant &fName, const QVariant &fPath) const
 {
 	/* Cannot use foreach (), because contains pre-allocated empty lines. */
 	for (int row = 0; row < rowCount(); ++row) {
 		const QVector<QVariant> &rowEntry = m_data.at(row);
 		if ((rowEntry.at(FNAME_COL) == fName) &&
+		    (rowEntry.at(FPATH_COL) == fPath) &&
 		    (rowEntry.at(CONTENT_COL) == base64content)) {
 			return true;
 		}
