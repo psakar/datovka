@@ -60,6 +60,7 @@ namespace MethodNames {
 	static const QString uNamePwdCrt(QLatin1String("user_certificate"));
 	static const QString uNamePwdHotp(QLatin1String("hotp"));
 	static const QString uNamePwdTotp(QLatin1String("totp"));
+	static const QString uMojeId(QLatin1String("mojeid"));
 }
 
 /*!
@@ -87,6 +88,9 @@ enum AcntSettings::LogInMethod methodIntToEnum(int num)
 	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		return AcntSettings::LIM_UNAME_PWD_TOTP;
 		break;
+	case AcntSettings::LIM_MOJE_ID:
+		return AcntSettings::LIM_MOJE_ID;
+		break;
 	case AcntSettings::LIM_UNKNOWN:
 	default:
 		return AcntSettings::LIM_UNKNOWN;
@@ -113,10 +117,13 @@ enum AcntSettings::LogInMethod methodStrToEnum(const QString &str)
 		return AcntSettings::LIM_UNAME_PWD_HOTP;
 	} else if (str == MethodNames::uNamePwdTotp) {
 		return AcntSettings::LIM_UNAME_PWD_TOTP;
+	} else if (str == MethodNames::uMojeId) {
+		return AcntSettings::LIM_MOJE_ID;
 	} else {
 		return AcntSettings::LIM_UNKNOWN;
 	}
 }
+
 
 /*!
  * @brief Converts login method identifier to string.
@@ -144,6 +151,9 @@ const QString &methodEnumToStr(enum AcntSettings::LogInMethod val)
 		break;
 	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		return MethodNames::uNamePwdTotp;
+		break;
+	case AcntSettings::LIM_MOJE_ID:
+		return MethodNames::uMojeId;
 		break;
 	case AcntSettings::LIM_UNKNOWN:
 	default:

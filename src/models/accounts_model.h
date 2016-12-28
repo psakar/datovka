@@ -32,7 +32,16 @@
 #include <QString>
 #include <QVariant>
 
+
 #include "src/settings/accounts.h"
+
+/* Login method descriptors. */
+#define LIM_USERNAME "username"
+#define LIM_CERT "certificate"
+#define LIM_USER_CERT "user_certificate"
+#define LIM_HOTP "hotp"
+#define LIM_TOTP "totp"
+#define LIM_MOJEID "mojeid"
 
 /*!
  * @brief Account hierarchy.

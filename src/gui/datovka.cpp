@@ -52,10 +52,12 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_login_mojeid.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -72,11 +74,13 @@
 #include "src/io/isds_helper.h"
 #include "src/io/isds_login.h"
 #include "src/io/isds_sessions.h"
+#include "src/io/wd_sessions.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/model_interaction/attachment_interaction.h"
+#include "src/io/tag_db_container.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -86,9 +90,17 @@
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
+#include "src/worker/task_download_message_list_mojeid.h"
+#include "src/worker/task_download_message_mojeid.h"
+#include "src/worker/task_sync_mojeid.h"
+#include "src/worker/task_tag_sync_mojeid.h"
+#include "src/worker/task_download_owner_info.h"
+#include "src/worker/task_download_password_info.h"
+#include "src/worker/task_download_user_info.h"
 #include "src/worker/task_import_zfo.h"
 #include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
+#include "src/worker/task_get_account_list_mojeid.h"
 #include "ui_datovka.h"
 
 
@@ -286,6 +298,12 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
 	        QString, bool)));
 	connect(&globMsgProcEmitter,
+	    SIGNAL(downloadMessageFinishedMojeId(QString, qint64, int,
+	        QString, bool)),
+	    this,
+	    SLOT(collectDownloadMessageMojeId(QString, qint64, int,
+	        QString, bool)));
+	connect(&globMsgProcEmitter,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
 	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
@@ -300,6 +318,13 @@ MainWindow::MainWindow(QWidget *parent)
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
+	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(refreshAccountList(QString)), this,
+	    SLOT(refreshAccountList(QString)));
+
 	connect(&globWorkPool, SIGNAL(assignedFinished()),
 	    this, SLOT(backgroundWorkersFinished()));
 
@@ -502,7 +527,7 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));
-		if (vstr > VERSION) {
+		if (vstr > QCoreApplication::applicationVersion()) {
 			showStatusTextWithTimeout(
 			    tr("New version of Datovka is available:") +
 			    " " + vstr);
@@ -510,7 +535,8 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			int res = QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is %1").arg(VERSION)
+			    tr("Current version is %1").
+			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
 			    tr("New version is %1").arg(vstr) +
 			    + "\n\n" +
@@ -525,7 +551,8 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 			QMessageBox::information(this,
 			    tr("New version of Datovka"),
 			    tr("New version of Datovka is available.") +"\n\n"+
-			    tr("Current version is \"%1\"").arg(VERSION)
+			    tr("Current version is \"%1\"").
+			        arg(QCoreApplication::applicationVersion())
 			    + "\n" +
 			    tr("New version is \"%1\"").arg(vstr)
 			    + "\n\n" +
@@ -593,8 +620,15 @@ void MainWindow::clearStatusBar(void)
 void MainWindow::updateProgressBar(const QString &label, int value)
  /* ========================================================================= */
 {
+	if (value == -1) {
+		mui_statusProgressBar->setMaximum(0);
+		mui_statusProgressBar->setMinimum(0);
+	} else {
+		mui_statusProgressBar->setMaximum(100);
+		mui_statusProgressBar->setMinimum(0);
+		mui_statusProgressBar->setValue(value);
+	}
 	mui_statusProgressBar->setFormat(label);
-	mui_statusProgressBar->setValue(value);
 	mui_statusProgressBar->repaint();
 }
 
@@ -703,7 +737,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		/* Decouple model and show banner page. */
 		ui->messageList->setModel(0);
 		ui->messageStackedWidget->setCurrentIndex(0);
-		ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+		ui->accountTextInfo->setHtml(createDatovkaBanner(
+		    QCoreApplication::applicationVersion()));
 		ui->accountTextInfo->setReadOnly(true);
 		return;
 	}
@@ -1058,6 +1093,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionImport_ZFO_file_into_database);
 	} else {
 		menu->addAction(ui->actionAdd_account);
+		menu->addAction(ui->actionAdd_mojeID_account);
 	}
 
 	menu->exec(QCursor::pos());
@@ -2287,6 +2323,48 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 	}
 }
 
+void MainWindow::collectDownloadMessageMojeId(const QString &usrName,
+    qint64 msgId, int result, const QString &errDesc, bool listScheduled)
+{
+	debugSlotCall();
+
+	if (TaskDownloadMessageMojeId::DM_SUCCESS == result) {
+		/* Refresh account and attachment list. */
+		refreshAccountList(usrName);
+
+		if (0 <= msgId) {
+			postDownloadSelectedMessageAttachments(usrName, msgId);
+		}
+	} else {
+		/* Notify the user. */
+		if (!listScheduled) {
+			QMessageBox msgBox(this);
+
+			showStatusTextWithTimeout(tr("It was not possible download "
+			    "complete message \"%1\" from webdatovka server.").arg(msgId));
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(tr("Download message error"));
+			msgBox.setText(tr("It was not possible to download a complete "
+			    "message \"%1\" from webdatovka server.").arg(msgId));
+			if (!errDesc.isEmpty()) {
+				msgBox.setInformativeText(tr("Webdatovka: ") + errDesc);
+			} else {
+				msgBox.setInformativeText(tr("A connection error "
+				    "occurred or the message has already been deleted "
+				    "from the server."));
+			}
+
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+		} else {
+			showStatusTextWithTimeout(
+			    tr("Couldn't download message '%1'.").arg(msgId));
+		}
+	}
+}
+
+
 void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
     int direction, int result, const QString &errDesc,
     bool add, int rt, int rn, int st, int sn)
@@ -2304,16 +2382,16 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 
 		QString errorMessage = (MSG_RECEIVED == direction) ?
 		    tr("It was not possible download received message list from"
-		        " ISDS server.") :
+		        " server.") :
 		    tr("It was not possible download sent message list from"
-		        " ISDS server.");
+		        " server.");
 
 		showStatusTextWithTimeout(errorMessage);
 		msgBox.setIcon(QMessageBox::Warning);
 		msgBox.setWindowTitle(tr("Download message list error"));
 		msgBox.setText(errorMessage);
 		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(tr("ISDS: ") + errDesc);
+			msgBox.setInformativeText(tr("Server: ") + errDesc);
 		} else {
 			msgBox.setInformativeText(
 			    tr("A connection error occurred."));
@@ -2367,7 +2445,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	debugFuncCall();
 
 	showStatusTextWithTimeout(tr("Message \"%1\" "
-	    " was downloaded from ISDS server.").arg(dmId));
+	    " was downloaded from server.").arg(dmId));
 
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
@@ -2947,22 +3025,28 @@ void MainWindow::messageItemsSelectedMarkSettled(void)
 
 /* ========================================================================= */
 /*
- * Delete selected message from local database and ISDS.
+ * Delete selected message from local database and ISDS/Webdatovka.
  */
 void MainWindow::deleteMessage(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
 
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (firstMsgColumnIdxs.isEmpty()) {
-		return;
-	}
-
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
+		return;
+	}
+
+	if (isWebDatovkaAccount(userName)) {
+		deleteMessageWebdatovka(userName);
+		return;
+	}
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+
+	if (firstMsgColumnIdxs.isEmpty()) {
 		return;
 	}
 
@@ -2983,7 +3067,7 @@ void MainWindow::deleteMessage(void)
 		checkBoxText =
 		    tr("Delete these messages also from server ISDS");
 		detailText = tr("Warning: If you delete selected messages "
-		    "from ISDS then these message will be lost forever.");
+		    "from ISDS then these messages will be lost forever.");
 	}
 
 	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
@@ -3026,6 +3110,109 @@ void MainWindow::deleteMessage(void)
 			 * Tag in the tag table are kept.
 			 */
 			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
+		}
+	}
+
+	/* Refresh account list. */
+	refreshAccountList(userName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Delete selected message from local database and Webdatovka.
+ */
+void MainWindow::deleteMessageWebdatovka(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		showWebDatovkaInfoDialog(userName,
+		    tr("You have to be logged into the Webdatovka "
+			"if you want to delete message(s)."));
+		return;
+	}
+
+	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
+	if (firstMsgColumnIdxs.isEmpty()) {
+		return;
+	}
+
+	QString dlgTitleText, questionText, detailText;
+	int msgIdxCnt = firstMsgColumnIdxs.size();
+
+	if (1 == msgIdxCnt) {
+		qint64 dmId = firstMsgColumnIdxs.first().data().toLongLong();
+		dlgTitleText = tr("Delete message %1").arg(dmId);
+		questionText = tr("Do you want to delete "
+		    "message '%1'?").arg(dmId);
+		detailText = tr("Warning: If you delete the message "
+		    "from Webdatovka then this message will be lost forever.");
+	} else {
+		dlgTitleText = tr("Delete messages");
+		questionText = tr("Do you want to delete selected messages?");
+		detailText = tr("Warning: If you delete selected messages "
+		    "from Webdatovka then these messages will be lost forever.");
+	}
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Question);
+	msgBox.setWindowTitle(dlgTitleText);
+	msgBox.setText(questionText);
+	msgBox.setInformativeText(detailText);
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	if (QMessageBox::No == msgBox.exec()) {
+		return;
+	}
+
+	QList<MessageDb::MsgId> msgIds;
+	foreach (const QModelIndex &idx, firstMsgColumnIdxs) {
+		msgIds.append(MessageDb::MsgId(idx.data().toLongLong(),
+		    msgDeliveryTime(idx)));
+	}
+
+	/* Save current account index */
+	QModelIndex selectedAcntIndex(currentAccountModelIndex());
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QString errStr;
+	foreach (const MessageDb::MsgId &id, msgIds) {
+		MessageDb *messageDb =
+		    dbSet->accessMessageDb(id.deliveryTime, false);
+		if (!jsonlayer.deleteMessage(userName,
+		    messageDb->getWebDatokaId(id.dmId), errStr)) {
+			qDebug() << "WD_DELETE_MESSAGE_ERROR:" << id.dmId
+			    << errStr;
+			continue;
+		}
+		if (eraseMessage(userName, id, false)) {
+			/*
+			 * Hiding selected line in the message model actually
+			 * does not help. The model contains all the old data
+			 * and causes problems. Therefore the model must be
+			 * regenerated.
+			 */
+			if (selectedAcntIndex.isValid()) {
+				accountItemCurrentChanged(selectedAcntIndex);
+			}
+			/*
+			 * TODO -- Remove the year on account list if last
+			 * message was removed.
+			 */
+
+			/* Delete all tags from message_tags table.
+			 * Tag in the tag table are kept.
+			 */
+			TagDb *tagDb =
+			    globWebDatovkaTagDbPtr->accessTagDb(userName);
+			tagDb->removeAllTagsFromMsg(userName, id.dmId);
 		}
 	}
 
@@ -3191,6 +3378,13 @@ void MainWindow::synchroniseAllAccounts(void)
 			continue;
 		}
 
+		// webdatovka sync
+		if (isWebDatovkaAccount(userName)) {
+			synchroniseSelectedAccount(userName);
+			continue;
+		}
+
+
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
 		if (!globIsdsSessions.isConnectedToIsds(userName) &&
 		    !connectToIsds(userName)) {
@@ -3229,6 +3423,12 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		userName = m_accountModel.userName(currentAccountModelIndex());
 		Q_ASSERT(!userName.isEmpty());
 	}
+
+	// webdatovka sync
+	if (isWebDatovkaAccount(userName)) {
+		return wdSyncAccount(userName);
+	}
+
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		return false;
@@ -3321,21 +3521,49 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName)) {
-		return;
-	}
 
-	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionGet_messages->setEnabled(false);
+	if (isWebDatovkaAccount(userName)) {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
 
-	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
-		/* Using PREPEND in order to outrun other jobs. */
-		TaskDownloadMessage *task =
-		    new (std::nothrow) TaskDownloadMessage(userName, dbSet,
-		        msgDirect, id, false);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to download complete message."));
+			return;
+		}
+
+		foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
+			/* Using prepend() just to outrun other jobs. */
+			MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
+			int mId = messageDb->getWebDatokaId(id.dmId);
+			TaskDownloadMessageMojeId *task;
+
+			task = new (std::nothrow) TaskDownloadMessageMojeId(
+			    userName, dbSet, msgDirect, mId, id.dmId, false);
+			task->setAutoDelete(true);
+			globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		}
+	} else {
+
+		if (!globIsdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName)) {
+			return;
+		}
+
+		ui->actionSync_all_accounts->setEnabled(false);
+		ui->actionGet_messages->setEnabled(false);
+
+		foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
+			/* Using prepend() just to outrun other jobs. */
+			TaskDownloadMessage *task;
+
+			task = new (std::nothrow) TaskDownloadMessage(
+			    userName, dbSet, msgDirect, id, false);
+			task->setAutoDelete(true);
+			globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		}
 	}
 }
 
@@ -3355,10 +3583,17 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 	html.append(indentDivStart);
 	html.append("<h3>");
-	if (AccountModel::globAccounts[userName].isTestAccount()) {
-		html.append(tr("Test account"));
+
+	if (isWebDatovkaAccount(userName)) {
+		html.append(tr("MojeID account"));
+		html.append("<br/><img src=\":/mojeid2.png\" alt=\"mojeID\">");
 	} else {
-		html.append(tr("Standard account"));
+		if (AccountModel::globAccounts[userName].isTestAccount()) {
+			html.append(tr("Test account"));
+		} else {
+			html.append(tr("Standard account"));
+		}
+		html.append("<br/><img src=\":/dschranka.png\" alt=\"ISDS\">");
 	}
 	html.append("</h3>");
 
@@ -4089,6 +4324,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionAdd_account, SIGNAL(triggered()),
 	    this, SLOT(addNewAccount()));
+	connect(ui->actionAdd_mojeID_account, SIGNAL(triggered()),
+	    this, SLOT(addNewMojeIDAccount()));
 	connect(ui->actionDelete_account, SIGNAL(triggered()),
 	    this, SLOT(deleteSelectedAccount()));
 	    /* Separator. */
@@ -4891,6 +5128,19 @@ void MainWindow::addNewAccount(void)
 
 /* ========================================================================= */
 /*
+ * Add mojeID account action and dialog.
+ */
+void MainWindow::addNewMojeIDAccount(void)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	loginToMojeId(QString());
+}
+
+
+/* ========================================================================= */
+/*
  * Slot: Delete selected account
  */
 void MainWindow::deleteSelectedAccount(void)
@@ -4900,6 +5150,19 @@ void MainWindow::deleteSelectedAccount(void)
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
+
+	deleteAccount(userName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Delete account.
+ */
+void MainWindow::deleteAccount(const QString &userName)
+/* ========================================================================= */
+{
+	debugSlotCall();
 
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -4951,7 +5214,17 @@ void MainWindow::deleteSelectedAccount(void)
 		    .arg(accountName));
 	}
 
-	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	if (isWebDatovkaAccount(userName)) {	
+		TagDb *tagDbWd = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
+		if (!existsAnotherMojeIdAccountWithSameUserId(userName)) {
+			globWebDatovkaTagDbPtr->deleteDb(tagDbWd);
+		} else {
+			tagDbWd->removeAllMsgTagsFromAccount(userName);
+		}
+	} else {
+		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	}
 
 	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
 	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
@@ -5222,9 +5495,22 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName)) {
-		return;
+	if (!isWebDatovkaAccount(userName)) {
+		if (!globIsdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName)) {
+			return;
+		}
+	} else {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to find databox."));
+			return;
+		}
 	}
 
 	/* Method connectToIsds() acquires account information. */
@@ -5242,10 +5528,18 @@ void MainWindow::findDatabox(void)
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-	    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
-	dsSearch->exec();
-	dsSearch->deleteLater();
+	if (isWebDatovkaAccount(userName)) {
+		QDialog *dsSearch =
+		    new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_BLANK, 0,
+		    dbType, dbEffectiveOVM, this, userName);
+		dsSearch->exec();
+		dsSearch->deleteLater();
+	} else {
+		QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
+		    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
+		dsSearch->exec();
+		dsSearch->deleteLater();
+	}
 }
 
 
@@ -5551,7 +5845,7 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 void MainWindow::refreshAccountList(const QString &userName)
 /* ========================================================================= */
 {
-	debugFuncCall();
+	debugSlotCall();
 
 	if (userName.isEmpty()) {
 		logWarning("%s\n",
@@ -5947,6 +6241,12 @@ void MainWindow::verifySelectedMessage(void)
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(msgId.dmId >= 0);
@@ -6097,6 +6397,14 @@ void MainWindow::showImportZFOActionDialog(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
+
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
 
 	QDialog *importZfo = new ImportZFODialog(this);
 	connect(importZfo,
@@ -6586,20 +6894,52 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 		return false;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
-	    !connectToIsds(userName)) {
-		return false;
-	}
+	bool ret = false;
 
-	TaskDownloadMessage *task = new (std::nothrow) TaskDownloadMessage(
-	    userName, dbSet, msgDirect, msgId, false);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-	bool ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
-	if (ret) {
-		msgId.deliveryTime = task->m_mId.deliveryTime;
+	if (isWebDatovkaAccount(userName)) {
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to download complete message."));
+			return ret;
+		}
+
+		MessageDb *messageDb =
+		    dbSet->accessMessageDb(msgId.deliveryTime, false);
+		int mId = messageDb->getWebDatokaId(msgId.dmId);
+		TaskDownloadMessageMojeId *task;
+
+		task = new (std::nothrow) TaskDownloadMessageMojeId(
+		    userName, dbSet, msgDirect, mId, msgId.dmId, false);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+		ret = TaskDownloadMessageMojeId::DM_SUCCESS == task->m_result;
+		delete task;
+
+	} else {
+
+		if (!globIsdsSessions.isConnectedToIsds(userName) &&
+		    !connectToIsds(userName)) {
+			return false;
+		}
+		TaskDownloadMessage *task;
+
+		task = new (std::nothrow) TaskDownloadMessage(
+		    userName, dbSet, msgDirect, msgId, false);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+		ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
+		if (ret) {
+			msgId.deliveryTime = task->m_mId.deliveryTime;
+		}
+
+		delete task;
 	}
-	delete task;
 
 	/* Process all pending events. */
 	QCoreApplication::processEvents();
@@ -7217,10 +7557,17 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
 		exportDeliveryInfoAsZFO(QString(), QString(),
-		    globPref.delivery_filename_format, userName, msgId, true);
+		globPref.delivery_filename_format, userName, msgId, true);
 	}
 }
 
@@ -7237,6 +7584,12 @@ void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
 
 	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
@@ -7619,6 +7972,15 @@ void MainWindow::openDeliveryInfoExternally(void)
 {
 	debugSlotCall();
 
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	/* First column. */
 	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
 	if (1 != firstMsgColumnIdxs.size()) {
@@ -7634,8 +7996,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
+	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -8883,6 +9244,14 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 {
 	debugSlotCall();
 
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	if (isWebDatovkaAccount(userName)) {
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Question);
 	msgBox.setWindowTitle(tr("Import of mesages from database"));
@@ -8913,8 +9282,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	m_on_import_database_dir_activate =
 	    QFileInfo(files.at(0)).absoluteDir().absolutePath();
 
-	doMsgsImportFromDatabase(files,
-	    m_accountModel.userName(currentAccountModelIndex()));
+	doMsgsImportFromDatabase(files, userName);
 }
 
 
@@ -9565,7 +9933,8 @@ void MainWindow::setUpUi(void)
 
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
-	ui->accountTextInfo->setHtml(createDatovkaBanner(VERSION));
+	ui->accountTextInfo->setHtml(createDatovkaBanner(
+	    QCoreApplication::applicationVersion()));
 	ui->accountTextInfo->setReadOnly(true);
 }
 
@@ -9628,6 +9997,7 @@ void MainWindow::setMenuActionIcons(void)
 	}
 	    /* Separator. */
 	ui->actionAdd_account->isEnabled();
+	ui->actionAdd_mojeID_account->isEnabled();
 	ui->actionDelete_account->isEnabled();
 	    /* Separator. */
 	ui->actionImport_database_directory->isEnabled();
@@ -9785,8 +10155,32 @@ void MainWindow::showTagDlg(void)
  {
 	debugSlotCall();
 
-	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
-	    QList<qint64>());
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	TagDb *tagDb = NULL;
+
+	if (isWebDatovkaAccount(userName)) {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to find modify tags."));
+			return;
+		}
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
+
+		QDialog *tagsDlg = new DlgTags(userName, tagDb, this);
+		tagsDlg->exec();
+		tagsDlg->deleteLater();
+	} else {
+		// TODO - disable this function because webdatovka
+		// modifyTags(userName, QList<qint64>());
+	}
 }
 
 
@@ -9800,13 +10194,63 @@ void MainWindow::addOrDeleteMsgTags(void)
 	debugSlotCall();
 
 	QList<qint64> msgIdList;
+	QList<int> msgIdWebDatovkaList;
+
+	const QString userName =
+	    m_accountModel.userName(currentAccountModelIndex());
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	foreach (const QModelIndex &idx, currentFrstColMessageIndexes()) {
 		msgIdList.append(idx.data().toLongLong());
+		if (isWebDatovkaAccount(userName)) {
+			QDateTime deliveryTime(msgDeliveryTime(idx));
+			MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+			int mId = messageDb->getWebDatokaId(idx.data().toLongLong());
+			msgIdWebDatovkaList.append(mId);
+		}
 	}
 
-	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
-	    msgIdList);
+	/*
+	 * FIXME -- The tags dialogue as it now exists is not suitable for
+	 * adding tags to messages.
+	 */
+
+	TagDb *tagDb = NULL;
+
+	if (isWebDatovkaAccount(userName)) {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka "
+			        "if you want to modify tags."));
+			return;
+		}
+
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
+	} else {
+		// TODO - disable this function because webdatovka
+		// modifyTags(userName, msgIdList);
+		return;
+	}
+
+	QDialog *tagsDlg = new DlgTags(userName, tagDb, msgIdList,
+	    msgIdWebDatovkaList, this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
+
+	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	Q_ASSERT(0 != messageModel);
+	messageModel->refillTagsColumn(userName, msgIdList, -1);
 }
 
 
@@ -9899,6 +10343,10 @@ void MainWindow::vacuumMsgDbSlot(void)
 	delete task;
 }
 
+#if 0
+
+TODO - disable this function because webdatovka
+
 void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 {
 	QDialog *tagsDlg = 0;
@@ -9943,4 +10391,326 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 	}
 
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
+}
+#endif
+
+/* ========================================================================= */
+/*
+ * Func: Download and update all accounts from webdatovka.
+ */
+bool MainWindow::wdGetAccountList(const QString &userName,
+    const QNetworkCookie &sessionid, bool syncWithAll)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	bool ret = false;
+	QStringList deletedAccounts;
+	deletedAccounts.clear();
+
+	/* list of accounts task */
+	TaskGetAccountListMojeId *task;
+	task = new (std::nothrow) TaskGetAccountListMojeId(userName, sessionid,
+	    syncWithAll, &m_accountModel, deletedAccounts);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	QString msgBoxTitle = tr("Add account(s) error");
+	if (!userName.isEmpty()) {
+		msgBoxTitle =
+		    AccountModel::globAccounts[userName].accountName() + " : "
+		    + userName;
+	}
+
+	QMessageBox msgBox(this);
+	QString msgBoxText = task->m_error;
+	TaskGetAccountListMojeId::Result retVal = task->m_return;
+	QString delAcntName = "\n";
+
+	delete task;
+
+	switch (retVal) {
+	case TaskGetAccountListMojeId::ACNTLIST_WEBDAT_ERR:
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_NONEXIST:
+		msgBoxText = tr("There aren't any Webdatovka accounts for this "
+		    "mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle, msgBoxText,
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_WRONGUSER:
+		msgBoxText = tr("You are login into wrong mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		QMessageBox::warning(this, msgBoxTitle,
+		    msgBoxText + " " + tr("Please enter correct mojeID "
+		    "login for account '%1'.").
+		    arg(AccountModel::globAccounts[userName].accountName()),
+		    QMessageBox::Ok);
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_WU_HAS_ACNT:
+		msgBoxText = tr("You are login into wrong mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(msgBoxTitle);
+		msgBox.setText(msgBoxText + " " +
+		    tr("New mojeID identity has some account(s)."));
+		msgBox.setInformativeText(tr("Do you want to add account(s) "
+		    "for this mojeID identity to Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			ret = wdGetAccountList(QString(), sessionid, syncWithAll);
+		}
+		break;
+	case TaskGetAccountListMojeId::ACNTLIST_DELETE_ACNT:
+		foreach (const QString &username, deletedAccounts) {
+			delAcntName.append("\n");
+			delAcntName.append(AccountModel::globAccounts[username]
+			    .accountName());
+			delAcntName.append(" (" + username + ")");
+		}
+		msgBoxText = tr("Some account(s) were removed from Webdatovka "
+		   "for this mojeID identity.");
+		showStatusTextWithTimeout(msgBoxText);
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(msgBoxTitle);
+		msgBox.setText(msgBoxText + delAcntName);
+		msgBox.setInformativeText(tr("Do you want to also "
+		    "remove these accounts from Datovka?"));
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (QMessageBox::Yes == msgBox.exec()) {
+			foreach (const QString &username, deletedAccounts) {
+				deleteAccount(username);
+			}
+		}
+		ret = true;
+		break;
+	default:
+		ret = true;
+		break;
+	}
+
+	return ret;
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Download all messsages for selected account from webdatovka.
+ */
+bool MainWindow::wdGetMessageList(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!isWebDatovkaAccount(userName)) {
+		return false;
+	}
+
+	/* list of tags task */
+	TaskTagSyncAccount *tagtask;
+	tagtask = new (std::nothrow) TaskTagSyncAccount(userName);
+	tagtask->setAutoDelete(true);
+	globWorkPool.assignHi(tagtask);
+
+	int accountID = getWebDatovkaAccountId(userName);
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	/* list of received messages task */
+	TaskDownloadMessageListMojeID *task;
+	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
+	    MSG_RECEIVED, globPref.auto_download_whole_messages,
+	    MESSAGE_LIST_LIMIT,
+	    accountID, 0);
+	task->setAutoDelete(true);
+	globWorkPool.assignLo(task);
+
+	/* list of sent messages task */
+	task = new (std::nothrow) TaskDownloadMessageListMojeID(userName, dbSet,
+	    MSG_SENT, globPref.auto_download_whole_messages,
+	    MESSAGE_LIST_LIMIT,
+	    accountID, 0);
+	task->setAutoDelete(true);
+	globWorkPool.assignLo(task);
+
+	return true;
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Sync selected account in webdatovka server.
+ */
+bool MainWindow::wdSyncAccount(const QString &userName)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (!isWebDatovkaAccount(userName)) {
+		return false;
+	}
+
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		loginToMojeId(userName);
+	}
+
+	if (!wdSessions.isConnectedToWebdatovka(userName)) {
+		return false;
+	}
+
+	int accountID = getWebDatovkaAccountId(userName);
+
+	/* sync account task */
+	TaskSyncAccount *task;
+	task = new (std::nothrow) TaskSyncAccount(userName, accountID);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
+
+	return wdGetMessageList(userName);
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Show dialog for webdatovka account, that action is not supported.
+ */
+void MainWindow::showWebDatovkaInfoDialog(const QString &userName, QString txt)
+/* ========================================================================= */
+{
+	debugFuncCall();
+
+	if (txt.isEmpty()) {
+		txt = tr("This action is not supported for MojeID account "
+		"'%1'").arg(AccountModel::globAccounts[userName].accountName());
+	}
+	showStatusTextWithTimeout(txt);
+	QMessageBox::warning(this,
+	    AccountModel::globAccounts[userName].accountName() + " : "
+	    + userName, txt, QMessageBox::Ok);
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Performs action depending on webdatovka message send outcome.
+ */
+void MainWindow::sendMessageMojeIdAction(const QString &userName,
+    const QStringList &result, const QString &error)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	if (!error.isEmpty()) {
+		qDebug() << error;
+		return;
+	}
+
+	if (result.isEmpty()) {
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (0 == dbSet) {
+			return;
+		}
+
+		TaskDownloadMessageListMojeID *task;
+		task = new (std::nothrow) TaskDownloadMessageListMojeID(
+		    userName, dbSet, MSG_SENT,
+		    globPref.auto_download_whole_messages, MESSAGE_LIST_LIMIT,
+		    getWebDatovkaAccountId(userName), 0);
+		task->setAutoDelete(true);
+		globWorkPool.assignLo(task);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Login to MojeID - first step.
+ */
+void MainWindow::loginToMojeId(const QString &userName)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QUrl lastUrl;
+	jsonlayer.startLoginToWebDatovka(lastUrl);
+
+	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(userName,
+	    lastUrl.toString(), this);
+
+	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString, QString,
+	    QString, QString, QString, bool, QString)),
+	    this, SLOT(callMojeId(QString,
+	    QString, QString, QString, QString, QString, bool, QString)));
+
+	mojeIDLoginDialog->exec();
+}
+
+
+/* ========================================================================= */
+/*
+ * Slot: Login to MojeID - second step.
+ */
+void MainWindow::callMojeId(const QString &user,
+    const QString &lastUrl, const QString &token,
+    QString userName, QString pwd, QString otp, bool syncALL,
+    const QString &certPath)
+/* ========================================================================= */
+{
+	debugSlotCall();
+
+	QString error;
+
+	QNetworkCookie sessionid;
+
+	if (!jsonlayer.loginToMojeID(lastUrl, token, userName, pwd, otp,
+	    certPath, error, sessionid)) {
+		showStatusTextWithTimeout(error);
+		QMessageBox::critical(this, tr("Login problem"),
+		    error, QMessageBox::Ok);
+		return;
+	} else {
+		mui_statusOnlineLabel->setText(tr("Mode: online"));
+	}
+
+	wdGetAccountList(user, sessionid, syncALL);
+
+	if (ui->accountList->model()->rowCount() > 0) {
+		activeAccountMenuAndButtons(true);
+	}
+}
+
+
+/* ========================================================================= */
+/*
+ * Func: Test if exists another mojeID account with same userId
+ *       when we delete any mojeID acccount.
+ */
+bool MainWindow::existsAnotherMojeIdAccountWithSameUserId(
+    const QString &userName)
+/* ========================================================================= */
+{
+	AccountsMap::iterator i;
+	int cnt = 0;
+	int userId = getWebDatovkaUserId(userName);
+
+	for (i = m_accountModel.globAccounts.begin();
+	    i != m_accountModel.globAccounts.end(); ++i) {
+		if (isWebDatovkaAccount(i->userName())) {
+			if (userId == getWebDatovkaUserId(i->userName())) {
+				cnt++;
+			}
+		}
+	}
+
+	return (cnt > 1);
 }

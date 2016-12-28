@@ -62,6 +62,18 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
+#define DB_MOJEID_NAME_PREFIX "mojeid-"
+
+/* return values of Datovka login methods */
+typedef enum {
+	USER_NAME = 0,
+	CERTIFICATE = 1,
+	USER_CERTIFICATE = 2,
+	HOTP = 3,
+	TOTP = 4,
+	MOJEID = 5
+} LoginMethodsIndex;
+
 
 /* return values of Datovka message state */
 enum MessageProcessState {
@@ -243,4 +255,28 @@ QString toBase64(const QString &plain);
  */
 int base64RealSize(const QByteArray &b64);
 
+/*!
+ * @brief Test if selected account is WebDatovka (MojeId) account.
+ */
+bool isWebDatovkaAccount(const QString &userName);
+
+/*!
+ * @brief Get/create WebDatovka (MojeId) username.
+ */
+QString getWebDatovkaUsername(const QString &userId, const QString &accountId);
+
+/*!
+ * Get account id from username of WebDatovka account.
+ */
+int getWebDatovkaAccountId(const QString &userName);
+
+/*!
+ * Get user id from username of WebDatovka account.
+ */
+int getWebDatovkaUserId(const QString &userName);
+
+/*!
+ * Get name prefix of tag database from username (WebDatovka).
+ */
+QString getWebDatovkaTagDbPrefix(const QString &userName);
 #endif /* _COMMON_H_ */
