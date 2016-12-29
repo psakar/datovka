@@ -757,12 +757,8 @@ private:
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
 
-
-#if 0
-	// TODO - disable this function because webdatovka
-
 	/*!
-	 * @brief Shows tag editing dialogue.
+	 * @brief Shows tag editing dialogue - NOT USED NOW.
 	 *
 	 * @no If no message identifiers are supplied then just the tags are
 	 *     edited.
@@ -772,14 +768,25 @@ private:
 	 * @maram[in] msgIdList Messages whose tags should be edited.
 	 */
 	void modifyTags(const QString &userName, QList<qint64> msgIdList);
-#endif
 
-
+	/*!
+	 * @brief Get message list from webdatovka server.
+	 */
 	bool wdGetMessageList(const QString &userName);
+
+	/*!
+	 * @brief Do sync of account in the webdatovka server.
+	 */
 	bool wdSyncAccount(const QString &userName);
 
+	/*!
+	 * @brief Show status bar text with timeout.
+	 */
 	void showStatusTextWithTimeout(const QString &qStr);
 
+	/*!
+	 * @brief Show status bar text permanently.
+	 */
 	void showStatusTextPermanently(const QString &qStr);
 
 	/*!

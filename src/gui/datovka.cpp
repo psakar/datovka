@@ -10173,14 +10173,13 @@ void MainWindow::showTagDlg(void)
 		}
 		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
 		    getWebDatovkaTagDbPrefix(userName));
-
-		QDialog *tagsDlg = new DlgTags(userName, tagDb, this);
-		tagsDlg->exec();
-		tagsDlg->deleteLater();
 	} else {
-		// TODO - disable this function because webdatovka
-		// modifyTags(userName, QList<qint64>());
+		tagDb = globTagDbPtr;
 	}
+
+	QDialog *tagsDlg = new DlgTags(userName, tagDb, this);
+	tagsDlg->exec();
+	tagsDlg->deleteLater();
 }
 
 
@@ -10237,19 +10236,36 @@ void MainWindow::addOrDeleteMsgTags(void)
 		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
 		    getWebDatovkaTagDbPrefix(userName));
 	} else {
-		// TODO - disable this function because webdatovka
-		// modifyTags(userName, msgIdList);
-		return;
+		tagDb = globTagDbPtr;
 	}
 
 	QDialog *tagsDlg = new DlgTags(userName, tagDb, msgIdList,
 	    msgIdWebDatovkaList, this);
-	tagsDlg->exec();
+	int dlgRet = tagsDlg->exec();
 	tagsDlg->deleteLater();
+
+	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
+		/* Nothing to do. */
+		return;
+	}
 
 	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
 	Q_ASSERT(0 != messageModel);
+
+	if (dlgRet == DlgTags::TAGS_CHANGED) {
+		/* May affect all rows. */
+		msgIdList.clear();
+		for (int row = 0; row < messageModel->rowCount(); ++row) {
+			msgIdList.append(messageModel->index(row,
+			    DbMsgsTblModel::DMID_COL).data().toLongLong());
+		}
+	}
+
+	if (msgIdList.isEmpty()) {
+		return;
+	}
+
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
 }
 
@@ -10344,9 +10360,6 @@ void MainWindow::vacuumMsgDbSlot(void)
 }
 
 #if 0
-
-TODO - disable this function because webdatovka
-
 void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 {
 	QDialog *tagsDlg = 0;
