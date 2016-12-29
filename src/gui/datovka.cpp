@@ -10193,7 +10193,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 	debugSlotCall();
 
 	QList<qint64> msgIdList;
-	QList<int> msgIdWebDatovkaList;
+	QList<qint64> msgIdWebDatovkaList;
 
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
@@ -10209,7 +10209,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 		if (isWebDatovkaAccount(userName)) {
 			QDateTime deliveryTime(msgDeliveryTime(idx));
 			MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-			int mId = messageDb->getWebDatokaId(idx.data().toLongLong());
+			qint64 mId = messageDb->getWebDatokaId(idx.data().toLongLong());
 			msgIdWebDatovkaList.append(mId);
 		}
 	}

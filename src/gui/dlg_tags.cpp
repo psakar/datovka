@@ -39,8 +39,8 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
     m_tagDbPtr(tagDb),
     m_msgIdList(),
     m_msgIdWebDatovkaList(),
-    m_tagsDelegate(0),
-    m_tagsModel(0),
+    m_tagsDelegate(Q_NULLPTR),
+    m_tagsModel(Q_NULLPTR),
     m_retCode(NO_ACTION),
     m_isWebDatovkaAccount(false)
 {
@@ -50,14 +50,14 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
 
 DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
     const QList<qint64> &msgIdList,
-    const QList<int> &msgIdWebDatovkaList, QWidget *parent)
+    const QList<qint64> &msgIdWebDatovkaList, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_msgIdList(msgIdList),
     m_msgIdWebDatovkaList(msgIdWebDatovkaList),
-    m_tagsDelegate(0),
-    m_tagsModel(0),
+    m_tagsDelegate(Q_NULLPTR),
+    m_tagsModel(Q_NULLPTR),
     m_retCode(NO_ACTION),
     m_isWebDatovkaAccount(false)
 {
@@ -68,10 +68,10 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
 
 DlgTags::~DlgTags(void)
 {
-	if (0 != m_tagsDelegate) {
+	if (Q_NULLPTR != m_tagsDelegate) {
 		delete m_tagsDelegate;
 	}
-	if (0 != m_tagsModel) {
+	if (Q_NULLPTR != m_tagsModel) {
 		delete m_tagsModel;
 	}
 }
