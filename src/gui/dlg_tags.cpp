@@ -280,11 +280,7 @@ void DlgTags::fillTagsToListView(void)
 
 void DlgTags::initDlg(void)
 {
-	if (isWebDatovkaAccount(m_userName)) {
-		m_isWebDatovkaAccount = true;
-	} else {
-		m_isWebDatovkaAccount = false;
-	}
+	m_isWebDatovkaAccount = isWebDatovkaAccount(m_userName);
 
 	m_tagsDelegate = new TagsDelegate(this);
 	m_tagsModel = new TagsModel(this);

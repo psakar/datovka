@@ -765,9 +765,12 @@ private:
 	 *
 	 * @param[in] userName Account login string. Must be supplied when
 	 *                     message identifiers are passed.
-	 * @maram[in] msgIdList Messages whose tags should be edited.
+	 * @param[in] msgIdList Messages whose tags should be edited.
+	 * @param[in] msgIdWebDatovkaList Webdatovka messages whose tags should
+	 *                                be edited.
 	 */
-	void modifyTags(const QString &userName, QList<qint64> msgIdList);
+	void modifyTags(const QString &userName, QList<qint64> msgIdList,
+	    QList<qint64> msgIdWebDatovkaList);
 
 	/*!
 	 * @brief Get message list from webdatovka server.

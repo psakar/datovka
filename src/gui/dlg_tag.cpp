@@ -103,6 +103,7 @@ void DlgTag::saveTag(void)
 	if (m_tagItem.id >= 0) {
 
 		if (m_isWebDatovkaAccount) {
+			Q_ASSERT(!m_userName.isEmpty());
 			if (!jsLayer.updateTag(m_userName, m_tagItem.id,
 			   m_tagItem.name, m_tagItem.colour, errStr)) {
 				msgBox.setWindowTitle(tr("Tag update error"));
@@ -119,7 +120,7 @@ void DlgTag::saveTag(void)
 
 	} else {
 		if (m_isWebDatovkaAccount) {
-
+			Q_ASSERT(!m_userName.isEmpty());
 			int tagId = jsLayer.createTag(m_userName,
 			    m_tagItem.name, m_tagItem.colour, errStr);
 			if (tagId <= 0) {

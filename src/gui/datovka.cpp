@@ -10155,31 +10155,8 @@ void MainWindow::showTagDlg(void)
  {
 	debugSlotCall();
 
-	const QString userName =
-	    m_accountModel.userName(currentAccountModelIndex());
-
-	TagDb *tagDb = NULL;
-
-	if (isWebDatovkaAccount(userName)) {
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			loginToMojeId(userName);
-		}
-
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			showWebDatovkaInfoDialog(userName,
-			    tr("You have to be logged into the WebDatovka "
-			        "if you want to find modify tags."));
-			return;
-		}
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName));
-	} else {
-		tagDb = globTagDbPtr;
-	}
-
-	QDialog *tagsDlg = new DlgTags(userName, tagDb, this);
-	tagsDlg->exec();
-	tagsDlg->deleteLater();
+	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
+	    QList<qint64>(), QList<qint64>());
 }
 
 
@@ -10195,18 +10172,22 @@ void MainWindow::addOrDeleteMsgTags(void)
 	QList<qint64> msgIdList;
 	QList<qint64> msgIdWebDatovkaList;
 
-	const QString userName =
-	    m_accountModel.userName(currentAccountModelIndex());
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	const bool webdatovkaAccount = isWebDatovkaAccount(userName);
+	MessageDbSet *dbSet = Q_NULLPTR;
+	if (webdatovkaAccount) {
+		dbSet = accountDbSet(userName, this);
+		if (Q_NULLPTR == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
 	}
 
 	foreach (const QModelIndex &idx, currentFrstColMessageIndexes()) {
 		msgIdList.append(idx.data().toLongLong());
-		if (isWebDatovkaAccount(userName)) {
+		if (webdatovkaAccount) {
+			Q_ASSERT(Q_NULLPTR != dbSet);
 			QDateTime deliveryTime(msgDeliveryTime(idx));
 			MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 			qint64 mId = messageDb->getWebDatokaId(idx.data().toLongLong());
@@ -10214,59 +10195,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 		}
 	}
 
-	/*
-	 * FIXME -- The tags dialogue as it now exists is not suitable for
-	 * adding tags to messages.
-	 */
-
-	TagDb *tagDb = NULL;
-
-	if (isWebDatovkaAccount(userName)) {
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			loginToMojeId(userName);
-		}
-
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			showWebDatovkaInfoDialog(userName,
-			    tr("You have to be logged into the WebDatovka "
-			        "if you want to modify tags."));
-			return;
-		}
-
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName));
-	} else {
-		tagDb = globTagDbPtr;
-	}
-
-	QDialog *tagsDlg = new DlgTags(userName, tagDb, msgIdList,
-	    msgIdWebDatovkaList, this);
-	int dlgRet = tagsDlg->exec();
-	tagsDlg->deleteLater();
-
-	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
-		/* Nothing to do. */
-		return;
-	}
-
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
-	if (dlgRet == DlgTags::TAGS_CHANGED) {
-		/* May affect all rows. */
-		msgIdList.clear();
-		for (int row = 0; row < messageModel->rowCount(); ++row) {
-			msgIdList.append(messageModel->index(row,
-			    DbMsgsTblModel::DMID_COL).data().toLongLong());
-		}
-	}
-
-	if (msgIdList.isEmpty()) {
-		return;
-	}
-
-	messageModel->refillTagsColumn(userName, msgIdList, -1);
+	modifyTags(userName, msgIdList, msgIdWebDatovkaList);
 }
 
 
@@ -10359,36 +10288,70 @@ void MainWindow::vacuumMsgDbSlot(void)
 	delete task;
 }
 
-#if 0
-void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
+void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList,
+    QList<qint64> msgIdWebDatovkaList)
 {
-	QDialog *tagsDlg = 0;
+	TagDb *tagDb = Q_NULLPTR;
 
-	if (msgIdList.isEmpty()) {
-		tagsDlg = new DlgTags(this);
-	} else if (!userName.isEmpty() && !msgIdList.isEmpty()) {
-		/*
-		 * FIXME -- The tags dialogue as it now exists is not suitable
-		 * for adding tags to messages.
-		 */
-		tagsDlg = new DlgTags(userName, msgIdList, this);
+	if (isWebDatovkaAccount(userName)) {
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			loginToMojeId(userName);
+		}
+
+		if (!wdSessions.isConnectedToWebdatovka(userName)) {
+			showWebDatovkaInfoDialog(userName,
+			    tr("You have to be logged into the WebDatovka if you want to modify tags."));
+			return;
+		}
+
+		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
+		    getWebDatovkaTagDbPrefix(userName));
 	} else {
+		tagDb = globTagDbPtr;
+	}
+	if (tagDb == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	Q_ASSERT(tagsDlg != 0);
+	QDialog *tagsDlg = Q_NULLPTR;
+
+	if (msgIdList.isEmpty() && msgIdWebDatovkaList.isEmpty()) {
+		tagsDlg = new DlgTags(userName, tagDb, this);
+	} else if (!msgIdList.isEmpty() && !msgIdWebDatovkaList.isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) ||
+	           (!userName.isEmpty() && !msgIdWebDatovkaList.isEmpty())) {
+		/*
+		 * FIXME -- The tags dialogue as it now exists is not suitable
+		 * for adding tags to messages.
+		 */
+		tagsDlg = new DlgTags(userName, tagDb, msgIdList,
+		    msgIdWebDatovkaList, this);
+	} else {
+		Q_ASSERT(0);
+		return;
+	}
+	if (tagsDlg == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	int dlgRet = tagsDlg->exec();
 	tagsDlg->deleteLater();
 
 	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
-		/* Nothing to do. */
+		/* Nothing else to do. */
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
+	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
+	if (messageModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	if (dlgRet == DlgTags::TAGS_CHANGED) {
 		/* May affect all rows. */
@@ -10405,7 +10368,6 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 
 	messageModel->refillTagsColumn(userName, msgIdList, -1);
 }
-#endif
 
 /* ========================================================================= */
 /*
