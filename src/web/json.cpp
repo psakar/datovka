@@ -193,8 +193,10 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 			    QSsl::PrivateKey, passPhrase.toUtf8());
 			netmanager.createPostRequestMojeIdCert(url, lUrl,
 			    data, cert, key, reply);
-		// is PKCS12 format
-		} else if (ext == "p12" || ext == "pfx") {
+		}
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+		else if (ext == "p12" || ext == "pfx") {
+			// is PKCS12 format
 			QSslCertificate cert;
 			QSslKey key;
 			QList<QSslCertificate> importedCerts;
@@ -207,6 +209,9 @@ bool JsonLayer::loginToMojeID(const QString &lastUrl,
 				return false;
 			}
 		}
+#else /* < Qt-5.4 */
+#warning "Compiling against version < Qt-5.4 which does not have QSslCertificate::importPkcs12()."
+#endif /* >= Qt-5.4 */
 		lUrl = url;
 	}
 
