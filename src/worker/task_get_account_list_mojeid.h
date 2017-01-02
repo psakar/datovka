@@ -63,7 +63,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	enum Result m_return; /*!< Retrun error code. */
 	QString m_error; /*!< Error description. */

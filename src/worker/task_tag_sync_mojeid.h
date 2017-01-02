@@ -44,7 +44,7 @@ public:
 	 * @brief Performs action.
 	 */
 	virtual
-	void run(void);
+	void run(void) Q_DECL_OVERRIDE;
 
 	bool m_success; /*!< True on success. */
 	QString m_error; /*!< Error description. */

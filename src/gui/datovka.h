@@ -742,7 +742,6 @@ private slots:
 	 */
 	void addOrDeleteMsgTags(void);
 
-
 	/*!
 	 * @brief Vacuum message database.
 	 */
@@ -758,7 +757,7 @@ private:
 	int m_timeoutSyncAccounts;
 
 	/*!
-	 * @brief Shows tag editing dialogue - NOT USED NOW.
+	 * @brief Shows tag editing dialogue.
 	 *
 	 * @no If no message identifiers are supplied then just the tags are
 	 *     edited.

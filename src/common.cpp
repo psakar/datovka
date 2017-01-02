@@ -527,10 +527,7 @@ int base64RealSize(const QByteArray &b64)
 bool isWebDatovkaAccount(const QString &userName)
 /* ========================================================================= */
 {
-	if (userName.contains(DB_MOJEID_NAME_PREFIX)) {
-		return true;
-	}
-	return false;
+	return userName.contains(DB_MOJEID_NAME_PREFIX);
 }
 
 /* ========================================================================= */

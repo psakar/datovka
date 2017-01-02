@@ -40,7 +40,7 @@ class NetManager : public QObject {
 	Q_OBJECT
 
 public:
-	NetManager(QObject *parent = 0);
+	explicit NetManager(QObject *parent = 0);
 	~NetManager(void);
 
 public:

@@ -94,13 +94,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	checkInputFields();
 }
 
-
-/* ========================================================================= */
-/*
- *  Check content of mandatory items in dialog and activate save button
- */
 void DlgCreateAccount::checkInputFields(void)
-/* ========================================================================= */
 {
 	bool buttonEnabled;
 

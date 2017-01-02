@@ -182,7 +182,7 @@ public:
 		JsonLayer::UserInfo userInfo;
 	};
 
-	JsonLayer(QObject *parent = 0);
+	explicit JsonLayer(QObject *parent = 0);
 	~JsonLayer(void);
 
 	/*!

@@ -7567,7 +7567,7 @@ void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
 		exportDeliveryInfoAsZFO(QString(), QString(),
-		globPref.delivery_filename_format, userName, msgId, true);
+		    globPref.delivery_filename_format, userName, msgId, true);
 	}
 }
 
