@@ -46,6 +46,7 @@
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
 #include "src/single/single_instance.h"
+#include "src/web/json.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
 /* Forward declaration as we don;t wan to pull-in all header file content. */
@@ -89,6 +90,30 @@ public:
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
 
+	/*!
+	 * @brief Get data about logged in user and his box.
+	 */
+	static
+	bool getOwnerInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get information about password expiration date.
+	 */
+	static
+	bool getPasswordInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get data about logged in user.
+	 */
+	static
+	bool getUserInfoFromLogin(const QString &userName);
+
+	/*!
+	 * @brief Get account list from Webdatovka.
+	 */
+	bool wdGetAccountList(const QString &userName,
+	    const QNetworkCookie &sessionid, bool syncWithAll);
+
 protected:
 	/*!
 	 * Check if some worker is working on the background and show
@@ -97,7 +122,18 @@ protected:
 	void closeEvent(QCloseEvent *event);
 
 
+public slots:
+
+	/*!
+	 * @brief Login to mojeID.
+	 */
+	void loginToMojeId(const QString &userName);
+
 private slots:
+	/*!
+	 * @brief Refresh AccountList.
+	 */
+	void refreshAccountList(const QString &userName);
 
 	/*!
 	 * @brief Processes messages from single instance emitter.
@@ -118,6 +154,14 @@ private slots:
 	    bool listScheduled);
 
 	/*!
+	 * @brief Performs action depending on message download outcome
+	 *        for webdatovka.
+	 */
+	void collectDownloadMessageMojeId(const QString &usrName,
+	    qint64 msgId, int result, const QString &errDesc,
+	    bool listScheduled);
+
+	/*!
 	 * @brief Performs action depending on message list download outcome.
 	 */
 	void collectDownloadMessageListStatus(const QString &usrName,
@@ -131,6 +175,12 @@ private slots:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
+
+	/*!
+	 * @brief Performs action depending on webdatovka message send outcome.
+	 */
+	void sendMessageMojeIdAction(const QString &userName,
+	    const QStringList &result, const QString &error);
 
 	/*!
 	 * @brief Version response slot.
@@ -341,6 +391,11 @@ private slots:
 	void deleteMessage(void);
 
 	/*!
+	 * @brief Delete selected message(s) from local database and Webdatovka.
+	 */
+	void deleteMessageWebdatovka(const QString &userName);
+
+	/*!
 	 * @brief Downloads new messages from server for all accounts.
 	 */
 	void synchroniseAllAccounts(void);
@@ -407,9 +462,19 @@ private slots:
 	void addNewAccount(void);
 
 	/*!
+	 * @brief Add mojeID account action and dialog.
+	 */
+	void addNewMojeIDAccount(void);
+
+	/*!
 	 * @brief Deletion confirmation dialog.
 	 */
 	void deleteSelectedAccount(void);
+
+	/*!
+	 * @brief Delete account.
+	 */
+	void deleteAccount(const QString &userName);
 
 	/*!
 	 * @brief Show import database directory dialog.
@@ -682,6 +747,10 @@ private slots:
 	 */
 	void vacuumMsgDbSlot(void);
 
+	void callMojeId(const QString &user, const QString &lastUrl,
+	    const QString &token, QString userName, QString pwd, QString otp,
+	    bool syncALL, const QString &certPath);
+
 private:
 
 	QTimer m_timerSyncAccounts;
@@ -695,12 +764,31 @@ private:
 	 *
 	 * @param[in] userName Account login string. Must be supplied when
 	 *                     message identifiers are passed.
-	 * @maram[in] msgIdList Messages whose tags should be edited.
+	 * @param[in] msgIdList Messages whose tags should be edited.
+	 * @param[in] msgIdWebDatovkaList Webdatovka messages whose tags should
+	 *                                be edited.
 	 */
-	void modifyTags(const QString &userName, QList<qint64> msgIdList);
+	void modifyTags(const QString &userName, QList<qint64> msgIdList,
+	    QList<qint64> msgIdWebDatovkaList);
 
+	/*!
+	 * @brief Get message list from webdatovka server.
+	 */
+	bool wdGetMessageList(const QString &userName);
+
+	/*!
+	 * @brief Do sync of account in the webdatovka server.
+	 */
+	bool wdSyncAccount(const QString &userName);
+
+	/*!
+	 * @brief Show status bar text with timeout.
+	 */
 	void showStatusTextWithTimeout(const QString &qStr);
 
+	/*!
+	 * @brief Show status bar text permanently.
+	 */
 	void showStatusTextPermanently(const QString &qStr);
 
 	/*!
@@ -755,11 +843,6 @@ private:
 	 */
 	void dataFromWorkerToStatusBarInfo(bool add,
 	    int rt, int rn, int st, int sn);
-
-	/*!
-	 * @brief Refresh AccountList.
-	 */
-	void refreshAccountList(const QString &userName);
 
 	/*!
 	 * @brief Set tablewidget when message download worker is done.
@@ -1138,6 +1221,22 @@ private:
 	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
 	    const QString &userName);
 
+	/*!
+	 * @brief Show dialog for webdatovka account
+	 *        that action is not implemented.
+	 * @param[in] userName - account username.
+	 * @param[in] txt        additional info text.
+	 */
+	void showWebDatovkaInfoDialog(const QString &userName, QString txt);
+
+	/*!
+	 * @brief Test if exists another mojeID account with same userId
+	 *        when we delete any mojeID acccount.
+	 *
+	 * @param[in] userName - account username.
+	 * @return true if any account exists
+	 */
+	bool existsAnotherMojeIdAccountWithSameUserId(const QString &userName);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
@@ -1207,7 +1306,6 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
-
 };
 
 

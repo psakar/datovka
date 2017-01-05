@@ -306,8 +306,12 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 		switch (type) {
 		case nodeAccountTop:
-			return QIcon(ICON_3PARTY_PATH +
-			    QStringLiteral("letter_16.png"));
+			if (isWebDatovkaAccount(uName)) {
+				return QIcon(":/mojeid.png");
+			} else {
+				return QIcon(ICON_3PARTY_PATH +
+				    QStringLiteral("letter_16.png"));
+			}
 			break;
 		case nodeRecentReceived:
 		case nodeReceived:

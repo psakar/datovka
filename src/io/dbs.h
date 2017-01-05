@@ -85,5 +85,14 @@ QString tmBirthToDbFormat(const struct tm *t);
  */
 QString qDateTimeToDbFormat(const QDateTime &dateTime);
 
+/*!
+ * @brief Converts iso datetime to format to be stored in database.
+ */
+QString fromIsoDatetimetoDbformat(const QString &dateTimeStr);
+
+/*!
+ * @brief Converts iso datetime to datetime.
+ */
+QDateTime fromIsoDatetimetoDateTime(const QString &dateTimeStr);
 
 #endif /* _DBS_H_ */

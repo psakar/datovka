@@ -337,7 +337,19 @@ SOURCES += \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
     src/worker/task_vacuum_db_set.cpp \
-    src/worker/task_verify_message.cpp
+    src/worker/task_verify_message.cpp \
+    src/web/net.cpp \
+    src/web/json.cpp \
+    src/worker/task_download_message_list_mojeid.cpp \
+    src/worker/task_sync_mojeid.cpp \
+    src/worker/task_get_account_list_mojeid.cpp \
+    src/worker/task_download_message_mojeid.cpp \
+    src/gui/dlg_search_mojeid.cpp \
+    src/worker/task_send_message_mojeid.cpp \
+    src/io/wd_sessions.cpp \
+    src/io/tag_db_container.cpp \
+    src/worker/task_tag_sync_mojeid.cpp \
+    src/gui/dlg_login_mojeid.cpp
 
 HEADERS += \
     src/cli/cli.h \
@@ -422,7 +434,21 @@ HEADERS += \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
     src/worker/task_vacuum_db_set.h \
-    src/worker/task_verify_message.h
+    src/worker/task_verify_message.h \
+    src/web/net.h \
+    src/web/net_consts.h \
+    src/web/json.h \
+    src/worker/task_download_message_list_mojeid.h \
+    src/worker/task_sync_mojeid.h \
+    src/worker/task_get_account_list_mojeid.h \
+    src/worker/task_download_message_mojeid.h \
+    src/gui/dlg_search_mojeid.h \
+    src/worker/task_send_message_mojeid.h \
+    src/io/wd_sessions.h \
+    src/io/tag_db_container.h \
+    src/worker/task_tag_sync_mojeid.h \
+    src/gui/dlg_login_mojeid.h
+
 
 FORMS += \
     src/gui/ui/datovka.ui \
@@ -445,7 +471,9 @@ FORMS += \
     src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui
+    src/gui/ui/dlg_yes_no_checkbox.ui \
+    src/gui/ui/dlg_search_mojeid.ui \
+    src/gui/ui/dlg_login_mojeid.ui
 
 RESOURCES += \
     res/resources.qrc

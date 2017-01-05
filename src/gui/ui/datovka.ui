@@ -380,6 +380,7 @@ sent reply on this message</string>
     <addaction name="actionSync_all_accounts"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_account"/>
+    <addaction name="actionAdd_mojeID_account"/>
     <addaction name="actionDelete_account"/>
     <addaction name="separator"/>
     <addaction name="actionImport_database_directory"/>
@@ -536,6 +537,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Add new account</string>
    </property>
+   <property name="toolTip">
+    <string>Add new data box account</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -566,6 +570,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Proxy settings</string>
    </property>
+   <property name="toolTip">
+    <string>Proxy settings</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -593,6 +600,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Quit</string>
    </property>
+   <property name="toolTip">
+    <string>Quit the application</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
    </property>
@@ -606,6 +616,9 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/address_16.png</normaloff>:/icons/3party/address_16.png</iconset>
    </property>
    <property name="text">
+    <string>Create account from database</string>
+   </property>
+   <property name="toolTip">
     <string>Create account from database</string>
    </property>
    <property name="menuRole">
@@ -655,6 +668,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Mark all as read</string>
+   </property>
+   <property name="toolTip">
+    <string>Mark all messages as read</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -761,20 +777,11 @@ sent reply on this message</string>
    <property name="text">
     <string>User manual</string>
    </property>
+   <property name="toolTip">
+    <string>User manual</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionUpdate">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/present_16.png</normaloff>:/icons/3party/present_16.png</iconset>
-   </property>
-   <property name="text">
-    <string>Datovka update </string>
-   </property>
-   <property name="toolTip">
-    <string>Update Datovka application</string>
    </property>
   </action>
   <action name="actionFind_databox">
@@ -784,6 +791,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Find Data Box</string>
+   </property>
+   <property name="toolTip">
+    <string>Find data box</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -797,6 +807,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Authenticate message file</string>
    </property>
+   <property name="toolTip">
+    <string>Verify message authenticity</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -809,6 +822,9 @@ sent reply on this message</string>
    <property name="text">
     <string>View message from ZFO file</string>
    </property>
+   <property name="toolTip">
+    <string>View content of a ZFO file</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -820,6 +836,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Export correspondence overview</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a correspondence overview</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1033,6 +1052,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Import messages from ZFO files</string>
    </property>
+   <property name="toolTip">
+    <string>Import a message from ZFO file into the database</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -1078,6 +1100,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Time stamp expiration check</string>
    </property>
+   <property name="toolTip">
+    <string>Check whether the message time stamp is not expired or expiring</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -1089,6 +1114,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Homepage</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the home page of the application</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1102,6 +1130,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Import messages from database</string>
    </property>
+   <property name="toolTip">
+    <string>Import messages into database from an external database file</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -1113,6 +1144,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Split database by years</string>
+   </property>
+   <property name="toolTip">
+    <string>Messages are going to be stored into separate database files according to years</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -1147,6 +1181,9 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>Creates an e-mail containing selected attachments</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionTag_settings">
    <property name="icon">
@@ -1154,6 +1191,9 @@ sent reply on this message</string>
      <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
    </property>
    <property name="text">
+    <string>Edit tags</string>
+   </property>
+   <property name="toolTip">
     <string>Edit tags</string>
    </property>
    <property name="menuRole">
@@ -1168,6 +1208,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Vacuum message database</string>
    </property>
+   <property name="toolTip">
+    <string>This may reduce the database file size and optimise the access speed</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
@@ -1179,6 +1222,24 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Forward message</string>
+   </property>
+   <property name="toolTip">
+    <string>Forward message</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionAdd_mojeID_account">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/mojeid.png</normaloff>:/mojeid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add mojeID account</string>
+   </property>
+   <property name="toolTip">
+    <string>Add new mojeID account</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

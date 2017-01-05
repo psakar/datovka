@@ -26,7 +26,7 @@
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 #include <QStorageInfo>
 #else /* < Qt-5.4 */
-#warning "Compiling against version < Qt-5.4." /* Doesn't have QStorageInfo. */
+#warning "Compiling against version < Qt-5.4 which does not have QStorageInfo."
 #include <QTemporaryFile>
 #endif /* >= Qt-5.4 */
 #include <QThread>

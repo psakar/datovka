@@ -714,6 +714,14 @@ public:
 	bool copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	   const QString &year);
 
+	/*!
+	 * @brief Get id of message in webdatovka db form ISDS msgId.
+	 *
+	 * @param[in] msgId  Message identifier.
+	 * @return Internal id of message in webdatovka db.
+	 */
+	int getWebDatokaId(qint64 msgId);
+
 protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return all received messages model.

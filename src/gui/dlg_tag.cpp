@@ -25,10 +25,14 @@
 #include <QMessageBox>
 
 #include "src/gui/dlg_tag.h"
-#include "src/io/tag_db.h"
+#include "src/web/json.h"
 
-DlgTag::DlgTag(QWidget *parent)
+DlgTag::DlgTag(const QString &userName, TagDb *tagDb,
+    bool isWebDatovkaAccount, QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
+    m_tagDbPtr(tagDb),
+    m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem()
 {
 	setupUi(this);
@@ -36,8 +40,12 @@ DlgTag::DlgTag(QWidget *parent)
 	initDlg();
 }
 
-DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
+DlgTag::DlgTag(const QString &userName, TagDb *tagDb,
+    bool isWebDatovkaAccount, const TagItem &tag, QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
+    m_tagDbPtr(tagDb),
+    m_isWebDatovkaAccount(isWebDatovkaAccount),
     m_tagItem(tag)
 {
 	setupUi(this);
@@ -87,17 +95,62 @@ void DlgTag::saveTag(void)
 
 	Q_ASSERT(TagItem::isValidColourStr(m_tagItem.colour));
 
+	JsonLayer jsLayer;
+	QString errStr;
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Critical);
+
 	if (m_tagItem.id >= 0) {
-		globTagDbPtr->updateTag(m_tagItem.id, m_tagItem.name, m_tagItem.colour);
+
+		if (m_isWebDatovkaAccount) {
+			Q_ASSERT(!m_userName.isEmpty());
+			if (!jsLayer.updateTag(m_userName, m_tagItem.id,
+			   m_tagItem.name, m_tagItem.colour, errStr)) {
+				msgBox.setWindowTitle(tr("Tag update error"));
+				msgBox.setText(tr("Tag with name '%1'' wasn't "
+				    "updated in the WebDatovka database.").arg(
+				    m_tagItem.name));
+				msgBox.setInformativeText(errStr);
+				msgBox.exec();
+				return;
+			}
+		}
+		m_tagDbPtr->updateTag(m_tagItem.id, m_tagItem.name,
+		    m_tagItem.colour);
+
 	} else {
-		if (!globTagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
-			QMessageBox msgBox;
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Tag error"));
-			msgBox.setText(tr("Tag with name '%1'' already "
-			   "exists in database.").arg(m_tagItem.name));
-			msgBox.setInformativeText(tr("Tag wasn't created again."));
-			msgBox.exec();
+		if (m_isWebDatovkaAccount) {
+			Q_ASSERT(!m_userName.isEmpty());
+			int tagId = jsLayer.createTag(m_userName,
+			    m_tagItem.name, m_tagItem.colour, errStr);
+			if (tagId <= 0) {
+				msgBox.setWindowTitle(tr("Tag insert error"));
+				msgBox.setText(tr("Tag with name '%1'' wasn't'"
+				    " created in WebDatovka database.").arg(
+				    m_tagItem.name));
+				msgBox.setInformativeText(errStr);
+				msgBox.exec();
+				return;
+			}
+			if (!m_tagDbPtr->insertUpdateWebDatovkaTag(tagId,
+			    m_tagItem.name, m_tagItem.colour)) {
+				msgBox.setWindowTitle(tr("Tag error"));
+				msgBox.setText(tr("Tag with name '%1'' already "
+				   "exists in database.").arg(m_tagItem.name));
+				msgBox.setInformativeText(
+				    tr("Tag wasn't created again."));
+				msgBox.exec();
+			}
+		} else {
+			if (!m_tagDbPtr->insertTag(m_tagItem.name,
+			    m_tagItem.colour)) {
+				msgBox.setWindowTitle(tr("Tag error"));
+				msgBox.setText(tr("Tag with name '%1'' already "
+				    "exists in database.").arg(m_tagItem.name));
+				msgBox.setInformativeText(
+				    tr("Tag wasn't created again."));
+				msgBox.exec();
+			}
 		}
 	}
 }

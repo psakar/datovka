@@ -43,6 +43,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/io/tag_db_container.h"
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
@@ -636,6 +637,13 @@ int main(int argc, char *argv[])
 			    globPref.tagDbPath().toUtf8().constData());
 			return EXIT_FAILURE;
 		}
+
+		/* Create tag DB container. */
+		globWebDatovkaTagDbPtr = new (std::nothrow) TagDbContainer("tagDbWebDatovka");
+		if (0 == globWebDatovkaTagDbPtr) {
+			logErrorNL("%s", "Cannot allocate webdatovka tag db container.");
+			return EXIT_FAILURE;
+		}
 	}
 
 
@@ -701,6 +709,12 @@ int main(int argc, char *argv[])
 		delete globTagDbPtr;
 		globTagDbPtr = 0;
 	}
+
+	if (0 != globWebDatovkaTagDbPtr) {
+		delete globWebDatovkaTagDbPtr;
+		globWebDatovkaTagDbPtr = 0;
+	}
+
 	if (0 != globMessageDbsPtr) {
 		delete globMessageDbsPtr;
 		globMessageDbsPtr = 0;

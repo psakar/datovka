@@ -257,7 +257,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		/* Message is NOT in db (-1), -> insert */
 		if (-1 == dmDbMsgStatus) {
 
-			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
+			Task::storeEnvelope(msgDirect, dbSet, item->envelope, NULL);
 			if (downloadWhole) {
 				TaskDownloadMessage *task;
 				task = new (std::nothrow) TaskDownloadMessage(
@@ -278,7 +278,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			if (dmNewMsgStatus != dmDbMsgStatus) {
 				/* Update envelope */
 				Task::updateEnvelope(msgDirect, *messageDb,
-				    item->envelope);
+				    item->envelope, NULL);
 
 				/*
 				 * Download whole message again if exists in db
@@ -286,6 +286,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 * downloadWhole in the settings.
 				 */
 				if (downloadWhole || messageDb->msgsStoredWhole(msgId.dmId)) {
+
 					TaskDownloadMessage *task;
 					task = new (std::nothrow) TaskDownloadMessage(
 					    userName, &dbSet, msgDirect, msgId,
@@ -430,7 +431,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		 * we get proper data from ISDS rather than storing potentially
 		 * guessed values.
 		 */
-		Task::updateEnvelope(msgDirect, *messageDb, envel);
+		Task::updateEnvelope(msgDirect, *messageDb, envel, NULL);
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    envel->dmMessageStatus ?
