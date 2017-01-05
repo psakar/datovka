@@ -1136,6 +1136,9 @@ sent reply on this message</string>
    <property name="toolTip">
     <string>Creates an e-mail containing selected attachments</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionTag_settings">
    <property name="icon">
@@ -1180,6 +1183,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Add mojeID account</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
