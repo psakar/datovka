@@ -118,6 +118,11 @@ QNetworkAccessManager* nam;
  */
 #define DISABLE_ALL_TABLE 1
 
+/*
+ * If defined then adding of mojeID account will be inaccessible.
+ */
+#define DISABLE_MOJEID_ACCOUNT_ADDING 1
+
 /*!
  * @brief Returns QModelIndex of the currently selected account model node.
  */
@@ -1094,6 +1099,9 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 	} else {
 		menu->addAction(ui->actionAdd_account);
 		menu->addAction(ui->actionAdd_mojeID_account);
+#ifdef DISABLE_MOJEID_ACCOUNT_ADDING
+		ui->actionAdd_mojeID_account->setVisible(false);
+#endif /* DISABLE_MOJEID_ACCOUNT_ADDING */
 	}
 
 	menu->exec(QCursor::pos());
@@ -9998,6 +10006,9 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	ui->actionAdd_account->isEnabled();
 	ui->actionAdd_mojeID_account->isEnabled();
+#ifdef DISABLE_MOJEID_ACCOUNT_ADDING
+	ui->actionAdd_mojeID_account->setVisible(false);
+#endif /* DISABLE_MOJEID_ACCOUNT_ADDING */
 	ui->actionDelete_account->isEnabled();
 	    /* Separator. */
 	ui->actionImport_database_directory->isEnabled();
