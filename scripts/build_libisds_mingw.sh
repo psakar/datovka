@@ -314,6 +314,9 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	# --disable-static
+	# Receiving undefined reference to `rpl_malloc' with i686-w64-mingw32.
+	# The following variable forces the malloc check to pass.
+	ac_cv_func_malloc_0_nonnull=yes \
 	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
 	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
 	    LDFLAGS="-L${BUILTDIR}/lib"
