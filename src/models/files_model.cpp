@@ -352,10 +352,10 @@ void DbFlsTblModel::setHeader(void)
 	}
 
 	/* Columns with missing names. */
-	setHeaderData(FSIZE_COL, Qt::Horizontal,
-	    QObject::tr("File size"), Qt::DisplayRole);
-	setHeaderData(FPATH_COL, Qt::Horizontal,
-	    QObject::tr("File path"), Qt::DisplayRole);
+	setHeaderData(FSIZE_COL, Qt::Horizontal, tr("File size"),
+	    Qt::DisplayRole);
+	setHeaderData(FPATH_COL, Qt::Horizontal, tr("File path"),
+	    Qt::DisplayRole);
 }
 
 bool DbFlsTblModel::setMessage(const struct isds_message *message)
