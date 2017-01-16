@@ -16,8 +16,8 @@ WORKDIR="${SCRIPT_LOCATION}/work"
 BUILTDIR="${SCRIPT_LOCATION}/built"
 
 
-X86_MINGV_HOST=i586-mingw32msvc
-#X86_MINGV_HOST=i686-w64-mingw32 # Generated usable debugging information.
+#X86_MINGV_HOST=i586-mingw32msvc # This old compiler chain isn't available on newer distros.
+X86_MINGV_HOST=i686-w64-mingw32
 #X86_MINGV_HOST=i686-pc-mingw32
 X86_MINGW_PREFIX=${X86_MINGV_HOST}-
 X86_MINGW_CC=${X86_MINGV_HOST}-gcc
