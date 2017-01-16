@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Latest libraries.
-_ZLIB_ARCHIVE="zlib-1.2.10.tar.xz"
+_ZLIB_ARCHIVE="zlib-1.2.11.tar.xz"
 _EXPAT_ARCHIVE="expat-2.2.0.tar.bz2"
 _LIBTOOL_ARCHIVE="libtool-2.4.6.tar.xz"
 
