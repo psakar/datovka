@@ -1,3 +1,19 @@
+4.7.1 / YYYY-MM-DD
+ * User is notified about existent files when storing all attachments.
+ * Added forward message action.
+ * Fixed problem in which the main window was placed slightly off-screen when
+   run for the first time.
+ * Added script datovka-log.bat. Its purpose it to run the application in
+   debugging mode where all debugging messages are written into a file.
+ * Fixed most obvious problems when using UHD displays on Windows. Text lines
+   in table views (especially in message list) should now be displayed
+   correctly even with font size above 200%.
+ * When composing messages, attachment files s can be rearranged using drag and
+   drop actions.
+ * Fixed bug. Message model is updated after tags have been edited.
+ * Fixes errors in application localisation.
+ * Merged mojeid-datovka functionality. The code is inactivated.
+
 4.7.0 / 2016-10-19
  * The application can be compiled against OpenSSL 1.1.0.
  * Re-written the login sequence. Fixed some bugs related to creating new
