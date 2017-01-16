@@ -194,6 +194,8 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	#CONFOPTS="${CONFOPTS} --disable-shared"
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --enable-threads=win32"
+	CONFOPTS="${CONFOPTS} --enable-relocatable"
 
 	# --disable-static
 	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
