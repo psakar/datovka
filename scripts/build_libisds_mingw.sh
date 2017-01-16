@@ -40,6 +40,13 @@ if [ ! -d "${BUILTDIR}" ]; then
 	mkdir "${BUILTDIR}"
 fi
 
+# Store information about build.
+${X86_MINGW_PREFIX}gcc -v 2> "${BUILTDIR}/gcc-version.txt"
+${X86_MINGW_PREFIX}g++ -v 2> "${BUILTDIR}/g++-version.txt"
+cat /etc/*{release,version} > "${BUILTDIR}/linux-version.txt"
+uname -a > "${BUILTDIR}/uname.txt"
+git log -n 1 --pretty=format:"%h - %ad : %s" > "${BUILTDIR}/git.txt"
+
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
 EXPAT_ARCHIVE="${_EXPAT_ARCHIVE}"
