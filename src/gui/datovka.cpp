@@ -3185,7 +3185,7 @@ void MainWindow::deleteMessageWebdatovka(const QString &userName)
 	QModelIndex selectedAcntIndex(currentAccountModelIndex());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -3194,6 +3194,10 @@ void MainWindow::deleteMessageWebdatovka(const QString &userName)
 	foreach (const MessageDb::MsgId &id, msgIds) {
 		MessageDb *messageDb =
 		    dbSet->accessMessageDb(id.deliveryTime, false);
+		if (messageDb == Q_NULLPTR) {
+			Q_ASSERT(0);
+			return;
+		}
 		if (!jsonlayer.deleteMessage(userName,
 		    messageDb->getWebDatokaId(id.dmId), errStr)) {
 			qDebug() << "WD_DELETE_MESSAGE_ERROR:" << id.dmId
@@ -3524,7 +3528,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -3545,6 +3549,10 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
 			/* Using prepend() just to outrun other jobs. */
 			MessageDb *messageDb = dbSet->accessMessageDb(id.deliveryTime, false);
+			if (messageDb == Q_NULLPTR) {
+				Q_ASSERT(0);
+				return;
+			}
 			int mId = messageDb->getWebDatokaId(id.dmId);
 			TaskDownloadMessageMojeId *task;
 
@@ -6897,7 +6905,7 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -6919,6 +6927,10 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 
 		MessageDb *messageDb =
 		    dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (messageDb == Q_NULLPTR) {
+			Q_ASSERT(0);
+			return false;
+		}
 		int mId = messageDb->getWebDatokaId(msgId.dmId);
 		TaskDownloadMessageMojeId *task;
 
@@ -10200,7 +10212,12 @@ void MainWindow::addOrDeleteMsgTags(void)
 		if (webdatovkaAccount) {
 			Q_ASSERT(Q_NULLPTR != dbSet);
 			QDateTime deliveryTime(msgDeliveryTime(idx));
-			MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
+			MessageDb *messageDb =
+			    dbSet->accessMessageDb(deliveryTime, false);
+			if (messageDb == Q_NULLPTR) {
+				Q_ASSERT(0);
+				return;
+			}
 			qint64 mId = messageDb->getWebDatokaId(idx.data().toLongLong());
 			msgIdWebDatovkaList.append(mId);
 		}
