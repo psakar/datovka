@@ -175,7 +175,7 @@ protected:
 	 */
 	static
 	qdatovka_error storeEnvelopeWebDatovka(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, JsonLayer::Envelope envel, bool isNew);
+	    MessageDbSet &dbSet, const JsonLayer::Envelope &envel, bool isNew);
 
 private:
 //	/*!

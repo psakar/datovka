@@ -400,7 +400,7 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 
 
 qdatovka_error Task::storeEnvelopeWebDatovka(enum MessageDirection msgDirect,
-    MessageDbSet &dbSet, JsonLayer::Envelope envel, bool isNew)
+    MessageDbSet &dbSet, const JsonLayer::Envelope &envel, bool isNew)
 {
 	debugFuncCall();
 
