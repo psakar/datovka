@@ -1,4 +1,4 @@
-4.7.1 / YYYY-MM-DD
+4.7.1 / 2017-01-19
  * User is notified about existent files when storing all attachments.
  * Added forward message action.
  * Fixed problem in which the main window was placed slightly off-screen when
