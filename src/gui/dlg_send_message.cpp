@@ -1486,8 +1486,8 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 		if (dbID.isEmpty() || dbID.length() != 7) {
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Wrong databox ID"));
-			msgBox.setText(tr("Wrong databox ID '%1'!").arg(dbID));
+			msgBox.setWindowTitle(tr("Wrong data box ID"));
+			msgBox.setText(tr("Wrong data box ID '%1'!").arg(dbID));
 			msgBox.setStandardButtons(QMessageBox::Ok);
 			msgBox.setDefaultButton(QMessageBox::Ok);
 			msgBox.exec();
@@ -1531,15 +1531,31 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 			if (NULL != item->address) {
 				address = item->address;
 			}
-			pdz = item->commercial_sending ? tr("yes") : tr("no");
 			if (!item->active) {
 				QMessageBox msgBox;
 				msgBox.setIcon(QMessageBox::Warning);
-				msgBox.setWindowTitle(tr("Databox is not active"));
-				msgBox.setText(tr("Recipient with databox ID '%1' "
-				    "does not have active databox.").arg(dbID));
-				msgBox.setDetailedText(tr("The message can "
+				msgBox.setWindowTitle(tr("Data box is not active"));
+				msgBox.setText(tr("Recipient with data box ID '%1' "
+				    "does not have active data box.").arg(dbID));
+				msgBox.setInformativeText(tr("The message can "
 				    "not be delivered."));
+				msgBox.setStandardButtons(QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Ok);
+				msgBox.exec();
+				return;
+			}
+			if (item->public_sending) {
+				pdz = tr("no");
+			} else if (item->commercial_sending) {
+				pdz = tr("yes");
+			} else if (item->dbEffectiveOVM) {
+				pdz = tr("no");
+			} else {
+				QMessageBox msgBox;
+				msgBox.setIcon(QMessageBox::Critical);
+				msgBox.setWindowTitle(tr("Cannot send to data box"));
+				msgBox.setText(tr("Cannot send message to recipient with data box ID '%1'.").arg(dbID));
+				msgBox.setInformativeText(tr("You won't be able as user '%1' to send messages into data box '%2'.").arg(m_userName).arg(dbID));
 				msgBox.setStandardButtons(QMessageBox::Ok);
 				msgBox.setDefaultButton(QMessageBox::Ok);
 				msgBox.exec();
@@ -1549,7 +1565,7 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Wrong recipient"));
-			msgBox.setText(tr("Recipient with databox ID '%1' "
+			msgBox.setText(tr("Recipient with data box ID '%1' "
 			    "does not exist.").arg(dbID));
 			msgBox.setStandardButtons(QMessageBox::Ok);
 			msgBox.setDefaultButton(QMessageBox::Ok);
