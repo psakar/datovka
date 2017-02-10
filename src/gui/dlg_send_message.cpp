@@ -48,6 +48,7 @@
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "src/worker/task_send_message_mojeid.h"
 #include "ui_dlg_send_message.h"
 
@@ -1483,6 +1484,13 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 
 	if (ok) {
 		if (dbID.isEmpty() || dbID.length() != 7) {
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Wrong databox ID"));
+			msgBox.setText(tr("Wrong databox ID '%1'!").arg(dbID));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
 			return;
 		}
 
@@ -1496,18 +1504,73 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 			}
 		}
 
+		struct isds_list *box = NULL;
+		TaskSearchOwnerFulltext *task;
+		// search dbID only
+		const isds_fulltext_target target = FULLTEXT_BOX_ID;
+
+		task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
+		    dbID, &target, NULL);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		box = task->m_results; task->m_results = NULL;
+		delete task;
+
+		QString name = tr("Unknown");
+		QString address = tr("Unknown");
+		QString pdz = "n/a";
+
+		if (box != 0) {
+			isds_fulltext_result *item =
+			    (isds_fulltext_result *) box->data;
+			Q_ASSERT(0 != item);
+			if (NULL != item->name) {
+				name = item->name;
+			}
+			if (NULL != item->address) {
+				address = item->address;
+			}
+			pdz = item->commercial_sending ? tr("yes") : tr("no");
+			if (!item->active) {
+				QMessageBox msgBox;
+				msgBox.setIcon(QMessageBox::Warning);
+				msgBox.setWindowTitle(tr("Databox is not active"));
+				msgBox.setText(tr("Recipient with databox ID '%1' "
+				    "does not have active databox.").arg(dbID));
+				msgBox.setDetailedText(tr("The message can "
+				    "not be delivered."));
+				msgBox.setStandardButtons(QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Ok);
+				msgBox.exec();
+				return;
+			}
+		} else {
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Wrong recipient"));
+			msgBox.setText(tr("Recipient with databox ID '%1' "
+			    "does not exist.").arg(dbID));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			return;
+		}
+
+		isds_list_free(&box);
+
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setText(dbID);
 		this->recipientTableWidget->setItem(row, RTW_ID, item);
 		item = new QTableWidgetItem;
-		item->setText("Unknown");
+		item->setText(name);
 		this->recipientTableWidget->setItem(row, RTW_NAME, item);
 		item = new QTableWidgetItem;
-		item->setText("Unknown");
+		item->setText(address);
 		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
-		item->setText("n/a");
+		item->setText(pdz);
 		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 	}
 }
