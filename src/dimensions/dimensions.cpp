@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ const qreal Dimensions::m_screenRatio = 0.8;
 static inline
 int fontHeight(const QWidget *widget)
 {
-	Q_ASSERT(0 != widget);
+	Q_ASSERT(Q_NULLPTR != widget);
 
 	QStyleOption option;
 	option.initFrom(widget);
@@ -64,9 +64,14 @@ int Dimensions::tableLineHeight(const QStyleOptionViewItem &option)
 	return QFontMetrics(option.font).height() * m_lineHeight;
 }
 
+QRect Dimensions::screenSize(void)
+{
+	return QApplication::desktop()->screenGeometry();
+}
+
 QSize Dimensions::windowSize(const QWidget *widget, qreal wr, qreal hr)
 {
-	if (widget == 0 || wr <= 0.0 || hr <= 0.0) {
+	if (widget == Q_NULLPTR || wr <= 0.0 || hr <= 0.0) {
 		return QSize();
 	}
 
@@ -89,7 +94,7 @@ QSize Dimensions::windowSize(const QWidget *widget, qreal wr, qreal hr)
 
 QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 {
-	if (widget == 0 || wr <= 0.0 || hr <= 0.0) {
+	if (widget == Q_NULLPTR || wr <= 0.0 || hr <= 0.0) {
 		return QRect(40, 40, 400, 300);
 	}
 
@@ -97,8 +102,8 @@ QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 	int w = height * wr;
 	int h = height * hr;
 
-	/* Reduce dimensions with if they exceed screen width. */
-	QRect screenRect(QApplication::desktop()->screenGeometry());
+	/* Reduce dimensions if they exceed screen width. */
+	QRect screenRect(screenSize());
 
 	if (screenRect.width() < w) {
 		w = screenRect.width() * m_screenRatio;

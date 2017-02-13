@@ -117,11 +117,16 @@ public:
 
 protected:
 	/*!
-	 * Check if some worker is working on the background and show
+	 * @brief Check if some worker is working on the background and show
 	 * dialog if user want to close application
 	 */
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Check window geometry, adjust size if window is too large for
+	 *     desktop..
+	 */
+	void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
 
 public slots:
 

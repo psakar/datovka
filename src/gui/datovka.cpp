@@ -7518,14 +7518,7 @@ bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo)
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Check if some worker is not working on the background and show
- * dialog if user want to close application
- */
 void MainWindow::closeEvent(QCloseEvent *event)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -7553,6 +7546,55 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	}
 }
 
+void MainWindow::showEvent(QShowEvent *event)
+{
+	debugFuncCall();
+
+	QMainWindow::showEvent(event);
+
+	QRect screenRect(Dimensions::screenSize());
+	QRect windowRect(geometry());
+	QRect frameRect(frameGeometry());
+
+	if ((frameRect.width() <= screenRect.width()) &
+	    (frameRect.height() <= screenRect.height())) {
+		/* Window fits to screen. */
+		return;
+	}
+
+	/* Differences. */
+	int left = frameRect.left() - windowRect.left();
+	int top = frameRect.top() - windowRect.top();
+	if (left < 0) {
+		left = -left;
+	}
+	if (top < 0) {
+		top = -top;
+	}
+	int width = frameRect.width() - windowRect.width();
+	int height = frameRect.height() - windowRect.height();
+	if (width < 0) {
+		width = -width;
+	}
+	if (height < 0) {
+		height = -height;
+	}
+	int right = width - left;
+	int bottom = height - top;
+
+	if (top != 0) {
+		width = screenRect.width() - (2 * (top + bottom));
+		height = screenRect.height() - (2 * (top + bottom));
+	} else {
+		width = screenRect.width() * 0.8;
+		height = screenRect.height() * 0.8;
+	}
+
+	left = (screenRect.width() - width) / 2;
+	top = (screenRect.height() - height) / 2;
+
+	this->setGeometry(left, top, width, height);
+}
 
 /* ========================================================================= */
 /*
