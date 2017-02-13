@@ -140,6 +140,8 @@ void DlgSearch2::findDataboxes()
 		box_type = DBTYPE_PFO;
 	} else if (this->foRradioButton->isChecked()) {
 		box_type = DBTYPE_FO;
+	} else {
+		box_type = DBTYPE_SYSTEM;
 	}
 
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
