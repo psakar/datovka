@@ -118,10 +118,12 @@ void DlgSearch2::findDataboxes()
 	this->contactTableWidget->setRowCount(0);
 	this->contactTableWidget->setEnabled(false);
 
+	long max = MAXSIZE;
 	struct isds_list *boxes = NULL;
 	TaskSearchOwnerFulltext *task;
-
 	isds_fulltext_target target = FULLTEXT_ALL;
+	isds_DbType box_type;
+
 	if (this->dbIDRadioButton->isChecked()) {
 		target = FULLTEXT_BOX_ID;
 	} else if (this->icRadioButton->isChecked()) {
@@ -130,9 +132,18 @@ void DlgSearch2::findDataboxes()
 		target = FULLTEXT_ADDRESS;
 	}
 
-	long max = MAXSIZE;
+	if (this->ovmRadioButton->isChecked()) {
+		box_type = DBTYPE_OVM;
+	} else if (this->poRadioButton->isChecked()) {
+		box_type = DBTYPE_PO;
+	} else if (this->pfoRadioButton->isChecked()) {
+		box_type = DBTYPE_PFO;
+	} else if (this->foRradioButton->isChecked()) {
+		box_type = DBTYPE_FO;
+	}
+
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    this->textLineEdit->text(), &target, NULL, NULL, &max);
+	    this->textLineEdit->text(), &target, &box_type, NULL, &max);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
