@@ -90,6 +90,9 @@ public:
 	 * @brief Returns dimensions of window specified as the ratio of the
 	 *     detected font height.
 	 *
+	 * @note If \a wr of \a hr is negative, the window size will be
+	 *     computed to fill available space.
+	 *
 	 * @param[in] widget Widget to obtain font metrics from.
 	 * @param[in] wr Width ratio relative to font height.
 	 * @param[in] hr Height ratio relative to font height.

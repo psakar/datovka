@@ -99,27 +99,67 @@ QSize Dimensions::windowSize(const QWidget *widget, qreal wr, qreal hr)
 
 QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 {
-	if (widget == Q_NULLPTR || wr <= 0.0 || hr <= 0.0) {
+	if (widget == Q_NULLPTR) {
 		return QRect(40, 40, 400, 300);
 	}
 
-	int height = fontHeight(widget);
-	int w = height * wr;
-	int h = height * hr;
+	int x = 0; /* top */
+	int y = 0; /* left */
+	int w = 400; /* width */
+	int h = 300; /* height */
 
 	/* Reduce dimensions if they exceed screen width. */
-	QRect screenRect(availableScreenSize());
+	QRect availRect(availableScreenSize());
 
-	if (screenRect.width() < w) {
-		w = screenRect.width() * m_screenRatio;
-	}
-	if (screenRect.height() < h) {
-		h = screenRect.height() * m_screenRatio;
+	if (wr <= 0.0 || hr <= 0.0) {
+		/* Use available screen space to compute geometry. */
+		QRect windowRect(widget->geometry());
+		QRect frameRect(widget->frameGeometry());
+
+		/* Frame differences don't work on X11. */
+		x = frameRect.x() - windowRect.x();
+		y = frameRect.y() - windowRect.y();
+		if (x < 0) {
+			x = -x;
+		}
+		if (y < 0) {
+			y = -y;
+		}
+		w = frameRect.width() - windowRect.width();
+		h = frameRect.height() - windowRect.height();
+		if (w < 0) {
+			w = -w;
+		}
+		if (h < 0) {
+			h = -h;
+		}
+		//int right = w - x;
+		int bottom = h - y;
+
+		if (y != 0) {
+			w = availRect.width() - (2 * (y + bottom));
+			h = availRect.height() - (2 * (y + bottom));
+		} else {
+			w = availRect.width() * m_screenRatio;
+			h = availRect.height() * m_screenRatio;
+		}
+	} else {
+		/* Use font height to determine window size. */
+		int fh = fontHeight(widget);
+		w = fh * wr;
+		h = fh * hr;
+
+		if (availRect.width() < w) {
+			w = availRect.width() * m_screenRatio;
+		}
+		if (availRect.height() < h) {
+			h = availRect.height() * m_screenRatio;
+		}
 	}
 
 	/* Compute centred window position. */
-	int x = (screenRect.width() - w) / 2;
-	int y = (screenRect.height() - h) / 2;
+	x = availRect.x() + ((availRect.width() - w) / 2);
+	y = availRect.y() + ((availRect.height() - h) / 2);
 
 	return QRect(x, y, w, h);
 }

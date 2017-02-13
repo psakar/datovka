@@ -7553,7 +7553,6 @@ void MainWindow::showEvent(QShowEvent *event)
 	QMainWindow::showEvent(event);
 
 	QRect availRect(Dimensions::availableScreenSize());
-	QRect windowRect(geometry());
 	QRect frameRect(frameGeometry());
 
 	if (isMaximized() ||
@@ -7563,38 +7562,7 @@ void MainWindow::showEvent(QShowEvent *event)
 		return;
 	}
 
-	/* Differences. */
-	int left = frameRect.left() - windowRect.left();
-	int top = frameRect.top() - windowRect.top();
-	if (left < 0) {
-		left = -left;
-	}
-	if (top < 0) {
-		top = -top;
-	}
-	int width = frameRect.width() - windowRect.width();
-	int height = frameRect.height() - windowRect.height();
-	if (width < 0) {
-		width = -width;
-	}
-	if (height < 0) {
-		height = -height;
-	}
-	int right = width - left;
-	int bottom = height - top;
-
-	if (top != 0) {
-		width = availRect.width() - (2 * (top + bottom));
-		height = availRect.height() - (2 * (top + bottom));
-	} else {
-		width = availRect.width() * 0.8;
-		height = availRect.height() * 0.8;
-	}
-
-	left = availRect.left() + (availRect.width() - width) / 2;
-	top = availRect.top() + (availRect.height() - height) / 2;
-
-	this->setGeometry(left, top, width, height);
+	this->setGeometry(Dimensions::windowDimensions(this, -1.0, -1.0));
 }
 
 /* ========================================================================= */
