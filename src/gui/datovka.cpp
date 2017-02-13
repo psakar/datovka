@@ -56,7 +56,8 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
-#include "src/gui/dlg_ds_search.h"
+//#include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_ds_search2.h"
 #include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
@@ -5394,7 +5395,7 @@ void MainWindow::findDatabox(void)
 
 	QString dbType = accountData.at(0);
 	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+	//bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
@@ -5406,8 +5407,11 @@ void MainWindow::findDatabox(void)
 		dsSearch->exec();
 		dsSearch->deleteLater();
 	} else {
-		QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-		    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
+		//QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
+		//    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
+		QStringList dbIDs;
+		QDialog *dsSearch = new DlgSearch2(DlgSearch2::ACT_BLANK, dbIDs,
+		    this, userName);
 		dsSearch->exec();
 		dsSearch->deleteLater();
 	}

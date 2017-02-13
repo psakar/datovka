@@ -42,7 +42,7 @@ public:
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
 	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_typ);
+	    const isds_DbType *box_typ, long *page, long *pageSize);
 
 	/*!
 	 * @brief Destructor.
@@ -69,7 +69,7 @@ public:
 	static
 	int isdsSearch2(const QString &userName,
 	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_typ,
+	    const isds_DbType *box_typ, long *page, long *pageSize,
 	    struct isds_list **results);
 
 	int m_isdsRetError; /*!< Returned error code. */
@@ -83,9 +83,11 @@ private:
 	TaskSearchOwnerFulltext &operator=(const TaskSearchOwnerFulltext &);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const QString m_query; /*!< Sought box identifiers. */
+	const QString m_query; /*!< search phrase. */
 	const isds_fulltext_target *m_target; /*!< Sought box identifiers. */
 	const isds_DbType *m_box_type;
+	long *m_page;
+	long *m_pageSize;
 };
 
 

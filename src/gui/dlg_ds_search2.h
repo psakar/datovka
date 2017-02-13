@@ -22,42 +22,44 @@
  */
 
 
-#ifndef _DLG_CONTACTS_H_
-#define _DLG_CONTACTS_H_
+#ifndef _DLG_DS_SEARCH2_H_
+#define _DLG_DS_SEARCH2_H_
 
 
 #include <QDialog>
-#include <QTableWidget>
+#include <QTimer>
 
 #include "src/common.h"
-#include "src/io/message_db_set.h"
-#include "ui_dlg_contacts.h"
+#include "ui_dlg_ds_search2.h"
 
 
-class DlgContacts : public QDialog, public Ui::Contacts
+class DlgSearch2 : public QDialog, public Ui::Search2
 {
 	Q_OBJECT
 
 public:
-	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-	    QStringList &dbIdList, QWidget *parent = 0);
+	enum Action {
+		ACT_BLANK,
+		ACT_ADDNEW
+	};
+
+	DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent = 0,
+	    const QString &userName = QString());
 
 private slots:
 
-	void filterContact(const QString &text);
-	void clearContactText(void);
-	void fillContactsFromMessageDb(void);
 	void enableOkButton(void);
+	void enableSearchButton(const QString &text);
+	void findDataboxes(void);
 	void addSelectedDbIDs(void);
 	void setFirtsColumnActive(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-
-	const MessageDbSet &m_dbSet;
-	const QString m_dbId;
+	Action m_action;
 	QStringList &m_dbIdList;
+	const QString m_userName;
 };
 
 
-#endif /* _DLG_CONTACTS_H_ */
+#endif /* DLG_DS_SEARCH2_H */

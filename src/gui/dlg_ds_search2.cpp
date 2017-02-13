@@ -22,30 +22,46 @@
  */
 
 
-#include "src/gui/dlg_contacts.h"
+#include <cstddef>
+#include <QMessageBox>
+
+#include "src/gui/dlg_ds_search2.h"
+#include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
+#include "src/worker/pool.h"
+#include "src/worker/task_search_owner_fulltext.h"
+
+/*
+ * Column indexes into recipient table widget.
+ */
+#define RTW_CHECK 0
+#define RTW_ID 1
+#define RTW_TYPE 2
+#define RTW_NAME 3
+#define RTW_ADDR 4
+// Max items per page
+#define MAXSIZE 100
 
 
-DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-    QStringList &dbIdList, QWidget *parent)
+DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
+    const QString &userName)
     : QDialog(parent),
-    m_dbSet(dbSet),
-    m_dbId(dbId),
-    m_dbIdList(dbIdList)
+    m_action(action),
+    m_dbIdList(dbIdList),
+    m_userName(userName)
 {
 	setupUi(this);
 	/* Set default line height for table views/widgets. */
-	contactTableWidget->setNarrowedLineHeight();
-
-	this->contactTableWidget->setColumnWidth(0,20);
-	this->contactTableWidget->setColumnWidth(1,70);
-	this->contactTableWidget->setColumnWidth(2,150);
+	this->contactTableWidget->setEnabled(false);
+	this->contactTableWidget->setNarrowedLineHeight();
+	this->contactTableWidget->setColumnWidth(RTW_CHECK,20);
+	this->contactTableWidget->setColumnWidth(RTW_ID,70);
+	this->contactTableWidget->setColumnWidth(RTW_TYPE,70);
+	this->contactTableWidget->setColumnWidth(RTW_NAME,200);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->clearPushButton->setEnabled(false);
-
-	fillContactsFromMessageDb();
+	this->searchPushButton->setEnabled(false);
 
 	if (this->contactTableWidget->rowCount() > 0) {
 		this->contactTableWidget->selectColumn(0);
@@ -55,16 +71,16 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	connect(this->contactTableWidget,
 	    SIGNAL(itemSelectionChanged()), this,
 	    SLOT(setFirtsColumnActive()));
-	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(filterContact(QString)));
+	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(enableSearchButton(QString)));
 	connect(this->contactTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->contactTableWidget,
 	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
-	connect(this->clearPushButton, SIGNAL(clicked()), this,
-	    SLOT(clearContactText()));
+	connect(this->searchPushButton, SIGNAL(clicked()), this,
+	    SLOT(findDataboxes()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(addSelectedDbIDs()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
@@ -72,7 +88,6 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
 	this->contactTableWidget->installEventFilter(
 	    new TableHomeEndFilter(this));
 	this->contactTableWidget->installEventFilter(
@@ -84,7 +99,7 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 /*
  * Set first column with checkbox active if item was changed
  */
-void DlgContacts::setFirtsColumnActive(void)
+void DlgSearch2::setFirtsColumnActive(void)
 /* ========================================================================= */
 {
 	this->contactTableWidget->selectColumn(0);
@@ -95,70 +110,85 @@ void DlgContacts::setFirtsColumnActive(void)
 
 /* ========================================================================= */
 /*
- * Apply filter text on the tablewidget
- */
-void DlgContacts::filterContact(const QString &text)
-/* ========================================================================= */
-{
-	this->clearPushButton->setEnabled(true);
-	if (!text.isEmpty()) {
-		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-			contactTableWidget->hideRow(i);
-		}
-		QList<QTableWidgetItem *> items =
-		    contactTableWidget->findItems(text, Qt::MatchContains);
-		for (int i = 0; i < items.count(); i++) {
-				contactTableWidget->showRow(items.at(i)->row());
-		}
-	} else {
-		this->clearPushButton->setEnabled(false);
-		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-			contactTableWidget->showRow(i);
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Clear search text in the filterLineEdit
- */
-void DlgContacts::clearContactText(void)
-/* ========================================================================= */
-{
-	this->filterLineEdit->clear();
-	this->clearPushButton->setEnabled(false);
-}
-
-
-/* ========================================================================= */
-/*
  * Get contacts from message db and fill wablewidget
  */
-void DlgContacts::fillContactsFromMessageDb()
+void DlgSearch2::findDataboxes()
 /* ========================================================================= */
 {
-	QList<MessageDb::ContactEntry> contactList(m_dbSet.uniqueContacts());
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(false);
 
-	foreach (const MessageDb::ContactEntry &entry, contactList) {
-		if (m_dbId != entry.boxId) {
-			int row = this->contactTableWidget->rowCount();
-			this->contactTableWidget->insertRow(row);
-			QTableWidgetItem *item = new QTableWidgetItem;
-			item->setCheckState(Qt::Unchecked);
-			this->contactTableWidget->setItem(row, 0, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.boxId);
-			this->contactTableWidget->setItem(row, 1, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.name);
-			this->contactTableWidget->setItem(row, 2, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.address);
-			this->contactTableWidget->setItem(row, 3, item);
-		};
+	struct isds_list *boxes = NULL;
+	TaskSearchOwnerFulltext *task;
+
+	isds_fulltext_target target = FULLTEXT_ALL;
+	if (this->dbIDRadioButton->isChecked()) {
+		target = FULLTEXT_BOX_ID;
+	} else if (this->icRadioButton->isChecked()) {
+		target = FULLTEXT_IC;
+	} else if (this->addressRadioButton->isChecked()) {
+		target = FULLTEXT_ADDRESS;
 	}
-	this->contactTableWidget->resizeColumnsToContents();
+
+	long max = MAXSIZE;
+	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
+	    this->textLineEdit->text(), &target, NULL, NULL, &max);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	boxes = task->m_results; task->m_results = NULL;
+	delete task;
+
+	struct isds_list *box;
+	box = boxes;
+
+	QString name = tr("Unknown");
+	QString address = tr("Unknown");
+	QString dbID = "n/a";
+	isds_DbType dbType;
+
+	while (0 != box) {
+
+		this->contactTableWidget->setEnabled(true);
+
+		isds_fulltext_result *boxdata =
+		    (isds_fulltext_result *) box->data;
+		Q_ASSERT(0 != boxdata);
+		if (NULL != boxdata->dbID) {
+			dbID = boxdata->dbID;
+		}
+		dbType = boxdata->dbType;
+		if (NULL != boxdata->name) {
+			name = boxdata->name;
+		}
+		if (NULL != boxdata->address) {
+			address = boxdata->address;
+		}
+
+		int row = this->contactTableWidget->rowCount();
+		this->contactTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setCheckState(Qt::Unchecked);
+		this->contactTableWidget->setItem(row, RTW_CHECK, item);
+		item = new QTableWidgetItem;
+		item->setText(dbID);
+		this->contactTableWidget->setItem(row, RTW_ID, item);
+		item = new QTableWidgetItem;
+		item->setText(convertDbTypeToString(dbType));
+		this->contactTableWidget->setItem(row, RTW_TYPE, item);
+		item = new QTableWidgetItem;
+		item->setText(name);
+		this->contactTableWidget->setItem(row, RTW_NAME, item);
+		item = new QTableWidgetItem;
+		item->setText(address);
+		this->contactTableWidget->setItem(row, RTW_ADDR, item);
+		//this->contactTableWidget->resizeColumnsToContents();
+
+		box = box->next;
+	}
+
+	isds_list_free(&boxes);
+
 }
 
 
@@ -166,12 +196,24 @@ void DlgContacts::fillContactsFromMessageDb()
 /*
  * Enable ok (add) button if some contact was selected
  */
-void DlgContacts::enableOkButton(void)
+void DlgSearch2::enableSearchButton(const QString &text)
+/* ========================================================================= */
+{
+	this->searchPushButton->setEnabled(text.count() > 2);
+}
+
+
+
+/* ========================================================================= */
+/*
+ * Enable ok (add) button if some contact was selected
+ */
+void DlgSearch2::enableOkButton(void)
 /* ========================================================================= */
 {
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,0)->checkState()) {
+		if (this->contactTableWidget->item(i,RTW_CHECK)->checkState()) {
 			this->buttonBox->button(QDialogButtonBox::Ok)->
 			    setEnabled(true);
 		}
@@ -179,17 +221,18 @@ void DlgContacts::enableOkButton(void)
 }
 
 
+
 /* ========================================================================= */
 /*
  * Add selected recipient databox IDs into recipient list
  */
-void DlgContacts::addSelectedDbIDs(void)
+void DlgSearch2::addSelectedDbIDs(void)
 /* ========================================================================= */
 {
 	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,0)->checkState()) {
+		if (this->contactTableWidget->item(i,RTW_CHECK)->checkState()) {
 			m_dbIdList.append(this->contactTableWidget->
-			    item(i, 1)->text());
+			    item(i, RTW_ID)->text());
 		}
 	}
 }
@@ -199,7 +242,7 @@ void DlgContacts::addSelectedDbIDs(void)
 /*
  * Add selected recipient databox ID into recipient list
  */
-void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
+void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
 /* ========================================================================= */
 {
 	if (!index.isValid()) {
@@ -208,6 +251,6 @@ void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
 	}
 
 	m_dbIdList.append(this->contactTableWidget->
-	    item(index.row(), 1)->text());
+	    item(index.row(), RTW_ID)->text());
 	this->close();
 }
