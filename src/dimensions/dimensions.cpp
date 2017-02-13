@@ -64,6 +64,11 @@ int Dimensions::tableLineHeight(const QStyleOptionViewItem &option)
 	return QFontMetrics(option.font).height() * m_lineHeight;
 }
 
+QRect Dimensions::availableScreenSize(void)
+{
+	return QApplication::desktop()->availableGeometry();
+}
+
 QRect Dimensions::screenSize(void)
 {
 	return QApplication::desktop()->screenGeometry();
@@ -103,7 +108,7 @@ QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 	int h = height * hr;
 
 	/* Reduce dimensions if they exceed screen width. */
-	QRect screenRect(screenSize());
+	QRect screenRect(availableScreenSize());
 
 	if (screenRect.width() < w) {
 		w = screenRect.width() * m_screenRatio;

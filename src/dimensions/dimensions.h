@@ -60,6 +60,14 @@ public:
 	int tableLineHeight(const QStyleOptionViewItem &option);
 
 	/*!
+	 * @brief Return size of available space on desktop.
+	 * @note This excludes some control elements (e.g. dock, menu bar,
+	 *     task bar). This may not work when using X11.
+	 */
+	static
+	QRect availableScreenSize(void);
+
+	/*!
 	 * @brief Return screen size.
 	 * @return Screen size.
 	 */

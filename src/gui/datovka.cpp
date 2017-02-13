@@ -7552,12 +7552,13 @@ void MainWindow::showEvent(QShowEvent *event)
 
 	QMainWindow::showEvent(event);
 
-	QRect screenRect(Dimensions::screenSize());
+	QRect availRect(Dimensions::availableScreenSize());
 	QRect windowRect(geometry());
 	QRect frameRect(frameGeometry());
 
-	if ((frameRect.width() <= screenRect.width()) &
-	    (frameRect.height() <= screenRect.height())) {
+	if (isMaximized() ||
+	    ((frameRect.width() <= availRect.width()) &&
+	    (frameRect.height() <= availRect.height()))) {
 		/* Window fits to screen. */
 		return;
 	}
@@ -7583,15 +7584,15 @@ void MainWindow::showEvent(QShowEvent *event)
 	int bottom = height - top;
 
 	if (top != 0) {
-		width = screenRect.width() - (2 * (top + bottom));
-		height = screenRect.height() - (2 * (top + bottom));
+		width = availRect.width() - (2 * (top + bottom));
+		height = availRect.height() - (2 * (top + bottom));
 	} else {
-		width = screenRect.width() * 0.8;
-		height = screenRect.height() * 0.8;
+		width = availRect.width() * 0.8;
+		height = availRect.height() * 0.8;
 	}
 
-	left = (screenRect.width() - width) / 2;
-	top = (screenRect.height() - height) / 2;
+	left = availRect.left() + (availRect.width() - width) / 2;
+	top = availRect.top() + (availRect.height() - height) / 2;
 
 	this->setGeometry(left, top, width, height);
 }
