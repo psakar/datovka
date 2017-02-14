@@ -7565,7 +7565,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::moveEvent(QMoveEvent *event)
 {
-	if (isMaximized()) {
+	/* Event precedes actual maximisation. */
+	if (!isMaximized()) {
 		QPoint oldPos(event->oldPos());
 		if (oldPos != event->pos()) {
 			m_geometry.setTopLeft(oldPos);
@@ -7576,7 +7577,8 @@ void MainWindow::moveEvent(QMoveEvent *event)
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-	if (isMaximized()) {
+	/* Event precedes actual maximisation. */
+	if (!isMaximized()) {
 		QSize oldSize(event->oldSize());
 		if (oldSize != event->size()) {
 			m_geometry.setSize(oldSize);
