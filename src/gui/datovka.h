@@ -120,12 +120,26 @@ protected:
 	 * @brief Check if some worker is working on the background and show
 	 * dialog if user want to close application
 	 */
+	virtual
 	void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Store original window position on window maximisation.
+	 */
+	virtual
+	void moveEvent(QMoveEvent *event) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Store original window size on window maximisation.
+	 */
+	virtual
+	void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Check window geometry, adjust size if window is too large for
 	 *     desktop..
 	 */
+	virtual
 	void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
 
 public slots:
@@ -1223,6 +1237,7 @@ private:
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;
 	QString m_import_zfo_path;
+	QRect m_geometry; /* Non-maximised window geometry. */
 
 	QStringList m_msgTblAppendedCols; /*< Appended columns. */
 

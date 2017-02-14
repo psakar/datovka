@@ -109,6 +109,7 @@
 #define WIN_POSITION_Y "y"
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
+#define WIN_POSITION_MAX "max"
 
 QNetworkAccessManager* nam;
 
@@ -275,6 +276,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
+    m_geometry(),
     m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
@@ -4119,6 +4121,12 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	    defaultDimensions.height()).toInt();
 	this->setGeometry(x, y, w, h);
 
+	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
+	    false).toBool();
+	if (max) {
+		this->showMaximized();
+	}
+
 	/* Splitter geometry. */
 
 	// set mainspliter - hSplitterAccount
@@ -4465,19 +4473,28 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 	int value;
 
 	/* Window geometry. */
+	QRect geom(this->geometry());
+
+	if (this->isMaximized() && m_geometry.isValid()) {
+		geom = m_geometry;
+	}
 
 	settings.beginGroup(WIN_POSITION_HEADER);
 
-	value = this->geometry().x();
+	value = geom.x();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_X, value);
 
-	value = this->geometry().y();
+	value = geom.y();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_Y, value);
 
-	settings.setValue(WIN_POSITION_W, this->geometry().width());
-	settings.setValue(WIN_POSITION_H, this->geometry().height());
+	settings.setValue(WIN_POSITION_W, geom.width());
+	settings.setValue(WIN_POSITION_H, geom.height());
+
+	if (this->isMaximized()) {
+		settings.setValue(WIN_POSITION_MAX, true);
+	}
 
 	settings.endGroup();
 
@@ -7544,6 +7561,28 @@ void MainWindow::closeEvent(QCloseEvent *event)
 			event->ignore();
 		}
 	}
+}
+
+void MainWindow::moveEvent(QMoveEvent *event)
+{
+	if (isMaximized()) {
+		QPoint oldPos(event->oldPos());
+		if (oldPos != event->pos()) {
+			m_geometry.setTopLeft(oldPos);
+		}
+	}
+	QMainWindow::moveEvent(event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+	if (isMaximized()) {
+		QSize oldSize(event->oldSize());
+		if (oldSize != event->size()) {
+			m_geometry.setSize(oldSize);
+		}
+	}
+	QMainWindow::resizeEvent(event);
 }
 
 void MainWindow::showEvent(QShowEvent *event)
