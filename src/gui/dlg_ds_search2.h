@@ -30,6 +30,7 @@
 #include <QTimer>
 
 #include "src/common.h"
+#include "src/io/isds_sessions.h"
 #include "ui_dlg_ds_search2.h"
 
 
@@ -50,15 +51,26 @@ private slots:
 
 	void enableOkButton(void);
 	void enableSearchButton(const QString &text);
-	void findDataboxes(void);
+	void searchNewDataboxes(void);
+	void showNextDataboxes(void);
 	void addSelectedDbIDs(void);
 	void setFirtsColumnActive(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
+
+	void findDataboxes(ulong pageNumber, isds_fulltext_target target,
+	    isds_DbType box_type, const QString &phrase);
+
 	Action m_action;
 	QStringList &m_dbIdList;
 	const QString m_userName;
+
+	// hold some search settings for showing of next results
+	ulong m_currentPage;
+	isds_fulltext_target m_target;
+	isds_DbType m_box_type;
+	QString m_phrase;
 };
 
 

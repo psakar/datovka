@@ -32,14 +32,18 @@
 
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
-    const isds_DbType *box_type, long *page, long *pageSize)
+    const isds_DbType *box_type, ulong *pageNumber, ulong *pageSize)
     : m_isdsRetError(IE_ERROR),
     m_results(NULL),
+    m_totalDb(NULL),
+    m_currentPage(NULL),
+    m_curentPageSize(NULL),
+    m_isLastPage(NULL),
     m_userName(userName),
     m_query(query),
     m_target(target),
     m_box_type(box_type),
-    m_page(page),
+    m_pageNumber(pageNumber),
     m_pageSize(pageSize)
 {
 	Q_ASSERT(!m_userName.isEmpty());
@@ -69,7 +73,8 @@ void TaskSearchOwnerFulltext::run(void)
 	/* ### Worker task begin. ### */
 
 	m_isdsRetError = isdsSearch2(m_userName, m_query, m_target, m_box_type,
-	    m_page, m_pageSize, &m_results);
+	    m_pageNumber, m_pageSize, &m_totalDb, &m_currentPage,
+	    &m_curentPageSize, &m_isLastPage, &m_results);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -81,8 +86,9 @@ void TaskSearchOwnerFulltext::run(void)
 
 int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
-    const isds_DbType *box_type, long *page, long *pageSize,
-    struct isds_list **results)
+    const isds_DbType *box_type, ulong *pageNumber, ulong *pageSize,
+    ulong **totalDb, ulong **currentPage, ulong **curentPageSize,
+    bool **isLastPage, struct isds_list **results)
 {
 	isds_error ret = IE_ERROR;
 
@@ -98,7 +104,9 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 	}
 
 	ret = isds_find_box_by_fulltext(session, query.toStdString().c_str(),
-	    target, box_type, (unsigned long *)pageSize, (unsigned long*)page, NULL, NULL, NULL, NULL, NULL, results);
+	    target, box_type, (unsigned long *) pageSize,
+	    (unsigned long *) pageNumber, NULL, totalDb, currentPage,
+	    curentPageSize, isLastPage, results);
 
 	logDebugLv1NL("Find databox returned '%d': '%s'.",
 	    ret, isdsStrError(ret).toUtf8().constData());

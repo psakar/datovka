@@ -42,7 +42,7 @@ public:
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
 	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_typ, long *page, long *pageSize);
+	    const isds_DbType *box_typ, ulong *pageNumber, ulong *pageSize);
 
 	/*!
 	 * @brief Destructor.
@@ -69,11 +69,17 @@ public:
 	static
 	int isdsSearch2(const QString &userName,
 	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_typ, long *page, long *pageSize,
-	    struct isds_list **results);
+	    const isds_DbType *box_type, ulong *pageNumber, ulong *pageSize,
+	    ulong **totalDb, ulong **currentPage, ulong **curentPageSize,
+	    bool **isLastPage, struct isds_list **results);
 
 	int m_isdsRetError; /*!< Returned error code. */
 	struct isds_list *m_results; /*!< List of found data boxes. */
+	ulong *m_totalDb;
+	ulong *m_currentPage;
+	ulong *m_curentPageSize;
+	bool *m_isLastPage;
+
 
 private:
 	/*!
@@ -86,8 +92,8 @@ private:
 	const QString m_query; /*!< search phrase. */
 	const isds_fulltext_target *m_target; /*!< Sought box identifiers. */
 	const isds_DbType *m_box_type;
-	long *m_page;
-	long *m_pageSize;
+	ulong *m_pageNumber;
+	ulong *m_pageSize;
 };
 
 

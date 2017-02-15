@@ -23,10 +23,8 @@
 
 
 #include <cstddef>
-#include <QMessageBox>
 
 #include "src/gui/dlg_ds_search2.h"
-#include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
@@ -40,8 +38,8 @@
 #define RTW_TYPE 2
 #define RTW_NAME 3
 #define RTW_ADDR 4
-// Max items per page
-#define MAXSIZE 100
+// Max databoxes per page, isds has limit max 100
+#define MAX_DB_ON_PAGE 100
 
 
 DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
@@ -49,9 +47,14 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     : QDialog(parent),
     m_action(action),
     m_dbIdList(dbIdList),
-    m_userName(userName)
+    m_userName(userName),
+    m_currentPage(0),
+    m_target(FULLTEXT_ALL),
+    m_box_type(DBTYPE_SYSTEM),
+    m_phrase("")
 {
 	setupUi(this);
+
 	/* Set default line height for table views/widgets. */
 	this->contactTableWidget->setEnabled(false);
 	this->contactTableWidget->setNarrowedLineHeight();
@@ -62,6 +65,7 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->searchPushButton->setEnabled(false);
+	this->resultGroupBox->hide();
 
 	if (this->contactTableWidget->rowCount() > 0) {
 		this->contactTableWidget->selectColumn(0);
@@ -80,7 +84,9 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(findDataboxes()));
+	    SLOT(searchNewDataboxes()));
+	connect(this->nextPushButton, SIGNAL(clicked()), this,
+	    SLOT(showNextDataboxes()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(addSelectedDbIDs()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
@@ -110,46 +116,91 @@ void DlgSearch2::setFirtsColumnActive(void)
 
 /* ========================================================================= */
 /*
- * Get contacts from message db and fill wablewidget
+ * Start new search and show first page of results
  */
-void DlgSearch2::findDataboxes()
+void DlgSearch2::searchNewDataboxes()
+/* ========================================================================= */
+{
+	m_phrase = this->textLineEdit->text();
+	m_currentPage = 0;
+
+	if (this->dbIDRadioButton->isChecked()) {
+		m_target = FULLTEXT_BOX_ID;
+	} else if (this->icRadioButton->isChecked()) {
+		m_target = FULLTEXT_IC;
+	} else if (this->addressRadioButton->isChecked()) {
+		m_target = FULLTEXT_ADDRESS;
+	}
+
+	if (this->ovmRadioButton->isChecked()) {
+		m_box_type = DBTYPE_OVM;
+	} else if (this->poRadioButton->isChecked()) {
+		m_box_type = DBTYPE_PO;
+	} else if (this->pfoRadioButton->isChecked()) {
+		m_box_type = DBTYPE_PFO;
+	} else if (this->foRradioButton->isChecked()) {
+		m_box_type = DBTYPE_FO;
+	} else {
+		m_box_type = DBTYPE_SYSTEM;
+	}
+
+	findDataboxes(m_currentPage, m_target, m_box_type , m_phrase);
+}
+
+
+/* ========================================================================= */
+/*
+ * Show next page from result
+ */
+void DlgSearch2::showNextDataboxes()
+/* ========================================================================= */
+{
+	m_currentPage++;
+	findDataboxes(m_currentPage, m_target, m_box_type , m_phrase);
+}
+
+
+/* ========================================================================= */
+/*
+ * Search databoxes on ISDS
+ */
+void DlgSearch2::findDataboxes(ulong pageNumber, isds_fulltext_target target,
+isds_DbType box_type, const QString &phrase)
 /* ========================================================================= */
 {
 	this->contactTableWidget->setRowCount(0);
 	this->contactTableWidget->setEnabled(false);
+	this->nextPushButton->setEnabled(false);
+	this->nextPushButton->hide();
+	this->resultGroupBox->hide();
 
-	long max = MAXSIZE;
+	ulong pageSize = MAX_DB_ON_PAGE;
+	QString resultString = tr("Total found: 0") ;
+
 	struct isds_list *boxes = NULL;
 	TaskSearchOwnerFulltext *task;
-	isds_fulltext_target target = FULLTEXT_ALL;
-	isds_DbType box_type;
-
-	if (this->dbIDRadioButton->isChecked()) {
-		target = FULLTEXT_BOX_ID;
-	} else if (this->icRadioButton->isChecked()) {
-		target = FULLTEXT_IC;
-	} else if (this->addressRadioButton->isChecked()) {
-		target = FULLTEXT_ADDRESS;
-	}
-
-	if (this->ovmRadioButton->isChecked()) {
-		box_type = DBTYPE_OVM;
-	} else if (this->poRadioButton->isChecked()) {
-		box_type = DBTYPE_PO;
-	} else if (this->pfoRadioButton->isChecked()) {
-		box_type = DBTYPE_PFO;
-	} else if (this->foRradioButton->isChecked()) {
-		box_type = DBTYPE_FO;
-	} else {
-		box_type = DBTYPE_SYSTEM;
-	}
-
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    this->textLineEdit->text(), &target, &box_type, NULL, &max);
+	    phrase, &target, &box_type, &pageNumber, &pageSize);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
+	int ret = task->m_isdsRetError;
 	boxes = task->m_results; task->m_results = NULL;
+
+	this->resultGroupBox->show();
+	this->resultGroupBox->setEnabled(true);
+
+	if (ret != IE_SUCCESS) {
+		delete task;
+		this->searchResultText->setText(resultString);
+		return;
+	}
+
+	ulong totalDb = *task->m_totalDb;
+	ulong curentPageSize = *task->m_curentPageSize;
+	ulong currentPage = *task->m_currentPage;
+	bool isLastPage = *task->m_isLastPage;
+
 	delete task;
 
 	struct isds_list *box;
@@ -159,6 +210,21 @@ void DlgSearch2::findDataboxes()
 	QString address = tr("Unknown");
 	QString dbID = "n/a";
 	isds_DbType dbType;
+
+	if (isLastPage) {
+		this->nextPushButton->setEnabled(false);
+		this->nextPushButton->hide();
+	} else {
+		this->nextPushButton->setEnabled(true);
+		this->nextPushButton->show();
+	}
+
+	QString interval = QString::number(currentPage) + "-" +
+	    QString::number(currentPage + curentPageSize);
+	resultString = tr("Total found: ") + QString::number(totalDb);
+	resultString += "; " + tr("Shown: ") + interval;
+
+	this->searchResultText->setText(resultString);
 
 	while (0 != box) {
 
