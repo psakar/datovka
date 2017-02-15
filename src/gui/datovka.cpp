@@ -4108,9 +4108,10 @@ bool MainWindow::ensureConfPresence(void)
 void MainWindow::loadWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
-	/* Window geometry. */
+	/* Default geometry. */
 	QRect defaultDimensions(Dimensions::windowDimensions(this, 76.0, 48.0));
 
+	/* Stored geometry. */
 	int x = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_X,
 	    defaultDimensions.x()).toInt();
 	int y = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_Y,
@@ -4120,6 +4121,9 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
 	    defaultDimensions.height()).toInt();
 	this->setGeometry(x, y, w, h);
+
+	/* Adjust for screen size. */
+	this->setGeometry(Dimensions::windowOnScreenDimensions(this));
 
 	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
 	    false).toBool();

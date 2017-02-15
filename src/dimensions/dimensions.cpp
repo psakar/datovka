@@ -32,6 +32,7 @@ const qreal Dimensions::m_margin = 0.4;
 const qreal Dimensions::m_padding = 0.1;
 const qreal Dimensions::m_lineHeight = 1.5;
 const qreal Dimensions::m_screenRatio = 0.8;
+const QRect Dimensions::m_dfltWinRect(40, 40, 400, 300);
 
 /*!
  * @brief Obtain default widget font height.
@@ -97,10 +98,48 @@ QSize Dimensions::windowSize(const QWidget *widget, qreal wr, qreal hr)
 	return QSize(w, h);
 }
 
+/*!
+ * @brief Compute difference between window frame and its actual size.
+ *
+ * @param[in] widget Window widget.
+ * @return Absolute difference between frame and window geometry.
+ */
+static
+QRect frameDifference(const QWidget *widget)
+{
+	if (widget == Q_NULLPTR) {
+		return QRect(0, 0, 0, 0);
+	}
+
+	QRect windowRect(widget->geometry());
+	QRect frameRect(widget->frameGeometry());
+
+	/* Frame differences don't work on X11. */
+	int x = frameRect.x() - windowRect.x();
+	int y = frameRect.y() - windowRect.y();
+	if (x < 0) {
+		x = -x;
+	}
+	if (y < 0) {
+		y = -y;
+	}
+
+	int w = frameRect.width() - windowRect.width();
+	int h = frameRect.height() - windowRect.height();
+	if (w < 0) {
+		w = -w;
+	}
+	if (h < 0) {
+		h = -h;
+	}
+
+	return QRect(x, y, w, h);
+}
+
 QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 {
 	if (widget == Q_NULLPTR) {
-		return QRect(40, 40, 400, 300);
+		return m_dfltWinRect;
 	}
 
 	int x = 0; /* top */
@@ -113,32 +152,14 @@ QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 
 	if (wr <= 0.0 || hr <= 0.0) {
 		/* Use available screen space to compute geometry. */
-		QRect windowRect(widget->geometry());
-		QRect frameRect(widget->frameGeometry());
+		QRect diffRect(frameDifference(widget));
 
-		/* Frame differences don't work on X11. */
-		x = frameRect.x() - windowRect.x();
-		y = frameRect.y() - windowRect.y();
-		if (x < 0) {
-			x = -x;
-		}
-		if (y < 0) {
-			y = -y;
-		}
-		w = frameRect.width() - windowRect.width();
-		h = frameRect.height() - windowRect.height();
-		if (w < 0) {
-			w = -w;
-		}
-		if (h < 0) {
-			h = -h;
-		}
-		//int right = w - x;
-		int bottom = h - y;
+		//int right = diffRect.width() - diffRect.x();
+		int bottom = diffRect.height() - diffRect.y();
 
-		if (y != 0) {
-			w = availRect.width() - (2 * (y + bottom));
-			h = availRect.height() - (2 * (y + bottom));
+		if (diffRect.y() != 0) {
+			w = availRect.width() - (2 * (diffRect.y() + bottom));
+			h = availRect.height() - (2 * (diffRect.y() + bottom));
 		} else {
 			w = availRect.width() * m_screenRatio;
 			h = availRect.height() * m_screenRatio;
@@ -162,4 +183,48 @@ QRect Dimensions::windowDimensions(const QWidget *widget, qreal wr, qreal hr)
 	y = availRect.y() + ((availRect.height() - h) / 2);
 
 	return QRect(x, y, w, h);
+}
+
+QRect Dimensions::windowOnScreenDimensions(const QWidget *widget)
+{
+	if (widget == Q_NULLPTR) {
+		return m_dfltWinRect;
+	}
+
+	QRect frameRect(widget->frameGeometry());
+	QRect availRect(availableScreenSize());
+
+	if ((frameRect.width() > availRect.width()) ||
+	    (frameRect.height() > availRect.height())) {
+		/*
+		 * Window is too large. Position the window in the centre of
+		 * available space.
+		 */
+		return windowDimensions(widget, -1.0, -1.0);
+	}
+
+	/* Negative values mean the window exceeds screen border. */
+	int beyondLeft = frameRect.topLeft().x() - availRect.topLeft().x();
+	int beyondTop = frameRect.topLeft().y() - availRect.topLeft().y();
+	int beyondRight =
+	    availRect.bottomRight().x() - frameRect.bottomRight().x();
+	int beyondBottom =
+	    availRect.bottomRight().y() - frameRect.bottomRight().y();
+
+	QRect windowRect(widget->geometry());
+
+	if (beyondLeft < 0) {
+		windowRect.setX(windowRect.topLeft().x() - beyondLeft);
+	}
+	if (beyondTop < 0) {
+		windowRect.setY(windowRect.topLeft().y() - beyondTop);
+	}
+	if (beyondRight < 0) {
+		windowRect.setX(windowRect.topLeft().x() + beyondRight);
+	}
+	if (beyondBottom < 0) {
+		windowRect.setY(windowRect.topLeft().y() + beyondBottom);
+	}
+
+	return windowRect;
 }

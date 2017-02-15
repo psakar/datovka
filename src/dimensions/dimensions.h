@@ -101,6 +101,15 @@ public:
 	static
 	QRect windowDimensions(const QWidget *widget, qreal wr, qreal hr);
 
+	/*!
+	 * @brief Returns window geometry to fit the screen..
+	 *
+	 * @param[in] widget Window widget.
+	 * @return Widget geometry to fit into the screen.
+	 */
+	static
+	QRect windowOnScreenDimensions(const QWidget *widget);
+
 private:
 	/*!
 	 * @brief Constructor.
@@ -120,6 +129,9 @@ private:
 
 	static
 	const qreal m_screenRatio; /*!< Ratio of screen dimensions to use. */
+
+	static
+	const QRect m_dfltWinRect; /*!< Default window rectangle. */
 };
 
 #endif /* _DIMENSIONS_H_ */
