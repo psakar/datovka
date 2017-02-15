@@ -214,16 +214,16 @@ QRect Dimensions::windowOnScreenDimensions(const QWidget *widget)
 	QRect windowRect(widget->geometry());
 
 	if (beyondLeft < 0) {
-		windowRect.setX(windowRect.topLeft().x() - beyondLeft);
+		windowRect.moveLeft(windowRect.topLeft().x() - beyondLeft);
 	}
 	if (beyondTop < 0) {
-		windowRect.setY(windowRect.topLeft().y() - beyondTop);
+		windowRect.moveTop(windowRect.topLeft().y() - beyondTop);
 	}
 	if (beyondRight < 0) {
-		windowRect.setX(windowRect.topLeft().x() + beyondRight);
+		windowRect.moveLeft(windowRect.topLeft().x() + beyondRight);
 	}
 	if (beyondBottom < 0) {
-		windowRect.setY(windowRect.topLeft().y() + beyondBottom);
+		windowRect.moveTop(windowRect.topLeft().y() + beyondBottom);
 	}
 
 	return windowRect;
