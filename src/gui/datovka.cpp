@@ -4124,6 +4124,7 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
 	    false).toBool();
 	if (max) {
+		m_geometry = QRect(x, y, w, h);
 		this->showMaximized();
 	}
 
