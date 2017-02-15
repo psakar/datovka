@@ -1279,7 +1279,6 @@ private:
 	QString m_on_export_zfo_activate;
 	QString m_on_import_database_dir_activate;
 	QString m_import_zfo_path;
-	bool isMainWindow;
 
 	QStringList m_msgTblAppendedCols; /*< Appended columns. */
 

@@ -275,7 +275,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
-    isMainWindow(false),
     m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
@@ -465,8 +464,6 @@ void MainWindow::setWindowsAfterInit(void)
 /* ========================================================================= */
 {
 	debugSlotCall();
-
-	isMainWindow = true;
 
 	if (globPref.check_new_versions) {
 		checkNewDatovkaVersion();
