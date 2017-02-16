@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,23 +21,17 @@
  * the two.
  */
 
-
 #ifndef _DLG_DS_SEARCH2_H_
 #define _DLG_DS_SEARCH2_H_
 
-
 #include <QDialog>
-#include <QTimer>
 
 #include "src/common.h"
 #include "src/io/isds_sessions.h"
 #include "ui_dlg_ds_search2.h"
 
-
-class DlgSearch2 : public QDialog, public Ui::Search2
-{
+class DlgSearch2 : public QDialog, public Ui::Search2 {
 	Q_OBJECT
-
 public:
 	enum Action {
 		ACT_BLANK,
@@ -48,7 +42,6 @@ public:
 	    const QString &userName = QString());
 
 private slots:
-
 	void enableOkButton(void);
 	void enableSearchButton(const QString &text);
 	void searchNewDataboxes(void);
@@ -58,8 +51,7 @@ private slots:
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-
-	void findDataboxes(ulong pageNumber, isds_fulltext_target target,
+	void findDataboxes(quint64 pageNumber, isds_fulltext_target target,
 	    isds_DbType box_type, const QString &phrase);
 
 	Action m_action;
@@ -67,11 +59,11 @@ private:
 	const QString m_userName;
 
 	// hold some search settings for showing of next results
-	ulong m_currentPage;
+	quint64 m_currentPage;
 	isds_fulltext_target m_target;
 	isds_DbType m_box_type;
 	QString m_phrase;
 };
 
 
-#endif /* DLG_DS_SEARCH2_H */
+#endif /* _DLG_DS_SEARCH2_H_ */

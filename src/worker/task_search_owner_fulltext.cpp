@@ -22,7 +22,6 @@
  */
 
 #include <cstdlib>
-#include <cstring>
 #include <QThread>
 
 #include "src/io/isds_sessions.h"
@@ -30,21 +29,24 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_search_owner_fulltext.h"
 
+/* ISDS limits the response size to 100 entries. */
+const quint64 TaskSearchOwnerFulltext::maxResponseSize = 100;
+
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
-    const isds_DbType *box_type, ulong *pageNumber, ulong *pageSize)
+    const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber)
     : m_isdsRetError(IE_ERROR),
+    m_pageSize((pageSize <= maxResponseSize) ? pageSize: maxResponseSize),
+    m_pageNumber(pageNumber),
+    m_totalMatchingBoxes(0),
+    m_currentPageStart(0),
+    m_currentPageSize(0),
+    m_isLastPage(false),
     m_results(NULL),
-    m_totalDb(NULL),
-    m_currentPage(NULL),
-    m_curentPageSize(NULL),
-    m_isLastPage(NULL),
     m_userName(userName),
     m_query(query),
     m_target(target),
-    m_box_type(box_type),
-    m_pageNumber(pageNumber),
-    m_pageSize(pageSize)
+    m_box_type(box_type)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(NULL != m_query);
@@ -73,8 +75,8 @@ void TaskSearchOwnerFulltext::run(void)
 	/* ### Worker task begin. ### */
 
 	m_isdsRetError = isdsSearch2(m_userName, m_query, m_target, m_box_type,
-	    m_pageNumber, m_pageSize, &m_totalDb, &m_currentPage,
-	    &m_curentPageSize, &m_isLastPage, &m_results);
+	    m_pageSize, m_pageNumber, m_totalMatchingBoxes, m_currentPageStart,
+	    m_currentPageSize, m_isLastPage, &m_results);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -86,9 +88,9 @@ void TaskSearchOwnerFulltext::run(void)
 
 int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
-    const isds_DbType *box_type, ulong *pageNumber, ulong *pageSize,
-    ulong **totalDb, ulong **currentPage, ulong **curentPageSize,
-    bool **isLastPage, struct isds_list **results)
+    const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber,
+    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
+    quint64 &currentPageSize, bool &isLastPage, struct isds_list **results)
 {
 	isds_error ret = IE_ERROR;
 
@@ -103,10 +105,36 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 		return IE_ERROR;
 	}
 
+	/* For conversion purposes. */
+	unsigned long int iPageSize = pageSize;
+	unsigned long int iPageNumber = pageNumber;
+	unsigned long int *iTotalMatchingBoxes = NULL;
+	unsigned long int *iCurrentPageStart = NULL;
+	unsigned long int *iCurentPageSize = NULL;
+	_Bool *iIsLastPage = NULL;
+
 	ret = isds_find_box_by_fulltext(session, query.toStdString().c_str(),
-	    target, box_type, (unsigned long *) pageSize,
-	    (unsigned long *) pageNumber, NULL, totalDb, currentPage,
-	    curentPageSize, isLastPage, results);
+	    target, box_type, &iPageSize, &iPageNumber,
+	    NULL, &iTotalMatchingBoxes, &iCurrentPageStart, &iCurentPageSize,
+	    &iIsLastPage, results);
+
+	/* Free allocated stuff. */
+	if (iTotalMatchingBoxes != NULL) {
+		totalMatchingBoxes = *iTotalMatchingBoxes;
+		free(iTotalMatchingBoxes); iTotalMatchingBoxes = NULL;
+	}
+	if (iCurrentPageStart != NULL) {
+		currentPageStart = *iCurrentPageStart;
+		free(iCurrentPageStart); iCurrentPageStart = NULL;
+	}
+	if (iCurentPageSize != NULL) {
+		currentPageSize = *iCurentPageSize;
+		free(iCurentPageSize); iCurentPageSize = NULL;
+	}
+	if (iIsLastPage != NULL) {
+		isLastPage = *iIsLastPage;
+		free(iIsLastPage); iIsLastPage = NULL;
+	}
 
 	logDebugLv1NL("Find databox returned '%d': '%s'.",
 	    ret, isdsStrError(ret).toUtf8().constData());

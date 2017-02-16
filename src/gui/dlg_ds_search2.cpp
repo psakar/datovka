@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,6 @@
  * the two.
  */
 
-
-#include <cstddef>
-
 #include "src/gui/dlg_ds_search2.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
@@ -38,9 +35,6 @@
 #define RTW_TYPE 2
 #define RTW_NAME 3
 #define RTW_ADDR 4
-// Max databoxes per page, isds has limit max 100
-#define MAX_DB_ON_PAGE 100
-
 
 DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     const QString &userName)
@@ -51,7 +45,7 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     m_currentPage(0),
     m_target(FULLTEXT_ALL),
     m_box_type(DBTYPE_SYSTEM),
-    m_phrase("")
+    m_phrase()
 {
 	setupUi(this);
 
@@ -155,7 +149,7 @@ void DlgSearch2::searchNewDataboxes()
 void DlgSearch2::showNextDataboxes()
 /* ========================================================================= */
 {
-	m_currentPage++;
+	++m_currentPage;
 	findDataboxes(m_currentPage, m_target, m_box_type , m_phrase);
 }
 
@@ -164,7 +158,7 @@ void DlgSearch2::showNextDataboxes()
 /*
  * Search databoxes on ISDS
  */
-void DlgSearch2::findDataboxes(ulong pageNumber, isds_fulltext_target target,
+void DlgSearch2::findDataboxes(quint64 pageNumber, isds_fulltext_target target,
 isds_DbType box_type, const QString &phrase)
 /* ========================================================================= */
 {
@@ -174,13 +168,13 @@ isds_DbType box_type, const QString &phrase)
 	this->nextPushButton->hide();
 	this->resultGroupBox->hide();
 
-	ulong pageSize = MAX_DB_ON_PAGE;
 	QString resultString = tr("Total found: 0") ;
 
 	struct isds_list *boxes = NULL;
 	TaskSearchOwnerFulltext *task;
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    phrase, &target, &box_type, &pageNumber, &pageSize);
+	    phrase, &target, &box_type,
+	    TaskSearchOwnerFulltext::maxResponseSize, pageNumber);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -196,12 +190,12 @@ isds_DbType box_type, const QString &phrase)
 		return;
 	}
 
-	ulong totalDb = *task->m_totalDb;
-	ulong curentPageSize = *task->m_curentPageSize;
-	ulong currentPage = *task->m_currentPage;
-	bool isLastPage = *task->m_isLastPage;
+	quint64 totalDb = task->m_totalMatchingBoxes;
+	quint64 currentPageStart = task->m_currentPageStart;
+	quint64 currentPageSize = task->m_currentPageSize;
+	bool isLastPage = task->m_isLastPage;
 
-	delete task;
+	delete task; task = NULL;
 
 	struct isds_list *box;
 	box = boxes;
@@ -219,8 +213,8 @@ isds_DbType box_type, const QString &phrase)
 		this->nextPushButton->show();
 	}
 
-	QString interval = QString::number(currentPage) + "-" +
-	    QString::number(currentPage + curentPageSize);
+	QString interval = QString::number(currentPageStart) + "-" +
+	    QString::number(currentPageStart + currentPageSize);
 	resultString = tr("Total found: ") + QString::number(totalDb);
 	resultString += "; " + tr("Shown: ") + interval;
 
